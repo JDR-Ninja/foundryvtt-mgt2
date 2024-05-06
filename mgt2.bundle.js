@@ -335,16 +335,16 @@ function createCharacteristicField(show = true, showMax = false) {
   });
 }
 
-const MGT2$1 = {};
-MGT2$1.MetricRange = Object.freeze({
+const MGT2 = {};
+MGT2.MetricRange = Object.freeze({
   meter: "MGT2.MetricRange.meter",
   kilometer: "MGT2.MetricRange.kilometer"
 });
-MGT2$1.MetricWeight = Object.freeze({
+MGT2.MetricWeight = Object.freeze({
   kilogram: "MGT2.MetricWeight.kilogram",
   ton: "MGT2.MetricWeight.ton"
 });
-MGT2$1.Difficulty = Object.freeze({
+MGT2.Difficulty = Object.freeze({
   NA: "MGT2.Difficulty.NA",
   Simple: "MGT2.Difficulty.Simple",
   Easy: "MGT2.Difficulty.Easy",
@@ -355,27 +355,27 @@ MGT2$1.Difficulty = Object.freeze({
   Formidable: "MGT2.Difficulty.Formidable",
   Impossible: "MGT2.Difficulty.Impossible"
 });
-MGT2$1.ItemSubType = Object.freeze({
+MGT2.ItemSubType = Object.freeze({
   loot: "MGT2.ItemSubType.loot",
   software: "MGT2.ItemSubType.software"
 });
-MGT2$1.EquipmentSubType = Object.freeze({
+MGT2.EquipmentSubType = Object.freeze({
   augment: "MGT2.EquipmentSubType.augment",
   clothing: "MGT2.EquipmentSubType.clothing",
   equipment: "MGT2.EquipmentSubType.equipment",
   trinket: "MGT2.EquipmentSubType.trinket",
   toolkit: "MGT2.EquipmentSubType.toolkit"
 });
-MGT2$1.TalentSubType = Object.freeze({
+MGT2.TalentSubType = Object.freeze({
   skill: "MGT2.TalentSubType.skill",
   psionic: "MGT2.TalentSubType.psionic"
 });
-MGT2$1.DiseaseSubType = Object.freeze({
+MGT2.DiseaseSubType = Object.freeze({
   disease: "MGT2.DiseaseSubType.disease",
   poison: "MGT2.DiseaseSubType.poison",
   wound: "MGT2.DiseaseSubType.wound"
 });
-MGT2$1.PsionicReach = Object.freeze({
+MGT2.PsionicReach = Object.freeze({
   NA: "MGT2.PsionicReach.NA",
   Personal: "MGT2.PsionicReach.Personal",
   Close: "MGT2.PsionicReach.Close",
@@ -388,18 +388,18 @@ MGT2$1.PsionicReach = Object.freeze({
   Continental: "MGT2.PsionicReach.Continental",
   Planetary: "MGT2.PsionicReach.Planetary"
 });
-MGT2$1.ContactRelations = Object.freeze({
+MGT2.ContactRelations = Object.freeze({
   Allie: "MGT2.Contact.Relation.Allie",
   Contact: "MGT2.Contact.Relation.Contact",
   Rival: "MGT2.Contact.Relation.Rival",
   Enemy: "MGT2.Contact.Relation.Enemy"
 });
-MGT2$1.ContactStatus = Object.freeze({
+MGT2.ContactStatus = Object.freeze({
   Alive: "MGT2.Contact.Status.Alive",
   Unknow: "MGT2.Contact.Status.Unknow",
   Dead: "MGT2.Contact.Status.Dead"
 });
-MGT2$1.Attitudes = Object.freeze({
+MGT2.Attitudes = Object.freeze({
   Unknow: "MGT2.Contact.Attitude.Unknow",
   Hostile: "MGT2.Contact.Attitude.Hostile",
   Unfriendly: "MGT2.Contact.Attitude.Unfriendly",
@@ -408,7 +408,7 @@ MGT2$1.Attitudes = Object.freeze({
   Helpful: "MGT2.Contact.Attitude.Helpful",
   Complicated: "MGT2.Contact.Attitude.Complicated"
 });
-MGT2$1.Characteristics = Object.freeze({
+MGT2.Characteristics = Object.freeze({
   strength: "MGT2.Characteristics.strength.name",
   dexterity: "MGT2.Characteristics.dexterity.name",
   endurance: "MGT2.Characteristics.endurance.name",
@@ -422,16 +422,16 @@ MGT2$1.Characteristics = Object.freeze({
   psionic: "MGT2.Characteristics.psionic.name",
   other: "MGT2.Characteristics.other.name"
 });
-MGT2$1.InitiativeCharacteristics = Object.freeze({
+MGT2.InitiativeCharacteristics = Object.freeze({
   dexterity: "MGT2.Characteristics.dexterity.name",
   intellect: "MGT2.Characteristics.intellect.name"
 });
-MGT2$1.DamageCharacteristics = Object.freeze({
+MGT2.DamageCharacteristics = Object.freeze({
   strength: "MGT2.Characteristics.strength.name",
   dexterity: "MGT2.Characteristics.dexterity.name",
   endurance: "MGT2.Characteristics.endurance.name"
 });
-MGT2$1.TL = Object.freeze({
+MGT2.TL = Object.freeze({
   NA: "MGT2.TL.NA",
   Unknow: "MGT2.TL.Unknow",
   NotIdentified: "MGT2.TL.NotIdentified",
@@ -452,12 +452,12 @@ MGT2$1.TL = Object.freeze({
   TL14: "MGT2.TL.L14",
   TL15: "MGT2.TL.L15"
 });
-MGT2$1.Timeframes = Object.freeze({
+MGT2.Timeframes = Object.freeze({
   Normal: "MGT2.Timeframes.Normal",
   Slower: "MGT2.Timeframes.Slower",
   Faster: "MGT2.Timeframes.Faster"
 });
-MGT2$1.SpeedBands = Object.freeze({
+MGT2.SpeedBands = Object.freeze({
   Stoppped: "MGT2.Stoppped",
   Idle: "MGT2.Idle",
   VerySlow: "MGT2.VerySlow",
@@ -1877,7 +1877,7 @@ class TravellerActorSheet extends ActorSheet {
       }
     }
     rollOptions.skills.sort(MGT2Helper.compareByName);
-    rollOptions.skills = [{ _id: "NP", name: "Not proficient (-3)" }].concat(rollOptions.skills);
+    rollOptions.skills = [{ _id: "NP", name: game.i18n.localize("MGT2.Items.NotProficient") }].concat(rollOptions.skills);
     let itemObj = null;
     let isInitiative = false;
     const button = event.currentTarget;
@@ -1904,11 +1904,11 @@ class TravellerActorSheet extends ActorSheet {
         itemObj = this.actor.getEmbeddedDocument("Item", button.dataset.itemId);
         rollOptions.rollObjectName = itemObj.name;
         if (itemObj.type === "weapon")
-          rollOptions.rollTypeName = "Weapon";
+          rollOptions.rollTypeName = game.i18n.localize("TYPES.Item.weapon");
         else if (itemObj.type === "armor")
-          rollOptions.rollTypeName = "Armor";
+          rollOptions.rollTypeName = game.i18n.localize("TYPES.Item.armor");
         else if (itemObj.type === "computer")
-          rollOptions.rollTypeName = "Computer";
+          rollOptions.rollTypeName = game.i18n.localize("TYPES.Item.computer");
       }
       if (button.dataset.roll === "psionic") {
         rollOptions.rollObjectName = itemObj.name;
@@ -1917,9 +1917,9 @@ class TravellerActorSheet extends ActorSheet {
         rollOptions.damageFormula = itemObj.system.damage;
         if (itemObj.type === "disease") {
           if (itemObj.system.subTypetype === "disease") {
-            rollOptions.rollTypeName = "Disease";
+            rollOptions.rollTypeName = game.i18n.localize("DiseaseSubType.disease");
           } else if (itemObj.system.subTypetype === "poison") {
-            rollOptions.rollTypeName = "Poison";
+            rollOptions.rollTypeName = game.i18n.localize("DiseaseSubType.poison");
           }
         }
       }
@@ -1953,7 +1953,7 @@ class TravellerActorSheet extends ActorSheet {
     if (userRollData.hasOwnProperty("skill") && userRollData.skill !== "") {
       if (userRollData.skill === "NP") {
         rollFormulaParts.push("-3");
-        rollModifiers.push("Not proficient (-3)");
+        rollModifiers.push(game.i18n.localize("MGT2.Items.NotProficient"));
       } else {
         const skillObj = this.actor.getEmbeddedDocument("Item", userRollData.skill);
         rollFormulaParts.push(MGT2Helper.getFormulaDM(skillObj.system.level));
@@ -2333,7 +2333,7 @@ function registerHandlebarsHelpers() {
   });
 }
 Hooks.once("init", async function() {
-  CONFIG.MGT2 = MGT2$1;
+  CONFIG.MGT2 = MGT2;
   CONFIG.Combat.initiative = {
     formula: "2d6 + @initiative",
     decimals: 2
@@ -2408,5 +2408,5 @@ Hooks.once("init", async function() {
   await preloadHandlebarsTemplates();
 });
 
-export { MGT2$1 as MGT2 };
+export { MGT2 };
 //# sourceMappingURL=mgt2.bundle.js.map
