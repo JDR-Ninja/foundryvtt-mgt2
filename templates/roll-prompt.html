@@ -1,0 +1,50 @@
+<form class="{{cssClass}} flexcol" autocomplete="off" style="padding: 0 6px;">
+    <div class="form-group">
+        <label>{{ localize 'MGT2.RollPrompt.CharacteristicDM' }}</label>
+        <select name="characteristic">
+            {{selectOptions characteristics selected=characteristic nameAttr="_id" labelAttr="name"}}
+        </select>
+    </div>
+    <div class="form-group">
+        <label>{{ localize 'MGT2.RollPrompt.SkillDM' }}</label>
+        <select name="skill">
+            <option></option>
+            {{selectOptions skills selected=skill nameAttr="_id" labelAttr="name"}}
+        </select>
+    </div>
+    <div class="form-group">
+        <label>{{ localize 'MGT2.RollPrompt.Timeframes' }}</label>
+        <select name="timeframes">
+            {{selectOptions config.Timeframes selected = timeframe localize = true}}
+        </select>
+    </div>
+    <fieldset>
+        <legend>{{ localize 'MGT2.RollPrompt.States' }}</legend>
+        <div class="form-group">
+            <label class="mgt2-checkbox"><input type="checkbox" name="encumbrance" data-dtype="Boolean" {{checked encumbrance}} />{{ localize 'MGT2.RollPrompt.EncumbranceDM' }}</label>
+            <label class="mgt2-checkbox"><input type="checkbox" name="fatigue" data-dtype="Boolean" {{checked fatigue}} />{{ localize 'MGT2.RollPrompt.FatigueDM' }}</label>
+        </div>
+    </fieldset>
+    <div class="form-group">
+        <label>{{ localize 'MGT2.RollPrompt.CustomDM' }}</label>
+        <input type="text" name="customDM" maxlength="15" />
+    </div>
+    {{#if showDifficulty}}
+    <div class="form-group">
+        <label>{{ localize 'MGT2.RollPrompt.Difficulty' }}</label>
+        <select name="difficulty">
+            <option></option>
+            {{selectOptions config.Difficulty selected = difficulty localize = true}}
+        </select>
+    </div>
+    {{/if}}
+    <div class="form-group">
+        <label>{{ localize 'MGT2.RollPrompt.RollMode' }}</label>
+        <select name="rollMode">
+            <option value="publicroll" selected="">{{ localize 'MGT2.RollPrompt.PublicRoll' }}</option>
+            <option value="gmroll">{{ localize 'MGT2.RollPrompt.PrivateGMRoll' }}</option>
+            <option value="blindroll">{{ localize 'MGT2.RollPrompt.BlindGMRoll' }}</option>
+            <option value="selfroll">{{ localize 'MGT2.RollPrompt.SelfRoll' }}</option>
+        </select>
+    </div>
+</form>

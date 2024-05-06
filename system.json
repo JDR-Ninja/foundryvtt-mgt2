@@ -1,0 +1,40 @@
+{
+	"id": "mgt2",
+	"version": "0.1.0",
+	"title": "MGT2 - Mongoose Traveller (Unofficial)",
+	"description": "An unofficial implementation of Mongoose Publishing Traveller. Traveller is the property of Mongoose Publishing, and can be purchased at https://www.mongoosepublishing.com",
+	"background": "systems/mgt2/assets/screens/rosette-nebula-ngc2239-hoo.webp",
+	"url": "https://github.com/JDR-Ninja/foundryvtt-mgt2",
+  "manifest": "https://github.com/JDR-Ninja/foundryvtt-mgt2/releases/latest/download/system.json",
+  "readme": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/README.md",
+	"download": "https://github.com/JDR-Ninja/foundryvtt-mgt2/releases/download/v0.1.0/mgt2.zip",
+	"authors": [
+		{
+			"name": "JdR Ninja",
+			"url": "https://www.jdr.ninja/",
+			"discord": "jdr.ninja"
+		}
+	],
+	"esmodules": ["mgt2.bundle.js"],
+	"styles": ["styles/mgt2.min.css"],
+	"packs": [],
+	"languages": [
+		{
+			"lang": "en",
+			"name": "English",
+			"path": "lang/en.json"
+		},
+		{
+			"lang": "fr",
+			"name": "Français",
+			"path": "lang/fr.json"
+		}
+	],
+	"compatibility": {
+		"minimum": "11",
+		"verified": "11.315"
+	},
+	"gridDistance": 1.5,
+	"gridUnits": "m",
+	"primaryTokenAttribute": "life"	
+}

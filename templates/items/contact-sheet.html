@@ -1,0 +1,84 @@
+<form class="{{cssClass}} itemsheet" autocomplete="off">
+    <div class="itemsheet-header"><label class="upcase">{{ localize 'MGT2.Items.Contact' }}</label></div>
+    <div class="itemsheet-panel">
+        <div class="itemsheet-maincol">
+            <img class="profile-img" src="{{item.img}}" data-edit="img" data-tooltip="{{item.name}}" />
+            <div class="field-group mt-1">
+                <label>{{ localize 'MGT2.Items.Relation' }}</label>
+                <select name="system.relation">
+                    {{selectOptions config.ContactRelations selected = system.relation localize = true}}
+                </select>
+
+            </div>
+            <div class="field-group mt-1">
+                <label>{{ localize 'MGT2.Items.Attitude' }}</label>
+                <select name="system.attitude">
+                    {{selectOptions config.Attitudes selected = system.attitude localize = true}}
+                </select>
+
+            </div>
+            <div class="field-group mt-1">
+                <label>{{ localize 'MGT2.Items.Status' }}</label>
+                <select name="system.status">
+                    {{selectOptions config.ContactStatus selected = system.status localize = true}}
+                </select>
+            </div>
+        </div>
+        <div class="w-100 h100 flexcol">
+            <input class="field field-item-name" name="name" type="text" value="{{item.name}}" style="flex-grow: 0;" />
+            <div class="field-groups mt-1" style="flex-grow: 0;">
+                <div class="field-group">
+                    <label>{{ localize 'MGT2.Species' }}</label>
+                    <input type="text" name="system.species" value="{{system.species}}" data-dtype="String" />
+                </div>
+                {{#if settings.useGender}}
+                <div class="field-group" style="margin:0 1rem">
+                    <label>{{ localize 'MGT2.Gender' }}</label>
+                    <input type="text" name="system.gender" value="{{system.gender}}" data-dtype="String" />
+                </div>
+                {{/if}}
+                {{#if settings.usePronouns}}
+                <div class="field-group">
+                    <label>{{ localize 'MGT2.Pronouns' }}</label>
+                    <input type="text" name="system.pronouns" value="{{system.pronouns}}" data-dtype="String" />
+                </div>
+                {{/if}}
+            </div>
+            <nav class="horizontal-tabs tabs mt-1" data-group="primary" style="flex-grow: 0;">
+                <a class="item tab-select" data-tab="tab1">{{ localize 'MGT2.Items.Informations' }}</a>
+                <a class="item tab-select" data-tab="description">{{ localize 'MGT2.Items.Description' }}</a>
+                <a class="item tab-select" data-tab="notes">{{ localize 'MGT2.Items.Notes' }}</a>
+            </nav>
+            <div class="tab" data-group="primary" data-tab="tab1">
+                <div class="field-group mt-1">
+                    <label>{{ localize 'MGT2.Items.Title' }}</label>
+                    <input type="text" name="system.title" value="{{system.title}}" data-dtype="String" />
+                </div>
+                <div class="field-group mt-1">
+                    <label>{{ localize 'MGT2.Items.Nickname' }}</label>
+                    <input type="text" name="system.nickname" value="{{system.nickname}}" data-dtype="String" />
+                </div>
+                <div class="field-groups mt-1">
+                    <div class="field-group flex-1">
+                        <label>{{ localize 'MGT2.Items.Homeworld' }}</label>
+                        <input type="text" name="system.homeworld" value="{{system.homeworld}}" data-dtype="String" />
+                    </div>
+                    <div class="field-group flex-1">
+                        <label>{{ localize 'MGT2.Items.Location' }}</label>
+                        <input type="text" name="system.location" value="{{system.location}}" data-dtype="String" />
+                    </div>
+                </div>
+                <div class="field-group mt-1">
+                    <label>{{ localize 'MGT2.Items.Occupation' }}</label>
+                    <input type="text" name="system.occupation" value="{{system.occupation}}" data-dtype="String" />
+                </div>
+            </div>
+            <div class="tab w100 h100" data-group="primary" data-tab="description">
+                {{editor system.description.value target="system.description" button=true editable=true}}
+            </div>
+            <div class="tab w100 h100" data-group="primary" data-tab="notes">
+                {{editor system.notes target="system.notes" button=true editable=true}}
+            </div>
+        </div>
+    </div>
+</form>

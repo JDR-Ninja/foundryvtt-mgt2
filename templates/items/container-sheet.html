@@ -1,0 +1,55 @@
+<form class="{{cssClass}} itemsheet" autocomplete="off">
+  <div class="itemsheet-header"><label class="upcase">{{ localize 'MGT2.Items.Container' }}</label></div>
+  <div class="itemsheet-panel">
+    <div class="itemsheet-maincol">
+      <img class="profile-img" src="{{item.img}}" data-edit="img" data-tooltip="{{item.name}}" />
+      {{#if system.locked}}
+      <div class="field-group mt-05">
+        <i class="fa-solid fa-lock"></i><label class="upcase">{{ localize 'MGT2.Items.Locked' }}</label>
+      </div>
+      {{/if}}
+      <div class="field-group mt-05">
+        <label>{{ localize 'MGT2.Items.Weight' }} ({{unitlabels.weight}})</label>
+        <input type="number" value="{{weight}}" readonly />
+      </div>
+    </div>
+    <div style="flex: 1">
+      <input class="field field-item-name" name="name" type="text" value="{{item.name}}" data-dtype="String" />
+      <nav class="horizontal-tabs tabs mt-1" data-group="primary">
+        <a class="item tab-select" data-tab="tab1">{{ localize 'MGT2.Items.Description' }}</a>
+        <a class="item tab-select" data-tab="tab2">{{ localize 'MGT2.Items.Details' }}</a>
+        <a class="item tab-select" data-tab="tab3">{{ localize 'MGT2.Items.Configuration' }}</a>
+      </nav>
+      <div class="tab" data-group="primary" data-tab="tab1">
+        <div class="field-group mt-1">
+          <label>{{ localize 'MGT2.Items.Description' }}</label>
+          <textarea name="system.description" rows="6">{{system.description}}</textarea>
+        </div>
+      </div>
+      <div class="tab" data-group="primary" data-tab="tab2">
+        <div class="field-groups  mt-05">
+          <div class="field-group flex-1">
+            <label class="mgt2-checkbox"><input type="checkbox" name="system.onHand" data-dtype="Boolean" {{checked system.onHand}} />{{ localize 'MGT2.Items.OnHand' }}</label>
+          </div>
+          {{#if isGM}}
+          <div class="field-group flex-1">
+            <label class="mgt2-checkbox"><input type="checkbox" name="system.locked" data-dtype="Boolean" {{checked system.locked}} />{{ localize 'MGT2.Items.Locked' }}</label>
+          </div>
+          {{/if}}
+        </div>
+        <div class="field-group flex-1">
+          <label>{{ localize 'MGT2.Items.Location' }}</label>
+          <input type="text" name="system.location" value="{{system.location}}" data-dtype="String" />
+        </div>
+      </div>
+      <div class="tab" data-group="primary" data-tab="tab3">
+        {{#if isGM}}
+        <div class="field-group mt-05">
+          <label>{{ localize 'MGT2.Items.LockedDescription' }}</label>
+          <textarea name="system.lockedDescription" rows="6">{{system.lockedDescription}}</textarea>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</form>

@@ -1,0 +1,16 @@
+<form class="{{cssClass}} flexcol" autocomplete="off">
+    <div class="form-group">
+        <label class="mgt2-checkbox"><input type="checkbox" name="show" data-dtype="Boolean" {{checked show}} />{{ localize 'MGT2.Actor.Show' }}</label>
+    </div>
+    <div class="form-group">
+        <label class="mgt2-checkbox"><input type="checkbox" name="showMax" data-dtype="Boolean" {{checked showMax}} />{{ localize 'MGT2.Actor.ShowMinMax' }}</label>
+    </div>
+    {{#if showAll}}
+    <fieldset>
+        <legend>{{ localize 'MGT2.Actor.HiddenCharacteristics' }}</legend>
+        <div class="form-group">
+            <label class="mgt2-checkbox"><input type="checkbox" name="showAll" data-dtype="Boolean" />{{ localize 'MGT2.Actor.ShowHiddenFields' }}</label>
+        </div>
+    </fieldset>
+    {{/if}}
+</form>

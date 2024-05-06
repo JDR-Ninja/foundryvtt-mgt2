@@ -1,0 +1,35 @@
+<div class="roll-info">
+    <div class="roll-object-name">{{rollObjectName}}</div>
+    {{#if rollTypeName}}
+    <div class="roll-type-name">{{rollTypeName}}</div>
+    {{/if}}
+    {{#if rollModifiers}}
+    {{#each rollModifiers as |rollModifier i| }}
+    <div>{{rollModifier}}</div>
+    {{/each}}
+    {{/if}}
+</div>
+<div class="dice-roll">
+    {{#if flavor}}
+    <div class="dice-flavor">{{flavor}}</div>
+    {{/if}}
+    <div class="dice-result">
+        <div class="dice-formula">{{formula}}</div>
+        {{{tooltip}}}
+        <h4 class="dice-total">{{total}}</h4>
+    </div>
+</div>
+{{#if showButtons}}
+<div class="mgt2-buttons">
+    {{#if hasDamage}}
+    <button data-action="damage" title="{{ localize 'MGT2.Chat.Roll.ApplyDamages' }}"><i class="fa-regular fa-heart-circle-minus"></i></button>
+    <!-- <button data-action="healing" data-multiplier="1" title="Apply Healing"><i class="fa-regular fa-heart-circle-plus"></i></button> -->
+    {{/if}}
+    {{#if showRollRequest}}
+    <button data-action="requestRoll" data-roll="characteristic" data-roll-characteristic="strength" title="Roll!"><i class="fa-solid fa-dice"></i></button>
+    {{/if}}
+    {{#if showRollDamage}}
+    <button data-action="rollDamage" title="Roll">{{ localize 'MGT2.Chat.Roll.Damages' }}</button>
+    {{/if}}
+</div>
+{{/if}}

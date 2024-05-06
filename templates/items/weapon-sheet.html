@@ -1,0 +1,89 @@
+<form class="{{cssClass}} itemsheet" autocomplete="off">
+  <div class="itemsheet-header"><label class="upcase">{{ localize 'MGT2.Items.Weapon' }}</label></div>
+  <div class="itemsheet-panel">
+    <div class="itemsheet-maincol">
+      <img class="profile-img" src="{{item.img}}" data-edit="img" data-tooltip="{{item.name}}" />
+      {{> systems/mgt2/templates/items/parts/sheet-physical-item.html }}
+    </div>
+    <div class="w-100">
+      <input class="field field-item-name" name="name" type="text" value="{{item.name}}" />
+      <nav class="horizontal-tabs tabs mt-1" data-group="primary">
+        <a class="item tab-select" data-tab="tab1">{{ localize 'MGT2.Items.Description' }}</a>
+        <a class="item tab-select" data-tab="tab2">{{ localize 'MGT2.Items.Details' }}</a>
+        <a class="item tab-select" data-tab="tab3">{{ localize 'MGT2.Items.Configuration' }}</a>
+      </nav>
+      <div class="tab" data-group="primary" data-tab="tab1">
+        <div class="field-group mt-1">
+          <label>{{ localize 'MGT2.Items.Description' }}</label>
+          <textarea name="system.description" rows="6">{{system.description}}</textarea>
+        </div>
+      </div>
+      <div class="tab" data-group="primary" data-tab="tab2">
+        <div class="field-groups mt-1">
+          <div class="field-group flex-1">
+            <label class="mgt2-checkbox"><input type="checkbox" name="system.equipped" data-dtype="Boolean" {{checked system.equipped}} />{{ localize 'MGT2.Items.Equipped' }}</label>
+          </div>
+          {{#if hadContainer}}
+          <div class="field-group">
+            <label>{{ localize 'MGT2.Items.Storage' }}</label>
+            <select name="system.container.id">
+              {{selectOptions containers selected=system.container.id nameAttr="_id" labelAttr="name"}}
+            </select>
+          </div>
+          {{/if}}
+        </div>
+        <div class="field-groups mt-1">
+          <div class="field-group w3-10">
+            <label class="mgt2-checkbox"><input type="checkbox" name="system.range.isMelee" data-dtype="Boolean" {{checked system.range.isMelee}} />{{ localize 'MGT2.Items.IsMelee' }}</label>
+          </div>
+          {{#unless system.range.isMelee}}
+          <div class="field-group w3-10">
+            <label>{{ localize 'MGT2.Items.Range' }}</label>
+            <div class="flexrow">
+            <input type="text" name="system.range.value" value="{{system.range.value}}" data-dtype="String" />
+            <select name="system.range.unit" class="flex-fix" style="width: 5rem;">
+              {{selectOptions config.MetricRange selected=system.range.unit localize = true}}
+            </select>
+            </div>
+          </div>
+          {{/unless}}
+        </div>
+        <div class="field-groups mt-1">
+          <div class="field-group w3-10">
+            <label>{{ localize 'MGT2.Items.Damage' }}</label>
+            <input type="text" name="system.damage" value="{{system.damage}}" data-dtype="String" />
+          </div>
+          <div class="field-group w3-10" style="margin: 0 1rem;">
+            <label>{{ localize 'MGT2.Items.Magazine' }}</label>
+            <input type="number" name="system.magazine" value="{{system.magazine}}" data-dtype="Number" />
+          </div>
+          <div class="field-group w3-10">
+            <label>{{ localize 'MGT2.Items.MagazineCost' }}</label>
+            <input type="number" name="system.magazineCost" value="{{system.magazineCost}}" data-dtype="Number" />
+          </div>
+        </div>
+        <div class="table-container">
+          <div class="table-row heading color-2">
+            <div class="row-item row-item-left upcase">{{ localize 'MGT2.Items.Trait' }}</div>
+            <div class="row-item row-item-left">{{ localize 'MGT2.Items.Description' }}</div>
+            <div class="row-item row-item-right"><a class="options-create" data-property="traits"><i class="fas fa-plus"></i></a></div>
+          </div>
+          {{#each system.traits as |trait i| }}
+          <div class="table-row dropitem options-part" data-options-part="{{i}}" data-property="traits" role="rowgroup">
+            <div class="row-item row-item-left"><input type="text" name="system.traits.{{i}}.name" value="{{trait.name}}" /></div>
+            <div class="row-item row-item-left">
+              <textarea name="system.traits.{{i}}.description" rows="3">{{trait.description}}</textarea>
+            </div>
+            <div class="row-item row-item-right item-controls">
+              <a class="item-control options-delete" title="Delete Trait"><i class="fas fa-trash"></i></a>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+      <div class="tab" data-group="primary" data-tab="tab3">
+        {{> systems/mgt2/templates/items/parts/sheet-configuration.html }}
+      </div>
+    </div>
+  </div>
+</form>

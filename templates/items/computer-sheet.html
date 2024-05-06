@@ -1,0 +1,65 @@
+<form class="{{cssClass}} itemsheet" autocomplete="off">
+  <div class="itemsheet-header">
+    <label>{{localize 'MGT2.EquipmentSubType.computer'}}</label>
+  </div>
+  <div class="itemsheet-panel">
+    <div class="itemsheet-maincol">
+      <img class="profile-img" src="{{item.img}}" data-edit="img" data-tooltip="{{item.name}}" />
+      {{> systems/mgt2/templates/items/parts/sheet-physical-item.html }}
+    </div>
+    <div class="w-100">
+      <input class="field field-item-name" name="name" type="text" value="{{item.name}}" />
+      <nav class="horizontal-tabs tabs mt-1" data-group="primary">
+        <a class="item tab-select" data-tab="tab1">{{ localize 'MGT2.Items.Description' }}</a>
+        <a class="item tab-select" data-tab="tab2">{{ localize 'MGT2.Items.Details' }}</a>
+        <a class="item tab-select" data-tab="tab3">{{ localize 'MGT2.Items.Configuration' }}</a>
+      </nav>
+      <div class="tab" data-group="primary" data-tab="tab1">
+        <div class="field-group mt-1">
+          <label>{{ localize 'MGT2.Items.Description' }}</label>
+          <textarea name="system.description" rows="6">{{system.description}}</textarea>
+        </div>
+      </div>
+      <div class="tab" data-group="primary" data-tab="tab2">
+        <div class="field-groups mt-1">
+          <div class="field-group">
+            <label class="mgt2-checkbox"><input type="checkbox" name="system.equipped" data-dtype="Boolean" {{checked system.equipped}} />{{ localize 'MGT2.Items.Equipped' }}</label>
+          </div>
+          {{#if hadContainer}}
+          <div class="field-group">
+            <label>{{ localize 'MGT2.Items.Storage' }}</label>
+            <select name="system.container.id">
+              {{selectOptions containers selected=system.container.id nameAttr="_id" labelAttr="name"}}
+            </select>
+          </div>
+          {{/if}}
+        </div>
+        <div class="field-group mt-1">
+          <label>{{ localize 'MGT2.Items.Processing' }}</label>
+          <input type="number" name="system.processing" value="{{system.processing}}" data-dtype="Number" />
+        </div>
+        <div class="table-container mt-1">
+          <div class="table-row heading color-2">
+            <div class="row-item row-item-left flex-grow-2 upcase">{{ localize 'MGT2.Items.Options' }}</div>
+            <div class="row-item row-item-left flex-grow-3">{{ localize 'MGT2.Items.Description' }}</div>
+            <div class="row-item row-item-right"><a class="options-create" data-property="options"><i class="fas fa-plus"></i></a></div>
+          </div>
+          {{#each system.options as |option i| }}
+          <div class="table-row dropitem options-part" data-options-part="{{i}}" data-property="options" role="rowgroup">
+            <div class="row-item row-item-left flex-grow-2"><input type="text" name="system.options.{{i}}.name" value="{{option.name}}" /></div>
+            <div class="row-item row-item-left flex-grow-3">
+              <textarea name="system.options.{{i}}.description" rows="3">{{option.description}}</textarea>
+            </div>
+            <div class="row-item row-item-right item-controls">
+              <a class="item-control options-delete" title="Delete Option"><i class="fas fa-trash"></i></a>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+      <div class="tab" data-group="primary" data-tab="tab3">
+        {{> systems/mgt2/templates/items/parts/sheet-configuration.html }}
+      </div>
+    </div>
+  </div>
+</form>

@@ -1,0 +1,21 @@
+<div class="field-group mt-05">
+  <label>{{ localize 'MGT2.Items.Quantity' }}</label>
+  <input type="number" name="system.quantity" value="{{system.quantity}}" data-dtype="Number" integer="true" positive="true" />
+</div>
+<div class="field-group mt-05">
+  <label>{{ localize 'MGT2.Items.Weight' }} ({{unitlabels.weight}})</label>
+  <input type="number" name="weight" value="{{weight}}" data-dtype="Number" step="0.5" />
+</div>
+<div class="field-group mt-05">
+  <label class="mgt2-checkbox"><input type="checkbox" name="system.weightless" data-dtype="Boolean" {{checked system.weightless}} />{{ localize 'MGT2.Items.Weightless' }}</label>
+</div>
+<div class="field-group mt-05">
+  <label>{{ localize 'MGT2.Items.Cost' }}</label>
+  <input type="number" name="system.cost" value="{{system.cost}}" data-dtype="Number" step="1" />
+</div>
+<div class="field-group mt-05">
+  <label>{{ localize 'MGT2.Items.TL' }}</label>
+  <select name="system.tl">
+    {{selectOptions config.TL selected = system.tl localize = true}}
+</select>
+</div>

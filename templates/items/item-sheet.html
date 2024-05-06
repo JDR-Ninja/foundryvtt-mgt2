@@ -1,0 +1,60 @@
+<form class="{{cssClass}} itemsheet" autocomplete="off">
+  <div class="itemsheet-header">
+    {{#if (eq system.subType "loot")}}
+    <label>{{localize 'MGT2.ItemSubType.loot'}}</label>
+    {{else}}
+    <label>{{localize 'MGT2.ItemSubType.software'}}</label>
+    {{/if}}
+  </div>
+  <div class="itemsheet-panel">
+    <div class="itemsheet-maincol">
+      <img class="profile-img" src="{{item.img}}" data-edit="img" data-tooltip="{{item.name}}" />
+      <div class="field-group mt-1">
+        <label>{{ localize 'MGT2.Items.Type' }}</label>
+        <select name="system.subType">
+          {{selectOptions config.ItemSubType selected = system.subType localize = true}}
+        </select>
+      </div>
+      {{> systems/mgt2/templates/items/parts/sheet-physical-item.html }}
+    </div>
+    <div class="flex-1">
+      <input class="field field-item-name" name="name" type="text" value="{{item.name}}" />
+      <nav class="horizontal-tabs tabs mt-1" data-group="primary">
+        <a class="item tab-select" data-tab="tab1">{{ localize 'MGT2.Items.Description' }}</a>
+        <a class="item tab-select" data-tab="tab2">{{ localize 'MGT2.Items.Details' }}</a>
+      </nav>
+      <div class="tab" data-group="primary" data-tab="tab1">
+        <div class="field-group mt-1">
+          <label>{{ localize 'MGT2.Items.Description' }}</label>
+          <textarea name="system.description" rows="6">{{system.description}}</textarea>
+        </div>
+      </div>
+      <div class="tab" data-group="primary" data-tab="tab2">
+        {{#if hadContainer}}
+        <div class="field-groups mt-1">
+          {{#if (eq system.subType "software")}}
+          <div class="field-group">
+            <label>{{ localize 'MGT2.Items.Computer' }}</label>
+            <select name="system.software.computerId">
+              {{selectOptions computers selected=system.software.computerId nameAttr="_id" labelAttr="name"}}
+            </select>
+          </div>
+          {{/if}}
+          <div class="field-group">
+            <label>{{ localize 'MGT2.Items.Storage' }}</label>
+            <select name="system.container.id">
+              {{selectOptions containers selected=system.container.id nameAttr="_id" labelAttr="name"}}
+            </select>
+          </div>
+        </div>
+        {{/if}}
+        {{#if (eq system.subType "software")}}
+        <div class="field-group mt-1">
+          <label>{{ localize 'MGT2.Items.Bandwidth' }}</label>
+          <input type="number" name="system.software.bandwidth" value="{{system.software.bandwidth}}" data-dtype="Number" />
+        </div>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</form>

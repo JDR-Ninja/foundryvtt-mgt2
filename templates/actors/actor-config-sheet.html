@@ -1,0 +1,35 @@
+<form class="{{cssClass}} flexcol" autocomplete="off">
+    <div class="form-group">
+        <label class="mgt2-checkbox"><input type="checkbox" name="system.config.psionic" data-dtype="Boolean" {{checked system.config.psionic}} />{{ localize 'MGT2.Actor.ShowPsionicTalents' }}</label>
+    </div>
+    <fieldset>
+        <legend>{{ localize 'MGT2.Actor.Initiative' }}</legend>
+        <div class="form-group">
+            <label>{{ localize 'MGT2.Actor.Characteristic' }}</label>
+            <select name="initiative">
+                {{selectOptions config.InitiativeCharacteristics selected = system.config.initiative localize = true}}
+            </select>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>{{ localize 'MGT2.Actor.DamageOrder' }}</legend>
+        <div class="form-group">
+            <label>{{ localize 'MGT2.Actor.Damage' }} #1</label>
+            <select name="damages.rank1">
+                {{selectOptions config.DamageCharacteristics selected = system.config.damages.rank1 localize = true}}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>{{ localize 'MGT2.Actor.Damage' }} #2</label>
+            <select name="damages.rank2">
+                {{selectOptions config.DamageCharacteristics selected = system.config.damages.rank2 localize = true}}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>{{ localize 'MGT2.Actor.Damage' }} #3</label>
+            <select name="damages.rank3">
+                {{selectOptions config.DamageCharacteristics selected = system.config.damages.rank3 localize = true}}
+            </select>
+        </div>
+    </fieldset>
+</form>

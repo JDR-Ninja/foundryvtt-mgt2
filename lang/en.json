@@ -1,0 +1,426 @@
+{
+  "TYPES.Item.armor": "Armor",
+  "TYPES.Item.augment": "Augment",
+  "TYPES.Item.career": "Career",
+  "TYPES.Item.contact": "Contact",
+  "TYPES.Item.computer": "Computer",
+  "TYPES.Item.disease": "Disease",
+  "TYPES.Item.item": "Item",
+  "TYPES.Item.equipment": "Equipment",
+  "TYPES.Item.talent": "Skill & Psionic Talent",
+  "TYPES.Item.species": "Espèce",
+  "TYPES.Item.weapon": "Weapon",
+  "TYPES.Item.container": "Container (backpack, chest)",
+  "TYPES.Actor.character": "Traveller",
+  "TYPES.Actor.vehicule": "Vehicule",
+  "TYPES.Actor.container": "Container (backpack, chest)",
+  "MGT2": {
+    "Themes": {
+      "BlackAndRed": "Classic Traveller Cover",
+      "Mwamba": "Oppa Mwamba Style"
+    },
+    "Settings": {
+      "theme": {
+        "name": "Choice color theme",
+        "hint": "Choice a theme for color"
+      },
+      "useWeightMetric": {
+        "name": "Use Metric system for WEIGHT",
+        "hint": "kilogram (kg) instead of pounds (lbs)"
+      },
+      "useDistanceMetric": {
+        "name": "Use Metric system for DISTANCE",
+        "hint": "kilometer (km) instead of mile (mi)"
+      },
+      "usePronouns": {
+        "name": "Use Pronouns",
+        "hint": "Displays the fields that allow you to enter pronouns"
+      },
+      "useGender": {
+        "name": "Use Gender",
+        "hint": "Displays the fields that allow you to enter a gender"
+      },
+      "showLife": {
+        "name": "Show Life in sheet",
+        "hint": "Show life information in actor sheet"
+      }
+    },
+    "Specie": "Specie",
+    "Species": "Species",
+    "Gender": "Gender",
+    "Pronouns": "Pronouns",
+    "Actor": {
+      "StudyPeriod":"Study Period",
+      "TrainingInSkill":"Training In Skill",
+      "Completed":"Completed",
+      "Weeks":"Weeks",
+      "NewCareer":"New Career",
+      "AddCareer":"Add Career",
+      "EditCareer":"Edit Career",
+      "DeleteCareer":"Delete Career",
+      "NewSkill":"New Skill",
+      "DeleteSkill":"Delete Skill",
+      "EditSkill":"EditSkill",
+      "PsionicTalents":"Psionic Talents",
+      "NewPsionicTalent": "New Psionic Talent",
+      "AddPsionicTalent": "Add Psionic Talent",
+      "EditPsionic": "Edit Psionic",
+      "DeletePsionic": "Delete Psionic",
+      "AddArmor": "Add Armor",
+      "AddAugment": "Add Augment",
+      "AddContact": "Add Contact",
+      "AddDisease": "Add Disease",
+      "AddEquipment": "Add Equipment",
+      "AddItem": "Add Item",
+      "AddWeapon": "Add Weapon",
+      "AddWound": "Add Wound",
+      "Armor": "Armor",
+      "Armors": "Armors",
+      "Augments": "Augments",
+      "Biography": "Biography",
+      "CashOnHand": "Cash On Hand",
+      "Characteristic": "Characteristic",
+      "Contacts": "Contacts",
+      "Damage": "Damage",
+      "DamageOrder": "Damage Order",
+      "Debt": "Debt",
+      "DeleteArmor": "Delete Armor",
+      "DeleteAugment": "Delete Augment",
+      "DeleteContact": "Delete Contact",
+      "DeleteDisease": "Delete Disease",
+      "DeleteEquipment": "DeleteEquipment",
+      "DeleteItem": "Delete Item",
+      "DeleteSoftware": "Delete Software",
+      "DeleteWeapon": "Delete Weapon",
+      "DeleteWound": "Delete Wound",
+      "EditArmor": "Edit Armor",
+      "EditAugment": "Edit Augment",
+      "EditContact": "Edit Contact",
+      "EditDisease": "Edit Disease",
+      "EditItem": "Edit Item",
+      "EditSoftware": "Edit Software",
+      "EditWeapon": "Edit Weapon",
+      "EditWound": "Edit Wound",
+      "Encumbrance": "Encumbrance",
+      "EncumbranceHint": "DM -2 on all physical actions. They will also count as performing heavy labour.",
+      "Fatigue": "Fatigue",
+      "FatigueHint": "DM -2 to all checks until full rest.",
+      "Finance": "Finance",
+      "Health": "Health",
+      "HiddenCharacteristics": "Hidden Characteristics",
+      "Initiative": "Initiative",
+      "Inventory": "Inventory",
+      "Life": "Life",
+      "LivingCost": "Living Cost",
+      "NewArmor": "New Armor",
+      "NewAugment": "New Augment",
+      "NewContact": "New Contact",
+      "NewDiseases": "New Diseases",
+      "NewEquipment": "New Equipment",
+      "NewItem": "New Item",
+      "NewWeapon": "New Weapon",
+      "NewWound": "New Wound",
+      "Notes": "Notes",
+      "Pension": "Pension",
+      "PlaceholderAGE": "AGE",
+      "PlaceholderGENDER": "GENDER",
+      "PlaceholderPRONOUNS": "PRONOUNS",
+      "PlaceholderSPECIES": "SPECIES",
+      "PlaceholderTITLE": "TITLE",
+      "PlaceholderUCP": "UCP",
+      "Rads": "Rads",
+      "RelationsAndContacts": "Relations & Contacts",
+      "ShowHiddenFields": "Show hidden fields",
+      "ShowMinMax": "Show Min/Max",
+      "ShowPsionicTalents": "Show Psionic Talents",
+      "Skills": "Skills",
+      "States": "States",
+      "StoreEquipment": "Store Equipment",
+      "StoreItem": "Store Item",
+      "SurgeryRequired": "Surgery Required",
+      "SurgeryRequiredHint": "Recover only the END DM (can get worse).",
+      "TabCore": "CORE",
+      "TabOthers": "OTHERS",
+      "TotalWeight": "Total Weight",
+      "UnloadSoftware": "Unload Software",
+      "UnstoreItem": "UnstoreItem",
+      "Wounds": "Wounds",
+      "Show": "Show"
+    },
+    "Characteristics": {
+      "strength": {
+        "name": "Strength",
+        "short": "STR"
+      },
+      "dexterity": {
+        "name": "Dexterity",
+        "short": "DEX"
+      },
+      "endurance": {
+        "name": "Endurance",
+        "short": "END"
+      },
+      "intellect": {
+        "name": "Intellect",
+        "short": "INT"
+      },
+      "education": {
+        "name": "Education",
+        "short": "EDU"
+      },
+      "social": {
+        "name": "Social",
+        "short": "SOC"
+      },
+      "morale": {
+        "name": "Morale",
+        "short": "MOR"
+      },
+      "luck": {
+        "name": "Luck",
+        "short": "LUC"
+      },
+      "sanity": {
+        "name": "Sanity",
+        "short": "SAN"
+      },
+      "charm": {
+        "name": "Charm",
+        "short": "CHA"
+      },
+      "psionic": {
+        "name": "Psionic",
+        "short": "PSI"
+      },
+      "other": {
+        "name": "Other",
+        "short": "OTH"
+      }
+    },
+    "MetricSystem": {
+      "Weight": {
+        "kg": "kg"
+      },
+      "Distance": {
+        "km": "km"
+      }
+    },
+    "ImperialSystem": {
+      "Weight": {
+        "lb": "lb"
+      },
+      "Distance": {
+        "mi": "mi"
+      }
+    },
+    "Melee": "Melee",
+    "MetricRange": {
+      "meter": "M",
+      "kilometer": "KM"
+    },
+    "MetricWeight": {
+      "kilogram": "KG",
+      "ton": "TON"
+    },
+    "EquipmentSubType": {
+      "augment": "Augment",
+      "clothing": "Clothing",
+      "equipment": "Equipment",
+      "computer": "Computer",
+      "trinket": "trinket",
+      "toolkit": "toolkit"
+    },
+    "ItemSubType": {
+      "loot": "Loot",
+      "software": "Software"
+    },
+    "DiseaseSubType": {
+      "disease": "Disease",
+      "poison": "Poison",
+      "wound": "Wound"
+    },
+    "Difficulty": {
+      "NA": "Not Applicable",
+      "Simple": "Simple",
+      "Easy": "Easy",
+      "Routine": "Routine",
+      "Average": "Average",
+      "Difficult": "Difficult",
+      "VeryDifficult": "Very Difficult",
+      "Formidable": "Formidable",
+      "Impossible": "Impossible"
+    },
+    "PsionicReach": {
+      "NA": "N/A",
+      "Personal": "Personal",
+      "Close": "Close",
+      "Short": "Short",
+      "Medium": "Medium",
+      "Long": "Long",
+      "VeryLong": "VeryLong",
+      "Distant": "Distant",
+      "VeryDistant": "VeryDistant",
+      "Continental": "Continental",
+      "Planetary": "Planetary"
+    },
+    "TalentSubType": {
+      "skill": "Skill",
+      "psionic": "Psionic talent"
+    },
+    "Contact": {
+      "Attitude": {
+        "Unknow": "Unknow",
+        "Hostile": "Hostile",
+        "Unfriendly": "Unfriendly",
+        "Indifferent": "Indifferent",
+        "Friendly": "Friendly",
+        "Helpful": "Helpful",
+        "Complicated": "Complicated"
+      },
+      "Relation": {
+        "Allie": "Allie",
+        "Contact": "Contact",
+        "Rival": "Rival",
+        "Enemy": "Enemy"
+      },
+      "Status": {
+        "Alive": "Alive",
+        "Unknow": "Unknow",
+        "Dead": "Dead"
+      }
+    },
+    "TL": {
+      "NA": "N/A",
+      "Unknow": "Unknow",
+      "NotIdentified": "Not Identified",
+      "L00": "TL0",
+      "L01": "TL1",
+      "L02": "TL2",
+      "L03": "TL3",
+      "L04": "TL4",
+      "L05": "TL5",
+      "L06": "TL6",
+      "L07": "TL7",
+      "L08": "TL8",
+      "L09": "TL9",
+      "L10": "TL10",
+      "L11": "TL11",
+      "L12": "TL12",
+      "L13": "TL13",
+      "L14": "TL14",
+      "L15": "TL15"
+    },
+    "RollPrompt": {
+      "Title": "Roll: ",
+      "CharacteristicRoll": "Characteristic Roll",
+      "Roll": "Roll",
+      "SkillRoll": "Skill Roll",
+      "ItemRoll": "Item Roll",
+      "PsionicRoll": "Psionic Roll",
+      "InitiativeRoll": "Initiative",
+      "CharacteristicDM": "Characteristic DM",
+      "SkillDM": "Skill DM",
+      "Timeframes": "Timeframes",
+      "States": "States",
+      "CustomDM": "Custom DM",
+      "Difficulty": "Difficulty",
+      "RollMode": "Roll Mode",
+      "PublicRoll": "Public Roll",
+      "PrivateGMRoll": "Private GM Roll",
+      "BlindGMRoll": "Blind GM Roll",
+      "SelfRoll": "Self Roll",
+      "EncumbranceDM": "Encumbrance (DM -2)",
+      "FatigueDM": "Fatigue (DM -2)",
+      "Boon": "Boon",
+      "Bane": "Bane"
+    },
+    "Timeframes": {
+      "Normal": "Normal",
+      "Slower": "Slower (+2)",
+      "Faster": "Faster (-2)"
+    },
+    "Chat": {
+      "Roll": {
+        "ApplyDamages": "Apply Damages",
+        "Damages": "Roll damages"
+      }
+    },
+    "Items": {
+      "Age": "Age",
+      "Armor": "Armor",
+      "Armors": "Armors",
+      "Assignment": "Assignment",
+      "Attitude": "Attitude",
+      "Bandwidth": "Bandwidth",
+      "Career": "Career",
+      "Careers": "Careers",
+      "Characteristic": "Characteristic",
+      "Characteristics": "Characteristics",
+      "Computer": "Computer",
+      "Computers": "Computers",
+      "Configuration": "Configuration",
+      "Contact": "Contact",
+      "Container": "Container",
+      "Containers": "Containers",
+      "Cost": "Cost",
+      "Damage": "Damage",
+      "Description": "Description",
+      "Details": "Details",
+      "Disease": "Disease",
+      "Diseases": "Diseases",
+      "Difficulty": "Difficulty",
+      "Equipped": "Equipped",
+      "Equipment": "Equipment",
+      "Equipments": "Equipments",
+      "EventsMishaps": "Events & Mishaps",
+      "Homeworld": "Homeworld",
+      "Informations": "Informations",
+      "Improvement": "Improvement",
+      "Interval": "Interval",
+      "IsMelee": "IsMelee",
+      "Items": "Items",
+      "Level": "Level",
+      "Location": "Location",
+      "Locked": "Locked",
+      "LockedDescription": "Locked Description",
+      "Magazine": "Magazine",
+      "MagazineCost": "Magazine Cost",
+      "Nickname": "Nickname",
+      "NotProficient": "Not proficient (-3)",
+      "Notes": "Notes",
+      "Occupation": "Occupation",
+      "OnHand": "On Hand",
+      "Options": "Options",
+      "PSICost": "PSI Cost",
+      "Powered": "Powered",
+      "Processing": "Processing",
+      "Protection": "Protection",
+      "PsionicSkill": "Psionic Skill",
+      "Qty": "Qty",
+      "Radiations": "Radiations",
+      "Rads": "Rads",
+      "Range": "Range",
+      "Rank": "Rank",
+      "Reach": "Reach",
+      "ReduceEncumbrance": "Reduce Encumbrance",
+      "Relation": "Relation",
+      "Relations": "Relations",
+      "Skill": "Skill",
+      "Speciality": "Speciality",
+      "Status": "Status",
+      "Storage": "Storage",
+      "Software": "Software",
+      "Softwares": "Softwares",
+      "TL": "TL",
+      "Terms": "Terms",
+      "Title": "Title",
+      "Trait": "Trait",
+      "Type": "Type",
+      "Weapon": "Weapon",
+      "Weapons": "Weapons",
+      "Weight": "Weight",
+      "Weightless": "Weightless",
+      "Quantity": "Quantity"
+    }
+  }
+}

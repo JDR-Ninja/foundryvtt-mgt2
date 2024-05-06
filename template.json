@@ -1,0 +1,39 @@
+{
+	"Actor": {
+		"types": [
+			"character",
+			"vehicule"
+		],
+		"htmlFields": ["notes"],
+		"character": {},
+		"vehicule": {}
+	},
+	"Item": {
+		"types": [
+			"contact",
+			"career",
+			"disease",
+			"item",
+			"equipment",
+			"talent",
+			"armor",
+			"weapon",
+			"computer",
+			"container",
+			"species"
+		],
+		"htmlFields": ["description", "notes"],
+		"item": {},
+		"equipment": {},
+		"container": {},
+		"weapon": {},
+		"armor": {},
+		"computer": {},
+		"disease": {},
+		"career": {},
+		"contact": {},
+		"talent": {},
+		"race": {},
+		"species": {}
+	}
+}

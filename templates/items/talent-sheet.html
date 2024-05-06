@@ -1,0 +1,68 @@
+<form class="{{cssClass}} flexrow itemsheet" autocomplete="off">
+    <div class="itemsheet-header">
+    {{#if (eq system.subType "skill")}}
+        <label>{{localize 'MGT2.TalentSubType.skill'}}</label>
+    {{else if (eq system.subType "psionic")}}
+        <label>{{localize 'MGT2.TalentSubType.psionic'}}</label>
+    {{/if}}
+    </div>
+    <div class="itemsheet-panel">
+        <div class="itemsheet-maincol">
+            <img class="profile-img" src="{{item.img}}" data-edit="img" data-tooltip="{{item.name}}" />
+            <div class="field-group mt-1">
+                <label>{{ localize 'MGT2.Items.Type' }}</label>
+                <select name="system.subType">
+                  {{selectOptions config.TalentSubType selected = system.subType localize = true}}
+                </select>
+              </div>
+        </div>
+        <div class="w-100">
+            <input class="field field-item-name" name="name" type="text" value="{{item.name}}" />
+            {{#if (eq system.subType "skill")}}
+            <div class="field-groups mt-1">
+                <div class="field-group">
+                    <label>{{ localize 'MGT2.Items.Speciality' }}</label>
+                    <input type="text" name="system.skill.speciality" value="{{system.skill.speciality}}" data-dtype="String" />
+                </div>
+                <div class="field-group">
+                    <label>{{ localize 'MGT2.Items.Level' }}</label>
+                    <input type="text" name="system.level" value="{{system.level}}" data-dtype="Number" />
+                </div>
+            </div>
+            {{else if (eq system.subType "psionic")}}
+            <div class="field-groups mt-1">
+                <div class="field-group">
+                    <label>{{ localize 'MGT2.Items.Level' }}</label>
+                    <input type="text" name="system.level" value="{{system.level}}" data-dtype="Number" />
+                </div>
+                <div class="field-group">
+                    <label>{{ localize 'MGT2.Items.Reach' }}</label>
+                    <select name="system.psionic.reach">
+                        <option></option>
+                        {{selectOptions config.PsionicReach selected = system.psionic.reach localize = true}}
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>{{ localize 'MGT2.Items.PSICost' }}</label>
+                    <input type="number" name="system.psionic.cost" value="{{system.psionic.cost}}" data-dtype="Number" />
+                </div>
+            </div>
+            {{/if}}
+            <nav class="horizontal-tabs tabs mt-1" data-group="primary">
+                <a class="item tab-select" data-tab="tab1">{{ localize 'MGT2.Items.Description' }}</a>
+                <a class="item tab-select" data-tab="config">{{ localize 'MGT2.Items.Configuration' }}</a>
+            </nav>
+            <div class="tab" data-group="primary" data-tab="tab1">
+                <textarea name="system.description" rows="6">{{system.description}}</textarea>
+            </div>
+            <div class="tab" data-group="primary" data-tab="config">
+                {{#if (eq system.subType "skill")}}
+                <div class="field-group mt-05">
+                    <label class="mgt2-checkbox"><input type="checkbox" name="system.skill.reduceEncumbrance" data-dtype="Boolean" {{checked system.skill.reduceEncumbrance}} />{{ localize 'MGT2.Items.ReduceEncumbrance' }}</label>
+                </div>
+                {{/if}}
+                {{> systems/mgt2/templates/items/parts/sheet-configuration.html }}
+            </div>
+        </div>
+    </div>
+</form>

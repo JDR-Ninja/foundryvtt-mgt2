@@ -1,0 +1,426 @@
+{
+  "TYPES.Item.armor": "Armure",
+  "TYPES.Item.augment": "Augmentation",
+  "TYPES.Item.career": "Carrière",
+  "TYPES.Item.contact": "Contact",
+  "TYPES.Item.computer": "Ordinateur",
+  "TYPES.Item.disease": "Maladie, Poison & Blessure",
+  "TYPES.Item.item": "Objet",
+  "TYPES.Item.equipment": "Équipment",
+  "TYPES.Item.talent": "Compétence & Talent Psy",
+  "TYPES.Item.race": "Race",
+  "TYPES.Item.weapon": "Arme",
+  "TYPES.Item.container": "Contenant (sac, coffre)",
+  "TYPES.Actor.character": "Voyageur",
+  "TYPES.Actor.vehicule": "Véhicule",
+  "TYPES.Actor.container": "Contenant (sac, coffre)",
+  "MGT2": {
+    "Themes": {
+      "BlackAndRed": "Couverture Classique Traveller",
+      "Mwamba": "Oppa Mwamba Style"
+    },
+    "Settings": {
+      "theme": {
+        "name": "Thème",
+        "hint": "Choisissez un thème"
+      },
+      "useWeightMetric": {
+        "name": "Utiliser le Système Métrique pour le Poid",
+        "hint": "kilogramme (kg) au lieu de la livre (lbs)"
+      },
+      "useDistanceMetric": {
+        "name": "Utiliser le Système Métrique pour la Distance",
+        "hint": "kilomètre (km) au lieu du mile (mi)"
+      },
+      "usePronouns": {
+        "name": "Utiliser le Pronom",
+        "hint": "Afficher le champs qui permet de saisir le pronom"
+      },
+      "useGender": {
+        "name": "Utiliser le Genre",
+        "hint": "Afficher le champs qui permet de saisir le genre"
+      },
+      "showLife": {
+        "name": "Afficher la Vie sur la fiche",
+        "hint": "Affiche le compteur de vie sur la fiche"
+      }
+    },
+    "Specie": "Espèce",
+    "Species": "Espèces",
+    "Gender": "Genre",
+    "Pronouns": "Pronoms",
+    "Actor": {
+      "StudyPeriod":"Période d'étude",
+      "TrainingInSkill":"Compétence en formation",
+      "Completed":"Completée",
+      "Weeks":"Semaines",
+      "NewCareer":"Nouvelle Carrière",
+      "AddCareer":"Ajouter Carrière",
+      "EditCareer":"Éditer Carrière",
+      "DeleteCareer":"Supprimer Carrière",
+      "NewSkill":"Nouvelle Compétence",
+      "DeleteSkill":"Supprimer Compétence",
+      "EditSkill":"Éditer Compétence",
+      "PsionicTalents":"Talents Psionique",
+      "NewPsionicTalent": "Nouveau Talent Psionique",
+      "AddPsionicTalent": "Ajouter Talent Psionique",
+      "EditPsionic": "Éditer Talent Psionique",
+      "DeletePsionic": "Supprimer Talent Psionique",
+      "AddArmor": "Ajouter Armure",
+      "AddAugment": "Ajouter Augmentation",
+      "AddContact": "Ajouter Contact",
+      "AddDisease": "Ajouter Maladie",
+      "AddEquipment": "Ajouter Équipement",
+      "AddItem": "Ajouter Objet",
+      "AddWeapon": "Ajouter Arme",
+      "AddWound": "Ajouter Blessure",
+      "Armor": "Armure",
+      "Armors": "Armures",
+      "Augments": "Augmentations",
+      "Biography": "Biographie",
+      "CashOnHand": "Crédits en main",
+      "Characteristic": "Caractéristique",
+      "Contacts": "Contacts",
+      "Damage": "Dégâts",
+      "DamageOrder": "Ordre des dégâts",
+      "Debt": "Dette",
+      "DeleteArmor": "Supprimer Armure",
+      "DeleteAugment": "Supprimer Augmentation",
+      "DeleteContact": "Supprimer Contact",
+      "DeleteDisease": "Supprimer Malaide",
+      "DeleteEquipment": "Supprimer Équipement",
+      "DeleteItem": "Supprimer Objet",
+      "DeleteSoftware": "Supprimer Logiciel",
+      "DeleteWeapon": "Supprimer Arme",
+      "DeleteWound": "Supprimer Blessure",
+      "EditArmor": "Éditer Armure",
+      "EditAugment": "Éditer Augmentation",
+      "EditContact": "Éditer Contact",
+      "EditDisease": "Éditer Maladie",
+      "EditItem": "Éditer Objet",
+      "EditSoftware": "Éditer Logiciel",
+      "EditWeapon": "Éditer Arme",
+      "EditWound": "Éditer Blessure",
+      "Encumbrance": "Encombrement",
+      "EncumbranceHint": "DM -2 on all physical actions. They will also count as performing heavy labour.",
+      "Fatigue": "Fatigue",
+      "FatigueHint": "DM -2 to all checks until full rest.",
+      "Finance": "Finance",
+      "Health": "Santé",
+      "HiddenCharacteristics": "Caractéristiques cachées",
+      "Initiative": "Initiative",
+      "Inventory": "Inventaire",
+      "Life": "Vie",
+      "LivingCost": "Coût de la vie",
+      "NewArmor": "Nouvelle Armure",
+      "NewAugment": "Nouvelle Augmentation",
+      "NewContact": "Nouveau Contact",
+      "NewDiseases": "Nouvelle Maladie",
+      "NewEquipment": "Nouvelle Équipement",
+      "NewItem": "Nouveau Objet",
+      "NewWeapon": "Nouvel Arme",
+      "NewWound": "Nouvelle Blessure",
+      "Notes": "Notes",
+      "Pension": "Pension",
+      "PlaceholderAGE": "ÂGE",
+      "PlaceholderGENDER": "GENRE",
+      "PlaceholderPRONOUNS": "PRONOMS",
+      "PlaceholderSPECIES": "ESPÈCE",
+      "PlaceholderTITLE": "TITRE",
+      "PlaceholderUCP": "PUP",
+      "Rads": "Rads",
+      "RelationsAndContacts": "Relations & Contacts",
+      "ShowHiddenFields": "Afficher les champs cachés",
+      "ShowMinMax": "Afficher le Min/Max",
+      "ShowPsionicTalents": "Afficher les Talents Psy",
+      "Skills": "Compétences",
+      "States": "États",
+      "StoreEquipment": "Entreposer Équipement",
+      "StoreItem": "Entreposer Objet",
+      "SurgeryRequired": "Chirugie requise",
+      "SurgeryRequiredHint": "Recover only the END DM (can get worse).",
+      "TabCore": "P",
+      "TabOthers": "A",
+      "TotalWeight": "Poids total",
+      "UnloadSoftware": "Éjecter le Logiciel",
+      "UnstoreItem": "Rependre",
+      "Wounds": "Blessures",
+      "Show": "Afficher"
+    },
+    "Characteristics": {
+      "strength": {
+        "name": "Force",
+        "short": "FOR"
+      },
+      "dexterity": {
+        "name": "Dexterité",
+        "short": "DEX"
+      },
+      "endurance": {
+        "name": "Endurance",
+        "short": "END"
+      },
+      "intellect": {
+        "name": "Intellect",
+        "short": "INT"
+      },
+      "education": {
+        "name": "Éducation",
+        "short": "ÉDU"
+      },
+      "social": {
+        "name": "Sociale",
+        "short": "SOC"
+      },
+      "morale": {
+        "name": "Moral",
+        "short": "MOR"
+      },
+      "luck": {
+        "name": "Chance",
+        "short": "CHA"
+      },
+      "sanity": {
+        "name": "Mentale",
+        "short": "MEN"
+      },
+      "charm": {
+        "name": "Charme",
+        "short": "CHA"
+      },
+      "psionic": {
+        "name": "Psionique",
+        "short": "PSI"
+      },
+      "other": {
+        "name": "Autre",
+        "short": "AUT"
+      }
+    },
+    "MetricSystem": {
+      "Weight": {
+        "kg": "kg"
+      },
+      "Distance": {
+        "km": "km"
+      }
+    },
+    "ImperialSystem": {
+      "Weight": {
+        "lb": "lb"
+      },
+      "Distance": {
+        "mi": "mi"
+      }
+    },
+    "Melee": "Mêlée",
+    "MetricRange": {
+      "meter": "M",
+      "kilometer": "KM"
+    },
+    "MetricWeight": {
+      "kilogram": "KG",
+      "ton": "TON"
+    },
+    "EquipmentSubType": {
+      "augment": "Augmentation",
+      "clothing": "Vêtement",
+      "equipment": "Équipement",
+      "computer": "Ordinateur",
+      "trinket": "Babiole",
+      "toolkit": "Outils"
+    },
+    "ItemSubType": {
+      "loot": "Butin",
+      "software": "Logiciel"
+    },
+    "DiseaseSubType": {
+      "disease": "Maladie",
+      "poison": "Poison",
+      "wound": "Blessure"
+    },
+    "Difficulty": {
+      "NA": "N/A",
+      "Simple": "Simple",
+      "Easy": "Facile",
+      "Routine": "Routine",
+      "Average": "Moyenne",
+      "Difficult": "Difficile",
+      "VeryDifficult": "Très Difficile",
+      "Formidable": "Formidable",
+      "Impossible": "Impossible"
+    },
+    "PsionicReach": {
+      "NA": "N/A",
+      "Personal": "Personel",
+      "Close": "Close",
+      "Short": "Courte",
+      "Medium": "Moyenne",
+      "Long": "Longue",
+      "VeryLong": "Très Longue",
+      "Distant": "Distant",
+      "VeryDistant": "Très Distant",
+      "Continental": "Continental",
+      "Planetary": "Planétaire"
+    },
+    "TalentSubType": {
+      "skill": "Compétence",
+      "psionic": "Talent Psionique"
+    },
+    "Contact": {
+      "Attitude": {
+        "Unknow": "Inconnu",
+        "Hostile": "Hostile",
+        "Unfriendly": "Non favorable",
+        "Indifferent": "Indifférente",
+        "Friendly": "Amicale",
+        "Helpful": "Aidante",
+        "Complicated": "Compliqué"
+      },
+      "Relation": {
+        "Allie": "Allié",
+        "Contact": "Contact",
+        "Rival": "Rival",
+        "Enemy": "Ennemie"
+      },
+      "Status": {
+        "Alive": "En vie",
+        "Unknow": "Inconnu",
+        "Dead": "Mort"
+      }
+    },
+    "TL": {
+      "NA": "N/A",
+      "Unknow": "Inconnue",
+      "NotIdentified": "Non Identifié",
+      "L00": "TL0",
+      "L01": "TL1",
+      "L02": "TL2",
+      "L03": "TL3",
+      "L04": "TL4",
+      "L05": "TL5",
+      "L06": "TL6",
+      "L07": "TL7",
+      "L08": "TL8",
+      "L09": "TL9",
+      "L10": "TL10",
+      "L11": "TL11",
+      "L12": "TL12",
+      "L13": "TL13",
+      "L14": "TL14",
+      "L15": "TL15"
+    },
+    "RollPrompt": {
+      "Title": "Jet: ",
+      "CharacteristicRoll": "Jet de caractéristique",
+      "Roll": "Jet",
+      "SkillRoll": "Jet de Compétence",
+      "ItemRoll": "Jet d'Objet",
+      "PsionicRoll": "Jet de Psionique",
+      "InitiativeRoll": "Initiative",
+      "CharacteristicDM": "Caractéristique MD",
+      "SkillDM": "Compétence MD",
+      "Timeframes": "Délais MD",
+      "States": "États",
+      "CustomDM": "MD Personnalisé",
+      "Difficulty": "Difficulté",
+      "RollMode": "Style de Jet",
+      "PublicRoll": "Jet Public",
+      "PrivateGMRoll": "Jet Privé au MJ",
+      "BlindGMRoll": "Jet Aveugle au MJ",
+      "SelfRoll": "Jet pour Soi",
+      "EncumbranceDM": "Encombrement (MD -2)",
+      "FatigueDM": "Fatigue (MD -2)",
+      "Boon": "Avantage",
+      "Bane": "Désavantage"
+    },
+    "Timeframes": {
+      "Normal": "Normal",
+      "Slower": "Lent (+2)",
+      "Faster": "Rapide (-2)"
+    },
+    "Chat": {
+      "Roll": {
+        "ApplyDamages": "Appliquer Dégâts",
+        "Damages": "Lancer les Dégâts"
+      }
+    },
+    "Items": {
+      "Age": "Âge",
+      "Armor": "Armure",
+      "Armors": "Armures",
+      "Assignment": "Affectation",
+      "Attitude": "Attitude",
+      "Bandwidth": "Bande passante",
+      "Career": "Carrière",
+      "Careers": "Carrières",
+      "Characteristic": "Caracteristique",
+      "Characteristics": "Caracteristiques",
+      "Computer": "Ordinateur",
+      "Computers": "Ordinateurs",
+      "Configuration": "Configuration",
+      "Contact": "Contact",
+      "Container": "Conteneur",
+      "Containers": "Conteneurs",
+      "Cost": "Coût",
+      "Damage": "Dégâts",
+      "Description": "Description",
+      "Details": "Détails",
+      "Difficulty": "Difficulté",
+      "Disease": "Maladie",
+      "Diseases": "Maladies",
+      "Equipped": "Équipé",
+      "Equipment": "Équipement",
+      "Equipments": "Équipements",
+      "EventsMishaps": "Événements & Incidents",
+      "Homeworld": "Monde Natal",
+      "Informations": "Informations",
+      "Improvement": "Améliorations",
+      "Interval": "Intervalle",
+      "IsMelee": "Est Mêlée",
+      "Items": "Objets",
+      "Level": "Niveau",
+      "Location": "Localisation",
+      "Locked": "Verrouillé",
+      "LockedDescription": "Description Verrouillé",
+      "Magazine": "Chargeur",
+      "MagazineCost": "Coût du Chargeur",
+      "Nickname": "Surnom",
+      "NotProficient": "Incompétent (-3)",
+      "Notes": "Notes",
+      "Occupation": "Profession",
+      "OnHand": "Sur Soi",
+      "Options": "Options",
+      "PSICost": "Coût PSI",
+      "Powered": "Alimenté",
+      "Processing": "Traitement",
+      "Protection": "Protection",
+      "PsionicSkill": "Compétence Psionique",
+      "Qty": "Qté",
+      "Radiations": "Radiations",
+      "Rads": "Rads",
+      "Range": "Portée",
+      "Rank": "Rang",
+      "Reach": "Portée",
+      "ReduceEncumbrance": "Réduit l'Encombrement",
+      "Relation": "Relation",
+      "Relations": "Relations",
+      "Skill": "Compétence",
+      "Speciality": "Spécialité",
+      "Status": "Statut",
+      "Storage": "Stockage",
+      "Software": "Logiciel",
+      "Softwares": "Logiciels",
+      "TL": "TL",
+      "Terms": "Termes",
+      "Title": "Titre",
+      "Trait": "Trait",
+      "Type": "Type",
+      "Weapon": "Arme",
+      "Weapons": "Armes",
+      "Weight": "Poid",
+      "Weightless": "Aucun Poid",
+      "Quantity": "Quantité"
+    }
+  }
+}

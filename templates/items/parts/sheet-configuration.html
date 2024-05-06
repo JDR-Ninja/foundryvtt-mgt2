@@ -1,0 +1,23 @@
+<div class="field-groups mt-1">
+  <div class="field-group  w3-10">
+    <label>{{ localize 'MGT2.Items.Difficulty' }}</label>
+    <select name="system.roll.difficulty">
+      <option></option>
+      {{selectOptions config.Difficulty selected = system.roll.difficulty localize = true}}
+    </select>
+  </div>
+  <div class="field-group w3-10">
+    <label>{{ localize 'MGT2.Items.Skill' }}</label>
+    <select name="system.roll.skill">
+      <option></option>
+      {{selectOptions skills selected=system.roll.skill nameAttr="_id" labelAttr="name"}}
+    </select>
+  </div>
+  <div class="field-group w3-10">
+    <label>{{ localize 'MGT2.Items.Characteristic' }}</label>
+    <select name="system.roll.characteristic">
+      <option></option>
+      {{selectOptions config.Characteristics selected=system.roll.characteristic localize = true}}
+    </select>
+  </div>
+</div>

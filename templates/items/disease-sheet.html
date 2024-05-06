@@ -1,0 +1,45 @@
+<form class="{{cssClass}} itemsheet" autocomplete="off">
+  <div class="itemsheet-header">
+    {{#if (eq system.subType "disease")}}
+        <label>{{localize 'MGT2.DiseaseSubType.disease'}}</label>
+    {{else if (eq system.subType "poison")}}
+        <label>{{localize 'MGT2.DiseaseSubType.poison'}}</label>
+    {{else}}
+    <label>{{localize 'MGT2.DiseaseSubType.wound'}}</label>
+    {{/if}}
+  </div>
+  <div class="itemsheet-panel">
+    <div class="itemsheet-maincol">
+      <img class="profile-img" src="{{item.img}}" data-edit="img" data-tooltip="{{item.name}}" />
+      <div class="field-group mt-1">
+        <label>{{ localize 'MGT2.Items.Type' }}</label>
+        <select name="system.subType">
+          {{selectOptions config.DiseaseSubType selected = system.subType localize = true}}
+        </select>
+      </div>
+    </div>
+    <div class="w-100">
+      <input class="field field-item-name" name="name" type="text" value="{{item.name}}" />
+      <div class="field-groups mt-1">
+        <div class="field-group w3-10">
+          <label>{{ localize 'MGT2.Items.Difficulty' }}</label>
+          <select name="system.difficulty">
+            {{selectOptions config.Difficulty selected = system.difficulty localize = true}}
+          </select>
+        </div>
+        <div class="field-group w3-10" style="margin: 0 1rem;">
+          <label>{{ localize 'MGT2.Items.Damage' }}</label>
+          <input type="text" name="system.damage" value="{{system.damage}}" data-dtype="String" />
+        </div>
+        <div class="field-group w3-10">
+          <label>{{ localize 'MGT2.Items.Interval' }}</label>
+          <input type="text" name="system.interval" value="{{system.interval}}" data-dtype="String" />
+        </div>
+      </div>
+      <div class="field-group mt-1 w-100">
+        <label>{{ localize 'MGT2.Items.Description' }}</label>
+        <textarea name="system.description" rows="6">{{system.description}}</textarea>
+    </div>
+    </div>
+  </div>
+</form>

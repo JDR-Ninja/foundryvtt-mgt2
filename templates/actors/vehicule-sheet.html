@@ -1,0 +1,16 @@
+<form class="{{cssClass}} flexcol" autocomplete="off" style="align-content: flex-start;align-items: baseline;overflow: hidden;height: 100%;">
+    <section class="vehicule-header">
+		<div class="vehicule-header-img">
+			<img class="profile" src="{{img}}" data-edit="img" title="{{name}}" height="130" width="100" />
+		</div>
+        <div class="vehicule-header-body">
+            <input class="field-name" name="name" type="text" value="{{name}}" />
+            <ul class="character-summary">
+                <li class="w5-10"><input name="system.personal.title" type="text" value="{{system.personal.title}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderTITLE' }}" /></li>
+				<li class="w2-10"><input name="system.personal.species" type="text" value="{{system.personal.species}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderSPECIES' }}" /></li>
+				<li class="w1-10"><input name="system.personal.age" type="text" value="{{system.personal.age}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderAGE' }}" /></li>
+				<li class="w2-10"><input name="system.personal.wup" type="text" value="{{system.personal.wup}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderUCP' }}" /></li>
+			</ul>
+        </div>
+    </section>
+</form>
