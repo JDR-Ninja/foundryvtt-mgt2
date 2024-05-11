@@ -7,7 +7,7 @@
 	"url": "https://github.com/JDR-Ninja/foundryvtt-mgt2",
   "manifest": "https://github.com/JDR-Ninja/foundryvtt-mgt2/releases/latest/download/system.json",
   "readme": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/README.md",
-	"download": "https://github.com/JDR-Ninja/foundryvtt-mgt2/releases/download/v0.1.0/mgt2.zip",
+	"download": "https://github.com/JDR-Ninja/foundryvtt-mgt2/releases/download/v0.1.1/mgt2.zip",
 	"authors": [
 		{
 			"name": "JdR Ninja",
