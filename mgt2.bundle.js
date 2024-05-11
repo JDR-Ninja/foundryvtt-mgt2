@@ -504,7 +504,7 @@ class ActorCharacter {
       await $this.deleteEmbeddedDocuments("Item", toDeleteIds);
     if (itemToUpdates.length > 0)
       await $this.updateEmbeddedDocuments("Item", itemToUpdates);
-    await $this.recalculateWeight();
+    await this.recalculateWeight();
   }
   static async onUpdateDescendantDocuments($this, parent, collection, documents, changes, options, userId) {
     await this.calculEncumbranceAndWeight($this, parent, collection, documents, changes, options, userId);
@@ -1521,7 +1521,7 @@ class TravellerActorSheet extends ActorSheet {
   _prepareCharacterItems(sheetData) {
     const actorData = sheetData.data;
     actorData.isGM = game.user.isGM;
-    actorData.showTrash = game.user.isGM || game.settings.get("mgt2", "showTrash");
+    actorData.showTrash = false;
     actorData.initiative = this.actor.getInitiative();
     const weapons = [];
     const armors = [];

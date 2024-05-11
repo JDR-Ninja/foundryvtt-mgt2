@@ -1,6 +1,6 @@
 {
 	"id": "mgt2",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"title": "MGT2 - Mongoose Traveller (Unofficial)",
 	"description": "An unofficial implementation of Mongoose Publishing Traveller. Traveller is the property of Mongoose Publishing, and can be purchased at https://www.mongoosepublishing.com",
 	"background": "systems/mgt2/assets/screens/rosette-nebula-ngc2239-hoo.webp",
