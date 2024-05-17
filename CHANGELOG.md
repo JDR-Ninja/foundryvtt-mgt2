@@ -1,4 +1,4 @@
-## [0.1.2](https://github.com/xdy/twodsix-foundryvtt/compare/v4.24.5...v4.24.6) (2024-05-04)
+## [0.1.2] (2024-05-16)
 
 ### Bug Fixes
 * Affichage de la difficulté pour les Talents Psioniques
