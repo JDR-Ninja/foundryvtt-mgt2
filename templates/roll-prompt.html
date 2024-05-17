@@ -29,7 +29,6 @@
         <label>{{ localize 'MGT2.RollPrompt.CustomDM' }}</label>
         <input type="text" name="customDM" maxlength="15" />
     </div>
-    {{#if showDifficulty}}
     <div class="form-group">
         <label>{{ localize 'MGT2.RollPrompt.Difficulty' }}</label>
         <select name="difficulty">
@@ -37,7 +36,6 @@
             {{selectOptions config.Difficulty selected = difficulty localize = true}}
         </select>
     </div>
-    {{/if}}
     <div class="form-group">
         <label>{{ localize 'MGT2.RollPrompt.RollMode' }}</label>
         <select name="rollMode">

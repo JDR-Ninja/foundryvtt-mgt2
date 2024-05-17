@@ -10,11 +10,21 @@ class CharacterData extends foundry.abstract.TypeDataModel {
       personal: new fields.SchemaField({
         title: new fields.StringField({ required: false, blank: true, trim: true }),
         species: new fields.StringField({ required: false, blank: true, trim: true }),
+        speciesText: new fields.SchemaField({
+          description: new fields.StringField({ required: false, blank: true, trim: true, nullable: true }),
+          descriptionLong: new fields.HTMLField({ required: false, blank: true, trim: true })
+        }),
         age: new fields.StringField({ required: false, blank: true, trim: true }),
         gender: new fields.StringField({ required: false, blank: true, trim: true }),
         pronouns: new fields.StringField({ required: false, blank: true, trim: true }),
         homeworld: new fields.StringField({ required: false, blank: true, trim: true }),
-        ucp: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
+        ucp: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+        traits: new fields.ArrayField(
+          new fields.SchemaField({
+            name: new fields.StringField({ required: true, blank: true, trim: true }),
+            description: new fields.StringField({ required: false, blank: true, trim: true })
+          })
+        )
       }),
       biography: new fields.HTMLField({ required: false, blank: true, trim: true }),
       characteristics: new fields.SchemaField({
@@ -212,7 +222,9 @@ class TalentData extends ItemBaseData {
     });
     schema.psionic = new fields.SchemaField({
       reach: new fields.StringField({ required: false, blank: true, trim: true }),
-      cost: new fields.NumberField({ required: false, initial: 1, min: 0, integer: true })
+      cost: new fields.NumberField({ required: false, initial: 1, min: 0, integer: true }),
+      duration: new fields.StringField({ required: false, blank: true, trim: true }),
+      durationUnit: new fields.StringField({ required: false })
     });
     schema.roll = new fields.SchemaField({
       characteristic: new fields.StringField({ required: false, blank: true, trim: true }),
@@ -306,9 +318,25 @@ class ComputerData extends PhysicalItemData {
     return schema;
   }
 }
-class SpeciesData extends ItemBaseData {
+class SpeciesData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
-    const schema = super.defineSchema();
+    const fields2 = foundry.data.fields;
+    const schema = {
+      description: new fields2.StringField({ required: false, blank: true, trim: true, nullable: true }),
+      descriptionLong: new fields2.HTMLField({ required: false, blank: true, trim: true }),
+      traits: new fields2.ArrayField(
+        new fields2.SchemaField({
+          name: new fields2.StringField({ required: true, blank: true, trim: true }),
+          description: new fields2.StringField({ required: false, blank: true, trim: true })
+        })
+      ),
+      modifiers: new fields2.ArrayField(
+        new fields2.SchemaField({
+          characteristic: new fields2.StringField({ required: false, blank: true, trim: true }),
+          value: new fields2.NumberField({ required: false, integer: true, nullable: true })
+        })
+      )
+    };
     return schema;
   }
 }
@@ -458,16 +486,21 @@ MGT2.Timeframes = Object.freeze({
   Faster: "MGT2.Timeframes.Faster"
 });
 MGT2.SpeedBands = Object.freeze({
-  Stoppped: "MGT2.Stoppped",
-  Idle: "MGT2.Idle",
-  VerySlow: "MGT2.VerySlow",
-  Slow: "MGT2.Slow",
-  Medium: "MGT2.Medium",
-  High: "MGT2.High.",
-  Fast: "MGT2.Fast",
-  VeryFast: "MGT2.VeryFast",
-  Subsonic: "MGT2.Subsonic",
-  Hypersonic: "MGT2.Hypersonic"
+  Stoppped: "MGT2.SpeedBands.Stoppped",
+  Idle: "MGT2.SpeedBands.Idle",
+  VerySlow: "MGT2.SpeedBands.VerySlow",
+  Slow: "MGT2.SpeedBands.Slow",
+  Medium: "MGT2.SpeedBands.Medium",
+  High: "MGT2.SpeedBands.High.",
+  Fast: "MGT2.SpeedBands.Fast",
+  VeryFast: "MGT2.SpeedBands.VeryFast",
+  Subsonic: "MGT2.SpeedBands.Subsonic",
+  Hypersonic: "MGT2.SpeedBands.Hypersonic"
+});
+MGT2.Durations = Object.freeze({
+  Seconds: "MGT2.Durations.Seconds",
+  Minutes: "MGT2.Durations.Minutes",
+  Heures: "MGT2.Durations.Heures"
 });
 
 class ActorCharacter {
@@ -975,6 +1008,9 @@ var __publicField = (obj, key, value) => {
   return value;
 };
 const _MGT2Helper = class _MGT2Helper {
+  static hasValue(object, property) {
+    return object !== void 0 && object.hasOwnProperty(property) && object[property] !== null && object[property] !== void 0 && object[property] !== "";
+  }
   static getItemsWeight(items) {
     let weight = 0;
     for (let i of items) {
@@ -1043,26 +1079,66 @@ const _MGT2Helper = class _MGT2Helper {
     }
     return total;
   }
+  static getDifficultyValue(difficulty) {
+    switch (difficulty) {
+      case "Simple":
+        return 2;
+      case "Easy":
+        return 4;
+      case "Routine":
+        return 6;
+      case "Average":
+        return 8;
+      case "Difficult":
+        return 10;
+      case "VeryDifficult":
+        return 12;
+      case "Formidable":
+        return 14;
+      case "Impossible":
+        return 16;
+      default:
+        return 0;
+    }
+  }
+  static getDifficultyDisplay(difficulty) {
+    switch (difficulty) {
+      case "Simple":
+        return game.i18n.localize("MGT2.Difficulty.Simple") + " (2+)";
+      case "Easy":
+        return game.i18n.localize("MGT2.Difficulty.Easy") + " (4+)";
+      case "Routine":
+        return game.i18n.localize("MGT2.Difficulty.Routine") + " (6+)";
+      case "Average":
+        return game.i18n.localize("MGT2.Difficulty.Average") + " (8+)";
+      case "Difficult":
+        return game.i18n.localize("MGT2.Difficulty.Difficult") + " (10+)";
+      case "VeryDifficult":
+        return game.i18n.localize("MGT2.Difficulty.VeryDifficult") + " (12+)";
+      case "Formidable":
+        return game.i18n.localize("MGT2.Difficulty.Formidable") + " (14+)";
+      case "Impossible":
+        return game.i18n.localize("MGT2.Difficulty.Impossible") + " (16+)";
+      default:
+        return null;
+    }
+  }
   static getRangeDisplay(range) {
     let value = Number(range.value);
     if (isNaN(value))
       return null;
     let label;
-    if (game.settings.get("mgt2", "useDistanceMetric") === true) {
-      if (range.unit !== null && range.unit !== void 0 && range.unit !== "")
-        label = game.i18n.localize(`MGT2.MetricRange.${range.unit}`).toLowerCase();
-      else
-        label = "";
-    }
+    if (range.unit !== null && range.unit !== void 0 && range.unit !== "")
+      label = game.i18n.localize(`MGT2.MetricRange.${range.unit}`).toLowerCase();
+    else
+      label = "";
     return `${value}${label}`;
   }
   static getWeightLabel() {
-    const label = game.settings.get("mgt2", "useWeightMetric") === true ? "MGT2.MetricSystem.Weight.kg" : "MGT2.ImperialSystem.Weight.lb";
-    return game.i18n.localize(label);
+    return game.i18n.localize("MGT2.MetricSystem.Weight.kg");
   }
   static getDistanceLabel() {
-    const label = game.settings.get("mgt2", "useDistanceMetric") === true ? "MGT2.MetricSystem.Distance.km" : "MGT2.ImperialSystem.Distance.mi";
-    return game.i18n.localize(label);
+    return game.i18n.localize("MGT2.MetricSystem.Distance.km");
   }
   static getIntegerFromInput(data) {
     return Math.trunc(this.getNumberFromInput(data));
@@ -1082,16 +1158,10 @@ const _MGT2Helper = class _MGT2Helper {
     return converted;
   }
   static convertWeightForDisplay(weight) {
-    if (game.settings.get("mgt2", "useWeightMetric") === true || weight === 0)
-      return weight;
-    const pounds = weight * this.POUNDS_CONVERT;
-    return Math.round(pounds * 10) / 10;
+    return weight;
   }
   static convertWeightFromInput(weight) {
-    if (game.settings.get("mgt2", "useWeightMetric") === true || weight === 0)
-      return Math.round(weight * 10) / 10;
-    const kg = this.POUNDS_CONVERT / weight;
-    return Math.round(kg * 10) / 10;
+    return Math.round(weight * 10) / 10;
   }
   static getDataFromDropEvent(event) {
     var _a;
@@ -1127,6 +1197,14 @@ __publicField(_MGT2Helper, "decimalSeparator");
 __publicField(_MGT2Helper, "badDecimalSeparator");
 _MGT2Helper.decimalSeparator = Number(1.1).toLocaleString().charAt(1);
 _MGT2Helper.badDecimalSeparator = _MGT2Helper.decimalSeparator === "." ? "," : ".";
+__publicField(_MGT2Helper, "format", function() {
+  var s = arguments[0];
+  for (var i = 0; i < arguments.length - 1; i++) {
+    var reg = new RegExp("\\{" + i + "\\}", "gm");
+    s = s.replace(reg, arguments[i + 1]);
+  }
+  return s;
+});
 let MGT2Helper = _MGT2Helper;
 
 class TravellerItemSheet extends ItemSheet {
@@ -1208,10 +1286,55 @@ class TravellerItemSheet extends ItemSheet {
     if (this.item.type == "career") {
       html.find(".event-create").click(this._onCareerEventCreate.bind(this));
       html.find(".event-delete").click(this._onCareerEventDelete.bind(this));
-    } else if (this.item.type == "armor" || this.item.type == "computer" || this.item.type == "weapon") {
+    } else if (this.item.type == "armor" || this.item.type == "computer" || this.item.type == "species" || this.item.type == "weapon") {
       html.find(".options-create").click(this._onOptionCreate.bind(this));
       html.find(".options-delete").click(this._onOptionDelete.bind(this));
     }
+    if (this.item.type == "species") {
+      html.find(".modifiers-create").click(this._onModifierEventCreate.bind(this));
+      html.find(".modifiers-delete").click(this._onModifierEventDelete.bind(this));
+    }
+  }
+  async _onModifierEventCreate(event) {
+    event.preventDefault();
+    await this._onSubmit(event);
+    let modifiers = this.item.system.modifiers;
+    let index;
+    if (modifiers.length === 0) {
+      modifiers = {};
+      modifiers["0"] = { characteristic: "Endurance", value: null };
+    } else {
+      index = Math.max(...Object.keys(modifiers));
+      index++;
+      modifiers[index] = { characteristic: "Endurance", value: null };
+    }
+    let update = {
+      system: {
+        modifiers
+      }
+    };
+    return this.item.update(update);
+  }
+  async _onModifierEventDelete(event) {
+    event.preventDefault();
+    await this._onSubmit(event);
+    const element = event.currentTarget.closest(".modifiers-part");
+    const modifiers = foundry.utils.deepClone(this.item.system.modifiers);
+    let index = Number(element.dataset.modifiersPart);
+    const newModifiers = [];
+    let entries = Object.entries(modifiers);
+    if (entries.length > 1) {
+      for (const [key, value] of entries) {
+        if (key != index)
+          newModifiers.push(value);
+      }
+    }
+    let update = {
+      system: {
+        modifiers: newModifiers
+      }
+    };
+    return this.item.update(update);
   }
   async _onCareerEventCreate(event) {
     event.preventDefault();
@@ -1291,20 +1414,20 @@ class TravellerItemSheet extends ItemSheet {
     update[`system.${property}`] = newOptions;
     return this.item.update(update);
   }
-  async _onTraitCreate(event) {
-    event.preventDefault();
-    await this._onSubmit(event);
-    const traits = this.item.system.traits;
-    return this.item.update({ "system.traits.parts": traits.parts.concat([["", ""]]) });
-  }
-  async _onTraitDelete(event) {
-    event.preventDefault();
-    await this._onSubmit(event);
-    const element = event.currentTarget.closest(".traits-part");
-    const traits = foundry.utils.deepClone(this.item.system.traits);
-    traits.parts.splice(Number(element.dataset.traitsPart), 1);
-    return this.item.update({ "system.traits.parts": traits.parts });
-  }
+  // async _onTraitCreate(event) {
+  //   event.preventDefault();
+  //   await this._onSubmit(event);
+  //   const traits = this.item.system.traits;
+  //   return this.item.update({ "system.traits.parts": traits.parts.concat([["", ""]]) });
+  // }
+  // async _onTraitDelete(event) {
+  //   event.preventDefault();
+  //   await this._onSubmit(event);
+  //   const element = event.currentTarget.closest(".traits-part");
+  //   const traits = foundry.utils.deepClone(this.item.system.traits);
+  //   traits.parts.splice(Number(element.dataset.traitsPart), 1);
+  //   return this.item.update({ "system.traits.parts": traits.parts });
+  // }
   _getSubmitData(updateData = {}) {
     const formData = foundry.utils.expandObject(super._getSubmitData(updateData));
     if (formData.hasOwnProperty("system") && formData.system.hasOwnProperty("container") && this.item.system.hasOwnProperty("equipped")) {
@@ -1351,7 +1474,8 @@ class RollPromptDialog extends Dialog {
       skills: options.skills,
       skill: options.skill,
       fatigue: options.fatigue,
-      encumbrance: options.encumbrance
+      encumbrance: options.encumbrance,
+      difficulty: options.difficulty
     });
     const results = new Promise((resolve) => {
       new this({
@@ -1425,6 +1549,29 @@ class RollPromptHelper {
   }
 }
 
+class EditorFullViewDialog extends Dialog {
+  constructor(dialogData = {}, options = {}) {
+    super(dialogData, options);
+    this.options.classes = ["mgt2", game.settings.get("mgt2", "theme"), "sheet"];
+    this.options.resizable = true;
+  }
+  static async create(title, html) {
+    const htmlContent = await renderTemplate("systems/mgt2/templates/editor-fullview.html", {
+      config: CONFIG.MGT2,
+      html
+    });
+    const results = new Promise((resolve) => {
+      new this({
+        title,
+        content: htmlContent,
+        buttons: {
+          //close: { label: game.i18n.localize("MGT2.Close") }
+        }
+      }).render(true);
+    });
+    return results;
+  }
+}
 class ActorConfigDialog extends Dialog {
   constructor(dialogData = {}, options = {}) {
     super(dialogData, options);
@@ -1441,7 +1588,7 @@ class ActorConfigDialog extends Dialog {
         content: htmlContent,
         buttons: {
           submit: {
-            label: "Save",
+            label: game.i18n.localize("MGT2.Save"),
             icon: '<i class="fa-solid fa-floppy-disk"></i>',
             callback: (html) => {
               const formData = new FormDataExtended(html[0].querySelector("form")).object;
@@ -1452,14 +1599,6 @@ class ActorConfigDialog extends Dialog {
       }).render(true);
     });
     return results;
-  }
-}
-class CharacterPrompts {
-  static async openConfig(system) {
-    return await ActorConfigDialog.create(system);
-  }
-  static async openCharacteristic(name, hide, showMax, showAll = false) {
-    return await ActorCharacteristicDialog.create(name, hide, showMax, showAll);
   }
 }
 class ActorCharacteristicDialog extends Dialog {
@@ -1481,7 +1620,7 @@ class ActorCharacteristicDialog extends Dialog {
         content: htmlContent,
         buttons: {
           submit: {
-            label: "Save",
+            label: game.i18n.localize("MGT2.Save"),
             icon: '<i class="fa-solid fa-floppy-disk"></i>',
             callback: (html) => {
               const formData = new FormDataExtended(html[0].querySelector("form")).object;
@@ -1492,6 +1631,56 @@ class ActorCharacteristicDialog extends Dialog {
       }).render(true);
     });
     return results;
+  }
+}
+class TraitEditDialog extends Dialog {
+  constructor(dialogData = {}, options = {}) {
+    super(dialogData, options);
+    this.options.classes = ["mgt2", game.settings.get("mgt2", "theme"), "sheet"];
+  }
+  static async create(data) {
+    const htmlContent = await renderTemplate("systems/mgt2/templates/actors/trait-sheet.html", {
+      config: CONFIG.MGT2,
+      data
+    });
+    const title = data.hasOwnProperty("name") && data.name !== void 0 ? data.name : game.i18n.localize("MGT2.Actor.EditTrait");
+    const results = new Promise((resolve) => {
+      new this({
+        title,
+        content: htmlContent,
+        buttons: {
+          submit: {
+            label: game.i18n.localize("MGT2.Save"),
+            icon: '<i class="fa-solid fa-floppy-disk"></i>',
+            callback: (html) => {
+              const formData = new FormDataExtended(html[0].querySelector("form")).object;
+              resolve(formData);
+            }
+          }
+          //cancel: { label: "Cancel" }
+        }
+        // close: (html) => {
+        //     console.log("This always is logged no matter which option is chosen");
+        //     const formData = new FormDataExtended(html[0].querySelector('form')).object;
+        //     resolve(formData);
+        //  }
+      }).render(true);
+    });
+    return results;
+  }
+}
+class CharacterPrompts {
+  static async openConfig(system) {
+    return await ActorConfigDialog.create(system);
+  }
+  static async openCharacteristic(name, hide, showMax, showAll = false) {
+    return await ActorCharacteristicDialog.create(name, hide, showMax, showAll);
+  }
+  static async openTraitEdit(data) {
+    return await TraitEditDialog.create(data);
+  }
+  static async openEditorFullView(title, html) {
+    return await EditorFullViewDialog.create(title, html);
   }
 }
 
@@ -1538,7 +1727,8 @@ class TravellerActorSheet extends ActorSheet {
     const wounds = [];
     const contacts = [];
     const settings = {
-      weightUnit: game.settings.get("mgt2", "useWeightMetric") ? "kg" : "lb",
+      weightUnit: "kg",
+      //weightUnit: game.settings.get("mgt2", "useWeightMetric") ? "kg" : "lb",
       usePronouns: game.settings.get("mgt2", "usePronouns"),
       useGender: game.settings.get("mgt2", "useGender"),
       showLife: game.settings.get("mgt2", "showLife")
@@ -1694,6 +1884,12 @@ class TravellerActorSheet extends ActorSheet {
           if (i.system.subType === "skill") {
             skills.push(i);
           } else {
+            if (MGT2Helper.hasValue(i.system.psionic, "reach")) {
+              i.reach = game.i18n.localize(`MGT2.PsionicReach.${i.system.psionic.reach}`);
+            }
+            if (MGT2Helper.hasValue(i.system.roll, "difficulty")) {
+              i.difficulty = game.i18n.localize(`MGT2.Difficulty.${i.system.roll.difficulty}`);
+            }
             psionics.push(i);
           }
           break;
@@ -1810,6 +2006,55 @@ class TravellerActorSheet extends ActorSheet {
     html.find("a[data-roll]").click(this._onRoll.bind(this));
     html.find('a[name="config"]').click(this._onOpenConfig.bind(this));
     html.find("a[data-cfg-characteristic]").click(this._onOpenCharacteristic.bind(this));
+    html.find(".traits-create").click(this._onTraitCreate.bind(this));
+    html.find(".traits-edit").click(this._onTraitEdit.bind(this));
+    html.find(".traits-delete").click(this._onTraitDelete.bind(this));
+    html.find('a[data-editor="open"]').click(this._onOpenEditor.bind(this));
+  }
+  async _onOpenEditor(event) {
+    event.preventDefault();
+    await CharacterPrompts.openEditorFullView(this.actor.system.personal.species, this.actor.system.personal.speciesText.descriptionLong);
+  }
+  async _onTraitCreate(event) {
+    event.preventDefault();
+    await this._onSubmit(event);
+    let traits = this.actor.system.personal.traits;
+    let index;
+    if (traits.length === 0) {
+      traits = {};
+      traits["0"] = { name: "", description: "" };
+    } else {
+      index = Math.max(...Object.keys(traits));
+      index++;
+      traits[index] = { name: "", description: "" };
+    }
+    return this.actor.update({ system: { personal: { traits } } });
+  }
+  async _onTraitEdit(event) {
+    event.preventDefault();
+    const index = $(event.currentTarget).parents("[data-traits-part]").data("traits-part");
+    const trait = this.actor.system.personal.traits[index];
+    let result = await CharacterPrompts.openTraitEdit(trait);
+    const traits = this.actor.system.personal.traits;
+    traits[index].name = result.name;
+    traits[index].description = result.description;
+    return this.actor.update({ system: { personal: { traits } } });
+  }
+  async _onTraitDelete(event) {
+    event.preventDefault();
+    await this._onSubmit(event);
+    const element = event.currentTarget.closest(".traits-part");
+    const traits = foundry.utils.deepClone(this.actor.system.personal.traits);
+    let index = Number(element.dataset.traitsPart);
+    const newTraits = [];
+    let entries = Object.entries(traits);
+    if (entries.length > 1) {
+      for (const [key, value] of entries) {
+        if (key != index)
+          newTraits.push(value);
+      }
+    }
+    return this.actor.update({ system: { personal: { traits: newTraits } } });
   }
   async _onOpenConfig(ev) {
     ev.preventDefault();
@@ -1864,6 +2109,7 @@ class TravellerActorSheet extends ActorSheet {
       difficulty: null,
       damageFormula: null
     };
+    const cardButtons = [];
     for (const [key, label] of Object.entries(MGT2.Characteristics)) {
       const c = this.actor.system.characteristics[key];
       if (c.show) {
@@ -1912,25 +2158,35 @@ class TravellerActorSheet extends ActorSheet {
       }
       if (button.dataset.roll === "psionic") {
         rollOptions.rollObjectName = itemObj.name;
+        if (MGT2Helper.hasValue(itemObj.system.psionic, "duration")) {
+          cardButtons.push({
+            label: game.i18n.localize("MGT2.Items.Duration"),
+            formula: itemObj.system.psionic.duration,
+            message: {
+              objectName: itemObj.name,
+              flavor: "{0} ".concat(game.i18n.localize(`MGT2.Durations.${itemObj.system.psionic.durationUnit}`))
+            }
+          });
+        }
       }
       if (itemObj.system.hasOwnProperty("damage")) {
         rollOptions.damageFormula = itemObj.system.damage;
         if (itemObj.type === "disease") {
           if (itemObj.system.subTypetype === "disease") {
-            rollOptions.rollTypeName = game.i18n.localize("DiseaseSubType.disease");
+            rollOptions.rollTypeName = game.i18n.localize("MGT2.DiseaseSubType.disease");
           } else if (itemObj.system.subTypetype === "poison") {
-            rollOptions.rollTypeName = game.i18n.localize("DiseaseSubType.poison");
+            rollOptions.rollTypeName = game.i18n.localize("MGT2.DiseaseSubType.poison");
           }
         }
       }
       if (itemObj.system.hasOwnProperty("roll")) {
-        if (itemObj.system.roll.hasOwnProperty("characteristic") && itemObj.system.roll.characteristic !== "" && itemObj.system.roll.characteristic !== void 0) {
+        if (MGT2Helper.hasValue(itemObj.system.roll, "characteristic")) {
           rollOptions.characteristic = itemObj.system.roll.characteristic;
         }
-        if (itemObj.system.roll.hasOwnProperty("skill") && itemObj.system.roll.skill !== "" && itemObj.system.roll.skill !== void 0) {
+        if (MGT2Helper.hasValue(itemObj.system.roll, "skill")) {
           rollOptions.skill = itemObj.system.roll.skill;
         }
-        if (rollOptions.difficulty === null && itemObj.system.roll.hasOwnProperty("difficulty") && itemObj.system.roll.difficulty !== "" && itemObj.system.roll.difficulty !== void 0) {
+        if (MGT2Helper.hasValue(itemObj.system.roll, "difficulty")) {
           rollOptions.difficulty = itemObj.system.roll.difficulty;
         }
       }
@@ -1983,6 +2239,9 @@ class TravellerActorSheet extends ActorSheet {
         rollFormulaParts.push("+");
       rollFormulaParts.push(s);
     }
+    if (MGT2Helper.hasValue(userRollData, "difficulty")) {
+      rollOptions.difficulty = userRollData.difficulty;
+    }
     const rollData = this.actor.getRollData();
     const rollFormula = rollFormulaParts.join("");
     if (!Roll.validate(rollFormula)) {
@@ -2007,13 +2266,31 @@ class TravellerActorSheet extends ActorSheet {
       rollTypeName: rollOptions.rollTypeName,
       rollObjectName: rollOptions.rollObjectName,
       rollModifiers,
-      showRollDamage: rollOptions.damageFormula !== null && rollOptions.damageFormula !== ""
+      showRollDamage: rollOptions.damageFormula !== null && rollOptions.damageFormula !== "",
+      cardButtons
     };
+    if (MGT2Helper.hasValue(rollOptions, "difficulty")) {
+      chatData.rollDifficulty = rollOptions.difficulty;
+      chatData.rollDifficultyLabel = MGT2Helper.getDifficultyDisplay(rollOptions.difficulty);
+      if (roll.total >= MGT2Helper.getDifficultyValue(rollOptions.difficulty)) {
+        chatData.rollSuccess = true;
+      } else {
+        chatData.rollFailure = true;
+      }
+    }
     const html = await renderTemplate("systems/mgt2/templates/chat/roll.html", chatData);
     chatData.content = html;
+    let flags = null;
     if (rollOptions.damageFormula !== null && rollOptions.damageFormula !== "") {
-      chatData.flags = { mgt2: { damage: { formula: rollOptions.damageFormula, rollObjectName: rollOptions.rollObjectName, rollTypeName: rollOptions.rollTypeName } } };
+      flags = { mgt2: { damage: { formula: rollOptions.damageFormula, rollObjectName: rollOptions.rollObjectName, rollTypeName: rollOptions.rollTypeName } } };
     }
+    if (cardButtons.length > 0) {
+      if (flags === null)
+        flags = { mgt2: {} };
+      flags.mgt2.buttons = cardButtons;
+    }
+    if (flags !== null)
+      chatData.flags = flags;
     return roll.toMessage(chatData);
   }
   _onItemCreate(ev) {
@@ -2098,7 +2375,49 @@ class TravellerActorSheet extends ActorSheet {
     if (!dropData)
       return false;
     const sourceItemData = await MGT2Helper.getItemDataFromDropData(dropData);
-    if (sourceItemData.type !== "contact" && sourceItemData.type !== "talent" && sourceItemData.type !== "armor" && sourceItemData.type !== "weapon" && sourceItemData.type !== "computer" && sourceItemData.type !== "container" && sourceItemData.type !== "species" && sourceItemData.type !== "item" && sourceItemData.type !== "equipment")
+    if (sourceItemData.type === "species") {
+      const update = {
+        system: {
+          personal: {
+            species: sourceItemData.name,
+            speciesText: {
+              description: sourceItemData.system.description,
+              descriptionLong: sourceItemData.system.descriptionLong
+            }
+          }
+        }
+      };
+      update.system.personal.traits = this.actor.system.personal.traits.concat(sourceItemData.system.traits);
+      if (sourceItemData.system.modifiers && sourceItemData.system.modifiers.length > 0) {
+        update.system.characteristics = {};
+        for (let modifier of sourceItemData.system.modifiers) {
+          if (MGT2Helper.hasValue(modifier, "characteristic") && MGT2Helper.hasValue(modifier, "value")) {
+            const c = this.actor.system.characteristics[modifier.characteristic];
+            const updateValue = { value: c.value };
+            updateValue.value += modifier.value;
+            if (c.showMax) {
+              updateValue.max = c.max + modifier.value;
+            }
+            update.system.characteristics[modifier.characteristic] = updateValue;
+          }
+        }
+      }
+      this.actor.update(update);
+      return true;
+    }
+    if (sourceItemData.type === "contact" || sourceItemData.type === "disease" || sourceItemData.type === "career" || sourceItemData.type === "talent") {
+      let transferData = {};
+      try {
+        transferData = sourceItemData.toJSON();
+      } catch (err) {
+        transferData = sourceItemData;
+      }
+      delete transferData._id;
+      delete transferData.id;
+      await this.actor.createEmbeddedDocuments("Item", [transferData]);
+      return true;
+    }
+    if (sourceItemData.type !== "armor" && sourceItemData.type !== "weapon" && sourceItemData.type !== "computer" && sourceItemData.type !== "container" && sourceItemData.type !== "item" && sourceItemData.type !== "equipment")
       return false;
     const target = event.target.closest(".table-row");
     let targetId = null;
@@ -2142,7 +2461,6 @@ class TravellerActorSheet extends ActorSheet {
       } catch (err) {
         transferData = sourceItemData;
       }
-      transferData._id;
       delete transferData._id;
       delete transferData.id;
       const recalcWeight = transferData.system.hasOwnProperty("weight");
@@ -2193,7 +2511,9 @@ const preloadHandlebarsTemplates = async function() {
     "systems/mgt2/templates/chat/roll.html",
     //"systems/mgt2/templates/chat/roll-characteristic.html",
     "systems/mgt2/templates/actors/actor-config-sheet.html",
-    "systems/mgt2/templates/actors/actor-config-characteristic-sheet.html"
+    "systems/mgt2/templates/actors/actor-config-characteristic-sheet.html",
+    "systems/mgt2/templates/actors/trait-sheet.html",
+    "systems/mgt2/templates/editor-fullview.html"
     //"systems/mgt2/templates/actors/parts/actor-characteristic.html"
   ];
   return loadTemplates(templatePaths);
@@ -2216,6 +2536,33 @@ class ChatHelper {
     html.find('button[data-action="healing"]').click(async (event) => {
       ui.notifications.warn("healing");
     });
+    html.find("button[data-index]").click(async (event) => {
+      await this._processRollButtonEvent(message, event);
+    });
+  }
+  static async _processRollButtonEvent(message, event) {
+    event.preventDefault();
+    event.stopPropagation();
+    let buttons = message.flags.mgt2.buttons;
+    const index = event.target.dataset.index;
+    const button = buttons[index];
+    let roll = await new Roll(button.formula, {}).roll({ async: true });
+    const chatData = {
+      user: game.user.id,
+      speaker: message.speaker,
+      formula: roll._formula,
+      tooltip: await roll.getTooltip(),
+      total: Math.round(roll.total * 100) / 100,
+      //formula: isPrivate ? "???" : roll._formula,
+      //tooltip: isPrivate ? "" : await roll.getTooltip(),
+      //total: isPrivate ? "?" : Math.round(roll.total * 100) / 100,
+      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+      rollObjectName: button.message.objectName,
+      rollMessage: MGT2Helper.format(button.message.flavor, Math.round(roll.total * 100) / 100)
+    };
+    const html = await renderTemplate("systems/mgt2/templates/chat/roll.html", chatData);
+    chatData.content = html;
+    return roll.toMessage(chatData);
   }
   static async _processRollDamageButtonEvent(message, event) {
     event.preventDefault();
@@ -2270,7 +2617,8 @@ const registerSettings = function() {
     type: String,
     choices: {
       "black-and-red": "MGT2.Themes.BlackAndRed",
-      "mwamba": "MGT2.Themes.Mwamba"
+      "mwamba": "MGT2.Themes.Mwamba",
+      "blue": "MGT2.Themes.Blue"
     },
     requiresReload: true
   });
@@ -2295,29 +2643,11 @@ const registerSettings = function() {
   game.settings.register("mgt2", "showLife", {
     name: "MGT2.Settings.showLife.name",
     hint: "MGT2.Settings.showLife.hint",
-    default: true,
+    default: false,
     scope: "world",
     type: Boolean,
     config: true,
     requiresReload: false
-  });
-  game.settings.register("mgt2", "useWeightMetric", {
-    name: "MGT2.Settings.useWeightMetric.name",
-    hint: "MGT2.Settings.useWeightMetric.hint",
-    default: true,
-    scope: "world",
-    type: Boolean,
-    config: true,
-    requiresReload: true
-  });
-  game.settings.register("mgt2", "useDistanceMetric", {
-    name: "MGT2.Settings.useDistanceMetric.name",
-    hint: "MGT2.Settings.useDistanceMetric.hint",
-    default: true,
-    scope: "world",
-    type: Boolean,
-    config: true,
-    requiresReload: true
   });
 };
 

@@ -47,6 +47,17 @@
                     <input type="number" name="system.psionic.cost" value="{{system.psionic.cost}}" data-dtype="Number" />
                 </div>
             </div>
+            <div class="field-groups mt-1">
+                <div class="field-group">
+                    <label>{{ localize 'MGT2.Items.Duration' }}</label>
+                    <div class="flexrow">
+                        <input type="text" name="system.psionic.duration" value="{{system.psionic.duration}}" data-dtype="String" class="flex-basis-50" />
+                        <select name="system.psionic.durationUnit" class="flex-basis-50 flex-fix">
+                          {{selectOptions config.Durations selected=system.psionic.durationUnit localize = true}}
+                        </select>
+                    </div>
+                </div>
+            </div>
             {{/if}}
             <nav class="horizontal-tabs tabs mt-1" data-group="primary">
                 <a class="item tab-select" data-tab="tab1">{{ localize 'MGT2.Items.Description' }}</a>

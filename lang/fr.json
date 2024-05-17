@@ -15,9 +15,13 @@
   "TYPES.Actor.vehicule": "Véhicule",
   "TYPES.Actor.container": "Contenant (sac, coffre)",
   "MGT2": {
+    "Save": "Sauvegarder",
+    "Cancel": "Annuler",
+    "Close": "Fermer",
     "Themes": {
       "BlackAndRed": "Couverture Classique Traveller",
-      "Mwamba": "Oppa Mwamba Style"
+      "Mwamba": "Oppa Mwamba Style",
+      "Blue": "Bleu"
     },
     "Settings": {
       "theme": {
@@ -57,6 +61,8 @@
       "NewCareer":"Nouvelle Carrière",
       "AddCareer":"Ajouter Carrière",
       "EditCareer":"Éditer Carrière",
+      "EditTrait":"Éditer Trait",
+      "DeleteTrait": "Supprimer Trait",
       "DeleteCareer":"Supprimer Carrière",
       "NewSkill":"Nouvelle Compétence",
       "DeleteSkill":"Supprimer Compétence",
@@ -136,6 +142,7 @@
       "ShowMinMax": "Afficher le Min/Max",
       "ShowPsionicTalents": "Afficher les Talents Psy",
       "Skills": "Compétences",
+      "TabSkills": "Traits & Compétences",
       "States": "États",
       "StoreEquipment": "Entreposer Équipement",
       "StoreItem": "Entreposer Objet",
@@ -344,7 +351,9 @@
     "Chat": {
       "Roll": {
         "ApplyDamages": "Appliquer Dégâts",
-        "Damages": "Lancer les Dégâts"
+        "Damages": "Lancer les Dégâts",
+        "Success": "Succès",
+        "Failure": "Échec"
       }
     },
     "Items": {
@@ -367,10 +376,12 @@
       "Cost": "Coût",
       "Damage": "Dégâts",
       "Description": "Description",
+      "DetailedDescription": "Desc. Détailée",
       "Details": "Détails",
       "Difficulty": "Difficulté",
       "Disease": "Maladie",
       "Diseases": "Maladies",
+      "Duration": "Durée",
       "Equipped": "Équipé",
       "Equipment": "Équipement",
       "Equipments": "Équipements",
@@ -387,6 +398,9 @@
       "LockedDescription": "Description Verrouillé",
       "Magazine": "Chargeur",
       "MagazineCost": "Coût du Chargeur",
+      "Modifier": "Modificateur",
+      "Modifiers": "Modificateurs",
+      "Name": "Nom",
       "Nickname": "Surnom",
       "NotProficient": "Incompétent (-3)",
       "Notes": "Notes",
@@ -408,6 +422,7 @@
       "Relation": "Relation",
       "Relations": "Relations",
       "Skill": "Compétence",
+      "PsySkill": "Comp. Psionique",
       "Speciality": "Spécialité",
       "Status": "Statut",
       "Storage": "Stockage",
@@ -417,12 +432,18 @@
       "Terms": "Termes",
       "Title": "Titre",
       "Trait": "Trait",
+      "Traits": "Traits",
       "Type": "Type",
       "Weapon": "Arme",
       "Weapons": "Armes",
       "Weight": "Poid",
       "Weightless": "Aucun Poid",
       "Quantity": "Quantité"
+    },
+    "Durations": {
+      "Seconds": "Secondes",
+      "Minutes": "Minutes",
+      "Heures": "Heures"
     }
   }
 }

@@ -15,9 +15,13 @@
   "TYPES.Actor.vehicule": "Vehicule",
   "TYPES.Actor.container": "Container (backpack, chest)",
   "MGT2": {
+    "Save": "Save",
+    "Cancel": "Cancel",
+    "Close": "Close",
     "Themes": {
       "BlackAndRed": "Classic Traveller Cover",
-      "Mwamba": "Oppa Mwamba Style"
+      "Mwamba": "Oppa Mwamba Style",
+      "Blue": "Blue"
     },
     "Settings": {
       "theme": {
@@ -57,6 +61,8 @@
       "NewCareer":"New Career",
       "AddCareer":"Add Career",
       "EditCareer":"Edit Career",
+      "EditTrait":"Éditer Trait",
+      "DeleteTrait": "Supprimer Trait",
       "DeleteCareer":"Delete Career",
       "NewSkill":"New Skill",
       "DeleteSkill":"Delete Skill",
@@ -136,6 +142,7 @@
       "ShowMinMax": "Show Min/Max",
       "ShowPsionicTalents": "Show Psionic Talents",
       "Skills": "Skills",
+      "TabSkills": "Traits & Compétences",
       "States": "States",
       "StoreEquipment": "Store Equipment",
       "StoreItem": "Store Item",
@@ -344,7 +351,9 @@
     "Chat": {
       "Roll": {
         "ApplyDamages": "Apply Damages",
-        "Damages": "Roll damages"
+        "Damages": "Roll damages",
+        "Success": "Success",
+        "Failure": "Failure"
       }
     },
     "Items": {
@@ -367,10 +376,12 @@
       "Cost": "Cost",
       "Damage": "Damage",
       "Description": "Description",
+      "DetailedDescription": "Detailled Description",
       "Details": "Details",
       "Disease": "Disease",
       "Diseases": "Diseases",
       "Difficulty": "Difficulty",
+      "Duration": "Duration",
       "Equipped": "Equipped",
       "Equipment": "Equipment",
       "Equipments": "Equipments",
@@ -387,6 +398,9 @@
       "LockedDescription": "Locked Description",
       "Magazine": "Magazine",
       "MagazineCost": "Magazine Cost",
+      "Modifier": "Modifier",
+      "Modifiers": "Modifiers",
+      "Name": "Name",
       "Nickname": "Nickname",
       "NotProficient": "Not proficient (-3)",
       "Notes": "Notes",
@@ -408,6 +422,7 @@
       "Relation": "Relation",
       "Relations": "Relations",
       "Skill": "Skill",
+      "PsySkill": "Psy Skill",
       "Speciality": "Speciality",
       "Status": "Status",
       "Storage": "Storage",
@@ -417,12 +432,18 @@
       "Terms": "Terms",
       "Title": "Title",
       "Trait": "Trait",
+      "Traits": "Traits",
       "Type": "Type",
       "Weapon": "Weapon",
       "Weapons": "Weapons",
       "Weight": "Weight",
       "Weightless": "Weightless",
       "Quantity": "Quantity"
+    },
+    "Durations": {
+      "Seconds": "Seconds",
+      "Minutes": "Minutes",
+      "Heures": "Hours"
     }
   }
 }

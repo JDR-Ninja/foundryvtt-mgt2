@@ -1,0 +1,749 @@
+<form class="{{cssClass}} flexcol" autocomplete="off" style="align-content: flex-start;align-items: baseline;overflow: hidden;height: 100%;">
+	<nav class="sheet-sidebar tabs" data-group="sidebar">
+		<!-- <a class="item tab-select" data-tab="personal" title="Personal"><i class="fa-solid fa-id-card"></i></a> -->
+		<a class="item tab-select" data-tab="health" title="{{ localize 'MGT2.Actor.Health' }}"><i class="fa-solid fa-heart-pulse"></i></a>
+		<a class="item tab-select" data-tab="skills" title="{{ localize 'MGT2.Actor.TabSkills' }}"><i class="fa-solid fa-head-side"></i></a>
+		<a class="item tab-select" data-tab="inventory" title="{{ localize 'MGT2.Actor.Inventory' }}"><i class="fa-solid fa-briefcase-blank"></i></a>
+		<a class="item tab-select" data-tab="relations" title="{{ localize 'MGT2.Actor.Contacts' }}"><i class="fa-solid fa-users"></i></a>
+		<a class="item tab-select" data-tab="notes" title="{{ localize 'MGT2.Actor.Notes' }}"><i class="fa-solid fa-books"></i></a>
+		<a class="item tab-select" data-tab="biography" title="{{ localize 'MGT2.Actor.Biography' }}"><i class="fa-solid fa-book-user"></i></a>
+	</nav>
+	<section class="character-header">
+		<div class="character-header-img">
+			<img class="profile" src="{{img}}" data-edit="img" title="{{name}}" height="130" width="100" />
+		</div>
+		<div class="character-header-body">
+			<input class="field-name" name="name" type="text" value="{{name}}" />
+			<ul class="character-summary">
+				{{#if (and settings.usePronouns settings.useGender)}}
+				<li class="w1-10"><input name="system.personal.pronouns" type="text" value="{{system.personal.pronouns}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderPRONOUNS' }}" /></li>
+				<li class="w1-10"><input name="system.personal.gender" type="text" value="{{system.personal.gender}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderGENDER' }}" /></li>
+				<li class="w4-10"><input name="system.personal.title" type="text" value="{{system.personal.title}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderTITLE' }}" /></li>
+				{{else if settings.usePronouns}}
+				<li class="w5-10"><input name="system.personal.pronouns" type="text" value="{{system.personal.pronouns}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderPRONOUNS' }}" /></li>
+				<li class="w4-10"><input name="system.personal.title" type="text" value="{{system.personal.title}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderTITLE' }}" /></li>
+				{{else if settings.useGender}}
+				<li class="w1-10"><input name="system.personal.gender" type="text" value="{{system.personal.gender}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderGENDER' }}" /></li>
+				<li class="w4-10"><input name="system.personal.title" type="text" value="{{system.personal.title}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderTITLE' }}" /></li>
+				{{else}}
+				<li class="w5-10"><input name="system.personal.title" type="text" value="{{system.personal.title}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderTITLE' }}" /></li>
+				{{/if}}
+				<li class="w2-10"><input name="system.personal.species" type="text" value="{{system.personal.species}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderSPECIES' }}" /></li>
+				<li class="w1-10"><input name="system.personal.age" type="text" value="{{system.personal.age}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderAGE' }}" /></li>
+				<li class="w2-10"><input name="system.personal.wup" type="text" value="{{system.personal.wup}}" placeholder="{{ localize 'MGT2.Actor.PlaceholderUCP' }}" /></li>
+			</ul>
+			<div class="flexrow">
+				<div class="w4-10">
+					<!-- FULL REST ICON -->
+				</div>
+				<div class="flex-fix">
+					<fieldset class="lifes">
+						<legend><a class="roll upcase" data-roll="initiative" tabindex='-1' style="display: inline-flex;"><i class="fa-solid fa-dice"></i>{{ localize 'MGT2.Actor.Initiative' }}</a></legend>
+						<div>{{showDM initiative}}</div>
+					</fieldset>
+				</div>
+				<div class="flex-fix">
+					{{#if settings.showLife}}
+					<fieldset class="lifes">
+						<legend class="upcase">{{ localize 'MGT2.Actor.Life' }}</legend>
+						<div>{{system.life.value}}{{#if (gt system.life.max 0) }}/{{system.life.max}}{{/if}}</div>
+					</fieldset>
+					{{/if}}
+				</div>
+				<div class="flex-fix">
+					<fieldset class="lifes">
+						<legend class="upcase">{{ localize 'MGT2.Actor.Armor' }}</legend>
+						<div>{{system.inventory.armor}}</div>
+					</fieldset>
+				</div>
+				<div class="w4-10">
+					<fieldset style="margin:0;padding: 0 1rem;">
+						<legend class="upcase">{{ localize 'MGT2.Actor.States' }}</legend>
+						<ul class="character-states">
+							<li><label title="{{ localize 'MGT2.Actor.EncumbranceHint' }}">{{ localize 'MGT2.Actor.Encumbrance' }}</label><input type="checkbox" class="checkbox-small" {{checked system.states.encumbrance}} readonly disabled /></label></li>
+							<li><label title="{{ localize 'MGT2.Actor.FatigueHint' }}">{{ localize 'MGT2.Actor.Fatigue' }}</label><input type="checkbox" class="checkbox-small" name="system.states.fatigue" data-dtype="Boolean" {{checked system.states.fatigue}} /></label></li>
+							<li><label title="{{ localize 'MGT2.Actor.SurgeryRequiredHint' }}">{{ localize 'MGT2.Actor.SurgeryRequired' }}</label><input type="checkbox" class="checkbox-small" name="system.states.surgeryRequired" data-dtype="Boolean" {{checked system.states.surgeryRequired}} /></li>
+							<!-- <li><label>Unconscious</label><input type="checkbox" class="checkbox-small" name="system.states.unconscious" data-dtype="Boolean" {{checked system.states.unconscious}} /></li> -->
+						</ul>
+					</fieldset>
+				</div>
+			</div>
+		</div>
+	</section>
+	<div style="height: 100%;overflow: hidden;display: flex;flex-direction: row;width: 100%;justify-content: flex-start;align-items: flex-start;">
+		<div class="characteristics">
+			<nav class="horizontal-tabs tabs" data-group="characteristics" style="border-right: 7px double #fff;">
+				<a class="item tab-select" data-tab="core">{{ localize 'MGT2.Actor.TabCore' }}</a>
+				<a class="item tab-select" data-tab="other">{{ localize 'MGT2.Actor.TabOthers' }}</a>
+			</nav>
+			<section class="characteristics-panel">
+				<div class="tab" data-group="characteristics" data-tab="core">
+					{{#if system.characteristics.strength.show}}
+					<div class="characteristic-label"><a class="roll" data-roll="characteristic" data-roll-characteristic="strength" tabindex='-1'><i class="fa-solid fa-dice"></i></a>{{ localize 'MGT2.Characteristics.strength.name' }}<a class="cfg-characteristic" data-cfg-characteristic="strength" title="Configure"><i class="fa-solid fa-gear"></i></a></div>
+					{{#if system.characteristics.strength.showMax}}
+					<div class="characteristic-minmax">
+						<div class="minmaxwrapper">
+							<input type="text" maxlength="2" name="system.characteristics.strength.value" value="{{system.characteristics.strength.value}}" data-dtype="Number" /><span>|</span><input type="text" maxlength="2" name="system.characteristics.strength.max" value="{{system.characteristics.strength.max}}" />
+						</div>
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.strength.dm 0)}}+{{/if}}{{system.characteristics.strength.dm}}" readonly tabindex='-1' />
+					</div>
+					{{else}}
+					<div class="characteristic-row">
+						<input class="characteristic-input" type="text" maxlength="2" name="system.characteristics.strength.value" value="{{system.characteristics.strength.value}}" />
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.strength.dm 0)}}+{{/if}}{{system.characteristics.strength.dm}}" readonly tabindex='-1' />
+					</div>
+					{{/if}}
+					{{/if}}
+					{{#if system.characteristics.dexterity.show}}
+					<div class="characteristic-label mt-1"><a class="roll" data-roll="characteristic" data-roll-characteristic="dexterity" tabindex='-1'><i class="fa-solid fa-dice"></i></a>{{ localize 'MGT2.Characteristics.dexterity.name' }}<a class="cfg-characteristic" data-cfg-characteristic="dexterity" title="Configure"><i class="fa-solid fa-gear"></i></a></div>
+					{{#if system.characteristics.dexterity.showMax}}
+					<div class="characteristic-minmax">
+						<div class="minmaxwrapper">
+							<input type="text" maxlength="2" name="system.characteristics.dexterity.value" value="{{system.characteristics.dexterity.value}}" /><span>|</span><input type="text" maxlength="2" name="system.characteristics.dexterity.max" value="{{system.characteristics.dexterity.max}}" />
+						</div>
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.dexterity.dm 0)}}+{{/if}}{{system.characteristics.dexterity.dm}}" readonly tabindex='-1' />
+					</div>
+					{{else}}
+					<div class="characteristic-row">
+						<input class="characteristic-input" type="text" maxlength="2" name="system.characteristics.dexterity.value" value="{{system.characteristics.dexterity.value}}" />
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.dexterity.dm 0)}}+{{/if}}{{system.characteristics.dexterity.dm}}" readonly tabindex='-1' />
+					</div>
+					{{/if}}
+					{{/if}}
+					{{#if system.characteristics.endurance.show}}
+					<div class="characteristic-label mt-1"><a class="roll" data-roll="characteristic" data-roll-characteristic="endurance" tabindex='-1'><i class="fa-solid fa-dice"></i></a>{{ localize 'MGT2.Characteristics.endurance.name' }}<a class="cfg-characteristic" data-cfg-characteristic="endurance" title="Configure"><i class="fa-solid fa-gear"></i></a></div>
+					{{#if system.characteristics.endurance.showMax}}
+					<div class="characteristic-minmax">
+						<div class="minmaxwrapper">
+							<input type="text" maxlength="2" name="system.characteristics.endurance.value" value="{{system.characteristics.endurance.value}}" /><span>|</span><input type="text" maxlength="2" name="system.characteristics.endurance.max" value="{{system.characteristics.endurance.max}}" />
+						</div>
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.endurance.dm 0)}}+{{/if}}{{system.characteristics.endurance.dm}}" readonly tabindex='-1' />
+					</div>
+					{{else}}
+					<div class="characteristic-row">
+						<input class="characteristic-input" type="text" maxlength="2" name="system.characteristics.endurance.value" value="{{system.characteristics.endurance.value}}" />
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.endurance.dm 0)}}+{{/if}}{{system.characteristics.endurance.dm}}" readonly tabindex='-1' />
+					</div>
+					{{/if}}
+					{{/if}}
+					{{#if system.characteristics.intellect.show}}
+					<div class="characteristic-label mt-1"><a class="roll" data-roll="characteristic" data-roll-characteristic="intellect" tabindex='-1'><i class="fa-solid fa-dice"></i></a>{{ localize 'MGT2.Characteristics.intellect.name' }}<a class="cfg-characteristic" data-cfg-characteristic="intellect" title="Configure"><i class="fa-solid fa-gear"></i></a></div>
+					{{#if system.characteristics.intellect.showMax}}
+					<div class="characteristic-minmax">
+						<div class="minmaxwrapper">
+							<input type="text" maxlength="2" name="system.characteristics.intellect.value" value="{{system.characteristics.intellect.value}}" /><span>|</span><input type="text" maxlength="2" name="system.characteristics.intellect.max" value="{{system.characteristics.intellect.max}}" />
+						</div>
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.intellect.dm 0)}}+{{/if}}{{system.characteristics.intellect.dm}}" readonly tabindex='-1' />
+					</div>
+					{{else}}
+					<div class="characteristic-row">
+						<input class="characteristic-input" type="text" maxlength="2" name="system.characteristics.intellect.value" value="{{system.characteristics.intellect.value}}" />
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.intellect.dm 0)}}+{{/if}}{{system.characteristics.intellect.dm}}" readonly tabindex='-1' />
+					</div>
+					{{/if}}
+					{{/if}}
+					{{#if system.characteristics.education.show}}
+					<div class="characteristic-label mt-1"><a class="roll" data-roll="characteristic" data-roll-characteristic="education" tabindex='-1'><i class="fa-solid fa-dice"></i></a>{{ localize 'MGT2.Characteristics.education.name' }}<a class="cfg-characteristic" data-cfg-characteristic="education" title="Configure"><i class="fa-solid fa-gear"></i></a></div>
+					{{#if system.characteristics.education.showMax}}
+					<div class="characteristic-minmax">
+						<div class="minmaxwrapper">
+							<input type="text" maxlength="2" name="system.characteristics.education.value" value="{{system.characteristics.education.value}}" /><span>|</span><input type="text" maxlength="2" name="system.characteristics.education.max" value="{{system.characteristics.education.max}}" />
+						</div>
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.education.dm 0)}}+{{/if}}{{system.characteristics.education.dm}}" readonly tabindex='-1' />
+					</div>
+					{{else}}
+					<div class="characteristic-row">
+						<input class="characteristic-input" type="text" maxlength="2" name="system.characteristics.education.value" value="{{system.characteristics.education.value}}" />
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.education.dm 0)}}+{{/if}}{{system.characteristics.education.dm}}" readonly tabindex='-1' />
+					</div>
+					{{/if}}
+					{{/if}}
+					{{#if system.characteristics.social.show}}
+					<div class="characteristic-label mt-1"><a class="roll" data-roll="characteristic" data-roll-characteristic="social" tabindex='-1'><i class="fa-solid fa-dice"></i></a>{{ localize 'MGT2.Characteristics.social.name' }}<a class="cfg-characteristic" data-cfg-characteristic="social" title="Configure"><i class="fa-solid fa-gear"></i></a></div>
+					{{#if system.characteristics.social.showMax}}
+					<div class="characteristic-minmax">
+						<div class="minmaxwrapper">
+							<input type="text" maxlength="2" name="system.characteristics.social.value" value="{{system.characteristics.social.value}}" /><span>|</span><input type="text" maxlength="2" name="system.characteristics.social.max" value="{{system.characteristics.social.max}}" />
+						</div>
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.social.dm 0)}}+{{/if}}{{system.characteristics.social.dm}}" readonly tabindex='-1' />
+					</div>
+					{{else}}
+					<div class="characteristic-row">
+						<input class="characteristic-input" type="text" maxlength="2" name="system.characteristics.social.value" value="{{system.characteristics.social.value}}" />
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.social.dm 0)}}+{{/if}}{{system.characteristics.social.dm}}" readonly tabindex='-1' />
+					</div>
+					{{/if}}
+					{{/if}}
+				</div>
+				<div class="tab" data-group="characteristics" data-tab="other">
+					{{#if system.characteristics.morale.show}}
+					<div class="characteristic-label"><a class="roll" data-roll="characteristic" data-roll-characteristic="morale" tabindex='-1'><i class="fa-solid fa-dice"></i></a>{{ localize 'MGT2.Characteristics.morale.name' }}<a class="cfg-characteristic" data-cfg-characteristic="morale" title="Configure"><i class="fa-solid fa-gear"></i></a></div>
+					{{#if system.characteristics.morale.showMax}}
+					<div class="characteristic-minmax">
+						<div class="minmaxwrapper">
+							<input type="text" maxlength="2" name="system.characteristics.morale.value" value="{{system.characteristics.morale.value}}" /><span>|</span><input type="text" maxlength="2" name="system.characteristics.morale.max" value="{{system.characteristics.morale.max}}" />
+						</div>
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.morale.dm 0)}}+{{/if}}{{system.characteristics.morale.dm}}" readonly tabindex='-1' />
+					</div>
+					{{else}}
+					<div class="characteristic-row">
+						<input class="characteristic-input" type="text" maxlength="2" name="system.characteristics.morale.value" value="{{system.characteristics.morale.value}}" />
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.morale.dm 0)}}+{{/if}}{{system.characteristics.morale.dm}}" readonly tabindex='-1' />
+					</div>
+					{{/if}}
+					{{/if}}
+					{{#if system.characteristics.luck.show}}
+					<div class="characteristic-label mt-1"><a class="roll" data-roll="characteristic" data-roll-characteristic="luck" tabindex='-1'><i class="fa-solid fa-dice"></i></a>{{ localize 'MGT2.Characteristics.luck.name' }}<a class="cfg-characteristic" data-cfg-characteristic="luck" title="Configure"><i class="fa-solid fa-gear"></i></a></div>
+					{{#if system.characteristics.luck.showMax}}
+					<div class="characteristic-minmax">
+						<div class="minmaxwrapper">
+							<input type="text" maxlength="2" name="system.characteristics.luck.value" value="{{system.characteristics.luck.value}}" /><span>|</span><input type="text" maxlength="2" name="system.characteristics.luck.max" value="{{system.characteristics.luck.max}}" />
+						</div>
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.luck.dm 0)}}+{{/if}}{{system.characteristics.luck.dm}}" readonly tabindex='-1' />
+					</div>
+					{{else}}
+					<div class="characteristic-row">
+						<input class="characteristic-input" type="text" maxlength="2" name="system.characteristics.luck.value" value="{{system.characteristics.luck.value}}" />
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.luck.dm 0)}}+{{/if}}{{system.characteristics.luck.dm}}" readonly tabindex='-1' />
+					</div>
+					{{/if}}
+					{{/if}}
+					{{#if system.characteristics.sanity.show}}
+					<div class="characteristic-label mt-1"><a class="roll" data-roll="characteristic" data-roll-characteristic="sanity" tabindex='-1'><i class="fa-solid fa-dice"></i></a>{{ localize 'MGT2.Characteristics.sanity.name' }}<a class="cfg-characteristic" data-cfg-characteristic="sanity" title="Configure"><i class="fa-solid fa-gear"></i></a></div>
+					{{#if system.characteristics.sanity.showMax}}
+					<div class="characteristic-minmax">
+						<div class="minmaxwrapper">
+							<input type="text" maxlength="2" name="system.characteristics.sanity.value" value="{{system.characteristics.sanity.value}}" /><span>|</span><input type="text" maxlength="2" name="system.characteristics.sanity.max" value="{{system.characteristics.sanity.max}}" />
+						</div>
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.sanity.dm 0)}}+{{/if}}{{system.characteristics.sanity.dm}}" readonly tabindex='-1' />
+					</div>
+					{{else}}
+					<div class="characteristic-row">
+						<input class="characteristic-input" type="text" maxlength="2" name="system.characteristics.sanity.value" value="{{system.characteristics.sanity.value}}" />
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.sanity.dm 0)}}+{{/if}}{{system.characteristics.sanity.dm}}" readonly tabindex='-1' />
+					</div>
+					{{/if}}
+					{{/if}}
+					{{#if system.characteristics.charm.show}}
+					<div class="characteristic-label mt-1"><a class="roll" data-roll="characteristic" data-roll-characteristic="charm" tabindex='-1'><i class="fa-solid fa-dice"></i></a>{{ localize 'MGT2.Characteristics.charm.name' }}<a class="cfg-characteristic" data-cfg-characteristic="charm" title="Configure"><i class="fa-solid fa-gear"></i></a></div>
+					{{#if system.characteristics.charm.showMax}}
+					<div class="characteristic-minmax">
+						<div class="minmaxwrapper">
+							<input type="text" maxlength="2" name="system.characteristics.charm.value" value="{{system.characteristics.charm.value}}" /><span>|</span><input type="text" maxlength="2" name="system.characteristics.charm.max" value="{{system.characteristics.charm.max}}" />
+						</div>
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.charm.dm 0)}}+{{/if}}{{system.characteristics.charm.dm}}" readonly tabindex='-1' />
+					</div>
+					{{else}}
+					<div class="characteristic-row">
+						<input class="characteristic-input" type="text" maxlength="2" name="system.characteristics.charm.value" value="{{system.characteristics.charm.value}}" />
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.charm.dm 0)}}+{{/if}}{{system.characteristics.charm.dm}}" readonly tabindex='-1' />
+					</div>
+					{{/if}}
+					{{/if}}
+					{{#if system.characteristics.psionic.show}}
+					<div class="characteristic-label mt-1"><a class="roll" data-roll="characteristic" data-roll-characteristic="psionic" tabindex='-1'><i class="fa-solid fa-dice"></i></a>{{ localize 'MGT2.Characteristics.psionic.name' }}<a class="cfg-characteristic" data-cfg-characteristic="psionic" title="Configure"><i class="fa-solid fa-gear"></i></a></div>
+					{{#if system.characteristics.psionic.showMax}}
+					<div class="characteristic-minmax">
+						<div class="minmaxwrapper">
+							<input type="text" maxlength="2" name="system.characteristics.psionic.value" value="{{system.characteristics.psionic.value}}" /><span>|</span><input type="text" maxlength="2" name="system.characteristics.psionic.max" value="{{system.characteristics.psionic.max}}" />
+						</div>
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.psionic.dm 0)}}+{{/if}}{{system.characteristics.psionic.dm}}" readonly tabindex='-1' />
+					</div>
+					{{else}}
+					<div class="characteristic-row">
+						<input class="characteristic-input" type="text" maxlength="2" name="system.characteristics.psionic.value" value="{{system.characteristics.psionic.value}}" />
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.psionic.dm 0)}}+{{/if}}{{system.characteristics.psionic.dm}}" readonly tabindex='-1' />
+					</div>
+					{{/if}}
+					{{/if}}
+					{{#if system.characteristics.other.show}}
+					<div class="characteristic-label mt-1"><a class="roll" data-roll="characteristic" data-roll-characteristic="other" tabindex='-1'><i class="fa-solid fa-dice"></i></a>{{ localize 'MGT2.Characteristics.other.name' }}<a class="cfg-characteristic" data-cfg-characteristic="other" title="Configure"><i class="fa-solid fa-gear"></i></a></div>
+					{{#if system.characteristics.other.showMax}}
+					<div class="characteristic-minmax">
+						<div class="minmaxwrapper">
+							<input type="text" maxlength="2" name="system.characteristics.other.value" value="{{system.characteristics.other.value}}" /><span>|</span><input type="text" maxlength="2" name="system.characteristics.other.max" value="{{system.characteristics.other.max}}" />
+						</div>
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.other.dm 0)}}+{{/if}}{{system.characteristics.other.dm}}" readonly tabindex='-1' />
+					</div>
+					{{else}}
+					<div class="characteristic-row">
+						<input class="characteristic-input" type="text" maxlength="2" name="system.characteristics.other.value" value="{{system.characteristics.other.value}}" />
+						<input class="characteristic-dm" type="text" maxlength="2" value="{{#if (gt system.characteristics.other.dm 0)}}+{{/if}}{{system.characteristics.other.dm}}" readonly tabindex='-1' />
+					</div>
+					{{/if}}
+					{{/if}}
+				</div>
+			</section>
+		</div>
+		<div class="tab w100" data-group="sidebar" data-tab="health">
+			<div class="header upcase">{{ localize 'MGT2.Actor.Health' }}</div>
+			<div class="field-group mb-1">
+				<label class="upcase">{{ localize 'MGT2.Actor.Rads' }}</label>
+				<input class="field" name="system.health.radiations" type="text" value="{{system.health.radiations}}" />
+			</div>
+			<div class="table-container">
+				<div class="table-row heading color-1">
+					<div class="row-item row-item-30 row-item-left upcase">{{ localize 'MGT2.Actor.Wounds' }}</div>
+					<div class="row-item row-item-center">{{ localize 'MGT2.Items.Difficulty' }}</div>
+					<div class="row-item row-item-center">{{ localize 'MGT2.Items.Damage' }}</div>
+					<div class="row-item row-item-center">{{ localize 'MGT2.Items.Interval' }}</div>
+					<div class="row-item row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="disease" data-subtype="wound" data-create-name="{{ localize 'MGT2.Actor.NewWound' }}" title="{{ localize 'MGT2.Actor.AddWound' }}"><i class="fas fa-plus"></i></a></div>
+				</div>
+				{{#each wounds as |wound id|}}
+				<div class="table-row item" data-item-id="{{wound._id}}" role="rowgroup">
+					<div class="row-item row-item-30 row-item-left">{{wound.name}}</div>
+					<div class="row-item row-item-center">{{wound.system.difficulty}}</div>
+					<div class="row-item row-item-center">{{wound.system.damage}}</div>
+					<div class="row-item row-item-center">{{wound.system.interval}}</div>
+					<div class="row-item row-item row-item-15 item-controls flex-fix">
+						<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditWound' }}"><i class="fas fa-edit"></i></a>
+						<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteWound' }}"><i class="fas fa-trash"></i></a>
+					</div>
+				</div>
+				{{/each}}
+			</div>
+			<div class="table-container">
+				<div class="table-row heading color-1">
+					<div class="row-item row-item-30 row-item-left upcase">{{ localize 'MGT2.Items.Diseases' }}</div>
+					<div class="row-item row-item-center">{{ localize 'MGT2.Items.Difficulty' }}</div>
+					<div class="row-item row-item-center">{{ localize 'MGT2.Items.Damage' }}</div>
+					<div class="row-item row-item-center">{{ localize 'MGT2.Items.Interval' }}</div>
+					<div class="row-item row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="disease" data-subtype="disease" data-create-name="{{ localize 'MGT2.Actor.NewDisease' }}" title="{{ localize 'MGT2.Actor.AddDisease' }}"><i class="fas fa-plus"></i></a></div>
+				</div>
+				{{#each diseases as |disease id|}}
+				<div class="table-row item" data-item-id="{{disease._id}}" role="rowgroup">
+					<div class="row-item row-item-30 row-item-left"><a data-roll="disease" data-item-id="{{disease._id}}"><i class="fa-solid fa-dice"></i></a>{{disease.name}}</div>
+					<div class="row-item row-item-center">{{disease.system.difficulty}}</div>
+					<div class="row-item row-item-center">{{disease.system.damage}}</div>
+					<div class="row-item row-item-center">{{disease.system.interval}}</div>
+					<div class="row-item row-item row-item-15 item-controls flex-fix">
+						<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditDisease' }}"><i class="fas fa-edit"></i></a>
+						<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteDisease' }}"><i class="fas fa-trash"></i></a>
+					</div>
+				</div>
+				{{/each}}
+			</div>
+		</div>
+		<div class="tab w100 tab-scroll" data-group="sidebar" data-tab="skills">
+			<div class="header upcase">{{ localize 'MGT2.Actor.TabSkills' }}</div>
+			<div class="species"><a title="Description longue"><i class="fa-solid fa-book"></i></a>{{system.personal.speciesText.description}}</div>
+			<div class="table-container">
+				<div class="table-row heading color-1">
+				  <div class="row-item row-item-15 row-item-left upcase">{{ localize 'MGT2.Items.Trait' }}</div>
+				  <div class="row-item row-item-left">{{ localize 'MGT2.Items.Description' }}</div>
+				  <div class="row-item row-item row-item-15 item-controls flex-fix"><a class="traits-create"><i class="fas fa-plus"></i></a></div>
+				</div>
+				{{#each system.personal.traits as |trait i| }}
+				<div class="table-row traits-part" data-traits-part="{{i}}" role="rowgroup">
+				  <div class="row-item row-item-15 row-item-left">{{trait.name}}</div>
+				  <div class="row-item row-item-left">{{trait.description}}</div>
+				  <div class="row-item row-item row-item-15 item-controls flex-fix">
+					<a class="item-control traits-edit" title="{{ localize 'MGT2.Actor.EditTrait' }}"><i class="fas fa-edit"></i></a>
+					<a class="item-control traits-delete" title="Delete Trait"><i class="fas fa-trash"></i></a>
+				  </div>
+				</div>
+				{{/each}}
+			  </div>
+			<div class="header upcase">{{ localize 'MGT2.Actor.StudyPeriod' }}</div>
+			<div class="fields mb-1">
+				<div class="field-group" style="flex: 2 1 auto;">
+					<label class="upcase">{{ localize 'MGT2.Actor.TrainingInSkill' }}</label>
+					<input class="field" name="system.study.skill" type="text" value="{{system.study.skill}}" />
+				</div>
+				<div class="field-group" style="flex: 1 1 0%;">
+					<label>{{ localize 'MGT2.Actor.Completed' }}</label>
+					<input class="field" name="system.study.completed" type="number" value="{{system.study.completed}}" />
+				</div>
+				<div class="field-group" style="flex: 1 1 0%;">
+					<label class="upcase">{{ localize 'MGT2.Actor.Weeks' }}</label>
+					<input class="field" name="system.study.total" type="number" value="{{system.study.total}}" />
+				</div>
+			</div>
+			<div class="table-container">
+				<div class="table-row heading color-1">
+					<div class="row-item row-item-30 row-item-left">{{ localize 'MGT2.Items.Careers' }}</div>
+					<div class="row-item row-item-center">{{ localize 'MGT2.Items.Terms' }}</div>
+					<div class="row-item row-item-center">{{ localize 'MGT2.Items.Rank' }}</div>
+					<div class="row-item row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="career" data-create-name="{{ localize 'MGT2.Actor.NewCareer' }}" title="{{ localize 'MGT2.Actor.AddCareer' }}"><i class="fas fa-plus"></i></a></div>
+				</div>
+				{{#each careers as |career id|}}
+				<div class="table-row item" data-item-id="{{career._id}}" role="rowgroup">
+					<div class="row-item row-item-30 row-item-left">{{career.name}}</div>
+					<div class="row-item row-item-center">{{career.system.terms}}</div>
+					<div class="row-item row-item-center">{{career.system.rank}}</div>
+					<div class="row-item row-item row-item-15 item-controls flex-fix">
+						<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditCareer' }}"><i class="fas fa-edit"></i></a>
+						<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteCareer' }}"><i class="fas fa-trash"></i></a>
+					</div>
+				</div>
+				{{/each}}
+			</div>
+			<div class="table-container">
+				<div class="table-row heading color-1">
+					<div class="row-item row-item-30 row-item-left flex-fix">{{ localize 'MGT2.Actor.Skills' }}</div>
+					<div class="row-item row-item-center">{{ localize 'MGT2.Items.Level' }}</div>
+					<div class="row-item row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="talent" data-subtype="skill" data-create-name="{{ localize 'MGT2.Actor.NewSkill' }}" title="{{ localize 'MGT2.Actor.AddSkill' }}"><i class="fas fa-plus"></i></a></div>
+				</div>
+				{{#each skills as |skill id|}}
+				<div class="table-row" data-item-id="{{skill._id}}" role="rowgroup">
+					<div class="row-item row-item-30 row-item-left flex-fix">
+						<a data-roll="skill" data-roll-skill="{{skill._id}}"><i class="fa-solid fa-dice"></i></a>{{skill.name}}{{#if skill.system.skill.speciality}} ({{skill.system.skill.speciality}}){{/if}}
+					</div>
+					<div class="row-item row-item-center">{{skill.system.level}}</div>
+					<div class="row-item item-controls">
+						<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditSkill' }}"><i class="fas fa-edit"></i></a>
+						<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteSkill' }}"><i class="fas fa-trash"></i></a>
+					</div>
+				</div>
+				{{/each}}
+			</div>
+			{{#if system.config.psionic}}
+			<div class="table-container">
+				<div class="table-row heading color-1">
+					<div class="row-item row-item-30 row-item-left upcase">{{ localize 'MGT2.Actor.PsionicTalents' }}</div>
+					<div class="row-item row-item-10 row-item-center flex-fix">{{ localize 'MGT2.Items.Level' }}</div>
+					<div class="row-item row-item-10 row-item-center flex-fix">{{ localize 'MGT2.Items.Cost' }}</div>
+					<div class="row-item row-item-10 row-item-center flex-fix">{{ localize 'MGT2.Items.Reach' }}</div>
+					<div class="row-item row-item-10 row-item-center flex-fix">{{ localize 'MGT2.Items.Difficulty' }}</div>
+					<div class="row-item row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="talent" data-subtype="psionic" data-create-name="{{ localize 'MGT2.Actor.NewPsionicTalent' }}" title="{{ localize 'MGT2.Actor.AddPsionicTalent' }}"><i class="fas fa-plus"></i></a></div>
+				</div>
+				{{#each psionics as |psionic id|}}
+				<div class="table-row" data-item-id="{{psionic._id}}" role="rowgroup">
+					<div class="row-item row-item-30 row-item-left">
+						<a data-roll="psionic" data-item-id="{{psionic._id}}"><i class="fa-solid fa-dice"></i></a>{{psionic.name}}
+					</div>
+					<div class="row-item row-item-10 row-item-center flex-fix">{{psionic.system.level}}</div>
+					<div class="row-item row-item-10 row-item-center flex-fix">{{psionic.system.psionic.cost}}</div>
+					<div class="row-item row-item-10 row-item-center flex-fix">{{psionic.system.psionic.reach}}</div>
+					<div class="row-item row-item-10 row-item-center flex-fix">{{psionic.system.psionic.difficulty}}</div>
+					<div class="row-item row-item row-item-15 item-controls flex-fix">
+						<a class="item-control item-edit" title="{{ localize 'MGT2.Items.EditPsionic' }}"><i class="fas fa-edit"></i></a>
+						<a class="item-control item-delete" title="{{ localize 'MGT2.Items.DeletePsionic' }}"><i class="fas fa-trash"></i></a>
+					</div>
+				</div>
+				{{/each}}
+			</div>
+			{{/if}}
+		</div>
+		<div class="tab w100 subTabs" data-group="sidebar" data-tab="inventory">
+			<nav class="horizontal-tabs tabs" data-group="inventory">
+				<a class="item tab-select" data-tab="onhand"><i class="fa-solid fa-person-walking-luggage"></i>{{ localize 'MGT2.Items.OnHand' }}</a>
+				<a class="item tab-select" data-tab="storage"><i class="fa-solid fa-treasure-chest"></i>{{ localize 'MGT2.Items.Storage' }}</a>
+				<a class="item tab-select" data-tab="finance"><i class="fa-solid fa-credit-card"></i>{{ localize 'MGT2.Actor.Finance' }}</a>
+				{{#if showTrash}}
+				<!-- <a class="item tab-select" data-tab="trash" style="flex-basis: 3rem;flex-grow: 0;" title="Trash"><i class="fa-solid fa-trash" style="margin: 0;"></i></a> -->
+				{{/if}}
+			</nav>
+			<div class="tab w100 tab-scroll" data-group="inventory" data-tab="onhand">
+				<div class="table-container mt-1">
+					<div class="table-row heading color-1">
+						<div class="row-item row-item-30 row-item-left upcase"><i class="fa-solid fa-gun"></i>{{ localize 'MGT2.Items.Weapons' }}</div>
+						<div class="row-item row-item-2 row-item-center">{{ localize 'MGT2.Items.Range' }}</div>
+						<div class="row-item row-item-20 row-item-center">{{ localize 'MGT2.Items.Damage' }}</div>
+						<div class="row-item row-item-2 row-item-right flex-fix">{{ localize 'MGT2.Items.Weight' }}</div>
+						<div class="row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="weapon" data-create-name="{{ localize 'MGT2.Actor.NewWeapon' }}" title="{{ localize 'MGT2.Actor.AddWeapon' }}"><i class="fas fa-plus"></i></a></div>
+					</div>
+					{{#each weapons as |weapon id|}}
+					<div class="table-row{{#if weapon.subInfo}} table-row-mb-4{{/if}} drag-item-list" data-item-id="{{weapon._id}}" role="rowgroup">
+						<div class="row-item row-item-30 row-item-left flex-3 row-large">
+							<a data-roll="item" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}{{#if weapon.subInfo}}<div class="item-options">{{weapon.subInfo}}</div>{{/if}}
+						</div>
+						<div class="row-item row-item-2 row-item-center">{{weapon.range}}</div>
+						<div class="row-item row-item-20 row-item-center">{{weapon.system.damage}}</div>
+						<div class="row-item row-item-2 row-item-right flex-fix">{{weapon.weight}}</div>
+						<div class="row-item row-item-15 item-controls flex-fix">
+							<a class="item-control item-equip {{weapon.toggleClass}}" title="Equip"><i class="fa-solid fa-shield-halved"></i></a>
+							<a class="item-control item-storage-in" title="{{ localize 'MGT2.Actor.StoreItem' }}"><i class="fa-solid fa-inbox-in"></i></a>
+							<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditWeapon' }}"><i class="fas fa-edit"></i></a>
+							<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteWeapon' }}"><i class="fas fa-trash"></i></a>
+						</div>
+					</div>
+					{{/each}}
+				</div>
+				<div class="table-container">
+					<div class="table-row heading color-1">
+						<div class="row-item row-item-40 row-item-left upcase"><i class="fa-solid fa-shield"></i>{{ localize 'MGT2.Items.Armors' }}</div>
+						<div class="row-item row-item-10 row-item-center">{{ localize 'MGT2.Items.Rads' }}</div>
+						<div class="row-item row-item-10 row-item-center">{{ localize 'MGT2.Items.Protection' }}</div>
+						<div class="row-item row-item-2 row-item-right flex-fix">{{ localize 'MGT2.Items.Weight' }}</div>
+						<div class="row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="armor" data-create-name="{{ localize 'MGT2.Actor.NewArmor' }}" title="{{ localize 'MGT2.Actor.AddArmor' }}"><i class="fas fa-plus"></i></a></div>
+					</div>
+					{{#each armors as |armor id|}}
+					<div class="table-row{{#if armor.subInfo}} table-row-mb-4{{/if}} drag-item-list" data-item-id="{{armor._id}}" role="rowgroup">
+						<div class="row-item row-item-40 row-item-left">
+							<a data-roll="item" data-item-id="{{armor._id}}"><i class="fa-solid fa-dice"></i></a>{{armor.name}}{{#if armor.subInfo}}<div class="item-options">{{armor.subInfo}}</div>{{/if}}
+						</div>
+						<div class="row-item row-item-10 row-item-center">{{armor.system.radiations}}</div>
+						<div class="row-item row-item-10 row-item-center">{{armor.system.protection}}</div>
+						<div class="row-item row-item-2 row-item-right flex-fix">{{armor.weight}}</div>
+						<div class="row-item row-item-15 item-controls flex-fix">
+							<a class="item-control item-equip {{armor.toggleClass}}" title="Equip"><i class="fa-solid fa-shield-halved"></i></a>
+							<a class="item-control item-storage-in" title="{{ localize 'MGT2.Actor.StoreItem' }}"><i class="fa-solid fa-inbox-in"></i></a>
+							<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditArmor' }}"><i class="fas fa-edit"></i></a>
+							<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteArmor' }}"><i class="fas fa-trash"></i></a>
+						</div>
+					</div>
+					{{/each}}
+				</div>
+				<div class="table-container">
+					<div class="table-row heading color-1">
+						<div class="row-item row-item-30 row-item-left upcase"><i class="fa-solid fa-brain-circuit"></i>{{ localize 'MGT2.Actor.Augments' }}</div>
+						<div class="row-item row-item-40 row-item-left">{{ localize 'MGT2.Items.Improvement' }}</div>
+						<div class="row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="equipment" data-subtype="augment" data-create-name="{{ localize 'MGT2.Actor.NewAugment' }}" title="{{ localize 'MGT2.Actor.AddAugment' }}"><i class="fas fa-plus"></i></a></div>
+					</div>
+					{{#each augments as |augment id|}}
+					<div class="table-row drag-item-list" data-item-id="{{augment._id}}" role="rowgroup">
+						<div class="row-item row-item-30 row-item-left">{{augment.name}}</div>
+						<div class="row-item row-item-40 row-item-left">{{augment.system.improvement}}</div>
+						<div class="row-item row-item-15 item-controls flex-fix">
+							<a class="item-control item-equip {{augment.toggleClass}}" title="Equip"><i class="fa-solid fa-shield-halved"></i></a>
+							<a class="item-control item-storage-in" title="{{ localize 'MGT2.Actor.StoreItem' }}"><i class="fa-solid fa-inbox-in"></i></a>
+							<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditAugment' }}"><i class="fas fa-edit"></i></a>
+							<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteAugment' }}"><i class="fas fa-trash"></i></a>
+						</div>
+					</div>
+					{{/each}}
+				</div>
+				<div class="table-container">
+					<div class="table-row heading color-1">
+						<div class="row-item row-item-50 row-item-left upcase"><i class="fa-solid fa-tablet-screen"></i>{{ localize 'MGT2.Items.Computers' }}</div>
+						<div class="row-item row-item-2 row-item-center"><i class="fa-solid fa-bolt-lightning"></i></div>
+						<div class="row-item row-item-2 row-item-right flex-fix">{{ localize 'MGT2.Items.Weight' }}</div>
+						<div class="row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="computer" data-create-name="{{ localize 'MGT2.Actor.NewComputer' }}" title="{{ localize 'MGT2.Actor.AddComputer' }}"><i class="fas fa-plus"></i></a></div>
+					</div>
+					{{#each computers as |computer id|}}
+					<div class="table-row drop-item-list" data-item-id="{{computer._id}}" role="rowgroup">
+						<div class="row-item row-item-50 row-item-left">
+							<a data-roll="item" data-item-id="{{computer._id}}"><i class="fa-solid fa-dice"></i></a>{{computer.name}}{{#if computer.subInfo}}<div class="item-options">{{computer.subInfo}}</div>{{/if}}
+						</div>
+						<div class="row-item row-item-2 row-item-center {{overloadClass}}">{{computer.system.processingUsed}}/{{computer.system.processing}}
+							{{#if computer.system.overload}}<a title="Overload"><i class="fa-solid fa-triangle-exclamation"></i></a>{{/if}}
+						</div>
+						<div class="row-item row-item-2 row-item-right flex-fix">{{computer.weight}}</div>
+						<div class="row-item row-item-15 item-controls flex-fix">
+							<a class="item-control item-equip {{computer.toggleClass}}" title="Equip"><i class="fa-solid fa-shield-halved"></i></a>
+							<a class="item-control item-storage-in" title="{{ localize 'MGT2.Actor.StoreItem' }}"><i class="fa-solid fa-inbox-in"></i></a>
+							<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditComputer' }}"><i class="fas fa-edit"></i></a>
+							<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteComputer' }}"><i class="fas fa-trash"></i></a>
+						</div>
+					</div>
+					{{#each subItems as |subItem|}}
+					<div class="table-row table-subrow drag-item-list" data-item-id="{{subItem._id}}">
+						<div class="row-item row-item-50 row-item-left"><i class="fa-brands fa-usb"></i>{{subItem.name}}</div>
+						<div class="row-item row-item-2 row-item-center">{{subItem.system.bandwidth}}</div>
+						<div class="row-item row-item-2 row-item-right flex-fix"></div>
+						<div class="row-item row-item-15 item-controls flex-fix">
+							<a class="item-control software-eject" title="{{ localize 'MGT2.Actor.UnloadSoftware' }}"><i class="fa-solid fa-eject"></i></i></a>
+							<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditSoftware' }}"><i class="fas fa-edit"></i></a>
+						</div>
+					</div>
+					{{/each}}
+					{{/each}}
+					{{#if softwares}}
+					<fieldset style="padding: 5px;margin: 1rem 0;">
+						<legend><i class="fa-brands fa-usb"></i> {{ localize 'MGT2.Items.Softwares' }}</legend>
+						<ul class="softwares">
+							{{#each softwares as |software id|}}
+							<li class="drag-item-list" data-item-id="{{software._id}}">{{software.display}}
+								<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditSoftware' }}"><i class="fas fa-edit"></i></a>
+								<a class="item-delete" title="{{ localize 'MGT2.Actor.DeleteSoftware' }}"><i class="fas fa-trash"></i></a>
+							</li>
+							{{/each}}
+						</ul>
+					</fieldset>
+					{{/if}}
+				</div>
+				<div class="table-container">
+					<div class="table-row heading color-1">
+						<div class="row-item row-item-85 row-item-left upcase"><i class="fa-solid fa-toolbox"></i>{{ localize 'MGT2.Items.Equipments' }}</div>
+						<div class="row-item row-item-2 row-item-center">{{ localize 'MGT2.Items.Qty' }}</div>
+						<div class="row-item row-item-2 row-item-right flex-fix">{{ localize 'MGT2.Items.Weight' }}</div>
+						<div class="row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="equipment" data-create-name="{{ localize 'MGT2.Actor.Equipment' }}" title="{{ localize 'MGT2.Actor.AddEquipment' }}"><i class="fas fa-plus"></i></a></div>
+					</div>
+					{{#each equipments as |equipment id|}}
+					<div class="table-row drag-item-list" data-item-id="{{equipment._id}}" role="rowgroup">
+						<div class="row-item row-item-85 row-item-left">{{equipment.name}}</div>
+						<div class="row-item row-item-2 row-item-center">{{equipment.system.quantity}}</div>
+						<div class="row-item row-item-2 row-item-right flex-fix">{{equipment.weight}}</div>
+						<div class="row-item row-item-15 item-controls flex-fix">
+							<a class="item-control item-equip {{equipment.toggleClass}}" title="{{ localize 'MGT2.Actor.EquipUnequip' }}"><i class="fa-solid fa-shield-halved"></i></a>
+							<a class="item-control item-storage-in" title="{{ localize 'MGT2.Actor.StoreEquipment' }}"><i class="fa-solid fa-inbox-in"></i></a>
+							<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditEquipment' }}"><i class="fas fa-edit"></i></a>
+							<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteEquipment' }}"><i class="fas fa-trash"></i></a>
+						</div>
+					</div>
+					{{/each}}
+				</div>
+				<div class="table-container">
+					<div class="table-row heading color-1">
+						<div class="row-item row-item-85 row-item-left upcase"><i class="fa-solid fa-backpack"></i>{{ localize 'MGT2.Items.Items' }}</div>
+						<div class="row-item row-item-2 row-item-center">{{ localize 'MGT2.Items.Qty' }}</div>
+						<div class="row-item row-item-2 row-item-right flex-fix">{{ localize 'MGT2.Items.Weight' }}</div>
+						<div class="row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="item" data-create-name="{{ localize 'MGT2.Actor.NewItem' }}" title="{{ localize 'MGT2.Actor.AddItem' }}"><i class="fas fa-plus"></i></a></div>
+					</div>
+					{{#each items as |item|}}
+					{{#if (eq item.type "container")}}
+					<div class="table-row drop-item-list" data-item-id="{{item._id}}">
+						{{else}}
+						<div class="table-row drag-item-list" data-item-id="{{item._id}}">
+							{{/if}}
+							<div class="row-item row-item-85 row-item-left">{{item.name}}</div>
+							<div class="row-item row-item-2 row-item-center">{{item.system.quantity}}</div>
+							<div class="row-item row-item-2 row-item-right flex-fix">{{item.weight}}</div>
+							<div class="row-item row-item-15 item-controls flex-fix">
+								<a class="item-control item-storage-in" title="{{ localize 'MGT2.Actor.StoreItem' }}"><i class="fa-solid fa-inbox-in"></i></a>
+								<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditItem' }}"><i class="fas fa-edit"></i></a>
+								<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteItem' }}"><i class="fas fa-trash"></i></a>
+							</div>
+						</div>
+						{{#if (eq item.type "container")}}
+						{{#each subItems as |subItem|}}
+						<div class="table-row table-subrow drag-item-list" data-item-id="{{subItem._id}}">
+							<div class="row-item row-item-85 row-item-left">{{subItem.name}}</div>
+							<div class="row-item row-item-2 row-item-center">{{subItem.system.quantity}}</div>
+							<div class="row-item row-item-2 row-item-right flex-fix">{{subItem.weight}}</div>
+							<div class="row-item row-item-15 item-controls flex-fix">
+								<a class="item-control item-storage-out" title="{{ localize 'MGT2.Actor.UnstoreItem' }}"><i class="fa-solid fa-inbox-out"></i></a>
+								<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditItem' }}"><i class="fas fa-edit"></i></a>
+								<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteItem' }}"><i class="fas fa-trash"></i></a>
+							</div>
+						</div>
+						{{/each}}
+						{{/if}}
+						{{/each}}
+					</div>
+					<hr />
+					<div class="table-container">
+						<div class="table-row">
+							<div class="row-item row-item-left" style="flex-basis: 48%">{{ localize 'MGT2.Actor.Encumbrance' }} {{encumbranceNormal}} {{settings.weightUnit}} / {{encumbranceHeavy}} {{settings.weightUnit}}</div>
+							<div class="row-item row-item-right" style="flex-basis: 28%">Total :</div>
+							<div class="row-item row-item-2 row-item-right {{encumbranceClasses}} flex-fix">{{system.inventory.weight}} {{settings.weightUnit}}</div>
+							<div class="row-item row-item-15 row-item-left  flex-fix {{encumbranceClasses}}"></div>
+						</div>
+					</div>
+				</div>
+				<div class="tab" data-group="inventory" data-tab="storage">
+					<div class="mt-1" style="flex-direction: row;display: flex;justify-content: space-between;">
+						<div>
+							<label>{{ localize 'MGT2.Items.Containers' }}</label>
+							<select name="system.containerView">
+								{{selectOptions containers selected=system.containerView nameAttr="_id" labelAttr="display"}}
+							</select>
+							<div class="container-controls">
+								{{#unless containerShowAll}}<a class="container-edit"><i class="fas fa-edit"></i></a>{{/unless}}
+								<a class="container-create"><i class="fas fa-plus"></i></a>
+								{{#unless containerShowAll}}<a class="container-delete"><i class="fas fa-trash"></i></a>{{/unless}}
+							</div>
+						</div>
+						<div>
+							<label>DropIn</label>
+							<select name="system.containerDropIn">
+								{{selectOptions actorContainers selected=system.containerDropIn nameAttr="_id" labelAttr="display"}}
+							</select>
+						</div>
+					</div>
+					<hr />
+					{{#if (and containerView.system.locked (not isGM))}}
+					<i class="fa-solid fa-lock"></i><label class="upcase">{{ localize 'MGT2.Items.Locked' }}</label>
+					{{else}}
+					<div class="table-container">
+						<div class="table-row heading color-1">
+							<div class="row-item row-item-30 row-item-left upcase">{{ localize 'MGT2.Items.Items' }}</div>
+							{{#if containerShowAll}}
+							<div class="row-item row-item-center row-item-storage">{{ localize 'MGT2.Items.Storage' }}</div>
+							{{/if}}
+							<div class="row-item row-item-2 row-item-center flex-fix">{{ localize 'MGT2.Items.Qty' }}</div>
+							<div class="row-item row-item-2 row-item-center flex-fix">{{ localize 'MGT2.Items.Weight' }}</div>
+							<div class="row-item row-item-15 item-controls flex-fix"></div>
+						</div>
+						{{#each containerItems as |containerItem id|}}
+						<div class="table-row drag-item-list" data-item-id="{{containerItem._id}}" role="rowgroup">
+							<div class="row-item row-item-30 row-item-left">{{containerItem.name}}</div>
+							{{#if ../containerShowAll}}
+							<div class="row-item row-item-center row-item-storage">{{containerItem.containerName}}</div>
+							{{/if}}
+							<div class="row-item row-item-2 row-item-center flex-fix">{{containerItem.system.quantity}}</div>
+							<div class="row-item row-item-2 row-item-center flex-fix">{{containerItem.weight}}</div>
+							<div class="row-item row-item-15 item-controls flex-fix">
+								<a class="item-control item-storage-out" title="{{ localize 'MGT2.Actor.UnstoreItem' }}"><i class="fa-solid fa-inbox-out"></i></a>
+								<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditItem' }}"><i class="fas fa-edit"></i></a>
+								<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteItem' }}"><i class="fas fa-trash"></i></a>
+							</div>
+						</div>
+						{{/each}}
+					</div>
+					<hr />
+					<div>{{ localize 'MGT2.Actor.TotalWeight' }} : {{containerWeight}} {{settings.weightUnit}}</div>
+					{{/if}}
+				</div>
+				<div class="tab" data-group="inventory" data-tab="finance">
+					<div class="field-groups mb-1 mt-1">
+						<div class="field-group">
+							<label class="upcase">{{ localize 'MGT2.Actor.CashOnHand' }}</label>
+							<input class="field" name="system.finance.credits" type="text" value="{{system.finance.credits}}" />
+						</div>
+						<div class="field-group">
+							<label class="upcase">{{ localize 'MGT2.Actor.Pension' }}</label>
+							<input class="field" name="system.finance.pension" type="text" value="{{system.finance.pension}}" />
+						</div>
+						<div class="field-group">
+							<label class="upcase">{{ localize 'MGT2.Actor.LivingCost' }}</label>
+							<input class="field" name="system.finance.livingCost" type="text" value="{{system.finance.livingCost}}" />
+						</div>
+						<div class="field-group">
+							<label class="upcase">{{ localize 'MGT2.Actor.Debt' }}</label>
+							<input class="field" name="system.finance.debt" type="text" value="{{system.finance.debt}}" />
+						</div>
+					</div>
+					<div class="field-group mt-1">
+						<label class="upcase">{{ localize 'MGT2.Actor.Notes' }}</label>
+						<textarea name="system.finance.description" rows="3">{{system.finance.description}}</textarea>
+					</div>
+				</div>
+			</div>
+			<div class="tab w100 tab-scroll" data-group="sidebar" data-tab="relations">
+				<div class="header upcase">{{ localize 'MGT2.Actor.RelationsAndContacts' }}</div>
+				<div class="table-container">
+					<div class="table-row heading color-1">
+						<div class="row-item flex-grow-2">{{ localize 'MGT2.Items.Relations' }}</div>
+						<div class="row-item row-item-center">{{ localize 'MGT2.Items.Relation' }}</div>
+						<div class="row-item row-item-center">{{ localize 'MGT2.Items.Attitude' }}</div>
+						<div class="row-item row-item-center">{{ localize 'MGT2.Items.Occupation' }}</div>
+						<div class="row-item row-item-center">{{ localize 'MGT2.Items.Location' }}</div>
+						<div class="row-item item-controls"><a class="item-create" data-type-item="contact" data-create-name="{{ localize 'MGT2.Actor.NewContact' }}" title="{{ localize 'MGT2.Actor.AddContact' }}"><i class="fas fa-plus"></i></a></div>
+					</div>
+					{{#each contacts as |contact id|}}
+					<div class="table-row" data-item-id="{{contact._id}}" role="rowgroup">
+						<div class="row-item row-item-left flex-grow-2">{{contact.name}}</div>
+						<div class="row-item row-item-center">{{localize (concat "MGT2.Contact.Relation." contact.system.relation)}}</div>
+						<div class="row-item row-item-center">{{localize (concat "MGT2.Contact.Attitude." contact.system.attitude)}}</div>
+						<div class="row-item row-item-center">{{contact.system.occupation}}</div>
+						<div class="row-item row-item-center">{{contact.system.location}}</div>
+						<div class="row-item item-controls">
+							<a class="item-control item-edit" title="{{ localize 'MGT2.Actor.EditContact' }}"><i class="fas fa-edit"></i></a>
+							<a class="item-control item-delete" title="{{ localize 'MGT2.Actor.DeleteContact' }}"><i class="fas fa-trash"></i></a>
+						</div>
+					</div>
+					{{/each}}
+				</div>
+			</div>
+			<div class="tab w100 h100" data-group="sidebar" data-tab="notes">
+				<div class="header upcase">{{ localize 'MGT2.Actor.Notes' }}</div>
+				{{editor system.notes target="system.notes" button=true editable=true}}
+			</div>
+			<div class="tab w100 h100" data-group="sidebar" data-tab="biography">
+				<div class="header upcase">{{ localize 'MGT2.Actor.Biography' }}</div>
+				{{editor system.biography target="system.biography" button=true editable=true}}
+			</div>
+			{{#if showTrash}}
+			<!-- <div class="tab" data-group="inventory" data-tab="trash">
+				<p>À FAIRE</p>
+			</div> -->
+			{{/if}}
+		</div>
+		<section class="actor-footer">
+
+			<div></div>
+			<div><a name="config" title="Config" style="margin-right: 0.5rem;"><i class="fa-solid fa-gear"></i></a></div>
+		</section>
+</form>

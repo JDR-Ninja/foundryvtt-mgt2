@@ -1,0 +1,12 @@
+<form class="{{cssClass}} itemsheet" autocomplete="off">
+    <div class="itemsheet-header"><label class="upcase">{{ localize 'MGT2.Items.Trait' }}</label></div>
+    <div class="itemsheet-panel">
+        <div class="w-100 h100 flexcol">
+            <input class="field field-item-name" name="name" type="text" value="{{data.name}}" style="flex-grow: 0;" />
+            <div class="field-group mt-1">
+                <label>{{ localize 'MGT2.Items.Description' }}</label>
+                <textarea name="description" rows="6">{{data.description}}</textarea>
+              </div>
+        </div>
+    </div>
+</form>

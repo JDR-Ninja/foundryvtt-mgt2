@@ -1,7 +1,14 @@
 <div class="roll-info">
     <div class="roll-object-name">{{rollObjectName}}</div>
     {{#if rollTypeName}}
-    <div class="roll-type-name">{{rollTypeName}}</div>
+        {{#if rollDifficulty}}
+        <div class="roll-type-group"><div class="roll-type-name">{{rollTypeName}}</div><div class="roll-type-name">{{ localize rollDifficultyLabel }}</div></div>
+        {{else}}
+        <div class="roll-type-name">{{rollTypeName}}</div>
+        {{/if}}
+    {{/if}}
+    {{#if rollMessage}}
+    <div>{{rollMessage}}</div>
     {{/if}}
     {{#if rollModifiers}}
     {{#each rollModifiers as |rollModifier i| }}
@@ -13,12 +20,13 @@
     {{#if flavor}}
     <div class="dice-flavor">{{flavor}}</div>
     {{/if}}
-    <div class="dice-result">
-        <div class="dice-formula">{{formula}}</div>
-        {{{tooltip}}}
-        <h4 class="dice-total">{{total}}</h4>
-    </div>
+    <div class="dice-result"><div class="dice-formula">{{formula}}</div>{{{tooltip}}}<h4 class="dice-total">{{total}}</h4></div>
 </div>
+{{#if rollSuccess}}
+<div class="roll-success">{{ localize 'MGT2.Chat.Roll.Success' }}</div>
+{{else if rollFailure}}
+<div class="roll-success">{{ localize 'MGT2.Chat.Roll.Failure' }}</div>
+{{/if}}
 {{#if showButtons}}
 <div class="mgt2-buttons">
     {{#if hasDamage}}
@@ -31,5 +39,8 @@
     {{#if showRollDamage}}
     <button data-action="rollDamage" title="Roll">{{ localize 'MGT2.Chat.Roll.Damages' }}</button>
     {{/if}}
+    {{#each cardButtons as |cardButton i| }}
+    <button data-index="{{i}}" title="{{cardButton.label}}">{{cardButton.label}}</button>
+    {{/each}}
 </div>
 {{/if}}

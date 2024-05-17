@@ -43,6 +43,26 @@
   --mgt2-row-inactive-icon: #b5b3a4;
 }
 
+.blue {
+  --mgt2-color-form: #0A0405;
+  --mgt2-bgcolor-form: #fff;
+  --mgt2-color-primary: #91AAC8;
+  --mgt2-color-primary-active: #BCDCFF;
+  --mgt2-bgcolor-primary: #0A0405;
+  --mgt2-color-primary-light: #4b4a44;
+  --mgt2-color-warning: #EE4050;
+  --mgt2-color-dm: #fff;
+  --mgt2-bgcolor-dm: #0A0405;
+  --mgt2-color-software: #fff;
+  --mgt2-bgcolor-software: #0A0405;
+  --mgt2-input-color: #0A0405;
+  --mgt2-input-bgcolor: #fff;
+  --mgt2-editor-border: #C6C6C6;
+  --mgt2-row-hover: #F2F2F2;
+  --mgt2-subrow-color: #727272;
+  --mgt2-row-inactive-icon: #b5b3a4;
+}
+
 .upcase {
   text-transform: uppercase;
 }
@@ -90,10 +110,6 @@
 .mgt2 .mt-2 {
   margin-top: 14px;
 }
-.mgt2 .flex-fix {
-  flex-grow: 0 !important;
-  flex-shrink: 0 !important;
-}
 
 .mgt2.sheet header.window-header {
   color: var(--mgt2-color-primary);
@@ -110,6 +126,32 @@
 
 .nopad .window-content {
   padding: 0;
+}
+
+.mgt2 .flex-fix {
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+}
+.mgt2 .flex-basis-10 {
+  flex-basis: 10%;
+}
+.mgt2 .flex-basis-20 {
+  flex-basis: 20%;
+}
+.mgt2 .flex-basis-30 {
+  flex-basis: 30%;
+}
+.mgt2 .flex-basis-40 {
+  flex-basis: 40%;
+}
+.mgt2 .flex-basis-50 {
+  flex-basis: 50%;
+}
+.mgt2 .flex-basis-60 {
+  flex-basis: 60%;
+}
+.mgt2 .flex-basis-70 {
+  flex-basis: 70%;
 }
 
 .mgt2.sheet textarea {
@@ -205,6 +247,15 @@
 
 .characteristics-panel .tab {
   padding: 4px;
+}
+
+.species {
+  font-size: 13px;
+  margin: 4px 1rem 0 1rem;
+  text-align: justify;
+}
+.species a {
+  margin-right: 1rem;
 }
 
 .mgt2 .characteristics {
@@ -482,6 +533,17 @@ ul.softwares li:hover a {
   font-weight: bold;
 }
 
+.character-body {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: flex-start;
+  border-top: 3px solid black;
+}
+
 .actor-footer {
   bottom: 0;
   color: var(--mgt2-color-primary);
@@ -560,12 +622,6 @@ ul.softwares li:hover a {
   box-shadow: 0 0 2px #FFF inset;
 }
 
-.chat-message.message {
-  color: #0A0405;
-  background-color: #fff;
-  background-image: none;
-}
-
 .dice-formula,
 .dice-total {
   background-color: #fff;
@@ -590,6 +646,13 @@ ul.softwares li:hover a {
   flex-direction: column;
 }
 
+.roll-type-group {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  display: flex;
+}
+
 .roll-type-name {
   font-size: 11px;
   text-transform: uppercase;
@@ -599,6 +662,14 @@ ul.softwares li:hover a {
 .roll-object-name {
   font-weight: 400;
   font-size: 1.4rem;
+}
+
+.roll-success {
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-top: 1rem;
+  text-align: center;
 }
 
 .mgt2 nav.horizontal-tabs {
@@ -930,6 +1001,14 @@ ul.softwares li:hover a {
 .table-row:last-child,
 .row-sub-container .row-item:last-child {
   border-bottom: 0;
+}
+
+.table-container.editable .table-row {
+  margin-top: 4px;
+}
+
+.table-container.editable .table-row:last-child {
+  margin-bottom: 4px;
 }
 
 .item-options {
