@@ -29,7 +29,7 @@
         "hint": "Choisissez un thème"
       },
       "useWeightMetric": {
-        "name": "Utiliser le Système Métrique pour le Poid",
+        "name": "Utiliser le Système Métrique pour le Poids",
         "hint": "kilogramme (kg) au lieu de la livre (lbs)"
       },
       "useDistanceMetric": {
@@ -123,6 +123,8 @@
       "NewArmor": "Nouvelle Armure",
       "NewAugment": "Nouvelle Augmentation",
       "NewContact": "Nouveau Contact",
+      "NewContainer": "Nouveau Conteneur",
+      "NewComputer": "Nouvel Ordinateur",
       "NewDisease": "Nouvelle Maladie",
       "NewEquipment": "Nouvelle Équipement",
       "NewItem": "Nouveau Objet",
@@ -250,14 +252,14 @@
     },
     "Difficulty": {
       "NA": "N/A",
-      "Simple": "Simple",
-      "Easy": "Facile",
-      "Routine": "Routine",
-      "Average": "Moyenne",
-      "Difficult": "Difficile",
-      "VeryDifficult": "Très Difficile",
-      "Formidable": "Formidable",
-      "Impossible": "Impossible"
+      "Simple": "Simple (2)",
+      "Easy": "Facile (4)",
+      "Routine": "Routine (6)",
+      "Average": "Moyenne (8)",
+      "Difficult": "Difficile (10)",
+      "VeryDifficult": "Très Difficile (12)",
+      "Formidable": "Formidable (14)",
+      "Impossible": "Impossible (16)"
     },
     "PsionicReach": {
       "NA": "N/A",
@@ -357,6 +359,7 @@
       }
     },
     "Items": {
+      "SelectAll": "(tous)",
       "Age": "Âge",
       "Armor": "Armure",
       "Armors": "Armures",
@@ -409,7 +412,7 @@
       "Options": "Options",
       "PSICost": "Coût PSI",
       "Powered": "Alimenté",
-      "Processing": "Traitement",
+      "Processing": "Capacité de Traitement",
       "Protection": "Protection",
       "PsionicSkill": "Compétence Psionique",
       "Qty": "Qté",
@@ -436,8 +439,8 @@
       "Type": "Type",
       "Weapon": "Arme",
       "Weapons": "Armes",
-      "Weight": "Poid",
-      "Weightless": "Aucun Poid",
+      "Weight": "Poids",
+      "Weightless": "Aucun Poids",
       "Quantity": "Quantité"
     },
     "Durations": {

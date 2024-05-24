@@ -43,7 +43,7 @@
           <div class="field-group">
             <label>{{ localize 'MGT2.Items.Storage' }}</label>
             <select name="system.container.id">
-              {{selectOptions containers selected=system.container.id nameAttr="_id" labelAttr="name"}}
+              {{selectOptions containers selected=system.container.id valueAttr="_id" labelAttr="name"}}
             </select>
           </div>
           {{/if}}

@@ -1,6 +1,15 @@
+## [0.1.3] (2024-05-25)
+
+### Correctifs
+* Localisation
+* Ajouter valeur de la difficulté dans le label
+
+### Features
+* Support de la v12
+
 ## [0.1.2] (2024-05-16)
 
-### Bug Fixes
+### Correctifs
 * Affichage de la difficulté pour les Talents Psioniques
 * Ajout de scrollbar dans la feuille de personnage
 * Drag & Drop sur la fiche des Carrières, Maladies, Contacts, Espèces

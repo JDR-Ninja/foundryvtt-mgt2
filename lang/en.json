@@ -123,6 +123,8 @@
       "NewArmor": "New Armor",
       "NewAugment": "New Augment",
       "NewContact": "New Contact",
+      "NewComputer": "New Computer",
+      "NewContainer": "New Container",
       "NewDisease": "New Diseases",
       "NewEquipment": "New Equipment",
       "NewItem": "New Item",
@@ -250,14 +252,14 @@
     },
     "Difficulty": {
       "NA": "Not Applicable",
-      "Simple": "Simple",
-      "Easy": "Easy",
-      "Routine": "Routine",
-      "Average": "Average",
-      "Difficult": "Difficult",
-      "VeryDifficult": "Very Difficult",
-      "Formidable": "Formidable",
-      "Impossible": "Impossible"
+      "Simple": "Simple (2)",
+      "Easy": "Easy (4)",
+      "Routine": "Routine (6)",
+      "Average": "Average (8)",
+      "Difficult": "Difficult (10)",
+      "VeryDifficult": "Very Difficult (12)",
+      "Formidable": "Formidable (14)",
+      "Impossible": "Impossible (16)"
     },
     "PsionicReach": {
       "NA": "N/A",
@@ -357,6 +359,7 @@
       }
     },
     "Items": {
+      "SelectAll": "(all)",
       "Age": "Age",
       "Armor": "Armor",
       "Armors": "Armors",

@@ -618,10 +618,10 @@ class ActorCharacter {
       const cloneActor = duplicate($this);
       await this.recalculateArmor($this, cloneActor);
       if (recalculEncumbrance) {
-        const str = $this.system.characteristics.strength.value;
-        const end = $this.system.characteristics.endurance.value;
+        const str = Number($this.system.characteristics.strength.value);
+        const end = Number($this.system.characteristics.endurance.value);
         let sumSkill = 0;
-        $this.items.filter((x) => x.type === "talent" && x.system.subType === "skill" && x.system.skill.reduceEncumbrance === true).forEach((x) => sumSkill += x.system.level);
+        $this.items.filter((x) => x.type === "talent" && x.system.subType === "skill" && x.system.skill.reduceEncumbrance === true).forEach((x) => sumSkill += Number(x.system.level));
         let normal = str + end + sumSkill;
         let heavy = normal * 2;
         cloneActor.system.states.encumbrance = $this.system.inventory.weight > normal;
@@ -714,23 +714,23 @@ class ActorCharacter {
   }
   static async preUpdate($this, changed, options, user) {
     var _a, _b, _c, _d, _e, _f, _g, _h;
-    const newStr = (_a = foundry.utils.getProperty(changed, "system.characteristics.strength.value")) != null ? _a : $this.system.characteristics.strength.value;
-    const newEnd = (_b = foundry.utils.getProperty(changed, "system.characteristics.endurance.value")) != null ? _b : $this.system.characteristics.endurance.value;
+    const newStr = Number((_a = foundry.utils.getProperty(changed, "system.characteristics.strength.value")) != null ? _a : $this.system.characteristics.strength.value);
+    const newEnd = Number((_b = foundry.utils.getProperty(changed, "system.characteristics.endurance.value")) != null ? _b : $this.system.characteristics.endurance.value);
     if (newStr !== $this.system.characteristics.strength.value || newEnd !== $this.system.characteristics.endurance.value) {
       let sumSkill = 0;
-      $this.items.filter((x) => x.type === "talent" && x.system.subType === "skill" && x.system.skill.reduceEncumbrance === true).forEach((x) => sumSkill += x.system.level);
+      $this.items.filter((x) => x.type === "talent" && x.system.subType === "skill" && x.system.skill.reduceEncumbrance === true).forEach((x) => sumSkill += Number(x.system.level));
       let normal = newStr + newEnd + sumSkill;
       let heavy = normal * 2;
       foundry.utils.setProperty(changed, "system.inventory.encumbrance.normal", normal);
       foundry.utils.setProperty(changed, "system.inventory.encumbrance.heavy", heavy);
     }
     const characteristicModified = this.computeCharacteristics(changed);
-    const strengthValue = (_c = foundry.utils.getProperty(changed, "system.characteristics.strength.value")) != null ? _c : $this.system.characteristics.strength.value;
-    const strengthMax = (_d = foundry.utils.getProperty(changed, "system.characteristics.strength.max")) != null ? _d : $this.system.characteristics.strength.max;
-    const dexterityValue = (_e = foundry.utils.getProperty(changed, "system.characteristics.dexterity.value")) != null ? _e : $this.system.characteristics.dexterity.value;
-    const dexterityMax = (_f = foundry.utils.getProperty(changed, "system.characteristics.dexterity.max")) != null ? _f : $this.system.characteristics.dexterity.max;
-    const enduranceValue = (_g = foundry.utils.getProperty(changed, "system.characteristics.endurance.value")) != null ? _g : $this.system.characteristics.endurance.value;
-    const enduranceMax = (_h = foundry.utils.getProperty(changed, "system.characteristics.endurance.max")) != null ? _h : $this.system.characteristics.endurance.max;
+    const strengthValue = Number((_c = foundry.utils.getProperty(changed, "system.characteristics.strength.value")) != null ? _c : $this.system.characteristics.strength.value);
+    const strengthMax = Number((_d = foundry.utils.getProperty(changed, "system.characteristics.strength.max")) != null ? _d : $this.system.characteristics.strength.max);
+    const dexterityValue = Number((_e = foundry.utils.getProperty(changed, "system.characteristics.dexterity.value")) != null ? _e : $this.system.characteristics.dexterity.value);
+    const dexterityMax = Number((_f = foundry.utils.getProperty(changed, "system.characteristics.dexterity.max")) != null ? _f : $this.system.characteristics.dexterity.max);
+    const enduranceValue = Number((_g = foundry.utils.getProperty(changed, "system.characteristics.endurance.value")) != null ? _g : $this.system.characteristics.endurance.value);
+    const enduranceMax = Number((_h = foundry.utils.getProperty(changed, "system.characteristics.endurance.max")) != null ? _h : $this.system.characteristics.endurance.max);
     const lifeValue = strengthValue + dexterityValue + enduranceValue;
     const lifeMax = strengthMax + dexterityMax + enduranceMax;
     if ($this.system.life.value !== lifeValue)
@@ -837,8 +837,8 @@ class ActorCharacter {
   }
   static computeCharacteristic(changed, name) {
     const path = `system.characteristics.${name}`;
-    const newValue = foundry.utils.getProperty(changed, path + ".value");
-    if (newValue) {
+    const newValue = Number(foundry.utils.getProperty(changed, path + ".value"));
+    if (newValue && !isNaN(newValue)) {
       const dm = this.getModifier(newValue);
       foundry.utils.setProperty(changed, path + ".dm", dm);
       return true;
@@ -1746,7 +1746,7 @@ class TravellerActorSheet extends ActorSheet {
       }
     }
     actorContainers.sort(MGT2Helper.compareByName);
-    const containers = [{ "name": "(tous)", "_id": "" }].concat(actorContainers);
+    const containers = [{ "name": game.i18n.localize("MGT2.Items.SelectAll"), "_id": "", "display": game.i18n.localize("MGT2.Items.SelectAll") }].concat(actorContainers);
     const containerIndex = /* @__PURE__ */ new Map();
     for (let c of actorContainers) {
       containerIndex.set(c._id, c);
@@ -2271,7 +2271,7 @@ class TravellerActorSheet extends ActorSheet {
     };
     if (MGT2Helper.hasValue(rollOptions, "difficulty")) {
       chatData.rollDifficulty = rollOptions.difficulty;
-      chatData.rollDifficultyLabel = MGT2Helper.getDifficultyDisplay(rollOptions.difficulty);
+      chatData.rollDifficultyLabel = game.i18n.localize(`MGT2.Difficulty.${rollOptions.difficulty}`);
       if (roll.total >= MGT2Helper.getDifficultyValue(rollOptions.difficulty)) {
         chatData.rollSuccess = true;
       } else {
@@ -2327,7 +2327,7 @@ class TravellerActorSheet extends ActorSheet {
       if (this.actor.system.containerDropIn == "" || this.actor.system.containerDropIn === null) {
         if (containers.length === 0) {
           const cls = getDocumentClass("Item");
-          container = cls.create({ name: "New container", type: "container" }, { parent: this.actor });
+          container = cls.create({ name: game.i18n.localize("MGT2.Actor.NewContainer"), type: "container" }, { parent: this.actor });
         } else {
           container = containers[0];
         }
@@ -2363,7 +2363,7 @@ class TravellerActorSheet extends ActorSheet {
   _onContainerCreate(ev) {
     ev.preventDefault();
     const cls = getDocumentClass("Item");
-    return cls.create({ name: "New container", type: "container" }, { parent: this.actor });
+    return cls.create({ name: game.i18n.localize("MGT2.Actor.NewContainer"), type: "container" }, { parent: this.actor });
   }
   _canDragDrop(selector) {
     return this.isEditable;

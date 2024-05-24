@@ -558,7 +558,7 @@
 						<div class="row-item row-item-85 row-item-left upcase"><i class="fa-solid fa-toolbox"></i>{{ localize 'MGT2.Items.Equipments' }}</div>
 						<div class="row-item row-item-2 row-item-center">{{ localize 'MGT2.Items.Qty' }}</div>
 						<div class="row-item row-item-2 row-item-right flex-fix">{{ localize 'MGT2.Items.Weight' }}</div>
-						<div class="row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="equipment" data-create-name="{{ localize 'MGT2.Actor.Equipment' }}" title="{{ localize 'MGT2.Actor.AddEquipment' }}"><i class="fas fa-plus"></i></a></div>
+						<div class="row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="equipment" data-create-name="{{ localize 'MGT2.Actor.NewEquipment' }}" title="{{ localize 'MGT2.Actor.AddEquipment' }}"><i class="fas fa-plus"></i></a></div>
 					</div>
 					{{#each equipments as |equipment id|}}
 					<div class="table-row drag-item-list" data-item-id="{{equipment._id}}" role="rowgroup">
@@ -582,11 +582,11 @@
 						<div class="row-item row-item-15 item-controls flex-fix"><a class="item-create" data-type-item="item" data-create-name="{{ localize 'MGT2.Actor.NewItem' }}" title="{{ localize 'MGT2.Actor.AddItem' }}"><i class="fas fa-plus"></i></a></div>
 					</div>
 					{{#each items as |item|}}
-					{{#if (eq item.type "container")}}
-					<div class="table-row drop-item-list" data-item-id="{{item._id}}">
+						{{#if (eq item.type "container")}}
+						<div class="table-row drop-item-list" data-item-id="{{item._id}}">
 						{{else}}
 						<div class="table-row drag-item-list" data-item-id="{{item._id}}">
-							{{/if}}
+						{{/if}}
 							<div class="row-item row-item-85 row-item-left">{{item.name}}</div>
 							<div class="row-item row-item-2 row-item-center">{{item.system.quantity}}</div>
 							<div class="row-item row-item-2 row-item-right flex-fix">{{item.weight}}</div>
@@ -627,7 +627,7 @@
 						<div>
 							<label>{{ localize 'MGT2.Items.Containers' }}</label>
 							<select name="system.containerView">
-								{{selectOptions containers selected=system.containerView nameAttr="_id" labelAttr="display"}}
+								{{selectOptions containers selected=system.containerView valueAttr="_id" labelAttr="display"}}
 							</select>
 							<div class="container-controls">
 								{{#unless containerShowAll}}<a class="container-edit"><i class="fas fa-edit"></i></a>{{/unless}}
@@ -638,7 +638,7 @@
 						<div>
 							<label>DropIn</label>
 							<select name="system.containerDropIn">
-								{{selectOptions actorContainers selected=system.containerDropIn nameAttr="_id" labelAttr="display"}}
+								{{selectOptions actorContainers selected=system.containerDropIn valueAttr="_id" labelAttr="display"}}
 							</select>
 						</div>
 					</div>
