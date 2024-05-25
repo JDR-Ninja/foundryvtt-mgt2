@@ -537,7 +537,7 @@ class ActorCharacter {
       await $this.deleteEmbeddedDocuments("Item", toDeleteIds);
     if (itemToUpdates.length > 0)
       await $this.updateEmbeddedDocuments("Item", itemToUpdates);
-    await this.recalculateWeight();
+    await this.recalculateWeight($this);
   }
   static async onUpdateDescendantDocuments($this, parent, collection, documents, changes, options, userId) {
     await this.calculEncumbranceAndWeight($this, parent, collection, documents, changes, options, userId);
@@ -615,8 +615,10 @@ class ActorCharacter {
       i++;
     }
     if (recalculEncumbrance || recalculWeight) {
-      const cloneActor = duplicate($this);
-      await this.recalculateArmor($this, cloneActor);
+      const cloneActorSystem = duplicate($this.system);
+      await this.recalculateArmor($this, cloneActorSystem);
+      if (!recalculEncumbrance && !recalculWeight)
+        await $this.update({ system: cloneActorSystem });
       if (recalculEncumbrance) {
         const str = Number($this.system.characteristics.strength.value);
         const end = Number($this.system.characteristics.endurance.value);
@@ -624,17 +626,19 @@ class ActorCharacter {
         $this.items.filter((x) => x.type === "talent" && x.system.subType === "skill" && x.system.skill.reduceEncumbrance === true).forEach((x) => sumSkill += Number(x.system.level));
         let normal = str + end + sumSkill;
         let heavy = normal * 2;
-        cloneActor.system.states.encumbrance = $this.system.inventory.weight > normal;
-        cloneActor.system.encumbrance.normal = normal;
-        cloneActor.system.encumbrance.heavy = heavy;
+        cloneActorSystem.states.encumbrance = $this.system.inventory.weight > normal;
+        cloneActorSystem.encumbrance.normal = normal;
+        cloneActorSystem.encumbrance.heavy = heavy;
+        if (!recalculWeight)
+          await $this.update({ system: cloneActorSystem });
       }
       if (recalculWeight)
-        await this.recalculateWeight($this, cloneActor);
+        await this.recalculateWeight($this, cloneActorSystem);
     }
   }
-  static async recalculateArmor($this, cloneActor) {
-    if (cloneActor === null || cloneActor === void 0)
-      cloneActor = duplicate($this);
+  static async recalculateArmor($this, cloneActorSystem) {
+    if (cloneActorSystem === null || cloneActorSystem === void 0)
+      cloneActorSystem = foundry.utils.duplicate($this.system);
     let armor = 0;
     for (let item of $this.items) {
       if (item.type === "armor") {
@@ -643,11 +647,11 @@ class ActorCharacter {
         }
       }
     }
-    cloneActor.system.inventory.armor = armor;
+    cloneActorSystem.inventory.armor = armor;
   }
-  static async recalculateWeight($this, cloneActor) {
-    if (cloneActor === null || cloneActor === void 0)
-      cloneActor = duplicate($this);
+  static async recalculateWeight($this, cloneActorSystem) {
+    if (cloneActorSystem === null || cloneActorSystem === void 0)
+      cloneActorSystem = foundry.utils.duplicate($this.system);
     let updatedContainers = [];
     let containerChanges = {};
     let containers = [];
@@ -705,9 +709,9 @@ class ActorCharacter {
         }
       }
     }
-    cloneActor.system.inventory.weight = onHandWeight;
-    cloneActor.system.states.encumbrance = onHandWeight > $this.system.inventory.encumbrance.normal;
-    await $this.update(cloneActor);
+    cloneActorSystem.inventory.weight = onHandWeight;
+    cloneActorSystem.states.encumbrance = onHandWeight > $this.system.inventory.encumbrance.normal;
+    await $this.update({ system: cloneActorSystem });
     if (updatedContainers.length > 0) {
       await $this.updateEmbeddedDocuments("Item", updatedContainers);
     }
@@ -950,6 +954,16 @@ class TravellerActor extends Actor {
     }
     return [];
   }
+  async recalculateWeight() {
+    if (this.type === "character") {
+      return ActorCharacter.recalculateWeight(this);
+    }
+  }
+  async recalculateArmor() {
+    if (this.type === "character") {
+      return ActorCharacter.recalculateArmor(this);
+    }
+  }
 }
 
 class TravellerItem extends Item {
@@ -1189,7 +1203,7 @@ const _MGT2Helper = class _MGT2Helper {
       const pack = game.packs.get(item.pack);
       item = await (pack == null ? void 0 : pack.getDocument(item._id));
     }
-    return deepClone(item);
+    return foundry.utils.deepClone(item);
   }
 };
 __publicField(_MGT2Helper, "POUNDS_CONVERT", 2.20462262185);
@@ -2485,14 +2499,17 @@ class TravellerActorSheet extends ActorSheet {
               transferData.system.container.id = targetId;
             }
           } else {
-            transferData.system.container.id = targetItem.system.container.id;
+            if (MGT2Helper.hasValue(targetItem.system.container, "id"))
+              transferData.system.container.id = targetItem.system.container.id;
+            else
+              transferData.system.container.id = "";
           }
         }
       }
       (await this.actor.createEmbeddedDocuments("Item", [transferData]))[0];
       if (transferData.actor) ;
       if (recalcWeight) {
-        await this.actor.recalculateWeight();
+        await this.actor.recalculateWeight(this.actor);
       }
     }
     return true;

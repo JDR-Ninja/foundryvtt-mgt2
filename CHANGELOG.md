@@ -1,4 +1,9 @@
-## [0.1.3] (2024-05-25)
+## [0.1.4] (2024-05-25)
+
+### Correctifs
+* Erreur lors du calcul du poids lors de différent événement (Drop, Delete)
+
+## [0.1.3] (2024-05-24)
 
 ### Correctifs
 * Localisation
