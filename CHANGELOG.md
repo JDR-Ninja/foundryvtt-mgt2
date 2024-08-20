@@ -1,3 +1,5 @@
+* `system.json` no longer generates warnings ([#3](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/3))
+
 ## [0.1.4] (2024-05-25)
 
 ### Correctifs
