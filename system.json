@@ -39,7 +39,9 @@
 		"minimum": "11",
 		"verified": "12.324"
 	},
-	"grid.distance": 1.5,
-	"grid.units": "m",
+	"grid": {
+		"distance": 1.5,
+		"units": "m"
+	},
 	"primaryTokenAttribute": "life"
 }
