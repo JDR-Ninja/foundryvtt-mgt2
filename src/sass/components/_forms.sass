@@ -1,0 +1,84 @@
+.mgt2
+	&.sheet
+		textarea
+			color: var(--mgt2-input-color)
+			background-color: var(--mgt2-input-bgcolor)
+			font-family: "Roboto", sans-serif
+			font-size: 13px
+			font-stretch: 100%
+
+	input:focus,
+	textarea:focus,
+	select:focus
+		outline: none
+		box-shadow: none
+
+	.checkbox-small
+		flex: none!important
+		width: auto!important
+		height: auto!important
+		margin: 0!important
+
+	.header
+		color: var(--mgt2-color-primary)
+		background: var(--mgt2-bgcolor-primary)
+		font-size: 14px
+		font-family: "Roboto Condensed", sans-serif
+		font-weight: bold
+		padding-left: 5px
+		margin-bottom: 4px
+		line-height: 30px
+		text-transform: uppercase
+
+	.field-groups
+		display: flex
+		flex-direction: row
+		flex-wrap: nowrap
+		align-items: center
+		justify-content: space-between
+
+	.field-group
+		label
+			text-transform: uppercase
+			font-weight: 700
+			font-size: 14px
+			font-family: "Roboto Condensed", sans-serif
+			font-optical-sizing: auto
+	input
+		&.field
+			background-color: var(--mgt2-input-bgcolor)
+			font-size: 13px
+		&.field-name
+			background-color: var(--mgt2-input-bgcolor)
+			font-size: 2rem
+			border: none
+			font-weight: 700
+			font-family: "Roboto Condensed", sans-serif
+			margin-bottom: 0.5rem
+			padding: 0
+		&.field-item-name
+			background-color: var(--mgt2-input-bgcolor)
+			height: auto
+			font-size: 2rem
+			font-weight: 700
+			font-family: "Roboto Condensed", sans-serif
+
+	.fields
+		display: flex
+
+	.editor
+		min-height: 3rem
+		border: 1px solid var(--mgt2-editor-border)
+		height: 100%
+
+	.sheet-body
+		margin-left: 140px
+		padding-bottom: 1.5rem
+
+	label
+		&.mgt2-checkbox
+			display: flex
+			flex-direction: row
+			align-items: center
+			input
+				margin: 0 0.3rem 0 0

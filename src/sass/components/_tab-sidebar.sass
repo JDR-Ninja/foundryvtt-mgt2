@@ -1,0 +1,40 @@
+.mgt2
+	.sheet-sidebar
+		.item
+			margin: 0 1rem
+
+	nav[data-group="sidebar"].tabs
+		position: absolute
+		left: 100%
+		top: 172px
+		display: flex
+		flex-direction: column
+		z-index: -1
+		& > .item
+			height: 40px
+			position: relative
+			display: flex
+			justify-content: end
+			align-items: center
+			padding-right: 0.75rem
+			background: var(--mgt2-bgcolor-primary)
+			color: var(--mgt2-color-primary)
+			border: 1px solid transparent
+			font-size: 1rem
+			transition: all 250ms ease
+			margin-left: 0
+			&.active
+				text-shadow: none
+				margin: 0
+				border-color: var(--mgt2-color-primary)
+				&::after
+					border-left: none
+					inset: 0.25rem 0.25rem 0.25rem 0
+			&::after
+				content: ""
+				position: absolute
+				inset: 0.25rem
+				border: 1px solid var(--mgt2-color-primary)
+				pointer-events: none
+			i
+				margin-left: 0.8rem

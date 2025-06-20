@@ -1,0 +1,38 @@
+.itemsheet
+	display: flex
+	flex-wrap: nowrap
+	flex-direction: row
+.itemsheet-header
+	display: flex
+	background-color: var(--mgt2-bgcolor-primary)
+	color: red
+	padding: 0.5rem
+	align-items: center
+	flex: 0 0 2rem
+	label
+		writing-mode: tb-rl
+		transform: rotate(-180deg)
+		font-weight: 700
+		font-size: 20px
+		letter-spacing: 5px
+		font-family: "Rubik Mono One", monospace
+		font-style: normal
+		text-transform: uppercase
+.itemsheet-maincol
+	flex: 0 0 130px
+	padding: 0 1rem 0 0
+.itemsheet-panel
+	display: flex
+	flex: inherit
+	padding: 1rem
+	img
+		&.profile-img
+			width: 100px
+			height: 100px
+.itemsheet input,
+.itemsheet select
+	color: var(--mgt2-input-color)
+	background-color: var(--mgt2-input-bgcolor)
+	display: block
+	width: 100%
+	font-size: 13px

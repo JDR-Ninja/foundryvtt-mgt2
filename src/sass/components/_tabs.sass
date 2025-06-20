@@ -1,0 +1,58 @@
+.mgt2
+	nav
+		&.horizontal-tabs
+			color: var(--mgt2-color-primary)
+			background: var(--mgt2-bgcolor-primary)
+			font-style: normal
+			font-weight: 700
+			font-size: 14px
+			line-height: 30px
+			text-transform: uppercase
+			justify-content: space-around
+			align-items: center
+			font-family: "Roboto Condensed", sans-serif
+			a
+				&.item
+					position: relative
+					flex: 1 1 auto
+					i
+						margin-right: 0.5rem
+			& > a
+				&.item
+					&::after
+						content: ""
+						position: absolute
+						inset: 0.25rem 0.25rem 0.25rem 0.25rem
+						border: 1px solid var( --mgt2-color-primary-active)
+						pointer-events: none
+					&.active
+						&::after
+							border-bottom: none
+							border-top: 2px solid var( --mgt2-color-primary-active)
+							border-left: 2px solid var( --mgt2-color-primary-active)
+							border-right: 2px solid var( --mgt2-color-primary-active)
+							inset: 0.25rem 0.25rem 0 0.25rem
+			.active
+				color: var(--mgt2-color-primary)
+				text-decoration: none
+				text-shadow: none
+				border-bottom: none
+
+
+.tab[data-tab].fullsize
+	height: calc(100% - 3rem)
+
+.subTab
+	flex-flow: column
+	height: 100%
+	display: flex
+	justify-content: flex-start
+	align-items: stretch
+.tab-scroll
+	overflow-y: auto
+	height: 100%
+.subTabs
+	height: 100%
+	flex-direction: column
+	&.active
+		display: flex !important

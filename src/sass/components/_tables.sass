@@ -1,0 +1,172 @@
+.container-controls
+	display: inline-block
+	margin-left: 1rem
+	a
+		&:not(:last-child)
+			margin-right: 0.5rem
+
+.table-container
+	display: flex
+	flex-flow: column nowrap
+	width: 100%
+	margin: 0 auto
+.table-row
+	display: flex
+	flex-flow: row nowrap
+	width: 100%
+	position: relative
+	align-items: flex-start
+	&.heading
+		background-color: var(--mgt2-bgcolor-primary)
+		align-items: center
+		.row-item
+			text-transform: uppercase
+			font-size: 12px
+			&:first-child
+				font-weight: bold
+				font-size: 13px
+				letter-spacing: 3px
+				i
+					margin-right: 0.5rem
+		&.color-1
+			.row-item
+				background-color: var(--mgt2-bgcolor-primary)
+				color: var(--mgt2-color-primary)
+		&.color-2
+			.row-item
+				background-color: var(--mgt2-bgcolor-form)
+				color: var(--mgt2-bgcolor-primary)
+		div
+			&.row-item
+				padding-left: 5px
+				&:last-child
+					padding-right: 5px
+	&:hover
+		&:not(.heading)
+			background-color: var(--mgt2-row-hover)
+.table-row-mb-4
+	margin-bottom: 4px
+.row-item
+	display: flex
+	flex-grow: 1
+	font-size: 14px
+	line-height: 25px
+	align-items: center
+	transition: all 0.15s ease-in-out
+	overflow: hidden !important
+	text-overflow: ellipsis
+	text-wrap: nowrap
+	&.item-controls
+		justify-content: right
+		padding-right: 4px
+		a
+			&:not(:last-child)
+				margin-right: 0.4rem
+	i
+		color: black
+	a[data-roll]
+		margin-right: 0.5rem
+.heading
+	&.color-1
+		.row-item
+			i
+				color: var(--mgt2-color-primary) !important
+	&.color-2
+		.row-item
+			i
+				color: var(--mgt2-bgcolor-primary) !important
+.table-subrow
+	border-left: 2px var(--mgt2-subrow-color) dashed
+	color: var(--mgt2-subrow-color)
+	.row-item
+		font-size: 0.8em
+		line-height: 20px
+		&:first-child
+			padding-left: 1rem
+		& > i
+			margin-right: 4px
+.row-item-center
+	justify-content: center
+	text-align: center
+.row-item-left
+	justify-content: left
+.row-item-right
+	justify-content: right
+.row-item-space-between
+	justify-content: space-between
+.row-item-2
+	flex-basis: 4rem
+.row-item-5
+	flex-basis: 5%
+.row-item-10
+	flex-basis: 10%
+.row-item-12
+	flex-basis: 4rem
+.row-item-15
+	flex-basis: 5rem
+.row-item-20
+	flex-basis: 20%
+.row-item-25
+	flex-basis: 25%
+.row-item-30
+	flex-basis: 30%
+.row-item-35
+	flex-basis: 35%
+.row-item-40
+	flex-basis: 40%
+.row-item-45
+	flex-basis: 45%
+.row-item-50
+	flex-basis: 50%
+.row-item-65
+	flex-basis: 50%
+.row-item-85
+	flex-basis: 50%
+.row-item-storage
+	flex-wrap: wrap
+	flex-grow: 0
+	flex-basis: 20%
+	font-size: 0.7rem
+	line-height: 0.8rem
+.item-control
+	&.item-equip
+		i
+			color: var(--mgt2-row-inactive-icon)
+		&.active
+			i
+				color: var(--mgt2-color-form)
+.row-description
+	flex-basis: 100%
+	font-size: 14px
+	padding: 4px 0
+	justify-content: left
+	transition: all 0.15s ease-in-out
+.row-sub-container
+	display: flex
+	flex-flow: column nowrap
+	flex: 1
+	.row-item
+		padding: 8px 0
+		border-bottom: 1px solid var(--mgt2-bgcolor-primary)
+.table-row:last-child,
+.row-sub-container .row-item:last-child
+	border-bottom: 0
+.table-container
+	&.editable
+		.table-row
+			margin-top: 4px
+.table-container
+	&.editable
+		.table-row:last-child
+			margin-bottom: 4px
+.item-options
+	position: absolute
+	top: 0.7rem
+	font-size: 0.7em
+	left: 1.6rem
+	text-transform: uppercase
+	font-family: "DM Sans", sans-serif
+	font-optical-sizing: auto
+	font-weight: 600
+	font-style: normal
+	color: var(--mgt2-subrow-color)
