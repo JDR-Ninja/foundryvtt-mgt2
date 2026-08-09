@@ -58,6 +58,12 @@ export class TravellerActor extends Actor {
     }
   }
 
+  async recalculateWeight() {
+    if (this.type === "character") {
+      await ActorCharacter.recalculateWeight(this);
+    }
+  }
+
   getContainers() {
     if (this.type === "character") {
       return ActorCharacter.getContainers(this);

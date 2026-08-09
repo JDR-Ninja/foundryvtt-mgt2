@@ -1,33 +1,28 @@
-<form class="{{cssClass}} itemsheet" autocomplete="off">
   <div class="itemsheet-header"><label>{{ localize 'MGT2.Specie' }}</label></div>
   <div class="itemsheet-panel">
     <div class="itemsheet-maincol">
-      <img class="profile-img" src="{{item.img}}" data-edit="img" data-tooltip="{{item.name}}" />
+      <img class="profile-img" src="{{item.img}}" data-edit="img" data-action="editImage" data-tooltip="{{item.name}}" />
     </div>
     <div class="w-100" style="display: flex;flex-direction: column;justify-content: flex-start;align-items: stretch;">
       <input class="field item-name" name="name" type="text" value="{{item.name}}" />
       <div class="field-group mt-1">
         <label>{{ localize 'MGT2.Items.Description' }}</label>
-        <nav class="horizontal-tabs tabs mt-1" data-group="primary">
-          <a class="item tab-select" data-tab="tab1">{{ localize 'MGT2.Items.Description' }}</a>
-          <a class="item tab-select" data-tab="tab2">{{ localize 'MGT2.Items.DetailedDescription' }}</a>
-          <a class="item tab-select" data-tab="tab3">{{ localize 'MGT2.Items.Details' }}</a>
-        </nav>
-        <div class="tab" data-group="primary" data-tab="tab1">
+        {{> systems/mgt2/templates/items/parts/item-tabs.html }}
+        <div class="tab{{#if tabs.tab1.active}} active{{/if}}" data-group="primary" data-tab="tab1">
           <div class="field-group mt-1">
             <label>{{ localize 'MGT2.Items.Description' }}</label>
             <textarea name="system.description" rows="6">{{system.description}}</textarea>
           </div>
         </div>
-        <div class="tab w100 h100" data-group="primary" data-tab="tab2">
-          {{editor system.descriptionLong target="system.descriptionLong" button=true editable=true}}
+        <div class="tab w100 h100{{#if tabs.tab2.active}} active{{/if}}" data-group="primary" data-tab="tab2">
+          <prose-mirror name="system.descriptionLong" value="{{system.descriptionLong}}" toggled></prose-mirror>
         </div>
-        <div class="tab" data-group="primary" data-tab="tab3">
+        <div class="tab{{#if tabs.tab3.active}} active{{/if}}" data-group="primary" data-tab="tab3">
           <div class="table-container">
             <div class="table-row heading color-2">
               <div class="row-item row-item-left upcase">{{ localize 'MGT2.Items.Characteristics' }}</div>
               <div class="row-item row-item-center row-item-15 flex-fix">{{ localize 'MGT2.Items.Modifiers' }}</div>
-              <div class="row-item row-item-15 item-controls flex-fix"><a class="modifiers-create"><i class="fas fa-plus"></i></a></div>
+              <div class="row-item row-item-15 item-controls flex-fix"><a class="modifiers-create" data-action="modifierCreate"><i class="fas fa-plus"></i></a></div>
             </div>
             {{#each system.modifiers as |modifier i| }}
             <div class="table-row modifiers-part" data-modifiers-part="{{i}}" role="rowgroup">
@@ -40,7 +35,7 @@
                 <input type="number" name="system.modifiers.{{i}}.value" value="{{modifier.value}}" />
               </div>
               <div class="row-item row-item-15 item-controls flex-fix">
-                <a class="item-control modifiers-delete" title="Delete Trait"><i class="fas fa-trash"></i></a>
+                <a class="item-control modifiers-delete" data-action="modifierDelete" title="Delete Trait"><i class="fas fa-trash"></i></a>
               </div>
             </div>
             {{/each}}
@@ -49,7 +44,7 @@
             <div class="table-row heading color-2">
               <div class="row-item row-item-30 row-item-left upcase">{{ localize 'MGT2.Items.Traits' }}</div>
               <div class="row-item row-item-left">{{ localize 'MGT2.Items.Description' }}</div>
-              <div class="row-item row-item-15 item-controls flex-fix"><a class="options-create" data-property="traits"><i class="fas fa-plus"></i></a></div>
+              <div class="row-item row-item-15 item-controls flex-fix"><a class="options-create" data-action="optionCreate" data-property="traits"><i class="fas fa-plus"></i></a></div>
             </div>
             {{#each system.traits as |trait i| }}
             <div class="table-row options-part" data-options-part="{{i}}" data-property="traits" role="rowgroup">
@@ -58,7 +53,7 @@
                 <textarea name="system.traits.{{i}}.description" rows="3">{{trait.description}}</textarea>
               </div>
               <div class="row-item row-item-15 item-controls flex-fix">
-                <a class="item-control options-delete" title="Delete Trait"><i class="fas fa-trash"></i></a>
+                <a class="item-control options-delete" data-action="optionDelete" title="Delete Trait"><i class="fas fa-trash"></i></a>
               </div>
             </div>
             {{/each}}
@@ -67,4 +62,3 @@
     </div>
     </div>
   </div>
-</form>

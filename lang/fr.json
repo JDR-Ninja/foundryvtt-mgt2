@@ -62,6 +62,7 @@
       "AddCareer":"Ajouter Carrière",
       "EditCareer":"Éditer Carrière",
       "EditTrait":"Éditer Trait",
+      "Configuration": "Configuration",
       "DeleteTrait": "Supprimer Trait",
       "DeleteCareer":"Supprimer Carrière",
       "NewSkill":"Nouvelle Compétence",
@@ -447,6 +448,11 @@
       "Seconds": "Secondes",
       "Minutes": "Minutes",
       "Heures": "Heures"
+    },
+    "Errors": {
+      "InvalidRollFormula": "Formule de jet invalide.",
+      "LockedContainer": "Ce conteneur est verrouillé.",
+      "CouldNotFindItem": "Objet introuvable : _ITEM_ID_."
     }
   }
 }

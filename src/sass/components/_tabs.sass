@@ -1,4 +1,14 @@
+// Foundry v14 styles bare `nav.tabs` with a gap and top/bottom borders, and colours
+// inactive tab labels with --color-text-secondary. Neither existed in v12, so both are
+// neutralised here to keep the original look.
 .mgt2
+	nav.tabs
+		gap: 0
+		border-top: none
+		border-bottom: none
+		[data-tab]
+			color: inherit
+
 	nav
 		&.horizontal-tabs
 			color: var(--mgt2-color-primary)

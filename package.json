@@ -1,0 +1,14 @@
+{
+  "name": "foundryvtt-mgt2",
+  "version": "0.1.4",
+  "description": "Build tooling for the MGT2 - Mongoose Traveller (Unofficial) Foundry VTT system",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "sass src/sass/mgt2.sass styles/mgt2.min.css --no-source-map",
+    "watch": "sass --watch src/sass/mgt2.sass styles/mgt2.min.css --no-source-map"
+  },
+  "devDependencies": {
+    "sass": "^1.80.0"
+  }
+}

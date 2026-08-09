@@ -195,15 +195,11 @@ export class MGT2Helper {
     }
 
     static getDataFromDropEvent(event) {
-        let data;
         try {
             return JSON.parse(event.dataTransfer?.getData("text/plain"));
         } catch (err) {
             return false;
         }
-
-        //if ( data.type !== "Item" ) return false;
-        //const item = await Item.implementation.fromDropData(data);
     }
 
     static async getItemDataFromDropData(dropData) {
@@ -219,12 +215,12 @@ export class MGT2Helper {
         }
 
         if (!item) {
-            throw new Error(game.i18n.localize("Errors.CouldNotFindItem").replace("_ITEM_ID_", dropData.uuid));
+            throw new Error(game.i18n.localize("MGT2.Errors.CouldNotFindItem").replace("_ITEM_ID_", dropData.uuid));
         }
         if (item.pack) {
             const pack = game.packs.get(item.pack);
             item = await pack?.getDocument(item._id);
         }
-        return deepClone(item);
+        return foundry.utils.deepClone(item);
     }
 }

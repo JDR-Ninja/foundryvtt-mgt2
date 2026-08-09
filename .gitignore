@@ -28,3 +28,8 @@
 .history/
 
 mgt2.zip
+
+# Node
+node_modules/
+package-lock.json
+.sass-cache/

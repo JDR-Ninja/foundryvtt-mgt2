@@ -18,5 +18,5 @@ export const preloadHandlebarsTemplates = async function() {
       //"systems/mgt2/templates/actors/parts/actor-characteristic.html"
     ];
   
-    return loadTemplates(templatePaths);
+    return foundry.applications.handlebars.loadTemplates(templatePaths);
   };

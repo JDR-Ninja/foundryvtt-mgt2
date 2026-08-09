@@ -56,6 +56,6 @@ export class TravellerItem extends Item {
       }
     }
 
-    return name;
+    return this.name;
   }
 }

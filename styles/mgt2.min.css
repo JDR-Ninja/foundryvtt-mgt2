@@ -115,16 +115,32 @@
   color: var(--mgt2-color-primary);
   background-color: var(--mgt2-bgcolor-primary);
 }
-.mgt2.sheet h4.window-title {
+.mgt2.sheet .window-title {
   font-weight: bold;
   text-transform: uppercase;
 }
-.mgt2.window-app .window-content {
+.mgt2.application .window-content {
   background: var(--mgt2-bgcolor-form);
   padding: 0;
 }
 
 .nopad .window-content {
+  padding: 0;
+}
+
+.mgt2.application.character {
+  overflow: visible;
+}
+.mgt2.application.character > .window-content {
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
+  height: 100%;
+  padding: 0;
+  overflow: visible;
+}
+
+.mgt2.application.item > .window-content {
   padding: 0;
 }
 
@@ -165,7 +181,6 @@
 .mgt2 textarea:focus,
 .mgt2 select:focus {
   outline: none;
-  -webkit-box-shadow: none;
   box-shadow: none;
 }
 .mgt2 .checkbox-small {
@@ -321,7 +336,6 @@
   font-weight: 500;
   width: 2.4rem;
   height: 2rem;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   border: none;
   outline: none;
@@ -346,12 +360,10 @@
 }
 .mgt2 .characteristic-dm:focus {
   outline: none;
-  -webkit-box-shadow: none;
   box-shadow: none;
 }
 .mgt2 .characteristic-dm-minmax:focus {
   outline: none;
-  -webkit-box-shadow: none;
   box-shadow: none;
 }
 .mgt2 .minmaxwrapper {
@@ -362,7 +374,6 @@
   justify-content: center;
   align-items: center;
   margin: 0 0.5rem;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   background: linear-gradient(45deg, rgba(0, 0, 0, 0) 7.07px, #000 0 9.07px, rgba(0, 0, 0, 0) 0 calc(100% - 7.07px - 2px), #000 0 calc(100% - 7.07px), rgba(0, 0, 0, 0) 0), linear-gradient(-45deg, rgba(0, 0, 0, 0) 7.07px, #000 0 9.07px, rgba(0, 0, 0, 0) 0 calc(100% - 7.07px - 2px), #000 0 calc(100% - 7.07px), rgba(0, 0, 0, 0) 0), linear-gradient(90deg, #000 4px, rgba(0, 0, 0, 0) 0) -2px 50%/100% calc(100% - 20px) repeat-x, linear-gradient(#000 4px, rgba(0, 0, 0, 0) 0) 50% -2px/calc(100% - 20px) 100% repeat-y;
 }
@@ -379,7 +390,6 @@
 }
 .mgt2 .minmaxwrapper input:focus {
   outline: none;
-  -webkit-box-shadow: none;
   box-shadow: none;
 }
 .mgt2 .minmaxwrapper input:first-child {
@@ -575,11 +585,7 @@ ul.softwares li:hover a {
   flex: 0 0 2rem;
 }
 .itemsheet-header label {
-  -webkit-writing-mode: tb-rl;
-  -ms-writing-mode: tb-rl;
   writing-mode: tb-rl;
-  -webkit-transform: rotate(-180deg);
-  -ms-transform: rotate(-180deg);
   transform: rotate(-180deg);
   font-weight: 700;
   font-size: 20px;
@@ -605,7 +611,8 @@ ul.softwares li:hover a {
 }
 
 .itemsheet input,
-.itemsheet select {
+.itemsheet select,
+.itemsheet textarea {
   color: var(--mgt2-input-color);
   background-color: var(--mgt2-input-bgcolor);
   display: block;
@@ -618,7 +625,6 @@ ul.softwares li:hover a {
   background: rgba(0, 0, 0, 0.1);
   border: 1px solid var(--color-border-light-2);
   border-radius: 3px;
-  -webkit-box-shadow: 0 0 2px #FFF inset;
   box-shadow: 0 0 2px #FFF inset;
 }
 
@@ -672,6 +678,14 @@ ul.softwares li:hover a {
   text-align: center;
 }
 
+.mgt2 nav.tabs {
+  gap: 0;
+  border-top: none;
+  border-bottom: none;
+}
+.mgt2 nav.tabs [data-tab] {
+  color: inherit;
+}
 .mgt2 nav.horizontal-tabs {
   color: var(--mgt2-color-primary);
   background: var(--mgt2-bgcolor-primary);
@@ -759,7 +773,6 @@ ul.softwares li:hover a {
   color: var(--mgt2-color-primary);
   border: 1px solid transparent;
   font-size: 1rem;
-  -webkit-transition: all 250ms ease;
   transition: all 250ms ease;
   margin-left: 0;
 }
@@ -849,7 +862,6 @@ ul.softwares li:hover a {
   font-size: 14px;
   line-height: 25px;
   align-items: center;
-  -webkit-transition: all 0.15s ease-in-out;
   transition: all 0.15s ease-in-out;
   overflow: hidden !important;
   text-overflow: ellipsis;
@@ -984,7 +996,6 @@ ul.softwares li:hover a {
   font-size: 14px;
   padding: 4px 0;
   justify-content: left;
-  -webkit-transition: all 0.15s ease-in-out;
   transition: all 0.15s ease-in-out;
 }
 

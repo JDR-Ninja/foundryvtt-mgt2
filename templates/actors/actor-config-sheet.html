@@ -1,6 +1,6 @@
-<form class="{{cssClass}} flexcol" autocomplete="off">
+<div class="mgt2-dialog flexcol">
     <div class="form-group">
-        <label class="mgt2-checkbox"><input type="checkbox" name="system.config.psionic" data-dtype="Boolean" {{checked system.config.psionic}} />{{ localize 'MGT2.Actor.ShowPsionicTalents' }}</label>
+        <label class="mgt2-checkbox"><input type="checkbox" name="psionic" data-dtype="Boolean" {{checked system.config.psionic}} />{{ localize 'MGT2.Actor.ShowPsionicTalents' }}</label>
     </div>
     <fieldset>
         <legend>{{ localize 'MGT2.Actor.Initiative' }}</legend>
@@ -32,4 +32,4 @@
             </select>
         </div>
     </fieldset>
-</form>
+</div>

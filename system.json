@@ -17,7 +17,7 @@
 		}
 	],
 	"esmodules": [
-		"mgt2.bundle.js"
+		"src/module/core.js"
 	],
 	"styles": [
 		"styles/mgt2.min.css"
@@ -35,9 +35,49 @@
 			"path": "lang/fr.json"
 		}
 	],
+	"documentTypes": {
+		"Actor": {
+			"character": {
+				"htmlFields": [
+					"biography",
+					"notes",
+					"personal.speciesText.descriptionLong"
+				]
+			},
+			"vehicule": {}
+		},
+		"Item": {
+			"armor": {},
+			"career": {},
+			"computer": {},
+			"contact": {
+				"htmlFields": [
+					"description",
+					"notes"
+				]
+			},
+			"container": {},
+			"disease": {},
+			"equipment": {},
+			"item": {},
+			"species": {
+				"htmlFields": [
+					"descriptionLong"
+				]
+			},
+			"talent": {},
+			"weapon": {}
+		}
+	},
+	"flags": {
+		"hotReload": {
+			"extensions": ["css", "html", "json"],
+			"paths": ["styles", "templates", "lang"]
+		}
+	},
 	"compatibility": {
-		"minimum": "11",
-		"verified": "12.324"
+		"minimum": "14",
+		"verified": "14"
 	},
 	"grid": {
 		"distance": 1.5,

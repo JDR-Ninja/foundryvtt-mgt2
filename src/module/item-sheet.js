@@ -1,402 +1,267 @@
 import { MGT2Helper } from "./helper.js";
 
+const { HandlebarsApplicationMixin } = foundry.applications.api;
+const { ItemSheetV2 } = foundry.applications.sheets;
+
 /**
- * Extend the basic ItemSheet with some very simple modifications
- * @extends {ItemSheet}
+ * The Traveller item sheet, shared by all item sub-types.
+ *
+ * A single root part is used rather than one part per section: the per-type templates each render
+ * their own `.itemsheet-header` + `.itemsheet-panel` pair, and a root part is allowed to emit several
+ * sibling elements. `_configureRenderParts` swaps the template for the item's sub-type, replacing the
+ * `get template()` accessor of the V1 sheet.
+ *
+ * @extends {ItemSheetV2}
+ * @mixes HandlebarsApplication
  */
-export class TravellerItemSheet extends ItemSheet {
+export class TravellerItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
 
-  /** @inheritdoc */
-  static get defaultOptions() {
-    const options = super.defaultOptions;
-    return foundry.utils.mergeObject(options, {
-      classes: ["mgt2", game.settings.get("mgt2", "theme"), "sheet"],
-      width: 630,
-      tabs: [{ navSelector: ".horizontal-tabs", contentSelector: ".itemsheet-panel", initial: "tab1" }]
-    });
+  /** @inheritDoc */
+  static DEFAULT_OPTIONS = {
+    // See TravellerActorSheet: the mgt2 palette assumes a light sheet.
+    classes: ["mgt2", "item", "themed", "theme-light"],
+    position: { width: 630, height: "auto" },
+    window: { resizable: true, contentClasses: ["itemsheet"] },
+    form: { submitOnChange: true, closeOnSubmit: false },
+    actions: {
+      optionCreate: TravellerItemSheet.#onOptionCreate,
+      optionDelete: TravellerItemSheet.#onOptionDelete,
+      eventCreate: TravellerItemSheet.#onCareerEventCreate,
+      eventDelete: TravellerItemSheet.#onCareerEventDelete,
+      modifierCreate: TravellerItemSheet.#onModifierCreate,
+      modifierDelete: TravellerItemSheet.#onModifierDelete
+    }
+  };
+
+  /** @inheritDoc */
+  static PARTS = {
+    sheet: {
+      root: true,
+      template: "systems/mgt2/templates/items/item-sheet.html", // replaced per sub-type
+      templates: [
+        "systems/mgt2/templates/items/parts/item-tabs.html",
+        "systems/mgt2/templates/items/parts/sheet-configuration.html",
+        "systems/mgt2/templates/items/parts/sheet-physical-item.html"
+      ]
+    }
+  };
+
+  /**
+   * Declares the single tab group so that ApplicationV2 fills `context.tabs` on its own.
+   * The actual tab list is per sub-type and comes from {@link TravellerItemSheet#_getTabsConfig}.
+   * @inheritDoc
+   */
+  static TABS = {
+    primary: { initial: "tab1", tabs: [] }
+  };
+
+  /** Tab layout per item sub-type. Types absent from this map use `_default`. */
+  static #TABS_BY_TYPE = {
+    _default: [
+      { id: "tab1", label: "MGT2.Items.Description" },
+      { id: "tab2", label: "MGT2.Items.Details" },
+      { id: "tab3", label: "MGT2.Items.Configuration" }
+    ],
+    item: [
+      { id: "tab1", label: "MGT2.Items.Description" },
+      { id: "tab2", label: "MGT2.Items.Details" }
+    ],
+    species: [
+      { id: "tab1", label: "MGT2.Items.Description" },
+      { id: "tab2", label: "MGT2.Items.DetailedDescription" },
+      { id: "tab3", label: "MGT2.Items.Details" }
+    ],
+    career: [
+      { id: "tab1", label: "MGT2.Items.Description" },
+      { id: "events", label: "MGT2.Items.EventsMishaps" }
+    ],
+    contact: [
+      { id: "tab1", label: "MGT2.Items.Informations" },
+      { id: "description", label: "MGT2.Items.Description" },
+      { id: "notes", label: "MGT2.Items.Notes" }
+    ],
+    talent: [
+      { id: "tab1", label: "MGT2.Items.Description" },
+      { id: "config", label: "MGT2.Items.Configuration" }
+    ],
+    disease: []
+  };
+
+  /* -------------------------------------------- */
+
+  /**
+   * The theme is a client setting, so it cannot live in the static DEFAULT_OPTIONS
+   * (which is evaluated once at import time).
+   * @inheritDoc
+   */
+  _initializeApplicationOptions(options) {
+    options = super._initializeApplicationOptions(options);
+    const theme = game.settings.get("mgt2", "theme");
+    if ( theme && !options.classes.includes(theme) ) options.classes.push(theme);
+    return options;
   }
 
   /* -------------------------------------------- */
 
-  get template() {
-    const path = "systems/mgt2/templates/items";
-    return `${path}/${this.item.type}-sheet.html`;
+  /** Replaces the `get template()` accessor of the V1 sheet. @inheritDoc */
+  _configureRenderParts(options) {
+    const parts = super._configureRenderParts(options);
+    parts.sheet.template = `systems/mgt2/templates/items/${this.item.type}-sheet.html`;
+    return parts;
   }
 
-  /** @inheritdoc */
-  async getData(options) {
-    const context = await super.getData(options);
-    //console.log('-=getData=-');
-    //console.log(context);
-    const item = context.item;
+  /* -------------------------------------------- */
 
-    const source = item.toObject();
-    context.config = CONFIG.MGT2;
+  /** @inheritDoc */
+  _getTabsConfig(group) {
+    if ( group !== "primary" ) return super._getTabsConfig(group);
+    const byType = TravellerItemSheet.#TABS_BY_TYPE;
+    const tabs = (byType[this.item.type] ?? byType._default).map(t => ({ ...t, cssClass: "item tab-select" }));
+    return { tabs, initial: tabs[0]?.id ?? null };
+  }
 
-    const settings = {};
-    settings.usePronouns = game.settings.get("mgt2", "usePronouns");
+  /* -------------------------------------------- */
 
-    let containers = null;
-    let computers = null;;
-    let hadContainer;
-    if (context.item.actor != null) {
-      hadContainer = true;
-      containers = [{ "name": "", "_id": "" }].concat(context.item.actor.getContainers());
-      computers = [{ "name": "", "_id": "" }].concat(context.item.actor.getComputers());
-    } else {
-      hadContainer = false;
-    }
+  /** @inheritDoc */
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    const item = this.item;
+    const actor = item.actor;
 
-    let weight = null;
-    if (item.system.hasOwnProperty("weight")) {
-      weight = MGT2Helper.convertWeightForDisplay(item.system.weight);
-    }
-    let unitlabels = {
-      weight: MGT2Helper.getWeightLabel()
-    };
-    let skills = [];
-
-    if (this.actor !== null) {
-      for (let item of this.actor.items) {
-        if (item.type === "talent") {
-          if (item.system.subType === "skill")
-            skills.push({ _id: item._id, name: item.getRollDisplay() });
-        }
-      }
-    }
-    
-    skills.sort(MGT2Helper.compareByName);
-    skills = [{ _id: "NP", name: game.i18n.localize("MGT2.Items.NotProficient") }].concat(skills);
-
-    foundry.utils.mergeObject(context, {
-      source: source.system,
+    return Object.assign(context, {
+      item,
       system: item.system,
-      settings: settings,
-      containers: containers,
-      computers: computers,
-      hadContainer: hadContainer,
-      weight: weight,
-      unitlabels: unitlabels,
-      editable: this.isEditable,
+      source: item.toObject().system,
+      config: CONFIG.MGT2,
+      settings: { usePronouns: game.settings.get("mgt2", "usePronouns") },
+      hadContainer: actor != null,
+      containers: actor ? [{ name: "", _id: "" }].concat(actor.getContainers()) : null,
+      computers: actor ? [{ name: "", _id: "" }].concat(actor.getComputers()) : null,
+      weight: "weight" in item.system ? MGT2Helper.convertWeightForDisplay(item.system.weight) : null,
+      unitlabels: { weight: MGT2Helper.getWeightLabel() },
       isGM: game.user.isGM,
-      skills: skills,
-      config: CONFIG
-      //rollData: this.item.getRollData(),
+      skills: this.#prepareSkills(actor)
     });
-
-    return context;
   }
 
   /* -------------------------------------------- */
 
-  /** @inheritdoc */
-  activateListeners(html) {
-    super.activateListeners(html);
-
-    // Everything below here is only needed if the sheet is editable
-    if (!this.isEditable) return;
-
-    //let handler = ev => this._onDropCustom(ev);
-
-    //console.log(html);
-    // itemsheet-panel
-    //html.addEventListener("dragstart", this._onDropCustom, false);
-    html.find('div.itemsheet-panel').each((i, li) => {
-      //  //if (li.classList.contains("inventory-header")) return;
-      //li.setAttribute("draggable", true);
-      //li.addEventListener("drop", handler, false);
-    });
-
-
-    //html.find('div.dropitem').each((i, li) => {
-    //  //if (li.classList.contains("inventory-header")) return;
-    //  li.setAttribute("draggable", true);
-    //  li.addEventListener("dragstart", handler, false);
-    //});
-
-    // if (this.item.type == "weapon") {
-    //   html.find('.trait-create').click(this._onTraitCreate.bind(this));
-    //   html.find('.trait-delete').click(this._onTraitDelete.bind(this));
-    // }
-
-    if (this.item.type == "career") {
-      html.find('.event-create').click(this._onCareerEventCreate.bind(this));
-      html.find('.event-delete').click(this._onCareerEventDelete.bind(this));
+  /**
+   * The skill list offered by the "roll" configuration tab.
+   * @param {Actor|null} actor
+   * @returns {{_id: string, name: string}[]}
+   */
+  #prepareSkills(actor) {
+    const skills = [];
+    for ( const item of actor?.items ?? [] ) {
+      if ( item.type === "talent" && item.system.subType === "skill" ) {
+        skills.push({ _id: item.id, name: item.getRollDisplay() });
+      }
     }
-
-    else if (this.item.type == "armor" ||
-             this.item.type == "computer" ||
-             this.item.type == "species" ||
-             this.item.type == "weapon") {
-        html.find('.options-create').click(this._onOptionCreate.bind(this));
-        html.find('.options-delete').click(this._onOptionDelete.bind(this));
-    }
-
-    if (this.item.type == "species") {
-      html.find('.modifiers-create').click(this._onModifierEventCreate.bind(this));
-      html.find('.modifiers-delete').click(this._onModifierEventDelete.bind(this));
-    }
+    skills.sort(MGT2Helper.compareByName);
+    return [{ _id: "NP", name: game.i18n.localize("MGT2.Items.NotProficient") }].concat(skills);
   }
 
-  async _onModifierEventCreate(event) {
-    event.preventDefault();
-    await this._onSubmit(event);
+  /* -------------------------------------------- */
+  /*  Form Submission                             */
+  /* -------------------------------------------- */
 
-    let modifiers = this.item.system.modifiers;
-    let index;
-    if (modifiers.length === 0) {
-      modifiers = {};
-      modifiers["0"] = { characteristic: "Endurance", value: null };
-    } else {
-      index = Math.max(...Object.keys(modifiers));
-      index++;
-      modifiers[index] = { characteristic: "Endurance", value: null };
+  /**
+   * Replaces `_getSubmitData` of the V1 sheet.
+   * Note it must return an *expanded* object: the result is handed to Document#validate.
+   * @inheritDoc
+   */
+  _processFormData(event, form, formData) {
+    const submitData = super._processFormData(event, form, formData);
+    const system = submitData.system;
+
+    // Equipping an item takes it out of its container; putting it in a container unequips it.
+    if ( system?.container && ("equipped" in this.item.system) ) {
+      const equippedChange = this.item.system.equipped !== system.equipped;
+      const containerChange = this.item.system.container.id !== system.container.id;
+
+      if ( equippedChange ) {
+        if ( system.equipped === true ) system.container = { id: "" };
+      }
+      else if ( containerChange ) {
+        const wasLoose = this.item.system.container.id === "" || this.item.system.container.id === null;
+        if ( system.container.id !== "" && wasLoose ) system.equipped = false;
+      }
     }
 
-    let update = {
-      system: {
-        modifiers: modifiers
-      }
-    };
+    // "weight" is a bare input outside the schema: convert it and drop it before validation.
+    if ( "weight" in submitData ) {
+      submitData.system ??= {};
+      submitData.system.weight = MGT2Helper.convertWeightFromInput(submitData.weight);
+      delete submitData.weight;
+    }
 
-    return this.item.update(update);
+    if ( system?.quantity !== undefined ) system.quantity = MGT2Helper.getIntegerFromInput(system.quantity);
+    if ( system?.cost !== undefined ) system.cost = MGT2Helper.getIntegerFromInput(system.cost);
+
+    return submitData;
   }
 
-  async _onModifierEventDelete(event) {
-    event.preventDefault();
-    await this._onSubmit(event);
-    const element = event.currentTarget.closest(".modifiers-part");
-    const modifiers = foundry.utils.deepClone(this.item.system.modifiers);
-    let index = Number(element.dataset.modifiersPart);
+  /* -------------------------------------------- */
+  /*  Event Listeners and Handlers                */
+  /* -------------------------------------------- */
 
-    const newModifiers = [];
-    let entries = Object.entries(modifiers);
-    if (entries.length > 1) {
-      for (const [key, value] of entries) {
-        if (key != index)
-        newModifiers.push(value);
-      }
-    }
-
-    let update = {
-      system: {
-        modifiers: newModifiers
-      }
-    };
-    
-    return this.item.update(update);
+  /**
+   * Append an entry to an indexed collection stored on the item, saving pending form edits first.
+   * @param {string} property   The system property holding the collection
+   * @param {object} blank      The entry to append
+   * @this {TravellerItemSheet}
+   */
+  static async #appendEntry(property, blank) {
+    await this.submit();
+    const current = foundry.utils.getProperty(this.item.system, property) ?? [];
+    return this.item.update({ [`system.${property}`]: [...Object.values(current), blank] });
   }
 
-  async _onCareerEventCreate(event) {
-    event.preventDefault();
-    await this._onSubmit(event);
-
-    let events = this.item.system.events;
-    let index;
-    if (events.length === 0) {
-      events = {};
-      events["0"] = { age: "", description: "" };
-    } else {
-      index = Math.max(...Object.keys(events));
-      index++;
-      events[index] = { age: "", description: "" };
-    }
-
-    let update = {
-      system: {
-        events: events
-      }
-    };
-
-    return this.item.update(update);
+  /**
+   * Remove one entry from an indexed collection stored on the item.
+   * @param {string} property   The system property holding the collection
+   * @param {number} index      The index to drop
+   * @this {TravellerItemSheet}
+   */
+  static async #removeEntry(property, index) {
+    await this.submit();
+    const current = Object.values(foundry.utils.getProperty(this.item.system, property) ?? []);
+    return this.item.update({ [`system.${property}`]: current.filter((_v, i) => i !== index) });
   }
 
-  async _onCareerEventDelete(event) {
-    event.preventDefault();
-    await this._onSubmit(event);
-    const element = event.currentTarget.closest(".events-part");
-    const events = foundry.utils.deepClone(this.item.system.events);
-    let index = Number(element.dataset.eventsPart);
+  /* -------------------------------------------- */
 
-    const newEvents = [];
-    let entries = Object.entries(events);
-    if (entries.length > 1) {
-      for (const [key, value] of entries) {
-        if (key != index)
-        newEvents.push(value);
-      }
-    }
-
-    let update = {
-      system: {
-        events: newEvents
-      }
-    };
-    
-    return this.item.update(update);
+  /** @this {TravellerItemSheet} */
+  static #onOptionCreate(event, target) {
+    return TravellerItemSheet.#appendEntry.call(this, target.dataset.property, { name: "", description: "" });
   }
 
-  async _onOptionCreate(event) {
-    event.preventDefault();
-    await this._onSubmit(event);
-
-    //const subType = event.currentTarget.dataset.subType;
-    const property = event.currentTarget.dataset.property;
-
-    //let options = this.item.system[subType][property];
-    let options = this.item.system[property];
-    let index;
-    if (options.length === 0) {
-      options = {};
-      options["0"] = { name: "", description: "" };
-    } else {
-      index = Math.max(...Object.keys(options));
-      index++;
-      options[index] = { name: "", description: "" };
-    }
-
-    let update = {};
-    //update[`system.${subType}.${property}`] = options;
-    update[`system.${property}`] = options;
-    return this.item.update(update);
+  /** @this {TravellerItemSheet} */
+  static #onOptionDelete(event, target) {
+    const element = target.closest(".options-part");
+    return TravellerItemSheet.#removeEntry.call(this, element.dataset.property, Number(element.dataset.optionsPart));
   }
 
-  async _onOptionDelete(event) {
-    event.preventDefault();
-    await this._onSubmit(event);
-    const element = event.currentTarget.closest(".options-part");
-    //const subType = element.dataset.subType;
-    const property = element.dataset.property;
-    //const options = foundry.utils.deepClone(this.item.system[subType][property]);
-    const options = foundry.utils.deepClone(this.item.system[property]);
-    let index = Number(element.dataset.optionsPart);
-
-    const newOptions = [];
-    let entries = Object.entries(options);
-    if (entries.length > 1) {
-      for (const [key, value] of entries) {
-        if (key != index)
-          newOptions.push(value);
-      }
-    }
-
-    let update = {};
-    //update[`system.${subType}.${property}`] = newOptions;
-    update[`system.${property}`] = newOptions;
-    return this.item.update(update);
+  /** @this {TravellerItemSheet} */
+  static #onCareerEventCreate() {
+    return TravellerItemSheet.#appendEntry.call(this, "events", { age: "", description: "" });
   }
 
-  // async _onTraitCreate(event) {
-  //   event.preventDefault();
-  //   await this._onSubmit(event);
-  //   const traits = this.item.system.traits;
-  //   return this.item.update({ "system.traits.parts": traits.parts.concat([["", ""]]) });
-  // }
+  /** @this {TravellerItemSheet} */
+  static #onCareerEventDelete(event, target) {
+    const element = target.closest(".events-part");
+    return TravellerItemSheet.#removeEntry.call(this, "events", Number(element.dataset.eventsPart));
+  }
 
-  // async _onTraitDelete(event) {
-  //   event.preventDefault();
-  //   await this._onSubmit(event);
-  //   const element = event.currentTarget.closest(".traits-part");
-  //   const traits = foundry.utils.deepClone(this.item.system.traits);
-  //   traits.parts.splice(Number(element.dataset.traitsPart), 1);
-  //   return this.item.update({ "system.traits.parts": traits.parts });
-  // }
+  /** @this {TravellerItemSheet} */
+  static #onModifierCreate() {
+    return TravellerItemSheet.#appendEntry.call(this, "modifiers", { characteristic: "endurance", value: null });
+  }
 
-  _getSubmitData(updateData = {}) {
-    const formData = foundry.utils.expandObject(super._getSubmitData(updateData));
-
-    // Gestion des containers
-    if (formData.hasOwnProperty("system") && formData.system.hasOwnProperty("container") &&
-      (this.item.system.hasOwnProperty("equipped"))) {
-      //*console.log('-=_getSubmitData=-');
-      //console.log(this.item.system.onHand);
-      //console.log(formData.system.onHand);
-      //const onHandChange = this.item.system.onHand !== formData.system.onHand;
-      const equippedChange = this.item.system.equipped !== formData.system.equipped;
-      const containerChange = this.item.system.container.id !== formData.system.container.id;
-      // Maintenant équipé
-      if (equippedChange) {
-        if (formData.system.equipped === true) {
-          //formData.system.onHand = true;
-          //console.log("clear container");
-          formData.system.container = {
-            //inContainer: false,
-            id: ""
-          };
-        }
-      }
-
-      /*else if (onHandChange) {
-        // Maintenant à portée
-        if (formData.system.onHand === true) {
-          //console.log("clear container");
-          formData.system.container = {
-            inContainer: false,
-            id: ""
-          };
-        } else {
-          formData.system.equipped = false;
-        }
-      }*/
-
-      else if (containerChange) {
-        // Mise en storage
-        if (formData.system.container.id !== "" && (this.item.system.container.id === "" || this.item.system.container.id === null)) {
-          //console.log("put in container");
-          //formData.system.onHand = false;
-          formData.system.equipped = false;
-          //formData.system.container.inContainer = true;
-        }
-      }
-    }
-
-    // if (this.item.type == "weapon") {
-    //   const traits = formData.system?.traits;
-    //   if (traits)
-    //     traits.parts = Object.values(traits?.parts || {}).map(d => [d[0] || "", d[1] || ""]);
-    // }
-
-    // else if (this.item.type == "career") {
-    //   const events = formData.system?.events;
-    //   if (events)
-    //     events.parts = Object.values(events?.parts || {}).map(d => [d[0] || "", d[1] || ""]);
-    // }
-
-    // else if (this.item.type == "equipment") {
-    //   if (this.item.system.subType == "armor") {
-    //     // const armor = formData.system?.armor;
-    //     // if (armor)
-    //     //   //options.parts = Object.values(options?.parts || {}).map(d => [d[0] || "", d[1] || ""]);
-    //     //   console.log(armor.options);
-    //     //   armor.options = Object.values(armor?.options || {})
-    //     //     .map(d => [d.name || "", d.description || ""]);
-    //     //     console.log(armor.options);
-    //   } else if (this.item.system.subType == "computer") {
-    //     const computer = formData.system?.computer;
-    //     if (computer)
-    //       //options.parts = Object.values(options?.parts || {}).map(d => [d[0] || "", d[1] || ""]);
-    //       computer.options = Object.values(computer?.options || {}).map(d => [d[0] || "", d[1] || ""]);
-    //   }
-    // }
-
-    if (formData.hasOwnProperty("weight")) {
-      formData.system.weight = MGT2Helper.convertWeightFromInput(formData.weight);
-      delete formData.weight;
-    }
-
-    if (formData.system.hasOwnProperty("quantity")) {
-      formData.system.quantity = MGT2Helper.getIntegerFromInput(formData.system.quantity);
-    }
-
-    if (formData.system.hasOwnProperty("cost")) {
-      formData.system.cost = MGT2Helper.getIntegerFromInput(formData.system.cost);
-    }
-    //console.log("before flatten");
-    //console.log(formData);
-    //console.log("after flatten");
-    //    let x = foundry.utils.flattenObject(formData);;
-    //    console.log(x);
-    //    return x;
-    return foundry.utils.flattenObject(formData);
+  /** @this {TravellerItemSheet} */
+  static #onModifierDelete(event, target) {
+    const element = target.closest(".modifiers-part");
+    return TravellerItemSheet.#removeEntry.call(this, "modifiers", Number(element.dataset.modifiersPart));
   }
 }

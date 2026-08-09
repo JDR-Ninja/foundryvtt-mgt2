@@ -1,8 +1,7 @@
-<form class="{{cssClass}} itemsheet" autocomplete="off">
     <div class="itemsheet-header"><label class="upcase">{{ localize 'MGT2.Items.Career' }}</label></div>
     <div class="itemsheet-panel">
         <div class="itemsheet-maincol">
-            <img class="profile-img" src="{{item.img}}" data-edit="img" data-tooltip="{{item.name}}" />
+            <img class="profile-img" src="{{item.img}}" data-edit="img" data-action="editImage" data-tooltip="{{item.name}}" />
             <div class="field-group mt-1">
                 <label class="upcase">{{ localize 'MGT2.Items.Terms' }}</label>
                 <input type="number" name="system.terms" value="{{system.terms}}" data-dtype="Number" />
@@ -18,19 +17,16 @@
                 <label class="upcase">{{ localize 'MGT2.Items.Assignment' }}</label>
                 <input type="text" name="system.assignment" value="{{system.assignment}}" data-dtype="String" />
             </div>
-            <nav class="horizontal-tabs tabs mt-1" data-group="primary">
-                <a class="item tab-select" data-tab="tab1">{{ localize 'MGT2.Items.Description' }}</a>
-                <a class="item tab-select" data-tab="events">{{ localize 'MGT2.Items.EventsMishaps' }}</a>
-            </nav>
-            <div class="tab" data-group="primary" data-tab="tab1">
+            {{> systems/mgt2/templates/items/parts/item-tabs.html }}
+            <div class="tab{{#if tabs.tab1.active}} active{{/if}}" data-group="primary" data-tab="tab1">
                 <textarea name="system.description" rows="6">{{system.description}}</textarea>
             </div>
-            <div class="tab" data-group="primary" data-tab="events">
+            <div class="tab{{#if tabs.events.active}} active{{/if}}" data-group="primary" data-tab="events">
                 <div class="table-container color-2 mt-1">
                     <div class="table-row heading color-2">
                         <div class="row-item row-item-left upcase">{{ localize 'MGT2.Items.Age' }}</div>
                         <div class="row-item row-item-left upcase">{{ localize 'MGT2.Items.Details' }}</div>
-                        <div class="row-item item-controls"><a class="event-create"><i class="fas fa-plus"></i></a></div>
+                        <div class="row-item item-controls"><a class="event-create" data-action="eventCreate"><i class="fas fa-plus"></i></a></div>
                     </div>
                     {{#each system.events as |event i| }}
                     <div class="table-row dropitem events-part" data-events-part="{{i}}" role="rowgroup">
@@ -39,7 +35,7 @@
                             <textarea name="system.events.{{i}}.description" rows="3">{{event.description}}</textarea>
                         </div>
                         <div class="row-item item-controls">
-                            <a class="item-control event-delete" title="Delete Event"><i class="fas fa-trash"></i></a>
+                            <a class="item-control event-delete" data-action="eventDelete" title="Delete Event"><i class="fas fa-trash"></i></a>
                         </div>
                     </div>
                     {{/each}}
@@ -47,4 +43,3 @@
             </div>
         </div>
     </div>
-</form>

@@ -62,6 +62,7 @@
       "AddCareer":"Add Career",
       "EditCareer":"Edit Career",
       "EditTrait":"Éditer Trait",
+      "Configuration": "Configuration",
       "DeleteTrait": "Supprimer Trait",
       "DeleteCareer":"Delete Career",
       "NewSkill":"New Skill",
@@ -447,6 +448,11 @@
       "Seconds": "Seconds",
       "Minutes": "Minutes",
       "Heures": "Hours"
+    },
+    "Errors": {
+      "InvalidRollFormula": "Invalid roll formula.",
+      "LockedContainer": "This container is locked.",
+      "CouldNotFindItem": "Could not find item _ITEM_ID_."
     }
   }
 }

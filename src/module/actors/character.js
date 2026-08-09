@@ -26,8 +26,8 @@ export class ActorCharacter {
             } else if (d.type === "computer") {
                 // Eject software
                 for (let item of $this.items) {
-                    if (item.system.hasOwnProperty("software") && item.system.computerId === d._id) {
-                        let clone = duplicate(item);
+                    if (item.system.hasOwnProperty("software") && item.system.software.computerId === d._id) {
+                        let clone = foundry.utils.duplicate(item);
                         clone.system.software.computerId = "";
                         itemToUpdates.push(clone);
                     }
@@ -41,7 +41,7 @@ export class ActorCharacter {
         if (itemToUpdates.length > 0)
             await $this.updateEmbeddedDocuments('Item', itemToUpdates);
 
-        await this.recalculateWeight();
+        await this.recalculateWeight($this);
     }
 
     static async onUpdateDescendantDocuments($this, parent, collection, documents, changes, options, userId) {
@@ -90,7 +90,7 @@ export class ActorCharacter {
             for (let computer of computers) {
                 let newProcessingUsed = computerChanges[computer._id].processingUsed;
                 if (computer.system.processingUsed !== newProcessingUsed) {
-                    const cloneComputer = duplicate($this.getEmbeddedDocument("Item", computer._id));
+                    const cloneComputer = foundry.utils.duplicate($this.getEmbeddedDocument("Item", computer._id));
                     cloneComputer.system.processingUsed = newProcessingUsed;
                     cloneComputer.system.overload = cloneComputer.system.processingUsed > cloneComputer.system.processing;
                     updatedComputers.push(cloneComputer);
@@ -138,7 +138,7 @@ export class ActorCharacter {
         }
 
         if (recalculEncumbrance || recalculWeight) {
-            const cloneActor = duplicate($this);
+            const cloneActor = foundry.utils.duplicate($this);
 
             await this.recalculateArmor($this, cloneActor);
 
@@ -152,18 +152,20 @@ export class ActorCharacter {
                 let heavy = normal * 2;
 
                 cloneActor.system.states.encumbrance = $this.system.inventory.weight > normal;
-                cloneActor.system.encumbrance.normal = normal;
-                cloneActor.system.encumbrance.heavy = heavy;
+                cloneActor.system.inventory.encumbrance.normal = normal;
+                cloneActor.system.inventory.encumbrance.heavy = heavy;
             }
 
-            if (recalculWeight)
-                await this.recalculateWeight($this, cloneActor);
+            // recalculateWeight applies the update itself; otherwise it must be applied here,
+            // else the recalculated armor and encumbrance would be discarded.
+            if (recalculWeight) await this.recalculateWeight($this, cloneActor);
+            else await $this.update(cloneActor);
         }
     }
 
     static async recalculateArmor($this, cloneActor) {
         if (cloneActor === null || cloneActor === undefined)
-            cloneActor = duplicate($this);
+            cloneActor = foundry.utils.duplicate($this);
 
         let armor = 0;
         for (let item of $this.items) {
@@ -180,7 +182,7 @@ export class ActorCharacter {
     static async recalculateWeight($this, cloneActor) {
 
         if (cloneActor === null || cloneActor === undefined)
-            cloneActor = duplicate($this);
+            cloneActor = foundry.utils.duplicate($this);
 
         let updatedContainers = [];
         let containerChanges = {};
@@ -241,8 +243,8 @@ export class ActorCharacter {
             let newWeight = containerChanges[container._id].weight;
             let newCount = containerChanges[container._id].count;
             if (container.system.weight !== newWeight || container.system.count !== newCount) {
-                //const cloneContainer = duplicate();
-                const cloneContainer = duplicate($this.getEmbeddedDocument("Item", container._id));
+                //const cloneContainer = foundry.utils.duplicate();
+                const cloneContainer = foundry.utils.duplicate($this.getEmbeddedDocument("Item", container._id));
                 //foundry.utils.setProperty(cloneContainer, "system.weight", newWeight);
                 cloneContainer.system.weight = newWeight;
                 cloneContainer.system.count = newCount;
@@ -256,7 +258,9 @@ export class ActorCharacter {
         }
 
         cloneActor.system.inventory.weight = onHandWeight;
-        cloneActor.system.states.encumbrance = onHandWeight > $this.system.inventory.encumbrance.normal;
+        // Compare against the clone's threshold, not the actor's: calculEncumbranceAndWeight may
+        // have just recalculated it, and the stored value would be stale.
+        cloneActor.system.states.encumbrance = onHandWeight > cloneActor.system.inventory.encumbrance.normal;
 
 
         await $this.update(cloneActor);
@@ -278,6 +282,12 @@ export class ActorCharacter {
             let heavy = normal * 2;
             foundry.utils.setProperty(changed, "system.inventory.encumbrance.normal", normal);
             foundry.utils.setProperty(changed, "system.inventory.encumbrance.heavy", heavy);
+
+            // Moving the threshold can flip the encumbered state even though the carried
+            // weight did not change, so it must be re-evaluated here too.
+            const weight = foundry.utils.getProperty(changed, "system.inventory.weight")
+                ?? $this.system.inventory.weight;
+            foundry.utils.setProperty(changed, "system.states.encumbrance", weight > normal);
         }
 
         //console.log(foundry.utils.getProperty(changed, "system.characteristics.strength.value"));

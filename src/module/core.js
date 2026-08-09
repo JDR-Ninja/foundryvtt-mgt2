@@ -88,11 +88,20 @@ Hooks.once("init", async function () {
   CONFIG.Actor.documentClass = TravellerActor;
   CONFIG.Item.documentClass = TravellerItem;
 
-  Actors.unregisterSheet("core", ActorSheet);
-  Actors.registerSheet("mgt2", TravellerActorSheet, { types: ["character"], makeDefault: true, label: "Traveller Sheet" });
-
-  Items.unregisterSheet("core", ItemSheet);
-  Items.registerSheet("mgt2", TravellerItemSheet, { makeDefault: true });
+  // Foundry v14 registers no default Actor/Item sheet, so there is nothing to unregister.
+  const { DocumentSheetConfig } = foundry.applications.apps;
+  // themes: null prevents Foundry from adding "themed theme-light|dark" to the sheet root,
+  // which would inject core colour variables over the mgt2 themes.
+  DocumentSheetConfig.registerSheet(Actor, "mgt2", TravellerActorSheet, {
+    types: ["character"],
+    makeDefault: true,
+    label: "Traveller Sheet",
+    themes: null
+  });
+  DocumentSheetConfig.registerSheet(Item, "mgt2", TravellerItemSheet, {
+    makeDefault: true,
+    themes: null
+  });
 
   Object.assign(CONFIG.Actor.dataModels, {
     "character": CharacterData
@@ -113,7 +122,7 @@ Hooks.once("init", async function () {
   });
 
 
-  Hooks.on("renderChatMessage", (message, html, messageData) => {
+  Hooks.on("renderChatMessageHTML", (message, html, messageData) => {
     ChatHelper.setupCardListeners(message, html, messageData);
   });
 

@@ -1,18 +1,37 @@
+// ApplicationV2 roots are `.application` (V1 used `.window-app`) and the window title
+// is an <h1> (V1 used <h4>).
 .mgt2
 	&.sheet
 		header
 			&.window-header
 				color: var(--mgt2-color-primary)
 				background-color: var(--mgt2-bgcolor-primary)
-		h4
-			&.window-title
-				font-weight: bold
-				text-transform: uppercase
-	&.window-app
+		.window-title
+			font-weight: bold
+			text-transform: uppercase
+	&.application
 		.window-content
 			background: var(--mgt2-bgcolor-form)
 			padding: 0
 
 .nopad
 	.window-content
+		padding: 0
+
+// The V1 sheets carried this layout as inline styles on the root <form>; in V2 the
+// window content element takes that role.
+.mgt2.application.character
+	// The sidebar tab strip is absolutely positioned outside the sheet (left: 100%).
+	// Foundry v14 clips `.application`, so both it and the content box must let it through.
+	overflow: visible
+	> .window-content
+		display: flex
+		flex-direction: column
+		align-content: flex-start
+		height: 100%
+		padding: 0
+		overflow: visible
+
+.mgt2.application.item
+	> .window-content
 		padding: 0

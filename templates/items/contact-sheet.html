@@ -1,8 +1,7 @@
-<form class="{{cssClass}} itemsheet" autocomplete="off">
     <div class="itemsheet-header"><label class="upcase">{{ localize 'MGT2.Items.Contact' }}</label></div>
     <div class="itemsheet-panel">
         <div class="itemsheet-maincol">
-            <img class="profile-img" src="{{item.img}}" data-edit="img" data-tooltip="{{item.name}}" />
+            <img class="profile-img" src="{{item.img}}" data-edit="img" data-action="editImage" data-tooltip="{{item.name}}" />
             <div class="field-group mt-1">
                 <label>{{ localize 'MGT2.Items.Relation' }}</label>
                 <select name="system.relation">
@@ -44,12 +43,8 @@
                 </div>
                 {{/if}}
             </div>
-            <nav class="horizontal-tabs tabs mt-1" data-group="primary" style="flex-grow: 0;">
-                <a class="item tab-select" data-tab="tab1">{{ localize 'MGT2.Items.Informations' }}</a>
-                <a class="item tab-select" data-tab="description">{{ localize 'MGT2.Items.Description' }}</a>
-                <a class="item tab-select" data-tab="notes">{{ localize 'MGT2.Items.Notes' }}</a>
-            </nav>
-            <div class="tab" data-group="primary" data-tab="tab1">
+            {{> systems/mgt2/templates/items/parts/item-tabs.html navStyle="flex-grow: 0;" }}
+            <div class="tab{{#if tabs.tab1.active}} active{{/if}}" data-group="primary" data-tab="tab1">
                 <div class="field-group mt-1">
                     <label>{{ localize 'MGT2.Items.Title' }}</label>
                     <input type="text" name="system.title" value="{{system.title}}" data-dtype="String" />
@@ -73,12 +68,11 @@
                     <input type="text" name="system.occupation" value="{{system.occupation}}" data-dtype="String" />
                 </div>
             </div>
-            <div class="tab w100 h100" data-group="primary" data-tab="description">
-                {{editor system.description.value target="system.description" button=true editable=true}}
+            <div class="tab w100 h100{{#if tabs.description.active}} active{{/if}}" data-group="primary" data-tab="description">
+                <prose-mirror name="system.description" value="{{system.description}}" toggled></prose-mirror>
             </div>
-            <div class="tab w100 h100" data-group="primary" data-tab="notes">
-                {{editor system.notes target="system.notes" button=true editable=true}}
+            <div class="tab w100 h100{{#if tabs.notes.active}} active{{/if}}" data-group="primary" data-tab="notes">
+                <prose-mirror name="system.notes" value="{{system.notes}}" toggled></prose-mirror>
             </div>
         </div>
     </div>
-</form>
