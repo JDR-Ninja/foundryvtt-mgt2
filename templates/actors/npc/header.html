@@ -1,0 +1,206 @@
+<section class="mgt2-header">
+	<img class="portrait" src="{{img}}" alt="{{name}}" data-edit="img" data-action="editImage" data-tooltip="{{name}}" />
+
+	<div class="idy">
+		<div class="name">
+			<span class="play-only">{{name}}</span>
+			<input class="f edit-only" name="name" type="text" value="{{name}}" />
+		</div>
+
+		<div class="meta play-only">
+			{{#if isCreature}}
+			{{#if system.behaviour.diet}}<span>{{localize (lookup choices.diets system.behaviour.diet)}}</span>{{/if}}
+			{{#if npc.reaction}}<span>{{localize npc.reaction.label}}</span>{{/if}}
+			{{#if system.speed.note}}<span>{{system.speed.note}}</span>{{/if}}
+			{{else}}
+			{{#if system.role}}<span>{{system.role}}</span>{{/if}}
+			{{#if system.personal.species}}<span>{{system.personal.species}}</span>{{/if}}
+			{{#if system.attitude}}<span>{{localize (lookup choices.attitudes system.attitude)}}</span>{{/if}}
+			{{#if npc.experience}}<span>{{localize npc.experience.label}}</span>{{/if}}
+			{{/if}}
+		</div>
+
+		<div class="meta edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.npc.Preset'}}</span>
+				{{formInput systemFields.subType name="system.subType" value=system.subType localize=true classes="f"}}
+			</label>
+			{{#if isCreature}}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.npc.Diet'}}</span>
+				{{formInput systemFields.behaviour.fields.diet name="system.behaviour.diet" value=system.behaviour.diet localize=true blank="" classes="f"}}
+			</label>
+			{{! Independent of the diet: the published statblocks pair the two freely and the reaction
+			    lookup keys on the pattern alone. }}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.npc.Pattern'}}</span>
+				{{formInput systemFields.behaviour.fields.pattern name="system.behaviour.pattern" value=system.behaviour.pattern localize=true blank="" classes="f"}}
+			</label>
+			{{else}}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.npc.Role'}}</span>
+				{{formInput systemFields.role name="system.role" value=system.role classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Specie'}}</span>
+				{{formInput systemFields.personal.fields.species name="system.personal.species" value=system.personal.species classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.npc.Attitude'}}</span>
+				{{formInput systemFields.attitude name="system.attitude" value=system.attitude localize=true classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.npc.Experience'}}</span>
+				{{formInput systemFields.experience name="system.experience" value=system.experience localize=true blank="" classes="f"}}
+			</label>
+			<label class="check">
+				{{formInput systemFields.combatant name="system.combatant" value=system.combatant}}
+				<span>{{localize 'MGT2.Actor.npc.Combatant'}}</span>
+			</label>
+			{{/if}}
+		</div>
+
+		{{! Every one of these is derived — see NpcData#damageStates. Fatigue is the one stored flag. }}
+		<div class="states">
+			{{#if isCreature}}
+			<label data-tooltip="{{localize 'MGT2.Actor.npc.DrivenOffHint'}}">
+				<input type="checkbox" {{checked system.states.drivenOff}} disabled />{{localize 'MGT2.Actor.npc.DrivenOff'}}
+			</label>
+			<label data-tooltip="{{localize 'MGT2.Actor.npc.IncapacitatedHint'}}">
+				<input type="checkbox" {{checked system.states.incapacitated}} disabled />{{localize 'MGT2.Actor.npc.Incapacitated'}}
+			</label>
+			{{else}}
+			<label data-tooltip="{{localize 'MGT2.Actor.FatigueHint'}}">
+				{{formInput systemFields.states.fields.fatigue name="system.states.fatigue" value=system.states.fatigue}}{{localize 'MGT2.Actor.Fatigue'}}
+			</label>
+			{{/if}}
+			<label data-tooltip="{{localize 'MGT2.Actor.UnconsciousHint'}}">
+				<input type="checkbox" {{checked system.states.unconscious}} disabled />{{localize 'MGT2.Actor.Unconscious'}}
+			</label>
+			<label data-tooltip="{{localize 'MGT2.Actor.DeadHint'}}">
+				<input type="checkbox" {{checked system.states.dead}} disabled />{{localize 'MGT2.Actor.Dead'}}
+			</label>
+			{{#if isCreature}}
+			<label data-tooltip="{{localize 'MGT2.Actor.npc.DestroyedHint'}}">
+				<input type="checkbox" {{checked system.states.destroyed}} disabled />{{localize 'MGT2.Actor.npc.Destroyed'}}
+			</label>
+			{{/if}}
+		</div>
+	</div>
+
+	{{#if isCreature}}
+	{{! No statblock prints a number appearing; three rules need a count and nothing else gives one. }}
+	<div class="upp">
+		<span class="lbl">{{localize 'MGT2.Actor.npc.Group'}}</span>
+		{{! `group` is declared gmOnly in the manifest, so the inputs are only rendered for a
+		    referee: with submitOnChange every rendered control is submitted on every change. }}
+		<div class="code" data-derived="system.group.count">
+			<span class="play-only">{{system.group.count.value}}<span class="of">/{{system.group.count.max}}</span></span>
+			{{#if isGM}}
+			<span class="edit-only grp">
+				{{formInput systemFields.group.fields.count.fields.value name="system.group.count.value" value=system.group.count.value classes="f num"}}
+				{{formInput systemFields.group.fields.count.fields.max name="system.group.count.max" value=system.group.count.max classes="f num"}}
+			</span>
+			{{/if}}
+		</div>
+	</div>
+	{{else}}
+	{{! Stored here and derived on `character`: a referee transcribing an NPC has the printed code
+	    and may never type the six characteristics. }}
+	<div class="upp">
+		<span class="lbl">{{localize 'MGT2.Actor.UPP'}}</span>
+		<div class="code">
+			<span class="play-only" data-derived="system.upp">{{system.upp}}</span>
+			{{formInput systemFields.personal.fields.ucp name="system.personal.ucp" value=system.personal.ucp placeholder=system.upp classes="f edit-only"}}
+		</div>
+	</div>
+	{{/if}}
+
+	{{! The animal statblock's own print order — Hits, Speed, Skills, Attacks, Traits, Behaviour
+	    (Core p.85). Carries data-derived and must never hold a form control, in either mode. }}
+	<dl class="statline" data-derived="system.life">
+		{{#if isCreature}}
+		<div class="stat lead{{#if system.life.damage}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.DamageTracks.hits'}}</dt>
+			<dd>{{system.characteristics.hits.value}}<span class="of">/{{system.characteristics.hits.max}}</span></dd>
+		</div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.npc.Speed'}}</dt><dd>{{system.speed.ground}}<i>m</i></dd></div>
+		{{#if system.speed.swim}}
+		<div class="stat"><dt>{{localize 'MGT2.Actor.npc.SpeedSwim'}}</dt><dd>{{system.speed.swim}}<i>m</i></dd></div>
+		{{/if}}
+		{{#if npc.flyBand}}
+		<div class="stat"><dt>{{localize 'MGT2.Actor.npc.SpeedFly'}}</dt><dd class="word">{{localize npc.flyBand}}</dd></div>
+		{{/if}}
+		<div class="stat{{#unless npc.size.stored}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.npc.Size'}}</dt>
+			<dd>{{#if npc.size.stored}}{{showDM npc.size.dm}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		{{else}}
+		{{#if settings.showLife}}
+		<div class="stat lead{{#if system.life.damage}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.Actor.Life'}}</dt>
+			<dd>{{system.life.value}}{{#if (gt system.life.max 0)}}<span class="of">/{{system.life.max}}</span>{{/if}}</dd>
+		</div>
+		{{/if}}
+		{{/if}}
+		<div class="stat{{#unless system.stun}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.Stun'}}</dt>
+			<dd>{{system.stun}}</dd>
+		</div>
+		<div class="stat{{#unless system.inventory.armor}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.Armor'}}</dt>
+			<dd>{{system.inventory.armor}}</dd>
+		</div>
+		<div class="stat">
+			<dt><a class="roll" data-action="roll" data-roll="initiative" tabindex="-1">{{localize 'MGT2.Actor.Initiative'}}</a></dt>
+			<dd>{{showDM initiative}}</dd>
+		</div>
+	</dl>
+
+	{{! The pool runs to TWICE the maximum, because `damage` is stored and can exceed it — that
+	    overrun is the Destroyed state, and the four printed thresholds are four marks on it. }}
+	{{#if npc.track}}
+	<div class="trackwrap">
+		<div class="track{{#if system.life.damage}} hurt{{/if}}" data-derived="system.life.damage">
+			<div class="fill" style="--g: {{npc.track.wound}}%"></div>
+			{{#if system.stun}}<div class="stun" data-tooltip="{{localize 'MGT2.Actor.StunHint'}}" style="--s0: {{npc.track.stunFrom}}%; --s: {{npc.track.stun}}%"></div>{{/if}}
+			{{#each npc.track.marks}}
+			<div class="mk"{{#if hit}} data-hit="1"{{/if}} style="--x: {{at}}%"><span>{{localize label}}</span></div>
+			{{/each}}
+		</div>
+	</div>
+	{{else if lifeTrack}}
+	<div class="trackwrap">
+		<div class="track{{#if system.life.damage}} hurt{{/if}}" data-derived="system.life.damage">
+			<div class="fill" style="--g: {{lifeTrack.wound}}%"></div>
+			{{#if system.stun}}<div class="stun" data-tooltip="{{localize 'MGT2.Actor.StunHint'}}" style="--s0: {{lifeTrack.stunFrom}}%; --s: {{lifeTrack.stun}}%"></div>{{/if}}
+		</div>
+	</div>
+	{{/if}}
+
+	{{! Live in both modes: after the {base, damage} split this is the only way a current value can
+	    change, because no input binds one. }}
+	<div class="hdctl">
+		<span class="dmgctl">
+			<input type="number" min="0" step="1" value="1" aria-label="{{localize 'MGT2.Actor.Amount'}}" />
+			<button type="button" class="btn b-dmg" data-action="applyDamage" data-sign="1">{{localize 'MGT2.Actor.Damage'}}</button>
+			<button type="button" class="btn" data-action="applyStun">{{localize 'MGT2.Actor.Stun'}}</button>
+			<button type="button" class="btn" data-action="applyDamage" data-sign="-1">{{localize 'MGT2.Actor.Heal'}}</button>
+			<button type="button" class="btn" data-action="restHour" data-tooltip="{{localize 'MGT2.Actor.RestHourHint'}}">{{localize 'MGT2.Actor.RestHour'}}</button>
+		</span>
+		{{! The creature preset has no characteristics column and no footer, so this is the only way
+		    to reach the damage chain and the flat Initiative DM. }}
+		<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
+	</div>
+
+	{{#if damagePrompt}}
+	<div class="dmgprompt show">
+		<p>{{localize 'MGT2.Actor.OverflowPrompt' filled=damagePrompt.filled remaining=damagePrompt.remaining}}</p>
+		<div class="row">
+			{{#each damagePrompt.choices}}
+			<button type="button" class="btn" data-action="pickOverflow" data-overflow="{{key}}">{{localize label}}</button>
+			{{/each}}
+		</div>
+	</div>
+	{{/if}}
+</section>

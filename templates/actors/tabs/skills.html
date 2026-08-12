@@ -1,0 +1,152 @@
+<section class="tab mgt2-panel{{#if tabs.sidebar.skills.active}} active{{/if}}" data-group="sidebar" data-tab="skills">
+	{{#if system.personal.speciesText.description}}
+	<p class="mgt2-species">
+		<a data-action="openEditor" data-tooltip="{{localize 'MGT2.Items.DetailedDescription'}}"><i class="fa-solid fa-book"></i></a>
+		<span>{{system.personal.speciesText.description}}</span>
+	</p>
+	{{/if}}
+
+	{{! The same code row the item sheets use — one shared field, one component. No definition text:
+	    the registry ships names, parameter shapes, families and citations only. }}
+	{{> systems/mgt2/templates/items/blocks/traits.html}}
+
+	{{! Both counters stay live in play: accumulating a week is the session loop, not structure. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.StudyPeriod'}}</h3>
+			{{#if system.study.skill}}<span class="count">{{system.study.skill}}</span>{{/if}}
+		</div>
+		<div class="grid">
+			<label class="wide">
+				<span class="lbl">{{localize 'MGT2.Actor.TrainingInSkill'}}</span>
+				{{formInput systemFields.study.fields.skill name="system.study.skill" value=system.study.skill classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.StudyPeriodsDone'}}</span>
+				{{formInput systemFields.study.fields.completed name="system.study.completed" value=system.study.completed classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.Weeks'}}</span>
+				{{formInput systemFields.study.fields.total name="system.study.total" value=system.study.total classes="f num"}}
+			</label>
+		</div>
+		{{! Weeks answer "when is the check", periods "how many more" — and neither total is stored,
+		    because the trained skill is what sets both (Core p.56). The flag is the check: the line
+		    that says one has fallen due is the one you click to make it. }}
+		{{#if system.study.skill}}
+		<section class="budget compact" data-over="soft" data-derived="system.study.percent">
+			<span class="lbl">{{localize 'MGT2.Actor.StudyTowardPeriod'}}</span>
+			<div class="gauge"><i style="--g: {{system.study.percent}}%"></i></div>
+			<span class="tot"><b>{{system.study.total}}</b><span class="of">/ {{system.study.weeksPerPeriod}}</span></span>
+			{{#if system.study.checkDue}}
+			<a class="flag" data-action="roll" data-roll="characteristic" data-roll-characteristic="education"
+				data-tooltip="{{localize 'MGT2.Actor.StudyCheckHint'}}">{{localize 'MGT2.Actor.StudyCheckDue'}}</a>
+			{{/if}}
+		</section>
+		<dl class="statline" data-derived="system.study.periodsLeft">
+			<div class="stat">
+				<dt>{{localize 'MGT2.Actor.StudyPeriodsDone'}}</dt>
+				<dd>{{system.study.completed}}<span class="of">/ {{system.study.periodsNeeded}}</span></dd>
+			</div>
+			<div class="stat">
+				<dt>{{localize 'MGT2.Actor.StudyTarget'}}</dt>
+				<dd class="word">{{#if system.study.hasSkill}}{{localize 'MGT2.Items.Level'}} {{system.study.target}}{{else}}{{localize 'MGT2.Actor.StudyNewSkill'}}{{/if}}</dd>
+			</div>
+		</dl>
+		{{/if}}
+	</div>
+
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Items.Careers'}}</h3>
+			<span class="count">{{careers.length}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="career" data-create-name="{{localize 'MGT2.Actor.NewCareer'}}" data-tooltip="{{localize 'MGT2.Actor.AddCareer'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if careers.length}}
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Career'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Terms'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Rank'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each careers as |career|}}
+				<tr data-item-id="{{career._id}}">
+					<td>{{career.name}}</td>
+					<td class="c num">{{career.system.terms}}</td>
+					<td class="c num">{{career.system.rank}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditCareer" del="MGT2.Actor.DeleteCareer"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+	</div>
+
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.Skills'}}</h3>
+			<span class="count">{{skills.length}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="talent" data-subtype="skill" data-create-name="{{localize 'MGT2.Actor.NewSkill'}}" data-tooltip="{{localize 'MGT2.Actor.AddSkill'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if skills.length}}
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Skill'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Level'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each skills as |skill|}}
+				<tr data-item-id="{{skill._id}}">
+					<td><a class="roll" data-action="roll" data-roll="skill" data-roll-skill="{{skill._id}}"><i class="fa-solid fa-dice"></i></a>{{skill.name}}{{#if skill.system.skill.speciality}} ({{skill.system.skill.speciality}}){{/if}}</td>
+					<td class="c num">{{skill.system.level}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditSkill" del="MGT2.Actor.DeleteSkill"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+	</div>
+
+	{{#if system.config.psionic}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.PsionicTalents'}}</h3>
+			<span class="count">{{psionics.length}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="talent" data-subtype="psionic" data-create-name="{{localize 'MGT2.Actor.NewPsionicTalent'}}" data-tooltip="{{localize 'MGT2.Actor.AddPsionicTalent'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if psionics.length}}
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Name'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Level'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Cost'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Reach'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Difficulty'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each psionics as |psionic|}}
+				<tr data-item-id="{{psionic._id}}">
+					<td><a class="roll" data-action="roll" data-roll="psionic" data-item-id="{{psionic._id}}"><i class="fa-solid fa-dice"></i></a>{{psionic.name}}</td>
+					<td class="c num">{{psionic.system.level}}</td>
+					<td class="c num">{{psionic.system.psionic.cost}}</td>
+					<td class="c">{{psionic.reach}}</td>
+					<td class="c">{{psionic.difficulty}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditPsionic" del="MGT2.Actor.DeletePsionic"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+	</div>
+	{{/if}}
+</section>

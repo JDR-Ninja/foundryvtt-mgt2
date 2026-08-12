@@ -1,0 +1,104 @@
+<section class="mgt2-header">
+	<img class="portrait vehicle" src="{{img}}" alt="{{name}}" data-edit="img" data-action="editImage" data-tooltip="{{name}}" />
+
+	<div class="idy">
+		<div class="name">
+			<span class="play-only">{{name}}</span>
+			<input class="f edit-only" name="name" type="text" value="{{name}}" />
+		</div>
+
+		<div class="meta play-only">
+			{{#if system.hull.shipClass}}<span>{{system.hull.shipClass}}</span>{{/if}}
+			<span>{{localize (lookup (lookup choices.configurations system.hull.configuration) 'label')}} {{system.hull.tons}} {{localize 'MGT2.Actor.spacecraft.Tons'}}</span>
+			<span>{{localize 'MGT2.Actor.spacecraft.TL'}} {{system.tl}}</span>
+			<span>{{localize (lookup choices.service system.role)}}</span>
+			{{#if system.owner}}<span>{{system.owner}}</span>{{/if}}
+			{{#if system.homeport}}<span>{{system.homeport}}</span>{{/if}}
+		</div>
+
+		<div class="meta edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Class'}}</span>
+				{{formInput systemFields.hull.fields.shipClass name="system.hull.shipClass" value=system.hull.shipClass classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Registration'}}</span>
+				{{formInput systemFields.registration name="system.registration" value=system.registration classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Owner'}}</span>
+				{{formInput systemFields.owner name="system.owner" value=system.owner classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Homeport'}}</span>
+				{{formInput systemFields.homeport name="system.homeport" value=system.homeport classes="f"}}
+			</label>
+			{{! Switches the whole Crew Requirements column, which is why it sits in the header. }}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Service'}}</span>
+				{{formInput systemFields.role name="system.role" value=system.role localize=true classes="f"}}
+			</label>
+		</div>
+
+		<div class="states">
+			<label data-tooltip="{{localize 'MGT2.Actor.spacecraft.WreckedHint'}}">
+				<input type="checkbox" {{checked system.states.wrecked}} disabled />{{localize 'MGT2.Actor.spacecraft.Wrecked'}}
+			</label>
+			{{#if ship.mounts.scansUnarmed}}
+			<label data-tooltip="{{localize 'MGT2.Actor.spacecraft.ScansUnarmedHint'}}">
+				<input type="checkbox" checked disabled />{{localize 'MGT2.Actor.spacecraft.ScansUnarmed'}}
+			</label>
+			{{/if}}
+		</div>
+	</div>
+
+	{{! The registry code anchors a ship's header the way the UPP anchors a person's. }}
+	<div class="reg">
+		<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Registration'}}</span>
+		<div class="code play-only">{{#if system.registration}}{{system.registration}}{{else}}&mdash;{{/if}}</div>
+		<div class="ref play-only">{{localize 'MGT2.Actor.spacecraft.Ref'}}</div>
+	</div>
+
+	{{! BLOCK 1 — read-only in both modes. Every entry is derived or a transcribed rating whose
+	    input lives in the Hull & drives block, which is the §1.2 rule made visible. }}
+	<dl class="statline" data-derived="system">
+		<div class="stat lead{{#if ship.hull.damage}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.DamageTracks.hull'}}</dt>
+			<dd>{{ship.hull.value}}<span class="of">/{{ship.hull.max}}</span></dd>
+		</div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Armour'}}</dt><dd>{{showDM system.protection}}</dd></div>
+		<div class="stat{{#if system.criticalEffects.thrustLoss}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.Actor.spacecraft.Thrust'}}</dt>
+			<dd>{{system.drives.effectiveThrust}}</dd>
+		</div>
+		<div class="stat{{#unless system.drives.jump}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.spacecraft.Jump'}}</dt>
+			<dd>{{#if system.drives.jump}}{{system.drives.jump}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat{{#if ship.power.over}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.Actor.spacecraft.Power'}}</dt>
+			<dd>{{system.power.surplus}}<i>{{localize 'MGT2.Actor.spacecraft.Free'}}</i></dd>
+		</div>
+		<div class="stat{{#unless system.fuel.tons}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.spacecraft.Fuel'}}</dt>
+			<dd>{{#if system.fuel.tons}}{{system.fuel.tons}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i>{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat{{#unless system.cargo.capacity}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.spacecraft.Cargo'}}</dt>
+			<dd>{{#if system.cargo.capacity}}{{system.cargo.capacity}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i>{{else}}&mdash;{{/if}}</dd>
+		</div>
+		{{! 2D + the pilot's Pilot skill + CURRENT Thrust, so an M-Drive critical feeds it. }}
+		<div class="stat"><dt>{{localize 'MGT2.Actor.Initiative'}}</dt><dd>{{showDM system.initiative}}</dd></div>
+	</dl>
+
+	{{! Live in both modes: with the wound stored and everything else derived, this is the only way
+	    the hull can change at all. }}
+	<div class="hdctl">
+		<span class="dmgctl">
+			<input type="number" min="0" step="1" value="1" aria-label="{{localize 'MGT2.Actor.Amount'}}" />
+			<button type="button" class="btn b-dmg" data-action="applyDamage" data-sign="1">{{localize 'MGT2.Actor.Damage'}}</button>
+			<button type="button" class="btn" data-action="applyDamage" data-sign="-1">{{localize 'MGT2.Actor.spacecraft.Repair'}}</button>
+		</span>
+		<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
+	</div>
+</section>

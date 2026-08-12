@@ -1,0 +1,9 @@
+<div class="block">
+	<div class="sect"><h3>{{localize 'MGT2.Items.Description'}}</h3></div>
+	{{#if (eq item.type "contact")}}
+	<prose-mirror name="system.description" value="{{system.description}}" toggled></prose-mirror>
+	{{else}}
+	<p class="prose play-only">{{system.description}}</p>
+	<textarea class="f edit-only" name="system.description" rows="6">{{system.description}}</textarea>
+	{{/if}}
+</div>

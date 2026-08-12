@@ -1,0 +1,67 @@
+{{! Who this person is to the crew — the one thing a contact sheet is opened for. }}
+<div class="block">
+	<div class="sect"><h3>{{localize 'MGT2.Items.Relationship'}}</h3></div>
+
+	<ul class="specs play-only">
+		<li><span class="lbl">{{localize 'MGT2.Items.Relation'}}</span><b class="word">{{localize (concat "MGT2.Contact.Relation." system.relation)}}</b></li>
+		<li><span class="lbl">{{localize 'MGT2.Items.Attitude'}}</span><b class="word">{{localize (concat "MGT2.Contact.Attitude." system.attitude)}}</b></li>
+		<li><span class="lbl">{{localize 'MGT2.Items.Status'}}</span><b class="word">{{localize (concat "MGT2.Contact.Status." system.status)}}</b></li>
+		{{#if system.title}}<li><span class="lbl">{{localize 'MGT2.Items.Title'}}</span><b class="word">{{system.title}}</b></li>{{/if}}
+		{{#if system.nickname}}<li><span class="lbl">{{localize 'MGT2.Items.Nickname'}}</span><b class="word">{{system.nickname}}</b></li>{{/if}}
+		{{#if system.occupation}}<li><span class="lbl">{{localize 'MGT2.Items.Occupation'}}</span><b class="word">{{system.occupation}}</b></li>{{/if}}
+		{{#if system.species}}<li><span class="lbl">{{localize 'MGT2.Specie'}}</span><b class="word">{{system.species}}</b></li>{{/if}}
+		{{#if system.homeworld}}<li><span class="lbl">{{localize 'MGT2.Items.Homeworld'}}</span><b class="word">{{system.homeworld}}</b></li>{{/if}}
+		{{#if system.location}}<li><span class="lbl">{{localize 'MGT2.Items.Location'}}</span><b class="word">{{system.location}}</b></li>{{/if}}
+	</ul>
+
+	<div class="grid edit-only">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Relation'}}</span>
+			<select class="f" name="system.relation">{{selectOptions config.ContactRelations selected=system.relation localize=true}}</select>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Attitude'}}</span>
+			<select class="f" name="system.attitude">{{selectOptions config.Attitudes selected=system.attitude localize=true}}</select>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Status'}}</span>
+			<select class="f" name="system.status">{{selectOptions config.ContactStatus selected=system.status localize=true}}</select>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Title'}}</span>
+			{{formInput systemFields.title name="system.title" value=system.title classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Nickname'}}</span>
+			{{formInput systemFields.nickname name="system.nickname" value=system.nickname classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Occupation'}}</span>
+			{{formInput systemFields.occupation name="system.occupation" value=system.occupation classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Specie'}}</span>
+			{{formInput systemFields.species name="system.species" value=system.species classes="f"}}
+		</label>
+		{{#if settings.useGender}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Gender'}}</span>
+			{{formInput systemFields.gender name="system.gender" value=system.gender classes="f"}}
+		</label>
+		{{/if}}
+		{{#if settings.usePronouns}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Pronouns'}}</span>
+			{{formInput systemFields.pronouns name="system.pronouns" value=system.pronouns classes="f"}}
+		</label>
+		{{/if}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Homeworld'}}</span>
+			{{formInput systemFields.homeworld name="system.homeworld" value=system.homeworld classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Location'}}</span>
+			{{formInput systemFields.location name="system.location" value=system.location classes="f"}}
+		</label>
+	</div>
+</div>

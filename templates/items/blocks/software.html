@@ -1,0 +1,34 @@
+{{! What is loaded into this computer. Reads in both modes; ejecting and deleting are edit-mode. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Items.Softwares'}}</h3>
+		<span class="count">{{nested.length}}</span>
+		{{#if system.overload}}<span class="flag">{{localize 'MGT2.Items.Overload'}}</span>{{/if}}
+	</div>
+	{{#if nested.length}}
+	<table class="rows">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Items.Name'}}</th>
+				<th class="c">{{localize 'MGT2.Items.Bandwidth'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each nested as |entry|}}
+			<tr data-item-id="{{entry._id}}">
+				<td>{{entry.name}}</td>
+				<td class="c num">{{entry.bandwidth}}</td>
+				<td class="r">
+					<div class="acts edit-only">
+						<a data-action="nestedRemove" data-tooltip="{{localize 'MGT2.Actor.UnloadSoftware'}}"><i class="fa-solid fa-eject"></i></a>
+						<a data-action="nestedEdit" data-tooltip="{{localize 'MGT2.Actor.EditSoftware'}}"><i class="fas fa-edit"></i></a>
+						<a data-action="nestedDelete" data-tooltip="{{localize 'MGT2.Actor.DeleteSoftware'}}"><i class="fas fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</div>

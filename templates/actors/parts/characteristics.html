@@ -1,0 +1,49 @@
+<aside class="mgt2-chars chars">
+	{{! Group 1: the chain. Rows stay in the roster's order, the one the rulebook prints — the chain
+	    is a property of the group, so the header states it once instead of a chip on every row. }}
+	{{#if damageTrack.length}}
+	<div class="grp">
+		<span class="lbl">{{localize 'MGT2.Actor.DamageTrack'}}</span>
+		<span class="order" data-tooltip="{{localize 'MGT2.Actor.DamageChain'}}">{{#each chainOrder}}{{#unless @first}}<i>&rarr;</i>{{/unless}}{{localize short}}{{/each}}</span>
+		<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.DamageOrder'}}"><i class="fa-solid fa-gear"></i></a>
+	</div>
+	<div class="char-list">
+		{{#each damageTrack}}
+		{{> systems/mgt2/templates/actors/parts/characteristic.html pool=true}}
+		{{/each}}
+	</div>
+	{{/if}}
+
+	{{! Group 2: the constants. Nothing depletes here, so no gauge and no current/max reading — but
+	    the same row as the other two groups, so the mode flip moves nothing sideways. }}
+	{{#if statics.length}}
+	<div class="grp">
+		<span class="lbl">{{localize 'MGT2.Actor.Constants'}}</span>
+	</div>
+	<div class="char-list">
+		{{#each statics}}
+		{{> systems/mgt2/templates/actors/parts/characteristic.html}}
+		{{/each}}
+	</div>
+	{{/if}}
+
+	{{! Group 3: a spent reserve, not a wound. PSI is not in the damage chain, so it gets its own
+	    control and keeps the neutral fill. It sits last, where the rulebook puts it, so the six
+	    canonical characteristics read as one unbroken run above it. }}
+	{{#if psionic}}
+	<div class="grp">
+		<span class="lbl">{{localize 'MGT2.Actor.PsionicReserve'}}</span>
+		<a class="cfg edit-only" data-action="openCharacteristic" data-cfg-characteristic="psionic" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
+	</div>
+	<div class="char-list">
+		{{#with psionic}}
+		{{> systems/mgt2/templates/actors/parts/characteristic.html pool=true spent=true}}
+		{{/with}}
+	</div>
+	<span class="dmgctl" data-characteristic="psionic">
+		<input type="number" min="0" step="1" value="1" aria-label="{{localize 'MGT2.Actor.Amount'}}" />
+		<button type="button" class="btn b-dmg" data-action="applyDamage" data-sign="1">{{localize 'MGT2.Actor.Spend'}}</button>
+		<button type="button" class="btn" data-action="applyDamage" data-sign="-1">{{localize 'MGT2.Actor.Recover'}}</button>
+	</span>
+	{{/if}}
+</aside>

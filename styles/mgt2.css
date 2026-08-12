@@ -1,0 +1,3421 @@
+@charset "UTF-8";
+@import url("https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Roboto:wght@400;500;600;700&family=Roboto+Condensed:wght@400;500;600;700&family=Rubik+Mono+One&display=swap");
+.mgt2 {
+  --chrome: #0a0405;
+  --paper: #ffffff;
+  --ink: #16110f;
+  --danger: #c8372a;
+  --good: #1f7a4d;
+  --lgt: min(l, 0.55);
+  --lgt-hot: min(l, 0.40);
+  --rule: color-mix(in oklab, var(--ink) 22%, transparent);
+  --rule-soft: color-mix(in oklab, var(--ink) 11%, transparent);
+  --mute: color-mix(in oklab, var(--ink) 60%, var(--paper));
+  --faint: color-mix(in oklab, var(--ink) 40%, var(--paper));
+  --hover: color-mix(in oklab, var(--ink) 6%, transparent);
+  --track: color-mix(in oklab, var(--ink) 13%, transparent);
+  --fill: color-mix(in oklab, var(--ink) 45%, var(--paper));
+  --accent-text: oklch(from var(--accent) var(--lgt) c h);
+  --accent-hot: oklch(from var(--accent) var(--lgt-hot) c h);
+  --accent-line: color-mix(in oklab, var(--accent-text) 45%, transparent);
+  --accent-soft: color-mix(in oklab, var(--accent-text) 13%, transparent);
+  --mgt2-color-primary: var(--accent-text);
+  --mgt2-color-primary-active: var(--accent-hot);
+  --mgt2-color-primary-light: var(--mute);
+  --mgt2-bgcolor-form: var(--paper);
+  --mgt2-color-form: var(--ink);
+  --mgt2-input-bgcolor: var(--hover);
+  --mgt2-input-color: var(--ink);
+  --mgt2-row-hover: var(--hover);
+  --mgt2-subrow-color: var(--mute);
+  --mgt2-editor-border: var(--rule);
+  --mgt2-row-inactive-icon: var(--faint);
+  --mgt2-track: var(--track);
+  --mgt2-depletion: var(--danger);
+  --mgt2-color-warning: var(--danger);
+  --mgt2-bgcolor-primary: var(--chrome);
+  --mgt2-color-dm: #e9e7e4;
+  --mgt2-bgcolor-dm: var(--chrome);
+  --mgt2-color-software: #e9e7e4;
+  --mgt2-bgcolor-software: var(--chrome);
+  --mgt2-encumbrance-normal: #D94826;
+  --mgt2-encumbrance-heavy: #D82727;
+}
+
+body.theme-dark .mgt2:not(.theme-light),
+.mgt2.theme-dark {
+  --paper: #0b0a13;
+  --ink: #e9e7e4;
+  --danger: #e86152;
+  --good: #4fbe8b;
+  --lgt: max(l, 0.72);
+  --lgt-hot: max(l, 0.86);
+}
+
+.mgt2 .window-header,
+.mgt2 .itemsheet-header {
+  --paper: var(--chrome);
+  --ink: #e9e7e4;
+  --danger: #e86152;
+  --good: #4fbe8b;
+  --lgt: max(l, 0.72);
+  --lgt-hot: max(l, 0.86);
+  --rule: color-mix(in oklab, var(--ink) 22%, transparent);
+  --rule-soft: color-mix(in oklab, var(--ink) 11%, transparent);
+  --mute: color-mix(in oklab, var(--ink) 60%, var(--paper));
+  --faint: color-mix(in oklab, var(--ink) 40%, var(--paper));
+  --hover: color-mix(in oklab, var(--ink) 6%, transparent);
+  --track: color-mix(in oklab, var(--ink) 13%, transparent);
+  --fill: color-mix(in oklab, var(--ink) 45%, var(--paper));
+  --accent-text: oklch(from var(--accent) var(--lgt) c h);
+  --accent-hot: oklch(from var(--accent) var(--lgt-hot) c h);
+  --accent-line: color-mix(in oklab, var(--accent-text) 45%, transparent);
+  --accent-soft: color-mix(in oklab, var(--accent-text) 13%, transparent);
+  --mgt2-color-primary: var(--accent-text);
+  --mgt2-color-primary-active: var(--accent-hot);
+  --mgt2-color-primary-light: var(--mute);
+  --mgt2-bgcolor-form: var(--paper);
+  --mgt2-color-form: var(--ink);
+  --mgt2-input-bgcolor: var(--hover);
+  --mgt2-input-color: var(--ink);
+  --mgt2-row-hover: var(--hover);
+  --mgt2-subrow-color: var(--mute);
+  --mgt2-editor-border: var(--rule);
+  --mgt2-row-inactive-icon: var(--faint);
+  --mgt2-track: var(--track);
+  --mgt2-depletion: var(--danger);
+  --mgt2-color-warning: var(--danger);
+}
+
+body {
+  --accent: #d13b46;
+}
+
+.black-and-red {
+  --accent: #d13b46;
+}
+
+.mwamba {
+  --accent: #2a9932;
+}
+
+.blue {
+  --accent: #91aac8;
+}
+
+.upcase {
+  text-transform: uppercase;
+}
+
+.w3-10 {
+  width: 30%;
+}
+
+.h100 {
+  height: 100%;
+}
+
+.w100 {
+  width: 100%;
+}
+
+.mgt2 a:hover {
+  text-shadow: none;
+}
+.mgt2 .w-100 {
+  width: 100%;
+}
+.mgt2 .mb-1 {
+  margin-bottom: 8px;
+}
+.mgt2 .mt-1, .mgt2 .mt-05 {
+  margin-top: 8px;
+}
+.mgt2 .flex-1 {
+  flex: 1;
+}
+.mgt2 .flex-grow-0 {
+  flex-grow: 0;
+}
+.mgt2 .flex-grow-2 {
+  flex-grow: 2;
+}
+.mgt2 .flexcol-stretch {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+.mgt2 .mx-1 {
+  margin: 0 1rem;
+}
+.mgt2 select.narrow {
+  width: 5rem;
+}
+
+.mgt2.sheet header.window-header {
+  color: var(--mgt2-color-primary);
+  background-color: var(--mgt2-bgcolor-primary);
+}
+.mgt2.sheet .window-title {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.mgt2.application .window-content {
+  background: var(--mgt2-bgcolor-form);
+  color: var(--mgt2-color-form);
+  padding: 0;
+}
+
+.nopad .window-content {
+  padding: 0;
+}
+
+.mgt2.application.character {
+  container-type: inline-size;
+  container-name: sheet;
+}
+.mgt2.application.character > .window-content {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas: "header header" "chars nav" "chars panel" "footer footer";
+  height: 100%;
+  overflow: hidden;
+}
+.mgt2.application.character > .window-content > [data-application-part=header] {
+  grid-area: header;
+}
+.mgt2.application.character > .window-content > [data-application-part=characteristics] {
+  grid-area: chars;
+}
+.mgt2.application.character > .window-content > [data-application-part=nav] {
+  grid-area: nav;
+}
+.mgt2.application.character > .window-content > [data-application-part=footer] {
+  grid-area: footer;
+}
+.mgt2.application.character > .window-content > .tab[data-group=sidebar] {
+  grid-area: panel;
+  min-height: 0;
+}
+.mgt2.application.character > .window-content > .tab[data-group=sidebar].active {
+  display: flex;
+  flex-direction: column;
+}
+
+.mgt2.application.npc > .window-content {
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "header header" "chars panel";
+}
+.mgt2.application.npc > .window-content > [data-application-part=panel] {
+  grid-area: panel;
+  min-height: 0;
+}
+.mgt2.application.npc[data-preset=creature] > .window-content {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "header" "panel";
+}
+
+.mgt2.application.vehicle > .window-content {
+  grid-template-columns: 19rem minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "header header" "rail panel";
+}
+.mgt2.application.vehicle > .window-content > [data-application-part=rail] {
+  grid-area: rail;
+  min-height: 0;
+}
+.mgt2.application.vehicle > .window-content > [data-application-part=panel] {
+  grid-area: panel;
+  min-height: 0;
+}
+
+.mgt2.application.spacecraft > .window-content {
+  grid-template-columns: 21rem minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "header header" "rail panel";
+}
+.mgt2.application.spacecraft > .window-content > [data-application-part=rail] {
+  grid-area: rail;
+  min-height: 0;
+}
+.mgt2.application.spacecraft > .window-content > [data-application-part=panel] {
+  grid-area: panel;
+  min-height: 0;
+}
+
+.mgt2.application.robot > .window-content {
+  grid-template-columns: 20rem minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "header header" "rail panel";
+}
+.mgt2.application.robot > .window-content > [data-application-part=rail] {
+  grid-area: rail;
+  min-height: 0;
+}
+.mgt2.application.robot > .window-content > [data-application-part=panel] {
+  grid-area: panel;
+  min-height: 0;
+}
+
+.mgt2.application.item > .window-content {
+  padding: 0;
+}
+
+.mgt2[data-mode=play] .edit-only {
+  display: none !important;
+}
+
+.mgt2[data-mode=edit] .play-only {
+  display: none !important;
+}
+
+.mgt2 [hidden] {
+  display: none !important;
+}
+
+.mgt2 .window-header .mgt2-mode {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: auto;
+  min-height: 0;
+  padding: 2px 7px;
+  font-family: var(--mgt2-cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--faint);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .window-header .mgt2-mode::before {
+  content: "";
+  width: 18px;
+  height: 9px;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  background: linear-gradient(90deg, currentColor 0 7px, transparent 7px) no-repeat;
+  background-size: 100% 100%;
+  background-position: 1px center;
+}
+.mgt2 .window-header .mgt2-mode:hover {
+  color: var(--accent-text);
+  background: none;
+  border-color: var(--accent-line);
+}
+
+.mgt2[data-mode=edit] .window-header .mgt2-mode {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+}
+.mgt2[data-mode=edit] .window-header .mgt2-mode::before {
+  background-position: 8px center;
+}
+
+.mgt2 .flex-fix {
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+}
+.mgt2 .flex-basis-10 {
+  flex-basis: 10%;
+}
+.mgt2 .flex-basis-20 {
+  flex-basis: 20%;
+}
+.mgt2 .flex-basis-30 {
+  flex-basis: 30%;
+}
+.mgt2 .flex-basis-40 {
+  flex-basis: 40%;
+}
+.mgt2 .flex-basis-50 {
+  flex-basis: 50%;
+}
+.mgt2 .flex-basis-60 {
+  flex-basis: 60%;
+}
+.mgt2 .flex-basis-70 {
+  flex-basis: 70%;
+}
+
+.mgt2.sheet textarea {
+  color: var(--mgt2-input-color);
+  background-color: var(--mgt2-input-bgcolor);
+  font-family: "Roboto", sans-serif;
+  font-size: 13px;
+  font-stretch: 100%;
+}
+.mgt2 input:focus,
+.mgt2 textarea:focus,
+.mgt2 select:focus {
+  outline: none;
+  box-shadow: none;
+}
+.mgt2 .checkbox-small {
+  flex: none !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+}
+.mgt2 .field-groups {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.mgt2 .field-group {
+  display: flex;
+  flex-direction: column;
+}
+.mgt2 .field-group label {
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 12px;
+  font-family: var(--mgt2-cond);
+  letter-spacing: 0.1em;
+  color: var(--mgt2-subrow-color);
+}
+.mgt2 input.field {
+  color: var(--mgt2-input-color);
+  background-color: var(--mgt2-input-bgcolor);
+  font-size: 13px;
+}
+.mgt2 input.field-item-name {
+  color: var(--mgt2-input-color);
+  background-color: var(--mgt2-input-bgcolor);
+  height: auto;
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: "Roboto Condensed", sans-serif;
+}
+.mgt2 .editor {
+  min-height: 3rem;
+  border: 1px solid var(--mgt2-editor-border);
+  height: 100%;
+}
+.mgt2 label.mgt2-checkbox {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.mgt2 label.mgt2-checkbox input {
+  margin: 0 0.3rem 0 0;
+}
+
+.mgt2 .dlg {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.mgt2 .dblock {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.mgt2 .drow {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr) var(--dm-col, 2.2rem);
+  align-items: center;
+  gap: 10px;
+}
+.mgt2 .drow .dm {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--accent-text);
+}
+.mgt2 .drow .dm.zero {
+  color: var(--faint);
+}
+.mgt2 .drow .dm.bad {
+  color: var(--danger);
+}
+.mgt2 .dblock:has(.dm.total),
+.mgt2 .dblock:has(.dm.outcome) {
+  --dm-col: 5.8rem;
+}
+.mgt2 .distrow {
+  display: grid;
+  grid-template-columns: 7.5rem auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+.mgt2 .distrow .unit {
+  margin-left: 4px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--faint);
+}
+.mgt2 .distrow input.f {
+  width: 5rem;
+  text-align: right;
+  font-family: var(--mono);
+}
+.mgt2 .band {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.mgt2 .band .b {
+  font-size: 15px;
+}
+.mgt2 .band .dmv {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0;
+}
+.mgt2 .band .why {
+  font-family: var(--body);
+  font-size: 11.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--faint);
+}
+.mgt2 .band.pos .b, .mgt2 .band.pos .dmv {
+  color: var(--good);
+}
+.mgt2 .band.neg .b, .mgt2 .band.neg .dmv {
+  color: var(--danger);
+}
+.mgt2 .band.out .b {
+  color: var(--danger);
+}
+.mgt2 .band.forced .why {
+  color: var(--danger);
+}
+.mgt2 .situ {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.mgt2 .situ label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .situ label input {
+  margin: 0;
+  accent-color: var(--accent-text);
+}
+.mgt2 .situ label .v {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0;
+}
+.mgt2 .situ label.disabled {
+  opacity: 0.4;
+  cursor: var(--cursor-default);
+  text-decoration: line-through;
+}
+.mgt2 .drow.voided {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+.mgt2 .traitlist {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.mgt2 .traitrow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.mgt2 .traitrow .st {
+  font-size: 11.5px;
+  color: var(--faint);
+}
+.mgt2 .traitrow .val {
+  min-width: 2.4rem;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  text-align: right;
+  color: var(--faint);
+}
+.mgt2 .traitrow label.situ {
+  justify-self: end;
+}
+.mgt2 .traitrow.applied .val {
+  color: var(--accent-text);
+}
+.mgt2 .hint.augment-name {
+  margin-top: -5px;
+  padding-left: 8.5rem;
+}
+.mgt2 .dstates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.mgt2 .dstates label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .dstates label input {
+  margin: 0;
+  accent-color: var(--danger);
+}
+.mgt2 .dstates label input:checked + span {
+  color: var(--danger);
+}
+.mgt2 .dstates label .v {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0;
+}
+.mgt2 .hint {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--faint);
+}
+.mgt2 .hint b {
+  font-weight: 600;
+  color: var(--mute);
+}
+
+.mgt2 .readout {
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+}
+.mgt2 .readout .line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+.mgt2 .readout .form {
+  font-family: var(--cond);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .readout .vs {
+  margin-left: auto;
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .readout .vs b {
+  font-size: 18px;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.mgt2 .readout .vs.assumed {
+  opacity: 0.55;
+}
+.mgt2 .readout .terms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+  margin-top: 7px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .readout .terms .neg {
+  color: var(--danger);
+}
+
+.mgt2 .eladder {
+  margin-top: 10px;
+}
+.mgt2 .eladder .strip {
+  display: flex;
+  height: 20px;
+}
+.mgt2 .eladder .strip span {
+  flex: 1 1 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+  border: 1px solid var(--rule-soft);
+  border-right: 0;
+}
+.mgt2 .eladder .strip span:last-child {
+  border-right: 1px solid var(--rule-soft);
+}
+.mgt2 .eladder .strip span.f {
+  color: var(--danger);
+  background: color-mix(in oklab, var(--danger) 10%, transparent);
+}
+.mgt2 .eladder .strip span.s {
+  color: var(--good);
+  background: color-mix(in oklab, var(--good) 10%, transparent);
+}
+.mgt2 .eladder .strip span.here {
+  font-weight: 600;
+  color: var(--accent-text);
+  outline: 2px solid var(--accent-text);
+  outline-offset: -2px;
+}
+.mgt2 .eladder .cap {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 5px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .eladder .cap b {
+  font-family: var(--cond);
+  font-size: 15px;
+  color: var(--ink);
+}
+.mgt2 .eladder .cap .band {
+  margin-left: auto;
+}
+
+.mgt2-prompt .form-footer {
+  gap: 6px;
+}
+.mgt2-prompt .form-footer button {
+  flex: 1 1 0;
+  height: auto;
+  padding: 7px 6px;
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.mgt2-prompt .form-footer button:hover {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+}
+.mgt2-prompt .form-footer button .d {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--faint);
+}
+.mgt2-prompt .form-footer button[data-action=submit] {
+  flex: 1.6 1 0;
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+}
+.mgt2-prompt .form-footer button[data-action=submit]:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-text);
+}
+
+.mgt2 {
+  --cond: "Barlow Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+  --body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+
+.mgt2 .lbl {
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .sect {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 3px;
+  border-bottom: 2px solid var(--accent-text);
+}
+.mgt2 .sect h3 {
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  border: none;
+}
+.mgt2 .sect .count {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.mgt2 .sect .add {
+  margin-left: auto;
+  display: inline-flex;
+  font-size: 12px;
+  color: var(--accent-text);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .sect .add svg {
+  width: 13px;
+  height: 13px;
+}
+.mgt2 .sect .gm {
+  margin-left: auto;
+  padding: 0 5px;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--rule);
+}
+.mgt2 .block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mgt2 input.f,
+.mgt2 select.f,
+.mgt2 textarea.f {
+  width: 100%;
+  height: auto;
+  padding: 2px 5px;
+  font: inherit;
+  font-family: var(--body);
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--hover);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.mgt2 input.f:focus,
+.mgt2 select.f:focus,
+.mgt2 textarea.f:focus {
+  outline: none;
+  background: var(--paper);
+  border-color: var(--accent-text);
+}
+.mgt2 input.f.num,
+.mgt2 input.f.n {
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.mgt2 .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: 9px 10px;
+}
+.mgt2 .grid.cols2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.mgt2 .grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.mgt2 .grid label.wide {
+  grid-column: span 2;
+}
+.mgt2 .grid label.check {
+  flex-direction: row;
+  align-items: center;
+  align-self: end;
+  gap: 6px;
+  padding-bottom: 3px;
+}
+.mgt2 .grid label.check input {
+  margin: 0;
+  accent-color: var(--accent-text);
+}
+.mgt2 .grid label.check span {
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 table.rows.fixed {
+  table-layout: fixed;
+}
+.mgt2 table.rows.fixed th.num {
+  width: 4.5rem;
+}
+.mgt2 table.rows.fixed th.acts {
+  width: 3.5rem;
+}
+.mgt2 table.rows.fixed th.f {
+  width: auto;
+}
+.mgt2 table.rows {
+  width: 100%;
+  border-collapse: collapse;
+}
+.mgt2 table.rows th {
+  padding: 6px 6px 5px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  text-align: left;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 table.rows th.r,
+.mgt2 table.rows td.r {
+  text-align: right;
+}
+.mgt2 table.rows th.c,
+.mgt2 table.rows td.c {
+  text-align: center;
+}
+.mgt2 table.rows td {
+  padding: 6px;
+  font-size: 13.5px;
+  vertical-align: baseline;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 table.rows tr:last-child td {
+  border-bottom: 0;
+}
+.mgt2 table.rows tbody tr:hover {
+  background: var(--hover);
+}
+.mgt2 table.rows td.num {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 table.rows .sub {
+  display: block;
+  margin-top: 1px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .acts {
+  display: flex;
+  gap: 9px;
+  justify-content: flex-end;
+  font-size: 12px;
+  color: var(--faint);
+}
+.mgt2 .acts a {
+  color: inherit;
+  cursor: var(--cursor-pointer);
+  display: inline-flex;
+}
+.mgt2 .acts a:hover {
+  color: var(--accent-text);
+}
+.mgt2 .acts svg {
+  width: 13px;
+  height: 13px;
+}
+.mgt2 .btn {
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: 4px 10px;
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .btn:hover {
+  color: var(--accent-text);
+  background: none;
+  border-color: var(--accent-line);
+}
+.mgt2 .btn.hot {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+}
+.mgt2 .btn.hot:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-text);
+}
+.mgt2 .btn[disabled] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.mgt2 .btn[disabled]:hover {
+  color: var(--mute);
+  background: none;
+  border-color: var(--rule);
+}
+
+.mgt2 .statline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 0;
+  margin: 0;
+  padding: 7px 0;
+  border-top: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .statline .stat {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 0 13px;
+}
+.mgt2 .statline .stat + .stat {
+  border-left: 1px solid var(--rule-soft);
+}
+.mgt2 .statline .stat:first-child {
+  padding-left: 0;
+}
+.mgt2 .statline dt {
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .statline dd {
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mgt2 .statline dd .of {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mute);
+}
+.mgt2 .statline dd i {
+  margin-left: 1px;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--mute);
+}
+.mgt2 .statline dd .word {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.mgt2 .statline .stat.none dd {
+  color: var(--faint);
+  font-weight: 500;
+}
+.mgt2 .statline .stat.hurt dd {
+  color: var(--danger);
+}
+.mgt2 .statline .stat.good dd {
+  color: var(--good);
+}
+.mgt2 .statline .stat.lead dd {
+  font-size: 26px;
+}
+.mgt2 .statline .stat.lead dt {
+  font-size: 10.5px;
+}
+
+.mgt2 .statline.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.6rem, 1fr));
+  gap: 0;
+  padding: 0;
+  border-top: 0;
+  border-bottom: 0;
+}
+.mgt2 .statline.grid .stat {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 6px 10px 6px 0;
+  border-left: 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .statline.grid .stat + .stat {
+  border-left: 0;
+}
+.mgt2 .statline.grid dd {
+  font-size: 16px;
+}
+
+.mgt2 .budget {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mgt2 .budget > header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.mgt2 .budget > header .tot {
+  margin-left: auto;
+}
+.mgt2 .budget > header .rem {
+  min-width: 6.5rem;
+}
+.mgt2 .budget .tot {
+  font-family: var(--cond);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .budget .tot .of {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mute);
+}
+.mgt2 .budget .rem {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-align: right;
+  color: var(--faint);
+}
+.mgt2 .budget .gauge {
+  position: relative;
+  height: 4px;
+  background: var(--track);
+}
+.mgt2 .budget .gauge i {
+  display: block;
+  height: 100%;
+  width: var(--g, 0%);
+  max-width: 100%;
+  background: var(--fill);
+}
+.mgt2 .budget .gauge u {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: var(--m, 100%);
+  width: 1px;
+  background: var(--mute);
+}
+.mgt2 .budget.over .gauge i {
+  background: var(--danger);
+}
+.mgt2 .budget.over .tot {
+  color: var(--danger);
+}
+.mgt2 .budget.over[data-over=soft] .gauge i {
+  background: var(--fill);
+}
+.mgt2 .budget.over[data-over=soft] .tot {
+  color: var(--ink);
+  border-bottom: 2px solid var(--mute);
+}
+.mgt2 .budget .brows td {
+  padding: 4px 6px;
+  font-size: 13px;
+}
+.mgt2 .budget .brows td.sw {
+  width: 1.6rem;
+}
+.mgt2 .budget .brows td.sw input {
+  margin: 0;
+  accent-color: var(--accent-text);
+}
+.mgt2 .budget .brows td.num {
+  width: 5.5rem;
+  text-align: right;
+}
+.mgt2 .budget .brows td .why {
+  margin-left: 8px;
+  font-family: var(--cond);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .budget .brows tr.off td {
+  color: var(--faint);
+}
+.mgt2 .budget .brows tr.off td.num {
+  text-decoration: line-through;
+}
+.mgt2 .budget .flag {
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--danger);
+}
+.mgt2 .budget a.flag {
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .budget a.flag:hover {
+  color: var(--accent-text);
+}
+.mgt2 .budget[data-over=soft] .flag {
+  color: var(--mute);
+}
+.mgt2 .budget.compact {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+.mgt2 .budget.compact .gauge {
+  flex: 1 1 auto;
+}
+.mgt2 .budget.check .brows td.d {
+  width: 4.5rem;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--faint);
+}
+.mgt2 .budget.check .brows tr.mismatch td.d {
+  color: var(--danger);
+}
+
+.mgt2 .roster {
+  width: 100%;
+  border-collapse: collapse;
+}
+.mgt2 .roster th {
+  padding: 6px 8px 5px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--faint);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .roster td {
+  padding: 7px 8px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .roster tr:last-child td {
+  border-bottom: 0;
+}
+.mgt2 .roster tbody tr:hover {
+  background: var(--hover);
+}
+.mgt2 .roster .station b {
+  display: block;
+  font-family: var(--cond);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.mgt2 .roster .station .dept {
+  font-family: var(--cond);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .roster .who {
+  white-space: nowrap;
+}
+.mgt2 .roster .who .av {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  vertical-align: -4px;
+  background: var(--track);
+  border: 1px solid var(--rule);
+}
+.mgt2 .roster .who .src {
+  display: block;
+  margin-left: 24px;
+  font-style: normal;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .roster .who.linked a {
+  color: var(--accent-text);
+  text-decoration: none;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .roster .who.plain em {
+  font-style: italic;
+  color: var(--mute);
+}
+.mgt2 .roster .who.plain .src {
+  margin-left: 0;
+}
+.mgt2 .roster tr.vacant .who {
+  color: var(--faint);
+  font-style: italic;
+}
+.mgt2 .roster tr.vacant .station b {
+  color: var(--mute);
+}
+.mgt2 .roster .duty select.f {
+  width: auto;
+  min-width: 7.5rem;
+  padding: 1px 4px;
+  font-size: 12px;
+}
+.mgt2 .roster .duty .ro {
+  font-family: var(--cond);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.mgt2 .roster .duty .at {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+.mgt2 .roster .todo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.mgt2 .roster .todo .btn {
+  padding: 2px 7px;
+  font-size: 9.5px;
+}
+.mgt2 .roster .todo .btn i {
+  margin-left: 5px;
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--faint);
+}
+.mgt2 .roster .need {
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--faint);
+}
+.mgt2 .roster .need b {
+  font-weight: 400;
+}
+.mgt2 .roster .need.short {
+  color: var(--danger);
+}
+
+.mgt2 .codes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .codes .code {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+  padding: 1px 6px 2px;
+  font-family: var(--cond);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.mgt2 .codes .code b {
+  font-weight: 700;
+}
+.mgt2 .codes .code .ps {
+  margin-left: 5px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--mute);
+}
+.mgt2 .codes .code .ps::before {
+  content: "(";
+}
+.mgt2 .codes .code .ps::after {
+  content: ")";
+}
+.mgt2 .codes .code .ps .p + .p::before {
+  content: ", ";
+}
+.mgt2 .codes .code .note {
+  margin-left: 5px;
+  align-self: center;
+  font-family: var(--body);
+  font-size: 11px;
+  line-height: 1;
+  text-decoration: none;
+  color: var(--accent-text);
+  cursor: help;
+}
+.mgt2 .codes .code .x {
+  margin-left: 6px;
+  font-family: var(--body);
+  font-size: 12px;
+  line-height: 1;
+  text-decoration: none;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .codes .code .x:hover {
+  color: var(--danger);
+}
+.mgt2 .codes .code.hot {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+}
+.mgt2 .codes .code.hot .ps {
+  color: var(--accent-text);
+}
+.mgt2 .codes .code.inert {
+  color: var(--faint);
+  border-style: dashed;
+}
+.mgt2 .codes .code.inert .ps {
+  color: var(--faint);
+}
+.mgt2 .codes .code.off {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+.mgt2 .codes .addtag {
+  display: inline-flex;
+}
+.mgt2 .codes .addtag input {
+  width: 9rem;
+  height: auto;
+  padding: 1px 6px 2px;
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--hover);
+  border: 1px dashed var(--rule);
+  border-radius: 2px;
+}
+.mgt2 .codes .addtag input:focus {
+  outline: none;
+  border-color: var(--accent-text);
+  border-style: solid;
+}
+
+.mgt2 .track {
+  position: relative;
+  height: 9px;
+  background: var(--track);
+  overflow: visible;
+}
+.mgt2 .track .fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--g, 0%);
+  background: var(--fill);
+}
+.mgt2 .track .stun {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--s0, 0%);
+  width: var(--s, 0%);
+  background: repeating-linear-gradient(135deg, var(--mute) 0 2px, transparent 2px 5px);
+}
+.mgt2 .track.hurt .fill {
+  background: color-mix(in oklab, var(--danger) 75%, var(--paper));
+}
+.mgt2 .track .mk {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: var(--x);
+  width: 1px;
+  background: var(--mute);
+}
+.mgt2 .track .mk span {
+  position: absolute;
+  top: -13px;
+  left: 0;
+  transform: translateX(-50%);
+  font-family: var(--cond);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--faint);
+}
+.mgt2 .track .mk[data-hit] {
+  width: 2px;
+  background: var(--danger);
+}
+.mgt2 .track .mk[data-hit] span {
+  color: var(--danger);
+}
+
+.mgt2 .trackwrap {
+  padding-top: 13px;
+}
+
+.mgt2 .crits {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+  gap: 2px 10px;
+  align-items: center;
+}
+.mgt2 .crits .loc {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .crits .loc i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+}
+.mgt2 .crits .pips {
+  display: flex;
+  gap: 3px;
+}
+.mgt2 .crits .pips i {
+  width: 15px;
+  height: 9px;
+  border: 1px solid var(--rule);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .crits .pips i.on {
+  background: color-mix(in oklab, var(--danger) 70%, var(--paper));
+  border-color: color-mix(in oklab, var(--danger) 70%, var(--paper));
+}
+.mgt2 .crits .row.hit .loc {
+  color: var(--danger);
+}
+.mgt2 .crits .eff {
+  grid-column: 2;
+  margin: -1px 0 3px;
+  font-size: 11.5px;
+  color: var(--faint);
+}
+.mgt2 .crits .eff b {
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.mgt2 .chars {
+  display: flex;
+  flex-direction: column;
+}
+
+.mgt2 .grp {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 11px 2px 4px;
+  border-bottom: 1px solid var(--rule);
+}
+.mgt2 .grp:first-child {
+  padding-top: 4px;
+}
+.mgt2 .grp .cfg {
+  margin-left: auto;
+  display: inline-flex;
+  font-size: 11px;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .grp .cfg:hover {
+  color: var(--accent-text);
+}
+.mgt2 .grp .cfg svg {
+  width: 12px;
+  height: 12px;
+}
+.mgt2 .grp .order {
+  margin-left: auto;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--faint);
+}
+.mgt2 .grp .order i {
+  padding: 0 2px;
+  font-style: normal;
+  color: color-mix(in oklab, var(--faint) 60%, transparent);
+}
+.mgt2 .grp .order ~ .cfg {
+  margin-left: 0;
+  width: 14px;
+  justify-content: center;
+}
+
+.mgt2 .char {
+  display: grid;
+  grid-template-columns: 1fr auto 2.2rem;
+  grid-template-areas: "n v d";
+  align-items: center;
+  gap: 3px 8px;
+  padding: 7px 2px 6px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .char:last-of-type {
+  border-bottom: 0;
+}
+.mgt2 .char .n {
+  grid-area: n;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-family: var(--cond);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .char .n a.nm {
+  color: inherit;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .char .n a.nm:hover {
+  color: var(--accent-text);
+}
+.mgt2 .char .v {
+  grid-area: v;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 5px;
+  font-family: var(--cond);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .char .v > .edit-only {
+  display: contents;
+}
+.mgt2 .char .v .sl {
+  margin: 0 3px;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--faint);
+}
+.mgt2 .char .v .mx {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--faint);
+}
+.mgt2 .char .v input.f {
+  width: 2.9rem;
+  padding: 0 4px;
+  font-family: var(--cond);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: right;
+}
+.mgt2 .char.hurt .v .cur {
+  color: var(--danger);
+}
+.mgt2 .char .drv {
+  min-width: 2.1rem;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  white-space: nowrap;
+  text-align: right;
+  color: var(--faint);
+}
+.mgt2 .char .drv b {
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.mgt2 .char .d {
+  grid-area: d;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-text);
+}
+.mgt2 .char .d a.dm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 100%;
+  margin: 0 -4px;
+  padding: 2px 4px;
+  border-radius: 2px;
+  color: var(--accent-text);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .char .d a.dm:hover {
+  color: var(--accent-hot);
+  background: var(--hover);
+  box-shadow: inset 0 0 0 1px var(--accent-line);
+}
+.mgt2 .char .d a.cfg {
+  display: inline-flex;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .char .d a.cfg:hover {
+  color: var(--accent-text);
+}
+.mgt2 .char .d a.cfg svg {
+  width: 12px;
+  height: 12px;
+}
+.mgt2 .char .g {
+  grid-area: g;
+  height: 3px;
+  align-self: center;
+  background: color-mix(in oklab, var(--ink) 9%, transparent);
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 4px);
+  mask-image: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 4px);
+}
+.mgt2 .char .g i {
+  display: block;
+  height: 100%;
+  width: var(--g, 0%);
+  background: var(--fill);
+}
+.mgt2 .char.hurt .g i {
+  background: color-mix(in oklab, var(--danger) 75%, var(--paper));
+}
+.mgt2 .char.spent .v .cur {
+  color: inherit;
+}
+.mgt2 .char.spent .g i {
+  background: var(--fill);
+}
+
+.mgt2[data-mode=play] .char {
+  grid-template-columns: minmax(2.6rem, max-content) minmax(0, 1fr) minmax(3.6rem, max-content) 2.2rem;
+  grid-template-areas: "n g v d";
+}
+
+.mgt2[data-mode=edit] .char .g {
+  display: none;
+}
+
+.mgt2[data-mode=play] .grp .order {
+  padding-right: 22px;
+}
+
+.mgt2 .dmgctl {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.mgt2 .dmgctl input {
+  width: 2.8rem;
+  height: auto;
+  padding: 1px 4px;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--hover);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.mgt2 .dmgctl input:focus {
+  outline: none;
+  background: var(--paper);
+  border-color: var(--accent-text);
+}
+.mgt2 .dmgctl .btn.b-dmg:hover {
+  color: var(--danger);
+  border-color: color-mix(in oklab, var(--danger) 55%, transparent);
+}
+
+.mgt2 .chars .dmgctl {
+  margin-top: 7px;
+}
+
+.mgt2 .dmgprompt {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in oklab, var(--danger) 45%, transparent);
+  background: color-mix(in oklab, var(--danger) 8%, transparent);
+}
+.mgt2 .dmgprompt.show {
+  display: flex;
+}
+.mgt2 .dmgprompt p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+.mgt2 .dmgprompt p b {
+  color: var(--danger);
+}
+.mgt2 .dmgprompt .row {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.mgt2 {
+  --mgt2-cond: var(--cond);
+  --mgt2-rule: 1px solid var(--rule);
+}
+
+.mgt2.application.character > .window-content,
+.mgt2.application.npc > .window-content,
+.mgt2.application.vehicle > .window-content,
+.mgt2.application.spacecraft > .window-content,
+.mgt2.application.robot > .window-content {
+  font-family: var(--body);
+  font-size: 14px;
+}
+
+.mgt2 .mgt2-label {
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+.mgt2 .mgt2-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0 14px;
+  align-items: start;
+  padding: 14px 16px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.mgt2 .mgt2-header .portrait {
+  width: 74px;
+  height: 92px;
+  object-fit: cover;
+  background: var(--chrome);
+  border: 1px solid var(--rule);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .mgt2-header .idy {
+  min-width: 0;
+}
+.mgt2 .mgt2-header .name {
+  margin: -3px 0 4px;
+  font-family: var(--cond);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+.mgt2 .mgt2-header .name input.f {
+  font-family: var(--cond);
+  font-size: 28px;
+  font-weight: 700;
+  padding: 0 6px;
+}
+.mgt2 .mgt2-header .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--mute);
+}
+.mgt2 .mgt2-header .meta span:not(:last-child)::after {
+  content: "·";
+  margin-left: 8px;
+  color: var(--faint);
+}
+.mgt2 .mgt2-header .meta.edit-only {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: 6px 10px;
+}
+.mgt2 .mgt2-header .meta.edit-only > label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mgt2 .mgt2-header .statline {
+  grid-column: 1/-1;
+  margin-top: 12px;
+}
+.mgt2 .mgt2-header .trackwrap {
+  grid-column: 1/-1;
+  padding-top: 10px;
+}
+.mgt2 .mgt2-header .hdctl {
+  grid-column: 1/-1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 9px 0;
+}
+.mgt2 .mgt2-header .hdctl .cfg {
+  margin-left: auto;
+  display: inline-flex;
+  font-size: 12px;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .mgt2-header .hdctl .cfg:hover {
+  color: var(--accent-text);
+}
+.mgt2 .mgt2-header .dmgprompt {
+  grid-column: 1/-1;
+  margin-bottom: 10px;
+}
+
+.mgt2 .recovery {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.mgt2 .recovery .btn i {
+  margin-left: 6px;
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--faint);
+}
+.mgt2 .recovery .btn.hot i {
+  color: var(--accent-text);
+}
+.mgt2 .recovery .reset {
+  display: inline-flex;
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .recovery .reset:hover {
+  color: var(--accent-text);
+}
+
+.mgt2 .states {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding-bottom: 10px;
+}
+.mgt2 .states label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .states label::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border: 1px solid currentColor;
+}
+.mgt2 .states label:has(input:checked) {
+  color: var(--danger);
+}
+.mgt2 .states label:has(input:checked)::before {
+  background: currentColor;
+  box-shadow: inset 0 0 0 2px var(--paper);
+}
+.mgt2 .states input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .states input:disabled {
+  cursor: default;
+}
+
+.mgt2 .upp {
+  text-align: right;
+}
+.mgt2 .upp .code {
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.14em;
+}
+
+.mgt2 .mgt2-chars {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 12px 10px;
+  border-right: 1px solid var(--rule);
+}
+
+.mgt2 .mgt2-panel {
+  min-height: 0;
+  overflow-y: auto;
+  gap: 18px;
+  padding: 12px 16px 16px;
+}
+.mgt2 .mgt2-panel.active {
+  display: flex;
+  flex-direction: column;
+}
+.mgt2 .mgt2-panel > p {
+  margin: 0;
+}
+
+.mgt2 .mgt2-container-picker {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mgt2 .mgt2-species {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  text-align: justify;
+}
+.mgt2 .mgt2-species a {
+  color: var(--accent-text);
+}
+
+.mgt2 .mgt2-editor-panel .block {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.mgt2 .mgt2-editor-panel prose-mirror {
+  flex: 1 1 auto;
+  min-height: 8rem;
+  border: 1px solid var(--rule);
+}
+
+.mgt2 table.rows .roll {
+  margin-right: 7px;
+  font-size: 12px;
+  color: var(--accent-text);
+  cursor: var(--cursor-pointer);
+  vertical-align: -1px;
+}
+.mgt2 table.rows td .on {
+  color: var(--accent-text);
+}
+.mgt2 table.rows .acts {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.mgt2 table.rows tr:hover .acts {
+  opacity: 1;
+}
+
+.mgt2[data-mode=edit] table.rows .acts {
+  opacity: 1;
+}
+
+.mgt2 .mgt2-footer {
+  padding: 7px 16px;
+  border-top: 1px solid var(--rule);
+  background: color-mix(in oklab, var(--ink) 4%, transparent);
+}
+.mgt2 .mgt2-footer .cfg {
+  display: inline-flex;
+  font-size: 12px;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .mgt2-footer .cfg:hover {
+  color: var(--accent-text);
+}
+
+.mgt2 .mgt2-encumbrance {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px;
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  color: var(--mute);
+}
+.mgt2 .mgt2-encumbrance .total {
+  font-variant-numeric: tabular-nums;
+}
+
+.computer-overload,
+.computer-overload i {
+  color: var(--danger) !important;
+}
+
+.mgt2 p.hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--faint);
+}
+.mgt2 p.hint b {
+  font-weight: 600;
+  color: var(--mute);
+}
+
+.mgt2 .mgt2-npc-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.mgt2 .reaction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+.mgt2 .reaction .statline {
+  flex: 1 1 14rem;
+  border-top: 0;
+  border-bottom: 0;
+  padding: 0;
+}
+
+.mgt2 .upp .code .grp {
+  display: inline-flex;
+  gap: 4px;
+}
+.mgt2 .upp .code .grp input.f {
+  width: 3.4rem;
+}
+
+.mgt2 .mgt2-header .portrait.vehicle {
+  width: 104px;
+  height: 74px;
+}
+
+.mgt2 .reg {
+  text-align: right;
+}
+.mgt2 .reg .code {
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.1em;
+}
+.mgt2 .reg .ref {
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+
+.mgt2 .mgt2-header .vstat {
+  grid-column: 1/-1;
+  padding-top: 10px;
+}
+
+.mgt2 .mgt2-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 12px 16px;
+  border-right: 1px solid var(--rule);
+}
+
+.mgt2 .mgt2-chars,
+.mgt2 .mgt2-panel,
+.mgt2 .mgt2-rail {
+  scrollbar-gutter: stable;
+}
+
+.mgt2 .mgt2-vehicle-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.mgt2 .grid .rm,
+.mgt2 .sect .rm {
+  align-self: end;
+  display: inline-flex;
+  padding-bottom: 5px;
+  font-size: 12px;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .grid .rm:hover,
+.mgt2 .sect .rm:hover {
+  color: var(--danger);
+}
+
+.mgt2 .sect .rm {
+  margin-left: auto;
+  padding-bottom: 0;
+}
+
+.mgt2 .facings {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+.mgt2 .facings .facing {
+  padding: 5px 7px;
+  text-align: center;
+  border: 1px solid var(--rule);
+}
+.mgt2 .facings .facing b {
+  font-family: var(--cond);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .facings .facing .lbl {
+  display: block;
+  margin-bottom: 2px;
+}
+.mgt2 .facings .facing .src {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--cond);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .facings .facing .re {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent-text);
+}
+.mgt2 .facings .facing input.f {
+  text-align: center;
+  font-family: var(--cond);
+  font-size: 16px;
+  font-weight: 700;
+}
+.mgt2 .facings .facing.derived {
+  border-style: dashed;
+}
+.mgt2 .facings .facing.derived b {
+  font-weight: 500;
+  color: var(--mute);
+}
+
+.mgt2 table.systems td.who {
+  width: 11rem;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 table.systems tr.opposed td.who {
+  color: var(--danger);
+}
+.mgt2 table.systems td.val {
+  width: 7rem;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 table.systems tr.absent td {
+  color: var(--faint);
+}
+
+.mgt2 .critctl {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.mgt2 .critctl select.f {
+  flex: 0 1 12rem;
+}
+.mgt2 .critctl input.f {
+  flex: 0 0 4.5rem;
+}
+
+.mgt2 .mount {
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mgt2 .mountedit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mgt2 .mw {
+  white-space: nowrap;
+}
+
+.mgt2 .mgt2-spacecraft-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.mgt2 table.mounts td.mt {
+  width: 10.5rem;
+}
+.mgt2 table.mounts td.mt select.f {
+  font-size: 12px;
+  padding: 1px 3px;
+}
+.mgt2 table.mounts td.mt b {
+  display: block;
+  font-family: var(--cond);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.mgt2 table.mounts td.mt .arc {
+  font-family: var(--cond);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 table.mounts td.dmg {
+  width: 8rem;
+  text-align: right;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 table.mounts td.dmg b {
+  font-family: var(--cond);
+  font-size: 16px;
+  font-weight: 700;
+}
+.mgt2 table.mounts td.dmg .mult {
+  display: block;
+  font-size: 10px;
+  color: var(--faint);
+}
+.mgt2 table.mounts td.dmg.big b {
+  color: var(--danger);
+}
+.mgt2 table.mounts .mag {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--mute);
+}
+.mgt2 table.mounts .mag.empty {
+  color: var(--danger);
+}
+
+.mgt2 .finance {
+  border: 1px solid var(--rule);
+  padding: 9px 11px;
+}
+.mgt2 .finance .row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 3px 0;
+}
+.mgt2 .finance .row + .row {
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2 .finance .row .v {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .finance .row .v i {
+  font-style: normal;
+  color: var(--faint);
+}
+.mgt2 .finance .why {
+  font-family: var(--cond);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+ul.softwares {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+ul.softwares li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--mgt2-color-software);
+  background-color: var(--mgt2-bgcolor-software);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+ul.softwares li a {
+  display: none;
+  color: inherit;
+}
+ul.softwares li:hover a {
+  display: inline-block;
+}
+
+.mgt2 .mgt2-robot-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.mgt2 .chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--mute);
+}
+.mgt2 .chain .t {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 2px;
+}
+.mgt2 .chain .t b {
+  font-family: var(--cond);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .chain .t span {
+  font-family: var(--cond);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .chain .t.off b {
+  font-weight: 500;
+  color: var(--faint);
+}
+.mgt2 .chain .op {
+  font-size: 13px;
+  color: var(--faint);
+}
+.mgt2 .chain .eq {
+  font-size: 13px;
+  color: var(--accent-text);
+}
+.mgt2 .chain .t.result b {
+  font-size: 21px;
+  color: var(--accent-text);
+}
+
+.mgt2 table.manip td.f,
+.mgt2 table.manip th.f {
+  width: 12rem;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+
+.mgt2 table.rows tr.off {
+  opacity: 0.5;
+}
+
+.mgt2 .effect-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  vertical-align: -4px;
+  border: none;
+  object-fit: cover;
+}
+
+.mgt2 ul.changes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 ul.changes li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.mgt2 ul.changes .k {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--mute);
+}
+.mgt2 ul.changes .v {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  white-space: nowrap;
+  color: var(--faint);
+}
+.mgt2 ul.changes .ph {
+  padding: 0 4px;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--rule);
+}
+.mgt2 ul.changes .ph.final {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+}
+
+.active-effect-config .tab.changes.mgt2-changes header,
+.active-effect-config .tab.changes.mgt2-changes ol {
+  grid-template-columns: 11rem 6rem 6rem 6rem 3.5rem 1rem;
+}
+
+@container sheet (max-width: 640px) {
+  .mgt2.application.character > .window-content {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "header" "chars" "nav" "panel" "footer";
+  }
+  .mgt2.application.npc > .window-content {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "header" "chars" "panel";
+  }
+  .mgt2.application.vehicle > .window-content,
+  .mgt2.application.spacecraft > .window-content,
+  .mgt2.application.robot > .window-content {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "header" "rail" "panel";
+  }
+  .mgt2 .mgt2-header {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding-top: 12px;
+  }
+  .mgt2 .mgt2-header .upp,
+  .mgt2 .mgt2-header .reg {
+    grid-column: 2;
+    text-align: left;
+    margin-top: 6px;
+  }
+  .mgt2 .mgt2-header .upp .code,
+  .mgt2 .mgt2-header .reg .code {
+    font-size: 21px;
+  }
+  .mgt2 .mgt2-header .name {
+    font-size: 24px;
+  }
+  .mgt2 .mgt2-chars,
+  .mgt2 .mgt2-rail {
+    border-right: none;
+    border-bottom: 1px solid var(--rule);
+  }
+  .mgt2 .facings {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .mgt2 .char-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 14px;
+  }
+  .mgt2[data-mode=play] .char,
+  .mgt2 .char {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "n v" "d d" "g g";
+  }
+  .mgt2[data-mode=play] .char .d,
+  .mgt2 .char .d {
+    text-align: left;
+  }
+  .mgt2[data-mode=play] .char .g,
+  .mgt2 .char .g {
+    margin-top: 3px;
+  }
+  .mgt2 nav.horizontal-tabs a.item {
+    padding: 8px 12px;
+  }
+  .mgt2 nav.horizontal-tabs a.item span {
+    display: none;
+  }
+  .mgt2 nav.horizontal-tabs a.item i {
+    margin-right: 0;
+  }
+}
+@container sheet (min-width: 980px) {
+  .mgt2.application.character > .window-content,
+  .mgt2.application.npc > .window-content {
+    grid-template-columns: 17rem minmax(0, 1fr);
+  }
+  .mgt2.application.npc[data-preset=creature] > .window-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mgt2 .mgt2-panel {
+    padding: 14px 22px 20px;
+  }
+}
+.mgt2 .mgt2-damage-order {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mgt2 .mgt2-damage-order ol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  counter-reset: rank;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .mgt2-damage-order li {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 7px;
+  border: 1px solid var(--mgt2-editor-border);
+  border-radius: 3px;
+  background: var(--mgt2-bgcolor-form);
+  cursor: grab;
+}
+.mgt2 .mgt2-damage-order li::before {
+  counter-increment: rank;
+  content: counter(rank);
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  font-family: "Rubik Mono One", monospace;
+  font-size: 9px;
+  border-radius: 2px;
+  color: var(--mgt2-depletion);
+  border: 1px solid color-mix(in srgb, var(--mgt2-depletion) 45%, transparent);
+}
+.mgt2 .mgt2-damage-order li[hidden] {
+  display: none;
+}
+.mgt2 .mgt2-damage-order li.is-dragged {
+  opacity: 0.4;
+}
+.mgt2 .mgt2-damage-order li .grip {
+  color: var(--mgt2-subrow-color);
+}
+.mgt2 .mgt2-damage-order li .who {
+  font-size: 13px;
+}
+.mgt2 .mgt2-damage-order li .cur {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--mgt2-subrow-color);
+}
+.mgt2 .mgt2-damage-order li .remove {
+  color: var(--mgt2-subrow-color);
+}
+.mgt2 .mgt2-damage-order li .remove:hover {
+  color: var(--mgt2-color-warning);
+}
+.mgt2 .mgt2-damage-order .pool {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 4px;
+}
+.mgt2 .mgt2-damage-order .chip {
+  width: auto;
+  height: auto;
+  line-height: 1.4;
+  margin: 0;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-family: inherit;
+  border: 1px dashed var(--mgt2-editor-border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--mgt2-subrow-color);
+}
+.mgt2 .mgt2-damage-order .chip:hover:not(:disabled) {
+  border-style: solid;
+  border-color: var(--mgt2-color-primary);
+  color: var(--mgt2-color-primary);
+  background: transparent;
+  box-shadow: none;
+}
+.mgt2 .mgt2-damage-order .chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.mgt2 .mgt2-damage-order .chip[hidden] {
+  display: none;
+}
+.mgt2 .mgt2-damage-order .empty, .mgt2 .mgt2-damage-order .hint {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--mgt2-subrow-color);
+}
+
+.mgt2 .window-content.itemsheet {
+  display: grid;
+  grid-template-columns: 2.1rem minmax(0, 1fr);
+  align-content: start;
+  font-family: var(--body);
+  font-size: 14px;
+}
+
+.mgt2 .itemsheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+  background: var(--paper);
+}
+.mgt2 .itemsheet-header span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.42em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--accent-text);
+}
+
+.mgt2 .imain {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 12px 16px 16px;
+}
+
+.mgt2 .ihd {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 14px;
+  align-items: start;
+}
+.mgt2 .ihd .iportrait {
+  width: 76px;
+  height: 76px;
+  object-fit: cover;
+  background: var(--chrome);
+  border: 1px solid var(--rule);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .ihd .idy {
+  min-width: 0;
+}
+.mgt2 .ihd .iname {
+  margin: -2px 0 0;
+  font-family: var(--cond);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.05;
+}
+.mgt2 .ihd .iname input.f {
+  padding: 0 6px;
+  font-family: var(--cond);
+  font-size: 24px;
+  font-weight: 700;
+}
+.mgt2 .ihd .isub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  margin-top: 3px;
+  font-size: 12.5px;
+  color: var(--mute);
+}
+.mgt2 .ihd .isub span:not(:last-child)::after {
+  content: "·";
+  margin-left: 8px;
+  color: var(--faint);
+}
+.mgt2 .ihd .isub.edit-only {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: 6px 10px;
+}
+.mgt2 .ihd .isub.edit-only > label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mgt2 .ihd .isub.edit-only span::after {
+  content: none;
+}
+
+.mgt2 .rollbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.mgt2 .rollbar > .grid {
+  flex: 1 0 100%;
+}
+
+.mgt2 .rollline {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.mgt2 .rollline .op {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .rollline .none {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--faint);
+}
+
+.mgt2 .btn-roll {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: 5px 14px;
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  background: none;
+  border: 1px solid var(--accent-line);
+  border-radius: 2px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .btn-roll:hover {
+  color: var(--accent-hot);
+  background: var(--accent-soft);
+  border-color: var(--accent-text);
+}
+.mgt2 .btn-roll[disabled] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.mgt2 .btn-roll[disabled]:hover {
+  color: var(--accent-text);
+  background: none;
+  border-color: var(--accent-line);
+}
+
+.mgt2 .specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .specs li {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.mgt2 .specs b {
+  font-family: var(--cond);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .specs b.word {
+  font-size: 14px;
+}
+.mgt2 .specs b .u {
+  margin-left: 1px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--mute);
+}
+.mgt2 .specs li.off b {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--faint);
+}
+
+.mgt2.hazard .specs b,
+.mgt2.hazard .rollline {
+  color: var(--danger);
+}
+.mgt2.hazard .itemsheet-header span {
+  color: var(--danger);
+}
+
+.mgt2 .carried {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.mgt2 .carried .chk {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mgt2 .carried .chk input {
+  margin: 0;
+  accent-color: var(--accent-text);
+}
+.mgt2 .carried .chk span {
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .carried .chk input:checked + span {
+  color: var(--accent-text);
+}
+.mgt2 .carried .store {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.mgt2 .carried .store select.f {
+  width: auto;
+  min-width: 8rem;
+  font-size: 12px;
+}
+.mgt2 .carried .ro {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--mute);
+}
+
+.mgt2 .prose {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.mgt2 .imain textarea.f {
+  min-height: 6.5rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+.mgt2 .imain prose-mirror {
+  min-height: 8rem;
+  border: 1px solid var(--rule);
+}
+.mgt2 .imain .pair {
+  display: flex;
+  gap: 4px;
+}
+.mgt2 .imain .pair select.f {
+  width: auto;
+  flex: 0 0 auto;
+}
+.mgt2 .imain label.off {
+  opacity: 0.45;
+}
+
+.mgt2 .codes .code input {
+  height: auto;
+  padding: 0 4px;
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+}
+.mgt2 .codes .code input:focus {
+  outline: none;
+  border-bottom-color: var(--accent-text);
+}
+.mgt2 .codes .code .ps input {
+  width: 4.2rem;
+  padding: 0 2px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--mute);
+}
+.mgt2 .codes .code input.note-edit {
+  width: 9rem;
+  margin-left: 6px;
+  font-family: var(--body);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--mute);
+}
+
+.mgt2 .sect .flag {
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--danger);
+}
+
+.mgt2.card {
+  overflow: hidden;
+  font-family: var(--body);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.mgt2.card .chd {
+  padding: 8px 11px 7px;
+  border-bottom: 1px solid var(--rule);
+}
+.mgt2.card .who {
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2.card .what {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 1px;
+}
+.mgt2.card .what h4 {
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.1;
+  border: none;
+}
+.mgt2.card .what .tgt {
+  margin-left: auto;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--mute);
+}
+.mgt2.card .cmsg {
+  padding: 7px 11px 0;
+  font-size: 13px;
+  color: var(--mute);
+}
+.mgt2.card .cdice {
+  padding: 9px 11px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2.card .cdice:hover {
+  background: var(--hover);
+}
+.mgt2.card .cdice .line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mgt2.card .cdice .f {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--mute);
+}
+.mgt2.card .cdice .t {
+  margin-left: auto;
+  font-family: var(--cond);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2.card .eff {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 11px;
+  border-top: 1px solid var(--rule);
+}
+.mgt2.card .eff .band {
+  font-family: var(--cond);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.mgt2.card .eff .n {
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.mgt2.card .eff .n b {
+  font-family: var(--cond);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2.card .dmgpick {
+  display: flex;
+  border-top: 1px solid var(--rule);
+}
+.mgt2.card .dmgpick > div {
+  flex: 1 1 0;
+  padding: 8px 10px;
+  border-right: 1px solid var(--rule-soft);
+  cursor: var(--cursor-pointer);
+}
+.mgt2.card .dmgpick > div:last-child {
+  border-right: 0;
+}
+.mgt2.card .dmgpick > div:hover {
+  background: var(--hover);
+}
+.mgt2.card .dmgpick > div.on {
+  background: var(--accent-soft);
+}
+.mgt2.card .dmgpick > div.on .n {
+  color: var(--accent-text);
+}
+.mgt2.card .dmgpick > div.bytraits {
+  box-shadow: inset 0 0 0 1px var(--accent-line);
+}
+.mgt2.card .dmgpick > div.bytraits .k::after {
+  content: " ◆";
+}
+.mgt2.card .dmgpick .k {
+  display: block;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2.card .dmgpick .n {
+  display: block;
+  font-family: var(--cond);
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2.card .dmgpick .fx {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--faint);
+}
+.mgt2.card .dmgvoid {
+  display: none;
+}
+.mgt2.card.immune .dmgpick > div {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+.mgt2.card.immune .dmgvoid {
+  display: block;
+  padding: 7px 11px;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--danger);
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.card .pipe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  padding: 7px 11px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.card .pipe b {
+  font-weight: 700;
+  color: var(--ink);
+}
+.mgt2.card .pipe .hot {
+  color: var(--danger);
+}
+.mgt2.card .cmods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  padding: 7px 11px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.card .cmods .neg {
+  color: var(--danger);
+}
+.mgt2.card .cbtns {
+  display: flex;
+  gap: 5px;
+  padding: 8px 11px;
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.card .cbtns button {
+  flex: 1 1 0;
+  height: auto;
+  padding: 5px 6px;
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  background: none;
+  border: 1px solid var(--accent-line);
+  border-radius: 2px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2.card .cbtns button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-text);
+}
+.mgt2.card .cbtns button i {
+  margin-right: 5px;
+}
+
+.mgt2.card.ok .eff {
+  background: color-mix(in oklab, var(--good) 9%, transparent);
+}
+.mgt2.card.ok .eff .band,
+.mgt2.card.ok .eff .n b {
+  color: var(--good);
+}
+
+.mgt2.card.bad .eff {
+  background: color-mix(in oklab, var(--danger) 9%, transparent);
+}
+.mgt2.card.bad .eff .band,
+.mgt2.card.bad .eff .n b {
+  color: var(--danger);
+}
+
+.mgt2.card.edge .eff {
+  background: var(--hover);
+}
+.mgt2.card.edge .eff .band,
+.mgt2.card.edge .eff .n b {
+  color: var(--mute);
+}
+
+.mgt2 nav.tabs {
+  gap: 0;
+  border-top: none;
+  border-bottom: none;
+}
+.mgt2 nav.tabs [data-tab] {
+  color: inherit;
+}
+.mgt2 nav.horizontal-tabs {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: stretch;
+  border-bottom: 1px solid var(--mgt2-editor-border);
+  font-family: var(--mgt2-cond);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--mgt2-subrow-color);
+}
+.mgt2 nav.horizontal-tabs a.item {
+  position: relative;
+  flex: 0 1 auto;
+  padding: 6px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mgt2 nav.horizontal-tabs a.item i {
+  margin-right: 0.4rem;
+}
+.mgt2 nav.horizontal-tabs a.item:hover {
+  color: var(--mgt2-color-primary-active);
+}
+.mgt2 nav.horizontal-tabs a.item.active {
+  color: var(--mgt2-color-primary);
+  text-decoration: none;
+  text-shadow: none;
+  border-bottom: none;
+}
+.mgt2 nav.horizontal-tabs a.item.active::after {
+  content: "";
+  position: absolute;
+  inset: auto 6px -1px;
+  border-bottom: 2px solid var(--mgt2-color-primary);
+}
+.mgt2 nav.mgt2-subnav {
+  font-size: 11px;
+}
+.mgt2 nav.mgt2-subnav a.item {
+  padding: 3px 7px;
+}
+.mgt2 .tab[data-group=inventory].active {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.tab[data-tab].fullsize {
+  height: calc(100% - 3rem);
+}

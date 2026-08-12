@@ -8,13 +8,14 @@
   "TYPES.Item.item": "Objet",
   "TYPES.Item.equipment": "Équipment",
   "TYPES.Item.talent": "Compétence & Talent Psy",
-  "TYPES.Item.race": "Race",
+  "TYPES.Item.species": "Espèce",
   "TYPES.Item.weapon": "Arme",
   "TYPES.Item.container": "Contenant (sac, coffre)",
   "TYPES.Actor.character": "Voyageur",
   "TYPES.Actor.vehicule": "Véhicule",
   "TYPES.Actor.container": "Contenant (sac, coffre)",
   "MGT2": {
+    "Edit": "Modifier",
     "Save": "Sauvegarder",
     "Cancel": "Annuler",
     "Close": "Fermer",
@@ -56,9 +57,16 @@
     "Actor": {
       "StudyPeriod":"Période d'étude",
       "TrainingInSkill":"Compétence en formation",
-      "Completed":"Completée",
+      "StudyPeriodsDone":"Périodes complétées",
       "Weeks":"Semaines",
+      "StudyTowardPeriod":"Vers la prochaine période",
+      "StudyCheckDue":"Jet d'EDU à faire",
+      "StudyCheckHint":"Lancez le jet que cette période demande.",
+      "StudyTarget":"Objectif",
+      "StudyNewSkill":"Nouvelle compétence",
       "NewCareer":"Nouvelle Carrière",
+      "AddComputer": "Ajouter un ordinateur",
+      "AddSkill": "Ajouter une compétence",
       "AddCareer":"Ajouter Carrière",
       "EditCareer":"Éditer Carrière",
       "EditTrait":"Éditer Trait",
@@ -89,10 +97,18 @@
       "Characteristic": "Caractéristique",
       "Contacts": "Contacts",
       "Damage": "Dégâts",
+      "DamageChain": "La chaîne — vidée dans cet ordre",
+      "DamageOrderAvailable": "Disponibles",
+      "DamageOrderEmpty": "Aucune chaîne configurée",
+      "DamageOrderHint": "Les dégâts vident chaque maillon avant de passer au suivant. Une caractéristique sans maximum renseigné ne peut pas entrer dans la chaîne.",
+      "DamageOrderNeedsMax": "Aucun maximum renseigné",
+      "DamageOrderRemove": "Retirer de la chaîne",
+      "DropIn": "Ranger dans",
       "DamageOrder": "Ordre des dégâts",
       "Debt": "Dette",
       "DeleteArmor": "Supprimer Armure",
       "DeleteAugment": "Supprimer Augmentation",
+      "DeleteComputer": "Supprimer l'ordinateur",
       "DeleteContact": "Supprimer Contact",
       "DeleteDisease": "Supprimer Malaide",
       "DeleteEquipment": "Supprimer Équipement",
@@ -104,6 +120,7 @@
       "EditAugment": "Éditer Augmentation",
       "EditContact": "Éditer Contact",
       "EditComputer": "Éditer Ordinateur",
+      "EditEquipment": "Éditer l'équipement",
       "EditDisease": "Éditer Maladie",
       "EditItem": "Éditer Objet",
       "EditSoftware": "Éditer Logiciel",
@@ -142,7 +159,6 @@
       "Rads": "Rads",
       "RelationsAndContacts": "Relations & Contacts",
       "ShowHiddenFields": "Afficher les champs cachés",
-      "ShowMinMax": "Afficher le Min/Max",
       "ShowPsionicTalents": "Afficher les Talents Psy",
       "Skills": "Compétences",
       "TabSkills": "Traits & Compétences",
@@ -335,6 +351,7 @@
       "Timeframes": "Délais MD",
       "States": "États",
       "CustomDM": "MD Personnalisé",
+      "TraitUnmet": "nécessite {requirement}",
       "Difficulty": "Difficulté",
       "RollMode": "Style de Jet",
       "PublicRoll": "Jet Public",
@@ -348,8 +365,8 @@
     },
     "Timeframes": {
       "Normal": "Normal",
-      "Slower": "Lent (+2)",
-      "Faster": "Rapide (-2)"
+      "Slower": "Lent",
+      "Faster": "Rapide"
     },
     "Chat": {
       "Roll": {
@@ -379,6 +396,7 @@
       "Containers": "Conteneurs",
       "Cost": "Coût",
       "Damage": "Dégâts",
+      "DamagePlaceholder": "3d6-3",
       "Description": "Description",
       "DetailedDescription": "Desc. Détailée",
       "Details": "Détails",
@@ -396,6 +414,7 @@
       "Interval": "Intervalle",
       "IsMelee": "Est Mêlée",
       "Items": "Objets",
+      "Overload": "Surcharge",
       "Level": "Niveau",
       "Location": "Localisation",
       "Locked": "Verrouillé",
@@ -406,7 +425,7 @@
       "Modifiers": "Modificateurs",
       "Name": "Nom",
       "Nickname": "Surnom",
-      "NotProficient": "Incompétent (-3)",
+      "NotProficient": "Incompétent",
       "Notes": "Notes",
       "Occupation": "Profession",
       "OnHand": "Sur Soi",
@@ -450,9 +469,18 @@
       "Heures": "Heures"
     },
     "Errors": {
-      "InvalidRollFormula": "Formule de jet invalide.",
+      "InvalidRollFormula": "Formule de jet invalide. Les dés s'écrivent 3d6, pas 3D.",
       "LockedContainer": "Ce conteneur est verrouillé.",
-      "CouldNotFindItem": "Objet introuvable : _ITEM_ID_."
+      "CouldNotFindItem": "Objet introuvable : _ITEM_ID_.",
+      "NoOwnedTokenSelected": "Aucun jeton vous appartenant n'est sélectionné."
+    },
+    "Migration": {
+      "Begin": "MGT2 : migration des données du monde, ne fermez pas la partie.",
+      "Complete": "MGT2 : migration du monde terminée.",
+      "Failed": "MGT2 : échec de la migration du monde. Consultez la console ; elle sera retentée au prochain chargement."
+    },
+    "Notifications": {
+      "HealViaCharacteristics": "Les points de vie découlent de FOR+DEX+END. Restaurez ces caractéristiques pour soigner."
     }
   }
 }

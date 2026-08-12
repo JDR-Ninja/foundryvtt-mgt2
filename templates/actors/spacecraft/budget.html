@@ -1,0 +1,34 @@
+{{! BLOCK 2 — one budget panel, four times over on this sheet at four different scales. The total,
+    the bar and the over-state are computed and never authored, which is the block's contract.
+    `switched` is the power variant: a consumer taken offline frees its draw (Core p.172). }}
+<section class="budget{{#if switched}} switched{{/if}}{{#if b.over}} over{{/if}}" data-over="hard">
+	<header>
+		<span class="lbl">{{title}}</span>
+		{{#if b.over}}<span class="flag">{{flag}}</span>{{/if}}
+		<span class="tot" data-derived="{{derived}}"><b>{{b.total}}</b><span class="of">/ {{b.cap}}{{#if unit}} {{unit}}{{/if}}</span></span>
+		<span class="rem">{{#if b.over}}{{localize 'MGT2.Actor.spacecraft.Over' n=b.remaining}}{{else}}{{localize 'MGT2.Actor.spacecraft.FreeN' n=b.remaining}}{{/if}}</span>
+	</header>
+	<div class="gauge"><i style="--g: {{b.fill}}%"></i><u style="--m: {{b.mark}}%"></u></div>
+	{{! The switched variant's rows hold a STORED control beside a derived number, so the derived
+	    marker stays on the total: nothing under `data-derived` may contain a form control. }}
+	{{#if b.rows.length}}
+	<table class="rows brows"{{#unless switched}} data-derived="{{derived}}"{{/unless}}>
+		<tbody>
+			{{#each b.rows as |row|}}
+			<tr{{#if (eq row.powered false)}} class="off"{{/if}}>
+				{{#if ../switched}}
+				<td class="sw">
+					<input type="checkbox" data-action="powerToggle" data-consumer="{{row.key}}" {{checked row.powered}} />
+				</td>
+				{{/if}}
+				<td>
+					{{#if row.label}}{{row.label}}{{else}}{{localize (concat ../prefix row.key)}}{{/if}}
+					{{#if row.why}}<span class="why">{{localize row.why}}</span>{{/if}}
+				</td>
+				<td class="num">{{row.value}}</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</section>

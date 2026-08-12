@@ -1,0 +1,54 @@
+<aside class="mgt2-rail">
+
+	{{! BLOCK 2 — the spine. `slots.base` is the Size table's figure and NEVER changes with a
+	    modification: it stays the multiplier for every "per Base Slot" cost and every "% of Slots"
+	    rounding, which is why the cap and the armour row move together. }}
+	{{> systems/mgt2/templates/actors/robot/budget.html
+		b=robot.slots
+		title=(localize 'MGT2.Actor.robot.Slots')
+		flag=(localize 'MGT2.Actor.robot.OverBudget')
+		derived="system.slots"}}
+	<dl class="statline" data-derived="system.slots">
+		<div class="stat"><dt>{{localize 'MGT2.Actor.robot.Spare'}}</dt><dd>{{robot.slots.spare}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.robot.BaseSlots'}}</dt><dd>{{robot.slots.base}}</dd></div>
+		<div class="stat{{#unless robot.slots.removed}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.robot.Removed'}}</dt>
+			<dd>{{#if robot.slots.removed}}{{robot.slots.removed}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+	</dl>
+	<p class="hint">{{localize 'MGT2.Actor.robot.SlotHint'}}</p>
+
+	{{! The second budget, in a different currency, and the two are coupled: past the Default Suite's
+	    allowance each further zero-slot option costs a real Slot in the panel above. }}
+	{{> systems/mgt2/templates/actors/robot/budget.html
+		b=robot.zero
+		title=(localize 'MGT2.Actor.robot.ZeroSlot')
+		flag=(localize 'MGT2.Actor.robot.ZeroFlag')
+		derived="system.zeroSlot"}}
+	<p class="hint">{{localize 'MGT2.Actor.robot.ZeroHint' n=robot.zero.cap}}</p>
+
+	{{! The pool. The scale is TWICE the maximum, because `damage` can exceed `max` and that overrun
+	    is the Destroyed state — the same bar a creature's Hits use, with two marks instead of four. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.DamageTracks.hits'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.robot.HitsChain'}}</span>
+		</div>
+		<div class="trackwrap">
+			<div class="track{{#if robot.hits.damage}} hurt{{/if}}" data-derived="system.life.damage">
+				<div class="fill" style="--g: {{robot.hits.wound}}%"></div>
+				{{#each robot.hits.marks}}
+				<div class="mk"{{#if hit}} data-hit="1"{{/if}} style="--x: {{at}}%"><span>{{localize label}}</span></div>
+				{{/each}}
+			</div>
+		</div>
+		<dl class="statline" data-derived="system.characteristics.hits">
+			<div class="stat"><dt>{{localize 'MGT2.Actor.Damage'}}</dt><dd>{{robot.hits.damage}}</dd></div>
+			<div class="stat">
+				<dt>{{localize 'MGT2.Actor.robot.State'}}</dt>
+				<dd class="word">{{localize (concat 'MGT2.Actor.robot.States.' robot.hits.state)}}</dd>
+			</div>
+		</dl>
+		<p class="hint">{{localize 'MGT2.Actor.robot.DamageHint'}}</p>
+	</div>
+</aside>

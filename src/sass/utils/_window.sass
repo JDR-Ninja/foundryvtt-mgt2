@@ -12,25 +12,104 @@
 	&.application
 		.window-content
 			background: var(--mgt2-bgcolor-form)
+			color: var(--mgt2-color-form)
 			padding: 0
 
 .nopad
 	.window-content
 		padding: 0
 
-// The V1 sheets carried this layout as inline styles on the root <form>; in V2 the
-// window content element takes that role.
+// The character sheet is a grid of parts: the parts render in PARTS order but are placed by
+// area, so the six sidebar panels can share one cell and only the active one occupies it.
+// The sheet reflows on its own width rather than the viewport's, so the application root is the
+// query container. `inline-size` and not `size`: the height still comes from the window.
 .mgt2.application.character
-	// The sidebar tab strip is absolutely positioned outside the sheet (left: 100%).
-	// Foundry v14 clips `.application`, so both it and the content box must let it through.
-	overflow: visible
+	container-type: inline-size
+	container-name: sheet
+
 	> .window-content
-		display: flex
-		flex-direction: column
-		align-content: flex-start
+		display: grid
+		grid-template-columns: 15rem minmax(0, 1fr)
+		grid-template-rows: auto auto minmax(0, 1fr) auto
+		grid-template-areas: "header header" "chars nav" "chars panel" "footer footer"
 		height: 100%
-		padding: 0
-		overflow: visible
+		overflow: hidden
+
+		> [data-application-part="header"]
+			grid-area: header
+		> [data-application-part="characteristics"]
+			grid-area: chars
+		> [data-application-part="nav"]
+			grid-area: nav
+		> [data-application-part="footer"]
+			grid-area: footer
+		> .tab[data-group="sidebar"]
+			grid-area: panel
+			min-height: 0
+			&.active
+				display: flex
+				flex-direction: column
+
+// The NPC sheet is the same grid with no tab strip: one panel, and on the creature preset no
+// characteristics column either. ApplicationV2 concatenates `classes` up the inheritance chain, so
+// this root also carries `character` — everything above applies and only the areas are restated.
+.mgt2.application.npc
+	> .window-content
+		grid-template-rows: auto minmax(0, 1fr)
+		grid-template-areas: "header header" "chars panel"
+
+		> [data-application-part="panel"]
+			grid-area: panel
+			min-height: 0
+
+	&[data-preset="creature"] > .window-content
+		grid-template-columns: minmax(0, 1fr)
+		grid-template-areas: "header" "panel"
+
+// The vehicle sheet is the same grid again: header across the top, a rail of the numbers that change
+// in play, and the panel. Wider than the person sheets because the statblock header is eleven lines.
+.mgt2.application.vehicle
+	> .window-content
+		grid-template-columns: 19rem minmax(0, 1fr)
+		grid-template-rows: auto minmax(0, 1fr)
+		grid-template-areas: "header header" "rail panel"
+
+		> [data-application-part="rail"]
+			grid-area: rail
+			min-height: 0
+		> [data-application-part="panel"]
+			grid-area: panel
+			min-height: 0
+
+// The ship is the same grid a third time, and the widest of the three: the rail carries three
+// budget panels rather than one column of numbers.
+.mgt2.application.spacecraft
+	> .window-content
+		grid-template-columns: 21rem minmax(0, 1fr)
+		grid-template-rows: auto minmax(0, 1fr)
+		grid-template-areas: "header header" "rail panel"
+
+		> [data-application-part="rail"]
+			grid-area: rail
+			min-height: 0
+		> [data-application-part="panel"]
+			grid-area: panel
+			min-height: 0
+
+// The robot is the same grid a fourth time. The rail carries two slot budgets and the Hits track;
+// the panel carries the derivation chains, which is the one thing no other type prints.
+.mgt2.application.robot
+	> .window-content
+		grid-template-columns: 20rem minmax(0, 1fr)
+		grid-template-rows: auto minmax(0, 1fr)
+		grid-template-areas: "header header" "rail panel"
+
+		> [data-application-part="rail"]
+			grid-area: rail
+			min-height: 0
+		> [data-application-part="panel"]
+			grid-area: panel
+			min-height: 0
 
 .mgt2.application.item
 	> .window-content

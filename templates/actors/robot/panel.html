@@ -1,0 +1,395 @@
+<section class="mgt2-panel active mgt2-robot-panel">
+
+	{{! The one thing this type owns. Nine of the thirteen printed rows are computed, several of them
+	    multiplicatively, and a bare result is unauditable — a wrong efficiency flag cannot be told
+	    from a wrong TL band. So the sheet prints the terms. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.robot.Derivations'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.robot.DerivationsCount'}}</span>
+		</div>
+
+		<span class="lbl">{{localize 'MGT2.Actor.robot.ChainEndurance'}}</span>
+		<div class="chain" data-derived="system.endurance.hours">
+			{{#each robot.chains.endurance}}
+			{{#unless @first}}<span class="{{#if result}}eq{{else}}op{{/if}}">{{#if result}}={{else}}{{#if op}}{{op}}{{else}}&times;{{/if}}{{/if}}</span>{{/unless}}
+			<span class="t{{#if off}} off{{/if}}{{#if result}} result{{/if}}"><b>{{value}}</b><span>{{localize label}}</span></span>
+			{{/each}}
+		</div>
+
+		<span class="lbl">{{localize 'MGT2.Actor.robot.ChainSpeed'}}</span>
+		<div class="chain" data-derived="system.speed.metres">
+			{{#each robot.chains.speed}}
+			{{#unless @first}}<span class="{{#if result}}eq{{else}}op{{/if}}">{{#if result}}={{else}}{{#if op}}{{op}}{{else}}+{{/if}}{{/if}}</span>{{/unless}}
+			<span class="t{{#if off}} off{{/if}}{{#if result}} result{{/if}}"><b>{{value}}</b><span>{{localize label}}</span></span>
+			{{/each}}
+		</div>
+
+		<span class="lbl">{{localize 'MGT2.Actor.robot.ChainCost'}}</span>
+		<div class="chain" data-derived="system.baseCost">
+			{{#each robot.chains.cost}}
+			{{#unless @first}}<span class="{{#if result}}eq{{else}}op{{/if}}">{{#if result}}={{else}}&times;{{/if}}</span>{{/unless}}
+			<span class="t{{#if result}} result{{/if}}"><b>{{value}}</b><span>{{localize label}}</span></span>
+			{{/each}}
+		</div>
+
+		{{#if robot.chains.vehicle}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.VehicleSpeedHint' hours=robot.chains.vehicle}}</p>
+		{{else}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.ChainHint'}}</p>
+		{{/if}}
+
+		<div class="grid edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Tactical'}}</span>
+				{{formInput systemFields.speed.fields.tactical name="system.speed.tactical" value=system.speed.tactical classes="f num"}}
+			</label>
+			{{! An explicit control and not `formInput`: a nullable NumberField carrying both a min and
+			    a max renders as a range-picker, and a slider cannot express `null`. }}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.VehicleBand'}}</span>
+				<select class="f" name="system.speed.vehicleBand" data-dtype="Number">
+					<option value="">&mdash;</option>
+					{{#each choices.speedBands as |label key|}}
+					<option value="{{@index}}"{{#if (eq @index ../system.speed.vehicleBand)}} selected{{/if}}>{{localize label}}</option>
+					{{/each}}
+				</select>
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.AgilityEnhancement'}}</span>
+				{{formInput systemFields.agilityEnhancement name="system.agilityEnhancement" value=system.agilityEnhancement classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Power'}}</span>
+				{{formInput systemFields.endurance.fields.source name="system.endurance.source" value=system.endurance.source localize=true classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.PowerPacks'}}</span>
+				<input class="f num" type="number" name="system.endurance.powerPacks" min="0" max="3" step="1" value="{{system.endurance.powerPacks}}" />
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.HalfLife'}}</span>
+				{{formInput systemFields.endurance.fields.halfLife name="system.endurance.halfLife" value=system.endurance.halfLife classes="f num"}}
+			</label>
+			<label class="check">
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Efficiency'}}</span>
+				{{formInput systemFields.endurance.fields.efficiency name="system.endurance.efficiency" value=system.endurance.efficiency}}
+			</label>
+		</div>
+	</div>
+
+	{{! Locomotion drives four values at once, so it cannot be a plain enum — and a robot may carry
+	    two modes, each granting its own traits (RH p.17, p.24). }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.robot.Locomotion'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.robot.LocomotionCount'}}</span>
+			<a class="add edit-only" data-action="rowCreate" data-rows="locomotion" data-tooltip="{{localize 'MGT2.Actor.robot.AddLocomotion'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if robot.locomotion.length}}
+		<table class="rows fixed">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Actor.robot.Mode'}}</th>
+					<th class="c num">{{localize 'MGT2.Actor.robot.Agility'}}</th>
+					<th class="c num">{{localize 'MGT2.Actor.robot.BaseEndurance'}}</th>
+					<th>{{localize 'MGT2.Actor.robot.TraitGranted'}}</th>
+					<th class="c num">{{localize 'MGT2.Actor.robot.CostMultiplier'}}</th>
+					<th class="acts"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each robot.locomotion}}
+				<tr data-row-index="{{index}}">
+					<td>
+						<span class="play-only">{{localize label}}</span>
+						<select class="f edit-only" name="system.locomotion.{{index}}.type">
+							{{#each choices}}
+							<option value="{{key}}"{{#if selected}} selected{{/if}}>{{localize label}}</option>
+							{{/each}}
+						</select>
+						<span class="sub">{{#if isPrimary}}{{localize 'MGT2.Actor.robot.Primary'}}{{else}}{{localize 'MGT2.Actor.robot.Secondary'}}{{/if}}</span>
+						{{! Which mode is primary rides a hidden checkbox, because the whole array is
+						    rewritten on submit and a flag with no control would reset to its initial. }}
+						<input type="checkbox" name="system.locomotion.{{index}}.primary" {{checked isPrimary}} hidden />
+					</td>
+					<td class="c num">{{#if agility}}{{agility}}{{else}}&mdash;{{/if}}</td>
+					<td class="c num">{{endurance}}</td>
+					<td>{{#each traits}}{{#unless @first}}, {{/unless}}{{this}}{{/each}}</td>
+					<td class="c num">&times;{{costMultiplier}}</td>
+					<td>
+						<div class="acts edit-only">
+							<a data-action="locomotionPrimary" data-tooltip="{{localize 'MGT2.Actor.robot.MakePrimary'}}"><i class="fa-solid fa-star{{#unless isPrimary}}-half-stroke{{/unless}}"></i></a>
+							<a data-action="rowDelete" data-rows="locomotion" data-tooltip="{{localize 'MGT2.Actor.robot.DeleteLocomotion'}}"><i class="fa-solid fa-trash"></i></a>
+						</div>
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.LocomotionHint'}}</p>
+	</div>
+
+	{{! STR and DEX are stored and not derived even though both have a formula: each limb may be
+	    bought up independently, so the formula is the starting point and never the value. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.robot.Manipulators'}}</h3>
+			<span class="count">{{robot.statblock.manipulators}}</span>
+			<a class="add edit-only" data-action="rowCreate" data-rows="manipulators" data-tooltip="{{localize 'MGT2.Actor.robot.AddManipulator'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if robot.manipulators.length}}
+		<table class="rows manip fixed">
+			<thead>
+				<tr>
+					<th class="c num">{{localize 'MGT2.Actor.robot.Limbs'}}</th>
+					<th class="c num">{{localize 'MGT2.Actor.robot.LimbSize'}}</th>
+					<th class="c num">{{localize 'MGT2.Characteristics.strength.short'}}</th>
+					<th class="c num">{{localize 'MGT2.Characteristics.dexterity.short'}}</th>
+					<th class="f">{{localize 'MGT2.Actor.robot.Formula'}}</th>
+					<th class="acts"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each robot.manipulators}}
+				<tr data-row-index="{{index}}">
+					<td class="c num">
+						<span class="play-only">&times;{{count}}{{#if isLeg}} <i class="fa-solid fa-shoe-prints" data-tooltip="{{localize 'MGT2.Actor.robot.IsLeg'}}"></i>{{/if}}</span>
+						<input class="f num edit-only" type="number" min="1" step="1" name="system.manipulators.{{index}}.count" value="{{count}}" />
+						{{! RH p.27: a walker's legs can be promoted to manipulators. }}
+						<label class="edit-only" data-tooltip="{{localize 'MGT2.Actor.robot.IsLeg'}}">
+							<input type="checkbox" name="system.manipulators.{{index}}.isLeg" {{checked isLeg}} />
+						</label>
+					</td>
+					<td class="c num">
+						<span class="play-only">{{size}}</span>
+						<input class="f num edit-only" type="number" min="1" max="10" step="1" name="system.manipulators.{{index}}.size" value="{{size}}" />
+					</td>
+					{{! The two limbs the STR and DEX projections read (RH p.116). }}
+					<td class="c num"{{#if strongest}} data-tooltip="{{localize 'MGT2.Actor.robot.Strongest'}}"{{/if}}>
+						<span class="play-only">{{#if strongest}}<b>{{strength}}</b>{{else}}{{strength}}{{/if}}</span>
+						<input class="f num edit-only" type="number" min="0" step="1" name="system.manipulators.{{index}}.strength" value="{{strength}}" />
+					</td>
+					<td class="c num"{{#if deftest}} data-tooltip="{{localize 'MGT2.Actor.robot.Deftest'}}"{{/if}}>
+						<span class="play-only">{{#if deftest}}<b>{{dexterity}}</b>{{else}}{{dexterity}}{{/if}}</span>
+						<input class="f num edit-only" type="number" min="0" step="1" name="system.manipulators.{{index}}.dexterity" value="{{dexterity}}" />
+					</td>
+					<td class="f">{{localize 'MGT2.Actor.robot.ManipulatorFormula' str=baseStrength dex=baseDexterity}}</td>
+					<td>
+						<div class="acts edit-only">
+							<a data-action="rowDelete" data-rows="manipulators" data-tooltip="{{localize 'MGT2.Actor.robot.DeleteManipulator'}}"><i class="fa-solid fa-trash"></i></a>
+						</div>
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.ManipulatorHint'}}</p>
+	</div>
+
+	{{! Options are the slot budget's rows. §6.1 would make them `equipment` Items with a `slots`
+	    field; until that field exists they are rows the referee transcribes, and a robot option has
+	    no use for weight, quantity or an equipped flag anyway. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.robot.Options'}}</h3>
+			<span class="count">{{system.options.length}}</span>
+			<a class="add edit-only" data-action="rowCreate" data-rows="options" data-tooltip="{{localize 'MGT2.Actor.robot.AddOption'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if system.options.length}}
+		<table class="rows fixed">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Name'}}</th>
+					<th class="c num">{{localize 'MGT2.Actor.robot.SlotCost'}}</th>
+					<th class="c num">{{localize 'MGT2.Actor.robot.ZeroSlotFlag'}}</th>
+					<th>{{localize 'MGT2.Actor.robot.Why'}}</th>
+					<th class="acts"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each system.options}}
+				<tr data-row-index="{{@index}}">
+					<td>
+						<span class="play-only">{{name}}</span>
+						<input class="f edit-only" type="text" name="system.options.{{@index}}.name" value="{{name}}" />
+					</td>
+					<td class="c num">
+						<span class="play-only">{{#if zeroSlot}}&mdash;{{else}}{{slots}}{{/if}}</span>
+						<input class="f num edit-only" type="number" min="0" step="1" name="system.options.{{@index}}.slots" value="{{slots}}" />
+					</td>
+					<td class="c">
+						<input type="checkbox" name="system.options.{{@index}}.zeroSlot" {{checked zeroSlot}} />
+					</td>
+					<td>
+						<span class="play-only">{{note}}</span>
+						<input class="f edit-only" type="text" name="system.options.{{@index}}.note" value="{{note}}" />
+					</td>
+					<td>
+						<div class="acts edit-only">
+							<a data-action="rowDelete" data-rows="options" data-tooltip="{{localize 'MGT2.Actor.robot.DeleteOption'}}"><i class="fa-solid fa-trash"></i></a>
+						</div>
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.OptionHint'}}</p>
+	</div>
+
+	{{! The brain is a `computer` Item, for the third time after a handcomp and a starship's
+	    Computer/25: its `processing` IS the total Bandwidth, so a storage module raises it by
+	    raising the Item. With no Item the grade's own inherent Computer/X stands. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.robot.Brain'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.robot.BrainCount'}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="computer" data-create-name="{{localize 'MGT2.Actor.robot.NewBrain'}}" data-tooltip="{{localize 'MGT2.Actor.robot.AddBrain'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{> systems/mgt2/templates/actors/robot/budget.html
+			b=robot.bandwidth
+			title=(localize 'MGT2.Actor.robot.Bandwidth')
+			flag=(localize 'MGT2.Actor.robot.Overload')
+			derived="system.brain.bandwidth"}}
+		<dl class="statline grid" data-derived="system.brain">
+			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.Grade'}}</dt><dd class="word">{{localize robot.brain.label}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.BaseIntellect'}}</dt><dd>{{robot.brain.baseIntellect}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.SkillDM'}}</dt><dd>{{showDM robot.brain.skillDM}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.Inherent'}}</dt><dd>{{robot.bandwidth.inherent}}</dd></div>
+			<div class="stat{{#unless robot.brain.ceiling}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.robot.TaskCeiling'}}</dt>
+				<dd class="word">{{#if robot.brain.ceiling}}{{localize robot.brain.ceiling}}{{else}}&mdash;{{/if}}</dd>
+			</div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.SkillCap'}}</dt><dd>{{robot.brain.skillCap}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.FreeSkills'}}</dt><dd>{{robot.brain.freeSkills}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.EducationCap'}}</dt><dd>{{robot.brain.educationCap}}</dd></div>
+		</dl>
+		{{#if robot.brain.item}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.BrainItem' name=robot.brain.item.name n=robot.brain.item.processing}}</p>
+		{{else}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.NoBrainItem' n=robot.bandwidth.inherent}}</p>
+		{{/if}}
+		{{#if robot.bandwidth.oversized.length}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.Oversized' n=robot.bandwidth.inherent}}</p>
+		{{/if}}
+		<label class="check edit-only">
+			{{formInput systemFields.brain.fields.hardened name="system.brain.hardened" value=system.brain.hardened}}
+			<span class="lbl">{{localize 'MGT2.Actor.robot.Hardened'}}</span>
+		</label>
+	</div>
+
+	{{! §5.8 — one type with a flag, not a chassis Item and not a second sub-type. }}
+	{{#if system.traveller.enabled}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.robot.Characteristics'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.robot.TravellerCount'}}</span>
+		</div>
+		<div class="chars">
+			<div class="char-list">
+				{{#each robot.traveller}}
+				{{> systems/mgt2/templates/actors/parts/characteristic.html pool=true}}
+				{{/each}}
+			</div>
+		</div>
+		<div class="grid edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Society'}}</span>
+				{{formInput systemFields.traveller.fields.society name="system.traveller.society" value=system.traveller.society localize=true classes="f"}}
+			</label>
+		</div>
+		<p class="hint">{{localize 'MGT2.Actor.robot.TravellerHint'}}</p>
+	</div>
+	{{/if}}
+
+	{{! Attacks are `weapon` Items flagged `natural`, exactly as a creature's are. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.robot.Attacks'}}</h3>
+			<span class="count">{{naturals.length}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if naturals.length}}
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Name'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Damage'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Range'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each naturals as |weapon|}}
+				<tr data-item-id="{{weapon._id}}">
+					<td><a class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}</td>
+					<td class="c num">{{weapon.system.damage}}</td>
+					<td class="c num">{{weapon.range}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.AttackHint'}}</p>
+	</div>
+
+	{{#if carried.length}}
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Items.Weapons'}}</h3><span class="count">{{carried.length}}</span></div>
+		<table class="rows">
+			<tbody>
+				{{#each carried as |weapon|}}
+				<tr data-item-id="{{weapon._id}}">
+					<td><a class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}</td>
+					<td class="c num">{{weapon.system.damage}}</td>
+					<td class="c num">{{weapon.range}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+	{{/if}}
+
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.Skills'}}</h3>
+			<span class="count">{{skills.length}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="talent" data-subtype="skill" data-create-name="{{localize 'MGT2.Actor.NewSkill'}}" data-tooltip="{{localize 'MGT2.Actor.AddSkill'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if skills.length}}
+		<table class="rows">
+			<tbody>
+				{{#each skills as |skill|}}
+				<tr data-item-id="{{skill._id}}">
+					<td><a class="roll" data-action="roll" data-roll="skill" data-roll-skill="{{skill._id}}"><i class="fa-solid fa-dice"></i></a>{{skill.name}}{{#if skill.system.skill.speciality}} ({{skill.system.skill.speciality}}){{/if}}</td>
+					<td class="r num">{{skill.system.level}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditSkill" del="MGT2.Actor.DeleteSkill"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.SkillHint' n=robot.brain.skillCap}}</p>
+	</div>
+
+	{{! The shared code row: NAME(param, param) and no definition text. }}
+	{{> systems/mgt2/templates/items/blocks/traits.html}}
+	{{#if robot.statblock.traits.length}}
+	<p class="hint">{{localize 'MGT2.Actor.robot.LocomotionTraits'}} {{#each robot.statblock.traits}}{{#unless @first}}, {{/unless}}{{this}}{{/each}}</p>
+	{{/if}}
+
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Actor.robot.Description'}}</h3></div>
+		<prose-mirror name="system.description" value="{{system.description}}" toggled></prose-mirror>
+	</div>
+
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Actor.Notes'}}</h3></div>
+		<prose-mirror name="system.notes" value="{{system.notes}}" toggled></prose-mirror>
+	</div>
+</section>

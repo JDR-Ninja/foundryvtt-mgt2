@@ -1,0 +1,143 @@
+<section class="mgt2-header">
+	<img class="portrait" src="{{img}}" alt="{{name}}" data-edit="img" data-action="editImage" data-tooltip="{{name}}" />
+
+	<div class="idy">
+		<div class="name">
+			<span class="play-only">{{name}}</span>
+			<input class="f edit-only" name="name" type="text" value="{{name}}" />
+		</div>
+
+		<div class="meta play-only">
+			{{#if robot.statblock.locomotion.length}}
+			<span>{{#each robot.statblock.locomotion}}{{#unless @first}} / {{/unless}}{{localize this}}{{/each}}</span>
+			{{/if}}
+			<span>{{localize (lookup (lookup choices.sizes system.size) 'label')}}</span>
+			<span>{{localize robot.brain.label}}</span>
+			<span>{{localize 'MGT2.Actor.robot.TL'}} {{system.tl}}</span>
+			{{#if system.owner}}<span>{{system.owner}}</span>{{/if}}
+		</div>
+
+		{{! Size is a `<select>` and not the schema's bounded number: a NumberField carrying both a
+		    min and a max renders as a range-picker through `formInput`, and the Size table's rows
+		    are what a builder actually picks between. }}
+		<div class="meta edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Size'}}</span>
+				<select class="f" name="system.size" data-dtype="Number">
+					{{#each robot.sizes}}
+					<option value="{{key}}"{{#if selected}} selected{{/if}}>{{localize label}} &middot; {{slots}}/{{hits}}</option>
+					{{/each}}
+				</select>
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.TL'}}</span>
+				{{formInput systemFields.tl name="system.tl" value=system.tl classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.SlotsRemoved'}}</span>
+				{{formInput systemFields.slots.fields.removed name="system.slots.removed" value=system.slots.removed classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Brain'}}</span>
+				{{formInput systemFields.brain.fields.grade name="system.brain.grade" value=system.brain.grade localize=true classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.IntellectUp'}}</span>
+				<input class="f num" type="number" name="system.brain.intellect" min="0" max="3" step="1" value="{{system.brain.intellect}}" />
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Resiliency'}}</span>
+				{{formInput systemFields.resiliency name="system.resiliency" value=system.resiliency classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Cost'}}</span>
+				{{formInput systemFields.cost name="system.cost" value=system.cost classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Owner'}}</span>
+				{{formInput systemFields.owner name="system.owner" value=system.owner classes="f"}}
+			</label>
+			{{! §5.8: one type with a flag. Nothing about the schema changes when it is set — the six
+			    canonical characteristics are declared on every robot and this only reveals them. }}
+			<label class="check">
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Traveller'}}</span>
+				{{formInput systemFields.traveller.fields.enabled name="system.traveller.enabled" value=system.traveller.enabled}}
+			</label>
+		</div>
+
+		{{! Derived from the wound, both of them (RH p.14), plus the one hard budget state. }}
+		<div class="states">
+			<label data-tooltip="{{localize 'MGT2.Actor.robot.WreckedHint'}}">
+				<input type="checkbox" {{checked robot.hits.wrecked}} disabled />{{localize 'MGT2.Actor.robot.Wrecked'}}
+			</label>
+			<label data-tooltip="{{localize 'MGT2.Actor.robot.DestroyedHint'}}">
+				<input type="checkbox" {{checked robot.hits.destroyed}} disabled />{{localize 'MGT2.Actor.robot.Destroyed'}}
+			</label>
+			<label data-tooltip="{{localize 'MGT2.Actor.robot.OverloadHint'}}">
+				<input type="checkbox" {{checked robot.brain.overload}} disabled />{{localize 'MGT2.Actor.robot.Overload'}}
+			</label>
+		</div>
+	</div>
+
+	{{! Programming takes the UPP's slot: it is what a robot is called on paper. }}
+	<div class="reg">
+		<span class="lbl">{{localize 'MGT2.Actor.robot.Programming'}}</span>
+		<div class="code play-only" data-derived="system.brain">{{localize robot.brain.label}}</div>
+		<div class="ref play-only">
+			{{#if robot.brain.ceiling}}{{localize 'MGT2.Actor.robot.Ceiling'}} {{robot.brain.ceilingTarget}}+{{else}}{{localize 'MGT2.Actor.robot.NoCeiling'}}{{/if}}
+		</div>
+	</div>
+
+	{{! BLOCK 1, .grid — the thirteen printed statblock rows, and NINE of them are computed. Every
+	    entry is derived or transcribed elsewhere; nothing here is a form control in either mode. }}
+	<dl class="statline grid" data-derived="system">
+		<div class="stat lead{{#if robot.hits.damage}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.DamageTracks.hits'}}</dt>
+			<dd>{{robot.hits.value}}<span class="of">/{{robot.hits.max}}</span></dd>
+		</div>
+		<div class="stat{{#unless robot.statblock.locomotion.length}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.robot.Locomotion'}}</dt>
+			<dd class="word">{{#if robot.statblock.locomotion.length}}{{#each robot.statblock.locomotion}}{{#unless @first}} / {{/unless}}{{localize this}}{{/each}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		{{! Metres OR a Speed Band, never both: Vehicle Speed Movement replaces the figure (RH p.24). }}
+		<div class="stat">
+			<dt>{{localize 'MGT2.Actor.robot.Speed'}}</dt>
+			<dd>{{#if robot.statblock.band}}<span class="word">{{localize robot.statblock.band}}</span>{{else}}{{robot.statblock.speed}}<i>{{localize 'MGT2.Actor.robot.Metres'}}</i>{{/if}}</dd>
+		</div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.robot.TL'}}</dt><dd>{{system.tl}}</dd></div>
+		<div class="stat">
+			<dt>{{localize 'MGT2.Actor.robot.Endurance'}}</dt>
+			<dd>{{robot.statblock.endurance}}<i>{{localize 'MGT2.Actor.robot.Hours'}}</i></dd>
+		</div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.robot.Armour'}}</dt><dd>{{showDM system.inventory.armor}}</dd></div>
+		<div class="stat{{#if robot.slots.over}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.Actor.robot.Slots'}}</dt>
+			<dd>{{robot.slots.total}}<span class="of">/{{robot.slots.cap}}</span></dd>
+		</div>
+		<div class="stat{{#if robot.brain.overload}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.Actor.robot.Bandwidth'}}</dt>
+			<dd>{{robot.bandwidth.total}}<span class="of">/{{robot.bandwidth.cap}}</span></dd>
+		</div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.robot.AttackDM'}}</dt><dd>{{showDM robot.statblock.attackDM}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.robot.Manipulators'}}</dt><dd>{{robot.statblock.manipulators}}</dd></div>
+		<div class="stat{{#unless system.cost}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.robot.Cost'}}</dt>
+			<dd>{{#if system.cost}}<i>Cr</i>{{system.cost}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat{{#unless robot.statblock.halfLife}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.robot.HalfLife'}}</dt>
+			<dd>{{#if robot.statblock.halfLife}}{{robot.statblock.halfLife}}<i>{{localize 'MGT2.Actor.robot.Years'}}</i>{{else}}&mdash;{{/if}}</dd>
+		</div>
+	</dl>
+
+	{{! Live in both modes: with the wound stored and every other number derived, this is the only
+	    way a robot's Hits can change at all. }}
+	<div class="hdctl">
+		<span class="dmgctl">
+			<input type="number" min="0" step="1" value="1" aria-label="{{localize 'MGT2.Actor.Amount'}}" />
+			<button type="button" class="btn b-dmg" data-action="applyDamage" data-sign="1">{{localize 'MGT2.Actor.Damage'}}</button>
+			<button type="button" class="btn" data-action="applyDamage" data-sign="-1">{{localize 'MGT2.Actor.robot.Repair'}}</button>
+		</span>
+		<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
+	</div>
+</section>

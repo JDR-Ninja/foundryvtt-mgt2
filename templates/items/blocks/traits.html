@@ -1,0 +1,49 @@
+{{! The shared code row: NAME(param, param) and no definition text. The registry ships names,
+    parameter shapes, families and citations only, so what would have been a `name -> what it does`
+    table is a chip carrying the OWNER's note on a dagger. `key`, `family` and each slot ride hidden
+    inputs because the whole array element is rewritten on submit. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize traits.label}}</h3>
+		<span class="count">{{localize traits.familyLabel}} &middot; {{traits.entries.length}}</span>
+	</div>
+	<ul class="codes" data-property="{{traits.property}}" data-family="{{traits.family}}">
+		{{#each traits.entries as |entry i|}}
+		<li class="code{{#if entry.note}} noted{{/if}}" data-trait-index="{{i}}">
+			{{#if entry.custom}}
+			<b class="play-only">{{entry.note}}</b>
+			<input class="edit-only" type="text" name="system.{{../traits.property}}.{{i}}.note" value="{{entry.note}}" />
+			{{else}}
+			<b>{{entry.label}}</b>
+			{{#if entry.params.length}}
+			<span class="ps">
+				{{#each entry.params as |param j|}}
+				<span class="p">
+					<span class="play-only">{{param.value}}</span>
+					<input class="edit-only" type="text" size="6" value="{{param.value}}"
+						name="system.{{../../traits.property}}.{{i}}.params.{{j}}.value"
+						data-tooltip="{{param.slotLabel}}" aria-label="{{param.slotLabel}}" />
+					<input type="hidden" name="system.{{../../traits.property}}.{{i}}.params.{{j}}.slot" value="{{param.slot}}" />
+				</span>
+				{{/each}}
+			</span>
+			{{/if}}
+			{{#if entry.note}}<a class="note play-only" data-tooltip="{{entry.note}}">&dagger;</a>{{/if}}
+			<input class="note-edit edit-only" type="text" name="system.{{../traits.property}}.{{i}}.note"
+				value="{{entry.note}}" placeholder="{{localize 'MGT2.Items.OwnerNote'}}" />
+			{{/if}}
+			<input type="hidden" name="system.{{../traits.property}}.{{i}}.family" value="{{entry.family}}" />
+			<input type="hidden" name="system.{{../traits.property}}.{{i}}.key" value="{{entry.key}}" />
+			<a class="x edit-only" data-action="traitDelete" data-tooltip="{{localize 'MGT2.Items.DeleteEntry'}}">&times;</a>
+		</li>
+		{{/each}}
+		<li class="addtag edit-only">
+			<input type="text" list="{{traits.listId}}" placeholder="{{localize 'MGT2.Items.AddTrait'}}" />
+		</li>
+	</ul>
+	{{#if traits.vocabulary.length}}
+	<datalist id="{{traits.listId}}">
+		{{#each traits.vocabulary}}<option value="{{label}}" label="{{hint}}"></option>{{/each}}
+	</datalist>
+	{{/if}}
+</div>

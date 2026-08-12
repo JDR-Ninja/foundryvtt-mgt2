@@ -1,0 +1,42 @@
+{{! Pinned light for the same reason as roll.html: Foundry hard-codes `themed theme-light` on
+    ol.chat-log. Nothing on this card names a target — no portrait, no "vs.", no armour figure.
+    Stages 2 to 6 of the pipeline run in applyDamage on whoever a player applies it to. }}
+<div class="mgt2 theme-light card">
+	<div class="chd">
+		{{#if who}}<div class="who">{{who}}</div>{{/if}}
+		<div class="what">
+			<h4>{{localize 'MGT2.Actor.Damage'}}</h4>
+			<span class="tgt">{{localize 'MGT2.Chat.Damage.ApplyToWhoever'}}</span>
+		</div>
+	</div>
+	{{! Three readings of one attack. Reduced is a different roll, so it was rolled with the full
+	    one; Minimum is one point per die. Every reading carries the Effect. }}
+	<div class="dmgpick">
+		{{#each options}}
+		<div class="{{#if @first}}on{{/if}}" data-transform="{{key}}" data-total="{{total}}">
+			<span class="k">{{localize label}}</span>
+			<span class="n">{{total}}</span>
+			<span class="fx">{{detail}}</span>
+		</div>
+		{{/each}}
+	</div>
+	{{! Filled in against whichever token the referee has selected, and only then — nothing on this
+	    card resolved against a target when the attack was rolled. }}
+	<div class="dmgvoid">{{localize 'MGT2.Chat.Damage.Immune'}}</div>
+	<div class="pipe">
+		<span>{{localize 'MGT2.Chat.Damage.Scale'}} <b>{{localize scaleLabel}}</b></span>
+		{{#if typeLabels.length}}
+		<span>{{localize 'MGT2.Chat.Damage.Type'}} <b>{{#each typeLabels}}{{#unless @first}} · {{/unless}}{{localize this}}{{/each}}</b></span>
+		{{/if}}
+		{{#if ap}}<span class="hot">{{localize 'MGT2.Chat.Damage.AP' score=ap}}</span>{{/if}}
+		{{! Lo-Pen needs the target's Protection at attack time, which the system never reads: it is
+		    a reminder here and nothing else. }}
+		{{#if loPen}}<span class="hot">{{localize 'MGT2.Chat.Damage.LoPen' score=loPen}}</span>{{/if}}
+		{{#if stun}}<span class="hot">{{localize 'MGT2.Chat.Damage.Stun'}}</span>{{/if}}
+		<span>{{localize 'MGT2.Chat.Roll.Effect'}} <b>{{effectDisplay}}</b></span>
+		{{#if floor}}<span class="hot">{{localize 'MGT2.Chat.Damage.Floor'}}</span>{{/if}}
+	</div>
+	<div class="cbtns">
+		<button data-action="damage"><i class="fa-regular fa-heart-circle-minus"></i><span>{{applyLabel}}</span></button>
+	</div>
+</div>

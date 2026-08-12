@@ -1,0 +1,35 @@
+<section class="tab mgt2-panel{{#if tabs.sidebar.relations.active}} active{{/if}}" data-group="sidebar" data-tab="relations">
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Items.Relations'}}</h3>
+			<span class="count">{{contacts.length}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="contact" data-create-name="{{localize 'MGT2.Actor.NewContact'}}" data-tooltip="{{localize 'MGT2.Actor.AddContact'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if contacts.length}}
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Name'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Relation'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Attitude'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Occupation'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Location'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each contacts as |contact|}}
+				<tr data-item-id="{{contact._id}}">
+					<td>{{contact.name}}</td>
+					<td class="c">{{localize (concat "MGT2.Contact.Relation." contact.system.relation)}}</td>
+					<td class="c">{{localize (concat "MGT2.Contact.Attitude." contact.system.attitude)}}</td>
+					<td class="c">{{contact.system.occupation}}</td>
+					<td class="c">{{contact.system.location}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditContact" del="MGT2.Actor.DeleteContact"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+	</div>
+</section>

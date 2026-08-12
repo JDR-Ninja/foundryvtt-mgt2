@@ -1,6 +1,6 @@
 // Foundry v14 styles bare `nav.tabs` with a gap and top/bottom borders, and colours
-// inactive tab labels with --color-text-secondary. Neither existed in v12, so both are
-// neutralised here to keep the original look.
+// inactive tab labels with --color-text-secondary. Both are neutralised here, and the
+// remaining look is the direction B tab bar: condensed label, accent underline when active.
 .mgt2
 	nav.tabs
 		gap: 0
@@ -9,60 +9,50 @@
 		[data-tab]
 			color: inherit
 
-	nav
-		&.horizontal-tabs
-			color: var(--mgt2-color-primary)
-			background: var(--mgt2-bgcolor-primary)
-			font-style: normal
-			font-weight: 700
-			font-size: 14px
-			line-height: 30px
-			text-transform: uppercase
-			justify-content: space-around
-			align-items: center
-			font-family: "Roboto Condensed", sans-serif
-			a
-				&.item
-					position: relative
-					flex: 1 1 auto
-					i
-						margin-right: 0.5rem
-			& > a
-				&.item
-					&::after
-						content: ""
-						position: absolute
-						inset: 0.25rem 0.25rem 0.25rem 0.25rem
-						border: 1px solid var( --mgt2-color-primary-active)
-						pointer-events: none
-					&.active
-						&::after
-							border-bottom: none
-							border-top: 2px solid var( --mgt2-color-primary-active)
-							border-left: 2px solid var( --mgt2-color-primary-active)
-							border-right: 2px solid var( --mgt2-color-primary-active)
-							inset: 0.25rem 0.25rem 0 0.25rem
-			.active
+	nav.horizontal-tabs
+		display: flex
+		flex-flow: row nowrap
+		align-items: stretch
+		border-bottom: 1px solid var(--mgt2-editor-border)
+		font-family: var(--mgt2-cond)
+		font-size: 12px
+		font-weight: 600
+		letter-spacing: 0.12em
+		line-height: 1.4
+		text-transform: uppercase
+		color: var(--mgt2-subrow-color)
+		a.item
+			position: relative
+			flex: 0 1 auto
+			padding: 6px 10px
+			white-space: nowrap
+			overflow: hidden
+			text-overflow: ellipsis
+			i
+				margin-right: 0.4rem
+			&:hover
+				color: var(--mgt2-color-primary-active)
+			&.active
 				color: var(--mgt2-color-primary)
 				text-decoration: none
 				text-shadow: none
 				border-bottom: none
+				&::after
+					content: ""
+					position: absolute
+					inset: auto 6px -1px
+					border-bottom: 2px solid var(--mgt2-color-primary)
 
+	// The characteristics and inventory switches are the same bar at a smaller scale.
+	nav.mgt2-subnav
+		font-size: 11px
+		a.item
+			padding: 3px 7px
+
+	.tab[data-group="inventory"].active
+		display: flex
+		flex: 1 1 auto
+		min-height: 0
 
 .tab[data-tab].fullsize
 	height: calc(100% - 3rem)
-
-.subTab
-	flex-flow: column
-	height: 100%
-	display: flex
-	justify-content: flex-start
-	align-items: stretch
-.tab-scroll
-	overflow-y: auto
-	height: 100%
-.subTabs
-	height: 100%
-	flex-direction: column
-	&.active
-		display: flex !important

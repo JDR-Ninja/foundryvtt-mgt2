@@ -1,0 +1,50 @@
+{{! Every type carries this block, and it renders while empty: an ActiveEffect on an Item transfers
+    to its owner, so the absence of one is worth stating. Also included by the actor's Effects tab. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Effects.Title'}}</h3>
+		<span class="count">{{effects.length}}</span>
+		<a class="add edit-only" data-action="effectCreate" data-tooltip="{{localize 'MGT2.Effects.Add'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	{{#if effects.length}}
+	<table class="rows">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Items.Name'}}</th>
+				<th>{{localize 'MGT2.Effects.Source'}}</th>
+				<th>{{localize 'MGT2.Effects.Changes'}}</th>
+				<th class="c">{{localize 'MGT2.Effects.Duration'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each effects}}
+			<tr data-effect-uuid="{{uuid}}"{{#unless active}} class="off"{{/unless}}>
+				<td><img class="effect-icon" src="{{img}}" alt="" />{{name}}</td>
+				<td>{{#if origin}}{{origin}}{{else}}—{{/if}}</td>
+				<td>
+					{{#if changes.length}}
+					<ul class="changes">
+						{{#each changes}}
+						<li><span class="k">{{key}}</span><span class="v">{{type}} {{value}}</span><span class="ph{{#if final}} final{{/if}}">{{phase}}</span></li>
+						{{/each}}
+					</ul>
+					{{else}}—{{/if}}
+				</td>
+				<td class="c">{{#if duration}}{{duration}}{{else}}—{{/if}}</td>
+				<td class="r">
+					<div class="acts">
+						<a class="{{#unless disabled}}on{{/unless}}" data-action="effectToggle" data-tooltip="{{localize 'MGT2.Effects.Toggle'}}"><i class="fa-solid fa-power-off"></i></a>
+						<a class="{{#if suspended}}on{{/if}}" data-action="effectSuspend" data-tooltip="{{localize 'MGT2.Effects.Suspend'}}"><i class="fa-solid fa-circle-pause"></i></a>
+						<a data-action="effectEdit" data-tooltip="{{localize 'MGT2.Effects.Edit'}}"><i class="fas fa-edit"></i></a>
+						{{#unless mirrored}}<a data-action="effectDelete" data-tooltip="{{localize 'MGT2.Effects.Delete'}}"><i class="fas fa-trash"></i></a>{{/unless}}
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{else}}
+	<p class="hint">{{localize 'MGT2.Effects.Empty'}}</p>
+	{{/if}}
+</div>

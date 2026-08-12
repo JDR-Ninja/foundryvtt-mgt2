@@ -1,48 +1,187 @@
-<div class="mgt2-dialog flexcol">
-    <div class="form-group">
-        <label>{{ localize 'MGT2.RollPrompt.CharacteristicDM' }}</label>
-        <select name="characteristic">
-            {{selectOptions characteristics selected=characteristic valueAttr="_id" labelAttr="name"}}
-        </select>
-    </div>
-    <div class="form-group">
-        <label>{{ localize 'MGT2.RollPrompt.SkillDM' }}</label>
-        <select name="skill">
-            <option></option>
-            {{selectOptions skills selected=skill valueAttr="_id" labelAttr="name"}}
-        </select>
-    </div>
-    <div class="form-group">
-        <label>{{ localize 'MGT2.RollPrompt.Timeframes' }}</label>
-        <select name="timeframes">
-            {{selectOptions config.Timeframes selected = timeframe localize = true}}
-        </select>
-    </div>
-    <fieldset>
-        <legend>{{ localize 'MGT2.RollPrompt.States' }}</legend>
-        <div class="form-group">
-            <label class="mgt2-checkbox"><input type="checkbox" name="encumbrance" data-dtype="Boolean" {{checked encumbrance}} />{{ localize 'MGT2.RollPrompt.EncumbranceDM' }}</label>
-            <label class="mgt2-checkbox"><input type="checkbox" name="fatigue" data-dtype="Boolean" {{checked fatigue}} />{{ localize 'MGT2.RollPrompt.FatigueDM' }}</label>
-        </div>
-    </fieldset>
-    <div class="form-group">
-        <label>{{ localize 'MGT2.RollPrompt.CustomDM' }}</label>
-        <input type="text" name="customDM" maxlength="15" />
-    </div>
-    <div class="form-group">
-        <label>{{ localize 'MGT2.RollPrompt.Difficulty' }}</label>
-        <select name="difficulty">
-            <option></option>
-            {{selectOptions config.Difficulty selected = difficulty localize = true}}
-        </select>
-    </div>
-    <div class="form-group">
-        <label>{{ localize 'MGT2.RollPrompt.RollMode' }}</label>
-        <select name="rollMode">
-            <option value="public" selected="">{{ localize 'MGT2.RollPrompt.PublicRoll' }}</option>
-            <option value="gm">{{ localize 'MGT2.RollPrompt.PrivateGMRoll' }}</option>
-            <option value="blind">{{ localize 'MGT2.RollPrompt.BlindGMRoll' }}</option>
-            <option value="self">{{ localize 'MGT2.RollPrompt.SelfRoll' }}</option>
-        </select>
-    </div>
+<div class="dlg">
+	<div class="dblock">
+		<div class="sect"><h3>{{ localize 'MGT2.RollPrompt.Check' }}</h3></div>
+		<div class="drow">
+			<span class="lbl">{{ localize 'MGT2.RollPrompt.CharacteristicDM' }}</span>
+			<select class="f dm-source" name="characteristic">
+				{{#each characteristics as |c|}}
+				<option value="{{c._id}}" data-dm="{{c.dm}}" data-term="{{c.term}}"{{#if (eq c._id ../characteristic)}} selected{{/if}}>{{c.name}}</option>
+				{{/each}}
+			</select>
+			<span class="dm zero">+0</span>
+		</div>
+		{{#if blocks.skill}}
+		<div class="drow">
+			<span class="lbl">{{ localize 'MGT2.RollPrompt.SkillDM' }}</span>
+			<select class="f dm-source" name="skill">
+				<option value="" data-dm="0"></option>
+				{{#each skills as |s|}}
+				<option value="{{s._id}}" data-dm="{{s.dm}}" data-term="{{s.term}}"{{#if (eq s._id ../skill)}} selected{{/if}}>{{s.name}}</option>
+				{{/each}}
+			</select>
+			<span class="dm zero">+0</span>
+		</div>
+		{{/if}}
+	</div>
+
+	{{#if blocks.range}}
+	<div class="dblock">
+		<div class="sect">
+			<h3>{{ localize 'MGT2.RollPrompt.Range' }}</h3>
+			<span class="count">{{weapon.name}}</span>
+		</div>
+		<div class="distrow">
+			<span class="lbl">{{ localize 'MGT2.RollPrompt.Distance' }}</span>
+			<span><input class="f num" type="text" name="distance" maxlength="9" /><span class="unit">{{weapon.unit}}</span></span>
+			<span class="band" data-readout="band" data-range="{{weapon.range}}" data-unit="{{weapon.unit}}"></span>
+		</div>
+		{{#if weapon.thresholds}}
+		<div class="drow">
+			<span class="lbl">{{ localize 'MGT2.RollPrompt.ExtremeRange' }}</span>
+			<select class="f" name="rangeThreshold">
+				<option value="0">{{ localize 'MGT2.RollPrompt.ThresholdNone' }}</option>
+				{{#each weapon.thresholds as |t|}}
+				<option value="{{t.metres}}">{{t.label}}</option>
+				{{/each}}
+			</select>
+			<span class="dm"></span>
+		</div>
+		{{/if}}
+		<div class="drow">
+			<span class="lbl">{{ localize 'MGT2.AttackModifiers.aiming' }}</span>
+			<select class="f dm-source" name="aiming">
+				{{#each aiming as |a|}}
+				<option value="{{a.value}}" data-dm="{{a.dm}}" data-term="{{a.term}}">{{a.label}}</option>
+				{{/each}}
+			</select>
+			<span class="dm zero">+0</span>
+		</div>
+		<div class="drow">
+			<span class="lbl">{{ localize 'MGT2.AttackModifiers.fastMovingTarget' }}</span>
+			<span><input class="f num" type="text" name="targetMovement" maxlength="9" data-dm="-1" data-per="10"
+				data-term="{{localize 'MGT2.AttackModifiers.fastMovingTarget'}}" /><span class="unit">{{metre}}</span></span>
+			<span class="dm zero" data-readout="targetMovement">+0</span>
+		</div>
+		<div class="situ">
+			<label>
+				<input type="checkbox" name="cover" data-dtype="Boolean" data-dm="-2" data-term="{{localize 'MGT2.AttackModifiers.cover'}}" />
+				<span>{{ localize 'MGT2.AttackModifiers.cover' }}</span><span class="v">-2</span>
+			</label>
+			<label>
+				<input type="checkbox" name="prone" data-dtype="Boolean" data-dm="-1" data-term="{{localize 'MGT2.AttackModifiers.prone'}}" />
+				<span>{{ localize 'MGT2.AttackModifiers.prone' }}</span><span class="v">-1</span>
+			</label>
+			<label>
+				<input type="checkbox" name="laserSight" data-dtype="Boolean" data-dm="1" data-requires="aiming" data-term="{{localize 'MGT2.AttackModifiers.laserSight'}}" />
+				<span>{{ localize 'MGT2.AttackModifiers.laserSight' }}</span><span class="v">+1</span>
+			</label>
+		</div>
+	</div>
+	{{/if}}
+
+	{{#if blocks.traits}}
+	{{! Three tones and no fourth: a solid chip is already in the total, a toggle is the player's to
+	    confirm, a dashed chip contributes nothing. The chip is the shared codes component and
+	    carries the registry shape, so it names the trait and never defines it. }}
+	<div class="dblock">
+		<div class="sect">
+			<h3>{{ localize 'MGT2.RollPrompt.WeaponTraits' }}</h3>
+			<span class="count">{{ localize 'MGT2.TraitFamily.weapon' }}</span>
+		</div>
+		<div class="traitlist">
+			{{#each traits as |t|}}
+			<div class="traitrow {{t.tone}}" data-trait-row="{{t.key}}">
+				<ul class="codes">
+					<li class="code {{#if (eq t.tone 'reminded')}}inert{{else}}hot{{/if}}">
+						<b>{{t.term}}</b>
+						{{#if t.params.length}}
+						<span class="ps">{{#each t.params}}<span class="p">{{this}}</span>{{/each}}</span>
+						{{/if}}
+					</li>
+				</ul>
+				<span class="st" data-readout="{{t.name}}-status">{{ localize t.status }}</span>
+				{{#if (eq t.tone 'offered')}}
+				<label class="situ">
+					<input type="checkbox" name="{{t.name}}" data-dtype="Boolean" data-dm="{{t.dm}}"
+						data-term="{{t.term}}" data-trait="{{t.key}}" data-auto="{{#if t.when}}true{{/if}}"
+						data-when="{{t.when}}" data-when-value="{{t.whenValue}}"
+						data-requires="{{t.requires}}" data-suppress="{{t.suppress}}"
+						{{#if t.checked}}checked{{/if}} />
+					<span class="v">{{t.display}}</span>
+				</label>
+				{{else}}
+				<span class="val" data-term="{{t.term}}"{{#if (eq t.tone 'applied')}} data-applied-dm="{{t.dm}}"{{/if}}>{{t.display}}</span>
+				{{/if}}
+			</div>
+			{{/each}}
+		</div>
+		<p class="hint"><b>{{ localize 'MGT2.RollPrompt.TraitsHint' }}</b> {{ localize 'MGT2.RollPrompt.TraitsBoundary' }}</p>
+	</div>
+	{{/if}}
+
+	<div class="dblock">
+		<div class="sect"><h3>{{ localize 'MGT2.Items.Modifiers' }}</h3></div>
+		{{#if checkModifiers.length}}
+		<div class="dstates">
+			{{#each checkModifiers as |m|}}
+			<label>
+				<input type="checkbox" name="check-{{m.key}}" data-dtype="Boolean" data-dm="{{m.dm}}" data-term="{{m.label}}" checked />
+				<span>{{m.label}}</span><span class="v">{{m.display}}</span>
+			</label>
+			{{/each}}
+		</div>
+		{{/if}}
+		<div class="drow">
+			<span class="lbl">{{ localize 'MGT2.RollPrompt.CustomDM' }}</span>
+			<input class="f num" type="text" name="customDM" maxlength="15" />
+			<span class="dm zero" data-readout="customDM">+0</span>
+		</div>
+	</div>
+
+	<div class="dblock">
+		<div class="sect"><h3>{{ localize 'MGT2.RollPrompt.Target' }}</h3></div>
+		<div class="drow">
+			<span class="lbl">{{ localize 'MGT2.RollPrompt.Difficulty' }}</span>
+			<select class="f" name="difficulty">
+				<option></option>
+				{{selectOptions config.Difficulty selected = difficulty localize = true}}
+			</select>
+			<span class="dm"></span>
+		</div>
+		<div class="drow">
+			<span class="lbl">{{ localize 'MGT2.RollPrompt.Timeframes' }}</span>
+			<select class="f dm-source" name="timeframes">
+				{{#each timeframes as |t|}}
+				<option value="{{t.key}}" data-dm="{{t.dm}}" data-term="{{../timeframeTerm}}">{{t.label}}</option>
+				{{/each}}
+			</select>
+			<span class="dm zero">+0</span>
+		</div>
+		<div class="drow">
+			<span class="lbl">{{ localize 'MGT2.RollPrompt.Visibility' }}</span>
+			<select class="f" name="rollMode">
+				<option value="public" selected="">{{ localize 'MGT2.RollPrompt.PublicRoll' }}</option>
+				<option value="gm">{{ localize 'MGT2.RollPrompt.PrivateGMRoll' }}</option>
+				<option value="blind">{{ localize 'MGT2.RollPrompt.BlindGMRoll' }}</option>
+				<option value="self">{{ localize 'MGT2.RollPrompt.SelfRoll' }}</option>
+			</select>
+			<span class="dm"></span>
+		</div>
+	</div>
+
+	<div class="readout">
+		<div class="line">
+			<span class="form" data-readout="formula"></span>
+			<span class="vs">{{ localize 'MGT2.RollPrompt.Target' }} <b data-readout="target"></b></span>
+		</div>
+		<div class="terms" data-readout="terms"></div>
+		<div class="eladder">
+			<div class="strip" data-readout="ladder"></div>
+			<div class="cap">
+				<span>{{ localize 'MGT2.RollPrompt.EffectOnAverage' }}</span>
+				<b data-readout="effect"></b>
+				<span class="band" data-readout="effectBand"></span>
+			</div>
+		</div>
+	</div>
 </div>

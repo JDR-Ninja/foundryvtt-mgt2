@@ -1,55 +1,31 @@
-  <div class="itemsheet-header">
-    {{#if (eq system.subType "loot")}}
-    <label>{{localize 'MGT2.ItemSubType.loot'}}</label>
-    {{else}}
-    <label>{{localize 'MGT2.ItemSubType.software'}}</label>
-    {{/if}}
-  </div>
-  <div class="itemsheet-panel">
-    <div class="itemsheet-maincol">
-      <img class="profile-img" src="{{item.img}}" data-edit="img" data-action="editImage" data-tooltip="{{item.name}}" />
-      <div class="field-group mt-1">
-        <label>{{ localize 'MGT2.Items.Type' }}</label>
-        <select name="system.subType">
-          {{selectOptions config.ItemSubType selected = system.subType localize = true}}
-        </select>
-      </div>
-      {{> systems/mgt2/templates/items/parts/sheet-physical-item.html }}
-    </div>
-    <div class="flex-1">
-      <input class="field field-item-name" name="name" type="text" value="{{item.name}}" />
-      {{> systems/mgt2/templates/items/parts/item-tabs.html }}
-      <div class="tab{{#if tabs.tab1.active}} active{{/if}}" data-group="primary" data-tab="tab1">
-        <div class="field-group mt-1">
-          <label>{{ localize 'MGT2.Items.Description' }}</label>
-          <textarea name="system.description" rows="6">{{system.description}}</textarea>
-        </div>
-      </div>
-      <div class="tab{{#if tabs.tab2.active}} active{{/if}}" data-group="primary" data-tab="tab2">
-        {{#if hadContainer}}
-        <div class="field-groups mt-1">
-          {{#if (eq system.subType "software")}}
-          <div class="field-group">
-            <label>{{ localize 'MGT2.Items.Computer' }}</label>
-            <select name="system.software.computerId">
-              {{selectOptions computers selected=system.software.computerId valueAttr="_id" labelAttr="name"}}
-            </select>
-          </div>
-          {{/if}}
-          <div class="field-group">
-            <label>{{ localize 'MGT2.Items.Storage' }}</label>
-            <select name="system.container.id">
-              {{selectOptions containers selected=system.container.id valueAttr="_id" labelAttr="name"}}
-            </select>
-          </div>
-        </div>
-        {{/if}}
-        {{#if (eq system.subType "software")}}
-        <div class="field-group mt-1">
-          <label>{{ localize 'MGT2.Items.Bandwidth' }}</label>
-          <input type="number" name="system.software.bandwidth" value="{{system.software.bandwidth}}" data-dtype="Number" />
-        </div>
-        {{/if}}
-      </div>
-    </div>
-  </div>
+{{! A root part is unwrapped into .window-content, so the spine and the main column are siblings
+    and the grid that places them lives on .itemsheet. The spine's class is also what _colors.sass
+    re-anchors the palette on. }}
+<div class="itemsheet-header"><span>{{localize spine}}</span></div>
+
+<div class="imain">
+	<div class="ihd">
+		<img class="iportrait" src="{{item.img}}" alt="{{item.name}}" data-edit="img" data-action="editImage" data-tooltip="{{item.name}}" />
+		<div class="idy">
+			<div class="iname">
+				<span class="play-only">{{item.name}}</span>
+				<input class="f edit-only" name="name" type="text" value="{{item.name}}" />
+			</div>
+			{{#if tags}}
+			<div class="isub play-only">{{#each tags}}<span>{{this}}</span>{{/each}}</div>
+			{{/if}}
+			{{#if subTypes}}
+			<div class="isub edit-only">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Items.Type'}}</span>
+					<select class="f" name="system.subType">{{selectOptions subTypes selected=system.subType localize=true}}</select>
+				</label>
+			</div>
+			{{/if}}
+		</div>
+	</div>
+
+	{{#each blocks as |block|}}
+	{{> (lookup block "template") ../this}}
+	{{/each}}
+</div>

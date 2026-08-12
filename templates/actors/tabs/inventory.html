@@ -1,0 +1,323 @@
+<section class="tab{{#if tabs.sidebar.inventory.active}} active{{/if}}" data-group="sidebar" data-tab="inventory">
+	{{> systems/mgt2/templates/actors/parts/tabs-nav.html group="inventory" navClass="horizontal-tabs mgt2-subnav tabs" tabs=tabs.inventory}}
+
+	<div class="tab mgt2-panel{{#if tabs.inventory.onhand.active}} active{{/if}}" data-group="inventory" data-tab="onhand">
+		<div class="block">
+			<div class="sect">
+				<h3>{{localize 'MGT2.Items.Weapons'}}</h3>
+				<span class="count">{{weapons.length}}</span>
+				<a class="add edit-only" data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-plus"></i></a>
+			</div>
+			{{#if weapons.length}}
+			<table class="rows">
+				<thead>
+					<tr>
+						<th>{{localize 'MGT2.Items.Weapon'}}</th>
+						<th class="c">{{localize 'MGT2.Items.Range'}}</th>
+						<th class="c">{{localize 'MGT2.Items.Damage'}}</th>
+						<th class="r">{{localize 'MGT2.Items.Weight'}}</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each weapons as |weapon|}}
+					<tr class="drag-item-list" data-item-id="{{weapon._id}}">
+						<td>
+							<a class="roll" data-action="roll" data-roll="item" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}
+							{{#if weapon.subInfo}}<span class="sub">{{weapon.subInfo}}</span>{{/if}}
+						</td>
+						<td class="c">{{weapon.range}}</td>
+						<td class="c num">{{weapon.system.damage}}</td>
+						<td class="r num">{{weapon.weight}}</td>
+						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=weapon.toggleClass store=true edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+			{{/if}}
+		</div>
+
+		<div class="block">
+			<div class="sect">
+				<h3>{{localize 'MGT2.Items.Armors'}}</h3>
+				<span class="count">{{armors.length}}</span>
+				<a class="add edit-only" data-action="itemCreate" data-type-item="armor" data-create-name="{{localize 'MGT2.Actor.NewArmor'}}" data-tooltip="{{localize 'MGT2.Actor.AddArmor'}}"><i class="fa-solid fa-plus"></i></a>
+			</div>
+			{{#if armors.length}}
+			<table class="rows">
+				<thead>
+					<tr>
+						<th>{{localize 'MGT2.Items.Armor'}}</th>
+						<th class="c">{{localize 'MGT2.Items.Rads'}}</th>
+						<th class="c">{{localize 'MGT2.Items.Protection'}}</th>
+						<th class="r">{{localize 'MGT2.Items.Weight'}}</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each armors as |armor|}}
+					<tr class="drag-item-list" data-item-id="{{armor._id}}">
+						<td>
+							<a class="roll" data-action="roll" data-roll="item" data-item-id="{{armor._id}}"><i class="fa-solid fa-dice"></i></a>{{armor.name}}
+							{{#if armor.subInfo}}<span class="sub">{{armor.subInfo}}</span>{{/if}}
+						</td>
+						<td class="c num">{{armor.system.radiations}}</td>
+						<td class="c num">{{armor.system.protection}}</td>
+						<td class="r num">{{armor.weight}}</td>
+						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=armor.toggleClass store=true edit="MGT2.Actor.EditArmor" del="MGT2.Actor.DeleteArmor"}}
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+			{{/if}}
+		</div>
+
+		<div class="block">
+			<div class="sect">
+				<h3>{{localize 'MGT2.Actor.Augments'}}</h3>
+				<span class="count">{{augments.length}}</span>
+				<a class="add edit-only" data-action="itemCreate" data-type-item="equipment" data-subtype="augment" data-create-name="{{localize 'MGT2.Actor.NewAugment'}}" data-tooltip="{{localize 'MGT2.Actor.AddAugment'}}"><i class="fa-solid fa-plus"></i></a>
+			</div>
+			{{#if augments.length}}
+			<table class="rows">
+				<thead>
+					<tr>
+						<th>{{localize 'MGT2.Items.Name'}}</th>
+						<th>{{localize 'MGT2.Items.Improvement'}}</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each augments as |augment|}}
+					<tr class="drag-item-list" data-item-id="{{augment._id}}">
+						<td>{{augment.name}}</td>
+						<td>{{augment.system.improvement}}</td>
+						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=augment.toggleClass store=true edit="MGT2.Actor.EditAugment" del="MGT2.Actor.DeleteAugment"}}
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+			{{/if}}
+		</div>
+
+		<div class="block">
+			<div class="sect">
+				<h3>{{localize 'MGT2.Items.Computers'}}</h3>
+				<span class="count">{{computers.length}}</span>
+				<a class="add edit-only" data-action="itemCreate" data-type-item="computer" data-create-name="{{localize 'MGT2.Actor.NewComputer'}}" data-tooltip="{{localize 'MGT2.Actor.AddComputer'}}"><i class="fa-solid fa-plus"></i></a>
+			</div>
+			{{#if computers.length}}
+			<table class="rows">
+				<thead>
+					<tr>
+						<th>{{localize 'MGT2.Items.Computer'}}</th>
+						<th class="c">{{localize 'MGT2.Items.Processing'}}</th>
+						<th class="r">{{localize 'MGT2.Items.Weight'}}</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each computers as |computer|}}
+					<tr class="drop-item-list" data-item-id="{{computer._id}}">
+						<td>
+							<a class="roll" data-action="roll" data-roll="item" data-item-id="{{computer._id}}"><i class="fa-solid fa-dice"></i></a>{{computer.name}}
+							{{#if computer.subInfo}}<span class="sub">{{computer.subInfo}}</span>{{/if}}
+						</td>
+						<td class="c num {{computer.overloadClass}}">{{computer.system.processingUsed}}/{{computer.system.processing}}{{#if computer.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}</td>
+						<td class="r num">{{computer.weight}}</td>
+						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=computer.toggleClass store=true edit="MGT2.Actor.EditComputer" del="MGT2.Actor.DeleteComputer"}}
+					</tr>
+					{{#each computer.subItems as |subItem|}}
+					<tr class="drag-item-list" data-item-id="{{subItem._id}}">
+						<td><i class="fa-brands fa-usb"></i> {{subItem.name}}</td>
+						<td class="c num">{{subItem.system.software.bandwidth}}</td>
+						<td class="r num"></td>
+						{{> systems/mgt2/templates/actors/parts/row-controls.html eject=true edit="MGT2.Actor.EditSoftware"}}
+					</tr>
+					{{/each}}
+					{{/each}}
+				</tbody>
+			</table>
+			{{/if}}
+		</div>
+
+		{{#if softwares}}
+		<div class="block">
+			<div class="sect">
+				<h3>{{localize 'MGT2.Items.Softwares'}}</h3>
+				<span class="count">{{softwares.length}}</span>
+			</div>
+			<ul class="softwares">
+				{{#each softwares as |software|}}
+				<li class="drag-item-list" data-item-id="{{software._id}}">{{software.display}}
+					<a data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.EditSoftware'}}"><i class="fas fa-edit"></i></a>
+					<a data-action="itemDelete" data-tooltip="{{localize 'MGT2.Actor.DeleteSoftware'}}"><i class="fas fa-trash"></i></a>
+				</li>
+				{{/each}}
+			</ul>
+		</div>
+		{{/if}}
+
+		<div class="block">
+			<div class="sect">
+				<h3>{{localize 'MGT2.Items.Equipments'}}</h3>
+				<span class="count">{{equipments.length}}</span>
+				<a class="add edit-only" data-action="itemCreate" data-type-item="equipment" data-create-name="{{localize 'MGT2.Actor.NewEquipment'}}" data-tooltip="{{localize 'MGT2.Actor.AddEquipment'}}"><i class="fa-solid fa-plus"></i></a>
+			</div>
+			{{#if equipments.length}}
+			<table class="rows">
+				<thead>
+					<tr>
+						<th>{{localize 'MGT2.Items.Equipment'}}</th>
+						<th class="c">{{localize 'MGT2.Items.Qty'}}</th>
+						<th class="r">{{localize 'MGT2.Items.Weight'}}</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each equipments as |equipment|}}
+					<tr class="drag-item-list" data-item-id="{{equipment._id}}">
+						<td>{{equipment.name}}</td>
+						<td class="c num">{{equipment.system.quantity}}</td>
+						<td class="r num">{{equipment.weight}}</td>
+						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=equipment.toggleClass store=true edit="MGT2.Actor.EditEquipment" del="MGT2.Actor.DeleteEquipment"}}
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+			{{/if}}
+		</div>
+
+		<div class="block">
+			<div class="sect">
+				<h3>{{localize 'MGT2.Items.Items'}}</h3>
+				<span class="count">{{items.length}}</span>
+				<a class="add edit-only" data-action="itemCreate" data-type-item="item" data-create-name="{{localize 'MGT2.Actor.NewItem'}}" data-tooltip="{{localize 'MGT2.Actor.AddItem'}}"><i class="fa-solid fa-plus"></i></a>
+			</div>
+			{{#if items.length}}
+			<table class="rows">
+				<thead>
+					<tr>
+						<th>{{localize 'MGT2.Items.Name'}}</th>
+						<th class="c">{{localize 'MGT2.Items.Qty'}}</th>
+						<th class="r">{{localize 'MGT2.Items.Weight'}}</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each items as |item|}}
+					<tr class="{{#if (eq item.type "container")}}drop-item-list{{else}}drag-item-list{{/if}}" data-item-id="{{item._id}}">
+						<td>{{item.name}}</td>
+						<td class="c num">{{item.system.quantity}}</td>
+						<td class="r num">{{item.weight}}</td>
+						{{> systems/mgt2/templates/actors/parts/row-controls.html store=true edit="MGT2.Actor.EditItem" del="MGT2.Actor.DeleteItem"}}
+					</tr>
+					{{#each item.subItems as |subItem|}}
+					<tr class="drag-item-list" data-item-id="{{subItem._id}}">
+						<td>{{subItem.name}}<span class="sub">{{../item.name}}</span></td>
+						<td class="c num">{{subItem.system.quantity}}</td>
+						<td class="r num">{{subItem.weight}}</td>
+						{{> systems/mgt2/templates/actors/parts/row-controls.html unstore=true edit="MGT2.Actor.EditItem" del="MGT2.Actor.DeleteItem"}}
+					</tr>
+					{{/each}}
+					{{/each}}
+				</tbody>
+			</table>
+			{{/if}}
+		</div>
+	</div>
+
+	<div class="tab mgt2-panel{{#if tabs.inventory.storage.active}} active{{/if}}" data-group="inventory" data-tab="storage">
+		<div class="block">
+			<div class="sect"><h3>{{localize 'MGT2.Items.Containers'}}</h3></div>
+			<div class="grid">
+				<label class="wide">
+					<span class="lbl">{{localize 'MGT2.Items.Containers'}}</span>
+					<span class="mgt2-container-picker">
+						<select class="f" name="containerView">
+							{{selectOptions containers selected=containerViewId valueAttr="_id" labelAttr="display"}}
+						</select>
+						<span class="acts">
+							{{#unless containerShowAll}}<a data-action="containerEdit" data-tooltip="{{localize 'MGT2.Edit'}}"><i class="fas fa-edit"></i></a>{{/unless}}
+							<a data-action="containerCreate" data-tooltip="{{localize 'MGT2.Actor.NewContainer'}}"><i class="fas fa-plus"></i></a>
+							{{#unless containerShowAll}}<a data-action="containerDelete" data-tooltip="{{localize 'MGT2.Actor.DeleteItem'}}"><i class="fas fa-trash"></i></a>{{/unless}}
+						</span>
+					</span>
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Actor.DropIn'}}</span>
+					<select class="f" name="containerDropIn">
+						{{selectOptions actorContainers selected=containerDropInId valueAttr="_id" labelAttr="display"}}
+					</select>
+				</label>
+			</div>
+		</div>
+
+		{{#if (and containerView.system.locked (not isGM))}}
+		<p class="mgt2-label"><i class="fa-solid fa-lock"></i> {{localize 'MGT2.Items.Locked'}}</p>
+		{{else}}
+		<div class="block">
+			<div class="sect">
+				<h3>{{localize 'MGT2.Items.Items'}}</h3>
+				<span class="count">{{containerItems.length}}</span>
+			</div>
+			{{#if containerItems.length}}
+			<table class="rows">
+				<thead>
+					<tr>
+						<th>{{localize 'MGT2.Items.Name'}}</th>
+						{{#if containerShowAll}}<th class="c">{{localize 'MGT2.Items.Storage'}}</th>{{/if}}
+						<th class="c">{{localize 'MGT2.Items.Qty'}}</th>
+						<th class="r">{{localize 'MGT2.Items.Weight'}}</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each containerItems as |containerItem|}}
+					<tr class="drag-item-list" data-item-id="{{containerItem._id}}">
+						<td>{{containerItem.name}}</td>
+						{{#if ../containerShowAll}}<td class="c">{{containerItem.containerName}}</td>{{/if}}
+						<td class="c num">{{containerItem.system.quantity}}</td>
+						<td class="r num">{{containerItem.weight}}</td>
+						{{> systems/mgt2/templates/actors/parts/row-controls.html unstore=true edit="MGT2.Actor.EditItem" del="MGT2.Actor.DeleteItem"}}
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+			{{/if}}
+		</div>
+		<div class="mgt2-encumbrance">
+			<span class="lbl">{{localize 'MGT2.Actor.TotalWeight'}}</span>
+			<span class="total">{{containerWeight}} {{settings.weightUnit}}</span>
+		</div>
+		{{/if}}
+	</div>
+
+	<div class="tab mgt2-panel{{#if tabs.inventory.finance.active}} active{{/if}}" data-group="inventory" data-tab="finance">
+		<div class="block">
+			<div class="sect"><h3>{{localize 'MGT2.Actor.Finance'}}</h3></div>
+			<div class="grid">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Actor.CashOnHand'}}</span>
+					{{formInput systemFields.finance.fields.credits name="system.finance.credits" value=system.finance.credits classes="f num"}}
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Actor.Pension'}}</span>
+					{{formInput systemFields.finance.fields.pension name="system.finance.pension" value=system.finance.pension classes="f num"}}
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Actor.LivingCost'}}</span>
+					{{formInput systemFields.finance.fields.livingCost name="system.finance.livingCost" value=system.finance.livingCost classes="f num"}}
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Actor.Debt'}}</span>
+					{{formInput systemFields.finance.fields.debt name="system.finance.debt" value=system.finance.debt classes="f num"}}
+				</label>
+				<label class="wide">
+					<span class="lbl">{{localize 'MGT2.Actor.Notes'}}</span>
+					<textarea class="f" name="system.finance.notes" rows="4">{{system.finance.notes}}</textarea>
+				</label>
+			</div>
+		</div>
+	</div>
+</section>

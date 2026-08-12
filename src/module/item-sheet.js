@@ -1,35 +1,56 @@
+import { MGT2 } from "./config.js";
+import { EFFECT_ACTIONS, prepareEffects } from "./effects.js";
 import { MGT2Helper } from "./helper.js";
+import { SheetModeMixin } from "./sheet-mode.js";
+import { appendTraitText, bindTraitInput, prepareTraitBlock, refreshTraitNumbers } from "./traits.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ItemSheetV2 } = foundry.applications.sheets;
 
+/** Every block the sheet can compose from; each one is a partial of the same name. */
+const BLOCKS = ["roll", "hazard", "specs", "carried", "traits", "relationship", "description",
+  "detail", "notes", "software", "contents", "events", "station", "actions", "effects"];
+
+const blockPath = id => `systems/mgt2/templates/items/blocks/${id}.html`;
+
+/** The sub-type dictionary that names each type, where it has one. */
+const SUBTYPES = {
+  item: MGT2.ItemSubType,
+  equipment: MGT2.EquipmentSubType,
+  talent: MGT2.TalentSubType,
+  disease: MGT2.DiseaseSubType
+};
+
 /**
  * The Traveller item sheet, shared by all item sub-types.
  *
- * A single root part is used rather than one part per section: the per-type templates each render
- * their own `.itemsheet-header` + `.itemsheet-panel` pair, and a root part is allowed to emit several
- * sibling elements. `_configureRenderParts` swaps the template for the item's sub-type, replacing the
- * `get template()` accessor of the V1 sheet.
+ * One root template for every type: the types differ by which blocks they carry, not by which
+ * layout they need, so the per-type work is a list of block names and nothing else.
  *
  * @extends {ItemSheetV2}
  * @mixes HandlebarsApplication
  */
-export class TravellerItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
+export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixin(ItemSheetV2)) {
 
   /** @inheritDoc */
   static DEFAULT_OPTIONS = {
-    // See TravellerActorSheet: the mgt2 palette assumes a light sheet.
-    classes: ["mgt2", "item", "themed", "theme-light"],
+    classes: ["mgt2", "item"],
     position: { width: 630, height: "auto" },
     window: { resizable: true, contentClasses: ["itemsheet"] },
     form: { submitOnChange: true, closeOnSubmit: false },
     actions: {
-      optionCreate: TravellerItemSheet.#onOptionCreate,
-      optionDelete: TravellerItemSheet.#onOptionDelete,
+      traitDelete: TravellerItemSheet.#onTraitDelete,
       eventCreate: TravellerItemSheet.#onCareerEventCreate,
       eventDelete: TravellerItemSheet.#onCareerEventDelete,
       modifierCreate: TravellerItemSheet.#onModifierCreate,
-      modifierDelete: TravellerItemSheet.#onModifierDelete
+      modifierDelete: TravellerItemSheet.#onModifierDelete,
+      actionCreate: TravellerItemSheet.#onRoleActionCreate,
+      actionDelete: TravellerItemSheet.#onRoleActionDelete,
+      itemRoll: TravellerItemSheet.#onItemRoll,
+      nestedEdit: TravellerItemSheet.#onNestedEdit,
+      nestedRemove: TravellerItemSheet.#onNestedRemove,
+      nestedDelete: TravellerItemSheet.#onNestedDelete,
+      ...EFFECT_ACTIONS
     }
   };
 
@@ -37,88 +58,33 @@ export class TravellerItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
   static PARTS = {
     sheet: {
       root: true,
-      template: "systems/mgt2/templates/items/item-sheet.html", // replaced per sub-type
-      templates: [
-        "systems/mgt2/templates/items/parts/item-tabs.html",
-        "systems/mgt2/templates/items/parts/sheet-configuration.html",
-        "systems/mgt2/templates/items/parts/sheet-physical-item.html"
-      ]
+      template: "systems/mgt2/templates/items/item-sheet.html",
+      templates: BLOCKS.map(blockPath)
     }
   };
 
   /**
-   * Declares the single tab group so that ApplicationV2 fills `context.tabs` on its own.
-   * The actual tab list is per sub-type and comes from {@link TravellerItemSheet#_getTabsConfig}.
-   * @inheritDoc
+   * Which blocks each type carries, in render order. Keyed by type, or by `type:subType` where the
+   * sub-type changes the answer. A type absent from the map uses `_default`.
+   *
+   * `effects` is on every list, empty or not: any Item can carry an ActiveEffect and any of them
+   * transfers to the owner, so a type that never shows the block is a type whose effects are
+   * invisible.
    */
-  static TABS = {
-    primary: { initial: "tab1", tabs: [] }
+  static #BLOCKS_BY_TYPE = {
+    _default: ["specs", "carried", "effects", "description"],
+    weapon: ["roll", "specs", "carried", "traits", "effects", "description"],
+    armor: ["specs", "carried", "traits", "effects", "description"],
+    talent: ["roll", "effects", "description"],
+    "talent:psionic": ["roll", "specs", "effects", "description"],
+    disease: ["hazard", "effects", "description"],
+    computer: ["specs", "carried", "traits", "effects", "description", "software"],
+    container: ["carried", "effects", "description", "contents"],
+    career: ["specs", "effects", "description", "events"],
+    contact: ["relationship", "effects", "description", "notes"],
+    species: ["specs", "traits", "effects", "description", "detail"],
+    role: ["station", "actions", "effects", "description"]
   };
-
-  /** Tab layout per item sub-type. Types absent from this map use `_default`. */
-  static #TABS_BY_TYPE = {
-    _default: [
-      { id: "tab1", label: "MGT2.Items.Description" },
-      { id: "tab2", label: "MGT2.Items.Details" },
-      { id: "tab3", label: "MGT2.Items.Configuration" }
-    ],
-    item: [
-      { id: "tab1", label: "MGT2.Items.Description" },
-      { id: "tab2", label: "MGT2.Items.Details" }
-    ],
-    species: [
-      { id: "tab1", label: "MGT2.Items.Description" },
-      { id: "tab2", label: "MGT2.Items.DetailedDescription" },
-      { id: "tab3", label: "MGT2.Items.Details" }
-    ],
-    career: [
-      { id: "tab1", label: "MGT2.Items.Description" },
-      { id: "events", label: "MGT2.Items.EventsMishaps" }
-    ],
-    contact: [
-      { id: "tab1", label: "MGT2.Items.Informations" },
-      { id: "description", label: "MGT2.Items.Description" },
-      { id: "notes", label: "MGT2.Items.Notes" }
-    ],
-    talent: [
-      { id: "tab1", label: "MGT2.Items.Description" },
-      { id: "config", label: "MGT2.Items.Configuration" }
-    ],
-    disease: []
-  };
-
-  /* -------------------------------------------- */
-
-  /**
-   * The theme is a client setting, so it cannot live in the static DEFAULT_OPTIONS
-   * (which is evaluated once at import time).
-   * @inheritDoc
-   */
-  _initializeApplicationOptions(options) {
-    options = super._initializeApplicationOptions(options);
-    const theme = game.settings.get("mgt2", "theme");
-    if ( theme && !options.classes.includes(theme) ) options.classes.push(theme);
-    return options;
-  }
-
-  /* -------------------------------------------- */
-
-  /** Replaces the `get template()` accessor of the V1 sheet. @inheritDoc */
-  _configureRenderParts(options) {
-    const parts = super._configureRenderParts(options);
-    parts.sheet.template = `systems/mgt2/templates/items/${this.item.type}-sheet.html`;
-    return parts;
-  }
-
-  /* -------------------------------------------- */
-
-  /** @inheritDoc */
-  _getTabsConfig(group) {
-    if ( group !== "primary" ) return super._getTabsConfig(group);
-    const byType = TravellerItemSheet.#TABS_BY_TYPE;
-    const tabs = (byType[this.item.type] ?? byType._default).map(t => ({ ...t, cssClass: "item tab-select" }));
-    return { tabs, initial: tabs[0]?.id ?? null };
-  }
 
   /* -------------------------------------------- */
 
@@ -127,30 +93,63 @@ export class TravellerItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
     const context = await super._prepareContext(options);
     const item = this.item;
     const actor = item.actor;
+    const byType = TravellerItemSheet.#BLOCKS_BY_TYPE;
+    const blocks = byType[`${item.type}:${item.system.subType}`] ?? byType[item.type] ?? byType._default;
 
     return Object.assign(context, {
       item,
       system: item.system,
       source: item.toObject().system,
+      systemFields: item.system.schema.fields,
       config: CONFIG.MGT2,
-      settings: { usePronouns: game.settings.get("mgt2", "usePronouns") },
+      settings: {
+        usePronouns: game.settings.get("mgt2", "usePronouns"),
+        useGender: game.settings.get("mgt2", "useGender")
+      },
+      blocks: blocks.map(id => ({ id, template: blockPath(id) })),
+      spine: this.#spine(),
+      tags: this.#tags(),
+      subTypes: SUBTYPES[item.type] ?? null,
       hadContainer: actor != null,
       containers: actor ? [{ name: "", _id: "" }].concat(actor.getContainers()) : null,
       computers: actor ? [{ name: "", _id: "" }].concat(actor.getComputers()) : null,
-      weight: "weight" in item.system ? MGT2Helper.convertWeightForDisplay(item.system.weight) : null,
+      weight: "weight" in item.system ? item.system.weight : null,
       unitlabels: { weight: MGT2Helper.getWeightLabel() },
       isGM: game.user.isGM,
-      skills: this.#prepareSkills(actor)
+      skills: this.#prepareSkills(actor),
+      roll: this.#prepareRoll(actor),
+      traits: this.#prepareTraits(),
+      effects: prepareEffects(item),
+      // A Set is neither an array nor a plain object, so Handlebars cannot walk it.
+      damageTypes: Array.from(item.system.damageType ?? [], key => game.i18n.localize(MGT2.DamageTypes[key])),
+      scale: MGT2.WeaponScales[item.system.scale] ?? null,
+      nested: this.#prepareNested(actor)
     });
   }
 
-  /* -------------------------------------------- */
+  /** The spine reads the sub-type where there is one, because that is the name on the character sheet. */
+  #spine() {
+    const item = this.item;
+    // `TYPES.Item.container` disambiguates in the create dialog — too long to stand on a spine.
+    if ( item.type === "container" ) return "MGT2.Items.Container";
+    return SUBTYPES[item.type]?.[item.system.subType] ?? `TYPES.Item.${item.type}`;
+  }
 
-  /**
-   * The skill list offered by the "roll" configuration tab.
-   * @param {Actor|null} actor
-   * @returns {{_id: string, name: string}[]}
-   */
+  /** The identity line under the name. */
+  #tags() {
+    const { type, system } = this.item;
+    const tags = [];
+
+    if ( type === "talent" ) {
+      if ( system.skill.speciality ) tags.push(system.skill.speciality);
+      tags.push(`${game.i18n.localize("MGT2.Items.Level")} ${system.level}`);
+    }
+    if ( type === "weapon" ) tags.push(game.i18n.localize(MGT2.WeaponScales[system.scale]?.label ?? ""));
+    if ( "tl" in system ) tags.push(game.i18n.localize(MGT2.TL[system.tl] ?? ""));
+    return tags.filter(tag => tag !== "");
+  }
+
+  /** The skill list the roll block offers, which only an owned item has. */
   #prepareSkills(actor) {
     const skills = [];
     for ( const item of actor?.items ?? [] ) {
@@ -159,7 +158,125 @@ export class TravellerItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
       }
     }
     skills.sort(MGT2Helper.compareByName);
-    return [{ _id: "NP", name: game.i18n.localize("MGT2.Items.NotProficient") }].concat(skills);
+    // Every other option in the list states the level it contributes; unskilled states its own.
+    return [{ _id: "NP",
+      name: game.i18n.localize("MGT2.Items.NotProficient") + MGT2Helper.getDisplayDM(-3) }].concat(skills);
+  }
+
+  /**
+   * The item's binding to its owner, stated as a sentence — which skill, which characteristic, at
+   * what difficulty — plus the dispatch key the actor sheet's roll handler reads off the button.
+   */
+  #prepareRoll(actor) {
+    const { type, system } = this.item;
+    const hazard = type === "disease";
+    const binding = system.roll ?? {};
+    const dispatch = hazard ? "disease"
+      : (type === "talent") ? (system.subType === "psionic" ? "psionic" : "skill")
+        : "item";
+
+    let skill = null;
+    if ( (type === "talent") && (system.subType === "skill") ) {
+      skill = game.i18n.format("MGT2.Items.LevelValue", { level: MGT2Helper.signed(system.level) });
+    }
+    else if ( binding.skill === "NP" ) {
+      skill = game.i18n.localize("MGT2.Items.NotProficient") + MGT2Helper.getDisplayDM(-3);
+    }
+    else if ( binding.skill ) skill = actor?.items.get(binding.skill)?.getRollDisplay() ?? null;
+
+    return {
+      hazard,
+      dispatch,
+      skill,
+      characteristic: binding.characteristic
+        ? game.i18n.localize(MGT2.Characteristics[binding.characteristic]) : null,
+      difficulty: MGT2Helper.getDifficultyDisplay(hazard ? system.difficulty : binding.difficulty),
+      label: hazard ? "MGT2.Items.Resist" : "MGT2.Items.Roll",
+      // An item with no owner has no characteristics and no skills to roll against.
+      disabled: actor === null
+    };
+  }
+
+  /**
+   * The trait array as the shared code row. A weapon's traits and a species' come from the
+   * registry; the accessory lists the other types call options have no printed vocabulary, so they
+   * declare the `custom` family and their autocomplete is empty by design.
+   */
+  #prepareTraits() {
+    const { type, system } = this.item;
+    const traits = (type === "weapon") || (type === "species");
+    const property = traits ? "traits" : "options";
+    // Most types carry neither array, and the context is built before the block list is consulted.
+    const field = system.schema.fields[property];
+    if ( !field ) return null;
+    return prepareTraitBlock(system[property], property, field.element.fields.family.initial,
+      traits ? "MGT2.Items.Traits" : "MGT2.Items.Options");
+  }
+
+  /**
+   * What this item holds: software loaded into a computer, or items stored in a container. Both
+   * read in play mode, so the list is not gated on the sheet being editable.
+   */
+  #prepareNested(actor) {
+    const item = this.item;
+    const isComputer = item.type === "computer";
+    if ( !actor || (!isComputer && (item.type !== "container")) ) return [];
+
+    const held = [];
+    for ( const sibling of actor.items ) {
+      const inside = isComputer
+        ? sibling.system.software?.computerId === item.id
+        : sibling.system.container?.id === item.id;
+      if ( !inside ) continue;
+      held.push({
+        _id: sibling.id,
+        name: sibling.name,
+        img: sibling.img,
+        type: game.i18n.localize(`TYPES.Item.${sibling.type}`),
+        bandwidth: sibling.system.software?.bandwidth ?? null,
+        quantity: sibling.system.quantity ?? null,
+        weight: sibling.system.weight ?? null
+      });
+    }
+    held.sort(MGT2Helper.compareByName);
+    return held;
+  }
+
+  /** @inheritDoc */
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+    // A root part is unwrapped into the window content, so the sheet has no element of its own to
+    // carry the variant: the application root does.
+    this.element.classList.toggle("hazard", context.roll.hazard);
+    const select = this.element.querySelector("[data-scale-select]");
+    select?.addEventListener("change", () => this.#applyScale(select.value));
+    bindTraitInput(this.element, (property, text) => this.#addTrait(property, text));
+  }
+
+  async #addTrait(property, text) {
+    await this.submit();
+    const family = this.item.system.schema.fields[property].element.fields.family.initial;
+    const entries = appendTraitText(this.item.system[property], text, family);
+    if (entries) await this.item.update({ [`system.${property}`]: entries });
+  }
+
+  /**
+   * Fire control and power draw exist only above ground scale, and the scale also decides which
+   * unit the range field speaks. Applied on change so the grid answers before the round trip.
+   * @param {string} key
+   */
+  #applyScale(key) {
+    const scale = MGT2.WeaponScales[key];
+    if ( !scale ) return;
+    const root = this.element;
+    const unit = root.querySelector("[name='system.range.unit']");
+    if ( unit ) unit.value = scale.range;
+    for ( const field of ["fireControl", "power"] ) {
+      const input = root.querySelector(`[name='system.${field}']`);
+      if ( !input ) continue;
+      input.disabled = !scale[field];
+      input.closest("label")?.classList.toggle("off", !scale[field]);
+    }
   }
 
   /* -------------------------------------------- */
@@ -192,12 +309,15 @@ export class TravellerItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
     // "weight" is a bare input outside the schema: convert it and drop it before validation.
     if ( "weight" in submitData ) {
       submitData.system ??= {};
-      submitData.system.weight = MGT2Helper.convertWeightFromInput(submitData.weight);
+      submitData.system.weight = MGT2Helper.roundWeight(submitData.weight);
       delete submitData.weight;
     }
 
     if ( system?.quantity !== undefined ) system.quantity = MGT2Helper.getIntegerFromInput(system.quantity);
     if ( system?.cost !== undefined ) system.cost = MGT2Helper.getIntegerFromInput(system.cost);
+
+    // The chip row lets a printed parameter be retyped; the number a rule reads follows from it.
+    for ( const property of ["traits", "options"] ) refreshTraitNumbers(system?.[property]);
 
     return submitData;
   }
@@ -233,14 +353,10 @@ export class TravellerItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
   /* -------------------------------------------- */
 
   /** @this {TravellerItemSheet} */
-  static #onOptionCreate(event, target) {
-    return TravellerItemSheet.#appendEntry.call(this, target.dataset.property, { name: "", description: "" });
-  }
-
-  /** @this {TravellerItemSheet} */
-  static #onOptionDelete(event, target) {
-    const element = target.closest(".options-part");
-    return TravellerItemSheet.#removeEntry.call(this, element.dataset.property, Number(element.dataset.optionsPart));
+  static #onTraitDelete(event, target) {
+    const element = target.closest(".code");
+    const property = element.closest("[data-property]").dataset.property;
+    return TravellerItemSheet.#removeEntry.call(this, property, Number(element.dataset.traitIndex));
   }
 
   /** @this {TravellerItemSheet} */
@@ -255,6 +371,17 @@ export class TravellerItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
   }
 
   /** @this {TravellerItemSheet} */
+  static #onRoleActionCreate() {
+    return TravellerItemSheet.#appendEntry.call(this, "actions", { label: "", kind: "skill" });
+  }
+
+  /** @this {TravellerItemSheet} */
+  static #onRoleActionDelete(event, target) {
+    const element = target.closest(".actions-part");
+    return TravellerItemSheet.#removeEntry.call(this, "actions", Number(element.dataset.actionsPart));
+  }
+
+  /** @this {TravellerItemSheet} */
   static #onModifierCreate() {
     return TravellerItemSheet.#appendEntry.call(this, "modifiers", { characteristic: "endurance", value: null });
   }
@@ -263,5 +390,49 @@ export class TravellerItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
   static #onModifierDelete(event, target) {
     const element = target.closest(".modifiers-part");
     return TravellerItemSheet.#removeEntry.call(this, "modifiers", Number(element.dataset.modifiersPart));
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * The roll belongs to the character sheet: it owns the characteristics, the skill list and the
+   * Effect card. Its handler reads nothing but the clicked element's dataset, so this hands it the
+   * item sheet's own button and borrows the sheet as `this` rather than growing a second roll path.
+   * @this {TravellerItemSheet}
+   */
+  static #onItemRoll(event, target) {
+    const sheet = this.item.actor?.sheet;
+    let handler = sheet?.options.actions?.roll;
+    if ( typeof handler === "object" ) handler = handler.handler;
+    if ( typeof handler !== "function" ) return;
+    return handler.call(sheet, event, target);
+  }
+
+  /* -------------------------------------------- */
+
+  /** The sibling item a nested row stands for. @this {TravellerItemSheet} */
+  static #nestedItem(target) {
+    return this.item.actor?.items.get(target.closest("[data-item-id]")?.dataset.itemId);
+  }
+
+  /** @this {TravellerItemSheet} */
+  static #onNestedEdit(event, target) {
+    return TravellerItemSheet.#nestedItem.call(this, target)?.sheet.render({ force: true });
+  }
+
+  /**
+   * A sibling changing is not a change to this item, so nothing re-renders the list on its own.
+   * @this {TravellerItemSheet}
+   */
+  static async #onNestedRemove(event, target) {
+    const field = this.item.type === "computer" ? "system.software.computerId" : "system.container.id";
+    await TravellerItemSheet.#nestedItem.call(this, target)?.update({ [field]: "" });
+    return this.render();
+  }
+
+  /** @this {TravellerItemSheet} */
+  static async #onNestedDelete(event, target) {
+    await TravellerItemSheet.#nestedItem.call(this, target)?.delete();
+    return this.render();
   }
 }

@@ -1,0 +1,113 @@
+<section class="tab mgt2-panel{{#if tabs.sidebar.health.active}} active{{/if}}" data-group="sidebar" data-tab="health">
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Actor.Health'}}</h3></div>
+		<div class="grid">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.Rads'}}</span>
+				{{formInput systemFields.health.fields.radiations name="system.health.radiations" value=system.health.radiations classes="f num"}}
+			</label>
+		</div>
+	</div>
+
+	{{! The four rulebook procedures, as controls. Live in both modes — like the damage control, this
+	    is the session loop rather than structure. Each button carries the rate it will use; the
+	    numbers the system cannot know are asked for in the prompt each one opens. }}
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Recovery.Title'}}</h3></div>
+
+		<dl class="statline" data-derived="system.states">
+			<div class="stat{{#unless recovery.damaged}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Recovery.Damaged'}}</dt>
+				<dd>{{recovery.damaged}}</dd>
+			</div>
+			<div class="stat">
+				<dt>{{localize 'MGT2.Recovery.EnduranceDM'}}</dt>
+				<dd>{{showDM recovery.enduranceDM}}</dd>
+			</div>
+			<div class="stat{{#unless recovery.firstAidUsed}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Recovery.FirstAid'}}</dt>
+				<dd><span class="word">{{#if recovery.firstAidUsed}}{{localize 'MGT2.Recovery.Spent'}}{{else}}{{localize 'MGT2.Recovery.Available'}}{{/if}}</span></dd>
+			</div>
+			<div class="stat{{#unless recovery.augment}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Recovery.Augment'}}</dt>
+				<dd><span class="word">{{#if recovery.augment}}{{recovery.augment}}{{else}}—{{/if}}</span></dd>
+			</div>
+		</dl>
+
+		<div class="recovery">
+			<button type="button" class="btn" data-action="firstAid" {{#if recovery.firstAidUsed}}disabled{{/if}} data-tooltip="{{localize 'MGT2.Recovery.FirstAidHint'}}">{{localize 'MGT2.Recovery.FirstAid'}}</button>
+			<button type="button" class="btn{{#if recovery.needsSurgery}} hot{{/if}}" data-action="surgery" data-tooltip="{{localize 'MGT2.Recovery.SurgeryHint'}}">{{localize 'MGT2.Recovery.Surgery'}}</button>
+			<button type="button" class="btn{{#if recovery.canMedicalCare}} hot{{/if}}" data-action="medicalCare" data-tooltip="{{localize 'MGT2.Recovery.MedicalCareHint'}}">{{localize 'MGT2.Recovery.MedicalCare'}}</button>
+			<button type="button" class="btn" data-action="naturalHealing" data-tooltip="{{localize 'MGT2.Recovery.NaturalHealingHint'}}">{{localize 'MGT2.Recovery.NaturalHealing'}}<i>{{recovery.naturalFormula}}</i></button>
+			<button type="button" class="btn" data-action="mentalHealing" {{#unless recovery.mental}}disabled{{/unless}} data-tooltip="{{localize 'MGT2.Recovery.MentalHint'}}">{{localize 'MGT2.Recovery.Mental'}}</button>
+			<button type="button" class="btn{{#if recovery.unconscious}} hot{{/if}}" data-action="revive" {{#unless recovery.unconscious}}disabled{{/unless}} data-tooltip="{{localize 'MGT2.Recovery.ReviveHint'}}">{{localize 'MGT2.Recovery.Revive'}}<i>{{showDM recovery.reviveDM}}</i></button>
+			{{#if recovery.firstAidUsed}}
+			<a class="reset" data-action="firstAidReset" data-tooltip="{{localize 'MGT2.Recovery.FirstAidResetHint'}}"><i class="fa-solid fa-rotate-left"></i></a>
+			{{/if}}
+		</div>
+	</div>
+
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.Wounds'}}</h3>
+			<span class="count">{{wounds.length}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="disease" data-subtype="wound" data-create-name="{{localize 'MGT2.Actor.NewWound'}}" data-tooltip="{{localize 'MGT2.Actor.AddWound'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if wounds.length}}
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Name'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Difficulty'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Damage'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Interval'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each wounds as |wound|}}
+				<tr data-item-id="{{wound._id}}">
+					<td>{{wound.name}}</td>
+					<td class="c num">{{wound.system.difficulty}}</td>
+					<td class="c num">{{wound.system.damage}}</td>
+					<td class="c num">{{wound.system.interval}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWound" del="MGT2.Actor.DeleteWound"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+	</div>
+
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Items.Diseases'}}</h3>
+			<span class="count">{{diseases.length}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="disease" data-subtype="disease" data-create-name="{{localize 'MGT2.Actor.NewDisease'}}" data-tooltip="{{localize 'MGT2.Actor.AddDisease'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if diseases.length}}
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Name'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Difficulty'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Damage'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Interval'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each diseases as |disease|}}
+				<tr data-item-id="{{disease._id}}">
+					<td><a class="roll" data-action="roll" data-roll="disease" data-item-id="{{disease._id}}"><i class="fa-solid fa-dice"></i></a>{{disease.name}}</td>
+					<td class="c num">{{disease.system.difficulty}}</td>
+					<td class="c num">{{disease.system.damage}}</td>
+					<td class="c num">{{disease.system.interval}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditDisease" del="MGT2.Actor.DeleteDisease"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+	</div>
+</section>

@@ -1,35 +1,46 @@
 <div class="mgt2-dialog flexcol">
+    {{! Psionic talents are a `character` idea; the field is absent on every other sub-type. }}
+    {{#if system.schema.fields.config.fields.psionic}}
     <div class="form-group">
         <label class="mgt2-checkbox"><input type="checkbox" name="psionic" data-dtype="Boolean" {{checked system.config.psionic}} />{{ localize 'MGT2.Actor.ShowPsionicTalents' }}</label>
     </div>
+    {{/if}}
     <fieldset>
         <legend>{{ localize 'MGT2.Actor.Initiative' }}</legend>
         <div class="form-group">
             <label>{{ localize 'MGT2.Actor.Characteristic' }}</label>
-            <select name="initiative">
-                {{selectOptions config.InitiativeCharacteristics selected = system.config.initiative localize = true}}
+            <select name="initiative.characteristic">
+                {{selectOptions config.InitiativeCharacteristics selected = system.config.initiative.characteristic localize = true blank = ""}}
             </select>
+        </div>
+        {{! Core p.86 hands a creature its Initiative DM directly, so the flat figure stands in
+            whenever no characteristic is named. }}
+        <div class="form-group">
+            <label>{{ localize 'MGT2.Actor.InitiativeFlat' }}</label>
+            <input type="number" step="1" name="initiative.flat" value="{{system.config.initiative.flat}}" data-dtype="Number" />
         </div>
     </fieldset>
-    <fieldset>
+    <fieldset class="mgt2-damage-order">
         <legend>{{ localize 'MGT2.Actor.DamageOrder' }}</legend>
-        <div class="form-group">
-            <label>{{ localize 'MGT2.Actor.Damage' }} #1</label>
-            <select name="damages.rank1">
-                {{selectOptions config.DamageCharacteristics selected = system.config.damages.rank1 localize = true}}
-            </select>
+        <p class="mgt2-label">{{ localize 'MGT2.Actor.DamageChain' }}</p>
+        <ol>
+            {{#each ordered as |c|}}
+            <li data-key="{{c.key}}" draggable="true"{{#unless c.inChain}} hidden{{/unless}}>
+                <span class="grip"><i class="fa-solid fa-grip-dots-vertical"></i></span>
+                <span class="who">{{localize c.label}}</span>
+                <span class="cur">{{c.value}} / {{#if c.max}}{{c.max}}{{else}}&mdash;{{/if}}</span>
+                <a class="remove" data-tooltip="{{localize 'MGT2.Actor.DamageOrderRemove'}}"><i class="fa-solid fa-xmark"></i></a>
+            </li>
+            {{/each}}
+        </ol>
+        <p class="empty"{{#if chainLength}} hidden{{/if}}>{{ localize 'MGT2.Actor.DamageOrderEmpty' }}</p>
+        <p class="mgt2-label">{{ localize 'MGT2.Actor.DamageOrderAvailable' }}</p>
+        <div class="pool">
+            {{#each ordered as |c|}}
+            <button type="button" class="chip" data-key="{{c.key}}"{{#if c.inChain}} hidden{{/if}}{{#unless c.addable}} disabled data-tooltip="{{localize 'MGT2.Actor.DamageOrderNeedsMax'}}"{{/unless}}>+ {{localize c.label}}</button>
+            {{/each}}
         </div>
-        <div class="form-group">
-            <label>{{ localize 'MGT2.Actor.Damage' }} #2</label>
-            <select name="damages.rank2">
-                {{selectOptions config.DamageCharacteristics selected = system.config.damages.rank2 localize = true}}
-            </select>
-        </div>
-        <div class="form-group">
-            <label>{{ localize 'MGT2.Actor.Damage' }} #3</label>
-            <select name="damages.rank3">
-                {{selectOptions config.DamageCharacteristics selected = system.config.damages.rank3 localize = true}}
-            </select>
-        </div>
+        <p class="hint">{{ localize 'MGT2.Actor.DamageOrderHint' }}</p>
+        <input type="hidden" name="damageOrder" value="{{damageOrder}}" />
     </fieldset>
 </div>

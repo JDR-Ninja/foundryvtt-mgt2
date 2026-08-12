@@ -1,0 +1,257 @@
+{{! What the item IS — the intrinsic numbers. How it sits in the inventory is the Carried block. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Items.Specs'}}</h3>
+		{{#if (eq item.type "species")}}<span class="count">{{system.modifiers.length}}</span>
+		<a class="add edit-only" data-action="modifierCreate" data-tooltip="{{localize 'MGT2.Items.AddModifier'}}"><i class="fa-solid fa-plus"></i></a>{{/if}}
+		{{#if (eq item.type "weapon")}}<span class="count edit-only">{{localize 'MGT2.Items.ScaleHint'}}</span>{{/if}}
+	</div>
+
+	{{#if (eq item.type "species")}}
+	{{#if system.modifiers.length}}
+	<table class="rows">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Items.Characteristics'}}</th>
+				<th class="c">{{localize 'MGT2.Items.Modifier'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each system.modifiers as |modifier i|}}
+			<tr class="modifiers-part" data-modifiers-part="{{i}}">
+				<td>
+					<span class="play-only">{{localize (lookup ../config.Characteristics modifier.characteristic)}}</span>
+					<select class="f edit-only" name="system.modifiers.{{i}}.characteristic">
+						{{selectOptions ../config.Characteristics selected=modifier.characteristic localize=true}}
+					</select>
+				</td>
+				<td class="c num">
+					<span class="play-only">{{showDM modifier.value}}</span>
+					<input class="f num edit-only" type="number" name="system.modifiers.{{i}}.value" value="{{modifier.value}}" />
+				</td>
+				<td class="r">
+					<div class="acts edit-only">
+						<a data-action="modifierDelete" data-tooltip="{{localize 'MGT2.Items.DeleteModifier'}}"><i class="fas fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+
+	{{else}}
+	<ul class="specs play-only">
+		{{#if (eq item.type "weapon")}}
+		<li{{#unless system.damage}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Damage'}}</span><b>{{#if system.damage}}{{system.damage}}{{else}}—{{/if}}</b></li>
+		<li><span class="lbl">{{localize 'MGT2.Items.Range'}}</span><b>{{#if system.range.isMelee}}{{localize 'MGT2.Melee'}}{{else}}{{system.range.value}}{{#if system.range.unit}}<span class="u">{{localize (concat "MGT2.MetricRange." system.range.unit)}}</span>{{/if}}{{/if}}</b></li>
+		{{#if damageTypes}}
+		<li><span class="lbl">{{localize 'MGT2.Items.DamageType'}}</span><b class="word">{{#each damageTypes}}{{#unless @first}}, {{/unless}}{{this}}{{/each}}</b></li>
+		{{/if}}
+		<li{{#unless system.magazine}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span><b>{{system.magazine}}</b></li>
+		<li{{#unless system.magazineCost}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span><b>{{system.magazineCost}}</b></li>
+		<li{{#unless scale.fireControl}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.FireControl'}}</span><b>{{#if scale.fireControl}}{{showDM system.fireControl}}{{else}}—{{/if}}</b></li>
+		<li{{#unless scale.power}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Power'}}</span><b>{{#if scale.power}}{{system.power}}{{else}}—{{/if}}</b></li>
+		{{#if system.natural}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Natural'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
+		{{/if}}
+		{{/if}}
+
+		{{#if (eq item.type "armor")}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Protection'}}</span><b>{{system.protection}}</b></li>
+		<li{{#unless system.radiations}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Radiations'}}</span><b>{{system.radiations}}</b></li>
+		{{#if system.requireSkill}}
+		<li><span class="lbl">{{localize 'MGT2.Items.RequiredSkill'}}</span><b class="word">{{system.requireSkill}} {{system.requireSkillLevel}}</b></li>
+		{{/if}}
+		{{#if system.powered}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Powered'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
+		{{/if}}
+		{{/if}}
+
+		{{#if (eq item.type "computer")}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.processingUsed}}<span class="u">/ {{system.processing}}</span></b></li>
+		{{/if}}
+
+		{{#if (eq item.type "career")}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Assignment'}}</span><b class="word">{{#if system.assignment}}{{system.assignment}}{{else}}—{{/if}}</b></li>
+		<li><span class="lbl">{{localize 'MGT2.Items.Terms'}}</span><b>{{system.terms}}</b></li>
+		<li><span class="lbl">{{localize 'MGT2.Items.Rank'}}</span><b>{{system.rank}}</b></li>
+		{{/if}}
+
+		{{#if (eq item.type "talent")}}
+		{{#if system.psionic.reach}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Reach'}}</span><b class="word">{{localize (concat "MGT2.PsionicReach." system.psionic.reach)}}</b></li>
+		{{/if}}
+		<li><span class="lbl">{{localize 'MGT2.Items.PSICost'}}</span><b>{{system.psionic.cost}}</b></li>
+		{{#if system.psionic.duration}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Duration'}}</span><b>{{system.psionic.duration}}<span class="u">{{localize (concat "MGT2.Durations." system.psionic.durationUnit)}}</span></b></li>
+		{{/if}}
+		{{/if}}
+
+		{{#if (eq item.type "equipment")}}
+		{{#if system.augment.improvement}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Improvement'}}</span><b class="word">{{system.augment.improvement}}</b></li>
+		{{/if}}
+		{{/if}}
+
+		{{#if (eq system.subType "software")}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Bandwidth'}}</span><b>{{system.software.bandwidth}}</b></li>
+		{{#if system.software.effect}}
+		<li><span class="lbl">{{localize 'MGT2.Items.SoftwareEffect'}}</span><b class="word">{{system.software.effect}}</b></li>
+		{{/if}}
+		{{/if}}
+
+		{{#if system.tl}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Legality'}}</span><b>{{system.legality}}</b></li>
+		{{/if}}
+	</ul>
+
+	<div class="grid edit-only">
+		{{#if (eq item.type "weapon")}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Scale'}}</span>
+			<select class="f" name="system.scale" data-scale-select>
+				{{selectOptions config.WeaponScales selected=system.scale labelAttr="label" localize=true}}
+			</select>
+		</label>
+		<label class="check">
+			{{formInput systemFields.range.fields.isMelee name="system.range.isMelee" value=system.range.isMelee}}
+			<span>{{localize 'MGT2.Items.IsMelee'}}</span>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Range'}}</span>
+			<span class="pair">
+				{{formInput systemFields.range.fields.value name="system.range.value" value=system.range.value classes="f num"}}
+				<select class="f" name="system.range.unit">
+					{{selectOptions config.MetricRange selected=system.range.unit localize=true}}
+				</select>
+			</span>
+		</label>
+		{{! Foundry's parser has no `3D` shorthand, and the books print one on every statblock — so the
+		    field states the notation it wants rather than failing at the roll button. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Damage'}}</span>
+			{{formInput systemFields.damage name="system.damage" value=system.damage classes="f" placeholder=(localize 'MGT2.Items.DamagePlaceholder')}}
+		</label>
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.DamageType'}}</span>
+			{{formInput systemFields.damageType name="system.damageType" value=system.damageType localize=true}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span>
+			{{formInput systemFields.magazine name="system.magazine" value=system.magazine classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span>
+			{{formInput systemFields.magazineCost name="system.magazineCost" value=system.magazineCost classes="f num"}}
+		</label>
+		<label{{#unless scale.fireControl}} class="off"{{/unless}}>
+			<span class="lbl">{{localize 'MGT2.Items.FireControl'}}</span>
+			{{formInput systemFields.fireControl name="system.fireControl" value=system.fireControl classes="f num" disabled=(not scale.fireControl)}}
+		</label>
+		<label{{#unless scale.power}} class="off"{{/unless}}>
+			<span class="lbl">{{localize 'MGT2.Items.Power'}}</span>
+			{{formInput systemFields.power name="system.power" value=system.power classes="f num" disabled=(not scale.power)}}
+		</label>
+		<label class="check">
+			{{formInput systemFields.natural name="system.natural" value=system.natural}}
+			<span>{{localize 'MGT2.Items.Natural'}}</span>
+		</label>
+		{{/if}}
+
+		{{#if (eq item.type "armor")}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Protection'}}</span>
+			{{formInput systemFields.protection name="system.protection" value=system.protection classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Radiations'}}</span>
+			{{formInput systemFields.radiations name="system.radiations" value=system.radiations classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.RequiredSkill'}}</span>
+			<input class="f" type="text" name="system.requireSkill" value="{{system.requireSkill}}" />
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Level'}}</span>
+			<input class="f num" type="number" name="system.requireSkillLevel" value="{{system.requireSkillLevel}}" min="0" step="1" />
+		</label>
+		<label class="check">
+			{{formInput systemFields.powered name="system.powered" value=system.powered}}
+			<span>{{localize 'MGT2.Items.Powered'}}</span>
+		</label>
+		{{/if}}
+
+		{{#if (eq item.type "computer")}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Processing'}}</span>
+			{{formInput systemFields.processing name="system.processing" value=system.processing classes="f num"}}
+		</label>
+		{{/if}}
+
+		{{#if (eq item.type "career")}}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.Assignment'}}</span>
+			{{formInput systemFields.assignment name="system.assignment" value=system.assignment classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Terms'}}</span>
+			{{formInput systemFields.terms name="system.terms" value=system.terms classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Rank'}}</span>
+			{{formInput systemFields.rank name="system.rank" value=system.rank classes="f num"}}
+		</label>
+		{{/if}}
+
+		{{#if (eq item.type "talent")}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Reach'}}</span>
+			<select class="f" name="system.psionic.reach">
+				<option></option>
+				{{selectOptions config.PsionicReach selected=system.psionic.reach localize=true}}
+			</select>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.PSICost'}}</span>
+			{{formInput systemFields.psionic.fields.cost name="system.psionic.cost" value=system.psionic.cost classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Duration'}}</span>
+			<span class="pair">
+				{{formInput systemFields.psionic.fields.duration name="system.psionic.duration" value=system.psionic.duration classes="f"}}
+				<select class="f" name="system.psionic.durationUnit">
+					{{selectOptions config.Durations selected=system.psionic.durationUnit localize=true}}
+				</select>
+			</span>
+		</label>
+		{{/if}}
+
+		{{#if (eq item.type "equipment")}}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.Improvement'}}</span>
+			{{formInput systemFields.augment.fields.improvement name="system.augment.improvement" value=system.augment.improvement classes="f"}}
+		</label>
+		{{/if}}
+
+		{{#if (eq system.subType "software")}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Bandwidth'}}</span>
+			{{formInput systemFields.software.fields.bandwidth name="system.software.bandwidth" value=system.software.bandwidth classes="f num"}}
+		</label>
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.SoftwareEffect'}}</span>
+			{{formInput systemFields.software.fields.effect name="system.software.effect" value=system.software.effect classes="f"}}
+		</label>
+		{{/if}}
+
+		{{#if system.tl}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Legality'}}</span>
+			{{formInput systemFields.legality name="system.legality" value=system.legality classes="f num"}}
+		</label>
+		{{/if}}
+	</div>
+	{{/if}}
+</div>

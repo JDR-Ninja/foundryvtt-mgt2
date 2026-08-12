@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "checkJs": false,
+    "baseUrl": ".",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
+  },
+  "include": ["src/module/**/*.js", "eslint.config.mjs"],
+  "exclude": ["node_modules", "styles"]
+}

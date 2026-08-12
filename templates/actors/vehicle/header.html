@@ -1,0 +1,154 @@
+<section class="mgt2-header">
+	<img class="portrait vehicle" src="{{img}}" alt="{{name}}" data-edit="img" data-action="editImage" data-tooltip="{{name}}" />
+
+	<div class="idy">
+		<div class="name">
+			<span class="play-only">{{name}}</span>
+			<input class="f edit-only" name="name" type="text" value="{{name}}" />
+		</div>
+
+		<div class="meta play-only">
+			{{#each vehicle.skills as |pair|}}
+			<span>{{localize pair.label}}{{#if pair.specialityLabel}} ({{localize pair.specialityLabel}}){{/if}}</span>
+			{{/each}}
+			{{#if system.owner}}<span>{{system.owner}}</span>{{/if}}
+			{{#if system.shipping}}<span>{{system.shipping}} {{localize 'MGT2.Actor.vehicle.Tons'}}</span>{{/if}}
+		</div>
+
+		<div class="meta edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Registration'}}</span>
+				{{formInput systemFields.registration name="system.registration" value=system.registration classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Owner'}}</span>
+				{{formInput systemFields.owner name="system.owner" value=system.owner classes="f"}}
+			</label>
+		</div>
+
+		{{! Derived from the wound; the only stored flag a craft has is none at all. }}
+		<div class="states">
+			<label data-tooltip="{{localize 'MGT2.Actor.vehicle.WreckedHint'}}">
+				<input type="checkbox" {{checked system.states.wrecked}} disabled />{{localize 'MGT2.Actor.vehicle.Wrecked'}}
+			</label>
+		</div>
+	</div>
+
+	<div class="reg">
+		<span class="lbl">{{localize 'MGT2.Actor.vehicle.Registration'}}</span>
+		<div class="code play-only">{{#if system.registration}}{{system.registration}}{{else}}&mdash;{{/if}}</div>
+		<div class="ref play-only">{{localize 'MGT2.Actor.vehicle.Ref'}}</div>
+	</div>
+
+	{{! The eleven printed statblock lines, in the books' own print order (Core p.138, VH p.13).
+	    Readout in both modes: eleven entries rag over three lines inline, so this is the .grid
+	    variant, and every transcription control lives in the edit grid below instead. }}
+	<dl class="statline grid" data-derived="system">
+		<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.TL'}}</dt><dd>{{system.tl}}</dd></div>
+		<div class="stat{{#unless vehicle.skills.length}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.vehicle.Skill'}}</dt>
+			<dd class="word">
+				{{#if vehicle.skills.length}}
+				{{#each vehicle.skills as |pair|}}{{#unless @first}}, {{/unless}}{{localize pair.label}}{{#if pair.specialityLabel}} ({{localize pair.specialityLabel}}){{/if}}{{/each}}
+				{{else}}&mdash;{{/if}}
+			</dd>
+		</div>
+		<div class="stat{{#if vehicle.agility.penalties.length}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.Actor.vehicle.Agility'}}</dt>
+			<dd>{{showDM system.agilityEffective}}</dd>
+		</div>
+		<div class="stat{{#if vehicle.speed.reduced}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.Actor.vehicle.Speed'}}</dt>
+			<dd class="word">
+				{{#if vehicle.speed.max}}{{localize vehicle.speed.max}}{{else}}&mdash;{{/if}}
+				{{#if vehicle.speed.cruise}}<span class="of">({{localize vehicle.speed.cruise}})</span>{{/if}}
+			</dd>
+		</div>
+		<div class="stat{{#unless system.range.max}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.vehicle.Range'}}</dt>
+			<dd>{{system.range.max}}{{#if system.range.cruise}}<span class="of"> ({{system.range.cruise}})</span>{{/if}}<i>{{localize (lookup choices.rangeUnits system.range.unit)}}</i></dd>
+		</div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.Crew'}}</dt><dd>{{system.crew}}</dd></div>
+		<div class="stat{{#unless system.passengers}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.vehicle.Passengers'}}</dt>
+			<dd>{{#if system.passengers}}{{system.passengers}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat{{#unless system.cargo}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.vehicle.Cargo'}}</dt>
+			<dd>{{#if system.cargo}}{{system.cargo}}<i>{{localize 'MGT2.Actor.vehicle.Tons'}}</i>{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat lead{{#if vehicle.hull.damage}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.DamageTracks.hull'}}</dt>
+			<dd>{{vehicle.hull.value}}<span class="of">/{{vehicle.hull.max}}</span></dd>
+		</div>
+		<div class="stat{{#unless system.shipping}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.vehicle.Shipping'}}</dt>
+			<dd>{{#if system.shipping}}{{system.shipping}}<i>{{localize 'MGT2.Actor.vehicle.Tons'}}</i>{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat{{#unless system.cost}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.vehicle.Cost'}}</dt>
+			<dd>{{#if system.cost}}<i>Cr</i>{{system.cost}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+	</dl>
+
+	{{! The transcription form. Printed value wins: nothing below is ever written by a derivation,
+	    and the cross-check panel in the rail is where a `spaces` disagreement is reported. }}
+	<div class="meta edit-only vstat">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.TL'}}</span>
+			{{formInput systemFields.tl name="system.tl" value=system.tl classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.Spaces'}}</span>
+			{{formInput systemFields.spaces name="system.spaces" value=system.spaces classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.DamageTracks.hull'}}</span>
+			{{formInput systemFields.characteristics.fields.hull.fields.base name="system.characteristics.hull.base" value=system.characteristics.hull.base classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.Crew'}}</span>
+			{{formInput systemFields.crew name="system.crew" value=system.crew classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.Passengers'}}</span>
+			{{formInput systemFields.passengers name="system.passengers" value=system.passengers classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.Cargo'}}</span>
+			{{formInput systemFields.cargo name="system.cargo" value=system.cargo classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.Shipping'}}</span>
+			{{formInput systemFields.shipping name="system.shipping" value=system.shipping classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.Cost'}}</span>
+			{{formInput systemFields.cost name="system.cost" value=system.cost classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.RangeMax'}}</span>
+			{{formInput systemFields.range.fields.max name="system.range.max" value=system.range.max classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.RangeCruise'}}</span>
+			{{formInput systemFields.range.fields.cruise name="system.range.cruise" value=system.range.cruise classes="f num"}}
+		</label>
+		{{! Five of the 78 print a service life instead of a distance (VH p.50). }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.RangeUnit'}}</span>
+			{{formInput systemFields.range.fields.unit name="system.range.unit" value=system.range.unit localize=true classes="f"}}
+		</label>
+	</div>
+
+	{{! Live in both modes: with `base` and `damage` stored and everything else derived, this is the
+	    only way the hull can change at all. }}
+	<div class="hdctl">
+		<span class="dmgctl">
+			<input type="number" min="0" step="1" value="1" aria-label="{{localize 'MGT2.Actor.Amount'}}" />
+			<button type="button" class="btn b-dmg" data-action="applyDamage" data-sign="1">{{localize 'MGT2.Actor.Damage'}}</button>
+			<button type="button" class="btn" data-action="applyDamage" data-sign="-1">{{localize 'MGT2.Actor.vehicle.Repair'}}</button>
+		</span>
+		<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
+	</div>
+</section>

@@ -1,20 +1,8 @@
 .upcase
 	text-transform: uppercase
 
-.w1-10
-	width: calc(100% / 10)
-
-.w2-10
-	width: calc(100% / 10 * 2)
-
 .w3-10
 	width: calc(100% / 10 * 3)
-
-.w4-10
-	width: calc(100% / 10 * 4)
-
-.w5-10
-	width: calc(100% / 10 * 5)
 
 .h100
 	height: 100%
@@ -35,5 +23,19 @@
 	.mt-1, .mt-05
 		margin-top: 8px
 
-	.mt-2
-		margin-top: 14px
+	// Replacements for the inline styles the templates used to carry.
+	.flex-1
+		flex: 1
+	.flex-grow-0
+		flex-grow: 0
+	.flex-grow-2
+		flex-grow: 2
+	.flexcol-stretch
+		display: flex
+		flex-direction: column
+		justify-content: flex-start
+		align-items: stretch
+	.mx-1
+		margin: 0 1rem
+	select.narrow
+		width: 5rem

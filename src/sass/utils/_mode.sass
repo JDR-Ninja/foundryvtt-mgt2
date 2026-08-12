@@ -1,0 +1,54 @@
+// Play mode emits no structural inputs at all — nothing to tab through, nothing to submit.
+.mgt2[data-mode="play"] .edit-only
+	display: none !important
+
+.mgt2[data-mode="edit"] .play-only
+	display: none !important
+
+// Several blocks set `display`, which beats the UA rule for [hidden] on a plain class selector.
+// Anything toggled by JS uses `hidden`, so restate it.
+.mgt2 [hidden]
+	display: none !important
+
+// The toggle sits in the window header, a chrome island, so it reads the re-anchored tokens.
+.mgt2 .window-header .mgt2-mode
+	flex: 0 0 auto
+	display: inline-flex
+	align-items: center
+	gap: 6px
+	height: auto
+	min-height: 0
+	padding: 2px 7px
+	font-family: var(--mgt2-cond)
+	font-size: 10px
+	font-weight: 600
+	letter-spacing: 0.18em
+	line-height: 1.4
+	text-transform: uppercase
+	color: var(--faint)
+	background: none
+	border: 1px solid var(--rule)
+	border-radius: 2px
+	cursor: var(--cursor-pointer)
+
+	&::before
+		content: ""
+		width: 18px
+		height: 9px
+		border: 1px solid currentColor
+		border-radius: 5px
+		background: linear-gradient(90deg, currentColor 0 7px, transparent 7px) no-repeat
+		background-size: 100% 100%
+		background-position: 1px center
+
+	&:hover
+		color: var(--accent-text)
+		background: none
+		border-color: var(--accent-line)
+
+.mgt2[data-mode="edit"] .window-header .mgt2-mode
+	color: var(--accent-text)
+	border-color: var(--accent-line)
+
+	&::before
+		background-position: 8px center

@@ -1,0 +1,63 @@
+{{! The item's interface to the character, stated as a sentence and actionable from here. }}
+<div class="block">
+	<div class="sect"><h3>{{localize 'MGT2.Items.Roll'}}</h3></div>
+	<div class="rollbar">
+		<p class="rollline play-only">
+			{{#if roll.skill}}<span>{{roll.skill}}</span>{{/if}}
+			{{#if roll.characteristic}}
+			{{#if roll.skill}}<span class="op">+</span>{{/if}}<span>{{roll.characteristic}}</span>
+			{{/if}}
+			<span class="op">{{localize 'MGT2.Items.Versus'}}</span>
+			{{#if roll.difficulty}}<span>{{roll.difficulty}}</span>
+			{{else}}<span class="none">{{localize 'MGT2.Items.RefereeDifficulty'}}</span>{{/if}}
+		</p>
+		<button type="button" class="btn-roll" data-action="itemRoll" data-roll="{{roll.dispatch}}"
+			data-item-id="{{item.id}}" data-roll-skill="{{item.id}}"
+			{{#if roll.disabled}}disabled data-tooltip="MGT2.Items.RollNeedsOwner"{{/if}}>
+			<i class="fa-solid fa-dice"></i>{{localize roll.label}}
+		</button>
+
+		<div class="grid edit-only">
+			{{#if (eq item.type "talent")}}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Items.Level'}}</span>
+				{{formInput systemFields.level name="system.level" value=system.level classes="f num"}}
+			</label>
+			{{#if (eq system.subType "skill")}}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Items.Speciality'}}</span>
+				{{formInput systemFields.skill.fields.speciality name="system.skill.speciality" value=system.skill.speciality classes="f"}}
+			</label>
+			{{/if}}
+			{{else}}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Items.Skill'}}</span>
+				<select class="f" name="system.roll.skill">
+					<option></option>
+					{{selectOptions skills selected=system.roll.skill valueAttr="_id" labelAttr="name"}}
+				</select>
+			</label>
+			{{/if}}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Items.Characteristic'}}</span>
+				<select class="f" name="system.roll.characteristic">
+					<option></option>
+					{{selectOptions config.Characteristics selected=system.roll.characteristic localize=true}}
+				</select>
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Items.Difficulty'}}</span>
+				<select class="f" name="system.roll.difficulty">
+					<option></option>
+					{{selectOptions config.Difficulty selected=system.roll.difficulty localize=true}}
+				</select>
+			</label>
+			{{#if (eq system.subType "skill")}}
+			<label class="check">
+				{{formInput systemFields.skill.fields.reduceEncumbrance name="system.skill.reduceEncumbrance" value=system.skill.reduceEncumbrance}}
+				<span>{{localize 'MGT2.Items.ReduceEncumbrance'}}</span>
+			</label>
+			{{/if}}
+		</div>
+	</div>
+</div>

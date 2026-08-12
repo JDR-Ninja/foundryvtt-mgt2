@@ -1,0 +1,195 @@
+<section class="mgt2-panel active mgt2-npc-panel">
+
+	{{#if isCreature}}
+	{{! Fight or Flight (Core p.91). The lookup keys on the pattern ALONE: the published statblocks
+	    pair diet and pattern freely, so the table's diet grouping is not part of the key. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.npc.Behaviour'}}</h3>
+			{{#if npc.reaction}}<span class="count">{{localize npc.reaction.label}}</span>{{/if}}
+		</div>
+		{{#if npc.reaction}}
+		<div class="reaction">
+			<dl class="statline" data-derived="system.reaction">
+				<div class="stat{{#unless npc.reaction.flee}} none{{/unless}}">
+					<dt>{{localize 'MGT2.Actor.npc.Flee'}}</dt>
+					<dd>{{#if npc.reaction.flee}}{{npc.reaction.flee}}&minus;{{else}}&mdash;{{/if}}</dd>
+				</div>
+				<div class="stat{{#unless npc.reaction.attack}} none{{/unless}}">
+					<dt>{{localize 'MGT2.Actor.npc.Attack'}}</dt>
+					<dd>{{#if npc.reaction.attack}}{{npc.reaction.attack}}+{{else}}&mdash;{{/if}}</dd>
+				</div>
+				{{#if npc.reaction.altAttack}}
+				<div class="stat">
+					<dt>{{localize 'MGT2.Actor.npc.AttackIfLarger'}}</dt>
+					<dd>{{npc.reaction.altAttack}}+</dd>
+				</div>
+				{{/if}}
+			</dl>
+			<button type="button" class="btn hot" data-action="reactionRoll">{{localize 'MGT2.Actor.npc.ReactionRoll'}}</button>
+		</div>
+		{{#if npc.reaction.fleeGate}}<p class="hint">{{localize npc.reaction.fleeGate}}</p>{{/if}}
+		{{#if npc.reaction.gate}}<p class="hint">{{localize npc.reaction.gate}}</p>{{/if}}
+		{{else}}
+		<p class="hint">{{localize 'MGT2.Actor.npc.NoPattern'}}</p>
+		{{/if}}
+	</div>
+
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Actor.npc.Speed'}}</h3></div>
+		<dl class="statline grid play-only" data-derived="system.speed">
+			<div class="stat"><dt>{{localize 'MGT2.Actor.npc.SpeedGround'}}</dt><dd>{{system.speed.ground}}<i>m</i></dd></div>
+			<div class="stat{{#unless system.speed.swim}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.npc.SpeedSwim'}}</dt>
+				<dd>{{#if system.speed.swim}}{{system.speed.swim}}<i>m</i>{{else}}&mdash;{{/if}}</dd>
+			</div>
+			<div class="stat{{#unless npc.flyBand}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.npc.SpeedFly'}}</dt>
+				<dd class="word">{{#if npc.flyBand}}{{localize npc.flyBand}}{{else}}&mdash;{{/if}}</dd>
+			</div>
+			<div class="stat{{#unless system.speed.note}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.npc.SpeedNote'}}</dt>
+				<dd class="word">{{#if system.speed.note}}{{system.speed.note}}{{else}}&mdash;{{/if}}</dd>
+			</div>
+		</dl>
+		<div class="grid edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.npc.SpeedGround'}} ({{localize 'MGT2.Actor.npc.Metres'}})</span>
+				{{formInput systemFields.speed.fields.ground name="system.speed.ground" value=system.speed.ground classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.npc.SpeedSwim'}} ({{localize 'MGT2.Actor.npc.Metres'}})</span>
+				{{formInput systemFields.speed.fields.swim name="system.speed.swim" value=system.speed.swim classes="f num"}}
+			</label>
+			{{! A Speed Band and not metres: `Flyer (X)` names "a maximum Speed Band" (Core p.86). }}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.npc.SpeedFly'}} ({{localize 'MGT2.Actor.npc.SpeedBand'}})</span>
+				<select class="f" name="system.speed.fly" data-dtype="Number">
+					<option value="">&mdash;</option>
+					{{#each choices.speedBands as |label key|}}
+					<option value="{{@index}}"{{#if (eq @index ../system.speed.fly)}} selected{{/if}}>{{localize label}}</option>
+					{{/each}}
+				</select>
+			</label>
+			<label class="wide">
+				<span class="lbl">{{localize 'MGT2.Actor.npc.SpeedNote'}}</span>
+				{{formInput systemFields.speed.fields.note name="system.speed.note" value=system.speed.note classes="f" placeholder=(localize 'MGT2.Actor.npc.SpeedNotePlaceholder')}}
+			</label>
+		</div>
+	</div>
+	{{/if}}
+
+	{{! Attacks are `weapon` Items flagged `natural`, never an array: an array would fork the roll
+	    path, the chat card and the damage application, all of which already work. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.npc.Attacks'}}</h3>
+			<span class="count">{{naturals.length}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if naturals.length}}
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Name'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Damage'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Range'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each naturals as |weapon|}}
+				<tr data-item-id="{{weapon._id}}">
+					<td><a class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}{{#if weapon.subInfo}}<span class="sub">{{weapon.subInfo}}</span>{{/if}}</td>
+					<td class="c num">{{weapon.system.damage}}</td>
+					<td class="c num">{{weapon.range}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		{{#if isCreature}}<p class="hint">{{localize 'MGT2.Actor.npc.NaturalHint'}}</p>{{/if}}
+	</div>
+
+	{{#if carried.length}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Items.Weapons'}}</h3>
+			<span class="count">{{carried.length}}</span>
+		</div>
+		<table class="rows">
+			<tbody>
+				{{#each carried as |weapon|}}
+				<tr data-item-id="{{weapon._id}}">
+					<td><a class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}</td>
+					<td class="c num">{{weapon.system.damage}}</td>
+					<td class="c num">{{weapon.range}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+	{{/if}}
+
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.Skills'}}</h3>
+			<span class="count">{{skills.length}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="talent" data-subtype="skill" data-create-name="{{localize 'MGT2.Actor.NewSkill'}}" data-tooltip="{{localize 'MGT2.Actor.AddSkill'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if skills.length}}
+		<table class="rows">
+			<tbody>
+				{{#each skills as |skill|}}
+				<tr data-item-id="{{skill._id}}">
+					<td><a class="roll" data-action="roll" data-roll="skill" data-roll-skill="{{skill._id}}"><i class="fa-solid fa-dice"></i></a>{{skill.name}}{{#if skill.system.skill.speciality}} ({{skill.system.skill.speciality}}){{/if}}</td>
+					<td class="r num">{{skill.system.level}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditSkill" del="MGT2.Actor.DeleteSkill"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		{{#if isCreature}}<p class="hint">{{localize 'MGT2.Actor.npc.SkillDefaults'}}</p>{{/if}}
+		{{#if npc.experience}}<p class="hint">{{localize 'MGT2.Actor.npc.ExperienceHint' level=npc.experience.skillLevel}}</p>{{/if}}
+	</div>
+
+	{{! The shared code row: NAME(param, param) and no definition text. }}
+	{{> systems/mgt2/templates/items/blocks/traits.html}}
+
+	{{#if isCreature}}
+	{{! Both derived from the trait list, and both read by the damage pipeline rather than here. The
+	    size ladder is advisory: the table says a referee need not be bound by it, and the published
+	    statblocks break it constantly. }}
+	<dl class="statline grid" data-derived="system.damageResponse">
+		<div class="stat">
+			<dt>{{localize 'MGT2.Actor.npc.DamageResponse'}}</dt>
+			<dd class="word">{{localize (concat 'MGT2.DamageTransforms.' system.damageResponse.transform)}}</dd>
+		</div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.npc.Scale'}}</dt><dd class="word">{{localize (concat 'MGT2.Scales.' system.scale)}}</dd></div>
+		<div class="stat{{#unless npc.armourConditional}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.npc.ArmourConditional'}}</dt>
+			<dd class="word">{{#if npc.armourConditional}}{{npc.armourConditional.score}} {{npc.armourConditional.condition}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat{{#unless npc.size.band}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.npc.SizeRecommended'}}</dt>
+			<dd class="word">{{#if npc.size.band}}{{showDM npc.size.band.dm}} · {{npc.size.band.damage}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+	</dl>
+	{{#if npc.size.band}}
+	<p class="hint">{{localize (ifThen npc.size.agrees 'MGT2.Actor.npc.SizeAgrees' 'MGT2.Actor.npc.SizeAdvisory')}}</p>
+	{{/if}}
+	{{/if}}
+
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Actor.Biography'}}</h3></div>
+		<prose-mirror name="system.biography" value="{{system.biography}}" toggled></prose-mirror>
+	</div>
+
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Actor.Notes'}}</h3></div>
+		<prose-mirror name="system.notes" value="{{system.notes}}" toggled></prose-mirror>
+	</div>
+</section>

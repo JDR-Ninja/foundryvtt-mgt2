@@ -1,4 +1,321 @@
-.mgt2 
-	.dialog-button 
-		color: var(--mgt2-color-primary)
-		background-color: var(--mgt2-bgcolor-primary) !important 
+// Dialogs. Ported from docs/sketch-dialogs-chat.html; the outer padding is core's — the sketch
+// drew its own frame — and the buttons are DialogV2's footer rather than the sketch's `.dbtns`.
+
+.mgt2
+	.dlg
+		display: flex
+		flex-direction: column
+		gap: 14px
+
+	.dblock
+		display: flex
+		flex-direction: column
+		gap: 9px
+
+	// Each row is its own grid, so an `auto` third track sized itself on that row's own readout and
+	// the control column absorbed the difference — the inputs came out ragged down the dialog. The
+	// track is fixed, and a block that needs a wider one sets it for every row it holds at once.
+	.drow
+		display: grid
+		grid-template-columns: 7.5rem minmax(0, 1fr) var(--dm-col, 2.2rem)
+		align-items: center
+		gap: 10px
+		.dm
+			font-family: var(--mono)
+			font-size: 13px
+			font-variant-numeric: tabular-nums
+			text-align: right
+			color: var(--accent-text)
+		.dm.zero
+			color: var(--faint)
+		// What the referee is being told will go wrong: an overspent pool, a failed operation, a
+		// Tech Level gap the surgeon has to eat.
+		.dm.bad
+			color: var(--danger)
+
+	// Surgery and medical care print a sentence where every other row prints a DM.
+	.dblock:has(.dm.total),
+	.dblock:has(.dm.outcome)
+		--dm-col: 5.8rem
+
+	// Range: the bands are fractions of the weapon's own Range score, and the distance is typed.
+	.distrow
+		display: grid
+		grid-template-columns: 7.5rem auto minmax(0, 1fr)
+		align-items: center
+		gap: 10px
+		.unit
+			margin-left: 4px
+			font-family: var(--mono)
+			font-size: 12px
+			color: var(--faint)
+		input.f
+			width: 5rem
+			text-align: right
+			font-family: var(--mono)
+
+	.band
+		display: flex
+		align-items: baseline
+		gap: 8px
+		font-family: var(--cond)
+		font-size: 12px
+		font-weight: 600
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		.b
+			font-size: 15px
+		.dmv
+			font-family: var(--mono)
+			font-size: 13px
+			letter-spacing: 0
+		.why
+			font-family: var(--body)
+			font-size: 11.5px
+			font-weight: 400
+			letter-spacing: 0
+			text-transform: none
+			color: var(--faint)
+	.band.pos .b, .band.pos .dmv
+		color: var(--good)
+	.band.neg .b, .band.neg .dmv
+		color: var(--danger)
+	.band.out .b
+		color: var(--danger)
+	.band.forced .why
+		color: var(--danger)
+
+	.situ
+		display: flex
+		flex-wrap: wrap
+		gap: 8px 16px
+		label
+			display: inline-flex
+			align-items: center
+			gap: 6px
+			font-family: var(--cond)
+			font-size: 11px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--mute)
+			cursor: var(--cursor-pointer)
+			input
+				margin: 0
+				accent-color: var(--accent-text)
+			.v
+				font-family: var(--mono)
+				font-size: 11px
+				letter-spacing: 0
+		label.disabled
+			opacity: 0.4
+			cursor: var(--cursor-default)
+			text-decoration: line-through
+
+	// A row voided by another: Auto forfeits aiming, so the aiming row is struck through rather
+	// than silently ignored.
+	.drow.voided
+		opacity: 0.45
+		text-decoration: line-through
+
+	// Weapon traits: chip, what the system did about it, and the control or the number.
+	.traitlist
+		display: flex
+		flex-direction: column
+		gap: 7px
+
+	.traitrow
+		display: grid
+		grid-template-columns: auto minmax(0, 1fr) auto
+		align-items: center
+		gap: 10px
+		.st
+			font-size: 11.5px
+			color: var(--faint)
+		.val
+			min-width: 2.4rem
+			font-family: var(--mono)
+			font-size: 12.5px
+			text-align: right
+			color: var(--faint)
+		label.situ
+			justify-self: end
+	.traitrow.applied .val
+		color: var(--accent-text)
+
+	// The augment reminder sits under the field it belongs to, not beside it.
+	.hint.augment-name
+		margin-top: -5px
+		padding-left: 8.5rem
+
+	.dstates
+		display: flex
+		flex-wrap: wrap
+		gap: 8px 18px
+		label
+			display: inline-flex
+			align-items: center
+			gap: 6px
+			font-family: var(--cond)
+			font-size: 11px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--mute)
+			cursor: var(--cursor-pointer)
+			input
+				margin: 0
+				accent-color: var(--danger)
+			input:checked + span
+				color: var(--danger)
+			.v
+				font-family: var(--mono)
+				font-size: 11px
+				letter-spacing: 0
+
+	.hint
+		margin: 0
+		font-size: 11.5px
+		color: var(--faint)
+		b
+			font-weight: 600
+			color: var(--mute)
+
+// --------------------------------------------
+//  THE READOUT — what you are about to roll, and what Effect it produces
+// --------------------------------------------
+
+.mgt2 .readout
+	padding-top: 10px
+	border-top: 1px solid var(--rule)
+
+	.line
+		display: flex
+		flex-wrap: wrap
+		align-items: baseline
+		gap: 10px
+
+	.form
+		font-family: var(--cond)
+		font-size: 24px
+		font-weight: 700
+		line-height: 1
+		font-variant-numeric: tabular-nums
+
+	.vs
+		margin-left: auto
+		font-family: var(--cond)
+		font-size: 12px
+		font-weight: 600
+		letter-spacing: 0.16em
+		text-transform: uppercase
+		color: var(--mute)
+		b
+			font-size: 18px
+			letter-spacing: 0
+			color: var(--ink)
+	// No difficulty set still produces an Effect, against an assumed 8 (Core p.62).
+	.vs.assumed
+		opacity: 0.55
+
+	.terms
+		display: flex
+		flex-wrap: wrap
+		gap: 3px 12px
+		margin-top: 7px
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+		.neg
+			color: var(--danger)
+
+// The Effect ladder: six bands, and the marker moves as the form changes. Effect is what the next
+// action reads, so it belongs in front of the player before the dice and not only on the card.
+.mgt2 .eladder
+	margin-top: 10px
+
+	.strip
+		display: flex
+		height: 20px
+		span
+			flex: 1 1 0
+			display: grid
+			place-items: center
+			font-family: var(--mono)
+			font-size: 10px
+			color: var(--faint)
+			border: 1px solid var(--rule-soft)
+			border-right: 0
+		span:last-child
+			border-right: 1px solid var(--rule-soft)
+		span.f
+			color: var(--danger)
+			background: color-mix(in oklab, var(--danger) 10%, transparent)
+		span.s
+			color: var(--good)
+			background: color-mix(in oklab, var(--good) 10%, transparent)
+		span.here
+			font-weight: 600
+			color: var(--accent-text)
+			outline: 2px solid var(--accent-text)
+			outline-offset: -2px
+
+	.cap
+		display: flex
+		align-items: baseline
+		gap: 8px
+		margin-top: 5px
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		color: var(--mute)
+		b
+			font-family: var(--cond)
+			font-size: 15px
+			color: var(--ink)
+		.band
+			margin-left: auto
+
+// --------------------------------------------
+//  PROMPT BUTTONS — DialogV2's footer, carrying the dice each one rolls
+// --------------------------------------------
+
+.mgt2-prompt .form-footer
+	gap: 6px
+	button
+		flex: 1 1 0
+		height: auto
+		padding: 7px 6px
+		font: inherit
+		font-family: var(--cond)
+		font-size: 11px
+		font-weight: 600
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		color: var(--mute)
+		background: none
+		border: 1px solid var(--rule)
+		border-radius: 2px
+		&:hover
+			color: var(--accent-text)
+			border-color: var(--accent-line)
+		.d
+			display: block
+			margin-top: 2px
+			font-family: var(--mono)
+			font-size: 10px
+			letter-spacing: 0
+			text-transform: none
+			color: var(--faint)
+	button[data-action="submit"]
+		flex: 1.6 1 0
+		color: var(--accent-text)
+		border-color: var(--accent-line)
+		&:hover
+			background: var(--accent-soft)
+			border-color: var(--accent-text)

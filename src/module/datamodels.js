@@ -1,149 +1,15 @@
 // https://foundryvtt.com/article/system-data-models/
 // https://foundryvtt.com/api/classes/foundry.data.fields.NumberField.html
 // https://foundryvtt.com/api/v10/classes/foundry.data.fields.DataField.html
+import { MGT2 } from "./config.js";
+import { buildTraitMap, createTraitsField, migrateTraitArray } from "./traits.js";
+
 const fields = foundry.data.fields;
-
-export class CharacterData extends foundry.abstract.TypeDataModel {
-
-    static defineSchema() {
-        // XP
-        return {
-            name: new fields.StringField({ required: false, blank: false, trim: true }),
-            life: new fields.SchemaField({
-                value: new fields.NumberField({ required: false, initial: 0, integer: true }),
-                max: new fields.NumberField({ required: true, initial: 0, integer: true })
-            }),
-            personal: new fields.SchemaField({
-                title: new fields.StringField({ required: false, blank: true, trim: true }),
-                species: new fields.StringField({ required: false, blank: true, trim: true }),
-                speciesText: new fields.SchemaField({
-                    description: new fields.StringField({ required: false, blank: true, trim: true, nullable: true }),
-                    descriptionLong: new fields.HTMLField({ required: false, blank: true, trim: true })
-                }),
-                age: new fields.StringField({ required: false, blank: true, trim: true }),
-                gender: new fields.StringField({ required: false, blank: true, trim: true }),
-                pronouns: new fields.StringField({ required: false, blank: true, trim: true }),
-                homeworld: new fields.StringField({ required: false, blank: true, trim: true }),
-                ucp: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-                traits: new fields.ArrayField(
-                    new fields.SchemaField({
-                        name: new fields.StringField({ required: true, blank: true, trim: true }),
-                        description: new fields.StringField({ required: false, blank: true, trim: true })
-                    })
-                )
-            }),
-            biography: new fields.HTMLField({ required: false, blank: true, trim: true }),
-
-            characteristics: new fields.SchemaField({
-                strength: createCharacteristicField(true, true),
-                dexterity: createCharacteristicField(true, true),
-                endurance: createCharacteristicField(true, true),
-                intellect: createCharacteristicField(true, false),
-                education: createCharacteristicField(true, false),
-                social: createCharacteristicField(true, false),
-                morale: createCharacteristicField(true, false),
-                luck: createCharacteristicField(true, false),
-                sanity: createCharacteristicField(true, false),
-                charm: createCharacteristicField(true, false),
-                psionic: createCharacteristicField(true, false),
-                other: createCharacteristicField(true, false)
-            }),
-
-            health: new fields.SchemaField({
-                radiations: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true })
-            }),
-            study: new fields.SchemaField({
-                skill: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-                total: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true }),
-                completed: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true })
-            }),
-            finance: new fields.SchemaField({
-                pension: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
-                credits: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
-                cashOnHand: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
-                debt: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
-                livingCost: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
-                monthlyShipPayments: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
-                notes: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
-            }),
-            containerView: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-            containerDropIn: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-            notes: new fields.HTMLField({ required: false, blank: true, trim: true }),
-
-            inventory: new fields.SchemaField({
-                armor: new fields.NumberField({ required: true, initial: 0, integer: true }),
-                weight: new fields.NumberField({ required: true, initial: 0, min: 0, integer: false }),
-                encumbrance: new fields.SchemaField({
-                    normal: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
-                    heavy: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true })
-                })
-            }),
-            states: new fields.SchemaField({
-                encumbrance: new fields.BooleanField({ required: false, initial: false }),
-                fatigue: new fields.BooleanField({ required: false, initial: false }),
-                unconscious: new fields.BooleanField({ required: false, initial: false }),
-                surgeryRequired: new fields.BooleanField({ required: false, initial: false })
-            }),
-
-            config: new fields.SchemaField({
-                psionic: new fields.BooleanField({ required: false, initial: true }),
-                initiative: new fields.StringField({ required: false, blank: true, initial: "dexterity" }),
-                damages: new fields.SchemaField({
-                    rank1: new fields.StringField({ required: false, blank: true, initial: "strength" }),
-                    rank2: new fields.StringField({ required: false, blank: true, initial: "dexterity" }),
-                    rank3: new fields.StringField({ required: false, blank: true, initial: "endurance" })
-                })
-            })
-        };
-    }
-}
-
-// export class CreatureData extends foundry.abstract.TypeDataModel {
-//     static defineSchema() {
-//         return {
-//             name: new fields.StringField({ required: false, blank: false, trim: true }),
-//             TL: new fields.StringField({ required: true, blank: false, initial: "NA" }),
-//             species: new fields.StringField({ required: false, blank: true, trim: true }),
-//             //cost: new fields.NumberField({ required: true, integer: true }),
-//             armor: new fields.NumberField({ required: false, initial: 0, integer: true }),
-//             life: new fields.SchemaField({
-//                 value: new fields.NumberField({ required: false, initial: 0, integer: true }),
-//                 max: new fields.NumberField({ required: true, initial: 0, integer: true })
-//             }),
-
-//             speed: new fields.StringField({ required: false, initial: "4m", blank: true, trim: true }),
-
-//             traits: new fields.ArrayField(
-//                 new fields.SchemaField({
-//                     name: new fields.StringField({ required: true, blank: true, trim: true }),
-//                     description: new fields.StringField({ required: false, blank: true, trim: true })
-//                 })
-//             ),
-
-//             description: new fields.HTMLField({ required: false, blank: true, trim: true }),
-//             behaviour: new fields.StringField({ required: false, blank: true, trim: true })
-//         }
-//     };
-// }
-
-// export class NPCData extends CreatureData {
-//     static defineSchema() {
-//         const schema = super.defineSchema();
-//         // Species, Gender, Age
-//         // STR, DEX, END, INT,. EDU, SOC, PSI, SKILL/Psy, equipment
-//         // Status
-//         schema.secret = new fields.HTMLField({ required: false, blank: true, trim: true });
-
-//         return schema;
-//     }
-// }
 
 export class VehiculeData extends foundry.abstract.TypeDataModel {
 
     static defineSchema() {
         return {
-            name: new fields.StringField({ required: false, blank: false, trim: true }),
-
             skillId: new fields.StringField({ required: false, initial: "", blank: true, trim: true }),
             speed: new fields.SchemaField({
                 cruise: new fields.StringField({ required: false, initial: "Slow", blank: true }),
@@ -153,7 +19,6 @@ export class VehiculeData extends foundry.abstract.TypeDataModel {
             crew: new fields.NumberField({ required: false, min: 0, integer: true }),
             passengers: new fields.NumberField({ required: false, min: 0, integer: true }),
             cargo: new fields.NumberField({ required: false, min: 0, integer: false }),
-            //hull
             life: new fields.SchemaField({
                 value: new fields.NumberField({ required: true, initial: 0, integer: true }),
                 max: new fields.NumberField({ required: true, initial: 0, integer: true })
@@ -185,9 +50,7 @@ class ItemBaseData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         const fields = foundry.data.fields;
         const schema = {
-            //name: new fields.StringField({ required: true, blank: true, trim: true, nullable: true }),
             description: new fields.StringField({ required: false, blank: true, trim: true, nullable: true }),
-            //type: new fields.StringField({ required: false, blank: false }),
             subType: new fields.StringField({ required: false, blank: false, nullable: true })
         };
 
@@ -203,8 +66,9 @@ class PhysicalItemData extends ItemBaseData {
         schema.weightless = new fields.BooleanField({ required: false, initial: false });
         schema.cost = new fields.NumberField({ required: true, initial: 0, min: 0, integer: true });
         schema.tl = new fields.StringField({ required: true, blank: false, initial: "TL12" });
+        // The Law Level at which the item becomes restricted (Core p.255, CSC p.5).
+        schema.legality = new fields.NumberField({ required: false, initial: 9, min: 0, integer: true });
         schema.container = new fields.SchemaField({
-            //inContainer: new fields.BooleanField({ required: false, initial: false }),
             id: new fields.StringField({ required: false, blank: true })
         });
 
@@ -214,7 +78,6 @@ class PhysicalItemData extends ItemBaseData {
             difficulty: new fields.StringField({ required: false, blank: true, trim: true })
         });
 
-        schema.trash = new fields.BooleanField({ required: false, initial: false });
 
         return schema;
     }
@@ -238,8 +101,6 @@ export class EquipmentData extends PhysicalItemData {
         const schema = super.defineSchema();
         // augment, clothes
         schema.equipped = new fields.BooleanField({ required: false, initial: false });
-        //schema.skillModifier = new fields.StringField({ required: false, blank: true });
-        //schema.characteristicModifier = new fields.StringField({ required: false, blank: true });
 
         schema.augment = new fields.SchemaField({
             improvement: new fields.StringField({ required: false, blank: true, trim: true })
@@ -257,6 +118,9 @@ export class DiseaseData extends ItemBaseData {
         schema.subType.initial = "disease"; // disease;poison
         schema.difficulty = new fields.StringField({ required: true, initial: "Average" });
         schema.damage = new fields.StringField({ required: false, blank: true });
+        // The named condition, third of the four slots the Poison and Diseased traits print. It
+        // holds the referee's own word — `paralysis` — and never what that word does.
+        schema.effect = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
         schema.interval = new fields.StringField({ required: false, blank: true });
         return schema;
     }
@@ -317,7 +181,7 @@ export class ContactData extends ItemBaseData {
     static defineSchema() {
         const schema = super.defineSchema();
 
-        schema.subType.initial = "skill";
+        schema.subType.initial = "contact";
         schema.cost = new fields.NumberField({ required: true, initial: 1, min: 0, integer: true })
 
         schema.skill = new fields.SchemaField({
@@ -343,6 +207,17 @@ export class ContactData extends ItemBaseData {
 }
 
 export class WeaponData extends PhysicalItemData {
+    /** Traits were `{name, description}`; a weapon's speak the `weapon` vocabulary. @inheritDoc */
+    static migrateData(source, options) {
+        migrateTraitArray(source.traits, "weapon");
+        migrateTraitArray(source.options, "custom");
+        return super.migrateData(source, options);
+    }
+
+    prepareDerivedData() {
+        this.traitMap = buildTraitMap(this.traits);
+    }
+
     static defineSchema() {
         const schema = super.defineSchema();
         schema.equipped = new fields.BooleanField({ required: false, initial: false });
@@ -350,34 +225,56 @@ export class WeaponData extends PhysicalItemData {
             isMelee: new fields.BooleanField({ required: false, initial: false }),
             value: new fields.NumberField({ required: false, integer: true, nullable: true }),
             unit: new fields.StringField({ required: false, blank: true, nullable: true })
-        }),
-            //schema.tons = new fields.NumberField({ required: false, initial: 0, min: 0, integer: false });
-            schema.damage = new fields.StringField({ required: false, blank: true, trim: true });
+        });
+        schema.damage = new fields.StringField({ required: false, blank: true, trim: true });
+        // Companion p.94-95. A set because the printed vocabulary is not a partition — "blades" and
+        // "stabbing" overlap — and empty because no book types every weapon: an empty set means a
+        // defender's damage transform applies, and guessing a type would be inventing a rule.
+        schema.damageType = new fields.SetField(
+            new fields.StringField({ required: true, blank: false, choices: MGT2.DamageTypes }),
+            { required: false, initial: [] });
         schema.magazine = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
         schema.magazineCost = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
-        schema.traits = new fields.ArrayField(
-            new fields.SchemaField({
-                name: new fields.StringField({ required: true, blank: true, trim: true }),
-                description: new fields.StringField({ required: false, blank: true, trim: true })
-            })
-        );
-        schema.options = new fields.ArrayField(
-            new fields.SchemaField({
-                name: new fields.StringField({ required: true, blank: true, trim: true }),
-                description: new fields.StringField({ required: false, blank: true, trim: true })
-            })
-        );
+        // One enum selects which range vocabulary the weapon speaks and which accuracy fields it
+        // has (Core p.140, p.143; VH p.46), instead of a vehicleWeapon type duplicating the whole
+        // roll path. The keys are MGT2.Scales', so the value drops straight into the damage
+        // pipeline's cross-scale step.
+        schema.scale = new fields.StringField({
+            required: false, blank: false, initial: "ground", choices: MGT2.WeaponScales });
+        // The vehicle and spacecraft accuracy grade, which stands in for a scope (VH p.46).
+        schema.fireControl = new fields.NumberField({ required: false, initial: 0, min: 0, max: 4, integer: true });
+        // A spacecraft weapon draws against the ship's power budget (HG p.27).
+        schema.power = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
+        // A creature's Claw or Charge is a weapon it cannot drop, store or be disarmed of.
+        schema.natural = new fields.BooleanField({ required: false, initial: false });
+        schema.traits = createTraitsField("weapon");
+        // Accessories, not traits: no family in the registry covers them, so they declare `custom`.
+        schema.options = createTraitsField("custom");
 
         return schema;
     }
 }
 
 export class ArmorData extends PhysicalItemData {
+    /** protection was a StringField; blank and non-numeric values become 0. @inheritDoc */
+    static migrateData(source, options) {
+        if (typeof source.protection === "string") {
+            const value = Number.parseInt(source.protection, 10);
+            source.protection = Number.isFinite(value) && value > 0 ? value : 0;
+        }
+        migrateTraitArray(source.options, "custom");
+        return super.migrateData(source, options);
+    }
+
+    prepareDerivedData() {
+        this.traitMap = buildTraitMap(this.options);
+    }
+
     static defineSchema() {
         const schema = super.defineSchema();
         schema.equipped = new fields.BooleanField({ required: false, initial: false });
         schema.radiations = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
-        schema.protection = new fields.StringField({ required: false, blank: false, trim: true });
+        schema.protection = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
 
         // Some armours have a required skill. A Traveller suffers DM-1 to all checks taken in the armour per missing
         // skill level. For example, a Traveller with Vacc Suit skill 0 who is in a suit that requires Vacc Suit 2 would have
@@ -385,17 +282,11 @@ export class ArmorData extends PhysicalItemData {
         schema.requireSkill = new fields.StringField({ required: false, blank: false });
         schema.requireSkillLevel = new fields.NumberField({ required: false, min: 0, integer: true });
 
-        //requirements: new fields.StringField({ required: false, blank: false, trim: true }),
 
         // As powered armour, battle dress supports its own weight. While powered and active, the mass of battle dress
         // does not count against the encumbrance of the wearer and is effectively weightless.
         schema.powered = new fields.BooleanField({ required: false, initial: false });
-        schema.options = new fields.ArrayField(
-            new fields.SchemaField({
-                name: new fields.StringField({ required: true, blank: true, trim: true }),
-                description: new fields.StringField({ required: false, blank: true, trim: true })
-            })
-        );
+        schema.options = createTraitsField("custom");
 
         // Characteristics Modifiers (Pirate of Drinax - ASLAN BATTLE DRESS STR/DEX, Slot)
 
@@ -404,48 +295,49 @@ export class ArmorData extends PhysicalItemData {
 }
 
 export class ComputerData extends PhysicalItemData {
+    /** @inheritDoc */
+    static migrateData(source, options) {
+        migrateTraitArray(source.options, "custom");
+        return super.migrateData(source, options);
+    }
+
+    /** Derived by the owning actor; reset here so a loose computer still reads sanely. */
+    prepareBaseData() {
+        this.processingUsed = 0;
+        this.overload = false;
+    }
+
+    prepareDerivedData() {
+        this.traitMap = buildTraitMap(this.options);
+    }
+
     static defineSchema() {
         const schema = super.defineSchema();
 
         schema.processing = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
-        schema.processingUsed = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
-        schema.overload = new fields.BooleanField({ required: false, initial: false });
-        //schema.softwares = new fields.ArrayField(new fields.StringField({ required: false, blank: true, trim: true }));
-        schema.options = new fields.ArrayField(
-            new fields.SchemaField({
-                name: new fields.StringField({ required: true, blank: true, trim: true }),
-                description: new fields.StringField({ required: false, blank: true, trim: true })
-            })
-        );
-
-        return schema;
-    }
-}
-
-export class SoftwareData extends ItemBaseData {
-    static defineSchema() {
-        const schema = super.defineSchema();
-
-        schema.bandwidth = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
-        schema.inUse = new fields.BooleanField({ required: false, initial: false });
-        schema.computer = new fields.StringField({ required: false, blank: true, nullable: true });
+        schema.options = createTraitsField("custom");
 
         return schema;
     }
 }
 
 export class SpeciesData extends foundry.abstract.TypeDataModel {
+    /** @inheritDoc */
+    static migrateData(source, options) {
+        migrateTraitArray(source.traits, "species");
+        return super.migrateData(source, options);
+    }
+
+    prepareDerivedData() {
+        this.traitMap = buildTraitMap(this.traits);
+    }
+
     static defineSchema() {
         const fields = foundry.data.fields;
         const schema = {
             description: new fields.StringField({ required: false, blank: true, trim: true, nullable: true }),
             descriptionLong: new fields.HTMLField({ required: false, blank: true, trim: true }),
-            traits: new fields.ArrayField(
-                new fields.SchemaField({
-                    name: new fields.StringField({ required: true, blank: true, trim: true }),
-                    description: new fields.StringField({ required: false, blank: true, trim: true })
-                })
-            ),
+            traits: createTraitsField("species"),
             modifiers: new fields.ArrayField(
                 new fields.SchemaField({
                     characteristic: new fields.StringField({ required: false, blank: true, trim: true }),
@@ -459,13 +351,17 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
 }
 
 export class ItemContainerData extends ItemBaseData {
+    /** Derived by the owning actor; reset here so a loose container still reads sanely. */
+    prepareBaseData() {
+        this.weight = 0;
+        this.count = 0;
+    }
+
     static defineSchema() {
         const schema = super.defineSchema();
 
         schema.onHand = new fields.BooleanField({ required: false, initial: false });
         schema.location = new fields.StringField({ required: false, blank: true, trim: true });
-        schema.count = new fields.NumberField({ required: false, initial: 0, integer: true });
-        schema.weight = new fields.NumberField({ required: false, initial: 0, integer: false });
         schema.weightless = new fields.BooleanField({ required: false, initial: false });
 
         schema.locked = new fields.BooleanField({ required: false, initial: false }); // GM only
@@ -474,12 +370,38 @@ export class ItemContainerData extends ItemBaseData {
     }
 }
 
-function createCharacteristicField(show = true, showMax = false) {
-    return new fields.SchemaField({
-        value: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
-        max: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true }),
-        dm: new fields.NumberField({ required: false, initial: 0, integer: true }),
-        show: new fields.BooleanField({ required: false, initial: show }),
-        showMax: new fields.BooleanField({ required: false, initial: showMax })
-    });
+/**
+ * A station on a ship, not a person in it. An Item rather than a config enum for one reason: the
+ * eight combat duties are a closed list (Core p.165) but the stations are not, and a referee should
+ * be able to add a Flight Deck Chief without a system release.
+ *
+ * The station carries its own actions, which is what the crew roster's buttons are built from.
+ */
+export class RoleData extends ItemBaseData {
+    static defineSchema() {
+        const schema = super.defineSchema();
+
+        schema.positions = new fields.NumberField({ required: false, initial: 1, min: 0, integer: true });
+        schema.department = new fields.StringField({
+            required: false, blank: false, initial: "command", choices: MGT2.Departments });
+        // HG p.24 prints a monthly average for a skill-1 crewman; the eleven construction roles
+        // ship as names AND numbers, and this is the number.
+        schema.salary = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
+        schema.colour = new fields.ColorField({ required: false, nullable: true, initial: null });
+        schema.show = new fields.BooleanField({ required: false, initial: true });
+
+        schema.actions = new fields.ArrayField(new fields.SchemaField({
+            label: new fields.StringField({ required: false, blank: true, trim: true }),
+            // `skill` needs a sheet to read the level off, so the roster refuses it on a vacant or
+            // unstatted slot; `special` is a referee's call and is always offered.
+            kind: new fields.StringField({
+                required: false, blank: false, initial: "skill", choices: MGT2.RoleActions }),
+            characteristic: new fields.StringField({ required: false, blank: true, trim: true }),
+            skill: new fields.StringField({ required: false, blank: true, trim: true }),
+            difficulty: new fields.StringField({ required: false, blank: true, trim: true }),
+            dm: new fields.NumberField({ required: false, initial: 0, integer: true })
+        }), { initial: [] });
+
+        return schema;
+    }
 }

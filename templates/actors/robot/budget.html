@@ -1,0 +1,29 @@
+{{! BLOCK 2 — one budget panel, three times over on this sheet in two different over-states.
+    `data-over` is the whole point here: the two slot panels are `soft`, because the Robot Handbook
+    states NO penalty for exceeding Slots — a design-time warning with no rule behind it must not
+    borrow the danger colour — while the brain's Bandwidth is `hard`, an overload the rules define.
+    The total, the bar and the over-state are computed and never authored. }}
+<section class="budget{{#if b.over}} over{{/if}}" data-over="{{b.kind}}">
+	<header>
+		<span class="lbl">{{title}}</span>
+		{{#if b.over}}<span class="flag">{{flag}}</span>{{/if}}
+		<span class="tot" data-derived="{{derived}}"><b>{{b.total}}</b><span class="of">/ {{b.cap}}{{#if unit}} {{unit}}{{/if}}</span></span>
+		<span class="rem">{{#if b.over}}{{localize 'MGT2.Actor.robot.OverN' n=b.remaining}}{{else}}{{localize 'MGT2.Actor.robot.FreeN' n=b.remaining}}{{/if}}</span>
+	</header>
+	<div class="gauge"><i style="--g: {{b.fill}}%"></i><u style="--m: {{b.mark}}%"></u></div>
+	{{#if b.rows.length}}
+	<table class="rows brows" data-derived="{{derived}}">
+		<tbody>
+			{{#each b.rows}}
+			<tr>
+				<td>
+					{{#if label}}{{label}}{{else}}&mdash;{{/if}}
+					{{#if why}}<span class="why">{{why}}</span>{{/if}}
+				</td>
+				<td class="num">{{value}}</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</section>

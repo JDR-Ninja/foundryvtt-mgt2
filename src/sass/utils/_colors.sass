@@ -1,63 +1,103 @@
-$primary-color: #3498db
-$secondary-color: #2ecc71
-$background-color: #ecf0f1
-$text-color: #34495e
+// One accent and two anchors — --ink and --paper. Rules, mutes, hovers and tracks are a
+// color-mix() of ink into paper, so the ground flips with no duplicated declaration.
+$ink-dark: #e9e7e4
 
-.black-and-red
-    --mgt2-color-form: #0A0405
-    --mgt2-bgcolor-form: #fff
-    --mgt2-color-primary: #EE4050
-    --mgt2-color-primary-active: #AF2F3C
-    --mgt2-bgcolor-primary: #0A0405
-    --mgt2-color-primary-light: #4b4a44
-    --mgt2-color-warning: #EE4050
-    --mgt2-color-dm: #fff
-    --mgt2-bgcolor-dm: #0A0405
-    --mgt2-color-software: #fff
-    --mgt2-bgcolor-software:  #0A0405
-    --mgt2-input-color: #0A0405
-    --mgt2-input-bgcolor: #fff
-    --mgt2-editor-border: #C6C6C6
-    --mgt2-row-hover: #F2F2F2
-    --mgt2-subrow-color: #727272
-    --mgt2-row-inactive-icon: #b5b3a4
+// A custom property is computed where it is DECLARED, so re-anchoring --ink on a descendant does
+// not re-run a color-mix() written higher up: every re-anchoring element includes these again.
+@mixin derived
+    --rule: color-mix(in oklab, var(--ink) 22%, transparent)
+    --rule-soft: color-mix(in oklab, var(--ink) 11%, transparent)
+    --mute: color-mix(in oklab, var(--ink) 60%, var(--paper))
+    --faint: color-mix(in oklab, var(--ink) 40%, var(--paper))
+    --hover: color-mix(in oklab, var(--ink) 6%, transparent)
+    --track: color-mix(in oklab, var(--ink) 13%, transparent)
+    --fill: color-mix(in oklab, var(--ink) 45%, var(--paper))
+    // The accent is clamped rather than mixed: hue and chroma pass through untouched and only
+    // lightness is disciplined. min()/max() survives inside a custom property because the token
+    // is substituted before oklch() is parsed.
+    --accent-text: oklch(from var(--accent) var(--lgt) c h)
+    --accent-hot: oklch(from var(--accent) var(--lgt-hot) c h)
+    --accent-line: color-mix(in oklab, var(--accent-text) 45%, transparent)
+    --accent-soft: color-mix(in oklab, var(--accent-text) 13%, transparent)
+
+// The names the component partials still consume, as aliases of the derived tokens. They are
+// computed where declared too, so they travel with the mixin above.
+@mixin legacy-names
+    --mgt2-color-primary: var(--accent-text)
+    --mgt2-color-primary-active: var(--accent-hot)
+    --mgt2-color-primary-light: var(--mute)
+    --mgt2-bgcolor-form: var(--paper)
+    --mgt2-color-form: var(--ink)
+    --mgt2-input-bgcolor: var(--hover)
+    --mgt2-input-color: var(--ink)
+    --mgt2-row-hover: var(--hover)
+    --mgt2-subrow-color: var(--mute)
+    --mgt2-editor-border: var(--rule)
+    --mgt2-row-inactive-icon: var(--faint)
+    --mgt2-track: var(--track)
+    --mgt2-depletion: var(--danger)
+    --mgt2-color-warning: var(--danger)
+
+.mgt2
+    --chrome: #0a0405
+    --paper: #ffffff
+    --ink: #16110f
+    --danger: #c8372a
+    --good: #1f7a4d
+    --lgt: min(l, 0.55)
+    --lgt-hot: min(l, 0.40)
+    @include derived
+    @include legacy-names
+
+    --mgt2-bgcolor-primary: var(--chrome)
+    // The DM and software chips are painted on the chrome fill, so they carry its ink and not
+    // the page's — otherwise they vanish on the dark ground.
+    --mgt2-color-dm: #{$ink-dark}
+    --mgt2-bgcolor-dm: var(--chrome)
+    --mgt2-color-software: #{$ink-dark}
+    --mgt2-bgcolor-software: var(--chrome)
+    // A status colour never uses the accent: on the black-and-red theme it would read as its
+    // opposite. Load is not depletion either, hence a pair of its own.
     --mgt2-encumbrance-normal: #D94826
     --mgt2-encumbrance-heavy: #D82727
 
+// Two mechanisms put a sheet on the dark theme: the body class from the user's colourScheme
+// setting, and the per-document override that pushes `themed theme-<x>` onto the sheet itself.
+// The :not() keeps an explicitly-light sheet light while the body is dark. Only the anchors move:
+// the derived block is declared on this same element, so it re-runs against the new ink.
+body.theme-dark .mgt2:not(.theme-light),
+.mgt2.theme-dark
+    --paper: #0b0a13
+    --ink: #{$ink-dark}
+    --danger: #e86152
+    --good: #4fbe8b
+    --lgt: max(l, 0.72)
+    --lgt-hot: max(l, 0.86)
+
+// The window bar and the item-sheet spine keep their dark fill on both grounds, so they
+// re-anchor instead of being special-cased — and re-declare everything derived from the anchors.
+.mgt2 .window-header,
+.mgt2 .itemsheet-header
+    --paper: var(--chrome)
+    --ink: #{$ink-dark}
+    --danger: #e86152
+    --good: #4fbe8b
+    --lgt: max(l, 0.72)
+    --lgt-hot: max(l, 0.86)
+    @include derived
+    @include legacy-names
+
+// A theme is now just its accent, carried by the body so one class swap reaches every sheet,
+// every dialog and the chat sidebar. `body` alone holds the default, which a theme class on that
+// same element outranks.
+body
+    --accent: #d13b46
+
+.black-and-red
+    --accent: #d13b46
+
 .mwamba
-    --mgt2-color-form: #0A0405
-    --mgt2-bgcolor-form: #fff
-    --mgt2-color-primary: #2A9932
-    --mgt2-color-primary-active: #40ED4E
-    --mgt2-bgcolor-primary: #0A0405
-    --mgt2-color-primary-light: #4b4a44
-    --mgt2-color-warning: #EE4050
-    --mgt2-color-dm: #fff
-    --mgt2-bgcolor-dm: #0A0405
-    --mgt2-color-software: #fff
-    --mgt2-bgcolor-software:  #0A0405
-    --mgt2-input-color: #0A0405
-    --mgt2-input-bgcolor: #fff
-    --mgt2-editor-border: #C6C6C6
-    --mgt2-row-hover: #F2F2F2
-    --mgt2-subrow-color: #727272
-    --mgt2-row-inactive-icon: #b5b3a4
+    --accent: #2a9932
 
 .blue
-    --mgt2-color-form: #0A0405
-    --mgt2-bgcolor-form: #fff
-    --mgt2-color-primary: #91AAC8
-    --mgt2-color-primary-active: #BCDCFF
-    --mgt2-bgcolor-primary: #0A0405
-    --mgt2-color-primary-light: #4b4a44
-    --mgt2-color-warning: #EE4050
-    --mgt2-color-dm: #fff
-    --mgt2-bgcolor-dm: #0A0405
-    --mgt2-color-software: #fff
-    --mgt2-bgcolor-software:  #0A0405
-    --mgt2-input-color: #0A0405
-    --mgt2-input-bgcolor: #fff
-    --mgt2-editor-border: #C6C6C6
-    --mgt2-row-hover: #F2F2F2
-    --mgt2-subrow-color: #727272
-    --mgt2-row-inactive-icon: #b5b3a4
+    --accent: #91aac8

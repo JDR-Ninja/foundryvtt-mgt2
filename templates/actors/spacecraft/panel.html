@@ -1,0 +1,559 @@
+<section class="mgt2-panel active mgt2-spacecraft-panel">
+
+	{{! The stored ratings the whole sheet reads. Three of the four headline numbers are formulas
+	    over `hull.tons`, `thrust` and `jump` rather than sums over a parts list, which is the whole
+	    of §4.1's argument — and the reason a ship with no Items at all is complete. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.spacecraft.HullDrives'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.spacecraft.DesignInputs'}}</span>
+		</div>
+		<dl class="statline grid play-only" data-derived="system.hull">
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Tonnage'}}</dt><dd>{{system.hull.tons}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Configuration'}}</dt><dd class="word">{{localize (lookup (lookup choices.configurations system.hull.configuration) 'label')}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.HullPoints'}}</dt><dd>{{ship.hull.max}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.ArmourFit'}}</dt><dd class="word">{{localize (lookup (lookup choices.materials system.armour.material) 'label')}} {{showDM system.armour.current}}</dd></div>
+			<div class="stat{{#if (gt system.armour.points system.armour.max)}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Actor.spacecraft.ArmourMax'}}</dt><dd>{{system.armour.max}}</dd>
+			</div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.PowerPlant'}}</dt><dd>{{system.power.plant}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.FuelJump'}}</dt><dd>{{system.fuel.jumpTons}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.JumpsInTank'}}</dt><dd>{{system.fuel.jumpCapacity}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Bridge'}}</dt><dd class="word">{{localize (lookup (lookup choices.bridges system.bridge.type) 'label')}}{{#if system.bridge.dm}} {{showDM system.bridge.dm}}{{/if}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Sensors'}}</dt><dd class="word">{{localize (lookup (lookup choices.sensors system.sensors.grade) 'label')}} {{showDM system.sensors.dm}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Scale'}}</dt><dd class="word">{{localize (lookup (lookup choices.scales system.scale) 'label')}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.TL'}}</dt><dd>{{system.tl}}</dd></div>
+		</dl>
+
+		<div class="grid edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.HullTons'}}</span>
+				{{formInput systemFields.hull.fields.tons name="system.hull.tons" value=system.hull.tons classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Configuration'}}</span>
+				{{formInput systemFields.hull.fields.configuration name="system.hull.configuration" value=system.hull.configuration localize=true classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.ArmourMaterial'}}</span>
+				{{formInput systemFields.armour.fields.material name="system.armour.material" value=system.armour.material localize=true classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.ArmourPoints'}}</span>
+				{{formInput systemFields.armour.fields.points name="system.armour.points" value=system.armour.points classes="f num"}}
+			</label>
+			{{! Stored because criticals strip it in play, and stored as the wound rather than the
+			    current score for the reason every other wound is (§1.2). }}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.ArmourDamage'}}</span>
+				{{formInput systemFields.armour.fields.damage name="system.armour.damage" value=system.armour.damage classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Thrust'}}</span>
+				{{formInput systemFields.drives.fields.thrust name="system.drives.thrust" value=system.drives.thrust classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Jump'}}</span>
+				{{formInput systemFields.drives.fields.jump name="system.drives.jump" value=system.drives.jump classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.PowerPlant'}}</span>
+				{{formInput systemFields.power.fields.plant name="system.power.plant" value=system.power.plant classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Bridge'}}</span>
+				{{formInput systemFields.bridge.fields.type name="system.bridge.type" value=system.bridge.type localize=true classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Sensors'}}</span>
+				{{formInput systemFields.sensors.fields.grade name="system.sensors.grade" value=system.sensors.grade localize=true classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Processing'}}</span>
+				{{formInput systemFields.computer.fields.processing name="system.computer.processing" value=system.computer.processing classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.TL'}}</span>
+				{{formInput systemFields.tl name="system.tl" value=system.tl classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.FuelTons'}}</span>
+				{{formInput systemFields.fuel.fields.tons name="system.fuel.tons" value=system.fuel.tons classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.CargoCapacity'}}</span>
+				{{formInput systemFields.cargo.fields.capacity name="system.cargo.capacity" value=system.cargo.capacity classes="f num"}}
+			</label>
+			<label class="check">
+				{{formInput systemFields.drives.fields.reaction name="system.drives.reaction" value=system.drives.reaction}}
+				<span>{{localize 'MGT2.Actor.spacecraft.ReactionDrive'}}</span>
+			</label>
+			<label class="check">
+				{{formInput systemFields.fuel.fields.refined name="system.fuel.refined" value=system.fuel.refined}}
+				<span>{{localize 'MGT2.Actor.spacecraft.Refined'}}</span>
+			</label>
+		</div>
+
+		{{! BLOCK 4. Hull options are options, not traits: the registry has no ship family, so a
+		    spacecraft carries no traits[] at all and this block replaces it (§1.4). }}
+		<ul class="codes" data-family="hull">
+			{{#each ship.options as |option|}}
+			<li class="code{{#unless option.on}} off{{/unless}}" data-action="hullOptionToggle" data-option="{{option.key}}">
+				<b>{{localize option.label}}</b>
+			</li>
+			{{/each}}
+		</ul>
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.OptionsHint'}}</p>
+	</div>
+
+	{{! Berths and passengers. Four numbers with three consumers each — tonnage, life support and the
+	    steward requirement — which is why they are ratings on the ship rather than Items. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.spacecraft.Accommodation'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.spacecraft.AccommodationCount'}}</span>
+		</div>
+		<dl class="statline grid play-only" data-derived="system.staterooms">
+			{{#each ship.accommodation as |row|}}
+			<div class="stat{{#unless row.value}} none{{/unless}}">
+				<dt>{{localize row.label}}</dt>
+				<dd>{{#if row.value}}{{row.value}}{{else}}&mdash;{{/if}}</dd>
+			</div>
+			{{/each}}
+		</dl>
+		<div class="grid edit-only">
+			{{#each ship.accommodation as |row|}}
+			<label>
+				<span class="lbl">{{localize row.label}}</span>
+				<input class="f num" type="number" min="0" step="1" name="system.{{row.path}}" value="{{row.value}}" data-dtype="Number" />
+			</label>
+			{{/each}}
+		</div>
+	</div>
+
+	{{! The mount is not packaging: it carries the fire arc, the magazine and a damage multiple that
+	    spans three orders of magnitude, and it is the ship that owns the hardpoint (HG p.30). }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.spacecraft.Mounts'}}</h3>
+			<span class="count">{{ship.mounts.rows.length}}</span>
+			<a class="add edit-only" data-action="rowCreate" data-rows="mounts" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddMount'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if ship.mounts.rows.length}}
+		<table class="rows mounts">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Actor.spacecraft.Mount'}}</th>
+					<th>{{localize 'MGT2.Items.Weapons'}}</th>
+					<th class="c">{{localize 'MGT2.Actor.spacecraft.Ammo'}}</th>
+					<th class="r">{{localize 'MGT2.Items.Damage'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each ship.mounts.rows as |mount|}}
+				<tr data-row-index="{{mount.index}}">
+					<td class="mt">
+						<span class="play-only">
+							<b>{{localize mount.typeLabel}}</b>
+							<span class="arc">{{#if mount.label}}{{mount.label}}{{/if}}{{#if mount.popup}} &middot; {{localize 'MGT2.Actor.spacecraft.Popup'}}{{/if}}</span>
+						</span>
+						<span class="edit-only">
+							{{! `mount` is a block param and stays lexically in scope inside the nested
+							    each; `../mount` would look the key up on the parent CONTEXT and select
+							    the first option every time. }}
+							<select class="f" name="system.mounts.{{mount.index}}.type">
+								{{#each ../choices.mountTypes as |entry key|}}
+								<option value="{{key}}"{{#if (eq key mount.type)}} selected{{/if}}>{{localize entry.label}}</option>
+								{{/each}}
+							</select>
+							<input class="f" type="text" name="system.mounts.{{mount.index}}.label" value="{{mount.label}}" placeholder="{{localize 'MGT2.Actor.spacecraft.MountLabel'}}" />
+							<label class="check">
+								<input type="checkbox" name="system.mounts.{{mount.index}}.popup" {{checked mount.popup}} />
+								<span>{{localize 'MGT2.Actor.spacecraft.Popup'}}</span>
+							</label>
+						</span>
+					</td>
+					<td>
+						{{#each mount.weapons as |weapon|}}
+						<div class="mw">
+							<a class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}
+						</div>
+						{{/each}}
+						<select class="f edit-only" name="system.mounts.{{mount.index}}.weapons" multiple size="3">
+							{{#each mount.choices as |choice|}}
+							<option value="{{choice._id}}"{{#if choice.selected}} selected{{/if}}>{{choice.name}}</option>
+							{{/each}}
+						</select>
+					</td>
+					<td class="c">
+						<span class="mag{{#unless mount.ammo}} empty{{/unless}}">{{mount.ammo}} / {{mount.ammoMax}}</span>
+						<input class="f num edit-only" type="number" min="0" step="1" name="system.mounts.{{mount.index}}.ammo" value="{{mount.ammo}}" data-dtype="Number" />
+					</td>
+					<td class="dmg{{#if mount.big}} big{{/if}}">
+						{{#each mount.weapons as |weapon|}}<b>{{weapon.system.damage}}</b>{{/each}}
+						<span class="mult">
+							{{#if mount.missile}}{{localize 'MGT2.Actor.spacecraft.NoMultiple'}}
+							{{else}}&times;{{mount.multiple}} &middot; {{localize 'MGT2.Actor.spacecraft.AfterArmour'}}{{/if}}
+						</span>
+					</td>
+					<td class="r">
+						<div class="acts edit-only">
+							<a data-action="rowDelete" data-rows="mounts" data-tooltip="{{localize 'MGT2.Actor.spacecraft.DeleteMount'}}"><i class="fas fa-trash"></i></a>
+						</div>
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		{{#if ship.mounts.unmounted.length}}
+		<table class="rows">
+			<tbody>
+				{{#each ship.mounts.unmounted as |weapon|}}
+				<tr data-item-id="{{weapon._id}}">
+					<td><a class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}<span class="sub">{{localize 'MGT2.Actor.spacecraft.Unmounted'}}</span></td>
+					<td class="c num">{{weapon.system.damage}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		<div class="sect">
+			<a class="add edit-only" data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{! The price of the multiple, and the attacker-side rules the system deliberately will not
+		    resolve: nothing here reads the canvas or a selected target. }}
+		<ul class="codes" data-family="shipWeapon">
+			<li class="code inert">
+				<b>{{localize 'MGT2.Actor.spacecraft.AttackerTonnage'}}</b>
+				<span class="ps"><span class="p">{{ship.mounts.tons}} t</span></span>
+			</li>
+			{{#if ship.mounts.spinal}}
+			<li class="code inert">
+				<b>{{localize 'MGT2.Actor.spacecraft.SpinalVsSmall'}}</b>
+				<span class="ps"><span class="p">&le;10 000 t &minus;4</span><span class="p">&le;5 000 t &minus;8</span><span class="p">&lt;2 000 t {{localize 'MGT2.Actor.spacecraft.NoAttack'}}</span></span>
+			</li>
+			{{/if}}
+			{{#if ship.mounts.scansUnarmed}}
+			<li class="code"><b>{{localize 'MGT2.Actor.spacecraft.ScansUnarmed'}}</b></li>
+			{{/if}}
+		</ul>
+	</div>
+
+	{{! BLOCK 3 — the crew. A station action of kind `skill` needs a sheet to read the level off, so
+	    it is disabled on a vacant or unstatted slot; a `special` action is not. The link is a
+	    stored UUID and nothing here reads the canvas. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.spacecraft.Crew'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.spacecraft.CrewCount' stations=ship.crew.totals.stations aboard=ship.crew.totals.aboard}}</span>
+			<a class="add edit-only" data-action="rowCreate" data-rows="crew" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddStation'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if ship.crew.rows.length}}
+		<table class="roster">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Actor.spacecraft.Station'}}</th>
+					<th>{{localize 'MGT2.Actor.spacecraft.Who'}}</th>
+					<th>{{localize 'MGT2.Actor.spacecraft.Duty'}}</th>
+					<th>{{localize 'MGT2.Actor.spacecraft.Actions'}}</th>
+					<th class="r">{{localize 'MGT2.Actor.spacecraft.Req'}}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each ship.crew.rows as |row|}}
+				<tr data-row-index="{{row.index}}"{{#if row.vacant}} class="vacant"{{/if}}>
+					<td class="station">
+						<span class="play-only">
+							<b>{{#if row.station}}{{row.station}}{{else}}&mdash;{{/if}}{{#if (gt row.count 1)}} &times;{{row.count}}{{/if}}</b>
+							{{#if row.department}}<span class="dept">{{localize row.department}}</span>{{/if}}
+						</span>
+						<span class="edit-only">
+							<select class="f" name="system.crew.{{row.index}}.role">
+								<option value="">&mdash;</option>
+								{{#each row.roles as |choice|}}
+								<option value="{{choice._id}}"{{#if choice.selected}} selected{{/if}}>{{choice.name}}</option>
+								{{/each}}
+							</select>
+							<input class="f num" type="number" min="1" step="1" name="system.crew.{{row.index}}.count" value="{{row.count}}" data-dtype="Number" />
+						</span>
+					</td>
+					<td class="who{{#if row.statted}} linked{{else}}{{#if row.name}} plain{{/if}}{{/if}}">
+						<span class="play-only">
+							{{#if row.statted}}
+							<span class="av"></span><a data-action="openCraft" data-uuid="{{row.actor}}">{{row.name}}</a>
+							<i class="src">{{localize 'MGT2.Actor.spacecraft.LinkedActor'}}</i>
+							{{else if row.name}}
+							<em>{{row.name}}</em><i class="src">{{localize 'MGT2.Actor.spacecraft.NameOnly'}}</i>
+							{{else}}
+							{{localize 'MGT2.Actor.spacecraft.Vacant'}}
+							{{/if}}
+						</span>
+						<span class="edit-only">
+							<input class="f" type="text" name="system.crew.{{row.index}}.name" value="{{row.name}}" placeholder="{{localize 'MGT2.Actor.spacecraft.CrewName'}}" />
+							<input class="f" type="text" name="system.crew.{{row.index}}.actor" value="{{row.actor}}" placeholder="{{localize 'MGT2.Actor.spacecraft.ActorUuid'}}" />
+						</span>
+					</td>
+					<td class="duty">
+						<span class="ro play-only">{{#if row.dutyLabel}}{{localize row.dutyLabel}}{{else}}&mdash;{{/if}}</span>
+						{{#if row.dutyTarget}}<span class="at">{{row.dutyTarget}}</span>{{/if}}
+						<span class="edit-only">
+							<select class="f" name="system.crew.{{row.index}}.duty">
+								<option value="">&mdash;</option>
+								{{#each ../choices.duties as |entry key|}}
+								<option value="{{key}}"{{#if (eq key row.duty)}} selected{{/if}}>{{localize entry.label}}</option>
+								{{/each}}
+							</select>
+							<input class="f" type="text" name="system.crew.{{row.index}}.dutyTarget" value="{{row.dutyTarget}}" placeholder="{{localize 'MGT2.Actor.spacecraft.DutyTarget'}}" />
+						</span>
+					</td>
+					<td>
+						<div class="todo">
+							{{#each row.actions as |action|}}
+							<button type="button" class="btn" data-action="stationAction" data-action-index="{{action.index}}"{{#if action.disabled}} disabled data-tooltip="{{localize 'MGT2.Actor.spacecraft.NoCrewSheet'}}"{{/if}}>
+								{{action.label}}<i>{{#if action.skill}}{{action.skill}}{{/if}}{{#if action.target}} {{action.target}}+{{else}}{{#unless action.skill}}&mdash;{{/unless}}{{/if}}</i>
+							</button>
+							{{/each}}
+						</div>
+					</td>
+					<td class="r">
+						{{#if row.required}}
+						<span class="need{{#if (lt row.count row.required)}} short{{/if}}">{{row.count}} / <b>{{row.required}}</b></span>
+						{{else}}
+						<span class="need">{{row.count}} / <b>&mdash;</b></span>
+						{{/if}}
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+
+		{{! Advisory, and it stays advisory: the Core Rulebook's own Patrol Corvette does not satisfy
+		    its own table, Marines are absent from the table entirely, and under-crewing is a
+		    legitimate campaign state (§9.20). The roster is what is actually aboard. }}
+		<section class="budget check" data-over="soft">
+			<header>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.CrewRequired'}}</span>
+				<span class="rem">{{localize (lookup choices.service system.role)}}</span>
+			</header>
+			<table class="rows brows" data-derived="system.crewRequired">
+				<tbody>
+					{{#each ship.crew.required as |row|}}
+					<tr>
+						<td>{{localize row.label}}</td>
+						<td class="num">{{row.count}}</td>
+						<td class="d"><i>Cr</i>{{row.salary}}</td>
+					</tr>
+					{{/each}}
+					<tr>
+						<td>{{localize 'MGT2.Actor.spacecraft.CrewTotal'}}</td>
+						<td class="num">{{ship.crew.totals.required}}</td>
+						<td class="d"><i>Cr</i>{{ship.crew.totals.salaries}}</td>
+					</tr>
+				</tbody>
+			</table>
+			<p class="hint">{{localize 'MGT2.Actor.spacecraft.CrewHint'}}</p>
+		</section>
+	</div>
+
+	{{! BLOCK 3 again, different columns. A carried craft is a full independent ship record, so it
+	    is a reference and not an embedded document — and the parent has to know which craft it
+	    carries in order to exclude them from its own maintenance (Core p.184). }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.spacecraft.CarriedCraft'}}</h3>
+			<span class="count">{{ship.bays.length}}</span>
+			<a class="add edit-only" data-action="rowCreate" data-rows="bays" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddBay'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if ship.bays.length}}
+		<table class="roster">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Actor.spacecraft.Bay'}}</th>
+					<th>{{localize 'MGT2.Actor.spacecraft.Craft'}}</th>
+					<th>{{localize 'MGT2.Actor.spacecraft.State'}}</th>
+					<th class="r">{{localize 'MGT2.Actor.spacecraft.Tons'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each ship.bays as |bay|}}
+				<tr data-row-index="{{bay.index}}"{{#if bay.vacant}} class="vacant"{{/if}}>
+					<td class="station">
+						<span class="play-only">
+							<b>{{localize bay.kindLabel}}</b>
+							<span class="dept">{{#if bay.external}}{{localize 'MGT2.Actor.spacecraft.External'}}{{else}}{{localize 'MGT2.Actor.spacecraft.Internal'}}{{/if}}</span>
+						</span>
+						<select class="f edit-only" name="system.bays.{{bay.index}}.kind">
+							{{#each ../choices.bays as |entry key|}}
+							<option value="{{key}}"{{#if (eq key bay.kind)}} selected{{/if}}>{{localize entry.label}}</option>
+							{{/each}}
+						</select>
+					</td>
+					<td class="who{{#if bay.name}} linked{{/if}}">
+						<span class="play-only">
+							{{#if bay.name}}
+							<span class="av"></span><a data-action="openCraft" data-uuid="{{bay.craft}}">{{bay.name}}</a>
+							<i class="src">{{localize 'MGT2.Actor.spacecraft.LinkedActor'}}</i>
+							{{else}}{{localize 'MGT2.Actor.spacecraft.Empty'}}{{/if}}
+						</span>
+						<input class="f edit-only" type="text" name="system.bays.{{bay.index}}.craft" value="{{bay.craft}}" placeholder="{{localize 'MGT2.Actor.spacecraft.ActorUuid'}}" />
+					</td>
+					<td class="duty">
+						<span class="ro">{{#if bay.name}}{{localize 'MGT2.Actor.spacecraft.Docked'}}{{else}}&mdash;{{/if}}</span>
+						{{#if bay.transfer}}<span class="at">{{bay.transfer}}</span>{{/if}}
+					</td>
+					<td class="r">
+						<span class="need play-only">{{bay.capacity}} t</span>
+						<input class="f num edit-only" type="number" min="0" step="0.1" name="system.bays.{{bay.index}}.capacity" value="{{bay.capacity}}" data-dtype="Number" />
+					</td>
+					<td class="r">
+						<div class="acts edit-only">
+							<a data-action="rowDelete" data-rows="bays" data-tooltip="{{localize 'MGT2.Actor.spacecraft.DeleteBay'}}"><i class="fas fa-trash"></i></a>
+						</div>
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+	</div>
+
+	{{! Severity is stored and the effect is a lookup (§1.11). Sixteen of the sixty-six cells do not
+	    damage their own location at all — they raise the separate Hull Severity track. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.spacecraft.Criticals'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.spacecraft.CriticalsCount'}}</span>
+			<a class="rm edit-only" data-action="criticalClear" data-tooltip="{{localize 'MGT2.Actor.spacecraft.ClearCriticals'}}"><i class="fa-solid fa-eraser"></i></a>
+		</div>
+		<div class="crits">
+			{{#each ship.criticals.locations as |location|}}
+			<span class="loc{{#if location.severity}} hit{{/if}}">{{localize location.label}}<i>{{location.roll}}</i></span>
+			<div class="pips" data-location="{{location.key}}">
+				{{#each location.pips as |pip|}}
+				<i class="{{#if pip.on}}on{{/if}}" data-action="criticalSet" data-step="{{pip.step}}"></i>
+				{{/each}}
+			</div>
+			{{#if location.effect}}
+			<span class="eff">{{localize 'MGT2.Actor.spacecraft.Severity'}} {{location.severity}} — <b>{{location.effect}}</b></span>
+			{{/if}}
+			{{/each}}
+		</div>
+		<div class="grid edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.HullSeverity'}}</span>
+				{{! A number, not the <range-picker> a min-and-max NumberField would otherwise render. }}
+				<input class="f num" type="number" min="0" max="6" step="1"
+					name="system.hullSeverity" value="{{system.hullSeverity}}" data-dtype="Number" />
+			</label>
+		</div>
+		<dl class="statline" data-derived="system.criticalEffects">
+			<div class="stat{{#if ship.criticals.hullSeverity}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Actor.spacecraft.HullSeverity'}}</dt><dd>{{ship.criticals.hullSeverity}}</dd>
+			</div>
+			<div class="stat{{#unless ship.criticals.standing.controlDM}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.spacecraft.ControlDM'}}</dt><dd>{{showDM ship.criticals.standing.controlDM}}</dd>
+			</div>
+			<div class="stat{{#unless ship.criticals.standing.sensorDM}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.spacecraft.SensorDM'}}</dt><dd>{{showDM ship.criticals.standing.sensorDM}}</dd>
+			</div>
+			<div class="stat{{#unless ship.criticals.standing.jumpDM}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.spacecraft.JumpDM'}}</dt><dd>{{showDM ship.criticals.standing.jumpDM}}</dd>
+			</div>
+		</dl>
+		{{! No `name` on either control: they belong to the referee's action, not to the document,
+		    and `submitOnChange` submits every named control on the sheet. }}
+		<div class="critctl">
+			<select class="f" data-crit="location" aria-label="{{localize 'MGT2.Actor.spacecraft.Location'}}">
+				{{#each ship.criticals.locations as |location|}}
+				<option value="{{location.key}}">{{location.roll}} &middot; {{localize location.label}}</option>
+				{{/each}}
+			</select>
+			<input class="f num" type="number" data-crit="effect" min="0" step="1" value="6" aria-label="{{localize 'MGT2.Actor.spacecraft.Effect'}}" />
+			<button type="button" class="btn b-dmg" data-action="criticalRoll">{{localize 'MGT2.Actor.spacecraft.ApplyCritical'}}</button>
+		</div>
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.CriticalHint'}}</p>
+	</div>
+
+	{{! The `computer` Item pattern for the third time: ship software spends Processing exactly as
+	    personal software spends bandwidth (HG p.21). }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.spacecraft.Computer'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.spacecraft.ComputerCount'}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="item" data-subtype="software" data-create-name="{{localize 'MGT2.Actor.spacecraft.NewSoftware'}}" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddSoftware'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{> systems/mgt2/templates/actors/spacecraft/budget.html
+			b=ship.computer
+			title=(localize 'MGT2.Actor.spacecraft.Processing')
+			flag=(localize 'MGT2.Actor.spacecraft.Overload')
+			derived="system.computer"}}
+	</div>
+
+	{{! GM only, and declared so in the manifest: `gmOnlyFields` is server-side enforcement (§1.7). }}
+	{{#if isGM}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.spacecraft.Finance'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.spacecraft.GMOnly'}}</span>
+		</div>
+		<div class="grid edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Purchase'}}</span>
+				{{formInput systemFields.finance.fields.purchase name="system.finance.purchase" value=system.finance.purchase classes="f num"}}
+			</label>
+			{{! Nullable: a ship bought outright, bought with Ship Shares, or taken as a career
+			    Benefit have three different legitimate mortgages (§9.13). }}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.MortgageOverride'}}</span>
+				<input class="f num" type="number" min="0" step="1" placeholder="&mdash;"
+					name="system.finance.mortgageOverride" value="{{system.finance.mortgageOverride}}" data-dtype="Number" />
+			</label>
+		</div>
+		<div class="finance" data-derived="system.finance">
+			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Purchase'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.PurchaseWhy'}}</span><span class="v"><i>Cr</i>{{ship.finance.purchase}}</span></div>
+			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Mortgage'}}</span><span class="why">{{#if ship.finance.mortgageOverridden}}{{localize 'MGT2.Actor.spacecraft.MortgageOverridden'}}{{else}}{{localize 'MGT2.Actor.spacecraft.MortgageWhy'}}{{/if}}</span><span class="v">{{ship.finance.mortgage}}</span></div>
+			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Maintenance'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.MaintenanceWhy'}}</span><span class="v">{{ship.finance.maintenance}}</span></div>
+			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.LifeSupport'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.LifeSupportWhy'}}</span><span class="v">{{ship.finance.lifeSupport}}</span></div>
+			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Salaries'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.SalariesWhy'}}</span><span class="v">{{ship.finance.salaries}}</span></div>
+			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.FuelCost'}}</span><span class="why">{{#if ship.finance.refined}}{{localize 'MGT2.Actor.spacecraft.Refined'}}{{else}}{{localize 'MGT2.Actor.spacecraft.Unrefined'}}{{/if}}</span><span class="v">{{ship.finance.fuel}}</span></div>
+		</div>
+
+		{{! Authoritative and takes no override (§9.20): the catalogue's plain cost ÷ 12 000 bills a
+		    carried craft twice, once here and once on its own sheet. The delta is shown rather than
+		    hidden, so a transcriber sees why their book and their sheet differ. }}
+		{{#if ship.finance.carried}}
+		<section class="budget check" data-over="soft">
+			<header>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.CrossCheck'}}</span>
+				<span class="rem">{{localize 'MGT2.Actor.spacecraft.PrintedVsDerived'}}</span>
+			</header>
+			<table class="rows brows">
+				<tbody>
+					<tr class="mismatch">
+						<td>{{localize 'MGT2.Actor.spacecraft.Maintenance'}}<span class="why">{{localize 'MGT2.Actor.spacecraft.CatalogueWhy' n=ship.finance.catalogue}}</span></td>
+						<td class="num">{{ship.finance.maintenance}}</td>
+						<td class="d">&minus; {{ship.finance.delta}}</td>
+					</tr>
+				</tbody>
+			</table>
+			<p class="hint">{{localize 'MGT2.Actor.spacecraft.MaintenanceHint'}}</p>
+		</section>
+		{{/if}}
+	</div>
+	{{/if}}
+
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Actor.spacecraft.Description'}}</h3></div>
+		<prose-mirror name="system.description" value="{{system.description}}" toggled></prose-mirror>
+	</div>
+
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Actor.Notes'}}</h3></div>
+		<prose-mirror name="system.notes" value="{{system.notes}}" toggled></prose-mirror>
+	</div>
+</section>

@@ -1,16 +1,39 @@
-<div class="mgt2-dialog flexcol">
-    <div class="form-group">
-        <label class="mgt2-checkbox"><input type="checkbox" name="show" data-dtype="Boolean" {{checked show}} />{{ localize 'MGT2.Actor.Show' }}</label>
-    </div>
-    <div class="form-group">
-        <label class="mgt2-checkbox"><input type="checkbox" name="showMax" data-dtype="Boolean" {{checked showMax}} />{{ localize 'MGT2.Actor.ShowMinMax' }}</label>
-    </div>
-    {{#if showAll}}
-    <fieldset>
-        <legend>{{ localize 'MGT2.Actor.HiddenCharacteristics' }}</legend>
-        <div class="form-group">
-            <label class="mgt2-checkbox"><input type="checkbox" name="showAll" data-dtype="Boolean" />{{ localize 'MGT2.Actor.ShowHiddenFields' }}</label>
-        </div>
-    </fieldset>
-    {{/if}}
+<div class="dlg">
+	<div class="grid">
+		<label>
+			<span class="lbl">{{ localize 'MGT2.Actor.CharacteristicBase' }}</span>
+			<input class="f num" type="number" name="base" data-dtype="Number" min="0" step="1" value="{{characteristic.base}}" />
+		</label>
+		{{! The other stored number. Everywhere else damage is applied as an amount; this is the one
+		    control that sets the wound outright, which is what correcting a bad one takes. }}
+		<label>
+			<span class="lbl">{{ localize 'MGT2.Actor.Damage' }}</span>
+			<input class="f num" type="number" name="damage" data-dtype="Number" min="0" step="1" value="{{characteristic.damage}}" />
+		</label>
+		<label>
+			<span class="lbl">{{ localize 'MGT2.Actor.ChainRank' }}</span>
+			<select class="f" name="rank" data-dtype="Number">
+				<option value="0"{{#unless rank}} selected{{/unless}}>{{ localize 'MGT2.Actor.NotInChain' }}</option>
+				{{#each ranks as |r|}}
+				<option value="{{r}}"{{#if (eq r ../rank)}} selected{{/if}}>{{r}}</option>
+				{{/each}}
+			</select>
+		</label>
+	</div>
+	{{! Where the maximum came from. Derived readings only — the block may hold no form control. }}
+	<dl class="statline" data-derived="system.characteristics.{{key}}">
+		<div class="stat"><dt>{{ localize 'MGT2.Actor.CharacteristicAuto' }}</dt><dd>{{showDM characteristic.auto}}</dd></div>
+		<div class="stat"><dt>{{ localize 'MGT2.Actor.CharacteristicEffect' }}</dt><dd>{{showDM characteristic.effect}}</dd></div>
+		<div class="stat"><dt>{{ localize 'MGT2.Actor.CharacteristicMax' }}</dt><dd>{{characteristic.max}}</dd></div>
+		<div class="stat{{#if characteristic.damage}} hurt{{/if}}"><dt>{{ localize 'MGT2.Actor.CharacteristicValue' }}</dt><dd>{{characteristic.value}}</dd></div>
+	</dl>
+	<div class="dstates">
+		<label><input type="checkbox" name="show" data-dtype="Boolean" {{checked characteristic.show}} /><span>{{ localize 'MGT2.Actor.Show' }}</span></label>
+	</div>
+	{{#if showAll}}
+	<div class="dstates">
+		<label><input type="checkbox" name="showAll" data-dtype="Boolean" /><span>{{ localize 'MGT2.Actor.ShowHiddenFields' }}</span></label>
+	</div>
+	{{/if}}
+	<p class="hint">{{ localize 'MGT2.Actor.CharacteristicHint' }}</p>
 </div>

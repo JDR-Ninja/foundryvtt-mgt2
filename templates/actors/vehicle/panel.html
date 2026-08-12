@@ -1,0 +1,321 @@
+<section class="mgt2-panel active mgt2-vehicle-panel">
+
+	{{! Three printed facings and two nullable overrides. Leaving top and bottom null is what
+	    preserves the books' "unless otherwise stated" condition — an eagerly written default is
+	    indistinguishable from a stated one — so a dashed cell reports a fallback (Core p.141). }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.vehicle.Armour'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.vehicle.ArmourCount'}}</span>
+		</div>
+		<div class="facings">
+			{{#each vehicle.armour.facings as |facing|}}
+			<div class="facing{{#if facing.derived}} derived{{/if}}">
+				<span class="lbl">{{localize (concat 'MGT2.Actor.vehicle.Facing.' facing.key)}}</span>
+				<b class="play-only">{{facing.value}}</b>
+				{{#if facing.field}}
+				{{formInput (lookup ../systemFields.armour.fields facing.key) name=(concat "system.armour." facing.key) value=facing.value classes="f edit-only"}}
+				{{else}}
+				{{formInput (lookup ../systemFields.armour.fields facing.key) name=(concat "system.armour." facing.key) value=(lookup ../system.armour facing.key) classes="f edit-only" placeholder="—"}}
+				{{/if}}
+				<span class="src">{{localize (concat 'MGT2.Actor.vehicle.ArmourSrc.' (ifThen facing.derived facing.key 'stored'))}}</span>
+				{{#if facing.reactive}}<span class="re">+{{facing.reactive}} {{localize 'MGT2.Actor.vehicle.Reactive'}}</span>{{/if}}
+			</div>
+			{{/each}}
+		</div>
+		<div class="grid edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Reactive'}} — {{localize 'MGT2.Actor.vehicle.Facing.front'}}</span>
+				{{formInput systemFields.armour.fields.reactive.fields.front name="system.armour.reactive.front" value=system.armour.reactive.front classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Reactive'}} — {{localize 'MGT2.Actor.vehicle.Facing.rear'}}</span>
+				{{formInput systemFields.armour.fields.reactive.fields.rear name="system.armour.reactive.rear" value=system.armour.reactive.rear classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Reactive'}} — {{localize 'MGT2.Actor.vehicle.Facing.sides'}}</span>
+				{{formInput systemFields.armour.fields.reactive.fields.sides name="system.armour.reactive.sides" value=system.armour.reactive.sides classes="f num"}}
+			</label>
+		</div>
+		<dl class="statline" data-derived="system.armour">
+			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.VsLight'}}</dt><dd>{{showDM vehicle.armour.vsLight}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.ToHit'}}</dt><dd>{{showDM vehicle.armour.toHit}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.Maintenance'}}</dt><dd><i>Cr</i>{{vehicle.armour.maintenance}}<i>/{{localize 'MGT2.Actor.vehicle.Month'}}</i></dd></div>
+		</dl>
+		<p class="hint">{{localize 'MGT2.Actor.vehicle.ArmourHint'}}</p>
+	</div>
+
+	{{! Six lines, six kinds of number (VH p.13). The two `opposed` rows are a negative DM applied to
+	    somebody else's roll, and they oppose different skills — a single grade field cannot say
+	    that. A dash is not a zero: Sensors genuinely prints +0 on five published vehicles. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.vehicle.Systems'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.vehicle.SystemsCount'}}</span>
+		</div>
+		<table class="rows systems">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Actor.vehicle.System'}}</th>
+					<th>{{localize 'MGT2.Actor.vehicle.AppliesTo'}}</th>
+					<th class="r">{{localize 'MGT2.Actor.vehicle.Value'}}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each vehicle.systems as |row|}}
+				<tr class="{{#if row.opposed}}opposed {{/if}}{{#if row.absent}}absent{{/if}}">
+					<td>{{localize (concat 'MGT2.Actor.vehicle.Sys.' row.key)}}</td>
+					<td class="who">{{localize (concat 'MGT2.Actor.vehicle.SysWho.' row.key)}}</td>
+					<td class="val">
+						<span class="play-only">
+							{{#if row.absent}}&mdash;{{else}}{{#if row.signed}}{{showDM row.value}}{{else}}{{row.value}}{{/if}}{{#if row.unit}} {{localize row.unit}}{{/if}}{{/if}}
+						</span>
+						{{! Written out rather than taken from the field: `formInput` turns a NumberField
+						    carrying both `min` and `max` into a <range-picker>, and a slider cannot
+						    express the one distinction this block exists to keep — a printed `-` is
+						    absent, not zero, and Sensors genuinely prints +0. }}
+						<input class="f num edit-only" type="number" step="1" placeholder="—"
+							name="system.systems.{{row.key}}" value="{{row.value}}" data-dtype="Number" />
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+
+	{{! The mount belongs to the vehicle, not the weapon: it supplies the fire arc and the fire
+	    control, and one mount can hold several weapons (VH p.38-39). The weapons themselves are
+	    ordinary embedded Items and roll through the same path a Traveller's do. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.vehicle.Mounts'}}</h3>
+			<span class="count">{{vehicle.mounts.rows.length}}</span>
+			<a class="add edit-only" data-action="mountCreate" data-tooltip="{{localize 'MGT2.Actor.vehicle.AddMount'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if vehicle.mounts.rows.length}}
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Actor.vehicle.Mount'}}</th>
+					<th>{{localize 'MGT2.Items.Weapons'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Range'}}</th>
+					<th class="c">{{localize 'MGT2.Items.Damage'}}</th>
+					<th class="c">{{localize 'MGT2.Actor.vehicle.FireControl'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each vehicle.mounts.rows as |mount|}}
+				<tr data-mount-index="{{mount.index}}">
+					<td>
+						<span class="play-only"><b class="mount">{{localize mount.typeLabel}}</b><span class="sub">{{localize mount.arcLabel}}</span></span>
+						<span class="edit-only mountedit">
+							{{! `mount` is a block param and stays lexically in scope inside the nested each;
+							    `../mount` would look the key up on the parent CONTEXT, which is the
+							    mount itself, and silently select the first option every time. }}
+							<select class="f" name="system.mounts.{{mount.index}}.type">
+								{{#each ../choices.mountTypes as |label key|}}
+								<option value="{{key}}"{{#if (eq key mount.type)}} selected{{/if}}>{{localize label}}</option>
+								{{/each}}
+							</select>
+							<select class="f" name="system.mounts.{{mount.index}}.arc">
+								{{#each ../choices.arcs as |label key|}}
+								<option value="{{key}}"{{#if (eq key mount.arc)}} selected{{/if}}>{{localize label}}</option>
+								{{/each}}
+							</select>
+						</span>
+					</td>
+					<td>
+						{{#each mount.weapons as |weapon|}}
+						<div class="mw">
+							<a class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}
+						</div>
+						{{/each}}
+						<select class="f edit-only" name="system.mounts.{{mount.index}}.weapons" multiple size="3">
+							{{#each mount.choices as |choice|}}
+							<option value="{{choice._id}}"{{#if choice.selected}} selected{{/if}}>{{choice.name}}</option>
+							{{/each}}
+						</select>
+					</td>
+					<td class="c num">{{#each mount.weapons as |weapon|}}<div>{{weapon.range}}</div>{{/each}}</td>
+					<td class="c num">{{#each mount.weapons as |weapon|}}<div>{{weapon.system.damage}}</div>{{/each}}</td>
+					<td class="c num">
+						<span class="play-only">{{#if mount.fireControl}}{{showDM mount.fireControl}}{{else}}&mdash;{{/if}}</span>
+						<input class="f num edit-only" type="number" min="0" max="4" step="1" name="system.mounts.{{mount.index}}.fireControl" value="{{mount.fireControl}}" />
+					</td>
+					<td class="r">
+						<div class="acts">
+							<a data-action="mountDelete" data-tooltip="{{localize 'MGT2.Actor.vehicle.DeleteMount'}}"><i class="fas fa-trash"></i></a>
+						</div>
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		{{#if vehicle.mounts.unmounted.length}}
+		<table class="rows">
+			<tbody>
+				{{#each vehicle.mounts.unmounted as |weapon|}}
+				<tr data-item-id="{{weapon._id}}">
+					<td><a class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}<span class="sub">{{localize 'MGT2.Actor.vehicle.Unmounted'}}</span></td>
+					<td class="c num">{{weapon.range}}</td>
+					<td class="c num">{{weapon.system.damage}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		<div class="sect">
+			<a class="add edit-only" data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{! The attacker-side rules the system deliberately will not resolve: nothing here reads the
+		    canvas or a selected target, so these are reminders and not modifiers. }}
+		<ul class="codes" data-family="vehicle">
+			<li class="code inert"><b>{{localize 'MGT2.Actor.vehicle.BandDifference'}}</b><span class="ps"><span class="p">{{localize 'MGT2.Actor.vehicle.BandDifferenceValue'}}</span></span></li>
+			<li class="code inert"><b>{{localize 'MGT2.Actor.vehicle.MinEngagement'}}</b><span class="ps"><span class="p">{{localize 'MGT2.Actor.vehicle.MinEngagementValue'}}</span></span></li>
+			<li class="code{{#unless (lte vehicle.hull.weapons vehicle.hull.cap)}} hot{{/unless}}">
+				<b>{{localize 'MGT2.Actor.vehicle.WeaponCap'}}</b>
+				<span class="ps"><span class="p">{{vehicle.hull.weapons}} / {{vehicle.hull.cap}}</span></span>
+			</li>
+		</ul>
+	</div>
+
+	{{! Severity is stored, the effect is a lookup (§1.11). A critical is written on every hit and is
+	    parameterised where a status is boolean, so an embedded document per hit would be both
+	    expensive and racy. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.vehicle.Criticals'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.vehicle.CriticalsCount'}}</span>
+			<a class="rm edit-only" data-action="criticalClear" data-tooltip="{{localize 'MGT2.Actor.vehicle.ClearCriticals'}}"><i class="fa-solid fa-eraser"></i></a>
+		</div>
+		<div class="crits">
+			{{#each vehicle.criticals.locations as |location|}}
+			<span class="loc{{#if location.severity}} hit{{/if}}">{{localize location.label}}<i>{{location.roll}}</i></span>
+			<div class="pips" data-location="{{location.key}}">
+				{{#each location.pips as |pip|}}
+				<i class="{{#if pip.on}}on{{/if}}" data-action="criticalSet" data-step="{{pip.step}}"></i>
+				{{/each}}
+			</div>
+			{{#if location.effect}}
+			<span class="eff">{{localize 'MGT2.Actor.vehicle.Severity'}} {{location.severity}} — <b>{{location.effect}}</b></span>
+			{{/if}}
+			{{/each}}
+		</div>
+		{{! Its own track rather than a tenth location: eight of the nine locations have cells that
+		    raise this instead of damaging the location that was hit. }}
+		<div class="grid edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.HullSeverity'}}</span>
+				{{! A number, not the <range-picker> a min-and-max NumberField would otherwise render. }}
+				<input class="f num" type="number" min="0" max="6" step="1"
+					name="system.hullSeverity" value="{{system.hullSeverity}}" data-dtype="Number" />
+			</label>
+		</div>
+		<dl class="statline">
+			<div class="stat{{#if vehicle.criticals.hullSeverity}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.HullSeverity'}}</dt>
+				<dd>{{vehicle.criticals.hullSeverity}}</dd>
+			</div>
+			<div class="stat{{#unless vehicle.criticals.standing.controlDM}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.ControlDM'}}</dt>
+				<dd>{{showDM vehicle.criticals.standing.controlDM}}</dd>
+			</div>
+			<div class="stat{{#unless vehicle.criticals.standing.systemsDM}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.SystemsDM'}}</dt>
+				<dd>{{showDM vehicle.criticals.standing.systemsDM}}</dd>
+			</div>
+		</dl>
+		{{! No `name` on either control: they belong to the referee's action, not to the document, and
+		    `submitOnChange` submits every named control on the sheet. }}
+		<div class="critctl">
+			<select class="f" data-crit="location" aria-label="{{localize 'MGT2.Actor.vehicle.Location'}}">
+				{{#each vehicle.criticals.locations as |location|}}
+				<option value="{{location.key}}">{{location.roll}} &middot; {{localize location.label}}</option>
+				{{/each}}
+			</select>
+			<input class="f num" type="number" data-crit="effect" min="0" step="1" value="6" aria-label="{{localize 'MGT2.Actor.vehicle.Effect'}}" />
+			<button type="button" class="btn b-dmg" data-action="criticalRoll">{{localize 'MGT2.Actor.vehicle.ApplyCritical'}}</button>
+		</div>
+		<p class="hint">{{localize 'MGT2.Actor.vehicle.CriticalHint'}}</p>
+	</div>
+
+	{{> systems/mgt2/templates/items/blocks/traits.html}}
+
+	{{! Submersibles, airships and drones are one type with two nullable sub-objects, not three
+	    types: no behaviour differs at the type level (§9.8). Absent is a state, not zeroes. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.vehicle.SubTypeDetail'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.vehicle.SubTypeCount'}}</span>
+		</div>
+		<div class="grid">
+			<label class="check">
+				<input type="checkbox" data-action="blockToggle" data-block="submersible" {{checked system.submersible}} />
+				<span>{{localize 'MGT2.Actor.vehicle.Submersible'}}</span>
+			</label>
+			<label class="check">
+				<input type="checkbox" data-action="blockToggle" data-block="remote" {{checked system.remote}} />
+				<span>{{localize 'MGT2.Actor.vehicle.Remote'}}</span>
+			</label>
+		</div>
+
+		{{#if system.submersible}}
+		<dl class="statline grid play-only" data-derived="system.submersible">
+			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.SafeDepth'}}</dt><dd>{{system.submersible.safeDepth}}<i>m</i></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.CrushDepth'}}</dt><dd>{{system.submersible.crushDepth}}<i>m</i></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.LifeSupport'}}</dt><dd>{{system.submersible.lifeSupportDays}}<i>{{localize 'MGT2.Actor.vehicle.Days'}}</i></dd></div>
+		</dl>
+		<div class="grid edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.SafeDepth'}}</span>
+				{{formInput systemFields.submersible.fields.safeDepth name="system.submersible.safeDepth" value=system.submersible.safeDepth classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.CrushDepth'}}</span>
+				{{formInput systemFields.submersible.fields.crushDepth name="system.submersible.crushDepth" value=system.submersible.crushDepth classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.LifeSupport'}}</span>
+				{{formInput systemFields.submersible.fields.lifeSupportDays name="system.submersible.lifeSupportDays" value=system.submersible.lifeSupportDays classes="f num"}}
+			</label>
+		</div>
+		{{/if}}
+
+		{{#if system.remote}}
+		<dl class="statline grid play-only" data-derived="system.remote">
+			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.Interface'}}</dt><dd class="word">{{localize (lookup (lookup choices.interfaces system.remote.interface) 'label')}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.ControlRange'}}</dt><dd>{{system.remote.commsRange}}<i>km</i></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.TelemetryRange'}}</dt><dd>{{system.remote.telemetryRange}}<i>km</i></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.ControlDM'}}</dt><dd>{{showDM system.remoteControlDM}}</dd></div>
+		</dl>
+		<div class="grid edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Interface'}}</span>
+				{{formInput systemFields.remote.fields.interface name="system.remote.interface" value=system.remote.interface localize=true classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.ControlRange'}}</span>
+				{{formInput systemFields.remote.fields.commsRange name="system.remote.commsRange" value=system.remote.commsRange classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.TelemetryRange'}}</span>
+				{{formInput systemFields.remote.fields.telemetryRange name="system.remote.telemetryRange" value=system.remote.telemetryRange classes="f num"}}
+			</label>
+		</div>
+		<p class="hint">{{localize 'MGT2.Actor.vehicle.RemoteHint'}}</p>
+		{{/if}}
+	</div>
+
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Actor.vehicle.Description'}}</h3></div>
+		<prose-mirror name="system.description" value="{{system.description}}" toggled></prose-mirror>
+	</div>
+
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Actor.Notes'}}</h3></div>
+		<prose-mirror name="system.notes" value="{{system.notes}}" toggled></prose-mirror>
+	</div>
+</section>

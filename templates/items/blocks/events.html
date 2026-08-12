@@ -1,0 +1,37 @@
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Items.EventsMishaps'}}</h3>
+		<span class="count">{{system.events.length}}</span>
+		<a class="add edit-only" data-action="eventCreate" data-tooltip="{{localize 'MGT2.Items.AddEvent'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	{{#if system.events.length}}
+	<table class="rows">
+		<thead>
+			<tr>
+				<th class="c">{{localize 'MGT2.Items.Age'}}</th>
+				<th>{{localize 'MGT2.Items.Details'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each system.events as |event i|}}
+			<tr class="events-part" data-events-part="{{i}}">
+				<td class="c num">
+					<span class="play-only">{{event.age}}</span>
+					<input class="f num edit-only" type="number" name="system.events.{{i}}.age" value="{{event.age}}" />
+				</td>
+				<td>
+					<span class="play-only">{{event.description}}</span>
+					<textarea class="f edit-only" name="system.events.{{i}}.description" rows="2">{{event.description}}</textarea>
+				</td>
+				<td class="r">
+					<div class="acts edit-only">
+						<a data-action="eventDelete" data-tooltip="{{localize 'MGT2.Items.DeleteEvent'}}"><i class="fas fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</div>

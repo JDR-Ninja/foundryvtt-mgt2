@@ -1,39 +1,325 @@
-.itemsheet
+// The item screen's own skeleton. The palette is _colors.sass and the primitives — .block, .sect,
+// .grid, .codes, table.rows — are _blocks.sass; what is below is the spine, the identity header,
+// the roll line and the two blocks that exist only here.
+
+// A root part is unwrapped into the window content, so the content element IS the grid.
+.mgt2 .window-content.itemsheet
+	display: grid
+	grid-template-columns: 2.1rem minmax(0, 1fr)
+	align-content: start
+	font-family: var(--body)
+	font-size: 14px
+
+// The one deliberate brand-chrome exception: dark on both grounds. _colors.sass re-anchors the
+// palette on this class, so the label reads the chrome's ink and not the page's.
+.mgt2 .itemsheet-header
 	display: flex
-	flex-wrap: nowrap
-	flex-direction: row
-.itemsheet-header
-	display: flex
-	background-color: var(--mgt2-bgcolor-primary)
-	color: red
-	padding: 0.5rem
 	align-items: center
-	flex: 0 0 2rem
-	label
-		writing-mode: tb-rl
-		transform: rotate(-180deg)
+	justify-content: center
+	padding: 10px 0
+	background: var(--paper)
+	span
+		writing-mode: vertical-rl
+		transform: rotate(180deg)
+		font-family: var(--cond)
+		font-size: 15px
 		font-weight: 700
-		font-size: 20px
-		letter-spacing: 5px
-		font-family: "Rubik Mono One", monospace
-		font-style: normal
+		letter-spacing: 0.42em
+		line-height: 1
 		text-transform: uppercase
-.itemsheet-maincol
-	flex: 0 0 130px
-	padding: 0 1rem 0 0
-.itemsheet-panel
+		white-space: nowrap
+		color: var(--accent-text)
+
+.mgt2 .imain
 	display: flex
-	flex: inherit
-	padding: 1rem
-	img
-		&.profile-img
-			width: 100px
-			height: 100px
-.itemsheet input,
-.itemsheet select,
-.itemsheet textarea
-	color: var(--mgt2-input-color)
-	background-color: var(--mgt2-input-bgcolor)
-	display: block
-	width: 100%
-	font-size: 13px
+	flex-direction: column
+	gap: 14px
+	min-width: 0
+	padding: 12px 16px 16px
+
+// --------------------------------------------
+//  Identity header
+// --------------------------------------------
+
+.mgt2 .ihd
+	display: grid
+	grid-template-columns: auto minmax(0, 1fr)
+	gap: 0 14px
+	align-items: start
+
+	.iportrait
+		width: 76px
+		height: 76px
+		object-fit: cover
+		background: var(--chrome)
+		border: 1px solid var(--rule)
+		cursor: var(--cursor-pointer)
+
+	.idy
+		min-width: 0
+
+	.iname
+		margin: -2px 0 0
+		font-family: var(--cond)
+		font-size: 26px
+		font-weight: 700
+		line-height: 1.05
+		input.f
+			padding: 0 6px
+			font-family: var(--cond)
+			font-size: 24px
+			font-weight: 700
+
+	.isub
+		display: flex
+		flex-wrap: wrap
+		gap: 3px 8px
+		margin-top: 3px
+		font-size: 12.5px
+		color: var(--mute)
+		span:not(:last-child)::after
+			content: "·"
+			margin-left: 8px
+			color: var(--faint)
+
+	.isub.edit-only
+		display: grid
+		grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr))
+		gap: 6px 10px
+		> label
+			display: flex
+			flex-direction: column
+			gap: 2px
+		span::after
+			content: none
+
+// --------------------------------------------
+//  ROLL — the item's interface to the character, stated as a sentence
+// --------------------------------------------
+
+.mgt2 .rollbar
+	display: flex
+	align-items: center
+	flex-wrap: wrap
+	gap: 8px 12px
+	// The binding's fields sit under the sentence, not beside it.
+	> .grid
+		flex: 1 0 100%
+
+.mgt2 .rollline
+	display: flex
+	align-items: baseline
+	flex-wrap: wrap
+	gap: 7px
+	margin: 0
+	font-family: var(--cond)
+	font-size: 17px
+	font-weight: 700
+	letter-spacing: 0.02em
+	.op
+		font-size: 12px
+		font-weight: 500
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		color: var(--faint)
+	.none
+		font-size: 14px
+		font-weight: 500
+		color: var(--faint)
+
+.mgt2 .btn-roll
+	margin-left: auto
+	display: inline-flex
+	align-items: center
+	gap: 6px
+	width: auto
+	height: auto
+	min-height: 0
+	padding: 5px 14px
+	font: inherit
+	font-family: var(--cond)
+	font-size: 11px
+	font-weight: 600
+	letter-spacing: 0.16em
+	text-transform: uppercase
+	color: var(--accent-text)
+	background: none
+	border: 1px solid var(--accent-line)
+	border-radius: 2px
+	cursor: var(--cursor-pointer)
+	&:hover
+		color: var(--accent-hot)
+		background: var(--accent-soft)
+		border-color: var(--accent-text)
+	&[disabled]
+		opacity: 0.35
+		cursor: not-allowed
+		&:hover
+			color: var(--accent-text)
+			background: none
+			border-color: var(--accent-line)
+
+// --------------------------------------------
+//  SPECS — the statline's type scale, one step down
+// --------------------------------------------
+
+.mgt2 .specs
+	display: flex
+	flex-wrap: wrap
+	gap: 6px 22px
+	margin: 0
+	padding: 0
+	list-style: none
+
+	li
+		display: flex
+		align-items: baseline
+		gap: 7px
+	b
+		font-family: var(--cond)
+		font-size: 17px
+		font-weight: 700
+		line-height: 1
+		font-variant-numeric: tabular-nums
+		&.word
+			font-size: 14px
+		.u
+			margin-left: 1px
+			font-size: 11.5px
+			font-weight: 500
+			color: var(--mute)
+	li.off b
+		font-size: 14px
+		font-weight: 500
+		color: var(--faint)
+
+// A hazard is what the item does TO you, so its numbers carry the danger colour.
+.mgt2.hazard
+	.specs b,
+	.rollline
+		color: var(--danger)
+	.itemsheet-header span
+		color: var(--danger)
+
+// --------------------------------------------
+//  CARRIED — equipping and storing stay live in play mode
+// --------------------------------------------
+
+.mgt2 .carried
+	display: flex
+	align-items: center
+	flex-wrap: wrap
+	gap: 8px 20px
+
+	.chk
+		display: flex
+		align-items: center
+		gap: 6px
+		input
+			margin: 0
+			accent-color: var(--accent-text)
+		span
+			font-family: var(--cond)
+			font-size: 10px
+			font-weight: 600
+			letter-spacing: 0.16em
+			text-transform: uppercase
+			color: var(--mute)
+		input:checked + span
+			color: var(--accent-text)
+
+	.store
+		display: flex
+		align-items: center
+		gap: 7px
+		select.f
+			width: auto
+			min-width: 8rem
+			font-size: 12px
+
+	.ro
+		display: flex
+		align-items: baseline
+		gap: 16px
+		margin-left: auto
+		font-family: var(--mono)
+		font-size: 12px
+		font-variant-numeric: tabular-nums
+		color: var(--mute)
+
+// --------------------------------------------
+//  Shared odds and ends
+// --------------------------------------------
+
+.mgt2 .prose
+	margin: 0
+	font-size: 13.5px
+	line-height: 1.6
+	white-space: pre-wrap
+
+.mgt2 .imain
+	textarea.f
+		min-height: 6.5rem
+		line-height: 1.5
+		resize: vertical
+	prose-mirror
+		min-height: 8rem
+		border: 1px solid var(--rule)
+	// Two controls sharing one grid cell: a value and the unit or unit-like enum beside it.
+	.pair
+		display: flex
+		gap: 4px
+		select.f
+			width: auto
+			flex: 0 0 auto
+	// A field the current scale does not reach still occupies its cell, greyed.
+	label.off
+		opacity: 0.45
+
+// The code row's edit face: a custom chip becomes its own name field, a registered one keeps its
+// name and opens its printed parameters, and both carry the owner's note.
+.mgt2 .codes .code
+	input
+		height: auto
+		padding: 0 4px
+		font: inherit
+		font-family: var(--cond)
+		font-size: 11.5px
+		font-weight: 700
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		color: var(--ink)
+		background: none
+		border: none
+		border-bottom: 1px solid var(--rule)
+		&:focus
+			outline: none
+			border-bottom-color: var(--accent-text)
+	// A slot round-trips the printed token verbatim, so it is typed in the mono face the play
+	// view reads it in and keeps its own width.
+	.ps input
+		width: 4.2rem
+		padding: 0 2px
+		font-family: var(--mono)
+		font-size: 10.5px
+		font-weight: 400
+		letter-spacing: 0
+		text-transform: none
+		color: var(--mute)
+	input.note-edit
+		width: 9rem
+		margin-left: 6px
+		font-family: var(--body)
+		font-size: 11px
+		font-weight: 400
+		letter-spacing: 0
+		text-transform: none
+		color: var(--mute)
+
+.mgt2 .sect .flag
+	font-family: var(--cond)
+	font-size: 10.5px
+	font-weight: 600
+	letter-spacing: 0.14em
+	text-transform: uppercase
+	color: var(--danger)

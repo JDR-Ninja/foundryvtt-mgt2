@@ -1,47 +1,241 @@
-.chat-sidebar,
-.mgt2-buttons button
-	background: rgba(0, 0, 0, 0.1)
-	border: 1px solid var(--color-border-light-2)
+// The chat card. Ported from docs/sketch-dialogs-chat.html.
+// ONE GROUND ONLY: Foundry hard-codes `themed theme-light` on ol.chat-log, so a card never renders
+// on the dark ground whatever the viewer's colour scheme says. The card element carries
+// `theme-light` itself, which the `:not(.theme-light)` guard in _colors.sass then honours.
+// Status colours never use the accent — on the black-and-red theme a success band would read as
+// its opposite.
+
+.mgt2.card
+	overflow: hidden
+	font-family: var(--body)
+	font-size: 14px
+	color: var(--ink)
+	background: var(--paper)
+	border: 1px solid var(--rule)
 	border-radius: 3px
-	box-shadow: 0 0 2px #FFF inset
-//.chat-message
-	// &.message
-	// 	color: #0A0405
-	// 	background-color: #fff
-	// 	background-image: none
-.dice-formula,
-.dice-total
-	background-color: #fff
-.mgt2-buttons
-	display: flex
-	justify-content: center
-	align-items: center
-	flex-wrap: nowrap
-	color: #0A0405
-	margin-top: 5px
-	button
-		i
-			font-size: 1.1rem
-			padding: 0
+
+	.chd
+		padding: 8px 11px 7px
+		border-bottom: 1px solid var(--rule)
+
+	.who
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.18em
+		text-transform: uppercase
+		color: var(--mute)
+
+	.what
+		display: flex
+		align-items: baseline
+		gap: 10px
+		margin-top: 1px
+		h4
 			margin: 0
-.roll-info 
-	display: flex
-	flex-direction: column
-.roll-type-group
-	flex-direction: row
-	flex-wrap: wrap
-	justify-content: space-between
-	display: flex
-.roll-type-name
-	font-size: 11px
-	text-transform: uppercase
-	color: #515151
-.roll-object-name 
-	font-weight: 400
-	font-size: 1.4rem
-.roll-success
-	font-size: 1.2rem
-	font-weight: bold
-	text-transform: uppercase
-	margin-top: 1rem
-	text-align: center
+			font-family: var(--cond)
+			font-size: 19px
+			font-weight: 700
+			line-height: 1.1
+			border: none
+		.tgt
+			margin-left: auto
+			font-family: var(--cond)
+			font-size: 10.5px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			white-space: nowrap
+			color: var(--mute)
+
+	.cmsg
+		padding: 7px 11px 0
+		font-size: 13px
+		color: var(--mute)
+
+	.cdice
+		padding: 9px 11px
+		cursor: var(--cursor-pointer)
+		&:hover
+			background: var(--hover)
+		.line
+			display: flex
+			align-items: center
+			gap: 10px
+		.f
+			font-family: var(--mono)
+			font-size: 12px
+			color: var(--mute)
+		.t
+			margin-left: auto
+			font-family: var(--cond)
+			font-size: 30px
+			font-weight: 700
+			line-height: 1
+			font-variant-numeric: tabular-nums
+
+	.eff
+		display: flex
+		align-items: center
+		gap: 10px
+		padding: 8px 11px
+		border-top: 1px solid var(--rule)
+		.band
+			font-family: var(--cond)
+			font-size: 13px
+			font-weight: 700
+			letter-spacing: 0.16em
+			text-transform: uppercase
+		.n
+			margin-left: auto
+			display: flex
+			align-items: baseline
+			gap: 7px
+			b
+				font-family: var(--cond)
+				font-size: 24px
+				font-weight: 700
+				line-height: 1
+				font-variant-numeric: tabular-nums
+
+	// Three readings of one attack, side by side. The defender clicks one; nothing is stored.
+	.dmgpick
+		display: flex
+		border-top: 1px solid var(--rule)
+		> div
+			flex: 1 1 0
+			padding: 8px 10px
+			border-right: 1px solid var(--rule-soft)
+			cursor: var(--cursor-pointer)
+			&:last-child
+				border-right: 0
+			&:hover
+				background: var(--hover)
+			&.on
+				background: var(--accent-soft)
+				.n
+					color: var(--accent-text)
+			// Which reading the selected target's own traits select. An outline rather than a
+			// fill, because the viewer's own pick is still the one that applies.
+			&.bytraits
+				box-shadow: inset 0 0 0 1px var(--accent-line)
+				.k::after
+					content: " \25C6"
+		.k
+			display: block
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 600
+			letter-spacing: 0.16em
+			text-transform: uppercase
+			color: var(--mute)
+		.n
+			display: block
+			font-family: var(--cond)
+			font-size: 23px
+			font-weight: 700
+			line-height: 1.1
+			font-variant-numeric: tabular-nums
+		.fx
+			display: block
+			font-family: var(--mono)
+			font-size: 9.5px
+			color: var(--faint)
+
+	// An immune defender takes none of the three, and not even the Effect-6 floor gets through.
+	.dmgvoid
+		display: none
+	&.immune
+		.dmgpick > div
+			opacity: 0.4
+			text-decoration: line-through
+		.dmgvoid
+			display: block
+			padding: 7px 11px
+			font-family: var(--cond)
+			font-size: 11px
+			font-weight: 600
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--danger)
+			border-top: 1px solid var(--rule-soft)
+
+	// The rest of the payload: scale, damage type, AP, Effect and the floor. `.hot` marks what the
+	// system carries but cannot resolve here.
+	.pipe
+		display: flex
+		flex-wrap: wrap
+		gap: 2px 12px
+		padding: 7px 11px
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+		border-top: 1px solid var(--rule-soft)
+		b
+			font-weight: 700
+			color: var(--ink)
+		.hot
+			color: var(--danger)
+
+	.cmods
+		display: flex
+		flex-wrap: wrap
+		gap: 2px 12px
+		padding: 7px 11px
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+		border-top: 1px solid var(--rule-soft)
+		.neg
+			color: var(--danger)
+
+	.cbtns
+		display: flex
+		gap: 5px
+		padding: 8px 11px
+		border-top: 1px solid var(--rule-soft)
+		button
+			flex: 1 1 0
+			height: auto
+			padding: 5px 6px
+			font: inherit
+			font-family: var(--cond)
+			font-size: 10.5px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--accent-text)
+			background: none
+			border: 1px solid var(--accent-line)
+			border-radius: 2px
+			cursor: var(--cursor-pointer)
+			&:hover
+				background: var(--accent-soft)
+				border-color: var(--accent-text)
+			i
+				margin-right: 5px
+
+.mgt2.card.ok .eff
+	background: color-mix(in oklab, var(--good) 9%, transparent)
+	.band,
+	.n b
+		color: var(--good)
+
+.mgt2.card.bad .eff
+	background: color-mix(in oklab, var(--danger) 9%, transparent)
+	.band,
+	.n b
+		color: var(--danger)
+
+// The two marginal bands: neither a success nor a failure to celebrate.
+.mgt2.card.edge .eff
+	background: var(--hover)
+	.band,
+	.n b
+		color: var(--mute)

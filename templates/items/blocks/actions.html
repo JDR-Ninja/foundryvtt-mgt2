@@ -1,0 +1,60 @@
+{{! What can be done from this station. The crew roster builds its buttons from exactly this list,
+    and `kind` is what decides whether a button is offered on a vacant or unstatted slot. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Items.Actions'}}</h3>
+		<span class="count">{{system.actions.length}}</span>
+		<a class="add edit-only" data-action="actionCreate" data-tooltip="{{localize 'MGT2.Items.AddAction'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	{{#if system.actions.length}}
+	<table class="rows">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Items.Action'}}</th>
+				<th>{{localize 'MGT2.Items.ActionKind'}}</th>
+				<th>{{localize 'MGT2.Items.Skill'}}</th>
+				<th>{{localize 'MGT2.Items.Difficulty'}}</th>
+				<th class="c">{{localize 'MGT2.Items.DM'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each system.actions as |entry i|}}
+			<tr class="actions-part" data-actions-part="{{i}}">
+				<td>
+					<span class="play-only">{{entry.label}}</span>
+					<input class="f edit-only" type="text" name="system.actions.{{i}}.label" value="{{entry.label}}" />
+				</td>
+				<td>
+					<span class="play-only">{{localize (lookup ../config.RoleActions entry.kind)}}</span>
+					<select class="f edit-only" name="system.actions.{{i}}.kind">
+						{{selectOptions ../config.RoleActions selected=entry.kind localize=true}}
+					</select>
+				</td>
+				<td>
+					<span class="play-only">{{entry.skill}}</span>
+					<input class="f edit-only" type="text" name="system.actions.{{i}}.skill" value="{{entry.skill}}" />
+				</td>
+				<td>
+					<span class="play-only">{{localize (lookup ../config.Difficulty entry.difficulty)}}</span>
+					<select class="f edit-only" name="system.actions.{{i}}.difficulty">
+						<option></option>
+						{{selectOptions ../config.Difficulty selected=entry.difficulty localize=true}}
+					</select>
+				</td>
+				<td class="c num">
+					<span class="play-only">{{showDM entry.dm}}</span>
+					<input class="f num edit-only" type="number" step="1" name="system.actions.{{i}}.dm" value="{{entry.dm}}" data-dtype="Number" />
+				</td>
+				<td class="r">
+					<div class="acts edit-only">
+						<a data-action="actionDelete" data-tooltip="{{localize 'MGT2.Items.DeleteAction'}}"><i class="fas fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+	<p class="hint">{{localize 'MGT2.Items.ActionsHint'}}</p>
+</div>

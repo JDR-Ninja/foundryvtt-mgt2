@@ -1,0 +1,46 @@
+{{! Titled Hazard and not Effect: Effect is the number the Resist roll produces on its chat card,
+    so a block of that name beside a Resist button would name two different things at once. }}
+<div class="block">
+	<div class="sect"><h3>{{localize 'MGT2.Items.Hazard'}}</h3></div>
+	<div class="rollbar">
+		<p class="rollline play-only">
+			<span class="op">{{localize 'MGT2.Items.Versus'}}</span>
+			{{#if roll.difficulty}}<span>{{roll.difficulty}}</span>
+			{{else}}<span class="none">{{localize 'MGT2.Items.RefereeDifficulty'}}</span>{{/if}}
+			{{#if (or system.damage system.effect)}}
+			<span class="op">·</span><span class="op">{{localize 'MGT2.Items.OnFail'}} &rarr;</span>
+			{{#if system.damage}}<span>{{system.damage}}</span>{{/if}}
+			{{#if system.effect}}{{#if system.damage}}<span class="op">·</span>{{/if}}<span>{{system.effect}}</span>{{/if}}
+			{{/if}}
+			{{#if system.interval}}
+			<span class="op">{{localize 'MGT2.Items.Every'}}</span><span>{{system.interval}}</span>
+			{{/if}}
+		</p>
+		<button type="button" class="btn-roll" data-action="itemRoll" data-roll="{{roll.dispatch}}"
+			data-item-id="{{item.id}}"
+			{{#if roll.disabled}}disabled data-tooltip="MGT2.Items.RollNeedsOwner"{{/if}}>
+			<i class="fa-solid fa-dice"></i>{{localize roll.label}}
+		</button>
+
+		<div class="grid edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Items.Difficulty'}}</span>
+				<select class="f" name="system.difficulty">
+					{{selectOptions config.Difficulty selected=system.difficulty localize=true}}
+				</select>
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Items.Damage'}}</span>
+				{{formInput systemFields.damage name="system.damage" value=system.damage classes="f"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Items.Condition'}}</span>
+				{{formInput systemFields.effect name="system.effect" value=system.effect classes="f" placeholder=(localize "MGT2.Items.ConditionHint")}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Items.Interval'}}</span>
+				{{formInput systemFields.interval name="system.interval" value=system.interval classes="f"}}
+			</label>
+		</div>
+	</div>
+</div>

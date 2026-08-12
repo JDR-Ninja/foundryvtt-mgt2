@@ -1,0 +1,24 @@
+<div class="char{{#if spent}} spent{{else}}{{#if hurt}} hurt{{/if}}{{/if}}" data-characteristic="{{key}}">
+	<div class="n">
+		{{! No dice icon: the name is the secondary roll target and the DM below is the primary one. }}
+		<a class="nm" data-action="roll" data-roll="characteristic" data-roll-characteristic="{{key}}" tabindex="-1" data-tooltip="{{localize label}}">{{localize short}}</a>
+	</div>
+	<div class="v">
+		{{! Only a pool has a current value distinct from its max; a constant reads as one number,
+		    until a wound makes the two differ. }}
+		<span class="play-only" data-derived="system.characteristics.{{key}}.value"><span class="cur">{{value}}</span>{{#if (or pool damage)}}<span class="sl">/</span><span class="mx">{{max}}</span>{{/if}}</span>
+		{{! Exactly one bound input, to `base`; the derivation to `max` sits beside it. }}
+		<span class="edit-only">
+			{{! `f` only: the kit's numeric modifier is also `.n`, which inside a `.char` collides
+			    with the name cell and turns the input into a flex block. }}
+			{{formInput fields.base name=(concat "system.characteristics." key ".base") value=base classes="f"}}
+			<span class="drv" data-derived="system.characteristics.{{key}}.max">{{#if modifier}}{{showDM modifier}} {{/if}}&rarr; <b>{{max}}</b></span>
+		</span>
+	</div>
+	<div class="d">
+		{{! You click the number that goes into the roll — it is already the row's one accent cell. }}
+		<a class="dm play-only" data-action="roll" data-roll="characteristic" data-roll-characteristic="{{key}}" data-derived="system.characteristics.{{key}}.dm" data-tooltip="{{localize 'MGT2.Actor.RollFormula' formula=formula label=(localize label)}}">{{showDM dm}}</a>
+		<a class="cfg edit-only" data-action="openCharacteristic" data-cfg-characteristic="{{key}}" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
+	</div>
+	{{#if pool}}<div class="g"><i style="--g: {{percent}}%"></i></div>{{/if}}
+</div>

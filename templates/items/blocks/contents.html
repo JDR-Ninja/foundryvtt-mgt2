@@ -1,0 +1,37 @@
+{{! What is stored in this container. Reads in both modes; taking out and deleting are edit-mode. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Items.Contents'}}</h3>
+		<span class="count">{{nested.length}}</span>
+	</div>
+	{{#if nested.length}}
+	<table class="rows">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Items.Name'}}</th>
+				<th class="c">{{localize 'MGT2.Items.Type'}}</th>
+				<th class="c">{{localize 'MGT2.Items.Qty'}}</th>
+				<th class="c">{{localize 'MGT2.Items.Weight'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each nested as |entry|}}
+			<tr data-item-id="{{entry._id}}">
+				<td>{{entry.name}}</td>
+				<td class="c">{{entry.type}}</td>
+				<td class="c num">{{entry.quantity}}</td>
+				<td class="c num">{{entry.weight}}</td>
+				<td class="r">
+					<div class="acts edit-only">
+						<a data-action="nestedRemove" data-tooltip="{{localize 'MGT2.Actor.UnstoreItem'}}"><i class="fa-solid fa-inbox-out"></i></a>
+						<a data-action="nestedEdit" data-tooltip="{{localize 'MGT2.Actor.EditItem'}}"><i class="fas fa-edit"></i></a>
+						<a data-action="nestedDelete" data-tooltip="{{localize 'MGT2.Actor.DeleteItem'}}"><i class="fas fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</div>

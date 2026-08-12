@@ -1,0 +1,161 @@
+<aside class="mgt2-rail">
+
+	{{! The pool. A hull only ever fills — there is no state under wrecked — so the bar runs to the
+	    maximum and the sustained-damage ladder marks the tenths (Core p.141). }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.DamageTracks.hull'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.vehicle.HullChain'}}</span>
+		</div>
+		<div class="trackwrap">
+			<div class="track{{#if vehicle.hull.damage}} hurt{{/if}}" data-derived="system.life.damage">
+				<div class="fill" style="--g: {{vehicle.hull.wound}}%"></div>
+				<div class="mk"{{#if vehicle.hull.wrecked}} data-hit="1"{{/if}} style="--x: 100%"><span>{{localize 'MGT2.Actor.vehicle.Wrecked'}}</span></div>
+			</div>
+		</div>
+		<dl class="statline" data-derived="system.characteristics.hull">
+			<div class="stat"><dt>{{localize 'MGT2.Actor.Damage'}}</dt><dd>{{vehicle.hull.damage}}</dd></div>
+			<div class="stat{{#if vehicle.hull.wrecked}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.State'}}</dt>
+				<dd class="word">{{#if vehicle.hull.wrecked}}{{localize 'MGT2.Actor.vehicle.Wrecked'}}{{else if vehicle.hull.damage}}{{localize 'MGT2.Actor.vehicle.Damaged'}}{{else}}{{localize 'MGT2.Actor.vehicle.Intact'}}{{/if}}</dd>
+			</div>
+		</dl>
+		<p class="hint">{{localize 'MGT2.Actor.vehicle.SustainedHint' crossed=vehicle.hull.crossed steps=vehicle.hull.steps}}</p>
+	</div>
+
+	{{! One number plus modes, not a base plus a table: the printed AGILITY is the value in the
+	    vehicle's NATIVE medium, and a mode only ever subtracts (VH p.4, p.48-49). }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.vehicle.Agility'}}</h3>
+			<span class="count">{{localize (lookup (lookup choices.operatingModes system.operatingMode) 'label')}}{{#if system.towing}} · {{localize 'MGT2.Actor.vehicle.Towing'}}{{/if}}</span>
+		</div>
+		{{! The two live controls come first and the track count is pinned: an edit-only cell placed
+		    ahead of them takes their column on the mode flip, and one joining an auto-fit row
+		    re-sizes it. Both stay clickable in play, so neither may move. }}
+		<div class="grid cols2">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.OperatingMode'}}</span>
+				{{formInput systemFields.operatingMode name="system.operatingMode" value=system.operatingMode localize=true classes="f"}}
+			</label>
+			<label class="check">
+				{{formInput systemFields.towing name="system.towing" value=system.towing}}
+				<span>{{localize 'MGT2.Actor.vehicle.Towing'}}</span>
+			</label>
+			<label class="edit-only">
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.AgilityNative'}}</span>
+				{{formInput systemFields.agility name="system.agility" value=system.agility classes="f num"}}
+			</label>
+		</div>
+		<dl class="statline" data-derived="system.agilityEffective">
+			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.Printed'}}</dt><dd>{{showDM vehicle.agility.printed}}</dd></div>
+			<div class="stat{{#if vehicle.agility.penalties.length}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.Effective'}}</dt>
+				<dd>{{showDM vehicle.agility.effective}}</dd>
+			</div>
+		</dl>
+		{{#if vehicle.agility.penalties.length}}
+		<ul class="codes">
+			{{#each vehicle.agility.penalties as |penalty|}}
+			<li class="code"><b>{{localize penalty.label}}</b><span class="ps"><span class="p">{{showDM penalty.dm}}</span></span></li>
+			{{/each}}
+		</ul>
+		{{/if}}
+	</div>
+
+	{{! Store the integer, render the label: collision damage is 1D per band, Weave picks a negative
+	    DM up to the current band, and an attack takes DM-1 per band of difference (Core p.137-143).
+	    Cruise is stored because two published vehicles break "maximum minus one". }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.vehicle.Speed'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.vehicle.SpeedBand'}}</span>
+		</div>
+		<div class="grid">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.SpeedMax'}}</span>
+				<select class="f" name="system.speed.max" data-dtype="Number">
+					{{#each choices.speedBands as |label key|}}
+					<option value="{{@index}}"{{#if (eq @index ../system.speed.max)}} selected{{/if}}>{{@index}} &middot; {{localize label}}</option>
+					{{/each}}
+				</select>
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.SpeedCruise'}}</span>
+				<select class="f" name="system.speed.cruise" data-dtype="Number">
+					{{#each choices.speedBands as |label key|}}
+					<option value="{{@index}}"{{#if (eq @index ../system.speed.cruise)}} selected{{/if}}>{{@index}} &middot; {{localize label}}</option>
+					{{/each}}
+				</select>
+			</label>
+		</div>
+		{{#if vehicle.speed.reduced}}
+		<dl class="statline" data-derived="system.speed.effective">
+			<div class="stat hurt">
+				<dt>{{localize 'MGT2.Actor.vehicle.Effective'}}</dt>
+				<dd class="word">{{localize vehicle.speed.effective}}</dd>
+			</div>
+		</dl>
+		{{/if}}
+	</div>
+
+	{{! The chassis sets both, and an array because a multi-mode vehicle prints more than one pair. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.vehicle.Chassis'}}</h3>
+			<span class="count">{{vehicle.skills.length}}</span>
+			<a class="add edit-only" data-action="skillCreate" data-tooltip="{{localize 'MGT2.Actor.vehicle.AddSkill'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#each vehicle.skills as |pair|}}
+		<div class="grid" data-skill-index="{{pair.index}}">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Skill'}}</span>
+				{{! `pair` is a block param and stays in scope inside the nested each; `../pair` would
+				    look the key up on the parent CONTEXT, which is `pair` itself. }}
+				<select class="f" name="system.skill.{{pair.index}}.skill">
+					<option value="">&mdash;</option>
+					{{#each ../choices.vehicleSkills as |entry key|}}
+					<option value="{{key}}"{{#if (eq key pair.skill)}} selected{{/if}}>{{localize entry.label}}</option>
+					{{/each}}
+				</select>
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Speciality'}}</span>
+				<select class="f" name="system.skill.{{pair.index}}.speciality">
+					<option value="">&mdash;</option>
+					{{#each pair.specialities as |label key|}}
+					<option value="{{key}}"{{#if (eq key pair.speciality)}} selected{{/if}}>{{localize label}}</option>
+					{{/each}}
+				</select>
+			</label>
+			<a class="rm edit-only" data-action="skillDelete" data-tooltip="{{localize 'MGT2.Actor.vehicle.DeleteSkill'}}"><i class="fa-solid fa-trash"></i></a>
+		</div>
+		{{/each}}
+	</div>
+
+	{{! Printed value wins, derived value warns (§9.20). Hull, Cargo and Shipping are transcribed off
+	    the page; the Spaces figures beside them exist only to flag a mismatch and never overwrite. }}
+	{{#if vehicle.crossCheck.rows.length}}
+	<section class="budget check" data-over="soft">
+		<header>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.CrossCheck'}}</span>
+			{{#if vehicle.crossCheck.mismatch}}<span class="flag">{{localize 'MGT2.Actor.vehicle.Mismatch'}}</span>{{/if}}
+		</header>
+		<table class="rows brows" data-derived="system.crossCheck">
+			<tbody>
+				{{#each vehicle.crossCheck.rows as |row|}}
+				<tr{{#unless row.agrees}} class="mismatch"{{/unless}}>
+					<td>{{localize (concat 'MGT2.Actor.vehicle.Check.' row.key)}}</td>
+					<td class="num">{{row.printed}}</td>
+					<td class="d">{{row.derived}}</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{#if vehicle.crossCheck.envelope}}
+		<p class="hint">{{localize 'MGT2.Actor.vehicle.EnvelopeHint' spaces=vehicle.crossCheck.envelope}}</p>
+		{{/if}}
+		<p class="hint">{{localize 'MGT2.Actor.vehicle.CrossCheckHint'}}</p>
+	</section>
+	{{/if}}
+</aside>

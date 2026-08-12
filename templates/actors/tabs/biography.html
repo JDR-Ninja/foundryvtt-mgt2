@@ -1,0 +1,10 @@
+<section class="tab mgt2-panel mgt2-editor-panel{{#if tabs.sidebar.biography.active}} active{{/if}}" data-group="sidebar" data-tab="biography">
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Actor.Biography'}}</h3></div>
+		<prose-mirror name="system.biography" value="{{system.biography}}" toggled></prose-mirror>
+	</div>
+	<div class="block">
+		<div class="sect"><h3>{{localize 'MGT2.Actor.Notes'}}</h3></div>
+		<prose-mirror name="system.notes" value="{{system.notes}}" toggled></prose-mirror>
+	</div>
+</section>

@@ -1,0 +1,62 @@
+<aside class="mgt2-rail">
+
+	{{! The pool. Core p.169: a hull at zero is wrecked and there is no state under it, so the bar
+	    runs to the maximum and the sustained-damage ladder marks the tenths. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.DamageTracks.hull'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.spacecraft.HullChain'}}</span>
+		</div>
+		<div class="trackwrap">
+			<div class="track{{#if ship.hull.damage}} hurt{{/if}}" data-derived="system.life.damage">
+				<div class="fill" style="--g: {{ship.hull.wound}}%"></div>
+				<div class="mk"{{#if ship.hull.wrecked}} data-hit="1"{{/if}} style="--x: 100%"><span>{{localize 'MGT2.Actor.spacecraft.Wrecked'}}</span></div>
+			</div>
+		</div>
+		<dl class="statline" data-derived="system.characteristics.hull">
+			<div class="stat"><dt>{{localize 'MGT2.Actor.Damage'}}</dt><dd>{{ship.hull.damage}}</dd></div>
+			<div class="stat{{#if ship.hull.severity}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Actor.spacecraft.HullSeverity'}}</dt>
+				<dd>{{ship.hull.severity}}</dd>
+			</div>
+		</dl>
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.SustainedHint' crossed=ship.hull.crossed steps=ship.hull.steps}}</p>
+	</div>
+
+	{{! Three budgets, not one — a ship is constrained by tonnage, by power and by hardpoints, and
+	    the third is easy to miss because no catalogue entry prints it (§4.3). }}
+	{{> systems/mgt2/templates/actors/spacecraft/budget.html
+		b=ship.tonnage
+		title=(localize 'MGT2.Actor.spacecraft.Tonnage')
+		flag=(localize 'MGT2.Actor.spacecraft.OverHull')
+		unit=(localize 'MGT2.Actor.spacecraft.Tons')
+		prefix="MGT2.Actor.spacecraft.TonnageRows."
+		derived="system.budget"}}
+
+	{{! The power panel is the one with a state, which is why it is a panel and not a number. }}
+	{{> systems/mgt2/templates/actors/spacecraft/budget.html
+		b=ship.power
+		switched=true
+		title=(localize 'MGT2.Actor.spacecraft.Power')
+		flag=(localize 'MGT2.Actor.spacecraft.Brownout')
+		prefix="MGT2.Actor.spacecraft.DrawRows."
+		derived="system.power.requirements"}}
+	{{#if ship.power.damaged}}
+	<p class="hint">{{localize 'MGT2.Actor.spacecraft.PlantDamaged' plant=ship.power.plant available=ship.power.cap}}</p>
+	{{/if}}
+
+	{{> systems/mgt2/templates/actors/spacecraft/budget.html
+		b=ship.hardpoints
+		title=(localize 'MGT2.Actor.spacecraft.Hardpoints')
+		flag=(localize 'MGT2.Actor.spacecraft.NoHardpoint')
+		derived="system.hardpoints"}}
+
+	{{! One per full 100 tons, free (HG p.26-27). A cap of zero is a real answer, not a blank. }}
+	<dl class="statline" data-derived="system.firmpoints">
+		<div class="stat{{#unless ship.hardpoints.firmpoints}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.spacecraft.Firmpoints'}}</dt>
+			<dd>{{#if ship.hardpoints.firmpoints}}{{ship.hardpoints.firmpoints}}{{else}}&mdash;<i>{{localize 'MGT2.Actor.spacecraft.FirmpointsHint'}}</i>{{/if}}</dd>
+		</div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Airlocks'}}</dt><dd>{{ship.hardpoints.airlocks}}<i>{{localize 'MGT2.Actor.spacecraft.Free'}}</i></dd></div>
+	</dl>
+</aside>

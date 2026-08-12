@@ -1,276 +1,802 @@
-.characteristics-panel
-	.tab
-		padding: 4px
-
-.species
-	font-size: 13px
-	margin: 4px 1rem 0 1rem
-	text-align: justify
-	a
-		margin-right: 1rem
+// The character screen's own skeleton. The palette is _colors.sass and every block it composes
+// from is _blocks.sass; what is below is the header, the rail, the panel and the footer.
 
 .mgt2
-	.characteristics
-		flex-basis: 138px
-		flex-grow: 0
-		flex-shrink: 0
-		position: relative
+	--mgt2-cond: var(--cond)
+	--mgt2-rule: 1px solid var(--rule)
 
-	.characteristics-header
-		color: var(--mgt2-color-primary)
-		background: var(--mgt2-bgcolor-primary)
-		font-family: "Rubik", monospace
+.mgt2.application.character,
+.mgt2.application.npc,
+.mgt2.application.vehicle,
+.mgt2.application.spacecraft,
+.mgt2.application.robot
+	> .window-content
+		font-family: var(--body)
+		font-size: 14px
+
+// Kept because the item sheets, the config dialogs and the storage panel still label with it.
+.mgt2 .mgt2-label
+	font-family: var(--cond)
+	font-size: 11px
+	font-weight: 600
+	letter-spacing: 0.14em
+	line-height: 1.2
+	text-transform: uppercase
+	color: var(--mute)
+
+// --------------------------------------------
+//  Header
+// --------------------------------------------
+
+.mgt2 .mgt2-header
+	display: grid
+	grid-template-columns: auto minmax(0, 1fr) auto
+	gap: 0 14px
+	align-items: start
+	padding: 14px 16px 0
+	border-bottom: 1px solid var(--rule)
+
+	.portrait
+		width: 74px
+		height: 92px
+		object-fit: cover
+		// Foundry's default portrait is a light silhouette: it needs a dark ground in both themes.
+		background: var(--chrome)
+		border: 1px solid var(--rule)
+		cursor: var(--cursor-pointer)
+
+	.idy
+		min-width: 0
+
+	.name
+		margin: -3px 0 4px
+		font-family: var(--cond)
+		font-size: 30px
+		font-weight: 700
+		line-height: 1
+		letter-spacing: 0.01em
+		input.f
+			font-family: var(--cond)
+			font-size: 28px
+			font-weight: 700
+			padding: 0 6px
+
+	.meta
+		display: flex
+		flex-wrap: wrap
+		gap: 3px 8px
+		margin-bottom: 8px
+		font-size: 13px
+		color: var(--mute)
+		span:not(:last-child)::after
+			content: "·"
+			margin-left: 8px
+			color: var(--faint)
+
+	.meta.edit-only
+		display: grid
+		grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr))
+		gap: 6px 10px
+		> label
+			display: flex
+			flex-direction: column
+			gap: 2px
+
+	.statline
+		grid-column: 1 / -1
+		margin-top: 12px
+
+	.trackwrap
+		grid-column: 1 / -1
+		padding-top: 10px
+
+	.hdctl
+		grid-column: 1 / -1
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 8px 14px
+		padding: 9px 0
+		.cfg
+			margin-left: auto
+			display: inline-flex
+			font-size: 12px
+			color: var(--faint)
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
+
+	.dmgprompt
+		grid-column: 1 / -1
+		margin-bottom: 10px
+
+// The healing procedures, as a row of controls. Each one carries the rate it will use in `i`, so
+// the button says what it is about to do without a line of prose under it.
+.mgt2 .recovery
+	display: flex
+	flex-wrap: wrap
+	align-items: center
+	gap: 6px
+
+	.btn i
+		margin-left: 6px
 		font-style: normal
-		font-size: 1rem
-		line-height: 2rem
-		text-transform: uppercase
+		font-family: var(--mono)
+		font-size: 10px
+		letter-spacing: 0
+		text-transform: none
+		color: var(--faint)
+	.btn.hot i
+		color: var(--accent-text)
 
-	.characteristic-row
-		display: flex
-		flex-direction: row
-		align-items: center
-		justify-content: center
-		position: relative
-
-	.characteristic-minmax
-		display: flex
-		flex-direction: row
-		align-items: center
-		justify-content: center
-		flex-wrap: nowrap
-
-	.characteristic-dm
-		span
-			&.label
-				font-size: 0.8rem
-				font-weight: 600
-
-	.characteristic-label
-		font-family: "Barlow Condensed", sans-serif
-		font-size: 1.2rem
-		font-weight: 600
-		font-style: italic
-		text-align: center
-		position: relative
-		& > a
-			&.roll
-				color: black
-				position: absolute
-				left: 0
-		a
-			&.cfg-characteristic
-				display: none
-				font-size: 12px
-				position: absolute
-				right: 0
-				top: 0
+	.reset
+		display: inline-flex
+		margin-left: auto
+		font-size: 12px
+		color: var(--faint)
+		cursor: var(--cursor-pointer)
 		&:hover
-			a
-				&.cfg-characteristic
-					display: block
+			color: var(--accent-text)
 
-	.characteristic-input
-		color: var(--mgt2-bgcolor-primary)
-		text-align: center
-		font-size: 1.5rem
-		font-weight: 500
-		width: 2.4rem
-		height: 2rem
-		box-sizing: border-box
-		border: none
-		outline: none
-		background: linear-gradient(45deg, #0000 5.66px, #000 0 calc(5.66px + 2px), #0000 0 calc(100% - 5.66px - 2px), #000 0 calc(100% - 5.66px), #0000 0), linear-gradient(-45deg, #0000 5.66px, #000 0 calc(5.66px + 2px), #0000 0 calc(100% - 5.66px - 2px), #000 0 calc(100% - 5.66px), #0000 0), linear-gradient(90deg, #000 4px, #0000 0) -2px 50%/100% calc(100% - 16px) repeat-x, linear-gradient(#000 4px, #0000 0) 50% -2px/calc(100% - 16px) 100% repeat-y
+// States: text switches, not pills. A dossier ticks boxes, it does not wear badges. They stay live
+// in both modes — they are the session loop, not structure.
+.mgt2 .states
+	display: flex
+	flex-wrap: wrap
+	gap: 4px 16px
+	padding-bottom: 10px
 
-	.characteristic-dm
-		color: var(--mgt2-color-dm)
-		background-color: transparent
-		text-align: center
-		font-size: 1rem
-		width: 1.5rem
-		height: 1.4rem
-		padding: 0
-		outline: none
-		border: none
-		margin: 0
-		position: absolute
-		right: 0
-		background-color: var(--mgt2-bgcolor-dm)
-		border-radius: 9px
-		margin-right: 2px
-		&:focus
-			outline: none
-			box-shadow: none
-
-	.characteristic-dm-minmax
-		&:focus
-			outline: none
-			box-shadow: none
-
-	.minmaxwrapper
-		display: flex
-		flex-direction: row
-		flex-wrap: nowrap
-		justify-content: center
-		justify-content: center
+	label
+		position: relative
+		display: inline-flex
 		align-items: center
-		margin: 0 0.5rem
-		box-sizing: border-box
-		background: linear-gradient(45deg, #0000 7.07px, #000 0 calc(7.07px + 2px), #0000 0 calc(100% - 7.07px - 2px), #000 0 calc(100% - 7.07px), #0000 0), linear-gradient(-45deg, #0000 7.07px, #000 0 calc(7.07px + 2px), #0000 0 calc(100% - 7.07px - 2px), #000 0 calc(100% - 7.07px), #0000 0), linear-gradient(90deg, #000 4px, #0000 0) -2px 50%/100% calc(100% - 20px) repeat-x, linear-gradient(#000 4px, #0000 0) 50% -2px/calc(100% - 20px) 100% repeat-y
-		input
-			display: inline-block
-			color: black
-			background-color: transparent
-			text-align: center
-			font-size: 1.5rem
-			width: 2rem
-			height: 2rem
-			border: none
-			outline: none
-			&:focus
-				outline: none
-				box-shadow: none
-			&:first-child
-				margin-left: 5px
-			&:last-child
-				margin-right: 5px
-		span
-			font-size: 1.5rem
-			font-weight: 500
+		gap: 6px
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.16em
+		text-transform: uppercase
+		color: var(--faint)
+		&::before
+			content: ""
+			width: 9px
+			height: 9px
+			border: 1px solid currentColor
+		&:has(input:checked)
+			color: var(--danger)
+			&::before
+				background: currentColor
+				box-shadow: inset 0 0 0 2px var(--paper)
+
+	// The tick above is the control; the real checkbox covers the label invisibly so that the
+	// pointer and the keyboard both still reach it.
+	input
+		position: absolute
+		inset: 0
+		width: 100%
+		height: 100%
+		margin: 0
+		opacity: 0
+		cursor: var(--cursor-pointer)
+		&:disabled
+			cursor: default
+
+// The UPP is the character's identity code in Traveller — it anchors the header.
+.mgt2 .upp
+	text-align: right
+	.code
+		margin-top: 2px
+		font-family: var(--mono)
+		font-size: 27px
+		font-weight: 600
+		line-height: 1
+		letter-spacing: 0.14em
+
+// --------------------------------------------
+//  Characteristics rail
+// --------------------------------------------
+
+.mgt2 .mgt2-chars
+	display: flex
+	flex-direction: column
+	min-height: 0
+	overflow-y: auto
+	padding: 0 12px 10px
+	border-right: 1px solid var(--rule)
+
+// --------------------------------------------
+//  Panels
+// --------------------------------------------
+
+// Display is gated on .active: the system layer beats the core rule that hides an inactive tab.
+.mgt2 .mgt2-panel
+	min-height: 0
+	overflow-y: auto
+	gap: 18px
+	padding: 12px 16px 16px
+	&.active
+		display: flex
+		flex-direction: column
+	> p
+		margin: 0
+
+.mgt2 .mgt2-container-picker
+	display: flex
+	flex-direction: row
+	align-items: center
+	gap: 0.5rem
+
+.mgt2 .mgt2-species
+	display: flex
+	flex-direction: row
+	align-items: baseline
+	gap: 8px
+	font-size: 13px
+	text-align: justify
+	a
+		color: var(--accent-text)
+
+// Two editors share the tab, so each block takes half of whatever height is going.
+.mgt2 .mgt2-editor-panel
+	.block
+		flex: 1 1 auto
+		min-height: 0
+	prose-mirror
+		flex: 1 1 auto
+		min-height: 8rem
+		border: 1px solid var(--rule)
+
+// Row actions are revealed by the pointer in play mode and are always on in edit mode.
+.mgt2 table.rows
+	.roll
+		margin-right: 7px
+		font-size: 12px
+		color: var(--accent-text)
+		cursor: var(--cursor-pointer)
+		vertical-align: -1px
+	td .on
+		color: var(--accent-text)
+	.acts
+		opacity: 0
+		transition: opacity 0.12s
+	tr:hover .acts
+		opacity: 1
+
+.mgt2[data-mode="edit"] table.rows .acts
+	opacity: 1
+
+// --------------------------------------------
+//  Footer — the budget block's compact face
+// --------------------------------------------
+
+// The only strip of always-on real estate the sheet has.
+.mgt2 .mgt2-footer
+	padding: 7px 16px
+	border-top: 1px solid var(--rule)
+	background: color-mix(in oklab, var(--ink) 4%, transparent)
+	.cfg
+		display: inline-flex
+		font-size: 12px
+		color: var(--faint)
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--accent-text)
+
+.mgt2 .mgt2-encumbrance
+	display: flex
+	flex-direction: row
+	align-items: center
+	gap: 8px
+	padding: 6px 2px
+	border-top: 1px solid var(--rule)
+	font-size: 12px
+	color: var(--mute)
+	.total
+		font-variant-numeric: tabular-nums
+
 .computer-overload,
 .computer-overload i
-	color: var(--mgt2-color-warning) !important
-ul
-	&.softwares
-		list-style: none
-		margin: 0
-		padding: 0
-		li
-			display: inline-block
-			color: var(--mgt2-color-software)
-			background-color: var(--mgt2-bgcolor-software)
-			padding: 3px 7px
-			border-radius: 8px
-			a
-				display: none
-				&:first-child
-					margin: 0 0.5rem
-			&:hover
-				a
-					display: inline-block
+	color: var(--danger) !important
 
-.character-header
-	display: flex
-	margin-top: 8px
-	margin-right: 8px
-	flex-direction: row
-	flex-wrap: nowrap
-	flex-grow: 0
-	flex-shrink: 0
-	justify-content: flex-start
-	align-items: flex-start
-.character-header-img
-	flex-basis: 138px
-	flex-grow: 0
-	flex-shrink: 0
-	text-align: center
-.character-summary
-	flex: 0 0 100%
+// --------------------------------------------
+//  NPC — what the shared skeleton does not already carry
+// --------------------------------------------
+
+// A statement about the rule, under the block it qualifies. Never a definition: the hints say what
+// the sheet is doing, not what the trait does.
+.mgt2 p.hint
 	margin: 0
-	padding: 0
-	list-style: none
-	border-top: 5px double var(--mgt2-bgcolor-primary)
-	li
-		float: left
-		margin: 0
-		padding: 0
-		color: var(--mgt2-color-primary-light)
-	input
-		display: block
-		border: none
-		font-weight: bold
-		font-family: "Roboto Condensed", sans-serif
-		background-color: #fff
-		font-size: 0.8rem
-		border: 1px solid #fff
-		&:hover
-			border: 1px solid #111
-.character-header-body
+	font-size: 12px
+	line-height: 1.4
+	color: var(--faint)
+	b
+		font-weight: 600
+		color: var(--mute)
+
+.mgt2 .mgt2-npc-panel
 	display: flex
 	flex-direction: column
-	flex-wrap: nowrap
-	justify-content: flex-start
-	legend
-		font-size: 0.7rem
-		text-transform: uppercase
-		text-wrap: nowrap
-		i
-			margin-right: 0.25rem
-.character-body
-	display: flex
-	flex-direction: row
-	align-content: flex-start
-	flex-wrap: nowrap
-	.tab
-		width: 100%
 
-
-.lifes
-	height: 100%
+// Fight or Flight: the two thresholds and the die that reads them, on one line.
+.mgt2 .reaction
 	display: flex
-	flex-direction: row
-	justify-content: center
+	flex-wrap: wrap
 	align-items: center
-	div
-		font-size: 2rem
-.character-states
+	gap: 10px 16px
+	.statline
+		flex: 1 1 14rem
+		border-top: 0
+		border-bottom: 0
+		padding: 0
+
+// The group count takes the UPP's slot on the creature preset, so its two inputs share the row.
+.mgt2 .upp .code .grp
+	display: inline-flex
+	gap: 4px
+	input.f
+		width: 3.4rem
+
+// --------------------------------------------
+//  Vehicle — what the shared skeleton does not already carry
+// --------------------------------------------
+
+// A vehicle's portrait is a landscape plate, not a person's head-and-shoulders.
+.mgt2 .mgt2-header .portrait.vehicle
+	width: 104px
+	height: 74px
+
+// The registration code takes the UPP's slot: it is what a vehicle is called on paper.
+.mgt2 .reg
+	text-align: right
+	.code
+		margin-top: 2px
+		font-family: var(--mono)
+		font-size: 20px
+		font-weight: 600
+		line-height: 1
+		letter-spacing: 0.1em
+	.ref
+		margin-top: 6px
+		font-family: var(--mono)
+		font-size: 10px
+		color: var(--faint)
+
+// The transcription form. Eleven printed lines is too many to bind inside the statline itself, so
+// the readout and the inputs are two blocks and only the readout carries `data-derived`.
+.mgt2 .mgt2-header .vstat
+	grid-column: 1 / -1
+	padding-top: 10px
+
+.mgt2 .mgt2-rail
+	display: flex
+	flex-direction: column
+	gap: 16px
+	min-height: 0
+	overflow-y: auto
+	padding: 12px 12px 16px
+	border-right: 1px solid var(--rule)
+
+// The three scrolling columns keep their gutter whether they are scrolling or not. Edit mode is
+// taller than play — inputs stand where readouts sat, and whole blocks arrive — so a bar that
+// appears in one mode and not the other drags everything beside it sideways on the flip, and the
+// only thing allowed to change there is a readout becoming an input. The reserved strip costs
+// content width; the alternative costs the rule.
+.mgt2 .mgt2-chars,
+.mgt2 .mgt2-panel,
+.mgt2 .mgt2-rail
+	scrollbar-gutter: stable
+
+.mgt2 .mgt2-vehicle-panel
+	display: flex
+	flex-direction: column
+
+.mgt2 .grid .rm,
+.mgt2 .sect .rm
+	align-self: end
+	display: inline-flex
+	padding-bottom: 5px
+	font-size: 12px
+	color: var(--faint)
+	cursor: var(--cursor-pointer)
+	&:hover
+		color: var(--danger)
+
+.mgt2 .sect .rm
+	margin-left: auto
+	padding-bottom: 0
+
+// Three printed facings and two nullable overrides: the dashed border is the sheet saying "this is
+// a fallback, not a value", which is the distinction the books' "unless otherwise stated" rests on.
+.mgt2 .facings
+	display: grid
+	grid-template-columns: repeat(5, minmax(0, 1fr))
+	gap: 6px
+
+	.facing
+		padding: 5px 7px
+		text-align: center
+		border: 1px solid var(--rule)
+		b
+			font-family: var(--cond)
+			font-size: 20px
+			font-weight: 700
+			line-height: 1
+			font-variant-numeric: tabular-nums
+		.lbl
+			display: block
+			margin-bottom: 2px
+		.src
+			display: block
+			margin-top: 2px
+			font-family: var(--cond)
+			font-size: 9px
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--faint)
+		.re
+			display: block
+			font-family: var(--mono)
+			font-size: 10px
+			color: var(--accent-text)
+		input.f
+			text-align: center
+			font-family: var(--cond)
+			font-size: 16px
+			font-weight: 700
+
+	.facing.derived
+		border-style: dashed
+		b
+			font-weight: 500
+			color: var(--mute)
+
+// Six lines, six kinds of number — and two of them are a DM on the OBSERVER's roll, not on ours.
+.mgt2 table.systems
+	td.who
+		width: 11rem
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		color: var(--faint)
+	tr.opposed td.who
+		color: var(--danger)
+	td.val
+		width: 7rem
+		text-align: right
+		font-family: var(--mono)
+		font-size: 13px
+		font-variant-numeric: tabular-nums
+	tr.absent td
+		color: var(--faint)
+
+// Effect in, severity out. The location is the referee's own 2D roll, typed rather than rolled.
+.mgt2 .critctl
+	display: flex
+	flex-wrap: wrap
+	align-items: center
+	gap: 6px
+	select.f
+		flex: 0 1 12rem
+	input.f
+		flex: 0 0 4.5rem
+
+.mgt2 .mount
+	font-family: var(--cond)
+	font-size: 12px
+	font-weight: 700
+	letter-spacing: 0.08em
+	text-transform: uppercase
+
+.mgt2 .mountedit
+	display: flex
+	flex-direction: column
+	gap: 4px
+
+.mgt2 .mw
+	white-space: nowrap
+
+// --------------------------------------------
+//  Spacecraft — the two things the kit genuinely does not carry
+// --------------------------------------------
+
+.mgt2 .mgt2-spacecraft-panel
+	display: flex
+	flex-direction: column
+
+// The mount is not packaging: it carries a damage multiple spanning three orders of magnitude, and
+// the readout has to make ×1 and ×1 000 tell apart at a glance.
+.mgt2 table.mounts
+	td.mt
+		width: 10.5rem
+		select.f
+			font-size: 12px
+			padding: 1px 3px
+		b
+			display: block
+			font-family: var(--cond)
+			font-size: 12.5px
+			font-weight: 700
+			letter-spacing: 0.1em
+			text-transform: uppercase
+		.arc
+			font-family: var(--cond)
+			font-size: 9.5px
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--faint)
+	td.dmg
+		width: 8rem
+		text-align: right
+		font-family: var(--mono)
+		font-variant-numeric: tabular-nums
+		b
+			font-family: var(--cond)
+			font-size: 16px
+			font-weight: 700
+		.mult
+			display: block
+			font-size: 10px
+			color: var(--faint)
+	td.dmg.big b
+		color: var(--danger)
+	.mag
+		font-family: var(--mono)
+		font-size: 11.5px
+		color: var(--mute)
+		&.empty
+			color: var(--danger)
+
+// The running costs. A row of label, reason and figure — not a budget, because nothing here has a
+// cap, and not a statline, because every figure wants the same right-aligned column.
+.mgt2 .finance
+	border: 1px solid var(--rule)
+	padding: 9px 11px
+	.row
+		display: flex
+		align-items: baseline
+		gap: 10px
+		padding: 3px 0
+		& + .row
+			border-top: 1px solid var(--rule-soft)
+		.v
+			margin-left: auto
+			font-family: var(--mono)
+			font-size: 12.5px
+			font-variant-numeric: tabular-nums
+			i
+				font-style: normal
+				color: var(--faint)
+	.why
+		font-family: var(--cond)
+		font-size: 9.5px
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+
+// --------------------------------------------
+//  Software chips
+// --------------------------------------------
+
+ul.softwares
+	display: flex
+	flex-flow: row wrap
+	gap: 4px
+	list-style: none
+	margin: 0
+	padding: 0
+	li
+		display: inline-flex
+		align-items: center
+		gap: 4px
+		color: var(--mgt2-color-software)
+		background-color: var(--mgt2-bgcolor-software)
+		padding: 2px 8px
+		border-radius: 10px
+		font-size: 11px
+		a
+			display: none
+			color: inherit
+		&:hover a
+			display: inline-block
+
+// --------------------------------------------
+//  Robot — the one thing the kit genuinely does not carry
+// --------------------------------------------
+
+.mgt2 .mgt2-robot-panel
+	display: flex
+	flex-direction: column
+
+// A derivation chain, written out. Nine of the thirteen printed statblock rows are computed and
+// several of them multiplicatively, so a bare result is unauditable: the reader cannot tell a wrong
+// efficiency flag from a wrong TL band. No other Actor type needs this — a creature's statblock is
+// entirely stated — which is why it is here rather than in the shared kit.
+.mgt2 .chain
+	display: flex
+	flex-wrap: wrap
+	align-items: baseline
+	gap: 0 6px
+	font-family: var(--mono)
+	font-size: 12px
+	color: var(--mute)
+
+	.t
+		display: inline-flex
+		flex-direction: column
+		align-items: center
+		padding: 0 2px
+		b
+			font-family: var(--cond)
+			font-size: 17px
+			font-weight: 700
+			line-height: 1.1
+			color: var(--ink)
+			font-variant-numeric: tabular-nums
+		span
+			font-family: var(--cond)
+			font-size: 8.5px
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--faint)
+	// A term that is not contributing still prints: an efficiency of ×1 is information.
+	.t.off b
+		font-weight: 500
+		color: var(--faint)
+
+	.op
+		font-size: 13px
+		color: var(--faint)
+	.eq
+		font-size: 13px
+		color: var(--accent-text)
+	.t.result b
+		font-size: 21px
+		color: var(--accent-text)
+
+// The formula beside the stored score, never instead of it: both limbs are bought up from it.
+.mgt2 table.manip td.f,
+.mgt2 table.manip th.f
+	width: 12rem
+	font-family: var(--mono)
+	font-size: 10.5px
+	color: var(--faint)
+
+// --------------------------------------------
+//  Active Effects — the tab, the block and the change editor
+// --------------------------------------------
+
+// The same table serves the actor's Effects tab and the Item sheet's Effects block.
+.mgt2 table.rows tr.off
+	opacity: 0.5
+
+.mgt2 .effect-icon
+	width: 18px
+	height: 18px
+	margin-right: 6px
+	vertical-align: -4px
+	border: none
+	object-fit: cover
+
+// One line per change: the key, what it does to it, and the phase it lands in — which is the field
+// that decides whether it lands at all.
+.mgt2 ul.changes
+	display: flex
+	flex-direction: column
+	gap: 2px
 	margin: 0
 	padding: 0
 	list-style: none
-	display: flex
-	flex-direction: column
-	justify-content: flex-start
-	align-items: flex-start
-	width: 100%
-	float: right
 	li
 		display: flex
-		margin: 0
-		padding: 0
-		color: #4b4a44
-		justify-content: space-between
-		align-items: center
-		width: 100%
-		font-size: 0.7rem
-		line-height: 1.1rem
+		align-items: baseline
+		gap: 6px
+	.k
+		flex: 1 1 auto
+		min-width: 0
+		overflow-wrap: anywhere
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--mute)
+	.v
+		font-family: var(--mono)
+		font-size: 10.5px
+		white-space: nowrap
+		color: var(--faint)
+	.ph
+		padding: 0 4px
+		font-family: var(--cond)
+		font-size: 9.5px
+		font-weight: 600
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		color: var(--faint)
+		border: 1px solid var(--rule)
+		&.final
+			color: var(--accent-text)
+			border-color: var(--accent-line)
 
-.encumbrance-normal
-	color: var(--mgt2-encumbrance-normal)!important
+// The change editor is Foundry's own window with a sixth column, so it restates core's grid rather
+// than joining the kit: `.tab.changes` is styled in foundry2.css for five columns exactly.
+.active-effect-config .tab.changes.mgt2-changes
+	header,
+	ol
+		grid-template-columns: 11rem 6rem 6rem 6rem 3.5rem 1rem
 
-.encumbrance-heavy
-	color: var(--mgt2-encumbrance-heavy)!important
-	font-weight: bold
+// --------------------------------------------
+//  Adaptive — the same sheet, reflowed by container width
+// --------------------------------------------
 
-.character-body
-	height: 100%
-	overflow: hidden
-	display: flex
-	flex-direction: row
-	width: 100%
-	justify-content: flex-start
-	align-items: flex-start
-	border-top: 3px solid black
+@container sheet (max-width: 640px)
+	.mgt2.application.character > .window-content
+		grid-template-columns: minmax(0, 1fr)
+		grid-template-rows: auto auto auto minmax(0, 1fr) auto
+		grid-template-areas: "header" "chars" "nav" "panel" "footer"
 
-.actor-footer
-	bottom: 0
-	color: var(--mgt2-color-primary)
-	background-color: var(--mgt2-bgcolor-primary)
-	width: 100%
-	margin: 0 -8px
-	height: 1.5rem
-	justify-content: space-between
-	align-items: center
-	padding: 0 1rem
-	flex-grow: 0
-	flex-shrink: 0
-	display: flex
-	flex-direction: row
+	.mgt2.application.npc > .window-content
+		grid-template-columns: minmax(0, 1fr)
+		grid-template-rows: auto auto minmax(0, 1fr)
+		grid-template-areas: "header" "chars" "panel"
+
+	.mgt2.application.vehicle > .window-content,
+	.mgt2.application.spacecraft > .window-content,
+	.mgt2.application.robot > .window-content
+		grid-template-columns: minmax(0, 1fr)
+		grid-template-rows: auto auto minmax(0, 1fr)
+		grid-template-areas: "header" "rail" "panel"
+
+	.mgt2 .mgt2-header
+		grid-template-columns: auto minmax(0, 1fr)
+		padding-top: 12px
+		.upp,
+		.reg
+			grid-column: 2
+			text-align: left
+			margin-top: 6px
+			.code
+				font-size: 21px
+		.name
+			font-size: 24px
+
+	.mgt2 .mgt2-chars,
+	.mgt2 .mgt2-rail
+		border-right: none
+		border-bottom: 1px solid var(--rule)
+
+	.mgt2 .facings
+		grid-template-columns: repeat(3, minmax(0, 1fr))
+
+	.mgt2 .char-list
+		display: grid
+		grid-template-columns: repeat(3, minmax(0, 1fr))
+		gap: 0 14px
+
+	// Three across leaves no slack, so the gauge goes back under its row. The mode attribute is
+	// restated because the play rule in the kit would otherwise win on specificity.
+	.mgt2[data-mode="play"] .char,
+	.mgt2 .char
+		grid-template-columns: 1fr auto
+		grid-template-areas: "n v" "d d" "g g"
+		.d
+			text-align: left
+		.g
+			margin-top: 3px
+
+	.mgt2 nav.horizontal-tabs a.item
+		padding: 8px 12px
+		span
+			display: none
+		i
+			margin-right: 0
+
+@container sheet (min-width: 980px)
+	.mgt2.application.character > .window-content,
+	.mgt2.application.npc > .window-content
+		grid-template-columns: 17rem minmax(0, 1fr)
+
+	.mgt2.application.npc[data-preset="creature"] > .window-content
+		grid-template-columns: minmax(0, 1fr)
+
+	.mgt2 .mgt2-panel
+		padding: 14px 22px 20px
