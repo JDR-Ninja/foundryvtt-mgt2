@@ -32,20 +32,29 @@ export class RollPromptHelper {
                 characteristic: options.characteristic,
                 skills: options.skills,
                 skill: options.skill,
-                // Built here so the timeframe DM has one home, shared with the roll path.
+                // Built here so the timeframe DM has one home, shared with the roll path. A strip
+                // implies an order, so they run from rushed to unhurried rather than in key order.
                 timeframes: Object.entries(CONFIG.MGT2.Timeframes).map(([key, label]) => ({
                     key,
                     label: game.i18n.localize(label),
-                    dm: MGT2Helper.getTimeframeDM(key)
-                })),
+                    dm: MGT2Helper.getTimeframeDM(key),
+                    display: MGT2Helper.signed(MGT2Helper.getTimeframeDM(key))
+                })).sort((a, b) => a.dm - b.dm),
                 timeframeTerm: game.i18n.localize("MGT2.RollPrompt.Timeframes"),
                 checkModifiers: (options.checkModifiers ?? []).map(source => ({
                     key: source.key,
                     label: MGT2Helper.modifierLabel(source),
                     dm: source.dm,
+                    negative: source.dm < 0,
                     display: MGT2Helper.signed(source.dm)
                 })),
                 difficulty: options.difficulty,
+                // The rungs that have a target number; "not applicable" is the strip's empty cell.
+                difficulties: Object.entries(CONFIG.MGT2.DifficultyTargets).map(([key, target]) => ({
+                    key,
+                    target,
+                    label: game.i18n.localize(CONFIG.MGT2.Difficulty[key])
+                })),
                 traits: MGT2Helper.weaponTraitRows(options.weapon, options.strengthDM),
                 // Core p.75's table is headed "Common Modifiers to Ranged Attacks"; a melee weapon
                 // still brings its traits.
@@ -64,9 +73,16 @@ export class RollPromptHelper {
         };
 
         return DialogV2.wait({
-            window: { title: options.rollTypeName || game.i18n.localize("MGT2.RollPrompt.Roll") },
+            // What is being rolled, not what kind of thing it is: the gutter form has no block
+            // caption to carry the weapon's name, and "Weapon" never identified which one anyway.
+            window: {
+                title: options.rollObjectName || options.rollTypeName
+                    || game.i18n.localize("MGT2.RollPrompt.Roll")
+            },
             classes: ["mgt2", "mgt2-prompt"],
-            position: { width: 440 },
+            // Wider than it was, and much shorter for it: the gutter form pays for two controls a
+            // line with width, which is the dimension a 16:9 screen has to spare.
+            position: { width: 500 },
             content,
             buttons: [
                 {
@@ -109,9 +125,9 @@ export class RollPromptHelper {
             weapon: {
                 range: range.value,
                 unit,
+                // Under the gutter word, so the band can be read against the score it came from.
                 // A weapon with no Range score names no bands, and "0 m" would read like one.
-                name: [weapon.name, range.value ? MGT2Helper.getRangeDisplay(range) : null]
-                    .filter(part => part).join(" · "),
+                rangeLabel: range.value ? MGT2Helper.getRangeDisplay(range) : "",
                 // Core p.78 states the rule in metres, so a weapon ranged in kilometres is not offered it.
                 thresholds: (range.unit === "kilometer") ? null
                     : Object.values(MGT2.ExtremeRangeThresholds).map(threshold => ({
@@ -160,7 +176,23 @@ export class RollPromptHelper {
             box.addEventListener("change", () => { box.dataset.auto = "false"; });
         }
 
-        const update = () => this.#readout(form);
+        // The difficulty cells carry the target number; the word sits beside them and follows the
+        // pointer, so the ladder names its own rungs without ever being opened.
+        const ladder = form.querySelector('[data-name="difficulty"]');
+        const name = form.querySelector('[data-readout="difficultyName"]');
+        const showDifficulty = peeked => {
+            if ( !ladder || !name ) return;
+            const chosen = ladder.querySelector("input:checked")?.closest("label");
+            name.textContent = (peeked ?? chosen)?.dataset.name ?? "";
+            name.classList.toggle("peek", Boolean(peeked) && (peeked !== chosen));
+        };
+        ladder?.addEventListener("pointerover", event => {
+            const cell = event.target.closest("label");
+            if ( cell ) showDifficulty(cell);
+        });
+        ladder?.addEventListener("pointerleave", () => showDifficulty());
+
+        const update = () => { this.#readout(form); showDifficulty(); };
         form.addEventListener("change", update);
         form.addEventListener("input", update);
         update();
@@ -184,9 +216,9 @@ export class RollPromptHelper {
                 ? (distance > bound)
                 : ((distance > 0) && (bound > 0) && (distance <= bound));
             if ( box.dataset.auto === "true" ) box.checked = met;
-            const status = form.querySelector(`[data-readout="${box.name}-status"]`);
+            const status = form.querySelector(`[data-status="${box.name}"]`);
             if ( status ) {
-                status.textContent = game.i18n.localize(met
+                status.title = game.i18n.localize(met
                     ? "MGT2.RollPrompt.TraitConditionMet" : "MGT2.RollPrompt.TraitOffered");
             }
         }
@@ -225,14 +257,17 @@ export class RollPromptHelper {
 
         const suppressed = this.#traits(form);
 
-        for ( const select of form.querySelectorAll("select.dm-source") ) {
-            const option = select.selectedOptions[0];
-            const void_ = suppressed.has(select.name);
-            const dm = void_ ? 0 : Number(option?.dataset.dm ?? 0);
-            const row = select.closest(".drow");
-            cell(row?.querySelector(".dm"), dm);
-            row?.classList.toggle("voided", void_);
-            if ( dm ) terms.push([option.dataset.term ?? option.textContent, dm]);
+        // A DM source is either a select or a segmented radio group; both name a chosen node that
+        // carries the DM, so the only difference is how the choice is read off.
+        for ( const control of form.querySelectorAll(".dm-source") ) {
+            const isSelect = control.matches("select");
+            const chosen = isSelect ? control.selectedOptions[0] : control.querySelector("input:checked");
+            const source = isSelect ? control.name : control.dataset.name;
+            const void_ = suppressed.has(source);
+            const dm = void_ ? 0 : Number(chosen?.dataset.dm ?? 0);
+            cell(out(source), dm);
+            (control.closest(".seggrp") ?? control).classList.toggle("voided", void_);
+            if ( dm ) terms.push([chosen.dataset.term || chosen.textContent, dm]);
         }
 
         // Applied traits have no control of their own: the row is the readout's only input.
@@ -260,16 +295,17 @@ export class RollPromptHelper {
                 && (MGT2Helper.getNumberFromInput(form.elements[requires]?.value) > 0));
             box.disabled = !live;
             box.closest("label")?.classList.toggle("disabled", !live);
-            // A box the player cannot reach is not an offer, and "your call" beside a greyed control
-            // says the opposite of what the row is doing. Name what is missing instead.
-            const status = requires && form.querySelector(`[data-readout="${box.name}-status"]`);
+            // A box the player cannot reach is not an offer, and "your call" on a greyed control
+            // says the opposite of what it is doing. Name what is missing instead.
+            const status = requires && form.querySelector(`[data-status="${box.name}"]`);
             if ( status ) {
-                status.textContent = live ? game.i18n.localize("MGT2.RollPrompt.TraitOffered")
+                status.title = live ? game.i18n.localize("MGT2.RollPrompt.TraitOffered")
                     : game.i18n.format("MGT2.RollPrompt.TraitUnmet",
                         { requirement: game.i18n.localize(MGT2.AttackModifiers[requires]?.label ?? requires) });
             }
-            // A chip is solid while it is in the roll and struck through while it is not.
-            const chip = box.closest(".traitrow")?.querySelector(".code");
+            // A chip is solid while it is in the roll and struck through while it is not. The chip
+            // IS the control now, so it is the box's own label.
+            const chip = box.closest(".code");
             chip?.classList.toggle("hot", box.checked && live);
             chip?.classList.toggle("off", !(box.checked && live));
             if ( box.checked && live && Number(box.dataset.dm) ) {

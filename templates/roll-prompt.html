@@ -1,171 +1,199 @@
-<div class="dlg">
-	<div class="dblock">
-		<div class="sect"><h3>{{ localize 'MGT2.RollPrompt.Check' }}</h3></div>
-		<div class="drow">
-			<span class="lbl">{{ localize 'MGT2.RollPrompt.CharacteristicDM' }}</span>
-			<select class="f dm-source" name="characteristic">
+<div class="pdlg">
+	{{! The section name lives in a left gutter and takes the per-field labels with it: a select
+	    already reading "Dexterity 10" does not need a label saying Characteristic. Losing that
+	    column is what lets two controls share a line. Every unlabelled control carries an
+	    aria-label, and each row is a group named by its gutter word. }}
+	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.Check' }}">
+		<span class="pgut">{{ localize 'MGT2.RollPrompt.Check' }}</span>
+		<div class="pfields">
+			<select class="f dm-source" name="characteristic"
+				aria-label="{{ localize 'MGT2.RollPrompt.CharacteristicDM' }}">
 				{{#each characteristics as |c|}}
 				<option value="{{c._id}}" data-dm="{{c.dm}}" data-term="{{c.term}}"{{#if (eq c._id ../characteristic)}} selected{{/if}}>{{c.name}}</option>
 				{{/each}}
 			</select>
-			<span class="dm zero">+0</span>
-		</div>
-		{{#if blocks.skill}}
-		<div class="drow">
-			<span class="lbl">{{ localize 'MGT2.RollPrompt.SkillDM' }}</span>
-			<select class="f dm-source" name="skill">
+			<span class="pdm zero" data-readout="characteristic">+0</span>
+			{{#if blocks.skill}}
+			<select class="f dm-source" name="skill"
+				aria-label="{{ localize 'MGT2.RollPrompt.SkillDM' }}">
 				<option value="" data-dm="0"></option>
 				{{#each skills as |s|}}
 				<option value="{{s._id}}" data-dm="{{s.dm}}" data-term="{{s.term}}"{{#if (eq s._id ../skill)}} selected{{/if}}>{{s.name}}</option>
 				{{/each}}
 			</select>
-			<span class="dm zero">+0</span>
+			<span class="pdm zero" data-readout="skill">+0</span>
+			{{/if}}
 		</div>
-		{{/if}}
 	</div>
 
 	{{#if blocks.range}}
-	<div class="dblock">
-		<div class="sect">
-			<h3>{{ localize 'MGT2.RollPrompt.Range' }}</h3>
-			<span class="count">{{weapon.name}}</span>
-		</div>
-		<div class="distrow">
-			<span class="lbl">{{ localize 'MGT2.RollPrompt.Distance' }}</span>
-			<span><input class="f num" type="text" name="distance" maxlength="9" /><span class="unit">{{weapon.unit}}</span></span>
+	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.Range' }}">
+		<span class="pgut">{{ localize 'MGT2.RollPrompt.Range' }}<b>{{weapon.rangeLabel}}</b></span>
+		<div class="pfields">
+			<span class="numunit">
+				<input class="f n" type="text" name="distance" maxlength="9"
+					aria-label="{{ localize 'MGT2.RollPrompt.Distance' }}" /><i>{{weapon.unit}}</i>
+			</span>
 			<span class="band" data-readout="band" data-range="{{weapon.range}}" data-unit="{{weapon.unit}}"></span>
-		</div>
-		{{#if weapon.thresholds}}
-		<div class="drow">
-			<span class="lbl">{{ localize 'MGT2.RollPrompt.ExtremeRange' }}</span>
-			<select class="f" name="rangeThreshold">
-				<option value="0">{{ localize 'MGT2.RollPrompt.ThresholdNone' }}</option>
-				{{#each weapon.thresholds as |t|}}
-				<option value="{{t.metres}}">{{t.label}}</option>
-				{{/each}}
-			</select>
-			<span class="dm"></span>
-		</div>
-		{{/if}}
-		<div class="drow">
-			<span class="lbl">{{ localize 'MGT2.AttackModifiers.aiming' }}</span>
-			<select class="f dm-source" name="aiming">
-				{{#each aiming as |a|}}
-				<option value="{{a.value}}" data-dm="{{a.dm}}" data-term="{{a.term}}">{{a.label}}</option>
-				{{/each}}
-			</select>
-			<span class="dm zero">+0</span>
-		</div>
-		<div class="drow">
-			<span class="lbl">{{ localize 'MGT2.AttackModifiers.fastMovingTarget' }}</span>
-			<span><input class="f num" type="text" name="targetMovement" maxlength="9" data-dm="-1" data-per="10"
-				data-term="{{localize 'MGT2.AttackModifiers.fastMovingTarget'}}" /><span class="unit">{{metre}}</span></span>
-			<span class="dm zero" data-readout="targetMovement">+0</span>
-		</div>
-		<div class="situ">
-			<label>
-				<input type="checkbox" name="cover" data-dtype="Boolean" data-dm="-2" data-term="{{localize 'MGT2.AttackModifiers.cover'}}" />
-				<span>{{ localize 'MGT2.AttackModifiers.cover' }}</span><span class="v">-2</span>
-			</label>
-			<label>
-				<input type="checkbox" name="prone" data-dtype="Boolean" data-dm="-1" data-term="{{localize 'MGT2.AttackModifiers.prone'}}" />
-				<span>{{ localize 'MGT2.AttackModifiers.prone' }}</span><span class="v">-1</span>
-			</label>
-			<label>
-				<input type="checkbox" name="laserSight" data-dtype="Boolean" data-dm="1" data-requires="aiming" data-term="{{localize 'MGT2.AttackModifiers.laserSight'}}" />
+
+			{{! Aiming is a ladder of minor actions, so it is drawn as one. }}
+			<span class="brk"></span>
+			<span class="seggrp">
+				<span class="seglbl">{{ localize 'MGT2.AttackModifiers.aiming' }}</span>
+				<span class="seg num dm-source" data-name="aiming" role="radiogroup"
+					aria-label="{{ localize 'MGT2.AttackModifiers.aiming' }}">
+					{{#each aiming as |a|}}
+					<label><input type="radio" name="aiming" value="{{a.value}}" data-dm="{{a.dm}}"
+						data-term="{{a.term}}"{{#unless a.value}} checked{{/unless}} /><span>{{a.label}}</span></label>
+					{{/each}}
+				</span>
+			</span>
+			<label class="tog pos" data-status="laserSight">
+				<input type="checkbox" name="laserSight" data-dtype="Boolean" data-dm="1" data-requires="aiming"
+					data-term="{{localize 'MGT2.AttackModifiers.laserSight'}}" />
 				<span>{{ localize 'MGT2.AttackModifiers.laserSight' }}</span><span class="v">+1</span>
 			</label>
+
+			<span class="brk"></span>
+			<label class="tog neg">
+				<input type="checkbox" name="cover" data-dtype="Boolean" data-dm="-2"
+					data-term="{{localize 'MGT2.AttackModifiers.cover'}}" />
+				<span>{{ localize 'MGT2.AttackModifiers.cover' }}</span><span class="v">-2</span>
+			</label>
+			<label class="tog neg">
+				<input type="checkbox" name="prone" data-dtype="Boolean" data-dm="-1"
+					data-term="{{localize 'MGT2.AttackModifiers.prone'}}" />
+				<span>{{ localize 'MGT2.AttackModifiers.prone' }}</span><span class="v">-1</span>
+			</label>
+			{{! The field prefix is abbreviated so the p.75 row fits on one line; the full name is
+			    on the title and is what the readout names the term by. }}
+			<span class="numunit" title="{{ localize 'MGT2.AttackModifiers.fastMovingTarget' }}">
+				<i class="pre">{{ localize 'MGT2.AttackModifiers.fastMovingTargetShort' }}</i>
+				<input class="f n" type="text" name="targetMovement" maxlength="9" data-dm="-1" data-per="10"
+					data-term="{{localize 'MGT2.AttackModifiers.fastMovingTarget'}}"
+					aria-label="{{ localize 'MGT2.AttackModifiers.fastMovingTarget' }}" /><i>{{metre}}</i>
+				<span class="pdm zero" data-readout="targetMovement">+0</span>
+			</span>
+
+			{{#if weapon.thresholds}}
+			<span class="brk"></span>
+			<span class="seggrp">
+				<span class="seglbl">{{ localize 'MGT2.RollPrompt.ExtremeRange' }}</span>
+				<span class="seg" data-name="rangeThreshold" role="radiogroup"
+					aria-label="{{ localize 'MGT2.RollPrompt.ExtremeRange' }}">
+					<label title="{{ localize 'MGT2.RollPrompt.ThresholdNone' }}"><input type="radio"
+						name="rangeThreshold" value="0" checked /><span>&mdash;</span></label>
+					{{#each weapon.thresholds as |t|}}
+					<label title="{{t.label}}"><input type="radio" name="rangeThreshold"
+						value="{{t.metres}}" /><span>{{t.metres}}&nbsp;{{../metre}}</span></label>
+					{{/each}}
+				</span>
+			</span>
+			{{/if}}
 		</div>
 	</div>
 	{{/if}}
 
 	{{#if blocks.traits}}
-	{{! Three tones and no fourth: a solid chip is already in the total, a toggle is the player's to
-	    confirm, a dashed chip contributes nothing. The chip is the shared codes component and
-	    carries the registry shape, so it names the trait and never defines it. }}
-	<div class="dblock">
-		<div class="sect">
-			<h3>{{ localize 'MGT2.RollPrompt.WeaponTraits' }}</h3>
-			<span class="count">{{ localize 'MGT2.TraitFamily.weapon' }}</span>
-		</div>
-		<div class="traitlist">
-			{{#each traits as |t|}}
-			<div class="traitrow {{t.tone}}" data-trait-row="{{t.key}}">
-				<ul class="codes">
-					<li class="code {{#if (eq t.tone 'reminded')}}inert{{else}}hot{{/if}}">
-						<b>{{t.term}}</b>
-						{{#if t.params.length}}
-						<span class="ps">{{#each t.params}}<span class="p">{{this}}</span>{{/each}}</span>
-						{{/if}}
-					</li>
-				</ul>
-				<span class="st" data-readout="{{t.name}}-status">{{ localize t.status }}</span>
+	{{! Three tones and no fourth: a solid chip is already in the total, a pressable one is the
+	    player's to confirm, a dashed chip contributes nothing. The chip is the shared codes
+	    component and carries the registry shape, so it names the trait and never defines it. Why
+	    the system did what it did is on the chip's title — a paragraph teaching that rule is worth
+	    reading once, not on every roll. }}
+	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.WeaponTraits' }}">
+		<span class="pgut">{{ localize 'MGT2.RollPrompt.Traits' }}</span>
+		<div class="pfields">
+			<ul class="codes">
+				{{#each traits as |t|}}
 				{{#if (eq t.tone 'offered')}}
-				<label class="situ">
+				<li><label class="code pressable" data-status="{{t.name}}" data-trait-row="{{t.key}}"
+						title="{{ localize t.status }}">
 					<input type="checkbox" name="{{t.name}}" data-dtype="Boolean" data-dm="{{t.dm}}"
 						data-term="{{t.term}}" data-trait="{{t.key}}" data-auto="{{#if t.when}}true{{/if}}"
 						data-when="{{t.when}}" data-when-value="{{t.whenValue}}"
 						data-requires="{{t.requires}}" data-suppress="{{t.suppress}}"
 						{{#if t.checked}}checked{{/if}} />
-					<span class="v">{{t.display}}</span>
-				</label>
+					<b>{{t.term}}</b>
+					{{#if t.params.length}}<span class="ps">{{#each t.params}}<span class="p">{{this}}</span>{{/each}}</span>{{/if}}
+					{{#if t.numeric}}<span class="v">{{t.display}}</span>{{/if}}
+				</label></li>
 				{{else}}
-				<span class="val" data-term="{{t.term}}"{{#if (eq t.tone 'applied')}} data-applied-dm="{{t.dm}}"{{/if}}>{{t.display}}</span>
+				<li class="code {{#if (eq t.tone 'applied')}}hot{{else}}inert{{/if}}"
+					data-trait-row="{{t.key}}" title="{{ localize t.status }}"
+					data-term="{{t.term}}"{{#if (eq t.tone 'applied')}} data-applied-dm="{{t.dm}}"{{/if}}>
+					<b>{{t.term}}</b>
+					{{#if t.params.length}}<span class="ps">{{#each t.params}}<span class="p">{{this}}</span>{{/each}}</span>{{/if}}
+					{{#if t.numeric}}<span class="v">{{t.display}}</span>{{/if}}
+				</li>
 				{{/if}}
-			</div>
-			{{/each}}
+				{{/each}}
+			</ul>
 		</div>
-		<p class="hint"><b>{{ localize 'MGT2.RollPrompt.TraitsHint' }}</b> {{ localize 'MGT2.RollPrompt.TraitsBoundary' }}</p>
 	</div>
 	{{/if}}
 
-	<div class="dblock">
-		<div class="sect"><h3>{{ localize 'MGT2.Items.Modifiers' }}</h3></div>
-		{{#if checkModifiers.length}}
-		<div class="dstates">
+	{{! The timeframe sits here rather than under Target: taking longer over a task modifies the
+	    check, it does not move the number the check is compared against. }}
+	<div class="pline" role="group" aria-label="{{ localize 'MGT2.Items.Modifiers' }}">
+		<span class="pgut">{{ localize 'MGT2.Items.Modifiers' }}</span>
+		<div class="pfields">
 			{{#each checkModifiers as |m|}}
-			<label>
-				<input type="checkbox" name="check-{{m.key}}" data-dtype="Boolean" data-dm="{{m.dm}}" data-term="{{m.label}}" checked />
+			<label class="tog {{#if m.negative}}neg{{else}}pos{{/if}}">
+				<input type="checkbox" name="check-{{m.key}}" data-dtype="Boolean" data-dm="{{m.dm}}"
+					data-term="{{m.label}}" checked />
 				<span>{{m.label}}</span><span class="v">{{m.display}}</span>
 			</label>
 			{{/each}}
-		</div>
-		{{/if}}
-		<div class="drow">
-			<span class="lbl">{{ localize 'MGT2.RollPrompt.CustomDM' }}</span>
-			<input class="f num" type="text" name="customDM" maxlength="15" />
-			<span class="dm zero" data-readout="customDM">+0</span>
+			<span class="numunit">
+				<i class="pre">{{ localize 'MGT2.RollPrompt.CustomDM' }}</i>
+				<input class="f n" type="text" name="customDM" maxlength="15"
+					aria-label="{{ localize 'MGT2.RollPrompt.CustomDM' }}" />
+			</span>
+			<span class="pdm zero" data-readout="customDM">+0</span>
+
+			<span class="brk"></span>
+			<span class="seggrp">
+				<span class="seglbl">{{ localize 'MGT2.RollPrompt.Timeframes' }}</span>
+				<span class="seg dm-source" data-name="timeframes" role="radiogroup"
+					aria-label="{{ localize 'MGT2.RollPrompt.Timeframes' }}">
+					{{#each timeframes as |t|}}
+					<label><input type="radio" name="timeframes" value="{{t.key}}" data-dm="{{t.dm}}"
+						data-term="{{../timeframeTerm}}"{{#unless t.dm}} checked{{/unless}} /><span>{{t.label}}</span>{{#if t.dm}}<span class="v">{{t.display}}</span>{{/if}}</label>
+					{{/each}}
+				</span>
+			</span>
 		</div>
 	</div>
 
-	<div class="dblock">
-		<div class="sect"><h3>{{ localize 'MGT2.RollPrompt.Target' }}</h3></div>
-		<div class="drow">
-			<span class="lbl">{{ localize 'MGT2.RollPrompt.Difficulty' }}</span>
-			<select class="f" name="difficulty">
-				<option></option>
-				{{selectOptions config.Difficulty selected = difficulty localize = true}}
-			</select>
-			<span class="dm"></span>
-		</div>
-		<div class="drow">
-			<span class="lbl">{{ localize 'MGT2.RollPrompt.Timeframes' }}</span>
-			<select class="f dm-source" name="timeframes">
-				{{#each timeframes as |t|}}
-				<option value="{{t.key}}" data-dm="{{t.dm}}" data-term="{{../timeframeTerm}}">{{t.label}}</option>
+	{{! Difficulty is a ladder of eight target numbers, and the ladder is the information: a referee
+	    choosing between Routine and Difficult is choosing a position on it. The cells carry the
+	    number, the word sits beside them and follows the pointer along the rungs. }}
+	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.Target' }}">
+		<span class="pgut">{{ localize 'MGT2.RollPrompt.Target' }}</span>
+		<div class="pfields">
+			<span class="seg num" data-name="difficulty" role="radiogroup"
+				aria-label="{{ localize 'MGT2.RollPrompt.Difficulty' }}">
+				<label class="off" title="{{ localize 'MGT2.Difficulty.NA' }}"
+					data-name="{{ localize 'MGT2.Difficulty.NA' }}"><input type="radio" name="difficulty"
+					value=""{{#unless (lookup config.DifficultyTargets difficulty)}} checked{{/unless}} /><span>&mdash;</span></label>
+				{{#each difficulties as |d|}}
+				<label title="{{d.label}}" data-name="{{d.label}}"><input type="radio" name="difficulty"
+					value="{{d.key}}"{{#if (eq d.key ../difficulty)}} checked{{/if}} /><span>{{d.target}}+</span></label>
 				{{/each}}
-			</select>
-			<span class="dm zero">+0</span>
-		</div>
-		<div class="drow">
-			<span class="lbl">{{ localize 'MGT2.RollPrompt.Visibility' }}</span>
-			<select class="f" name="rollMode">
-				<option value="public" selected="">{{ localize 'MGT2.RollPrompt.PublicRoll' }}</option>
-				<option value="gm">{{ localize 'MGT2.RollPrompt.PrivateGMRoll' }}</option>
-				<option value="blind">{{ localize 'MGT2.RollPrompt.BlindGMRoll' }}</option>
-				<option value="self">{{ localize 'MGT2.RollPrompt.SelfRoll' }}</option>
-			</select>
-			<span class="dm"></span>
+			</span>
+			<span class="segname" data-readout="difficultyName"></span>
+
+			<span class="brk"></span>
+			<span class="seggrp">
+				<span class="seglbl">{{ localize 'MGT2.RollPrompt.Visibility' }}</span>
+				<span class="seg" data-name="rollMode" role="radiogroup"
+					aria-label="{{ localize 'MGT2.RollPrompt.Visibility' }}">
+					<label><input type="radio" name="rollMode" value="public" checked /><span>{{ localize 'MGT2.RollPrompt.PublicRoll' }}</span></label>
+					<label><input type="radio" name="rollMode" value="gm" /><span>{{ localize 'MGT2.RollPrompt.PrivateGMRoll' }}</span></label>
+					<label><input type="radio" name="rollMode" value="blind" /><span>{{ localize 'MGT2.RollPrompt.BlindGMRoll' }}</span></label>
+					<label><input type="radio" name="rollMode" value="self" /><span>{{ localize 'MGT2.RollPrompt.SelfRoll' }}</span></label>
+				</span>
+			</span>
 		</div>
 	</div>
 

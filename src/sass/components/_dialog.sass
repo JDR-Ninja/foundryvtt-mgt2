@@ -1,5 +1,7 @@
 // Dialogs. Ported from docs/sketch-dialogs-chat.html; the outer padding is core's — the sketch
 // drew its own frame — and the buttons are DialogV2's footer rather than the sketch's `.dbtns`.
+// The roll prompt has moved on to the gutter form below (docs/sketch-roll-prompt.html); the
+// stacked `.dlg` rows here still serve the smaller dialogs.
 
 .mgt2
 	.dlg
@@ -38,22 +40,6 @@
 	.dblock:has(.dm.outcome)
 		--dm-col: 5.8rem
 
-	// Range: the bands are fractions of the weapon's own Range score, and the distance is typed.
-	.distrow
-		display: grid
-		grid-template-columns: 7.5rem auto minmax(0, 1fr)
-		align-items: center
-		gap: 10px
-		.unit
-			margin-left: 4px
-			font-family: var(--mono)
-			font-size: 12px
-			color: var(--faint)
-		input.f
-			width: 5rem
-			text-align: right
-			font-family: var(--mono)
-
 	.band
 		display: flex
 		align-items: baseline
@@ -84,64 +70,6 @@
 		color: var(--danger)
 	.band.forced .why
 		color: var(--danger)
-
-	.situ
-		display: flex
-		flex-wrap: wrap
-		gap: 8px 16px
-		label
-			display: inline-flex
-			align-items: center
-			gap: 6px
-			font-family: var(--cond)
-			font-size: 11px
-			font-weight: 600
-			letter-spacing: 0.14em
-			text-transform: uppercase
-			color: var(--mute)
-			cursor: var(--cursor-pointer)
-			input
-				margin: 0
-				accent-color: var(--accent-text)
-			.v
-				font-family: var(--mono)
-				font-size: 11px
-				letter-spacing: 0
-		label.disabled
-			opacity: 0.4
-			cursor: var(--cursor-default)
-			text-decoration: line-through
-
-	// A row voided by another: Auto forfeits aiming, so the aiming row is struck through rather
-	// than silently ignored.
-	.drow.voided
-		opacity: 0.45
-		text-decoration: line-through
-
-	// Weapon traits: chip, what the system did about it, and the control or the number.
-	.traitlist
-		display: flex
-		flex-direction: column
-		gap: 7px
-
-	.traitrow
-		display: grid
-		grid-template-columns: auto minmax(0, 1fr) auto
-		align-items: center
-		gap: 10px
-		.st
-			font-size: 11.5px
-			color: var(--faint)
-		.val
-			min-width: 2.4rem
-			font-family: var(--mono)
-			font-size: 12.5px
-			text-align: right
-			color: var(--faint)
-		label.situ
-			justify-self: end
-	.traitrow.applied .val
-		color: var(--accent-text)
 
 	// The augment reminder sits under the field it belongs to, not beside it.
 	.hint.augment-name
@@ -182,11 +110,297 @@
 			color: var(--mute)
 
 // --------------------------------------------
+//  THE GUTTER FORM — docs/sketch-roll-prompt.html
+//  The section name moves into a left column and takes the per-field labels with it, because a
+//  select already reading "Dexterity 10" does not need a label saying Characteristic. Losing that
+//  column is what lets two controls share a line, and that is what halves the dialog.
+// --------------------------------------------
+
+.mgt2 .pdlg
+	display: flex
+	flex-direction: column
+	gap: 7px
+	// The query container the gutter rows collapse against. It has to be declared here: the sheets
+	// establish theirs on the application root, and a dialog has no such root of its own.
+	container-type: inline-size
+
+	.pline
+		display: grid
+		grid-template-columns: 4.6rem minmax(0, 1fr)
+		align-items: start
+		gap: 0 10px
+	.pline + .pline
+		padding-top: 7px
+		border-top: 1px solid var(--rule-soft)
+
+	.pgut
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 700
+		letter-spacing: 0.18em
+		line-height: 23px
+		text-transform: uppercase
+		color: var(--mute)
+		// What the row is measured against — the weapon and its Range score under the word.
+		b
+			display: block
+			margin-top: -5px
+			font-family: var(--mono)
+			font-size: 9.5px
+			font-weight: 400
+			letter-spacing: 0
+			line-height: 1.3
+			text-transform: none
+			color: var(--faint)
+
+	.pfields
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 5px 8px
+		min-width: 0
+		> .f
+			flex: 1 1 8rem
+			width: auto
+			min-width: 0
+
+	// Break the wrap where we mean it rather than wherever the widths land.
+	.brk
+		flex-basis: 100%
+		height: 0
+
+	.pdm
+		min-width: 1.8rem
+		font-family: var(--mono)
+		font-size: 12.5px
+		font-variant-numeric: tabular-nums
+		color: var(--accent-text)
+	.pdm.zero
+		color: var(--faint)
+
+	.numunit
+		display: inline-flex
+		align-items: center
+		gap: 4px
+		input.f
+			width: 3.5rem
+			height: auto
+			text-align: right
+			font-family: var(--mono)
+			font-size: 12px
+		i
+			font-family: var(--mono)
+			font-size: 11px
+			font-style: normal
+			color: var(--faint)
+		i.pre
+			font-family: var(--cond)
+			font-size: 10px
+			font-weight: 700
+			letter-spacing: 0.18em
+			text-transform: uppercase
+
+	// Narrow window: the gutter stacks above its fields rather than squeezing them.
+	@container (max-width: 400px)
+		.pline
+			grid-template-columns: minmax(0, 1fr)
+			gap: 3px
+		.pline + .pline
+			padding-top: 6px
+		.pgut
+			line-height: 1.3
+			b
+				display: inline
+				margin: 0 0 0 6px
+
+// A situational modifier is a chip, not a checkbox with a caption: the same information in a third
+// of the height, and an active one is coloured by the SIGN of what it does, so a penalty that is
+// switched on reads as a penalty without being read at all.
+.mgt2 .tog
+	position: relative
+	display: inline-flex
+	align-items: baseline
+	gap: 5px
+	padding: 1px 6px 2px
+	font-family: var(--cond)
+	font-size: 10.5px
+	font-weight: 600
+	letter-spacing: 0.12em
+	text-transform: uppercase
+	color: var(--mute)
+	border: 1px solid var(--rule)
+	border-radius: 2px
+	cursor: var(--cursor-pointer)
+	user-select: none
+	input
+		position: absolute
+		inset: 0
+		margin: 0
+		opacity: 0
+		cursor: inherit
+	.v
+		font-family: var(--mono)
+		font-size: 10px
+		letter-spacing: 0
+		color: var(--faint)
+	&:hover
+		border-color: var(--accent-line)
+	&:has(input:focus-visible)
+		outline: 2px solid var(--accent-text)
+		outline-offset: 1px
+	&:has(input:checked)
+		color: var(--accent-text)
+		background: var(--accent-soft)
+		border-color: var(--accent-line)
+		.v
+			color: inherit
+	&.pos:has(input:checked)
+		color: var(--good)
+		background: color-mix(in oklab, var(--good) 10%, transparent)
+		border-color: color-mix(in oklab, var(--good) 45%, transparent)
+	&.neg:has(input:checked)
+		color: var(--danger)
+		background: color-mix(in oklab, var(--danger) 10%, transparent)
+		border-color: color-mix(in oklab, var(--danger) 45%, transparent)
+	&.disabled
+		opacity: 0.4
+		text-decoration: line-through
+		cursor: var(--cursor-default)
+
+// A trait chip that is the player's to confirm IS the control: one click on the chip itself.
+.mgt2 .codes .code.pressable
+	position: relative
+	cursor: var(--cursor-pointer)
+	user-select: none
+	input
+		position: absolute
+		inset: 0
+		margin: 0
+		opacity: 0
+		cursor: inherit
+	.v
+		margin-left: 5px
+		font-family: var(--mono)
+		font-size: 10.5px
+		font-weight: 400
+		letter-spacing: 0
+		text-transform: none
+	&:hover
+		border-color: var(--accent-line)
+	&:has(input:focus-visible)
+		outline: 2px solid var(--accent-text)
+		outline-offset: 1px
+	&.disabled
+		cursor: var(--cursor-default)
+.mgt2 .codes .code.hot .v
+	color: var(--accent-text)
+.mgt2 .codes .code.inert .v
+	color: var(--faint)
+
+// A select costs two clicks and hides its own options. Where the list is short and fixed by CONFIG
+// both are pure loss, so it is drawn as one strip of radios: one click, choices on screen. The DOM
+// contract is unchanged — name plus value, read by FormDataExtended exactly as the select was.
+.mgt2 .seggrp
+	display: inline-flex
+	align-items: center
+	gap: 5px
+
+.mgt2 .seglbl
+	font-family: var(--cond)
+	font-size: 9.5px
+	font-weight: 700
+	letter-spacing: 0.18em
+	text-transform: uppercase
+	color: var(--faint)
+
+.mgt2 .seg
+	display: inline-flex
+	align-items: stretch
+	border: 1px solid var(--rule)
+	border-radius: 2px
+	label
+		position: relative
+		display: inline-flex
+		align-items: baseline
+		justify-content: center
+		gap: 4px
+		// A cell is a smaller target than a select; it must not shrink below this.
+		min-width: 1.8rem
+		padding: 1px 6px 2px
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		white-space: nowrap
+		color: var(--mute)
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--ink)
+			background: var(--hover)
+		&:has(input:checked)
+			color: var(--accent-text)
+			background: var(--accent-soft)
+		&:has(input:focus-visible)
+			outline: 2px solid var(--accent-text)
+			outline-offset: -2px
+	label + label
+		border-left: 1px solid var(--rule-soft)
+	input
+		position: absolute
+		inset: 0
+		margin: 0
+		opacity: 0
+		cursor: inherit
+	.v
+		font-family: var(--mono)
+		font-size: 9.5px
+		letter-spacing: 0
+		color: var(--faint)
+	label:has(input:checked) .v
+		color: inherit
+	// The rung that sets no target is not part of the ladder, so it sits off the end of it.
+	.off
+		margin-right: 2px
+		border-right: 1px solid var(--rule)
+
+// A ladder of target numbers reads as numbers, not as labels.
+.mgt2 .seg.num label
+	min-width: 1.6rem
+	padding: 1px 5px 2px
+	font-family: var(--mono)
+	font-size: 11px
+	font-weight: 400
+	letter-spacing: 0
+	text-transform: none
+
+// The cells carry the number; this carries the word, and follows the pointer along the rungs.
+.mgt2 .segname
+	font-family: var(--cond)
+	font-size: 11px
+	font-weight: 700
+	letter-spacing: 0.16em
+	text-transform: uppercase
+	color: var(--accent-text)
+.mgt2 .segname.peek
+	color: var(--mute)
+
+// Voided by another control: Auto forfeits aiming, so the ladder greys out rather than being
+// silently ignored. Struck through on the label, not on the strip, which would cross every cell.
+.mgt2 .dm-source.voided,
+.mgt2 .seggrp.voided
+	opacity: 0.45
+.mgt2 .seggrp.voided .seg
+	pointer-events: none
+.mgt2 .seggrp.voided .seglbl
+	text-decoration: line-through
+
+// --------------------------------------------
 //  THE READOUT — what you are about to roll, and what Effect it produces
 // --------------------------------------------
 
 .mgt2 .readout
-	padding-top: 10px
+	padding-top: 8px
 	border-top: 1px solid var(--rule)
 
 	.line
@@ -197,7 +411,7 @@
 
 	.form
 		font-family: var(--cond)
-		font-size: 24px
+		font-size: 23px
 		font-weight: 700
 		line-height: 1
 		font-variant-numeric: tabular-nums
@@ -221,10 +435,10 @@
 	.terms
 		display: flex
 		flex-wrap: wrap
-		gap: 3px 12px
-		margin-top: 7px
+		gap: 2px 10px
+		margin-top: 5px
 		font-family: var(--cond)
-		font-size: 10.5px
+		font-size: 10px
 		font-weight: 600
 		letter-spacing: 0.12em
 		text-transform: uppercase
@@ -235,17 +449,17 @@
 // The Effect ladder: six bands, and the marker moves as the form changes. Effect is what the next
 // action reads, so it belongs in front of the player before the dice and not only on the card.
 .mgt2 .eladder
-	margin-top: 10px
+	margin-top: 7px
 
 	.strip
 		display: flex
-		height: 20px
+		height: 17px
 		span
 			flex: 1 1 0
 			display: grid
 			place-items: center
 			font-family: var(--mono)
-			font-size: 10px
+			font-size: 9.5px
 			color: var(--faint)
 			border: 1px solid var(--rule-soft)
 			border-right: 0
@@ -267,16 +481,16 @@
 		display: flex
 		align-items: baseline
 		gap: 8px
-		margin-top: 5px
+		margin-top: 4px
 		font-family: var(--cond)
-		font-size: 10.5px
+		font-size: 10px
 		font-weight: 600
 		letter-spacing: 0.14em
 		text-transform: uppercase
 		color: var(--mute)
 		b
 			font-family: var(--cond)
-			font-size: 15px
+			font-size: 14px
 			color: var(--ink)
 		.band
 			margin-left: auto
@@ -289,8 +503,13 @@
 	gap: 6px
 	button
 		flex: 1 1 0
+		// Core's `button` is a flex row with no wrap, so `display: block` on the sub-label was
+		// never going to break the line — it blockifies into a flex item and sits beside the
+		// label. Wrapping the button and giving the sub-label a full row is what stacks it.
+		flex-wrap: wrap
+		row-gap: 3px
 		height: auto
-		padding: 7px 6px
+		padding: 6px
 		font: inherit
 		font-family: var(--cond)
 		font-size: 11px
@@ -305,11 +524,12 @@
 			color: var(--accent-text)
 			border-color: var(--accent-line)
 		.d
-			display: block
-			margin-top: 2px
+			flex: 0 0 100%
 			font-family: var(--mono)
 			font-size: 10px
 			letter-spacing: 0
+			line-height: 1
+			text-align: center
 			text-transform: none
 			color: var(--faint)
 	button[data-action="submit"]

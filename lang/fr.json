@@ -349,6 +349,7 @@
       "CharacteristicDM": "Caractéristique MD",
       "SkillDM": "Compétence MD",
       "Timeframes": "Délais MD",
+      "Traits": "Traits",
       "States": "États",
       "CustomDM": "MD Personnalisé",
       "TraitUnmet": "nécessite {requirement}",
@@ -481,6 +482,9 @@
     },
     "Notifications": {
       "HealViaCharacteristics": "Les points de vie découlent de FOR+DEX+END. Restaurez ces caractéristiques pour soigner."
+    },
+    "AttackModifiers": {
+      "fastMovingTargetShort": "Mouvement"
     }
   }
 }

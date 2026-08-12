@@ -983,6 +983,7 @@
       "BoonDice": "3D drop low",
       "BaneDice": "3D drop high",
       "WeaponTraits": "Weapon traits",
+      "Traits": "Traits",
       "TraitApplied": "in this roll",
       "TraitOffered": "your call",
       "TraitConditionMet": "condition met — confirm",
@@ -1008,6 +1009,7 @@
       "aiming": "Aiming",
       "laserSight": "Laser sight",
       "fastMovingTarget": "Fast moving target",
+      "fastMovingTargetShort": "Moving",
       "cover": "Target in cover",
       "prone": "Prone target"
     },
