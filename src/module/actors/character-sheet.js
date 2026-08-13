@@ -46,9 +46,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       itemStorageOut: TravellerActorSheet.#onItemStorageOut,
       softwareEject: TravellerActorSheet.#onSoftwareEject,
       applyDamage: TravellerActorSheet.#onApplyDamage,
-      applyStun: TravellerActorSheet.#onApplyStun,
+      openDamage: TravellerActorSheet.#onOpenDamage,
+      editStun: TravellerActorSheet.#onEditStun,
       restHour: TravellerActorSheet.#onRestHour,
-      pickOverflow: TravellerActorSheet.#onPickOverflow,
       firstAid: TravellerActorSheet.#onFirstAid,
       firstAidReset: TravellerActorSheet.#onFirstAidReset,
       surgery: TravellerActorSheet.#onSurgery,
@@ -143,6 +143,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     ["system.health", ["health", "header"]],
     ["system.config", ["characteristics", "skills", "header"]],
     ["system.states", ["header", "health"]],
+    ["system.stun", ["header"]],
     ["system.study", ["skills"]],
     ["system.notes", ["biography"]],
     ["name", ["header"]],
@@ -204,13 +205,6 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
   /** @type {object} */
   #pendingViewState = {};
-
-  /**
-   * The overflow this sheet is waiting for the target to route, or null. Sheet state, not actor
-   * state: the question belongs to the person who clicked Damage, not to the document.
-   * @type {{filled: string, remaining: number, choices: string[]}|null}
-   */
-  #pendingOverflow = null;
 
   /**
    * `_prepareSubmitData` validates with `clean: {copy: false}`, which strips everything outside the
@@ -554,12 +548,6 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       protection: actor.system.radiationProtection
     } : null;
 
-    model.damagePrompt = this.#pendingOverflow ? {
-      filled: game.i18n.localize(TravellerActorSheet.#linkLabel(this.#pendingOverflow.filled)),
-      remaining: this.#pendingOverflow.remaining,
-      choices: this.#pendingOverflow.choices.map(key => ({ key, label: TravellerActorSheet.#linkLabel(key) }))
-    } : null;
-
     // The budget block's bar is a CSS variable, and the numbers behind it are already derived —
     // so the percentage is computed here rather than walked out of the DOM the way the kit does.
     const inventory = actor.system.inventory;
@@ -710,70 +698,131 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return MGT2.Characteristics[key] ?? MGT2.DamageTracks[key] ?? key;
   }
 
-  /** The number typed into the control a button belongs to. */
-  static #controlAmount(target) {
-    return Number(target.closest(".dmgctl")?.querySelector("input")?.value) || 0;
-  }
-
   /**
-   * Wound or heal by the amount sitting in the control. Live in both modes: after the
-   * `{base, damage}` split this is the only way a current value can change at all. The control
-   * types a wound rather than resolving an attack, so it skips the pipeline — and it is the one
-   * place that still asks Core folio 77's question outright, rather than reading the answer the
-   * chain already carries.
+   * Spend or recover on one characteristic's own track, by the amount sitting in the control. Its
+   * one caller is the psionic reserve, which is not in the damage chain: spending writes its own
+   * wound and never reaches `life` (Core folio 229 sends only the overrun there, through
+   * `spendPsi`). Everything that walks the chain goes through the dialog below.
    * @this {TravellerActorSheet}
    */
   static async #onApplyDamage(event, target) {
-    this.#pendingOverflow = null;
     const control = target.closest(".dmgctl");
-    const amount = TravellerActorSheet.#controlAmount(target) * Number(target.dataset.sign ?? 1);
-    if ( !amount ) return;
+    const key = control?.dataset.characteristic;
+    const amount = (Number(control?.querySelector("input")?.value) || 0) * Number(target.dataset.sign ?? 1);
+    if ( !key || !amount ) return;
 
-    const key = control.dataset.characteristic;
-    if ( key ) {
-      // PSI is not in the damage chain: spending writes its own wound and never reaches `life`.
-      const c = this.actor.system.characteristics[key];
-      const damage = Math.min(c.max, Math.max(0, c.damage + amount));
-      if ( damage === c.damage ) return;
-      return this.actor.update({ [`system.characteristics.${key}.damage`]: damage });
-    }
-
-    const choice = (amount > 0) ? this.actor.system.overflowChoice(amount) : null;
-    if ( !choice ) return this.actor.system.applyDamage(amount, { raw: true });
-
-    this.#pendingOverflow = choice;
-    if ( choice.taken > 0 ) await this.actor.system.applyDamage(choice.taken, { raw: true });
-    return this.render({ parts: ["header"] });
-  }
-
-  /** @this {TravellerActorSheet} */
-  static async #onPickOverflow(event, target) {
-    const choice = this.#pendingOverflow;
-    this.#pendingOverflow = null;
-    if ( !choice ) return this.render({ parts: ["header"] });
-    await this.actor.system.applyDamage(choice.remaining, { raw: true, overflow: target.dataset.overflow });
-    return this.render({ parts: ["header"] });
+    const c = this.actor.system.characteristics[key];
+    const damage = Math.min(c.max, Math.max(0, c.damage + amount));
+    if ( damage === c.damage ) return;
+    return this.actor.update({ [`system.characteristics.${key}.damage`]: damage });
   }
 
   /**
-   * Core p.79: Stun damage reaches END alone, and whatever exceeds it becomes rounds of
-   * incapacitation instead of injury. The round count is reported and not tracked.
+   * The reverse direction, worded by type in one place: a person is healed, a craft is repaired.
+   * @type {Record<string, string>}
+   */
+  static #HEAL_LABEL = {
+    robot: "MGT2.Actor.robot.Repair",
+    vehicle: "MGT2.Actor.vehicle.Repair",
+    spacecraft: "MGT2.Actor.spacecraft.Repair"
+  };
+
+  /**
+   * The pool, the wound track and the tail icon are one door. What it types is a wound and not an
+   * attack, so it skips the pipeline entirely — and folio 77's question is asked in the preview,
+   * before anything is written, rather than from a block that opens after half of it already is.
    * @this {TravellerActorSheet}
    */
-  static async #onApplyStun(event, target) {
-    this.#pendingOverflow = null;
-    const amount = TravellerActorSheet.#controlAmount(target);
+  static async #onOpenDamage() {
+    const result = await CharacterPrompts.openDamage({
+      system: this.actor.system,
+      name: this.actor.name,
+      healLabel: TravellerActorSheet.#HEAL_LABEL[this.actor.type] ?? "MGT2.Actor.Heal"
+    });
+    if ( !result ) return;
+
+    const amount = Math.max(0, Number(result.amount) || 0);
     if ( !amount ) return;
-    const result = await this.actor.system.applyDamage(amount, { raw: true, stun: true });
-    if ( result?.rounds > 0 ) {
-      ui.notifications.info(game.i18n.format("MGT2.Actor.StunIncapacitated",
-        { name: this.actor.name, rounds: result.rounds }));
-    }
+    // Re-read off the document: the dialog was awaited, and an update in the meantime would have
+    // replaced `actor.system` with a fresh instance.
+    const system = this.actor.system;
+    return (result.direction === "heal")
+      ? system.applyDamage(-amount, { raw: true })
+      : system.applyDamage(amount, { raw: true, overflow: result.overflow });
   }
 
-  /** @this {TravellerActorSheet} */
+  /**
+   * The stun sub-track is stored and bounded and Rest 1 h puts it back, so its own number is the
+   * control that changes it. One transient field, removed on Enter, Escape or blur — and it carries
+   * no `name`, because `submitOnChange` serialises the form by name and a named control here would
+   * submit on every keystroke.
+   * @this {TravellerActorSheet}
+   */
+  static #onEditStun(event, target) {
+    if ( target.hidden ) return;
+    const field = document.createElement("input");
+    field.type = "number";
+    field.className = "edit";
+    field.min = "0";
+    field.value = String(this.actor.system.stun);
+    field.setAttribute("aria-label", game.i18n.localize("MGT2.Actor.Stun"));
+    target.hidden = true;
+    target.after(field);
+    field.focus();
+    field.select();
+
+    let closed = false;
+    const close = commit => {
+      if ( closed ) return;
+      closed = true;
+      const value = Math.max(0, Number(field.value) || 0);
+      field.remove();
+      target.hidden = false;
+      if ( commit ) return this.#setStun(value);
+    };
+    // `submitOnChange` listens for `change` on the form. Nothing of a nameless control is
+    // serialised, but the submit still re-renders the header — and it fires BEFORE blur, so the
+    // field would be torn out from under the commit below.
+    field.addEventListener("change", changeEvent => changeEvent.stopPropagation());
+    field.addEventListener("keydown", keyEvent => {
+      if ( keyEvent.key === "Enter" ) { keyEvent.preventDefault(); close(true); }
+      else if ( keyEvent.key === "Escape" ) { keyEvent.preventDefault(); close(false); }
+    });
+    field.addEventListener("blur", () => close(true));
+  }
+
+  /**
+   * Set the sub-track outright. Upwards it is Stun damage: capped at the stun link and the excess
+   * reported as rounds of incapacitation rather than written (Core p.79). Downwards it is what
+   * Rest 1 h does to the whole track done to part of it — straight off the stun link, never through
+   * the heal path, which walks the chain backwards and would hand back a lethal wound taken since.
+   */
+  async #setStun(value) {
+    const system = this.actor.system;
+    const delta = value - system.stun;
+    if ( !delta ) return;
+
+    if ( delta > 0 ) {
+      const result = await system.applyDamage(delta, { raw: true, stun: true });
+      if ( result?.rounds > 0 ) {
+        ui.notifications.info(game.i18n.format("MGT2.Actor.StunIncapacitated",
+          { name: this.actor.name, rounds: result.rounds }));
+      }
+      return;
+    }
+
+    const c = system.characteristics[system.stunLink];
+    const healed = Math.min(-delta, c?.damage ?? 0);
+    return this.actor.update({
+      system: {
+        stun: system.stun + delta,
+        characteristics: healed > 0 ? { [system.stunLink]: { damage: c.damage - healed } } : {}
+      }
+    });
+  }
+
+  /** Core p.79: an hour of rest wipes the stun sub-track, and that much of the wound with it. */
   static async #onRestHour() {
-    this.#pendingOverflow = null;
     return this.actor.system.restHour();
   }
 

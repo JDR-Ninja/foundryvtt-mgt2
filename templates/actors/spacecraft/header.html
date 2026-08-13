@@ -64,7 +64,7 @@
 	<dl class="statline" data-derived="system">
 		<div class="stat lead{{#if ship.hull.damage}} hurt{{/if}}">
 			<dt>{{localize 'MGT2.DamageTracks.hull'}}</dt>
-			<dd>{{ship.hull.value}}<span class="of">/{{ship.hull.max}}</span></dd>
+			<dd><a class="open" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.spacecraft.Repair'}}">{{ship.hull.value}}<span class="of">/{{ship.hull.max}}</span></a></dd>
 		</div>
 		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Armour'}}</dt><dd>{{showDM system.protection}}</dd></div>
 		<div class="stat{{#if system.criticalEffects.thrustLoss}} hurt{{/if}}">
@@ -89,16 +89,11 @@
 		</div>
 		{{! 2D + the pilot's Pilot skill + CURRENT Thrust, so an M-Drive critical feeds it. }}
 		<div class="stat"><dt>{{localize 'MGT2.Actor.Initiative'}}</dt><dd>{{showDM system.initiative}}</dd></div>
+		{{! The wound is the one number nothing else on the sheet can move, and its track is drawn in
+		    the rail — so the door is rendered here whatever the Hull entry shows. }}
+		<div class="ends">
+			<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
+			<a class="tail" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.spacecraft.Repair'}}"><i class="fa-solid fa-heart-crack"></i></a>
+		</div>
 	</dl>
-
-	{{! Live in both modes: with the wound stored and everything else derived, this is the only way
-	    the hull can change at all. }}
-	<div class="hdctl">
-		<span class="dmgctl">
-			<input type="number" min="0" step="1" value="1" aria-label="{{localize 'MGT2.Actor.Amount'}}" />
-			<button type="button" class="btn b-dmg" data-action="applyDamage" data-sign="1">{{localize 'MGT2.Actor.Damage'}}</button>
-			<button type="button" class="btn" data-action="applyDamage" data-sign="-1">{{localize 'MGT2.Actor.spacecraft.Repair'}}</button>
-		</span>
-		<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
-	</div>
 </section>

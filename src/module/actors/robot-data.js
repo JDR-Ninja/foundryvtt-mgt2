@@ -408,17 +408,26 @@ export class RobotData extends ActorBaseData {
      * and `0 >= 0` would read as destroyed on creation.
      * @inheritDoc
      */
-    get damageStates() {
-        const hits = this.characteristics.hits;
+    damageStatesFor(characteristics) {
+        const hits = characteristics.hits;
         const live = (hits.max > 0) && this.damageChain.includes("hits");
         return {
-            ...super.damageStates,
+            ...super.damageStatesFor(characteristics),
             wrecked: live && (hits.damage >= hits.max),
             destroyed: live && (hits.damage >= (2 * hits.max)),
             // RH folio 106: "Robots reduced to INT 0 are inoperable" — reduced, so a grade that
             // never had an INT to lose (a drone brain) is not one of them.
-            inoperable: (this.radiationLoss > 0) && (this.characteristics.intellect.value <= 0)
+            inoperable: (this.radiationLoss > 0) && (characteristics.intellect.value <= 0)
         };
+    }
+
+    /**
+     * A robot is wrecked and then destroyed; it is never unconscious and never dead. `inoperable` is
+     * off the roster because it comes off the rad count, and no wound moves it.
+     * @inheritDoc
+     */
+    get damageStateLabels() {
+        return { wrecked: "MGT2.Actor.robot.Wrecked", destroyed: "MGT2.Actor.robot.Destroyed" };
     }
 
     /**

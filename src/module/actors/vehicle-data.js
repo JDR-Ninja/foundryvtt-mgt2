@@ -34,6 +34,8 @@ export class VehicleData extends CraftData {
 
     static CRITICALS = MGT2.VehicleCriticals;
 
+    static WRECKED_LABEL = "MGT2.Actor.vehicle.Wrecked";
+
     /** The medium a vehicle with no chassis skill stored is assumed to be built for. */
     static DEFAULT_MODE = "ground";
 

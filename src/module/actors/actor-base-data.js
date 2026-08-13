@@ -282,19 +282,39 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
      * Core p.77: unconscious once a characteristic *past* the first has been emptied — the chain
      * puts END first, so the first zero is the one the rule does not count — and dead once the whole
      * chain is at zero. Stated against the chain rather than against STR/DEX/END so that a
-     * single-link pool gets the same machinery; a sub-type with its own thresholds (a creature is
-     * driven off at half its Hits, Core p.85) overrides this getter.
+     * single-link pool gets the same machinery.
      * @type {{unconscious: boolean, dead: boolean}}
      */
     get damageStates() {
+        return this.damageStatesFor(this.characteristics);
+    }
+
+    /**
+     * The same rule read against a projection instead of the stored wound, so the damage dialog can
+     * state what a hit would cause before writing it. A sub-type with its own thresholds — a
+     * creature is driven off at half its Hits, Core p.85 — overrides **this**, never the getter.
+     * @param {object} characteristics   The model's own shape: `{max, damage, value}` per key
+     */
+    damageStatesFor(characteristics) {
         // A link with no score has no pool to empty, so a blank sheet is not a corpse.
-        const chain = this.damageChain.filter(key => this.characteristics[key].max > 0);
+        const chain = this.damageChain.filter(key => characteristics[key].max > 0);
         if (chain.length === 0) return { unconscious: false, dead: false };
-        const emptied = key => this.characteristics[key].value <= 0;
+        const emptied = key => characteristics[key].value <= 0;
         return {
             unconscious: chain.slice(1).some(emptied),
             dead: chain.every(emptied)
         };
+    }
+
+    /**
+     * Which of `damageStates` the damage dialog names, and the word this type uses for each. Not
+     * every state belongs on it: a robot's `inoperable` is a radiation count and no wound moves it.
+     * The dialog draws the intersection with the states actually computed, so a roster naming one
+     * the rule did not produce costs nothing.
+     * @type {Record<string, string>}
+     */
+    get damageStateLabels() {
+        return { unconscious: "MGT2.Actor.Unconscious", dead: "MGT2.Actor.Dead" };
     }
 
     /**

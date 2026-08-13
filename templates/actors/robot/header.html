@@ -98,7 +98,7 @@
 	<dl class="statline grid" data-derived="system">
 		<div class="stat lead{{#if robot.hits.damage}} hurt{{/if}}">
 			<dt>{{localize 'MGT2.DamageTracks.hits'}}</dt>
-			<dd>{{robot.hits.value}}<span class="of">/{{robot.hits.max}}</span></dd>
+			<dd><a class="open" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.robot.Repair'}}">{{robot.hits.value}}<span class="of">/{{robot.hits.max}}</span></a></dd>
 		</div>
 		<div class="stat{{#unless robot.statblock.locomotion.length}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.robot.Locomotion'}}</dt>
@@ -133,16 +133,11 @@
 			<dt>{{localize 'MGT2.Actor.robot.HalfLife'}}</dt>
 			<dd>{{#if robot.statblock.halfLife}}{{robot.statblock.halfLife}}<i>{{localize 'MGT2.Actor.robot.Years'}}</i>{{else}}&mdash;{{/if}}</dd>
 		</div>
+		{{! The wound is the one number a robot has that nothing else on the sheet can move, and its
+		    track is drawn in the rail — so the door is rendered here whatever the Hits entry shows. }}
+		<div class="ends">
+			<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
+			<a class="tail" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.robot.Repair'}}"><i class="fa-solid fa-heart-crack"></i></a>
+		</div>
 	</dl>
-
-	{{! Live in both modes: with the wound stored and every other number derived, this is the only
-	    way a robot's Hits can change at all. }}
-	<div class="hdctl">
-		<span class="dmgctl">
-			<input type="number" min="0" step="1" value="1" aria-label="{{localize 'MGT2.Actor.Amount'}}" />
-			<button type="button" class="btn b-dmg" data-action="applyDamage" data-sign="1">{{localize 'MGT2.Actor.Damage'}}</button>
-			<button type="button" class="btn" data-action="applyDamage" data-sign="-1">{{localize 'MGT2.Actor.robot.Repair'}}</button>
-		</span>
-		<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
-	</div>
 </section>

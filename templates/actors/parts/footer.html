@@ -5,6 +5,6 @@
 		<div class="gauge"><i style="--g: {{encumbrancePercent}}%"></i><u style="--m: {{encumbranceTick}}%"></u></div>
 		<span class="tot"><b>{{system.inventory.weight}}</b><span class="of">/ {{encumbranceNormal}} {{settings.weightUnit}}</span></span>
 		{{#if encumbranceOver}}<span class="flag" data-tooltip="{{localize 'MGT2.Actor.EncumbranceHint'}}">{{localize 'MGT2.Actor.EncumbranceFlag'}}</span>{{/if}}
-		<a class="cfg" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
+		<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
 	</section>
 </footer>

@@ -79,7 +79,7 @@
 		</div>
 		<div class="stat lead{{#if vehicle.hull.damage}} hurt{{/if}}">
 			<dt>{{localize 'MGT2.DamageTracks.hull'}}</dt>
-			<dd>{{vehicle.hull.value}}<span class="of">/{{vehicle.hull.max}}</span></dd>
+			<dd><a class="open" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.vehicle.Repair'}}">{{vehicle.hull.value}}<span class="of">/{{vehicle.hull.max}}</span></a></dd>
 		</div>
 		<div class="stat{{#unless system.shipping}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.vehicle.Shipping'}}</dt>
@@ -88,6 +88,12 @@
 		<div class="stat{{#unless system.cost}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.vehicle.Cost'}}</dt>
 			<dd>{{#if system.cost}}<i>Cr</i>{{system.cost}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		{{! The wound is the one number nothing else on the sheet can move, and its track is drawn in
+		    the rail — so the door is rendered here whatever the Hull entry shows. }}
+		<div class="ends">
+			<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
+			<a class="tail" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.vehicle.Repair'}}"><i class="fa-solid fa-heart-crack"></i></a>
 		</div>
 	</dl>
 
@@ -139,16 +145,5 @@
 			<span class="lbl">{{localize 'MGT2.Actor.vehicle.RangeUnit'}}</span>
 			{{formInput systemFields.range.fields.unit name="system.range.unit" value=system.range.unit localize=true classes="f"}}
 		</label>
-	</div>
-
-	{{! Live in both modes: with `base` and `damage` stored and everything else derived, this is the
-	    only way the hull can change at all. }}
-	<div class="hdctl">
-		<span class="dmgctl">
-			<input type="number" min="0" step="1" value="1" aria-label="{{localize 'MGT2.Actor.Amount'}}" />
-			<button type="button" class="btn b-dmg" data-action="applyDamage" data-sign="1">{{localize 'MGT2.Actor.Damage'}}</button>
-			<button type="button" class="btn" data-action="applyDamage" data-sign="-1">{{localize 'MGT2.Actor.vehicle.Repair'}}</button>
-		</span>
-		<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
 	</div>
 </section>

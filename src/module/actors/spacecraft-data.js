@@ -36,6 +36,8 @@ export class SpacecraftData extends CraftData {
 
     static CRITICALS = MGT2.ShipCriticals;
 
+    static WRECKED_LABEL = "MGT2.Actor.spacecraft.Wrecked";
+
     /**
      * Core p.167: a ship is Spacecraft scale and always was. That is what makes a Traveller
      * shooting a starship divide by ten with no branch anywhere in the damage pipeline.

@@ -147,6 +147,161 @@ export class CharacterPrompts {
     }
 
     /* -------------------------------------------- */
+    /*  Damage (Core folio 77)                      */
+    /* -------------------------------------------- */
+
+    /**
+     * Type a wound or take one back. Strictly raw: a number typed by hand names no weapon, so no
+     * scale, no Protection, no Effect floor and no damage-type transform apply — an attack carrying
+     * all four goes through the chat card instead.
+     *
+     * The map is a preview and writes nothing, so folio 77's question is answered and the two states
+     * it trips are stated before anything reaches the document.
+     * @param {object} context   `{system, name, healLabel}`
+     * @returns {Promise<{amount: number, direction: string, overflow: string}|null>}
+     */
+    static async openDamage(context) {
+        const system = context.system;
+        // The widest reading of folio 77's question — which links could take the overflow at all.
+        // Whether it is actually asked is decided per amount, live, by the same method.
+        const asks = system.overflowChoice(Number.MAX_SAFE_INTEGER);
+
+        // The roster the type names, intersected with what its rule actually produces: a creature
+        // with no Hits falls back to the two Traveller states and must not be offered four chips.
+        const reported = system.damageStates;
+        const states = Object.entries(system.damageStateLabels)
+            .filter(([key, label]) => label && (key in reported))
+            .map(([key, label]) => ({ key, label }));
+
+        const content = await buildContent("systems/mgt2/templates/actors/actor-damage-sheet.html", {
+            healLabel: context.healLabel,
+            states,
+            overflow: asks?.choices.map(key => ({ key, label: CharacterPrompts.#linkLabel(key) }))
+        });
+
+        return DialogV2.input({
+            window: { title: `${game.i18n.localize("MGT2.Actor.Damage")} — ${context.name}` },
+            classes: ["mgt2"],
+            position: { width: 440 },
+            content,
+            ok: { label: "MGT2.Recovery.Apply", icon: "fa-solid fa-heart-crack" },
+            render: (event, dialog) => CharacterPrompts.#wireDamage(dialog.element, system),
+            rejectClose: false
+        });
+    }
+
+    /** A chain link's label: a characteristic on a person, a pool on everything else. */
+    static #linkLabel(key) {
+        return CONFIG.MGT2.Characteristics[key] ?? CONFIG.MGT2.DamageTracks[key] ?? key;
+    }
+
+    /** The same link in the map's 2.6 rem name column, where the roster prints three letters. */
+    static #linkShort(key) {
+        return (key in CONFIG.MGT2.Characteristics)
+            ? game.i18n.localize(`MGT2.Characteristics.${key}.short`)
+            : game.i18n.localize(CharacterPrompts.#linkLabel(key));
+    }
+
+    /**
+     * Lay `amount` on the chain without writing anything. Mirrors what `applyDamage` will do: damage
+     * fills each link to its own maximum and the last one takes the remainder uncapped, with the
+     * target's choice moved forward one place (Core folio 77); healing walks the chain backwards, so
+     * the link injured last is repaired first.
+     * @returns {{rows: object[], states: Record<string, boolean>}}
+     */
+    static #planDamage(system, amount, heal, overflow) {
+        const chain = system.damageChain;
+        const rows = chain.map(key => {
+            const c = system.characteristics[key];
+            return { key, label: CharacterPrompts.#linkShort(key), max: c.max, was: c.value, damage: c.damage, applied: 0 };
+        });
+
+        let left = Math.max(0, amount);
+        if ( heal ) {
+            for ( const row of [...rows].reverse() ) {
+                const taken = Math.min(left, row.damage);
+                row.applied = -taken;
+                row.damage -= taken;
+                left -= taken;
+            }
+        }
+        else {
+            const byKey = new Map(rows.map(row => [row.key, row]));
+            const order = (overflow && (chain.indexOf(overflow) > 0))
+                ? [chain[0], overflow, ...chain.slice(1).filter(key => key !== overflow)]
+                : chain;
+            for ( const [index, key] of order.entries() ) {
+                if ( left <= 0 ) break;
+                const row = byKey.get(key);
+                const room = (index === order.length - 1) ? left : Math.max(0, row.max - row.damage);
+                const taken = Math.min(room, left);
+                row.applied += taken;
+                row.damage += taken;
+                left -= taken;
+            }
+        }
+        for ( const row of rows ) row.now = Math.max(0, row.max - row.damage);
+
+        // The states are read off the MODEL against this projection, never restated here: a creature
+        // is driven off at half its Hits and a craft is wrecked rather than dead, and only the
+        // sub-type knows that. Links outside the chain pass through — a robot's `inoperable` reads
+        // INT, which no wound on the chain moves.
+        const projected = { ...system.characteristics };
+        for ( const row of rows ) {
+            projected[row.key] = { ...system.characteristics[row.key], damage: row.damage, value: row.now };
+        }
+        return { rows, states: system.damageStatesFor(projected) };
+    }
+
+    /** Everything below the amount recomputes from the model on every keystroke, and writes nothing. */
+    static #wireDamage(root, system) {
+        const amount = root.querySelector("input.amount");
+        const echo = root.querySelector(".dm.echo");
+        const overRow = root.querySelector(".drow.over");
+        const over = root.querySelector("select.overflow");
+        const map = root.querySelector(".chainmap");
+        const hint = root.querySelector("p.hint");
+
+        const sync = () => {
+            const heal = root.querySelector('input[name="direction"]:checked').value === "heal";
+            const points = Math.max(0, Number(amount.value) || 0);
+            echo.textContent = `${heal ? "+" : "−"}${points}`;
+            echo.classList.toggle("bad", !heal && (points > 0));
+
+            const choice = heal ? null : system.overflowChoice(points);
+            if ( overRow ) {
+                overRow.hidden = !choice;
+                if ( choice ) root.querySelector(".dm.spill").textContent = `−${choice.remaining}`;
+            }
+
+            const plan = CharacterPrompts.#planDamage(system, points, heal, choice ? over.value : null);
+            map.innerHTML = plan.rows.map(row => {
+                const moved = row.applied !== 0;
+                const tone = (row.applied > 0) ? " hit" : ((row.applied < 0) ? " heal" : "");
+                const fill = row.max > 0 ? Math.min(100, (row.now / row.max) * 100) : 0;
+                return `<div class="lk${tone}">
+                    <span class="k">${esc(row.label)}</span>
+                    <span class="g"><i class="${moved ? "" : "was"}" style="--g:${fill}%"></i></span>
+                    <span class="n">${moved ? `<s>${row.was}</s><em>&rarr;</em>` : ""}${row.now}</span>
+                    <span class="d">${moved ? (row.applied > 0 ? "−" : "+") + Math.abs(row.applied) : "&mdash;"}</span>
+                </div>`;
+            }).join("");
+
+            for ( const chip of root.querySelectorAll(".outcome b[data-state]") ) {
+                chip.classList.toggle("on", plan.states[chip.dataset.state] === true);
+            }
+            hint.textContent = game.i18n.localize(heal ? "MGT2.Actor.HealChainHint" : "MGT2.Actor.DamageRawHint");
+        };
+
+        amount.addEventListener("input", sync);
+        over?.addEventListener("change", sync);
+        for ( const radio of root.querySelectorAll('input[name="direction"]') ) {
+            radio.addEventListener("change", sync);
+        }
+        sync();
+    }
+
+    /* -------------------------------------------- */
     /*  Healing (Core p.82-83)                      */
     /* -------------------------------------------- */
 

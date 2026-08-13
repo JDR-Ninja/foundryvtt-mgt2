@@ -19,7 +19,7 @@
 	// track is fixed, and a block that needs a wider one sets it for every row it holds at once.
 	.drow
 		display: grid
-		grid-template-columns: 7.5rem minmax(0, 1fr) var(--dm-col, 2.2rem)
+		grid-template-columns: var(--lbl-col, 7.5rem) minmax(0, 1fr) var(--dm-col, 2.2rem)
 		align-items: center
 		gap: 10px
 		.dm
@@ -108,6 +108,117 @@
 		b
 			font-weight: 600
 			color: var(--mute)
+
+// --------------------------------------------
+//  THE CHAIN MAP — docs/sketch-damage-control.html
+//  What retires `.dmgprompt`. That block appeared INSIDE the header after the part of the wound the
+//  first link could hold had already been written, asked Core folio 77's question, and pushed the
+//  sheet down while it waited. Here the same question is a <select> above a preview that runs before
+//  anything is written: the referee sees where the points land, sees the two states they trip, and
+//  can still cancel.
+// --------------------------------------------
+
+// "Overflow falls on" does not fit the stacked form's default label track.
+.mgt2 .dmgdlg
+	--lbl-col: 9.5rem
+
+.mgt2 .chainmap
+	display: flex
+	flex-direction: column
+
+	.lk
+		display: grid
+		grid-template-columns: 2.6rem minmax(0, 1fr) 4.6rem 2.6rem
+		align-items: center
+		gap: 9px
+		padding: 5px 0
+		border-bottom: 1px solid var(--rule-soft)
+		&:last-child
+			border-bottom: 0
+
+	.k
+		font-family: var(--cond)
+		font-size: 12px
+		font-weight: 600
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		color: var(--mute)
+
+	.g
+		height: 3px
+		background: color-mix(in oklab, var(--ink) 9%, transparent)
+		-webkit-mask-image: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 4px)
+		mask-image: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 4px)
+		i
+			display: block
+			height: 100%
+			width: var(--g, 0%)
+			background: var(--fill)
+		i.was
+			background: color-mix(in oklab, var(--ink) 30%, var(--paper))
+
+	.n
+		font-family: var(--cond)
+		font-size: 15px
+		font-weight: 700
+		text-align: right
+		font-variant-numeric: tabular-nums
+		// The value before, kept legible rather than struck out: it is the reading being replaced.
+		s
+			font-size: 12px
+			font-weight: 500
+			text-decoration: none
+			color: var(--faint)
+		em
+			padding: 0 3px
+			font-style: normal
+			font-weight: 400
+			color: var(--faint)
+
+	.d
+		font-family: var(--mono)
+		font-size: 11.5px
+		text-align: right
+		color: var(--faint)
+
+	.lk.hit
+		.k, .d
+			color: var(--danger)
+		.g i
+			background: color-mix(in oklab, var(--danger) 75%, var(--paper))
+	.lk.heal
+		.k, .d
+			color: var(--good)
+		.g i
+			background: color-mix(in oklab, var(--good) 70%, var(--paper))
+
+// The two states the chain decides, stated before the write rather than discovered after it.
+.mgt2 .outcome
+	display: flex
+	flex-wrap: wrap
+	gap: 6px 16px
+	font-family: var(--cond)
+	font-size: 11px
+	font-weight: 600
+	letter-spacing: 0.16em
+	text-transform: uppercase
+	color: var(--faint)
+	b
+		display: inline-flex
+		align-items: center
+		gap: 6px
+		font-weight: 600
+		color: inherit
+		&::before
+			content: ""
+			width: 9px
+			height: 9px
+			border: 1px solid currentColor
+	b.on
+		color: var(--danger)
+		&::before
+			background: currentColor
+			box-shadow: inset 0 0 0 2px var(--paper)
 
 // --------------------------------------------
 //  THE GUTTER FORM — docs/sketch-roll-prompt.html

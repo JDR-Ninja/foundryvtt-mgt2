@@ -158,9 +158,9 @@ export class NpcData extends ActorBaseData {
      * would otherwise read `0 >= 0` and call it dead on creation.
      * @inheritDoc
      */
-    get damageStates() {
-        const hits = this.characteristics.hits;
-        if (!(hits.max > 0) || !this.damageChain.includes("hits")) return super.damageStates;
+    damageStatesFor(characteristics) {
+        const hits = characteristics.hits;
+        if (!(hits.max > 0) || !this.damageChain.includes("hits")) return super.damageStatesFor(characteristics);
         return {
             // "at the referee's option" — reported, never acted on.
             drivenOff: hits.damage >= (hits.max / 2),
@@ -168,6 +168,23 @@ export class NpcData extends ActorBaseData {
             dead: hits.damage >= hits.max,
             destroyed: hits.damage >= (2 * hits.max)
         };
+    }
+
+    /**
+     * The creature ladder names four rungs and the dialog states all of them. A person-preset NPC
+     * falls through to the two Traveller states, and so does a creature with no Hits — the roster is
+     * intersected with what the rule actually produced.
+     * @inheritDoc
+     */
+    get damageStateLabels() {
+        return (this.subType === "creature")
+            ? {
+                drivenOff: "MGT2.Actor.npc.DrivenOff",
+                unconscious: "MGT2.Actor.Unconscious",
+                dead: "MGT2.Actor.Dead",
+                destroyed: "MGT2.Actor.npc.Destroyed"
+            }
+            : super.damageStateLabels;
     }
 
     /**

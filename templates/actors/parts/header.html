@@ -81,23 +81,32 @@
 		<div class="code" data-derived="system.upp">{{system.upp}}</div>
 	</div>
 
-	{{! The statline carries data-derived and must never hold a form control, in either mode. }}
-	<dl class="statline" data-derived="system.life">
-		<div class="stat">
+	{{! `data-derived` sits on the entries that genuinely derive, never on the <dl>: `system.stun` is
+	    STORED — applyDamage writes it, restHour zeroes it — and it is the entry this line makes live.
+	    A marked entry must hold no form control, in either mode; an <a> is an affordance, not one. }}
+	<dl class="statline">
+		<div class="stat" data-derived="system.initiative">
 			<dt><a class="roll" data-action="roll" data-roll="initiative" tabindex="-1">{{localize 'MGT2.Actor.Initiative'}}</a></dt>
 			<dd>{{showDM initiative}}</dd>
 		</div>
 		{{#if settings.showLife}}
-		<div class="stat{{#if system.life.damage}} hurt{{/if}}">
+		<div class="stat{{#if system.life.damage}} hurt{{/if}}" data-derived="system.life">
 			<dt>{{localize 'MGT2.Actor.Life'}}</dt>
-			<dd>{{system.life.value}}{{#if (gt system.life.max 0)}}<span class="of">/{{system.life.max}}</span>{{/if}}</dd>
+			<dd><a class="open" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.Heal'}}">{{system.life.value}}{{#if (gt system.life.max 0)}}<span class="of">/{{system.life.max}}</span>{{/if}}</a></dd>
 		</div>
 		{{/if}}
-		<div class="stat{{#unless system.stun}} none{{/unless}}">
+		{{! Core p.79: the stun sub-track is bounded by END and Rest 1 h puts it back, so the number is
+		    the control that changes it. The eraser renders only while restHour() would do anything. }}
+		<div class="stat live{{#unless system.stun}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.Stun'}}</dt>
-			<dd>{{system.stun}}</dd>
+			<dd>
+				<a class="val" data-action="editStun" data-tooltip="{{localize 'MGT2.Actor.StunHint'}}">{{system.stun}}</a>
+				{{#if system.stun}}
+				<a class="clear" data-action="restHour" data-tooltip="{{localize 'MGT2.Actor.RestHourHint'}}"><i class="fa-solid fa-eraser"></i></a>
+				{{/if}}
+			</dd>
 		</div>
-		<div class="stat{{#unless system.inventory.armor}} none{{/unless}}">
+		<div class="stat{{#unless system.inventory.armor}} none{{/unless}}" data-derived="system.inventory.armor">
 			<dt>{{localize 'MGT2.Actor.Armor'}}</dt>
 			<dd>{{system.inventory.armor}}</dd>
 		</div>
@@ -105,12 +114,17 @@
 			<dt>{{localize 'MGT2.Actor.Rads'}}</dt>
 			<dd>{{system.health.radiations}}</dd>
 		</div>
+		{{! `showLife` off hides the Life entry AND the track, so the door is always rendered here too:
+		    without it that configuration has no way to wound a character at all. }}
+		<div class="ends">
+			<a class="tail" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.Heal'}}"><i class="fa-solid fa-heart-crack"></i></a>
+		</div>
 	</dl>
 
 	{{! The wound, with the Stun portion hatched over it. `damage` is stored and the last link is
 	    uncapped, so the fill is clamped rather than the number behind it. }}
 	{{#if lifeTrack}}
-	<div class="trackwrap">
+	<div class="trackwrap open" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.Heal'}}">
 		<div class="track{{#if system.life.damage}} hurt{{/if}}" data-derived="system.life.damage">
 			<div class="fill" style="--g: {{lifeTrack.wound}}%"></div>
 			{{#if system.stun}}<div class="stun" data-tooltip="{{localize 'MGT2.Actor.StunHint'}}" style="--s0: {{lifeTrack.stunFrom}}%; --s: {{lifeTrack.stun}}%"></div>{{/if}}
@@ -118,28 +132,4 @@
 	</div>
 	{{/if}}
 
-	{{! Live in both modes: after the {base, damage} split this is the only way a current value
-	    can change, because no input binds one. }}
-	<div class="hdctl">
-		<span class="dmgctl">
-			<input type="number" min="0" step="1" value="1" aria-label="{{localize 'MGT2.Actor.Amount'}}" />
-			<button type="button" class="btn b-dmg" data-action="applyDamage" data-sign="1">{{localize 'MGT2.Actor.Damage'}}</button>
-			<button type="button" class="btn b-dmg" data-action="applyStun" data-tooltip="{{localize 'MGT2.Actor.StunHint'}}">{{localize 'MGT2.Actor.Stun'}}</button>
-			<button type="button" class="btn" data-action="applyDamage" data-sign="-1">{{localize 'MGT2.Actor.Heal'}}</button>
-			<button type="button" class="btn" data-action="restHour" data-tooltip="{{localize 'MGT2.Actor.RestHourHint'}}">{{localize 'MGT2.Actor.RestHour'}}</button>
-		</span>
-	</div>
-
-	{{! Core folio 77 hands the STR-or-DEX choice to the target. The stored chain is that choice
-	    pre-declared; this control is where it can still be made per hit, so it asks. }}
-	{{#if damagePrompt}}
-	<div class="dmgprompt show">
-		<p>{{localize 'MGT2.Actor.OverflowPrompt' link=damagePrompt.filled remaining=damagePrompt.remaining}}</p>
-		<div class="row">
-			{{#each damagePrompt.choices}}
-			<button type="button" class="btn pick" data-action="pickOverflow" data-overflow="{{key}}">{{localize label}}</button>
-			{{/each}}
-		</div>
-	</div>
-	{{/if}}
 </section>

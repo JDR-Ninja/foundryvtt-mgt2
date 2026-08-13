@@ -1016,9 +1016,10 @@
 .mgt2[data-mode="edit"] .char .g
 	display: none
 
-// The damage / heal control. Live in BOTH modes: draining a pool is the session loop rather than
-// structure — and after the {base, damage} split it is the only way a current value can change,
-// because no input binds one.
+// The spend / recover control, and its one caller is the psionic reserve. Live in BOTH modes:
+// draining a pool is the session loop rather than structure. A spent reserve is not a wound — it is
+// bounded by its own pool and Recover puts it back — so it stays on the line while the chain moved
+// behind a dialog. The input carries no `name`: submitOnChange serialises the form by name.
 .mgt2 .dmgctl
 	display: inline-flex
 	align-items: center
@@ -1043,31 +1044,9 @@
 		border-color: color-mix(in oklab, var(--danger) 55%, transparent)
 
 // In the characteristics column the control follows a row that has already closed its border, so
-// it needs the gap the header strips get from their own layout.
+// it needs a gap its own layout does not give it.
 .mgt2 .chars .dmgctl
 	margin-top: 7px
-
-// Damage overflowing END is the one moment the sheet must ask instead of decide: the rules hand
-// the STR-or-DEX choice to the target, per hit.
-.mgt2 .dmgprompt
-	display: none
-	align-items: center
-	gap: 12px
-	padding: 7px 10px
-	border: 1px solid color-mix(in oklab, var(--danger) 45%, transparent)
-	background: color-mix(in oklab, var(--danger) 8%, transparent)
-	&.show
-		display: flex
-	p
-		margin: 0
-		font-size: 12.5px
-		line-height: 1.35
-		b
-			color: var(--danger)
-	.row
-		display: flex
-		gap: 5px
-		margin-left: auto
 
 // --------------------------------------------
 //  DROP FEEDBACK — shared by every zone that takes a document

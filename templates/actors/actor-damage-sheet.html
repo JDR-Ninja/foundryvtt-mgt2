@@ -1,0 +1,44 @@
+{{! The door the pool, the wound track and the tail icon open. Strictly raw — a number typed by hand
+    names no weapon — so there is no scale, no Protection, no Effect floor and no formula field.
+    Core folio 77's question is asked here, BEFORE anything is written, and the map below is a
+    preview: it walks the order applyDamage will and writes nothing until Apply. }}
+<div class="dlg dmgdlg">
+	<div class="dblock">
+		<label class="drow">
+			<span class="lbl">{{localize 'MGT2.Actor.Amount'}}</span>
+			<input class="f n amount" type="number" name="amount" step="1" min="0" value="1" />
+			<span class="dm echo"></span>
+		</label>
+		<div class="drow">
+			<span class="lbl">{{localize 'MGT2.Actor.Direction'}}</span>
+			<span class="seg fill" role="radiogroup" aria-label="{{localize 'MGT2.Actor.Direction'}}">
+				<label><input type="radio" name="direction" value="damage" checked /><span>{{localize 'MGT2.Actor.Damage'}}</span></label>
+				<label><input type="radio" name="direction" value="heal" /><span>{{localize healLabel}}</span></label>
+			</span>
+			<span class="dm zero"></span>
+		</div>
+		{{#if overflow}}
+		<label class="drow over" hidden>
+			<span class="lbl">{{localize 'MGT2.Actor.OverflowFalls'}}</span>
+			<select class="f overflow" name="overflow">
+				{{#each overflow}}
+				<option value="{{key}}"{{#if @first}} selected{{/if}}>{{localize label}}</option>
+				{{/each}}
+			</select>
+			<span class="dm spill"></span>
+		</label>
+		{{/if}}
+	</div>
+
+	<div class="dblock">
+		<span class="lbl">{{localize 'MGT2.Actor.WhereItLands'}}</span>
+		<div class="chainmap"></div>
+		{{! The states this type names, in its own words and its own order — a craft is wrecked, a
+		    creature is driven off before it is dead. See ActorBaseData#damageStateLabels. }}
+		<div class="outcome">
+			{{#each states}}<b data-state="{{key}}">{{localize label}}</b>{{/each}}
+		</div>
+	</div>
+
+	<p class="hint"></p>
+</div>

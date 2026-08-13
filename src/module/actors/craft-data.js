@@ -30,6 +30,9 @@ export class CraftData extends ActorBaseData {
     /** Core p.140, p.169: the ladder fires each time the wound passes another tenth of the hull. */
     static SUSTAINED_FRACTION = 0.1;
 
+    /** What this craft is called once its hull is gone — the subclass owns the word. */
+    static WRECKED_LABEL = "";
+
     static defineSchema() {
         const schema = super.defineSchema();
         const severity = () => new fields.NumberField({
@@ -71,9 +74,19 @@ export class CraftData extends ActorBaseData {
      * header renders them.
      * @inheritDoc
      */
-    get damageStates() {
-        const hull = this.characteristics.hull;
-        return { ...super.damageStates, wrecked: (hull.max > 0) && (hull.damage >= hull.max) };
+    damageStatesFor(characteristics) {
+        const hull = characteristics.hull;
+        return { ...super.damageStatesFor(characteristics), wrecked: (hull.max > 0) && (hull.damage >= hull.max) };
+    }
+
+    /**
+     * One word, and it is the craft's own. The inherited pair still derives for the shared header,
+     * but a hull emptying is not a death — on a single-link chain `dead` and `wrecked` fire on the
+     * same point and only one of them is what the books call it.
+     * @inheritDoc
+     */
+    get damageStateLabels() {
+        return { wrecked: this.constructor.WRECKED_LABEL };
     }
 
     /** Core p.140: Effect − 5, so Effect 6 is severity 1 and Effect 11+ is severity 6. */
