@@ -135,7 +135,7 @@ export class RobotActorSheet extends TravellerActorSheet {
 
     /**
      * The pool, on a scale of **twice** the maximum: `damage` can exceed `max` and that overrun is
-     * the Destroyed state (RH p.14), so the two printed thresholds are two marks on one bar.
+     * the Destroyed state (RH p.13), so the two printed thresholds are two marks on one bar.
      */
     static #hits(system) {
         const hits = system.characteristics.hits;
@@ -161,7 +161,7 @@ export class RobotActorSheet extends TravellerActorSheet {
      * The slot budget, in the **soft** over-state: the Robot Handbook states no penalty for
      * exceeding Slots, so this is a design-time warning with no rule behind it and must not borrow
      * the danger colour. The zero-slot overrun is a row of its own, because that is where a real
-     * Slot is spent on an option that costs none (RH p.32).
+     * Slot is spent on an option that costs none (RH p.31).
      */
     static #slots(system) {
         const rows = system.options.filter(option => !option.zeroSlot).map(option => ({
@@ -247,7 +247,7 @@ export class RobotActorSheet extends TravellerActorSheet {
         return { endurance, speed, cost, vehicle: system.endurance.vehicleHours };
     }
 
-    /** Each mode with the four values it drives at once (RH p.17) — which is why it is not an enum. */
+    /** Each mode with the four values it drives at once (RH p.16) — which is why it is not an enum. */
     static #locomotion(system) {
         const chosen = system.locomotion.find(mode => mode.primary) ?? system.locomotion[0];
         return system.locomotion.map((mode, index) => {
@@ -274,7 +274,7 @@ export class RobotActorSheet extends TravellerActorSheet {
 
     /**
      * Per limb, with the formula printed beside the stored score rather than replacing it: both are
-     * bought up independently, so the formula is the starting point and not the value (RH p.27).
+     * bought up independently, so the formula is the starting point and not the value (RH p.26).
      */
     static #manipulators(system) {
         return system.manipulators.map((limb, index) => ({
@@ -295,7 +295,12 @@ export class RobotActorSheet extends TravellerActorSheet {
             intellect: brain.intellect,
             baseIntellect: system.brainIntellect,
             skillDM: brain.skillDM,
-            hardened: brain.hardened,
+            hardened: system.hardened,
+            // RH folio 106: the count is stored and both losses read off it, so the sheet prints
+            // the two together — the rads that reached the brain and what they have cost it.
+            rads: brain.rads,
+            radiationLoss: system.radiationLoss,
+            inoperable: system.states.inoperable,
             ceiling: brain.taskCeiling ? `MGT2.Difficulty.${brain.taskCeiling}` : "",
             ceilingTarget: brain.taskCeilingTarget,
             freeSkills: brain.freeSkills,
@@ -306,7 +311,7 @@ export class RobotActorSheet extends TravellerActorSheet {
         };
     }
 
-    /** The thirteen printed rows, nine of them computed (RH p.14-32, p.67). */
+    /** The thirteen printed rows, nine of them computed (RH p.13-31, p.66). */
     static #statblock(system) {
         return {
             locomotion: system.locomotion.map(mode => MGT2.RobotLocomotion[mode.type]?.label ?? "")
@@ -354,7 +359,7 @@ export class RobotActorSheet extends TravellerActorSheet {
 
     /**
      * Exactly one mode is primary, and it is the one Agility, the base endurance and the chassis
-     * cost multiplier all read (RH p.17, p.24).
+     * cost multiplier all read (RH p.16, p.23).
      * @this {RobotActorSheet}
      */
     static async #onLocomotionPrimary(event, target) {

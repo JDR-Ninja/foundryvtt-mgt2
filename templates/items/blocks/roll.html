@@ -16,6 +16,16 @@
 			{{#if roll.disabled}}disabled data-tooltip="MGT2.Items.RollNeedsOwner"{{/if}}>
 			<i class="fa-solid fa-dice"></i>{{localize roll.label}}
 		</button>
+		{{! Core folio 77: a spare magazine reloads the weapon in full, so this is one button and not a
+		    count. Folio 75 prices it at a Minor Action of the firer's — stated on the tooltip, since
+		    nothing here keeps an action budget — and FC folio 7 lets Slow Loader X raise it. }}
+		{{#if ammo}}
+		<button type="button" class="btn-roll" data-action="reload"
+			data-tooltip="{{localize 'MGT2.Items.ReloadHint' actions=ammo.actions}}"
+			{{#if ammo.full}}disabled{{/if}}>
+			<i class="fa-solid fa-rotate-right"></i>{{localize 'MGT2.Items.Reload'}}
+		</button>
+		{{/if}}
 
 		<div class="grid edit-only">
 			{{#if (eq item.type "talent")}}
@@ -49,7 +59,7 @@
 				<span class="lbl">{{localize 'MGT2.Items.Difficulty'}}</span>
 				<select class="f" name="system.roll.difficulty">
 					<option></option>
-					{{selectOptions config.Difficulty selected=system.roll.difficulty localize=true}}
+					{{selectOptions config.DifficultyChoices selected=system.roll.difficulty localize=true}}
 				</select>
 			</label>
 			{{#if (eq system.subType "skill")}}

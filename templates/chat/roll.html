@@ -1,6 +1,17 @@
 {{! Pinned light: Foundry hard-codes `themed theme-light` on ol.chat-log, so a card never renders
     on the dark ground whatever the viewer's colour scheme says. }}
 <div class="mgt2 theme-light card {{effectTone}}">
+	{{! The handoff strip, `sketch-task-chain.html`: the whole visual cost of a chain on the receiving
+	    side. It renders from the stored ids — click one and the log scrolls to that message, which
+	    is what makes a chain auditable without storing a chain anywhere. }}
+	{{#if chainedFrom.length}}
+	<div class="from">
+		<i class="fa-solid fa-link"></i>
+		<span>{{localize 'MGT2.Chat.Roll.ChainedFrom'}}
+			{{#each chainedFrom}}{{#unless @first}}<span class="sep">·</span>{{/unless}}<a data-action="chainSource" data-message-id="{{id}}">{{label}}</a>{{/each}}</span>
+		<span class="dm">{{chainTotal}}</span>
+	</div>
+	{{/if}}
 	<div class="chd">
 		{{! An initiative roll names no object, so the type takes the headline rather than leaving it blank. }}
 		{{#if rollObjectName}}{{#if rollTypeName}}<div class="who">{{rollTypeName}}</div>{{/if}}{{/if}}
@@ -9,8 +20,22 @@
 			{{#if effectBand}}<span class="tgt">{{#if rollDifficultyLabel}}{{rollDifficultyLabel}}{{else}}{{ localize 'MGT2.Chat.Roll.NoDifficulty' }}{{/if}}</span>{{/if}}
 		</div>
 	</div>
+	{{! Core folio 79: which of the three modes was fired, and what it cost. Its own line rather than
+	    a modifier — a fire mode changes what the attack does, not the DM it is rolled at. }}
+	{{#if fireModeLine}}
+	<div class="cmsg">{{fireModeLine}}</div>
+	{{/if}}
+	{{! Core folio 77: the rounds this pull of the trigger took out of the magazine, already spent. }}
+	{{#if ammoLine}}
+	<div class="cmsg">{{ammoLine}}</div>
+	{{/if}}
+	{{! Core folio 229: what the power cost the reserve, and what it cost the body when the reserve
+	    could not pay. Already spent by the time the card lands. }}
+	{{#if psiLine}}
+	<div class="cmsg">{{psiLine}}</div>
+	{{/if}}
 	{{#if rollMessage}}
-	<div class="cmsg">{{rollMessage}}</div>
+	<div class="cmsg{{#if opposedMessage}} jump{{/if}}"{{#if opposedMessage}} data-action="chainSource" data-message-id="{{opposedMessage}}"{{/if}}>{{rollMessage}}</div>
 	{{/if}}
 	{{! A recovery card that placed points rolled no dice at all. }}
 	{{#if formula}}
@@ -36,13 +61,12 @@
 	{{/if}}
 	{{#if showButtons}}
 	<div class="cbtns">
-		{{#if hasDamage}}
-		<button data-action="damage"><i class="fa-regular fa-heart-circle-minus"></i>{{ localize 'MGT2.Chat.Roll.ApplyDamages' }}</button>
+		{{! The offering side of the chain. Same gate as the Effect block: a card with no Effect has
+		    nothing to carry. }}
+		{{#if effectBand}}
+		<button data-action="chainInto"><i class="fa-solid fa-link"></i>{{localize 'MGT2.Chat.Roll.ChainInto'}}</button>
 		{{/if}}
-		{{#if showRollRequest}}
-		<button data-action="requestRoll" data-roll="characteristic" data-roll-characteristic="strength"><i class="fa-solid fa-dice"></i>{{ localize 'MGT2.RollPrompt.Roll' }}</button>
-		{{/if}}
-		{{! Core p.83 turns the Effect of a Medic check into the points first aid restores; who is
+		{{! Core p.82 turns the Effect of a Medic check into the points first aid restores; who is
 		    treated is picked the way the damage card picks a target. }}
 		{{#if firstAidPoints}}
 		<button data-action="firstAid"><i class="fa-regular fa-heart-circle-plus"></i>{{localize 'MGT2.Recovery.ApplyFirstAid' points=firstAidPoints}}</button>

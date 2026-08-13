@@ -359,6 +359,13 @@
 		color: var(--faint)
 	label:has(input:checked) .v
 		color: inherit
+	// A strip that is the width of its rail rather than the width of its labels.
+	&.fill
+		display: flex
+		label
+			flex: 1 1 0
+			padding: 2px 6px 3px
+
 	// The rung that sets no target is not part of the ladder, so it sits off the end of it.
 	.off
 		margin-right: 2px
@@ -384,6 +391,17 @@
 	color: var(--accent-text)
 .mgt2 .segname.peek
 	color: var(--mute)
+
+// RH folio 115's brain ceiling: a statement of fact beside the ladder, and a warning only once the
+// rung chosen is past it. Never a gate — the folio lets modifiers bring a task back inside.
+.mgt2 .ceil
+	font-family: var(--cond)
+	font-size: 11px
+	letter-spacing: 0.08em
+	color: var(--mute)
+.mgt2 .ceil.over
+	font-weight: 700
+	color: var(--danger)
 
 // Voided by another control: Auto forfeits aiming, so the ladder greys out rather than being
 // silently ignored. Struck through on the label, not on the strip, which would cross every cell.

@@ -159,6 +159,11 @@
 			background: none
 			border-color: var(--accent-line)
 
+// The first button pushes the group to the right edge; the ones after it sit against it. Without
+// this each takes its own share of the free space and Reload drifts a hundred pixels off Roll.
+.mgt2 .btn-roll + .btn-roll
+	margin-left: 0
+
 // --------------------------------------------
 //  SPECS — the statline's type scale, one step down
 // --------------------------------------------

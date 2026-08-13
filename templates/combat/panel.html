@@ -1,0 +1,236 @@
+<section class="mgt2-panel mgt2-combat-panel"{{#if panel.id}} data-group-id="{{panel.id}}"{{/if}}>
+{{#if panel}}
+
+	<div class="block">
+		<div class="sect">
+			<h3>{{panel.name}}</h3>
+			<span class="count">{{#if panel.shipClass}}{{panel.shipClass}} &middot; {{/if}}{{localize 'MGT2.SpaceCombat.Tons' tons=panel.tons}}</span>
+			{{#if canEdit}}
+			<a class="rm" data-action="removeShip" data-tooltip="{{localize 'MGT2.SpaceCombat.RemoveShip'}}"><i class="fa-solid fa-trash"></i></a>
+			{{/if}}
+		</div>
+		{{#unless panel.shipless}}
+		<dl class="statline grid" data-derived="spacecraft.combat">
+			<div class="stat lead{{#if panel.hurt}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.DamageTracks.hull'}}</dt>
+				<dd>{{panel.hull.value}}<span class="of">/{{panel.hull.max}}</span></dd>
+			</div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Armour'}}</dt><dd>{{panel.armour}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Thrust'}}</dt><dd>{{panel.thrust.now}}<span class="of">/{{panel.thrust.max}}</span></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Power'}}</dt><dd>{{panel.power.available}}<span class="of">/{{panel.power.plant}}</span></dd></div>
+			<div class="stat{{#unless panel.hasInitiative}} none{{/unless}}">
+				<dt>{{localize 'MGT2.SpaceCombat.Initiative'}}</dt>
+				<dd>{{#if panel.hasInitiative}}{{panel.initiative}}{{else}}&mdash;{{/if}}</dd>
+			</div>
+			<div class="stat{{#if panel.controlDM}} hurt{{else}} none{{/if}}">
+				<dt>{{localize 'MGT2.SpaceCombat.ControlDM'}}</dt>
+				<dd>{{#if panel.controlDM}}{{panel.controlDisplay}}{{else}}&mdash;{{/if}}</dd>
+			</div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Sensors'}}</dt><dd class="word">{{localize panel.sensors}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.SpaceCombat.Aboard'}}</dt><dd>{{panel.aboard}}</dd></div>
+		</dl>
+		{{/unless}}
+		{{#unless panel.owned}}
+		<p class="hint">{{localize 'MGT2.SpaceCombat.Foreign'}}</p>
+		{{/unless}}
+	</div>
+
+{{#if panel.owned}}
+	{{! Core p.165: the pilot splits the ship's Thrust between movement and combat manoeuvring, and
+	    the chapter names Docking, Aid Gunners and Evasive Action in prose without printing a table —
+	    so a row is the label the pilot used and the points behind it, and only the rows flagged as
+	    movement buy range. The block is the kit's; the rows are editable because allocating Thrust
+	    is the session loop rather than structure. }}
+	<div class="block" data-group-id="{{panel.id}}">
+		<div class="sect">
+			<h3>{{localize 'MGT2.SpaceCombat.ThrustTitle'}}</h3>
+			<span class="count">{{localize 'MGT2.SpaceCombat.ThrustWhy'}}</span>
+			{{#if canEdit}}
+			<a class="add" data-action="thrustCreate" data-tooltip="{{localize 'MGT2.SpaceCombat.AddAllocation'}}"><i class="fa-solid fa-plus"></i></a>
+			{{/if}}
+		</div>
+		<section class="budget{{#if panel.thrustBudget.over}} over{{/if}}" data-over="hard">
+			<header>
+				<span class="lbl">{{localize 'MGT2.SpaceCombat.ThisRound'}}</span>
+				{{#if panel.thrustBudget.over}}<span class="flag">{{localize 'MGT2.SpaceCombat.OverAllocated'}}</span>{{/if}}
+				<span class="tot"><b>{{panel.thrustBudget.total}}</b><span class="of">/ {{panel.thrustBudget.cap}}</span></span>
+				<span class="rem">{{#if panel.thrustBudget.over}}{{localize 'MGT2.Actor.spacecraft.Over' n=panel.thrustBudget.remaining}}{{else}}{{localize 'MGT2.Actor.spacecraft.FreeN' n=panel.thrustBudget.remaining}}{{/if}}</span>
+			</header>
+			<div class="gauge"><i style="--g: {{panel.thrustBudget.fill}}%"></i><u style="--m: {{panel.thrustBudget.mark}}%"></u></div>
+			{{#if panel.thrustBudget.rows.length}}
+			<table class="rows brows">
+				<tbody>
+					{{#each panel.thrustBudget.rows as |row|}}
+					<tr data-thrust-index="{{row.index}}">
+						<td class="sw">
+							<input type="checkbox" data-thrust-row="{{row.index}}" data-thrust-field="movement"
+								{{checked row.movement}}{{#unless ../canEdit}} disabled{{/unless}}
+								data-tooltip="{{localize 'MGT2.SpaceCombat.Movement'}}" />
+						</td>
+						<td>
+							{{#if ../canEdit}}
+							<input class="f" type="text" data-thrust-row="{{row.index}}" data-thrust-field="label"
+								value="{{row.label}}" placeholder="{{localize 'MGT2.SpaceCombat.Manoeuvre'}}" />
+							{{else}}{{row.label}}{{/if}}
+						</td>
+						<td class="num">
+							{{#if ../canEdit}}
+							<input class="f num" type="number" min="0" step="1" data-thrust-row="{{row.index}}"
+								data-thrust-field="points" value="{{row.value}}" />
+							{{else}}{{row.value}}{{/if}}
+						</td>
+						{{#if ../canEdit}}
+						<td class="num"><a class="rm" data-action="thrustDelete"><i class="fa-solid fa-trash"></i></a></td>
+						{{/if}}
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+			{{/if}}
+		</section>
+	</div>
+
+	{{! Core p.166: "A ship can spend Thrust over multiple rounds to close or open a category", so
+	    this is a bank and not an allocation. The cap is what LEAVING the current band costs, and
+	    being under it is the problem — which is why the panel opts into the `short` reading. }}
+	<div class="block" data-group-id="{{panel.id}}">
+		<div class="sect">
+			<h3>{{localize 'MGT2.SpaceCombat.Closing'}}</h3>
+			<span class="count">{{localize 'MGT2.SpaceCombat.ClosingWhy'}}</span>
+		</div>
+		<div class="fleet">
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.SpaceCombat.Against'}}</span>
+				<span class="v">
+					{{#if canEdit}}
+					<select class="f" name="closingTarget" aria-label="{{localize 'MGT2.SpaceCombat.Against'}}">
+						<option value="">&mdash;</option>
+						{{#each panel.closing.targets as |target|}}
+						<option value="{{target.id}}"{{#if target.selected}} selected{{/if}}>{{target.name}}</option>
+						{{/each}}
+					</select>
+					{{else}}{{#if panel.closing.opponent}}{{panel.closing.opponent}}{{else}}&mdash;{{/if}}{{/if}}
+				</span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.SpaceCombat.Toward'}}</span>
+				<span class="v">
+					{{#if canEdit}}
+					<select class="f" name="closingBand" aria-label="{{localize 'MGT2.SpaceCombat.Toward'}}">
+						<option value="">&mdash;</option>
+						{{#each panel.closing.bands as |band|}}
+						<option value="{{band.key}}"{{#if band.selected}} selected{{/if}}>{{localize band.label}}</option>
+						{{/each}}
+					</select>
+					{{else}}{{#if panel.closing.to}}{{localize panel.closing.to}}{{else}}&mdash;{{/if}}{{/if}}
+				</span>
+			</div>
+			{{! Stored, and editable, because a chase joined in progress has a bank behind it that no
+			    round this table played put there. }}
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.SpaceCombat.Banked'}}</span>
+				<span class="v">
+					{{#if canEdit}}
+					<input class="f n" type="number" min="0" step="1" name="banked" value="{{panel.closing.total}}"
+						aria-label="{{localize 'MGT2.SpaceCombat.Banked'}}" />
+					{{else}}{{panel.closing.total}}{{/if}}
+				</span>
+			</div>
+			<span class="why">{{localize 'MGT2.SpaceCombat.ClosingRate' rate=panel.closing.rate}}</span>
+		</div>
+		{{> systems/mgt2/templates/actors/spacecraft/budget.html
+			b=panel.closing
+			under="short"
+			over="soft"
+			title=(localize 'MGT2.SpaceCombat.Banked')
+			flag=(localize 'MGT2.SpaceCombat.BandChange')
+			derived="system.thrust.banked"}}
+	</div>
+
+	{{! BLOCK 3 — the roster, with each crew member's action list filtered by the CURRENT STEP.
+	    Which actions a crew member has is decided by their duty, through the `role` Item their
+	    station is; when they may take them is decided by the step (Core p.165, p.171-172). }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.SpaceCombat.Stations'}}</h3>
+			<span class="count">{{localize stepLabel}}</span>
+			{{#if panel.issues.any}}<span class="gm">{{localize 'MGT2.SpaceCombat.DutyIssues'}}</span>{{/if}}
+		</div>
+		<table class="roster">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Actor.spacecraft.Station'}}</th>
+					<th>{{localize 'MGT2.Actor.spacecraft.Who'}}</th>
+					<th>{{localize 'MGT2.SpaceCombat.Duty'}}</th>
+					<th>{{localize 'MGT2.SpaceCombat.ActionsIn' step=(localize stepLabel)}}</th>
+					<th class="r">{{localize 'MGT2.SpaceCombat.Action'}}</th>
+				</tr>
+			</thead>
+			<tbody data-accept="{{crewTypes}}">
+				{{#each panel.crew as |row|}}
+				<tr data-combatant-id="{{row.id}}" data-accept="{{../crewTypes}}" class="{{#if row.spent}}spent {{/if}}{{#if row.vacant}}vacant{{/if}}">
+					<td class="station">
+						<b>{{#if row.station}}{{row.station}}{{else}}&mdash;{{/if}}</b>
+						{{#if row.department}}<span class="dept">{{localize row.department}}</span>{{/if}}
+					</td>
+					<td class="who{{#if row.uuid}} linked{{/if}}">
+						{{#if row.uuid}}
+						<span class="av"></span><a data-action="openActor" data-uuid="{{row.uuid}}">{{row.name}}</a>
+						<i class="src">{{localize 'MGT2.Actor.spacecraft.LinkedActor'}}</i>
+						{{else if row.name}}
+						<em>{{row.name}}</em><i class="src">{{localize 'MGT2.Actor.spacecraft.NameOnly'}}</i>
+						{{else}}{{localize 'MGT2.SpaceCombat.DropActor'}}{{/if}}
+					</td>
+					<td class="duty">
+						{{#if ../canEdit}}
+						<select class="f" name="duty" data-combatant-id="{{row.id}}" aria-label="{{localize 'MGT2.SpaceCombat.Duty'}}">
+							{{#each row.duties as |duty|}}
+							<option value="{{duty.key}}"{{#if duty.selected}} selected{{/if}}>{{localize duty.label}}</option>
+							{{/each}}
+						</select>
+						{{else}}<span class="ro">{{localize row.dutyLabel}}</span>{{/if}}
+						{{! Core p.164 has a gunner choose their turret at the start of the combat, so the
+						    encounter's answer beats the roster's standing one. }}
+						{{#if row.needsMount}}
+						{{#if ../canEdit}}
+						<input class="f at" type="text" name="mount" data-combatant-id="{{row.id}}" value="{{row.mount}}"
+							placeholder="{{localize 'MGT2.Actor.spacecraft.DutyTarget'}}"
+							aria-label="{{localize 'MGT2.Actor.spacecraft.Mount'}}" />
+						{{else}}<span class="at">{{#if row.mount}}{{row.mount}}{{else}}&mdash;{{/if}}</span>{{/if}}
+						{{else if row.mount}}<span class="at">{{row.mount}}</span>{{/if}}
+						{{#if row.unmounted}}<span class="at">{{localize 'MGT2.SpaceCombat.NoMount'}}</span>{{/if}}
+					</td>
+					<td>
+						<div class="todo">
+							{{#each row.actions as |action|}}
+							<button type="button" class="btn" data-action="stationAction" data-action-index="{{action.index}}"{{#if action.disabled}} disabled{{/if}}>
+								{{action.label}}<i>{{#if action.skill}}{{action.skill}}{{/if}}{{#if action.target}} {{action.target}}+{{/if}}</i>
+							</button>
+							{{/each}}
+							{{#unless row.actions.length}}<span class="need">{{localize 'MGT2.SpaceCombat.NothingThisStep'}}</span>{{/unless}}
+						</div>
+					</td>
+					<td class="r act">
+						<span class="need{{#if row.spent}} short{{/if}}"{{#if ../canEdit}} data-action="toggleSpent"{{/if}}>{{#if row.spent}}1{{else}}0{{/if}} / 1</span>
+					</td>
+				</tr>
+				{{/each}}
+				{{! Core p.164 calls anyone aboard without a duty a Passenger, so that is what an actor
+				    dropped on the table and nowhere in particular becomes — and the row says so
+				    before the drop rather than after it. }}
+				<tr class="vacant" data-accept="{{crewTypes}}">
+					<td class="station"><b>+ {{localize 'MGT2.CombatDuties.passenger'}}</b><span class="dept">{{localize 'MGT2.SpaceCombat.PassengerWhy'}}</span></td>
+					<td class="who">{{localize 'MGT2.SpaceCombat.DropActor'}}</td>
+					<td class="duty"><span class="ro">{{localize 'MGT2.CombatDuties.passenger'}}</span></td>
+					<td><div class="todo"><span class="need">{{localize 'MGT2.SpaceCombat.NoDutyNoActions'}}</span></div></td>
+					<td class="r act"><span class="need">&mdash;</span></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+{{/if}}
+
+{{else}}
+	<p class="hint">{{localize 'MGT2.SpaceCombat.DropShipHint'}}</p>
+{{/if}}
+</section>

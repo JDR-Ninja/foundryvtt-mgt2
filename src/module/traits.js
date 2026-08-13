@@ -11,7 +11,7 @@
 const fields = foundry.data.fields;
 
 // >>> generated from docs/traits-registry.json
-// 136 entries over 122 names, 44 parameterised, across 7 families.
+// 137 entries over 122 names, 44 parameterised, across 7 families.
 const REGISTRY = {
     animal: {
         "alarm": {label: "Alarm"},
@@ -145,6 +145,7 @@ const REGISTRY = {
         "hazardous": {label: "Hazardous", params: [{slot: "score", type: "negative"}]},
         "inaccurate": {label: "Inaccurate", params: [{slot: "score", type: "negative"}]},
         "incendiary": {label: "Incendiary", params: [{slot: "score", type: "int"}]},
+        "ion": {label: "Ion"},
         "lo-pen": {label: "Lo-Pen", params: [{slot: "multiplier", type: "int"}], conflict: ["ap"]},
         "one-use": {label: "One Use"},
         "physical-signature": {label: "Physical Signature", params: [{slot: "level", type: "level"}], levels: ["minimal", "low", "normal", "high", "very high", "extreme"]},
@@ -168,8 +169,11 @@ const REGISTRY = {
 
 /**
  * Which vocabulary a stored trait speaks — part of its identity, not decoration: Radiation is
- * `2D × 20` rads at personal scale (Core p.80) and a Hull-proportional DM at ship scale (HG p.32),
- * and Armour takes three slots on a creature and one on a species. `custom` is the eighth key and
+ * `2D × 20` rads at personal scale (Core p.79) and a Hull-proportional DM at ship scale (HG p.31),
+ * and Armour takes three slots on a creature and one on a species. Ion is the same shape: RH folio
+ * 107's Pulse Carbine carries it at personal scale, HG folio 31's ion cannon at ship scale, and the
+ * two rules are different — so the slug is declared in both families rather than in either alone.
+ * `custom` is the eighth key and
  * has no registry entries: it is what a site whose accessory list the books never typed declares,
  * rather than claiming a family whose autocomplete would be wrong for it.
  */
@@ -244,7 +248,7 @@ export const TRAITS = deepFreeze(REGISTRY);
 const ALIASES = Object.freeze({
     camouflaged: ["Camouflage"],
     armour: ["Armoured"],
-    // `One Shot` on the thrown weapons (Dart, Javelin — Core p.155) is `One Use` said differently:
+    // `One Shot` on the thrown weapons (Dart, Javelin — CSC p.154) is `One Use` said differently:
     // the weapon is expended after a single use. Five printings against the registry's 48.
     "one-use": ["One Shot"]
 });
@@ -294,36 +298,48 @@ export function traitNumber(entry) {
 }
 
 /**
- * How each weapon trait meets an attack roll — Core p.80, CSC p.132 and FC p.7-9 between them.
+ * How each weapon trait meets an attack roll — Core p.79, CSC p.131 and FC p.6-8 between them.
  * `applied` is already in the total, `offered` is a toggle the player confirms, and everything
- * absent from this table is `reminded`: a line with no number. Surfacing beats applying
+ * absent from this table is `reminded`: a line with no number. A `control` names the row the prompt
+ * gives a trait whose rule is a choice rather than a number — Auto's three fire modes cannot be a
+ * checkbox, so the chip states the score and the strip is where it is spent. Surfacing beats applying
  * (`REDESIGN-PLAN.md` §1), so a rule turning on what no sheet holds is never applied — and AP,
- * Lo-Pen, Smart and Blast are reminders *permanently*, each needing a target the system never reads.
+ * Lo-Pen, Smart and Blast are reminders here *permanently*, each needing a target the attack roll
+ * must not read. AP and Lo-Pen do resolve later, on the damage card, against whoever it is applied
+ * to; Smart and Blast have no such moment.
  */
 export const WEAPON_ROLL = Object.freeze({
-    // Core p.80: "a negative DM equal to the difference between their STR DM and +1" — +2 for Very
+    // Core p.79: "a negative DM equal to the difference between their STR DM and +1" — +2 for Very
     // Bulky. The attacker's STR is on the sheet, so these are the traits that can compute at all.
     "bulky": { tone: "applied", strength: 1 },
     "very-bulky": { tone: "applied", strength: 2 },
-    // FC p.8: "The DM is applied to attack rolls and the results of weapon malfunctions."
+    // FC p.7: "The DM is applied to attack rolls and the results of weapon malfunctions."
     "ramshackle": { tone: "applied", param: true },
-    // FC p.8: only "when shooting at a target more than 10m distant", and the distance is typed.
+    // FC p.7: only "when shooting at a target more than 10m distant", and the distance is typed.
     "inaccurate": { tone: "offered", param: true, when: "beyond", value: 10 },
-    // FC p.9: "the firer MAY add the Spread value", and only "within its base range".
+    // FC p.8: "the firer MAY add the Spread value", and only "within its base range".
     "spread": { tone: "offered", param: true, when: "within" },
-    // Core p.80: the 100 m rule is ignored "so long as the Traveller aims before shooting".
+    // Core p.79: the 100 m rule is ignored "so long as the Traveller aims before shooting".
     "scope": { tone: "offered", requires: "aiming", suppress: "rangeThreshold", checked: true },
-    // Core p.80: "Attacks using the Auto trait lose any benefits gained from aiming."
-    "auto": { tone: "offered", suppress: "aiming" },
-    // CSC p.132: DM-2, but only for indirect fire at a target that cannot be physically seen.
+    // Core folio 79: Auto has three fire modes, and each of the three rules the trait carries hangs
+    // off which one was picked — so its control is the prompt's own fire-mode strip rather than a
+    // chip, and the chip states the score the strip reads.
+    "auto": { tone: "applied", control: "fireMode" },
+    // CSC p.131: DM-2, but only for indirect fire at a target that cannot be physically seen.
     "artillery": { tone: "offered", dm: -2 },
     "ap": { tone: "reminded", target: true },
     "lo-pen": { tone: "reminded", target: true },
+    // Core folio 79: "the target will receive 2D x 20 rads" — a dose delivered to whoever was hit,
+    // so it is resolved on the apply path like AP and Lo-Pen.
+    "radiation": { tone: "reminded", target: true },
+    // RH folio 106: an ion hit shuts a robot's brain down and its armour does not protect. Whether
+    // any of that happens depends on what was hit, so it resolves on the apply path too.
+    "ion": { tone: "reminded", target: true },
     "smart": { tone: "reminded", target: true },
     "blast": { tone: "reminded", target: true }
 });
 
-// Companion p.94-95: five creature traits substitute into the damage expression rather than
+// Companion p.93-94: five creature traits substitute into the damage expression rather than
 // scaling its total, and each names the damage types that get through untouched.
 export const DAMAGE_RESPONSE = Object.freeze({
     "dispersed": { transform: "reduced", exceptions: ["blades", "fire"] },

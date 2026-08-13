@@ -9,10 +9,18 @@
  * Each entry runs once, in order, for worlds coming from a version older than its own.
  */
 
+/**
+ * The `npc` person preset shipped the damage chain in UPP order; Core folio 77 applies damage to
+ * END first. Both are spelled out here rather than read off `NpcData`: a migration records what it
+ * did on one release and must not follow a constant a later one changes again.
+ */
+const NPC_CHAIN_STALE = ["strength", "dexterity", "endurance"];
+const NPC_CHAIN_FIXED = ["endurance", "strength", "dexterity"];
+
 const MIGRATIONS = [
   {
     version: "0.2.0",
-    label: "damageOrder, protection, view state",
+    label: "damageOrder, protection, view state, crew duty, NPC damage chain",
     async migrate() {
       const actorUpdates = [];
       for ( const actor of game.actors ) {
@@ -40,8 +48,9 @@ const MIGRATIONS = [
 
 /**
  * Drop the fields the 0.2.0 schema no longer declares. `migrateData` has already produced the new
- * shape in memory, so writing the document back is enough to persist it; the `-=` keys remove what
- * would otherwise linger in the source forever.
+ * shape in memory, so writing the document back is enough to persist it; the `ForcedDeletion`
+ * operators remove what would otherwise linger in the source forever. That operator is v14's
+ * replacement for the `-=key: null` syntax, which warns since 14 and is removed in 16.
  * @param {Actor} actor
  * @returns {object|null}
  */
@@ -53,29 +62,48 @@ function collectActorUpdate(actor) {
 
   if ( source.config?.damages ) {
     update["system.config.damageOrder"] = actor.system.config.damageOrder;
-    update["system.config.-=damages"] = null;
+    update["system.config.damages"] = new foundry.data.operators.ForcedDeletion();
+    dirty = true;
+  }
+  // Only the exact stale triple, order included: nothing records who wrote a chain, so a reordered,
+  // shortened or `hits`-based one is a decision and is left alone. The one case this cannot tell
+  // apart — a referee who chose the buggy order — loses only the order, no wound and no link.
+  if ( (actor.type === "npc") && isChain(source.config?.damageOrder, NPC_CHAIN_STALE) ) {
+    update["system.config.damageOrder"] = [...NPC_CHAIN_FIXED];
     dirty = true;
   }
   for ( const key of ["name", "containerView", "containerDropIn", "inventory"] ) {
     if ( key in source ) {
-      update[`system.-=${key}`] = null;
+      update[`system.${key}`] = new foundry.data.operators.ForcedDeletion();
       dirty = true;
     }
   }
   if ( source.states && ("encumbrance" in source.states) ) {
-    update["system.states.-=encumbrance"] = null;
+    update["system.states.encumbrance"] = new foundry.data.operators.ForcedDeletion();
+    dirty = true;
+  }
+  // `crew[].duty` moved onto the `crew` Combatant, where it clears with the encounter (§9.26). It
+  // carries nothing: there is no combat to carry it into, and the field never shipped outside 0.2.0.
+  // Writing the prepared array back is the removal — an ArrayField update replaces, never merges.
+  if ( (actor.type === "spacecraft") && source.crew?.some(row => "duty" in row) ) {
+    update["system.crew"] = actor.system.crew.map(row => ({ ...row }));
     dirty = true;
   }
   for ( const [key, characteristic] of Object.entries(source.characteristics ?? {}) ) {
     for ( const dropped of ["dm", "showMax"] ) {
       if ( dropped in characteristic ) {
-        update[`system.characteristics.${key}.-=${dropped}`] = null;
+        update[`system.characteristics.${key}.${dropped}`] = new foundry.data.operators.ForcedDeletion();
         dirty = true;
       }
     }
   }
 
   return dirty ? update : null;
+}
+
+/** Same links in the same order, and no others. */
+function isChain(stored, chain) {
+  return Array.isArray(stored) && (stored.length === chain.length) && stored.every((key, i) => key === chain[i]);
 }
 
 /* -------------------------------------------- */
@@ -95,17 +123,24 @@ function collectItemUpdate(item) {
     dirty = true;
   }
   if ( "trash" in source ) {
-    update["system.-=trash"] = null;
+    update["system.trash"] = new foundry.data.operators.ForcedDeletion();
     dirty = true;
   }
   if ( (item.type === "container") && (("weight" in source) || ("count" in source)) ) {
-    update["system.-=weight"] = null;
-    update["system.-=count"] = null;
+    update["system.weight"] = new foundry.data.operators.ForcedDeletion();
+    update["system.count"] = new foundry.data.operators.ForcedDeletion();
+    dirty = true;
+  }
+  // A station's construction position used to be read off the Item's NAME, which is user text in
+  // whatever language the world runs in. Stamping the derived key makes it explicit, so renaming
+  // the station later cannot silently cost a ship its pilot's Pilot skill.
+  if ( (item.type === "role") && !source.crewRole && item.system.crewRoleKey ) {
+    update["system.crewRole"] = item.system.crewRoleKey;
     dirty = true;
   }
   if ( (item.type === "computer") && (("processingUsed" in source) || ("overload" in source)) ) {
-    update["system.-=processingUsed"] = null;
-    update["system.-=overload"] = null;
+    update["system.processingUsed"] = new foundry.data.operators.ForcedDeletion();
+    update["system.overload"] = new foundry.data.operators.ForcedDeletion();
     dirty = true;
   }
 

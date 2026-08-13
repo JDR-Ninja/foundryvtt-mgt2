@@ -61,7 +61,36 @@ export class MGT2Helper {
     }
 
     /**
-     * Companion p.94, Reduced Damage — a weapon's damage dice drop to D3 and keep any plus or
+     * One signed term of a roll formula, optionally naming itself. `signed` is for display and
+     * produces `-3`, which `Roll` reads as a term rather than as a subtraction; this produces
+     * `- 3`. The flavour rides in brackets (`RollTerm.FLAVOR_REGEXP`) so a formula carrying several
+     * DMs says which is which in its own tooltip instead of totalling them into one number.
+     * @param {number} value
+     * @param {string} [flavor]   Already localised — it is read by whoever opens the roll
+     */
+    static term(value, flavor = "") {
+        const sign = (value < 0) ? "-" : "+";
+        return `${sign} ${Math.abs(value)}${flavor ? `[${flavor}]` : ""}`;
+    }
+
+    /**
+     * The books print damage as `3D`, a Destructive weapon as `3DD` (Core p.78) and a D3 weapon as
+     * `3D3`; Foundry's parser reads none of the three. Normalising here is what lets a weapon be
+     * transcribed exactly as its page prints it. A formula that already names its faces — `3d10` —
+     * is left alone, which is why the faces group refuses to match in front of another digit.
+     */
+    static damageFormula(formula) {
+        return String(formula ?? "")
+            .replace(/(\d*)[dD]{1,2}(3|6)?(?!\d)/g, (_m, n, faces) => `${n === "" ? 1 : n}d${faces ?? 6}`);
+    }
+
+    /** Core p.78: the doubled D of `3DD` is the Destructive trait, written into the damage score. */
+    static isDestructive(formula) {
+        return /\d*[dD]{2}(?!\d)/.test(String(formula ?? ""));
+    }
+
+    /**
+     * Companion p.93, Reduced Damage — a weapon's damage dice drop to D3 and keep any plus or
      * minus, so `3d6-3` becomes `3D3-3`. A different roll, not a scaled total, which is why the
      * attack rolls it alongside the full one. Falls back when the substitution would not parse.
      */
@@ -70,7 +99,7 @@ export class MGT2Helper {
         return Roll.validate(reduced) ? reduced : String(formula ?? "");
     }
 
-    /** Companion p.94, Minimum Damage — one point per die, ignoring any plus or minus. */
+    /** Companion p.93, Minimum Damage — one point per die, ignoring any plus or minus. */
     static minimumDamage(formula) {
         let dice = 0;
         for (const [, n] of String(formula ?? "").matchAll(/(\d*)[dD](?:3|6)?(?![0-9dD])/g)) {
@@ -80,7 +109,16 @@ export class MGT2Helper {
     }
 
     /**
-     * The score on a parameterised weapon trait — `AP 5`, `Lo-Pen 3` (Core p.80). The registry
+     * How many dice a damage score rolls, whichever way it is written. Normalised first, because the
+     * doubled D of `3DD` reads as one die otherwise — and the rules that count dice mean the printed
+     * score (Core folio 140's "less than Damage 4D"), which the doubling does not change.
+     */
+    static damageDice(formula) {
+        return this.minimumDamage(this.damageFormula(formula));
+    }
+
+    /**
+     * The score on a parameterised weapon trait — `AP 5`, `Lo-Pen 3` (Core p.79). The registry
      * already typed it, so the first numeric slot is the answer; a `custom` entry that the
      * registry did not recognise still reads through its note.
      * @param {object[]} traits   Stored traits, or a derived traitMap's values
@@ -98,7 +136,7 @@ export class MGT2Helper {
     }
 
     /**
-     * Whether a rolled skill is the Medic skill Core p.83 drives first aid off. A skill is a
+     * Whether a rolled skill is the Medic skill Core p.82 drives first aid off. A skill is a
      * free-text Item with no registry behind it, so this is a name match and nothing more — a world
      * that renames the skill loses the card button and uses the sheet's own control instead.
      */
@@ -125,7 +163,7 @@ export class MGT2Helper {
             const numeric = Boolean(rule.param || rule.strength || rule.dm);
             let dm = rule.dm ?? 0;
             if (rule.param) dm = traitNumber(trait);
-            // Core p.80: the penalty is what the wearer's STR DM falls short by, and nothing when
+            // Core p.79: the penalty is what the wearer's STR DM falls short by, and nothing when
             // it does not fall short.
             if (rule.strength) dm = Math.min(0, strengthDM - rule.strength);
 
@@ -139,7 +177,8 @@ export class MGT2Helper {
                 suppress: rule.suppress ?? "",
                 when: rule.when ?? "",
                 whenValue: (rule.when === "within") ? range : (rule.value ?? 0),
-                status: rule.target ? "MGT2.RollPrompt.TraitNeedsTarget" : TRAIT_STATUS[tone]
+                status: rule.target ? "MGT2.RollPrompt.TraitNeedsTarget"
+                    : (rule.control ? `MGT2.RollPrompt.TraitControl.${rule.control}` : TRAIT_STATUS[tone])
             };
         });
     }
@@ -180,11 +219,10 @@ export class MGT2Helper {
     }
 
     /**
-     * Core p.77-78: the band a shot falls in, measured against the weapon's own Range score — a
+     * Core folio 77: the band a shot falls in, measured against the weapon's own Range score — a
      * quarter of it is Short, up to it is normal, twice is Long, four times is Extreme and beyond
-     * that is out of range. Past `threshold` metres every attack is Extreme unless the weapon has
-     * the Scope trait, and the caller decides whether that is in play: no weapon carries its traits
-     * yet, so the prompt offers the rule instead of applying it.
+     * that is out of range. Past `threshold` metres every attack is Extreme; the caller passes 0
+     * where the Scope trait has voided the rule, which the prompt reads off the trait's own chip.
      * @returns {{key: string, dm: number, min: number, max: number|null, forced: boolean}|null}
      */
     static rangeBand(distance, range, threshold = 0) {
@@ -213,12 +251,33 @@ export class MGT2Helper {
         return { key: forced ? "extreme" : key, dm: band.dm, min: bounds[0], max: bounds[1], forced };
     }
 
+    /**
+     * The space combat band a distance falls in (Core p.165), and what that band is worth: the
+     * attack DM (p.167), the Thrust a change of band costs (p.166), and whether the exchange
+     * resolves as a dogfight. Adjacent and Close carry a null DM because the books print none for
+     * them — which is not the same as a zero, and the caller must not read it as one.
+     * @param {number|string} distance   Kilometres
+     * @returns {{key: string, dm: number|null, thrust: number, dogfight: boolean, max: number|null}|null}
+     */
+    static shipRangeBand(distance) {
+        const km = this.getNumberFromInput(distance);
+        if (!(km >= 0)) return null;
+        const entry = Object.entries(MGT2.ShipRangeBands)
+            .find(([, band]) => (band.maxKm === null) || (km <= band.maxKm));
+        if (!entry) return null;
+        const [key, band] = entry;
+        return {
+            key, dm: band.attackDM, thrust: band.thrust,
+            dogfight: band.dogfight, max: band.maxKm
+        };
+    }
+
     static getDifficultyValue(difficulty) {
         return MGT2.DifficultyTargets[difficulty] ?? 0;
     }
 
     /**
-     * The number a check is measured against. Core p.62: "if no difficulty is listed for a check,
+     * The number a check is measured against. Core p.61: "if no difficulty is listed for a check,
      * you can always assume it is Average (8+)", so every check yields an Effect.
      * @returns {{value: number, assumed: boolean}}
      */
@@ -228,7 +287,14 @@ export class MGT2Helper {
         return { value: MGT2.DifficultyTargets.Average, assumed: true };
     }
 
-    /** The Effect Results band (Core p.62) a margin of success falls in. */
+    /** Core p.63: what the Effect of the previous check is worth as a DM on the one it feeds. */
+    static taskChainDM(effect) {
+        const rung = MGT2.TaskChain.find(row =>
+            ((row.min === null) || (effect >= row.min)) && ((row.max === null) || (effect <= row.max)));
+        return rung?.dm ?? 0;
+    }
+
+    /** The Effect Results band (Core p.61) a margin of success falls in. */
     static getEffectBand(effect) {
         return Object.values(MGT2.EffectBands).find(
             band => (band.min === null || effect >= band.min) && (band.max === null || effect <= band.max));
@@ -300,6 +366,53 @@ export class MGT2Helper {
         } catch {
             return false;
         }
+    }
+
+    /**
+     * The drag in flight, cached from `dragstart`. `DataTransfer` puts its store in protected mode
+     * for the whole of `dragover`, so `getData` there returns "" — and a zone that cannot read the
+     * payload cannot refuse it at the pointer, only after the drop.
+     */
+    static watchDrags() {
+        if ( MGT2Helper.#watchingDrags ) return;
+        MGT2Helper.#watchingDrags = true;
+        // Clearing the pointer feedback belongs to the same watcher: `dragleave` does not fire when
+        // a drag ends outside every zone, so a refused cell would keep its red until the next one.
+        const clear = () => {
+            MGT2Helper.#dragged = null;
+            for ( const node of document.querySelectorAll("[data-accept].over, [data-accept].deny") ) {
+                node.classList.remove("over", "deny");
+            }
+        };
+        document.addEventListener("dragstart", event => {
+            MGT2Helper.#dragged = MGT2Helper.getDataFromDropEvent(event) || null;
+        }, true);
+        document.addEventListener("dragend", clear, true);
+        document.addEventListener("drop", clear, true);
+    }
+
+    static #watchingDrags = false;
+    static #dragged = null;
+
+    /**
+     * Does a zone take what is being dragged? A zone declares `Actor.<type>` rather than a bare
+     * document name because the type is only known once the uuid resolves, which is what this does.
+     *
+     * The payload defaults to the cached one, which is the only one `dragover` can see — but a drop
+     * handler must pass its own: the watcher above clears the cache on the CAPTURE phase, so it has
+     * already fired by the time a bubbling drop listener runs.
+     * @param {HTMLElement} zone   Carrying `data-accept`, a space-separated list
+     * @param {object} [data]      A drop payload, `{type, uuid}`
+     * @returns {boolean}
+     */
+    static dropAccepted(zone, data) {
+        const accept = zone?.dataset.accept;
+        const dragged = data ?? MGT2Helper.#dragged;
+        if ( !accept || !dragged?.uuid ) return false;
+        let record = null;
+        try { record = foundry.utils.fromUuidSync(dragged.uuid); } catch { return false; }
+        // A compendium entry answers with its index record, which carries the type and nothing else.
+        return record?.type ? accept.split(/\s+/).includes(`${dragged.type}.${record.type}`) : false;
     }
 
     static async getItemDataFromDropData(dropData) {

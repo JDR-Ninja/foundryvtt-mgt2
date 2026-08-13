@@ -48,10 +48,46 @@
 			white-space: nowrap
 			color: var(--mute)
 
+	// The handoff strip. Above the header because it is where this check came FROM, not part of it.
+	.from
+		display: flex
+		align-items: baseline
+		gap: 8px
+		padding: 6px 11px
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		color: var(--accent-text)
+		background: var(--accent-soft)
+		border-bottom: 1px solid var(--rule-soft)
+		i
+			font-size: 9px
+		a
+			color: inherit
+			text-decoration: none
+			border-bottom: 1px solid var(--accent-line)
+			cursor: var(--cursor-pointer)
+			&:hover
+				border-bottom-color: var(--accent-text)
+		.sep
+			margin: 0 4px
+			color: var(--accent-line)
+		.dm
+			margin-left: auto
+			font-family: var(--mono)
+			font-size: 12px
+			letter-spacing: 0
+
 	.cmsg
 		padding: 7px 11px 0
 		font-size: 13px
 		color: var(--mute)
+		&.jump
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
 
 	.cdice
 		padding: 9px 11px
@@ -239,3 +275,10 @@
 	.band,
 	.n b
 		color: var(--mute)
+
+// The jump target of a lineage link. On the chat log's own `li`, which is outside the card, and
+// deliberately brief: it answers "which one" and then gets out of the way.
+.mgt2-jumped
+	outline: 2px solid var(--accent-line)
+	outline-offset: -2px
+	transition: outline-color 0.5s ease-out

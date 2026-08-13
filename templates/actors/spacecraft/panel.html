@@ -132,7 +132,7 @@
 	</div>
 
 	{{! The mount is not packaging: it carries the fire arc, the magazine and a damage multiple that
-	    spans three orders of magnitude, and it is the ship that owns the hardpoint (HG p.30). }}
+	    spans three orders of magnitude, and it is the ship that owns the hardpoint (HG p.29). }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.spacecraft.Mounts'}}</h3>
@@ -145,6 +145,7 @@
 				<tr>
 					<th>{{localize 'MGT2.Actor.spacecraft.Mount'}}</th>
 					<th>{{localize 'MGT2.Items.Weapons'}}</th>
+					<th>{{localize 'MGT2.Actor.spacecraft.Band'}}</th>
 					<th class="c">{{localize 'MGT2.Actor.spacecraft.Ammo'}}</th>
 					<th class="r">{{localize 'MGT2.Items.Damage'}}</th>
 					<th></th>
@@ -186,6 +187,15 @@
 							{{/each}}
 						</select>
 					</td>
+					{{! Core p.165-167: a spacecraft weapon is printed with the furthest band it
+					    reaches. What the band is worth to an attack is a property of the RANGE the
+					    exchange happens at, not of the weapon, so only the reach is stated here. }}
+					<td class="mt">
+						{{#if mount.bandLabel}}
+						<b>{{localize mount.bandLabel}}</b>
+						<span class="arc">{{localize 'MGT2.Actor.spacecraft.BandReach'}}</span>
+						{{else}}<span class="arc">&mdash;</span>{{/if}}
+					</td>
 					<td class="c">
 						<span class="mag{{#unless mount.ammo}} empty{{/unless}}">{{mount.ammo}} / {{mount.ammoMax}}</span>
 						<input class="f num edit-only" type="number" min="0" step="1" name="system.mounts.{{mount.index}}.ammo" value="{{mount.ammo}}" data-dtype="Number" />
@@ -196,6 +206,11 @@
 							{{#if mount.missile}}{{localize 'MGT2.Actor.spacecraft.NoMultiple'}}
 							{{else}}&times;{{mount.multiple}} &middot; {{localize 'MGT2.Actor.spacecraft.AfterArmour'}}{{/if}}
 						</span>
+						{{! Core p.168: same-type weapons in one mount fire on ONE roll, each extra
+						    one adding +1 per damage die. }}
+						{{#if mount.linkedBonus}}
+						<span class="mult">{{localize 'MGT2.Actor.spacecraft.Linked' count=mount.linked bonus=mount.linkedBonus}}</span>
+						{{/if}}
 					</td>
 					<td class="r">
 						<div class="acts edit-only">
@@ -257,14 +272,17 @@
 				<tr>
 					<th>{{localize 'MGT2.Actor.spacecraft.Station'}}</th>
 					<th>{{localize 'MGT2.Actor.spacecraft.Who'}}</th>
-					<th>{{localize 'MGT2.Actor.spacecraft.Duty'}}</th>
+					<th>{{localize 'MGT2.Actor.spacecraft.Mount'}}</th>
 					<th>{{localize 'MGT2.Actor.spacecraft.Actions'}}</th>
 					<th class="r">{{localize 'MGT2.Actor.spacecraft.Req'}}</th>
 				</tr>
 			</thead>
-			<tbody>
+			{{! Drop a person on a row and they take that station; drop them on the table and nowhere in
+			    particular and they are a new one. The zone names `Actor.<type>` because the type is
+			    only known once the uuid resolves, and it refuses at the pointer. }}
+			<tbody data-accept="Actor.character Actor.npc">
 				{{#each ship.crew.rows as |row|}}
-				<tr data-row-index="{{row.index}}"{{#if row.vacant}} class="vacant"{{/if}}>
+				<tr data-row-index="{{row.index}}" data-accept="Actor.character Actor.npc"{{#if row.vacant}} class="vacant"{{/if}}>
 					<td class="station">
 						<span class="play-only">
 							<b>{{#if row.station}}{{row.station}}{{else}}&mdash;{{/if}}{{#if (gt row.count 1)}} &times;{{row.count}}{{/if}}</b>
@@ -296,24 +314,17 @@
 							<input class="f" type="text" name="system.crew.{{row.index}}.actor" value="{{row.actor}}" placeholder="{{localize 'MGT2.Actor.spacecraft.ActorUuid'}}" />
 						</span>
 					</td>
+					{{! The station's standing mount. The combat DUTY is not here: it starts and stops
+					    with the encounter, so it lives on the `crew` Combatant (§9.26). }}
 					<td class="duty">
-						<span class="ro play-only">{{#if row.dutyLabel}}{{localize row.dutyLabel}}{{else}}&mdash;{{/if}}</span>
-						{{#if row.dutyTarget}}<span class="at">{{row.dutyTarget}}</span>{{/if}}
-						<span class="edit-only">
-							<select class="f" name="system.crew.{{row.index}}.duty">
-								<option value="">&mdash;</option>
-								{{#each ../choices.duties as |entry key|}}
-								<option value="{{key}}"{{#if (eq key row.duty)}} selected{{/if}}>{{localize entry.label}}</option>
-								{{/each}}
-							</select>
-							<input class="f" type="text" name="system.crew.{{row.index}}.dutyTarget" value="{{row.dutyTarget}}" placeholder="{{localize 'MGT2.Actor.spacecraft.DutyTarget'}}" />
-						</span>
+						<span class="ro play-only">{{#if row.dutyTarget}}{{row.dutyTarget}}{{else}}&mdash;{{/if}}</span>
+						<input class="f edit-only" type="text" name="system.crew.{{row.index}}.dutyTarget" value="{{row.dutyTarget}}" placeholder="{{localize 'MGT2.Actor.spacecraft.DutyTarget'}}" />
 					</td>
 					<td>
 						<div class="todo">
 							{{#each row.actions as |action|}}
 							<button type="button" class="btn" data-action="stationAction" data-action-index="{{action.index}}"{{#if action.disabled}} disabled data-tooltip="{{localize 'MGT2.Actor.spacecraft.NoCrewSheet'}}"{{/if}}>
-								{{action.label}}<i>{{#if action.skill}}{{action.skill}}{{/if}}{{#if action.target}} {{action.target}}+{{else}}{{#unless action.skill}}&mdash;{{/unless}}{{/if}}</i>
+								{{action.label}}<i>{{#if action.skill}}{{action.skill}}{{/if}}{{#if action.target}} {{action.target}}+{{else}}{{#unless action.skill}}&mdash;{{/unless}}{{/if}}{{#if action.stepLabel}} &middot; {{localize action.stepLabel}}{{/if}}{{#if action.capLabel}} &middot; {{localize action.capLabel}}{{/if}}</i>
 							</button>
 							{{/each}}
 						</div>
@@ -361,7 +372,7 @@
 
 	{{! BLOCK 3 again, different columns. A carried craft is a full independent ship record, so it
 	    is a reference and not an embedded document — and the parent has to know which craft it
-	    carries in order to exclude them from its own maintenance (Core p.184). }}
+	    carries in order to exclude them from its own maintenance (Core p.183). }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.spacecraft.CarriedCraft'}}</h3>
@@ -480,7 +491,7 @@
 	</div>
 
 	{{! The `computer` Item pattern for the third time: ship software spends Processing exactly as
-	    personal software spends bandwidth (HG p.21). }}
+	    personal software spends bandwidth (HG p.20). }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.spacecraft.Computer'}}</h3>

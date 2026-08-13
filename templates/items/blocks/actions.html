@@ -13,7 +13,10 @@
 				<th>{{localize 'MGT2.Items.Action'}}</th>
 				<th>{{localize 'MGT2.Items.ActionKind'}}</th>
 				<th>{{localize 'MGT2.Items.Skill'}}</th>
+				<th>{{localize 'MGT2.Items.Characteristic'}}</th>
 				<th>{{localize 'MGT2.Items.Difficulty'}}</th>
+				<th>{{localize 'MGT2.CombatSteps.label'}}</th>
+				<th>{{localize 'MGT2.ActionCaps.label'}}</th>
 				<th class="c">{{localize 'MGT2.Items.DM'}}</th>
 				<th></th>
 			</tr>
@@ -35,11 +38,34 @@
 					<span class="play-only">{{entry.skill}}</span>
 					<input class="f edit-only" type="text" name="system.actions.{{i}}.skill" value="{{entry.skill}}" />
 				</td>
+				{{! It had no control at all, so `actor.system.characteristics[characteristic]` never
+				    resolved and every station action rolled with a characteristic DM of zero. }}
+				<td>
+					<span class="play-only">{{localize (lookup ../config.Characteristics entry.characteristic)}}</span>
+					<select class="f edit-only" name="system.actions.{{i}}.characteristic">
+						<option></option>
+						{{selectOptions ../config.Characteristics selected=entry.characteristic localize=true}}
+					</select>
+				</td>
 				<td>
 					<span class="play-only">{{localize (lookup ../config.Difficulty entry.difficulty)}}</span>
 					<select class="f edit-only" name="system.actions.{{i}}.difficulty">
 						<option></option>
-						{{selectOptions ../config.Difficulty selected=entry.difficulty localize=true}}
+						{{selectOptions ../config.DifficultyChoices selected=entry.difficulty localize=true}}
+					</select>
+				</td>
+				{{! Core p.164 for the step, and the per-action limit the rules set separately for
+				    point defence, electronic warfare and screens. }}
+				<td>
+					<span class="play-only">{{localize (lookup ../config.CombatSteps entry.step)}}</span>
+					<select class="f edit-only" name="system.actions.{{i}}.step">
+						{{selectOptions ../config.CombatSteps selected=entry.step localize=true}}
+					</select>
+				</td>
+				<td>
+					<span class="play-only">{{localize (lookup ../config.ActionCaps entry.cap)}}</span>
+					<select class="f edit-only" name="system.actions.{{i}}.cap">
+						{{selectOptions ../config.ActionCaps selected=entry.cap localize=true}}
 					</select>
 				</td>
 				<td class="c num">

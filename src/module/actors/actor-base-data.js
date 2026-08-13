@@ -94,24 +94,24 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     /** Which characteristic a new actor rolls Initiative off; blank hands it to `initiative.flat`. */
     static DEFAULT_INITIATIVE = "";
 
-    /** The characteristics whose current values set the encumbrance cap (Core p.99). */
+    /** The characteristics whose current values set the encumbrance cap (Core p.98). */
     static ENCUMBRANCE_LINKS = ["strength", "endurance"];
 
     /**
-     * Core p.80 names END as the only characteristic Stun damage reaches. A sub-type that has no
+     * Core p.79 names END as the only characteristic Stun damage reaches. A sub-type that has no
      * such characteristic leaves this blank and stuns the first link of its chain instead.
      */
     static STUN_LINK = "";
 
     /**
-     * Core p.84: the characteristics that recover a point a day on their own track, outside the
+     * Core p.83: the characteristics that recover a point a day on their own track, outside the
      * physical wound. Empty on a sub-type that has none.
      */
     static MENTAL_LINKS = [];
 
     /**
      * The scale a sub-type is at before any trait speaks — `spacecraft` overrides this permanently,
-     * because a ship's scale is what it is and not something it acquired (Core p.168).
+     * because a ship's scale is what it is and not something it acquired (Core p.167).
      */
     static SCALE = "ground";
 
@@ -126,7 +126,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
                 damage: new fields.NumberField({ required: false, nullable: false, initial: 0, integer: true })
             }),
             // The part of the wound dealt by Stun weapons, clamped to `life.damage` on every
-            // prepare: an hour of rest clears exactly this much (Core p.80).
+            // prepare: an hour of rest clears exactly this much (Core p.79).
             stun: new fields.NumberField({ required: false, nullable: false, initial: 0, min: 0, integer: true }),
             notes: new fields.HTMLField({ required: false, blank: true, trim: true }),
 
@@ -148,7 +148,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
                     new fields.StringField({ required: true, blank: false }),
                     { initial: damageOrder }),
                 // A creature has no DEX and Fast Metabolism (+X) hands it the DM directly (Core
-                // p.86), so the source is either a characteristic or a flat number: `flat` is read
+                // p.85), so the source is either a characteristic or a flat number: `flat` is read
                 // whenever `characteristic` is blank. A vehicle, a ship and a robot need the same.
                 initiative: new fields.SchemaField({
                     characteristic: new fields.StringField({
@@ -167,6 +167,17 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     /** The roster, off the schema — a config dictionary only ever describes one sub-type's. */
     get characteristicKeys() {
         return Object.keys(this.schema.fields.characteristics?.fields ?? {});
+    }
+
+    /**
+     * Which of them a check may be *rolled on*, which is not the same question as which the sheet
+     * shows. A damage pool is the difference: `hull` and `hits` run the DM ladder like every other
+     * characteristic, so the prompt was offering "Hull — 240 (+3)" as though a ship had a score.
+     * @type {string[]}
+     */
+    get rollableCharacteristics() {
+        return this.characteristicKeys.filter(key =>
+            this.characteristics[key].show && !(key in MGT2.DamageTracks));
     }
 
     /**
@@ -210,7 +221,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
 
     /**
      * The Protection this particular attack meets. One number for a person, who is armoured all
-     * round; a vehicle answers with the facing the attack came from (Core p.141), and a critical
+     * round; a vehicle answers with the facing the attack came from (Core p.140), and a critical
      * meets none at all.
      * @param {object} [options]   `applyDamage`'s options — `facing`, `ignoreArmour`
      * @returns {number}
@@ -219,17 +230,45 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         return this.protection;
     }
 
+    /**
+     * The hardest difficulty this actor may attempt, and which checks the limit reaches. Only a
+     * robot's brain grade states one (RH folio 115); everything else answers null and the roll
+     * prompt renders no ceiling caption at all.
+     * @type {{key: string, target: number, grade: string, characteristics: string[]}|null}
+     */
+    get taskCeiling() {
+        return null;
+    }
+
     /** The vocabulary a new trait typed on this actor starts in. */
     get traitFamily() {
         return this.schema.fields.traits.element.fields.family.initial;
     }
 
-    /** Core p.78: a melee attack adds the attacker's own STR DM to its damage. */
+    /**
+     * Core folio 100: an armour's Rad score "is deducted from the rads a Traveller receives every
+     * time they are exposed to radiation". Summed like Protection is, for the layered case the same
+     * page allows. Here rather than on `CharacterData` because `ChatHelper.resolveExposure` is one
+     * notion of a dose arriving for every sub-type that answers `applyRadiation` — a robot's ladder
+     * is RH folio 106's rather than folio 81's, but the shielding it comes off is the same field.
+     * @type {number}
+     */
+    get radiationProtection() {
+        let rads = 0;
+        for (const item of this.parent.items) {
+            if ((item.type === "armor") && (item.system.equipped === true)) {
+                rads += Math.max(0, item.system.radiations || 0);
+            }
+        }
+        return rads;
+    }
+
+    /** Core p.77: a melee attack adds the attacker's own STR DM to its damage. */
     get meleeDamageDM() {
         return this.characteristics.strength?.dm ?? 0;
     }
 
-    /** Every healing rate on Core p.84 is measured in the patient's own END DM. */
+    /** Every healing rate on Core p.83 is measured in the patient's own END DM. */
     get enduranceDM() {
         return this.characteristics.endurance?.dm ?? 0;
     }
@@ -240,11 +279,11 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * Core p.78: unconscious once a characteristic *past* the first has been emptied — the chain
+     * Core p.77: unconscious once a characteristic *past* the first has been emptied — the chain
      * puts END first, so the first zero is the one the rule does not count — and dead once the whole
      * chain is at zero. Stated against the chain rather than against STR/DEX/END so that a
      * single-link pool gets the same machinery; a sub-type with its own thresholds (a creature is
-     * driven off at half its Hits, Core p.86) overrides this getter.
+     * driven off at half its Hits, Core p.85) overrides this getter.
      * @type {{unconscious: boolean, dead: boolean}}
      */
     get damageStates() {
@@ -260,7 +299,8 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
 
     /**
      * The points `amount` would push past the first link while more than one link could still take
-     * them — the one moment Core p.78 hands the choice to the target rather than to the chain.
+     * them — the moment Core folio 77 hands the choice to the target. Only the sheet's own damage
+     * control asks it there; an attack takes the same choice off the stored chain, pre-declared.
      * Null whenever the chain cannot pose the question: a single link, damage that stops inside the
      * first, or only one link left with room.
      * @returns {{filled: string, taken: number, remaining: number, choices: string[]}|null}
@@ -344,19 +384,19 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         this.life = life;
 
         // Nothing may report more stun than there is wound to explain it, and a heal that emptied
-        // the pool has therefore already healed the stun (Core p.80).
+        // the pool has therefore already healed the stun (Core p.79).
         this.stun = Math.min(this.stun, life.damage);
-        // Companion p.95: a Gigantic creature "is treated as a Spacecraft scale object … for
+        // Companion p.94: a Gigantic creature "is treated as a Spacecraft scale object … for
         // purposes of dealing and sustaining damage". Scale is what makes a Traveller shooting a
-        // starship divide by ten with no branch anywhere (Core p.168).
+        // starship divide by ten with no branch anywhere (Core p.167).
         this.scale = MGT2Helper.hasTrait(this.traits, "gigantic")
             ? "spacecraft" : this.constructor.SCALE;
-        // Companion p.94-95: which reading of an attack lands is the defender's own property, and
+        // Companion p.93-94: which reading of an attack lands is the defender's own property, and
         // the card that offers all three is picked on by whoever is applying it.
         this.damageResponse = resolveDamageResponse(key => MGT2Helper.hasTrait(this.traits, key));
 
         const states = this.damageStates;
-        // Core p.84: an END check restores consciousness without healing anything, so the chain
+        // Core p.83: an END check restores consciousness without healing anything, so the chain
         // alone cannot answer. `consciousWound` is the wound the check was passed at — healing keeps
         // them on their feet, and one fresh point puts them back down.
         if (states.unconscious && (life.damage <= (this.states?.consciousWound ?? -1))) {
@@ -376,7 +416,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
 
     /**
      * Protection: what is worn, plus what a trait grants. `Armour (+X)` gives its bearer "a
-     * Protection score equal to the figure shown" (Core p.85) — the same quantity worn armour
+     * Protection score equal to the figure shown" (Core p.84) — the same quantity worn armour
      * already derives, so the two sum. The registry's second `armour` slot is a *conditional*
      * score and is surfaced beside the total, never added to it.
      *
@@ -396,33 +436,22 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * Mass of one item, quantity included.
-     * Worn armour counts a quarter of its mass; powered armour carries itself.
+     * Mass of one item, quantity included. The rule lives on the item: a loose container has to
+     * answer the same question with no actor in reach.
      */
     itemWeight(item) {
-        if (item.system.weightless === true) return 0;
-        if (!Object.hasOwn(item.system, "weight")) return 0;
-
-        const qty = item.system.quantity;
-        let weight = (!isNaN(qty) && qty > 0) ? item.system.weight : 0;
-        if (weight > 0) weight *= qty;
-
-        if (item.type === "armor" && item.system.equipped === true) {
-            weight = item.system.powered === true ? 0 : weight * 0.25;
-        }
-        return weight;
+        return item.getTotalWeight();
     }
 
     prepareWeight() {
         let onHand = 0;
         for (const item of this.parent.items) {
+            if (item.system.container?.id) continue;   // counted through its container
+            // A container is only carried when it is on the traveller rather than left somewhere.
             if (item.type === "container") {
-                if (item.system.onHand === true && item.system.weightless !== true) {
-                    onHand += item.system.weight;
-                }
+                if (item.system.onHand === true) onHand += item.getTotalWeight();
                 continue;
             }
-            if (item.system.container?.id) continue;   // counted through its container
             onHand += MGT2Helper.roundWeight(this.itemWeight(item));
         }
         this.inventory.weight = MGT2Helper.roundWeight(onHand);
@@ -452,12 +481,18 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
      *
      * `options` is what the attack knew and the target resolves, and every key is optional so that
      * a macro, a token-bar drag or a bare `applyDamage(3)` still works:
-     * `scale` the attacker's scale, `ap` the weapon's AP score, `effect` the attack's Effect,
+     * `scale` the attacker's scale, `ap` and `loPen` the weapon's scores, `effect` the attack's Effect,
      * `damageType` the printed types the defender's traits may except, `stun` whether it came from
-     * a Stun weapon, `raw` to skip the pipeline entirely (the sheet's
+     * a Stun weapon, `formula` the expression it was rolled from — which is how a target that cares
+     * how heavy the weapon was counts its dice — `raw` to skip the pipeline entirely (the sheet's
      * own damage control, which types a wound rather than an attack), and `overflow` naming the
      * link the *target* chooses for what the first link cannot hold. **With no `overflow` the
-     * stored chain order stands** — the rule needs a UI to ask, and applyDamage must not.
+     * stored chain order stands, and that is the answer rather than a gap**: Core folio 77 gives the
+     * target the choice of whether the excess past 0 END falls on STR or DEX, and `config.damageOrder`
+     * is where that target declared it — once, on their own sheet, instead of at every blow, so a
+     * card applied to six targets never stops to ask six times. `overflow` stays for the sheet's
+     * own control, which is where the choice can still be made in the moment.
+     * @param {number} [options.multiple]   The firing mount's damage multiple (HG p.29)
      * @returns {Promise<{wound: number, rounds: number}|undefined>}   `rounds` is Stun's incapacitation
      */
     async applyDamage(amount, options = {}) {
@@ -475,7 +510,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         const wound = options.raw ? amount : this.reduceDamage(amount, options);
         if (wound <= 0) return { wound: 0, rounds: 0 };
 
-        // Core p.80: Stun damage is only ever deducted from END, and the excess becomes rounds of
+        // Core p.79: Stun damage is only ever deducted from END, and the excess becomes rounds of
         // incapacitation rather than injury elsewhere.
         if (options.stun) {
             const key = this.stunLink;
@@ -496,7 +531,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
 
     /**
      * Which reading of an attack this actor's own traits select. A damage type its traits except
-     * gets through in full whatever else they say (Companion p.94-95).
+     * gets through in full whatever else they say (Companion p.93-94).
      * @param {Iterable<string>} [damageType]   The attack's damage types, usually none
      * @returns {string}   `full` · `reduced` · `minimum` · `immune`
      */
@@ -512,27 +547,72 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
      * card, because it substitutes into the damage expression and so has already been rolled.
      */
     reduceDamage(amount, options = {}) {
-        // Companion p.94: "Energy creatures are not affected by conventional weapons" is not a
+        // Companion p.93: "Energy creatures are not affected by conventional weapons" is not a
         // reduction the Effect-6 floor can beat — it says the attack does not land at all — so it
         // short-circuits every stage below, the floor included.
         if (this.damageTransform(options.damageType) === "immune") return 0;
 
-        // Core p.168: Spacecraft scale against Ground multiplies by ten, Ground against Spacecraft
-        // divides by ten and rounds down.
-        const from = MGT2.Scales[options.scale ?? this.scale]?.ratio ?? 1;
+        // Core p.167: Spacecraft scale against Ground multiplies by ten, Ground against Spacecraft
+        // divides by ten and rounds down — and the ratio is applied to the damage total, after
+        // Effect and Destructive, before the armour deduction of Core p.167.
+        const weaponScale = options.scale ?? this.scale;
+        const from = MGT2.Scales[weaponScale]?.ratio ?? 1;
         const to = MGT2.Scales[this.scale]?.ratio ?? 1;
         let wound = (from === to) ? amount : Math.floor(amount * from / to);
 
-        // Core p.78: Protection is subtracted; the AP trait ignores that much of it.
-        wound -= Math.max(0, this.protectionAgainst(options) - Math.max(0, options.ap ?? 0));
+        // FC p.7: Lo-Pen X multiplies the Protection this attack meets — a Lo-Pen (3) round treats a
+        // Protection +5 flak jacket as +15. There is no Lo-Pen 1, so anything below 2 is no trait.
+        const loPen = Math.max(1, options.loPen ?? 1);
+        // Core p.79: a Spacecraft scale target ignores AP unless the firing weapon is Spacecraft
+        // scale too. The registry declares AP and Lo-Pen in conflict, so a weapon carries one.
+        const pierced = (this.scale === "spacecraft") && (weaponScale !== "spacecraft")
+            ? 0 : Math.max(0, options.ap ?? 0);
 
-        // Core p.78: an attack with Effect 6+ always inflicts at least one point, whatever was
+        // Core p.77: Protection is subtracted; the AP trait ignores that much of it.
+        wound -= Math.max(0, this.protectionAgainst(options) * loPen - pierced);
+
+        // HG p.29: a bay, barbette or spinal mount multiplies what gets through, and the book puts
+        // that step AFTER the armour deduction — so it cannot be folded into the attack's dice.
+        // Missiles and torpedoes are excluded at the mount and arrive here as 1.
+        const multiple = Math.max(1, options.multiple ?? 1);
+        if (wound > 0) wound *= multiple;
+
+        // Core p.77: an attack with Effect 6+ always inflicts at least one point, whatever was
         // rolled and whatever the Protection score.
         return Math.max((options.effect ?? 0) >= 6 ? 1 : 0, wound);
     }
 
     /**
-     * Core p.80: an hour of rest completely heals the damage a Stun weapon dealt — so it subtracts
+     * Core folio 229: activating a power spends PSI, and "if this cost brings them below zero PSI,
+     * then any excess points are applied as damage". The reserve is not in the damage chain — it
+     * takes what it can hold as its own wound, and only the overrun reaches `applyDamage`, where the
+     * chain, the unconscious threshold and death are waiting for it.
+     *
+     * Lives here rather than on `CharacterData` because both person-shaped sub-types declare PSI and
+     * the overrun is the base model's own pipeline; a sub-type without the characteristic gets null.
+     * @param {number} points   What the power costs, reach multiplier already applied
+     * @returns {Promise<{points: number, spent: number, damage: number, left: number}|null>}
+     */
+    async spendPsi(points) {
+        const psi = this.characteristics.psionic;
+        const total = Math.max(0, Math.trunc(points) || 0);
+        if (!psi || (total === 0)) return null;
+
+        // Every figure is read before the first write: an update re-prepares the model in place, so
+        // `psi.value` afterwards is the new one.
+        const spent = Math.min(total, psi.value);
+        const result = { points: total, spent, damage: total - spent, left: psi.value - spent };
+        if (spent > 0) {
+            await this.parent.update({ "system.characteristics.psionic.damage": psi.damage + spent });
+        }
+        // Through the parent, not through `this`: an update replaces `actor.system` with a fresh
+        // instance and the one running this method is already the previous prepare.
+        if (result.damage > 0) await this.parent.system.applyDamage(result.damage, { raw: true });
+        return result;
+    }
+
+    /**
+     * Core p.79: an hour of rest completely heals the damage a Stun weapon dealt — so it subtracts
      * exactly the stun sub-track from the wound and zeroes it.
      */
     async restHour() {
@@ -547,11 +627,11 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     }
 
     /* -------------------------------------------- */
-    /*  Healing (Core p.83-84)                      */
+    /*  Healing (Core p.82-83)                      */
     /* -------------------------------------------- */
 
     /**
-     * Core p.83 divides first aid and surgery "as desired", so the split is an input here and never
+     * Core p.82 divides first aid and surgery "as desired", so the split is an input here and never
      * a policy; `extra` is written in the same update.
      * @returns {Promise<number>}   Points actually restored
      */
@@ -571,7 +651,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * Core p.84: medical care divides its points evenly among the damaged characteristics. A link
+     * Core p.83: medical care divides its points evenly among the damaged characteristics. A link
      * takes no more than its own wound, and what that frees is offered round again; the remainder
      * of an uneven division walks the chain in order.
      */
@@ -607,7 +687,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         return distribution;
     }
 
-    /** Core p.84: each mental characteristic recovers one point per day, never out of the wound. */
+    /** Core p.83: each mental characteristic recovers one point per day, never out of the wound. */
     async healMental() {
         const characteristics = {};
         for (const key of this.constructor.MENTAL_LINKS) {

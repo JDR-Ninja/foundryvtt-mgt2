@@ -1,5 +1,7 @@
+import { CHECK } from "../chat-message.js";
 import { MGT2 } from "../config.js";
 import { MGT2Helper } from "../helper.js";
+import { RollPromptHelper } from "../roll-prompt.js";
 import { CraftData } from "./craft-data.js";
 import { TravellerActorSheet } from "./character-sheet.js";
 
@@ -31,7 +33,10 @@ export class VehicleActorSheet extends TravellerActorSheet {
             mountDelete: VehicleActorSheet.#onMountDelete,
             skillCreate: VehicleActorSheet.#onSkillCreate,
             skillDelete: VehicleActorSheet.#onSkillDelete,
-            blockToggle: VehicleActorSheet.#onBlockToggle
+            blockToggle: VehicleActorSheet.#onBlockToggle,
+            vehicleAction: VehicleActorSheet.#onVehicleAction,
+            combatClear: VehicleActorSheet.#onCombatClear,
+            openDriver: VehicleActorSheet.#onOpenDriver
         }
     };
 
@@ -87,9 +92,23 @@ export class VehicleActorSheet extends TravellerActorSheet {
             systems: VehicleActorSheet.#systems(system),
             crossCheck: VehicleActorSheet.#crossCheck(system),
             criticals: this.#criticals(system),
+            combat: VehicleActorSheet.#combat(system),
             mounts: this.#mounts(system, context.weapons)
         };
         return context;
+    }
+
+    /** Core folio 138: who rolls the two vehicular actions, and what the last ones left standing. */
+    static #combat(system) {
+        return {
+            driver: system.driverActor?.name ?? "",
+            dogfight: system.combat.dogfight,
+            carry: system.combat.carry,
+            evasive: system.combat.evasive,
+            // The Effect is what is stored; the rule turns it into a negative DM, so that is what
+            // the row prints — and a failed check's negative Effect prints as a positive one.
+            evasiveDM: -system.combat.evasive
+        };
     }
 
     /* -------------------------------------------- */
@@ -299,7 +318,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
     }
 
     /**
-     * Core p.141: severity is Effect − 5, a repeat takes `max(new, old + 1)` and caps at 6, and a
+     * Core p.140: severity is Effect − 5, a repeat takes `max(new, old + 1)` and caps at 6, and a
      * further hit on a 6 deals 6D that ignores armour. The location is the referee's 2D roll, typed
      * here rather than rolled: the system does not read the canvas or resolve an attack for them.
      * @this {VehicleActorSheet}
@@ -360,5 +379,213 @@ export class VehicleActorSheet extends TravellerActorSheet {
         await this.submit();
         const key = target.dataset.block;
         return this.actor.update({ [`system.${key}`]: this.actor.system[key] ? null : {} });
+    }
+
+    /* -------------------------------------------- */
+    /*  Vehicular actions (Core folio 138)          */
+    /* -------------------------------------------- */
+
+    /**
+     * Core folio 138's two actions that leave a DM behind. Both are the **driver's** own skill check
+     * — "the drivers of both vehicles make opposed skill checks using the skill appropriate to their
+     * vehicle (Drive, Flyer, or Seafarer), modified by their vehicle's Agility as normal" — so the
+     * prompt is seeded from the person at the controls and the vehicle supplies one waivable DM.
+     *
+     * The dogfight resolves through the prompt's own **Opposed** row rather than a second
+     * comparison: Core folio 62's machinery already reads two Effects off two cards (§1 C), and all
+     * this adds is which side of it takes the DM+2.
+     * @this {VehicleActorSheet}
+     */
+    static async #onVehicleAction(event, target) {
+        const action = MGT2.VehicleActions[target.dataset.vehicleAction];
+        if (!action) return;
+        const system = this.actor.system;
+        const driver = system.driverActor;
+        if (!driver) return ui.notifications.warn(game.i18n.localize("MGT2.Actor.vehicle.NoDriver"));
+
+        // "All skill checks used in these actions use the Agility of the vehicle as a DM" — as a row
+        // the referee can untick, which is the treatment a ship's own station DM already gets.
+        const modifiers = [];
+        if (system.agilityEffective !== 0) {
+            modifiers.push({ key: "agility", label: "MGT2.Actor.vehicle.Agility",
+                dm: system.agilityEffective });
+        }
+        // "If one of the vehicles' drivers chooses to initiate a dogfight again in the following
+        // combat round, the winner of the previous dogfight applies the difference between that
+        // round's opposed check as a positive DM to this round's opposed check."
+        if (action.opposed && (system.combat.carry > 0)) {
+            modifiers.push({ key: "carry", label: "MGT2.Actor.vehicle.DogfightCarry",
+                dm: system.combat.carry });
+        }
+
+        const skills = RollPromptHelper.actorSkills(driver);
+        const rollOptions = {
+            rollTypeName: this.actor.name,
+            rollObjectName: game.i18n.localize(action.label),
+            characteristics: RollPromptHelper.actorCharacteristics(driver),
+            characteristic: "",
+            skills,
+            skill: VehicleActorSheet.#chassisSkill(system, skills),
+            checkModifiers: modifiers,
+            difficulty: null,
+            blocks: { skill: true, range: false, traits: false },
+            ceiling: driver.system.taskCeiling,
+            strengthDM: driver.system.characteristics.strength?.dm ?? 0
+        };
+
+        const data = await RollPromptHelper.roll(rollOptions);
+        if (!data) return; // dialog dismissed
+
+        const { formula, modifiers: named, chainSources } =
+            RollPromptHelper.terms(data, driver, modifiers);
+        if (MGT2Helper.hasValue(data, "difficulty")) rollOptions.difficulty = data.difficulty;
+        if (!Roll.validate(formula)) {
+            return ui.notifications.error(game.i18n.localize("MGT2.Errors.InvalidRollFormula"));
+        }
+
+        const roll = await new Roll(formula, driver.getRollData()).roll();
+        const against = MGT2Helper.getEffectTarget(rollOptions.difficulty);
+        const effect = roll.total - against.value;
+        const opposed = RollPromptHelper.opposedResult(data, effect);
+        const outcome = await this.#resolveAction(action, effect, opposed);
+
+        return VehicleActorSheet.#postAction(this.actor, driver, {
+            roll, action, effect, against, opposed, outcome,
+            modifiers: named, chainSources, difficulty: rollOptions.difficulty,
+            mode: data.rollMode
+        });
+    }
+
+    /**
+     * What the check leaves standing on the vehicle. A dogfight needs the other driver's check to
+     * have a winner at all, so with no Opposed source picked nothing is written and the card says
+     * so — clearing a standing dogfight because the row was left empty would be a silent wrong
+     * number. Evasive action stores the Effect as it stands, negative included (§1 C, Tactics).
+     * @returns {Promise<string>}   The i18n key of the sentence the card states
+     */
+    async #resolveAction(action, effect, opposed) {
+        if (!action.opposed) {
+            await this.actor.update({ "system.combat.evasive": effect });
+            return "MGT2.Chat.Roll.Evasive";
+        }
+        if (!opposed) return "MGT2.Chat.Roll.DogfightNone";
+
+        // "The winner of a dogfight gains DM+2 to all their attack rolls for this round while the
+        // loser suffers DM-2", and a draw leaves neither with an advantage.
+        const won = opposed.outcome === "won";
+        await this.actor.update({ system: { combat: {
+            dogfight: won ? action.winner : (opposed.outcome === "lost") ? action.loser : 0,
+            carry: won ? Math.abs(effect - opposed.effect) : 0
+        } } });
+        return `MGT2.Chat.Roll.Dogfight${won ? "Won" : (opposed.outcome === "lost") ? "Lost" : "Tie"}`;
+    }
+
+    /**
+     * Core folio 138 names "the skill appropriate to their vehicle (Drive, Flyer, or Seafarer)",
+     * which the chassis already stores — so the driver's own matching skill opens preselected. A
+     * preselection only: the dropdown still offers every skill they carry, and "Not proficient"
+     * stands when they carry none.
+     */
+    static #chassisSkill(system, skills) {
+        for (const pair of system.skill) {
+            const label = MGT2.VehicleSkills[pair.skill]?.label;
+            if (!label) continue;
+            const wanted = game.i18n.localize(label);
+            const match = skills.find(entry => MGT2Helper.matchesSkill(entry.term, wanted));
+            if (match) return match._id;
+        }
+        return "NP";
+    }
+
+    /**
+     * The same card every other check posts, so the action can be chained from and opposed like any
+     * other. Its one addition is the sentence naming what the outcome costs — including the half
+     * that lands on **the other side**, which is stated and never applied: an attack roll may not
+     * read its target (Appendix B), so a dogfight's DM-2 and evasive action's negative DM reach the
+     * attacker as a line a referee reads out.
+     */
+    static async #postAction(vehicle, driver, context) {
+        const { roll, action, effect, against, opposed, outcome } = context;
+        const band = MGT2Helper.getEffectBand(effect);
+        const lines = [];
+        if (opposed) {
+            lines.push(game.i18n.format("MGT2.Chat.Roll.OpposedLine", {
+                source: opposed.label || game.i18n.localize("MGT2.RollPrompt.Opposed"),
+                effect: MGT2Helper.signed(opposed.effect, "+0"),
+                outcome: game.i18n.localize(`MGT2.Chat.Roll.Opposed.${opposed.outcome}`)
+            }));
+        }
+        lines.push(game.i18n.format(outcome, {
+            dm: MGT2Helper.signed(-effect, "+0"),
+            carry: opposed ? Math.abs(effect - opposed.effect) : 0
+        }));
+
+        const message = {
+            speaker: ChatMessage.getSpeaker({ actor: driver }),
+            type: CHECK,
+            system: {
+                effect, target: against.value, assumed: against.assumed,
+                label: game.i18n.localize(action.label),
+                previous: context.chainSources.map(source => source.id), opposed
+            }
+        };
+        message.content = await foundry.applications.handlebars.renderTemplate(
+            "systems/mgt2/templates/chat/roll.html", {
+                formula: roll.formula,
+                tooltip: await roll.getTooltip(),
+                total: Math.round(roll.total * 100) / 100,
+                showButtons: true,
+                rollTypeName: vehicle.name,
+                rollObjectName: game.i18n.localize(action.label),
+                rollModifiers: context.modifiers,
+                rollDifficulty: context.difficulty,
+                rollDifficultyLabel: MGT2Helper.getDifficultyDisplay(context.difficulty),
+                rollTarget: against.value,
+                rollTargetAssumed: against.assumed,
+                effect,
+                effectDisplay: MGT2Helper.signed(effect, "+0"),
+                effectBand: band.label,
+                effectTone: band.tone,
+                rollMessage: lines.join(" · "),
+                opposedMessage: opposed?.message ?? null,
+                chainedFrom: context.chainSources,
+                chainTotal: MGT2Helper.signed(
+                    context.chainSources.reduce((sum, source) => sum + source.dm, 0), "+0")
+            });
+        return roll.toMessage(message, { messageMode: context.mode });
+    }
+
+    /** Both actions last a round and nothing on the sheet can watch for one. @this {VehicleActorSheet} */
+    static async #onCombatClear() {
+        return this.actor.update({ system: { combat: { dogfight: 0, carry: 0, evasive: 0 } } });
+    }
+
+    /** @this {VehicleActorSheet} */
+    static async #onOpenDriver() {
+        return this.actor.system.driverActor?.sheet?.render(true);
+    }
+
+    /* -------------------------------------------- */
+    /*  Drag and Drop                               */
+    /* -------------------------------------------- */
+
+    /**
+     * A person dropped on the sheet takes the controls — the same drop the ship's crew roster
+     * accepts, at one seat instead of a table. Core folio 138's two actions are the driver's own
+     * check, so the seat is what makes either rollable at all.
+     * @inheritDoc
+     */
+    async _onDrop(event) {
+        const data = MGT2Helper.getDataFromDropEvent(event);
+        if (data?.type !== "Actor") return super._onDrop(event);
+        if (!this.isEditable) return false;
+
+        const actor = await fromUuid(data.uuid);
+        if (!["character", "npc"].includes(actor?.type)) {
+            ui.notifications.warn(game.i18n.localize("MGT2.Actor.vehicle.NotDriver"));
+            return false;
+        }
+        await this.actor.update({ "system.driver": actor.uuid });
+        return true;
     }
 }

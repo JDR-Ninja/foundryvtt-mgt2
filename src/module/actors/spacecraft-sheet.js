@@ -1,5 +1,7 @@
+import { CHECK } from "../chat-message.js";
 import { MGT2 } from "../config.js";
 import { MGT2Helper } from "../helper.js";
+import { RollPromptHelper } from "../roll-prompt.js";
 import { CraftData } from "./craft-data.js";
 import { TravellerActorSheet } from "./character-sheet.js";
 
@@ -80,7 +82,6 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             bridges: MGT2.BridgeTypes,
             sensors: MGT2.SensorGrades,
             mountTypes: MGT2.ShipMounts,
-            duties: MGT2.CombatDuties,
             bays: MGT2.CraftBays,
             service: MGT2.ShipService,
             screens: MGT2.ShipScreens,
@@ -95,10 +96,11 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             computer: SpacecraftActorSheet.#computer(system),
             options: SpacecraftActorSheet.#hullOptions(system),
             accommodation: SpacecraftActorSheet.#accommodation(system),
-            mounts: this.#mounts(system, context.weapons),
+            mounts: SpacecraftActorSheet.#mounts(system, context.weapons),
             crew: this.#crew(system),
             bays: this.#bays(system),
             criticals: this.#criticals(system),
+            manoeuvre: system.manoeuvre,
             finance: SpacecraftActorSheet.#finance(system)
         };
         return context;
@@ -129,7 +131,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         };
     }
 
-    /** The pool. A hull only ever fills — there is no state under wrecked (Core p.169). */
+    /** The pool. A hull only ever fills — there is no state under wrecked (Core p.168). */
     static #hull(system) {
         const hull = system.characteristics.hull;
         return {
@@ -149,7 +151,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
 
     /**
      * The one budget with a state: a consumer taken offline is an Engineer's action and it frees its
-     * draw (Core p.172), which is why power is a panel rather than a number.
+     * draw (Core p.171), which is why power is a panel rather than a number.
      */
     static #power(system) {
         const budget = SpacecraftActorSheet.#budget(system.power.available,
@@ -206,7 +208,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     /* -------------------------------------------- */
 
     /** Each mount with the weapons it holds, its damage multiple, and the ones no mount claimed. */
-    #mounts(system, weapons) {
+    static #mounts(system, weapons) {
         const byId = new Map(weapons.map(weapon => [weapon._id, weapon]));
         const claimed = new Set();
         const rows = system.mounts.map((mount, index) => {
@@ -220,12 +222,24 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 held.push(weapon);
                 ammo += weapon.system.magazine ?? 0;
             }
-            // HG p.30: the multiple applies after armour and never to missiles or torpedoes.
+            // HG p.29: the multiple applies after armour and never to missiles or torpedoes.
             const missile = held.some(weapon => MGT2Helper.hasTrait(weapon.system.traits, "smart")
                 || /missile|torpedo/i.test(weapon.name));
+            // Core p.168: two or more weapons OF THE SAME TYPE in one mount fire together on a
+            // single attack roll, each extra one adding +1 per damage die. Missiles are excluded.
+            const linked = held.length
+                ? held.filter(weapon => weapon.name === held[0].name).length : 0;
+            const band = held[0]?.system.range?.band || "";
             return {
                 index, type: mount.type, label: mount.label, popup: mount.popup,
                 typeLabel: type.label,
+                // Core p.165-167: the furthest band the mounted weapon reaches. What the band is
+                // worth to an attack belongs to the range the exchange happens at, not to the
+                // weapon, so only the reach is carried here.
+                band, bandLabel: MGT2.ShipRangeBands[band]?.label ?? "",
+                linked: missile ? 1 : linked,
+                linkedBonus: missile ? 0
+                    : (linked - 1) * SpacecraftActorSheet.#damageDice(held[0]?.system.damage),
                 multiple: missile ? 1 : type.damageMultiple,
                 printed: type.damageMultiple,
                 missile,
@@ -270,18 +284,22 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 vacant: !statted && !station.name,
                 station: role?.name ?? "",
                 department: role ? MGT2.Departments[role.system.department] : "",
-                duty: station.duty,
-                dutyLabel: MGT2.CombatDuties[station.duty]?.label ?? "",
+                // The mount this station sits at. The combat DUTY is not the ship's any more: it is
+                // per-encounter and lives on the `crew` Combatant (§9.26), so this roster names the
+                // turret and the encounter names who is at it.
                 dutyTarget: station.dutyTarget,
                 actions: (role?.system.actions ?? []).map((action, i) => ({
                     index: i, label: action.label, kind: action.kind, skill: action.skill,
                     difficulty: action.difficulty,
+                    step: action.step, stepLabel: MGT2.CombatSteps[action.step] ?? "",
+                    cap: action.cap, capLabel: (action.cap && (action.cap !== "none"))
+                        ? MGT2.ActionCaps[action.cap] : "",
                     target: action.difficulty ? MGT2Helper.getDifficultyValue(action.difficulty) : null,
                     disabled: (action.kind !== "special") && !statted
                 })),
                 roles: this.actor.items.filter(item => item.type === "role")
                     .map(item => ({ _id: item.id, name: item.name, selected: item.id === station.role })),
-                required: role ? (required.get(SpacecraftActorSheet.#roleKey(role.name)) ?? null) : null
+                required: role ? (required.get(role.system.crewRoleKey) ?? null) : null
             };
         });
 
@@ -296,11 +314,6 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         };
     }
 
-    /** A station named for a construction role gets that role's requirement beside it. */
-    static #roleKey(name) {
-        const slug = MGT2Helper.skillSlug(name);
-        return Object.keys(MGT2.CrewRoles).find(key => key.toLowerCase() === slug) ?? slug;
-    }
 
     /** Carried craft are references: a stored UUID, resolved only where it is already loaded. */
     #bays(system) {
@@ -392,7 +405,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
 
     /**
      * The running costs, and the one row that disagrees with the printed page on purpose: Core
-     * p.184 subtracts carried craft from the maintenance base and the catalogue's cost ÷ 12 000 does
+     * p.183 subtracts carried craft from the maintenance base and the catalogue's cost ÷ 12 000 does
      * not, so the catalogue bills a carried boat twice (§9.20).
      */
     static #finance(system) {
@@ -432,7 +445,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     }
 
     /**
-     * Core p.170: severity is Effect − 5, a repeat takes `max(new, old + 1)` and caps at 6, and a
+     * Core p.169: severity is Effect − 5, a repeat takes `max(new, old + 1)` and caps at 6, and a
      * further hit on a 6 deals 6D that ignores armour. The location is the referee's own 2D roll,
      * typed here rather than rolled: the system does not resolve an attack for them.
      * @this {SpacecraftActorSheet}
@@ -468,7 +481,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return this.actor.update({ "system.hullSeverity": next });
     }
 
-    /** Core p.172: cutting power to a system is an Engineer's action, and it is reversible. */
+    /** Core p.171: cutting power to a system is an Engineer's action, and it is reversible. */
     static async #onPowerToggle(event, target) {
         const key = target.dataset.consumer;
         const offline = new Set(this.actor.system.power.offline);
@@ -523,6 +536,21 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         if (station.actor) {
             try { actor = foundry.utils.fromUuidSync(station.actor); } catch { actor = null; }
         }
+        return SpacecraftActorSheet.rollStationAction(this.actor, action,
+            { crew: actor, dutyTarget: station.dutyTarget });
+    }
+
+    /**
+     * The same roll from two screens: the ship's own roster and the space combat screen. The
+     * encounter's answer for the mount wins where there is one — Core folio 164 has a gunner choose
+     * a turret at the start of the combat, and the roster's own is the standing one (§9.26).
+     * @param {Actor} ship
+     * @param {object} action              A `role.actions[]` record
+     * @param {object} [options]
+     * @param {Actor|null} [options.crew]  Whoever is at the station, or null
+     * @param {string} [options.dutyTarget]
+     */
+    static async rollStationAction(ship, action, { crew: actor = null, dutyTarget = "" } = {}) {
         if ((action.kind !== "special") && !actor) {
             return ui.notifications.warn(game.i18n.localize("MGT2.Actor.spacecraft.NoCrewSheet"));
         }
@@ -531,30 +559,176 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 { action: action.label }));
         }
 
+        const system = ship.system;
+        // A `weapon` action fires the mount the gunner is sitting at — `dutyTarget`, which is what
+        // `MGT2.CombatDuties[duty].mount` marks the two gunner duties as needing.
+        const mount = (action.kind === "weapon")
+            ? SpacecraftActorSheet.#dutyMount(ship, dutyTarget) : null;
+        if ((action.kind === "weapon") && !mount) {
+            return ui.notifications.warn(game.i18n.localize("MGT2.Actor.spacecraft.NoMount"));
+        }
+
         // Core p.59: an unskilled check is DM−3, and a skill the crewman does not have is unskilled.
+        // The prompt states that as its own "Not proficient" option rather than as a term.
         const skill = actor.items.find(item => (item.type === "talent")
             && (item.system.subType === "skill") && MGT2Helper.matchesSkill(item.name, action.skill));
-        const characteristic = actor.system.characteristics[action.characteristic];
-        const terms = [
-            { label: action.skill || game.i18n.localize("MGT2.Items.NotProficient"),
-                dm: skill ? skill.system.level : -3 },
-            { label: action.characteristic, dm: characteristic?.dm ?? 0 },
-            { label: game.i18n.localize("MGT2.Actor.spacecraft.StationDM"), dm: action.dm ?? 0 }
-        ].filter(term => term.dm !== 0);
 
-        const formula = ["2d6", ...terms.map(term => MGT2Helper.getFormulaDM(term.dm))].join("");
-        const roll = await new Roll(formula).roll();
-        const target8 = action.difficulty ? MGT2Helper.getDifficultyValue(action.difficulty) : null;
-        const effect = (target8 === null) ? null : roll.total - target8;
+        // The ship's own contributions ride the prompt as waivable modifiers, which is what they
+        // are: a referee who rules that a critical has knocked the fire control out says so by
+        // unticking it rather than by editing the ship.
+        const shipModifiers = [];
+        if (action.dm) {
+            shipModifiers.push({ key: "station", label: "MGT2.Actor.spacecraft.StationDM", dm: action.dm });
+        }
+        // The mount's own accuracy grade, which stands in for a scope on a vehicle or ship weapon
+        // (VH p.45). It is stored per weapon and was displayed and never rolled.
+        const weapon = mount?.weapon ?? null;
+        if (weapon?.system.fireControl) {
+            shipModifiers.push({ key: "fireControl", label: "MGT2.Items.FireControl",
+                dm: weapon.system.fireControl });
+        }
+        // The sensor suite's grade modifies a sensors check made from this ship, and a Sensors
+        // critical is already folded into the same number (`sensors.dm`).
+        const sensorRole = MGT2.CrewRoles.sensorOperator;
+        const sensorCheck = MGT2Helper.matchesSkill(action.skill, sensorRole.skill)
+            && String(action.skill).toLowerCase().includes(sensorRole.speciality);
+        if (sensorCheck && system.sensors.dm) {
+            shipModifiers.push({ key: "sensors", label: "MGT2.Actor.spacecraft.SensorDM",
+                dm: system.sensors.dm });
+        }
 
-        return roll.toMessage({
+        // The same prompt every other check opens, seeded from the crew member's sheet: Boon and
+        // Bane, the timeframe, the difficulty ladder and the chain row all come with it. The
+        // characteristics and skills are the CREWMAN's — the ship has neither.
+        const rollOptions = {
+            rollTypeName: ship.name,
+            rollObjectName: action.label,
+            characteristics: RollPromptHelper.actorCharacteristics(actor),
+            characteristic: action.characteristic || "",
+            skills: RollPromptHelper.actorSkills(actor),
+            skill: skill?.id ?? "NP",
+            checkModifiers: shipModifiers,
+            difficulty: action.difficulty,
+            damageFormula: weapon?.system.damage ?? null,
+            // A ship weapon reaches in range BANDS, which Core p.74's ground table does not speak;
+            // its traits are not offered here either, and that is the entry's remaining half.
+            blocks: { skill: true, range: false, traits: false },
+            strengthDM: actor.system.characteristics.strength?.dm ?? 0
+        };
+
+        const userRollData = await RollPromptHelper.roll(rollOptions);
+        if (!userRollData) return; // dialog dismissed
+
+        const { formula, modifiers, chainSources } =
+            RollPromptHelper.terms(userRollData, actor, shipModifiers);
+        if (MGT2Helper.hasValue(userRollData, "difficulty")) {
+            rollOptions.difficulty = userRollData.difficulty;
+        }
+
+        if (!Roll.validate(formula)) {
+            return ui.notifications.error(game.i18n.localize("MGT2.Errors.InvalidRollFormula"));
+        }
+        const roll = await new Roll(formula, actor.getRollData()).roll();
+        // Core p.61 via `getEffectTarget`: a check with no stated difficulty is measured against
+        // Average (8+) rather than scoring no Effect at all — which is what this path used to do.
+        const against = MGT2Helper.getEffectTarget(rollOptions.difficulty);
+        const effect = roll.total - against.value;
+        const band = MGT2Helper.getEffectBand(effect);
+        const opposed = RollPromptHelper.opposedResult(userRollData, effect);
+
+        const message = {
             speaker: ChatMessage.getSpeaker({ actor }),
-            flavor: game.i18n.format("MGT2.Actor.spacecraft.ActionFlavor", {
-                action: action.label,
-                ship: this.actor.name,
-                effect: (effect === null) ? "—" : MGT2Helper.signed(effect)
-            })
-        });
+            // A station action scores an Effect like any other check, so it can feed a chain too —
+            // Core p.166's Aid Gunners is exactly that shape.
+            type: CHECK,
+            system: {
+                effect, target: against.value, assumed: against.assumed,
+                label: action.label, previous: chainSources.map(source => source.id), opposed
+            },
+            flags: { mgt2: {} }
+        };
+
+        // A fired mount carries the whole damage payload, so the card the defender resolves knows
+        // what the mount is worth. HG p.29's multiple and Core p.168's linked weapons both live
+        // here because both are properties of the MOUNT, not of the weapon.
+        if (weapon?.system.damage) {
+            const traits = weapon.system.traits;
+            message.flags.mgt2.damage = {
+                formula: mount.linkedBonus
+                    ? `${weapon.system.damage} + ${mount.linkedBonus}` : weapon.system.damage,
+                rollObjectName: weapon.name,
+                rollTypeName: game.i18n.localize(mount.typeLabel),
+                effect,
+                strengthDM: 0,
+                scale: weapon.system.scale ?? "spacecraft",
+                multiple: mount.multiple,
+                ap: MGT2Helper.traitScore(traits, "ap"),
+                loPen: MGT2Helper.traitScore(traits, "lo-pen"),
+                stun: MGT2Helper.hasTrait(traits, "stun"),
+                destructive: MGT2Helper.hasTrait(traits, "destructive"),
+                damageType: Array.from(weapon.system.damageType ?? [])
+            };
+        }
+
+        // The same card every other check posts. This path used to render a one-line flavour, which
+        // cost it three things: the Effect band, the terms that produced the roll, and — because the
+        // Roll damage button lives on that card and nowhere else — any way at all to roll the damage
+        // payload above. A gunner could fire and never resolve the hit.
+        message.content = await foundry.applications.handlebars.renderTemplate(
+            "systems/mgt2/templates/chat/roll.html", {
+                formula: roll.formula,
+                tooltip: await roll.getTooltip(),
+                total: Math.round(roll.total * 100) / 100,
+                showButtons: true,
+                // The ship names the context the action was taken in; the crewman is already the
+                // message's speaker.
+                rollTypeName: ship.name,
+                rollObjectName: action.label,
+                rollModifiers: modifiers,
+                rollDifficulty: rollOptions.difficulty,
+                rollDifficultyLabel: MGT2Helper.getDifficultyDisplay(rollOptions.difficulty),
+                rollTarget: against.value,
+                rollTargetAssumed: against.assumed,
+                effect,
+                effectDisplay: MGT2Helper.signed(effect, "+0"),
+                effectBand: band.label,
+                effectTone: band.tone,
+                rollMessage: opposed ? game.i18n.format("MGT2.Chat.Roll.OpposedLine", {
+                    source: opposed.label || game.i18n.localize("MGT2.RollPrompt.Opposed"),
+                    effect: MGT2Helper.signed(opposed.effect, "+0"),
+                    outcome: game.i18n.localize(`MGT2.Chat.Roll.Opposed.${opposed.outcome}`)
+                }) : null,
+                opposedMessage: opposed?.message ?? null,
+                chainedFrom: chainSources,
+                chainTotal: MGT2Helper.signed(chainSources.reduce((sum, s) => sum + s.dm, 0), "+0"),
+                showRollDamage: Boolean(message.flags.mgt2.damage),
+                damageCarriesEffect: true
+            });
+
+        return roll.toMessage(message, { messageMode: userRollData.rollMode });
+    }
+
+    /**
+     * The mount a gunner's `dutyTarget` names — an index, or a label, matched case-insensitively.
+     * Returns the prepared row rather than the stored record, so the caller gets the multiple and
+     * the linked-weapon bonus already computed.
+     */
+    static #dutyMount(ship, dutyTarget) {
+        const rows = SpacecraftActorSheet.#mounts(ship.system, ship.items.filter(i => i.type === "weapon"));
+        const wanted = String(dutyTarget ?? "").trim();
+        if (!wanted) return null;
+        const index = Number(wanted);
+        const row = Number.isInteger(index) ? rows.rows[index]
+            : rows.rows.find(entry => entry.label.trim().toLowerCase() === wanted.toLowerCase());
+        if (!row?.weapons.length) return null;
+        return { ...row, weapon: row.weapons[0] };
+    }
+
+    /** How many dice a damage expression rolls, for Core p.168's +1 per die per linked weapon. */
+    static #damageDice(formula) {
+        const match = /(\d*)\s*[dD]/.exec(String(formula ?? ""));
+        if (!match) return 0;
+        return match[1] ? Number(match[1]) : 1;
     }
 
     /** The link is a stored UUID and nothing here reads the canvas. @this {SpacecraftActorSheet} */
@@ -563,5 +737,49 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         if (!uuid) return;
         const document = await fromUuid(uuid);
         return document?.sheet?.render(true);
+    }
+
+    /* -------------------------------------------- */
+    /*  Drag and Drop                               */
+    /* -------------------------------------------- */
+
+    /**
+     * A person dropped on a station row takes it. The roster stored a UUID from the first day and
+     * the only way to put one there was to paste it into a text field, which §10 called the most
+     * visible UX hole in the system. Dropped on the table and nowhere in particular they are a new
+     * station with nobody's name on it, which is the roster's own vacant state.
+     * @inheritDoc
+     */
+    async _onDrop(event) {
+        const data = MGT2Helper.getDataFromDropEvent(event);
+        if (data?.type !== "Actor") return super._onDrop(event);
+        if (!this.isEditable) return false;
+
+        const actor = await fromUuid(data.uuid);
+        // §9.26's drop table names these two: a ship's crew is people, and a `spacecraft` dropped
+        // here would be asking for a carried craft, which is the bay's question and not this one.
+        if (!["character", "npc"].includes(actor?.type)) {
+            ui.notifications.warn(game.i18n.localize("MGT2.Actor.spacecraft.NotCrew"));
+            return false;
+        }
+
+        const index = Number(event.target.closest("[data-row-index]")?.dataset.rowIndex ?? -1);
+        const crew = this.actor.system.crew.map(station => ({ ...station }));
+        if (crew[index]) crew[index].actor = actor.uuid;
+        else crew.push({ actor: actor.uuid, name: actor.name });
+        await this.actor.update({ "system.crew": crew });
+        return true;
+    }
+
+    /** A zone refuses at the pointer or not at all — after the drop is too late to be feedback. */
+    _onDragOver(event) {
+        const zone = event.target.closest("[data-accept]");
+        for (const node of this.element.querySelectorAll(".over, .deny")) {
+            if (node !== zone) node.classList.remove("over", "deny");
+        }
+        if (!zone) return super._onDragOver(event);
+        const accepted = MGT2Helper.dropAccepted(zone);
+        zone.classList.toggle("over", accepted);
+        zone.classList.toggle("deny", !accepted);
     }
 }

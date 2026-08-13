@@ -1,0 +1,36 @@
+<div class="dlg">
+	{{! Core p.73 decides three things before the Initiative dice, and all three ride the same roll.
+	    The side is stored rather than read off the token's disposition, which only seeds it. }}
+	<div class="grid">
+		<label>
+			<span class="lbl">{{ localize 'MGT2.Combatant.Side' }}</span>
+			<select class="f" name="side">
+				<option value=""{{#unless side}} selected{{/unless}}>{{ localize 'MGT2.Combatant.NoSide' }}</option>
+				{{#each config.CombatSides as |label key|}}
+				<option value="{{key}}"{{#if (eq key ../side)}} selected{{/if}}>{{ localize label }}</option>
+				{{/each}}
+			</select>
+		</label>
+		<label>
+			<span class="lbl">{{ localize 'MGT2.Combatant.Ambush' }}</span>
+			<select class="f" name="ambush">
+				<option value=""{{#unless ambush}} selected{{/unless}}>{{ localize 'MGT2.Combatant.NoAmbush' }}</option>
+				{{#each config.Ambush as |entry key|}}
+				<option value="{{key}}"{{#if (eq key ../ambush)}} selected{{/if}}>{{ localize entry.label }} ({{showDM entry.dm}})</option>
+				{{/each}}
+			</select>
+		</label>
+		{{! Left blank the side has made no check: an Effect of 0 is a marginal success and is not
+		    the same answer. The books print no cap, so the field has no min and no max. Gated on the
+		    ambush select above it — p.73 opens "So long as they are not surprised". }}
+		<label>
+			<span class="lbl">{{ localize 'MGT2.Combatant.Tactics' }}</span>
+			<input class="f num" type="number" name="tactics" step="1" value="{{tactics}}" placeholder="—" />
+		</label>
+	</div>
+	<p class="hint surprised" hidden>{{ localize 'MGT2.Combatant.SurprisedHint' }}</p>
+	{{#if holder}}
+	<p class="hint">{{ localize 'MGT2.Combatant.TacticsHolder' }} <b>{{holder.name}}</b> {{holder.effect}}</p>
+	{{/if}}
+	<p class="hint">{{ localize 'MGT2.Combatant.SideHint' }}</p>
+</div>

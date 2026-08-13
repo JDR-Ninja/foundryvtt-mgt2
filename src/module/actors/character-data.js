@@ -15,7 +15,7 @@ const fields = foundry.data.fields;
  */
 export class CharacterData extends ActorBaseData {
 
-    // Core p.78: "Damage is initially applied to a target's END", and only the excess reaches STR
+    // Core p.77: "Damage is initially applied to a target's END", and only the excess reaches STR
     // or DEX. `initial` only — an existing actor keeps the chain it stored.
     static DEFAULT_DAMAGE_ORDER = ["endurance", "strength", "dexterity"];
 
@@ -23,11 +23,11 @@ export class CharacterData extends ActorBaseData {
 
     static DEFAULT_INITIATIVE = "dexterity";
 
-    // Core p.84 names INT and EDU as the mental characteristics that heal a point a day, and names
+    // Core p.83 names INT and EDU as the mental characteristics that heal a point a day, and names
     // PSI as the exception.
     static MENTAL_LINKS = ["intellect", "education"];
 
-    // Core p.56: "A Study Period is equal to eight weeks (or two months) of study and practice."
+    // Core p.55: "A Study Period is equal to eight weeks (or two months) of study and practice."
     static STUDY_PERIOD_WEEKS = 8;
 
     /** The six the core rulebook defines, in the order the UPP prints them. */
@@ -80,13 +80,17 @@ export class CharacterData extends ActorBaseData {
 
             states: new fields.SchemaField({
                 fatigue: new fields.BooleanField({ required: false, initial: false }),
+                // Core folio 81: the 51-150 rad band inflicts "Nausea (-1 to all checks until
+                // medical treatment received)". Stored like fatigue, because the rads that caused it
+                // stay on the sheet for good and so cannot say whether it has been treated.
+                nausea: new fields.BooleanField({ required: false, initial: false }),
                 unconscious: new fields.BooleanField({ required: false, initial: false }),
                 // The referee's override, kept beside the derived condition below.
                 surgeryRequired: new fields.BooleanField({ required: false, initial: false }),
-                // Core p.83: first aid "can only be successfully applied once", which no reading of
+                // Core p.82: first aid "can only be successfully applied once", which no reading of
                 // the wound can tell you — so it is stored.
                 firstAidUsed: new fields.BooleanField({ required: false, initial: false }),
-                // Core p.84: the cumulative DM+1 an unconscious Traveller earns per failed END
+                // Core p.83: the cumulative DM+1 an unconscious Traveller earns per failed END
                 // check, and the wound level the successful one was passed at. -1 is "never".
                 reviveFailures: new fields.NumberField({ required: false, nullable: false, initial: 0, min: 0, integer: true }),
                 consciousWound: new fields.NumberField({ required: false, nullable: false, initial: -1, integer: true })
@@ -153,6 +157,18 @@ export class CharacterData extends ActorBaseData {
     /* -------------------------------------------- */
 
     /**
+     * Core folio 81's cumulative radiation column costs END permanently, and the table prints the
+     * TOTAL at each band rather than a step — so it derives from the rad count here instead of being
+     * written to the score once per crossing. `auto` is the derivation sink, which is what makes a
+     * dose of anti-rad give the points straight back.
+     * @inheritDoc
+     */
+    prepareBaseData() {
+        super.prepareBaseData();
+        this.characteristics.endurance.auto += CharacterData.radiationBand(this.health.radiations).endurance;
+    }
+
+    /**
      * Everything below is recomputed from the characteristics and the carried items on every
      * prepare, so none of it is written to the database and none of it can go stale.
      * Runs after prepareEmbeddedDocuments, so the items are ready.
@@ -171,7 +187,6 @@ export class CharacterData extends ActorBaseData {
 
         this.inventory = { armor: 0, weight: 0, encumbrance: { normal: 0, heavy: 0 } };
         this.prepareArmor();
-        this.#prepareContainers();
         this.#prepareComputers();
         this.prepareWeight();
         this.prepareEncumbrance();
@@ -187,10 +202,18 @@ export class CharacterData extends ActorBaseData {
      */
     #prepareCheckModifiers() {
         const sources = [];
-        // Core p.81 fatigue, and Core p.99's second encumbrance band.
+        // Core folio 80: a fatigued Traveller "suffers DM-2 to all checks until they rest" — all of
+        // them, which is why this one names no characteristic.
         if (this.states.fatigue) sources.push({ key: "fatigue", label: "MGT2.Actor.Fatigue", dm: -2 });
+        // Core folio 81's Nausea, the same shape and the same reason.
+        if (this.states.nausea) sources.push({ key: "nausea", label: "MGT2.Radiation.Nausea", dm: -1 });
+        // Core folio 98 is narrower: the second encumbrance band is "DM-2 on all physical actions".
+        // No skill in this system is flagged physical and no book prints such a flag — but folio 9
+        // heads STR, DEX and END the physical characteristics, so the check's own characteristic is
+        // the printed answer. The prompt follows it and the player can still overrule.
         if (this.states.encumbrance) {
-            sources.push({ key: "encumbrance", label: "MGT2.Actor.Encumbrance", dm: -2 });
+            sources.push({ key: "encumbrance", label: "MGT2.Actor.Encumbrance", dm: -2,
+                characteristics: MGT2.PhysicalCharacteristics });
         }
         sources.push(...this.#armorSkillModifiers());
 
@@ -200,7 +223,7 @@ export class CharacterData extends ActorBaseData {
     }
 
     /**
-     * Core p.101: armour with a required skill costs DM-1 to every check per level the wearer is
+     * Core p.100: armour with a required skill costs DM-1 to every check per level the wearer is
      * short, and the flat DM-3 unskilled penalty to a wearer who has no such skill at all.
      */
     #armorSkillModifiers() {
@@ -235,7 +258,7 @@ export class CharacterData extends ActorBaseData {
     /* -------------------------------------------- */
 
     /**
-     * Which of the two treatment procedures the patient qualifies for (Core p.83-84). Both gates
+     * Which of the two treatment procedures the patient qualifies for (Core p.82-83). Both gates
      * count the same thing — the damaged links still standing once first aid has been spent — so
      * they derive rather than being ticked. `surgeryRequired` stays stored beside them as the
      * referee's override: it can force the condition on, never off, because a wound taken with no
@@ -254,7 +277,7 @@ export class CharacterData extends ActorBaseData {
     /* -------------------------------------------- */
 
     /**
-     * Core p.56: eight weeks make a Study Period, a completed one is settled by an Average (8+) EDU
+     * Core p.55: eight weeks make a Study Period, a completed one is settled by an Average (8+) EDU
      * check, and reaching a level costs as many *successful* periods as the level itself — one for a
      * skill the Traveller does not have at all, which the first success grants at level 0.
      *
@@ -275,25 +298,6 @@ export class CharacterData extends ActorBaseData {
     }
 
     /* -------------------------------------------- */
-
-    /** Containers aggregate the weight and quantity of whatever references them. */
-    #prepareContainers() {
-        const containers = new Map();
-        for (const item of this.parent.items) {
-            if (item.type !== "container") continue;
-            item.system.weight = 0;
-            item.system.count = 0;
-            containers.set(item.id, item);
-        }
-
-        for (const item of this.parent.items) {
-            if (item.type === "container") continue;
-            const container = containers.get(item.system.container?.id);
-            if (!container) continue;   // loose, or the container was deleted
-            container.system.weight += MGT2Helper.roundWeight(this.itemWeight(item));
-            container.system.count += item.system.quantity;
-        }
-    }
 
     /** Software occupies bandwidth on the computer it is installed in. */
     #prepareComputers() {
@@ -319,13 +323,44 @@ export class CharacterData extends ActorBaseData {
     /*  Accessors                                   */
     /* -------------------------------------------- */
 
-    /** Core p.84: 3 + the patient's END DM + the doctor's Medic skill, per day. */
+    /** Core p.83: 3 + the patient's END DM + the doctor's Medic skill, per day. */
     medicalCarePoints(medic) {
         return 3 + this.enduranceDM + (Math.trunc(medic) || 0);
     }
 
+    /* -------------------------------------------- */
+    /*  Radiation (Core folio 81)                   */
+    /* -------------------------------------------- */
+
+    /** The Radiation Effects row a number of rads falls in. @returns {object} */
+    static radiationBand(rads) {
+        const total = Math.max(0, Math.trunc(rads) || 0);
+        return MGT2.RadiationEffects.find(row => total >= row.min) ?? MGT2.RadiationEffects.at(-1);
+    }
+
     /**
-     * Core p.84: a day of full rest returns 1D + END DM, but only the END DM while surgery is
+     * Take a dose. Core folio 81 reads its two columns off two different numbers — the immediate
+     * effects against this exposure, the permanent ones against the running total — so both bands
+     * are handed back and the caller rolls the dice the immediate one names. The count itself only
+     * ever rises: "accumulated rads can only be removed by using anti-rad drugs", which is the field
+     * being edited rather than a procedure.
+     * @param {number} rads   The dose after folio 100's armour deduction
+     * @returns {Promise<{dose: number, total: number, immediate: object, before: object, after: object}|null>}
+     */
+    async applyRadiation(rads) {
+        const dose = Math.max(0, Math.trunc(rads) || 0);
+        if (dose === 0) return null;
+        const before = CharacterData.radiationBand(this.health.radiations);
+        const total = this.health.radiations + dose;
+        const immediate = CharacterData.radiationBand(dose);
+        // Nausea lasts "until medical treatment received", which no reading of the rads can tell.
+        const states = immediate.state ? { [immediate.state]: true } : {};
+        await this.parent.update({ system: { states, health: { radiations: total } } });
+        return { dose, total, immediate, before, after: CharacterData.radiationBand(total) };
+    }
+
+    /**
+     * Core p.83: a day of full rest returns 1D + END DM, but only the END DM while surgery is
      * required — which on a negative DM makes them worse instead. A bare "+0" is not a formula
      * Foundry's parser accepts, so the sign is only ever written beside a die.
      */
@@ -336,7 +371,7 @@ export class CharacterData extends ActorBaseData {
     }
 
     /**
-     * Core p.84: medical care and surgery take DM− equal to the Tech Level gap between the facility
+     * Core p.83: medical care and surgery take DM− equal to the Tech Level gap between the facility
      * and the highest *relevant* implant. Which one is relevant is the referee's call and no sheet
      * holds the facility's TL, so this reports the highest an augment carries and nothing more.
      * @returns {{tl: number, name: string}|null}   Null when no augment states one

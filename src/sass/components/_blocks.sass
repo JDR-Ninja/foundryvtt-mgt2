@@ -238,6 +238,14 @@
 				background: none
 				border-color: var(--rule)
 
+	// Core folio 138's vehicular actions: buttons on their own line, in a block whose other rows
+	// are readouts. Live in both modes — a dogfight is play, not transcription.
+	.vacts
+		display: flex
+		flex-wrap: wrap
+		gap: 6px
+		margin-top: 7px
+
 // --------------------------------------------
 //  BLOCK 1 — STATLINE. A dense read-only line of DERIVED values.
 // --------------------------------------------
@@ -849,9 +857,8 @@
 			color: color-mix(in oklab, var(--faint) 60%, transparent)
 
 	// Two `margin-left: auto` in one flex row split the free space between them. The order claims
-	// it, the gear follows, and play pads for the gear that is not there — otherwise the line
-	// slides sideways on the mode flip. The gear is a glyph, so its box is pinned rather than
-	// measured: the reservation below has to match it exactly.
+	// it and the gear follows in both modes — the damage order is a play decision, so the mode flip
+	// moves nothing here. The gear is a glyph, so its box is pinned rather than measured.
 	.order ~ .cfg
 		margin-left: 0
 		width: 14px
@@ -1009,9 +1016,6 @@
 .mgt2[data-mode="edit"] .char .g
 	display: none
 
-.mgt2[data-mode="play"] .grp .order
-	padding-right: 22px
-
 // The damage / heal control. Live in BOTH modes: draining a pool is the session loop rather than
 // structure — and after the {base, damage} split it is the only way a current value can change,
 // because no input binds one.
@@ -1064,3 +1068,32 @@
 		display: flex
 		gap: 5px
 		margin-left: auto
+
+// --------------------------------------------
+//  DROP FEEDBACK — shared by every zone that takes a document
+// --------------------------------------------
+// A zone declares what it accepts in `data-accept` and refuses everything else AT THE POINTER
+// rather than after the drop with a notification. In the kit rather than on one screen because the
+// space combat screen and the ship's own crew roster both use it, for the same two actor types.
+
+.mgt2 [data-accept].over
+	background: var(--accent-soft) !important
+	box-shadow: inset 0 0 0 1px var(--accent-line)
+
+.mgt2 [data-accept].deny
+	background: color-mix(in oklab, var(--danger) 8%, transparent) !important
+	box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--danger) 45%, transparent)
+
+// A table section cannot carry an inset shadow across its rows, so the two states outline instead.
+.mgt2 .roster tbody.over,
+.mgt2 .roster tbody.deny
+	box-shadow: none
+	outline: 1px solid var(--accent-line)
+	outline-offset: -1px
+
+.mgt2 .roster tbody.deny
+	outline-color: color-mix(in oklab, var(--danger) 45%, transparent)
+
+// A vacant station reads as a target before anything is dragged.
+.mgt2 .roster tr.vacant td.who
+	border: 1px dashed var(--rule)

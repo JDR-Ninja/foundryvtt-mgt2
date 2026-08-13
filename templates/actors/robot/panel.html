@@ -79,7 +79,7 @@
 	</div>
 
 	{{! Locomotion drives four values at once, so it cannot be a plain enum — and a robot may carry
-	    two modes, each granting its own traits (RH p.17, p.24). }}
+	    two modes, each granting its own traits (RH p.16, p.23). }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.robot.Locomotion'}}</h3>
@@ -157,7 +157,7 @@
 					<td class="c num">
 						<span class="play-only">&times;{{count}}{{#if isLeg}} <i class="fa-solid fa-shoe-prints" data-tooltip="{{localize 'MGT2.Actor.robot.IsLeg'}}"></i>{{/if}}</span>
 						<input class="f num edit-only" type="number" min="1" step="1" name="system.manipulators.{{index}}.count" value="{{count}}" />
-						{{! RH p.27: a walker's legs can be promoted to manipulators. }}
+						{{! RH p.26: a walker's legs can be promoted to manipulators. }}
 						<label class="edit-only" data-tooltip="{{localize 'MGT2.Actor.robot.IsLeg'}}">
 							<input type="checkbox" name="system.manipulators.{{index}}.isLeg" {{checked isLeg}} />
 						</label>
@@ -166,7 +166,7 @@
 						<span class="play-only">{{size}}</span>
 						<input class="f num edit-only" type="number" min="1" max="10" step="1" name="system.manipulators.{{index}}.size" value="{{size}}" />
 					</td>
-					{{! The two limbs the STR and DEX projections read (RH p.116). }}
+					{{! The two limbs the STR and DEX projections read (RH p.115). }}
 					<td class="c num"{{#if strongest}} data-tooltip="{{localize 'MGT2.Actor.robot.Strongest'}}"{{/if}}>
 						<span class="play-only">{{#if strongest}}<b>{{strength}}</b>{{else}}{{strength}}{{/if}}</span>
 						<input class="f num edit-only" type="number" min="0" step="1" name="system.manipulators.{{index}}.strength" value="{{strength}}" />
@@ -266,7 +266,16 @@
 			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.SkillCap'}}</dt><dd>{{robot.brain.skillCap}}</dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.FreeSkills'}}</dt><dd>{{robot.brain.freeSkills}}</dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.EducationCap'}}</dt><dd>{{robot.brain.educationCap}}</dd></div>
+			{{! RH folio 106. The count is the stored number and both losses read off it, so the two
+			    print together and neither is ever written to a score. }}
+			<div class="stat{{#unless robot.brain.rads}} none{{/unless}}{{#if robot.brain.radiationLoss}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Actor.robot.Rads'}}</dt>
+				<dd>{{#if robot.brain.rads}}{{robot.brain.rads}}{{else}}&mdash;{{/if}}</dd>
+			</div>
 		</dl>
+		{{#if robot.brain.radiationLoss}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.RadiationHint' n=robot.brain.radiationLoss}}</p>
+		{{/if}}
 		{{#if robot.brain.item}}
 		<p class="hint">{{localize 'MGT2.Actor.robot.BrainItem' name=robot.brain.item.name n=robot.brain.item.processing}}</p>
 		{{else}}
@@ -275,10 +284,18 @@
 		{{#if robot.bandwidth.oversized.length}}
 		<p class="hint">{{localize 'MGT2.Actor.robot.Oversized' n=robot.bandwidth.inherent}}</p>
 		{{/if}}
-		<label class="check edit-only">
-			{{formInput systemFields.brain.fields.hardened name="system.brain.hardened" value=system.brain.hardened}}
-			<span class="lbl">{{localize 'MGT2.Actor.robot.Hardened'}}</span>
-		</label>
+		<div class="grid cols2 edit-only">
+			<label class="check">
+				{{formInput systemFields.brain.fields.hardened name="system.brain.hardened" value=system.brain.hardened}}
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Hardened'}}</span>
+			</label>
+			{{! Editable, because RH folio 106's only repair is a new brain and that is this number
+			    going back to zero — there is no procedure to offer. }}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Rads'}}</span>
+				{{formInput systemFields.brain.fields.rads name="system.brain.rads" value=system.brain.rads classes="f num"}}
+			</label>
+		</div>
 	</div>
 
 	{{! §5.8 — one type with a flag, not a chassis Item and not a second sub-type. }}

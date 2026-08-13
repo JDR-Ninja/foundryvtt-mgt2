@@ -17,7 +17,7 @@
 		</thead>
 		<tbody>
 			{{#each nested as |entry|}}
-			<tr data-item-id="{{entry._id}}">
+			<tr class="draggable" data-item-id="{{entry._id}}">
 				<td>{{entry.name}}</td>
 				<td class="c">{{entry.type}}</td>
 				<td class="c num">{{entry.quantity}}</td>
@@ -33,5 +33,7 @@
 			{{/each}}
 		</tbody>
 	</table>
+	{{else}}
+	{{#if (eq item.type "container")}}<p class="hint">{{localize 'MGT2.Items.ContentsHint'}}</p>{{/if}}
 	{{/if}}
 </div>

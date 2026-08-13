@@ -65,7 +65,7 @@
 			</label>
 		</div>
 
-		{{! Derived from the wound, both of them (RH p.14), plus the one hard budget state. }}
+		{{! Derived from the wound, both of them (RH p.13), plus the one hard budget state. }}
 		<div class="states">
 			<label data-tooltip="{{localize 'MGT2.Actor.robot.WreckedHint'}}">
 				<input type="checkbox" {{checked robot.hits.wrecked}} disabled />{{localize 'MGT2.Actor.robot.Wrecked'}}
@@ -75,6 +75,11 @@
 			</label>
 			<label data-tooltip="{{localize 'MGT2.Actor.robot.OverloadHint'}}">
 				<input type="checkbox" {{checked robot.brain.overload}} disabled />{{localize 'MGT2.Actor.robot.Overload'}}
+			</label>
+			{{! RH folio 106: "Robots reduced to INT 0 are inoperable" — derived from the rad count
+			    like the two above are derived from the wound. }}
+			<label data-tooltip="{{localize 'MGT2.Actor.robot.InoperableHint'}}">
+				<input type="checkbox" {{checked robot.brain.inoperable}} disabled />{{localize 'MGT2.Actor.robot.Inoperable'}}
 			</label>
 		</div>
 	</div>
@@ -99,7 +104,7 @@
 			<dt>{{localize 'MGT2.Actor.robot.Locomotion'}}</dt>
 			<dd class="word">{{#if robot.statblock.locomotion.length}}{{#each robot.statblock.locomotion}}{{#unless @first}} / {{/unless}}{{localize this}}{{/each}}{{else}}&mdash;{{/if}}</dd>
 		</div>
-		{{! Metres OR a Speed Band, never both: Vehicle Speed Movement replaces the figure (RH p.24). }}
+		{{! Metres OR a Speed Band, never both: Vehicle Speed Movement replaces the figure (RH p.23). }}
 		<div class="stat">
 			<dt>{{localize 'MGT2.Actor.robot.Speed'}}</dt>
 			<dd>{{#if robot.statblock.band}}<span class="word">{{localize robot.statblock.band}}</span>{{else}}{{robot.statblock.speed}}<i>{{localize 'MGT2.Actor.robot.Metres'}}</i>{{/if}}</dd>

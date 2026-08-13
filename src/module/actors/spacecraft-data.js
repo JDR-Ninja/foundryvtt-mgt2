@@ -1,15 +1,16 @@
 import { MGT2 } from "../config.js";
+import { MGT2Helper } from "../helper.js";
 import { CraftData } from "./craft-data.js";
 
 const fields = foundry.data.fields;
 
-/** HG p.17: a jump drive is never smaller than this, whatever the percentage works out at. */
+/** HG p.16: a jump drive is never smaller than this, whatever the percentage works out at. */
 const MIN_JUMP_DRIVE_TONS = 10;
 
-/** HG p.20: MCr0.5 per 100 tons of ship, or part of one. */
+/** HG p.19: MCr0.5 per 100 tons of ship, or part of one. */
 const BRIDGE_COST_PER_100T = 500000;
 
-/** Core p.184 and HG p.26 both count a period as four weeks. */
+/** Core p.183 and HG p.25 both count a period as four weeks. */
 const WEEKS_PER_PERIOD = 4;
 
 /** The power consumers the panel can switch off, in the order the catalogue prints them. */
@@ -27,7 +28,7 @@ function band(table, tons) {
  *
  * Three budgets constrain it rather than one — tonnage, power and hardpoints — and the power budget
  * is a panel rather than a number because the rules give it a *state*: a consumer taken offline is
- * an Engineer's action and it frees its draw (Core p.172).
+ * an Engineer's action and it frees its draw (Core p.171).
  *
  * @extends {CraftData}
  */
@@ -35,11 +36,8 @@ export class SpacecraftData extends CraftData {
 
     static CRITICALS = MGT2.ShipCriticals;
 
-    /** Field labels come off the schema; see `MGT2.Actor.spacecraft` in `lang/en.json`. */
-    static LOCALIZATION_PREFIXES = ["MGT2.Actor.spacecraft"];
-
     /**
-     * Core p.168: a ship is Spacecraft scale and always was. That is what makes a Traveller
+     * Core p.167: a ship is Spacecraft scale and always was. That is what makes a Traveller
      * shooting a starship divide by ten with no branch anywhere in the damage pipeline.
      */
     static SCALE = "spacecraft";
@@ -66,7 +64,7 @@ export class SpacecraftData extends CraftData {
                 shipClass: new fields.StringField({ required: false, blank: true, trim: true })
             }),
 
-            // Bought per point of Protection as a percentage of hull tonnage (HG p.13-14); the
+            // Bought per point of Protection as a percentage of hull tonnage (HG p.12-13); the
             // tonnage, the cost and the cap all derive from the material and the count. `damage` is
             // the wound criticals inflict on it, stored for the same reason every other wound is.
             armour: new fields.SchemaField({
@@ -79,7 +77,7 @@ export class SpacecraftData extends CraftData {
             drives: new fields.SchemaField({
                 thrust: count(1),
                 jump: count(0),
-                // A reaction drive burns fuel instead of drawing Power (HG p.18-19).
+                // A reaction drive burns fuel instead of drawing Power (HG p.17-18).
                 reaction: new fields.BooleanField({ required: false, initial: false })
             }),
 
@@ -108,7 +106,7 @@ export class SpacecraftData extends CraftData {
                     required: false, blank: false, initial: "standard", choices: MGT2.BridgeTypes })
             }),
 
-            // HG p.21: a ship's computer has a Processing score and consumes no tonnage. Ship
+            // HG p.20: a ship's computer has a Processing score and consumes no tonnage. Ship
             // software is `item`/`software` and spends it exactly as personal software spends
             // bandwidth, which is the machinery `ComputerData` already carries.
             computer: new fields.SchemaField({ processing: count(5) }),
@@ -124,7 +122,7 @@ export class SpacecraftData extends CraftData {
                 high: count(0), middle: count(0), basic: count(0), low: count(0) }),
             cargo: new fields.SchemaField({ capacity: tons(0) }),
 
-            // Which column of the Crew Requirements table the ship reads (HG p.24). Named `role` by
+            // Which column of the Crew Requirements table the ship reads (HG p.23). Named `role` by
             // §4.9; it is the ship's service, and has nothing to do with a crew station's `role`.
             role: new fields.StringField({
                 required: false, blank: false, initial: "commercial", choices: MGT2.ShipService }),
@@ -142,9 +140,10 @@ export class SpacecraftData extends CraftData {
                 // How many bodies this station holds — the printed crew line says `Engineers x2`.
                 count: new fields.NumberField({
                     required: false, nullable: false, integer: true, min: 1, initial: 1 }),
-                duty: new fields.StringField({
-                    required: false, blank: true, initial: "", choices: MGT2.CombatDuties }),
-                // The mount a gunner is sitting at; blank for every other duty.
+                // The mount this station sits at. `duty` is NOT here: it is per-combat state on a
+                // shared party asset, so it lives on the `crew` Combatant and clears with the
+                // encounter (§9.26). The mount stays, because a gunner's turret is a standing fact
+                // about the ship and the station action needs it when no combat is running.
                 dutyTarget: new fields.StringField({ required: false, blank: true })
             }), { initial: [] }),
 
@@ -156,10 +155,10 @@ export class SpacecraftData extends CraftData {
                 label: new fields.StringField({ required: false, blank: true, trim: true }),
                 // Ids of this ship's own embedded weapons, as `mounts` already does on a vehicle.
                 weapons: new fields.ArrayField(new fields.DocumentIdField(), { initial: [] }),
-                // HG p.29: a ship whose weapons are all pop-up scans as unarmed.
+                // HG p.28: a ship whose weapons are all pop-up scans as unarmed.
                 popup: new fields.BooleanField({ required: false, initial: false }),
                 // Per mount and never a ship-wide pool: a turret missile rack holds twelve whatever
-                // it contains (HG p.29).
+                // it contains (HG p.28).
                 ammo: count(0)
             }), { initial: [] }),
 
@@ -172,7 +171,7 @@ export class SpacecraftData extends CraftData {
 
             // A carried craft is a full independent ship record, so it is a reference and not an
             // embedded document — and the mothership has to know which craft it carries in order to
-            // exclude them from its own maintenance base (Core p.184).
+            // exclude them from its own maintenance base (Core p.183).
             bays: new fields.ArrayField(new fields.SchemaField({
                 kind: new fields.StringField({
                     required: false, blank: false, initial: "dockingSpace", choices: MGT2.CraftBays }),
@@ -182,7 +181,7 @@ export class SpacecraftData extends CraftData {
             }), { initial: [] }),
 
             finance: new fields.SchemaField({
-                // Net of any Ship Shares contributed before the mortgage was calculated (Core p.150).
+                // Net of any Ship Shares contributed before the mortgage was calculated (Core p.149).
                 purchase: new fields.NumberField({ required: false, nullable: false, min: 0, initial: 0 }),
                 // The reference figure is under-determined: a ship bought outright, bought with
                 // shares, or taken as a career Benefit have three different legitimate mortgages
@@ -200,7 +199,7 @@ export class SpacecraftData extends CraftData {
     /*  Accessors                                   */
     /* -------------------------------------------- */
 
-    /** HG p.11-13: tons per point by size band, then the configuration and hull options. */
+    /** HG p.10-12: tons per point by size band, then the configuration and hull options. */
     get hullPoints() {
         const tons = this.hull.tons;
         if (!(tons > 0)) return 0;
@@ -212,7 +211,7 @@ export class SpacecraftData extends CraftData {
     }
 
     /**
-     * HG p.13-14: a percentage of the hull per point of Protection, multiplied by the
+     * HG p.12-13: a percentage of the hull per point of Protection, multiplied by the
      * configuration's Armour Volume Modifier and then by the framework multiplier for the hull size.
      */
     get armourTons() {
@@ -224,7 +223,7 @@ export class SpacecraftData extends CraftData {
             * size * this.armour.points;
     }
 
-    /** The cap the material and the Tech Level agree on; a Military Hull doubles it (HG p.13). */
+    /** The cap the material and the Tech Level agree on; a Military Hull doubles it (HG p.12). */
     get armourMax() {
         const material = MGT2.ArmourMaterials[this.armour.material];
         if (!material) return 0;
@@ -235,7 +234,7 @@ export class SpacecraftData extends CraftData {
         return Math.max(0, max);
     }
 
-    /** HG p.17: a percentage of the hull by rating, and a jump drive adds five tons on top. */
+    /** HG p.16: a percentage of the hull by rating, and a jump drive adds five tons on top. */
     get driveTons() {
         const thrust = MGT2.ThrustPotential[this.drives.thrust] ?? 0;
         const jumpPct = MGT2.JumpPotential[this.drives.jump] ?? 0;
@@ -244,7 +243,7 @@ export class SpacecraftData extends CraftData {
         return { mDrive: this.hull.tons * thrust, jDrive: jump };
     }
 
-    /** HG p.20: a ladder on hull size, one step down for a smaller bridge, +40 for a command deck. */
+    /** HG p.19: a ladder on hull size, one step down for a smaller bridge, +40 for a command deck. */
     get bridgeTons() {
         const type = MGT2.BridgeTypes[this.bridge.type];
         if (type?.tons !== undefined) return type.tons;
@@ -263,7 +262,7 @@ export class SpacecraftData extends CraftData {
         return (cost * (type?.costFactor ?? 1)) + (type?.addCost ?? 0);
     }
 
-    /** HG p.27: one hardpoint per full 100 tons; a hull too small for one gets firmpoints instead. */
+    /** HG p.26: one hardpoint per full 100 tons; a hull too small for one gets firmpoints instead. */
     get hardpointsMax() {
         return Math.floor(this.hull.tons / MGT2.HullPoints.tonsPerHardpoint);
     }
@@ -277,7 +276,7 @@ export class SpacecraftData extends CraftData {
         return this.mounts.map(mount => MGT2.ShipMounts[mount.type] ?? MGT2.ShipMounts.fixed);
     }
 
-    /** HG p.19: 10% of the hull per parsec of jump, plus a tenth of the plant per four weeks. */
+    /** HG p.18: 10% of the hull per parsec of jump, plus a tenth of the plant per four weeks. */
     get fuelPerJump() {
         return this.hull.tons * MGT2.ShipFuel.jumpFraction * this.drives.jump;
     }
@@ -293,7 +292,7 @@ export class SpacecraftData extends CraftData {
         return perTon > 0 ? this.power.plant / perTon : 0;
     }
 
-    /** HG p.18's Power Plant table, reduced to the best type the Tech Level can build. */
+    /** HG p.17's Power Plant table, reduced to the best type the Tech Level can build. */
     static #powerPerTon(tl) {
         if (tl >= 20) return 100;
         if (tl >= 15) return 20;
@@ -323,8 +322,8 @@ export class SpacecraftData extends CraftData {
     }
 
     /**
-     * HG p.13: the hull's own Protection plus the armour bolted to it, less what criticals have
-     * stripped. A ship has no facings — Core p.166 says facing generally does not matter, because
+     * HG p.12: the hull's own Protection plus the armour bolted to it, less what criticals have
+     * stripped. A ship has no facings — Core p.165 says facing generally does not matter, because
      * ships rotate and mount turrets — so one number answers every attack.
      * @inheritDoc
      */
@@ -360,9 +359,10 @@ export class SpacecraftData extends CraftData {
         this.#prepareTonnage();
         this.#prepareComputer();
         this.#prepareCrew();
+        this.#prepareManoeuvre();
         this.#prepareFinance();
 
-        // Core p.166: 2D + the pilot's Pilot skill + the ship's CURRENT Thrust, so an M-Drive
+        // Core p.165: 2D + the pilot's Pilot skill + the ship's CURRENT Thrust, so an M-Drive
         // critical feeds initiative directly. The manifest formula stays `2d6 + @initiative`.
         this.initiative = this.pilotSkill + this.drives.effectiveThrust;
     }
@@ -399,7 +399,7 @@ export class SpacecraftData extends CraftData {
         armour.tons = this.armourTons;
         armour.cost = armour.tons * (MGT2.ArmourMaterials[armour.material]?.costPerTon ?? 0);
         armour.max = this.armourMax;
-        // Every hull starts at Protection +0 except the two planetoids (HG p.13).
+        // Every hull starts at Protection +0 except the two planetoids (HG p.12).
         armour.hull = MGT2.HullConfigurations[this.hull.configuration]?.protection ?? 0;
     }
 
@@ -410,6 +410,25 @@ export class SpacecraftData extends CraftData {
             ? 0 : Math.max(0, drives.thrust - critical.thrustLoss);
         Object.assign(drives, this.driveTons);
         drives.plant = this.plantTons;
+    }
+
+    /**
+     * What the ship's CURRENT Thrust buys, band by band (Core folio 166): the listed figure is what
+     * a change OUT of that band costs, to either neighbour, and Thrust may be accumulated across
+     * rounds to pay a price one round cannot. The attack DM of each band (folio 167) rides along
+     * because it is the other half of what a range is worth, and Adjacent and Close carry `null`
+     * rather than a zero because the books print no DM for them at all — they resolve as a dogfight.
+     */
+    #prepareManoeuvre() {
+        const thrust = this.drives.effectiveThrust;
+        this.manoeuvre = Object.entries(MGT2.ShipRangeBands).map(([key, band]) => ({
+            key, label: band.label, thrust: band.thrust, attackDM: band.attackDM,
+            dogfight: band.dogfight,
+            // Affordable in ONE round. A slower ship still gets there by banking, which is why the
+            // rounds figure is printed beside it rather than the band being struck out.
+            affordable: (thrust > 0) && (thrust >= band.thrust),
+            rounds: (thrust > 0) ? Math.ceil(band.thrust / thrust) : null
+        }));
     }
 
     #prepareSystems() {
@@ -431,7 +450,7 @@ export class SpacecraftData extends CraftData {
         this.fuel.plantTons = this.fuelPerPeriod;
         this.fuel.jumpCapacity = this.fuelPerJump > 0 ? Math.floor(this.fuel.tons / this.fuelPerJump) : 0;
 
-        // HG p.26-27: one airlock and one hardpoint per full 100 tons, free.
+        // HG p.25-26: one airlock and one hardpoint per full 100 tons, free.
         this.hardpoints = { used: 0, max: this.hardpointsMax };
         this.firmpoints = { used: 0, max: this.firmpointsMax };
         this.airlocks = Math.floor(this.hull.tons / MGT2.HullPoints.tonsPerAirlock);
@@ -439,12 +458,12 @@ export class SpacecraftData extends CraftData {
         // A spinal mount's hardpoint cost is ceil(weapon tons / 100) and its tonnage is the weapon's
         // own, so both are unknown until the weapon is transcribed; it is charged one.
         this.hardpoints.used = this.mountClasses.reduce((sum, type) => sum + (type.hardpoints ?? 1), 0);
-        // Every mount concealed means the ship reads as unarmed to an exterior scan (HG p.29).
+        // Every mount concealed means the ship reads as unarmed to an exterior scan (HG p.28).
         this.scansUnarmed = (this.mounts.length > 0) && this.mounts.every(mount => mount.popup);
     }
 
     /**
-     * The power panel (HG p.18, Core p.172). A consumer switched off frees its draw, which is what
+     * The power panel (HG p.17, Core p.171). A consumer switched off frees its draw, which is what
      * makes this a panel with a state rather than a single number.
      */
     #preparePower() {
@@ -454,7 +473,7 @@ export class SpacecraftData extends CraftData {
 
         const requirements = {
             basic: hull * 0.20 * nonGravity,
-            // A reaction drive draws no Power at all; Thrust 0 draws a quarter (HG p.18).
+            // A reaction drive draws no Power at all; Thrust 0 draws a quarter (HG p.17).
             mDrive: this.drives.reaction ? 0
                 : hull * 0.10 * (this.drives.thrust === 0 ? 0.25 : this.drives.thrust),
             jDrive: hull * 0.10 * this.drives.jump,
@@ -482,7 +501,7 @@ export class SpacecraftData extends CraftData {
             return { key, draw, powered };
         });
 
-        // A damaged plant is a percentage of its rating (Core p.171); `available` is declared in the
+        // A damaged plant is a percentage of its rating (Core p.170); `available` is declared in the
         // schema so a `final`-phase Active Effect on it is coerced rather than written raw.
         this.power.available = Math.floor(this.power.plant * this.criticalEffects.powerFactor);
         this.power.requirements = Object.assign(requirements, { total });
@@ -528,7 +547,7 @@ export class SpacecraftData extends CraftData {
         };
     }
 
-    /** HG p.21: ship software consumes Processing exactly as personal software consumes bandwidth. */
+    /** HG p.20: ship software consumes Processing exactly as personal software consumes bandwidth. */
     #prepareComputer() {
         let used = 0;
         const software = [];
@@ -544,7 +563,7 @@ export class SpacecraftData extends CraftData {
     }
 
     /**
-     * HG p.24's Crew Requirements table, as the advisory target §9.20 settles it to be: computed,
+     * HG p.23's Crew Requirements table, as the advisory target §9.20 settles it to be: computed,
      * displayed beside the roster, never enforced and never written back. Fractions round up; the
      * `per full` rows floor, because that is what "per full 20 crew" says.
      */
@@ -587,7 +606,7 @@ export class SpacecraftData extends CraftData {
             officer: 0
         };
 
-        // HG p.23: capital ships centralise, and officers and medics are counted afterwards.
+        // HG p.22: capital ships centralise, and officers and medics are counted afterwards.
         const multiplier = band(MGT2.CrewReduction, tons).multiplier;
         if (multiplier < 1) {
             for (const [key, role] of Object.entries(MGT2.CrewRoles)) {
@@ -615,25 +634,36 @@ export class SpacecraftData extends CraftData {
         this.pilotSkill = this.#pilotSkill();
     }
 
-    /** The Pilot level of whoever holds the pilot duty; 0 when the slot is vacant or unstatted. */
+    /**
+     * The Pilot level of whoever mans the pilot station; 0 when it is vacant or unstatted. The
+     * station is found by the `role` Item's own `crewRole` key and never by its name, which is user
+     * text in whatever language the world runs in. It is a construction question, not a combat one:
+     * the ship's initiative is a standing figure, while `duty` is per-encounter and lives on the
+     * Combatant — who actually flies during a battle is the ship group's answer (§9.26).
+     */
     #pilotSkill() {
-        const station = this.crew.find(entry => entry.duty === "pilot");
+        const station = this.crew.find(entry =>
+            this.parent?.items?.get(entry.role)?.system.crewRoleKey === "pilot");
         if (!station?.actor) return 0;
         let actor = null;
         try { actor = foundry.utils.fromUuidSync(station.actor); } catch { return 0; }
+        // Core p.58 makes a Traveller take a speciality the moment they reach Pilot 1, and HG p.95
+        // names the starship one — so a ship's pilot holds `Pilot (spacecraft)` and never a bare
+        // `Pilot` above level 0. An equality test therefore answers 0 for every pilot who has the
+        // skill at all, which is why this is `matchesSkill` like the other five call sites.
         const skill = actor?.items?.find(item =>
             (item.type === "talent") && (item.system.subType === "skill")
-            && (item.name.toLowerCase() === "pilot"));
+            && MGT2Helper.matchesSkill(item.name, "pilot"));
         return skill?.system.level ?? 0;
     }
 
-    /** Core p.150, p.155, p.184; HG p.24. Every periodic figure runs on the four-week period. */
+    /** Core p.149, p.154, p.183; HG p.23. Every periodic figure runs on the four-week period. */
     #prepareFinance() {
         const finance = this.finance;
         const carried = this.carriedCraft
             .reduce((sum, actor) => sum + (actor.system?.finance?.purchase ?? 0), 0);
 
-        // Authoritative and takes no override (§9.20): p.184's form is the only one that excludes
+        // Authoritative and takes no override (§9.20): p.183's form is the only one that excludes
         // carried craft, and the catalogue's plain cost/12000 therefore bills a carried boat twice.
         finance.maintenance = Math.max(0, finance.purchase - carried) / MGT2.ShipCosts.maintenanceDivisor;
         finance.maintenanceCatalogue = finance.purchase / MGT2.ShipCosts.maintenanceDivisor;
@@ -643,6 +673,8 @@ export class SpacecraftData extends CraftData {
             ?? (finance.purchase / MGT2.ShipCosts.mortgageDivisor);
         finance.mortgageDerived = finance.purchase / MGT2.ShipCosts.mortgageDivisor;
 
+        // Core p.154 bills life support three times over: per stateroom, again per person NOT in a
+        // low berth, and a tenth of that per occupied low berth — which is why `awake` excludes them.
         const staterooms = this.staterooms.standard + this.staterooms.high + this.staterooms.luxury;
         const awake = this.crewTotals.aboard + this.passengers.high + this.passengers.middle
             + this.passengers.basic;

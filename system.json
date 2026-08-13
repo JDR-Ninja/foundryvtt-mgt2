@@ -116,6 +116,19 @@
 			},
 			"talent": {},
 			"weapon": {}
+		},
+		"Combatant": {
+			"person": {},
+			"crew": {}
+		},
+		"ChatMessage": {
+			"check": {}
+		},
+		"Combat": {
+			"space": {}
+		},
+		"CombatantGroup": {
+			"ship": {}
 		}
 	},
 	"flags": {

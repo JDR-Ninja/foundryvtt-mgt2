@@ -1,4 +1,7 @@
 <section class="tab mgt2-panel{{#if tabs.sidebar.health.active}} active{{/if}}" data-group="sidebar" data-tab="health">
+	{{! Core folio 81. The count is bound because "accumulated rads can only be removed by using
+	    anti-rad drugs" — the field is that dose, and nothing else lowers it. The standing END
+	    penalty beside it is derived from the count and is stated, never typed. }}
 	<div class="block">
 		<div class="sect"><h3>{{localize 'MGT2.Actor.Health'}}</h3></div>
 		<div class="grid">
@@ -7,6 +10,21 @@
 				{{formInput systemFields.health.fields.radiations name="system.health.radiations" value=system.health.radiations classes="f num"}}
 			</label>
 		</div>
+		{{#if radiation}}
+		<dl class="statline" data-derived="system.health.radiations">
+			<div class="stat{{#unless radiation.endurance}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Radiation.Cumulative'}}</dt>
+				<dd>{{showDM radiation.endurance}}</dd>
+			</div>
+			<div class="stat{{#unless radiation.protection}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Items.Radiations'}}</dt>
+				<dd>{{radiation.protection}}</dd>
+			</div>
+		</dl>
+		<div class="recovery">
+			<button type="button" class="btn" data-action="radiation" data-tooltip="{{localize 'MGT2.Radiation.ExposeHint'}}">{{localize 'MGT2.Radiation.Expose'}}</button>
+		</div>
+		{{/if}}
 	</div>
 
 	{{! The four rulebook procedures, as controls. Live in both modes — like the damage control, this

@@ -21,6 +21,7 @@ const foundryGlobals = {
   ChatMessage: "readonly",
   Combat: "readonly",
   Combatant: "readonly",
+  CombatantGroup: "readonly",
   Roll: "readonly"
 };
 

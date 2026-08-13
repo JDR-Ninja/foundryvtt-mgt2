@@ -1,7 +1,7 @@
 <aside class="mgt2-rail">
 
 	{{! The pool. A hull only ever fills — there is no state under wrecked — so the bar runs to the
-	    maximum and the sustained-damage ladder marks the tenths (Core p.141). }}
+	    maximum and the sustained-damage ladder marks the tenths (Core p.140). }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.DamageTracks.hull'}}</h3>
@@ -24,7 +24,7 @@
 	</div>
 
 	{{! One number plus modes, not a base plus a table: the printed AGILITY is the value in the
-	    vehicle's NATIVE medium, and a mode only ever subtracts (VH p.4, p.48-49). }}
+	    vehicle's NATIVE medium, and a mode only ever subtracts (VH p.3, p.47-48). }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Agility'}}</h3>
@@ -63,8 +63,43 @@
 		{{/if}}
 	</div>
 
+	{{! Core folio 138's two vehicular actions. Both are the DRIVER's own skill check with this
+	    vehicle's Agility as the DM, so the seat is filled by dropping a character or an NPC on the
+	    sheet before either can be rolled. Both leave a DM standing "for this round" or "until the
+	    driver's next action" — states nothing here can watch for, so they are stored and cleared. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.vehicle.Combat'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.vehicle.CombatCount'}}</span>
+			<a class="rm" data-action="combatClear" data-tooltip="{{localize 'MGT2.Actor.vehicle.ClearCombat'}}"><i class="fa-solid fa-rotate-left"></i></a>
+		</div>
+		<dl class="statline" data-derived="system.combat">
+			<div class="stat{{#unless vehicle.combat.driver}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.Driver'}}</dt>
+				<dd class="word">{{#if vehicle.combat.driver}}<a data-action="openDriver">{{vehicle.combat.driver}}</a>{{else}}&mdash;{{/if}}</dd>
+			</div>
+			<div class="stat{{#unless vehicle.combat.dogfight}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.Dogfight'}}</dt>
+				<dd>{{#if vehicle.combat.dogfight}}{{showDM vehicle.combat.dogfight}}{{else}}&mdash;{{/if}}</dd>
+			</div>
+			<div class="stat{{#unless vehicle.combat.carry}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.DogfightCarry'}}</dt>
+				<dd>{{#if vehicle.combat.carry}}{{showDM vehicle.combat.carry}}{{else}}&mdash;{{/if}}</dd>
+			</div>
+			<div class="stat{{#unless vehicle.combat.evasive}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.Evasive'}}</dt>
+				<dd>{{#if vehicle.combat.evasive}}{{showDM vehicle.combat.evasiveDM}}{{else}}&mdash;{{/if}}</dd>
+			</div>
+		</dl>
+		<div class="vacts">
+			<button type="button" class="btn" data-action="vehicleAction" data-vehicle-action="dogfight">{{localize 'MGT2.Actor.vehicle.Dogfight'}}</button>
+			<button type="button" class="btn" data-action="vehicleAction" data-vehicle-action="evasive">{{localize 'MGT2.Actor.vehicle.Evasive'}}</button>
+		</div>
+		<p class="hint">{{localize 'MGT2.Actor.vehicle.CombatHint'}}</p>
+	</div>
+
 	{{! Store the integer, render the label: collision damage is 1D per band, Weave picks a negative
-	    DM up to the current band, and an attack takes DM-1 per band of difference (Core p.137-143).
+	    DM up to the current band, and an attack takes DM-1 per band of difference (Core p.136-142).
 	    Cruise is stored because two published vehicles break "maximum minus one". }}
 	<div class="block">
 		<div class="sect">

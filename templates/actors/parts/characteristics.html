@@ -5,7 +5,10 @@
 	<div class="grp">
 		<span class="lbl">{{localize 'MGT2.Actor.DamageTrack'}}</span>
 		<span class="order" data-tooltip="{{localize 'MGT2.Actor.DamageChain'}}">{{#each chainOrder}}{{#unless @first}}<i>&rarr;</i>{{/unless}}{{localize short}}{{/each}}</span>
-		<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.DamageOrder'}}"><i class="fa-solid fa-gear"></i></a>
+		{{! Live in both modes, like the damage control: Core folio 77 gives the target the say over
+		    where the overflow past 0 END lands, and this order is that say — pre-declared rather
+		    than asked at every blow. Choosing it is play, not sheet construction. }}
+		<a class="cfg" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.DamageOrder'}}"><i class="fa-solid fa-gear"></i></a>
 	</div>
 	<div class="char-list">
 		{{#each damageTrack}}

@@ -1,0 +1,106 @@
+<aside class="mgt2-rail">
+
+	{{! Core p.164: a round is three named steps and every ship takes a step before any ship takes
+	    the next, so the step belongs to the encounter and not to a turn. }}
+	<div class="block">
+		<div class="roundno">
+			<span class="lbl">{{localize 'MGT2.SpaceCombat.Round'}}</span><b>{{round}}</b>
+			<span class="step">{{localize stepLabel}}</span>
+		</div>
+		<div class="seg fill" role="radiogroup" aria-label="{{localize 'MGT2.CombatSteps.label'}}">
+			{{#each steps as |entry|}}
+			<label><input type="radio" name="step" value="{{entry.key}}"{{#if entry.active}} checked{{/if}}{{#unless ../canEdit}} disabled{{/unless}} /><span>{{localize entry.label}}</span></label>
+			{{/each}}
+		</div>
+		{{#if canEdit}}
+		<button type="button" class="btn" data-action="endRound">{{localize 'MGT2.SpaceCombat.EndRound'}}</button>
+		{{/if}}
+	</div>
+
+	{{! One row per contact at its own Initiative, with a pip per step it has resolved. A ship is one
+	    row even though several people act inside it: that is what the CombatantGroup is for. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.SpaceCombat.Order'}}</h3>
+			<span class="count">{{localize 'MGT2.SpaceCombat.Contacts' n=order.length}}</span>
+		</div>
+		<ul class="order">
+			{{#each order as |ship|}}
+			<li class="{{#if ship.selected}}on{{/if}}" data-group-id="{{ship.id}}">
+				<span class="i" data-action="rollShipInitiative" data-tooltip="{{localize 'MGT2.SpaceCombat.RollInitiative'}}">{{#if ship.hasInitiative}}{{ship.initiative}}{{else}}&mdash;{{/if}}</span>
+				<span class="who" data-action="selectShip">
+					<span class="nm">{{ship.name}}</span>
+					<span class="sub">{{localize 'MGT2.SpaceCombat.ShipLine' tons=ship.tons thrust=ship.thrust}}</span>
+				</span>
+				<span class="st">
+					{{#each ship.steps as |entry|}}
+					<i class="{{#if entry.done}}done{{/if}}"{{#if ../../canEdit}} data-action="toggleResolved"{{/if}} data-step="{{entry.key}}" data-tooltip="{{localize entry.label}}"></i>
+					{{/each}}
+				</span>
+			</li>
+			{{/each}}
+		</ul>
+		{{#unless order.length}}<p class="hint">{{localize 'MGT2.SpaceCombat.DropShipHint'}}</p>{{/unless}}
+	</div>
+
+	{{! Core p.165: one Tactics (naval) check by the commander of a ship — or of a whole fleet, if
+	    several are present — and its Effect is added to Initiative. It is derived from nothing below
+	    it, so it is entered here. }}
+	{{#if panel.id}}
+	<div class="block" data-group-id="{{panel.id}}">
+		<div class="sect">
+			<h3>{{localize 'MGT2.SpaceCombat.Fleet'}}</h3>
+			<span class="count">{{localize 'MGT2.SpaceCombat.Entered'}}</span>
+		</div>
+		<div class="fleet">
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.SpaceCombat.Tactics'}}</span>
+				<span class="v">
+					{{#if canEdit}}
+					<input class="f n" type="number" step="1" name="tacticsEffect" value="{{panel.tacticsEffect}}"
+						aria-label="{{localize 'MGT2.SpaceCombat.Tactics'}}" />
+					{{else}}{{panel.tacticsEffect}}{{/if}}
+				</span>
+			</div>
+			<span class="why">{{localize 'MGT2.SpaceCombat.TacticsWhy'}}</span>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.SpaceCombat.Formula'}}</span>
+				<span class="v">{{panel.initiativeFormula}}</span>
+			</div>
+		</div>
+	</div>
+	{{/if}}
+
+	{{! Reactions are NOT a fourth step. The Core prints three and resolves reactions when they are
+	    provoked (p.171); HG p.41 calls them an informal fourth phase. Drawing a fourth cell on the
+	    step strip would print a rule that is not there, so they are a list, and every row carries
+	    the cap the rules put on that one separately. }}
+	{{#if panel.owned}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.SpaceCombat.Reactions'}}</h3>
+			<span class="count">{{localize 'MGT2.SpaceCombat.NotAStep'}}</span>
+		</div>
+		<div class="reacts">
+			{{#each panel.reactions as |row|}}
+			<div class="r{{#if row.spent}} spent{{/if}}" data-combatant-id="{{row.combatantId}}">
+				<span class="nm"{{#if ../canEdit}} data-action="toggleReaction" data-action-index="{{row.index}}"{{/if}}>{{row.label}}</span>
+				<span class="by">{{row.by}}{{#if row.duty}} &middot; {{localize row.duty}}{{/if}}</span>
+				<span class="cap">{{#if row.cap}}{{localize row.cap}}{{else}}&mdash;{{/if}}</span>
+			</div>
+			{{/each}}
+			{{#unless panel.reactions.length}}
+			<p class="hint">{{localize 'MGT2.SpaceCombat.NoReactions'}}</p>
+			{{/unless}}
+		</div>
+		{{! Core p.171: evasive action is paid for with Thrust the pilot did NOT spend, so what the
+		    ledger needs beside it is the unspent figure and not a fourth reaction row. }}
+		<dl class="statline" data-derived="system.thrust">
+			<div class="stat{{#unless panel.held}} hurt{{/unless}}">
+				<dt>{{localize 'MGT2.SpaceCombat.Held'}}</dt>
+				<dd>{{panel.held}}<i>{{localize 'MGT2.SpaceCombat.ThrustUnit'}}</i></dd>
+			</div>
+		</dl>
+	</div>
+	{{/if}}
+</aside>

@@ -28,10 +28,11 @@
 		{{#if typeLabels.length}}
 		<span>{{localize 'MGT2.Chat.Damage.Type'}} <b>{{#each typeLabels}}{{#unless @first}} · {{/unless}}{{localize this}}{{/each}}</b></span>
 		{{/if}}
+		{{! Both meet the target's Protection when the card is applied, never here: AP subtracts from
+		    it (Core p.79) and Lo-Pen multiplies it (FC p.7). }}
 		{{#if ap}}<span class="hot">{{localize 'MGT2.Chat.Damage.AP' score=ap}}</span>{{/if}}
-		{{! Lo-Pen needs the target's Protection at attack time, which the system never reads: it is
-		    a reminder here and nothing else. }}
 		{{#if loPen}}<span class="hot">{{localize 'MGT2.Chat.Damage.LoPen' score=loPen}}</span>{{/if}}
+		{{#if destructive}}<span class="hot">{{localize 'MGT2.Chat.Damage.Destructive'}}</span>{{/if}}
 		{{#if stun}}<span class="hot">{{localize 'MGT2.Chat.Damage.Stun'}}</span>{{/if}}
 		<span>{{localize 'MGT2.Chat.Roll.Effect'}} <b>{{effectDisplay}}</b></span>
 		{{#if floor}}<span class="hot">{{localize 'MGT2.Chat.Damage.Floor'}}</span>{{/if}}

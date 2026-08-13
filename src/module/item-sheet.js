@@ -1,6 +1,7 @@
 import { MGT2 } from "./config.js";
 import { EFFECT_ACTIONS, prepareEffects } from "./effects.js";
 import { MGT2Helper } from "./helper.js";
+import { copyItemWithContents } from "./item.js";
 import { SheetModeMixin } from "./sheet-mode.js";
 import { appendTraitText, bindTraitInput, prepareTraitBlock, refreshTraitNumbers } from "./traits.js";
 
@@ -47,6 +48,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       actionCreate: TravellerItemSheet.#onRoleActionCreate,
       actionDelete: TravellerItemSheet.#onRoleActionDelete,
       itemRoll: TravellerItemSheet.#onItemRoll,
+      reload: TravellerItemSheet.#onReload,
       nestedEdit: TravellerItemSheet.#onNestedEdit,
       nestedRemove: TravellerItemSheet.#onNestedRemove,
       nestedDelete: TravellerItemSheet.#onNestedDelete,
@@ -111,7 +113,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       tags: this.#tags(),
       subTypes: SUBTYPES[item.type] ?? null,
       hadContainer: actor != null,
-      containers: actor ? [{ name: "", _id: "" }].concat(actor.getContainers()) : null,
+      // A bag is offered neither itself nor anything already inside it.
+      containers: actor ? [{ name: "", _id: "" }].concat(actor.getContainers()
+        .filter(c => (c.id !== item.id) && !c.containerChain.some(p => p.id === item.id))) : null,
       computers: actor ? [{ name: "", _id: "" }].concat(actor.getComputers()) : null,
       weight: "weight" in item.system ? item.system.weight : null,
       unitlabels: { weight: MGT2Helper.getWeightLabel() },
@@ -123,6 +127,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       // A Set is neither an array nor a plain object, so Handlebars cannot walk it.
       damageTypes: Array.from(item.system.damageType ?? [], key => game.i18n.localize(MGT2.DamageTypes[key])),
       scale: MGT2.WeaponScales[item.system.scale] ?? null,
+      fireModes: this.#fireModes(),
+      ammo: this.#ammo(),
       nested: this.#prepareNested(actor)
     });
   }
@@ -176,7 +182,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         : "item";
 
     let skill = null;
-    if ( (type === "talent") && (system.subType === "skill") ) {
+    // Core p.229: a psionic talent is rolled as its own skill too, so both sub-types state a level.
+    if ( type === "talent" ) {
       skill = game.i18n.format("MGT2.Items.LevelValue", { level: MGT2Helper.signed(system.level) });
     }
     else if ( binding.skill === "NP" ) {
@@ -184,16 +191,62 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     }
     else if ( binding.skill ) skill = actor?.items.get(binding.skill)?.getRollDisplay() ?? null;
 
+    // Core p.229: the PSI DM rides every power, so the sentence states it even where the talent
+    // names no characteristic of its own — which is what the prompt does with the same rule.
+    const characteristic = binding.characteristic || ((dispatch === "psionic") ? "psionic" : "");
+
     return {
       hazard,
       dispatch,
       skill,
-      characteristic: binding.characteristic
-        ? game.i18n.localize(MGT2.Characteristics[binding.characteristic]) : null,
+      characteristic: characteristic
+        ? game.i18n.localize(MGT2.Characteristics[characteristic]) : null,
       difficulty: MGT2Helper.getDifficultyDisplay(hazard ? system.difficulty : binding.difficulty),
       label: hazard ? "MGT2.Items.Resist" : "MGT2.Items.Roll",
       // An item with no owner has no characteristics and no skills to roll against.
       disabled: actor === null
+    };
+  }
+
+  /**
+   * Core folio 79: what Auto X buys this weapon, one line per mode. **There is no fire-mode field
+   * and there will not be one** — the folio makes the mode a choice per pull of the trigger, so it
+   * is the prompt's control and the sheet's job is to state what each mode costs in rounds against
+   * the magazine printed beside it.
+   * @returns {string[]|null}   Null on anything that is not an Auto weapon
+   */
+  #fireModes() {
+    const auto = (this.item.type === "weapon")
+      ? MGT2Helper.traitScore(this.item.system.traits, "auto") : 0;
+    if ( auto <= 0 ) return null;
+    return Object.values(MGT2.FireModes).map(mode => {
+      const label = game.i18n.localize(mode.label);
+      if ( !mode.rounds ) return label;
+      return game.i18n.format("MGT2.Items.FireModeCost", {
+        mode: label,
+        gain: mode.damage ? MGT2Helper.signed(auto)
+          : game.i18n.format("MGT2.RollPrompt.FireModeAttacks", { count: auto }),
+        rounds: mode.rounds * auto
+      });
+    });
+  }
+
+  /**
+   * What is in the magazine, and what putting a full one in costs in actions. Core folio 77 makes a
+   * spare magazine "fully reload the weapon", so there is one reload and no partial one; Core folio
+   * 75 prices it at a Minor Action, and FC folio 7-8's Slow Loader X replaces that with X of them.
+   * The cost is **stated and never spent** — nothing in this system keeps a ground-combat action
+   * budget, which is the same treatment the prompt's aiming ladder already gets.
+   * @returns {{value: number, magazine: number, full: boolean, actions: number}|null}
+   */
+  #ammo() {
+    const { type, system } = this.item;
+    if ( (type !== "weapon") || !(system.magazine > 0) ) return null;
+    return {
+      value: system.ammo,
+      magazine: system.magazine,
+      full: system.ammo >= system.magazine,
+      actions: Math.max(1, MGT2Helper.traitScore(system.traits, "slow-loader"))
     };
   }
 
@@ -216,30 +269,28 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   /**
    * What this item holds: software loaded into a computer, or items stored in a container. Both
    * read in play mode, so the list is not gated on the sheet being editable.
+   *
+   * Software is loaded into a machine an actor owns, so it still needs one. A container does not:
+   * its contents are whatever sits beside it, in the world as much as on a character.
    */
   #prepareNested(actor) {
     const item = this.item;
     const isComputer = item.type === "computer";
-    if ( !actor || (!isComputer && (item.type !== "container")) ) return [];
+    if ( !isComputer && (item.type !== "container") ) return [];
 
-    const held = [];
-    for ( const sibling of actor.items ) {
-      const inside = isComputer
-        ? sibling.system.software?.computerId === item.id
-        : sibling.system.container?.id === item.id;
-      if ( !inside ) continue;
-      held.push({
-        _id: sibling.id,
-        name: sibling.name,
-        img: sibling.img,
-        type: game.i18n.localize(`TYPES.Item.${sibling.type}`),
-        bandwidth: sibling.system.software?.bandwidth ?? null,
-        quantity: sibling.system.quantity ?? null,
-        weight: sibling.system.weight ?? null
-      });
-    }
-    held.sort(MGT2Helper.compareByName);
-    return held;
+    const held = isComputer
+      ? (actor?.items.filter(i => i.system.software?.computerId === item.id) ?? [])
+      : item.contents;
+
+    return held.map(sibling => ({
+      _id: sibling.id,
+      name: sibling.name,
+      img: sibling.img,
+      type: game.i18n.localize(`TYPES.Item.${sibling.type}`),
+      bandwidth: sibling.system.software?.bandwidth ?? null,
+      quantity: sibling.system.quantity ?? null,
+      weight: MGT2Helper.roundWeight(sibling.getTotalWeight())
+    })).sort(MGT2Helper.compareByName);
   }
 
   /** @inheritDoc */
@@ -271,11 +322,12 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     const root = this.element;
     const unit = root.querySelector("[name='system.range.unit']");
     if ( unit ) unit.value = scale.range;
-    for ( const field of ["fireControl", "power"] ) {
+    for ( const field of ["fireControl", "power", "range.band"] ) {
       const input = root.querySelector(`[name='system.${field}']`);
       if ( !input ) continue;
-      input.disabled = !scale[field];
-      input.closest("label")?.classList.toggle("off", !scale[field]);
+      const applies = scale[field.split(".").pop()];
+      input.disabled = !applies;
+      input.closest("label")?.classList.toggle("off", !applies);
     }
   }
 
@@ -408,11 +460,79 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     return handler.call(sheet, event, target);
   }
 
+  /**
+   * Core folio 77: a spare magazine "will fully reload the weapon", so the whole capacity goes back
+   * in and there is nothing to count. Whose action it is, is settled by folio 75 — the firer's Minor
+   * Action — and the button says so rather than spending one.
+   * @this {TravellerItemSheet}
+   */
+  static #onReload() {
+    return this.item.update({ "system.loaded": this.item.system.magazine });
+  }
+
+  /* -------------------------------------------- */
+  /*  Drag and Drop                               */
   /* -------------------------------------------- */
 
-  /** The sibling item a nested row stands for. @this {TravellerItemSheet} */
+  /**
+   * A contents row stands for a sibling document, not for anything embedded in this item, so what
+   * leaves the sheet is that sibling's own drag data. Anything else is an effect.
+   * @inheritDoc
+   */
+  async _onDragStart(event) {
+    const nested = TravellerItemSheet.#nestedItem.call(this, event.currentTarget);
+    if ( !nested ) return super._onDragStart(event);
+    event.dataTransfer.setData("text/plain", JSON.stringify(nested.toDragData()));
+  }
+
+  /**
+   * Storing something is a drop on the container's own sheet. All it writes is a reference, so an
+   * item already in this collection only changes hands; one from a compendium, another actor or
+   * the world is copied in with everything it holds.
+   * @inheritDoc
+   */
+  async _onDrop(event) {
+    const data = MGT2Helper.getDataFromDropEvent(event);
+    const container = this.item;
+    if ( (container.type !== "container") || (data?.type !== "Item") ) return super._onDrop(event);
+    if ( !this.isEditable ) return;
+    if ( Hooks.call("dropItemSheetData", container, this, data) === false ) return;
+
+    // Only what carries a storage reference can be stored: a career or a skill has nowhere to put.
+    const dropped = await getDocumentClass("Item").fromDropData(data);
+    if ( !dropped || !("container" in dropped.system) ) return;
+
+    if ( container.system.locked && !game.user.isGM ) {
+      return ui.notifications.error(game.i18n.localize("MGT2.Errors.LockedContainer"));
+    }
+    // A bag cannot end up inside itself, at any remove.
+    if ( (dropped.id === container.id) || container.containerChain.some(c => c.id === dropped.id) ) {
+      return ui.notifications.error(game.i18n.localize("MGT2.Errors.ContainerRecursive"));
+    }
+
+    if ( (dropped.parent === container.parent) && (dropped.pack === container.pack) ) {
+      if ( dropped.system.container?.id === container.id ) return;
+      const update = { "system.container.id": container.id };
+      // Stowing something takes it off, the way the storage select does.
+      if ( "equipped" in dropped.system ) update["system.equipped"] = false;
+      await dropped.update(update);
+      return this.render();
+    }
+
+    const toCreate = await copyItemWithContents(dropped, container.id);
+    // A world copy belongs in the same folder as the bag it went into; an owned one has none.
+    for ( const entry of toCreate ) entry.folder = container.folder?.id ?? null;
+    await getDocumentClass("Item").createDocuments(toCreate,
+      { parent: container.parent, pack: container.pack, keepId: true });
+    return this.render();
+  }
+
+  /* -------------------------------------------- */
+
+  /** The sibling document a nested row stands for. @this {TravellerItemSheet} */
   static #nestedItem(target) {
-    return this.item.actor?.items.get(target.closest("[data-item-id]")?.dataset.itemId);
+    const id = target.closest("[data-item-id]")?.dataset.itemId;
+    return id ? this.item.siblings?.get(id) : null;
   }
 
   /** @this {TravellerItemSheet} */

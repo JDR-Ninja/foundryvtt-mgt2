@@ -1,7 +1,7 @@
 <section class="mgt2-panel active mgt2-npc-panel">
 
 	{{#if isCreature}}
-	{{! Fight or Flight (Core p.91). The lookup keys on the pattern ALONE: the published statblocks
+	{{! Fight or Flight (Core p.90). The lookup keys on the pattern ALONE: the published statblocks
 	    pair diet and pattern freely, so the table's diet grouping is not part of the key. }}
 	<div class="block">
 		<div class="sect">
@@ -61,7 +61,7 @@
 				<span class="lbl">{{localize 'MGT2.Actor.npc.SpeedSwim'}} ({{localize 'MGT2.Actor.npc.Metres'}})</span>
 				{{formInput systemFields.speed.fields.swim name="system.speed.swim" value=system.speed.swim classes="f num"}}
 			</label>
-			{{! A Speed Band and not metres: `Flyer (X)` names "a maximum Speed Band" (Core p.86). }}
+			{{! A Speed Band and not metres: `Flyer (X)` names "a maximum Speed Band" (Core p.85). }}
 			<label>
 				<span class="lbl">{{localize 'MGT2.Actor.npc.SpeedFly'}} ({{localize 'MGT2.Actor.npc.SpeedBand'}})</span>
 				<select class="f" name="system.speed.fly" data-dtype="Number">

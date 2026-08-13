@@ -1,6 +1,6 @@
 <aside class="mgt2-rail">
 
-	{{! The pool. Core p.169: a hull at zero is wrecked and there is no state under it, so the bar
+	{{! The pool. Core p.168: a hull at zero is wrecked and there is no state under it, so the bar
 	    runs to the maximum and the sustained-damage ladder marks the tenths. }}
 	<div class="block">
 		<div class="sect">
@@ -51,7 +51,7 @@
 		flag=(localize 'MGT2.Actor.spacecraft.NoHardpoint')
 		derived="system.hardpoints"}}
 
-	{{! One per full 100 tons, free (HG p.26-27). A cap of zero is a real answer, not a blank. }}
+	{{! One per full 100 tons, free (HG p.25-26). A cap of zero is a real answer, not a blank. }}
 	<dl class="statline" data-derived="system.firmpoints">
 		<div class="stat{{#unless ship.hardpoints.firmpoints}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.spacecraft.Firmpoints'}}</dt>
@@ -59,4 +59,29 @@
 		</div>
 		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Airlocks'}}</dt><dd>{{ship.hardpoints.airlocks}}<i>{{localize 'MGT2.Actor.spacecraft.Free'}}</i></dd></div>
 	</dl>
+
+	{{! Core p.166: what a change into or out of each band costs, against the Thrust this ship
+	    actually has — so an M-Drive critical shows up here as bands going out of reach. A band it
+	    cannot pay for in one round is still reachable by accumulating Thrust across rounds, which
+	    is what the round count says rather than the band being struck out. Adjacent and Close carry
+	    no attack DM at all (p.167): they resolve as a dogfight, and a dash is not a zero. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.spacecraft.Manoeuvre'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.spacecraft.ManoeuvreCount' thrust=system.drives.effectiveThrust}}</span>
+		</div>
+		<ul class="codes" data-derived="system.manoeuvre">
+			{{#each ship.manoeuvre as |band|}}
+			<li class="code{{#unless band.affordable}} inert{{/unless}}">
+				<b>{{localize band.label}}</b>
+				<span class="ps">
+					<span class="p">{{localize 'MGT2.Actor.spacecraft.BandThrust' thrust=band.thrust}}</span>
+					{{! No rounds figure on a ship with no Thrust at all: banking nothing never arrives. }}
+					{{#unless band.affordable}}{{#if band.rounds}}<span class="p">{{localize 'MGT2.Actor.spacecraft.BandRounds' rounds=band.rounds}}</span>{{/if}}{{/unless}}
+					<span class="p">{{#if band.dogfight}}{{localize 'MGT2.Actor.spacecraft.Dogfight'}}{{else}}{{showDM band.attackDM}}{{/if}}</span>
+				</span>
+			</li>
+			{{/each}}
+		</ul>
+	</div>
 </aside>

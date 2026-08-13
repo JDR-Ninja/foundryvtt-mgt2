@@ -2,10 +2,10 @@ import { ActorBaseData, createCharacteristicField } from "./actor-base-data.js";
 
 const fields = foundry.data.fields;
 
-/** Severity runs 1–6; 0 is "this location has not been hit" (Core p.141). */
+/** Severity runs 1–6; 0 is "this location has not been hit" (Core p.140). */
 const MAX_SEVERITY = 6;
 
-/** Core p.141: a further critical on a location already at 6 deals this instead of a seventh step. */
+/** Core p.140: a further critical on a location already at 6 deals this instead of a seventh step. */
 const OVERFLOW_DAMAGE = "6d6";
 
 /**
@@ -27,7 +27,7 @@ export class CraftData extends ActorBaseData {
      */
     static CRITICALS = {};
 
-    /** Core p.141, p.170: the ladder fires each time the wound passes another tenth of the hull. */
+    /** Core p.140, p.169: the ladder fires each time the wound passes another tenth of the hull. */
     static SUSTAINED_FRACTION = 0.1;
 
     static defineSchema() {
@@ -66,7 +66,7 @@ export class CraftData extends ActorBaseData {
     /* -------------------------------------------- */
 
     /**
-     * Core p.141, p.169: a hull at zero is wrecked and there is no state under it. The inherited
+     * Core p.140, p.168: a hull at zero is wrecked and there is no state under it. The inherited
      * pair still derives — a single-link chain can never be `unconscious` — because the shared
      * header renders them.
      * @inheritDoc
@@ -76,14 +76,14 @@ export class CraftData extends ActorBaseData {
         return { ...super.damageStates, wrecked: (hull.max > 0) && (hull.damage >= hull.max) };
     }
 
-    /** Core p.141: Effect − 5, so Effect 6 is severity 1 and Effect 11+ is severity 6. */
+    /** Core p.140: Effect − 5, so Effect 6 is severity 1 and Effect 11+ is severity 6. */
     static severityFor(effect) {
         return Math.min(MAX_SEVERITY, Math.max(0, (Math.trunc(effect) || 0) - 5));
     }
 
     /**
      * How many sustained-damage thresholds a wound moving from `before` to `after` crossed. Core
-     * p.141 asks for a Severity 1 critical at every tenth of starting Hull, and with the wound
+     * p.140 asks for a Severity 1 critical at every tenth of starting Hull, and with the wound
      * stored that is a subtraction rather than a counter to keep in step (§1.2).
      */
     sustainedCrossings(before, after) {
@@ -135,7 +135,7 @@ export class CraftData extends ActorBaseData {
     /*  Rules                                       */
     /* -------------------------------------------- */
 
-    /** Core p.141, p.170: critical damage ignores armour entirely. @inheritDoc */
+    /** Core p.140, p.169: critical damage ignores armour entirely. @inheritDoc */
     protectionAgainst(options = {}) {
         return options.ignoreArmour ? 0 : super.protectionAgainst(options);
     }
@@ -158,7 +158,7 @@ export class CraftData extends ActorBaseData {
     }
 
     /**
-     * Core p.141: a repeat hit on a location takes `max(new, old + 1)` and caps at 6; a further
+     * Core p.140: a repeat hit on a location takes `max(new, old + 1)` and caps at 6; a further
      * critical on a location already at 6 deals 6D extra damage instead, and that damage ignores
      * armour like every other critical.
      * @param {string} location   A key of this craft's `criticals`

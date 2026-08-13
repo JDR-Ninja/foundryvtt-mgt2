@@ -15,6 +15,14 @@
 			<span>{{localize 'MGT2.Items.Locked'}}</span>
 		</label>
 		{{/if}}
+		{{#if hadContainer}}
+		<span class="store">
+			<span class="lbl">{{localize 'MGT2.Items.Storage'}}</span>
+			<select class="f" name="system.container.id">
+				{{selectOptions containers selected=system.container.id valueAttr="_id" labelAttr="name"}}
+			</select>
+		</span>
+		{{/if}}
 		<span class="ro play-only">
 			<span>{{weight}} {{unitlabels.weight}}</span>
 			<span>&times;{{system.count}}</span>

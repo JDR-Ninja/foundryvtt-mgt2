@@ -1,0 +1,373 @@
+// The space combat screen. Ported from docs/sketch-space-combat.html: the statline, the two
+// budgets, the roster and the code row are the kit unchanged, and what is here is the window
+// skeleton plus the three things this screen owns — the range strip, the order and the reactions.
+
+// --------------------------------------------
+//  The header, and the distance a referee types
+// --------------------------------------------
+
+.mgt2 .mgt2-combat-head
+	display: flex
+	flex-direction: column
+	gap: 7px
+	padding: 11px 16px 13px
+	border-bottom: 1px solid var(--rule)
+
+	.top
+		display: flex
+		flex-wrap: wrap
+		align-items: baseline
+		gap: 10px
+		h2
+			margin: 0
+			font-family: var(--cond)
+			font-size: 15px
+			font-weight: 700
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			i
+				font-style: normal
+				color: var(--accent-text)
+		.of
+			font-family: var(--cond)
+			font-size: 11px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--faint)
+		.km
+			margin-left: auto
+			display: inline-flex
+			align-items: center
+			gap: 5px
+			input.f
+				width: 6rem
+			i
+				font-style: normal
+				font-family: var(--mono)
+				font-size: 11px
+				color: var(--faint)
+
+// --------------------------------------------
+//  THE RANGE STRIP — the one genuinely new component
+// --------------------------------------------
+// Position in MGT2 is not a map: it is one band per PAIR of contacts, and the band is what pays. So
+// the strip is read from the ship in the rail outwards with every other contact pinned on it, and
+// each cell carries the two numbers the band is worth — the attack DM (Core p.167) and the Thrust
+// it costs to leave it (p.166). `.band[data-band]` is the stored state; the kilometre readout above
+// derives from it, never the other way round.
+
+.mgt2 .bands
+	display: grid
+	grid-template-columns: repeat(7, minmax(0, 1fr))
+	border: 1px solid var(--rule-soft)
+
+	.band
+		position: relative
+		min-width: 0
+		padding: 23px 7px 7px
+		border-right: 1px solid var(--rule-soft)
+		&:last-child
+			border-right: 0
+		&:hover
+			background: var(--hover)
+		&[data-action]
+			cursor: var(--cursor-pointer)
+		b
+			display: block
+			font-family: var(--cond)
+			font-size: 11.5px
+			font-weight: 700
+			letter-spacing: 0.12em
+			text-transform: uppercase
+		.km
+			display: block
+			overflow: hidden
+			font-family: var(--mono)
+			font-size: 9.5px
+			white-space: nowrap
+			text-overflow: ellipsis
+			color: var(--faint)
+		.fig
+			display: flex
+			gap: 9px
+			margin-top: 4px
+			font-family: var(--mono)
+			font-size: 10.5px
+			color: var(--mute)
+			i
+				font-style: normal
+			.neg
+				color: var(--danger)
+			.none
+				color: var(--faint)
+
+	.band.here
+		background: var(--accent-soft)
+		box-shadow: inset 0 -2px 0 var(--accent-text)
+		b
+			color: var(--accent-text)
+
+	// Beyond the furthest band a mounted weapon reaches, nothing may be fired at all — so the cell
+	// is not dimmed for taste, it is unreachable and it reads that way.
+	.band.out
+		opacity: 0.45
+
+	.pins
+		position: absolute
+		top: 3px
+		left: 5px
+		right: 5px
+		display: flex
+		flex-wrap: wrap
+		gap: 3px
+
+.mgt2 .pin
+	display: inline-flex
+	align-items: center
+	gap: 4px
+	padding: 0 5px 1px
+	font-family: var(--cond)
+	font-size: 9.5px
+	font-weight: 600
+	letter-spacing: 0.1em
+	white-space: nowrap
+	text-transform: uppercase
+	background: var(--paper)
+	border: 1px solid var(--rule)
+	border-radius: 2px
+	cursor: var(--cursor-pointer)
+	&.on
+		color: var(--accent-text)
+		border-color: var(--accent-line)
+
+// --------------------------------------------
+//  THE ORDER — one row per contact, at its own Initiative
+// --------------------------------------------
+// A ship is one row even though several people act inside it: that is what the CombatantGroup is
+// for, and the row IS the group. The three pips are the round's three steps (Core p.165).
+
+.mgt2 .order
+	list-style: none
+	margin: 0
+	padding: 0
+
+	li
+		display: grid
+		grid-template-columns: 2.1rem minmax(0, 1fr) auto
+		gap: 0 9px
+		align-items: center
+		padding: 7px 4px
+		border-bottom: 1px solid var(--rule-soft)
+		&:last-child
+			border-bottom: 0
+		&:hover
+			background: var(--hover)
+
+	li.on
+		background: var(--accent-soft)
+		box-shadow: inset 2px 0 0 var(--accent-text)
+		.i
+			color: var(--accent-text)
+
+	.i
+		font-family: var(--cond)
+		font-size: 17px
+		font-weight: 700
+		line-height: 1
+		text-align: right
+		font-variant-numeric: tabular-nums
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--accent-text)
+
+	.who
+		min-width: 0
+		cursor: var(--cursor-pointer)
+
+	.nm
+		display: block
+		overflow: hidden
+		font-family: var(--cond)
+		font-size: 12.5px
+		font-weight: 700
+		letter-spacing: 0.08em
+		white-space: nowrap
+		text-overflow: ellipsis
+		text-transform: uppercase
+
+	.sub
+		display: block
+		font-family: var(--mono)
+		font-size: 9.5px
+		letter-spacing: 0
+		text-transform: none
+		color: var(--faint)
+
+	.st
+		display: flex
+		gap: 3px
+		i
+			width: 10px
+			height: 10px
+			border: 1px solid var(--rule)
+			&[data-action]
+				cursor: var(--cursor-pointer)
+			&.done
+				background: var(--fill)
+				border-color: var(--fill)
+
+// --------------------------------------------
+//  THE REACTION LEDGER — reactions are not a step
+// --------------------------------------------
+// The Core prints three steps (p.165) and resolves reactions when they are provoked; HG p.96 calls
+// them an informal fourth phase. A fourth cell on the step strip would print a rule that is not
+// there, so they get their own list and every row carries the cap the rules put on it.
+
+.mgt2 .reacts
+	display: flex
+	flex-direction: column
+
+	.r
+		display: grid
+		grid-template-columns: minmax(0, 1fr) auto
+		gap: 1px 10px
+		padding: 6px 2px
+		border-bottom: 1px solid var(--rule-soft)
+		&:last-child
+			border-bottom: 0
+
+	.nm
+		font-family: var(--cond)
+		font-size: 12px
+		font-weight: 700
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		&[data-action]
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
+
+	.by
+		grid-column: 1
+		font-family: var(--mono)
+		font-size: 10px
+		color: var(--faint)
+
+	.cap
+		grid-row: 1 / 3
+		align-self: center
+		font-family: var(--mono)
+		font-size: 10.5px
+		white-space: nowrap
+		text-align: right
+		color: var(--mute)
+
+	.r.spent
+		.nm,
+		.by
+			color: var(--faint)
+		.cap
+			text-decoration: line-through
+			color: var(--faint)
+
+// --------------------------------------------
+//  The rail's own two small blocks
+// --------------------------------------------
+
+.mgt2 .roundno
+	display: flex
+	align-items: baseline
+	gap: 8px
+	b
+		font-family: var(--cond)
+		font-size: 26px
+		font-weight: 700
+		line-height: 1
+		font-variant-numeric: tabular-nums
+	.step
+		margin-left: auto
+		font-family: var(--cond)
+		font-size: 11px
+		font-weight: 700
+		letter-spacing: 0.16em
+		text-transform: uppercase
+		color: var(--accent-text)
+
+// A check that belongs to no ship is entered once and read here rather than derived from any row.
+.mgt2 .fleet
+	display: flex
+	flex-direction: column
+	gap: 4px
+	padding: 8px 10px
+	border: 1px solid var(--rule)
+
+	.row
+		display: flex
+		align-items: baseline
+		gap: 8px
+		.v
+			margin-left: auto
+			font-family: var(--mono)
+			font-size: 12.5px
+			font-variant-numeric: tabular-nums
+			input.f
+				width: 3.6rem
+			select.f
+				width: auto
+				min-width: 8rem
+				font-size: 12px
+
+	.why
+		font-family: var(--cond)
+		font-size: 9.5px
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+
+.mgt2 .mgt2-combat-panel
+	display: flex
+	flex-direction: column
+
+.mgt2 table.roster td.act
+	width: 1px
+	white-space: nowrap
+	.need[data-action]
+		cursor: var(--cursor-pointer)
+
+// The Thrust panel's rows are editable, because allocating Thrust is the session loop rather than
+// structure — so its label cell holds a form control the read-only budgets never carry.
+.mgt2 .budget .brows td input.f
+	font-size: 12px
+	padding: 1px 4px
+
+// --------------------------------------------
+//  Adaptive — the rail becomes a band above the panel
+// --------------------------------------------
+// Seven cells shrink to nothing long before the rest of the screen does, so the strip folds to four
+// columns and then to two rather than squeezing every label out of legibility.
+
+@container sheet (max-width: 880px)
+	.mgt2.application.space-combat > .window-content
+		grid-template-columns: minmax(0, 1fr)
+		grid-template-rows: auto auto minmax(0, 1fr)
+		grid-template-areas: "header" "rail" "panel"
+
+	.mgt2 .mgt2-rail
+		border-right: 0
+		border-bottom: 1px solid var(--rule)
+
+	.mgt2 .bands
+		grid-template-columns: repeat(4, minmax(0, 1fr))
+		.band
+			border-bottom: 1px solid var(--rule-soft)
+		.band:nth-child(4)
+			border-right: 0
+
+@container sheet (max-width: 560px)
+	.mgt2 .bands
+		grid-template-columns: repeat(2, minmax(0, 1fr))
+		.band:nth-child(4)
+			border-right: 1px solid var(--rule-soft)
+		.band:nth-child(2n)
+			border-right: 0

@@ -14,6 +14,10 @@ import {
 } from "./datamodels.js";
 
 import { MGT2 } from "./config.js";
+import { CHECK, CheckMessageData } from "./chat-message.js";
+import { CrewCombatantData, MGT2Combatant, PersonCombatantData, registerCombatantContextOptions } from "./combatant.js";
+import { MGT2Combat, MGT2CombatantGroup, SHIP, ShipGroupData, SPACE, SpaceCombatData } from "./combat.js";
+import { registerSpaceCombatScreen } from "./combat-screen.js";
 import { registerActiveEffects } from "./effects.js";
 import { MGT2Helper } from "./helper.js";
 import { TravellerActor } from "./actors/actor.js";
@@ -23,6 +27,7 @@ import { VehicleData } from "./actors/vehicle-data.js";
 import { SpacecraftData } from "./actors/spacecraft-data.js";
 import { RobotData } from "./actors/robot-data.js";
 import { TravellerItem } from "./item.js";
+import { MGT2ItemDirectory } from "./item-directory.js";
 import { TravellerItemSheet } from "./item-sheet.js";
 import { NpcActorSheet, TravellerActorSheet } from "./actors/character-sheet.js";
 import { VehicleActorSheet } from "./actors/vehicle-sheet.js";
@@ -43,10 +48,26 @@ function registerHandlebarsHelpers() {
 
 Hooks.once("init", async function () {
   CONFIG.MGT2 = MGT2;
+  // The formula is the SHIP's (Core p.165: 2D + Pilot + Thrust). A person's Initiative is the
+  // Effect of a DEX or INT check (p.73), which is a different number off the same dice — so
+  // `MGT2Combatant#_getInitiativeFormula` dispatches, and the two hundredths hold the DEX
+  // tie-break p.73 asks for.
   CONFIG.Combat.initiative = {
     formula: "2d6 + @initiative",
     decimals: 2
   };
+  CONFIG.Combatant.documentClass = MGT2Combatant;
+  CONFIG.Combatant.dataModels = { person: PersonCombatantData, crew: CrewCombatantData };
+  // A space combat is three documents, because a range band is a property of a PAIR of ships and no
+  // Actor and no Item can hold a pair (§9.26).
+  CONFIG.Combat.documentClass = MGT2Combat;
+  CONFIG.Combat.dataModels = { [SPACE]: SpaceCombatData };
+  CONFIG.CombatantGroup.documentClass = MGT2CombatantGroup;
+  CONFIG.CombatantGroup.dataModels = { [SHIP]: ShipGroupData };
+  // `TypeDataField#getModelForType` reads `dataModels[type]` with the literal type string, so this
+  // key must be whatever `system.json`'s `documentTypes` produced — key it wrong and the document
+  // is created with the right type and an empty `system`, silently.
+  CONFIG.ChatMessage.dataModels = { [CHECK]: CheckMessageData };
 
   CONFIG.Actor.trackableAttributes = {
     character: {
@@ -173,9 +194,15 @@ Hooks.once("init", async function () {
 
   CONFIG.Actor.documentClass = TravellerActor;
   CONFIG.Item.documentClass = TravellerItem;
+  CONFIG.ui.items = MGT2ItemDirectory;
   // The document class, the statuses and the config sheet; `CONFIG.ActiveEffect.dataModels.base`
   // is left alone, because core already declares `changes` there.
   registerActiveEffects();
+  registerCombatantContextOptions();
+  // The screen is opened from the tracker's two context menus, and the drag watcher is what lets a
+  // drop zone refuse at the pointer — `dataTransfer` is unreadable for the whole of `dragover`.
+  registerSpaceCombatScreen();
+  MGT2Helper.watchDrags();
 
   // Foundry v14 registers no default Actor/Item sheet, so there is nothing to unregister.
   // Omitting `themes` leaves the light/dark choice in place: the sheets follow the viewer.

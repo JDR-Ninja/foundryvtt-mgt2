@@ -9,7 +9,7 @@ const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applicat
  * @param {object} data   Template context
  * @returns {Promise<HTMLDivElement>}
  */
-async function buildContent(path, data) {
+export async function buildContent(path, data) {
     const content = document.createElement("div");
     content.innerHTML = await foundry.applications.handlebars.renderTemplate(path, data);
     return content;
@@ -147,11 +147,11 @@ export class CharacterPrompts {
     }
 
     /* -------------------------------------------- */
-    /*  Healing (Core p.83-84)                      */
+    /*  Healing (Core p.82-83)                      */
     /* -------------------------------------------- */
 
     /**
-     * Core p.83 divides both first aid and surgery "as desired", so this one dialog ends both. The
+     * Core p.82 divides both first aid and surgery "as desired", so this one dialog ends both. The
      * pool is editable: the Effect a card carries is an offer, not a fact the referee must accept.
      * @param {object} context   `{title, points, opening, rows, conditions, note}`, `rows` being
      *                           `[{key, label, damage}]` and `conditions` labels that gate submit
@@ -256,7 +256,7 @@ export class CharacterPrompts {
     }
 
     /**
-     * Core p.83: surgery restores like first aid — the Effect, minimum one — and a failed check
+     * Core p.82: surgery restores like first aid — the Effect, minimum one — and a failed check
      * instead costs 3 + the Effect. That sum shrinks as the check gets worse and goes negative below
      * Effect -3, so it is floored: an operation that went wrong cannot heal.
      * @returns {{success: boolean, points: number}}
@@ -309,9 +309,76 @@ export class CharacterPrompts {
     }
 
     /* -------------------------------------------- */
+    /*  Radiation (Core folio 81)                   */
+    /* -------------------------------------------- */
 
     /**
-     * Core p.84's augment interference, offered and never applied: the system cannot know which
+     * One dose. Core folio 81's Radiation Exposure table is offered as it is printed — pick a source
+     * and its figure is rolled — and the field beside it is the exposure the table does not cover,
+     * which is most of them. Folio 100's armour Rad score is stated rather than typed: it is already
+     * on the sheet, and it comes off whichever route the dose arrived by.
+     * @param {object} context   `{rads, protection}`
+     * @returns {Promise<{source: string, rads: string}|null>}
+     */
+    static async openRadiation(context) {
+        const sources = Object.entries(CONFIG.MGT2.RadiationSources).map(([key, source]) =>
+            `<option value="${key}">${esc(game.i18n.localize(source.label))} — ${esc(source.formula)}</option>`);
+
+        const content = buildElement(`
+            <div class="dlg">
+                <div class="dblock">
+                    <label class="drow">
+                        <span class="lbl">${esc(game.i18n.localize("MGT2.Radiation.Source"))}</span>
+                        <select class="f source" name="source">
+                            <option value="">${esc(game.i18n.localize("MGT2.Radiation.Typed"))}</option>
+                            ${sources.join("")}
+                        </select>
+                    </label>
+                    <label class="drow">
+                        <span class="lbl">${esc(game.i18n.localize("MGT2.Actor.Rads"))}</span>
+                        <input class="f n rads" type="number" name="rads" step="1" min="0" value="0" />
+                        <span class="dm outcome"></span>
+                    </label>
+                </div>
+                <p class="hint">${esc(game.i18n.format("MGT2.Radiation.Standing", context))}</p>
+            </div>`);
+
+        return DialogV2.input({
+            window: { title: game.i18n.localize("MGT2.Radiation.Exposure") },
+            classes: ["mgt2"],
+            position: { width: 400 },
+            content,
+            ok: { label: "MGT2.Radiation.Expose", icon: "fa-solid fa-radiation" },
+            render: (event, dialog) => CharacterPrompts.#wireRadiation(dialog.element, context),
+            rejectClose: false
+        });
+    }
+
+    /**
+     * A picked source rolls its own figure on submit, so the typed field goes dark and the readout
+     * says which band a dose of that size lands in rather than pretending to know the total.
+     */
+    static #wireRadiation(root, context) {
+        const source = root.querySelector("select.source");
+        const rads = root.querySelector("input.rads");
+        const outcome = root.querySelector(".dm.outcome");
+        const sync = () => {
+            const picked = CONFIG.MGT2.RadiationSources[source.value];
+            rads.disabled = Boolean(picked);
+            const dose = picked ? null : Math.max(0, (Number(rads.value) || 0) - context.protection);
+            outcome.textContent = (dose === null) ? picked.formula
+                : game.i18n.format("MGT2.Radiation.Reaching", { rads: dose });
+            outcome.classList.toggle("bad", dose > 0);
+        };
+        source.addEventListener("change", sync);
+        rads.addEventListener("input", sync);
+        sync();
+    }
+
+    /* -------------------------------------------- */
+
+    /**
+     * Core p.83's augment interference, offered and never applied: the system cannot know which
      * implant is "relevant", and the facility's Tech Level is not on any sheet — so the referee
      * types it and reads the modifier off.
      */

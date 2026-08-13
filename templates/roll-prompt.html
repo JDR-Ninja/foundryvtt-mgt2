@@ -14,9 +14,13 @@
 			</select>
 			<span class="pdm zero" data-readout="characteristic">+0</span>
 			{{#if blocks.skill}}
+			{{! Core folio 58 makes characteristic checks and skill checks two different kinds of task
+			    check, and the first option is the first of them: no skill is used, so none is missing
+			    and DM+0 is right. It is named rather than blank because an unnamed row reads as a
+			    forgotten one, and folio 59 charges DM-3 for the skill check it would be. }}
 			<select class="f dm-source" name="skill"
 				aria-label="{{ localize 'MGT2.RollPrompt.SkillDM' }}">
-				<option value="" data-dm="0"></option>
+				<option value="" data-dm="0">{{ localize 'MGT2.RollPrompt.NoSkill' }}</option>
 				{{#each skills as |s|}}
 				<option value="{{s._id}}" data-dm="{{s.dm}}" data-term="{{s.term}}"{{#if (eq s._id ../skill)}} selected{{/if}}>{{s.name}}</option>
 				{{/each}}
@@ -25,6 +29,62 @@
 			{{/if}}
 		</div>
 	</div>
+
+	{{! Core p.63. One source, singular: the rule chains THE previous check, which is what a select
+	    with an empty first option says and a row of checkboxes does not. The row renders only when
+	    there is something to chain from — the same composition rule the blocks above follow. }}
+	{{#if priorChecks.length}}
+	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.Chain' }}">
+		<span class="pgut">{{ localize 'MGT2.RollPrompt.Chain' }}</span>
+		<div class="pfields">
+			{{! Core p.63. Several, because "working together" is this same table read once per
+			    contributor: one Traveller makes the final check and the others check to add task
+			    chain modifiers. Choosing nothing is not chained. }}
+			<select class="f dm-source" name="chain" multiple size="3"
+				aria-label="{{ localize 'MGT2.RollPrompt.ChainSource' }}">
+				{{#each priorChecks as |c|}}
+				<option value="{{c.id}}" data-dm="{{c.dm}}" data-term="{{c.term}}"{{#if c.selected}} selected{{/if}}>{{c.label}}</option>
+				{{/each}}
+			</select>
+			<span class="pdm zero" data-readout="chain">+0</span>
+		</div>
+	</div>
+
+	{{! Core p.62: both sides roll as normal and the higher Effect wins, so this row modifies
+	    nothing. It is not a `.dm-source` and carries no readout — the comparison happens after the
+	    dice, and the card states it. A separate row from the chain because the two are independent:
+	    a check may legitimately chain from one earlier roll and be opposed by another. }}
+	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.Opposed' }}">
+		<span class="pgut">{{ localize 'MGT2.RollPrompt.Opposed' }}</span>
+		<div class="pfields">
+			<select class="f" name="opposed"
+				aria-label="{{ localize 'MGT2.RollPrompt.OpposedSource' }}">
+				<option value="">{{ localize 'MGT2.RollPrompt.OpposedNone' }}</option>
+				{{#each priorChecks as |c|}}
+				<option value="{{c.id}}">{{c.label}}</option>
+				{{/each}}
+			</select>
+		</div>
+	</div>
+	{{/if}}
+
+	{{! Core folio 229. Not a `.dm-source` and no readout: reach costs PSI points, never a DM. The
+	    printed band is the first cell and the default; the other two are what "twice the PSI Cost"
+	    and "the PSI Cost multiplied by four" buy, each naming the band and the points it spends. }}
+	{{#if reach}}
+	<div class="pline" role="group" aria-label="{{ localize 'MGT2.Items.Reach' }}">
+		<span class="pgut">{{ localize 'MGT2.Items.Reach' }}</span>
+		<div class="pfields">
+			<span class="seg" data-name="psiBoost" role="radiogroup"
+				aria-label="{{ localize 'MGT2.RollPrompt.ReachHint' }}">
+				{{#each reach as |r|}}
+				<label title="{{ localize 'MGT2.RollPrompt.ReachCost' points=r.points }}"><input type="radio"
+					name="psiBoost" value="{{r.cost}}"{{#if r.checked}} checked{{/if}} /><span>{{r.band}}</span><span class="v">{{r.points}}</span></label>
+				{{/each}}
+			</span>
+		</div>
+	</div>
+	{{/if}}
 
 	{{#if blocks.range}}
 	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.Range' }}">
@@ -48,6 +108,21 @@
 					{{/each}}
 				</span>
 			</span>
+			{{! Core folio 79. Beside aiming because the two argue: burst and full auto declare they
+			    suppress it, which is the same wiring an offered trait uses, so the ladder greys out
+			    the moment a mode that forfeits it is picked. }}
+			{{#if fireModes}}
+			<span class="seggrp">
+				<span class="seglbl">{{ localize 'MGT2.RollPrompt.FireMode' }}</span>
+				<span class="seg" data-name="fireMode" role="radiogroup"
+					aria-label="{{ localize 'MGT2.RollPrompt.FireMode' }}">
+					{{#each fireModes as |m|}}
+					<label{{#if m.rounds}} title="{{ localize 'MGT2.RollPrompt.FireModeRounds' rounds=m.rounds }}"{{/if}}><input
+						type="radio" name="fireMode" value="{{m.key}}" data-suppress="{{m.suppress}}"{{#if @first}} checked{{/if}} /><span>{{m.label}}</span>{{#if m.display}}<span class="v">{{m.display}}</span>{{/if}}</label>
+					{{/each}}
+				</span>
+			</span>
+			{{/if}}
 			<label class="tog pos" data-status="laserSight">
 				<input type="checkbox" name="laserSight" data-dtype="Boolean" data-dm="1" data-requires="aiming"
 					data-term="{{localize 'MGT2.AttackModifiers.laserSight'}}" />
@@ -65,7 +140,17 @@
 					data-term="{{localize 'MGT2.AttackModifiers.prone'}}" />
 				<span>{{ localize 'MGT2.AttackModifiers.prone' }}</span><span class="v">-1</span>
 			</label>
-			{{! The field prefix is abbreviated so the p.75 row fits on one line; the full name is
+			{{! Core folio 167's to-hit column. A declared fact about what is being shot at, exactly
+			    like the two boxes above it — the weapon states the attacker's half of the scale pair,
+			    so the cell names the other half and nothing is resolved against a target. Unticked
+			    means the scales match, which is DM+0 and the common case. }}
+			<label class="tog {{#if crossScale.negative}}neg{{else}}pos{{/if}}"
+				title="{{ localize 'MGT2.RollPrompt.ScaleHint' }}">
+				<input type="checkbox" name="crossScale" data-dtype="Boolean" data-dm="{{crossScale.dm}}"
+					data-term="{{crossScale.label}}" />
+				<span>{{crossScale.label}}</span><span class="v">{{crossScale.display}}</span>
+			</label>
+			{{! The field prefix is abbreviated so the p.74 row fits on one line; the full name is
 			    on the title and is what the readout names the term by. }}
 			<span class="numunit" title="{{ localize 'MGT2.AttackModifiers.fastMovingTarget' }}">
 				<i class="pre">{{ localize 'MGT2.AttackModifiers.fastMovingTargetShort' }}</i>
@@ -82,10 +167,10 @@
 				<span class="seg" data-name="rangeThreshold" role="radiogroup"
 					aria-label="{{ localize 'MGT2.RollPrompt.ExtremeRange' }}">
 					<label title="{{ localize 'MGT2.RollPrompt.ThresholdNone' }}"><input type="radio"
-						name="rangeThreshold" value="0" checked /><span>&mdash;</span></label>
+						name="rangeThreshold" value="0" /><span>&mdash;</span></label>
 					{{#each weapon.thresholds as |t|}}
 					<label title="{{t.label}}"><input type="radio" name="rangeThreshold"
-						value="{{t.metres}}" /><span>{{t.metres}}&nbsp;{{../metre}}</span></label>
+						value="{{t.metres}}"{{#if t.checked}} checked{{/if}} /><span>{{t.metres}}&nbsp;{{../metre}}</span></label>
 					{{/each}}
 				</span>
 			</span>
@@ -137,10 +222,13 @@
 	<div class="pline" role="group" aria-label="{{ localize 'MGT2.Items.Modifiers' }}">
 		<span class="pgut">{{ localize 'MGT2.Items.Modifiers' }}</span>
 		<div class="pfields">
+			{{! A source that names the characteristics its rule reaches follows the Check row until
+			    the player touches it — Core folio 98 puts the encumbered DM on physical actions,
+			    and folio 9's roster is what "physical" means to a system that flags no skill. }}
 			{{#each checkModifiers as |m|}}
-			<label class="tog {{#if m.negative}}neg{{else}}pos{{/if}}">
+			<label class="tog {{#if m.negative}}neg{{else}}pos{{/if}}"{{#if m.scope}} title="{{ localize 'MGT2.RollPrompt.PhysicalOnly' }}"{{/if}}>
 				<input type="checkbox" name="check-{{m.key}}" data-dtype="Boolean" data-dm="{{m.dm}}"
-					data-term="{{m.label}}" checked />
+					data-term="{{m.label}}"{{#if m.scope}} data-scope="{{m.scope}}" data-auto="true"{{/if}} checked />
 				<span>{{m.label}}</span><span class="v">{{m.display}}</span>
 			</label>
 			{{/each}}
@@ -182,6 +270,13 @@
 				{{/each}}
 			</span>
 			<span class="segname" data-readout="difficultyName"></span>
+			{{! RH folio 115. Beside the ladder because that is the number it judges, and a caption
+			    rather than a gate: the folio itself lets external modifiers bring a task back within
+			    the brain's capability, so the rung is stated and the referee still picks it. }}
+			{{#if ceiling}}
+			<span class="ceil" data-readout="ceiling" data-scope="{{ceiling.scope}}"
+				data-target="{{ceiling.target}}" data-within="{{ceiling.within}}" data-over="{{ceiling.over}}"></span>
+			{{/if}}
 
 			<span class="brk"></span>
 			<span class="seggrp">

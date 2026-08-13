@@ -111,6 +111,29 @@
 			grid-area: panel
 			min-height: 0
 
+// The space combat screen is the same grid a fifth time, and the only one that is not a sheet: the
+// header is the range strip, the rail is the round and the order, and the panel is one ship.
+.mgt2.application.space-combat
+	container-type: inline-size
+	container-name: sheet
+
+	> .window-content
+		display: grid
+		grid-template-columns: 21rem minmax(0, 1fr)
+		grid-template-rows: auto minmax(0, 1fr)
+		grid-template-areas: "header header" "rail panel"
+		height: 100%
+		overflow: hidden
+
+		> [data-application-part="header"]
+			grid-area: header
+		> [data-application-part="rail"]
+			grid-area: rail
+			min-height: 0
+		> [data-application-part="panel"]
+			grid-area: panel
+			min-height: 0
+
 .mgt2.application.item
 	> .window-content
 		padding: 0

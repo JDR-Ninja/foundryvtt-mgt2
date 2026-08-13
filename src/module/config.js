@@ -42,8 +42,62 @@ MGT2.DifficultyTargets = Object.freeze({
     Impossible: 16
 });
 
-// Effect Results (Core p.62) — the six bands of `total - target`, the reading the next action
+// The eight rungs a check can be SET at — `Difficulty` without `NA`, derived from the targets so the
+// two cannot drift. A select carrying an empty first option already says "no difficulty stated", and
+// storing NA resolves to the same assumed Average (Core p.61), so offering both is one answer twice.
+// `NA` keeps its own uses: a disease states its check on a select with no empty option, and the roll
+// prompt's empty ladder cell is named by it.
+MGT2.DifficultyChoices = Object.freeze(Object.fromEntries(
+    Object.keys(MGT2.DifficultyTargets).map(key => [key, MGT2.Difficulty[key]])));
+
+// Effect Results (Core p.61) — the six bands of `total - target`, the reading the next action
 // takes. Success is `effect >= 0`; `tone` is how the chat card colours itself.
+// Core p.63. The Effect of the previous check is a DM on the next one. Six rungs, and none of
+// them worth zero: a check that resolved at all moves the one it feeds, and the sign flips straight
+// from -1 to +1. `EffectBands` below reads the same axis to name a result; this is what it is worth
+// to whatever comes next, and "working together" reads off the same rungs.
+MGT2.TaskChain = Object.freeze([
+    {min: null, max: -6, dm: -3},
+    {min: -5, max: -2, dm: -2},
+    {min: -1, max: -1, dm: -1},
+    {min: 0, max: 0, dm: 1},
+    {min: 1, max: 5, dm: 2},
+    {min: 6, max: null, dm: 3}
+]);
+
+// Core p.76. A Traveller may react as often as they like, and every Reaction costs DM-1 on their
+// next set of actions. `dm` is what the REACTOR imposes on the attacker: a flat figure where the
+// rule prints one, and otherwise read off the reactor's own sheet — the higher of `characteristic`
+// and `skill` for a dodge, the Melee level for a parry. It is announced and never applied, because
+// nothing here resolves against a target.
+MGT2.CombatReactions = Object.freeze({
+    dodge: {label: "MGT2.CombatReactions.dodge", icon: "fa-solid fa-person-running",
+        characteristic: "dexterity", skill: "Athletics (dexterity)"},
+    dive: {label: "MGT2.CombatReactions.dive", icon: "fa-solid fa-person-falling",
+        dm: -2, noCover: -1, forgoes: true},
+    parry: {label: "MGT2.CombatReactions.parry", icon: "fa-solid fa-shield-halved",
+        skill: "Melee"}
+});
+
+// Core p.73. The side that knows combat is coming takes DM+6 on its Initiative check and the side
+// that does not takes DM-6, for the first round only — and Initiative is rolled once for the whole
+// combat, so that is the roll it rides on.
+MGT2.Ambush = Object.freeze({
+    aware: {label: "MGT2.Ambush.aware", dm: 6},
+    unaware: {label: "MGT2.Ambush.unaware", dm: -6}
+});
+
+// Core p.73. One Tactics check moves the Initiative of "everyone on the same side", and nothing
+// else in the system knows what a side is. A stored key rather than the token's disposition, which
+// is only the DEFAULT it is initialised from: a disposition cannot be corrected without moving a
+// token, and SECRET says nothing about allegiance at all (§9.30). Blank is a real answer — a
+// combatant on no side takes no side's Effect.
+MGT2.CombatSides = Object.freeze({
+    allies: "MGT2.CombatSides.allies",
+    enemies: "MGT2.CombatSides.enemies",
+    neutral: "MGT2.CombatSides.neutral"
+});
+
 MGT2.EffectBands = Object.freeze({
     exceptionalFailure: {label: "MGT2.Effect.exceptionalFailure", min: null, max: -6, tone: "bad"},
     averageFailure: {label: "MGT2.Effect.averageFailure", min: -5, max: -2, tone: "bad"},
@@ -53,7 +107,7 @@ MGT2.EffectBands = Object.freeze({
     exceptionalSuccess: {label: "MGT2.Effect.exceptionalSuccess", min: 6, max: null, tone: "ok"}
 });
 
-// Core p.77-78. Each band is a multiple of the weapon's own Range score, so one table serves every
+// Core p.76-77. Each band is a multiple of the weapon's own Range score, so one table serves every
 // weapon. `out` carries no DM: beyond four times the Range there is no printed penalty because
 // there is no shot — and the system displays the band rather than blocking the roll.
 MGT2.RangeBands = Object.freeze({
@@ -64,9 +118,9 @@ MGT2.RangeBands = Object.freeze({
     out: {label: "MGT2.RangeBands.out", dm: 0}
 });
 
-// Core p.75, the Common Modifiers to Ranged Attacks table, in the book's own order. The three range
-// rows are the p.77 bands above stated a second time, so they share their labels. `max` is the six
-// consecutive Minor Actions p.76 caps aiming at, `per` the metres of target movement each -1 costs,
+// Core p.74, the Common Modifiers to Ranged Attacks table, in the book's own order. The three range
+// rows are the p.76 bands above stated a second time, so they share their labels. `max` is the six
+// consecutive Minor Actions p.75 caps aiming at, `per` the metres of target movement each -1 costs,
 // and `requires` the row a bonus is conditional on.
 MGT2.AttackModifiers = Object.freeze({
     aiming: {label: "MGT2.AttackModifiers.aiming", dm: 1, max: 6},
@@ -79,15 +133,28 @@ MGT2.AttackModifiers = Object.freeze({
     prone: {label: "MGT2.AttackModifiers.prone", dm: -1}
 });
 
-// Core p.78: without the Scope trait every attack past 100 metres is Extreme range, and outside a
-// combat situation the referee may raise that to 300. Traits are not modelled yet, so the prompt
-// offers these and never picks one.
+// Core folio 77: without the Scope trait every attack past 100 metres is Extreme range, and outside
+// a combat situation the referee "is free to increase this to 300 metres". `combat` is therefore the
+// rule and the prompt's default; the other threshold and the prompt's empty cell are both
+// concessions a referee grants.
 MGT2.ExtremeRangeThresholds = Object.freeze({
     combat: {label: "MGT2.RollPrompt.ThresholdCombat", metres: 100},
     noStress: {label: "MGT2.RollPrompt.ThresholdNoStress", metres: 300}
 });
 
-// The printed damage-type vocabulary (Companion p.94-95). Deliberately not a partition: "blades"
+// Core folio 79. A weapon with Auto X fires in three modes and the mode is a per-attack choice, so
+// nothing stores one: single is the normal combat rules, burst adds the Auto score to damage, and
+// full auto makes that many attacks — which may fall on separate targets within six metres of one
+// another, a constraint on the referee's picks rather than on the roll. `rounds` is the multiple of
+// the Auto score a mode spends; single spends what an ordinary shot does and the book restates
+// neither that nor any way of tracking it.
+MGT2.FireModes = Object.freeze({
+    single: {label: "MGT2.FireModes.single"},
+    burst: {label: "MGT2.FireModes.burst", damage: true, rounds: 1, suppress: "aiming"},
+    fullAuto: {label: "MGT2.FireModes.fullAuto", attacks: true, rounds: 3, suppress: "aiming"}
+});
+
+// The printed damage-type vocabulary (Companion p.93-94). Deliberately not a partition: "blades"
 // and "stabbing" overlap and no book assigns a type to every weapon, so an empty set is the normal
 // case and means a defender's transform applies in full.
 MGT2.DamageTypes = Object.freeze({
@@ -100,24 +167,37 @@ MGT2.DamageTypes = Object.freeze({
     laser: "MGT2.DamageTypes.laser"
 });
 
-// Core p.168 — a wound crossing the scale boundary is multiplied or divided by ten. `ratio` is what
+// Core folio 167's Damage Scale table prints a TO-HIT column beside the damage one: a Ground weapon
+// shooting a Spacecraft target takes DM+2 "simply because it is that much larger", a Spacecraft
+// weapon shooting a Ground target DM-2, and matched scales nothing. Keyed by the WEAPON's scale,
+// because that is the half the prompt already holds — folio 167: "scale is reflected by the weapon
+// being used, not what it is mounted upon". The other half is a declared bit, like cover and prone
+// on the same row: nothing here reads a target. `vehicle` is absent and resolves to Ground, which is
+// the same reduction `Scales` makes for the damage ratio.
+MGT2.CrossScaleAttack = Object.freeze({
+    ground: {label: "MGT2.RollPrompt.ScaleSpacecraftTarget", dm: 2},
+    spacecraft: {label: "MGT2.RollPrompt.ScaleGroundTarget", dm: -2}
+});
+
+// Core p.167 — a wound crossing the scale boundary is multiplied or divided by ten. `ratio` is what
 // makes that one expression instead of a branch per direction.
 MGT2.Scales = Object.freeze({
     ground: {label: "MGT2.Scales.ground", ratio: 1},
     spacecraft: {label: "MGT2.Scales.spacecraft", ratio: 10}
 });
 
-// A weapon's own scale. `range` is the unit the range field speaks; `fireControl` and `power` say
-// whether those two fields apply at all (VH p.46, HG p.27). The keys are MGT2.Scales', so a
-// weapon's scale is directly the pipeline's cross-scale input and `vehicle` — absent there —
-// resolves to ratio 1, which is the printed rule: a vehicle weapon is Ground scale.
+// A weapon's own scale. `range` is the unit the range field speaks; `fireControl`, `power` and
+// `band` say whether those fields apply at all (VH p.45, HG p.26; Core p.165-167 for the band,
+// which only a spacecraft weapon is printed with). The keys are MGT2.Scales', so a weapon's scale
+// is directly the pipeline's cross-scale input and `vehicle` — absent there — resolves to ratio 1,
+// which is the printed rule: a vehicle weapon is Ground scale.
 MGT2.WeaponScales = Object.freeze({
-    ground: {label: "MGT2.Scales.ground", range: "meter", fireControl: false, power: false},
-    vehicle: {label: "MGT2.Scales.vehicle", range: "kilometer", fireControl: true, power: false},
-    spacecraft: {label: "MGT2.Scales.spacecraft", range: "kilometer", fireControl: true, power: true}
+    ground: {label: "MGT2.Scales.ground", range: "meter", fireControl: false, power: false, band: false},
+    vehicle: {label: "MGT2.Scales.vehicle", range: "kilometer", fireControl: true, power: false, band: false},
+    spacecraft: {label: "MGT2.Scales.spacecraft", range: "kilometer", fireControl: true, power: true, band: true}
 });
 
-// The three readings of one attack (Companion p.94). Reduced and Minimum substitute into the damage
+// The three readings of one attack (Companion p.93). Reduced and Minimum substitute into the damage
 // expression, so they are rolled with the attack and can never be derived from its total.
 MGT2.DamageTransforms = Object.freeze({
     full: "MGT2.DamageTransforms.full",
@@ -125,10 +205,37 @@ MGT2.DamageTransforms = Object.freeze({
     minimum: "MGT2.DamageTransforms.minimum"
 });
 
-// Core p.83 drives first aid off the Effect of a Medic check, and a skill is a free-text Item with
+// Core p.82 drives first aid off the Effect of a Medic check, and a skill is a free-text Item with
 // no registry behind it — so these are the names a rolled skill is matched against, case- and
 // prefix-insensitively, to decide whether its card offers the first-aid button.
 MGT2.FirstAidSkills = Object.freeze(["medic"]);
+
+// Core folio 81, the Radiation Effects table. One row carries both of its columns, because both are
+// read off the same thresholds: `damage` and `condition` are what ONE exposure of that size inflicts
+// at once, `endurance` what the RUNNING TOTAL costs permanently. That second figure is a total and
+// not a step, which is why it derives from the count on every prepare rather than being applied once
+// per crossing. Highest band first: the row is the first whose floor the count reaches.
+MGT2.RadiationEffects = Object.freeze([
+    {min: 801, damage: "8D", condition: "MGT2.Radiation.Bleeding", endurance: -4},
+    {min: 501, damage: "6D", condition: "MGT2.Radiation.Sterile", endurance: -3},
+    {min: 301, damage: "4D", condition: "MGT2.Radiation.HairLoss", endurance: -2},
+    {min: 151, damage: "2D", condition: "", endurance: -1},
+    // The one immediate effect that is a number rather than a scene fact, so it is the one the
+    // system carries as a state.
+    {min: 51, damage: "1D", condition: "MGT2.Radiation.Nausea", state: "nausea", endurance: 0},
+    {min: 0, damage: "", condition: "", endurance: 0}
+]);
+
+// Core folio 81's Radiation Exposure table, and the weapon trait's dose from folio 79 — "2D x 20
+// rads, multiplied by three for Spacecraft scale weapons". The interval each source delivers on is
+// part of its printed name and stays a referee's clock: nothing here is scheduled.
+MGT2.RadiationSources = Object.freeze({
+    minorLeak: {label: "MGT2.Radiation.MinorLeak", formula: "2d6"},
+    seriousLeak: {label: "MGT2.Radiation.SeriousLeak", formula: "2d6"},
+    minorFlare: {label: "MGT2.Radiation.MinorFlare", formula: "1d6 * 100"},
+    majorFlare: {label: "MGT2.Radiation.MajorFlare", formula: "3d6 * 100"},
+    weapon: {label: "MGT2.Radiation.Weapon", formula: "2d6 * 20", spacecraft: "2d6 * 60"}
+});
 
 MGT2.ItemSubType = Object.freeze({
     loot: "MGT2.ItemSubType.loot",
@@ -154,6 +261,14 @@ MGT2.DiseaseSubType = Object.freeze({
     wound: "MGT2.DiseaseSubType.wound"
 });
 
+// Core folio 80: a disease is resisted by "a series of END checks", one per Interval, and "poisons
+// operate in the same way". `wound` is the system's own third sub-type, which the folio does not
+// speak of at all — so its check is the referee's.
+MGT2.EnduranceResisted = Object.freeze(["disease", "poison"]);
+
+// Core folio 229's Psionic Range table, in the order it prints — which is what makes "one Range
+// Band further" a step through these keys. `NA` is the system's own escape for a power that reaches
+// nowhere and is not a band.
 MGT2.PsionicReach = Object.freeze({
     NA: "MGT2.PsionicReach.NA",
     Personal: "MGT2.PsionicReach.Personal",
@@ -168,7 +283,17 @@ MGT2.PsionicReach = Object.freeze({
     Planetary: "MGT2.PsionicReach.Planetary"
 });
 
-// The five recurring-character types (Core p.92).
+// Core folio 229: "The Reach of a power can be increased by one Range Band if twice the PSI Cost is
+// paid and increased by two Range Bands if the PSI Cost is multiplied by four." Three positions and
+// nothing beyond — the folio names no third step — so the strip is the whole rule and `cost` is the
+// multiple of the printed PSI Cost each one spends.
+MGT2.PsionicBoosts = Object.freeze([
+    {bands: 0, cost: 1},
+    {bands: 1, cost: 2},
+    {bands: 2, cost: 4}
+]);
+
+// The five recurring-character types (Core p.91).
 MGT2.ContactRelations = Object.freeze({
     Allie: "MGT2.Contact.Relation.Allie",
     Contact: "MGT2.Contact.Relation.Contact",
@@ -208,6 +333,12 @@ MGT2.Characteristics = Object.freeze({
     other: "MGT2.Characteristics.other.name"
 });
 
+// Core folio 9 heads STR, DEX and END "PHYSICAL CHARACTERISTICS". That heading is the only
+// physical/mental partition the books state, and no skill carries such a flag — so it is what a
+// rule written against "physical actions" (folio 98's encumbrance) resolves to: the characteristic
+// a check is rolled on.
+MGT2.PhysicalCharacteristics = Object.freeze(["strength", "dexterity", "endurance"]);
+
 MGT2.InitiativeCharacteristics = Object.freeze({
     dexterity: "MGT2.Characteristics.dexterity.name",
     intellect: "MGT2.Characteristics.intellect.name"
@@ -242,7 +373,7 @@ MGT2.Timeframes = Object.freeze({
 });
 
 // Eleven bands, 0-10 in declaration order; the number is what the rules do arithmetic on
-// (collision damage, Weave, the per-band attack DM). Core p.137.
+// (collision damage, Weave, the per-band attack DM). Core p.136.
 MGT2.SpeedBands = Object.freeze({
     Stopped: "MGT2.SpeedBands.Stopped",
     Idle: "MGT2.SpeedBands.Idle",
@@ -270,7 +401,7 @@ MGT2.DamageTracks = Object.freeze({
     hull: "MGT2.DamageTracks.hull"
 });
 
-// Animal Size (Core p.90) — advisory only, the size trait is stored and never derived from Hits.
+// Animal Size (Core p.89) — advisory only, the size trait is stored and never derived from Hits.
 // The top band starts at 126 so no Hits value matches two rows; its label reads as printed.
 // `dm` is attacker-side: ranged attacks against the animal gain it.
 MGT2.AnimalSize = Object.freeze({
@@ -287,7 +418,7 @@ MGT2.AnimalSize = Object.freeze({
     large6: {label: "MGT2.AnimalSize.large6", min: 126, max: null, trait: "large", dm: 6, damage: "7D"}
 });
 
-// Fight or Flight (Core p.91). Keyed on the behaviour pattern alone — the published statblocks
+// Fight or Flight (Core p.90). Keyed on the behaviour pattern alone — the published statblocks
 // pair diet and pattern freely, so the diet grouping the table prints is not a lookup key.
 // `gate` is a scene fact the referee resolves; `altAttack` is the threshold once it holds.
 // Pouncer is the one row whose flee cell is conditional too, hence the second token.
@@ -309,7 +440,7 @@ MGT2.Reactions = Object.freeze({
     reducer: {label: "MGT2.Reactions.reducer", flee: 7, attack: 10, gate: null, fleeGate: null, altAttack: null}
 });
 
-// Core p.90. `inexplicable` and `none` are the escape the print needs: the Companion's statblocks
+// Core p.89. `inexplicable` and `none` are the escape the print needs: the Companion's statblocks
 // use both, and neither is one of the four the behaviour chapter groups its patterns under.
 MGT2.Diets = Object.freeze({
     herbivore: "MGT2.Diets.herbivore",
@@ -320,7 +451,7 @@ MGT2.Diets = Object.freeze({
     none: "MGT2.Diets.none"
 });
 
-// The Experience ladder's own axis (Core p.93); `combatant` is the other, and the pair names a row
+// The Experience ladder's own axis (Core p.92); `combatant` is the other, and the pair names a row
 // of MGT2.Experience.
 MGT2.ExperienceLevels = Object.freeze({
     green: "MGT2.ExperienceLevels.green",
@@ -334,7 +465,7 @@ MGT2.NpcSubTypes = Object.freeze({
     creature: "MGT2.Actor.npc.SubType.creature"
 });
 
-// Experience (Core p.93). `characteristicDMs` is the spread the level's characteristics use;
+// Experience (Core p.92). `characteristicDMs` is the spread the level's characteristics use;
 // the table's Skills column is generator guidance and is not carried.
 MGT2.Experience = Object.freeze({
     greenNonCombatant: {label: "MGT2.Experience.greenNonCombatant", skillLevel: 0, characteristicDMs: [0], combatant: false},
@@ -347,7 +478,7 @@ MGT2.Experience = Object.freeze({
     eliteCombatant: {label: "MGT2.Experience.eliteCombatant", skillLevel: 3, characteristicDMs: [1, 2, 3], combatant: true}
 });
 
-// Vehicle critical hits (Core p.141-142). Severity = Effect - 5; a repeat on a location takes
+// Vehicle critical hits (Core p.140-141). Severity = Effect - 5; a repeat on a location takes
 // max(new, old + 1), caps at 6, and a further one deals 6D instead. Critical damage ignores
 // armour. `roll` is the 2D location result. Cells carry numbers and system names only.
 MGT2.VehicleCriticals = Object.freeze({
@@ -428,7 +559,7 @@ MGT2.VehicleCriticals = Object.freeze({
         label: "MGT2.VehicleCriticals.driveSystem", roll: [10, 10],
         severities: [
             {controlDM: -1},
-            // UNVERIFIED: Core p.142 prints "DM+2" here. The row is a -1/-3/-4 ladder and a
+            // UNVERIFIED: Core p.141 prints "DM+2" here. The row is a -1/-3/-4 ladder and a
             // critical hit cannot help the target, so -2 is the reading, not the print.
             {controlDM: -2, speedBands: -1},
             {controlDM: -3, speedBands: "D3"},
@@ -469,7 +600,17 @@ MGT2.FireArcs = Object.freeze({
     turret: "MGT2.FireArcs.turret"
 });
 
-// The chassis sets the skill and its speciality (Core p.67, p.69, p.72). Firing a mounted weapon
+// Core folio 138's two vehicular actions that leave a DM behind. Both are the driver's own check
+// with the vehicle's Agility as a DM; `opposed` marks the one the folio resolves against another
+// driver, and `winner`/`loser` are the split it prints for that round. Manoeuvre, Ram, Stunt and
+// Weave are the same folio's other four and are absent on purpose: none of them leaves a standing
+// number — a Ram is an attack, a Weave is a DM the driver picks at the moment of rolling.
+MGT2.VehicleActions = Object.freeze({
+    dogfight: {label: "MGT2.Actor.vehicle.Dogfight", opposed: true, winner: 2, loser: -2},
+    evasive: {label: "MGT2.Actor.vehicle.Evasive", opposed: false}
+});
+
+// The chassis sets the skill and its speciality (Core p.66, p.68, p.71). Firing a mounted weapon
 // is Heavy Weapons (vehicle) instead, and a drone is run with Electronics (remote ops).
 MGT2.VehicleSkills = Object.freeze({
     drive: {
@@ -509,7 +650,7 @@ MGT2.VehicleSpecialities = Object.freeze(Object.fromEntries(
     Object.values(MGT2.VehicleSkills).flatMap(skill => Object.entries(skill.specialities))));
 
 // The medium a vehicle is operating in. `agility` is the penalty for operating OUTSIDE the chassis's
-// native medium — the printed Agility is the native-medium value (VH p.4, p.15, p.48-49) — so a
+// native medium — the printed Agility is the native-medium value (VH p.3, p.14, p.47-48) — so a
 // ground vehicle on the ground pays nothing. Rails is never native and always costs 2. Towing is a
 // separate flag, because a vehicle tows *while* it is somewhere.
 MGT2.OperatingModes = Object.freeze({
@@ -520,7 +661,7 @@ MGT2.OperatingModes = Object.freeze({
 });
 
 // Which skill puts a vehicle in which medium, so the native one is read off the chassis rather than
-// stored twice (Core p.67, p.69, p.72).
+// stored twice (Core p.66, p.68, p.71).
 MGT2.VehicleNativeModes = Object.freeze({
     drive: "ground",
     flyer: "flying",
@@ -528,14 +669,14 @@ MGT2.VehicleNativeModes = Object.freeze({
 });
 
 // Five of the 78 print a service life instead of a distance, because a fission or fusion plant
-// replaces fuel range altogether (VH p.50).
+// replaces fuel range altogether (VH p.49).
 MGT2.RangeUnits = Object.freeze({
     km: "MGT2.RangeUnits.km",
     years: "MGT2.RangeUnits.years"
 });
 
-// A drone's control interface, and the DM it gives the operator (VH p.68). A robot brain substitutes
-// a flat skill level instead (p.69), which is a brain and not an interface.
+// A drone's control interface, and the DM it gives the operator (VH p.67). A robot brain substitutes
+// a flat skill level instead (p.68), which is a brain and not an interface.
 MGT2.RemoteInterfaces = Object.freeze({
     primitive: {label: "MGT2.RemoteInterfaces.primitive", dm: -4},
     basic: {label: "MGT2.RemoteInterfaces.basic", dm: -2},
@@ -543,7 +684,7 @@ MGT2.RemoteInterfaces = Object.freeze({
     advanced: {label: "MGT2.RemoteInterfaces.advanced", dm: 1}
 });
 
-// Spacecraft critical hits (Core p.170-171). Same severity rule as a vehicle. Sixteen cells feed
+// Spacecraft critical hits (Core p.169-170). Same severity rule as a vehicle. Sixteen cells feed
 // `hullSeverity` instead of damaging their own location. An Engineer clears an effect for 1D
 // hours only, so the stored entry carries repair state as well as a severity.
 MGT2.ShipCriticals = Object.freeze({
@@ -667,7 +808,7 @@ MGT2.ShipCriticals = Object.freeze({
     }
 });
 
-// Spacecraft weapon mounts (HG p.27, p.30, p.35-36). The damage multiple applies after armour and
+// Spacecraft weapon mounts (HG p.26, p.29, p.34-35). The damage multiple applies after armour and
 // never to missiles or torpedoes. A spinal mount's tonnage is per weapon, uses ceil(tons / 100)
 // hardpoints, and cannot exceed half the ship's tonnage.
 MGT2.ShipMounts = Object.freeze({
@@ -697,19 +838,22 @@ MGT2.ShipMounts = Object.freeze({
     }
 });
 
-// Space combat range bands (Core p.166-168). Adjacent and Close resolve as a dogfight rather
-// than with a range DM. `thrust` is what it costs to move into the band.
+// Space combat range bands. `minKm`/`maxKm` transcribe the Range Bands table (Core folio 165) and
+// overlap at 1 km exactly as the book prints it — Adjacent is "1km or less", Close is "1-10km".
+// `thrust` is the Ship Movement table (folio 166) and is what it costs to move OUT of the band, to
+// either neighbour, not into it. `attackDM` is folio 167; Adjacent and Close carry null rather than
+// zero because no DM is printed for them at all — they resolve as a dogfight.
 MGT2.ShipRangeBands = Object.freeze({
-    adjacent: {label: "MGT2.ShipRangeBands.adjacent", maxKm: 1, thrust: 1, attackDM: null, dogfight: true},
-    close: {label: "MGT2.ShipRangeBands.close", maxKm: 10, thrust: 1, attackDM: null, dogfight: true},
-    short: {label: "MGT2.ShipRangeBands.short", maxKm: 1250, thrust: 2, attackDM: 1, dogfight: false},
-    medium: {label: "MGT2.ShipRangeBands.medium", maxKm: 10000, thrust: 5, attackDM: 0, dogfight: false},
-    long: {label: "MGT2.ShipRangeBands.long", maxKm: 25000, thrust: 10, attackDM: -2, dogfight: false},
-    veryLong: {label: "MGT2.ShipRangeBands.veryLong", maxKm: 50000, thrust: 25, attackDM: -4, dogfight: false},
-    distant: {label: "MGT2.ShipRangeBands.distant", maxKm: null, thrust: 50, attackDM: -6, dogfight: false}
+    adjacent: {label: "MGT2.ShipRangeBands.adjacent", minKm: 0, maxKm: 1, thrust: 1, attackDM: null, dogfight: true},
+    close: {label: "MGT2.ShipRangeBands.close", minKm: 1, maxKm: 10, thrust: 1, attackDM: null, dogfight: true},
+    short: {label: "MGT2.ShipRangeBands.short", minKm: 11, maxKm: 1250, thrust: 2, attackDM: 1, dogfight: false},
+    medium: {label: "MGT2.ShipRangeBands.medium", minKm: 1251, maxKm: 10000, thrust: 5, attackDM: 0, dogfight: false},
+    long: {label: "MGT2.ShipRangeBands.long", minKm: 10001, maxKm: 25000, thrust: 10, attackDM: -2, dogfight: false},
+    veryLong: {label: "MGT2.ShipRangeBands.veryLong", minKm: 25001, maxKm: 50000, thrust: 25, attackDM: -4, dogfight: false},
+    distant: {label: "MGT2.ShipRangeBands.distant", minKm: 50001, maxKm: null, thrust: 50, attackDM: -6, dogfight: false}
 });
 
-// Hull armour (HG p.13-14). `tonsPerPoint` is a percentage of hull tonnage, before the
+// Hull armour (HG p.12-13). `tonsPerPoint` is a percentage of hull tonnage, before the
 // configuration's Armour Volume Modifier and the hull-size multiplier. Maximum Protection is
 // min(TL + tlOffset, cap); a Military Hull doubles it.
 MGT2.ArmourMaterials = Object.freeze({
@@ -719,7 +863,7 @@ MGT2.ArmourMaterials = Object.freeze({
     molecularBonded: {label: "MGT2.ArmourMaterials.molecularBonded", tl: 16, tonsPerPoint: 0.50, costPerTon: 1500000, maxProtection: {tlOffset: 4, cap: null}}
 });
 
-// Carried craft (HG p.58, p.62-64). `tonsMultiple` applies to the carried craft's tonnage; a
+// Carried craft (HG p.57, p.61-63). `tonsMultiple` applies to the carried craft's tonnage; a
 // docking clamp instead has a fixed tonnage for a stated range of attached ship. A launch tube
 // does not replace each craft's own docking space or hangar.
 MGT2.CraftBays = Object.freeze({
@@ -734,9 +878,9 @@ MGT2.CraftBays = Object.freeze({
     recoveryDeck: {label: "MGT2.CraftBays.recoveryDeck", tonsMultiple: 10, craftPerRound: 10, external: true}
 });
 
-// Crew Requirements (HG p.24). Salary is a monthly average for a skill-1 crewman, +50% per level
+// Crew Requirements (HG p.23). Salary is a monthly average for a skill-1 crewman, +50% per level
 // above that. The commercial and military counts are derived from the ship, not stored here.
-// `reducible` marks the roles the over-5000 t crew reduction may be applied to (p.23).
+// `reducible` marks the roles the over-5000 t crew reduction may be applied to (p.22).
 MGT2.CrewRoles = Object.freeze({
     captain: {label: "MGT2.CrewRoles.captain", skill: null, salary: 10000, reducible: false},
     pilot: {label: "MGT2.CrewRoles.pilot", skill: "pilot", salary: 6000, reducible: false},
@@ -751,7 +895,7 @@ MGT2.CrewRoles = Object.freeze({
     officer: {label: "MGT2.CrewRoles.officer", skill: "leadership", altSkill: "persuade", salary: 5000, reducible: false}
 });
 
-// Crew reduction on capital ships (HG p.23). Officers and medics are counted after the reduction.
+// Crew reduction on capital ships (HG p.22). Officers and medics are counted after the reduction.
 MGT2.CrewReduction = Object.freeze([
     {maxTons: 5000, multiplier: 1},
     {maxTons: 19999, multiplier: 0.75},
@@ -760,8 +904,9 @@ MGT2.CrewReduction = Object.freeze([
     {maxTons: null, multiplier: 0.33}
 ]);
 
-// The eight duties of space combat (Core p.165). A separate vocabulary from the construction roles
-// above: only one pilot and one captain, and the two gunner duties bind to a specific mount.
+// The eight duties of space combat (Core folio 164). A separate vocabulary from the construction
+// roles above: only one pilot and one captain, and the two gunner duties bind to a specific mount.
+// The duty is per-encounter and lives on the `crew` Combatant, not on the ship's roster (§9.26).
 MGT2.CombatDuties = Object.freeze({
     pilot: {label: "MGT2.CombatDuties.pilot", unique: true},
     captain: {label: "MGT2.CombatDuties.captain", unique: true},
@@ -792,7 +937,29 @@ MGT2.RoleActions = Object.freeze({
     special: "MGT2.RoleActions.special"
 });
 
-// Hull configuration (HG p.12). `armourVolume` multiplies the armour tonnage, `hullPoints` and
+// Core folio 164. A space combat round resolves in three steps, and every ship takes a step before
+// any ship takes the next. `reaction` is deliberately in the same list and is NOT a fourth step: the
+// Core resolves reactions when they are provoked and HG folio 95 calls them an informal fourth
+// phase. The key exists so an action can say it is one, not so a screen draws a fourth cell.
+MGT2.CombatSteps = Object.freeze({
+    manoeuvre: "MGT2.CombatSteps.manoeuvre",
+    attack: "MGT2.CombatSteps.attack",
+    actions: "MGT2.CombatSteps.actions",
+    reaction: "MGT2.CombatSteps.reaction"
+});
+
+// What limits an action that may be taken more than once in a round — three different limits that
+// all read as "a reaction" without this: Point Defence once per round per gunner (Core folio 171),
+// Electronic Warfare once per salvo per round (folio 173), and screens angled against one attack
+// per round (HG folio 41).
+MGT2.ActionCaps = Object.freeze({
+    none: "MGT2.ActionCaps.none",
+    round: "MGT2.ActionCaps.round",
+    salvo: "MGT2.ActionCaps.salvo",
+    attack: "MGT2.ActionCaps.attack"
+});
+
+// Hull configuration (HG p.11). `armourVolume` multiplies the armour tonnage, `hullPoints` and
 // `hullCost` the hull itself. `protection` is what the hull is worth before any armour is bought.
 MGT2.HullConfigurations = Object.freeze({
     standard: {label: "MGT2.HullConfigurations.standard", streamlined: "partial", armourVolume: 1, hullPoints: 1, hullCost: 1, protection: 0},
@@ -804,7 +971,7 @@ MGT2.HullConfigurations = Object.freeze({
     bufferedPlanetoid: {label: "MGT2.HullConfigurations.bufferedPlanetoid", streamlined: "no", armourVolume: 1, hullPoints: 1.5, hullCost: null, protection: 4}
 });
 
-// Specialised hulls (HG p.13). Options rather than traits — the registry has no ship family.
+// Specialised hulls (HG p.12). Options rather than traits — the registry has no ship family.
 MGT2.HullOptions = Object.freeze({
     reinforced: {label: "MGT2.HullOptions.reinforced", hullPoints: 1.1, hullCost: 1.5},
     light: {label: "MGT2.HullOptions.light", hullPoints: 0.9, hullCost: 0.75},
@@ -813,14 +980,14 @@ MGT2.HullOptions = Object.freeze({
     breakaway: {label: "MGT2.HullOptions.breakaway", hullPoints: 1, hullCost: 1}
 });
 
-// Tons of hull per Hull point (HG p.11). Very large ships brace more heavily and take more.
+// Tons of hull per Hull point (HG p.10). Very large ships brace more heavily and take more.
 MGT2.HullPointRates = Object.freeze([
     {maxTons: 24999, tonsPerPoint: 2.5},
     {maxTons: 99999, tonsPerPoint: 2},
     {maxTons: null, tonsPerPoint: 1.5}
 ]);
 
-// Armour framework multiplier by hull size (HG p.14), applied after the configuration's volume
+// Armour framework multiplier by hull size (HG p.13), applied after the configuration's volume
 // modifier. A small hull spends proportionally more of itself on the frame the armour hangs from.
 MGT2.ArmourTonnage = Object.freeze([
     {maxTons: 15, multiplier: 4},
@@ -829,12 +996,12 @@ MGT2.ArmourTonnage = Object.freeze([
     {maxTons: null, multiplier: 1}
 ]);
 
-// Manoeuvre and jump drives as a percentage of hull (HG p.17), indexed by rating. A jump drive adds
+// Manoeuvre and jump drives as a percentage of hull (HG p.16), indexed by rating. A jump drive adds
 // five tons on top and is never smaller than ten.
 MGT2.ThrustPotential = Object.freeze([0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11]);
 MGT2.JumpPotential = Object.freeze([0, 0.025, 0.05, 0.075, 0.10, 0.125, 0.15, 0.175, 0.20, 0.225]);
 
-// Bridges (HG p.20). `tons` is the ladder by hull size; the cost is MCr0.5 per 100 tons of ship.
+// Bridges (HG p.19). `tons` is the ladder by hull size; the cost is MCr0.5 per 100 tons of ship.
 MGT2.BridgeSizes = Object.freeze([
     {maxTons: 50, tons: 3},
     {maxTons: 99, tons: 6},
@@ -854,7 +1021,7 @@ MGT2.BridgeTypes = Object.freeze({
     dualCockpit: {label: "MGT2.BridgeTypes.dualCockpit", dm: 0, tons: 2.5, cost: 15000, maxTons: 50}
 });
 
-// Sensors (HG p.22). One grade sets four numbers, which is why the ship stores the grade.
+// Sensors (HG p.21). One grade sets four numbers, which is why the ship stores the grade.
 MGT2.SensorGrades = Object.freeze({
     basic: {label: "MGT2.SensorGrades.basic", tl: 8, dm: -4, power: 0, tons: 0, cost: 0},
     civilian: {label: "MGT2.SensorGrades.civilian", tl: 9, dm: -2, power: 1, tons: 1, cost: 3000000},
@@ -863,7 +1030,7 @@ MGT2.SensorGrades = Object.freeze({
     advanced: {label: "MGT2.SensorGrades.advanced", tl: 15, dm: 2, power: 6, tons: 5, cost: 5300000}
 });
 
-// Staterooms and low berths (HG p.25, p.52). A low berth draws 1 Power per ten berths or part.
+// Staterooms and low berths (HG p.24, p.51). A low berth draws 1 Power per ten berths or part.
 MGT2.Staterooms = Object.freeze({
     standard: {label: "MGT2.Staterooms.standard", tons: 4, cost: 500000},
     high: {label: "MGT2.Staterooms.high", tons: 6, cost: 800000},
@@ -875,7 +1042,7 @@ MGT2.LowBerths = Object.freeze({
     emergency: {label: "MGT2.LowBerths.emergency", tons: 1, cost: 1000000, holds: 4, per: 1, power: 1}
 });
 
-// Passage classes (Core p.209-210). `lifeSupport` is what one passenger costs per period.
+// Passage classes (Core p.158).
 MGT2.PassageClasses = Object.freeze({
     high: "MGT2.PassageClasses.high",
     middle: "MGT2.PassageClasses.middle",
@@ -883,7 +1050,7 @@ MGT2.PassageClasses = Object.freeze({
     low: "MGT2.PassageClasses.low"
 });
 
-// Screens (HG p.42). A count and not a flag: every five nuclear dampers reduce a Destructive
+// Screens (HG p.41). A count and not a flag: every five nuclear dampers reduce a Destructive
 // weapon's damage by a further 1DD, which a boolean cannot express.
 MGT2.ShipScreens = Object.freeze({
     nuclearDamper: {label: "MGT2.ShipScreens.nuclearDamper", tl: 12, tons: 10, power: 20, cost: 60000000},
@@ -891,14 +1058,14 @@ MGT2.ShipScreens = Object.freeze({
     blackGlobe: {label: "MGT2.ShipScreens.blackGlobe", tl: 15, tons: 50, power: 30, cost: 100000000}
 });
 
-// Which column of the Crew Requirements table a ship reads (HG p.24).
+// Which column of the Crew Requirements table a ship reads (HG p.23).
 MGT2.ShipService = Object.freeze({
     commercial: "MGT2.ShipService.commercial",
     military: "MGT2.ShipService.military"
 });
 
-// Running costs (Core p.150, p.155, p.184; HG p.26). All periodic figures run on the four-week
-// maintenance period. `maintenanceDivisor` is p.184's form — the only one that excludes carried
+// Running costs (Core p.149, p.154, p.183; HG p.25). All periodic figures run on the four-week
+// maintenance period. `maintenanceDivisor` is p.183's form — the only one that excludes carried
 // craft — and it is authoritative: the catalogue's plain cost/12000 bills a carried boat twice.
 MGT2.ShipCosts = Object.freeze({
     mortgageDivisor: 240,
@@ -911,7 +1078,7 @@ MGT2.ShipCosts = Object.freeze({
     fuelUnrefined: 100
 });
 
-// Fuel (HG p.19). A jump costs 10% of the hull per parsec; a power plant burns a tenth of its own
+// Fuel (HG p.18). A jump costs 10% of the hull per parsec; a power plant burns a tenth of its own
 // tonnage every four weeks.
 MGT2.ShipFuel = Object.freeze({
     jumpFraction: 0.10,
@@ -919,7 +1086,7 @@ MGT2.ShipFuel = Object.freeze({
     weeksPerPeriod: 4
 });
 
-// Free allowances per full 100 tons of hull (HG p.26, p.27), and the firmpoint ladder for hulls
+// Free allowances per full 100 tons of hull (HG p.25, p.26), and the firmpoint ladder for hulls
 // too small to carry a hardpoint at all.
 MGT2.HullPoints = Object.freeze({
     tonsPerHardpoint: 100,
@@ -932,7 +1099,7 @@ MGT2.HullPoints = Object.freeze({
     ]
 });
 
-// Robot Size (Robot Handbook p.14). `attackDM` is the Small/Large trait score, the same
+// Robot Size (Robot Handbook p.13). `attackDM` is the Small/Large trait score, the same
 // attacker-side ranged DM a creature carries. Base Slots never changes with modifications.
 MGT2.RobotSize = Object.freeze({
     1: {label: "MGT2.RobotSize.1", slots: 1, hits: 1, attackDM: -4, spaces: 0, cost: 100},
@@ -945,9 +1112,12 @@ MGT2.RobotSize = Object.freeze({
     8: {label: "MGT2.RobotSize.8", slots: 128, hits: 72, attackDM: 3, spaces: 4, cost: 8000}
 });
 
-// Robot brains (Robot Handbook p.67). Computer/X is Bandwidth. `tl`, `bandwidth` and `intellect`
-// are parallel arrays: one entry per Tech Level step of the grade. `taskCeiling` is a hard cap on
-// the difficulty the robot may attempt at all, and it survives an INT upgrade.
+// Robot brains (Robot Handbook p.66). Computer/X is Bandwidth. `tl`, `bandwidth` and `intellect`
+// are parallel arrays: one entry per Tech Level step of the grade. `taskCeiling` is the hardest
+// difficulty the grade may attempt, and RH folio 115 qualifies it twice: it reaches INT-, EDU- and
+// SOC-based checks only — "a robot Traveller is free to try an Impossible (16+) feat of STR" — and
+// "performing a task more slowly can lower difficulty by one level", which can bring a task back
+// inside it. It does survive an INT upgrade.
 MGT2.RobotBrains = Object.freeze({
     primitive: {label: "MGT2.RobotBrains.primitive", tl: [7, 8], bandwidth: [0, 0], intellect: [1, 1], skillDM: -2, taskCeiling: null},
     basic: {label: "MGT2.RobotBrains.basic", tl: [8, 10], bandwidth: [1, 1], intellect: [3, 4], skillDM: -1, taskCeiling: null},
@@ -956,11 +1126,11 @@ MGT2.RobotBrains = Object.freeze({
     veryAdvanced: {label: "MGT2.RobotBrains.veryAdvanced", tl: [12, 13, 14], bandwidth: [3, 4, 5], intellect: [9, 10, 11], skillDM: 1, taskCeiling: "VeryDifficult"},
     selfAware: {label: "MGT2.RobotBrains.selfAware", tl: [15, 16], bandwidth: [10, 15], intellect: [12, 13], skillDM: 2, taskCeiling: "Formidable"},
     conscious: {label: "MGT2.RobotBrains.conscious", tl: [17, 18], bandwidth: [20, 30], intellect: [15, 15], skillDM: 3, taskCeiling: "Impossible"},
-    // A printed Programming grade on eight statblocks (p.209-216), absent from the brain ladder.
+    // A printed Programming grade on eight statblocks (p.208-215), absent from the brain ladder.
     drone: {label: "MGT2.RobotBrains.drone", tl: null, bandwidth: null, intellect: null, skillDM: null, taskCeiling: null}
 });
 
-// Robot locomotion (Robot Handbook p.17). `costMultiplier` times the Size table's basic cost is
+// Robot locomotion (Robot Handbook p.16). `costMultiplier` times the Size table's basic cost is
 // the Base Chassis Cost, the denominator for armour, resiliency, efficiency, agility and speed.
 // `None` also adds 25% to available Slots without raising Base Slots.
 MGT2.RobotLocomotion = Object.freeze({
@@ -977,7 +1147,7 @@ MGT2.RobotLocomotion = Object.freeze({
     thruster: {label: "MGT2.RobotLocomotion.thruster", tl: 7, agility: 1, traits: [], endurance: 2, costMultiplier: 20}
 });
 
-// Robot armour by TL band (Robot Handbook p.20). `slotsPerPoint` is a percentage of Base Slots,
+// Robot armour by TL band (Robot Handbook p.19). `slotsPerPoint` is a percentage of Base Slots,
 // rounded up, never below one Slot. Androids and biological robots get no base Protection.
 MGT2.RobotArmour = Object.freeze({
     tl6: {label: "MGT2.RobotArmour.tl6", minTL: 6, maxTL: 8, protection: 2, maxAdded: 20, slotsPerPoint: 1, maxPerSlot: 1, costPerSlot: 250},
@@ -988,14 +1158,14 @@ MGT2.RobotArmour = Object.freeze({
 });
 
 // Where the robot's power comes from. RTG and solar replace the endurance chain entirely and print
-// a half-life in years with the hourly figure beside it (Robot Handbook p.21, p.77).
+// a half-life in years with the hourly figure beside it (Robot Handbook p.20, p.76).
 MGT2.RobotPower = Object.freeze({
     internal: "MGT2.RobotPower.internal",
     rtg: "MGT2.RobotPower.rtg",
     solar: "MGT2.RobotPower.solar"
 });
 
-// Robot Handbook p.118: SOC is 0 where robots are property and a 2D roll where one is a citizen.
+// Robot Handbook p.117: SOC is 0 where robots are property and a 2D roll where one is a citizen.
 MGT2.RobotSociety = Object.freeze({
     property: "MGT2.RobotSociety.property",
     citizen: "MGT2.RobotSociety.citizen"

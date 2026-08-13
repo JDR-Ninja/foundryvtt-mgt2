@@ -16,7 +16,10 @@ const fields = foundry.data.fields;
  */
 export class NpcData extends ActorBaseData {
 
-    static DEFAULT_DAMAGE_ORDER = ["strength", "dexterity", "endurance"];
+    // Core folio 77: "Damage is initially applied to a target's END", and only the excess reaches
+    // STR or DEX. `initial` only — an existing actor keeps the chain it stored, so `migration.js`
+    // rewrites the ones created while this constant printed the UPP order instead.
+    static DEFAULT_DAMAGE_ORDER = ["endurance", "strength", "dexterity"];
 
     static DEFAULT_INITIATIVE = "dexterity";
 
@@ -24,7 +27,9 @@ export class NpcData extends ActorBaseData {
 
     static MENTAL_LINKS = ["intellect", "education"];
 
-    /** Field labels come off the schema; see `MGT2.Actor.npc.FIELDS` in `lang/en.json`. */
+    // `MGT2.Actor.npc.FIELDS` fills in `field.label` and `.hint`. A prefix with no `FIELDS`
+    // subtree is a silent no-op — `Object.assign(rules, undefined)` — so the two must move
+    // together. Only `{{formGroup}}` renders those, and no template calls it yet.
     static LOCALIZATION_PREFIXES = ["MGT2.Actor.npc"];
 
     /** The six the core rulebook defines, in the order the UPP prints them. */
@@ -38,7 +43,9 @@ export class NpcData extends ActorBaseData {
     static PRESETS = Object.freeze({
         person: {
             show: ["strength", "dexterity", "endurance", "intellect", "education", "social"],
-            damageOrder: ["strength", "dexterity", "endurance"],
+            // The constant rather than a second literal: the two said different things for a
+            // release, and the schema initial and the preset have to be the same chain.
+            damageOrder: this.DEFAULT_DAMAGE_ORDER,
             initiative: { characteristic: "dexterity", flat: 0 },
             actorLink: true
         },
@@ -74,15 +81,15 @@ export class NpcData extends ActorBaseData {
                 charm: createCharacteristicField(false),
                 psionic: createCharacteristicField(false),
                 other: createCharacteristicField(false),
-                // Core p.86 calls this "the Hits characteristic" in its own words, which is why it
+                // Core p.85 calls this "the Hits characteristic" in its own words, which is why it
                 // sits in the record rather than beside it: `damageOrder`, `life`, the token bar and
                 // the chain editor then need no special case.
                 hits: createCharacteristicField(false)
             }),
 
-            // Core p.85: how far the animal moves with one Minor Action. 6 m is a human's Movement
-            // (p.76). `fly` is a Speed Band and not metres — `Flyer (X)` names "a maximum Speed
-            // Band" (p.86) — and `note` carries the print that quantifies nothing at all.
+            // Core p.84: how far the animal moves with one Minor Action. 6 m is a human's Movement
+            // (p.75). `fly` is a Speed Band and not metres — `Flyer (X)` names "a maximum Speed
+            // Band" (p.85) — and `note` carries the print that quantifies nothing at all.
             speed: new fields.SchemaField({
                 ground: new fields.NumberField({ required: false, nullable: false, min: 0, initial: 6 }),
                 swim: new fields.NumberField({ required: false, nullable: true, min: 0, initial: null }),
@@ -91,8 +98,8 @@ export class NpcData extends ActorBaseData {
                 note: new fields.StringField({ required: false, blank: true, trim: true })
             }),
 
-            // Core p.90-91. The two are independent: the published statblocks pair them freely —
-            // Carnivore, Grazer (p.88) is not a row of the Fight or Flight table — so the reaction
+            // Core p.89-90. The two are independent: the published statblocks pair them freely —
+            // Carnivore, Grazer (p.87) is not a row of the Fight or Flight table — so the reaction
             // lookup keys on `pattern` alone and `diet` is flavour.
             behaviour: new fields.SchemaField({
                 diet: new fields.StringField({ required: false, blank: true, initial: "", choices: MGT2.Diets }),
@@ -104,14 +111,14 @@ export class NpcData extends ActorBaseData {
             attitude: new fields.StringField({
                 required: false, blank: true, initial: "Unknow", choices: MGT2.Attitudes }),
 
-            // Core p.93, the other axis of the Experience ladder being `combatant`.
+            // Core p.92, the other axis of the Experience ladder being `combatant`.
             experience: new fields.StringField({
                 required: false, blank: true, initial: "", choices: MGT2.ExperienceLevels }),
             combatant: new fields.BooleanField({ required: false, initial: false }),
 
             // No statblock prints a number appearing. This exists because three rules need a count
-            // and nothing else supplies one: Alarm (p.85), Chaser (p.91) and Ornery (Companion
-            // p.95). A pair rather than a scalar so a herd token's bar can read "7 of 12".
+            // and nothing else supplies one: Alarm (p.84), Chaser (p.90) and Ornery (Companion
+            // p.94). A pair rather than a scalar so a herd token's bar can read "7 of 12".
             group: new fields.SchemaField({
                 count: new fields.SchemaField({
                     value: new fields.NumberField({ required: false, nullable: false, integer: true, min: 0, initial: 1 }),
@@ -142,8 +149,8 @@ export class NpcData extends ActorBaseData {
     }
 
     /**
-     * Core p.86, restated p.85: four states off one number, because the wound is what is stored.
-     * A person-preset NPC drains STR, DEX and END and takes the Traveller rule instead — the test
+     * Core p.85, restated p.84: four states off one number, because the wound is what is stored.
+     * A person-preset NPC drains END, STR and DEX and takes the Traveller rule instead — the test
      * is the chain rather than `subType`, so a referee who moves one onto Hits gets the rule that
      * goes with the pool.
      *
@@ -164,8 +171,8 @@ export class NpcData extends ActorBaseData {
     }
 
     /**
-     * Core p.85 gives a creature no STR at all, so its melee attacks add nothing: the Animal Size
-     * ladder (p.90) is what stands in for the STR DM every other attacker adds.
+     * Core p.84 gives a creature no STR at all, so its melee attacks add nothing: the Animal Size
+     * ladder (p.89) is what stands in for the STR DM every other attacker adds.
      * @inheritDoc
      */
     get meleeDamageDM() {
@@ -173,8 +180,8 @@ export class NpcData extends ActorBaseData {
     }
 
     /**
-     * Core p.85: a Stun weapon incapacitates an animal once the cumulative damage it has dealt
-     * reaches half its Hits — where a Traveller's comes off END alone (p.80).
+     * Core p.84: a Stun weapon incapacitates an animal once the cumulative damage it has dealt
+     * reaches half its Hits — where a Traveller's comes off END alone (p.79).
      */
     get stunIncapacitated() {
         const hits = this.characteristics.hits;
@@ -183,7 +190,7 @@ export class NpcData extends ActorBaseData {
 
     /**
      * The size DM the creature carries, attacker-side: "all ranged attacks made against the animal
-     * gain a DM equal to the score" (Core p.86). Not a defence, and it does not touch melee.
+     * gain a DM equal to the score" (Core p.85). Not a defence, and it does not touch melee.
      */
     get sizeDM() {
         return MGT2Helper.traitScore(this.traits, "large")
@@ -191,7 +198,7 @@ export class NpcData extends ActorBaseData {
     }
 
     /**
-     * The Animal Size row the stored Hits fall in (Core p.90). **Advisory only** — the table itself
+     * The Animal Size row the stored Hits fall in (Core p.89). **Advisory only** — the table itself
      * says "a referee need not be bound by the suggestions here", and the published blocks break it
      * constantly. Offered beside the stored size trait; never computed with.
      */
@@ -202,7 +209,7 @@ export class NpcData extends ActorBaseData {
             .find(band => (hits >= band.min) && ((band.max === null) || (hits <= band.max))) ?? null;
     }
 
-    /** The Experience row (Core p.93) the stored level and combatant flag name together. */
+    /** The Experience row (Core p.92) the stored level and combatant flag name together. */
     get experienceRow() {
         if (!this.experience) return null;
         const key = `${this.experience}${this.combatant ? "Combatant" : "NonCombatant"}`;
@@ -217,13 +224,13 @@ export class NpcData extends ActorBaseData {
     prepareDerivedData() {
         super.prepareDerivedData();
 
-        // Core p.86: Fast Metabolism (+X) "gains a DM to Initiative rolls equal to the figure
+        // Core p.85: Fast Metabolism (+X) "gains a DM to Initiative rolls equal to the figure
         // shown", and its mirror the other way. Provisional, as `Armour (+X)` is: phase 7 turns
         // both into `final`-phase Active Effects.
         this.initiative += MGT2Helper.traitScore(this.traits, "fast-metabolism")
             - Math.abs(MGT2Helper.traitScore(this.traits, "slow-metabolism"));
 
-        // Fight or Flight (Core p.91), keyed on the pattern alone. A `gate` is a scene fact the
+        // Fight or Flight (Core p.90), keyed on the pattern alone. A `gate` is a scene fact the
         // referee resolves — surprise is deliberately not tracked — and `altAttack` is the
         // threshold once it holds.
         this.reaction = MGT2.Reactions[this.behaviour.pattern] ?? null;

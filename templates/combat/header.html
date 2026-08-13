@@ -1,0 +1,71 @@
+{{! THE RANGE STRIP. Position in Traveller is not a map: there is ONE BAND PER PAIR of contacts
+    (Core p.165), so the strip is read from the contact selected in the order outwards and every
+    other one is pinned on it. Each cell carries what the band is worth — the attack DM (p.167) and
+    the Thrust a change out of it costs (p.166). Adjacent and Close print a dash for the DM because
+    the book prints none, not because it is zero. The band is the stored state and the kilometres
+    above derive from it; clicking a cell moves the pinned contact, which is the only way a band
+    changes here. Nothing reads the canvas — the distance is typed. }}
+<header class="mgt2-combat-head">
+	<div class="top">
+		<h2>{{#if strip.from}}{{localize 'MGT2.SpaceCombat.RangeFrom'}} <i>{{strip.from.name}}</i>{{else}}{{localize 'MGT2.SpaceCombat.NoContacts'}}{{/if}}</h2>
+		<span class="of">{{#if strip.from}}{{localize 'MGT2.SpaceCombat.EveryContact'}}{{else}}{{localize 'MGT2.SpaceCombat.DropShipHint'}}{{/if}}</span>
+		{{#if strip.to}}
+		<span class="km">
+			<input class="f n" type="number" min="0" step="1" name="km" value="{{strip.km}}"
+				{{#unless canEdit}}disabled{{/unless}}
+				aria-label="{{localize 'MGT2.SpaceCombat.DistanceLabel'}}" />
+			<i>{{localize 'MGT2.SpaceCombat.Km'}}</i>
+			<span class="lbl">{{localize 'MGT2.SpaceCombat.To' name=strip.to.name}}</span>
+		</span>
+		{{/if}}
+	</div>
+
+	<div class="bands">
+		{{#each strip.cells as |cell|}}
+		<div class="band{{#if cell.here}} here{{/if}}{{#if cell.out}} out{{/if}}" data-band="{{cell.key}}"
+			data-accept="Actor.spacecraft"{{#if ../canEdit}} data-action="setBand"{{/if}}>
+			<span class="pins">
+				{{#each cell.pins as |pin|}}
+				<span class="pin{{#if pin.measured}} on{{/if}}" data-group-id="{{pin.id}}" data-action="measureTo">{{pin.name}}</span>
+				{{/each}}
+			</span>
+			<b>{{localize cell.label}}</b>
+			<span class="km">{{cell.km}}</span>
+			<span class="fig">
+				{{#if cell.noDM}}<i class="none">{{localize 'MGT2.SpaceCombat.NoDM'}}</i>
+				{{else}}<i{{#if cell.negative}} class="neg"{{/if}}>{{localize 'MGT2.SpaceCombat.CellDM' dm=cell.dm}}</i>{{/if}}
+				<i>{{localize 'MGT2.SpaceCombat.CellThrust' thrust=cell.thrust}}</i>
+			</span>
+		</div>
+		{{/each}}
+	</div>
+
+	{{! What the band between the two selected contacts is worth. Every figure here is a reading of
+	    the stored band; a dash is not a zero, so a rule that ran and paid nothing keeps its row. }}
+	<dl class="statline" data-derived="system.bands">
+		<div class="stat{{#unless strip.band}} none{{/unless}}">
+			<dt>{{localize 'MGT2.SpaceCombat.Band'}}</dt>
+			<dd class="word">{{#if strip.band}}{{localize strip.bandLabel}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat{{#if strip.noDM}} none{{/if}}">
+			<dt>{{localize 'MGT2.SpaceCombat.AttackDM'}}</dt>
+			<dd>{{#if strip.noDM}}&mdash;{{else}}{{strip.dm}}{{/if}}</dd>
+		</div>
+		<div class="stat{{#unless strip.band}} none{{/unless}}">
+			<dt>{{localize 'MGT2.SpaceCombat.ToClose'}}</dt>
+			<dd>{{#if strip.band}}{{strip.thrust}}<i>{{localize 'MGT2.SpaceCombat.ThrustUnit'}}</i>{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat{{#unless strip.sizeDM}} none{{/unless}}">
+			<dt>{{localize 'MGT2.SpaceCombat.TargetSize'}}</dt>
+			<dd>{{#if strip.sizeDM}}{{strip.sizeDisplay}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat{{#unless strip.dogfight}} none{{/unless}}">
+			<dt>{{localize 'MGT2.SpaceCombat.Dogfight'}}</dt>
+			<dd class="{{#if strip.dogfight}}word{{/if}}">{{#if strip.dogfight}}{{localize 'MGT2.SpaceCombat.DogfightOn'}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+	</dl>
+
+	{{#if strip.unplaced}}
+	<p class="hint">{{localize 'MGT2.SpaceCombat.Unplaced' names=strip.unplaced}}</p>
+	{{/if}}
+</header>

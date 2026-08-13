@@ -50,7 +50,12 @@
 			<label data-tooltip="{{localize 'MGT2.Actor.FatigueHint'}}">
 				{{formInput systemFields.states.fields.fatigue name="system.states.fatigue" value=system.states.fatigue}}{{localize 'MGT2.Actor.Fatigue'}}
 			</label>
-			{{! Core p.83 derives this from the wound once first aid is spent — see CharacterData.
+			{{! Core folio 81 sets this from a dose and ends it "until medical treatment received",
+			    which the rads cannot say — so the referee clears it, the way fatigue is cleared. }}
+			<label data-tooltip="{{localize 'MGT2.Radiation.NauseaHint'}}">
+				{{formInput systemFields.states.fields.nausea name="system.states.nausea" value=system.states.nausea}}{{localize 'MGT2.Radiation.Nausea'}}
+			</label>
+			{{! Core p.82 derives this from the wound once first aid is spent — see CharacterData.
 			    The stored flag stays as the referee's override, and is only reachable while the
 			    rule is not already imposing it. }}
 			<label data-tooltip="{{localize 'MGT2.Actor.SurgeryRequiredHint'}}">
@@ -125,8 +130,8 @@
 		</span>
 	</div>
 
-	{{! Core p.78 hands the STR-or-DEX choice to the target, per hit: a stored chain gives an order,
-	    never a choice, so the control asks. }}
+	{{! Core folio 77 hands the STR-or-DEX choice to the target. The stored chain is that choice
+	    pre-declared; this control is where it can still be made per hit, so it asks. }}
 	{{#if damagePrompt}}
 	<div class="dmgprompt show">
 		<p>{{localize 'MGT2.Actor.OverflowPrompt' link=damagePrompt.filled remaining=damagePrompt.remaining}}</p>

@@ -50,7 +50,17 @@
 		<li><span class="lbl">{{localize 'MGT2.Items.DamageType'}}</span><b class="word">{{#each damageTypes}}{{#unless @first}}, {{/unless}}{{this}}{{/each}}</b></li>
 		{{/if}}
 		<li{{#unless system.magazine}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span><b>{{system.magazine}}</b></li>
+		{{! Core folio 77, beside the capacity it is counted against. A weapon with no magazine
+		    printed counts nothing and shows no row. }}
+		{{#if ammo}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Loaded'}}</span><b>{{ammo.value}}<span class="u">/ {{ammo.magazine}}</span></b></li>
+		{{/if}}
 		<li{{#unless system.magazineCost}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span><b>{{system.magazineCost}}</b></li>
+		{{! Core folio 79, beside the magazine because that is what the round counts are read against.
+		    Derived from the Auto trait and never stored: the mode is picked at the roll prompt. }}
+		{{#if fireModes}}
+		<li><span class="lbl">{{localize 'MGT2.Items.FireModes'}}</span><b class="word">{{#each fireModes}}{{#unless @first}} · {{/unless}}{{this}}{{/each}}</b></li>
+		{{/if}}
 		<li{{#unless scale.fireControl}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.FireControl'}}</span><b>{{#if scale.fireControl}}{{showDM system.fireControl}}{{else}}—{{/if}}</b></li>
 		<li{{#unless scale.power}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Power'}}</span><b>{{#if scale.power}}{{system.power}}{{else}}—{{/if}}</b></li>
 		{{#if system.natural}}
@@ -128,6 +138,15 @@
 				</select>
 			</span>
 		</label>
+		{{! Core p.165-167: a spacecraft weapon is printed with the furthest band it reaches rather
+		    than with a Range score, so the band is what a ship's gunner reads. }}
+		<label{{#unless (lookup (lookup config.WeaponScales system.scale) 'band')}} class="off"{{/unless}}>
+			<span class="lbl">{{localize 'MGT2.Items.Band'}}</span>
+			<select class="f" name="system.range.band"{{#unless (lookup (lookup config.WeaponScales system.scale) 'band')}} disabled{{/unless}}>
+				<option value=""></option>
+				{{selectOptions config.ShipRangeBands selected=system.range.band labelAttr="label" localize=true}}
+			</select>
+		</label>
 		{{! Foundry's parser has no `3D` shorthand, and the books print one on every statblock — so the
 		    field states the notation it wants rather than failing at the roll button. }}
 		<label>
@@ -145,6 +164,11 @@
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span>
 			{{formInput systemFields.magazineCost name="system.magazineCost" value=system.magazineCost classes="f num"}}
+		</label>
+		{{! Blank is a real answer and means a full magazine — a weapon nobody has fired is loaded. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Loaded'}}</span>
+			{{formInput systemFields.loaded name="system.loaded" value=source.loaded classes="f num" placeholder=(localize 'MGT2.Items.LoadedFull')}}
 		</label>
 		<label{{#unless scale.fireControl}} class="off"{{/unless}}>
 			<span class="lbl">{{localize 'MGT2.Items.FireControl'}}</span>

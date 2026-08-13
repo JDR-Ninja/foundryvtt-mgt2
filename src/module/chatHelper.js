@@ -1,6 +1,8 @@
 import { CharacterPrompts } from "./actors/character-prompts.js";
+import { checkOf, jumpToMessage } from "./chat-message.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
+import { armChain } from "./roll-prompt.js";
 
 export class ChatHelper {
 
@@ -48,6 +50,31 @@ export class ChatHelper {
         if (html.querySelector(".dmgpick")) {
             html.addEventListener("pointerenter", () => this.#markTransform(message, html));
             this.#markTransform(message, html);
+        }
+
+        // The offering side of the chain: this check is held for whatever is rolled next. Several
+        // cards may be armed at once, which is Core p.63's working together — each contributor
+        // offers from their own card and the final check receives them all.
+        const chainInto = html.querySelector('button[data-action="chainInto"]');
+        if (chainInto) {
+            chainInto.addEventListener("click", event => {
+                event.preventDefault();
+                const check = checkOf(message);
+                const count = armChain(message.id);
+                ui.notifications.info(game.i18n.format("MGT2.Chat.Roll.ChainArmed", {
+                    source: check?.label || message.speaker?.alias || "",
+                    dm: MGT2Helper.signed(MGT2Helper.taskChainDM(check?.effect ?? 0), "+0"),
+                    count
+                }));
+            });
+        }
+
+        // The lineage links: the chain strip's sources and the opposed line's one source.
+        for (const link of html.querySelectorAll('[data-action="chainSource"]')) {
+            link.addEventListener("click", event => {
+                event.preventDefault();
+                jumpToMessage(link.dataset.messageId);
+            });
         }
 
         // Indexed buttons are meaningless without the flag that describes them, and a
@@ -98,36 +125,59 @@ export class ChatHelper {
         const damage = message.flags?.mgt2?.damage;
         if (!damage?.formula) return;
 
-        // Core p.78: damage is rolled with the attack's Effect added to the total, and a melee
+        // Core p.77: damage is rolled with the attack's Effect added to the total, and a melee
         // attack adds the attacker's STR DM on top. Both were captured with the attack roll, and
-        // both sit outside the transform: Companion p.94 scopes "any plus or minus" to the weapon's
+        // both sit outside the transform: Companion p.93 scopes "any plus or minus" to the weapon's
         // printed damage, and neither of these is one.
+        // Core folio 79: a burst adds the Auto score, and it sits outside the transform for the same
+        // reason — it is the fire mode's addition, not part of the weapon's printed damage.
         const attackBonus = [];
         if (damage.effect) attackBonus.push(MGT2Helper.getFormulaDM(damage.effect));
         if (damage.strengthDM) attackBonus.push(MGT2Helper.getFormulaDM(damage.strengthDM));
+        if (damage.burst) attackBonus.push(MGT2Helper.getFormulaDM(damage.burst));
         const bonus = attackBonus.join("");
-        const flat = (damage.effect ?? 0) + (damage.strengthDM ?? 0);
+        const flat = (damage.effect ?? 0) + (damage.strengthDM ?? 0) + (damage.burst ?? 0);
 
-        // Foundry's parser has no `4D` shorthand — a weapon has to store `4d6` — and an unresolved
-        // term throws out of the click handler rather than reporting anything.
-        if (!Roll.validate(damage.formula + bonus)) {
-            return ui.notifications.error(game.i18n.localize("MGT2.Errors.InvalidRollFormula"));
+        // The books print `3D`, `3DD` and `3D3` and Foundry parses none of the three, so the stored
+        // score is normalised here; an unresolved term throws out of the click handler rather than
+        // reporting anything.
+        const formula = MGT2Helper.damageFormula(damage.formula);
+        if (!Roll.validate(formula + bonus)) {
+            return ui.notifications.error(
+                game.i18n.format("MGT2.Errors.InvalidDamageFormula", { formula: damage.formula }));
         }
 
-        const full = await new Roll(damage.formula + bonus, {}).roll();
-        const reduced = await new Roll(MGT2Helper.reduceDamageFormula(damage.formula) + bonus, {}).roll();
-        const minimum = MGT2Helper.minimumDamage(damage.formula) + flat;
+        // Core p.78: a Destructive weapon multiplies the total rolled by 10 — written either as the
+        // doubled D of `3DD` or as the trait. Core p.167 puts the scale ratio *after* it, so it
+        // belongs to the damage total and not to the pipeline the target runs.
+        const boost = (MGT2Helper.isDestructive(damage.formula) || damage.destructive) ? 10 : 1;
+
+        const full = await new Roll(formula + bonus, {}).roll();
+        const reduced = await new Roll(MGT2Helper.reduceDamageFormula(formula) + bonus, {}).roll();
+        const minimum = MGT2Helper.minimumDamage(formula) + flat;
 
         const payload = {
-            formula: full.formula, total: full.total,
-            reduced: { formula: reduced.formula, total: reduced.total },
-            minimum,
+            // Read back on the apply path by Core folio 140's anti-light-weapon rule, which counts
+            // the attack's dice — the same count either way round, since the bonus adds no die.
+            formula: full.formula, total: full.total * boost,
+            reduced: { formula: reduced.formula, total: reduced.total * boost },
+            minimum: minimum * boost,
+            destructive: boost > 1,
             effect: damage.effect ?? 0,
             scale: damage.scale ?? "ground",
             ap: damage.ap ?? 0,
             loPen: damage.loPen ?? 0,
+            // HG p.29: what the MOUNT multiplies the wound by, applied after armour rather than
+            // rolled into the dice — which is why it travels as a number instead of a formula.
+            multiple: damage.multiple ?? 1,
             damageType: damage.damageType ?? [],
-            stun: damage.stun === true
+            stun: damage.stun === true,
+            // Core folio 79: a Radiation weapon also delivers a dose, which needs the target and so
+            // rides to the apply path with the rest of the pipeline's inputs.
+            radiation: damage.radiation === true,
+            // RH folio 106: an ion hit meets no armour and shuts a robot's brain down. Only the
+            // target knows whether either happens, so it travels the same way.
+            ion: damage.ion === true
         };
 
         // What the card spells out under each reading: the dice alone, then the attack's own
@@ -140,6 +190,11 @@ export class ChatHelper {
             added.push(game.i18n.localize("MGT2.Characteristics.strength.name") + " "
                 + MGT2Helper.signed(damage.strengthDM));
         }
+        if (damage.burst) {
+            added.push(game.i18n.localize("MGT2.FireModes.burst") + " "
+                + MGT2Helper.signed(damage.burst));
+        }
+        if (payload.destructive) added.push(game.i18n.localize("MGT2.Chat.Damage.Destructive"));
 
         const context = Object.assign({
             who: [message.speaker?.alias, damage.rollObjectName].filter(x => x).join(" · "),
@@ -149,7 +204,8 @@ export class ChatHelper {
             scaleLabel: (MGT2.Scales[payload.scale] ?? MGT2.WeaponScales[payload.scale])?.label ?? payload.scale,
             typeLabels: payload.damageType.map(type => MGT2.DamageTypes[type] ?? type),
             floor: payload.effect >= 6,
-            options: ChatHelper.#transformOptions(damage, payload, flat, added)
+            options: ChatHelper.#transformOptions(formula,
+                { full: full.total, reduced: reduced.total, minimum }, boost, flat, added)
         }, payload);
         context.applyLabel = ChatHelper.#applyLabel(context.options[0]);
 
@@ -164,16 +220,19 @@ export class ChatHelper {
         });
     }
 
-    /** The three readings, in the order the card offers them; the first is the one preselected. */
-    static #transformOptions(damage, payload, flat, added) {
+    /**
+     * The three readings, in the order the card offers them; the first is the one preselected. Each
+     * detail states the dice alone, so `raw` is what was rolled before Destructive's multiple.
+     */
+    static #transformOptions(formula, raw, boost, flat, added) {
         const detail = (expression, dice) => [`${expression} = ${dice}`, ...added].join(" · ");
         return [
-            { key: "full", label: MGT2.DamageTransforms.full, total: payload.total,
-                detail: detail(damage.formula, payload.total - flat) },
-            { key: "reduced", label: MGT2.DamageTransforms.reduced, total: payload.reduced.total,
-                detail: detail(MGT2Helper.reduceDamageFormula(damage.formula), payload.reduced.total - flat) },
-            { key: "minimum", label: MGT2.DamageTransforms.minimum, total: payload.minimum,
-                detail: detail(game.i18n.localize("MGT2.Chat.Damage.PerDie"), payload.minimum - flat) }
+            { key: "full", label: MGT2.DamageTransforms.full, total: raw.full * boost,
+                detail: detail(formula, raw.full - flat) },
+            { key: "reduced", label: MGT2.DamageTransforms.reduced, total: raw.reduced * boost,
+                detail: detail(MGT2Helper.reduceDamageFormula(formula), raw.reduced - flat) },
+            { key: "minimum", label: MGT2.DamageTransforms.minimum, total: raw.minimum * boost,
+                detail: detail(game.i18n.localize("MGT2.Chat.Damage.PerDie"), raw.minimum - flat) }
         ];
     }
 
@@ -252,19 +311,93 @@ export class ChatHelper {
 
         for (const token of targets) {
             const result = await token.actor.applyDamage(amount, {
-                scale: payload.scale, ap: payload.ap, effect: payload.effect, stun: payload.stun,
-                damageType: payload.damageType
+                scale: payload.scale, ap: payload.ap, loPen: payload.loPen,
+                effect: payload.effect, stun: payload.stun, formula: payload.formula,
+                multiple: payload.multiple, damageType: payload.damageType, ion: payload.ion
             });
-            // Core p.80: what a Stun weapon deals past END is rounds of incapacitation, not injury.
+            // Core p.79: what a Stun weapon deals past END is rounds of incapacitation, not injury.
             if (result?.rounds > 0) {
                 ui.notifications.info(game.i18n.format("MGT2.Actor.StunIncapacitated",
                     { name: token.actor.name, rounds: result.rounds }));
             }
+            // RH folio 106: an ion hit shuts a robot's brain down for as many rounds as it inflicted
+            // and a hardened one shrugs it off — the same kind of fact as the Stun rounds above, and
+            // reported the same way, because neither is a wound anything on the sheet can hold.
+            if (result?.shutdown > 0) {
+                ui.notifications.info(game.i18n.format("MGT2.Actor.robot.IonShutdown",
+                    { name: token.actor.name, rounds: result.shutdown }));
+            } else if (result?.immune) {
+                ui.notifications.info(game.i18n.format("MGT2.Actor.robot.IonImmune",
+                    { name: token.actor.name }));
+            }
+            if (payload.radiation) await ChatHelper.#applyRadiation(token.actor, payload.scale);
         }
     }
 
     /* -------------------------------------------- */
-    /*  Recovery (Core p.83-84)                     */
+    /*  Radiation (Core folio 81)                   */
+    /* -------------------------------------------- */
+
+    /**
+     * Core folio 79: "the target will receive 2D x 20 rads, multiplied by three for Spacecraft scale
+     * weapons". Rolled per target, because the folio gives each one their own dose. The Destructive
+     * clause, which doses everything within ten metres, is the referee's radius and is already how a
+     * card applied to several tokens behaves.
+     */
+    static async #applyRadiation(actor, scale) {
+        const source = MGT2.RadiationSources.weapon;
+        const roll = await new Roll((scale === "spacecraft") ? source.spacecraft : source.formula).roll();
+        return ChatHelper.resolveExposure(actor, { dose: roll.total, roll });
+    }
+
+    /**
+     * One exposure, read the way folio 81 reads it: the immediate column against this dose, the
+     * permanent one against the running total. Folio 100's armour Rad score comes off first, which
+     * is why the damage that follows is applied raw — the Protection was already paid at the rads.
+     *
+     * Both entry points end here — the health panel's own control and a Radiation weapon's damage
+     * card — so the table is read in one place.
+     * @param {Actor} actor
+     * @param {object} exposure   `{dose, roll}` — the dose before the armour deduction
+     */
+    static async resolveExposure(actor, { dose, roll = null }) {
+        if ((dose <= 0) || (typeof actor.system.applyRadiation !== "function")) return;
+        const protection = actor.system.radiationProtection;
+        const applied = await actor.system.applyRadiation(dose - protection);
+        if (!applied) {
+            return ChatHelper.postRadiation(actor,
+                game.i18n.format("MGT2.Radiation.Absorbed", { dose, protection }), roll);
+        }
+
+        const parts = [game.i18n.format("MGT2.Radiation.Dose", applied)];
+        if (applied.immediate?.damage) {
+            const damage = await new Roll(MGT2Helper.damageFormula(applied.immediate.damage)).roll();
+            // Read off the actor, never off a model held across the write above: an update replaces
+            // `actor.system` with a fresh instance, and the old one still answers with the END the
+            // cumulative penalty has just taken away.
+            await actor.system.applyDamage(damage.total, { raw: true });
+            parts.push(game.i18n.format("MGT2.Radiation.Immediate",
+                { formula: applied.immediate.damage, points: damage.total }));
+        }
+        if (applied.immediate?.condition) parts.push(game.i18n.localize(applied.immediate.condition));
+        // Stated only when it moved: the penalty is a standing figure the sheet already prints.
+        if (applied.after?.endurance !== applied.before?.endurance) {
+            parts.push(game.i18n.format("MGT2.Radiation.Permanent",
+                { endurance: MGT2Helper.signed(applied.after.endurance) }));
+        }
+        // A sub-type whose ladder is not folio 81's says so in sentences of its own: RH folio 106
+        // prices a robot's brain in INT and Bandwidth, and has no immediate column at all.
+        parts.push(...(applied.lines ?? []));
+        return ChatHelper.postRadiation(actor, parts.join(" · "), roll);
+    }
+
+    /** A dose is not a recovery, so the card names itself; everything else about it is the same. */
+    static postRadiation(actor, message, roll = null) {
+        return ChatHelper.postRecovery(actor, "MGT2.Radiation.Exposure", message, roll, "MGT2.Actor.Rads");
+    }
+
+    /* -------------------------------------------- */
+    /*  Recovery (Core p.82-83)                     */
     /* -------------------------------------------- */
 
     /** The card knows the Effect; who was treated is the referee's pick, as it is for damage. */
@@ -277,7 +410,7 @@ export class ChatHelper {
     }
 
     /**
-     * Core p.83: the Effect of a Medic check, minimum one point, once only. The two conditions it
+     * Core p.82: the Effect of a Medic check, minimum one point, once only. The two conditions it
      * also names are facts no sheet holds, so the dialog has the referee confirm them.
      */
     static applyFirstAid(actor, points) {
@@ -334,11 +467,11 @@ export class ChatHelper {
     }
 
     /** One compact card per procedure, so a day of healing leaves a trace the table can read back. */
-    static async postRecovery(actor, procedure, message, roll = null) {
+    static async postRecovery(actor, procedure, message, roll = null, title = "MGT2.Recovery.Title") {
         const chatData = {
             author: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor }),
-            rollTypeName: game.i18n.localize("MGT2.Recovery.Title"),
+            rollTypeName: game.i18n.localize(title),
             rollObjectName: game.i18n.localize(procedure),
             rollMessage: message
         };
