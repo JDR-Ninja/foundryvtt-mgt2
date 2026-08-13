@@ -104,7 +104,7 @@
 			<tbody>
 				{{#each skills as |skill|}}
 				<tr data-item-id="{{skill._id}}">
-					<td><a class="roll" data-action="roll" data-roll="skill" data-roll-skill="{{skill._id}}"><i class="fa-solid fa-dice"></i></a>{{skill.name}}{{#if skill.system.skill.speciality}} ({{skill.system.skill.speciality}}){{/if}}</td>
+					<td><button type="button" class="roll" data-action="roll" data-roll="skill" data-roll-skill="{{skill._id}}">{{skill.name}}{{#if skill.system.skill.speciality}} ({{skill.system.skill.speciality}}){{/if}}</button></td>
 					<td class="c num">{{skill.system.level}}</td>
 					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditSkill" del="MGT2.Actor.DeleteSkill"}}
 				</tr>
@@ -136,7 +136,7 @@
 			<tbody>
 				{{#each psionics as |psionic|}}
 				<tr data-item-id="{{psionic._id}}">
-					<td><a class="roll" data-action="roll" data-roll="psionic" data-item-id="{{psionic._id}}"><i class="fa-solid fa-dice"></i></a>{{psionic.name}}</td>
+					<td><button type="button" class="roll" data-action="roll" data-roll="psionic" data-item-id="{{psionic._id}}">{{psionic.name}}</button></td>
 					<td class="c num">{{psionic.system.level}}</td>
 					<td class="c num">{{psionic.system.psionic.cost}}</td>
 					<td class="c">{{psionic.reach}}</td>

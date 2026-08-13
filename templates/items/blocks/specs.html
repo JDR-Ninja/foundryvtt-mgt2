@@ -270,10 +270,24 @@
 		</label>
 		{{/if}}
 
+		{{! TL, legality and weightless describe what the item IS, so they stay here rather than
+		    following the rest of the Carried block into the masthead's supply cell. }}
+		{{#if systemFields.tl}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.TL'}}</span>
+			<select class="f" name="system.tl">{{selectOptions config.TL selected=system.tl localize=true}}</select>
+		</label>
+		{{/if}}
 		{{#if system.tl}}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Legality'}}</span>
 			{{formInput systemFields.legality name="system.legality" value=system.legality classes="f num"}}
+		</label>
+		{{/if}}
+		{{#if systemFields.weightless}}
+		<label class="check">
+			{{formInput systemFields.weightless name="system.weightless" value=system.weightless}}
+			<span>{{localize 'MGT2.Items.Weightless'}}</span>
 		</label>
 		{{/if}}
 	</div>

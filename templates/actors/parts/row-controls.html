@@ -4,7 +4,9 @@
 		{{#if store}}<a data-action="itemStorageIn" data-tooltip="{{localize 'MGT2.Actor.StoreItem'}}"><i class="fa-solid fa-inbox-in"></i></a>{{/if}}
 		{{#if unstore}}<a data-action="itemStorageOut" data-tooltip="{{localize 'MGT2.Actor.UnstoreItem'}}"><i class="fa-solid fa-inbox-out"></i></a>{{/if}}
 		{{#if eject}}<a data-action="softwareEject" data-tooltip="{{localize 'MGT2.Actor.UnloadSoftware'}}"><i class="fa-solid fa-eject"></i></a>{{/if}}
-		{{#if edit}}<a data-action="itemEdit" data-tooltip="{{localize edit}}"><i class="fas fa-edit"></i></a>{{/if}}
+		{{! One action, two faces: in play mode the sheet it opens is there to be read, not edited. }}
+		{{#if edit}}<a class="play-only" data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.View'}}"><i class="fas fa-eye"></i></a>
+		<a class="edit-only" data-action="itemEdit" data-tooltip="{{localize edit}}"><i class="fas fa-edit"></i></a>{{/if}}
 		{{#if del}}<a data-action="itemDelete" data-tooltip="{{localize del}}"><i class="fas fa-trash"></i></a>{{/if}}
 	</div>
 </td>

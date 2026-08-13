@@ -23,7 +23,7 @@
 					{{#each weapons as |weapon|}}
 					<tr class="drag-item-list" data-item-id="{{weapon._id}}">
 						<td>
-							<a class="roll" data-action="roll" data-roll="item" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}
+							<button type="button" class="roll" data-action="roll" data-roll="item" data-item-id="{{weapon._id}}">{{weapon.name}}</button>
 							{{#if weapon.subInfo}}<span class="sub">{{weapon.subInfo}}</span>{{/if}}
 						</td>
 						<td class="c">{{weapon.range}}</td>
@@ -58,7 +58,7 @@
 					{{#each armors as |armor|}}
 					<tr class="drag-item-list" data-item-id="{{armor._id}}">
 						<td>
-							<a class="roll" data-action="roll" data-roll="item" data-item-id="{{armor._id}}"><i class="fa-solid fa-dice"></i></a>{{armor.name}}
+							<button type="button" class="roll" data-action="roll" data-roll="item" data-item-id="{{armor._id}}">{{armor.name}}</button>
 							{{#if armor.subInfo}}<span class="sub">{{armor.subInfo}}</span>{{/if}}
 						</td>
 						<td class="c num">{{armor.system.radiations}}</td>
@@ -120,7 +120,7 @@
 					{{#each computers as |computer|}}
 					<tr class="drop-item-list" data-item-id="{{computer._id}}">
 						<td>
-							<a class="roll" data-action="roll" data-roll="item" data-item-id="{{computer._id}}"><i class="fa-solid fa-dice"></i></a>{{computer.name}}
+							<button type="button" class="roll" data-action="roll" data-roll="item" data-item-id="{{computer._id}}">{{computer.name}}</button>
 							{{#if computer.subInfo}}<span class="sub">{{computer.subInfo}}</span>{{/if}}
 						</td>
 						<td class="c num {{computer.overloadClass}}">{{computer.system.processingUsed}}/{{computer.system.processing}}{{#if computer.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}</td>

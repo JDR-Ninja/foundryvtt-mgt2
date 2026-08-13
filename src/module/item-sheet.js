@@ -14,6 +14,28 @@ const BLOCKS = ["roll", "hazard", "specs", "carried", "traits", "relationship", 
 
 const blockPath = id => `systems/mgt2/templates/items/blocks/${id}.html`;
 
+/**
+ * Which tab holds each block. `masthead` is not a tab: the roll binding is lifted above the strip so
+ * it stays on screen from every one of them. The map is TOTAL over `BLOCKS` — a block with no slot
+ * would silently stop rendering on every type, so the omission is caught at load instead.
+ */
+const SLOT = {
+  roll: "masthead", hazard: "masthead",
+  specs: "details", relationship: "details", station: "details",
+  traits: "traits",
+  contents: "contents", software: "contents", events: "contents", actions: "contents",
+  carried: "contents",
+  effects: "effects",
+  description: "description", detail: "description", notes: "description"
+};
+
+for ( const id of BLOCKS ) {
+  if ( !(id in SLOT) ) throw new Error(`MGT2 | the item sheet block "${id}" has no tab slot.`);
+}
+
+/** Blocks whose heading only repeats the nav entry above it, so alone in a tab they drop it. */
+const EPONYMOUS = new Set(["effects", "description", "contents"]);
+
 /** The sub-type dictionary that names each type, where it has one. */
 const SUBTYPES = {
   item: MGT2.ItemSubType,
@@ -56,12 +78,38 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     }
   };
 
-  /** @inheritDoc */
+  /**
+   * One root part, unwrapped into `.window-content`. That is what makes `.window-content` the form
+   * element, which is what lets the masthead carry `weight` — a bare input outside the schema, see
+   * `_processFormData`. Promoting the masthead to a part of its own breaks that round trip silently.
+   * @inheritDoc
+   */
   static PARTS = {
     sheet: {
       root: true,
       template: "systems/mgt2/templates/items/item-sheet.html",
-      templates: BLOCKS.map(blockPath)
+      templates: BLOCKS.map(blockPath).concat("systems/mgt2/templates/actors/parts/tabs-nav.html"),
+      // The masthead never scrolls, so the open tab is the only scroller — and `submitOnChange`
+      // re-renders the whole sheet on every keystroke.
+      scrollable: ['.tab[data-group="item"].active']
+    }
+  };
+
+  /**
+   * The five tabs, in nav order. Which of them render varies per document: a slot no block fills
+   * gets neither a nav entry nor a body, so no `initial` is declared here — the first surviving tab
+   * is it. `effects` and `description` are on every type's list, so there is always one.
+   * @inheritDoc
+   */
+  static TABS = {
+    item: {
+      tabs: [
+        { id: "details", cssClass: "item tab-select", icon: "fa-solid fa-gear", label: "MGT2.Items.Details" },
+        { id: "traits", cssClass: "item tab-select", icon: "fa-solid fa-tag", label: "MGT2.Items.Traits" },
+        { id: "contents", cssClass: "item tab-select", icon: "fa-solid fa-box-open", label: "MGT2.Items.Contents" },
+        { id: "effects", cssClass: "item tab-select", icon: "fa-solid fa-person-rays", label: "MGT2.Effects.Title" },
+        { id: "description", cssClass: "item tab-select", icon: "fa-solid fa-book", label: "MGT2.Items.Description" }
+      ]
     }
   };
 
@@ -90,13 +138,86 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
 
   /* -------------------------------------------- */
 
+  /**
+   * The blocks this document carries, grouped into the tab each one belongs in.
+   *
+   * `carried` is the block that dissolved: its inventory line is the masthead's supply cell and its
+   * TL, legality and weightless join Specs, so what the partial still draws is a container's own
+   * storage properties — nothing at all on anything else.
+   *
+   * @param {object[]} [traits]   The prepared code rows, when the blocks are being rendered
+   * @returns {{supply: boolean, slots: Record<string, object[]>}}
+   */
+  #composition(traits) {
+    const item = this.item;
+    const byType = TravellerItemSheet.#BLOCKS_BY_TYPE;
+    const list = byType[`${item.type}:${item.system.subType}`] ?? byType[item.type] ?? byType._default;
+    const slots = {};
+    let supply = false;
+
+    for ( const id of list ) {
+      if ( id === "carried" ) {
+        supply = true;
+        if ( item.type !== "container" ) continue;
+      }
+      // A weapon declares both trait arrays and the sheet had one code row to spend, so the block
+      // renders once per array rather than once per type.
+      const rows = ((id === "traits") && traits) ? traits : [null];
+      for ( const row of rows ) (slots[SLOT[id]] ??= []).push({ id, template: blockPath(id), row });
+    }
+
+    for ( const blocks of Object.values(slots) ) {
+      if ( (blocks.length === 1) && EPONYMOUS.has(blocks[0].id) ) blocks[0].bare = true;
+    }
+    return { supply, slots };
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * The tab set varies per document, so the declared list is filtered down to the slots this item's
+   * blocks fill and `initial` follows it. v14 reads both from here: `_prepareTabs`
+   * (`client/applications/api/application.mjs`) destructures `{tabs, labelPrefix, initial}` off this
+   * method, which is also where FilePicker varies its own source tabs.
+   * @inheritDoc
+   */
+  _getTabsConfig(group) {
+    const config = super._getTabsConfig(group);
+    if ( (group !== "item") || !config ) return config;
+    const { slots } = this.#composition();
+    const tabs = config.tabs.filter(tab => tab.id in slots);
+    return { ...config, tabs, initial: tabs[0]?.id ?? null };
+  }
+
+  /**
+   * `_prepareTabs` fills `tabGroups[group]` with `??=`, so a stored id outlives the tab that carried
+   * it: turn a talent from psionic to skill and Details is gone while the group still points at it,
+   * leaving a blank body under a strip with nothing active. Reset only when the id is genuinely
+   * absent — a blanket reset would bounce the user off the tab they are typing in, on every
+   * `submitOnChange` re-render.
+   * @inheritDoc
+   */
+  _prepareTabs(group) {
+    if ( group === "item" ) {
+      const { tabs } = this._getTabsConfig(group);
+      if ( !tabs.some(tab => tab.id === this.tabGroups[group]) ) this.tabGroups[group] = null;
+    }
+    return super._prepareTabs(group);
+  }
+
+  /* -------------------------------------------- */
+
   /** @inheritDoc */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     const item = this.item;
     const actor = item.actor;
-    const byType = TravellerItemSheet.#BLOCKS_BY_TYPE;
-    const blocks = byType[`${item.type}:${item.system.subType}`] ?? byType[item.type] ?? byType._default;
+    const traitRows = this.#prepareTraits();
+    const { supply, slots } = this.#composition(traitRows);
+
+    // The tab record is auto-prepared by ApplicationV2, there being one group; each entry carries
+    // the blocks its body renders.
+    for ( const tab of Object.values(context.tabs) ) tab.blocks = slots[tab.id];
 
     return Object.assign(context, {
       item,
@@ -108,7 +229,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         usePronouns: game.settings.get("mgt2", "usePronouns"),
         useGender: game.settings.get("mgt2", "useGender")
       },
-      blocks: blocks.map(id => ({ id, template: blockPath(id) })),
+      binding: slots.masthead?.[0] ?? null,
+      supply,
       spine: this.#spine(),
       tags: this.#tags(),
       subTypes: SUBTYPES[item.type] ?? null,
@@ -122,7 +244,6 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       isGM: game.user.isGM,
       skills: this.#prepareSkills(actor),
       roll: this.#prepareRoll(actor),
-      traits: this.#prepareTraits(),
       effects: prepareEffects(item),
       // A Set is neither an array nor a plain object, so Handlebars cannot walk it.
       damageTypes: Array.from(item.system.damageType ?? [], key => game.i18n.localize(MGT2.DamageTypes[key])),
@@ -251,19 +372,22 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   }
 
   /**
-   * The trait array as the shared code row. A weapon's traits and a species' come from the
-   * registry; the accessory lists the other types call options have no printed vocabulary, so they
-   * declare the `custom` family and their autocomplete is empty by design.
+   * The trait arrays as shared code rows, one per array the schema declares. A weapon's traits and a
+   * species' come from the registry; the accessory lists the other types call options have no
+   * printed vocabulary, so they declare the `custom` family and their autocomplete is empty by
+   * design. A weapon declares both, and with one row per sheet its accessories were unreachable.
+   * @returns {object[]}
    */
   #prepareTraits() {
-    const { type, system } = this.item;
-    const traits = (type === "weapon") || (type === "species");
-    const property = traits ? "traits" : "options";
-    // Most types carry neither array, and the context is built before the block list is consulted.
-    const field = system.schema.fields[property];
-    if ( !field ) return null;
-    return prepareTraitBlock(system[property], property, field.element.fields.family.initial,
-      traits ? "MGT2.Items.Traits" : "MGT2.Items.Options");
+    const system = this.item.system;
+    const rows = [];
+    for ( const [property, label] of [["traits", "MGT2.Items.Traits"], ["options", "MGT2.Items.Options"]] ) {
+      // Most types carry neither array, and the context is built before the block list is consulted.
+      const field = system.schema.fields[property];
+      if ( !field ) continue;
+      rows.push(prepareTraitBlock(system[property], property, field.element.fields.family.initial, label));
+    }
+    return rows;
   }
 
   /**

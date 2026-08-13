@@ -1,10 +1,10 @@
-{{! How the item sits in the inventory. Equipping and storing are the session loop rather than
-    structure, so those two controls stay live in play mode; the rest is edit-mode only. }}
+{{! What is left of the Carried block once it dissolved: a container's own storage properties, which
+    belong beside what is in it. Weight, quantity, cost, storage and equipped are the masthead's
+    supply cell now, and TL, legality and weightless describe the item, so they joined Specs. }}
 <div class="block">
-	<div class="sect"><h3>{{localize 'MGT2.Items.Carried'}}</h3></div>
+	<div class="sect"><h3>{{localize 'MGT2.Items.Storage'}}</h3></div>
 
 	<div class="carried">
-		{{#if (eq item.type "container")}}
 		<label class="chk">
 			{{formInput systemFields.onHand name="system.onHand" value=system.onHand}}
 			<span>{{localize 'MGT2.Items.OnHand'}}</span>
@@ -15,52 +15,9 @@
 			<span>{{localize 'MGT2.Items.Locked'}}</span>
 		</label>
 		{{/if}}
-		{{#if hadContainer}}
-		<span class="store">
-			<span class="lbl">{{localize 'MGT2.Items.Storage'}}</span>
-			<select class="f" name="system.container.id">
-				{{selectOptions containers selected=system.container.id valueAttr="_id" labelAttr="name"}}
-			</select>
-		</span>
-		{{/if}}
-		<span class="ro play-only">
-			<span>{{weight}} {{unitlabels.weight}}</span>
-			<span>&times;{{system.count}}</span>
-		</span>
-
-		{{else}}
-		{{#if systemFields.equipped}}
-		<label class="chk">
-			{{formInput systemFields.equipped name="system.equipped" value=system.equipped}}
-			<span>{{localize 'MGT2.Items.Equipped'}}</span>
-		</label>
-		{{/if}}
-		{{#if hadContainer}}
-		<span class="store">
-			<span class="lbl">{{localize 'MGT2.Items.Storage'}}</span>
-			<select class="f" name="system.container.id">
-				{{selectOptions containers selected=system.container.id valueAttr="_id" labelAttr="name"}}
-			</select>
-		</span>
-		{{#if (eq system.subType "software")}}
-		<span class="store edit-only">
-			<span class="lbl">{{localize 'MGT2.Items.Computer'}}</span>
-			<select class="f" name="system.software.computerId">
-				{{selectOptions computers selected=system.software.computerId valueAttr="_id" labelAttr="name"}}
-			</select>
-		</span>
-		{{/if}}
-		{{/if}}
-		<span class="ro play-only">
-			<span>{{weight}} {{unitlabels.weight}}</span>
-			<span>&times;{{system.quantity}}</span>
-			<span>Cr {{system.cost}}</span>
-		</span>
-		{{/if}}
 	</div>
 
 	<div class="grid edit-only">
-		{{#if (eq item.type "container")}}
 		<label class="wide">
 			<span class="lbl">{{localize 'MGT2.Items.Location'}}</span>
 			{{formInput systemFields.location name="system.location" value=system.location classes="f"}}
@@ -73,29 +30,6 @@
 		<label class="wide">
 			<span class="lbl">{{localize 'MGT2.Items.LockedDescription'}}</span>
 			<textarea class="f" name="system.lockedDescription" rows="3">{{system.lockedDescription}}</textarea>
-		</label>
-		{{/if}}
-
-		{{else}}
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.Weight'}} ({{unitlabels.weight}})</span>
-			<input class="f num" type="number" name="weight" value="{{weight}}" step="0.5" data-dtype="Number" />
-		</label>
-		<label class="check">
-			{{formInput systemFields.weightless name="system.weightless" value=system.weightless}}
-			<span>{{localize 'MGT2.Items.Weightless'}}</span>
-		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.Quantity'}}</span>
-			{{formInput systemFields.quantity name="system.quantity" value=system.quantity classes="f num"}}
-		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.Cost'}}</span>
-			{{formInput systemFields.cost name="system.cost" value=system.cost classes="f num"}}
-		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.TL'}}</span>
-			<select class="f" name="system.tl">{{selectOptions config.TL selected=system.tl localize=true}}</select>
 		</label>
 		{{/if}}
 	</div>

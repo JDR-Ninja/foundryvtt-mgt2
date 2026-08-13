@@ -4,7 +4,10 @@
 <div class="itemsheet-header"><span>{{localize spine}}</span></div>
 
 <div class="imain">
-	<div class="ihd">
+	{{! The masthead is outside every tab: identity, how the item sits in the inventory, and the
+	    binding that says what rolling it means. The two optional cells collapse — a role has
+	    neither, a computer no binding, a talent no supply. }}
+	<div class="mast">
 		<img class="iportrait" src="{{item.img}}" alt="{{item.name}}" data-edit="img" data-action="editImage" data-tooltip="{{item.name}}" />
 		<div class="idy">
 			<div class="iname">
@@ -23,9 +26,83 @@
 			</div>
 			{{/if}}
 		</div>
+
+		{{#if supply}}
+		<div class="supply">
+			{{#if (eq item.type "container")}}
+			{{! A bag has no mass, no price and no count of its own: all three read off its contents. }}
+			<div class="sline">
+				<span>{{weight}}<u>{{unitlabels.weight}}</u></span>
+				<span>&times;{{system.count}}</span>
+			</div>
+			{{else}}
+			<div class="sline play-only">
+				<span>{{weight}}<u>{{unitlabels.weight}}</u></span>
+				<span>&times;{{system.quantity}}</span>
+				<span>Cr {{system.cost}}</span>
+			</div>
+			<div class="sedit edit-only">
+				<label>
+					<span class="lbl">{{unitlabels.weight}}</span>
+					{{! "weight" is a bare input outside the schema, converted and dropped in
+					    _processFormData. It round-trips only because the root part is unwrapped into
+					    .window-content, which IS the form element — give the masthead a PART of its
+					    own and this field silently stops saving. }}
+					<input class="f num" type="number" name="weight" value="{{weight}}" step="0.5" data-dtype="Number" />
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Items.Qty'}}</span>
+					{{formInput systemFields.quantity name="system.quantity" value=system.quantity classes="f num"}}
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Items.Cost'}}</span>
+					{{formInput systemFields.cost name="system.cost" value=system.cost classes="f num"}}
+				</label>
+			</div>
+			{{/if}}
+
+			{{! Equipping and storing are the session loop rather than structure, so both stay live in
+			    play mode — which is why an item sheet is deliberately not zero-input there. }}
+			{{#if (or systemFields.equipped hadContainer)}}
+			<div class="srow">
+				{{#if systemFields.equipped}}
+				<label class="eq" data-tooltip="{{localize 'MGT2.Items.Equipped'}}" aria-label="{{localize 'MGT2.Items.Equipped'}}">
+					{{formInput systemFields.equipped name="system.equipped" value=system.equipped}}
+					<i class="fa-solid fa-shield-halved"></i>
+				</label>
+				{{/if}}
+				{{#if hadContainer}}
+				<select class="f" name="system.container.id" data-tooltip="{{localize 'MGT2.Items.Storage'}}" aria-label="{{localize 'MGT2.Items.Storage'}}">
+					{{selectOptions containers selected=system.container.id valueAttr="_id" labelAttr="name"}}
+				</select>
+				{{/if}}
+			</div>
+			{{/if}}
+			{{#if (and hadContainer (eq system.subType "software"))}}
+			<div class="srow edit-only">
+				<select class="f" name="system.software.computerId" data-tooltip="{{localize 'MGT2.Items.Computer'}}" aria-label="{{localize 'MGT2.Items.Computer'}}">
+					{{selectOptions computers selected=system.software.computerId valueAttr="_id" labelAttr="name"}}
+				</select>
+			</div>
+			{{/if}}
+		</div>
+		{{/if}}
+
+		{{! The binding spans all three columns at the full content width, and that is load-bearing:
+		    beside the portrait the row is ~90 px narrower and a weapon carrying a Reload button
+		    wraps to two lines. }}
+		{{#if binding}}
+		<div class="bind">{{> (lookup binding "template") this}}</div>
+		{{/if}}
 	</div>
 
-	{{#each blocks as |block|}}
-	{{> (lookup block "template") ../this}}
+	{{> systems/mgt2/templates/actors/parts/tabs-nav.html group="item" navClass="horizontal-tabs tabs" tabs=tabs}}
+
+	{{#each tabs as |tab|}}
+	<section class="tab{{#if tab.active}} active{{/if}}" data-group="item" data-tab="{{tab.id}}">
+		{{#each tab.blocks as |block|}}
+		{{> (lookup block "template") @root traits=block.row bare=block.bare}}
+		{{/each}}
+	</section>
 	{{/each}}
 </div>

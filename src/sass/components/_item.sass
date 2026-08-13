@@ -9,6 +9,10 @@
 	align-content: start
 	font-family: var(--body)
 	font-size: 14px
+	// What the tab body's cap has to leave room for: window padding, the masthead, two gaps and the
+	// nav. Generous exactly where it is consulted — the only tabs that can reach the cap belong to
+	// types carrying no roll binding, whose masthead is one rank shorter.
+	--item-chrome: 250px
 
 // The one deliberate brand-chrome exception: dark on both grounds. _colors.sass re-anchors the
 // palette on this class, so the label reads the chrome's ink and not the page's.
@@ -38,16 +42,21 @@
 	padding: 12px 16px 16px
 
 // --------------------------------------------
-//  Identity header
+//  MASTHEAD — identity, supply and the roll binding, outside every tab
 // --------------------------------------------
+// Both references keep the inventory line out of the tabs: dnd5e in the header's right column,
+// pf2e in a persistent sidebar. Three optional parts — a type with nothing carried has no supply
+// cell, a type with no roll or hazard has no binding row, and both collapse to nothing.
 
-.mgt2 .ihd
+.mgt2 .mast
 	display: grid
-	grid-template-columns: auto minmax(0, 1fr)
-	gap: 0 14px
+	grid-template-columns: auto minmax(0, 1fr) auto
+	gap: 9px 14px
 	align-items: start
 
 	.iportrait
+		grid-column: 1
+		grid-row: 1
 		width: 76px
 		height: 76px
 		object-fit: cover
@@ -56,6 +65,8 @@
 		cursor: var(--cursor-pointer)
 
 	.idy
+		grid-column: 2
+		grid-row: 1
 		min-width: 0
 
 	.iname
@@ -92,6 +103,113 @@
 			gap: 2px
 		span::after
 			content: none
+
+	// Equipping and storing are the session loop rather than structure, so both stay live in play
+	// mode — which is why an item sheet is deliberately not zero-input there.
+	.supply
+		grid-column: 3
+		grid-row: 1
+		display: flex
+		flex-direction: column
+		align-items: flex-end
+		gap: 6px
+		width: 12.5rem
+
+		.sline
+			display: flex
+			align-items: baseline
+			gap: 13px
+			font-family: var(--mono)
+			font-size: 12px
+			font-variant-numeric: tabular-nums
+			color: var(--mute)
+			u
+				margin-left: 1px
+				font-size: 10px
+				text-decoration: none
+				color: var(--faint)
+
+		.sedit
+			display: grid
+			grid-template-columns: repeat(3, minmax(0, 1fr))
+			gap: 5px
+			width: 100%
+			.lbl
+				display: block
+				margin-bottom: 2px
+				text-align: right
+			input.f
+				text-align: right
+				font-size: 12px
+
+		.srow
+			display: flex
+			align-items: center
+			gap: 6px
+			width: 100%
+			select.f
+				flex: 1 1 auto
+				min-width: 0
+				font-size: 12px
+
+		// The toggle stays a checkbox under its clothes: `_processFormData` reads `equipped` and
+		// `container` off the same submit to settle which one the other clears, so an action button
+		// writing the field directly would skip that rule.
+		.eq
+			position: relative
+			flex: none
+			display: grid
+			place-items: center
+			width: 27px
+			height: 24px
+			color: var(--faint)
+			border: 1px solid var(--rule)
+			border-radius: 2px
+			cursor: var(--cursor-pointer)
+			input
+				position: absolute
+				width: 1px
+				height: 1px
+				margin: 0
+				opacity: 0
+				pointer-events: none
+			&:has(:checked)
+				color: var(--accent-text)
+				background: var(--accent-soft)
+				border-color: var(--accent-line)
+			&:focus-within
+				border-color: var(--accent-text)
+
+	// The binding spans all three columns at the full content width, and that is load-bearing:
+	// beside the portrait the row is ~90 px narrower and a weapon carrying a Reload button wraps.
+	.bind
+		grid-column: 1 / -1
+		grid-row: 2
+		padding-top: 9px
+		border-top: 1px solid var(--rule-soft)
+
+// --------------------------------------------
+//  TABS — the cap goes on the tab body, never on the window
+// --------------------------------------------
+// The window keeps `height: auto` and stays resizable: the field grid is
+// `repeat(auto-fit, minmax(7rem, 1fr))`, four tracks at 630 px and five at 700, so width is a real
+// height lever. Capping the body instead means the masthead can never scroll away and only the
+// visible tab can push the sheet down.
+
+.mgt2 .tab[data-group="item"].active
+	display: flex
+	flex-direction: column
+	gap: 14px
+	max-height: calc(min(max(70vh, 1000px), 95vh) - var(--item-chrome))
+	overflow: auto
+	scrollbar-gutter: stable
+
+// A tab holding one block drops that block's heading where the nav entry above already says it. The
+// control row stays, because the count and the add button are real UI — and because the kit only
+// sizes an add button that sits inside a `.sect`.
+.mgt2 .sect.bare
+	padding-bottom: 2px
+	border-bottom: 1px solid var(--rule-soft)
 
 // --------------------------------------------
 //  ROLL — the item's interface to the character, stated as a sentence
@@ -207,7 +325,7 @@
 		color: var(--danger)
 
 // --------------------------------------------
-//  CARRIED — equipping and storing stay live in play mode
+//  CARRIED — a container's own storage properties, live in play mode
 // --------------------------------------------
 
 .mgt2 .carried
@@ -232,25 +350,6 @@
 			color: var(--mute)
 		input:checked + span
 			color: var(--accent-text)
-
-	.store
-		display: flex
-		align-items: center
-		gap: 7px
-		select.f
-			width: auto
-			min-width: 8rem
-			font-size: 12px
-
-	.ro
-		display: flex
-		align-items: baseline
-		gap: 16px
-		margin-left: auto
-		font-family: var(--mono)
-		font-size: 12px
-		font-variant-numeric: tabular-nums
-		color: var(--mute)
 
 // --------------------------------------------
 //  Shared odds and ends

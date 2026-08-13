@@ -1,5 +1,7 @@
 <div class="block">
-	<div class="sect"><h3>{{localize 'MGT2.Items.Description'}}</h3></div>
+	{{! This header carries no control, so alone in its tab it is dropped outright rather than left
+	    as an empty rule under a nav entry that already says Description. }}
+	{{#unless bare}}<div class="sect"><h3>{{localize 'MGT2.Items.Description'}}</h3></div>{{/unless}}
 	{{#if (eq item.type "contact")}}
 	<prose-mirror name="system.description" value="{{system.description}}" toggled></prose-mirror>
 	{{else}}

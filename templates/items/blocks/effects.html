@@ -1,8 +1,11 @@
 {{! Every type carries this block, and it renders while empty: an ActiveEffect on an Item transfers
     to its owner, so the absence of one is worth stating. Also included by the actor's Effects tab. }}
 <div class="block">
-	<div class="sect">
-		<h3>{{localize 'MGT2.Effects.Title'}}</h3>
+	{{! Alone in its tab the heading only repeats the nav entry above, so it goes — but the control
+	    row stays: the kit sizes `.sect .add svg`, and an add button outside a section header falls
+	    back to the SVG default box of 300×150. }}
+	<div class="sect{{#if bare}} bare{{/if}}">
+		{{#unless bare}}<h3>{{localize 'MGT2.Effects.Title'}}</h3>{{/unless}}
 		<span class="count">{{effects.length}}</span>
 		<a class="add edit-only" data-action="effectCreate" data-tooltip="{{localize 'MGT2.Effects.Add'}}"><i class="fa-solid fa-plus"></i></a>
 	</div>

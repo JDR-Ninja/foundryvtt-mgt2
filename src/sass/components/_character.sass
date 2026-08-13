@@ -248,12 +248,45 @@
 
 // Row actions are revealed by the pointer in play mode and are always on in edit mode.
 .mgt2 table.rows
+	// The row's name IS its roll control, as `a.nm` is on the characteristics — a button and not an
+	// anchor, since an href-less `<a>` is neither tabbable nor fired by Enter. Core dresses every
+	// `button` in a box of its own, undressed back to running text here; `inline-flex` and not
+	// `inline`, which a button blockifies to `inline-block` — whose baseline is its LAST line, so a
+	// name long enough to wrap dropped every other cell in the row by one line.
+	button.roll
+		display: inline-flex
+		height: auto
+		min-height: 0
+		padding: 0
+		font: inherit
+		text-align: left
+		background: none
+		border: 0
+		border-radius: 0
+		transition: none
+
+	// The accent arrives under the pointer only: a whole column of names in accent would read as a
+	// wall of it, against the sheet's one-accent palette.
 	.roll
+		color: inherit
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--accent-text)
+		&:focus
+			outline: none
+			box-shadow: none
+		&:focus-visible
+			color: var(--accent-text)
+			outline: 2px solid var(--accent-text)
+			outline-offset: 1px
+
+	// The panels that still front their roll with a die glyph rather than with the name.
+	.roll > i
 		margin-right: 7px
 		font-size: 12px
 		color: var(--accent-text)
-		cursor: var(--cursor-pointer)
 		vertical-align: -1px
+
 	td .on
 		color: var(--accent-text)
 	.acts
@@ -671,7 +704,10 @@ ul.softwares
 .mgt2 table.rows tr.off
 	opacity: 0.5
 
+// Core's reset gives every `img` `display: block`, which dropped the name onto the line below and
+// left `vertical-align` inert on a block box — the icon has to be put back in the text flow here.
 .mgt2 .effect-icon
+	display: inline-block
 	width: 18px
 	height: 18px
 	margin-right: 6px
@@ -783,7 +819,10 @@ ul.softwares
 		.g
 			margin-top: 3px
 
-	.mgt2 nav.horizontal-tabs a.item
+	// Scoped to the sheet that declares the container: the item sheet is 630 px wide, under this
+	// breakpoint, and the day it gains `container-type` — tempting, its specs grid wants to reflow —
+	// an unscoped rule would blank every one of its tab labels.
+	.mgt2.application.character nav.horizontal-tabs a.item
 		padding: 8px 12px
 		span
 			display: none

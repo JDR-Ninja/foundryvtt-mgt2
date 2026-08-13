@@ -1,7 +1,7 @@
 {{! What is stored in this container. Reads in both modes; taking out and deleting are edit-mode. }}
 <div class="block">
-	<div class="sect">
-		<h3>{{localize 'MGT2.Items.Contents'}}</h3>
+	<div class="sect{{#if bare}} bare{{/if}}">
+		{{#unless bare}}<h3>{{localize 'MGT2.Items.Contents'}}</h3>{{/unless}}
 		<span class="count">{{nested.length}}</span>
 	</div>
 	{{#if nested.length}}
