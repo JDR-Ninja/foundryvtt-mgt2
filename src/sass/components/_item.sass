@@ -196,6 +196,14 @@
 // height lever. Capping the body instead means the masthead can never scroll away and only the
 // visible tab can push the sheet down.
 
+// The strip is pulled out of `.imain`'s 16px so it starts flush with the sheet, the way the
+// character sheet's does: the shared `nav.horizontal-tabs` inset then lands the first label on
+// the content column instead of adding to a padding that is already there, and the rule under
+// the tabs spans the full width rather than floating inside the text block.
+.mgt2 .imain > nav.horizontal-tabs
+	margin-left: -16px
+	margin-right: -16px
+
 .mgt2 .tab[data-group="item"].active
 	display: flex
 	flex-direction: column

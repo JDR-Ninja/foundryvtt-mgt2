@@ -342,7 +342,7 @@
 			<tbody>
 				{{#each naturals as |weapon|}}
 				<tr data-item-id="{{weapon._id}}">
-					<td><a class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}</td>
+					<td><button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button></td>
 					<td class="c num">{{weapon.system.damage}}</td>
 					<td class="c num">{{weapon.range}}</td>
 					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
@@ -361,7 +361,7 @@
 			<tbody>
 				{{#each carried as |weapon|}}
 				<tr data-item-id="{{weapon._id}}">
-					<td><a class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}</td>
+					<td><button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button></td>
 					<td class="c num">{{weapon.system.damage}}</td>
 					<td class="c num">{{weapon.range}}</td>
 					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
@@ -383,7 +383,7 @@
 			<tbody>
 				{{#each skills as |skill|}}
 				<tr data-item-id="{{skill._id}}">
-					<td><a class="roll" data-action="roll" data-roll="skill" data-roll-skill="{{skill._id}}"><i class="fa-solid fa-dice"></i></a>{{skill.name}}{{#if skill.system.skill.speciality}} ({{skill.system.skill.speciality}}){{/if}}</td>
+					<td><button type="button" class="roll" data-action="roll" data-roll="skill" data-roll-skill="{{skill._id}}">{{skill.name}}{{#if skill.system.skill.speciality}} ({{skill.system.skill.speciality}}){{/if}}</button></td>
 					<td class="r num">{{skill.system.level}}</td>
 					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditSkill" del="MGT2.Actor.DeleteSkill"}}
 				</tr>

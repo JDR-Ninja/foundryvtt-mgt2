@@ -99,6 +99,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
    * The five tabs, in nav order. Which of them render varies per document: a slot no block fills
    * gets neither a nav entry nor a body, so no `initial` is declared here — the first surviving tab
    * is it. `effects` and `description` are on every type's list, so there is always one.
+   *
+   * Effects sits last on every sheet in the system, the character sheet included: it is the one tab
+   * that is about what is being done *to* the document rather than what the document is.
    * @inheritDoc
    */
   static TABS = {
@@ -107,8 +110,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         { id: "details", cssClass: "item tab-select", icon: "fa-solid fa-gear", label: "MGT2.Items.Details" },
         { id: "traits", cssClass: "item tab-select", icon: "fa-solid fa-tag", label: "MGT2.Items.Traits" },
         { id: "contents", cssClass: "item tab-select", icon: "fa-solid fa-box-open", label: "MGT2.Items.Contents" },
-        { id: "effects", cssClass: "item tab-select", icon: "fa-solid fa-person-rays", label: "MGT2.Effects.Title" },
-        { id: "description", cssClass: "item tab-select", icon: "fa-solid fa-book", label: "MGT2.Items.Description" }
+        { id: "description", cssClass: "item tab-select", icon: "fa-solid fa-book", label: "MGT2.Items.Description" },
+        { id: "effects", cssClass: "item tab-select", icon: "fa-solid fa-person-rays", label: "MGT2.Effects.Title" }
       ]
     }
   };

@@ -178,7 +178,7 @@
 					<td>
 						{{#each mount.weapons as |weapon|}}
 						<div class="mw">
-							<a class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}
+							<button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button>
 						</div>
 						{{/each}}
 						<select class="f edit-only" name="system.mounts.{{mount.index}}.weapons" multiple size="3">
@@ -227,7 +227,7 @@
 			<tbody>
 				{{#each ship.mounts.unmounted as |weapon|}}
 				<tr data-item-id="{{weapon._id}}">
-					<td><a class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice"></i></a>{{weapon.name}}<span class="sub">{{localize 'MGT2.Actor.spacecraft.Unmounted'}}</span></td>
+					<td><button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button><span class="sub">{{localize 'MGT2.Actor.spacecraft.Unmounted'}}</span></td>
 					<td class="c num">{{weapon.system.damage}}</td>
 					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
 				</tr>

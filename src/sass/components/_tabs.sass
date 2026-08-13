@@ -1,18 +1,28 @@
-// Foundry v14 styles bare `nav.tabs` with a gap and top/bottom borders, and colours
-// inactive tab labels with --color-text-secondary. Both are neutralised here, and the
-// remaining look is the direction B tab bar: condensed label, accent underline when active.
+// Foundry v14 styles bare `nav.tabs` with a gap, top/bottom borders and `space-evenly`, and
+// colours inactive tab labels with --color-text-secondary. All of it is neutralised here, and
+// the remaining look is the direction B tab bar: condensed label, accent underline when active.
+//
+// `space-evenly` (foundry2.css) is the one that shows: it spreads the tabs across the whole
+// strip, so the first label lands nowhere near the content column and the last is pushed
+// against the frame — worse the fewer tabs there are, which is every item sheet.
 .mgt2
 	nav.tabs
 		gap: 0
+		justify-content: flex-start
 		border-top: none
 		border-bottom: none
 		[data-tab]
 			color: inherit
 
+	// The strip is inset so the first label's TEXT starts on the same 16px column as the tab body
+	// below it — 6 here plus the 10 on `a.item`. Without it the nav ran to the window edge while
+	// everything it labelled sat 16px in, and the eye reads that mismatch as content crammed
+	// against the frame. The rule still spans wider than the text, as a tab strip should.
 	nav.horizontal-tabs
 		display: flex
 		flex-flow: row nowrap
 		align-items: stretch
+		padding: 0 6px
 		border-bottom: 1px solid var(--mgt2-editor-border)
 		font-family: var(--mgt2-cond)
 		font-size: 12px
@@ -46,6 +56,7 @@
 	// The characteristics and inventory switches are the same bar at a smaller scale.
 	nav.mgt2-subnav
 		font-size: 11px
+		padding: 0 9px
 		a.item
 			padding: 3px 7px
 
