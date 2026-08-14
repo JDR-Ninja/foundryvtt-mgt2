@@ -28,7 +28,6 @@
   "TYPES.HINTS.Actor.spacecraft": "A starship or small craft: hull, drives, three budgets, a crew roster and carried craft.",
   "TYPES.Actor.robot": "Robot",
   "TYPES.HINTS.Actor.robot": "A robot or drone: Hits, a slot budget, and a brain. Set the Traveller flag for a robot player character.",
-  "TYPES.Actor.vehicule": "Vehicule",
   "TYPES.Actor.container": "Container (backpack, chest)",
   "MGT2": {
     "CombatReactions": {

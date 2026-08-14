@@ -91,8 +91,7 @@
 					"description",
 					"notes"
 				]
-			},
-			"vehicule": {}
+			}
 		},
 		"Item": {
 			"armor": {},
@@ -153,7 +152,7 @@
 		"type": 1,
 		"distance": 1.5,
 		"units": "m",
-		"diagonals": 0
+		"diagonals": 1
 	},
 	"initiative": "2d6 + @initiative",
 	"primaryTokenAttribute": "life"

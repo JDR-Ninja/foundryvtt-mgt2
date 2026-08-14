@@ -165,11 +165,7 @@ Hooks.once("init", async function () {
       // The last two are derived and undeclared, so the picker offers them as read-only readouts:
       // spare Slots and Bandwidth spent are what a referee watches while a robot is being built.
       value: ["stun", "characteristics.hits.value", "slots.spare", "brain.bandwidth.used"]
-    },
-    // Declared in the manifest, unregistered and inert: its `system` is an unvalidated plain object
-    // with no schema, so it has nothing to track. The entry exists only because a MISSING one is not
-    // a fallback — it unions every other type's attributes onto this type's tokens.
-    vehicule: { bar: [], value: [] }
+    }
   };
 
   // Never auto-filled — `typeLabels` is, from TYPES.Actor.*, but without this the sidebar and every
@@ -178,7 +174,6 @@ Hooks.once("init", async function () {
     character: "fa-solid fa-user",
     npc: "fa-solid fa-users",
     vehicle: "fa-solid fa-car-side",
-    vehicule: "fa-solid fa-car-side",
     spacecraft: "fa-solid fa-rocket-launch",
     robot: "fa-solid fa-robot"
   };
@@ -236,9 +231,6 @@ Hooks.once("init", async function () {
     makeDefault: true
   });
 
-  // `vehicule` is deliberately absent: it stays declared in the manifest and unregistered, so an
-  // existing actor keeps loading with the same empty `system` it has now. The rename is §9.11's
-  // other half and needs a migration.
   Object.assign(CONFIG.Actor.dataModels, {
     "character": CharacterData,
     "npc": NpcData,

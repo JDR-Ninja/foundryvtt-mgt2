@@ -254,8 +254,7 @@ export class MGT2Combatant extends Combatant {
         // The placed token where there is one, and the actor's own prototype where the combatant was
         // added without one — a combatant with no token still belongs to a side.
         const disposition = this.token?.disposition ?? actor.prototypeToken?.disposition;
-        // v14 refuses a bare type change: the system field has to arrive as a ForcedReplacement, the
-        // same guard §9.11 recorded for the `vehicule` rename.
+        // v14 refuses a bare type change: the system field has to arrive as a ForcedReplacement.
         this.updateSource({
             type: PERSON,
             system: foundry.data.operators.ForcedReplacement.create({

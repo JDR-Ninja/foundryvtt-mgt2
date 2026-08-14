@@ -1626,7 +1626,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       return true;
     }
 
-    // Supported drop (don't drop vehicule stuff)
+    // Supported drop (don't drop vehicle stuff)
     if (sourceItemData.type !== "armor" && sourceItemData.type !== "weapon" &&
       sourceItemData.type !== "computer" && sourceItemData.type !== "container" &&
       sourceItemData.type !== "item" && sourceItemData.type !== "equipment") return false;

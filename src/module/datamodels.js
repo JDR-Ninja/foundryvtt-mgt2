@@ -7,46 +7,6 @@ import { buildTraitMap, createTraitsField, migrateTraitArray } from "./traits.js
 
 const fields = foundry.data.fields;
 
-export class VehiculeData extends foundry.abstract.TypeDataModel {
-
-    static defineSchema() {
-        return {
-            skillId: new fields.StringField({ required: false, initial: "", blank: true, trim: true }),
-            speed: new fields.SchemaField({
-                cruise: new fields.StringField({ required: false, initial: "Slow", blank: true }),
-                maximum: new fields.StringField({ required: false, initial: "Medium", blank: true })
-            }),
-            agility: new fields.NumberField({ required: false, min: 0, integer: true }),
-            crew: new fields.NumberField({ required: false, min: 0, integer: true }),
-            passengers: new fields.NumberField({ required: false, min: 0, integer: true }),
-            cargo: new fields.NumberField({ required: false, min: 0, integer: false }),
-            life: new fields.SchemaField({
-                value: new fields.NumberField({ required: true, initial: 0, integer: true }),
-                max: new fields.NumberField({ required: true, initial: 0, integer: true })
-            }),
-            shipping: new fields.NumberField({ required: false, min: 0, integer: true }),
-            cost: new fields.NumberField({ required: false, min: 0, integer: true }),
-            armor: new fields.SchemaField({
-                front: new fields.NumberField({ required: true, initial: 0, integer: true }),
-                rear: new fields.NumberField({ required: true, initial: 0, integer: true }),
-                sides: new fields.NumberField({ required: true, initial: 0, integer: true })
-            }),
-
-            skills: new fields.SchemaField({
-                // Skill Level
-                autopilot: new fields.NumberField({ required: true, initial: 0, integer: true })
-                // Communication Range
-                // Navigation
-                // Sensors
-                // Camouflage / Recon
-                // Stealth
-            })
-            // config: new fields.SchemaField({
-            // })
-        };
-    }
-}
-
 class ItemBaseData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         const fields = foundry.data.fields;

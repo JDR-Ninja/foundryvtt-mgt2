@@ -28,7 +28,6 @@
   "TYPES.HINTS.Actor.spacecraft": "Un vaisseau ou une petite navette : coque, propulseurs, trois budgets, une liste d'équipage et des appareils embarqués.",
   "TYPES.Actor.robot": "Robot",
   "TYPES.HINTS.Actor.robot": "Un robot ou un drone : des Hits, un budget d'emplacements et un cerveau. Cochez l'indicateur Voyageur pour un robot joueur.",
-  "TYPES.Actor.vehicule": "Véhicule",
   "TYPES.Actor.container": "Contenant (sac, coffre)",
   "MGT2": {
     "CombatReactions": {
