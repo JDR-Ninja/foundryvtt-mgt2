@@ -7,6 +7,20 @@
 		{{#if (eq item.type "weapon")}}<span class="count edit-only">{{localize 'MGT2.Items.ScaleHint'}}</span>{{/if}}
 	</div>
 
+	{{! A dose is taken, and taking it is the whole of what a drug does: it copies the drug's own
+	    Active Effects onto the Traveller, spends one of the doses carried, and counts it (§9.90). A
+	    drug nobody owns has nobody to take it, and an empty box has nothing to take. }}
+	{{#if (eq item.type "drug")}}
+	<div class="rollbar dose-take">
+		<span class="why">{{localize 'MGT2.Doses.NotEquipped'}}</span>
+		<button type="button" class="btn-roll" data-action="doseTake"
+			{{#unless hadContainer}}disabled data-tooltip="{{localize 'MGT2.Doses.NeedsOwner'}}"
+			{{else}}{{#unless system.quantity}}disabled{{/unless}}{{/unless}}>
+			<i class="fa-solid fa-syringe"></i>{{localize 'MGT2.Doses.Take'}}
+		</button>
+	</div>
+	{{/if}}
+
 	{{#if (eq item.type "species")}}
 	{{#if system.modifiers.length}}
 	<table class="rows">
@@ -44,18 +58,24 @@
 	{{else}}
 	<ul class="specs play-only">
 		{{#if (eq item.type "weapon")}}
-		<li{{#unless system.damage}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Damage'}}</span><b>{{#if system.damage}}{{system.damage}}{{else}}—{{/if}}</b></li>
+		{{! `system.effective` and not `system.*`: while a round is loaded the weapon's own printed
+		    line is unchanged and every number on it is wrong (§9.90). The round is named below so
+		    the reader can see WHY the figure is not the catalogue's. }}
+		<li{{#unless system.effective.damage}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Damage'}}</span><b>{{#if system.effective.damage}}{{system.effective.damage}}{{else}}—{{/if}}</b></li>
 		<li><span class="lbl">{{localize 'MGT2.Items.Range'}}</span><b>{{#if system.range.isMelee}}{{localize 'MGT2.Melee'}}{{else}}{{system.range.value}}{{#if system.range.unit}}<span class="u">{{localize (concat "MGT2.MetricRange." system.range.unit)}}</span>{{/if}}{{/if}}</b></li>
 		{{#if damageTypes}}
 		<li><span class="lbl">{{localize 'MGT2.Items.DamageType'}}</span><b class="word">{{#each damageTypes}}{{#unless @first}}, {{/unless}}{{this}}{{/each}}</b></li>
 		{{/if}}
-		<li{{#unless system.magazine}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span><b>{{system.magazine}}</b></li>
+		<li{{#unless system.effective.magazine}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span><b>{{system.effective.magazine}}</b></li>
 		{{! Core folio 77, beside the capacity it is counted against. A weapon with no magazine
 		    printed counts nothing and shows no row. }}
 		{{#if ammo}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Loaded'}}</span><b>{{ammo.value}}<span class="u">/ {{ammo.magazine}}</span></b></li>
 		{{/if}}
-		<li{{#unless system.magazineCost}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span><b>{{system.magazineCost}}</b></li>
+		{{#if system.round}}
+		<li><span class="lbl">{{localize 'MGT2.Items.LoadedRound'}}</span><b class="word">{{system.round.name}}</b></li>
+		{{/if}}
+		<li{{#unless system.effective.magazineCost}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span><b>{{system.effective.magazineCost}}</b></li>
 		{{! Core folio 79, beside the magazine because that is what the round counts are read against.
 		    Derived from the Auto trait and never stored: the mode is picked at the roll prompt. }}
 		{{#if fireModes}}
@@ -103,6 +123,15 @@
 		{{#if system.augment.improvement}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Improvement'}}</span><b class="word">{{system.augment.improvement}}</b></li>
 		{{/if}}
+		{{#if system.augment.skill.name}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Skill'}}</span><b class="word">{{system.augment.skill.name}} {{showDM system.augment.skill.value}}</b></li>
+		{{/if}}
+		{{#if system.augment.protection}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Protection'}}</span><b>{{system.augment.protection}}</b></li>
+		{{/if}}
+		{{#if system.augment.processing}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.augment.processing}}</b></li>
+		{{/if}}
 		{{/if}}
 
 		{{#if (eq system.subType "software")}}
@@ -112,7 +141,86 @@
 		{{/if}}
 		{{/if}}
 
-		{{#if system.tl}}
+		{{#if (eq item.type "cargo")}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Tons'}}</span><b>{{system.tons}}</b></li>
+		{{! Core p.242: a speculative lot is bought with no destination and no deadline at all, so
+		    both rows go quiet rather than absent — the lot is still a lot. }}
+		<li{{#unless destination}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Destination'}}</span><b class="word">{{#if destination}}{{destination}}{{else}}&mdash;{{/if}}</b></li>
+		<li{{#unless system.dueDay}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.DueDay'}}</span><b>{{#if system.dueDay}}{{system.dueDay}}{{else}}&mdash;{{/if}}</b></li>
+		<li{{#unless system.farePerTon}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.FarePerTon'}}</span><b>{{system.farePerTon}}<span class="u">Cr</span></b></li>
+		<li{{#unless system.basePrice}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.BasePrice'}}</span><b>{{system.basePrice}}<span class="u">Cr</span></b></li>
+		<li{{#unless system.purchasePct}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.PurchasePct'}}</span><b>{{#if system.purchasePct}}{{system.purchasePct}}<span class="u">%</span>{{else}}&mdash;{{/if}}</b></li>
+		<li{{#unless system.legality}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.BannedAt'}}</span><b>{{#if system.legality}}{{system.legality}}{{else}}&mdash;{{/if}}</b></li>
+		{{/if}}
+
+		{{#if (eq item.type "passage")}}
+		<li><span class="lbl">{{localize 'MGT2.Items.PassageClass'}}</span><b class="word">{{localize (lookup (lookup config.PassageClasses system.grade) 'label')}}</b></li>
+		<li><span class="lbl">{{localize 'MGT2.Items.Passengers'}}</span><b>{{system.count}}</b></li>
+		<li{{#unless destination}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Destination'}}</span><b class="word">{{#if destination}}{{destination}}{{else}}&mdash;{{/if}}</b></li>
+		{{! Both derive from the class and neither is stored: a working passage is carried for free
+		    and its fare is nothing, however much the per-head figure beside it says. }}
+		<li{{#unless system.fare}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Fare'}}</span><b>{{system.fare}}<span class="u">Cr</span></b></li>
+		<li><span class="lbl">{{localize 'MGT2.Items.Baggage'}}</span><b>{{system.baggage}}<span class="u">{{unitlabels.weight}}</span></b></li>
+		{{#if system.lowBerth}}
+		<li><span class="lbl">{{localize 'MGT2.Items.LowBerth'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
+		{{/if}}
+		{{/if}}
+
+		{{#if (eq item.type "component")}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Category'}}</span><b class="word">{{localize (lookup config.ComponentCategories system.category)}}</b></li>
+		<li><span class="lbl">{{localize 'MGT2.Items.TL'}}</span><b>{{system.tl}}</b></li>
+		{{! The tonnage triple: one row per arm that priced this part, and the hull's own answer
+		    beside them where the part is fitted to a ship rather than sitting in a compendium. }}
+		<li{{#unless system.tonnage.tons}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Tons'}}</span><b>{{system.tonnage.tons}}</b></li>
+		{{#if system.tonnage.percent}}
+		<li><span class="lbl">{{localize 'MGT2.Items.PercentOfHull'}}</span><b>{{system.tonnage.percent}}<span class="u">%</span></b></li>
+		{{/if}}
+		{{#if system.tonnage.minimum}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Minimum'}}</span><b>{{system.tonnage.minimum}}</b></li>
+		{{/if}}
+		{{#if componentTons}}
+		<li><span class="lbl">{{localize 'MGT2.Items.OnThisHull'}}</span><b>{{componentTons}}</b></li>
+		{{/if}}
+		<li{{#unless system.cost}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.CostMCr'}}</span><b>{{system.cost}}</b></li>
+		<li{{#unless system.power}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Power'}}</span><b>{{system.power}}</b></li>
+		{{#if system.rating}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Rating'}}</span><b>{{system.rating}}</b></li>
+		{{/if}}
+		<li{{#unless system.dm}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Critical'}}</span><b>{{#if system.dm}}&minus;{{system.dm}}{{else}}&mdash;{{/if}}</b></li>
+		{{/if}}
+
+		{{#if (eq item.type "drug")}}
+		<li{{#unless system.dose}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Dose'}}</span><b class="word">{{#if system.dose}}{{system.dose}}{{else}}&mdash;{{/if}}</b></li>
+		{{! The three moments a duration cannot hold on its own — an onset before anything happens, a
+		    run, and what it leaves behind. Empty is a drug the book states none for, not one nobody
+		    has typed: Fast Drug and anti-rad are no kind of clock. }}
+		<li{{#unless system.onset}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Onset'}}</span><b class="word">{{#if system.onset}}{{system.onset}}{{else}}{{localize 'MGT2.Items.Immediate'}}{{/if}}</b></li>
+		<li{{#unless system.duration}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Duration'}}</span><b class="word">{{#if system.duration}}{{system.duration}}{{else}}{{localize 'MGT2.Items.NotAClock'}}{{/if}}</b></li>
+		<li{{#unless system.afterEffect}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.AfterEffect'}}</span><b class="word">{{#if system.afterEffect}}{{system.afterEffect}}{{else}}&mdash;{{/if}}</b></li>
+		{{#if system.addiction.dosesBefore}}
+		<li><span class="lbl">{{localize 'MGT2.Items.DosesBefore'}}</span><b>{{system.addiction.dosesBefore}}</b></li>
+		{{/if}}
+		{{#if doses}}
+		<li><span class="lbl">{{localize 'MGT2.Doses.Counter'}}</span><b>{{doses}}</b></li>
+		{{/if}}
+		{{/if}}
+
+		{{#if (eq item.type "ammunition")}}
+		<li{{#unless system.weaponType}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Fits'}}</span><b class="word">{{#if system.weaponType}}{{system.weaponType}}{{else}}&mdash;{{/if}}</b></li>
+		{{! Every override is nullable and empty means the weapon's own, which is the common case:
+		    a standard round overrides nothing at all. }}
+		<li{{#unless system.damage}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Damage'}}</span><b class="word">{{#if system.damage}}{{system.damage}}{{else}}{{localize 'MGT2.Items.WeaponsOwn'}}{{/if}}</b></li>
+		<li{{#unless system.magazine}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span><b class="word">{{#if system.magazine}}{{system.magazine}}{{else}}{{localize 'MGT2.Items.WeaponsOwn'}}{{/if}}</b></li>
+		<li{{#unless system.magazineCost}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span><b class="word">{{#if system.magazineCost}}{{system.magazineCost}}<span class="u">Cr</span>{{else}}{{localize 'MGT2.Items.WeaponsOwn'}}{{/if}}</b></li>
+		{{#if system.replaceTraits}}
+		<li><span class="lbl">{{localize 'MGT2.Items.ReplaceTraits'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
+		{{/if}}
+		{{/if}}
+
+		{{! `supply` is the honest guard for the rest of the dissolved Carried block: it is true for
+		    exactly the types that carry the shared physical template. `component` and `cargo` each
+		    declare a field of the same name meaning something else, and both draw their own above. }}
+		{{#if supply}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Legality'}}</span><b>{{system.legality}}</b></li>
 		{{/if}}
 	</ul>
@@ -259,6 +367,27 @@
 		</label>
 		{{/if}}
 
+		{{! Core p.106's IMPROVEMENTS cell in the three kinds the system can compute (§9.84). The
+		    printed cell above stays whatever the book prints; these are what a rule can read. }}
+		{{#if (eq system.subType "augment")}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Skill'}}</span>
+			{{formInput systemFields.augment.fields.skill.fields.name name="system.augment.skill.name" value=system.augment.skill.name classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.AugmentSkillDM'}}</span>
+			{{formInput systemFields.augment.fields.skill.fields.value name="system.augment.skill.value" value=system.augment.skill.value classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Protection'}}</span>
+			{{formInput systemFields.augment.fields.protection name="system.augment.protection" value=system.augment.protection classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Processing'}}</span>
+			{{formInput systemFields.augment.fields.processing name="system.augment.processing" value=system.augment.processing classes="f num"}}
+		</label>
+		{{/if}}
+
 		{{#if (eq system.subType "software")}}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Bandwidth'}}</span>
@@ -270,15 +399,193 @@
 		</label>
 		{{/if}}
 
+		{{#if (eq item.type "cargo")}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Tons'}}</span>
+			{{formInput systemFields.tons name="system.tons" value=system.tons classes="f num"}}
+		</label>
+		{{! The pair degrades: the uuid where the world is an Actor, the bare name where it is not. }}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.DestinationWorld'}}</span>
+			{{formInput systemFields.destination.fields.world name="system.destination.world" value=source.destination.world}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.DestinationName'}}</span>
+			{{formInput systemFields.destination.fields.name name="system.destination.name" value=system.destination.name classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.DueDay'}}</span>
+			{{formInput systemFields.dueDay name="system.dueDay" value=source.dueDay classes="f num" placeholder=(localize 'MGT2.Items.NoDeadline')}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.FarePerTon'}}</span>
+			{{formInput systemFields.farePerTon name="system.farePerTon" value=system.farePerTon classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.BasePrice'}}</span>
+			{{formInput systemFields.basePrice name="system.basePrice" value=system.basePrice classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.PurchasePct'}}</span>
+			{{formInput systemFields.purchasePct name="system.purchasePct" value=source.purchasePct classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.BannedAt'}}</span>
+			{{formInput systemFields.legality name="system.legality" value=source.legality classes="f num" placeholder=(localize 'MGT2.Items.Unrestricted')}}
+		</label>
+		{{/if}}
+
+		{{#if (eq item.type "passage")}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.PassageClass'}}</span>
+			<select class="f" name="system.grade">
+				{{selectOptions config.PassageClasses selected=system.grade labelAttr="label" localize=true}}
+			</select>
+		</label>
+		{{! One Item per booking rather than per head (Core p.239-240), so the count is a field. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Passengers'}}</span>
+			{{formInput systemFields.count name="system.count" value=system.count classes="f num"}}
+		</label>
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.DestinationWorld'}}</span>
+			{{formInput systemFields.destination.fields.world name="system.destination.world" value=source.destination.world}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.DestinationName'}}</span>
+			{{formInput systemFields.destination.fields.name name="system.destination.name" value=system.destination.name classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.FarePerHead'}}</span>
+			{{formInput systemFields.farePerHead name="system.farePerHead" value=system.farePerHead classes="f num"}}
+		</label>
+		{{/if}}
+
+		{{#if (eq item.type "component")}}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.Category'}}</span>
+			<select class="f" name="system.category">
+				{{selectOptions config.ComponentCategories selected=system.category localize=true}}
+			</select>
+		</label>
+		{{! A ship's TL is a number, not the `TL12` string a personal item carries, so this type keeps
+		    its own control instead of the shared select below. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.TL'}}</span>
+			{{formInput systemFields.tl name="system.tl" value=system.tl classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Tons'}}</span>
+			{{formInput systemFields.tonnage.fields.tons name="system.tonnage.tons" value=system.tonnage.tons classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.PercentOfHull'}}</span>
+			{{formInput systemFields.tonnage.fields.percent name="system.tonnage.percent" value=system.tonnage.percent classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Minimum'}}</span>
+			{{formInput systemFields.tonnage.fields.minimum name="system.tonnage.minimum" value=system.tonnage.minimum classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.CostMCr'}}</span>
+			{{formInput systemFields.cost name="system.cost" value=system.cost classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Power'}}</span>
+			{{formInput systemFields.power name="system.power" value=system.power classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.PowerPerTon'}}</span>
+			{{formInput systemFields.powerPerTon name="system.powerPerTon" value=system.powerPerTon classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Rating'}}</span>
+			{{formInput systemFields.rating name="system.rating" value=system.rating classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Qty'}}</span>
+			{{formInput systemFields.quantity name="system.quantity" value=system.quantity classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Critical'}}</span>
+			{{formInput systemFields.dm name="system.dm" value=system.dm classes="f num"}}
+		</label>
+		{{/if}}
+
+		{{#if (eq item.type "drug")}}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.Dose'}}</span>
+			{{formInput systemFields.dose name="system.dose" value=system.dose classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Onset'}}</span>
+			{{formInput systemFields.onset name="system.onset" value=system.onset classes="f" placeholder=(localize 'MGT2.Items.Immediate')}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Duration'}}</span>
+			{{formInput systemFields.duration name="system.duration" value=system.duration classes="f" placeholder=(localize 'MGT2.Items.NotAClock')}}
+		</label>
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.AfterEffect'}}</span>
+			{{formInput systemFields.afterEffect name="system.afterEffect" value=system.afterEffect classes="f"}}
+		</label>
+		{{! Which pipeline the expiry goes down: a condition is a state, 2D damage is the damage
+		    pipeline, and most drugs leave neither. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.AfterKind'}}</span>
+			<select class="f" name="system.afterKind">
+				{{selectOptions config.DrugAfterKinds selected=system.afterKind localize=true}}
+			</select>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.DosesBefore'}}</span>
+			{{formInput systemFields.addiction.fields.dosesBefore name="system.addiction.dosesBefore" value=source.addiction.dosesBefore classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.CheckInterval'}}</span>
+			{{formInput systemFields.addiction.fields.checkInterval name="system.addiction.checkInterval" value=system.addiction.checkInterval classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.CravingDM'}}</span>
+			{{formInput systemFields.addiction.fields.cravingDM name="system.addiction.cravingDM" value=source.addiction.cravingDM classes="f num"}}
+		</label>
+		{{/if}}
+
+		{{#if (eq item.type "ammunition")}}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.Fits'}}</span>
+			{{formInput systemFields.weaponType name="system.weaponType" value=system.weaponType classes="f"}}
+		</label>
+		{{! Blank is a real answer on all three and means the weapon's own value stands. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Damage'}}</span>
+			{{formInput systemFields.damage name="system.damage" value=system.damage classes="f" placeholder=(localize 'MGT2.Items.WeaponsOwn')}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span>
+			{{formInput systemFields.magazine name="system.magazine" value=source.magazine classes="f num" placeholder=(localize 'MGT2.Items.WeaponsOwn')}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span>
+			{{formInput systemFields.magazineCost name="system.magazineCost" value=source.magazineCost classes="f num" placeholder=(localize 'MGT2.Items.WeaponsOwn')}}
+		</label>
+		{{! CSC p.179-182: a few rounds REPLACE the weapon's trait list instead of adding to it, and
+		    the list itself cannot say which. }}
+		<label class="check">
+			{{formInput systemFields.replaceTraits name="system.replaceTraits" value=system.replaceTraits}}
+			<span>{{localize 'MGT2.Items.ReplaceTraits'}}</span>
+		</label>
+		{{/if}}
+
 		{{! TL, legality and weightless describe what the item IS, so they stay here rather than
-		    following the rest of the Carried block into the masthead's supply cell. }}
-		{{#if systemFields.tl}}
+		    following the rest of the Carried block into the masthead's supply cell. `supply` is the
+		    guard because it is true for exactly the types built on the shared physical template —
+		    `component` and `cargo` each declare a field of the same name meaning something else. }}
+		{{#if supply}}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.TL'}}</span>
 			<select class="f" name="system.tl">{{selectOptions config.TL selected=system.tl localize=true}}</select>
 		</label>
-		{{/if}}
-		{{#if system.tl}}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Legality'}}</span>
 			{{formInput systemFields.legality name="system.legality" value=system.legality classes="f num"}}
@@ -291,5 +598,12 @@
 		</label>
 		{{/if}}
 	</div>
+
+	{{! One line per type, where a field means something its control cannot say on its own. }}
+	{{#if (eq item.type "cargo")}}<p class="hint edit-only">{{localize 'MGT2.Items.SpeculativeHint'}}</p>{{/if}}
+	{{#if (eq item.type "passage")}}<p class="hint edit-only">{{localize 'MGT2.Items.PassageHint'}}</p>{{/if}}
+	{{#if (eq item.type "component")}}<p class="hint edit-only">{{localize 'MGT2.Items.ComponentHint'}}</p>{{/if}}
+	{{#if (eq item.type "drug")}}<p class="hint edit-only">{{localize 'MGT2.Items.AddictionHint'}}</p>{{/if}}
+	{{#if (eq item.type "ammunition")}}<p class="hint edit-only">{{localize 'MGT2.Items.OverrideHint'}}</p>{{/if}}
 	{{/if}}
 </div>

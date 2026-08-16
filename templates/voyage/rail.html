@@ -1,0 +1,93 @@
+<aside class="mgt2-rail">
+
+	{{! The referee's clock, and the only writer of the leg (§9.35). Nothing subscribes to
+	    `updateWorldTime` and no roll moves the stop: `next` becomes `here` and the head of the
+	    queue becomes `next`, in one write. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Voyage.Advance'}}</h3>
+			<span class="count">{{localize 'MGT2.Voyage.RefereesClock'}}</span>
+		</div>
+		<div class="advance">
+			<button type="button" data-action="advance"{{#unless canEdit}} disabled{{/unless}}{{#unless route.next.named}} disabled{{/unless}}>
+				{{#if route.next.named}}{{localize 'MGT2.Voyage.ArriveAt' name=route.next.name}}{{else}}{{localize 'MGT2.Voyage.NowhereToGo'}}{{/if}}
+			</button>
+			<span class="why">{{#if route.next.named}}{{localize 'MGT2.Voyage.AdvanceWhy'}}{{else}}{{localize 'MGT2.Voyage.EmptyLegIsLegal'}}{{/if}}</span>
+		</div>
+	</div>
+
+	{{! The cap is `fuel.tons`, design tonnage that never moves; the one row is `ops.fuel`, the real
+	    level. The ship needs both, because Poor Maintenance leaks a percentage of CAPACITY (Core
+	    p.155). Nothing derives off `ops.fuel` on the model — "can I make this jump" is the reading
+	    below, made against the leg the screen already holds (§9.33.3). }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Voyage.Fuel'}}</h3>
+			<span class="count">{{localize 'MGT2.Voyage.FuelRule'}}</span>
+		</div>
+		{{> systems/mgt2/templates/actors/spacecraft/budget.html
+			b=fuel
+			title=(localize 'MGT2.Voyage.Aboard')
+			flag=(localize 'MGT2.Voyage.OverTank')
+			derived="system.fuel.tons"}}
+		{{#if canEdit}}
+		<div class="tank">
+			<span class="lbl">{{localize 'MGT2.Voyage.InTheTank'}}</span>
+			<input class="f n" type="number" min="0" step="0.1" name="fuel" value="{{fuel.level}}"
+				aria-label="{{localize 'MGT2.Voyage.InTheTank'}}" />
+		</div>
+		{{/if}}
+		<p class="hint{{#unless fuel.enough}} bad{{/unless}}">
+			{{#if fuel.enough}}{{localize 'MGT2.Voyage.BurnsLeaving' burn=fuel.burn after=fuel.after}}
+			{{else}}{{localize 'MGT2.Voyage.ShortBy' burn=fuel.burn have=fuel.level short=fuel.short}}{{/if}}
+		</p>
+	</div>
+
+	{{! Core p.158 makes the jump a task chain of two: an Easy (4+) Astrogation check and then an
+	    Easy (4+) Engineer (j-drive) check that carries its Effect. Both are raised through the
+	    ordinary roll prompt, so the chain row, the Boon/Bane buttons and the difficulty ladder all
+	    come with them and this screen stores nothing of its own. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Voyage.Jump'}}</h3>
+			<span class="count">{{localize 'MGT2.Voyage.ChainOfTwo'}}</span>
+		</div>
+		<div class="stage2">
+			<div class="st">
+				<button type="button" class="nm" data-action="jumpStep" data-step="plot">{{localize 'MGT2.Voyage.Plot'}}</button>
+				<span class="tgt">{{localize 'MGT2.Voyage.PlotTarget'}}</span>
+				<span class="dms">
+					{{#each jump.plot.dms as |dm|}}
+					<span class="dm{{#if dm.negative}} neg{{/if}}{{#if dm.inert}} inert{{/if}}">{{dm.label}}</span>
+					{{/each}}
+				</span>
+			</div>
+			<div class="st">
+				<button type="button" class="nm" data-action="jumpStep" data-step="jump"{{#unless fuel.enough}} disabled{{/unless}}>{{localize 'MGT2.Voyage.Jump'}}</button>
+				<span class="tgt">{{localize 'MGT2.Voyage.JumpTarget'}}</span>
+				<span class="dms">
+					{{#each jump.jump.dms as |dm|}}
+					<span class="dm{{#if dm.negative}} neg{{/if}}{{#if dm.inert}} inert{{/if}}">{{dm.label}}</span>
+					{{/each}}
+				</span>
+			</div>
+		</div>
+		<p class="hint">{{localize 'MGT2.Voyage.DebitWhy'}}</p>
+	</div>
+
+	{{! §9.33.10 Q1: the two procedures differ in shape, not in numbers, and the precedence rule the
+	    books print only holds if something declares which is in force. Only the Core branch is
+	    built — Companion's is not a chain and cannot ride the delivered roll path. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Voyage.Ruleset'}}</h3>
+			<span class="count">{{localize 'MGT2.Voyage.Declared'}}</span>
+		</div>
+		<div class="seg fill" role="radiogroup" aria-label="{{localize 'MGT2.Voyage.Ruleset'}}">
+			{{#each rulesets as |entry|}}
+			<label><input type="radio" name="ruleset" value="{{entry.key}}"{{#if entry.active}} checked{{/if}}{{#unless ../canEdit}} disabled{{/unless}} /><span>{{localize entry.label}}</span></label>
+			{{/each}}
+		</div>
+		<p class="hint">{{#if (eq jump.ruleset 'core')}}{{localize 'MGT2.Voyage.CoreWhy'}}{{else}}{{localize 'MGT2.Voyage.CompanionWhy'}}{{/if}}</p>
+	</div>
+</aside>

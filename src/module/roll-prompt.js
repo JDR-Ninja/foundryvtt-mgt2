@@ -1,4 +1,5 @@
 import { checkOf } from "./chat-message.js";
+import { Checks } from "./checks.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 
@@ -62,9 +63,11 @@ export class RollPromptHelper {
                     dm: source.dm,
                     negative: source.dm < 0,
                     display: MGT2Helper.signed(source.dm),
-                    // A source whose rule names the checks it reaches follows the characteristic
-                    // select instead of standing on every roll (Core folio 98's encumbrance).
-                    scope: source.characteristics?.join(" ") ?? ""
+                    // A source whose rule names the checks it reaches follows the select that
+                    // decides them instead of standing on every roll: the characteristic for Core
+                    // folio 98's encumbrance, the skill for folio 107's augment (§9.84).
+                    scope: source.characteristics?.join(" ") ?? "",
+                    skillScope: source.skills?.join(" ") ?? ""
                 })),
                 difficulty: options.difficulty,
                 // The rungs that have a target number; "not applicable" is the strip's empty cell.
@@ -74,12 +77,23 @@ export class RollPromptHelper {
                     label: game.i18n.localize(CONFIG.MGT2.Difficulty[key])
                 })),
                 traits: MGT2Helper.weaponTraitRows(options.weapon, options.strengthDM),
+                // Core folio 78 and folio 75, both folded into the Modifiers row rather than given
+                // rows of their own — and never both at once, since one belongs to a weapon attack
+                // and the other to the skill checks that are not one.
+                dualWeapons: options.blocks?.attack ? {
+                    dm: MGT2.AttackModifiers.dualWeapons.dm,
+                    display: MGT2Helper.signed(MGT2.AttackModifiers.dualWeapons.dm),
+                    suppress: MGT2.AttackModifiers.dualWeapons.suppress,
+                    label: game.i18n.localize(MGT2.AttackModifiers.dualWeapons.label)
+                } : null,
+                extended: options.blocks?.extended
+                    ? { dm: MGT2.ExtendedAction.dm, per: MGT2.ExtendedAction.per } : null,
                 priorChecks: this.#priorChecks(),
                 ...this.#ceilingContext(options.ceiling),
                 ...this.#reachContext(options.blocks?.psionic ? options.talent : null),
                 // Core p.74's table is headed "Common Modifiers to Ranged Attacks"; a melee weapon
                 // still brings its traits.
-                ...this.#rangeContext(options.blocks?.range ? options.weapon : null)
+                ...this.#rangeContext(options.blocks?.range ? options.weapon : null, options.measured)
             });
 
         /**
@@ -167,8 +181,37 @@ export class RollPromptHelper {
             .map(item => ({ _id: item.id, name: item.getRollDisplay(false), term: item.name,
                 dm: item.system.level }))
             .sort(MGT2Helper.compareByName);
+        const untrained = this.untrained(actor);
+        return [{ _id: "NP", name: untrained.label, term: untrained.label, dm: untrained.dm },
+            ...skills];
+    }
+
+    /**
+     * Core folio 59's DM−3 for an unskilled check, as folio 69's Jack-of-All-Trades leaves it: one
+     * point of the penalty per level, no benefit past level 3, and never a bonus. The label names
+     * the skill that softened it — the row read "Not proficient · −3" whatever the level was, which
+     * is what made the rule invisible in play.
+     * @param {Actor} actor
+     * @returns {{dm: number, level: number, label: string}}
+     */
+    static untrained(actor) {
+        const rule = MGT2.Untrained;
+        let level = 0;
+        let named = "";
+        for ( const item of actor?.items ?? [] ) {
+            if ( (item.type !== "talent") || (item.system.subType !== "skill") ) continue;
+            if ( !rule.skills.some(name => MGT2Helper.matchesSkill(item.name, name)) ) continue;
+            if ( (item.system.level ?? 0) <= level ) continue;
+            level = item.system.level;
+            named = item.name;
+        }
         const notProficient = game.i18n.localize("MGT2.Items.NotProficient");
-        return [{ _id: "NP", name: notProficient, term: notProficient, dm: -3 }, ...skills];
+        return {
+            level,
+            dm: rule.dm + Math.min(level, rule.max),
+            label: level ? game.i18n.format("MGT2.RollPrompt.UntrainedReduced",
+                { untrained: notProficient, skill: named, level }) : notProficient
+        };
     }
 
     /**
@@ -203,10 +246,10 @@ export class RollPromptHelper {
 
         if ( Object.hasOwn(data, "skill") && (data.skill !== "") ) {
             if ( data.skill === "NP" ) {
-                parts.push("-3");
+                const untrained = this.untrained(actor);
+                parts.push(MGT2Helper.getFormulaDM(untrained.dm));
                 // The card has no DM column, so each name carries its own number like the others.
-                modifiers.push(game.i18n.localize("MGT2.Items.NotProficient")
-                    + MGT2Helper.getDisplayDM(-3));
+                modifiers.push(untrained.label + MGT2Helper.getDisplayDM(untrained.dm));
             }
             else {
                 const skillObj = actor.getEmbeddedDocument("Item", data.skill);
@@ -232,6 +275,14 @@ export class RollPromptHelper {
             .map(source => [MGT2Helper.modifierLabel(source), source.dm]);
         rows.push(...extra);
 
+        // Core folio 75: the damage that interrupted an Extended Action is the negative DM on the
+        // check made to keep the round's work, one point for one point.
+        const sustained = MGT2Helper.getIntegerFromInput(data.damageSustained);
+        if ( sustained > 0 ) {
+            rows.push([game.i18n.localize("MGT2.RollPrompt.DamageSustained"),
+                sustained * MGT2.ExtendedAction.dm]);
+        }
+
         // Core p.63: the Effect of a previous check is a DM on this one, and the working together
         // rule on the same page is that table read once per contributor. The sources are kept
         // whole, not just their ids: the card's strip names each one and links back to it.
@@ -247,10 +298,9 @@ export class RollPromptHelper {
             rows.push([game.i18n.format("MGT2.RollPrompt.ChainTerm", { source: label }), dm]);
         }
 
-        for ( const [name, dm] of rows ) {
-            if ( dm !== 0 ) parts.push(MGT2Helper.getFormulaDM(dm));
-            modifiers.push(dm === 0 ? name : name + MGT2Helper.getDisplayDM(dm));
-        }
+        const reduced = Checks.modifiers(rows);
+        parts.push(...reduced.parts);
+        modifiers.push(...reduced.labels);
 
         if ( Object.hasOwn(data, "customDM") && (data.customDM !== "") ) {
             const typed = String(data.customDM).trim();
@@ -260,26 +310,6 @@ export class RollPromptHelper {
 
         return { formula: parts.join(""), modifiers, chainSources };
     }
-
-    /**
-     * Core p.62: both sides roll as normal and the higher Effect wins; a draw is a standstill in
-     * which neither gains an advantage. Nothing is modified — this is a comparison, and it runs
-     * after the dice because that is when both numbers exist.
-     * @returns {object|null}
-     */
-    static opposedResult(data, effect) {
-        if ( !MGT2Helper.hasValue(data, "opposed") ) return null;
-        const against = checkOf(game.messages.get(data.opposed));
-        if ( !Number.isInteger(against?.effect) ) return null;
-        return {
-            message: data.opposed,
-            label: against.label,
-            effect: against.effect,
-            outcome: (effect > against.effect) ? "won" : (effect < against.effect) ? "lost" : "tie"
-        };
-    }
-
-    /* -------------------------------------------- */
 
     /**
      * Checks this one can be measured against: chained from (Core p.63) or opposed (Core p.62).
@@ -380,13 +410,17 @@ export class RollPromptHelper {
      * thresholds Core folio 77 names and — for a weapon with Auto — the fire mode. **The 100 m
      * threshold is checked**, because that is the rule; the 300 m cell and the empty one are the
      * concessions the folio and the referee grant, and Scope voids the whole row from its own chip.
+     *
+     * `measured` is the caller's own snapshot of the canvas and is the only thing here that ever
+     * came off it: this prompt takes no actor and no token, and seeding a text field is not
+     * resolving a rule. Absent, the distance is typed exactly as it always was.
      */
-    static #rangeContext(weapon) {
+    static #rangeContext(weapon, measured = null) {
         if (!weapon) return {};
         const range = weapon.system.range;
         const unit = range.unit ? game.i18n.localize(MGT2.MetricRange[range.unit]).toLowerCase() : "";
         const aimTerm = game.i18n.localize(MGT2.AttackModifiers.aiming.label);
-        const auto = MGT2Helper.traitScore(weapon.system.traits, "auto");
+        const auto = MGT2Helper.traitScore(weapon.system.effective.traits, "auto");
         // Core folio 167: the to-hit half of the Damage Scale table. The weapon states one side of
         // the pair, so the cell offers the other one and nothing is read off a defender.
         const crossScale = MGT2.CrossScaleAttack[
@@ -396,6 +430,7 @@ export class RollPromptHelper {
             weapon: {
                 range: range.value,
                 unit,
+                distance: measured?.distance ?? "",
                 // Under the gutter word, so the band can be read against the score it came from.
                 // A weapon with no Range score names no bands, and "0 m" would read like one.
                 rangeLabel: range.value ? MGT2Helper.getRangeDisplay(range) : "",
@@ -408,6 +443,10 @@ export class RollPromptHelper {
                     }))
             },
             metre: game.i18n.localize(MGT2.MetricRange.meter).toLowerCase(),
+            // A snapshot can go stale, so the band says where the figure came from until the field
+            // is typed into — at which point it is the player's number and the caption is dropped.
+            measuredFrom: measured?.target
+                ? game.i18n.format("MGT2.RollPrompt.RangeMeasured", { target: measured.target }) : "",
             crossScale: {
                 dm: crossScale.dm,
                 negative: crossScale.dm < 0,
@@ -463,6 +502,12 @@ export class RollPromptHelper {
         for ( const box of form.querySelectorAll('input[data-auto="true"]') ) {
             box.addEventListener("change", () => { box.dataset.auto = "false"; });
         }
+
+        // The measured caption names where the seeded distance came from; a typed one came from
+        // nowhere but the player, so the attribution goes at the first keystroke.
+        form.elements.distance?.addEventListener("input", () => {
+            form.querySelector('[data-readout="band"]')?.removeAttribute("data-from");
+        }, { once: true });
 
         // The difficulty cells carry the target number; the word sits beside them and follows the
         // pointer, so the ladder names its own rungs without ever being opened.
@@ -529,19 +574,29 @@ export class RollPromptHelper {
     /* -------------------------------------------- */
 
     /**
-     * A modifier whose rule reaches only some checks follows the characteristic being rolled. Core
-     * folio 98 puts the encumbered DM-2 on "physical actions" and folio 9 heads STR, DEX and END the
-     * physical characteristics — no skill in this system carries such a flag and no book prints one,
-     * so the characteristic is the printed answer.
+     * A modifier whose rule reaches only some checks follows the select that decides them. Two
+     * scopes, and each names the control it watches rather than a rule of its own:
      *
-     * It stops deciding the moment the player touches the box, the same offer semantics an
+     * - `scope` — the **characteristic**. Core folio 98 puts the encumbered DM-2 on "physical
+     *   actions" and folio 9 heads STR, DEX and END the physical characteristics; no skill in this
+     *   system carries such a flag and no book prints one, so the characteristic is the answer.
+     * - `skillScope` — the **skill**, carrying Item ids because that is what the select's options
+     *   are keyed by. Core folio 107's skill augmentation is DM+1 "when using that specific skill",
+     *   and it is the only rule so far that scopes this way (§9.84).
+     *
+     * Either stops deciding the moment the player touches the box, the same offer semantics an
      * offered trait has: a referee who calls a check physical says so by ticking it back.
      */
     static #scoped(form) {
-        const chosen = form.elements.characteristic?.value ?? "";
-        for ( const box of form.querySelectorAll("input[data-scope]") ) {
-            if ( box.dataset.auto !== "true" ) continue;
-            box.checked = box.dataset.scope.split(" ").includes(chosen);
+        const chosen = {
+            scope: form.elements.characteristic?.value ?? "",
+            skillScope: form.elements.skill?.value ?? ""
+        };
+        for ( const box of form.querySelectorAll("input[data-auto='true']") ) {
+            for ( const [attr, value] of Object.entries(chosen) ) {
+                if ( box.dataset[attr] === undefined ) continue;
+                box.checked = box.dataset[attr].split(" ").includes(value);
+            }
         }
     }
 
@@ -560,7 +615,6 @@ export class RollPromptHelper {
             node.classList.toggle("zero", dm === 0);
         };
         const terms = [];
-        let total = 0;
 
         const suppressed = this.#traits(form);
         this.#scoped(form);
@@ -634,7 +688,9 @@ export class RollPromptHelper {
         cell(out("customDM"), custom);
         if ( custom ) terms.push([game.i18n.localize("MGT2.RollPrompt.CustomDM"), custom]);
 
-        for ( const [, dm] of terms ) total += dm;
+        // The preview totals through the same reducer the formula does, so the number on the strip
+        // and the number rolled cannot drift apart.
+        const { total } = Checks.modifiers(terms);
 
         out("formula").textContent = total === 0
             ? game.i18n.localize("MGT2.RollPrompt.RollDice")
@@ -738,7 +794,7 @@ export class RollPromptHelper {
         const parts = [["b", term]];
         // Out of range prints no DM: the band is shown and the player rolls anyway.
         if ( band.key !== "out" ) parts.push(["dmv", MGT2Helper.signed(band.dm, "+0")]);
-        parts.push(["why", why]);
+        parts.push(["why", node.dataset.from ? `${why} · ${node.dataset.from}` : why]);
         node.replaceChildren(...parts.map(([className, text]) => {
             const span = document.createElement("span");
             span.className = className;

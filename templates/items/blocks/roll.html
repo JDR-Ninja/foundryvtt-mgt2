@@ -26,6 +26,14 @@
 			<i class="fa-solid fa-rotate-right"></i>{{localize 'MGT2.Items.Reload'}}
 		</button>
 		{{/if}}
+		{{! WHICH round is in it. Live in play mode beside Reload, on the same argument equipping and
+		    storing are: loading is the session loop, not structure (§9.90). }}
+		{{#if rounds}}
+		<select class="f loadedround" name="system.ammunition"
+			data-tooltip="{{localize 'MGT2.Items.LoadedRound'}}" aria-label="{{localize 'MGT2.Items.LoadedRound'}}">
+			{{selectOptions rounds selected=system.ammunition valueAttr="_id" labelAttr="name"}}
+		</select>
+		{{/if}}
 
 		<div class="grid edit-only">
 			{{#if (eq item.type "talent")}}

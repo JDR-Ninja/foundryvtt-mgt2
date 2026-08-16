@@ -88,12 +88,24 @@
 					</tr>
 				</thead>
 				<tbody>
+					{{! A wafer jack is an implant that is also a computer (§9.84), so a hosting augment
+					    keeps its row here and gains the two things a computer row has: it accepts a
+					    software drop, and it prints what is loaded against its Processing. }}
 					{{#each augments as |augment|}}
-					<tr class="drag-item-list" data-item-id="{{augment._id}}">
+					<tr class="drag-item-list{{#if augment.hostsSoftware}} drop-item-list{{/if}}" data-item-id="{{augment._id}}">
 						<td>{{augment.name}}</td>
-						<td>{{augment.system.improvement}}</td>
+						<td>{{augment.system.improvement}}
+							{{#if augment.hostsSoftware}}<span class="sub {{augment.overloadClass}}">{{augment.system.processingUsed}}/{{augment.system.augment.processing}}{{#if augment.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}</span>{{/if}}
+						</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=augment.toggleClass store=true edit="MGT2.Actor.EditAugment" del="MGT2.Actor.DeleteAugment"}}
 					</tr>
+					{{#each augment.subItems as |subItem|}}
+					<tr class="drag-item-list" data-item-id="{{subItem._id}}">
+						<td><i class="fa-brands fa-usb"></i> {{subItem.name}}</td>
+						<td class="num">{{subItem.system.software.bandwidth}}</td>
+						{{> systems/mgt2/templates/actors/parts/row-controls.html eject=true edit="MGT2.Actor.EditSoftware"}}
+					</tr>
+					{{/each}}
 					{{/each}}
 				</tbody>
 			</table>

@@ -1,0 +1,34 @@
+{{! What a round does that is neither damage nor a trait — pellets ignoring the target's Dodge and
+    doubling its armour (Core p.128). No printed vocabulary covers these, so they are the referee's
+    own sentences and they sit beside the trait row rather than in it. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Items.Rules'}}</h3>
+		<span class="count">{{system.rules.length}}</span>
+	</div>
+	<table class="rows">
+		<tbody>
+			{{#each system.rules as |rule i|}}
+			<tr data-rule-index="{{i}}">
+				<td>
+					<span class="play-only">{{rule}}</span>
+					<input class="f edit-only" type="text" name="system.rules.{{i}}" value="{{rule}}" />
+				</td>
+				<td class="r">
+					<div class="acts edit-only">
+						<a data-action="ruleDelete" data-tooltip="{{localize 'MGT2.Items.DeleteRule'}}"><i class="fas fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+			{{! The trailing row is how one is added: the array refuses a blank entry, so an empty line
+			    is dropped on submit and a typed one lands at the end. }}
+			<tr class="edit-only">
+				<td colspan="2">
+					<input class="f" type="text" name="system.rules.{{system.rules.length}}" value="" placeholder="{{localize 'MGT2.Items.AddRule'}}" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<p class="hint">{{localize 'MGT2.Items.RulesHint'}}</p>
+</div>

@@ -256,6 +256,7 @@ export class NpcData extends ActorBaseData {
         this.prepareArmor();
         this.prepareWeight();
         this.prepareEncumbrance();
+        this.prepareCheckModifiers();
 
         this.states.incapacitated = this.stunIncapacitated;
 

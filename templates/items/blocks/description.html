@@ -5,7 +5,24 @@
 	{{#if (eq item.type "contact")}}
 	<prose-mirror name="system.description" value="{{system.description}}" toggled></prose-mirror>
 	{{else}}
-	<p class="prose play-only">{{system.description}}</p>
+	{{! Guarded, because an empty flex child still spends the block's gap: a compendium item whose
+	    whole description was the citation now has none, and it must read as absent rather than as a
+	    blank line above the reference. }}
+	{{#if system.description}}<p class="prose play-only">{{system.description}}</p>{{/if}}
 	<textarea class="f edit-only" name="system.description" rows="6">{{system.description}}</textarea>
 	{{/if}}
+
+	{{! Where the entry is printed. An item nobody transcribed from a book has no line at all, which
+	    is why the readout is the joined citation and not a label with two empty halves after it. }}
+	{{#if citation}}<p class="hint play-only"><b>{{localize 'MGT2.Items.Source'}}</b> {{citation}}</p>{{/if}}
+	<div class="grid cols2 edit-only">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.SourceBook'}}</span>
+			{{formInput systemFields.source.fields.book name="system.source.book" value=system.source.book classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.SourcePage'}}</span>
+			{{formInput systemFields.source.fields.page name="system.source.page" value=system.source.page classes="f" placeholder=(localize 'MGT2.Items.SourcePagePlaceholder')}}
+		</label>
+	</div>
 </div>

@@ -56,6 +56,20 @@ export class MGT2Helper {
         return ` (${this.signed(dm)})`;
     }
 
+    /**
+     * A credit figure with its thousands grouped. The `Cr` marker is the caller's — every sheet
+     * prints it as its own `<i>`, which is styled — so this returns the number alone.
+     *
+     * Grouped in the reader's own language, because a ship's purchase price is eight digits and
+     * `Cr48000000` is not a number anyone reads. A value that is not finite returns empty rather
+     * than `NaN`: the templates already guard the zero case with their own `{{#if}}`.
+     */
+    static credits(value) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) return "";
+        return number.toLocaleString(game.i18n?.lang ?? "en");
+    }
+
     static getFormulaDM(dm) {
         return this.signed(dm, "+0");
     }
@@ -155,7 +169,10 @@ export class MGT2Helper {
      */
     static weaponTraitRows(weapon, strengthDM = 0) {
         const range = this.getNumberFromInput(weapon?.system.range?.value);
-        return (weapon?.system.traits ?? []).map(trait => {
+        // The traits the loaded round leaves the weapon with: a shotgun firing pellets follows
+        // rules its own line never carried, and a few rounds replace the list outright (§9.90).
+        const traits = weapon?.system.effective?.traits ?? weapon?.system.traits;
+        return (traits ?? []).map(trait => {
             const rule = WEAPON_ROLL[trait.key] ?? {};
             const tone = rule.tone ?? "reminded";
             const term = traitLabel(trait);
@@ -209,6 +226,39 @@ export class MGT2Helper {
         if (!skill || !wanted) return false;
         return (skill === wanted)
             || (skill.startsWith(wanted) && /[^a-z0-9]/.test(skill.charAt(wanted.length)));
+    }
+
+    /**
+     * Whether software can run on this thing — a `computer` Item always, and a **fitted augment
+     * carrying a Processing figure** too (§9.84). Core p.107's wafer jack *is* a computer, and
+     * Core p.110 gives `Computer/N` and a computer's Processing the one scale, so the only thing
+     * separating them was which Item type they were authored as.
+     *
+     * Takes a source-shaped object rather than a document, because the inventory reasons over plain
+     * views and the delete path over `_source` data.
+     */
+    static runsSoftware(item) {
+        if (item?.type === "computer") return true;
+        return (item?.type === "equipment") && (item.system?.subType === "augment")
+            && (item.system?.equipped === true)
+            && ((+item.system?.augment?.processing || 0) > 0);
+    }
+
+    /** The Processing a host offers, wherever its own type happens to store it. */
+    static processing(item) {
+        return ((item?.type === "computer")
+            ? item.system?.processing : item?.system?.augment?.processing) ?? 0;
+    }
+
+    /**
+     * Whether a skill Item's name already ends in its own speciality. The packs name a speciality
+     * Item "Animals (Handling)" — the form `matchesSkill` resolves, and the one that keeps the five
+     * Items called "Art" apart — so a label that appends the speciality would state it twice.
+     */
+    static nameStatesSpeciality(name, speciality) {
+        const label = String(name ?? "").trim().toLowerCase();
+        const tail = String(speciality ?? "").trim().toLowerCase();
+        return !!tail && label.endsWith(`(${tail})`);
     }
 
     /** A named modifier contribution reads either straight or through its substitutions. */
@@ -372,10 +422,36 @@ export class MGT2Helper {
      * The drag in flight, cached from `dragstart`. `DataTransfer` puts its store in protected mode
      * for the whole of `dragover`, so `getData` there returns "" — and a zone that cannot read the
      * payload cannot refuse it at the pointer, only after the drop.
+     *
+     * **No listener on `document` can do it, and that was this watcher's bug until 2026-08-15.** A
+     * source writes its payload from its own `dragstart` handler, so a **capture** listener runs
+     * before every one of them and reads an empty store — and a **bubble** listener never runs at
+     * all, because `DragDrop#_handleDragStart` is
+     * `this.callback(event, "dragstart"); if ( event.dataTransfer.items.length ) event.stopPropagation();`
+     * (`ux/drag-drop.mjs`). Every drag Foundry itself starts is `DragDrop`-bound, so the payload was
+     * written and then sealed off one element below `document`, and `#dragged` was null for the
+     * lifetime of the feature.
+     *
+     * So the read happens **inside** `DragDrop`, through `CONFIG.ux.DragDrop` — the seam core
+     * provides and uses itself, every construction going through `DragDrop.implementation`. The
+     * bubble listener stays for the sources that are not `DragDrop`-bound (a delegated handler of
+     * ours), and the capture pass voids the previous drag, because a source that stops propagation
+     * before writing anything would otherwise leave a stale payload readable.
      */
     static watchDrags() {
         if ( MGT2Helper.#watchingDrags ) return;
         MGT2Helper.#watchingDrags = true;
+        // Subclass whatever is installed rather than the base class, so a module that has also
+        // overridden it still composes. `implementation` refuses anything that is not a subclass.
+        const Base = CONFIG.ux.DragDrop;
+        CONFIG.ux.DragDrop = class MGT2DragDrop extends Base {
+            /** @inheritDoc */
+            _handleDragStart(event) {
+                super._handleDragStart(event);
+                MGT2Helper.#dragged = MGT2Helper.getDataFromDropEvent(event) || null;
+            }
+        };
+
         // Clearing the pointer feedback belongs to the same watcher: `dragleave` does not fire when
         // a drag ends outside every zone, so a refused cell would keep its red until the next one.
         const clear = () => {
@@ -384,9 +460,10 @@ export class MGT2Helper {
                 node.classList.remove("over", "deny");
             }
         };
+        document.addEventListener("dragstart", () => { MGT2Helper.#dragged = null; }, true);
         document.addEventListener("dragstart", event => {
-            MGT2Helper.#dragged = MGT2Helper.getDataFromDropEvent(event) || null;
-        }, true);
+            MGT2Helper.#dragged ??= MGT2Helper.getDataFromDropEvent(event) || null;
+        });
         document.addEventListener("dragend", clear, true);
         document.addEventListener("drop", clear, true);
     }
@@ -431,5 +508,19 @@ export class MGT2Helper {
             item = await pack?.getDocument(item._id);
         }
         return foundry.utils.deepClone(item);
+    }
+
+    /**
+     * A dropped document as a creation payload: `getItemDataFromDropData` hands back a clone that
+     * still carries the source's id, and creating with it would collide with the original.
+     * @param {Item|object} source
+     * @returns {object}
+     */
+    static stripIds(source) {
+        let data;
+        try { data = source.toJSON(); } catch { data = source; }
+        delete data._id;
+        delete data.id;
+        return data;
     }
 }

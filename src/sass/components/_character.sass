@@ -825,6 +825,61 @@ ul.softwares
 			color: var(--accent-text)
 			border-color: var(--accent-line)
 
+// The permanent-change log's own list, which is `ul.changes` with a sign rather than a phase: one
+// line per characteristic a row moved, and the sign is the whole reading (§9.91).
+.mgt2 ul.deltas
+	display: flex
+	flex-wrap: wrap
+	gap: 2px 10px
+	margin: 0
+	padding: 0
+	list-style: none
+	li
+		display: flex
+		align-items: baseline
+		gap: 5px
+	.k
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.09em
+		text-transform: uppercase
+		color: var(--mute)
+	.v
+		font-family: var(--mono)
+		font-size: 11.5px
+		font-variant-numeric: tabular-nums
+		color: var(--good)
+	li.bad .v
+		color: var(--danger)
+
+// The dialog that writes a row. Three narrow fields on one line, and a billing line that states
+// what it is about to do to the purse before it does it.
+.mgt2 .dlg.loss
+	.row3
+		display: grid
+		grid-template-columns: repeat(3, minmax(0, 1fr))
+		gap: 8px
+	.drow.bill
+		gap: 7px
+		cursor: var(--cursor-pointer)
+		input
+			margin: 0
+			accent-color: var(--accent-text)
+		.lbl
+			flex: 0 0 auto
+	.dm.move
+		min-width: 4.5rem
+		text-align: right
+		font-variant-numeric: tabular-nums
+	.dm.good
+		color: var(--good)
+	// The crisis fills these itself. Read-only rather than disabled, because a disabled input
+	// submits nothing and the whole restoration would be previewed and then lost.
+	input.locked
+		opacity: 0.55
+		cursor: default
+
 // The change editor is Foundry's own window with a sixth column, so it restates core's grid rather
 // than joining the kit: `.tab.changes` is styled in foundry2.css for five columns exactly.
 .active-effect-config .tab.changes.mgt2-changes

@@ -15,7 +15,7 @@
 		<div class="stat"><dt>{{localize 'MGT2.Items.Department'}}</dt><dd class="word">{{localize (lookup config.Departments system.department)}}</dd></div>
 		<div class="stat{{#unless system.salary}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Items.Salary'}}</dt>
-			<dd>{{#if system.salary}}<i>Cr</i>{{system.salary}}<i>/{{localize 'MGT2.Actor.spacecraft.Month'}}</i>{{else}}&mdash;{{/if}}</dd>
+			<dd>{{#if system.salary}}<i>Cr</i>{{credits system.salary}}<i>/{{localize 'MGT2.Actor.spacecraft.Month'}}</i>{{else}}&mdash;{{/if}}</dd>
 		</div>
 	</dl>
 	<div class="grid edit-only">

@@ -95,6 +95,55 @@
 		font-family: var(--mono)
 		font-size: 12px
 
+	// The formula fields. Core dresses the host element as an input in `@layer elements`, so the
+	// chrome is taken back here — and `input.f` cannot reach the real control, because the class
+	// sits on the host and the `<input>` is built by the element.
+	formula-input.f
+		display: flex
+		align-items: center
+		width: 100%
+		height: auto
+		padding: 0 3px 0 0
+		background: var(--hover)
+		border: 1px solid var(--rule)
+		border-radius: 2px
+		box-shadow: none
+		&:focus-within
+			outline: none
+			background: var(--paper)
+			border-color: var(--accent-text)
+		// Padding and font are `input.f`'s, moved inward: the host draws the box, so a row holding a
+		// formula keeps the height of the plain fields beside it.
+		> input
+			flex: 1 1 auto
+			min-width: 0
+			height: auto
+			padding: 2px 5px
+			font: inherit
+			font-family: var(--body)
+			font-size: 13px
+			color: var(--ink)
+			background: none
+			border: none
+			&:focus
+				outline: none
+		// The lambda that opens the editor: a hint until the field is hovered, never a button shape,
+		// and never tall enough to set the control's height.
+		> button
+			flex: 0 0 auto
+			width: 1.1rem
+			height: 1.1rem
+			// Core gives every button a `min-height`, which otherwise sets the whole control's height.
+			min-height: 0
+			padding: 0
+			font-size: 11px
+			color: var(--faint)
+			background: none
+			border: none
+			box-shadow: none
+			&:hover
+				color: var(--accent-text)
+
 	.grid
 		display: grid
 		grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr))
@@ -302,6 +351,15 @@
 			font-size: 11px
 			font-weight: 500
 			color: var(--mute)
+		// The same provenance gloss the budget rows carry, in the one other place a derived figure
+		// can be standing in for a printed one (§4.1). `i` beside it is the unit and stays the unit.
+		.why
+			margin-left: 6px
+			font-family: var(--cond)
+			font-size: 10px
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--faint)
 		.word
 			font-size: 13px
 			font-weight: 600
@@ -426,13 +484,18 @@
 		&.num
 			width: 5.5rem
 			text-align: right
-		.why
-			margin-left: 8px
-			font-family: var(--cond)
-			font-size: 10px
-			letter-spacing: 0.12em
-			text-transform: uppercase
-			color: var(--faint)
+
+	// Where a figure came from. On a row it glosses the row; in the header it glosses the TOTAL,
+	// which is how a printed statblock says it is answering instead of the formula (§4.1) — and the
+	// only case in which the rows below do not add up to the number above them.
+	.why
+		margin-left: 8px
+		font-family: var(--cond)
+		font-size: 10px
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+
 	.brows tr.off td
 		color: var(--faint)
 		&.num
@@ -1076,3 +1139,93 @@
 // A vacant station reads as a target before anything is dragged.
 .mgt2 .roster tr.vacant td.who
 	border: 1px dashed var(--rule)
+
+// --------------------------------------------
+//  The design ledger — §6.2's expensive half
+// --------------------------------------------
+// Ported from docs/sketch-component.html. One line per rule the design either meets or does not,
+// and a third state the sketch did not have: a check with nothing to read (§9.92). Silent is not
+// green — a partial parts list answers fewer rules, and saying which is the point.
+
+.mgt2 .valid
+	display: flex
+	flex-direction: column
+	margin-top: 9px
+	.v
+		display: grid
+		grid-template-columns: 1.2rem minmax(0, 1fr) auto
+		gap: 0 8px
+		align-items: baseline
+		padding: 4px 2px
+		border-bottom: 1px solid var(--rule-soft)
+	.v:last-child
+		border-bottom: 0
+	.mk
+		font-family: var(--mono)
+		font-size: 12px
+		color: var(--faint)
+	.v.ok .mk
+		color: var(--good)
+	.v.no .mk
+		color: var(--danger)
+	.nm
+		font-family: var(--cond)
+		font-size: 11.5px
+		font-weight: 700
+		letter-spacing: 0.09em
+		text-transform: uppercase
+		.g
+			display: block
+			font-family: var(--mono)
+			font-size: 9.5px
+			letter-spacing: 0
+			text-transform: none
+			color: var(--faint)
+	.num
+		font-family: var(--mono)
+		font-size: 11.5px
+		font-variant-numeric: tabular-nums
+		white-space: nowrap
+	.v.no .num
+		color: var(--danger)
+	// A rule this parts list cannot answer. Drawn, because an absent line reads as a rule nobody
+	// thought of, and greyed, because it is not a pass.
+	.v.na
+		.nm, .num
+			color: var(--faint)
+
+// A component row whose stored `dm` is non-zero: a critical landed on it and it is still fitted.
+.mgt2 table.rows tr.hit td:first-child
+	box-shadow: inset 2px 0 0 var(--danger)
+
+// A power plant states what it MAKES where every other row states what it takes.
+.mgt2 table.rows td.num.good
+	color: var(--good)
+
+// A bay carrying identical craft: ten fighters on ten clamps are one Actor carried ten times
+// (§9.95), so the count sits against the name and the two stored halves sit under the total.
+
+.mgt2 .roster .times
+	margin-right: 1px
+	font-family: var(--mono)
+	font-size: 11px
+	font-weight: 400
+	color: var(--mute)
+
+// `count × capacity` is the row's own tonnage and the figure the budget sums; the per-craft number
+// only earns a line where there is more than one of them.
+.mgt2 .roster .need .each
+	display: block
+	margin-top: 1px
+	font-style: normal
+	font-size: 9.5px
+	color: var(--faint)
+
+.mgt2 .roster .baytons
+	display: flex
+	justify-content: flex-end
+	gap: 5px
+	input.f.num
+		width: 4rem
+	input.f.num:first-child
+		width: 3rem

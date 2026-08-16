@@ -1,3 +1,5 @@
+import { MGT2Helper } from "./helper.js";
+
 /**
  * World migrations.
  *
@@ -6,7 +8,13 @@
  * persisting those shims so they can eventually be dropped, and carrying the changes migrateData
  * cannot express (a document's `type`, or anything outside `system`).
  *
- * Each entry runs once, in order, for worlds coming from a version older than its own.
+ * Each entry runs once, in order, for worlds coming from a version older than its own — so an entry's
+ * version must be one `system.json` actually reaches, or `migrateWorld` re-runs it on every load.
+ *
+ * **0.2.0 is unreleased, so its entry is still open and gains work rather than getting a successor.**
+ * The cost is that a local world already stamped `0.2.0` does not see what was added afterwards: to
+ * replay it, clear the setting — `game.settings.set("mgt2", "migrationVersion", "")` — and reload.
+ * That is safe here because every step below re-runs to a no-op on a world it has already touched.
  */
 
 /**
@@ -20,8 +28,11 @@ const NPC_CHAIN_FIXED = ["endurance", "strength", "dexterity"];
 const MIGRATIONS = [
   {
     version: "0.2.0",
-    label: "damageOrder, protection, view state, crew duty, NPC damage chain",
+    label: "damageOrder, protection, view state, crew duty, NPC damage chain, species unwind, ucp, durationUnit",
     async migrate() {
+      // Before the sweep: it rewrites `characteristics.<k>.base`, which the sweep then persists.
+      for ( const actor of game.actors ) await unwindSpecies(actor);
+
       const actorUpdates = [];
       for ( const actor of game.actors ) {
         const update = collectActorUpdate(actor);
@@ -40,9 +51,78 @@ const MIGRATIONS = [
         const embedded = actor.items.map(collectItemUpdate).filter(Boolean);
         if ( embedded.length ) await actor.updateEmbeddedDocuments("Item", embedded);
       }
+
+      // Last, so the chains this entry rewrote are the ones counted.
+      return countRescaledLife();
     }
   }
 ];
+
+/* -------------------------------------------- */
+
+/**
+ * How many actors come out of this with a different `life.max` (§9.1) — the number the completion
+ * notice reports, because `life` is `primaryTokenAttribute` and every one of those tokens rescales.
+ *
+ * The comparison is possible at all because the two definitions live in two places: 0.1.x wrote
+ * STR+DEX+END into the document on every update, and nothing writes `system.life` any more, so the
+ * stored number is still the old reading while `actor.system.life` is the new sum over
+ * `damageOrder`. A stored zero is an actor that write never ran for — it has no previous reading to
+ * have moved — and `world` and `stash` carry no chain at all.
+ * @returns {number}
+ */
+function countRescaledLife() {
+  let count = 0;
+  for ( const actor of game.actors ) {
+    const stored = actor._source.system?.life?.max ?? 0;
+    const now = actor.system.life?.max;
+    if ( (stored > 0) && (now !== undefined) && (stored !== now) ) count++;
+  }
+  return count;
+}
+
+/* -------------------------------------------- */
+
+/**
+ * Take the species bonus back out of `base` and put the species Item on the actor instead (§9.18).
+ *
+ * **Every subtraction is logged, and that is not caution — it is the only check there can be.** The
+ * write being unwound was `base + value`: additive, non-idempotent, and nothing in the data
+ * distinguishes one drop from two, so a Traveller who took the same species twice comes out of this
+ * still carrying one copy of the bonus and no code can tell. A world whose species Item is gone gets
+ * a line naming the actor and is left alone, because guessing is worse than not moving.
+ * @param {Actor} actor
+ */
+async function unwindSpecies(actor) {
+  const name = actor._source.system?.personal?.species?.trim();
+  if ( !name || (actor.type !== "character") ) return;
+  // Already derived: an actor carrying the Item was never written to in the first place.
+  if ( actor.items.some(item => item.type === "species") ) return;
+
+  const species = game.items.find(item => (item.type === "species") && (item.name === name));
+  if ( !species ) {
+    console.warn(`mgt2 | "${actor.name}" names species "${name}" and no species Item matches it: `
+      + `its characteristics are left exactly as stored, and the bonus (if any was ever applied) `
+      + `has to be taken out by hand.`);
+    return;
+  }
+
+  const characteristics = {};
+  const taken = [];
+  for ( const modifier of species.system.modifiers ?? [] ) {
+    const c = actor._source.system.characteristics?.[modifier.characteristic];
+    if ( !c || !Number.isFinite(modifier.value) ) continue;
+    characteristics[modifier.characteristic] = { base: Math.max(0, c.base - modifier.value) };
+    taken.push(`${modifier.characteristic} ${c.base} → ${Math.max(0, c.base - modifier.value)}`);
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(`mgt2 | "${actor.name}": species "${name}" moved off base and onto an Item`
+    + (taken.length ? ` — ${taken.join(", ")}` : " — it carries no characteristic modifier"));
+
+  if ( taken.length ) await actor.update({ system: { characteristics } });
+  await actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(species)]);
+}
 
 /* -------------------------------------------- */
 
@@ -87,6 +167,18 @@ function collectActorUpdate(actor) {
   // Writing the prepared array back is the removal — an ArrayField update replaces, never merges.
   if ( (actor.type === "spacecraft") && source.crew?.some(row => "duty" in row) ) {
     update["system.crew"] = actor.system.crew.map(row => ({ ...row }));
+    dirty = true;
+  }
+  // The UPP is the six canonical maxima and derives; a typed one beside them was a second source of
+  // truth for one fact (§9.19). Logged rather than dropped silently: a world may have typed a
+  // species profile the six characteristics do not reproduce.
+  if ( source.personal && ("ucp" in source.personal) && (actor.type === "character") ) {
+    if ( source.personal.ucp ) {
+      // eslint-disable-next-line no-console
+      console.log(`mgt2 | "${actor.name}": discarding the typed UPP "${source.personal.ucp}" — `
+        + `it now derives as "${actor.system.upp}"`);
+    }
+    update["system.personal.ucp"] = new foundry.data.operators.ForcedDeletion();
     dirty = true;
   }
   for ( const [key, characteristic] of Object.entries(source.characteristics ?? {}) ) {
@@ -143,6 +235,12 @@ function collectItemUpdate(item) {
     update["system.overload"] = new foundry.data.operators.ForcedDeletion();
     dirty = true;
   }
+  // `MGT2.Durations` had a French key name in the English dictionary, and `durationUnit` stores that
+  // key rather than a label — so the typo was persisted on every psionic talent that names hours.
+  if ( source.psionic?.durationUnit === "Heures" ) {
+    update["system.psionic.durationUnit"] = "Hours";
+    dirty = true;
+  }
 
   return dirty ? update : null;
 }
@@ -168,14 +266,15 @@ export async function migrateWorld() {
   // Permanent so it cannot scroll away mid-migration — hence the explicit removal below.
   const banner = ui.notifications.info(game.i18n.localize("MGT2.Migration.Begin"), { permanent: true });
   try {
+    let count = 0;
     for ( const migration of pending ) {
       // Worth a log line: this rewrites documents once, and a GM chasing a problem needs the trace.
       // eslint-disable-next-line no-console
       console.log(`mgt2 | migrating world to ${migration.version}: ${migration.label}`);
-      await migration.migrate();
+      count += (await migration.migrate()) ?? 0;
     }
     await game.settings.set("mgt2", "migrationVersion", game.system.version);
-    ui.notifications.info(game.i18n.localize("MGT2.Migration.Complete"));
+    ui.notifications.info(game.i18n.format("MGT2.Migration.Complete", { count }));
   } catch(err) {
     // Leave migrationVersion untouched so the next load retries rather than skipping ahead.
     ui.notifications.error(game.i18n.localize("MGT2.Migration.Failed"), { permanent: true });

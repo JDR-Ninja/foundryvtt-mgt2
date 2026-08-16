@@ -266,7 +266,9 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
     get initiativeFormula() {
         const thrust = this.ship?.system.drives.effectiveThrust ?? 0;
         const parts = ["2d6"];
-        const base = this.pilotSkill + thrust;
+        // `SpacecraftData#initiative` is not read here — this pilot is whoever took the duty, not
+        // the ship's standing one — so the standing DM is summed in rather than inherited (§9.94).
+        const base = this.pilotSkill + thrust + (this.ship?.system.modifiers.initiative.dm ?? 0);
         if ( base ) parts.push(MGT2Helper.term(base));
         if ( this.tacticsEffect ) parts.push(MGT2Helper.term(this.tacticsEffect));
         return parts.join(" ");

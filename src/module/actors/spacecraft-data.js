@@ -10,6 +10,11 @@ const MIN_JUMP_DRIVE_TONS = 10;
 /** HG p.19: MCr0.5 per 100 tons of ship, or part of one. */
 const BRIDGE_COST_PER_100T = 500000;
 
+// Core p.186 / HG p.52: holographic controls, TL9, +25 % of the bridge cost for DM+2 to Initiative.
+const HOLOGRAPHIC_COST_FACTOR = 1.25;
+const HOLOGRAPHIC_TL = 9;
+const HOLOGRAPHIC_INITIATIVE_DM = 2;
+
 /** Core p.183 and HG p.25 both count a period as four weeks. */
 const WEEKS_PER_PERIOD = 4;
 
@@ -52,6 +57,21 @@ export class SpacecraftData extends CraftData {
         const tons = (initial = 0) => new fields.NumberField({
             required: false, nullable: false, min: 0, initial });
 
+        /**
+         * A formula is a default; a printed statblock is data (§4.1). Every figure this type
+         * derives and the books also print per-ship gets one of these: `null` derives, a value is
+         * what the book says, and the sheet says which is in force. Transcription is the dominant
+         * use of the type, and 24 of the 260 published ships whose card prints hull points disagree
+         * with the derivation — several of them the books' own arithmetic rather than misreads.
+         *
+         * `min: 0` states a rule and not a convenience (§1.12): no book prints a negative tonnage,
+         * cost or pool. There is deliberately NO `max` and no `integer` — a `NumberField` cleans
+         * before it validates, so a bound rounds or clamps a legal printed value away with no error
+         * at all (`common/data/fields.mjs`, `_cleanType`: `if ( this.integer ) value = Math.round(value)`).
+         */
+        const printed = () => new fields.NumberField({
+            required: false, nullable: true, min: 0, initial: null });
+
         Object.assign(schema, {
             // The design input everything else reads. Hull points are computed from these three and
             // land in `characteristics.hull.auto`, so a ship's `base` goes unused — the exact mirror
@@ -63,7 +83,12 @@ export class SpacecraftData extends CraftData {
                 options: new fields.SetField(
                     new fields.StringField({ required: true, blank: false, choices: MGT2.HullOptions }),
                     { required: false, initial: [] }),
-                shipClass: new fields.StringField({ required: false, blank: true, trim: true })
+                shipClass: new fields.StringField({ required: false, blank: true, trim: true }),
+                // The one figure of the six a book prints as a countable pool rather than as a
+                // measured quantity, and `characteristics.hull.max` is summed from it — so a
+                // fraction here would leave the ship a fractional hull and a fractional token bar.
+                pointsOverride: new fields.NumberField({
+                    required: false, nullable: true, integer: true, min: 0, initial: null })
             }),
 
             // Bought per point of Protection as a percentage of hull tonnage (HG p.12-13); the
@@ -73,7 +98,8 @@ export class SpacecraftData extends CraftData {
                 material: new fields.StringField({
                     required: false, blank: false, initial: "titaniumSteel", choices: MGT2.ArmourMaterials }),
                 points: count(0),
-                damage: count(0)
+                damage: count(0),
+                tonsOverride: printed()
             }),
 
             drives: new fields.SchemaField({
@@ -92,7 +118,12 @@ export class SpacecraftData extends CraftData {
                     { required: false, initial: [] }),
                 // Declared although derived, so an Active Effect from a damaged plant is coerced and
                 // validated rather than written raw (§1.5). Written in the `final` phase.
-                available: new fields.NumberField({ required: false, nullable: false, initial: 0 })
+                available: new fields.NumberField({ required: false, nullable: false, initial: 0 }),
+                // The panel's bottom line AT FULL POWER, which is what a catalogue entry prints:
+                // switching a consumer off is play state and goes on subtracting its own derived
+                // draw from whichever figure is in force. `plant` above needs no twin — the output
+                // is stored outright, which is the shape §4.1 asks for arrived at from the start.
+                drawOverride: printed()
             }),
 
             fuel: new fields.SchemaField({
@@ -100,12 +131,23 @@ export class SpacecraftData extends CraftData {
                 refined: new fields.BooleanField({ required: false, initial: true }),
                 // Weeks of power-plant operation the tank is sized for, printed on every catalogue
                 // entry beside the jump rating.
-                weeks: count(WEEKS_PER_PERIOD)
+                weeks: count(WEEKS_PER_PERIOD),
+                // Displaces the DESIGN tonnage a jump at the rated range needs, which is the figure
+                // the catalogue prints; `jumpFuel(parsecs)` goes on charging Core p.157's flat 10 %
+                // per parsec, because that is consumption and no card states it.
+                jumpTonsOverride: printed()
             }),
 
             bridge: new fields.SchemaField({
                 type: new fields.StringField({
-                    required: false, blank: false, initial: "standard", choices: MGT2.BridgeTypes })
+                    required: false, blank: false, initial: "standard", choices: MGT2.BridgeTypes }),
+                tonsOverride: printed(),
+                // In Credits, like every other cost on this type — HG prices a bridge in MCr0.5
+                // steps and `BRIDGE_COST_PER_100T` is that in full.
+                costOverride: printed(),
+                // Core p.186 / HG p.52: an option on any bridge rather than a type of its own —
+                // +25 % of the bridge cost, no tonnage, TL9, and DM+2 to Initiative.
+                holographic: new fields.BooleanField({ required: false, initial: false })
             }),
 
             // HG p.20: a ship's computer has a Processing score and consumes no tonnage. Ship
@@ -177,7 +219,18 @@ export class SpacecraftData extends CraftData {
             bays: new fields.ArrayField(new fields.SchemaField({
                 kind: new fields.StringField({
                     required: false, blank: false, initial: "dockingSpace", choices: MGT2.CraftBays }),
+                // **Per craft, not for the bay** (§4.7, §9.95): what one of them costs the hull, so
+                // the row consumes `count × capacity`. A carrier's clamps are identical and its
+                // fighters are one Actor, which is the whole reason `count` exists.
                 capacity: tons(0),
+                // §4.7: the Indigo class flies ten light fighters off ten clamps, and one entry per
+                // craft makes that ten rows differing only in a name the referee had to invent —
+                // which is a live request against `mgt2e`, where the same limit forces ten
+                // separately-named Actors. `min: 1` and not the shared `count()` helper, whose floor
+                // is 0: a bay of nothing is a bay with no craft in it, and `craft: null` already
+                // says that. A typed 0 therefore CLEANS to 1 rather than erroring (§1.12).
+                count: new fields.NumberField({
+                    required: false, nullable: false, integer: true, min: 1, initial: 1 }),
                 craft: new fields.DocumentUUIDField({
                     type: "Actor", embedded: false, required: false, nullable: true, initial: null })
             }), { initial: [] }),
@@ -192,7 +245,52 @@ export class SpacecraftData extends CraftData {
                     required: false, nullable: true, min: 0, initial: null })
             }),
 
-            homeport: new fields.StringField({ required: false, blank: true, trim: true })
+            // A free string nobody reads, kept deliberately (§9.33.10 q3). Anything that RESOLVES a
+            // world goes through `voyage` below, never through this.
+            homeport: new fields.StringField({ required: false, blank: true, trim: true }),
+
+            // THE LEG, and not an ordered array of stops: exactly one set of parsecs exists at a
+            // time, so nothing can chain on a previous leg and there is no index to shift. Advancing
+            // is `next` → `here` and the head of `queue` → `next`, on a button and never on a roll
+            // (§9.33.2, §9.33.10 Q4). The nullable uuid beside a bare name is `crew[]`'s degradation
+            // pattern: no content ships, so the world Actor may simply not exist yet.
+            voyage: new fields.SchemaField({
+                here: new fields.SchemaField({
+                    world: new fields.DocumentUUIDField({
+                        type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
+                    name: new fields.StringField({ required: false, blank: true, trim: true })
+                }),
+                next: new fields.SchemaField({
+                    world: new fields.DocumentUUIDField({
+                        type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
+                    name: new fields.StringField({ required: false, blank: true, trim: true }),
+                    // A property of the PAIR, typed by hand: no stored coordinate can compute it, and
+                    // `hex` is deliberately not in the schema (§9.33.5). Core p.157 counts anything
+                    // under a parsec as jump-1 for both the Astrogation DM and the fuel.
+                    parsecs: count(1)
+                }),
+                // Names and references, NOTHING else — no parsecs, no index, no note. The deletion
+                // test files the queue as a note, and no arithmetic anywhere may read it.
+                queue: new fields.ArrayField(new fields.SchemaField({
+                    world: new fields.DocumentUUIDField({
+                        type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
+                    name: new fields.StringField({ required: false, blank: true, trim: true })
+                }), { initial: [] }),
+                // Per hull rather than per world, because the screen that shows it reads one hull
+                // and a jump procedure is a property of the drive being fired (§9.33.10 Q1).
+                ruleset: new fields.StringField({
+                    required: false, blank: false, initial: "core", choices: MGT2.JumpRulesets })
+            }),
+
+            // One scalar (Core p.154-155). `periodsSkipped` was the second until §9.33.10 Q4 declined
+            // it outright, and with it the Poor Maintenance 2D/8+ roll and the Engineer's DM−1 per
+            // month behind: skipped maintenance stays on paper.
+            ops: new fields.SchemaField({
+                // The REAL level, distinct from `fuel.tons` — which is design tonnage summed into the
+                // hull budget and the divisor of `jumpCapacity`. Nothing can recompute it, so it is
+                // debited ATOMICALLY with the Jump button or it is wrong at the first forgotten jump.
+                fuel: tons(0)
+            })
         });
         return schema;
     }
@@ -201,12 +299,20 @@ export class SpacecraftData extends CraftData {
     /*  Accessors                                   */
     /* -------------------------------------------- */
 
-    /** HG p.10-12: tons per point by size band, then the configuration and hull options. */
+    /**
+     * HG p.10-12: tons per point by size band, then the configuration and hull options.
+     *
+     * The modifiers are percentages of the ship's Hull points, so they apply to the exact figure and
+     * the result is rounded down once. Rounding down before them as well costs a point wherever the
+     * tonnage is not a whole multiple of the band's rate: High Guard prints 183,333 for the
+     * 250,000-ton reinforced Fleet Carrier, which reads 183,332 when the base is floored first. A
+     * hull carrying no modifier is unaffected either way.
+     */
     get hullPoints() {
         const tons = this.hull.tons;
         if (!(tons > 0)) return 0;
         const config = MGT2.HullConfigurations[this.hull.configuration];
-        let points = Math.floor(tons / band(MGT2.HullPointRates, tons).tonsPerPoint);
+        let points = tons / band(MGT2.HullPointRates, tons).tonsPerPoint;
         points *= config?.hullPoints ?? 1;
         for (const key of this.hull.options) points *= MGT2.HullOptions[key]?.hullPoints ?? 1;
         return Math.floor(points);
@@ -257,11 +363,17 @@ export class SpacecraftData extends CraftData {
         return ladder[step].tons + (type?.addTons ?? 0);
     }
 
+    /**
+     * Core p.186 / HG p.52: holographic controls "add +25% to the cost of the bridge" — the bridge's
+     * own cost, so it multiplies a cockpit's flat price and a command deck's `addCost` alike, and
+     * consumes no tonnage, which is why `bridgeTons` says nothing about it.
+     */
     get bridgeCost() {
         const type = MGT2.BridgeTypes[this.bridge.type];
-        if (type?.cost !== undefined) return type.cost;
+        const holographic = this.bridge.holographic ? HOLOGRAPHIC_COST_FACTOR : 1;
+        if (type?.cost !== undefined) return type.cost * holographic;
         const cost = Math.ceil(this.hull.tons / 100) * BRIDGE_COST_PER_100T;
-        return (cost * (type?.costFactor ?? 1)) + (type?.addCost ?? 0);
+        return ((cost * (type?.costFactor ?? 1)) + (type?.addCost ?? 0)) * holographic;
     }
 
     /** HG p.26: one hardpoint per full 100 tons; a hull too small for one gets firmpoints instead. */
@@ -278,9 +390,56 @@ export class SpacecraftData extends CraftData {
         return this.mounts.map(mount => MGT2.ShipMounts[mount.type] ?? MGT2.ShipMounts.fixed);
     }
 
-    /** HG p.18: 10% of the hull per parsec of jump, plus a tenth of the plant per four weeks. */
-    get fuelPerJump() {
+    /**
+     * HG p.18: what the tank has to hold to reach the rated range — the ship's jump number is in
+     * it, so this is design tonnage and NOT what a jump burns. Read as consumption it over-burns by
+     * a factor equal to the rating, which is why the two names differ (§9.33.7 a).
+     */
+    get fuelPerMaxJump() {
         return this.hull.tons * MGT2.ShipFuel.jumpFraction * this.drives.jump;
+    }
+
+    /** Core p.157: consumption is flat — 10% of the hull per parsec, whatever the drive is rated. */
+    get fuelPerParsec() {
+        return this.hull.tons * MGT2.ShipFuel.jumpFraction;
+    }
+
+    /**
+     * What a jump of `parsecs` actually costs. Core p.157: "jumps of less than one parsec count as
+     * jump-1 for both the Astrogation DM and fuel", so the floor is printed and not defensive.
+     * @param {number} parsecs
+     * @returns {number}
+     */
+    jumpFuel(parsecs) {
+        return this.fuelPerParsec * Math.max(1, Math.trunc(parsecs) || 0);
+    }
+
+    /**
+     * The referee's clock, and the only writer of the leg: `next` becomes `here` and the head of
+     * `queue` becomes `next`, in ONE update. No index is shifted and no neighbour is read, so
+     * deleting a stop can never silently move the ship — which is the whole reason a voyage is a
+     * leg rather than an ordered array (§9.33.2). No roll reaches this and nothing schedules it
+     * (§9.35); the fuel is untouched, because the debit is atomic with the Jump button (§9.33.7 f)
+     * and a leg arrived at has already been paid for.
+     * @returns {Promise<Actor|null>}   null when there is nowhere to go, which is a legal state
+     */
+    async advanceLeg() {
+        const voyage = this.voyage;
+        if (!voyage.next.world && !voyage.next.name) return null;
+        const queue = voyage.queue.map(stop => ({ ...stop }));
+        const head = queue.shift() ?? { world: null, name: "" };
+        return this.parent.update({
+            system: {
+                voyage: {
+                    here: { world: voyage.next.world, name: voyage.next.name },
+                    // Back to the printed minimum: parsecs is a property of the PAIR, and the new
+                    // pair is one nobody has typed a distance for yet. Carrying the old count over
+                    // would state a measured distance between two worlds nobody measured.
+                    next: { world: head.world, name: head.name, parsecs: 1 },
+                    queue
+                }
+            }
+        });
     }
 
     get fuelPerPeriod() {
@@ -304,7 +463,14 @@ export class SpacecraftData extends CraftData {
         return 5;
     }
 
-    /** Every bay holding a craft, resolved where the document is already in memory (§4.6). */
+    /**
+     * Every bay holding a craft, resolved where the document is already in memory (§4.6), **as
+     * `{actor, count}` pairs and not as a list of Actors** (§9.95). Ten fighters on ten clamps are
+     * one Actor referenced once with `count: 10`, so a caller that wants a cost or a head count has
+     * to multiply — and one that wants the distinct craft, as a roster does, reads `actor` and gets
+     * one row rather than ten identical ones. That is the whole point of the field.
+     * @type {{actor: Actor, count: number}[]}
+     */
     get carriedCraft() {
         const craft = [];
         for (const bay of this.bays) {
@@ -313,14 +479,23 @@ export class SpacecraftData extends CraftData {
             // to its bay rather than throwing.
             let actor = null;
             try { actor = foundry.utils.fromUuidSync(bay.craft); } catch { actor = null; }
-            if (actor) craft.push(actor);
+            if (actor) craft.push({ actor, count: Math.max(1, bay.count) });
         }
         return craft;
     }
 
-    /** How many small craft the ship carries — the Crew Requirements table counts these twice. */
+    /**
+     * How many small craft the ship carries — the Crew Requirements table counts these twice. Every
+     * craft and not every bay: a clamp rack of ten fighters is ten craft to crew (§9.95).
+     */
     get smallCraftCount() {
-        return this.bays.filter(bay => bay.craft).length;
+        return this.bays.reduce((sum, bay) =>
+            sum + (bay.craft ? Math.max(1, bay.count) : 0), 0);
+    }
+
+    /** What the bays cost the hull: each row is `count × capacity`, capacity being per craft. */
+    get bayTons() {
+        return this.bays.reduce((sum, bay) => sum + (Math.max(1, bay.count) * bay.capacity), 0);
     }
 
     /**
@@ -334,6 +509,23 @@ export class SpacecraftData extends CraftData {
             + (MGT2.HullConfigurations[this.hull.configuration]?.protection ?? 0);
     }
 
+    /**
+     * Which of §4.1's figures the book is answering for rather than the formula. A READ over the
+     * six stored fields and never a write: the sheet marks what is in force, and no derivation
+     * anywhere may put a number into an override.
+     * @returns {Record<string, boolean>}
+     */
+    get printedFigures() {
+        return {
+            hullPoints: this.hull.pointsOverride !== null,
+            armourTons: this.armour.tonsOverride !== null,
+            bridgeTons: this.bridge.tonsOverride !== null,
+            bridgeCost: this.bridge.costOverride !== null,
+            jumpTons: this.fuel.jumpTonsOverride !== null,
+            powerDraw: this.power.drawOverride !== null
+        };
+    }
+
     /* -------------------------------------------- */
     /*  Data Preparation                            */
     /* -------------------------------------------- */
@@ -342,11 +534,18 @@ export class SpacecraftData extends CraftData {
      * Hull points are a derivation and not a transcription, so they land in `auto` exactly as a
      * species modifier does — and here, before the base clears it, because `prepareDerivedData`
      * reads `auto` on its first line.
+     *
+     * Unless the book said otherwise: §4.1's override is read here and nowhere else, which is what
+     * finally gives the printed figure something to displace.
      * @inheritDoc
      */
     prepareBaseData() {
         super.prepareBaseData();
-        this.characteristics.hull.auto = this.hullPoints;
+        this.characteristics.hull.auto = this.hull.pointsOverride ?? this.hullPoints;
+        // Here and not in `#prepareSystems`, which runs after `sumModifiers` has already totalled
+        // the accumulator — the §9.94 trap one layer up. `auto` is assigned, so a second holographic
+        // source would have to join this line rather than add to it.
+        this.modifiers.initiative.auto = this.bridge.holographic ? HOLOGRAPHIC_INITIATIVE_DM : 0;
     }
 
     /** @inheritDoc */
@@ -360,13 +559,21 @@ export class SpacecraftData extends CraftData {
         this.#preparePower();
         this.#prepareTonnage();
         this.#prepareComputer();
+        // After the power, tonnage and hardpoint budgets: the design check reads all three, and
+        // reads them rather than recomputing them (§9.92).
+        this.#prepareComponents();
+        // Before the crew: the steward requirement is read off the bookings when there are any.
+        this.#prepareManifest();
         this.#prepareCrew();
         this.#prepareManoeuvre();
         this.#prepareFinance();
 
         // Core p.165: 2D + the pilot's Pilot skill + the ship's CURRENT Thrust, so an M-Drive
         // critical feeds initiative directly. The manifest formula stays `2d6 + @initiative`.
-        this.initiative = this.pilotSkill + this.drives.effectiveThrust;
+        // The standing accumulator rides it because the books print one: Core p.186 and HG p.52
+        // give a Holographic Controls bridge "DM+2 when rolling for Initiative" (§9.94).
+        this.initiative = this.pilotSkill + this.drives.effectiveThrust
+            + this.modifiers.initiative.dm;
     }
 
     /**
@@ -398,7 +605,9 @@ export class SpacecraftData extends CraftData {
     #prepareArmour() {
         const armour = this.armour;
         armour.current = Math.max(0, armour.points - armour.damage);
-        armour.tons = this.armourTons;
+        armour.tons = armour.tonsOverride ?? this.armourTons;
+        // Off the tonnage in force rather than off the formula: a printed tonnage that did not
+        // carry its cost with it would leave the two halves of one row disagreeing.
         armour.cost = armour.tons * (MGT2.ArmourMaterials[armour.material]?.costPerTon ?? 0);
         armour.max = this.armourMax;
         // Every hull starts at Protection +0 except the two planetoids (HG p.12).
@@ -443,14 +652,25 @@ export class SpacecraftData extends CraftData {
         this.sensors.range = this.criticalEffects.sensorRange;
 
         const bridge = MGT2.BridgeTypes[this.bridge.type];
-        this.bridge.tons = this.bridgeTons;
-        this.bridge.cost = this.bridgeCost;
+        this.bridge.tons = this.bridge.tonsOverride ?? this.bridgeTons;
+        this.bridge.cost = this.bridge.costOverride ?? this.bridgeCost;
         this.bridge.dm = bridge?.dm ?? 0;
         this.bridge.tacticsDM = bridge?.tacticsDM ?? 0;
+        // A readout, not a gate: the DM is already in `modifiers.initiative.auto`. HG p.52 makes
+        // holographic controls TL9, and a ship below it is a transcription the sheet flags rather
+        // than refuses — the same call §9.92 made for every other design rule.
+        this.bridge.holographicUnderTL = this.bridge.holographic && (this.tl < HOLOGRAPHIC_TL);
 
-        this.fuel.jumpTons = this.fuelPerJump;
+        this.fuel.jumpTons = this.fuel.jumpTonsOverride ?? this.fuelPerMaxJump;
+        this.fuel.parsecTons = this.fuelPerParsec;
         this.fuel.plantTons = this.fuelPerPeriod;
-        this.fuel.jumpCapacity = this.fuelPerJump > 0 ? Math.floor(this.fuel.tons / this.fuelPerJump) : 0;
+        // Jumps at the RATED range, which is the only ratio the design tonnage answers, and it
+        // divides by the tonnage IN FORCE — a printed jump tank that the ratio ignored would put a
+        // figure on the sheet contradicting the one printed beside it. Nothing derives off
+        // `ops.fuel` here: §9.33.3 keeps "can I make THIS jump" a screen comparison, so the real
+        // level is never divided by a tank figure.
+        this.fuel.jumpCapacity = this.fuel.jumpTons > 0
+            ? Math.floor(this.fuel.tons / this.fuel.jumpTons) : 0;
 
         // HG p.25-26: one airlock and one hardpoint per full 100 tons, free.
         this.hardpoints = { used: 0, max: this.hardpointsMax };
@@ -494,31 +714,55 @@ export class SpacecraftData extends CraftData {
             requirements.screens += (MGT2.ShipScreens[screen.type]?.power ?? 0) * screen.count;
         }
 
+        // Rounded at the source, because `requirements` and `rows` publish the SAME seven numbers
+        // and one of them was raw: a 24-ton hull draws 4.800000000000001 for basic systems, and
+        // summing those reached the header as a surplus of -0.3999999999999986. §1.12 puts the
+        // rounding in one place, and the one place is where the number is made.
+        const round = value => Math.round(value * 100) / 100;
+        for (const key of POWER_CONSUMERS) requirements[key] = round(requirements[key]);
+
         const offline = this.power.offline;
-        let total = 0;
+        let full = 0, shed = 0;
         const rows = POWER_CONSUMERS.map(key => {
-            const draw = Math.round(requirements[key] * 100) / 100;
+            const draw = requirements[key];
             const powered = !offline.has(key);
-            if (powered) total += draw;
+            full += draw;
+            if (!powered) shed += draw;
             return { key, draw, powered };
         });
+
+        // §4.1's override displaces the panel's bottom line at FULL power, which is the figure a
+        // catalogue prints. What a consumer taken offline frees is still its own derived draw, so
+        // the panel keeps the state that makes it a panel (Core p.171) whichever figure is in force.
+        // Summing seven 2dp figures drifts again, so each total is rounded where it is published.
+        const printed = this.power.drawOverride;
+        const total = round(Math.max(0, (printed ?? full) - shed));
 
         // A damaged plant is a percentage of its rating (Core p.170); `available` is declared in the
         // schema so a `final`-phase Active Effect on it is coerced rather than written raw.
         this.power.available = Math.floor(this.power.plant * this.criticalEffects.powerFactor);
         this.power.requirements = Object.assign(requirements, { total });
         this.power.rows = rows;
-        this.power.surplus = this.power.available - total;
+        this.power.surplus = round(this.power.available - total);
+        // What the formula makes of the design with everything on — the quantity `drawOverride`
+        // stands in for, and the figure the edit form prompts with.
+        this.power.fullDraw = round(full);
     }
 
     /**
      * The tonnage budget, derived row by row from the stored ratings rather than summed from
      * component Items — which is the whole of §4.1's argument, and the reason a ship with no items
-     * still balances. Optional `component` Items, when they exist, land in `other`.
+     * still balances.
+     *
+     * **`component` Items are not a row here and never will be** (§9.92). An earlier draft of this
+     * comment promised them an `other` row; it was wrong in the way that matters, because a
+     * transcribed M-Drive component and the ship's own `drives.mDrive` are the same tons written
+     * twice, and `budget.free` would move with the parts list. The parts are a SECOND OPINION on
+     * this budget — `#prepareComponents` compares the two and says where they disagree.
      */
     #prepareTonnage() {
         const mounts = this.mountClasses.reduce((sum, type) => sum + (type.tons ?? 0), 0);
-        const bays = this.bays.reduce((sum, bay) => sum + bay.capacity, 0);
+        const bays = this.bayTons;
         const staterooms = Object.entries(this.staterooms)
             .reduce((sum, [key, n]) => sum + ((MGT2.Staterooms[key]?.tons ?? 0) * n), 0);
         const lowBerths = Object.entries(this.lowBerths)
@@ -549,6 +793,157 @@ export class SpacecraftData extends CraftData {
         };
     }
 
+    /**
+     * The parts list, and whether the design it describes balances — §6.2's "expensive half", which
+     * `DOCUMENT-TYPES.md` §10 rated the whole type L for (§9.92).
+     *
+     * **Every check is a red line and never a block.** Published ships fail these: the Core's own
+     * catalogue disagrees with its own construction chapter often enough that a validator refusing
+     * to store a failing design would make transcription impossible. Same call §9.20 made for
+     * `crew.required` — a derivation with a printed competitor is advisory.
+     *
+     * **And every check declares whether it APPLIES.** A parts list is a transcription and may be
+     * partial: a ship with no fuel row transcribed is not a ship short of fuel, it is a ship whose
+     * fuel row nobody typed. A check with nothing to read is silent rather than green, which is the
+     * one thing `sketch-component.html`'s ledger got wrong — its jump-fuel line failed on a ship
+     * with no components at all and needed a `mode === 'none'` escape to hide it.
+     */
+    #prepareComponents() {
+        const hullTons = this.hull.tons;
+        const rows = [];
+        let tons = 0, cost = 0, draw = 0, generates = 0, weapons = 0, fuel = 0;
+
+        // Which `budget` row each category is the parts-list spelling of. `hull` is the cap rather
+        // than a row, and `computer`, `software` and `option` cost the ship no tonnage row at all —
+        // so a docking space or a set of common areas is counted against the HULL and never against
+        // the budget, which is what keeps the comparison below symmetrical.
+        const budgetRow = { armour: "armour", mDrive: "mDrive", jDrive: "jDrive",
+            powerPlant: "powerPlant", fuel: "fuel", bridge: "bridge", sensors: "sensors",
+            weapon: "mounts", screen: "screens", stateroom: "staterooms", cargo: "cargo" };
+        const mapped = new Set();
+        let mappedTons = 0;
+
+        for (const item of this.parent.items) {
+            if (item.type !== "component") continue;
+            const part = item.system;
+            const quantity = Math.max(1, part.quantity);
+            const row = {
+                _id: item.id, name: item.name, category: part.category, tl: part.tl,
+                quantity: part.quantity, dm: part.dm, rating: part.rating,
+                tons: Math.round(part.tonsFor(hullTons) * 100) / 100,
+                // Stored per unit and in MCr (§6.2), so the quantity is applied here and nowhere else.
+                cost: Math.round(part.cost * quantity * 1000) / 1000,
+                draw: part.drawFor(hullTons),
+                generates: part.generates
+            };
+            rows.push(row);
+            tons += row.tons;
+            cost += row.cost;
+            draw += row.draw;
+            generates += row.generates;
+            // HG p.26 counts hardpoints against turrets, and a component's `quantity` is how many
+            // of that row the design fits.
+            if (part.category === "weapon") weapons += quantity;
+            if (part.category === "fuel") fuel += row.tons;
+            if (budgetRow[part.category]) {
+                mapped.add(budgetRow[part.category]);
+                mappedTons += row.tons;
+            }
+        }
+
+        const round = value => Math.round(value * 100) / 100;
+        // Core p.157: 10% of hull per parsec, at the drive's full rating — what a full tank has to
+        // hold for the ship to make the jump it is rated for.
+        const needed = this.jumpFuel(this.drives.jump);
+        const fitted = rows.length > 0;
+        // The ship's own figure for exactly the rows the parts list covers, and nothing else.
+        const budgetTons = this.budget.rows
+            .filter(row => mapped.has(row.key)).reduce((sum, row) => sum + row.tons, 0);
+
+        const checks = [
+            // The design's own red lines, each read off the parts and nothing else.
+            { key: "power", applies: (draw > 0) || (generates > 0),
+                ok: draw <= generates, used: round(draw), cap: round(generates) },
+            { key: "tonnage", applies: tons > 0, ok: tons <= hullTons,
+                used: round(tons), cap: hullTons },
+            { key: "hardpoints", applies: weapons > 0, ok: weapons <= this.hardpoints.max,
+                used: weapons, cap: this.hardpoints.max },
+            { key: "jumpFuel", applies: (fuel > 0) && (this.drives.jump > 0), ok: fuel >= needed,
+                used: round(fuel), cap: round(needed) },
+            // And the transcription: where the parts disagree with the statblock §4.1 stores. Not a
+            // rule of High Guard's — a rule about this system, and the only place the two figures
+            // are ever put beside each other.
+            //
+            // **Only over the categories both sides carry.** A parts list is a transcription and is
+            // routinely more detailed than the budget: the Core's own Patrol Corvette lists a
+            // docking space, fuel processors and common areas, none of which the ship's budget has
+            // a row for, so comparing the totals reports a 47-ton disagreement on a faithful
+            // transcription. A red line that fires on correct data is noise (§9.92).
+            { key: "statedTons", applies: mapped.size > 0,
+                ok: round(mappedTons) === round(budgetTons),
+                used: round(mappedTons), cap: round(budgetTons) },
+            { key: "statedPower", applies: generates > 0, ok: round(generates) === round(this.power.plant),
+                used: round(generates), cap: round(this.power.plant) }
+        ];
+
+        this.components = {
+            rows, fitted,
+            count: rows.length,
+            tons: round(tons), cost: Math.round(cost * 1000) / 1000,
+            draw: round(draw), generates: round(generates),
+            surplus: round(generates - draw),
+            weapons, fuel: round(fuel),
+            unaccounted: round(hullTons - tons)
+        };
+        this.design = {
+            checks,
+            // A check nobody can read is neither passed nor failed, and the count says so.
+            failed: checks.filter(check => check.applies && !check.ok).length,
+            silent: checks.filter(check => !check.applies).length
+        };
+    }
+
+    /**
+     * What the hold and the berths are actually carrying: the `cargo` and `passage` Items, summed.
+     *
+     * A ship with none of either is the DEFAULT and not an edge case (§6.3) — `cargo.capacity` and
+     * the typed `passengers` counts stand alone, and every figure here has to be reachable at zero.
+     * That is also why the bookings replace the typed counts only when at least one exists: a crew
+     * that never creates a `passage` Item keeps the hand-typed manifest it has always had, and one
+     * that does is never billed for both.
+     *
+     * A lot cannot be broken up (Core p.241), so `over` is a fact about ONE row: a 63-ton hold and a
+     * 70-ton lot is a hold that takes nothing, which a fill bar would report as nearly full.
+     */
+    #prepareManifest() {
+        const booked = {high: 0, middle: 0, basic: 0, low: 0};
+        const lots = [];
+        let used = 0, freight = 0, speculation = 0, bookings = 0;
+
+        for (const item of this.parent.items) {
+            if (item.type === "cargo") {
+                const lot = item.system;
+                used += lot.tons;
+                freight += lot.fare;
+                speculation += lot.paid ?? 0;
+                lots.push({_id: item.id, name: item.name, tons: lot.tons, fare: lot.fare,
+                    speculative: lot.speculative, over: lot.tons > this.cargo.capacity});
+            }
+            else if (item.type === "passage") {
+                const grade = item.system.grade;
+                if (grade in booked) booked[grade] += item.system.count;
+                bookings++;
+            }
+        }
+
+        this.cargo.used = Math.round(used * 100) / 100;
+        this.cargo.free = Math.round((this.cargo.capacity - used) * 100) / 100;
+        this.cargo.over = used > this.cargo.capacity;
+        this.cargo.lots = lots;
+        this.manifest = {lots: lots.length, bookings, freight, speculation,
+            passengers: bookings ? booked : {...this.passengers}};
+    }
+
     /** HG p.20: ship software consumes Processing exactly as personal software consumes bandwidth. */
     #prepareComputer() {
         let used = 0;
@@ -572,9 +967,10 @@ export class SpacecraftData extends CraftData {
     #prepareCrew() {
         const military = this.role === "military";
         const tons = this.hull.tons;
-        const carried = this.bays.reduce((sum, bay) => sum + bay.capacity, 0);
+        const carried = this.bayTons;
         const craft = this.smallCraftCount;
         const drives = this.drives.mDrive + this.drives.jDrive + this.drives.plant;
+        const booked = this.manifest.passengers;
 
         let turrets = 0, barbettes = 0, smallBays = 0, mediumBays = 0, largeBays = 0, spinalTons = 0;
         for (const [index, mount] of this.mounts.entries()) {
@@ -601,7 +997,8 @@ export class SpacecraftData extends CraftData {
             engineer: Math.ceil(drives / 35),
             maintenance: Math.ceil((tons + carried) / (military ? 500 : 1000)),
             gunner: gunners,
-            steward: Math.ceil(this.passengers.high / 10) + Math.ceil(this.passengers.middle / 100),
+            // Core p.158: one Steward level per 10 high or 100 middle passengers, off the bookings.
+            steward: Math.ceil(booked.high / 10) + Math.ceil(booked.middle / 100),
             administrator: Math.ceil(tons / (military ? 1000 : 2000)),
             sensorOperator: Math.ceil((military ? 3 : 1) * tons / 7500),
             medic: 0,
@@ -617,7 +1014,7 @@ export class SpacecraftData extends CraftData {
         }
 
         const core = Object.values(required).reduce((sum, n) => sum + n, 0);
-        const passengers = this.passengers.high + this.passengers.middle + this.passengers.basic;
+        const passengers = booked.high + booked.middle + booked.basic;
         required.medic = Math.ceil((core + (military ? 0 : passengers)) / 120);
         required.officer = Math.floor((core + required.medic) / (military ? 10 : 20));
 
@@ -662,8 +1059,10 @@ export class SpacecraftData extends CraftData {
     /** Core p.149, p.154, p.183; HG p.23. Every periodic figure runs on the four-week period. */
     #prepareFinance() {
         const finance = this.finance;
-        const carried = this.carriedCraft
-            .reduce((sum, actor) => sum + (actor.system?.finance?.purchase ?? 0), 0);
+        // Core p.183 excludes "any other ships it is carrying", so ten fighters are excluded ten
+        // times — `carriedCraft` hands back one entry with its count and the multiply is here.
+        const carried = this.carriedCraft.reduce((sum, entry) =>
+            sum + (entry.count * (entry.actor.system?.finance?.purchase ?? 0)), 0);
 
         // Authoritative and takes no override (§9.20): p.183's form is the only one that excludes
         // carried craft, and the catalogue's plain cost/12000 therefore bills a carried boat twice.
@@ -678,15 +1077,19 @@ export class SpacecraftData extends CraftData {
         // Core p.154 bills life support three times over: per stateroom, again per person NOT in a
         // low berth, and a tenth of that per occupied low berth — which is why `awake` excludes them.
         const staterooms = this.staterooms.standard + this.staterooms.high + this.staterooms.luxury;
-        const awake = this.crewTotals.aboard + this.passengers.high + this.passengers.middle
-            + this.passengers.basic;
+        const aboard = this.manifest.passengers;
+        const awake = this.crewTotals.aboard + aboard.high + aboard.middle + aboard.basic;
         finance.lifeSupport = (staterooms * MGT2.ShipCosts.lifeSupportPerStateroom)
             + (awake * MGT2.ShipCosts.lifeSupportPerPerson)
-            + (this.passengers.low * MGT2.ShipCosts.lifeSupportPerLowBerth);
+            + (aboard.low * MGT2.ShipCosts.lifeSupportPerLowBerth);
 
         finance.salaries = this.crewTotals.salaries;
-        finance.fuel = this.fuel.tons
-            * (this.fuel.refined ? MGT2.ShipCosts.fuelRefined : MGT2.ShipCosts.fuelUnrefined);
+        // Core p.155 prints fuel as a UNIT PRICE and never as a periodic charge, so neither of these
+        // belongs beside the five rows above: a full tank per period is an invented quantity
+        // (§9.33.7 c). `tankFill` is what filling the design tonnage costs, once.
+        finance.fuelPerTon = this.fuel.refined
+            ? MGT2.ShipCosts.fuelRefined : MGT2.ShipCosts.fuelUnrefined;
+        finance.tankFill = this.fuel.tons * finance.fuelPerTon;
     }
 
     /* -------------------------------------------- */

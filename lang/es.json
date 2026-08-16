@@ -1,0 +1,129 @@
+{
+  "MGT2": {
+    "Edit": "Editar",
+    "Save": "Guardar",
+    "Cancel": "Cancelar",
+    "Close": "Cerrar",
+    "Gender": "Género",
+    "Pronouns": "Pronombres",
+    "Specie": "Especie",
+    "Species": "Especies",
+    "Themes": {
+      "BlackAndRed": "Portada clásica de Traveller",
+      "Mwamba": "Estilo Oppa Mwamba",
+      "Blue": "Azul"
+    },
+    "Sheet": {
+      "ModePlay": "Juego",
+      "ModeEdit": "Edición",
+      "ModeToggle": "Modo juego / edición"
+    },
+    "Settings": {
+      "theme": {
+        "name": "Tema de colores",
+        "hint": "La paleta de colores que usan las hojas y ventanas de este sistema. Es solo tuya: no cambia nada para los demás en la mesa."
+      },
+      "campaignDay": {
+        "name": "Día de campaña",
+        "hint": "Días desde el que hayas llamado cero. Nada lo hace avanzar: lo escribes tú."
+      },
+      "useWeightMetric": {
+        "name": "Usar el sistema métrico para el PESO",
+        "hint": "Kilogramos (kg) en lugar de libras (lbs)."
+      },
+      "useDistanceMetric": {
+        "name": "Usar el sistema métrico para la DISTANCIA",
+        "hint": "Kilómetros (km) en lugar de millas (mi)."
+      },
+      "usePronouns": {
+        "name": "Usar pronombres",
+        "hint": "Muestra los campos para introducir pronombres."
+      },
+      "useGender": {
+        "name": "Usar género",
+        "hint": "Muestra los campos para introducir un género."
+      },
+      "showLife": {
+        "name": "Mostrar la vida en la hoja",
+        "hint": "Muestra la información de vida en la hoja de actor."
+      },
+      "worldPacks": {
+        "name": "Compendios del mundo",
+        "hint": "Crea los compendios vacíos donde vivirá tu biblioteca."
+      }
+    },
+    "Packs": {
+      "title": "Compendios del mundo",
+      "hint": "Estos compendios se crean vacíos. El sistema no incluye ningún texto de reglas ni equipo: copia en ellos desde los libros que poseas.",
+      "folder": "Traveller",
+      "folderHint": "Se agrupan en la carpeta {folder} y se dejan desbloqueados, para que puedas escribir en ellos de inmediato. Aquí nunca se borra ni se sobrescribe nada.",
+      "create": "Crear",
+      "visible": "visible para los jugadores",
+      "gmOnly": "solo el árbitro",
+      "exists": "ya creado",
+      "created": "{count} compendio(s) creado(s) en la carpeta {folder}.",
+      "nothing": "Nada que crear: todos los compendios marcados ya existen.",
+      "failed": "No se ha podido crear el compendio {label}.",
+      "labels": {
+        "library": "Biblioteca",
+        "ships": "Naves y vehículos",
+        "npcs": "PNJ y criaturas",
+        "tables": "Tablas",
+        "notes": "Notas y documentos"
+      }
+    },
+    "Compendium": {
+      "Docs": "MGT2 — Lo que este sistema hace con las reglas"
+    },
+    "Status": {
+      "Fatigued": "Fatigado",
+      "Encumbered": "Sobrecargado"
+    },
+    "Durations": {
+      "Seconds": "Segundos",
+      "Minutes": "Minutos",
+      "Hours": "Horas"
+    },
+    "MetricRange": {
+      "meter": "M",
+      "kilometer": "KM"
+    },
+    "MetricWeight": {
+      "kilogram": "KG",
+      "ton": "TON"
+    },
+    "MetricSystem": {
+      "Weight": {
+        "kg": "kg"
+      },
+      "Distance": {
+        "km": "km"
+      }
+    },
+    "ImperialSystem": {
+      "Weight": {
+        "lb": "lb"
+      },
+      "Distance": {
+        "mi": "mi"
+      }
+    },
+    "Errors": {
+      "InvalidRollFormula": "Fórmula de tirada no válida: revisa el modificador que has escrito.",
+      "InvalidDamageFormula": "Fórmula de daño no válida: {formula}.",
+      "LockedContainer": "Este contenedor está bloqueado.",
+      "MessageGone": "Esa tirada ya no está en el registro de chat.",
+      "ContainerRecursive": "Un contenedor no puede colocarse dentro de sí mismo.",
+      "CouldNotFindItem": "No se ha encontrado el objeto _ITEM_ID_.",
+      "NoOwnedTokenSelected": "No hay seleccionada ninguna ficha de tu propiedad.",
+      "NoPsiPoints": "A {name} no le quedan puntos PSI, así que no puede intentar ningún poder.",
+      "WeaponEmpty": "{name} está descargada y debe recargarse antes de volver a disparar.",
+      "WeaponShort": "{name} tiene {ammo} disparos cargados y este modo de fuego gasta {rounds}."
+    },
+    "Migration": {
+      "Begin": "MGT2: migrando los datos del mundo, no cierres la partida.",
+      "Complete": "MGT2: migración del mundo completada. {count} actor(es) han cambiado su vida máxima.",
+      "Failed": "MGT2: la migración del mundo ha fallado. Revisa la consola; se reintentará en la próxima carga."
+    }
+  }
+}

@@ -87,7 +87,7 @@
 		</div>
 		<div class="stat{{#unless system.cost}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.vehicle.Cost'}}</dt>
-			<dd>{{#if system.cost}}<i>Cr</i>{{system.cost}}{{else}}&mdash;{{/if}}</dd>
+			<dd>{{#if system.cost}}<i>Cr</i>{{credits system.cost}}{{else}}&mdash;{{/if}}</dd>
 		</div>
 		{{! The wound is the one number nothing else on the sheet can move, and its track is drawn in
 		    the rail — so the door is rendered here whatever the Hull entry shows. }}

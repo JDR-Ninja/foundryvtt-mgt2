@@ -1,0 +1,200 @@
+{
+  "_id": "2w4gYTV5vBiPiEiq",
+  "name": "Ce que ce système fait des règles",
+  "pages": [
+    {
+      "_id": "5rQrDSY0M0Bpkpuu",
+      "name": "Comment lire ceci",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<p><em>Généré depuis l'audit des règles du système. Il consigne ce que chaque écran fait des règles imprimées et là où il s'en écarte — ce n'est pas une liste de contrôle du livre de règles.</em></p>\n<p><strong>L'audit est terminé : aucune entrée n'est ouverte sur aucun écran.</strong> Trente-huit entrées — trente-cinq construites, deux retirées face à la page imprimée, une vérifiée correcte telle quelle.</p>\n<p>Le cœur de la résolution était fidèle et bien cité dès le départ : l'échelle des DM, les huit difficultés, les six bandes d'Effet, Coup de pouce et Coup du sort, les délais, les bandes de portée, les modificateurs d'attaque, Encombrant et Très encombrant, Viseur et Automatique, toute la chaîne de récupération, l'Encombrement, le malus d'armure, l'Incapacitation et le plancher d'Effet 6 concordent avec les livres.</p>\n<p>Les écarts se concentraient en quatre endroits : le <strong>préréglage PNJ « personne »</strong>, la <strong>chaîne de dégâts après le jet</strong>, la <strong>psionique</strong> et la <strong>formule d'initiative</strong>. Les quatre sont traités, et la chaîne de dégâts dépense désormais les munitions comme la psionique dépense ses points.</p>\n<p>Deux habitudes expliquent l'essentiel de ce que l'audit a trouvé. <strong>Vérifier contre le corpus, jamais contre un résumé</strong> : deux entrées ont été jugées contre une paraphrase et étaient fausses pour cette raison ; toutes deux ont été retirées avec la citation imprimée plutôt que « corrigées » dans du code qui avait déjà raison. Et <strong>mesurer la charge utile, pas le code</strong> : le seul vrai défaut trouvé tardivement était invisible à la lecture et évident à la mesure.</p>\n<h2>Gravité</h2>\n<table><thead><tr><th></th><th>Signification</th></tr></thead><tbody><tr><td><strong>A</strong></td><td>Produit un chiffre faux à la table. À corriger avant tout le reste.</td></tr><tr><td><strong>B</strong></td><td>Une règle imprimée que le système n'applique jamais, alors que la donnée pour l'appliquer est déjà là.</td></tr><tr><td><strong>C</strong></td><td>Un manque : la règle est absente et l'écran n'offre aucun chemin vers elle.</td></tr><tr><td><strong>D</strong></td><td>Friction, commentaire périmé ou code mort. Aucun chiffre faux, mais ça induit en erreur.</td></tr></tbody></table>\n<h2>Par écran</h2>\n<table><thead><tr><th>Écran</th><th>Ouvert</th><th>Réglé</th></tr></thead><tbody><tr><td>Fenêtre de jet</td><td>—</td><td>7</td></tr><tr><td>Carte de chat — résultat du jet</td><td>—</td><td>2</td></tr><tr><td>Carte de chat — dégâts</td><td>—</td><td>6</td></tr><tr><td>Feuille de personnage</td><td>—</td><td>6</td></tr><tr><td>Feuille de PNJ</td><td>—</td><td>1</td></tr><tr><td>Feuille de véhicule</td><td>—</td><td>2</td></tr><tr><td>Feuille de vaisseau</td><td>—</td><td>4</td></tr><tr><td>Feuille de robot</td><td>—</td><td>4</td></tr><tr><td>Feuilles d'objet</td><td>—</td><td>4</td></tr><tr><td>Suivi de combat</td><td>—</td><td>2</td></tr></tbody></table>\n<p>38 entrées sur 10 écrans ; 0 ouvertes.</p>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 100
+    },
+    {
+      "_id": "Dd7PL8AtzsXBbiAa",
+      "name": "1. Fenêtre de jet",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audité</h2>\n<table><thead><tr><th></th><th>Quoi</th><th>État</th><th>Pages</th></tr></thead><tbody><tr><td>A</td><td>les jets de pouvoir psionique omettent le niveau du talent</td><td>✅ construit</td><td>folio 229</td></tr><tr><td>B</td><td>la règle des 100 mètres est désactivée par défaut</td><td>✅ construit</td><td>—</td></tr><tr><td>C</td><td>les Réactions sont absentes</td><td>✅ construit</td><td>p.73</td></tr><tr><td>C</td><td>chaînes de tâches et jets opposés</td><td>✅ les deux construits</td><td>—</td></tr><tr><td>C</td><td>DM de toucher entre échelles</td><td>✅ construit</td><td>—</td></tr><tr><td>D</td><td>l'option de compétence vide se lit comme compétence 0</td><td>✅ construit</td><td>—</td></tr><tr><td>D</td><td>les feuilles d'engin proposent une réserve de dégâts comme caractéristique</td><td>✅ construit, avec §8 B</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 200
+    },
+    {
+      "_id": "0cvvHlmt8cOz2POO",
+      "name": "2. Carte de chat — résultat du jet",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audité</h2>\n<table><thead><tr><th></th><th>Quoi</th><th>État</th><th>Pages</th></tr></thead><tbody><tr><td>D</td><td>branche morte</td><td>✅ supprimé</td><td>—</td></tr><tr><td>D</td><td>bouton de durée psionique</td><td>✅ clos par §4.2</td><td>Core folio 229</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 300
+    },
+    {
+      "_id": "oFV3SyyiOfkC0ATc",
+      "name": "3. Carte de chat — dégâts",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Ce que cet écran fait correctement</h2>\n<ul><li>l'Effet et le DM de FOR en mêlée ajoutés au jet de dégâts <code>[Core p.78]</code></li><li>une rafale ajoutant le score Automatique, à côté de ces deux-là et hors de la transformation Réduits/Minimum <code>[Core folio 79]</code></li><li>Destructeur multipliant le total obtenu par 10, via le D doublé ou le trait <code>[Core p.79]</code></li><li>la Protection soustraite, l'AP en ignorant d'autant, Lo-Pen la multipliant <code>[Core p.78, FC p.8]</code></li><li>une cible à l'échelle vaisseau ignore l'AP d'une arme terrestre <code>[Core p.80]</code></li><li>une attaque d'Effet 6+ inflige toujours au moins 1 point <code>[Core p.78]</code></li><li>l'Incapacitation prise sur END seule, l'excédent reporté en rounds d'incapacitation <code>[Core p.80]</code></li><li>Terrestre/Vaisseau ×10 et ÷10 avec arrondi à l'inférieur, appliqué après l'Effet et Destructeur et avant la déduction du blindage <code>[Core p.168, folio 167]</code></li><li>le multiplicateur de dégâts propre à l'affût appliqué après la déduction du blindage <code>[HG p.30, Core p.169]</code></li><li>les cinq traits de réponse aux dégâts du Compagnon, et la règle qu'un type de dégâts excepté passe en totalité <code>[Companion p.94-95]</code></li></ul>\n<h2>Audité</h2>\n<table><thead><tr><th></th><th>Quoi</th><th>État</th><th>Pages</th></tr></thead><tbody><tr><td>A</td><td>Lo-Pen est saisi, affiché, et jamais appliqué</td><td>✅ construit</td><td>Field Catalogue p.8, folio 7</td></tr><tr><td>B</td><td>AP contre une cible à l'échelle vaisseau</td><td>✅ construit</td><td>folio 79</td></tr><tr><td>B</td><td>Destructeur</td><td>✅ construit</td><td>folio 78</td></tr><tr><td>B</td><td>Automatique X</td><td>✅ construit, avec §9 C</td><td>—</td></tr><tr><td>C</td><td>ordre entre l'échelle et la Protection</td><td>❌ retiré : le code avait raison</td><td>HG p.30</td></tr><tr><td>C</td><td>le choix de la cible entre FOR et DEX</td><td>✅ construit — le choix est déclaré à l'avance</td><td>Core p.78; p.77</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 400
+    },
+    {
+      "_id": "pzB6JxjOfJExuE4m",
+      "name": "4. Feuille de personnage",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audité</h2>\n<table><thead><tr><th></th><th>Quoi</th><th>État</th><th>Pages</th></tr></thead><tbody><tr><td>A</td><td>le bloc Période d'étude n'implémente aucune règle du résumé</td><td>❌ retiré : le code avait raison</td><td>—</td></tr><tr><td>C</td><td>talents psioniques</td><td>✅ construit</td><td>Core p.62; Core p.229</td></tr><tr><td>C</td><td>radiations</td><td>✅ construit</td><td>—</td></tr><tr><td>C</td><td>les jets de maladie et de poison ne présélectionnent pas END</td><td>✅ construit</td><td>—</td></tr><tr><td>D</td><td>le DM d'encombrement s'applique trop largement</td><td>✅ construit</td><td>—</td></tr><tr><td>D</td><td>fatigue</td><td>❌ sans objet : correct par conception, vérifié</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 500
+    },
+    {
+      "_id": "ae4LEZrQR4bJvAEN",
+      "name": "5. Feuille de PNJ",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audité</h2>\n<table><thead><tr><th></th><th>Quoi</th><th>État</th><th>Pages</th></tr></thead><tbody><tr><td>A</td><td>le préréglage « personne » vide END en dernier</td><td>✅ construit</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 600
+    },
+    {
+      "_id": "RugL6D2TNyyMdkyg",
+      "name": "6. Feuille de véhicule",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audité</h2>\n<table><thead><tr><th></th><th>Quoi</th><th>État</th><th>Pages</th></tr></thead><tbody><tr><td>B</td><td>le bonus de blindage contre armes légères est affiché, pas appliqué</td><td>✅ construit</td><td>—</td></tr><tr><td>C</td><td>actions de combat de véhicule</td><td>✅ les deux construits</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 700
+    },
+    {
+      "_id": "nB3cZPBdkLvF7NMH",
+      "name": "7. Feuille de vaisseau",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audité</h2>\n<table><thead><tr><th></th><th>Quoi</th><th>État</th><th>Pages</th></tr></thead><tbody><tr><td>A</td><td>un artilleur ne peut pas lancer sa propre attaque depuis cette feuille</td><td>✅ construit</td><td>—</td></tr><tr><td>B</td><td>les multiplicateurs de dégâts d'affût sont affichés et jamais appliqués</td><td>✅ construit</td><td><code>spacecraft-sheet.js:224-242</code>, HG p.30</td></tr><tr><td>C</td><td>tourelles doubles et triples</td><td>✅ construit</td><td>—</td></tr><tr><td>C</td><td>les actions de poste sautent la fenêtre et supposent aucune difficulté</td><td>✅ construit</td><td>HG p.30</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 800
+    },
+    {
+      "_id": "8dSM1YsGcHlhy1vO",
+      "name": "8. Feuille de robot",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audité</h2>\n<table><thead><tr><th></th><th>Quoi</th><th>État</th><th>Pages</th></tr></thead><tbody><tr><td>B</td><td>le DM de compétence du cerveau n'atteint pas le jet</td><td>✅ construit, avec §1 D</td><td>p.66</td></tr><tr><td>C</td><td>le plafond de tâche n'est pas appliqué, et son commentaire en dit trop</td><td>✅ construit, sous forme d'avertissement</td><td>—</td></tr><tr><td>C</td><td>dégâts propres aux robots</td><td>✅ les trois construits</td><td>—</td></tr><tr><td>D</td><td>le trait <code>ion</code> n'est classé que sous les armes de vaisseau</td><td>✅ construit</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 900
+    },
+    {
+      "_id": "EdoEJ0PE5vzMEi95",
+      "name": "9. Feuilles d'objet",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audité</h2>\n<table><thead><tr><th></th><th>Quoi</th><th>État</th><th>Pages</th></tr></thead><tbody><tr><td>C</td><td>aucune arme ne porte de mode de tir ni d'option de rafale</td><td>✅ construit, avec §3 B</td><td>—</td></tr><tr><td>C</td><td>les munitions tirées sont annoncées, jamais dépensées</td><td>✅ construit</td><td>Core p.77-79; Core p.77</td></tr><tr><td>D</td><td>la notation de dégâts des livres ne s'analyse pas</td><td>✅ construit</td><td>—</td></tr><tr><td>D</td><td>le sélecteur de difficulté propose « N/A »</td><td>✅ construit</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 1000
+    },
+    {
+      "_id": "I7On32i4IsSfcQKM",
+      "name": "10. Suivi de combat",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audité</h2>\n<table><thead><tr><th></th><th>Quoi</th><th>État</th><th>Pages</th></tr></thead><tbody><tr><td>A</td><td>une seule formule pour deux règles d'initiative différentes</td><td>✅ construit</td><td>—</td></tr><tr><td>C</td><td>départage des égalités</td><td>✅ construit</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 1100
+    }
+  ],
+  "folder": null,
+  "flags": {
+    "mgt2": {
+      "generated": "docs/RULES-AUDIT.md",
+      "lang": "fr"
+    }
+  }
+}

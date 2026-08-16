@@ -1,0 +1,200 @@
+{
+  "_id": "GrzxkM2VzONmEiOB",
+  "name": "What this system does with the rules",
+  "pages": [
+    {
+      "_id": "7k6jmqJusr6rcPto",
+      "name": "How to read this",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<p><em>Generated from the system's own rules audit. It records what each screen does with the printed rules and where it has diverged — it is not a checklist of the rulebook.</em></p>\n<p><strong>The survey is finished: no entry is open on any screen.</strong> What it found and what it left are two different lists, and both are worth stating.</p>\n<p>The resolution core was faithful and well cited from the start: the DM ladder, the eight difficulties, the six Effect bands, Boon/Bane, timeframes, range bands, the p.75 attack modifiers, Bulky/Very Bulky, Scope/Auto, the whole Core p.83-84 recovery chain, encumbrance, the armour skill penalty, Stun and the Effect-6 floor all match the books.</p>\n<p>The divergences clustered in four places: the <strong>NPC person preset</strong>, the <strong>damage pipeline after the roll</strong>, <strong>psionics</strong>, and the <strong>initiative formula</strong>. All four are worked: initiative is done, the NPC person preset drains END first and its stored chains are migrated, the damage pipeline is closed end to end — Auto's three fire modes included — and <strong>psionics now spends</strong>: the listed cost on a success, one point on a failure, the excess below zero as damage, and reach paid for at twice or four times the price. The pipeline now <strong>spends ammunition</strong> too: a weapon records what is loaded, an attack takes its rounds out of it, a magazine that cannot pay refuses the shot, and a spare magazine puts the whole capacity back for the Minor Action Core folio 75 charges.</p>\n<p>Two habits account for most of what the audit found, and both should outlive it. <strong>Verify against the corpus, never against the skill</strong> — two entries were graded against the <code>mgt2-rules</code> skill's paraphrase and were wrong for it, and both were withdrawn with the printed quote rather than \"fixed\" in code that was already right. And <strong>measure the payload, not the code</strong> — the one real defect found late (§8 D's <code>ion</code> reaching the attack payload and not the apply payload) was invisible to reading and obvious to a measurement, because the damage pipeline names a target-side trait in two places.</p>\n<h2>Severity</h2>\n<table><thead><tr><th></th><th>Meaning</th></tr></thead><tbody><tr><td><strong>A</strong></td><td>Produces a wrong number at the table. Fix before anything else.</td></tr><tr><td><strong>B</strong></td><td>A printed rule the system never applies, where the data to apply it is already present.</td></tr><tr><td><strong>C</strong></td><td>A gap: the rule is absent and the screen offers no route to it.</td></tr><tr><td><strong>D</strong></td><td>Friction, stale comment, or dead code. No wrong number, but it misleads.</td></tr></tbody></table>\n<h2>By screen</h2>\n<table><thead><tr><th>Screen</th><th>Open</th><th>Settled</th></tr></thead><tbody><tr><td>Roll prompt</td><td>—</td><td>7</td></tr><tr><td>Chat card — roll result</td><td>—</td><td>2</td></tr><tr><td>Chat card — damage</td><td>—</td><td>6</td></tr><tr><td>Character sheet</td><td>—</td><td>6</td></tr><tr><td>NPC sheet</td><td>—</td><td>1</td></tr><tr><td>Vehicle sheet</td><td>—</td><td>2</td></tr><tr><td>Spacecraft sheet</td><td>—</td><td>4</td></tr><tr><td>Robot sheet</td><td>—</td><td>4</td></tr><tr><td>Item sheets</td><td>—</td><td>4</td></tr><tr><td>Combat tracker</td><td>—</td><td>2</td></tr></tbody></table>\n<p>38 entries over 10 screens; 0 open.</p>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 100
+    },
+    {
+      "_id": "M4xWsIQfUJtLIkz8",
+      "name": "1. Roll prompt",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>A</td><td>psionic power rolls omit the talent's level</td><td>✅ built</td><td>folio 229</td></tr><tr><td>B</td><td>the 100-metre rule is off by default</td><td>✅ built</td><td>—</td></tr><tr><td>C</td><td>Reactions are absent</td><td>✅ built</td><td>p.73</td></tr><tr><td>C</td><td>task chains and opposed checks</td><td>✅ both built</td><td>—</td></tr><tr><td>C</td><td>cross-scale to-hit DM</td><td>✅ built</td><td>—</td></tr><tr><td>D</td><td>the blank skill option reads as skill 0</td><td>✅ built</td><td>—</td></tr><tr><td>D</td><td>craft sheets offer a damage pool as a characteristic</td><td>✅ built, with §8 B</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 200
+    },
+    {
+      "_id": "DJygVWGeb4ob3FY1",
+      "name": "2. Chat card — roll result",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>D</td><td>dead branch</td><td>✅ deleted</td><td>—</td></tr><tr><td>D</td><td>psionic duration button</td><td>✅ closed by §4.2</td><td>Core folio 229</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 300
+    },
+    {
+      "_id": "SWYR61yYnDtkzd7x",
+      "name": "3. Chat card — damage",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>What this screen gets right</h2>\n<ul><li>Effect and melee STR DM added to the damage roll <code>[Core p.78]</code></li><li>a burst adding the Auto score, beside those two and outside the Reduced/Minimum transform <code>[Core folio 79]</code></li><li>Destructive multiplying the rolled total by 10, from the doubled D or the trait <code>[Core p.79]</code></li><li>Protection subtracted, AP ignoring that much of it, Lo-Pen multiplying it <code>[Core p.78, FC p.8]</code></li><li>a spacecraft-scale target ignoring AP from a Ground weapon <code>[Core p.80]</code></li><li>an Effect 6+ attack always inflicting at least 1 point <code>[Core p.78]</code></li><li>Stun taken off END alone, the excess reported as rounds of incapacitation <code>[Core p.80]</code></li><li>Ground/Spacecraft ×10 and ÷10 with rounding down, applied after Effect and Destructive and before the armour deduction <code>[Core p.168, folio 167]</code></li><li>the mount's own damage multiple applied after the armour deduction <code>[HG p.30, Core p.169]</code></li><li>the five Companion damage-response traits, and the rule that an excepted damage type gets through in full <code>[Companion p.94-95]</code></li></ul>\n<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>A</td><td>Lo-Pen is captured, displayed, and never applied</td><td>✅ built</td><td>Field Catalogue p.8, folio 7</td></tr><tr><td>B</td><td>AP against a spacecraft-scale target</td><td>✅ built</td><td>folio 79</td></tr><tr><td>B</td><td>Destructive</td><td>✅ built</td><td>folio 78</td></tr><tr><td>B</td><td>Auto X</td><td>✅ built, with §9 C</td><td>—</td></tr><tr><td>C</td><td>order of scale and Protection</td><td>❌ withdrawn: the code was right</td><td>HG p.30</td></tr><tr><td>C</td><td>the target's choice of STR or DEX</td><td>✅ built — the choice is pre-declared, see <code>DOCTYPE-SCHEMAS.md</code> §9.31</td><td>Core p.78; p.77</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 400
+    },
+    {
+      "_id": "CBKHQUUMx4uxu4sL",
+      "name": "4. Character sheet",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>A</td><td>the Study Period block implements no rule the skill carries</td><td>❌ withdrawn: the code was right</td><td>—</td></tr><tr><td>C</td><td>psionic talents</td><td>✅ built</td><td>Core p.62; Core p.229</td></tr><tr><td>C</td><td>radiation</td><td>✅ built</td><td>—</td></tr><tr><td>C</td><td>disease and poison checks do not preset END</td><td>✅ built</td><td>—</td></tr><tr><td>D</td><td>the encumbrance DM is applied too widely</td><td>✅ built</td><td>—</td></tr><tr><td>D</td><td>fatigue</td><td>❌ no work: correct as designed, verified</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 500
+    },
+    {
+      "_id": "wSAZApEVeMntP5z5",
+      "name": "5. NPC sheet",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>A</td><td>the person preset drains END last</td><td>✅ built</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 600
+    },
+    {
+      "_id": "wEDZCrhauWtuROqZ",
+      "name": "6. Vehicle sheet",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>B</td><td>the anti-light-weapon armour bonus is surfaced, not applied</td><td>✅ built</td><td>—</td></tr><tr><td>C</td><td>vehicle combat actions</td><td>✅ both built</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 700
+    },
+    {
+      "_id": "Mq1pHrXy4zzsMeku",
+      "name": "7. Spacecraft sheet",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>A</td><td>a gunner cannot roll their own attack from this sheet</td><td>✅ built</td><td>—</td></tr><tr><td>B</td><td>mount damage multiples are displayed and never applied</td><td>✅ built</td><td><code>spacecraft-sheet.js:224-242</code>, HG p.30</td></tr><tr><td>C</td><td>double and triple turrets</td><td>✅ built</td><td>—</td></tr><tr><td>C</td><td>station actions skip the prompt and assume no difficulty</td><td>✅ built</td><td>HG p.30</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 800
+    },
+    {
+      "_id": "Mh4zbDZcy8zZei8d",
+      "name": "8. Robot sheet",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>B</td><td>the brain's skill DM does not reach a roll</td><td>✅ built, with §1 D</td><td>p.66</td></tr><tr><td>C</td><td>the task ceiling is not enforced, and its comment overreaches</td><td>✅ built, as a warning</td><td>—</td></tr><tr><td>C</td><td>robot-specific damage</td><td>✅ all three built</td><td>—</td></tr><tr><td>D</td><td>the <code>ion</code> trait is filed under ship weapons only</td><td>✅ built</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 900
+    },
+    {
+      "_id": "9R6dcr2JYzx6gUDz",
+      "name": "9. Item sheets",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>C</td><td>no weapon carries a fire mode or a burst option</td><td>✅ built, with §3 B</td><td>—</td></tr><tr><td>C</td><td>rounds fired are stated, never spent</td><td>✅ built</td><td>Core p.77-79; Core p.77</td></tr><tr><td>D</td><td>book damage notation does not parse</td><td>✅ built</td><td>—</td></tr><tr><td>D</td><td>the difficulty select offers \"N/A\"</td><td>✅ built</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 1000
+    },
+    {
+      "_id": "JrSqBhkSXi9jPTtz",
+      "name": "10. Combat tracker",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>A</td><td>one formula for two different initiative rules</td><td>✅ built</td><td>—</td></tr><tr><td>C</td><td>tie-breaking</td><td>✅ built</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 1100
+    }
+  ],
+  "folder": null,
+  "flags": {
+    "mgt2": {
+      "generated": "docs/RULES-AUDIT.md",
+      "lang": "en"
+    }
+  }
+}

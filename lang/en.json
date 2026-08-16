@@ -1,6 +1,5 @@
 {
   "TYPES.Item.armor": "Armor",
-  "TYPES.Item.augment": "Augment",
   "TYPES.Item.career": "Career",
   "TYPES.Item.contact": "Contact",
   "TYPES.Item.computer": "Computer",
@@ -19,6 +18,24 @@
   "TYPES.HINTS.CombatantGroup.ship": "One ship and its crew, with the Thrust its pilot allocates.",
   "TYPES.Item.container": "Container (backpack, chest)",
   "TYPES.Item.role": "Crew Station",
+  "TYPES.Item.cargo": "Cargo lot",
+  "TYPES.HINTS.Item.cargo": "A lot in the hold: freight with a destination and a deadline, or a speculative purchase with neither.",
+  "TYPES.Item.passage": "Passage",
+  "TYPES.HINTS.Item.passage": "One booking rather than one passenger: a class, a head count and a fare, for a single jump.",
+  "TYPES.Item.component": "Ship component",
+  "TYPES.HINTS.Item.component": "One row of a ship's design. Optional: a spacecraft stores its own ratings and is complete without any.",
+  "TYPES.Item.drug": "Drug",
+  "TYPES.HINTS.Item.drug": "A dose, what it does and what it leaves behind. The timing fields are empty where the book states none.",
+  "TYPES.Item.ammunition": "Ammunition",
+  "TYPES.HINTS.Item.ammunition": "Rounds, and what they override on the weapon they are loaded into. Empty means the weapon's own.",
+  "TYPES.RegionBehavior.gravity": "Gravity",
+  "TYPES.HINTS.RegionBehavior.gravity": "States the band and the DM it costs. It does not apply them: high gravity lasts until acclimatised, which no clock in Foundry can tell you.",
+  "TYPES.RegionBehavior.temperature": "Temperature",
+  "TYPES.HINTS.RegionBehavior.temperature": "States the ambient, the damage and the interval. Only the per-round rows could ever fire on their own.",
+  "TYPES.RegionBehavior.vacuum": "Vacuum",
+  "TYPES.HINTS.RegionBehavior.vacuum": "States the pressure, the damage and whether it escalates. The suit's breach shifts the whole table.",
+  "TYPES.RegionBehavior.radiation": "Radiation",
+  "TYPES.HINTS.RegionBehavior.radiation": "States the dose and what the region itself absorbs, before the Traveller's own armour.",
   "TYPES.Actor.character": "Traveller",
   "TYPES.Actor.npc": "NPC",
   "TYPES.HINTS.Actor.npc": "A person or a creature run by the referee. One type, two presets.",
@@ -28,7 +45,10 @@
   "TYPES.HINTS.Actor.spacecraft": "A starship or small craft: hull, drives, three budgets, a crew roster and carried craft.",
   "TYPES.Actor.robot": "Robot",
   "TYPES.HINTS.Actor.robot": "A robot or drone: Hits, a slot budget, and a brain. Set the Traveller flag for a robot player character.",
-  "TYPES.Actor.container": "Container (backpack, chest)",
+  "TYPES.Actor.world": "World",
+  "TYPES.HINTS.Actor.world": "A Universal World Profile, and everything the eight digits already say: trade codes, fuel grade and price, and both traffic tables' modifiers.",
+  "TYPES.Actor.stash": "Stash",
+  "TYPES.HINTS.Actor.stash": "An inventory nobody carries — a loot pile, a shop's stock, a cache. It has its own permissions, which is the whole reason it is an Actor.",
   "MGT2": {
     "CombatReactions": {
       "dodge": "Dodge",
@@ -77,8 +97,12 @@
     },
     "Settings": {
       "theme": {
-        "name": "Choice color theme",
-        "hint": "Choice a theme for color"
+        "name": "Colour theme",
+        "hint": "The colour scheme used by this system's sheets and dialogs. Yours alone — it changes nothing for anyone else at the table."
+      },
+      "campaignDay": {
+        "name": "Campaign day",
+        "hint": "Days since whatever day you called zero. Nothing advances it — you do. Speculative trade reads it: a supplier you walk away from is shut for a month, and a month is 28 days."
       },
       "useWeightMetric": {
         "name": "Use Metric system for WEIGHT",
@@ -99,6 +123,69 @@
       "showLife": {
         "name": "Show Life in sheet",
         "hint": "Show life information in actor sheet"
+      },
+      "worldPacks": {
+        "name": "World compendium packs",
+        "hint": "Create the empty compendium packs your library will live in. They are created empty and stay yours to fill.",
+        "label": "Create packs"
+      }
+    },
+    "Packs": {
+      "title": "World compendium packs",
+      "hint": "These packs are created empty. No rules text or equipment ships with the system — copy into them from the books you own.",
+      "folder": "Traveller",
+      "folderHint": "They are grouped in the {folder} folder and left unlocked, so you can write into them straight away. Nothing here is ever deleted or overwritten.",
+      "create": "Create",
+      "visible": "visible to players",
+      "gmOnly": "referee only",
+      "exists": "already created",
+      "created": "{count} compendium pack(s) created in the {folder} folder.",
+      "nothing": "Nothing to create — every pack you ticked already exists.",
+      "failed": "Could not create the compendium pack {label}.",
+      "labels": {
+        "library": "Library",
+        "ships": "Ships & Vehicles",
+        "npcs": "NPCs & Creatures",
+        "tables": "Tables",
+        "notes": "Notes & Handouts"
+      }
+    },
+    "Compendium": {
+      "Docs": "MGT2 — What this system does with the rules"
+    },
+    "Explorer": {
+      "Title": "Compendium explorer",
+      "Open": "Explore",
+      "Search": "Search",
+      "SearchHint": "name contains…",
+      "Class": "Document",
+      "Type": "Type",
+      "SubType": "Sub-type",
+      "Scale": "Scale",
+      "TL": "Tech Level",
+      "Min": "min",
+      "Max": "max",
+      "Any": "any",
+      "All": "all",
+      "None": "none",
+      "Reset": "Reset",
+      "ReadOnly": "Read-only — this pack belongs to a module or to the system",
+      "Count": "{matched} of {total}",
+      "Capped": "first {shown} of {matched} — narrow the search to see the rest",
+      "Loading": "{n} pack index(es) still arriving",
+      "Withheld": "{n} row(s) withheld until their index lands",
+      "Arriving": "The indexes are still arriving — a Tech Level or a sub-type cannot be read yet.",
+      "Empty": "Nothing matches.",
+      "Columns": {
+        "name": "Name",
+        "type": "Type",
+        "tl": "TL",
+        "pack": "Compendium"
+      },
+      "Sources": {
+        "world": "This world",
+        "system": "System",
+        "module": "Modules"
       }
     },
     "Specie": "Specie",
@@ -124,7 +211,7 @@
       "DeleteCareer": "Delete Career",
       "NewSkill": "New Skill",
       "DeleteSkill": "Delete Skill",
-      "EditSkill": "EditSkill",
+      "EditSkill": "Edit Skill",
       "PsionicTalents": "Psionic Talents",
       "NewPsionicTalent": "New Psionic Talent",
       "AddPsionicTalent": "Add Psionic Talent",
@@ -175,7 +262,7 @@
       "DeleteComputer": "Delete Computer",
       "DeleteContact": "Delete Contact",
       "DeleteDisease": "Delete Disease",
-      "DeleteEquipment": "DeleteEquipment",
+      "DeleteEquipment": "Delete Equipment",
       "DeleteItem": "Delete Item",
       "DeleteSoftware": "Delete Software",
       "DeleteWeapon": "Delete Weapon",
@@ -191,6 +278,7 @@
       "EditWeapon": "Edit Weapon",
       "EditWound": "Edit Wound",
       "ArmorSkill": "{armor} needs {skill}",
+      "AugmentSkill": "{augment} boosts {skill}",
       "Encumbrance": "Encumbrance",
       "EncumbranceFlag": "DM−2",
       "EncumbranceHint": "DM -2 on all physical actions. They will also count as performing heavy labour.",
@@ -247,7 +335,7 @@
       "Unconscious": "Unconscious",
       "UnconsciousHint": "A link past the first emptied — for a Traveller, STR or DEX at 0.",
       "UnloadSoftware": "Unload Software",
-      "UnstoreItem": "UnstoreItem",
+      "UnstoreItem": "Unstore Item",
       "View": "View",
       "Wounds": "Wounds",
       "Show": "Show",
@@ -545,6 +633,16 @@
         "Cargo": "Cargo",
         "CargoCapacity": "Cargo hold",
         "Bridge": "Bridge",
+        "BridgeTons": "Bridge tonnage",
+        "BridgeCost": "Bridge cost",
+        "Holographic": "Holographic controls",
+        "HolographicTLHint": "Holographic controls are TL9 (High Guard p.52). This hull is below it — the DM+2 still applies; the design does not.",
+        "ArmourTons": "Armour tonnage",
+        "PowerDraw": "Power draw",
+        "Printed": "printed",
+        "PrintedFigures": "Printed figures",
+        "PrintedCount": "the book's word against the formula's",
+        "PrintedHint": "A formula is a default; a printed statblock is data. Leave a box empty and the figure is derived; type what the ship's own page prints and that wins, marked as printed wherever it is shown. The greyed number is what deriving gives.",
         "Sensors": "Sensors",
         "Scale": "Scale",
         "Processing": "Processing",
@@ -617,6 +715,10 @@
         "BandRounds": "{rounds} rounds",
         "Dogfight": "dogfight",
         "CarriedCraft": "Carried craft",
+        "BayCount": "{bays} bays · {craft} craft",
+        "Each": "each",
+        "HowMany": "How many craft in this bay",
+        "TonsEach": "Tons each craft costs the hull",
         "AddBay": "Add a bay",
         "DeleteBay": "Remove this bay",
         "Bay": "Bay",
@@ -829,6 +931,201 @@
         "Attacks": "Attacks",
         "AttackHint": "Attacks are weapon Items flagged natural, exactly as a creature's are. Two rules the Item has to carry that a creature's does not: a robot only attacks with a manipulator if it has a Melee package, at roughly manipulator size ÷ 2 dice, and skill packages apply to weapons the robot holds while weapons installed in it are resolved by fire-control options.",
         "SkillHint": "A robot's stored skill level never exceeds {n}; the printed level can be higher because the characteristic DM is folded in. Jack-of-all-Trades is never available to a robot."
+      },
+      "world": {
+        "Ref": "MGT2 · WORLD",
+        "GM": "GM",
+        "Profile": "Profile",
+        "Paste": "Paste a UWP line",
+        "PasteHint": "the eight cells are stored, the line is a reading of them",
+        "PasteFailed": "\"{line}\" is not a Universal World Profile.",
+        "GasGiantsN": "{n} gas giants",
+        "Starport": "Starport",
+        "StarportDM": "Starport DM",
+        "Fuel": "Fuel",
+        "FuelGrade": {
+          "refined": "Refined",
+          "unrefined": "Unrefined",
+          "none": "None"
+        },
+        "FuelPrice": "Per ton",
+        "PerDie": "Per die",
+        "Bases": "Bases",
+        "Zone": "Travel zone",
+        "Forbidden": "A Red Zone is forbidden: nothing here offers passengers, freight or mail.",
+        "Berthing": "Berthing",
+        "BerthingCount": "rolled once, kept",
+        "BerthingBand": "1D × Cr{amount} per week",
+        "BerthingRoll": "Roll",
+        "BerthingClear": "Unroll",
+        "BerthingFree": "Free",
+        "BerthingNothing": "class E — a port that charges nothing",
+        "BerthingNoPort": "class X — no port at all",
+        "BerthingFlavour": "Berthing, class {port}",
+        "BerthingNoPortHint": "No port at all means no fuel and no supplier either, on the Starport DM shown above. That is not the same fact as a free berth, and one number cannot carry both.",
+        "BerthingFreeHint": "Class E charges nothing, which is a rolled value of zero and not an unrolled field.",
+        "BerthingUnrolledHint": "Not yet rolled. An empty field is a third state, distinct from class E's free berth and from class X having no port at all.",
+        "BerthingKeptHint": "Rolled and kept — prices are stable at any given port.",
+        "TradeCodes": "Trade codes",
+        "Derived": "Derived",
+        "Published": "Published",
+        "ForcedOn": "Forced on",
+        "ForcedOff": "Forced off",
+        "OverrideDerive": "Auto",
+        "OverrideDeriveHint": "Let the profile decide.",
+        "OverrideOn": "On",
+        "OverrideOff": "Off",
+        "LedgerCount": "{derived} derived · {published} published",
+        "LedgerHint": "What the digits say and what this world publishes are two readings, kept apart on purpose: an override with no condition printed beside it cannot be told from a typo.",
+        "Traffic": "What this world is worth",
+        "TrafficCount": "its own half of each table",
+        "TrafficHint": "The other half belongs to whatever world is at the other end of a leg, and so does the roll — a world has no destination. Population and Tech Level are read at the stop, with both profiles in hand.",
+        "Passengers": "Passengers",
+        "Freight": "Freight",
+        "ThisWorld": "This world",
+        "Suppliers": "Suppliers",
+        "SuppliersCount": "per world, outlives a voyage",
+        "SuppliersHint": "a supplier who refuses stays refused for a month",
+        "CampaignDay": "Campaign day",
+        "Searched": "Searched here",
+        "SearchedNone": "never",
+        "ThisMonth": "{n} this month",
+        "SearchDM": "Search DM",
+        "WalkedAway": "Walked away",
+        "Never": "never",
+        "ShutUntil": "shut until day {day}",
+        "Expired": "day {day}, expired",
+        "RecordSearch": "Record a search",
+        "ClearSearches": "Clear searches",
+        "Refuse": "Walk away",
+        "ClearRefusal": "Clear refusal",
+        "FIELDS": {
+          "uwp": {
+            "starport": {
+              "label": "Starport"
+            },
+            "size": {
+              "label": "Size"
+            },
+            "atmosphere": {
+              "label": "Atmos"
+            },
+            "hydrographics": {
+              "label": "Hydro"
+            },
+            "population": {
+              "label": "Pop"
+            },
+            "government": {
+              "label": "Gov"
+            },
+            "lawLevel": {
+              "label": "Law"
+            },
+            "techLevel": {
+              "label": "Tech"
+            }
+          },
+          "zone": {
+            "label": "Travel zone",
+            "hint": "Read by both traffic tables, with opposite signs."
+          },
+          "bases": {
+            "label": "Bases"
+          },
+          "gasGiants": {
+            "label": "Gas giants"
+          },
+          "berthing": {
+            "label": "Berthing",
+            "hint": "Leave it empty for not yet rolled."
+          },
+          "trade": {
+            "attempts": {
+              "label": "Supplier searches"
+            },
+            "refusedOn": {
+              "label": "Walked away on"
+            }
+          },
+          "codeOverrides": {
+            "label": "Trade code overrides"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "notes": {
+            "label": "Notes"
+          }
+        }
+      },
+      "stash": {
+        "Ref": "MGT2 · STASH",
+        "GM": "GM",
+        "Access": "Access",
+        "Everyone": "Everyone else",
+        "ConfigureOwnership": "Configure ownership",
+        "Rung": {
+          "none": "None",
+          "limited": "Limited",
+          "observer": "Observer",
+          "owner": "Owner"
+        },
+        "Gloss": {
+          "none": "the sheet does not open",
+          "limited": "the name, and nothing inside",
+          "observer": "reads the contents, moves nothing",
+          "owner": "reads and takes"
+        },
+        "WithheldNone": "You read the contents and, at Owner, may move them. Anything you drag out is taken, not copied back.",
+        "WithheldLocked": "The stash is locked, so its contents are withheld. The sheet stays open and the rows are never sent — that is the state a container Item cannot produce.",
+        "WithheldRung": "You may see that this stash exists and nothing that is in it. Observer is the rung that reads an inventory.",
+        "Items": "Items",
+        "Mass": "Mass",
+        "Value": "Value",
+        "CarriedBy": "Carried by",
+        "Nobody": "nobody",
+        "Lock": "Lock",
+        "Shut": "Locked",
+        "Open": "Unlocked",
+        "LockIt": "Lock it",
+        "Unlock": "Unlock",
+        "LockHint": "The only place a lock is enforced. A locked stash withholds its rows from everyone but an Owner; existing containers are left as their referees have been treating them.",
+        "Contents": "Contents",
+        "Withheld": "withheld",
+        "Holds": "holds {n}",
+        "EmptyHint": "Nothing in it yet. Drop items on the sheet to stock it.",
+        "NoEncumbranceHint": "No encumbrance line: nobody carries this. The value is a sum of what the contents cost — a stash holds things, it does not sell them.",
+        "WhyActor": "What an Actor buys",
+        "WhyActorCount": "three things, and only three",
+        "WhyOwnership": "Its own permissions",
+        "WhyOwnershipHint": "an Item's ownership is its parent's — showing players the loot means showing them its carrier",
+        "WhyPlaceable": "A place on a map",
+        "WhyPlaceableHint": "a token with nobody holding it; an Item has no placeable of its own",
+        "WhyOutlives": "A life of its own",
+        "WhyOutlivesHint": "it outlives whoever found it — a cache's owner can be dead and the document is not",
+        "FIELDS": {
+          "kind": {
+            "label": "Kind",
+            "hint": "A subtitle in the referee's own words, never a discriminator."
+          },
+          "locked": {
+            "label": "Locked"
+          },
+          "lockedDescription": {
+            "label": "Shown instead",
+            "hint": "What a viewer reads in place of the contents."
+          },
+          "showWeight": {
+            "label": "Show mass"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "notes": {
+            "label": "Notes"
+          }
+        }
       }
     },
     "RobotPower": {
@@ -911,6 +1208,29 @@
       }
     },
     "Melee": "Melee",
+    "Grapple": {
+      "Title": "Grapple",
+      "Resolve": "Resolve the grapple",
+      "Won": "{winner} · Effect {effect}",
+      "Apply": "Apply {amount}",
+      "NoArmour": "armour ignored",
+      "Thrown": "thrown {distance} {unit}",
+      "Dragged": "dragged {metres} {unit}",
+      "Taken": "the weapon may be taken",
+      "Held": "the weapon is not taken",
+      "WeaponAttack": "roll that weapon's own damage",
+      "Ends": "the grapple ends",
+      "Outcomes": {
+        "prone": "Force prone",
+        "disarm": "Disarm",
+        "throw": "Throw",
+        "damage": "Inflict damage",
+        "weapon": "Pistol or small blade",
+        "escape": "Escape and move away",
+        "drag": "Drag",
+        "hold": "Keep hold"
+      }
+    },
     "MetricRange": {
       "meter": "M",
       "kilometer": "KM"
@@ -923,9 +1243,8 @@
       "augment": "Augment",
       "clothing": "Clothing",
       "equipment": "Equipment",
-      "computer": "Computer",
-      "trinket": "trinket",
-      "toolkit": "toolkit"
+      "trinket": "Trinket",
+      "toolkit": "Toolkit"
     },
     "ItemSubType": {
       "loot": "Loot",
@@ -954,9 +1273,9 @@
       "Short": "Short",
       "Medium": "Medium",
       "Long": "Long",
-      "VeryLong": "VeryLong",
+      "VeryLong": "Very Long",
       "Distant": "Distant",
-      "VeryDistant": "VeryDistant",
+      "VeryDistant": "Very Distant",
       "Continental": "Continental",
       "Planetary": "Planetary"
     },
@@ -1022,6 +1341,11 @@
       "Timeframes": "Timeframes",
       "States": "States",
       "CustomDM": "Custom DM",
+      "UntrainedReduced": "{untrained} · {skill} {level}",
+      "DualWeaponsHint": "Attacking with two one-handed weapons: DM-2 to both attack rolls, and neither weapon may be aimed.",
+      "DamageSustained": "Damage sustained",
+      "DamageSustainedShort": "Damage",
+      "ExtendedActionHint": "Extended action interrupted by damage — enter the damage sustained; it counts as a negative DM on this check.",
       "Chain": "Chain",
       "ChainSource": "The checks that feed this one — several is working together",
       "ChainTerm": "Chain — {source}",
@@ -1061,12 +1385,14 @@
       "ReachHint": "Reach — paid for in PSI points",
       "ReachCost": "{points} PSI points",
       "PhysicalOnly": "The rule puts this on physical actions — it follows the characteristic being rolled, until you say otherwise.",
+      "SkillOnly": "The augment was bought for one skill — it follows the skill being rolled, until you say otherwise.",
       "Ceiling": "{grade} brain · up to {ceiling}",
       "CeilingOver": "{grade} brain · beyond its ceiling, {ceiling}",
       "RangeUpTo": "up to {max} {unit}",
       "RangeSpan": "{min} to {max} {unit}",
       "RangeBeyond": "beyond {min} {unit}",
       "RangeForced": "no Scope, beyond {distance} {unit}",
+      "RangeMeasured": "from {target}",
       "RollDice": "2D",
       "BoonDice": "3D drop low",
       "BaneDice": "3D drop high",
@@ -1107,7 +1433,8 @@
       "fastMovingTarget": "Fast moving target",
       "fastMovingTargetShort": "Moving",
       "cover": "Target in cover",
-      "prone": "Prone target"
+      "prone": "Prone target",
+      "dualWeapons": "Dual weapons"
     },
     "Effect": {
       "exceptionalFailure": "Exceptional failure",
@@ -1175,6 +1502,9 @@
       "FirstAidHint": "Medic (EDU) Effect, minimum 1 · as desired · once only",
       "FirstAidResetHint": "Clear the once-only flag for a new injury",
       "SurgeryHint": "Effect, minimum 1 · a failed check costs 3 + Effect · three damaged after first aid",
+      "SurgeryPointsHint": "3 + Effect, floored at 0 · retype the number if your table reads it as 3 + the size of the Effect",
+      "PsiHours": "Hours since last talent",
+      "PsiRestHint": "One PSI point per hour · beginning three hours after the last psionic talent used",
       "MedicalCareHint": "3 + END DM + Medic per day · evenly · one or two damaged after first aid",
       "NaturalHealingHint": "1D + END DM per day · END DM alone while surgery is required",
       "MentalHint": "INT and EDU, one point each per day · not PSI",
@@ -1234,6 +1564,9 @@
         "DogfightNone": "Dogfight — pick the opposing driver's check in the Opposed row to settle it; nothing has been applied.",
         "Evasive": "Evasive action — DM{dm} to attacks against this vehicle and its passengers, and to attacks made from it, until the driver's next action.",
         "AssumedAverage": "assumed Average 8+",
+        "ExtendedKept": "Extended action — the check held; this round's work counts towards the task.",
+        "ExtendedLost": "Extended action — the check failed; this round's work does not count towards the task.",
+        "ExtendedRuined": "Extended action — the task is ruined and has to be started again from scratch.",
         "Success": "Success",
         "Failure": "Failure"
       },
@@ -1302,8 +1635,10 @@
       "Homeworld": "Homeworld",
       "Informations": "Informations",
       "Improvement": "Improvement",
+      "AugmentSkillDM": "Skill DM",
+      "AugmentDuplicate": "Core p.107 allows one skill augmentation; this one is a second.",
       "Interval": "Interval",
-      "IsMelee": "IsMelee",
+      "IsMelee": "Melee",
       "Items": "Items",
       "Overload": "Overload",
       "Level": "Level",
@@ -1357,6 +1692,10 @@
       "Scale": "Scale",
       "ScaleHint": "the scale decides the range vocabulary",
       "SoftwareEffect": "Effect",
+      "Source": "Source",
+      "SourceBook": "Book",
+      "SourcePage": "Page",
+      "SourcePagePlaceholder": "p.79",
       "Specs": "Specs",
       "PsySkill": "Psy Skill",
       "Speciality": "Speciality",
@@ -1389,12 +1728,65 @@
       "AddAction": "Add an action",
       "DeleteAction": "Remove this action",
       "DM": "DM",
-      "ActionsHint": "An action of kind Skill needs a sheet to read the level off, so a ship roster refuses it on a vacant or unstatted slot. A Special action is the referee’s call and is always offered."
+      "ActionsHint": "An action of kind Skill needs a sheet to read the level off, so a ship roster refuses it on a vacant or unstatted slot. A Special action is the referee’s call and is always offered.",
+      "Tons": "Tons",
+      "Destination": "Destination",
+      "DestinationWorld": "Destination world",
+      "DestinationName": "Destination name",
+      "DueDay": "Delivery day",
+      "NoDeadline": "no deadline",
+      "FarePerTon": "Fare / ton",
+      "BasePrice": "Base price",
+      "PurchasePct": "Paid",
+      "BannedAt": "Banned at law level",
+      "Unrestricted": "unrestricted",
+      "PurchaseDM": "Purchase DM",
+      "SaleDM": "Sale DM",
+      "TradeCode": "Trade code",
+      "AddTradeDM": "Add a trade code",
+      "DeleteTradeDM": "Remove this trade code",
+      "TradeDMHint": "The largest applicable DM is the one that applies, never their sum (Core p.244).",
+      "SpeculativeHint": "A freight lot carries a destination, a deadline and a fare per ton; a speculative one has none of the three — it is bought here and sold at the next market.",
+      "PassageClass": "Class",
+      "Passengers": "Passengers",
+      "FarePerHead": "Fare / head",
+      "Fare": "Fare",
+      "Baggage": "Baggage",
+      "LowBerth": "Low berth",
+      "PassageHint": "One booking, not one passenger. The baggage allowance and the total fare follow the class and are not stored: a working passage pays nothing whatever the fare beside it says.",
+      "Category": "Category",
+      "PercentOfHull": "% of hull",
+      "Minimum": "Minimum",
+      "OnThisHull": "On this hull",
+      "CostMCr": "Cost (MCr)",
+      "PowerPerTon": "Power / ton",
+      "Rating": "Rating",
+      "Critical": "Critical",
+      "ComponentHint": "A component feeds the ship's budget and nothing else, so a spacecraft with no components is complete. Tonnage is flat, a percentage of the hull, or a percentage with a floor — whichever is largest wins. A critical is a grade from 1 to 6: a turret at DM−1 still fires.",
+      "Dose": "Dose",
+      "Onset": "Onset",
+      "Immediate": "immediate",
+      "NotAClock": "not a clock",
+      "AfterEffect": "After-effect",
+      "AfterKind": "Ends in",
+      "DosesBefore": "Doses before a check",
+      "CheckInterval": "Check interval",
+      "CravingDM": "Craving DM",
+      "AddictionHint": "Onset and duration are empty where the book states none, not where nobody typed one. Addiction is optional and set per drug (CSC p.97): leave its three fields empty and the referee has not switched it on for this one.",
+      "Fits": "Fits",
+      "WeaponsOwn": "the weapon's own",
+      "LoadedRound": "Loaded round",
+      "ReplaceTraits": "Replaces the weapon's traits",
+      "OverrideHint": "Every override is blank by default and blank means the weapon's own value stands — a standard round overrides nothing at all.",
+      "Rules": "Rules",
+      "AddRule": "add a rule",
+      "DeleteRule": "Remove this rule",
+      "RulesHint": "What the round does that is neither damage nor a trait — pellets ignoring the target's Dodge, armour counting double. Clear a line to remove it."
     },
     "Durations": {
       "Seconds": "Seconds",
       "Minutes": "Minutes",
-      "Heures": "Hours"
+      "Hours": "Hours"
     },
     "Errors": {
       "InvalidRollFormula": "Invalid roll formula — check the modifier you typed.",
@@ -1410,7 +1802,7 @@
     },
     "Migration": {
       "Begin": "MGT2: migrating world data, please do not close the game.",
-      "Complete": "MGT2: world migration complete.",
+      "Complete": "MGT2: world migration complete. {count} actor(s) changed life maximum.",
       "Failed": "MGT2: world migration failed. Check the console; it will be retried on the next load."
     },
     "Notifications": {
@@ -1784,6 +2176,9 @@
       "weapon": "Weapon",
       "custom": "Custom"
     },
+    "Hazard": {
+      "Name": "{trait} ({source})"
+    },
     "TraitSlot": {
       "acceleration": "Acceleration",
       "band": "Speed Band",
@@ -2050,7 +2445,576 @@
       "high": "High passage",
       "middle": "Middle passage",
       "basic": "Basic passage",
-      "low": "Low passage"
+      "low": "Low passage",
+      "working": "Working passage"
+    },
+    "Voyage": {
+      "Title": "Voyage: {ship}",
+      "Open": "Voyage screen",
+      "NoPermission": "Only an owner of this ship can change the leg.",
+      "Leg": "Leg",
+      "OnePairAtATime": "one pair at a time — nothing looks past the next jump",
+      "ShipLine": "{tons} t · jump-{jump} · thrust {thrust}",
+      "Here": "Here",
+      "Next": "Next",
+      "DropWorld": "— drop a world —",
+      "TypeAName": "Name the stop",
+      "ClearStop": "Clear this end",
+      "Parsecs": "parsecs",
+      "Then": "Then",
+      "Promote": "Make this the next stop",
+      "Forget": "Forget this stop",
+      "NothingPlanned": "nothing planned — and that is a legal state",
+      "FuelThisJump": "Fuel this jump",
+      "Astrogation": "Astrogation",
+      "InJump": "In jump",
+      "JumpDuration": "148+6D hours",
+      "JumpControl": "Jump Control",
+      "DriveRange": "Drive range",
+      "JumpN": "Jump-{n}",
+      "TravelZone": "Travel zone",
+      "BeyondRange": "The drive is rated jump-{n} and this leg is longer. A ship never jumps further than its rating, however full the tank is.",
+      "Advance": "Advance",
+      "RefereesClock": "the referee's clock",
+      "ArriveAt": "Arrive at {name}",
+      "NowhereToGo": "Nowhere to go",
+      "AdvanceWhy": "next → here · queue head → next",
+      "EmptyLegIsLegal": "the leg is empty, and that is legal",
+      "Fuel": "Fuel",
+      "FuelRule": "Core p.157 · 10% of hull per parsec",
+      "Aboard": "Aboard",
+      "OverTank": "Over tank",
+      "InTheTank": "In the tank",
+      "BurnsLeaving": "Burns {burn} t, leaving {after}.",
+      "ShortBy": "Needs {burn} t and holds {have} — {short} t short.",
+      "Jump": "Jump",
+      "Plot": "Plot",
+      "ChainOfTwo": "Core p.157 · a task chain of two",
+      "PlotTarget": "Easy (4+) Astrogation · EDU · 1D×10 min",
+      "JumpTarget": "Easy (4+) Engineer (j-drive) · EDU",
+      "ParsecChip": "{dm} · 1 per parsec, ×{parsecs}",
+      "UnrefinedChip": "Unrefined fuel −2",
+      "MaintenanceChip": "maintenance — not tracked",
+      "DiameterChip": "100-diameter limit — the referee's",
+      "ParsecDM": "Jump distance · {parsecs} parsecs",
+      "UnrefinedDM": "Unrefined fuel",
+      "DebitWhy": "The jump debits the tank as it rolls. Nothing else moves the fuel, and no roll moves the leg.",
+      "NoFuel": "This jump burns {need} t and the tank holds {have}. Core p.157: without the fuel the drive does not fire.",
+      "NoStation": "No {station} aboard with a linked sheet — the check has no character to read the skill level off.",
+      "Ruleset": "Ruleset",
+      "Declared": "declared, not assumed",
+      "RulesetCore": "Core",
+      "RulesetCompanion": "Companion",
+      "CoreWhy": "Core p.158 — the outcome reads the Effect of the failed Engineer check alone, so the two rolls are a chain and the delivered path carries it.",
+      "CompanionWhy": "Companion p.150-153 — a misjump is the sum of both Effects being 0 or less, so neither roll resolves first and nothing chains. The two variance tables run on every jump, not only on a failed one.",
+      "TheShip": "The ship",
+      "FuelPrice": "Cr{cr} per ton · Cr{fill} a full tank",
+      "Staterooms": "Staterooms",
+      "LowBerths": "Low berths",
+      "BothEnds": "Both ends",
+      "FromTheUwp": "derived from the UWP, never typed",
+      "PortFuel": "{grade} fuel",
+      "NoWorldDocuments": "Neither end is a world Actor yet, so the leg is running on typed names. Drop a world on either end to read its profile here.",
+      "Stations": "Stations",
+      "RosterLivesOnTheShip": "the roster lives on the ship",
+      "Reads": "Reads",
+      "NothingHere": "— nothing on this screen",
+      "AddAboard": "Aboard"
+    },
+    "Jump": {
+      "Title": "Misjump",
+      "CoreSource": "Core p.158 · the engineer's Effect alone",
+      "CompanionSource": "Companion p.150-153 · two Effects, three tables",
+      "Astrogator": "Astrogator",
+      "Engineer": "Engineer",
+      "AstrogatorEffect": "Astrogator's Effect",
+      "EngineerEffect": "Engineer's Effect",
+      "GravityAtEntry": "Gravity at entry",
+      "Sum": "Sum",
+      "ReadButton": "Read the jump",
+      "ReadLine": "2D {roll} {dm} = {total}",
+      "ReadHeader": "Read",
+      "Post": "Post",
+      "FromTheChecks": "the two checks, as they were rolled",
+      "RollFirst": "roll the jump, or type the Effects it was flown on",
+      "Table": "Table",
+      "Printed": "Printed",
+      "Result": "Result",
+      "DistanceVariance": "Distance variance",
+      "TimeVariance": "Time variance",
+      "MisjumpTable": "Misjump",
+      "VeryBadTable": "Very bad jump",
+      "Diameters": "{n} diameters",
+      "Hours": "{n} hours",
+      "Long": "long by {n}",
+      "Short": "short by {n}",
+      "Precipitated": "precipitated out at {n}",
+      "Merciful": "Core p.158 offers this one at the referee's option and calls the referee merciful for it — so it is named here rather than rolled.",
+      "Misjumped": "Misjump — the two Effects sum to 0 or less.",
+      "SeriousMisjump": "Serious misjump — both checks failed.",
+      "Averted": "Misjump averted: one check failed and the other outran it, which still costs a bad jump.",
+      "NoMisjump": "No misjump.",
+      "BadJumpFlag": "Bad jump",
+      "VeryBadJump": "Very bad jump",
+      "Core": {
+        "Clean": "The Engineer (j-drive) check held, so there is no misjump to read.",
+        "Late": "The ship arrives in the target system {days} days later than normal. At the referee's option the crew perceive {perceived} extra days in jumpspace.",
+        "Displaced": "The ship arrives in the target system {diameters} × 100 diameters from the intended world.",
+        "Adrift": "The most survivable misjump: the ship ends up {parsecs} parsecs in a random direction, potentially in deep and empty space."
+      },
+      "Misjump": {
+        "Lost": "The ship is lost in jumpspace, or emerges as fragments and subatomic particles.",
+        "Wrecked": "The ship misjumps {parsecs} parsecs in a random direction. Its jump drive is completely wrecked on emergence, and the crew and passengers risk lasting psychological effects.",
+        "Severe": "The ship misjumps {parsecs} parsecs in a random direction. Its jump drive is severely damaged on emergence.",
+        "Scattered": "The ship misjumps {parsecs} parsecs in a random direction.",
+        "Recalibrate": "Duration increased or decreased by {days} days. The jump drive needs extensive recalibration — {work} days of work — but no repairs.",
+        "Rough": "A very rough jump: emergence is {diameters} diameters from the target world."
+      },
+      "VeryBad": {
+        "None": "No additional effects.",
+        "Recalibration": "The jump drive needs lengthy recalibration after emergence — {days} days.",
+        "MinorRepairs": "The jump drive needs minor repairs after emergence.",
+        "MajorRepairs": "The jump drive needs major repairs after emergence.",
+        "Intrusions": "Jumpspace intrusions occur and the jump drive is destroyed on emergence. The ship loses {hullPerDay}% of its Hull per day.",
+        "SevereIntrusions": "Severe jumpspace intrusions occur and the jump drive is destroyed on emergence. The ship loses {hullPerDay}% of its Hull per day."
+      },
+      "VeryBadDM": {
+        "bothVariances": "both variances bad",
+        "precipitation": "precipitated",
+        "misjump": "misjump",
+        "significant": "significant gravity",
+        "serious": "serious gravity"
+      },
+      "Gravity": {
+        "none": "Clear of any gravity well",
+        "significant": "Significant — inside the 100-diameter limit",
+        "serious": "Serious — inside the 10-diameter limit"
+      },
+      "BadJump": {
+        "Checks": "Everyone aboard makes a {first} check and an {second} check, one at {routine} and the other at {difficult}. Each Traveller chooses which is taken at which level.",
+        "VeryBadDM": "A very bad jump puts DM{dm} on both.",
+        "Physical": "{first} failed: a DM equal to the Effect of the failure on every check for {hours} hours after entry, and again after emergence. At {at} or worse the Traveller is incapacitated for {out} minutes, then DM{then} for {thenHours} hours.",
+        "Mental": "{second} failed: DM{dm} on mental and interpersonal checks for the whole jump and {days} days after it. At {at} or worse the effects are serious."
+      }
+    },
+    "Starports": {
+      "A": "Excellent",
+      "B": "Good",
+      "C": "Routine",
+      "D": "Poor",
+      "E": "Frontier",
+      "X": "No starport"
+    },
+    "TravelZones": {
+      "green": "Green",
+      "amber": "Amber",
+      "red": "Red"
+    },
+    "Trade": {
+      "StopTraffic": "Traffic at the stop",
+      "OnOffer": "What is on offer here",
+      "Here": "Here",
+      "Destination": "Destination",
+      "Zone": "Zone",
+      "Parsecs": "Parsecs",
+      "Steward": "Best Steward",
+      "Rank": "Naval / Scout rank",
+      "SocialDM": "Highest SOC DM",
+      "LeadingCheck": "Leading check",
+      "CheckDM": "Skill + DM",
+      "Effect": "Effect",
+      "RollCheck": "Roll the Average (8+) check",
+      "Armed": "Ship is armed",
+      "NeedBothEnds": "Type both profiles: nothing below means anything until they parse.",
+      "BothEnds": "Both ends, scored twice",
+      "Against": "{passengers} against {freight}",
+      "Passengers": "Passengers",
+      "PassengerSource": "Core p.239",
+      "PassengerCount": "four rolls · 2D on the Passenger Traffic table",
+      "PopCap": "capped by population",
+      "Freight": "Freight",
+      "FreightSource": "Core p.240",
+      "FreightCount": "three rolls · a lot cannot be broken up",
+      "TonsPerLot": "{size} tons per lot",
+      "Lots": " t · {lots} lots · biggest {biggest}",
+      "CarouseSplit": "A Carouse check finds passengers only: freight takes Broker or Streetwise (Core p.240).",
+      "Mail": "Mail",
+      "MailSource": "Core p.241 · pass or fail on 12+",
+      "MailContainers": "{n} containers",
+      "MailNone": "None offered",
+      "MailPay": "{tons} tons · Cr{credits} flat, all or none",
+      "MailMissed": "needed {target}+, rolled {roll} {dm} = {total}",
+      "MailNeeds": "2D {dm} against {target}+",
+      "RollAll": "Roll all eight",
+      "Post": "Post to chat",
+      "NoDocument": "nothing is stored — this dialog owns no document",
+      "Route": "{here} → {next} · {parsecs} pc",
+      "NotAProfile": "not a profile — e.g. A788899-C, suffix A or R for a zone",
+      "Gloss": "port {port} · pop {pop} · TL {tl}",
+      "Speculative": "Speculative trade",
+      "World": "Market",
+      "Goods": "Goods",
+      "Broker": "Broker skill",
+      "OtherBroker": "Their Broker",
+      "Attempts": "Searches this month",
+      "BannedAt": "Banned at law",
+      "BlackMarket": "Black market supplier",
+      "NeedAWorld": "Type a profile: the trade codes, and everything read off them, come from it.",
+      "Codes": "Trade codes here",
+      "NoCodes": "no codes — common goods only",
+      "SearchLine": "finding a supplier: {dm} against {target}+",
+      "Shelf": "On the shelf",
+      "ShelfCount": "{n} types · common goods, plus every matching code",
+      "Drawn": "Also in stock",
+      "DrawnCount": "{n} random rows · one per point of population",
+      "D66": "D66",
+      "Tons": "Tons",
+      "BasePrice": "Base Cr",
+      "PurchaseDM": "Buy",
+      "SaleDM": "Sell",
+      "PriceSource": "Core p.243 · largest DM from each column, never the sum",
+      "ExoticsHint": "Exotics are outside these rules: no price, no tonnage, no DM.",
+      "PerTon": "Cr{credits} per ton",
+      "NotRolled": "not rolled",
+      "LotLine": "One lot is {size} tons at a base of Cr{base} per ton.",
+      "RollShelf": "Roll the shelf",
+      "RollPrice": "Roll both prices",
+      "At": "{world} · {goods}",
+      "MarketGloss": "port {port} · pop {pop} · law {law}",
+      "Side": {
+        "purchase": "Purchase",
+        "sale": "Sale"
+      },
+      "Passage": {
+        "high": "High passage",
+        "middle": "Middle passage",
+        "basic": "Basic passage",
+        "low": "Low passage"
+      },
+      "Lot": {
+        "incidental": "Incidental cargo",
+        "minor": "Minor cargo",
+        "major": "Major cargo"
+      },
+      "Skills": {
+        "broker": "Broker",
+        "carouse": "Carouse",
+        "streetwise": "Streetwise"
+      },
+      "Terms": {
+        "Population": "Population {n}",
+        "Starport": "Starport {port}",
+        "TechLevel": "Tech level {n}",
+        "Parsecs": "{n} parsecs",
+        "WorldTotal": "World total",
+        "Steward": "Chief Steward",
+        "Check": "{skill} Effect",
+        "FreightBand": "Freight band {dm}",
+        "Armed": "Ship armed",
+        "LowTech": "TL {n} or less",
+        "Rank": "Naval / Scout rank",
+        "SocialDM": "SOC DM",
+        "Broker": "Broker skill",
+        "OtherBroker": "Their Broker",
+        "Banned": "Banned at law {law}",
+        "Attempts": "{n} earlier searches"
+      }
+    },
+    "WorldBases": {
+      "naval": "Naval base",
+      "scout": "Scout base",
+      "military": "Military base",
+      "research": "Research station",
+      "tas": "Traveller's Aid Society",
+      "consulate": "Consulate",
+      "pirate": "Corsair base"
+    },
+    "Atmospheres": {
+      "0": "Vacuum, vacc suit",
+      "1": "Vacc suit",
+      "2": "Respirator + filter",
+      "3": "Respirator",
+      "4": "Filter mask",
+      "5": "Breathable",
+      "6": "Breathable",
+      "7": "Filter mask",
+      "8": "Breathable",
+      "9": "Filter mask",
+      "10": "Air supply",
+      "11": "Vacc suit, 1D/round",
+      "12": "Vacc suit fails",
+      "13": "Highlands only",
+      "14": "Lowlands only",
+      "15": "Unpredictable"
+    },
+    "Populations": {
+      "0": "Uninhabited",
+      "1": "Under 100",
+      "2": "100+",
+      "3": "1,000+",
+      "4": "10,000+",
+      "5": "100,000+",
+      "6": "1 million+",
+      "7": "10 million+",
+      "8": "100 million+",
+      "9": "1 billion+",
+      "10": "10 billion+",
+      "11": "100 billion+",
+      "12": "1 trillion+"
+    },
+    "Governments": {
+      "0": "Ungoverned",
+      "1": "Run by a company",
+      "2": "Everyone votes",
+      "3": "Unelected few",
+      "4": "Elected leaders",
+      "5": "Tech elite",
+      "6": "Offworld rule",
+      "7": "Rival states",
+      "8": "Career officials",
+      "9": "Faceless offices",
+      "10": "Popular despot",
+      "11": "Unpopular despot",
+      "12": "Popular council",
+      "13": "Ruled by a faith",
+      "14": "Ruled by a prophet",
+      "15": "Feared few"
+    },
+    "TradeCodes": {
+      "Ag": "Agricultural",
+      "As": "Asteroid",
+      "Ba": "Barren",
+      "De": "Desert",
+      "Fl": "Fluid oceans",
+      "Ga": "Garden",
+      "Hi": "High population",
+      "Ht": "High tech",
+      "Ic": "Ice-capped",
+      "In": "Industrial",
+      "Lo": "Low population",
+      "Lt": "Low tech",
+      "Na": "Non-agricultural",
+      "Ni": "Non-industrial",
+      "Po": "Poor",
+      "Ri": "Rich",
+      "Va": "Vacuum",
+      "Wa": "Water world"
+    },
+    "TradeGoods": {
+      "commonElectronics": "Common electronics",
+      "commonIndustrial": "Common industrial goods",
+      "commonManufactured": "Common manufactured goods",
+      "commonRawMaterials": "Common raw materials",
+      "commonConsumables": "Common consumables",
+      "commonOre": "Common ore",
+      "advancedElectronics": "Advanced electronics",
+      "advancedMachineParts": "Advanced machine parts",
+      "advancedManufactured": "Advanced manufactured goods",
+      "advancedWeapons": "Advanced weapons",
+      "advancedVehicles": "Advanced vehicles",
+      "biochemicals": "Biochemicals",
+      "crystalsGems": "Crystals & gems",
+      "cybernetics": "Cybernetics",
+      "liveAnimals": "Live animals",
+      "luxuryConsumables": "Luxury consumables",
+      "luxuryGoods": "Luxury goods",
+      "medicalSupplies": "Medical supplies",
+      "petrochemicals": "Petrochemicals",
+      "pharmaceuticals": "Pharmaceuticals",
+      "polymers": "Polymers",
+      "preciousMetals": "Precious metals",
+      "radioactives": "Radioactives",
+      "robots": "Robots",
+      "spices": "Spices",
+      "textiles": "Textiles",
+      "uncommonOre": "Uncommon ore",
+      "uncommonRawMaterials": "Uncommon raw materials",
+      "wood": "Wood",
+      "vehicles": "Vehicles",
+      "illegalBiochemicals": "Biochemicals, illegal",
+      "illegalCybernetics": "Cybernetics, illegal",
+      "illegalDrugs": "Drugs, illegal",
+      "illegalLuxuries": "Luxuries, illegal",
+      "illegalWeapons": "Weapons, illegal",
+      "exotics": "Exotics"
+    },
+    "Design": {
+      "Title": "Design",
+      "Optional": "optional — the ship above is complete without it",
+      "Count": "{n} components · {tons} t accounted",
+      "Category": "Category",
+      "MCr": "MCr",
+      "Rating": "rating {n}",
+      "NewComponent": "New component",
+      "AddComponent": "Add a component",
+      "EditComponent": "Edit this component",
+      "DeleteComponent": "Remove this component",
+      "NothingToRead": "nothing transcribed to read this against",
+      "Advisory": "Every line is advisory. Published ships fail these — the catalogue disagrees with the construction chapter often enough that refusing to store a failing design would make transcription impossible.",
+      "Failed": "{n} red lines. Advisory, never a block: the design is stored exactly as it was typed.",
+      "Checks": {
+        "power": "Power",
+        "tonnage": "Tonnage",
+        "hardpoints": "Hardpoints",
+        "jumpFuel": "Jump fuel",
+        "statedTons": "Against the stated tonnage",
+        "statedPower": "Against the stated plant"
+      },
+      "Why": {
+        "power": "drawn against generated",
+        "tonnage": "accounted against the hull",
+        "hardpoints": "one per full 100 tons (HG p.26)",
+        "jumpFuel": "10% of hull per parsec at the drive's rating",
+        "statedTons": "the parts against the budget rows they map to",
+        "statedPower": "the plants against the ship's own output"
+      }
+    },
+    "ComponentCategories": {
+      "hull": "Hull",
+      "armour": "Armour",
+      "mDrive": "Manoeuvre drive",
+      "jDrive": "Jump drive",
+      "powerPlant": "Power plant",
+      "fuel": "Fuel",
+      "bridge": "Bridge",
+      "computer": "Computer",
+      "sensors": "Sensors",
+      "weapon": "Weapon",
+      "screen": "Screen",
+      "stateroom": "Stateroom",
+      "cargo": "Cargo",
+      "software": "Software",
+      "option": "Option"
+    },
+    "DrugAfterKinds": {
+      "none": "None",
+      "condition": "Condition",
+      "damage": "Damage"
+    },
+    "DoseResets": {
+      "never": "Never",
+      "sleep": "After sleep",
+      "day": "Each day"
+    },
+    "Doses": {
+      "Take": "Take a dose",
+      "NotEquipped": "taken, not equipped",
+      "NeedsOwner": "A dose is taken by somebody. Give this drug to a Traveller first.",
+      "None": "There is no dose of {name} left to take.",
+      "Taken": "dose {n}",
+      "Counter": "Doses taken",
+      "OnsetLine": "Onset {onset}",
+      "OnsetIn": "starts in {onset}",
+      "DurationLine": "Runs {duration}",
+      "AfterLine": "Leaves {after}",
+      "NoClock": "Not a clock: it starts at once and does not run out on its own.",
+      "End": "End this dose",
+      "WoreOff": "wore off",
+      "AfterDamage": "{formula} — {n} damage."
+    },
+    "CharacteristicLossSources": {
+      "ageing": "Ageing",
+      "injury": "Injury",
+      "event": "Event",
+      "medicalCare": "Medical care",
+      "ageingCrisisCare": "Ageing crisis care",
+      "referee": "Referee"
+    },
+    "CharacteristicLossHints": {
+      "ageing": "Core p.48. It repeats every term from the fourth on, and the player chooses which characteristics take it — so the choice is recorded and the total derived.",
+      "injury": "Core p.49. A creation injury is a permanent reduction, and it arrives by a mishap, a life event, or the referee saying so.",
+      "event": "A characteristic a career event or mishap took or gave, several of which are the player's choice.",
+      "medicalCare": "Core p.49. Restoring a lost point costs Cr5000, and an employer may cover part of it — the Medical Bills roll is the referee's and only the outcome is recorded here.",
+      "ageingCrisisCare": "Core p.49. One rolled price whatever it restores, and it sets every zeroed characteristic back to 1 — not to where it was.",
+      "referee": "A permanent change nothing printed covers. It is recorded like any other, so it can be undone by deleting the row."
+    },
+    "Loss": {
+      "Title": "Permanent changes",
+      "Add": "Record a permanent change",
+      "Record": "Record",
+      "Delete": "Remove this entry",
+      "Empty": "Nothing permanent has happened to this Traveller. Ageing, a creation injury and the medical care that undoes one are all entries here.",
+      "Source": "Source",
+      "When": "When",
+      "Changes": "Change",
+      "Cost": "Cost",
+      "Note": "Note",
+      "Term": "Term",
+      "Age": "Age",
+      "Roll": "Roll",
+      "TermN": "term {n}",
+      "AgeN": "age {n}",
+      "Rolled": "rolled {n}",
+      "Paid": "Paid",
+      "PerPoint": "Cr{cr} a point",
+      "Bill": "Bill it",
+      "BillSplit": "Cr{paid} of Cr{cash} on hand, Cr{debt} to debt",
+      "BillOnRoll": "rolled on apply, then split against what is on hand",
+      "Crisis": "An ageing crisis: a characteristic stands at 0. Core p.49 makes that death unless 1D × Cr10000 buys medical care, which brings every reduced characteristic back to 1.",
+      "CrisisPast": "This Traveller has survived an ageing crisis. Core p.49 makes that permanent: they automatically fail every later qualification roll, whatever their scores now say.",
+      "CrisisWarning": "This takes a characteristic to 0. Core p.49 makes an ageing crisis death unless 1D × Cr10000 buys medical care."
+    },
+    "Region": {
+      "Hazard": "Environment",
+      "Damage": "{points} damage",
+      "Ambient": "{celsius} °C",
+      "Exposure": "round {round} of exposure",
+      "Shielded": "{rads} rads, all of it absorbed by the region's {shielded}",
+      "gravity": {
+        "AllChecks": "DM {dm} to all skill checks until acclimatised — 1D weeks, or 1D days with Athletics (strength). Leaving the region does not end it.",
+        "PhysicalChecks": "DM {dm} to all physical skill checks until acclimatised — 1D weeks, or 1D days with Athletics (dexterity). Leaving the region does not end it.",
+        "FIELDS": {
+          "band": { "label": "Band" },
+          "gees": { "label": "Gravity (g)", "hint": "The printed figure, for a world denser than its band. Left blank, the band's nominal value applies." },
+          "recoil": { "label": "Recoil spins the shooter", "hint": "Core p.81: in zero G, firing without an Average (8+) Athletics (dexterity) check sets the shooter spinning." }
+        }
+      },
+      "temperature": {
+        "FIELDS": {
+          "celsius": { "label": "Temperature" },
+          "damage": { "label": "Damage" },
+          "interval": { "label": "Interval", "hint": "Only Per round is applied on its own. Any longer interval is stated here and applied by the referee." },
+          "protectedBy": { "label": "Negated by", "hint": "Equipped gear whose name is listed here removes the hazard outright." }
+        }
+      },
+      "vacuum": {
+        "FIELDS": {
+          "pressure": { "label": "Pressure" },
+          "damage": { "label": "Damage" },
+          "breach": { "label": "Suit breach" }
+        }
+      },
+      "radiation": {
+        "FIELDS": {
+          "rads": { "label": "Dose" },
+          "shielded": { "label": "Absorbed by the region", "hint": "Rads stopped before the Traveller's own Rad score is deducted." }
+        }
+      }
+    },
+    "GravityBands": {
+      "micro": "Micro-gravity",
+      "minimal": "Minimal gravity",
+      "veryLow": "Very low gravity",
+      "low": "Low gravity",
+      "standard": "Standard gravity",
+      "high": "High gravity",
+      "extreme": "Extreme gravity"
+    },
+    "HazardClocks": {
+      "round": "Per round",
+      "minute": "Per minute",
+      "hour": "Per hour",
+      "day": "Per day"
+    },
+    "VacuumPressures": {
+      "hard": "Hard vacuum",
+      "partial": "Partial vacuum",
+      "minimal": "Thin atmosphere"
+    },
+    "SuitBreaches": {
+      "none": "Intact",
+      "minor": "Minor breach",
+      "major": "Major breach"
     }
   }
 }

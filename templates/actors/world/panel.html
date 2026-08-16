@@ -1,0 +1,92 @@
+<section class="mgt2-panel active mgt2-world-panel">
+
+	{{! THE DERIVATION LEDGER. Every code with the condition that produced it, and what the digits say
+	    printed beside what the referee publishes — never merged (§9.20). mgt2e shipped automatic codes
+	    and then had to add a manual override; §9.33.5 took that lesson pre-emptively, and an override
+	    with no visible condition beside it cannot be told from a typo. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.world.TradeCodes'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.world.LedgerCount' derived=world.ledger.derivedCount published=world.ledger.publishedCount}}</span>
+		</div>
+		<dl class="statline" data-derived="system.codes">
+			<div class="stat{{#unless world.ledger.derivedCount}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.world.Derived'}}</dt>
+				<dd class="word">{{#if world.ledger.derivedCount}}{{world.ledger.derivedLine}}{{else}}&mdash;{{/if}}</dd>
+			</div>
+			<div class="stat{{#unless world.ledger.publishedCount}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.world.Published'}}</dt>
+				<dd class="word">{{#if world.ledger.publishedCount}}{{world.ledger.publishedLine}}{{else}}&mdash;{{/if}}</dd>
+			</div>
+		</dl>
+		<div class="ledger">
+			{{#each world.ledger.rows as |row|}}
+			<div class="lr {{#if row.published}}on{{else}}off{{/if}}{{#unless (eq row.state 'derive')}} forced{{/unless}}" data-code="{{row.code}}">
+				<span class="c">{{row.code}}</span>
+				<span class="cond">{{localize row.label}} &mdash; {{row.condition}}</span>
+				<span class="st">
+					{{~#if (eq row.state 'on')}}{{localize 'MGT2.Actor.world.ForcedOn'}}{{else if (eq row.state 'off')}}{{localize 'MGT2.Actor.world.ForcedOff'}}{{else if row.derived}}{{localize 'MGT2.Actor.world.Derived'}}{{else}}&mdash;{{/if~}}
+				</span>
+				<span class="ov edit-only">
+					<button type="button" data-action="codeOverride" data-state="derive" class="{{#if (eq row.state 'derive')}}on{{/if}}" data-tooltip="{{localize 'MGT2.Actor.world.OverrideDeriveHint'}}">{{localize 'MGT2.Actor.world.OverrideDerive'}}</button>
+					<button type="button" data-action="codeOverride" data-state="on" class="{{#if (eq row.state 'on')}}on{{/if}}">{{localize 'MGT2.Actor.world.OverrideOn'}}</button>
+					<button type="button" data-action="codeOverride" data-state="off" class="{{#if (eq row.state 'off')}}on{{/if}}">{{localize 'MGT2.Actor.world.OverrideOff'}}</button>
+				</span>
+			</div>
+			{{/each}}
+		</div>
+		<p class="hint">{{localize 'MGT2.Actor.world.LedgerHint'}}</p>
+	</div>
+
+	{{! This world's own half of the two traffic tables, and only the half it can answer for. The
+	    other half belongs to whatever world is at the other end of a leg, so the sheet reports a
+	    contribution and never rolls one: a world has no destination. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.world.Traffic'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.world.TrafficCount'}}</span>
+		</div>
+		{{#if world.forbidden}}
+		<p class="hint forbidden">{{localize 'MGT2.Actor.world.Forbidden'}}</p>
+		{{/if}}
+		<div class="halves" data-derived="system.travel">
+			<div class="h">
+				<h4>{{localize 'MGT2.Actor.world.Passengers'}}</h4>
+				<table>
+					{{#each world.traffic.passengers.rows as |row|}}
+					<tr><td class="w">{{localize row.label}}</td><td class="d {{#if (gt row.dm 0)}}pos{{else if (lt row.dm 0)}}neg{{else}}nil{{/if}}">{{showDM row.dm}}</td></tr>
+					{{/each}}
+					<tr class="sum"><td>{{localize 'MGT2.Actor.world.ThisWorld'}}</td><td class="d">{{showDM world.traffic.passengers.total}}</td></tr>
+				</table>
+			</div>
+			<div class="h">
+				<h4>{{localize 'MGT2.Actor.world.Freight'}}</h4>
+				<table>
+					{{#each world.traffic.freight.rows as |row|}}
+					<tr><td class="w">{{localize row.label}}</td><td class="d {{#if (gt row.dm 0)}}pos{{else if (lt row.dm 0)}}neg{{else}}nil{{/if}}">{{showDM row.dm}}</td></tr>
+					{{/each}}
+					<tr class="sum"><td>{{localize 'MGT2.Actor.world.ThisWorld'}}</td><td class="d">{{showDM world.traffic.freight.total}}</td></tr>
+				</table>
+			</div>
+		</div>
+		<p class="hint">{{localize 'MGT2.Actor.world.TrafficHint'}}</p>
+	</div>
+
+	<div class="block">
+		<div class="sect"><h3>{{systemFields.description.label}}</h3></div>
+		<prose-mirror name="system.description" value="{{system.description}}" toggled></prose-mirror>
+	</div>
+
+	{{! Core p.238 hands the trade chapter to the players, so the profile is player-readable and this
+	    is not: the world Actor is the referee's, with OBSERVER to the players (§9.33.5). Withheld
+	    rather than badged — a chip is decoration, and the block is what carries the secret (§9.65). }}
+	{{#if isGM}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{systemFields.notes.label}}</h3>
+			<span class="gm">{{localize 'MGT2.Actor.world.GM'}}</span>
+		</div>
+		<prose-mirror name="system.notes" value="{{system.notes}}" toggled></prose-mirror>
+	</div>
+	{{/if}}
+</section>

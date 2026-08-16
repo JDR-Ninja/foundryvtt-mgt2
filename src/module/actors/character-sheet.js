@@ -1,5 +1,5 @@
-import { CHECK } from "../chat-message.js";
 import { ChatHelper } from "../chatHelper.js";
+import { Checks, renderRollCard } from "../checks.js";
 import { MGT2 } from "../config.js";
 import { EFFECT_ACTIONS, prepareEffects } from "../effects.js";
 import { MGT2Helper } from "../helper.js";
@@ -7,7 +7,7 @@ import { MGT2Combatant } from "../combatant.js";
 import { copyItemWithContents } from "../item.js";
 import { RollPromptHelper } from "../roll-prompt.js";
 import { SheetModeMixin } from "../sheet-mode.js";
-import { appendTraitText, bindTraitInput, formatTrait, prepareTraitBlock, refreshTraitNumbers } from "../traits.js";
+import { appendTraitText, bindTraitInput, formatTrait, hazardTraits, prepareTraitBlock, refreshTraitNumbers } from "../traits.js";
 import { CharacterPrompts } from "./character-prompts.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -57,6 +57,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       mentalHealing: TravellerActorSheet.#onMentalHealing,
       revive: TravellerActorSheet.#onRevive,
       radiation: TravellerActorSheet.#onRadiation,
+      lossAdd: TravellerActorSheet.#onLossAdd,
+      lossDelete: TravellerActorSheet.#onLossDelete,
       roll: TravellerActorSheet.#onRoll,
       openConfig: TravellerActorSheet.#onOpenConfig,
       openCharacteristic: TravellerActorSheet.#onOpenCharacteristic,
@@ -296,7 +298,11 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
    * @returns {object}
    */
   #itemView(item) {
-    return { _id: item.id, name: item.name, img: item.img, type: item.type, system: item.system };
+    const view = { _id: item.id, name: item.name, img: item.img, type: item.type, system: item.system };
+    // A skill row prints its level in a cell of its own, so it takes the roll's own name without it
+    // — composing one from the speciality would state it twice on a pack Item already named for it.
+    if ( item.type === "talent" ) view.rollName = item.getRollDisplay(false);
+    return view;
   }
 
   /* -------------------------------------------- */
@@ -374,7 +380,10 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const views = new Map();
     for (const item of actor.items) views.set(item.id, this.#itemView(item));
 
-    const weapons = [], armors = [], augments = [], computers = [], softwares = [];
+    // `hosts` is every view software can be loaded onto; `computers` is the subset that renders as
+    // its own row group. A wafer jack is both a computer and an implant, so it hosts software while
+    // staying in Augments where a reader expects it (§9.84).
+    const weapons = [], armors = [], augments = [], computers = [], hosts = [], softwares = [];
     const items = [], equipments = [], containerItems = [], careers = [];
     const skills = [], psionics = [], diseases = [], wounds = [], contacts = [];
     const actorContainers = [];
@@ -382,9 +391,13 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     for (const v of views.values()) {
       if (v.type === "container") {
         actorContainers.push(v);
-      } else if (v.type === "computer") {
-        computers.push(v);
+      } else if (MGT2Helper.runsSoftware(v)) {
+        if (v.type === "computer") computers.push(v);
+        hosts.push(v);
         v.subItems = [];
+        // A flag rather than `subItems.length`, because Handlebars reads an empty array as false
+        // and a host with nothing loaded still has to draw as one.
+        v.hostsSoftware = true;
         if (v.system.overload === true) v.overloadClass = "computer-overload";
       }
     }
@@ -469,8 +482,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         case "item":
           if (sys.subType !== "software") { items.push(v); break; }
           if (sys.software.computerId) {
-            const computer = computers.find(x => x._id === sys.software.computerId);
-            if (computer !== undefined) computer.subItems.push(v);
+            const host = hosts.find(x => x._id === sys.software.computerId);
+            if (host !== undefined) host.subItems.push(v);
             else softwares.push(v);
           } else {
             v.display = sys.software.bandwidth > 0 ? `${v.name} (${sys.software.bandwidth})` : v.name;
@@ -584,6 +597,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     model.traits = prepareTraitBlock(actor.system.traits, "traits",
       actor.system.traitFamily, "MGT2.Items.Traits");
     model.effects = prepareEffects(actor);
+    model.loss = this.#prepareLoss();
 
     return model;
   }
@@ -846,7 +860,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const result = await CharacterPrompts.openSurgery({ augment: system.augmentTL });
     if ( !result ) return;
 
-    const outcome = CharacterPrompts.surgeryPoints(Number(result.effect) || 0);
+    const outcome = CharacterPrompts.surgeryPoints(Number(result.effect) || 0, result.points);
     if ( outcome.success ) {
       return ChatHelper.applyRestore(this.actor,
         { procedure: "MGT2.Recovery.Surgery", points: outcome.points });
@@ -944,6 +958,139 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   /* -------------------------------------------- */
 
   /**
+   * One row of the permanent-change log (§9.39, §9.91). Signed, so this one control is ageing, a
+   * creation injury, an event, medical care and a referee's ruling alike — and none of them ever
+   * writes `base`. Nothing is scheduled: a Traveller ages when the table says so (§9.35).
+   * @this {TravellerActorSheet}
+   */
+  static async #onLossAdd() {
+    const system = this.actor.system;
+    const result = await CharacterPrompts.openCharacteristicLoss({
+      cash: system.finance.cashOnHand,
+      rows: system.rollableCharacteristics.map(key => ({
+        key,
+        label: game.i18n.localize(MGT2.Characteristics[key]),
+        // What the Traveller has NOW, which is what the reader is watching move — `max` is
+        // `base + auto + effect` floored at 0, so it already carries every earlier row. `base` goes
+        // with it because folio 49's crisis care restores what was REDUCED to 0, and a
+        // characteristic that was never rolled is not a casualty.
+        now: system.characteristics[key].max,
+        base: system.characteristics[key].base
+      }))
+    });
+    if (!result) return;
+
+    const care = MGT2.CharacteristicCare;
+    const changes = {};
+    for (const [name, value] of Object.entries(result)) {
+      if (!name.startsWith("delta.")) continue;
+      const delta = MGT2Helper.getIntegerFromInput(value);
+      if (delta) changes[name.slice(6)] = delta;
+    }
+
+    // Folio 49: the crisis is ONE rolled price whatever it restores, so it is rolled here rather
+    // than typed — `openRadiation`'s device, and for the same reason.
+    let cost = MGT2Helper.getIntegerFromInput(result.cost);
+    if (result.source === "ageingCrisisCare") {
+      cost = (await new Roll(MGT2Helper.damageFormula(care.crisisFormula)).roll()).total;
+    }
+    if (!Object.keys(changes).length && !cost) return;
+
+    const log = system.characteristicLog.map(entry => ({ ...entry }));
+    log.push({
+      source: result.source,
+      term: MGT2Helper.hasValue(result, "term") ? MGT2Helper.getIntegerFromInput(result.term) : null,
+      age: MGT2Helper.hasValue(result, "age") ? MGT2Helper.getIntegerFromInput(result.age) : null,
+      roll: MGT2Helper.hasValue(result, "roll") ? MGT2Helper.getIntegerFromInput(result.roll) : null,
+      changes, cost, note: String(result.note ?? "").trim()
+    });
+
+    const update = { "system.characteristicLog": log };
+    // Folio 52: what the Traveller cannot pay becomes debt carried into play. Only on request —
+    // a referee recording history is not making a transaction.
+    if (result.billed && (cost > 0)) {
+      const paid = Math.min(system.finance.cashOnHand, cost);
+      update["system.finance.cashOnHand"] = system.finance.cashOnHand - paid;
+      update["system.finance.debt"] = system.finance.debt + (cost - paid);
+    }
+    return this.actor.update(update);
+  }
+
+  /**
+   * A row deleted by index, which is safe here and is not on the ship's arrays: a log entry carries
+   * no reference to its neighbours, so removing one cannot falsify another — the sum simply loses
+   * that row, and the score it derives moves with it (§9.39).
+   * @this {TravellerActorSheet}
+   */
+  static async #onLossDelete(event, target) {
+    const index = Number(target.closest("[data-loss-index]")?.dataset.lossIndex ?? -1);
+    const log = this.actor.system.characteristicLog
+      .map(entry => ({ ...entry })).filter((entry, i) => i !== index);
+    if (log.length === this.actor.system.characteristicLog.length) return;
+    return this.actor.update({ "system.characteristicLog": log });
+  }
+
+  /**
+   * The log as the sheet reads it: each row with its changes already named and signed, the running
+   * score beside the characteristics that moved, and what the whole log has cost. Every figure is a
+   * reading of the stored rows — nothing here is a second copy of the derivation.
+   *
+   * **Null on anything that is not a `character`.** This runs from the shared view model, which the
+   * craft sheets inherit, and only `CharacterData` declares the log — §9.39 put it there because a
+   * ship does not age. The Health tab's block is guarded on the same value.
+   */
+  #prepareLoss() {
+    const system = this.actor.system;
+    const log = system.characteristicLog;
+    if (!Array.isArray(log)) return null;
+    const running = {};
+    const rows = log.map((entry, index) => ({
+      index,
+      source: game.i18n.localize(MGT2.CharacteristicLossSources[entry.source] ?? entry.source),
+      when: [
+        entry.term === null ? null : game.i18n.format("MGT2.Loss.TermN", { n: entry.term }),
+        entry.age === null ? null : game.i18n.format("MGT2.Loss.AgeN", { n: entry.age })
+      ].filter(part => part).join(" · "),
+      roll: entry.roll,
+      cost: entry.cost,
+      note: entry.note,
+      changes: Object.entries(entry.changes ?? {})
+        .filter(([key]) => key in system.characteristics)
+        .map(([key, delta]) => ({
+          key, delta: MGT2Helper.signed(delta),
+          label: game.i18n.localize(MGT2.Characteristics[key]), negative: delta < 0
+        }))
+    }));
+
+    // The score each moved characteristic now stands at, against the one it was rolled with. Read
+    // off `base` and `max` rather than re-summed: the sum is the model's and this is its readout.
+    for (const entry of log) {
+      for (const key of Object.keys(entry.changes ?? {})) {
+        if (key in system.characteristics) running[key] = true;
+      }
+    }
+    return {
+      rows,
+      // Two different facts, and the log distinguishes them where a single flag cannot. `crisis` is
+      // permanent — folio 49 makes a Traveller who has suffered one fail every later qualification
+      // roll, and buying care does not undo that — while `zeroed` is whether one is standing at 0
+      // right now, which is the half a doctor can still change.
+      crisis: system.states.ageingCrisis,
+      zeroed: Object.keys(running).some(key =>
+        (system.characteristics[key].max <= 0) && (system.characteristics[key].base > 0)),
+      paid: log.reduce((sum, entry) => sum + (entry.cost ?? 0), 0),
+      moved: Object.keys(running).map(key => ({
+        label: game.i18n.localize(MGT2.Characteristics[key]),
+        base: system.characteristics[key].base,
+        now: system.characteristics[key].max,
+        lost: system.characteristics[key].max < system.characteristics[key].base
+      }))
+    };
+  }
+
+  /* -------------------------------------------- */
+
+  /**
    * Everything standing against `modifiers.check`, each entry still named. The three provenances
    * are offered separately because they are waived separately: a referee's own entry and an Active
    * Effect are one standing figure, while fatigue or armour is a state the player can argue out of.
@@ -965,6 +1112,40 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   }
 
   /**
+   * The distance to the one targeted token, measured with Foundry's own `measurePath` so the figure
+   * agrees with what the ruler draws — centre to centre, elevation included, and on the diagonal
+   * rule the manifest declares (`grid.diagonals`, Euclidean, Companion p.173). A snapshot taken as
+   * the prompt opens and never again: it fills the field the player would otherwise have typed, and
+   * no rule downstream reads a target (`REDESIGN-PLAN.md` §1).
+   *
+   * Null wherever the answer would be a guess rather than a measurement — no target or several of
+   * them, no token to measure from, or a scene whose units are not the ones the weapon's own Range
+   * score is written in. The fallback is the field the player types, so nothing is ever wrong.
+   * @param {TokenDocument|null} token   The sheet's own token, where the sheet has one
+   * @returns {{distance: number, target: string}|null}
+   */
+  static #measureRange(actor, token, weapon) {
+    const targets = Array.from(game.user?.targets ?? []);
+    if (!canvas?.ready || (targets.length !== 1)) return null;
+
+    // `scene.grid.units` is free text, so it is matched against the two units the system knows.
+    const units = String(canvas.scene?.grid.units ?? "").trim().toLowerCase();
+    const scale = Object.keys(MGT2.MetricRange).find(key =>
+      game.i18n.localize(MGT2.MetricRange[key]).toLowerCase() === units);
+    if (!scale || (scale !== weapon?.system.range?.unit)) return null;
+
+    // The sheet's own token first: an unlinked NPC opened from its token is *that* token, not a
+    // sibling. Failing that, only a token there can be no argument about.
+    const placed = token ? null : actor.getActiveTokens();
+    const from = token ?? ((placed?.length === 1) ? placed[0] : null);
+    const start = (from?.document ?? from)?.getCenterPoint();
+    if (!start) return null;
+
+    const measured = canvas.grid.measurePath([start, targets[0].document.getCenterPoint()]).distance;
+    return { distance: Math.round(measured * 10) / 10, target: targets[0].document.name };
+  }
+
+  /**
    * Core p.74's Common Modifiers, read off the prompt. Aiming is capped at the six consecutive
    * Minor Actions p.75 allows, a laser sight is worth nothing without it, and a fast-moving target
    * costs a DM per full ten metres rather than per metre.
@@ -975,10 +1156,12 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const named = key => game.i18n.localize(MGT2.AttackModifiers[key].label);
     const aim = MGT2.AttackModifiers.aiming;
 
-    // Core folio 79 and folio 77, both ways round: a burst or full-auto attack forfeits aiming, and
-    // a scoped weapon that did aim is not held to the rule that makes every shot past 100 metres
-    // Extreme. The fire mode is the prompt's own strip since Auto's other two halves need it.
-    const aiming = (MGT2.FireModes[data.fireMode]?.suppress === "aiming") ? 0
+    // Core folio 79, folio 78 and folio 77: a burst or full-auto attack forfeits aiming and so does
+    // a second weapon in the other hand — both declare that as `suppress` — while a scoped weapon
+    // that did aim is not held to the rule making every shot past 100 metres Extreme.
+    const forfeitsAim = (MGT2.FireModes[data.fireMode]?.suppress === "aiming")
+      || ((data.dualWeapons === true) && (MGT2.AttackModifiers.dualWeapons.suppress === "aiming"));
+    const aiming = forfeitsAim ? 0
       : Math.min(aim.max, Math.max(0, MGT2Helper.getIntegerFromInput(data.aiming)));
     const threshold = ((data["trait-scope"] === true) && (aiming > 0)) ? 0
       : MGT2Helper.getIntegerFromInput(data.rangeThreshold);
@@ -1029,59 +1212,87 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
   /** @this {TravellerActorSheet} */
   static async #onRoll(event, target) {
+    return TravellerActorSheet.roll(this.actor, {
+      roll: target.dataset.roll,
+      characteristic: target.dataset.rollCharacteristic,
+      skill: target.dataset.rollSkill,
+      itemId: target.dataset.itemId
+    }, this.token);
+  }
+
+  /**
+   * Every check a Traveller makes, from the four things a control can name: the kind of roll, a
+   * characteristic key, a skill Item id and any other Item id. Public and actor-first because a
+   * hotbar macro has no sheet — `#onRoll` is one of its callers, not its owner.
+   *
+   * @param {Actor} actor
+   * @param {object} what
+   * @param {string} [what.roll]            `initiative` | `characteristic` | `skill` | `psionic`
+   * @param {string} [what.characteristic]  A characteristic key, for `roll: "characteristic"`
+   * @param {string} [what.skill]           A `talent` Item id, for `roll: "skill"`
+   * @param {string} [what.itemId]          Whatever else is being rolled
+   * @param {TokenDocument|null} [token]    The token this was rolled from, where there is one
+   * @returns {Promise<ChatMessage|undefined>}
+   */
+  static async roll(actor, { roll = "", characteristic = "", skill = "", itemId = "" } = {}, token = null) {
     const rollOptions = {
       rollTypeName: game.i18n.localize("MGT2.RollPrompt.Roll"),
       rollObjectName: "",
-      characteristics: RollPromptHelper.actorCharacteristics(this.actor),
+      characteristics: RollPromptHelper.actorCharacteristics(actor),
       characteristic: "",
-      skills: RollPromptHelper.actorSkills(this.actor),
+      skills: RollPromptHelper.actorSkills(actor),
       skill: "",
-      checkModifiers: TravellerActorSheet.#checkModifiers(this.actor, this.token),
+      checkModifiers: TravellerActorSheet.#checkModifiers(actor, token),
       difficulty: null,
       damageFormula: null,
       // The prompt renders its blocks from what is being rolled, so a bare characteristic check
       // is shorter than a weapon attack.
-      blocks: { skill: true, range: false, traits: false, psionic: false },
+      blocks: { skill: true, range: false, traits: false, psionic: false, attack: false,
+        extended: false },
       // RH folio 115's brain ceiling, which only a robot answers with anything.
-      ceiling: this.actor.system.taskCeiling,
+      ceiling: actor.system.taskCeiling,
       // Core p.79: Bulky and Very Bulky are read against the attacker's own STR DM.
-      strengthDM: this.actor.system.characteristics.strength?.dm ?? 0
+      strengthDM: actor.system.characteristics.strength?.dm ?? 0
     };
 
     const cardButtons = [];
 
     let itemObj = null;
     let isInitiative = false;
-    if (target.dataset.roll === "initiative") {
+    if (roll === "initiative") {
       rollOptions.rollTypeName = game.i18n.localize("MGT2.RollPrompt.InitiativeRoll");
-      rollOptions.characteristic = this.actor.system.config.initiative.characteristic;
+      rollOptions.characteristic = actor.system.config.initiative.characteristic;
       // Core p.85: a creature has no DEX and Fast Metabolism hands it the DM directly, so with no
-      // characteristic named the flat figure is offered as a waivable modifier instead.
-      if ( !rollOptions.characteristic ) {
+      // characteristic named the whole figure is offered as a waivable modifier instead. With one
+      // named the prompt reads that characteristic's own DM, so the standing accumulator is all
+      // that is left to carry — offering `system.initiative` there would count the DM twice (§9.94).
+      const standing = rollOptions.characteristic
+        ? actor.system.modifiers.initiative.dm : actor.system.initiative;
+      if (standing !== 0) {
         rollOptions.checkModifiers = [...rollOptions.checkModifiers,
-          { key: "initiative", label: "MGT2.Actor.Initiative", dm: this.actor.system.initiative }];
+          { key: "initiative", label: "MGT2.Actor.Initiative", dm: standing }];
       }
       isInitiative = true;
-    } else if (target.dataset.roll === "characteristic") {
-      rollOptions.characteristic = target.dataset.rollCharacteristic;
+    } else if (roll === "characteristic") {
+      rollOptions.characteristic = characteristic;
       rollOptions.rollTypeName = game.i18n.localize("MGT2.RollPrompt.CharacteristicRoll");
       rollOptions.rollObjectName = game.i18n.localize(`MGT2.Characteristics.${rollOptions.characteristic}.name`);
       rollOptions.blocks.skill = false;
     } else {
 
-      if (target.dataset.roll === "skill") {
-        rollOptions.skill = target.dataset.rollSkill;
-        itemObj = this.actor.getEmbeddedDocument("Item", rollOptions.skill);
+      if (roll === "skill") {
+        rollOptions.skill = skill;
+        itemObj = actor.getEmbeddedDocument("Item", rollOptions.skill);
         rollOptions.rollTypeName = game.i18n.localize("MGT2.RollPrompt.SkillRoll");
         rollOptions.rollObjectName = itemObj.name;
       } else {
-        if (target.dataset.roll === "psionic") {
+        if (roll === "psionic") {
           rollOptions.rollTypeName = game.i18n.localize("MGT2.RollPrompt.PsionicRoll");
         }
       }
 
-      if (itemObj === null && target.dataset.itemId) {
-        itemObj = this.actor.getEmbeddedDocument("Item", target.dataset.itemId);
+      if (itemObj === null && itemId) {
+        itemObj = actor.getEmbeddedDocument("Item", itemId);
         rollOptions.rollObjectName = itemObj.name;
         if (itemObj.type === "weapon")
           rollOptions.rollTypeName = game.i18n.localize("TYPES.Item.weapon");
@@ -1091,15 +1302,15 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
           rollOptions.rollTypeName = game.i18n.localize("TYPES.Item.computer");
       }
 
-      if (itemObj && target.dataset.roll === "psionic") {
+      if (itemObj && roll === "psionic") {
         // Core folio 229: "A Traveller with no PSI points cannot attempt to activate a power." The
         // refusal is what makes the folio's next clause reachable at all — the excess a spend pushes
         // past zero can only exist when there was a reserve to start from. Enforced only where the
         // sheet shows PSI: hiding the reserve is how a table opts out of tracking it.
-        const reserve = this.actor.system.characteristics.psionic;
+        const reserve = actor.system.characteristics.psionic;
         if (reserve?.show && (reserve.value <= 0)) {
           return ui.notifications.warn(
-            game.i18n.format("MGT2.Errors.NoPsiPoints", { name: this.actor.name }));
+            game.i18n.format("MGT2.Errors.NoPsiPoints", { name: actor.name }));
         }
 
         rollOptions.rollObjectName = itemObj.name;
@@ -1129,7 +1340,10 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       }
 
       if (itemObj && Object.hasOwn(itemObj.system, "damage")) {
-        rollOptions.damageFormula = itemObj.system.damage;
+        // A weapon answers with the round in it, which may replace its damage outright — a 40mm
+        // grenade in an Advanced Combat Rifle does the grenade's damage and not the rifle's 3D
+        // (Core p.127, §9.90). Every other type has no round and answers with its own.
+        rollOptions.damageFormula = itemObj.system.effective?.damage ?? itemObj.system.damage;
         if (itemObj.type === "disease") {
           if (itemObj.system.subType === "disease") {
             rollOptions.rollTypeName = game.i18n.localize("MGT2.DiseaseSubType.disease");
@@ -1155,8 +1369,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
       // Core p.229: the PSI DM is added to every power, so a talent that names no characteristic
       // of its own still gets one — but only where the sheet shows PSI at all.
-      if ((target.dataset.roll === "psionic") && (rollOptions.characteristic === "")
-        && this.actor.system.characteristics.psionic?.show) {
+      if ((roll === "psionic") && (rollOptions.characteristic === "")
+        && actor.system.characteristics.psionic?.show) {
         rollOptions.characteristic = "psionic";
       }
 
@@ -1172,7 +1386,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         // where the actor has an END to roll. A `wound` is the system's own third sub-type and the
         // folio says nothing about it, so it is left to the referee.
         if (MGT2.EnduranceResisted.includes(itemObj.system.subType)
-          && this.actor.system.rollableCharacteristics.includes("endurance")) {
+          && actor.system.rollableCharacteristics.includes("endurance")) {
           rollOptions.characteristic = "endurance";
         }
       }
@@ -1181,8 +1395,14 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       // Attacks", so the range block belongs to a ranged one and to nothing else.
       if (itemObj?.type === "weapon") {
         rollOptions.weapon = itemObj;
-        rollOptions.blocks.traits = itemObj.system.traits.length > 0;
+        rollOptions.blocks.traits = itemObj.system.effective.traits.length > 0;
         rollOptions.blocks.range = itemObj.system.range?.isMelee !== true;
+        if (rollOptions.blocks.range) {
+          rollOptions.measured = TravellerActorSheet.#measureRange(actor, token, itemObj);
+        }
+        // Core folio 78's pair is one-handed weapons of either kind, so this outlives the range
+        // block: a melee attack is offered the second weapon as readily as a pistol is.
+        rollOptions.blocks.attack = true;
         // Core folio 77: the magazine is how many shots can be fired "before reloading is
         // necessary", so an empty one is refused here rather than allowed to drift negative. Which
         // mode is short of rounds cannot be known until the prompt has been answered.
@@ -1203,12 +1423,23 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       else if (!rollOptions.skill && (itemObj?.type === "weapon")) rollOptions.skill = "NP";
     }
 
+    // Core folio 75 reaches any skill check running longer than a combat round, which is a fact
+    // about the fiction and not about the Item — so only the two that cannot be one are withheld.
+    rollOptions.blocks.extended = rollOptions.blocks.skill && !isInitiative
+      && (itemObj?.type !== "weapon");
+
     const userRollData = await RollPromptHelper.roll(rollOptions);
     if ( !userRollData ) return; // dialog dismissed
 
     // Core p.74's attack modifiers and the weapon traits are this path's own terms; everything else
     // the prompt came back with is assembled the same way for any caller.
     const extra = [];
+    // Core folio 78: DM-2 to the attack rolls of both weapons. Outside `#attackModifiers`, which is
+    // folio 74's ranged table and never runs for a melee pair.
+    if (rollOptions.blocks.attack && (userRollData.dualWeapons === true)) {
+      extra.push([game.i18n.localize(MGT2.AttackModifiers.dualWeapons.label),
+        MGT2.AttackModifiers.dualWeapons.dm]);
+    }
     if (rollOptions.blocks.range) {
       extra.push(...TravellerActorSheet.#attackModifiers(userRollData, rollOptions.weapon));
     }
@@ -1217,15 +1448,16 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         userRollData, rollOptions.weapon, rollOptions.strengthDM));
     }
     const { formula: rollFormula, modifiers: rollModifiers, chainSources } =
-      RollPromptHelper.terms(userRollData, this.actor, rollOptions.checkModifiers, extra);
-    const chainedFrom = chainSources.map(source => source.id);
+      RollPromptHelper.terms(userRollData, actor, rollOptions.checkModifiers, extra);
 
     if (MGT2Helper.hasValue(userRollData, "difficulty")) {
       rollOptions.difficulty = userRollData.difficulty;
     }
 
-    const rollData = this.actor.getRollData();
+    const rollData = actor.getRollData();
 
+    // Ahead of the magazine debit rather than left to `Checks.resolve`: a formula that cannot be
+    // parsed must not spend the rounds first.
     if (!Roll.validate(rollFormula)) {
       ui.notifications.error(game.i18n.localize("MGT2.Errors.InvalidRollFormula"));
       return;
@@ -1260,13 +1492,12 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
     let posted;
     for (let attack = 1; attack <= attacks; attack++) {
-      const roll = await new Roll(rollFormula, rollData).roll();
-
-      // Effect is what the NEXT action reads — initiative, damage, first aid, psionic duration — and
-      // those run later, on another actor, with no sheet rendered. It is computed here beside the roll.
-      const effectTarget = MGT2Helper.getEffectTarget(rollOptions.difficulty);
-      const effect = roll.total - effectTarget.value;
-      const effectBand = MGT2Helper.getEffectBand(effect);
+      const scored = await Checks.resolve({
+        formula: rollFormula, rollData,
+        difficulty: rollOptions.difficulty, prompt: userRollData
+      });
+      if (!scored) return;
+      const { effect, opposed } = scored;
       const carriesEffect = itemObj?.type === "weapon";
 
       // Core p.73: the Effect of the DEX or INT check IS the Initiative, not the total — and *every*
@@ -1277,82 +1508,38 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       // token's combatant belongs to this sheet; a mook is rolled from its own token sheet, where
       // `token` is set and getCombatantsByActor already routes through the synthetic actor.
       if (isInitiative) {
-        const combatants = game.combat?.getCombatantsByActor(this.actor) ?? [];
-        const own = this.token ? combatants : combatants.filter(c => c.token?.actorLink === true);
+        const combatants = game.combat?.getCombatantsByActor(actor) ?? [];
+        const own = token ? combatants : combatants.filter(c => c.token?.actorLink === true);
         for (const combatant of own) await combatant.update({ initiative: effect });
       }
 
-      const opposed = RollPromptHelper.opposedResult(userRollData, effect);
+      // Core folio 75: the Effect is the verdict on the work — any failure costs the round, the
+      // ruin rung costs the task. A sentence and never a write: nothing here holds task progress.
+      const sustained = MGT2Helper.getIntegerFromInput(userRollData.damageSustained);
+      const extendedLine = (sustained > 0)
+        ? game.i18n.localize(MGT2.ExtendedAction.outcomes[(effect >= 0) ? "kept"
+          : ((effect <= MGT2.ExtendedAction.ruin) ? "ruined" : "lost")])
+        : null;
 
       // Core p.82: first aid restores the Effect of a Medic check, minimum one point. The skill that
       // was actually rolled is the one the prompt came back with, not the one the row started from.
       const rolledSkill = (userRollData.skill && (userRollData.skill !== "NP"))
-        ? this.actor.getEmbeddedDocument("Item", userRollData.skill) : null;
+        ? actor.getEmbeddedDocument("Item", userRollData.skill) : null;
       const firstAidPoints = MGT2Helper.isFirstAidSkill(rolledSkill?.name) ? Math.max(1, effect) : 0;
+
+      // Core folio 78: to grapple IS to make an opposed Melee check, so nothing on the prompt
+      // declares one — the skill rolled and the Opposed row together are the declaration. A draw is
+      // a standstill and has no winner (Core p.62), so it offers no menu.
+      const grapple = (opposed && (opposed.outcome !== "tie")
+        && MGT2.Grapple.skills.some(name => MGT2Helper.matchesSkill(rolledSkill?.name, name)))
+        ? TravellerActorSheet.#grappleWinner(actor, opposed, effect) : null;
 
       // Core folio 229: the power is paid for now, out of the reserve, and the card states what it
       // cost. The write happens before the card is built so a spend that reached the damage chain
       // has already been taken when the message lands.
       const psiLine = rollOptions.blocks.psionic
-        ? await TravellerActorSheet.#spendPsi(this.actor, rollOptions.talent, userRollData, effect)
+        ? await TravellerActorSheet.#spendPsi(actor, rollOptions.talent, userRollData, effect)
         : null;
-
-      const chatData = {
-        author: game.user.id,
-        speaker: this.actor ? ChatMessage.getSpeaker({ actor: this.actor }) : null,
-        formula: roll.formula,
-        tooltip: await roll.getTooltip(),
-        total: Math.round(roll.total * 100) / 100,
-        showButtons: true,
-        rollTypeName: rollOptions.rollTypeName,
-        rollObjectName: rollOptions.rollObjectName,
-        rollModifiers: rollModifiers,
-        rollDifficulty: rollOptions.difficulty,
-        rollDifficultyLabel: MGT2Helper.getDifficultyDisplay(rollOptions.difficulty),
-        rollTarget: effectTarget.value,
-        rollTargetAssumed: effectTarget.assumed,
-        effect,
-        effectDisplay: MGT2Helper.signed(effect, "+0"),
-        effectBand: effectBand.label,
-        // The tone stays the roll's OWN band. An opposed check that was lost can still have been a
-        // success against its difficulty, and both facts are true — colouring the card by the verdict
-        // would hide the one the rules actually scored.
-        effectTone: effectBand.tone,
-        fireModeLine: TravellerActorSheet.#fireModeLine({ burst, rounds, attack, attacks }),
-        ammoLine: (attack === 1) ? ammoLine : null,
-        psiLine,
-        rollMessage: opposed ? game.i18n.format("MGT2.Chat.Roll.OpposedLine", {
-          source: opposed.label || game.i18n.localize("MGT2.RollPrompt.Opposed"),
-          effect: MGT2Helper.signed(opposed.effect, "+0"),
-          outcome: game.i18n.localize(`MGT2.Chat.Roll.Opposed.${opposed.outcome}`)
-        }) : null,
-        // The lineage the card can be clicked back through. The chain names each source; the opposed
-        // line carries its one id on the sentence rather than inside it, which keeps the label
-        // escaped — it is a document name and belongs nowhere near raw HTML.
-        chainedFrom: chainSources,
-        chainTotal: MGT2Helper.signed(chainSources.reduce((sum, s) => sum + s.dm, 0), "+0"),
-        opposedMessage: opposed?.message ?? null,
-        showRollDamage: rollOptions.damageFormula !== null && rollOptions.damageFormula !== "",
-        damageCarriesEffect: carriesEffect,
-        firstAidPoints,
-        cardButtons: cardButtons
-      };
-
-      chatData.content = await foundry.applications.handlebars.renderTemplate(
-        "systems/mgt2/templates/chat/roll.html", chatData);
-
-      // The Effect of an ordinary check lived only in the rendered card, so no second roll could read
-      // it and a task chain had no input. It is the message's own validated data now
-      // (`DOCUMENT-TYPES.md` #16), which is what makes a chain readable after the fact.
-      chatData.type = CHECK;
-      chatData.system = {
-        effect,
-        target: effectTarget.value,
-        assumed: effectTarget.assumed,
-        label: rollOptions.rollObjectName || rollOptions.rollTypeName || "",
-        previous: chainedFrom,
-        opposed
-      };
 
       // The damage payload stays a flag: it is the WEAPON's offer to a future defender, resolved on
       // another actor entirely, and it rides messages that are not checks.
@@ -1368,14 +1555,14 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
           // attacker's STR DM on top. Both are captured now — the roll happens on another card.
           effect: carriesEffect ? effect : 0,
           strengthDM: (carriesEffect && itemObj.system.range?.isMelee)
-            ? this.actor.system.meleeDamageDM : 0,
+            ? actor.system.meleeDamageDM : 0,
           // Core folio 79: a burst adds the Auto score to the damage this attack deals.
           burst,
           // The rest of the pipeline's inputs, carried so that stages 2 to 6 can run later on
           // whichever actor was hit. Nothing here names a target.
           // Core p.167: the scale that multiplies is the WEAPON's — a ship's turret is Spacecraft
           // scale whoever pulls the trigger. Only an item that has no scale falls back to the firer.
-          scale: itemObj?.system.scale ?? this.actor.system.scale,
+          scale: itemObj?.system.scale ?? actor.system.scale,
           ap: MGT2Helper.traitScore(traits, "ap"),
           loPen: MGT2Helper.traitScore(traits, "lo-pen"),
           stun: MGT2Helper.hasTrait(traits, "stun"),
@@ -1386,17 +1573,54 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
           ion: MGT2Helper.hasTrait(traits, "ion"),
           // Core p.78: most Destructive weapons say so in the score itself, which the card reads.
           destructive: MGT2Helper.hasTrait(traits, "destructive"),
+          // Poison and Diseased become an Item the DEFENDER owns (§9.4), so the parameters travel
+          // with the rest of the pipeline's inputs and are built on the apply path.
+          hazards: hazardTraits(traits),
           damageType: carriesEffect ? Array.from(itemObj.system.damageType ?? []) : []
         };
       }
 
       if (firstAidPoints > 0) flags.mgt2.firstAid = { points: firstAidPoints };
+      // A flag rather than a field on the check: like the damage payload it is an offer resolved
+      // later and on another actor, and it rides no rule the schema validates.
+      if (grapple) flags.mgt2.grapple = grapple;
       if (cardButtons.length > 0) flags.mgt2.buttons = cardButtons;
-      chatData.flags = flags;
 
-      posted = await roll.toMessage(chatData, { messageMode: userRollData.rollMode });
+      posted = await Checks.post(scored, {
+        actor,
+        label: rollOptions.rollObjectName || rollOptions.rollTypeName || "",
+        flags,
+        mode: userRollData.rollMode,
+        rollTypeName: rollOptions.rollTypeName,
+        rollObjectName: rollOptions.rollObjectName,
+        difficulty: rollOptions.difficulty,
+        modifiers: rollModifiers,
+        chainSources,
+        showButtons: true,
+        fireModeLine: TravellerActorSheet.#fireModeLine({ burst, rounds, attack, attacks }),
+        ammoLine: (attack === 1) ? ammoLine : null,
+        psiLine,
+        extendedLine,
+        grapple,
+        showRollDamage: rollOptions.damageFormula !== null && rollOptions.damageFormula !== "",
+        damageCarriesEffect: carriesEffect,
+        firstAidPoints,
+        cardButtons
+      });
     }
     return posted;
+  }
+
+  /**
+   * Who won the grapple and by how much. The comparison lives on this roll's card whichever way it
+   * went, so the winner is either this speaker or the check it was opposed by — and the winner's
+   * Effect is by definition the higher of the two, which is the number folio 78's damage reads.
+   * @returns {{winner: string, effect: number}}
+   */
+  static #grappleWinner(actor, opposed, effect) {
+    const winner = (opposed.outcome === "won") ? actor.name
+      : (game.messages.get(opposed.message)?.speaker?.alias || opposed.label);
+    return { winner, effect: Math.max(effect, opposed.effect) };
   }
 
   /**
@@ -1408,8 +1632,11 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
    */
   static #magazine(weapon) {
     const system = weapon?.system;
-    if (!system || (system.scale === "spacecraft") || !(system.magazine > 0)) return null;
-    return { ammo: system.ammo, magazine: system.magazine };
+    // The loaded round's magazine, where there is one: a grenade takes a 40-round rifle to 1, so
+    // the capacity the shot is counted against is the round's and not the weapon's (§9.90).
+    const magazine = system?.effective?.magazine ?? system?.magazine;
+    if (!system || (system.scale === "spacecraft") || !(magazine > 0)) return null;
+    return { ammo: system.ammo, magazine };
   }
 
   /**
@@ -1591,21 +1818,18 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       update.system.traits = Object.values(this.actor.system.traits ?? [])
         .concat(Object.values(sourceItemData.system.traits ?? []));
 
-      // A species modifier moves the score, not the current value: `max` and `value` derive, so a
-      // write to either is discarded on the next prepare. Deriving it into `auto` is phase 7.
-      if (sourceItemData.system.modifiers && sourceItemData.system.modifiers.length > 0) {
-        update.system.characteristics = {};
-        for (const modifier of sourceItemData.system.modifiers) {
-          if (MGT2Helper.hasValue(modifier, "characteristic") && MGT2Helper.hasValue(modifier, "value")) {
-            const c = this.actor.system.characteristics[modifier.characteristic];
-            update.system.characteristics[modifier.characteristic] = {
-              base: Math.max(0, c.base + modifier.value)
-            };
-          }
-        }
-      }
+      // The characteristic modifiers are NOT written. They are derived from the embedded Item in
+      // `CharacterData#prepareCharacteristicAuto`, which is what makes trying a species on and
+      // taking it off again correct by construction: the old write was `base + value` — additive,
+      // non-idempotent, and it survived deleting the species (§9.18).
+      //
+      // One species at a time, so an existing one is replaced rather than stacked: it is a fact of
+      // character generation, not something a Traveller accumulates.
+      const previous = this.actor.items.filter(item => item.type === "species").map(item => item.id);
+      if (previous.length) await this.actor.deleteEmbeddedDocuments("Item", previous);
 
       await this.actor.update(update);
+      await this.actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(sourceItemData)]);
 
       return true;
     }
@@ -1613,16 +1837,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     // Simple drop
     if (sourceItemData.type === "contact" || sourceItemData.type === "disease" ||
       sourceItemData.type === "career" || sourceItemData.type === "talent") {
-      let transferData = {};
-      try {
-        transferData = sourceItemData.toJSON();
-      } catch (err) {
-        transferData = sourceItemData;
-      }
-
-      delete transferData._id;
-      delete transferData.id;
-      await this.actor.createEmbeddedDocuments("Item", [transferData]);
+      await this.actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(sourceItemData)]);
       return true;
     }
 
@@ -1657,7 +1872,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         }
         await this.actor.updateEmbeddedDocuments('Item', [sourceItem]);
         return true;
-      } else if (targetItem.type === "computer") {
+      } else if (MGT2Helper.runsSoftware(targetItem)) {
         if (!sourceItem.system.software) return false;   // only software loads into a machine
         sourceItem.system.software.computerId = targetId;
         await this.actor.updateEmbeddedDocuments('Item', [sourceItem]);
@@ -1692,7 +1907,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
       // SOFTWARE --> COMPUTER: software follows the machine it was dropped on, not a container.
       if (head.system.software && (targetItem !== null)) {
-        if (targetItem.type === "computer") head.system.software.computerId = targetItem._id;
+        if (MGT2Helper.runsSoftware(targetItem)) head.system.software.computerId = targetItem._id;
         else if (targetItem.system.software) head.system.software.computerId = targetItem.system.software.computerId;
       }
 
@@ -1892,20 +2107,17 @@ export class NpcActorSheet extends TravellerActorSheet {
     else if ( (attack !== null) && (roll.total >= attack) ) outcome = "MGT2.Actor.npc.ReactionAttack";
 
     const gate = reaction.gate ?? reaction.fleeGate;
-    const chatData = {
+    return roll.toMessage({
       author: game.user.id,
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      rollTypeName: game.i18n.localize("MGT2.Actor.npc.Reaction"),
-      rollObjectName: game.i18n.localize(reaction.label),
-      rollMessage: gate
-        ? `${game.i18n.localize(outcome)} — ${game.i18n.localize(`MGT2.Reactions.Gates.${gate}`)}`
-        : game.i18n.localize(outcome),
-      formula: roll.formula,
-      tooltip: await roll.getTooltip(),
-      total: roll.total
-    };
-    chatData.content = await foundry.applications.handlebars.renderTemplate(
-      "systems/mgt2/templates/chat/roll.html", chatData);
-    return roll.toMessage(chatData);
+      content: await renderRollCard({
+        roll,
+        rollTypeName: game.i18n.localize("MGT2.Actor.npc.Reaction"),
+        rollObjectName: game.i18n.localize(reaction.label),
+        lines: [gate
+          ? `${game.i18n.localize(outcome)} — ${game.i18n.localize(`MGT2.Reactions.Gates.${gate}`)}`
+          : game.i18n.localize(outcome)]
+      })
+    });
   }
 }

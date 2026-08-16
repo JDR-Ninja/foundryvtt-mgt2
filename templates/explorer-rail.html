@@ -1,0 +1,82 @@
+<aside class="rail">
+
+	{{! Search reads `name`, which rides the world-load index, so it answers before any round-trip
+	    lands. Everything below it reads a declared field and cannot. }}
+	<div class="filters">
+		<label class="fld">
+			<span>{{localize 'MGT2.Explorer.Search'}}</span>
+			<input class="f" type="text" name="q" data-filter="q" value="{{filters.q}}"
+			       placeholder="{{localize 'MGT2.Explorer.SearchHint'}}" autocomplete="off" />
+		</label>
+
+		<label class="fld">
+			<span>{{localize 'MGT2.Explorer.Class'}}</span>
+			<select class="f" data-filter="cls">{{selectOptions classes valueAttr="value"
+				labelAttr="label" selected=filters.cls blank=(localize 'MGT2.Explorer.Any')}}</select>
+		</label>
+
+		<label class="fld">
+			<span>{{localize 'MGT2.Explorer.Type'}}</span>
+			<select class="f" data-filter="type">{{selectOptions types valueAttr="value"
+				labelAttr="text" selected=filters.type blank=(localize 'MGT2.Explorer.Any')}}</select>
+		</label>
+
+		<label class="fld">
+			<span>{{localize 'MGT2.Explorer.SubType'}}</span>
+			<select class="f" data-filter="subType">{{selectOptions subTypes valueAttr="value"
+				labelAttr="text" selected=filters.subType blank=(localize 'MGT2.Explorer.Any')}}</select>
+		</label>
+
+		{{! Only `weapon` carries a scale, so this appears when there is one to read and is absent
+		    otherwise — a permanently empty select is worse than no select (§88). }}
+		{{#if scales.length}}
+		<label class="fld">
+			<span>{{localize 'MGT2.Explorer.Scale'}}</span>
+			<select class="f" data-filter="scale">{{selectOptions scales valueAttr="value"
+				labelAttr="text" selected=filters.scale blank=(localize 'MGT2.Explorer.Any')}}</select>
+		</label>
+		{{/if}}
+
+		{{! Blank is "no bound", not zero — and a Tech Level of NA, Unknow or NotIdentified is not a
+		    number at all, so either bound drops every row that has none. }}
+		<label class="fld tl">
+			<span>{{localize 'MGT2.Explorer.TL'}}</span>
+			<span class="rng">
+				<input class="f n" type="number" step="1" min="0" data-filter="tlMin"
+				       value="{{filters.tlMin}}" placeholder="{{localize 'MGT2.Explorer.Min'}}" />
+				<input class="f n" type="number" step="1" min="0" data-filter="tlMax"
+				       value="{{filters.tlMax}}" placeholder="{{localize 'MGT2.Explorer.Max'}}" />
+			</span>
+		</label>
+
+		<button type="button" class="reset" data-action="reset" {{disabled (not filtered)}}>
+			<i class="fa-solid fa-rotate-left" inert></i>
+			<span>{{localize 'MGT2.Explorer.Reset'}}</span>
+		</button>
+	</div>
+
+	{{! THE PACK LIST IS THE SOURCE FILTER AND THE INDEX READOUT AT ONCE, because they are the same
+	    list: a pack switched off is a round-trip that bought nothing, and a pack still arriving is
+	    one whose rows cannot answer a Tech Level yet (§85). }}
+	<div class="sources">
+		{{#each sources}}
+		<div class="grp">
+			<div class="ghd">
+				<i class="{{icon}}" inert></i>
+				<span>{{localize label}}</span>
+				<a data-action="sources" data-on="true">{{localize 'MGT2.Explorer.All'}}</a>
+				<a data-action="sources" data-on="false">{{localize 'MGT2.Explorer.None'}}</a>
+			</div>
+			{{#each packs}}
+			<label class="pk {{state}}" data-tooltip="{{package}}">
+				<input type="checkbox" data-source="{{id}}" {{checked on}} />
+				<span class="t">{{title}}</span>
+				{{#if locked}}<i class="fa-solid fa-lock"
+					data-tooltip="{{localize 'MGT2.Explorer.ReadOnly'}}"></i>{{/if}}
+				<span class="m">{{doc}} · {{count}}</span>
+			</label>
+			{{/each}}
+		</div>
+		{{/each}}
+	</div>
+</aside>

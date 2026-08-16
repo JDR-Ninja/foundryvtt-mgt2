@@ -148,11 +148,6 @@ export class CraftData extends ActorBaseData {
     /*  Rules                                       */
     /* -------------------------------------------- */
 
-    /** Core p.140, p.169: critical damage ignores armour entirely. @inheritDoc */
-    protectionAgainst(options = {}) {
-        return options.ignoreArmour ? 0 : super.protectionAgainst(options);
-    }
-
     /**
      * The wound, plus how many sustained-damage thresholds it crossed. The count is reported rather
      * than acted on: the location is a 2D roll the referee makes.

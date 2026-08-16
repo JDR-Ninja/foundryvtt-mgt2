@@ -97,6 +97,74 @@
 		{{/if}}
 	</div>
 
+	{{! §9.39: ageing, creation injuries and the medical care that undoes them are ONE signed log, and
+	    its sum derives into `characteristics.<k>.auto` — so `base` holds the characteristics as first
+	    rolled and nothing ever writes it again. A row is added and removed; it is never edited, and
+	    a restoration is a new row rather than a correction to an old one. The control is live in both
+	    modes and never scheduled: a Traveller ages when the table says so (§9.35, §9.91). }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Loss.Title'}}</h3>
+			<span class="count">{{loss.rows.length}}</span>
+			<a class="add" data-action="lossAdd" data-tooltip="{{localize 'MGT2.Loss.Add'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if loss.moved.length}}
+		<dl class="statline" data-derived="system.characteristicLog">
+			{{#each loss.moved as |c|}}
+			<div class="stat{{#if c.lost}} hurt{{/if}}"><dt>{{c.label}}</dt><dd>{{c.now}}<span class="of">/{{c.base}}</span></dd></div>
+			{{/each}}
+			{{#if loss.paid}}
+			<div class="stat"><dt>{{localize 'MGT2.Loss.Paid'}}</dt><dd>{{credits loss.paid}}</dd></div>
+			{{/if}}
+		</dl>
+		{{/if}}
+		{{! Two facts, not one: having suffered a crisis is permanent and costs every later
+		    qualification roll (folio 49), while standing at 0 is what a doctor can still change. }}
+		{{#if loss.zeroed}}
+		<p class="hint bad">{{localize 'MGT2.Loss.Crisis'}}</p>
+		{{else if loss.crisis}}
+		<p class="hint">{{localize 'MGT2.Loss.CrisisPast'}}</p>
+		{{/if}}
+		{{#if loss.rows.length}}
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Loss.Source'}}</th>
+					<th>{{localize 'MGT2.Loss.When'}}</th>
+					<th>{{localize 'MGT2.Loss.Changes'}}</th>
+					<th class="c">{{localize 'MGT2.Loss.Cost'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each loss.rows as |row|}}
+				<tr data-loss-index="{{row.index}}">
+					<td>{{row.source}}{{#if row.note}}<span class="sub">{{row.note}}</span>{{/if}}</td>
+					<td class="num">{{#if row.when}}{{row.when}}{{else}}—{{/if}}{{#if row.roll}}<span class="sub">{{localize 'MGT2.Loss.Rolled' n=row.roll}}</span>{{/if}}</td>
+					<td>
+						{{#if row.changes.length}}
+						<ul class="deltas">
+							{{#each row.changes as |change|}}
+							<li{{#if change.negative}} class="bad"{{/if}}><span class="k">{{change.label}}</span><span class="v">{{change.delta}}</span></li>
+							{{/each}}
+						</ul>
+						{{else}}—{{/if}}
+					</td>
+					<td class="c num">{{#if row.cost}}{{credits row.cost}}{{else}}—{{/if}}</td>
+					<td class="r">
+						<div class="acts">
+							<a data-action="lossDelete" data-tooltip="{{localize 'MGT2.Loss.Delete'}}"><i class="fas fa-trash"></i></a>
+						</div>
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{else}}
+		<p class="hint">{{localize 'MGT2.Loss.Empty'}}</p>
+		{{/if}}
+	</div>
+
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Items.Diseases'}}</h3>

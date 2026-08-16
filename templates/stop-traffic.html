@@ -1,0 +1,79 @@
+<div class="hd">
+	<h2>{{localize 'MGT2.Trade.OnOffer'}}</h2>
+
+	{{! The seven typed values, in the order a referee has them to hand: the two ends first, because
+	    every DM below is read off them twice. No field carries a `name` — the dialog owns no document
+	    and submits nowhere, which is the property that lets it ship before any of §33 is built. }}
+	<div class="inputs">
+		<div class="end">
+			<label class="fld here">
+				<span>{{localize 'MGT2.Trade.Here'}}</span>
+				<input class="f" type="text" data-field="here" value="{{input.here}}" placeholder="A788899-C" />
+				<span class="g">{{glossHere}}</span>
+			</label>
+			<label class="fld zone">
+				<span>{{localize 'MGT2.Trade.Zone'}}</span>
+				<select class="f" data-field="hereZone">{{selectOptions zones selected=input.hereZone labelAttr="label" localize=true}}</select>
+			</label>
+		</div>
+
+		<div class="end">
+			<label class="fld next">
+				<span>{{localize 'MGT2.Trade.Destination'}}</span>
+				<input class="f" type="text" data-field="next" value="{{input.next}}" placeholder="C799663-9" />
+				<span class="g">{{glossNext}}</span>
+			</label>
+			<label class="fld zone">
+				<span>{{localize 'MGT2.Trade.Zone'}}</span>
+				<select class="f" data-field="nextZone">{{selectOptions zones selected=input.nextZone labelAttr="label" localize=true}}</select>
+			</label>
+		</div>
+
+		<div class="row4">
+			<label class="fld">
+				<span>{{localize 'MGT2.Trade.Parsecs'}}</span>
+				<input class="f n" type="number" step="1" min="1" data-field="parsecs" value="{{input.parsecs}}" />
+			</label>
+			<label class="fld">
+				<span>{{localize 'MGT2.Trade.Steward'}}</span>
+				<input class="f n" type="number" step="1" min="0" data-field="steward" value="{{input.steward}}" />
+			</label>
+			<label class="fld">
+				<span>{{localize 'MGT2.Trade.Rank'}}</span>
+				<input class="f n" type="number" step="1" min="0" data-field="rank" value="{{input.rank}}" />
+			</label>
+			<label class="fld">
+				<span>{{localize 'MGT2.Trade.SocialDM'}}</span>
+				<input class="f n" type="number" step="1" data-field="socialDM" value="{{input.socialDM}}" />
+			</label>
+		</div>
+
+		{{! The Average (8+) check whose Effect leads both tables. A table that has already rolled on
+		    paper types the Effect straight in and never touches the die. }}
+		<div class="row4 check">
+			<label class="fld">
+				<span>{{localize 'MGT2.Trade.LeadingCheck'}}</span>
+				<select class="f" data-field="checkSkill">{{selectOptions skills selected=input.checkSkill localize=true}}</select>
+			</label>
+			<label class="fld">
+				<span>{{localize 'MGT2.Trade.CheckDM'}}</span>
+				<input class="f n" type="number" step="1" data-field="checkDM" value="{{input.checkDM}}" />
+			</label>
+			<div class="fld">
+				<span>{{localize 'MGT2.Trade.Effect'}}</span>
+				<div class="pair">
+					<input class="f n" type="number" step="1" data-field="effect" value="{{input.effect}}"
+					       aria-label="{{localize 'MGT2.Trade.Effect'}}" />
+					<button type="button" class="btn" data-action="rollCheck"
+					        data-tooltip="{{localize 'MGT2.Trade.RollCheck'}}">
+						<i class="fa-solid fa-dice-d6"></i>
+					</button>
+				</div>
+			</div>
+			<label class="fld ck">
+				<input type="checkbox" data-field="armed" {{checked input.armed}} />
+				<span>{{localize 'MGT2.Trade.Armed'}}</span>
+			</label>
+		</div>
+	</div>
+</div>

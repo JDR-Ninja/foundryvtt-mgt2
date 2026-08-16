@@ -1,0 +1,228 @@
+// The stash screen — the thinnest sheet in the system, and the thinnest stylesheet to match.
+// Everything it can take from the shared kit it takes: `.statline`, `.block`, `.sect`, `.hint`,
+// `table.rows`, `.acts` and the header/rail/panel skeleton are _blocks.sass and _character.sass
+// unchanged. The contents table in particular is `table.rows` rather than a component of its own —
+// it is the same four columns the `container` Item draws, and duplicating it would let the two
+// drift. What is here is the window grid and the two things this type owns: the ownership strip and
+// the lock row.
+
+// `stash` extends TypeDataModel rather than ActorBaseData, so its sheet is not a subclass of the
+// character sheet and does not inherit the `character` class ApplicationV2 concatenates up the
+// chain — which is where the other types get their query container and their grid.
+.mgt2.application.stash
+	container-type: inline-size
+	container-name: sheet
+
+	> .window-content
+		display: grid
+		grid-template-columns: 19rem minmax(0, 1fr)
+		grid-template-rows: auto minmax(0, 1fr)
+		grid-template-areas: "header header" "rail panel"
+		height: 100%
+		overflow: hidden
+		font-family: var(--body)
+		font-size: 14px
+
+		> [data-application-part="header"]
+			grid-area: header
+		> [data-application-part="rail"]
+			grid-area: rail
+			min-height: 0
+		> [data-application-part="panel"]
+			grid-area: panel
+			min-height: 0
+
+.mgt2 .mgt2-stash-panel
+	display: flex
+	flex-direction: column
+
+// A stash's portrait is a crate on a floor, not a person's head-and-shoulders.
+.mgt2 .mgt2-header .portrait.stash
+	width: 84px
+	height: 84px
+
+// The lock takes the registration's slot, so it is a word rather than a code and does not want the
+// mono letter-spacing that reads a hull number.
+.mgt2.application.stash .reg .code
+	font-family: var(--cond)
+	font-size: 17px
+	letter-spacing: 0.12em
+	text-transform: uppercase
+	&.shut
+		color: var(--danger)
+
+// --------------------------------------------
+//  THE OWNERSHIP STRIP
+// --------------------------------------------
+// The one component this type owns, because it is the one thing the type exists for. An Item's
+// ownership is its parent's: showing players the party's loot means showing them whoever carries
+// it. An Actor carries its own, so the strip is per-user and it is the stored state.
+
+.mgt2 .own
+	grid-column: 1 / -1
+	display: grid
+	grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr))
+	margin: 12px 0 0
+	border: 1px solid var(--rule-soft)
+
+	.r
+		display: flex
+		flex-direction: column
+		gap: 2px
+		min-width: 0
+		padding: 6px 9px 7px
+		border-right: 1px solid var(--rule-soft)
+		&:last-child
+			border-right: 0
+
+		.who
+			overflow: hidden
+			font-family: var(--cond)
+			font-size: 10px
+			font-weight: 700
+			letter-spacing: 0.13em
+			text-transform: uppercase
+			white-space: nowrap
+			text-overflow: ellipsis
+
+		b
+			font-family: var(--cond)
+			font-size: 13px
+			font-weight: 700
+			line-height: 1.1
+			letter-spacing: 0.08em
+			text-transform: uppercase
+
+		.g
+			overflow: hidden
+			font-family: var(--mono)
+			font-size: 9px
+			white-space: nowrap
+			text-overflow: ellipsis
+			color: var(--faint)
+
+	// The four rungs read as four states or the strip is decoration. Amber for `limited` and not
+	// the danger colour: a player who sees the crate and not its contents is the state an adventure
+	// wants, not a fault.
+	.r.none b
+		color: var(--faint)
+	.r.limited b
+		color: #c98a2b
+	.r.observer b
+		color: var(--good)
+	.r.owner b
+		color: var(--accent-text)
+
+	// The default is what a user with no entry of their own gets, which is most of them.
+	.r.fallback
+		background: var(--hover)
+
+	.r[data-action]
+		cursor: var(--cursor-pointer)
+		&:hover
+			background: var(--accent-soft)
+
+// What the current viewer gets, stated rather than left to be inferred from an empty table.
+.mgt2 .asseen
+	padding: 8px 11px 10px
+	border: 1px dashed var(--rule)
+
+	.tag
+		font-family: var(--cond)
+		font-size: 9px
+		font-weight: 700
+		letter-spacing: 0.16em
+		text-transform: uppercase
+		color: var(--faint)
+
+	p
+		margin: 4px 0 0
+		font-size: 12.5px
+		line-height: 1.5
+		color: var(--mute)
+
+// --------------------------------------------
+//  THE LOCK
+// --------------------------------------------
+// `locked` has been on `container` since the start and read by nothing (§1.7). This is the first
+// document a player can see without being able to open, so it is the first place it means anything.
+
+.mgt2 .lockrow
+	display: flex
+	flex-wrap: wrap
+	align-items: baseline
+	gap: 9px
+
+	.v
+		font-family: var(--cond)
+		font-size: 15px
+		font-weight: 700
+		letter-spacing: 0.08em
+		text-transform: uppercase
+	.v.shut
+		color: var(--danger)
+	.v.open
+		color: var(--good)
+
+	button
+		width: auto
+		height: auto
+		min-height: 0
+		margin-left: auto
+		padding: 3px 9px 4px
+		font: inherit
+		font-family: var(--cond)
+		font-size: 9.5px
+		font-weight: 700
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--mute)
+		background: none
+		border: 1px solid var(--rule)
+		border-radius: 2px
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--accent-text)
+			border-color: var(--accent-line)
+
+// A withheld inventory is a statement, not an empty table — the rows never reached this client.
+.mgt2 p.hint.shut
+	padding-left: 9px
+	color: var(--mute)
+	border-left: 2px solid var(--danger)
+
+// Q12's own test, kept where it can be checked rather than re-argued: three things an Actor buys
+// that a `container` cannot, and if a campaign wants none of them the ship's locker stays an Item.
+// Scoped to this application: the roll prompt's readout already owns a `.vs`, and an unscoped
+// `display: flex` here would win on a property that rule never sets.
+.mgt2.application.stash .vs
+	display: flex
+	flex-direction: column
+
+	.v
+		padding: 5px 2px
+		border-bottom: 1px solid var(--rule-soft)
+		&:last-child
+			border-bottom: 0
+
+	.nm
+		font-family: var(--cond)
+		font-size: 11.5px
+		font-weight: 700
+		letter-spacing: 0.09em
+		text-transform: uppercase
+
+	.g
+		display: block
+		font-family: var(--mono)
+		font-size: 9.5px
+		line-height: 1.5
+		letter-spacing: 0
+		text-transform: none
+		color: var(--faint)
+
+@container sheet (max-width: 640px)
+	.mgt2.application.stash > .window-content
+		grid-template-columns: minmax(0, 1fr)
+		grid-template-rows: auto auto minmax(0, 1fr)
+		grid-template-areas: "header" "rail" "panel"

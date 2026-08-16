@@ -38,7 +38,19 @@
 			"layer": "system"
 		}
 	],
-	"packs": [],
+	"packs": [
+		{
+			"name": "docs",
+			"label": "MGT2.Compendium.Docs",
+			"path": "packs/docs",
+			"type": "JournalEntry",
+			"system": "mgt2",
+			"ownership": {
+				"PLAYER": "OBSERVER",
+				"ASSISTANT": "OWNER"
+			}
+		}
+	],
 	"languages": [
 		{
 			"lang": "en",
@@ -49,6 +61,16 @@
 			"lang": "fr",
 			"name": "Français",
 			"path": "lang/fr.json"
+		},
+		{
+			"lang": "es",
+			"name": "Español",
+			"path": "lang/es.json"
+		},
+		{
+			"lang": "pt-BR",
+			"name": "Português (Brasil)",
+			"path": "lang/pt-BR.json"
 		}
 	],
 	"documentTypes": {
@@ -91,12 +113,33 @@
 					"description",
 					"notes"
 				]
+			},
+			"world": {
+				"htmlFields": [
+					"description",
+					"notes"
+				]
+			},
+			"stash": {
+				"htmlFields": [
+					"description",
+					"notes"
+				],
+				"gmOnlyFields": [
+					"locked",
+					"lockedDescription"
+				]
 			}
 		},
 		"Item": {
+			"ammunition": {},
 			"armor": {},
 			"career": {},
+			"cargo": {},
+			"component": {},
 			"computer": {},
+			"drug": {},
+			"passage": {},
 			"contact": {
 				"htmlFields": [
 					"description",
@@ -128,6 +171,12 @@
 		},
 		"CombatantGroup": {
 			"ship": {}
+		},
+		"RegionBehavior": {
+			"gravity": {},
+			"temperature": {},
+			"vacuum": {},
+			"radiation": {}
 		}
 	},
 	"flags": {
@@ -145,8 +194,8 @@
 		}
 	},
 	"compatibility": {
-		"minimum": "14",
-		"verified": "14"
+		"minimum": "14.366",
+		"verified": "14.366"
 	},
 	"grid": {
 		"type": 1,

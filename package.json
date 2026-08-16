@@ -5,14 +5,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "sass src/sass/mgt2.sass styles/mgt2.css --no-source-map",
+    "build": "sass src/sass/mgt2.sass styles/mgt2.css --no-source-map && node tools/coverage.mjs build",
     "watch": "sass --watch src/sass/mgt2.sass styles/mgt2.css --no-source-map",
     "lint": "eslint src",
-    "lint:fix": "eslint src --fix"
+    "lint:fix": "eslint src --fix",
+    "docs": "node tools/coverage.mjs build",
+    "docs:check": "node tools/coverage.mjs check"
   },
   "devDependencies": {
     "eslint": "^9.0.0",
     "globals": "^15.0.0",
-    "sass": "^1.80.0"
+    "sass": "^1.80.0",
+    "classic-level": "^3.0.0"
   }
 }

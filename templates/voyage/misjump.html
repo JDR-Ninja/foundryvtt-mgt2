@@ -1,0 +1,121 @@
+{{! The misjump block, and the one place the `ruleset` enum decides anything: Core reads the failed
+    Engineer check alone (folio 158), the Companion reads two Effects across three tables and their
+    sum for the trigger (folios 150-153). A READOUT — nothing here writes to the ship, and the crew
+    checks a bad jump calls for are stated rather than rolled, because everyone aboard makes them
+    and none of those Actors belongs to this screen (§9.35, §9.89). }}
+<div class="block misjump">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Jump.Title'}}</h3>
+		<span class="count">{{#if misjump.core}}{{localize 'MGT2.Jump.CoreSource'}}{{else}}{{localize 'MGT2.Jump.CompanionSource'}}{{/if}}</span>
+	</div>
+
+	{{#unless card}}
+	<div class="effects">
+		{{#unless misjump.core}}
+		<label class="fld">
+			<span class="lbl">{{localize 'MGT2.Jump.AstrogatorEffect'}}</span>
+			<input class="f n" type="number" step="1" name="effectPlot" value="{{misjump.effects.plot}}" />
+		</label>
+		{{/unless}}
+		<label class="fld">
+			<span class="lbl">{{localize 'MGT2.Jump.EngineerEffect'}}</span>
+			<input class="f n" type="number" step="1" name="effectJump" value="{{misjump.effects.jump}}" />
+		</label>
+		{{#unless misjump.core}}
+		<label class="fld wide">
+			<span class="lbl">{{localize 'MGT2.Jump.GravityAtEntry'}}</span>
+			<select class="f" name="gravity">
+				{{#each misjump.gravity as |entry|}}
+				<option value="{{entry.key}}"{{#if entry.active}} selected{{/if}}>{{localize entry.label}}</option>
+				{{/each}}
+			</select>
+		</label>
+		{{/unless}}
+	</div>
+	<div class="advance">
+		<button type="button" data-action="misjumpRoll"{{#unless misjump.ready}} disabled{{/unless}}>{{localize 'MGT2.Jump.ReadButton'}}</button>
+		{{#if misjump.reading}}<button type="button" data-action="misjumpPost">{{localize 'MGT2.Jump.Post'}}</button>{{/if}}
+		<span class="why">{{#if misjump.ready}}{{localize 'MGT2.Jump.FromTheChecks'}}{{else}}{{localize 'MGT2.Jump.RollFirst'}}{{/if}}</span>
+	</div>
+	{{/unless}}
+
+	{{#if misjump.reading.core}}
+	<dl class="statline" data-derived="spacecraft.voyage.misjump">
+		<div class="stat lead"><dt>{{localize 'MGT2.Jump.EngineerEffect'}}</dt><dd>{{misjump.reading.effect}}</dd></div>
+	</dl>
+	<p class="outcome{{#if misjump.reading.misjumped}} bad{{/if}}">{{misjump.reading.outcome}}</p>
+	{{#if misjump.reading.merciful}}<p class="hint">{{localize 'MGT2.Jump.Merciful'}}</p>{{/if}}
+	{{/if}}
+
+	{{#if misjump.reading.companion}}
+	{{! The trigger first, because how every row below reads depends on it. }}
+	<dl class="statline grid" data-derived="spacecraft.voyage.misjump">
+		<div class="stat"><dt>{{localize 'MGT2.Jump.Astrogator'}}</dt><dd>{{misjump.reading.astrogator}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Jump.Engineer'}}</dt><dd>{{misjump.reading.engineer}}</dd></div>
+		<div class="stat lead{{#if misjump.reading.misjumped}} hurt{{/if}}"><dt>{{localize 'MGT2.Jump.Sum'}}</dt><dd>{{misjump.reading.sum}}</dd></div>
+	</dl>
+
+	<ul class="verdict">
+		{{#if misjump.reading.serious}}<li class="v bad">{{localize 'MGT2.Jump.SeriousMisjump'}}</li>
+		{{else if misjump.reading.misjumped}}<li class="v bad">{{localize 'MGT2.Jump.Misjumped'}}</li>
+		{{else if misjump.reading.averted}}<li class="v warn">{{localize 'MGT2.Jump.Averted'}}</li>
+		{{else}}<li class="v">{{localize 'MGT2.Jump.NoMisjump'}}</li>{{/if}}
+		{{#if misjump.reading.veryBad}}<li class="v bad">{{localize 'MGT2.Jump.VeryBadJump'}}</li>
+		{{else if misjump.reading.badJump}}<li class="v warn">{{localize 'MGT2.Jump.BadJumpFlag'}}</li>{{/if}}
+	</ul>
+
+	{{! `table.rows` is the shared block table; `.variance` adds the two columns that are dice. }}
+	<table class="rows variance">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Jump.Table'}}</th>
+				<th>{{localize 'MGT2.Jump.ReadHeader'}}</th>
+				<th>{{localize 'MGT2.Jump.Printed'}}</th>
+				<th>{{localize 'MGT2.Jump.Result'}}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr{{#if misjump.reading.distance.bad}} class="bad"{{/if}}>
+				<td class="nm">{{localize 'MGT2.Jump.DistanceVariance'}}</td>
+				<td class="n">{{misjump.reading.distance.read}}</td>
+				<td class="n dim">{{misjump.reading.distance.printed}}</td>
+				<td class="n">
+					{{localize 'MGT2.Jump.Diameters' n=misjump.reading.distance.value}}
+					{{#if misjump.reading.distance.precipitated}}<span class="chip bad">{{localize 'MGT2.Jump.Precipitated' n=misjump.reading.distance.emergence}}</span>{{/if}}
+				</td>
+			</tr>
+			<tr{{#if misjump.reading.time.bad}} class="bad"{{/if}}>
+				<td class="nm">{{localize 'MGT2.Jump.TimeVariance'}}</td>
+				<td class="n">{{misjump.reading.time.read}}</td>
+				<td class="n dim">{{misjump.reading.time.printed}}</td>
+				<td class="n">
+					{{localize 'MGT2.Jump.Hours' n=misjump.reading.time.duration}}
+					{{#if misjump.reading.time.value}}<span class="chip">{{#if misjump.reading.time.long}}{{localize 'MGT2.Jump.Long' n=misjump.reading.time.value}}{{else}}{{localize 'MGT2.Jump.Short' n=misjump.reading.time.value}}{{/if}}</span>{{/if}}
+				</td>
+			</tr>
+			{{#if misjump.reading.misjump}}
+			<tr class="bad">
+				<td class="nm">{{localize 'MGT2.Jump.MisjumpTable'}}</td>
+				<td class="n">{{misjump.reading.misjump.read}}</td>
+				<td class="outcome" colspan="2">{{misjump.reading.misjump.outcome}}</td>
+			</tr>
+			{{/if}}
+			{{#if misjump.reading.veryBadJump}}
+			<tr class="bad">
+				<td class="nm">{{localize 'MGT2.Jump.VeryBadTable'}}<span class="src">{{misjump.reading.veryBadJump.source}}</span></td>
+				<td class="n">{{misjump.reading.veryBadJump.read}}</td>
+				<td class="outcome" colspan="2">{{misjump.reading.veryBadJump.outcome}}</td>
+			</tr>
+			{{/if}}
+		</tbody>
+	</table>
+
+	{{#if misjump.reading.badJump}}
+	<div class="aftermath">
+		<p>{{misjump.badJump.checks}}{{#if misjump.reading.veryBad}} {{misjump.badJump.veryBad}}{{/if}}</p>
+		<p class="hint">{{misjump.badJump.physical}}</p>
+		<p class="hint">{{misjump.badJump.mental}}</p>
+	</div>
+	{{/if}}
+	{{/if}}
+</div>

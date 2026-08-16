@@ -1,0 +1,116 @@
+{{! THE ROUTE. Drawn as `here → next → queue[]` and NOT as a pointer into an array, because there
+    is no array: exactly one pair of worlds exists at a time and the parsec count belongs to that
+    pair (§9.33.2). A current-index pip would put the ordered list back at the UI level, and the
+    moment an index exists, deleting a stop falsifies its neighbour and moves the ship silently.
+    Everything under the strip is a reading of the three stored numbers plus the two world Actors —
+    a leg still reads with a typed name and no `world` document at all. The two ends are written
+    out rather than looped for the same reason the schema names them: they are not a list. }}
+<header class="mgt2-voyage-head">
+	<div class="top">
+		<h2>{{localize 'MGT2.Voyage.Leg'}}</h2>
+		<span class="of">{{localize 'MGT2.Voyage.OnePairAtATime'}}</span>
+		<span class="ship">{{localize 'MGT2.Voyage.ShipLine' tons=ship.tons jump=ship.jump thrust=ship.thrust}}</span>
+	</div>
+
+	<div class="leg">
+		<div class="end here{{#unless route.here.named}} vacant{{/unless}}"
+			data-accept="{{worldType}}" data-stop="here">
+			<span class="role">{{localize 'MGT2.Voyage.Here'}}</span>
+			{{#if route.here.linked}}
+			<b data-uuid="{{route.here.uuid}}" data-action="openDocument">{{route.here.name}}</b>
+			<span class="uwp">{{route.here.profile}}{{#each route.here.codes}} {{this}}{{/each}}</span>
+			{{else}}
+			<b>{{#if route.here.named}}{{route.here.name}}{{else}}{{localize 'MGT2.Voyage.DropWorld'}}{{/if}}</b>
+			{{! No document, so the typed name IS the stop. That is `crew[]`'s degradation pattern,
+			    and shipping no content is why it is not optional. }}
+			<span class="uwp">
+				{{#if canEdit}}
+				<input class="f" type="text" name="stopName" value="{{route.here.name}}" data-stop="here"
+					placeholder="{{localize 'MGT2.Voyage.TypeAName'}}"
+					aria-label="{{localize 'MGT2.Voyage.TypeAName'}}" />
+				{{else}}&mdash;{{/if}}
+			</span>
+			{{/if}}
+			{{#if route.here.zoneLabel}}<span class="zone{{#if route.here.forbidden}} bad{{/if}}">{{localize route.here.zoneLabel}}</span>{{/if}}
+		</div>
+
+		{{! The hop sits BETWEEN the two ends because it belongs to neither: it is the pair's own
+		    property, typed by hand, since no stored coordinate has a frame of reference across
+		    subsectors (§9.33.5). It is the only stored figure on the strip. }}
+		<div class="hop">
+			{{#if canEdit}}
+			<input class="f n" type="number" min="1" step="1" name="parsecs" value="{{route.parsecs}}"
+				aria-label="{{localize 'MGT2.Voyage.Parsecs'}}" />
+			{{else}}<span class="v">{{route.parsecs}}</span>{{/if}}
+			<span class="u">{{localize 'MGT2.Voyage.Parsecs'}}</span>
+		</div>
+
+		<div class="end to{{#unless route.next.named}} vacant{{/unless}}"
+			data-accept="{{worldType}}" data-stop="next">
+			<span class="role">{{localize 'MGT2.Voyage.Next'}}</span>
+			{{#if route.next.linked}}
+			<b data-uuid="{{route.next.uuid}}" data-action="openDocument">{{route.next.name}}</b>
+			<span class="uwp">{{route.next.profile}}{{#each route.next.codes}} {{this}}{{/each}}</span>
+			{{else}}
+			<b>{{#if route.next.named}}{{route.next.name}}{{else}}{{localize 'MGT2.Voyage.DropWorld'}}{{/if}}</b>
+			<span class="uwp">
+				{{#if canEdit}}
+				<input class="f" type="text" name="stopName" value="{{route.next.name}}" data-stop="next"
+					placeholder="{{localize 'MGT2.Voyage.TypeAName'}}"
+					aria-label="{{localize 'MGT2.Voyage.TypeAName'}}" />
+				{{else}}&mdash;{{/if}}
+			</span>
+			{{/if}}
+			{{#if route.next.zoneLabel}}<span class="zone{{#if route.next.forbidden}} bad{{/if}}">{{localize route.next.zoneLabel}}</span>{{/if}}
+			{{#if canEdit}}{{#if route.next.named}}
+			<a class="rm" data-action="stopClear" data-tooltip="{{localize 'MGT2.Voyage.ClearStop'}}"><i class="fa-solid fa-xmark"></i></a>
+			{{/if}}{{/if}}
+		</div>
+	</div>
+
+	{{! The queue: names, and not one number. No parsec count, no index, no note — the deletion test
+	    files it as a note, and the schema says so. }}
+	<div class="queue" data-accept="{{worldType}}" data-queue="">
+		<span class="lbl">{{localize 'MGT2.Voyage.Then'}}</span>
+		{{#each route.queue as |stop|}}
+		<span class="q{{#if stop.zone}} {{stop.zone}}{{/if}}" data-queue="{{stop.index}}">
+			<span class="nm"{{#if ../canEdit}} data-action="queuePromote" data-tooltip="{{localize 'MGT2.Voyage.Promote'}}"{{/if}}>{{#if stop.named}}{{stop.name}}{{else}}&mdash;{{/if}}</span>
+			{{#if ../canEdit}}<a class="x" data-action="queueRemove" data-tooltip="{{localize 'MGT2.Voyage.Forget'}}"><i class="fa-solid fa-xmark"></i></a>{{/if}}
+		</span>
+		{{/each}}
+		{{#unless route.queue.length}}<span class="none">{{localize 'MGT2.Voyage.NothingPlanned'}}</span>{{/unless}}
+	</div>
+
+	{{! Every figure here derives from `here`, `next` and `parsecs`; a dash is not a zero, so a rule
+	    that ran and paid nothing keeps its row. }}
+	<dl class="statline" data-derived="system.voyage">
+		<div class="stat lead">
+			<dt>{{localize 'MGT2.Voyage.FuelThisJump'}}</dt>
+			<dd>{{leg.burn}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i></dd>
+		</div>
+		<div class="stat">
+			<dt>{{localize 'MGT2.Voyage.Astrogation'}}</dt>
+			<dd>{{leg.astrogationDM}}</dd>
+		</div>
+		<div class="stat">
+			<dt>{{localize 'MGT2.Voyage.InJump'}}</dt>
+			<dd class="word">{{localize 'MGT2.Voyage.JumpDuration'}}</dd>
+		</div>
+		<div class="stat">
+			<dt>{{localize 'MGT2.Voyage.JumpControl'}}</dt>
+			<dd>/{{leg.jumpControl}}</dd>
+		</div>
+		<div class="stat{{#if leg.beyondRange}} hurt{{else}} none{{/if}}">
+			<dt>{{localize 'MGT2.Voyage.DriveRange'}}</dt>
+			<dd class="word">{{localize 'MGT2.Voyage.JumpN' n=leg.range}}</dd>
+		</div>
+		<div class="stat{{#unless leg.zoneLabel}} none{{/unless}}{{#if leg.forbidden}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.Voyage.TravelZone'}}</dt>
+			<dd class="word">{{#if leg.zoneLabel}}{{localize leg.zoneLabel}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+	</dl>
+
+	{{#if leg.beyondRange}}
+	<p class="hint">{{localize 'MGT2.Voyage.BeyondRange' n=leg.range}}</p>
+	{{/if}}
+</header>

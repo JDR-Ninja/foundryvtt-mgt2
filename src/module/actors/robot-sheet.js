@@ -237,7 +237,7 @@ export class RobotActorSheet extends TravellerActorSheet {
             term(system.speed.metres, "MGT2.Actor.robot.Chain.metres", { result: true })
         ];
 
-        const money = value => `Cr${value.toLocaleString("en-GB").replace(/,/g, " ")}`;
+        const money = value => `Cr${MGT2Helper.credits(value)}`;
         const cost = [
             term(money(system.sizeRow.cost), `MGT2.RobotSize.${system.size}`),
             term(loco?.costMultiplier ?? 1, loco?.label ?? ""),

@@ -1,7 +1,9 @@
 import { MGT2 } from "./config.js";
+import { Doses } from "./doses.js";
 import { EFFECT_ACTIONS, prepareEffects } from "./effects.js";
 import { MGT2Helper } from "./helper.js";
 import { copyItemWithContents } from "./item.js";
+import { RollPromptHelper } from "./roll-prompt.js";
 import { SheetModeMixin } from "./sheet-mode.js";
 import { appendTraitText, bindTraitInput, prepareTraitBlock, refreshTraitNumbers } from "./traits.js";
 
@@ -9,8 +11,8 @@ const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ItemSheetV2 } = foundry.applications.sheets;
 
 /** Every block the sheet can compose from; each one is a partial of the same name. */
-const BLOCKS = ["roll", "hazard", "specs", "carried", "traits", "relationship", "description",
-  "detail", "notes", "software", "contents", "events", "station", "actions", "effects"];
+const BLOCKS = ["roll", "hazard", "specs", "carried", "traits", "rules", "relationship", "description",
+  "detail", "notes", "software", "contents", "trade", "events", "station", "actions", "effects"];
 
 const blockPath = id => `systems/mgt2/templates/items/blocks/${id}.html`;
 
@@ -22,9 +24,10 @@ const blockPath = id => `systems/mgt2/templates/items/blocks/${id}.html`;
 const SLOT = {
   roll: "masthead", hazard: "masthead",
   specs: "details", relationship: "details", station: "details",
-  traits: "traits",
+  // A round's printed rules are what the trait vocabulary cannot say, so they sit beside it.
+  traits: "traits", rules: "traits",
   contents: "contents", software: "contents", events: "contents", actions: "contents",
-  carried: "contents",
+  trade: "contents", carried: "contents",
   effects: "effects",
   description: "description", detail: "description", notes: "description"
 };
@@ -69,8 +72,12 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       modifierDelete: TravellerItemSheet.#onModifierDelete,
       actionCreate: TravellerItemSheet.#onRoleActionCreate,
       actionDelete: TravellerItemSheet.#onRoleActionDelete,
+      tradeDMCreate: TravellerItemSheet.#onTradeDMCreate,
+      tradeDMDelete: TravellerItemSheet.#onTradeDMDelete,
+      ruleDelete: TravellerItemSheet.#onRuleDelete,
       itemRoll: TravellerItemSheet.#onItemRoll,
       reload: TravellerItemSheet.#onReload,
+      doseTake: TravellerItemSheet.#onDoseTake,
       nestedEdit: TravellerItemSheet.#onNestedEdit,
       nestedRemove: TravellerItemSheet.#onNestedRemove,
       nestedDelete: TravellerItemSheet.#onNestedDelete,
@@ -136,7 +143,14 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     career: ["specs", "effects", "description", "events"],
     contact: ["relationship", "effects", "description", "notes"],
     species: ["specs", "traits", "effects", "description", "detail"],
-    role: ["station", "actions", "effects", "description"]
+    role: ["station", "actions", "effects", "description"],
+    // The three ship-owned types are not carried by anyone, so none of them takes `carried` and none
+    // shows a supply cell. `drug` is deliberately absent: a dose is carried, priced and counted, so
+    // the default list is already the right one for it.
+    cargo: ["specs", "trade", "effects", "description"],
+    passage: ["specs", "effects", "description"],
+    component: ["specs", "effects", "description"],
+    ammunition: ["specs", "carried", "traits", "rules", "effects", "description"]
   };
 
   /* -------------------------------------------- */
@@ -242,6 +256,14 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       containers: actor ? [{ name: "", _id: "" }].concat(actor.getContainers()
         .filter(c => (c.id !== item.id) && !c.containerChain.some(p => p.id === item.id))) : null,
       computers: actor ? [{ name: "", _id: "" }].concat(actor.getComputers()) : null,
+      // Every round the owner carries, whatever it says it fits: `weaponType` is free text because
+      // no book prints a closed list, so it is a hint on the row and never a filter (§9.90).
+      rounds: (actor && (item.type === "weapon"))
+        ? [{ name: game.i18n.localize("MGT2.Items.WeaponsOwn"), _id: "" }]
+          .concat(actor.items.filter(entry => entry.type === "ammunition")) : null,
+      // The counter lives on the Traveller, not on the drug, so that it survives the last dose
+      // being swallowed — which is precisely when it matters most (§9.90).
+      doses: (item.type === "drug") ? Doses.countOf(actor, item.name) : null,
       weight: "weight" in item.system ? item.system.weight : null,
       unitlabels: { weight: MGT2Helper.getWeightLabel() },
       isGM: game.user.isGM,
@@ -253,6 +275,10 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       scale: MGT2.WeaponScales[item.system.scale] ?? null,
       fireModes: this.#fireModes(),
       ammo: this.#ammo(),
+      destination: this.#destination(),
+      citation: this.#citation(),
+      componentTons: this.#componentTons(),
+      trade: this.#tradeColumns(),
       nested: this.#prepareNested(actor)
     });
   }
@@ -271,7 +297,10 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     const tags = [];
 
     if ( type === "talent" ) {
-      if ( system.skill.speciality ) tags.push(system.skill.speciality);
+      if ( system.skill.speciality
+        && !MGT2Helper.nameStatesSpeciality(this.item.name, system.skill.speciality) ) {
+        tags.push(system.skill.speciality);
+      }
       tags.push(`${game.i18n.localize("MGT2.Items.Level")} ${system.level}`);
     }
     if ( type === "weapon" ) tags.push(game.i18n.localize(MGT2.WeaponScales[system.scale]?.label ?? ""));
@@ -288,9 +317,11 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       }
     }
     skills.sort(MGT2Helper.compareByName);
-    // Every other option in the list states the level it contributes; unskilled states its own.
-    return [{ _id: "NP",
-      name: game.i18n.localize("MGT2.Items.NotProficient") + MGT2Helper.getDisplayDM(-3) }].concat(skills);
+    // Every other option in the list states the level it contributes; unskilled states its own —
+    // which folio 69's Jack-of-All-Trades softens by a point per level, so the prompt's own reading
+    // of the rule is what fills the row rather than a second copy of the DM−3.
+    const untrained = RollPromptHelper.untrained(actor);
+    return [{ _id: "NP", name: untrained.label + MGT2Helper.getDisplayDM(untrained.dm) }].concat(skills);
   }
 
   /**
@@ -311,7 +342,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       skill = game.i18n.format("MGT2.Items.LevelValue", { level: MGT2Helper.signed(system.level) });
     }
     else if ( binding.skill === "NP" ) {
-      skill = game.i18n.localize("MGT2.Items.NotProficient") + MGT2Helper.getDisplayDM(-3);
+      const untrained = RollPromptHelper.untrained(actor);
+      skill = untrained.label + MGT2Helper.getDisplayDM(untrained.dm);
     }
     else if ( binding.skill ) skill = actor?.items.get(binding.skill)?.getRollDisplay() ?? null;
 
@@ -340,8 +372,10 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
    * @returns {string[]|null}   Null on anything that is not an Auto weapon
    */
   #fireModes() {
+    // The loaded round's list: a grenade replaces the rifle's traits outright, so Auto goes with
+    // them and the weapon offers no burst while that round is in it (§9.90).
     const auto = (this.item.type === "weapon")
-      ? MGT2Helper.traitScore(this.item.system.traits, "auto") : 0;
+      ? MGT2Helper.traitScore(this.item.system.effective.traits, "auto") : 0;
     if ( auto <= 0 ) return null;
     return Object.values(MGT2.FireModes).map(mode => {
       const label = game.i18n.localize(mode.label);
@@ -365,13 +399,68 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
    */
   #ammo() {
     const { type, system } = this.item;
-    if ( (type !== "weapon") || !(system.magazine > 0) ) return null;
+    // The loaded round's magazine, where one is loaded: a 40mm grenade takes the rifle from 40 to 1
+    // and every number on the weapon's own line is wrong while it is in there (§9.90).
+    const magazine = system.effective?.magazine ?? system.magazine;
+    if ( (type !== "weapon") || !(magazine > 0) ) return null;
     return {
       value: system.ammo,
-      magazine: system.magazine,
-      full: system.ammo >= system.magazine,
-      actions: Math.max(1, MGT2Helper.traitScore(system.traits, "slow-loader"))
+      magazine,
+      full: system.ammo >= magazine,
+      round: system.round?.name ?? null,
+      actions: Math.max(1, MGT2Helper.traitScore(system.effective.traits, "slow-loader"))
     };
+  }
+
+  /**
+   * Where a lot or a booking is bound for, as one name. §6.3 stores the pair degraded — a uuid where
+   * the world exists as an Actor, a bare name where it does not — so the readout takes whichever
+   * half is filled, and a speculative lot has neither (Core p.242).
+   * @returns {string|null}
+   */
+  #destination() {
+    const destination = this.item.system.destination;
+    if ( !destination ) return null;
+    const world = destination.world ? foundry.utils.fromUuidSync(destination.world) : null;
+    return world?.name || destination.name || null;
+  }
+
+  /**
+   * The printed reference as one line, from the two strings §6.1 stores. Either half may stand
+   * alone — a book with no page is still a citation — and neither is prefixed here: `page` holds
+   * whatever the book prints, which is `p.150-152` on one entry and `inside back cover` on another.
+   * @returns {string|null}
+   */
+  #citation() {
+    const source = this.item.system.source;
+    return [source?.book, source?.page].filter(half => half?.trim()).join(", ") || null;
+  }
+
+  /**
+   * §6.2's tonnage triple resolved against the hull this row is fitted to. A component off a ship
+   * has no hull to take a percentage of, and that is the normal state of one in a compendium.
+   * @returns {number|null}
+   */
+  #componentTons() {
+    const item = this.item;
+    if ( item.type !== "component" ) return null;
+    const hull = item.actor?.system.hull?.tons;
+    return hull ? Math.round(item.system.tonsFor(hull) * 10) / 10 : null;
+  }
+
+  /**
+   * Core p.244 keeps a purchase column and a sale column and applies the **largest applicable** DM
+   * rather than their sum, which is why each is a list of (trade code, DM) pairs. One block per
+   * column, the way the trait rows do it.
+   * @returns {object[]|null}
+   */
+  #tradeColumns() {
+    if ( this.item.type !== "cargo" ) return null;
+    const system = this.item.system;
+    return [
+      { property: "purchaseDM", label: "MGT2.Items.PurchaseDM", rows: system.purchaseDM },
+      { property: "saleDM", label: "MGT2.Items.SaleDM", rows: system.saleDM }
+    ];
   }
 
   /**
@@ -402,10 +491,11 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
    */
   #prepareNested(actor) {
     const item = this.item;
-    const isComputer = item.type === "computer";
-    if ( !isComputer && (item.type !== "container") ) return [];
+    // A fitted augment with Processing hosts software exactly as a computer does (§9.84).
+    const isHost = MGT2Helper.runsSoftware(item);
+    if ( !isHost && (item.type !== "container") ) return [];
 
-    const held = isComputer
+    const held = isHost
       ? (actor?.items.filter(i => i.system.software?.computerId === item.id) ?? [])
       : item.contents;
 
@@ -493,7 +583,16 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     }
 
     if ( system?.quantity !== undefined ) system.quantity = MGT2Helper.getIntegerFromInput(system.quantity);
-    if ( system?.cost !== undefined ) system.cost = MGT2Helper.getIntegerFromInput(system.cost);
+    // A ship component is priced in MCr and carries decimals, so the conversion asks the schema
+    // rather than the field's name — truncating it silently costs a drive most of its price.
+    if ( system?.cost !== undefined ) {
+      system.cost = this.item.system.schema.fields.cost.integer
+        ? MGT2Helper.getIntegerFromInput(system.cost) : MGT2Helper.getNumberFromInput(system.cost);
+    }
+
+    // `rules[]` refuses a blank entry, so emptying a row is how it is deleted and the trailing input
+    // is how one is added — otherwise clearing the text raises a validation error nobody can act on.
+    if ( system?.rules ) system.rules = Object.values(system.rules).filter(rule => rule?.trim());
 
     // The chip row lets a printed parameter be retyped; the number a rule reads follows from it.
     for ( const property of ["traits", "options"] ) refreshTraitNumbers(system?.[property]);
@@ -560,6 +659,29 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     return TravellerItemSheet.#removeEntry.call(this, "actions", Number(element.dataset.actionsPart));
   }
 
+  /**
+   * Purchase and sale are two columns of the same table (Core p.244), so the row goes to whichever
+   * one asked for it rather than to a handler each.
+   * @this {TravellerItemSheet}
+   */
+  static #onTradeDMCreate(event, target) {
+    const property = target.closest("[data-property]").dataset.property;
+    return TravellerItemSheet.#appendEntry.call(this, property, { code: "", dm: 0 });
+  }
+
+  /** @this {TravellerItemSheet} */
+  static #onTradeDMDelete(event, target) {
+    const element = target.closest("[data-dm-index]");
+    const property = element.closest("[data-property]").dataset.property;
+    return TravellerItemSheet.#removeEntry.call(this, property, Number(element.dataset.dmIndex));
+  }
+
+  /** @this {TravellerItemSheet} */
+  static #onRuleDelete(event, target) {
+    const element = target.closest("[data-rule-index]");
+    return TravellerItemSheet.#removeEntry.call(this, "rules", Number(element.dataset.ruleIndex));
+  }
+
   /** @this {TravellerItemSheet} */
   static #onModifierCreate() {
     return TravellerItemSheet.#appendEntry.call(this, "modifiers", { characteristic: "endurance", value: null });
@@ -593,8 +715,13 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
    * Action — and the button says so rather than spending one.
    * @this {TravellerItemSheet}
    */
+  /** A dose is taken, not equipped — everything that follows from that is in `doses.js` (§9.90). */
+  static #onDoseTake() {
+    return Doses.take(this.item);
+  }
+
   static #onReload() {
-    return this.item.update({ "system.loaded": this.item.system.magazine });
+    return this.item.update({ "system.loaded": this.item.system.effective.magazine });
   }
 
   /* -------------------------------------------- */
@@ -672,7 +799,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
    * @this {TravellerItemSheet}
    */
   static async #onNestedRemove(event, target) {
-    const field = this.item.type === "computer" ? "system.software.computerId" : "system.container.id";
+    const field = MGT2Helper.runsSoftware(this.item)
+      ? "system.software.computerId" : "system.container.id";
     await TravellerItemSheet.#nestedItem.call(this, target)?.update({ [field]: "" });
     return this.render();
   }

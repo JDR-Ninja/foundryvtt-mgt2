@@ -1,4 +1,4 @@
-import { CHECK } from "../chat-message.js";
+import { Checks } from "../checks.js";
 import { MGT2 } from "../config.js";
 import { MGT2Helper } from "../helper.js";
 import { RollPromptHelper } from "../roll-prompt.js";
@@ -403,9 +403,18 @@ export class VehicleActorSheet extends TravellerActorSheet {
         const driver = system.driverActor;
         if (!driver) return ui.notifications.warn(game.i18n.localize("MGT2.Actor.vehicle.NoDriver"));
 
+        // Folio 141: a critical's Control DM stands on control checks, and both actions here are
+        // control checks — they roll the chassis skill. Read off `criticalEffects` and not off
+        // `modifiers.check.sources`, which is the mounted weapon's list: the Systems half belongs to
+        // neither roll, and a dogfight is not an attack.
+        const modifiers = [];
+        if (system.criticalEffects.controlDM !== 0) {
+            modifiers.push({ key: "criticalControl", label: "MGT2.Actor.vehicle.ControlDM",
+                dm: system.criticalEffects.controlDM });
+        }
+
         // "All skill checks used in these actions use the Agility of the vehicle as a DM" — as a row
         // the referee can untick, which is the treatment a ship's own station DM already gets.
-        const modifiers = [];
         if (system.agilityEffective !== 0) {
             modifiers.push({ key: "agility", label: "MGT2.Actor.vehicle.Agility",
                 dm: system.agilityEffective });
@@ -439,20 +448,18 @@ export class VehicleActorSheet extends TravellerActorSheet {
         const { formula, modifiers: named, chainSources } =
             RollPromptHelper.terms(data, driver, modifiers);
         if (MGT2Helper.hasValue(data, "difficulty")) rollOptions.difficulty = data.difficulty;
-        if (!Roll.validate(formula)) {
-            return ui.notifications.error(game.i18n.localize("MGT2.Errors.InvalidRollFormula"));
-        }
 
-        const roll = await new Roll(formula, driver.getRollData()).roll();
-        const against = MGT2Helper.getEffectTarget(rollOptions.difficulty);
-        const effect = roll.total - against.value;
-        const opposed = RollPromptHelper.opposedResult(data, effect);
-        const outcome = await this.#resolveAction(action, effect, opposed);
+        const scored = await Checks.resolve({
+            formula, rollData: driver.getRollData(),
+            difficulty: rollOptions.difficulty, prompt: data
+        });
+        if (!scored) return;
 
-        return VehicleActorSheet.#postAction(this.actor, driver, {
-            roll, action, effect, against, opposed, outcome,
-            modifiers: named, chainSources, difficulty: rollOptions.difficulty,
-            mode: data.rollMode
+        const outcome = await this.#resolveAction(action, scored.effect, scored.opposed);
+
+        return VehicleActorSheet.#postAction(this.actor, driver, scored, {
+            action, outcome, modifiers: named, chainSources,
+            difficulty: rollOptions.difficulty, mode: data.rollMode
         });
     }
 
@@ -504,55 +511,25 @@ export class VehicleActorSheet extends TravellerActorSheet {
      * read its target (Appendix B), so a dogfight's DM-2 and evasive action's negative DM reach the
      * attacker as a line a referee reads out.
      */
-    static async #postAction(vehicle, driver, context) {
-        const { roll, action, effect, against, opposed, outcome } = context;
-        const band = MGT2Helper.getEffectBand(effect);
-        const lines = [];
-        if (opposed) {
-            lines.push(game.i18n.format("MGT2.Chat.Roll.OpposedLine", {
-                source: opposed.label || game.i18n.localize("MGT2.RollPrompt.Opposed"),
-                effect: MGT2Helper.signed(opposed.effect, "+0"),
-                outcome: game.i18n.localize(`MGT2.Chat.Roll.Opposed.${opposed.outcome}`)
-            }));
-        }
-        lines.push(game.i18n.format(outcome, {
-            dm: MGT2Helper.signed(-effect, "+0"),
-            carry: opposed ? Math.abs(effect - opposed.effect) : 0
-        }));
-
-        const message = {
-            speaker: ChatMessage.getSpeaker({ actor: driver }),
-            type: CHECK,
-            system: {
-                effect, target: against.value, assumed: against.assumed,
-                label: game.i18n.localize(action.label),
-                previous: context.chainSources.map(source => source.id), opposed
-            }
-        };
-        message.content = await foundry.applications.handlebars.renderTemplate(
-            "systems/mgt2/templates/chat/roll.html", {
-                formula: roll.formula,
-                tooltip: await roll.getTooltip(),
-                total: Math.round(roll.total * 100) / 100,
-                showButtons: true,
-                rollTypeName: vehicle.name,
-                rollObjectName: game.i18n.localize(action.label),
-                rollModifiers: context.modifiers,
-                rollDifficulty: context.difficulty,
-                rollDifficultyLabel: MGT2Helper.getDifficultyDisplay(context.difficulty),
-                rollTarget: against.value,
-                rollTargetAssumed: against.assumed,
-                effect,
-                effectDisplay: MGT2Helper.signed(effect, "+0"),
-                effectBand: band.label,
-                effectTone: band.tone,
-                rollMessage: lines.join(" · "),
-                opposedMessage: opposed?.message ?? null,
-                chainedFrom: context.chainSources,
-                chainTotal: MGT2Helper.signed(
-                    context.chainSources.reduce((sum, source) => sum + source.dm, 0), "+0")
-            });
-        return roll.toMessage(message, { messageMode: context.mode });
+    static async #postAction(vehicle, driver, scored, context) {
+        const { action, outcome } = context;
+        const label = game.i18n.localize(action.label);
+        const opposed = scored.opposed;
+        return Checks.post(scored, {
+            actor: driver,
+            label,
+            mode: context.mode,
+            rollTypeName: vehicle.name,
+            rollObjectName: label,
+            difficulty: context.difficulty,
+            modifiers: context.modifiers,
+            chainSources: context.chainSources,
+            showButtons: true,
+            lines: [game.i18n.format(outcome, {
+                dm: MGT2Helper.signed(-scored.effect, "+0"),
+                carry: opposed ? Math.abs(scored.effect - opposed.effect) : 0
+            })]
+        });
     }
 
     /** Both actions last a round and nothing on the sheet can watch for one. @this {VehicleActorSheet} */

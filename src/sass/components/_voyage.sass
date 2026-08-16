@@ -1,0 +1,471 @@
+// The voyage screen. Ported from docs/sketch-voyage.html: the statline, the fuel budget, the world
+// code rows, the roster and the segmented control are the kit unchanged, and what is here is the
+// window skeleton plus the two things this screen owns — the leg and the queue.
+//
+// The window grid is a sixth copy of the five in `utils/_window.sass` and it lives here rather than
+// there because the screen is not a sheet and the file that holds it is the one this build owns.
+
+.mgt2.application.voyage
+	container-type: inline-size
+	container-name: sheet
+
+	> .window-content
+		display: grid
+		grid-template-columns: 21rem minmax(0, 1fr)
+		grid-template-rows: auto minmax(0, 1fr)
+		grid-template-areas: "header header" "rail panel"
+		height: 100%
+		overflow: hidden
+
+		> [data-application-part="header"]
+			grid-area: header
+		> [data-application-part="rail"]
+			grid-area: rail
+			min-height: 0
+		> [data-application-part="panel"]
+			grid-area: panel
+			min-height: 0
+
+// --------------------------------------------
+//  The header
+// --------------------------------------------
+
+.mgt2 .mgt2-voyage-head
+	display: flex
+	flex-direction: column
+	gap: 9px
+	padding: 11px 16px 13px
+	border-bottom: 1px solid var(--rule)
+
+	.top
+		display: flex
+		flex-wrap: wrap
+		align-items: baseline
+		gap: 10px
+		h2
+			margin: 0
+			font-family: var(--cond)
+			font-size: 15px
+			font-weight: 700
+			letter-spacing: 0.14em
+			text-transform: uppercase
+		.of
+			font-family: var(--cond)
+			font-size: 11px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--faint)
+		.ship
+			margin-left: auto
+			font-family: var(--mono)
+			font-size: 10.5px
+			color: var(--faint)
+
+// --------------------------------------------
+//  THE LEG — the one genuinely new component
+// --------------------------------------------
+// A voyage is not an ordered array with a cursor. No printed rule looks past the next jump: the
+// jump cuts the ship off entirely and the Plot is made on the way out to the 100-diameter limit
+// (Core p.158). So exactly one pair exists at a time, and the parsec count between them is a
+// property of THAT PAIR — which is why the hop is drawn between the two ends and belongs to
+// neither. There is no current-index pip to draw, because there is no index (§9.33.2).
+
+.mgt2 .leg
+	display: grid
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr)
+	align-items: stretch
+	border: 1px solid var(--rule-soft)
+
+	.end
+		position: relative
+		display: flex
+		flex-direction: column
+		gap: 2px
+		min-width: 0
+		padding: 8px 11px 9px
+		.role
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 700
+			letter-spacing: 0.16em
+			text-transform: uppercase
+			color: var(--faint)
+		b
+			overflow: hidden
+			font-family: var(--cond)
+			font-size: 15px
+			font-weight: 700
+			letter-spacing: 0.08em
+			line-height: 1.1
+			text-overflow: ellipsis
+			text-transform: uppercase
+			white-space: nowrap
+		a[data-action]
+			cursor: var(--cursor-pointer)
+		.uwp
+			font-family: var(--mono)
+			font-size: 10.5px
+			color: var(--mute)
+			input.f
+				width: 100%
+		.zone
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 700
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: color-mix(in oklab, var(--danger) 70%, var(--ink))
+			&.bad
+				color: var(--danger)
+		.rm
+			position: absolute
+			top: 6px
+			right: 8px
+			font-size: 11px
+			color: var(--faint)
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--danger)
+	.end.to
+		border-left: 1px solid var(--rule-soft)
+	.end.here b
+		color: var(--accent-text)
+	// A slot with nothing in it is a drop target before anything has been dragged.
+	.end.vacant
+		border: 1px dashed var(--rule)
+		b
+			color: var(--faint)
+
+	.hop
+		display: flex
+		flex-direction: column
+		align-items: center
+		justify-content: center
+		gap: 1px
+		padding: 6px 13px
+		border-left: 1px solid var(--rule-soft)
+		border-right: 1px solid var(--rule-soft)
+		background: var(--accent-soft)
+		input.f
+			width: 2.8rem
+			text-align: center
+		.v
+			font-family: var(--mono)
+			font-size: 15px
+			font-variant-numeric: tabular-nums
+			color: var(--accent-text)
+		.u
+			font-family: var(--cond)
+			font-size: 9px
+			font-weight: 700
+			letter-spacing: 0.16em
+			text-transform: uppercase
+			color: var(--faint)
+
+// --------------------------------------------
+//  THE QUEUE — names, and nothing else
+// --------------------------------------------
+// The deletion test puts this on the far side of the line from the leg: lose it and a referee
+// retypes three world names, so it is a note. It therefore carries no parsec count, no index and no
+// derived figure — the moment a number appears here the array has grown a cursor again.
+
+.mgt2 .queue
+	display: flex
+	flex-wrap: wrap
+	align-items: center
+	gap: 6px
+	min-height: 1.6rem
+	.lbl
+		letter-spacing: 0.16em
+		font-size: 9.5px
+		color: var(--faint)
+	.q
+		display: inline-flex
+		align-items: center
+		gap: 5px
+		padding: 1px 7px 2px
+		border: 1px solid var(--rule)
+		border-radius: 2px
+		background: var(--paper)
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.09em
+		text-transform: uppercase
+		white-space: nowrap
+		.nm[data-action]
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
+		.x
+			font-size: 10px
+			color: var(--faint)
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--danger)
+	// An Amber Zone is a caution and a Red Zone a prohibition (Core p.261), so the two share the
+	// status colour and differ only in weight. The palette is one accent over two anchors and it
+	// carries no third hue; a diluted danger says "careful" without inventing one.
+	.q.amber
+		border-color: color-mix(in oklab, var(--danger) 45%, transparent)
+		color: color-mix(in oklab, var(--danger) 70%, var(--ink))
+	.q.red
+		border-color: var(--danger)
+		color: var(--danger)
+	.none
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--faint)
+
+// --------------------------------------------
+//  The rail's three controls
+// --------------------------------------------
+// The clock is the referee's: nothing subscribes to worldTime and no roll advances the leg
+// (§9.35). This button does, and only this.
+
+.mgt2 .advance
+	display: flex
+	align-items: center
+	gap: 9px
+	button
+		height: auto
+		padding: 5px 12px 6px
+		border: 1px solid var(--accent-text)
+		border-radius: 2px
+		background: var(--accent-text)
+		font: inherit
+		font-family: var(--cond)
+		font-size: 11px
+		font-weight: 700
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		color: var(--paper)
+		cursor: var(--cursor-pointer)
+		&[disabled]
+			border-color: var(--rule)
+			background: none
+			color: var(--faint)
+			cursor: default
+	.why
+		font-family: var(--cond)
+		font-size: 9.5px
+		letter-spacing: 0.11em
+		text-transform: uppercase
+		color: var(--faint)
+
+// The stored level beside the budget: the cap is design tonnage and the row is the real level, so
+// only the second is typed.
+.mgt2 .tank
+	display: flex
+	align-items: baseline
+	justify-content: space-between
+	gap: 8px
+	margin-top: 6px
+	input.f
+		width: 5rem
+		text-align: right
+
+// The two-stage jump control. Plot chains into Jump (Core p.158) and the chain DM is the shipped
+// `previous`/`taskChainDM` path, so both stages raise the ordinary roll prompt and store nothing.
+.mgt2 .stage2
+	display: grid
+	grid-template-columns: repeat(2, minmax(0, 1fr))
+	gap: 7px
+	.st
+		display: flex
+		flex-direction: column
+		gap: 3px
+		padding: 6px 8px 7px
+		border: 1px solid var(--rule)
+	button.nm
+		height: auto
+		padding: 0
+		border: none
+		background: none
+		font: inherit
+		font-family: var(--cond)
+		font-size: 11px
+		font-weight: 700
+		letter-spacing: 0.12em
+		text-align: left
+		text-transform: uppercase
+		color: var(--accent-text)
+		cursor: var(--cursor-pointer)
+		&:hover
+			text-decoration: underline
+		&[disabled]
+			color: var(--faint)
+			cursor: default
+			text-decoration: none
+	.tgt
+		font-family: var(--mono)
+		font-size: 10px
+		color: var(--faint)
+	.dms
+		display: flex
+		flex-wrap: wrap
+		gap: 4px
+		margin-top: 1px
+	.dm
+		padding: 0 4px 1px
+		border: 1px solid var(--rule-soft)
+		border-radius: 2px
+		font-family: var(--mono)
+		font-size: 9.5px
+		color: var(--mute)
+		// A modifier the system states and deliberately does not compute — the 100-diameter limit
+		// is a position nothing tracks, and the maintenance counter was declined (§9.33.10 Q4).
+		&.inert
+			opacity: 0.55
+		&.neg
+			border-color: var(--danger)
+			color: var(--danger)
+
+.mgt2 p.hint.bad
+	color: var(--danger)
+
+// Adaptive: the rail becomes a band above the panel, then the leg stacks its two ends. Under 560px
+// the hop turns into a row, because a column of three between two stacked cards reads as a third
+// stop rather than as the distance between the other two.
+// --------------------------------------------
+//  The misjump block
+// --------------------------------------------
+// The one place the `ruleset` enum decides anything (§9.89). Everything below the inputs is a
+// reading of dice already rolled: no state, no colour of its own, and the two grades of trouble
+// share `--danger` with every other warning in the system.
+
+.mgt2 .block.misjump
+	.effects
+		display: grid
+		grid-template-columns: repeat(3, minmax(0, 1fr))
+		gap: 8px 12px
+		margin-bottom: 9px
+		.fld
+			display: flex
+			flex-direction: column
+			gap: 2px
+			min-width: 0
+			.lbl
+				font-family: var(--cond)
+				font-size: 9px
+				font-weight: 700
+				letter-spacing: 0.15em
+				text-transform: uppercase
+				color: var(--faint)
+			.f
+				font-family: var(--mono)
+			.f.n
+				text-align: right
+		.fld.wide
+			grid-column: span 2
+
+	// The verdicts, in the order the folios resolve them: the trigger, then the grade of jump it
+	// earns. A chip and not a sentence, because the sentence is the table row underneath.
+	ul.verdict
+		display: flex
+		flex-wrap: wrap
+		gap: 5px
+		margin: 8px 0 0
+		padding: 0
+		list-style: none
+		.v
+			padding: 1px 7px 2px
+			border: 1px solid var(--rule)
+			border-radius: 2px
+			font-family: var(--cond)
+			font-size: 10px
+			font-weight: 700
+			letter-spacing: 0.11em
+			text-transform: uppercase
+			color: var(--mute)
+		.v.warn
+			border-color: color-mix(in oklab, var(--danger) 45%, transparent)
+			color: color-mix(in oklab, var(--danger) 70%, var(--ink))
+		.v.bad
+			border-color: var(--danger)
+			color: var(--danger)
+
+	table.rows.variance
+		margin-top: 9px
+		td.n
+			font-family: var(--mono)
+			font-size: 11.5px
+			font-variant-numeric: tabular-nums
+			white-space: nowrap
+		// What the page prints, beside what it rolled — the pair is the whole audit.
+		td.n.dim
+			color: var(--faint)
+		td.outcome
+			font-size: 12.5px
+			line-height: 1.45
+		td.nm .src
+			display: block
+			margin-top: 1px
+			font-family: var(--mono)
+			font-size: 9.5px
+			color: var(--faint)
+		tr.bad td.nm
+			color: var(--danger)
+		.chip
+			display: inline-block
+			margin-left: 5px
+			padding: 0 4px 1px
+			border: 1px solid var(--rule-soft)
+			border-radius: 2px
+			font-size: 9.5px
+			color: var(--mute)
+		.chip.bad
+			border-color: var(--danger)
+			color: var(--danger)
+
+	p.outcome
+		margin: 8px 0 0
+		font-size: 13px
+		line-height: 1.5
+	p.outcome.bad
+		color: var(--danger)
+
+	// Stated and never rolled: everyone aboard makes these, and none of those Actors is this
+	// screen's (§9.35).
+	.aftermath
+		margin-top: 10px
+		padding-top: 9px
+		border-top: 1px solid var(--rule-soft)
+		p
+			margin: 0 0 5px
+			font-size: 12.5px
+			line-height: 1.5
+		p:last-child
+			margin-bottom: 0
+
+@container sheet (max-width: 880px)
+	.mgt2.application.voyage > .window-content
+		grid-template-columns: minmax(0, 1fr)
+		grid-template-rows: auto auto minmax(0, 1fr)
+		grid-template-areas: "header" "rail" "panel"
+
+	.mgt2 .mgt2-rail
+		border-right: 0
+		border-bottom: 1px solid var(--rule)
+
+@container sheet (max-width: 560px)
+	.mgt2 .leg
+		grid-template-columns: minmax(0, 1fr)
+		.end.to
+			border-left: 0
+			border-top: 1px solid var(--rule-soft)
+		.hop
+			flex-direction: row
+			gap: 6px
+			border-left: 0
+			border-right: 0
+			border-top: 1px solid var(--rule-soft)
+
+	.mgt2 .stage2
+		grid-template-columns: minmax(0, 1fr)
+
+	.mgt2 .block.misjump .effects
+		grid-template-columns: repeat(2, minmax(0, 1fr))
+		.fld.wide
+			grid-column: span 2

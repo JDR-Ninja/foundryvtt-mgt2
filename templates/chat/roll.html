@@ -34,6 +34,12 @@
 	{{#if psiLine}}
 	<div class="cmsg">{{psiLine}}</div>
 	{{/if}}
+	{{! Core folio 75: what the interrupted Extended Action check cost the work. Beside the opposed
+	    verdict rather than under the Effect, because both are the same thing — a sentence the Effect
+	    resolves to, which the referee applies and the system never writes anywhere. }}
+	{{#if extendedLine}}
+	<div class="cmsg">{{extendedLine}}</div>
+	{{/if}}
 	{{#if rollMessage}}
 	<div class="cmsg{{#if opposedMessage}} jump{{/if}}"{{#if opposedMessage}} data-action="chainSource" data-message-id="{{opposedMessage}}"{{/if}}>{{rollMessage}}</div>
 	{{/if}}
@@ -73,6 +79,15 @@
 		{{/if}}
 		{{#if showRollDamage}}
 		<button data-action="rollDamage">{{#if damageCarriesEffect}}{{localize 'MGT2.Chat.Roll.DamagesWithEffect' effect=effectDisplay}}{{else}}{{ localize 'MGT2.Chat.Roll.Damages' }}{{/if}}</button>
+		{{/if}}
+		{{! Core folio 78: the opposed Melee check is the grapple, so the card that scored it is where
+		    the winner picks what it did. Nothing here names the loser — the outcome that wounds posts
+		    the wound as an ordinary damage offer, applied to whoever the referee selects. }}
+		{{#if grapple}}
+		<button data-action="grapple"><i class="fa-solid fa-hands-bound"></i>{{localize 'MGT2.Grapple.Resolve'}}</button>
+		{{/if}}
+		{{#if applyLabel}}
+		<button data-action="damage"><i class="fa-regular fa-heart-circle-minus"></i><span>{{applyLabel}}</span></button>
 		{{/if}}
 		{{#each cardButtons as |cardButton i|}}
 		<button data-index="{{i}}">{{cardButton.label}}</button>

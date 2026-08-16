@@ -1,6 +1,5 @@
 {
   "TYPES.Item.armor": "Armure",
-  "TYPES.Item.augment": "Augmentation",
   "TYPES.Item.career": "Carrière",
   "TYPES.Item.contact": "Contact",
   "TYPES.Item.computer": "Ordinateur",
@@ -19,6 +18,24 @@
   "TYPES.HINTS.CombatantGroup.ship": "Un vaisseau et son équipage, avec la Poussée que son pilote répartit.",
   "TYPES.Item.container": "Contenant (sac, coffre)",
   "TYPES.Item.role": "Poste d'équipage",
+  "TYPES.Item.cargo": "Lot de fret",
+  "TYPES.HINTS.Item.cargo": "Un lot en soute : du fret avec une destination et une échéance, ou un achat spéculatif qui n'a ni l'une ni l'autre.",
+  "TYPES.Item.passage": "Passage",
+  "TYPES.HINTS.Item.passage": "Une réservation plutôt qu'un passager : une classe, un nombre de places et un tarif, pour un seul saut.",
+  "TYPES.Item.component": "Composant de vaisseau",
+  "TYPES.HINTS.Item.component": "Une ligne du plan d'un vaisseau. Facultatif : un vaisseau stocke ses propres caractéristiques et reste complet sans aucun composant.",
+  "TYPES.Item.drug": "Drogue",
+  "TYPES.HINTS.Item.drug": "Une dose, ce qu'elle fait et ce qu'elle laisse derrière elle. Les champs de durée restent vides là où le livre n'en donne pas.",
+  "TYPES.Item.ammunition": "Munitions",
+  "TYPES.HINTS.Item.ammunition": "Des munitions, et ce qu'elles remplacent sur l'arme qui les tire. Un champ vide signifie « celui de l'arme ».",
+  "TYPES.RegionBehavior.gravity": "Gravité",
+  "TYPES.HINTS.RegionBehavior.gravity": "Indique la tranche et le DM qu'elle coûte. Elle ne les applique pas : une forte gravité dure jusqu'à l'acclimatation, ce qu'aucune horloge de Foundry ne sait dire.",
+  "TYPES.RegionBehavior.temperature": "Température",
+  "TYPES.HINTS.RegionBehavior.temperature": "Indique la température ambiante, les dégâts et l'intervalle. Seules les lignes par round pourraient se déclencher seules.",
+  "TYPES.RegionBehavior.vacuum": "Vide",
+  "TYPES.HINTS.RegionBehavior.vacuum": "Indique la pression, les dégâts et si l'effet s'aggrave. Une brèche dans la combinaison décale toute la table.",
+  "TYPES.RegionBehavior.radiation": "Radiations",
+  "TYPES.HINTS.RegionBehavior.radiation": "Indique la dose et ce que la région absorbe elle-même, avant l'armure du Voyageur.",
   "TYPES.Actor.character": "Voyageur",
   "TYPES.Actor.npc": "PNJ",
   "TYPES.HINTS.Actor.npc": "Une personne ou une créature dirigée par l'arbitre. Un seul type, deux préréglages.",
@@ -28,7 +45,10 @@
   "TYPES.HINTS.Actor.spacecraft": "Un vaisseau ou une petite navette : coque, propulseurs, trois budgets, une liste d'équipage et des appareils embarqués.",
   "TYPES.Actor.robot": "Robot",
   "TYPES.HINTS.Actor.robot": "Un robot ou un drone : des Hits, un budget d'emplacements et un cerveau. Cochez l'indicateur Voyageur pour un robot joueur.",
-  "TYPES.Actor.container": "Contenant (sac, coffre)",
+  "TYPES.Actor.world": "Monde",
+  "TYPES.HINTS.Actor.world": "Un Profil Universel de Monde, et tout ce que les huit chiffres disent déjà : codes commerciaux, qualité et prix du carburant, et les modificateurs des deux tables de trafic.",
+  "TYPES.Actor.stash": "Réserve",
+  "TYPES.HINTS.Actor.stash": "Un inventaire que personne ne porte — un tas de butin, le stock d'une boutique, une cache. Il a ses propres permissions, et c'est toute la raison d'en faire un Acteur.",
   "MGT2": {
     "CombatReactions": {
       "dodge": "Esquive",
@@ -77,8 +97,12 @@
     },
     "Settings": {
       "theme": {
-        "name": "Thème",
-        "hint": "Choisissez un thème"
+        "name": "Thème de couleurs",
+        "hint": "La palette utilisée par les feuilles et les fenêtres de ce système. Elle n'appartient qu'à vous : elle ne change rien pour les autres à la table."
+      },
+      "campaignDay": {
+        "name": "Jour de campagne",
+        "hint": "Jours écoulés depuis le jour que vous avez appelé zéro. Rien ne l'avance : c'est vous. Le commerce spéculatif le lit — un fournisseur que l'on quitte reste fermé un mois, et un mois vaut 28 jours."
       },
       "useWeightMetric": {
         "name": "Utiliser le Système Métrique pour le Poids",
@@ -99,6 +123,69 @@
       "showLife": {
         "name": "Afficher la Vie sur la fiche",
         "hint": "Affiche le compteur de vie sur la fiche"
+      },
+      "worldPacks": {
+        "name": "Compendiums du monde",
+        "hint": "Crée les compendiums vides qui accueilleront votre bibliothèque. Ils sont créés vides et restent les vôtres à remplir.",
+        "label": "Créer les compendiums"
+      }
+    },
+    "Packs": {
+      "title": "Compendiums du monde",
+      "hint": "Ces compendiums sont créés vides. Aucun texte de règles ni équipement n'est fourni avec le système — recopiez-y ce qui vient des livres que vous possédez.",
+      "folder": "Traveller",
+      "folderHint": "Ils sont regroupés dans le dossier {folder} et laissés déverrouillés : vous pouvez y écrire immédiatement. Rien n'est jamais supprimé ni écrasé ici.",
+      "create": "Créer",
+      "visible": "visible par les joueurs",
+      "gmOnly": "arbitre seulement",
+      "exists": "déjà créé",
+      "created": "{count} compendium(s) créé(s) dans le dossier {folder}.",
+      "nothing": "Rien à créer — tous les compendiums cochés existent déjà.",
+      "failed": "Impossible de créer le compendium {label}.",
+      "labels": {
+        "library": "Bibliothèque",
+        "ships": "Vaisseaux et véhicules",
+        "npcs": "PNJ et créatures",
+        "tables": "Tables",
+        "notes": "Notes et documents"
+      }
+    },
+    "Compendium": {
+      "Docs": "MGT2 — Ce que ce système fait des règles"
+    },
+    "Explorer": {
+      "Title": "Explorateur de compendiums",
+      "Open": "Explorer",
+      "Search": "Rechercher",
+      "SearchHint": "le nom contient…",
+      "Class": "Document",
+      "Type": "Type",
+      "SubType": "Sous-type",
+      "Scale": "Échelle",
+      "TL": "Niveau technologique",
+      "Min": "min",
+      "Max": "max",
+      "Any": "indifférent",
+      "All": "tous",
+      "None": "aucun",
+      "Reset": "Réinitialiser",
+      "ReadOnly": "Lecture seule — ce compendium appartient à un module ou au système",
+      "Count": "{matched} sur {total}",
+      "Capped": "les {shown} premiers sur {matched} — affinez la recherche pour voir la suite",
+      "Loading": "{n} index de compendium en cours de chargement",
+      "Withheld": "{n} ligne(s) retenue(s) tant que leur index n'est pas arrivé",
+      "Arriving": "Les index arrivent encore — un NT ou un sous-type ne peut pas encore être lu.",
+      "Empty": "Aucun résultat.",
+      "Columns": {
+        "name": "Nom",
+        "type": "Type",
+        "tl": "NT",
+        "pack": "Compendium"
+      },
+      "Sources": {
+        "world": "Ce monde",
+        "system": "Système",
+        "module": "Modules"
       }
     },
     "Specie": "Espèce",
@@ -191,6 +278,7 @@
       "EditWeapon": "Éditer Arme",
       "EditWound": "Éditer Blessure",
       "ArmorSkill": "{armor} exige {skill}",
+      "AugmentSkill": "{augment} améliore {skill}",
       "Encumbrance": "Encombrement",
       "EncumbranceFlag": "MD−2",
       "EncumbranceHint": "MD -2 à tous les tests d'action physique. Elles comptent aussi comme un travail de force.",
@@ -545,6 +633,16 @@
         "Cargo": "Cargaison",
         "CargoCapacity": "Soute",
         "Bridge": "Passerelle",
+        "BridgeTons": "Tonnage de passerelle",
+        "BridgeCost": "Coût de passerelle",
+        "Holographic": "Commandes holographiques",
+        "HolographicTLHint": "Les commandes holographiques sont disponibles à partir du NT9 (Garde Haute p.51). Cette coque est en dessous — le MD+2 s'applique quand même ; la conception, non.",
+        "ArmourTons": "Tonnage de blindage",
+        "PowerDraw": "Consommation",
+        "Printed": "imprimé",
+        "PrintedFigures": "Valeurs imprimées",
+        "PrintedCount": "le livre contre la formule",
+        "PrintedHint": "Une formule est un défaut ; une fiche imprimée est une donnée. Laissez une case vide et la valeur est calculée ; saisissez ce qu'imprime la page du vaisseau et c'est elle qui l'emporte, marquée « imprimé » partout où elle s'affiche. Le nombre grisé est ce que donne le calcul.",
         "Sensors": "Capteurs",
         "Scale": "Échelle",
         "Processing": "Processeur",
@@ -617,6 +715,10 @@
         "BandRounds": "{rounds} rounds",
         "Dogfight": "combat rapproché",
         "CarriedCraft": "Appareils embarqués",
+        "BayCount": "{bays} baies · {craft} appareils",
+        "Each": "chacun",
+        "HowMany": "Combien d'appareils dans cette baie",
+        "TonsEach": "Tonnes que coûte chaque appareil à la coque",
         "AddBay": "Ajouter une baie",
         "DeleteBay": "Retirer cette baie",
         "Bay": "Baie",
@@ -827,6 +929,201 @@
         "Attacks": "Attaques",
         "AttackHint": "Les attaques sont des Items arme marqués naturels, exactement comme celles d'une créature. Deux règles que l'Item doit porter et que celui d'une créature n'a pas : un robot n'attaque avec un manipulateur que s'il a un module de Mêlée, à raison d'environ taille du manipulateur ÷ 2 dés, et les modules de compétences s'appliquent aux armes que le robot tient tandis que les armes installées en lui sont résolues par les options de conduite de tir.",
         "SkillHint": "Le niveau de compétence enregistré d'un robot ne dépasse jamais {n} ; le niveau imprimé peut être plus élevé parce que le MD de caractéristique y est intégré. Jack-of-all-Trades n'est jamais disponible pour un robot."
+      },
+      "world": {
+        "Ref": "MGT2 · MONDE",
+        "GM": "MJ",
+        "Profile": "Profil",
+        "Paste": "Coller un PUM",
+        "PasteHint": "les huit cases sont stockées, la ligne n'en est qu'une lecture",
+        "PasteFailed": "« {line} » n'est pas un Profil Universel de Monde.",
+        "GasGiantsN": "{n} géantes gazeuses",
+        "Starport": "Astroport",
+        "StarportDM": "MD d'astroport",
+        "Fuel": "Carburant",
+        "FuelGrade": {
+          "refined": "Raffiné",
+          "unrefined": "Non raffiné",
+          "none": "Aucun"
+        },
+        "FuelPrice": "Par tonne",
+        "PerDie": "Par dé",
+        "Bases": "Bases",
+        "Zone": "Zone de voyage",
+        "Forbidden": "Une Zone Rouge est interdite : on n'y propose ni passagers, ni fret, ni courrier.",
+        "Berthing": "Amarrage",
+        "BerthingCount": "lancé une fois, conservé",
+        "BerthingBand": "1D × Cr{amount} par semaine",
+        "BerthingRoll": "Lancer",
+        "BerthingClear": "Effacer",
+        "BerthingFree": "Gratuit",
+        "BerthingNothing": "classe E — un astroport qui ne facture rien",
+        "BerthingNoPort": "classe X — aucun astroport",
+        "BerthingFlavour": "Amarrage, classe {port}",
+        "BerthingNoPortHint": "Aucun astroport signifie aussi aucun carburant et aucun fournisseur, au MD d'astroport indiqué plus haut. Ce n'est pas le même fait qu'un amarrage gratuit, et un seul nombre ne peut porter les deux.",
+        "BerthingFreeHint": "La classe E ne facture rien, ce qui est une valeur lancée de zéro et non un champ vide.",
+        "BerthingUnrolledHint": "Pas encore lancé. Un champ vide est un troisième état, distinct de l'amarrage gratuit de la classe E et de l'absence totale d'astroport de la classe X.",
+        "BerthingKeptHint": "Lancé et conservé — les prix sont stables sur un astroport donné.",
+        "TradeCodes": "Codes commerciaux",
+        "Derived": "Dérivés",
+        "Published": "Publiés",
+        "ForcedOn": "Forcé actif",
+        "ForcedOff": "Forcé inactif",
+        "OverrideDerive": "Auto",
+        "OverrideDeriveHint": "Laisser le profil décider.",
+        "OverrideOn": "Actif",
+        "OverrideOff": "Inactif",
+        "LedgerCount": "{derived} dérivés · {published} publiés",
+        "LedgerHint": "Ce que disent les chiffres et ce que ce monde publie sont deux lectures, tenues à part exprès : une dérogation dont la condition n'est pas imprimée à côté ne se distingue pas d'une faute de frappe.",
+        "Traffic": "Ce que vaut ce monde",
+        "TrafficCount": "sa propre moitié de chaque table",
+        "TrafficHint": "L'autre moitié appartient au monde qui se trouve à l'autre bout de l'étape, et le jet aussi — un monde n'a pas de destination. La Population et le Niveau Technologique se lisent à l'escale, les deux profils en main.",
+        "Passengers": "Passagers",
+        "Freight": "Fret",
+        "ThisWorld": "Ce monde",
+        "Suppliers": "Fournisseurs",
+        "SuppliersCount": "par monde, survit à un voyage",
+        "SuppliersHint": "un fournisseur qui refuse reste fermé un mois",
+        "CampaignDay": "Jour de campagne",
+        "Searched": "Recherché ici",
+        "SearchedNone": "jamais",
+        "ThisMonth": "{n} ce mois-ci",
+        "SearchDM": "MD de recherche",
+        "WalkedAway": "Départ sans accord",
+        "Never": "jamais",
+        "ShutUntil": "fermé jusqu'au jour {day}",
+        "Expired": "jour {day}, expiré",
+        "RecordSearch": "Noter une recherche",
+        "ClearSearches": "Effacer les recherches",
+        "Refuse": "Quitter la table",
+        "ClearRefusal": "Effacer le refus",
+        "FIELDS": {
+          "uwp": {
+            "starport": {
+              "label": "Astroport"
+            },
+            "size": {
+              "label": "Taille"
+            },
+            "atmosphere": {
+              "label": "Atmo"
+            },
+            "hydrographics": {
+              "label": "Hydro"
+            },
+            "population": {
+              "label": "Pop"
+            },
+            "government": {
+              "label": "Gouv"
+            },
+            "lawLevel": {
+              "label": "Loi"
+            },
+            "techLevel": {
+              "label": "NT"
+            }
+          },
+          "zone": {
+            "label": "Zone de voyage",
+            "hint": "Lue par les deux tables de trafic, avec des signes opposés."
+          },
+          "bases": {
+            "label": "Bases"
+          },
+          "gasGiants": {
+            "label": "Géantes gazeuses"
+          },
+          "berthing": {
+            "label": "Amarrage",
+            "hint": "Laissez vide pour « pas encore lancé »."
+          },
+          "trade": {
+            "attempts": {
+              "label": "Recherches de fournisseur"
+            },
+            "refusedOn": {
+              "label": "Départ sans accord le"
+            }
+          },
+          "codeOverrides": {
+            "label": "Dérogations aux codes commerciaux"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "notes": {
+            "label": "Notes"
+          }
+        }
+      },
+      "stash": {
+        "Ref": "MGT2 · RÉSERVE",
+        "GM": "MJ",
+        "Access": "Accès",
+        "Everyone": "Tous les autres",
+        "ConfigureOwnership": "Configurer les permissions",
+        "Rung": {
+          "none": "Aucune",
+          "limited": "Limitée",
+          "observer": "Observateur",
+          "owner": "Propriétaire"
+        },
+        "Gloss": {
+          "none": "la fiche ne s'ouvre pas",
+          "limited": "le nom, et rien de ce qu'elle contient",
+          "observer": "lit le contenu, ne déplace rien",
+          "owner": "lit et prend"
+        },
+        "WithheldNone": "Vous lisez le contenu et, en Propriétaire, vous pouvez le déplacer. Ce que vous faites glisser hors de la fiche est pris, pas copié.",
+        "WithheldLocked": "La réserve est verrouillée : son contenu est retenu. La fiche reste ouverte et les lignes ne sont jamais envoyées — c'est l'état qu'un objet conteneur ne sait pas produire.",
+        "WithheldRung": "Vous voyez que cette réserve existe, et rien de ce qu'elle contient. Observateur est le niveau qui lit un inventaire.",
+        "Items": "Objets",
+        "Mass": "Masse",
+        "Value": "Valeur",
+        "CarriedBy": "Portée par",
+        "Nobody": "personne",
+        "Lock": "Verrou",
+        "Shut": "Verrouillée",
+        "Open": "Déverrouillée",
+        "LockIt": "Verrouiller",
+        "Unlock": "Déverrouiller",
+        "LockHint": "Le seul endroit où un verrou est appliqué. Une réserve verrouillée retient ses lignes pour tout le monde sauf un Propriétaire ; les conteneurs existants restent tels que leurs arbitres les traitent.",
+        "Contents": "Contenu",
+        "Withheld": "retenu",
+        "Holds": "contient {n}",
+        "EmptyHint": "Encore vide. Déposez des objets sur la fiche pour la garnir.",
+        "NoEncumbranceHint": "Pas de ligne d'encombrement : personne ne porte cela. La valeur est la somme du coût du contenu — une réserve garde des choses, elle n'en vend pas.",
+        "WhyActor": "Ce qu'apporte un Acteur",
+        "WhyActorCount": "trois choses, et trois seulement",
+        "WhyOwnership": "Ses propres permissions",
+        "WhyOwnershipHint": "les permissions d'un objet sont celles de son parent — montrer le butin aux joueurs, c'est leur montrer qui le porte",
+        "WhyPlaceable": "Une place sur la carte",
+        "WhyPlaceableHint": "un pion que personne ne tient ; un objet n'a pas de figurine propre",
+        "WhyOutlives": "Une vie à elle",
+        "WhyOutlivesHint": "elle survit à qui l'a trouvée — le propriétaire d'une cache peut être mort, le document non",
+        "FIELDS": {
+          "kind": {
+            "label": "Genre",
+            "hint": "Un sous-titre dans les mots de l'arbitre, jamais un discriminant."
+          },
+          "locked": {
+            "label": "Verrouillée"
+          },
+          "lockedDescription": {
+            "label": "Affiché à la place",
+            "hint": "Ce qu'un spectateur lit à la place du contenu."
+          },
+          "showWeight": {
+            "label": "Afficher la masse"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "notes": {
+            "label": "Notes"
+          }
+        }
       }
     },
     "RobotPower": {
@@ -909,6 +1206,29 @@
       }
     },
     "Melee": "Mêlée",
+    "Grapple": {
+      "Title": "Empoignade",
+      "Resolve": "Résoudre l'empoignade",
+      "Won": "{winner} · Effet {effect}",
+      "Apply": "Appliquer {amount}",
+      "NoArmour": "blindage ignoré",
+      "Thrown": "projeté à {distance} {unit}",
+      "Dragged": "traîné sur {metres} {unit}",
+      "Taken": "l'arme peut être prise",
+      "Held": "l'arme n'est pas prise",
+      "WeaponAttack": "lancez les dégâts de cette arme",
+      "Ends": "l'empoignade prend fin",
+      "Outcomes": {
+        "prone": "Mettre à terre",
+        "disarm": "Désarmer",
+        "throw": "Projeter",
+        "damage": "Infliger des dégâts",
+        "weapon": "Pistolet ou lame courte",
+        "escape": "Se dégager et s'éloigner",
+        "drag": "Traîner",
+        "hold": "Maintenir la prise"
+      }
+    },
     "MetricRange": {
       "meter": "M",
       "kilometer": "KM"
@@ -921,7 +1241,6 @@
       "augment": "Augmentation",
       "clothing": "Vêtement",
       "equipment": "Équipement",
-      "computer": "Ordinateur",
       "trinket": "Babiole",
       "toolkit": "Outils"
     },
@@ -1024,6 +1343,11 @@
       "TraitConditionMet": "condition remplie — confirmez",
       "States": "États",
       "CustomDM": "MD Personnalisé",
+      "UntrainedReduced": "{untrained} · {skill} {level}",
+      "DualWeaponsHint": "Attaquer avec deux armes à une main : MD-2 aux jets d'attaque des deux, et aucune ne peut viser.",
+      "DamageSustained": "Dégâts subis",
+      "DamageSustainedShort": "Dégâts",
+      "ExtendedActionHint": "Action prolongée interrompue par des dégâts — saisissez les dégâts subis ; ils comptent comme MD négatif sur ce test.",
       "ReactionDM": "Réactions",
       "Range": "Portée",
       "Distance": "Distance",
@@ -1049,12 +1373,14 @@
       "ReachHint": "Portée — payée en points de PSI",
       "ReachCost": "{points} points de PSI",
       "PhysicalOnly": "La règle applique ceci aux actions physiques — le modificateur suit la caractéristique jetée, jusqu'à ce que vous en décidiez autrement.",
+      "SkillOnly": "L'augmentation a été acquise pour une seule compétence — le modificateur suit la compétence jetée, jusqu'à ce que vous en décidiez autrement.",
       "Ceiling": "cerveau {grade} · jusqu'à {ceiling}",
       "CeilingOver": "cerveau {grade} · au-delà de son plafond, {ceiling}",
       "RangeUpTo": "jusqu'à {max} {unit}",
       "RangeSpan": "de {min} à {max} {unit}",
       "RangeBeyond": "au-delà de {min} {unit}",
       "RangeForced": "sans Scope, au-delà de {distance} {unit}",
+      "RangeMeasured": "depuis {target}",
       "RollDice": "2D",
       "BoonDice": "3D, retire le plus bas",
       "BaneDice": "3D, retire le plus haut",
@@ -1237,7 +1563,576 @@
       "high": "Passage supérieur",
       "middle": "Passage intermédiaire",
       "basic": "Passage éco",
-      "low": "Passage inférieur"
+      "low": "Passage inférieur",
+      "working": "Passage de service"
+    },
+    "Voyage": {
+      "Title": "Voyage : {ship}",
+      "Open": "Écran de voyage",
+      "NoPermission": "Seul un propriétaire de ce vaisseau peut modifier l'étape.",
+      "Leg": "Étape",
+      "OnePairAtATime": "une paire à la fois — rien ne regarde au-delà du prochain saut",
+      "ShipLine": "{tons} t · saut-{jump} · poussée {thrust}",
+      "Here": "Ici",
+      "Next": "Ensuite",
+      "DropWorld": "— déposez un monde —",
+      "TypeAName": "Nommez l'escale",
+      "ClearStop": "Vider cette extrémité",
+      "Parsecs": "parsecs",
+      "Then": "Puis",
+      "Promote": "En faire la prochaine escale",
+      "Forget": "Oublier cette escale",
+      "NothingPlanned": "rien de prévu — et c'est un état légal",
+      "FuelThisJump": "Carburant pour ce saut",
+      "Astrogation": "Astrogation",
+      "InJump": "En saut",
+      "JumpDuration": "148+6D heures",
+      "JumpControl": "Contrôle de saut",
+      "DriveRange": "Portée du propulseur",
+      "JumpN": "Saut-{n}",
+      "TravelZone": "Zone de voyage",
+      "BeyondRange": "Le propulseur est coté saut-{n} et cette étape est plus longue. Un vaisseau ne saute jamais au-delà de sa cote, quel que soit le niveau du réservoir.",
+      "Advance": "Avancer",
+      "RefereesClock": "l'horloge de l'arbitre",
+      "ArriveAt": "Arriver à {name}",
+      "NowhereToGo": "Nulle part où aller",
+      "AdvanceWhy": "ensuite → ici · tête de file → ensuite",
+      "EmptyLegIsLegal": "l'étape est vide, et c'est légal",
+      "Fuel": "Carburant",
+      "FuelRule": "Core p.157 · 10 % du tonnage par parsec",
+      "Aboard": "À bord",
+      "OverTank": "Réservoir dépassé",
+      "InTheTank": "Dans le réservoir",
+      "BurnsLeaving": "Consomme {burn} t, il en reste {after}.",
+      "ShortBy": "Il en faut {burn} t et le réservoir en contient {have} — il manque {short} t.",
+      "Jump": "Saut",
+      "Plot": "Calcul",
+      "ChainOfTwo": "Core p.157 · une chaîne de deux tâches",
+      "PlotTarget": "Facile (4+) Astrogation · EDU · 1D×10 min",
+      "JumpTarget": "Facile (4+) Ingénieur (propulseur de saut) · EDU",
+      "ParsecChip": "{dm} · 1 par parsec, ×{parsecs}",
+      "UnrefinedChip": "Carburant non raffiné −2",
+      "MaintenanceChip": "entretien — non suivi",
+      "DiameterChip": "limite des 100 diamètres — à l'arbitre",
+      "ParsecDM": "Distance de saut · {parsecs} parsecs",
+      "UnrefinedDM": "Carburant non raffiné",
+      "DebitWhy": "Le saut débite le réservoir au moment du jet. Rien d'autre ne touche au carburant, et aucun jet ne fait avancer l'étape.",
+      "NoFuel": "Ce saut consomme {need} t et le réservoir en contient {have}. Core p.157 : sans le carburant, le propulseur ne s'allume pas.",
+      "NoStation": "Aucun {station} à bord avec une fiche liée — le test n'a aucun personnage où lire le niveau de compétence.",
+      "Ruleset": "Corpus de règles",
+      "Declared": "déclaré, jamais supposé",
+      "RulesetCore": "Livre de base",
+      "RulesetCompanion": "Companion",
+      "CoreWhy": "Livre de base p.158 — le résultat ne lit que l'Effet du jet d'Ingénieur raté : les deux jets forment donc une chaîne, et le chemin livré la porte.",
+      "CompanionWhy": "Compagnon p.150-153 — un saut manqué se déclenche sur la somme des deux Effets à 0 ou moins, donc aucun jet ne se résout en premier et rien ne s'enchaîne. Les deux tables de variance se lisent à chaque saut, pas seulement sur un échec.",
+      "TheShip": "Le vaisseau",
+      "FuelPrice": "Cr{cr} la tonne · Cr{fill} le plein",
+      "Staterooms": "Cabines",
+      "LowBerths": "Couchettes cryogéniques",
+      "BothEnds": "Les deux extrémités",
+      "FromTheUwp": "dérivé du PUM, jamais saisi",
+      "PortFuel": "Carburant {grade}",
+      "NoWorldDocuments": "Aucune des deux extrémités n'est encore un acteur monde : l'étape tourne sur des noms saisis. Déposez un monde sur l'une ou l'autre pour lire son profil ici.",
+      "Stations": "Postes",
+      "RosterLivesOnTheShip": "l'équipage appartient au vaisseau",
+      "Reads": "Lit",
+      "NothingHere": "— rien sur cet écran",
+      "AddAboard": "À bord"
+    },
+    "Jump": {
+      "Title": "Saut manqué",
+      "CoreSource": "Livre de base p.158 · le seul Effet de l'ingénieur",
+      "CompanionSource": "Compagnon p.150-153 · deux Effets, trois tables",
+      "Astrogator": "Astrogateur",
+      "Engineer": "Ingénieur",
+      "AstrogatorEffect": "Effet de l'astrogateur",
+      "EngineerEffect": "Effet de l'ingénieur",
+      "GravityAtEntry": "Gravité à l'entrée",
+      "Sum": "Somme",
+      "ReadButton": "Lire le saut",
+      "ReadLine": "2D {roll} {dm} = {total}",
+      "ReadHeader": "Lecture",
+      "Post": "Publier",
+      "FromTheChecks": "les deux jets, tels qu'ils ont été lancés",
+      "RollFirst": "lancez le saut, ou saisissez les Effets sur lesquels il a été fait",
+      "Table": "Table",
+      "Printed": "Imprimé",
+      "Result": "Résultat",
+      "DistanceVariance": "Variance de distance",
+      "TimeVariance": "Variance de durée",
+      "MisjumpTable": "Saut manqué",
+      "VeryBadTable": "Très mauvais saut",
+      "Diameters": "{n} diamètres",
+      "Hours": "{n} heures",
+      "Long": "plus long de {n}",
+      "Short": "plus court de {n}",
+      "Precipitated": "précipité à {n}",
+      "Merciful": "Le livre de base p.158 laisse celui-ci au choix de l'arbitre et le qualifie de clément : il est donc nommé ici, jamais lancé.",
+      "Misjumped": "Saut manqué — la somme des deux Effets est de 0 ou moins.",
+      "SeriousMisjump": "Saut manqué grave — les deux jets ont échoué.",
+      "Averted": "Saut manqué évité : un jet a échoué et l'autre l'a dépassé, ce qui coûte tout de même un mauvais saut.",
+      "NoMisjump": "Aucun saut manqué.",
+      "BadJumpFlag": "Mauvais saut",
+      "VeryBadJump": "Très mauvais saut",
+      "Core": {
+        "Clean": "Le jet d'Ingénieur (propulseur de saut) a réussi : il n'y a pas de saut manqué à lire.",
+        "Late": "Le vaisseau arrive dans le système visé avec {days} jours de retard. Au choix de l'arbitre, l'équipage perçoit {perceived} jours supplémentaires dans l'espace de saut.",
+        "Displaced": "Le vaisseau arrive dans le système visé à {diameters} × 100 diamètres du monde visé.",
+        "Adrift": "Le saut manqué le plus survivable : le vaisseau se retrouve à {parsecs} parsecs dans une direction aléatoire, éventuellement en plein espace vide."
+      },
+      "Misjump": {
+        "Lost": "Le vaisseau est perdu dans l'espace de saut, ou en ressort en fragments et en particules subatomiques.",
+        "Wrecked": "Le vaisseau saute de {parsecs} parsecs dans une direction aléatoire. Son propulseur de saut est entièrement détruit à la sortie, et l'équipage comme les passagers risquent des séquelles psychologiques durables.",
+        "Severe": "Le vaisseau saute de {parsecs} parsecs dans une direction aléatoire. Son propulseur de saut est gravement endommagé à la sortie.",
+        "Scattered": "Le vaisseau saute de {parsecs} parsecs dans une direction aléatoire.",
+        "Recalibrate": "Durée allongée ou raccourcie de {days} jours. Le propulseur de saut exige un recalibrage complet — {work} jours de travail — mais aucune réparation.",
+        "Rough": "Saut très chaotique : la sortie se fait à {diameters} diamètres du monde visé."
+      },
+      "VeryBad": {
+        "None": "Aucun effet supplémentaire.",
+        "Recalibration": "Le propulseur de saut exige un long recalibrage après la sortie — {days} jours.",
+        "MinorRepairs": "Le propulseur de saut exige des réparations mineures après la sortie.",
+        "MajorRepairs": "Le propulseur de saut exige des réparations majeures après la sortie.",
+        "Intrusions": "Des intrusions d'espace de saut se produisent et le propulseur de saut est détruit à la sortie. Le vaisseau perd {hullPerDay} % de sa coque par jour.",
+        "SevereIntrusions": "De graves intrusions d'espace de saut se produisent et le propulseur de saut est détruit à la sortie. Le vaisseau perd {hullPerDay} % de sa coque par jour."
+      },
+      "VeryBadDM": {
+        "bothVariances": "deux variances mauvaises",
+        "precipitation": "précipité",
+        "misjump": "saut manqué",
+        "significant": "gravité importante",
+        "serious": "gravité sérieuse"
+      },
+      "Gravity": {
+        "none": "Hors de tout puits de gravité",
+        "significant": "Importante — dans la limite des 100 diamètres",
+        "serious": "Sérieuse — dans la limite des 10 diamètres"
+      },
+      "BadJump": {
+        "Checks": "Toute personne à bord fait un jet de {first} et un jet de {second}, l'un en {routine} et l'autre en {difficult}. Chaque voyageur choisit lequel se fait à quel niveau.",
+        "VeryBadDM": "Un très mauvais saut impose un MD{dm} aux deux.",
+        "Physical": "{first} échoué : un MD égal à l'Effet de l'échec sur tous les jets pendant {hours} heures après l'entrée, puis de nouveau après la sortie. À {at} ou pire, le voyageur est incapacité pendant {out} minutes, puis subit un MD{then} pendant {thenHours} heures.",
+        "Mental": "{second} échoué : MD{dm} sur les jets mentaux et sociaux pendant tout le saut et {days} jours après. À {at} ou pire, les effets sont graves."
+      }
+    },
+    "Starports": {
+      "A": "Excellent",
+      "B": "Bon",
+      "C": "Correct",
+      "D": "Médiocre",
+      "E": "Frontalier",
+      "X": "Aucun astroport"
+    },
+    "TravelZones": {
+      "green": "Verte",
+      "amber": "Orange",
+      "red": "Rouge"
+    },
+    "Trade": {
+      "StopTraffic": "Trafic à l'escale",
+      "OnOffer": "Ce qui est proposé ici",
+      "Here": "Ici",
+      "Destination": "Destination",
+      "Zone": "Zone",
+      "Parsecs": "Parsecs",
+      "Steward": "Meilleur Intendant",
+      "Rank": "Rang Marine / Éclaireurs",
+      "SocialDM": "MD SOC le plus élevé",
+      "LeadingCheck": "Test de tête",
+      "CheckDM": "Compétence + MD",
+      "Effect": "Effet",
+      "RollCheck": "Lancer le test Moyenne (8+)",
+      "Armed": "Vaisseau armé",
+      "NeedBothEnds": "Saisissez les deux profils : rien ci-dessous n'a de sens tant qu'ils ne sont pas lus.",
+      "BothEnds": "Les deux extrémités, comptées deux fois",
+      "Against": "{passengers} contre {freight}",
+      "Passengers": "Passagers",
+      "PassengerSource": "Core p.239",
+      "PassengerCount": "quatre jets · 2D sur la table de Trafic de passagers",
+      "PopCap": "plafonné par la population",
+      "Freight": "Cargaison",
+      "FreightSource": "Core p.240",
+      "FreightCount": "trois jets · un lot ne peut pas être divisé",
+      "TonsPerLot": "{size} tonnes par lot",
+      "Lots": " t · {lots} lots · plus gros {biggest}",
+      "CarouseSplit": "Un test de Mondanités ne trouve que des passagers : la cargaison demande Courtier ou Sens de la rue (Core p.240).",
+      "Mail": "Courrier",
+      "MailSource": "Core p.241 · réussite ou échec sur 12+",
+      "MailContainers": "{n} conteneurs",
+      "MailNone": "Aucun courrier proposé",
+      "MailPay": "{tons} tonnes · {credits} Cr forfaitaires, tout ou rien",
+      "MailMissed": "il fallait {target}+, obtenu {roll} {dm} = {total}",
+      "MailNeeds": "2D {dm} contre {target}+",
+      "RollAll": "Lancer les huit",
+      "Post": "Envoyer au chat",
+      "NoDocument": "rien n'est enregistré — ce dialogue ne possède aucun document",
+      "Route": "{here} → {next} · {parsecs} pc",
+      "NotAProfile": "profil non reconnu — ex. A788899-C, suffixe A ou R pour une zone",
+      "Gloss": "astroport {port} · pop {pop} · NT {tl}",
+      "Speculative": "Commerce spéculatif",
+      "World": "Marché",
+      "Goods": "Marchandises",
+      "Broker": "Compétence Courtier",
+      "OtherBroker": "Courtier d'en face",
+      "Attempts": "Recherches ce mois-ci",
+      "BannedAt": "Interdit au niveau de loi",
+      "BlackMarket": "Fournisseur du marché noir",
+      "NeedAWorld": "Saisissez un profil : les codes commerciaux, et tout ce qui s'en déduit, en viennent.",
+      "Codes": "Codes commerciaux ici",
+      "NoCodes": "aucun code — marchandises communes seulement",
+      "SearchLine": "trouver un fournisseur : {dm} contre {target}+",
+      "Shelf": "En rayon",
+      "ShelfCount": "{n} types · marchandises communes, plus tout code correspondant",
+      "Drawn": "Également en stock",
+      "DrawnCount": "{n} lignes aléatoires · une par point de population",
+      "D66": "D66",
+      "Tons": "Tonnes",
+      "BasePrice": "Base Cr",
+      "PurchaseDM": "Achat",
+      "SaleDM": "Vente",
+      "PriceSource": "Core p.243 · le plus grand MD de chaque colonne, jamais la somme",
+      "ExoticsHint": "Les exotiques sortent de ces règles : ni prix, ni tonnage, ni MD.",
+      "PerTon": "{credits} Cr la tonne",
+      "NotRolled": "non lancé",
+      "LotLine": "Un lot fait {size} tonnes, sur une base de {base} Cr la tonne.",
+      "RollShelf": "Lancer le rayon",
+      "RollPrice": "Lancer les deux prix",
+      "At": "{world} · {goods}",
+      "MarketGloss": "astroport {port} · pop {pop} · loi {law}",
+      "Side": {
+        "purchase": "Achat",
+        "sale": "Vente"
+      },
+      "Passage": {
+        "high": "Passage supérieur",
+        "middle": "Passage intermédiaire",
+        "basic": "Passage éco",
+        "low": "Passage inférieur"
+      },
+      "Lot": {
+        "incidental": "Cargaison accessoire",
+        "minor": "Cargaison mineure",
+        "major": "Cargaison majeure"
+      },
+      "Skills": {
+        "broker": "Courtier",
+        "carouse": "Mondanités",
+        "streetwise": "Sens de la rue"
+      },
+      "Terms": {
+        "Population": "Population {n}",
+        "Starport": "Astroport {port}",
+        "TechLevel": "Niveau technologique {n}",
+        "Parsecs": "{n} parsecs",
+        "WorldTotal": "Total des mondes",
+        "Steward": "Chef Intendant",
+        "Check": "Effet ({skill})",
+        "FreightBand": "Palier cargaison {dm}",
+        "Armed": "Vaisseau armé",
+        "LowTech": "NT {n} ou moins",
+        "Rank": "Rang Marine / Éclaireurs",
+        "SocialDM": "MD SOC",
+        "Broker": "Compétence Courtier",
+        "OtherBroker": "Courtier d'en face",
+        "Banned": "Interdit au niveau de loi {law}",
+        "Attempts": "{n} recherches antérieures"
+      }
+    },
+    "WorldBases": {
+      "naval": "Base navale",
+      "scout": "Base des éclaireurs",
+      "military": "Base militaire",
+      "research": "Station de recherche",
+      "tas": "Traveller's Aid Society",
+      "consulate": "Consulat",
+      "pirate": "Base corsaire"
+    },
+    "Atmospheres": {
+      "0": "Vide, combi",
+      "1": "Combi",
+      "2": "Respirateur + filtre",
+      "3": "Respirateur",
+      "4": "Masque filtrant",
+      "5": "Respirable",
+      "6": "Respirable",
+      "7": "Masque filtrant",
+      "8": "Respirable",
+      "9": "Masque filtrant",
+      "10": "Réserve d'air",
+      "11": "Combi, 1D/round",
+      "12": "La combi cède",
+      "13": "Hauteurs seulement",
+      "14": "Vallées seulement",
+      "15": "Imprévisible"
+    },
+    "Populations": {
+      "0": "Inhabité",
+      "1": "Moins de 100",
+      "2": "100+",
+      "3": "1 000+",
+      "4": "10 000+",
+      "5": "100 000+",
+      "6": "1 million+",
+      "7": "10 millions+",
+      "8": "100 millions+",
+      "9": "1 milliard+",
+      "10": "10 milliards+",
+      "11": "100 milliards+",
+      "12": "1 billion+"
+    },
+    "Governments": {
+      "0": "Sans gouvernement",
+      "1": "Une société dirige",
+      "2": "Tous votent",
+      "3": "Quelques non-élus",
+      "4": "Des élus dirigent",
+      "5": "Élite technique",
+      "6": "Tutelle extérieure",
+      "7": "États rivaux",
+      "8": "Fonctionnaires",
+      "9": "Bureaux sans visage",
+      "10": "Despote aimé",
+      "11": "Despote mal-aimé",
+      "12": "Conseil aimé",
+      "13": "Une foi dirige",
+      "14": "Un prophète dirige",
+      "15": "Minorité redoutée"
+    },
+    "TradeCodes": {
+      "Ag": "Agricole",
+      "As": "Astéroïde",
+      "Ba": "Stérile",
+      "De": "Désertique",
+      "Fl": "Océans fluides",
+      "Ga": "Jardin",
+      "Hi": "Forte population",
+      "Ht": "Haute technologie",
+      "Ic": "Calottes glaciaires",
+      "In": "Industriel",
+      "Lo": "Faible population",
+      "Lt": "Basse technologie",
+      "Na": "Non agricole",
+      "Ni": "Non industriel",
+      "Po": "Pauvre",
+      "Ri": "Riche",
+      "Va": "Vide",
+      "Wa": "Monde aquatique"
+    },
+    "TradeGoods": {
+      "commonElectronics": "Électroniques communes",
+      "commonIndustrial": "Produits industriels communs",
+      "commonManufactured": "Biens manufacturés communs",
+      "commonRawMaterials": "Matières premières communes",
+      "commonConsumables": "Consommables communs",
+      "commonOre": "Minéraux communs",
+      "advancedElectronics": "Électronique avancée",
+      "advancedMachineParts": "Pièces de machines avancées",
+      "advancedManufactured": "Biens manufacturés avancés",
+      "advancedWeapons": "Armes avancées",
+      "advancedVehicles": "Véhicules avancés",
+      "biochemicals": "Biochimiques",
+      "crystalsGems": "Cristaux & gemmes",
+      "cybernetics": "Cybernétiques",
+      "liveAnimals": "Animaux vivants",
+      "luxuryConsumables": "Consommables de luxe",
+      "luxuryGoods": "Biens de luxe",
+      "medicalSupplies": "Fournitures médicales",
+      "petrochemicals": "Pétrochimiques",
+      "pharmaceuticals": "Produits pharmaceutiques",
+      "polymers": "Polymères",
+      "preciousMetals": "Métaux précieux",
+      "radioactives": "Matériaux radioactifs",
+      "robots": "Robots",
+      "spices": "Épices",
+      "textiles": "Textiles",
+      "uncommonOre": "Minéraux rares",
+      "uncommonRawMaterials": "Matières premières rares",
+      "wood": "Bois",
+      "vehicles": "Véhicules",
+      "illegalBiochemicals": "Biochimiques, illégal",
+      "illegalCybernetics": "Cybernétiques, illégal",
+      "illegalDrugs": "Drogues, illégal",
+      "illegalLuxuries": "Biens de luxe, illégal",
+      "illegalWeapons": "Armes, illégal",
+      "exotics": "Exotiques"
+    },
+    "Design": {
+      "Title": "Conception",
+      "Optional": "optionnelle — le vaisseau ci-dessus est complet sans elle",
+      "Count": "{n} composants · {tons} t comptabilisées",
+      "Category": "Catégorie",
+      "MCr": "MCr",
+      "Rating": "indice {n}",
+      "NewComponent": "Nouveau composant",
+      "AddComponent": "Ajouter un composant",
+      "EditComponent": "Modifier ce composant",
+      "DeleteComponent": "Retirer ce composant",
+      "NothingToRead": "rien de saisi pour confronter cette règle",
+      "Advisory": "Chaque ligne est indicative. Des vaisseaux publiés échouent à ces contrôles — le catalogue contredit assez souvent le chapitre de construction pour qu'un refus d'enregistrer rende toute transcription impossible.",
+      "Failed": "{n} lignes rouges. Indicatif, jamais bloquant : la conception est enregistrée telle qu'elle a été saisie.",
+      "Checks": {
+        "power": "Énergie",
+        "tonnage": "Tonnage",
+        "hardpoints": "Points d'ancrage",
+        "jumpFuel": "Carburant de saut",
+        "statedTons": "Face au tonnage déclaré",
+        "statedPower": "Face au générateur déclaré"
+      },
+      "Why": {
+        "power": "consommée face à produite",
+        "tonnage": "comptabilisé face à la coque",
+        "hardpoints": "un par tranche de 100 tonnes (HG p.26)",
+        "jumpFuel": "10 % de la coque par parsec à l'indice du propulseur",
+        "statedTons": "les pièces face aux lignes de budget qu'elles recouvrent",
+        "statedPower": "les générateurs face à la production du vaisseau"
+      }
+    },
+    "ComponentCategories": {
+      "hull": "Coque",
+      "armour": "Blindage",
+      "mDrive": "Propulseur de manœuvre",
+      "jDrive": "Propulseur de saut",
+      "powerPlant": "Générateur",
+      "fuel": "Carburant",
+      "bridge": "Passerelle",
+      "computer": "Ordinateur",
+      "sensors": "Détecteurs",
+      "weapon": "Arme",
+      "screen": "Écran",
+      "stateroom": "Cabine",
+      "cargo": "Soute",
+      "software": "Logiciel",
+      "option": "Option"
+    },
+    "DrugAfterKinds": {
+      "none": "Aucun",
+      "condition": "État",
+      "damage": "Dégâts"
+    },
+    "DoseResets": {
+      "never": "Jamais",
+      "sleep": "Après le sommeil",
+      "day": "Chaque jour"
+    },
+    "Doses": {
+      "Take": "Prendre une dose",
+      "NotEquipped": "prise, pas équipée",
+      "NeedsOwner": "Une dose est prise par quelqu'un. Donnez d'abord cette drogue à un voyageur.",
+      "None": "Il ne reste aucune dose de {name} à prendre.",
+      "Taken": "dose {n}",
+      "Counter": "Doses prises",
+      "OnsetLine": "Délai d'action {onset}",
+      "OnsetIn": "commence dans {onset}",
+      "DurationLine": "Dure {duration}",
+      "AfterLine": "Laisse {after}",
+      "NoClock": "Pas une horloge : elle agit aussitôt et ne s'épuise pas d'elle-même.",
+      "End": "Terminer cette dose",
+      "WoreOff": "dissipée",
+      "AfterDamage": "{formula} — {n} points de dégâts."
+    },
+    "CharacteristicLossSources": {
+      "ageing": "Vieillissement",
+      "injury": "Blessure",
+      "event": "Événement",
+      "medicalCare": "Soins médicaux",
+      "ageingCrisisCare": "Soins de crise de vieillissement",
+      "referee": "Arbitre"
+    },
+    "CharacteristicLossHints": {
+      "ageing": "Livre de base p.48. Il se répète à chaque terme à partir du quatrième, et le joueur choisit quelles caractéristiques l'encaissent — le choix est donc consigné et le total dérivé.",
+      "injury": "Livre de base p.49. Une blessure de création est une réduction permanente : elle arrive par un revers, un événement de vie, ou parce que l'arbitre le dit.",
+      "event": "Une caractéristique qu'un événement ou un revers de carrière a prise ou donnée, souvent au choix du joueur.",
+      "medicalCare": "Livre de base p.49. Rendre un point perdu coûte Cr5000, et un employeur peut en couvrir une part — le jet de Frais Médicaux appartient à l'arbitre et seul le résultat est consigné ici.",
+      "ageingCrisisCare": "Livre de base p.49. Un seul prix lancé quoi qu'il rende, et il remet chaque caractéristique tombée à 0 à 1 — pas là où elle était.",
+      "referee": "Un changement permanent qu'aucune règle imprimée ne couvre. Il se consigne comme les autres, et se défait en supprimant la ligne."
+    },
+    "Loss": {
+      "Title": "Changements permanents",
+      "Add": "Consigner un changement permanent",
+      "Record": "Consigner",
+      "Delete": "Retirer cette entrée",
+      "Empty": "Rien de permanent n'est arrivé à ce voyageur. Le vieillissement, une blessure de création et les soins qui la réparent sont tous des entrées ici.",
+      "Source": "Source",
+      "When": "Quand",
+      "Changes": "Changement",
+      "Cost": "Coût",
+      "Note": "Note",
+      "Term": "Terme",
+      "Age": "Âge",
+      "Roll": "Jet",
+      "TermN": "terme {n}",
+      "AgeN": "âge {n}",
+      "Rolled": "jet {n}",
+      "Paid": "Payé",
+      "PerPoint": "Cr{cr} le point",
+      "Bill": "Facturer",
+      "BillSplit": "Cr{paid} sur Cr{cash} en liquide, Cr{debt} en dette",
+      "BillOnRoll": "lancé à l'application, puis réparti sur le liquide disponible",
+      "Crisis": "Crise de vieillissement : une caractéristique est à 0. Le livre de base p.49 en fait une mort à moins que 1D × Cr10000 n'achète des soins, qui ramènent à 1 chaque caractéristique réduite.",
+      "CrisisPast": "Ce voyageur a survécu à une crise de vieillissement. Le livre de base p.49 la rend définitive : il rate automatiquement tous ses jets de qualification suivants, quels que soient ses scores actuels.",
+      "CrisisWarning": "Ceci amène une caractéristique à 0. Le livre de base p.49 fait de la crise de vieillissement une mort à moins que 1D × Cr10000 n'achète des soins."
+    },
+    "Region": {
+      "Hazard": "Environnement",
+      "Damage": "{points} dégâts",
+      "Ambient": "{celsius} °C",
+      "Exposure": "round {round} d'exposition",
+      "Shielded": "{rads} rads, entièrement absorbés par les {shielded} de la région",
+      "gravity": {
+        "AllChecks": "MD {dm} à tous les tests de compétence jusqu'à l'acclimatation — 1D semaines, ou 1D jours avec Athlétisme (force). Quitter la région n'y met pas fin.",
+        "PhysicalChecks": "MD {dm} à tous les tests de compétence physique jusqu'à l'acclimatation — 1D semaines, ou 1D jours avec Athlétisme (dextérité). Quitter la région n'y met pas fin.",
+        "FIELDS": {
+          "band": { "label": "Bande" },
+          "gees": { "label": "Gravité (g)", "hint": "La valeur imprimée, pour un monde plus dense que sa bande. Laissé vide, la valeur nominale de la bande s'applique." },
+          "recoil": { "label": "Le recul fait tournoyer le tireur", "hint": "Core p.81 : en gravité zéro, tirer sans un test d'Athlétisme (dextérité) Moyen (8+) met le tireur en rotation." }
+        }
+      },
+      "temperature": {
+        "FIELDS": {
+          "celsius": { "label": "Température" },
+          "damage": { "label": "Dégâts" },
+          "interval": { "label": "Intervalle", "hint": "Seul Par round s'applique de lui-même. Tout intervalle plus long est indiqué ici et appliqué par l'arbitre." },
+          "protectedBy": { "label": "Annulé par", "hint": "L'équipement porté dont le nom figure ici supprime entièrement le danger." }
+        }
+      },
+      "vacuum": {
+        "FIELDS": {
+          "pressure": { "label": "Pression" },
+          "damage": { "label": "Dégâts" },
+          "breach": { "label": "Brèche de combinaison" }
+        }
+      },
+      "radiation": {
+        "FIELDS": {
+          "rads": { "label": "Dose" },
+          "shielded": { "label": "Absorbé par la région", "hint": "Rads arrêtés avant la déduction du score de Rad du voyageur." }
+        }
+      }
+    },
+    "GravityBands": {
+      "micro": "Micro-gravité",
+      "minimal": "Gravité minimale",
+      "veryLow": "Gravité très faible",
+      "low": "Gravité faible",
+      "standard": "Gravité standard",
+      "high": "Gravité élevée",
+      "extreme": "Gravité extrême"
+    },
+    "HazardClocks": {
+      "round": "Par round",
+      "minute": "Par minute",
+      "hour": "Par heure",
+      "day": "Par jour"
+    },
+    "VacuumPressures": {
+      "hard": "Vide absolu",
+      "partial": "Vide partiel",
+      "minimal": "Atmosphère ténue"
+    },
+    "SuitBreaches": {
+      "none": "Intacte",
+      "minor": "Brèche mineure",
+      "major": "Brèche majeure"
     },
     "CrewRoles": {
       "captain": "Capitaine",
@@ -1294,6 +2189,9 @@
       "vehicle": "Véhicule",
       "weapon": "Arme",
       "custom": "Personnalisé"
+    },
+    "Hazard": {
+      "Name": "{trait} ({source})"
     },
     "TraitSlot": {
       "acceleration": "Accélération",
@@ -1438,6 +2336,9 @@
         "DogfightNone": "Combat rapproché — choisissez le test du conducteur adverse dans la ligne Opposé pour le trancher ; rien n'a été appliqué.",
         "Evasive": "Manœuvre d'évitement — MD{dm} aux attaques contre ce véhicule et ses passagers, et aux attaques tirées depuis lui, jusqu'à la prochaine action du conducteur.",
         "AssumedAverage": "Moyenne 8+ supposée",
+        "ExtendedKept": "Action prolongée — test réussi ; le travail effectué ce round compte pour l'achèvement de la tâche.",
+        "ExtendedLost": "Action prolongée — test échoué ; le travail effectué ce round ne compte pas pour l'achèvement de la tâche.",
+        "ExtendedRuined": "Action prolongée — la tâche est complètement annulée, il faut repartir de zéro.",
         "Damages": "Lancer les Dégâts",
         "DamagesWithEffect": "Lancer les Dégâts — porte l'Effet {effect}",
         "Effect": "Effet",
@@ -1521,6 +2422,8 @@
       "Homeworld": "Monde Natal",
       "Informations": "Informations",
       "Improvement": "Améliorations",
+      "AugmentSkillDM": "MD de compétence",
+      "AugmentDuplicate": "Le Livre de base p.107 n'autorise qu'une augmentation de compétence ; celle-ci est une seconde.",
       "Interval": "Intervalle",
       "IsMelee": "Est Mêlée",
       "Items": "Objets",
@@ -1576,6 +2479,10 @@
       "Scale": "Échelle",
       "ScaleHint": "l'échelle décide du vocabulaire de portée",
       "SoftwareEffect": "Effet",
+      "Source": "Source",
+      "SourceBook": "Ouvrage",
+      "SourcePage": "Page",
+      "SourcePagePlaceholder": "p. 79",
       "Specs": "Spécifications",
       "PsySkill": "Comp. Psionique",
       "Speciality": "Spécialité",
@@ -1597,12 +2504,65 @@
       "Quantity": "Quantité",
       "AddTrait": "ajouter un trait",
       "Station": "Poste",
-      "Positions": "Places"
+      "Positions": "Places",
+      "Tons": "Tonneaux",
+      "Destination": "Destination",
+      "DestinationWorld": "Monde de Destination",
+      "DestinationName": "Nom de la Destination",
+      "DueDay": "Jour de Livraison",
+      "NoDeadline": "aucun délai",
+      "FarePerTon": "Fret / tonneau",
+      "BasePrice": "Prix de Base",
+      "PurchasePct": "Payé",
+      "BannedAt": "Interdit au niveau de loi",
+      "Unrestricted": "sans restriction",
+      "PurchaseDM": "MD d'Achat",
+      "SaleDM": "MD de Vente",
+      "TradeCode": "Code Commercial",
+      "AddTradeDM": "Ajouter un code commercial",
+      "DeleteTradeDM": "Retirer ce code commercial",
+      "TradeDMHint": "C'est le plus grand MD applicable qui s'applique, jamais leur somme (Core p.244).",
+      "SpeculativeHint": "Un lot de fret porte une destination, un délai et un prix au tonneau ; un lot spéculatif n'a aucun des trois — il est acheté ici et revendu au marché suivant.",
+      "PassageClass": "Classe",
+      "Passengers": "Passagers",
+      "FarePerHead": "Prix par Personne",
+      "Fare": "Prix Total",
+      "Baggage": "Bagages",
+      "LowBerth": "Cryocapsule",
+      "PassageHint": "Une réservation, pas un passager. Les bagages et le prix total découlent de la classe et ne sont pas stockés : un passage de service ne rapporte rien, quel que soit le prix par personne indiqué à côté.",
+      "Category": "Catégorie",
+      "PercentOfHull": "% de la coque",
+      "Minimum": "Minimum",
+      "OnThisHull": "Sur cette coque",
+      "CostMCr": "Coût (MCr)",
+      "PowerPerTon": "Énergie / tonneau",
+      "Rating": "Indice",
+      "Critical": "Critique",
+      "ComponentHint": "Un composant alimente le budget du vaisseau et rien d'autre : un vaisseau sans aucun composant est complet. Le tonnage est un chiffre fixe, un pourcentage de la coque ou un pourcentage avec un plancher — le plus grand l'emporte. Un critique est un degré de 1 à 6 : une tourelle à MD−1 tire encore.",
+      "Dose": "Dose",
+      "Onset": "Délai d'Action",
+      "Immediate": "immédiat",
+      "NotAClock": "pas une durée",
+      "AfterEffect": "Contrecoup",
+      "AfterKind": "Se termine en",
+      "DosesBefore": "Doses avant un jet",
+      "CheckInterval": "Intervalle des Jets",
+      "CravingDM": "MD de Manque",
+      "AddictionHint": "Le délai d'action et la durée sont vides là où le livre n'en donne pas, non là où personne n'a rien saisi. L'accoutumance est optionnelle et se règle drogue par drogue (CSC p.97) : laissez ses trois champs vides et l'arbitre ne l'a pas activée pour celle-ci.",
+      "Fits": "Compatible avec",
+      "WeaponsOwn": "celle de l'arme",
+      "LoadedRound": "Munition chargée",
+      "ReplaceTraits": "Remplace les traits de l'arme",
+      "OverrideHint": "Chaque remplacement est vide par défaut, et vide signifie que la valeur de l'arme s'applique — une munition standard ne remplace rien du tout.",
+      "Rules": "Règles",
+      "AddRule": "ajouter une règle",
+      "DeleteRule": "Retirer cette règle",
+      "RulesHint": "Ce que fait la munition et qui n'est ni des dégâts ni un trait — la chevrotine ignore l'Esquive de la cible, l'armure compte double. Videz une ligne pour la retirer."
     },
     "Durations": {
       "Seconds": "Secondes",
       "Minutes": "Minutes",
-      "Heures": "Heures"
+      "Hours": "Heures"
     },
     "Errors": {
       "InvalidRollFormula": "Formule de jet invalide — vérifiez le modificateur saisi.",
@@ -1618,7 +2578,7 @@
     },
     "Migration": {
       "Begin": "MGT2 : migration des données du monde, ne fermez pas la partie.",
-      "Complete": "MGT2 : migration du monde terminée.",
+      "Complete": "MGT2 : migration du monde terminée. {count} acteur(s) ont changé de maximum de vie.",
       "Failed": "MGT2 : échec de la migration du monde. Consultez la console ; elle sera retentée au prochain chargement."
     },
     "Notifications": {
@@ -1836,7 +2796,8 @@
       "fastMovingTarget": "Cible bougeant vite",
       "fastMovingTargetShort": "Mouvement",
       "cover": "Cible à couvert",
-      "prone": "Cible au sol"
+      "prone": "Cible au sol",
+      "dualWeapons": "Deux armes"
     },
     "Effect": {
       "exceptionalFailure": "Échec exceptionnel",
@@ -1904,6 +2865,9 @@
       "FirstAidHint": "Effet de Médecine (ÉDU), minimum 1 · à volonté · une seule fois",
       "FirstAidResetHint": "Effacer l'indicateur d'unicité pour une nouvelle blessure",
       "SurgeryHint": "Effet, minimum 1 · un test raté coûte 3 + Effet · trois caractéristiques endommagées après les premiers soins",
+      "SurgeryPointsHint": "3 + Effet, plancher à 0 · retapez le nombre si votre table le lit comme 3 + la valeur absolue de l'Effet",
+      "PsiHours": "Heures depuis le dernier talent",
+      "PsiRestHint": "Un point de PSI par heure · à partir de trois heures après le dernier Talent Psionique utilisé",
       "MedicalCareHint": "3 + MD d'END + Médecine par jour · réparti également · une ou deux caractéristiques endommagées après les premiers soins",
       "NaturalHealingHint": "1D + MD d'END par jour · MD d'END seul tant qu'une chirurgie est requise",
       "MentalHint": "INT et ÉDU, un point chacune par jour · pas le PSI",

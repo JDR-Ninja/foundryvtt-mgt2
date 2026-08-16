@@ -1,5 +1,6 @@
 import { CharacterPrompts } from "./actors/character-prompts.js";
 import { checkOf, jumpToMessage } from "./chat-message.js";
+import { renderRollCard } from "./checks.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { armChain } from "./roll-prompt.js";
@@ -52,6 +53,15 @@ export class ChatHelper {
             this.#markTransform(message, html);
         }
 
+        // Core folio 78: the winner of the opposed check picks what the grapple did, so the menu
+        // hangs off the card that holds the comparison rather than off either sheet.
+        const grapple = html.querySelector('button[data-action="grapple"]');
+        if (grapple) {
+            grapple.addEventListener("click", async event => {
+                await this._resolveGrapple(message, event);
+            });
+        }
+
         // The offering side of the chain: this check is held for whatever is rolled next. Several
         // cards may be armed at once, which is Core p.63's working together — each contributor
         // offers from their own card and the final check receives them all.
@@ -97,19 +107,15 @@ export class ChatHelper {
         const roll = await new Roll(button.formula, {}).roll();
         const total = Math.round(roll.total * 100) / 100;
 
-        const chatData = {
+        return roll.toMessage({
             author: game.user.id,
             speaker: message.speaker,
-            formula: roll.formula,
-            tooltip: await roll.getTooltip(),
-            total,
-            rollObjectName: button.message.objectName,
-            rollMessage: MGT2Helper.format(button.message.flavor, total)
-        };
-
-        chatData.content = await foundry.applications.handlebars.renderTemplate(
-            "systems/mgt2/templates/chat/roll.html", chatData);
-        return roll.toMessage(chatData);
+            content: await renderRollCard({
+                roll,
+                rollObjectName: button.message.objectName,
+                lines: [MGT2Helper.format(button.message.flavor, total)]
+            })
+        });
     }
 
     /**
@@ -177,7 +183,11 @@ export class ChatHelper {
             radiation: damage.radiation === true,
             // RH folio 106: an ion hit meets no armour and shuts a robot's brain down. Only the
             // target knows whether either happens, so it travels the same way.
-            ion: damage.ion === true
+            ion: damage.ion === true,
+            // §9.4: the Poison or Diseased trait stays on the attacker; what the defender gets is a
+            // `disease` Item built from its parameters, named after whatever carried it.
+            hazards: damage.hazards ?? [],
+            sourceName: damage.rollObjectName ?? ""
         };
 
         // What the card spells out under each reading: the dice alone, then the attack's own
@@ -305,15 +315,18 @@ export class ChatHelper {
             return Promise.all(targets.map(t => t.actor.applyDamage(total, { raw: true })));
         }
 
+        // A card that offers no reading — the grapple's own damage — is applied at face value, so
+        // the two it does not carry must not be dereferenced.
         const picked = event.currentTarget.closest(".card")
             ?.querySelector(".dmgpick > [data-transform].on")?.dataset.transform ?? "full";
-        const amount = { full: payload.total, reduced: payload.reduced.total, minimum: payload.minimum }[picked];
+        const amount = { full: payload.total, reduced: payload.reduced?.total, minimum: payload.minimum }[picked];
 
         for (const token of targets) {
             const result = await token.actor.applyDamage(amount, {
                 scale: payload.scale, ap: payload.ap, loPen: payload.loPen,
                 effect: payload.effect, stun: payload.stun, formula: payload.formula,
-                multiple: payload.multiple, damageType: payload.damageType, ion: payload.ion
+                multiple: payload.multiple, damageType: payload.damageType, ion: payload.ion,
+                ignoreArmour: payload.ignoreArmour
             });
             // Core p.79: what a Stun weapon deals past END is rounds of incapacitation, not injury.
             if (result?.rounds > 0) {
@@ -331,7 +344,87 @@ export class ChatHelper {
                     { name: token.actor.name }));
             }
             if (payload.radiation) await ChatHelper.#applyRadiation(token.actor, payload.scale);
+            if (payload.hazards?.length) {
+                await token.actor.system.applyHazards(payload.hazards, payload.sourceName);
+            }
         }
+    }
+
+    /* -------------------------------------------- */
+    /*  Grappling (Core folio 78)                   */
+    /* -------------------------------------------- */
+
+    /**
+     * The winner's menu. Six of the eight outcomes are things the referee does to the fiction and the
+     * system writes none of them — it names the outcome and prints the figure the folio gives it.
+     * The two that produce a wound post it as an ordinary damage offer, so the defender applies it
+     * the way they apply every other one; the grapple's own damage carries `ignoreArmour`, and the
+     * throw's 1D does not, because the folio exempts only the first.
+     */
+    static async _resolveGrapple(message, event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const grapple = message.flags?.mgt2?.grapple;
+        if (!grapple) return;
+
+        const picked = await CharacterPrompts.openGrapple(grapple);
+        const rule = MGT2.Grapple.outcomes[picked?.outcome];
+        if (!rule) return;
+
+        const metre = game.i18n.localize(MGT2.MetricRange.meter).toLowerCase();
+        const lines = [game.i18n.format("MGT2.Grapple.Won",
+            { winner: grapple.winner, effect: MGT2Helper.signed(grapple.effect, "+0") })];
+        const rolls = [];
+        let wound = null;
+
+        // "Throw an opponent 1D metres, causing 1D damage" — two separate dice, and only the second
+        // is the one anybody applies.
+        if (rule.distance) {
+            const thrown = await new Roll(MGT2Helper.damageFormula(rule.distance)).roll();
+            rolls.push(thrown);
+            lines.push(game.i18n.format("MGT2.Grapple.Thrown", { distance: thrown.total, unit: metre }));
+        }
+        if (rule.damage) {
+            const rolled = await new Roll(MGT2Helper.damageFormula(rule.damage)).roll();
+            rolls.push(rolled);
+            wound = rolled.total;
+        }
+        // "Inflict damage equal to 2 + the Effect of the Melee check." A win can still be a failure
+        // against a difficulty, so the sum is floored: no outcome of this menu heals anybody.
+        if (rule.base !== undefined) {
+            wound = Math.max(0, rule.base + grapple.effect);
+            lines.push(game.i18n.localize("MGT2.Grapple.NoArmour"));
+        }
+        if (rule.metres) lines.push(game.i18n.format("MGT2.Grapple.Dragged", { metres: rule.metres, unit: metre }));
+        // "If the Effect is 6+, they may take their opponent's weapon."
+        if (rule.takes !== undefined) {
+            lines.push(game.i18n.localize(
+                (grapple.effect >= rule.takes) ? "MGT2.Grapple.Taken" : "MGT2.Grapple.Held"));
+        }
+        if (rule.attack) lines.push(game.i18n.localize("MGT2.Grapple.WeaponAttack"));
+        if (rule.ends) lines.push(game.i18n.localize("MGT2.Grapple.Ends"));
+
+        const chatData = {
+            author: game.user.id,
+            speaker: message.speaker
+        };
+        // The wound rides the same flag every other damage offer does, so the existing Apply button
+        // resolves it against whichever token the referee has selected.
+        const card = {
+            roll: (wound > 0) ? rolls.at(-1) ?? null : null,
+            showButtons: true,
+            rollTypeName: game.i18n.localize("MGT2.Grapple.Title"),
+            rollObjectName: game.i18n.localize(rule.label),
+            lines
+        };
+        if (wound > 0) card.applyLabel = game.i18n.format("MGT2.Grapple.Apply", { amount: wound });
+
+        chatData.content = await renderRollCard(card);
+        if (wound > 0) {
+            chatData.flags = { mgt2: { apply: { total: wound, ignoreArmour: rule.ignoreArmour === true } } };
+        }
+        if (rolls.length > 0) chatData.rolls = rolls;
+        return getDocumentClass("ChatMessage").create(chatData);
     }
 
     /* -------------------------------------------- */
@@ -471,19 +564,13 @@ export class ChatHelper {
         const chatData = {
             author: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor }),
-            rollTypeName: game.i18n.localize(title),
-            rollObjectName: game.i18n.localize(procedure),
-            rollMessage: message
+            content: await renderRollCard({
+                roll,
+                rollTypeName: game.i18n.localize(title),
+                rollObjectName: game.i18n.localize(procedure),
+                lines: [message]
+            })
         };
-
-        if (roll) {
-            chatData.formula = roll.formula;
-            chatData.tooltip = await roll.getTooltip();
-            chatData.total = roll.total;
-        }
-
-        chatData.content = await foundry.applications.handlebars.renderTemplate(
-            "systems/mgt2/templates/chat/roll.html", chatData);
         return roll ? roll.toMessage(chatData) : getDocumentClass("ChatMessage").create(chatData);
     }
 }

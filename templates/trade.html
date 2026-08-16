@@ -1,0 +1,51 @@
+<div class="hd">
+	<h2>{{localize 'MGT2.Trade.Speculative'}}</h2>
+
+	{{! One world, not two: traffic is a route and a market is a counter. No field carries a `name` —
+	    the dialog owns no document and submits nowhere, and the per-planet month state it would
+	    otherwise want already lives on the `world` Actor. }}
+	<div class="inputs">
+		<div class="end">
+			<label class="fld world">
+				<span>{{localize 'MGT2.Trade.World'}}</span>
+				<input class="f" type="text" data-field="world" value="{{input.world}}" placeholder="A788899-C" />
+				<span class="g">{{gloss}}</span>
+			</label>
+			<label class="fld zone">
+				<span>{{localize 'MGT2.Trade.Zone'}}</span>
+				<select class="f" data-field="zone">{{selectOptions zones selected=input.zone labelAttr="label" localize=true}}</select>
+			</label>
+		</div>
+
+		<label class="fld goods">
+			<span>{{localize 'MGT2.Trade.Goods'}}</span>
+			<select class="f" data-field="goods">{{selectOptions goodsList selected=input.goods}}</select>
+		</label>
+
+		<div class="row4">
+			<label class="fld">
+				<span>{{localize 'MGT2.Trade.Broker'}}</span>
+				<input class="f n" type="number" step="1" data-field="broker" value="{{input.broker}}" />
+			</label>
+			<label class="fld">
+				<span>{{localize 'MGT2.Trade.OtherBroker'}}</span>
+				<input class="f n" type="number" step="1" data-field="otherBroker" value="{{input.otherBroker}}" />
+			</label>
+			<label class="fld">
+				<span>{{localize 'MGT2.Trade.Attempts'}}</span>
+				<input class="f n" type="number" step="1" min="0" data-field="attempts" value="{{input.attempts}}" />
+			</label>
+			{{! Blank is "nobody bans this", which is not the same statement as Law Level 0. }}
+			<label class="fld">
+				<span>{{localize 'MGT2.Trade.BannedAt'}}</span>
+				<input class="f n" type="number" step="1" min="0" data-field="bannedAt" value="{{input.bannedAt}}"
+				       placeholder="&mdash;" />
+			</label>
+		</div>
+
+		<label class="fld ck">
+			<input type="checkbox" data-field="blackMarket" {{checked input.blackMarket}} />
+			<span>{{localize 'MGT2.Trade.BlackMarket'}}</span>
+		</label>
+	</div>
+</div>

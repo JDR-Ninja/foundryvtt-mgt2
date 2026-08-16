@@ -11,15 +11,22 @@
 		<dl class="statline grid play-only" data-derived="system.hull">
 			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Tonnage'}}</dt><dd>{{system.hull.tons}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i></dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Configuration'}}</dt><dd class="word">{{localize (lookup (lookup choices.configurations system.hull.configuration) 'label')}}</dd></div>
-			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.HullPoints'}}</dt><dd>{{ship.hull.max}}</dd></div>
+			{{! A formula is a default and a printed statblock is data (§4.1): where the book answered,
+			    the figure says so in the same gloss the mortgage override uses. }}
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.HullPoints'}}</dt><dd>{{ship.hull.max}}{{#if ship.printed.hullPoints}}<span class="why">{{localize 'MGT2.Actor.spacecraft.Printed'}}</span>{{/if}}</dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.ArmourFit'}}</dt><dd class="word">{{localize (lookup (lookup choices.materials system.armour.material) 'label')}} {{showDM system.armour.current}}</dd></div>
 			<div class="stat{{#if (gt system.armour.points system.armour.max)}} hurt{{/if}}">
 				<dt>{{localize 'MGT2.Actor.spacecraft.ArmourMax'}}</dt><dd>{{system.armour.max}}</dd>
 			</div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.PowerPlant'}}</dt><dd>{{system.power.plant}}</dd></div>
-			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.FuelJump'}}</dt><dd>{{system.fuel.jumpTons}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.FuelJump'}}</dt><dd>{{system.fuel.jumpTons}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i>{{#if ship.printed.jumpTons}}<span class="why">{{localize 'MGT2.Actor.spacecraft.Printed'}}</span>{{/if}}</dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.JumpsInTank'}}</dt><dd>{{system.fuel.jumpCapacity}}</dd></div>
-			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Bridge'}}</dt><dd class="word">{{localize (lookup (lookup choices.bridges system.bridge.type) 'label')}}{{#if system.bridge.dm}} {{showDM system.bridge.dm}}{{/if}}</dd></div>
+			{{! Holographic controls are an option on any bridge, not a type — Core p.186 / HG p.52 —
+			    so they read as a qualifier on the type's own line, with the DM they buy. }}
+			<div class="stat{{#if system.bridge.holographicUnderTL}} hurt{{/if}}"{{#if system.bridge.holographicUnderTL}} data-tooltip="{{localize 'MGT2.Actor.spacecraft.HolographicTLHint'}}"{{/if}}><dt>{{localize 'MGT2.Actor.spacecraft.Bridge'}}</dt><dd class="word">{{localize (lookup (lookup choices.bridges system.bridge.type) 'label')}}{{#if system.bridge.dm}} {{showDM system.bridge.dm}}{{/if}}{{#if system.bridge.holographic}} <span class="why">{{localize 'MGT2.Actor.spacecraft.Holographic'}}</span>{{/if}}</dd></div>
+			{{! The bridge's tonnage rides the tonnage budget, but its COST is derived here and printed
+			    by the books, and §4.1 cannot mark an override on a figure the sheet never shows. }}
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.BridgeCost'}}</dt><dd><i>Cr</i>{{credits system.bridge.cost}}{{#if ship.printed.bridgeCost}}<span class="why">{{localize 'MGT2.Actor.spacecraft.Printed'}}</span>{{/if}}</dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Sensors'}}</dt><dd class="word">{{localize (lookup (lookup choices.sensors system.sensors.grade) 'label')}} {{showDM system.sensors.dm}}</dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Scale'}}</dt><dd class="word">{{localize (lookup (lookup choices.scales system.scale) 'label')}}</dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.TL'}}</dt><dd>{{system.tl}}</dd></div>
@@ -65,6 +72,10 @@
 				{{formInput systemFields.bridge.fields.type name="system.bridge.type" value=system.bridge.type localize=true classes="f"}}
 			</label>
 			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Holographic'}}</span>
+				{{formInput systemFields.bridge.fields.holographic name="system.bridge.holographic" value=system.bridge.holographic classes="f"}}
+			</label>
+			<label>
 				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Sensors'}}</span>
 				{{formInput systemFields.sensors.fields.grade name="system.sensors.grade" value=system.sensors.grade localize=true classes="f"}}
 			</label>
@@ -93,6 +104,43 @@
 				<span>{{localize 'MGT2.Actor.spacecraft.Refined'}}</span>
 			</label>
 		</div>
+
+		{{! §4.1's overrides: transcription is what this type is mostly for, and the six figures below
+		    are the ones the formulas derive AND the books print per ship. Empty derives; a number is
+		    what the page says, and the readouts above mark which is in force. Every field is
+		    `{{formInput}}` rather than hand-written markup, because a NumberField with no `integer`
+		    renders `step="any"` and a hand-typed `step="1"` would refuse a 16.5-ton drive (§1.12). }}
+		<div class="sect edit-only">
+			<h3>{{localize 'MGT2.Actor.spacecraft.PrintedFigures'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.spacecraft.PrintedCount'}}</span>
+		</div>
+		<div class="grid edit-only">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.HullPoints'}}</span>
+				{{formInput systemFields.hull.fields.pointsOverride name="system.hull.pointsOverride" value=system.hull.pointsOverride placeholder=ship.derived.hullPoints classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.ArmourTons'}}</span>
+				{{formInput systemFields.armour.fields.tonsOverride name="system.armour.tonsOverride" value=system.armour.tonsOverride placeholder=ship.derived.armourTons classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.BridgeTons'}}</span>
+				{{formInput systemFields.bridge.fields.tonsOverride name="system.bridge.tonsOverride" value=system.bridge.tonsOverride placeholder=ship.derived.bridgeTons classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.BridgeCost'}}</span>
+				{{formInput systemFields.bridge.fields.costOverride name="system.bridge.costOverride" value=system.bridge.costOverride placeholder=ship.derived.bridgeCost classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.FuelJump'}}</span>
+				{{formInput systemFields.fuel.fields.jumpTonsOverride name="system.fuel.jumpTonsOverride" value=system.fuel.jumpTonsOverride placeholder=ship.derived.jumpTons classes="f num"}}
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.PowerDraw'}}</span>
+				{{formInput systemFields.power.fields.drawOverride name="system.power.drawOverride" value=system.power.drawOverride placeholder=ship.derived.powerDraw classes="f num"}}
+			</label>
+		</div>
+		<p class="hint edit-only">{{localize 'MGT2.Actor.spacecraft.PrintedHint'}}</p>
 
 		{{! BLOCK 4. Hull options are options, not traits: the registry has no ship family, so a
 		    spacecraft carries no traits[] at all and this block replaces it (§1.4). }}
@@ -356,13 +404,13 @@
 					<tr>
 						<td>{{localize row.label}}</td>
 						<td class="num">{{row.count}}</td>
-						<td class="d"><i>Cr</i>{{row.salary}}</td>
+						<td class="d"><i>Cr</i>{{credits row.salary}}</td>
 					</tr>
 					{{/each}}
 					<tr>
 						<td>{{localize 'MGT2.Actor.spacecraft.CrewTotal'}}</td>
 						<td class="num">{{ship.crew.totals.required}}</td>
-						<td class="d"><i>Cr</i>{{ship.crew.totals.salaries}}</td>
+						<td class="d"><i>Cr</i>{{credits ship.crew.totals.salaries}}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -376,7 +424,7 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.spacecraft.CarriedCraft'}}</h3>
-			<span class="count">{{ship.bays.length}}</span>
+			<span class="count">{{localize 'MGT2.Actor.spacecraft.BayCount' bays=ship.bays.length craft=ship.craftCount}}</span>
 			<a class="add edit-only" data-action="rowCreate" data-rows="bays" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddBay'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{#if ship.bays.length}}
@@ -405,9 +453,11 @@
 						</select>
 					</td>
 					<td class="who{{#if bay.name}} linked{{/if}}">
+						{{! Ten fighters on ten clamps are ONE Actor carried ten times (§9.95), so the
+						    count sits beside the name rather than making ten identical rows. }}
 						<span class="play-only">
 							{{#if bay.name}}
-							<span class="av"></span><a data-action="openCraft" data-uuid="{{bay.craft}}">{{bay.name}}</a>
+							<span class="av"></span>{{#if bay.many}}<b class="times">{{bay.count}}&times;</b> {{/if}}<a data-action="openCraft" data-uuid="{{bay.craft}}">{{bay.name}}</a>
 							<i class="src">{{localize 'MGT2.Actor.spacecraft.LinkedActor'}}</i>
 							{{else}}{{localize 'MGT2.Actor.spacecraft.Empty'}}{{/if}}
 						</span>
@@ -417,9 +467,15 @@
 						<span class="ro">{{#if bay.name}}{{localize 'MGT2.Actor.spacecraft.Docked'}}{{else}}&mdash;{{/if}}</span>
 						{{#if bay.transfer}}<span class="at">{{bay.transfer}}</span>{{/if}}
 					</td>
+					{{! The READOUT is the row's own tonnage — `count × capacity`, which is what the
+					    budget sums — and the two inputs beside it are the stored halves: how many,
+					    and what one of them costs the hull. }}
 					<td class="r">
-						<span class="need play-only">{{bay.capacity}} t</span>
-						<input class="f num edit-only" type="number" min="0" step="0.1" name="system.bays.{{bay.index}}.capacity" value="{{bay.capacity}}" data-dtype="Number" />
+						<span class="need play-only">{{bay.tons}} t{{#if bay.many}}<i class="each">{{bay.capacity}} t {{localize 'MGT2.Actor.spacecraft.Each'}}</i>{{/if}}</span>
+						<span class="baytons edit-only">
+							<input class="f num" type="number" min="1" step="1" name="system.bays.{{bay.index}}.count" value="{{bay.count}}" data-dtype="Number" aria-label="{{localize 'MGT2.Actor.spacecraft.HowMany'}}" />
+							<input class="f num" type="number" min="0" step="0.1" name="system.bays.{{bay.index}}.capacity" value="{{bay.capacity}}" data-dtype="Number" aria-label="{{localize 'MGT2.Actor.spacecraft.TonsEach'}}" />
+						</span>
 					</td>
 					<td class="r">
 						<div class="acts edit-only">
@@ -490,6 +546,64 @@
 		<p class="hint">{{localize 'MGT2.Actor.spacecraft.CriticalHint'}}</p>
 	</div>
 
+	{{! §6.2's expensive half. The parts list feeds NOTHING above — §4.1 stores the statblock on the
+	    Actor, and a ship with no components is complete — so this block is a second opinion and a
+	    ledger of red lines. Every check is advisory: published ships fail these, and a validator
+	    that refused to store a failing design would make transcription impossible (§9.92). }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Design.Title'}}</h3>
+			<span class="count">{{#if ship.design.fitted}}{{localize 'MGT2.Design.Count' n=ship.design.count tons=ship.design.tons}}{{else}}{{localize 'MGT2.Design.Optional'}}{{/if}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="component" data-create-name="{{localize 'MGT2.Design.NewComponent'}}" data-tooltip="{{localize 'MGT2.Design.AddComponent'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+
+		{{#if ship.design.fitted}}
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Name'}}</th>
+					<th>{{localize 'MGT2.Design.Category'}}</th>
+					<th class="c">{{localize 'MGT2.Actor.spacecraft.Tons'}}</th>
+					<th class="c">{{localize 'MGT2.Design.MCr'}}</th>
+					<th class="c">{{localize 'MGT2.Actor.spacecraft.Power'}}</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each ship.design.rows as |row|}}
+				<tr data-item-id="{{row._id}}"{{#if row.dm}} class="hit"{{/if}}>
+					<td>
+						{{row.name}}{{#if (gt row.quantity 1)}} <span class="sub">&times;{{row.quantity}}</span>{{/if}}
+						{{#if row.rating}}<span class="sub">{{localize 'MGT2.Design.Rating' n=row.rating}}</span>{{/if}}
+					</td>
+					<td class="word">{{localize row.categoryLabel}}</td>
+					<td class="c num">{{row.tons}}</td>
+					<td class="c num">{{#if row.cost}}{{row.cost}}{{else}}&mdash;{{/if}}</td>
+					{{! One column, two readings: a plant states what it makes and every other row
+					    what it takes, which is the `power` / `rating` split §6.2 stored (§9.67). }}
+					<td class="c num{{#if (gt row.power 0)}} good{{/if}}">{{#if row.power}}{{#if (gt row.power 0)}}+{{/if}}{{row.power}}{{else}}&mdash;{{/if}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Design.EditComponent" del="MGT2.Design.DeleteComponent"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+
+		{{! The ledger. A check with nothing to read is drawn and silent rather than green: a parts
+		    list is a transcription and may be partial, so a ship with no fuel row typed is not a
+		    ship short of fuel. }}
+		<div class="valid" data-derived="system.design">
+			{{#each ship.design.checks as |check|}}
+			<div class="v {{#unless check.applies}}na{{else}}{{#if check.ok}}ok{{else}}no{{/if}}{{/unless}}">
+				<span class="mk">{{#unless check.applies}}&middot;{{else}}{{#if check.ok}}&check;{{else}}&times;{{/if}}{{/unless}}</span>
+				<span class="nm">{{localize check.label}}<span class="g">{{#if check.applies}}{{localize check.why}}{{else}}{{localize 'MGT2.Design.NothingToRead'}}{{/if}}</span></span>
+				<span class="num">{{#if check.applies}}{{check.used}}{{#if check.match}} = {{else}}/{{/if}}{{check.cap}}{{else}}&mdash;{{/if}}</span>
+			</div>
+			{{/each}}
+		</div>
+		<p class="hint{{#if ship.design.failed}} bad{{/if}}">{{#if ship.design.failed}}{{localize 'MGT2.Design.Failed' n=ship.design.failed}}{{else}}{{localize 'MGT2.Design.Advisory'}}{{/if}}</p>
+	</div>
+
 	{{! The `computer` Item pattern for the third time: ship software spends Processing exactly as
 	    personal software spends bandwidth (HG p.20). }}
 	<div class="block">
@@ -526,12 +640,17 @@
 			</label>
 		</div>
 		<div class="finance" data-derived="system.finance">
-			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Purchase'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.PurchaseWhy'}}</span><span class="v"><i>Cr</i>{{ship.finance.purchase}}</span></div>
+			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Purchase'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.PurchaseWhy'}}</span><span class="v"><i>Cr</i>{{credits ship.finance.purchase}}</span></div>
 			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Mortgage'}}</span><span class="why">{{#if ship.finance.mortgageOverridden}}{{localize 'MGT2.Actor.spacecraft.MortgageOverridden'}}{{else}}{{localize 'MGT2.Actor.spacecraft.MortgageWhy'}}{{/if}}</span><span class="v">{{ship.finance.mortgage}}</span></div>
 			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Maintenance'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.MaintenanceWhy'}}</span><span class="v">{{ship.finance.maintenance}}</span></div>
 			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.LifeSupport'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.LifeSupportWhy'}}</span><span class="v">{{ship.finance.lifeSupport}}</span></div>
 			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Salaries'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.SalariesWhy'}}</span><span class="v">{{ship.finance.salaries}}</span></div>
-			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.FuelCost'}}</span><span class="why">{{#if ship.finance.refined}}{{localize 'MGT2.Actor.spacecraft.Refined'}}{{else}}{{localize 'MGT2.Actor.spacecraft.Unrefined'}}{{/if}}</span><span class="v">{{ship.finance.fuel}}</span></div>
+		</div>
+
+		{{! Its own group, and deliberately not a sixth row above: Core p.155 prints fuel as a unit
+		    price, so a full tank per period is a quantity no rule states (§9.33.7 c). }}
+		<div class="finance" data-derived="system.finance">
+			<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.FuelCost'}}</span><span class="why">{{#if ship.finance.refined}}{{localize 'MGT2.Actor.spacecraft.Refined'}}{{else}}{{localize 'MGT2.Actor.spacecraft.Unrefined'}}{{/if}}</span><span class="v">{{ship.finance.tankFill}}</span></div>
 		</div>
 
 		{{! Authoritative and takes no override (§9.20): the catalogue's plain cost ÷ 12 000 bills a

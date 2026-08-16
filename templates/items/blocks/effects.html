@@ -34,11 +34,14 @@
 					</ul>
 					{{else}}—{{/if}}
 				</td>
-				<td class="c">{{#if duration}}{{duration}}{{else}}—{{/if}}</td>
+				{{! An onset is not "switched off", and the two look identical on the row otherwise:
+				    a dose waiting out its onset is real and has simply not started (§9.90). }}
+				<td class="c">{{#if onset}}<span class="onset">{{localize 'MGT2.Doses.OnsetIn' onset=onset}}</span>{{else if duration}}{{duration}}{{else}}—{{/if}}</td>
 				<td class="r">
 					<div class="acts">
 						<a class="{{#unless disabled}}on{{/unless}}" data-action="effectToggle" data-tooltip="{{localize 'MGT2.Effects.Toggle'}}"><i class="fa-solid fa-power-off"></i></a>
 						<a class="{{#if suspended}}on{{/if}}" data-action="effectSuspend" data-tooltip="{{localize 'MGT2.Effects.Suspend'}}"><i class="fa-solid fa-circle-pause"></i></a>
+						{{#if dose}}<a data-action="doseEnd" data-tooltip="{{localize 'MGT2.Doses.End'}}"><i class="fa-solid fa-hourglass-end"></i></a>{{/if}}
 						<a data-action="effectEdit" data-tooltip="{{localize 'MGT2.Effects.Edit'}}"><i class="fas fa-edit"></i></a>
 						{{#unless mirrored}}<a data-action="effectDelete" data-tooltip="{{localize 'MGT2.Effects.Delete'}}"><i class="fas fa-trash"></i></a>{{/unless}}
 					</div>

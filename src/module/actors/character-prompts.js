@@ -1,3 +1,5 @@
+import { MGT2Helper } from "../helper.js";
+import { ActorBaseData } from "./actor-base-data.js";
 import { activateDamageOrder, prepareDamageOrder } from "./damage-order.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -112,9 +114,53 @@ export class CharacterPrompts {
             position: { width: 420 },
             content,
             ok: { label: "MGT2.Save", icon: "fa-solid fa-floppy-disk" },
-            render: (event, dialog) => this.#gateChainRank(dialog.element),
+            render: (event, dialog) => {
+                this.#gateChainRank(dialog.element);
+                this.#wirePsiRest(dialog.element, context);
+            },
             rejectClose: false
         });
+    }
+
+    /**
+     * Core folio 228: PSI comes back at one point an hour, beginning three hours after the last
+     * talent. This is the only procedure that reaches the reserve — it sits in no damage chain and
+     * Core p.83 names it the exception to the mental track — so a psion who had spent their points
+     * could otherwise only get them back by retyping the wound.
+     *
+     * The hours are typed and nothing is scheduled (§9.35), and the row writes into the dialog's own
+     * `damage` field rather than the document: what the rule proposes is still the referee's to
+     * overrule before saving. Built here rather than in the template because it belongs to one
+     * characteristic out of twelve.
+     */
+    static #wirePsiRest(root, context) {
+        if ( context.key !== "psionic" ) return;
+        const damage = root.querySelector('input[name="damage"]');
+        const grid = root.querySelector(".grid");
+        if ( !damage || !grid ) return;
+
+        // No `name`, so the hours never reach the update: only the wound they moved does.
+        const block = buildElement(`
+            <div class="dblock">
+                <label class="drow">
+                    <span class="lbl">${esc(game.i18n.localize("MGT2.Recovery.PsiHours"))}</span>
+                    <input class="f n hours" type="number" step="1" min="0" value="0" />
+                    <span class="dm"></span>
+                </label>
+                <p class="hint">${esc(game.i18n.localize("MGT2.Recovery.PsiRestHint"))}</p>
+            </div>`).firstElementChild;
+        grid.after(block);
+
+        const spent = context.characteristic.damage;
+        const hours = block.querySelector("input.hours");
+        const readout = block.querySelector(".dm");
+        const sync = () => {
+            const recovered = Math.min(spent, ActorBaseData.psiRecovered(hours.value));
+            damage.value = String(spent - recovered);
+            readout.textContent = recovered > 0 ? `+${recovered}` : "—";
+            readout.classList.toggle("zero", recovered === 0);
+        };
+        hours.addEventListener("input", sync);
     }
 
     /**
@@ -302,6 +348,53 @@ export class CharacterPrompts {
     }
 
     /* -------------------------------------------- */
+    /*  Grappling (Core folio 78)                   */
+    /* -------------------------------------------- */
+
+    /**
+     * Core folio 78: "The winner of this check may choose to do one of the following." Eight rows,
+     * each a name and the figure the folio attaches to it — never what the outcome does, which is
+     * the same rule the trait registry follows. Nothing here is live: the Effect is settled by the
+     * time the card offers the menu, so every figure is known when the dialog is built.
+     * @param {object} context   `{winner, effect}`, off the check card's own flag
+     * @returns {Promise<{outcome: string}|null>}
+     */
+    static async openGrapple(context) {
+        const metre = game.i18n.localize(CONFIG.MGT2.MetricRange.meter).toLowerCase();
+        const rows = Object.entries(CONFIG.MGT2.Grapple.outcomes).map(([key, rule], index) => `
+            <label class="drow">
+                <input type="radio" name="outcome" value="${key}"${index === 0 ? " checked" : ""} />
+                <span>${esc(game.i18n.localize(rule.label))}</span>
+                <span class="dm">${esc(CharacterPrompts.#grappleFigure(rule, context.effect, metre))}</span>
+            </label>`).join("");
+
+        const content = buildElement(`
+            <div class="dlg">
+                <div class="dblock" style="--lbl-col:1.2rem; --dm-col:5.4rem">${rows}</div>
+                <p class="hint">${esc(game.i18n.format("MGT2.Grapple.Won",
+                    { winner: context.winner, effect: MGT2Helper.signed(context.effect, "+0") }))}</p>
+            </div>`);
+
+        return DialogV2.input({
+            window: { title: game.i18n.localize("MGT2.Grapple.Title") },
+            classes: ["mgt2"],
+            position: { width: 400 },
+            content,
+            ok: { label: "MGT2.Grapple.Resolve", icon: "fa-solid fa-hands-bound" },
+            rejectClose: false
+        });
+    }
+
+    /** The number the folio prints beside an outcome, or an em dash where it prints none. */
+    static #grappleFigure(rule, effect, metre) {
+        if (rule.base !== undefined) return String(Math.max(0, rule.base + effect));
+        if (rule.distance) return `${rule.distance} ${metre} · ${rule.damage}`;
+        if (rule.metres) return `${rule.metres} ${metre}`;
+        if (rule.takes !== undefined) return `${rule.takes}+`;
+        return "—";
+    }
+
+    /* -------------------------------------------- */
     /*  Healing (Core p.82-83)                      */
     /* -------------------------------------------- */
 
@@ -379,9 +472,15 @@ export class CharacterPrompts {
                         <input class="f n effect" type="number" name="effect" step="1" value="0" />
                         <span class="dm outcome"></span>
                     </label>
+                    <label class="drow">
+                        <span class="lbl">${esc(game.i18n.localize("MGT2.Recovery.Points"))}</span>
+                        <input class="f n points" type="number" name="points" step="1" min="0" value="0" />
+                        <span class="dm"></span>
+                    </label>
                     ${CharacterPrompts.#augmentRow(context.augment)}
                 </div>
                 ${CharacterPrompts.#conditions([game.i18n.localize("MGT2.Recovery.NeedFacility")])}
+                <p class="hint">${esc(game.i18n.localize("MGT2.Recovery.SurgeryPointsHint"))}</p>
             </div>`);
 
         return DialogV2.input({
@@ -393,15 +492,21 @@ export class CharacterPrompts {
             render: (event, dialog) => {
                 const root = dialog.element;
                 const effect = root.querySelector("input.effect");
+                const points = root.querySelector("input.points");
                 const outcome = root.querySelector(".dm.outcome");
+                // The formula proposes and the referee disposes: the field follows the Effect until
+                // it is typed into, and the sentence always states the number that will be applied.
+                let typed = false;
                 const sync = () => {
-                    const value = Number(effect.value) || 0;
-                    const points = CharacterPrompts.surgeryPoints(value);
+                    const derived = CharacterPrompts.surgeryPoints(Number(effect.value) || 0);
+                    if ( !typed ) points.value = String(derived.points);
+                    const applied = CharacterPrompts.surgeryPoints(Number(effect.value) || 0, points.value);
                     outcome.textContent = game.i18n.format(
-                        points.success ? "MGT2.Recovery.Restores" : "MGT2.Recovery.Costs", { points: points.points });
-                    outcome.classList.toggle("bad", !points.success);
+                        applied.success ? "MGT2.Recovery.Restores" : "MGT2.Recovery.Costs", { points: applied.points });
+                    outcome.classList.toggle("bad", !applied.success);
                 };
                 effect.addEventListener("input", sync);
+                points.addEventListener("input", () => { typed = true; sync(); });
                 sync();
                 CharacterPrompts.#wireAugment(root, context.augment);
                 CharacterPrompts.#wireConditions(root);
@@ -414,12 +519,22 @@ export class CharacterPrompts {
      * Core p.82: surgery restores like first aid — the Effect, minimum one — and a failed check
      * instead costs 3 + the Effect. That sum shrinks as the check gets worse and goes negative below
      * Effect -3, so it is floored: an operation that went wrong cannot heal.
-     * @returns {{success: boolean, points: number}}
+     *
+     * The literal reading is what ships, and the cost is therefore *surfaced* rather than imposed
+     * (§9.22): `typed` is the number the dialog's own field carried, and it wins over the formula
+     * whenever it carries one — which is how a table reading `3 + |Effect|` gets to type 9 for an
+     * Effect of -6. The direction is not negotiable, because a failed check cannot heal.
+     * @param {number} effect
+     * @param {number|string|null} [typed]   The dialog's editable number, if it was submitted
+     * @returns {{success: boolean, points: number, derived: number}}
      */
-    static surgeryPoints(effect) {
-        return (effect >= 0)
-            ? { success: true, points: Math.max(1, effect) }
-            : { success: false, points: Math.max(0, 3 + effect) };
+    static surgeryPoints(effect, typed) {
+        const success = effect >= 0;
+        const derived = success ? Math.max(1, effect) : Math.max(0, 3 + effect);
+        // An emptied number input submits null, and `Number(null)` is a perfectly finite 0.
+        const override = ((typed === null) || (typed === undefined) || (typed === "")) ? NaN : Number(typed);
+        return { success, derived,
+            points: Number.isFinite(override) ? Math.max(0, Math.trunc(override)) : derived };
     }
 
     /** The doctor and the ward, neither of which is on the patient's sheet. */
@@ -585,5 +700,169 @@ export class CharacterPrompts {
         const unconfirmed = root.querySelector("input.cond:not(:checked)") !== null;
         const overspent = Number(root.querySelector(".dm.left")?.textContent ?? 0) < 0;
         button.disabled = unconfirmed || overspent;
+    }
+
+    /* -------------------------------------------- */
+    /*  Permanent characteristic change (folio 48-49)                                             */
+    /* -------------------------------------------- */
+
+    /**
+     * One row of the permanent-change log (§9.39, §9.91). **Signed**: ageing and creation injuries
+     * take, medical care gives back, and both are entries in the same list — so this one dialog is
+     * every route into it and nothing here ever writes a characteristic's `base`.
+     *
+     * The deltas are typed because the rules make them a choice: ageing "repeats every term from the
+     * fourth onwards and the PLAYER chooses which characteristics take the loss", and after the fact
+     * there is no way to infer what a roll took. Record the choice; derive the total.
+     *
+     * @param {object} context   `{rows, sources, cash, terms}` — see `#prepareLossPrompt`
+     * @returns {Promise<object|null>}
+     */
+    static async openCharacteristicLoss(context) {
+        const sources = Object.entries(CONFIG.MGT2.CharacteristicLossSources).map(([key, label]) =>
+            `<option value="${key}">${esc(game.i18n.localize(label))}</option>`).join("");
+        const deltas = context.rows.map(row => `
+            <label class="drow">
+                <span class="lbl">${esc(row.label)}</span>
+                <input class="f n delta" type="number" name="delta.${row.key}" step="1" value="0"
+                    data-key="${row.key}" data-now="${row.now}" data-base="${row.base}" />
+                <span class="dm move" data-for="${row.key}"></span>
+            </label>`).join("");
+
+        const content = buildElement(`
+            <div class="dlg loss">
+                <div class="dblock">
+                    <label class="drow">
+                        <span class="lbl">${esc(game.i18n.localize("MGT2.Loss.Source"))}</span>
+                        <select class="f source" name="source">${sources}</select>
+                    </label>
+                    <div class="row3">
+                        <label class="drow">
+                            <span class="lbl">${esc(game.i18n.localize("MGT2.Loss.Term"))}</span>
+                            <input class="f n" type="number" name="term" step="1" min="0" value="" />
+                        </label>
+                        <label class="drow">
+                            <span class="lbl">${esc(game.i18n.localize("MGT2.Loss.Age"))}</span>
+                            <input class="f n" type="number" name="age" step="1" min="0" value="" />
+                        </label>
+                        <label class="drow">
+                            <span class="lbl">${esc(game.i18n.localize("MGT2.Loss.Roll"))}</span>
+                            <input class="f n" type="number" name="roll" step="1" value="" />
+                        </label>
+                    </div>
+                </div>
+                <div class="dblock">${deltas}</div>
+                <div class="dblock">
+                    <label class="drow">
+                        <span class="lbl">${esc(game.i18n.localize("MGT2.Loss.Cost"))}</span>
+                        <input class="f n cost" type="number" name="cost" step="1" min="0" value="0" />
+                        <span class="dm price"></span>
+                    </label>
+                    <label class="drow bill">
+                        <input type="checkbox" class="billed" name="billed" />
+                        <span class="lbl">${esc(game.i18n.localize("MGT2.Loss.Bill"))}</span>
+                        <span class="dm purse"></span>
+                    </label>
+                    <label class="drow">
+                        <span class="lbl">${esc(game.i18n.localize("MGT2.Loss.Note"))}</span>
+                        <input class="f" type="text" name="note" value="" />
+                    </label>
+                </div>
+                <p class="hint why"></p>
+            </div>`);
+
+        return DialogV2.input({
+            window: { title: game.i18n.localize("MGT2.Loss.Add") },
+            classes: ["mgt2"],
+            position: { width: 460 },
+            content,
+            ok: { label: "MGT2.Loss.Record", icon: "fa-solid fa-clock-rotate-left" },
+            render: (event, dialog) => CharacterPrompts.#wireLoss(dialog.element, context),
+            rejectClose: false
+        });
+    }
+
+    /**
+     * The two care sources have arithmetic of their own and the other four have none (§9.39).
+     *
+     * `medicalCare` prices what is typed — Cr5000 a point — so the cost follows the deltas.
+     * `ageingCrisisCare` is the opposite: it prices ONE rolled sum and it decides the deltas itself,
+     * so the delta fields go dark carrying the restoration and the cost field goes dark too, rolled
+     * on apply. That is `#wireRadiation`'s device and the reason is the same — a figure the dialog
+     * would have to invent is better rolled by the handler that applies it.
+     */
+    static #wireLoss(root, context) {
+        const care = CONFIG.MGT2.CharacteristicCare;
+        const source = root.querySelector("select.source");
+        const cost = root.querySelector("input.cost");
+        const price = root.querySelector(".dm.price");
+        const billed = root.querySelector("input.billed");
+        const purse = root.querySelector(".dm.purse");
+        const why = root.querySelector("p.why");
+        const deltas = [...root.querySelectorAll("input.delta")];
+
+        const sync = () => {
+            const kind = source.value;
+            const crisis = kind === "ageingCrisisCare";
+
+            // The crisis restoration is not a choice: every characteristic the log REDUCED to 0
+            // comes back to 1. Folio 49 says *reduced*, so one that was never rolled — a Traveller
+            // with no PSI — is not a casualty and is not restored.
+            // **`readOnly` and not `disabled`** — a disabled input submits nothing, so the whole
+            // restoration would be previewed here and then lost on the way out.
+            for ( const field of deltas ) {
+                const now = Number(field.dataset.now);
+                const reduced = (now <= 0) && (Number(field.dataset.base) > 0);
+                if ( crisis ) field.value = String(reduced ? (care.crisisFloor - now) : 0);
+                field.readOnly = crisis;
+                field.classList.toggle("locked", crisis);
+                const move = root.querySelector(`.dm.move[data-for="${field.dataset.key}"]`);
+                const delta = Number(field.value) || 0;
+                const after = Math.max(0, now + delta);
+                move.textContent = delta ? `${now} → ${after}` : "—";
+                move.classList.toggle("bad", delta < 0);
+                move.classList.toggle("good", delta > 0);
+            }
+
+            const restored = deltas.reduce((sum, f) => sum + Math.max(0, Number(f.value) || 0), 0);
+            if ( kind === "medicalCare" ) {
+                cost.disabled = false;
+                cost.value = String(restored * care.perPoint);
+                price.textContent = game.i18n.format("MGT2.Loss.PerPoint", { cr: care.perPoint });
+            }
+            else if ( crisis ) {
+                cost.disabled = true;
+                price.textContent = care.crisisFormula.replace("*", " × Cr");
+            }
+            else {
+                cost.disabled = false;
+                price.textContent = "";
+            }
+
+            // What billing it would actually do, stated before it happens.
+            const due = crisis ? null : (Number(cost.value) || 0);
+            const paid = (due === null) ? null : Math.min(context.cash, due);
+            purse.textContent = !billed.checked ? ""
+                : (due === null) ? game.i18n.localize("MGT2.Loss.BillOnRoll")
+                    : game.i18n.format("MGT2.Loss.BillSplit",
+                        { paid, debt: Math.max(0, due - paid), cash: context.cash });
+
+            // A characteristic this row TAKES to 0, which is not the same as one already there: a
+            // Traveller with no PSI has not suffered an ageing crisis.
+            const zeroed = deltas.some(f => {
+                const delta = Number(f.value) || 0;
+                return (delta < 0) && ((Number(f.dataset.now) + delta) <= 0);
+            });
+            why.textContent = (zeroed && (kind === "ageing"))
+                ? game.i18n.localize("MGT2.Loss.CrisisWarning")
+                : game.i18n.localize(`MGT2.CharacteristicLossHints.${kind}`);
+            why.classList.toggle("bad", zeroed && (kind === "ageing"));
+        };
+
+        source.addEventListener("change", sync);
+        billed.addEventListener("change", sync);
+        cost.addEventListener("input", sync);
+        for ( const field of deltas ) field.addEventListener("input", sync);
+        sync();
     }
 }

@@ -1,0 +1,114 @@
+<div class="panel">
+	{{#unless ready}}
+	<p class="hint">{{localize 'MGT2.Trade.NeedBothEnds'}}</p>
+	{{else}}
+
+	{{! THE TWO COLUMNS, which is the whole feature. Passengers and freight read the SAME lines at
+	    BOTH ends and score them differently: population pays double for freight, freight alone has
+	    Tech Level terms, and an Amber Zone is +1 to passengers and −2 to freight (Core p.239-240).
+	    A referee reads those lines eight times with a different value each time, and the underlined
+	    cells are the ones where the two columns disagree. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Trade.BothEnds'}}</h3>
+			<span class="count">{{localize 'MGT2.Trade.Against' passengers=(showDM offer.passenger.total) freight=(showDM offer.freight.total)}}</span>
+		</div>
+		<div class="cols">
+			<div class="c">
+				<h4>{{localize 'MGT2.Trade.Passengers'}}<span class="src">{{localize 'MGT2.Trade.PassengerSource'}}</span></h4>
+				<table>
+					{{#each offer.passenger.groups as |group|}}
+					{{#if group.label}}<tr class="end"><td colspan="2">{{group.label}}</td></tr>{{/if}}
+					{{#each group.terms as |term|}}
+					<tr><td class="w">{{term.label}}</td>
+						<td class="d {{term.tone}}{{#if term.split}} split{{/if}}">{{#if term.dm}}{{showDM term.dm}}{{else}}&mdash;{{/if}}</td></tr>
+					{{/each}}
+					{{/each}}
+					<tr class="sum"><td>{{localize 'MGT2.Trade.Terms.WorldTotal'}}</td>
+						<td class="d">{{showDM offer.passenger.total}}</td></tr>
+				</table>
+			</div>
+			<div class="c">
+				<h4>{{localize 'MGT2.Trade.Freight'}}<span class="src">{{localize 'MGT2.Trade.FreightSource'}}</span></h4>
+				<table>
+					{{#each offer.freight.groups as |group|}}
+					{{#if group.label}}<tr class="end"><td colspan="2">{{group.label}}</td></tr>{{/if}}
+					{{#each group.terms as |term|}}
+					<tr><td class="w">{{term.label}}</td>
+						<td class="d {{term.tone}}{{#if term.split}} split{{/if}}">{{#if term.dm}}{{showDM term.dm}}{{else}}&mdash;{{/if}}</td></tr>
+					{{/each}}
+					{{/each}}
+					<tr class="sum"><td>{{localize 'MGT2.Trade.Terms.WorldTotal'}}</td>
+						<td class="d">{{showDM offer.freight.total}}</td></tr>
+				</table>
+			</div>
+		</div>
+		{{#if offer.carouseSplit}}<p class="hint">{{localize 'MGT2.Trade.CarouseSplit'}}</p>{{/if}}
+	</div>
+
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Trade.Passengers'}}</h3>
+			<span class="count">{{localize 'MGT2.Trade.PassengerCount'}}</span>
+		</div>
+		<div class="results">
+			{{#each offer.passengers as |row|}}
+			<div class="r{{#if ../rolled}}{{#unless row.count}} none{{/unless}}{{#if row.capped}} capped{{/if}}{{/if}}">
+				<span class="nm">{{localize row.label}}</span>
+				<span class="dm">2D {{showDM row.dm}}</span>
+				<span class="at">{{#if ../rolled}}{{row.roll}} &rarr; {{row.total}} &rarr; {{row.count}}D{{#if row.capped}} &middot; {{localize 'MGT2.Trade.PopCap'}}{{/if}}{{/if}}</span>
+				<span class="out">{{#if ../rolled}}{{#if row.count}}{{row.quantity}}{{else}}&mdash;{{/if}}{{else}}&mdash;{{/if}}</span>
+			</div>
+			{{/each}}
+		</div>
+	</div>
+
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Trade.Freight'}}</h3>
+			<span class="count">{{localize 'MGT2.Trade.FreightCount'}}</span>
+		</div>
+		<div class="results">
+			{{#each offer.freights as |row|}}
+			<div class="r{{#if ../rolled}}{{#unless row.count}} none{{/unless}}{{/if}}">
+				<span class="nm">{{localize row.label}}<span class="g">{{localize 'MGT2.Trade.TonsPerLot' size=row.lotSize}}</span></span>
+				<span class="dm">2D {{showDM row.dm}}</span>
+				{{! Every lot rolls its own tonnage, so the row prints them all: one die for N lots
+				    under-reports the hold a crew needs by a factor of N, and the biggest single lot
+				    is what decides whether any of it fits, because a lot cannot be broken up. }}
+				<span class="at">{{#if ../rolled}}{{row.roll}} &rarr; {{row.total}}{{#if row.count}} &rarr; {{#each row.parts}}{{#unless @first}}+{{/unless}}{{this}}{{/each}}{{/if}}{{/if}}</span>
+				<span class="out">{{#if ../rolled}}{{#if row.count}}{{row.quantity}}<span class="u">{{localize 'MGT2.Trade.Lots' lots=row.count biggest=row.biggest}}</span>{{else}}&mdash;{{/if}}{{else}}&mdash;{{/if}}</span>
+			</div>
+			{{/each}}
+		</div>
+	</div>
+
+	{{! Mail is pass or fail on 12+, not a quantity, so it does not share the row shape — and its DM
+	    is the FREIGHT world total banded, the one place one table's output is another's input. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Trade.Mail'}}</h3>
+			<span class="count">{{localize 'MGT2.Trade.MailSource'}}</span>
+		</div>
+		<div class="mail">
+			{{#if rolled}}
+			<span class="v {{#if offer.mail.offered}}yes{{else}}no{{/if}}">{{#if offer.mail.offered}}{{localize 'MGT2.Trade.MailContainers' n=offer.mail.containers}}{{else}}{{localize 'MGT2.Trade.MailNone'}}{{/if}}</span>
+			<span class="cr">{{#if offer.mail.offered}}{{localize 'MGT2.Trade.MailPay' tons=offer.mail.tons credits=offer.mail.credits}}{{else}}{{localize 'MGT2.Trade.MailMissed' target=offer.mail.target roll=offer.mail.roll dm=(showDM offer.mail.dm) total=offer.mail.total}}{{/if}}</span>
+			{{else}}
+			<span class="v no">&mdash;</span>
+			<span class="cr">{{localize 'MGT2.Trade.MailNeeds' target=offer.mail.target dm=(showDM offer.mail.dm)}}</span>
+			{{/if}}
+			<span class="terms">{{#each offer.mail.terms as |term|}}<span class="dm {{term.tone}}">{{term.label}} {{showDM term.dm}}</span>{{/each}}</span>
+		</div>
+	</div>
+	{{/unless}}
+
+	{{! Absent on the chat card, which is this same readout with nothing left to press. }}
+	{{#unless card}}
+	<div class="foot">
+		<button type="button" class="btn hot" data-action="rollTraffic">{{localize 'MGT2.Trade.RollAll'}}</button>
+		<button type="button" class="btn" data-action="post" {{#unless canPost}}disabled{{/unless}}>{{localize 'MGT2.Trade.Post'}}</button>
+		<span class="why">{{localize 'MGT2.Trade.NoDocument'}}</span>
+	</div>
+	{{/unless}}
+</div>

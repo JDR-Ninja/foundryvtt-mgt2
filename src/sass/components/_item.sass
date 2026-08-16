@@ -290,6 +290,35 @@
 .mgt2 .btn-roll + .btn-roll
 	margin-left: 0
 
+// WHICH round is in the weapon, beside the reload that fills it (§9.90). Narrow on purpose: it
+// names a magazine and the names are short, and a full-width select would read as the subject of
+// the bar rather than as a setting on it.
+.mgt2 .rollbar select.loadedround
+	flex: 0 1 12rem
+	min-width: 0
+	font-family: var(--cond)
+	font-size: 11px
+
+// A drug's bar carries no roll sentence, so the button would sit alone against the right edge with
+// the caption stranded. The caption takes the space instead.
+.mgt2 .rollbar.dose-take
+	.why
+		flex: 1 1 auto
+		font-family: var(--cond)
+		font-size: 9.5px
+		letter-spacing: 0.11em
+		text-transform: uppercase
+		color: var(--faint)
+
+// An onset reads in the duration column, where "—" would otherwise say the dose is permanent.
+.mgt2 .rows .onset
+	font-family: var(--cond)
+	font-size: 10px
+	font-weight: 700
+	letter-spacing: 0.09em
+	text-transform: uppercase
+	color: var(--faint)
+
 // --------------------------------------------
 //  SPECS — the statline's type scale, one step down
 // --------------------------------------------
@@ -377,6 +406,11 @@
 	prose-mirror
 		min-height: 8rem
 		border: 1px solid var(--rule)
+	// A DocumentUUIDField draws core's own drop target. It is the only control here that is not an
+	// `input.f`, and inside a grid track it needs telling that it may shrink.
+	document-tags
+		min-width: 0
+		font-size: 12px
 	// Two controls sharing one grid cell: a value and the unit or unit-like enum beside it.
 	.pair
 		display: flex

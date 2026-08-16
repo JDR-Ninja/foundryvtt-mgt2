@@ -1,0 +1,115 @@
+<div class="panel">
+	{{#unless ready}}
+	<p class="hint">{{localize 'MGT2.Trade.NeedAWorld'}}</p>
+	{{else}}
+
+	{{! The codes are the whole of step 2: every good on the shelf and every DM below is read off this
+	    one derived line, and a referee who miscopies it miscopies everything after it. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Trade.Codes'}}</h3>
+			<span class="count">{{localize 'MGT2.Trade.SearchLine' dm=(showDM search.dm) target=search.target}}</span>
+		</div>
+		<div class="codes">
+			{{#each codes as |code|}}<span class="code{{#if code.zone}} zone{{/if}}">{{localize code.label}}</span>{{else}}<span class="none">{{localize 'MGT2.Trade.NoCodes'}}</span>{{/each}}
+			<span class="terms">{{#each search.terms as |term|}}<span class="dm {{term.tone}}">{{term.label}} {{showDM term.dm}}</span>{{/each}}</span>
+		</div>
+	</div>
+
+	{{! THE SHELF. Common goods plus whatever the codes match, and the two DM columns side by side —
+	    which is where the sign flip becomes visible: the column that makes a cargo cheap here is the
+	    column that will be subtracted from it at the next port. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Trade.Shelf'}}</h3>
+			<span class="count">{{localize 'MGT2.Trade.ShelfCount' n=shelf.length}}</span>
+		</div>
+		<div class="shelf">
+			<div class="r hdr">
+				<span class="ix">{{localize 'MGT2.Trade.D66'}}</span>
+				<span class="nm">{{localize 'MGT2.Trade.Goods'}}</span>
+				<span class="sz">{{localize 'MGT2.Trade.Tons'}}</span>
+				<span class="cr">{{localize 'MGT2.Trade.BasePrice'}}</span>
+				<span class="d">{{localize 'MGT2.Trade.PurchaseDM'}}</span>
+				<span class="d">{{localize 'MGT2.Trade.SaleDM'}}</span>
+			</div>
+			{{#each shelf as |row|}}
+			<div class="r{{#if row.selected}} on{{/if}}{{#if row.illegal}} bad{{/if}}{{#if row.empty}} none{{/if}}"
+			     {{#unless ../card}}data-action="pick" data-d66="{{row.d66}}"{{/unless}}>
+				<span class="ix">{{row.d66}}</span>
+				<span class="nm">{{localize row.label}}</span>
+				<span class="sz">{{#if ../rolled}}{{row.tons}}{{else}}{{row.size}}{{/if}}</span>
+				<span class="cr">{{row.basePrice}}</span>
+				<span class="d {{row.purchase.tone}}">{{showDM row.purchase.dm}}</span>
+				<span class="d {{row.sale.tone}}">{{showDM row.sale.dm}}</span>
+			</div>
+			{{/each}}
+		</div>
+		{{#if drawn.length}}
+		<div class="sect sub"><h3>{{localize 'MGT2.Trade.Drawn'}}</h3>
+			<span class="count">{{localize 'MGT2.Trade.DrawnCount' n=drawn.length}}</span></div>
+		<div class="shelf">
+			{{#each drawn as |row|}}
+			<div class="r{{#if row.selected}} on{{/if}}{{#if row.illegal}} bad{{/if}}"
+			     {{#unless ../card}}data-action="pick" data-d66="{{row.d66}}"{{/unless}}>
+				<span class="ix">{{row.d66}}</span>
+				<span class="nm">{{localize row.label}}</span>
+				<span class="sz">{{#if ../rolled}}{{row.tons}}{{else}}{{row.size}}{{/if}}</span>
+				<span class="cr">{{row.basePrice}}</span>
+				<span class="d {{row.purchase.tone}}">{{showDM row.purchase.dm}}</span>
+				<span class="d {{row.sale.tone}}">{{showDM row.sale.dm}}</span>
+			</div>
+			{{/each}}
+		</div>
+		{{/if}}
+	</div>
+
+	{{! THE PRICE, both ways. The same trade codes feed the two columns with opposite signs, so one
+	    world never pays well for what it sells cheaply — reading that off the printed table is the
+	    error this panel exists to remove. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize goods.label}}</h3>
+			<span class="count">{{localize 'MGT2.Trade.PriceSource'}}</span>
+		</div>
+		{{#if goods.exotic}}
+		<p class="hint">{{localize 'MGT2.Trade.ExoticsHint'}}</p>
+		{{else}}
+		<div class="cols">
+			{{#each readings as |read|}}
+			<div class="c">
+				<h4>{{localize read.label}}<span class="src">3D {{showDM read.dm}}</span></h4>
+				<table>
+					{{#each read.terms as |term|}}
+					<tr><td class="w">{{term.label}}</td>
+						<td class="d {{term.tone}}{{#if term.split}} split{{/if}}">{{showDM term.dm}}</td></tr>
+					{{/each}}
+				</table>
+				<div class="out">
+					{{#if ../priced}}
+					<span class="v">{{read.percent}}%</span>
+					<span class="cr">{{localize 'MGT2.Trade.PerTon' credits=read.perTon}}</span>
+					<span class="at">{{read.roll}} {{showDM read.dm}} &rarr; {{read.total}}</span>
+					{{else}}
+					<span class="v no">&mdash;</span>
+					<span class="cr">{{localize 'MGT2.Trade.NotRolled'}}</span>
+					{{/if}}
+				</div>
+			</div>
+			{{/each}}
+		</div>
+		<p class="hint">{{localize 'MGT2.Trade.LotLine' size=lot.size base=lot.basePrice}}</p>
+		{{/if}}
+	</div>
+	{{/unless}}
+
+	{{! Absent on the chat card, which is this same readout with nothing left to press. }}
+	{{#unless card}}
+	<div class="foot">
+		<button type="button" class="btn hot" data-action="rollStock">{{localize 'MGT2.Trade.RollShelf'}}</button>
+		<button type="button" class="btn hot" data-action="rollPrice">{{localize 'MGT2.Trade.RollPrice'}}</button>
+		<button type="button" class="btn" data-action="post" {{#unless canPost}}disabled{{/unless}}>{{localize 'MGT2.Trade.Post'}}</button>
+		<span class="why">{{localize 'MGT2.Trade.NoDocument'}}</span>
+	</div>
+	{{/unless}}
+</div>

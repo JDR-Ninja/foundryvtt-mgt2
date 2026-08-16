@@ -1,0 +1,60 @@
+<div class="found">
+
+	{{! The screen says what it does not yet know. A list drawn while round-trips are outstanding is
+	    a settled answer to a question that has not been asked yet. }}
+	<div class="cnt">
+		{{#if capped}}
+		<span class="c">{{localize 'MGT2.Explorer.Capped' shown=shown matched=matched}}</span>
+		{{else}}
+		<span class="c">{{localize 'MGT2.Explorer.Count' matched=matched total=total}}</span>
+		{{/if}}
+		{{#if loading}}<span class="wait">{{localize 'MGT2.Explorer.Loading' n=loading}}</span>{{/if}}
+		{{#if withheld}}<span class="wait">{{localize 'MGT2.Explorer.Withheld' n=withheld}}</span>{{/if}}
+	</div>
+
+	<div class="rows">
+		<table>
+			<thead>
+				<tr>
+					<th class="im"></th>
+					{{#each columns}}
+					<th class="{{key}}{{#if on}} on{{/if}}" data-action="sort" data-key="{{key}}">
+						{{localize label}}{{#if on}}<i class="fa-solid {{#if up}}fa-caret-up{{else}}fa-caret-down{{/if}}" inert></i>{{/if}}
+					</th>
+					{{/each}}
+				</tr>
+			</thead>
+			<tbody>
+				{{#each rows}}
+				{{! `{uuid, type}` with the document name as the type — core's own compendium payload,
+				    so every sheet's `_onDrop` takes it. A locked pack is no obstacle: locked governs
+				    writing INTO a pack, not taking a copy out of one. }}
+				<tr draggable="true" data-uuid="{{uuid}}" data-doc="{{doc}}">
+					<td class="im">
+						{{#if img}}<img src="{{img}}" alt="" loading="lazy" />
+						{{else}}<i class="{{icon}}" inert></i>{{/if}}
+					</td>
+					<td class="nm">
+						<a data-action="openEntry">{{name}}</a>
+						{{#if subType}}<span class="sub">{{subType}}</span>{{/if}}
+					</td>
+					<td class="type">{{type}}</td>
+					{{! An em dash says "this row has no Tech Level"; before the index lands the screen
+					    does not know that, and the two must not print the same. }}
+					<td class="tl{{#if pending}} pending{{/if}}">{{#if pending}}⋯{{else}}{{#if tl}}{{tl}}{{else}}&mdash;{{/if}}{{/if}}</td>
+					<td class="pack">
+						<i class="{{sourceIcon}}" inert></i>{{pack}}
+						{{#if locked}}<i class="fa-solid fa-lock"
+							data-tooltip="{{localize 'MGT2.Explorer.ReadOnly'}}"></i>{{/if}}
+					</td>
+				</tr>
+				{{else}}
+				<tr class="none">
+					<td colspan="5">{{#if loading}}{{localize 'MGT2.Explorer.Arriving'}}
+						{{else}}{{localize 'MGT2.Explorer.Empty'}}{{/if}}</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+</div>

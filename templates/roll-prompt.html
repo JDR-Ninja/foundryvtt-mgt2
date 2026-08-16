@@ -90,11 +90,15 @@
 	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.Range' }}">
 		<span class="pgut">{{ localize 'MGT2.RollPrompt.Range' }}<b>{{weapon.rangeLabel}}</b></span>
 		<div class="pfields">
+			{{! Seeded from the canvas where one target is marked and the scene is scored in the
+			    weapon's own unit, and typed in every other case. `data-from` is the attribution the
+			    band prints beside the span; the field drops it the moment it is typed into. }}
 			<span class="numunit">
-				<input class="f n" type="text" name="distance" maxlength="9"
+				<input class="f n" type="text" name="distance" maxlength="9" value="{{weapon.distance}}"
 					aria-label="{{ localize 'MGT2.RollPrompt.Distance' }}" /><i>{{weapon.unit}}</i>
 			</span>
-			<span class="band" data-readout="band" data-range="{{weapon.range}}" data-unit="{{weapon.unit}}"></span>
+			<span class="band" data-readout="band" data-range="{{weapon.range}}" data-unit="{{weapon.unit}}"
+				data-from="{{measuredFrom}}"></span>
 
 			{{! Aiming is a ladder of minor actions, so it is drawn as one. }}
 			<span class="brk"></span>
@@ -226,18 +230,42 @@
 			    the player touches it — Core folio 98 puts the encumbered DM on physical actions,
 			    and folio 9's roster is what "physical" means to a system that flags no skill. }}
 			{{#each checkModifiers as |m|}}
-			<label class="tog {{#if m.negative}}neg{{else}}pos{{/if}}"{{#if m.scope}} title="{{ localize 'MGT2.RollPrompt.PhysicalOnly' }}"{{/if}}>
+			<label class="tog {{#if m.negative}}neg{{else}}pos{{/if}}"{{#if m.scope}} title="{{ localize 'MGT2.RollPrompt.PhysicalOnly' }}"{{else if m.skillScope}} title="{{ localize 'MGT2.RollPrompt.SkillOnly' }}"{{/if}}>
 				<input type="checkbox" name="check-{{m.key}}" data-dtype="Boolean" data-dm="{{m.dm}}"
-					data-term="{{m.label}}"{{#if m.scope}} data-scope="{{m.scope}}" data-auto="true"{{/if}} checked />
+					data-term="{{m.label}}"{{#if m.scope}} data-scope="{{m.scope}}" data-auto="true"{{/if}}{{#if m.skillScope}} data-skill-scope="{{m.skillScope}}" data-auto="true"{{/if}} checked />
 				<span>{{m.label}}</span><span class="v">{{m.display}}</span>
 			</label>
 			{{/each}}
+			{{! Core folio 78. Here rather than beside the aiming ladder it forfeits, because a melee
+			    pair is as much a pair as two pistols and the Range block belongs to a ranged weapon
+			    alone. The forfeit is declared the way Auto declares it, so the ladder greys out. }}
+			{{#if dualWeapons}}
+			<label class="tog neg" title="{{ localize 'MGT2.RollPrompt.DualWeaponsHint' }}">
+				<input type="checkbox" name="dualWeapons" data-dtype="Boolean" data-dm="{{dualWeapons.dm}}"
+					data-suppress="{{dualWeapons.suppress}}" data-term="{{dualWeapons.label}}" />
+				<span>{{dualWeapons.label}}</span><span class="v">{{dualWeapons.display}}</span>
+			</label>
+			{{/if}}
 			<span class="numunit">
 				<i class="pre">{{ localize 'MGT2.RollPrompt.CustomDM' }}</i>
 				<input class="f n" type="text" name="customDM" maxlength="15"
 					aria-label="{{ localize 'MGT2.RollPrompt.CustomDM' }}" />
 			</span>
 			<span class="pdm zero" data-readout="customDM">+0</span>
+			{{! Core folio 75: damage taken during an Extended Action is a negative DM on the check
+			    that keeps the round's work. The field takes the damage, not the DM — the referee
+			    reads that number straight off the damage card — and a figure typed here is what
+			    tells the check's own card to state the verdict. }}
+			{{#if extended}}
+			<span class="numunit" title="{{ localize 'MGT2.RollPrompt.ExtendedActionHint' }}">
+				<i class="pre">{{ localize 'MGT2.RollPrompt.DamageSustainedShort' }}</i>
+				<input class="f n" type="text" name="damageSustained" maxlength="9"
+					data-dm="{{extended.dm}}" data-per="{{extended.per}}"
+					data-term="{{localize 'MGT2.RollPrompt.DamageSustained'}}"
+					aria-label="{{ localize 'MGT2.RollPrompt.DamageSustained' }}" />
+				<span class="pdm zero" data-readout="damageSustained">+0</span>
+			</span>
+			{{/if}}
 
 			<span class="brk"></span>
 			<span class="seggrp">

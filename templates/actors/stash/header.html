@@ -1,0 +1,83 @@
+<section class="mgt2-header">
+	<img class="portrait stash" src="{{img}}" alt="{{name}}" data-edit="img" data-action="editImage" data-tooltip="{{name}}" />
+
+	<div class="idy">
+		<div class="name">
+			<span class="play-only">{{name}}</span>
+			<input class="f edit-only" name="name" type="text" value="{{name}}" />
+		</div>
+
+		<div class="meta play-only">
+			{{#if system.kind}}<span>{{system.kind}}</span>{{/if}}
+			<span>{{localize (concat 'MGT2.Actor.stash.Rung.' stash.access.rung)}}</span>
+		</div>
+
+		<div class="meta edit-only">
+			<label>
+				<span class="lbl">{{systemFields.kind.label}}</span>
+				{{formInput systemFields.kind name="system.kind" value=system.kind classes="f"}}
+			</label>
+			<label class="check">
+				{{formInput systemFields.showWeight name="system.showWeight" value=system.showWeight}}
+				<span>{{systemFields.showWeight.label}}</span>
+			</label>
+		</div>
+	</div>
+
+	{{! The lock takes the registration's slot: on a stash it is the one word that changes what the
+	    sheet is, and the rail below is where a referee turns it. }}
+	<div class="reg">
+		<span class="lbl">{{localize 'MGT2.Actor.stash.Lock'}}</span>
+		<div class="code play-only{{#if system.locked}} shut{{/if}}">
+			{{~#if system.locked}}{{localize 'MGT2.Actor.stash.Shut'}}{{else}}{{localize 'MGT2.Actor.stash.Open'}}{{/if~}}
+		</div>
+		<div class="ref play-only">{{localize 'MGT2.Actor.stash.Ref'}}</div>
+	</div>
+
+	{{! THE OWNERSHIP STRIP, and the only reason this type exists. An Item's ownership is its
+	    parent's, so showing players the party's loot means showing them whoever carries it; an
+	    Actor carries its own (§9.34). The strip is the stored state and everything below is a
+	    reading of it — including whether the sheet opens at all, which Foundry refuses under
+	    LIMITED before this template runs. `default` leads because it is what a user with no entry
+	    of their own gets; referees are omitted, being OWNER of every document by role. }}
+	<dl class="own">
+		{{#each stash.ownership as |row|}}
+		<div class="r {{row.rung}}{{#if row.fallback}} fallback{{/if}}"{{#if @root.isGM}} data-action="configureOwnership" data-tooltip="{{localize 'MGT2.Actor.stash.ConfigureOwnership'}}"{{/if}}>
+			<span class="who">{{row.name}}</span>
+			<b>{{localize (concat 'MGT2.Actor.stash.Rung.' row.rung)}}</b>
+			<span class="g">{{localize (concat 'MGT2.Actor.stash.Gloss.' row.rung)}}</span>
+		</div>
+		{{/each}}
+	</dl>
+
+	<dl class="statline" data-derived="system">
+		<div class="stat lead{{#unless stash.open}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.stash.Items'}}</dt>
+			<dd>{{#if stash.open}}{{stash.count}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		{{#if stash.showWeight}}
+		<div class="stat{{#unless stash.open}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.stash.Mass'}}</dt>
+			<dd>{{#if stash.open}}{{stash.weight}}<i>{{stash.unit}}</i>{{else}}&mdash;{{/if}}</dd>
+		</div>
+		{{/if}}
+		{{! A readout, not a till: the sum of what the contents cost, with no control on this sheet
+		    that writes money (§9.34/§9.66). Withheld exactly as its two neighbours are — the value is
+		    as sensitive as the inventory it sums, so a locked stash sends no number at all. }}
+		<div class="stat{{#unless stash.open}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.stash.Value'}}</dt>
+			<dd>{{#if stash.open}}<i>Cr</i>{{credits stash.value}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat">
+			<dt>{{localize 'MGT2.Actor.stash.CarriedBy'}}</dt>
+			<dd class="word">{{localize 'MGT2.Actor.stash.Nobody'}}</dd>
+		</div>
+		{{! Inert on purpose, and present on purpose. A `container` on a Traveller needs `onHand` and
+		    `weightless` to keep party loot off whoever happens to hold it; a stash has no carrier to
+		    protect, so the empty cell states the rule instead of leaving it to be noticed. }}
+		<div class="stat none">
+			<dt>{{localize 'MGT2.Actor.Encumbrance'}}</dt>
+			<dd>&mdash;</dd>
+		</div>
+	</dl>
+</section>

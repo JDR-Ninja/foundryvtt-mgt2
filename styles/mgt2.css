@@ -1143,6 +1143,804 @@ body {
   border-color: var(--accent-text);
 }
 
+.mgt2.stoptraffic .window-content,
+.mgt2.card.stoptraffic .window-content,
+.mgt2.spectrade .window-content,
+.mgt2.card.spectrade .window-content {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.mgt2.stoptraffic,
+.mgt2.card.stoptraffic,
+.mgt2.spectrade,
+.mgt2.card.spectrade {
+  container-type: inline-size;
+}
+.mgt2.stoptraffic .hd,
+.mgt2.card.stoptraffic .hd,
+.mgt2.spectrade .hd,
+.mgt2.card.spectrade .hd {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 11px 16px 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.mgt2.stoptraffic .hd h2,
+.mgt2.card.stoptraffic .hd h2,
+.mgt2.spectrade .hd h2,
+.mgt2.card.spectrade .hd h2 {
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: none;
+}
+.mgt2.stoptraffic .inputs,
+.mgt2.card.stoptraffic .inputs,
+.mgt2.spectrade .inputs,
+.mgt2.card.spectrade .inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 14px;
+}
+.mgt2.stoptraffic .inputs .end,
+.mgt2.card.stoptraffic .inputs .end,
+.mgt2.spectrade .inputs .end,
+.mgt2.card.spectrade .inputs .end {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 6.4rem;
+  gap: 9px 10px;
+  min-width: 0;
+}
+.mgt2.stoptraffic .inputs .fld,
+.mgt2.card.stoptraffic .inputs .fld,
+.mgt2.spectrade .inputs .fld,
+.mgt2.card.spectrade .inputs .fld {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.mgt2.stoptraffic .inputs .fld > span,
+.mgt2.card.stoptraffic .inputs .fld > span,
+.mgt2.spectrade .inputs .fld > span,
+.mgt2.card.spectrade .inputs .fld > span {
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2.stoptraffic .inputs .fld input.f,
+.mgt2.card.stoptraffic .inputs .fld input.f,
+.mgt2.spectrade .inputs .fld input.f,
+.mgt2.card.spectrade .inputs .fld input.f {
+  font-family: var(--mono);
+}
+.mgt2.stoptraffic .inputs .fld input.f.n,
+.mgt2.card.stoptraffic .inputs .fld input.f.n,
+.mgt2.spectrade .inputs .fld input.f.n,
+.mgt2.card.spectrade .inputs .fld input.f.n {
+  text-align: right;
+}
+.mgt2.stoptraffic .inputs .fld .g,
+.mgt2.card.stoptraffic .inputs .fld .g,
+.mgt2.spectrade .inputs .fld .g,
+.mgt2.card.spectrade .inputs .fld .g {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mgt2.stoptraffic .inputs .fld.bad input.f,
+.mgt2.card.stoptraffic .inputs .fld.bad input.f,
+.mgt2.spectrade .inputs .fld.bad input.f,
+.mgt2.card.spectrade .inputs .fld.bad input.f {
+  border-color: var(--danger);
+}
+.mgt2.stoptraffic .inputs .pair,
+.mgt2.card.stoptraffic .inputs .pair,
+.mgt2.spectrade .inputs .pair,
+.mgt2.card.spectrade .inputs .pair {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.mgt2.stoptraffic .inputs .pair input.f,
+.mgt2.card.stoptraffic .inputs .pair input.f,
+.mgt2.spectrade .inputs .pair input.f,
+.mgt2.card.spectrade .inputs .pair input.f {
+  min-width: 0;
+}
+.mgt2.stoptraffic .inputs .pair .btn,
+.mgt2.card.stoptraffic .inputs .pair .btn,
+.mgt2.spectrade .inputs .pair .btn,
+.mgt2.card.spectrade .inputs .pair .btn {
+  flex: none;
+  padding: 3px 7px;
+}
+.mgt2.stoptraffic .inputs .fld.ck,
+.mgt2.card.stoptraffic .inputs .fld.ck,
+.mgt2.spectrade .inputs .fld.ck,
+.mgt2.card.spectrade .inputs .fld.ck {
+  flex-direction: row;
+  align-items: center;
+  align-self: end;
+  gap: 6px;
+  padding-bottom: 4px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2.stoptraffic .inputs .fld.ck input,
+.mgt2.card.stoptraffic .inputs .fld.ck input,
+.mgt2.spectrade .inputs .fld.ck input,
+.mgt2.card.spectrade .inputs .fld.ck input {
+  margin: 0;
+  accent-color: var(--accent-text);
+}
+.mgt2.stoptraffic .inputs .fld.ck > span,
+.mgt2.card.stoptraffic .inputs .fld.ck > span,
+.mgt2.spectrade .inputs .fld.ck > span,
+.mgt2.card.spectrade .inputs .fld.ck > span {
+  font-size: 10px;
+  color: var(--mute);
+}
+.mgt2.stoptraffic .inputs .row4,
+.mgt2.card.stoptraffic .inputs .row4,
+.mgt2.spectrade .inputs .row4,
+.mgt2.card.spectrade .inputs .row4 {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px 14px;
+}
+.mgt2.stoptraffic .panel,
+.mgt2.card.stoptraffic .panel,
+.mgt2.spectrade .panel,
+.mgt2.card.spectrade .panel {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-width: 0;
+  padding: 12px 16px 16px;
+  overflow-y: auto;
+}
+.mgt2.stoptraffic.card .panel,
+.mgt2.card.stoptraffic.card .panel,
+.mgt2.spectrade.card .panel,
+.mgt2.card.spectrade.card .panel {
+  flex: none;
+  overflow: visible;
+}
+.mgt2.stoptraffic .cols,
+.mgt2.card.stoptraffic .cols,
+.mgt2.spectrade .cols,
+.mgt2.card.spectrade .cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--rule-soft);
+}
+.mgt2.stoptraffic .cols .c,
+.mgt2.card.stoptraffic .cols .c,
+.mgt2.spectrade .cols .c,
+.mgt2.card.spectrade .cols .c {
+  min-width: 0;
+  padding: 8px 11px 10px;
+}
+.mgt2.stoptraffic .cols .c + .c,
+.mgt2.card.stoptraffic .cols .c + .c,
+.mgt2.spectrade .cols .c + .c,
+.mgt2.card.spectrade .cols .c + .c {
+  border-left: 1px solid var(--rule-soft);
+}
+.mgt2.stoptraffic .cols h4,
+.mgt2.card.stoptraffic .cols h4,
+.mgt2.spectrade .cols h4,
+.mgt2.card.spectrade .cols h4 {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0 0 4px;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: none;
+}
+.mgt2.stoptraffic .cols h4 .src,
+.mgt2.card.stoptraffic .cols h4 .src,
+.mgt2.spectrade .cols h4 .src,
+.mgt2.card.spectrade .cols h4 .src {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--faint);
+}
+.mgt2.stoptraffic .cols table,
+.mgt2.card.stoptraffic .cols table,
+.mgt2.spectrade .cols table,
+.mgt2.card.spectrade .cols table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.mgt2.stoptraffic .cols td,
+.mgt2.card.stoptraffic .cols td,
+.mgt2.spectrade .cols td,
+.mgt2.card.spectrade .cols td {
+  padding: 1px 0;
+  font-size: 12px;
+}
+.mgt2.stoptraffic .cols td.w,
+.mgt2.card.stoptraffic .cols td.w,
+.mgt2.spectrade .cols td.w,
+.mgt2.card.spectrade .cols td.w {
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2.stoptraffic .cols td.d,
+.mgt2.card.stoptraffic .cols td.d,
+.mgt2.spectrade .cols td.d,
+.mgt2.card.spectrade .cols td.d {
+  width: 1px;
+  padding-left: 8px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.mgt2.stoptraffic .cols td.d.pos,
+.mgt2.card.stoptraffic .cols td.d.pos,
+.mgt2.spectrade .cols td.d.pos,
+.mgt2.card.spectrade .cols td.d.pos {
+  color: var(--good);
+}
+.mgt2.stoptraffic .cols td.d.neg,
+.mgt2.card.stoptraffic .cols td.d.neg,
+.mgt2.spectrade .cols td.d.neg,
+.mgt2.card.spectrade .cols td.d.neg {
+  color: var(--danger);
+}
+.mgt2.stoptraffic .cols td.d.nil,
+.mgt2.card.stoptraffic .cols td.d.nil,
+.mgt2.spectrade .cols td.d.nil,
+.mgt2.card.spectrade .cols td.d.nil {
+  color: var(--faint);
+}
+.mgt2.stoptraffic .cols td.d.split,
+.mgt2.card.stoptraffic .cols td.d.split,
+.mgt2.spectrade .cols td.d.split,
+.mgt2.card.spectrade .cols td.d.split {
+  box-shadow: inset 0 -2px 0 var(--accent-line);
+}
+.mgt2.stoptraffic .cols tr.end td,
+.mgt2.card.stoptraffic .cols tr.end td,
+.mgt2.spectrade .cols tr.end td,
+.mgt2.card.spectrade .cols tr.end td {
+  padding-top: 4px;
+  font-family: var(--cond);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.mgt2.stoptraffic .cols tr.sum td,
+.mgt2.card.stoptraffic .cols tr.sum td,
+.mgt2.spectrade .cols tr.sum td,
+.mgt2.card.spectrade .cols tr.sum td {
+  padding-top: 3px;
+  font-family: var(--cond);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.stoptraffic .cols tr.sum td.d,
+.mgt2.card.stoptraffic .cols tr.sum td.d,
+.mgt2.spectrade .cols tr.sum td.d,
+.mgt2.card.spectrade .cols tr.sum td.d {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+.mgt2.stoptraffic .results,
+.mgt2.card.stoptraffic .results,
+.mgt2.spectrade .results,
+.mgt2.card.spectrade .results {
+  display: flex;
+  flex-direction: column;
+}
+.mgt2.stoptraffic .results .r,
+.mgt2.card.stoptraffic .results .r,
+.mgt2.spectrade .results .r,
+.mgt2.card.spectrade .results .r {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: baseline;
+  gap: 0 10px;
+  padding: 5px 2px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2.stoptraffic .results .r:last-child,
+.mgt2.card.stoptraffic .results .r:last-child,
+.mgt2.spectrade .results .r:last-child,
+.mgt2.card.spectrade .results .r:last-child {
+  border-bottom: 0;
+}
+.mgt2.stoptraffic .results .nm,
+.mgt2.card.stoptraffic .results .nm,
+.mgt2.spectrade .results .nm,
+.mgt2.card.spectrade .results .nm {
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.mgt2.stoptraffic .results .nm .g,
+.mgt2.card.stoptraffic .results .nm .g,
+.mgt2.spectrade .results .nm .g,
+.mgt2.card.spectrade .results .nm .g {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--faint);
+}
+.mgt2.stoptraffic .results .dm,
+.mgt2.stoptraffic .results .at,
+.mgt2.card.stoptraffic .results .dm,
+.mgt2.card.stoptraffic .results .at,
+.mgt2.spectrade .results .dm,
+.mgt2.spectrade .results .at,
+.mgt2.card.spectrade .results .dm,
+.mgt2.card.spectrade .results .at {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+  white-space: nowrap;
+}
+.mgt2.stoptraffic .results .out,
+.mgt2.card.stoptraffic .results .out,
+.mgt2.spectrade .results .out,
+.mgt2.card.spectrade .results .out {
+  min-width: 3.4rem;
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+.mgt2.stoptraffic .results .out .u,
+.mgt2.card.stoptraffic .results .out .u,
+.mgt2.spectrade .results .out .u,
+.mgt2.card.spectrade .results .out .u {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--faint);
+}
+.mgt2.stoptraffic .results .r.none .nm,
+.mgt2.stoptraffic .results .r.none .out,
+.mgt2.card.stoptraffic .results .r.none .nm,
+.mgt2.card.stoptraffic .results .r.none .out,
+.mgt2.spectrade .results .r.none .nm,
+.mgt2.spectrade .results .r.none .out,
+.mgt2.card.spectrade .results .r.none .nm,
+.mgt2.card.spectrade .results .r.none .out {
+  color: var(--faint);
+}
+.mgt2.stoptraffic .results .r.capped .out,
+.mgt2.card.stoptraffic .results .r.capped .out,
+.mgt2.spectrade .results .r.capped .out,
+.mgt2.card.spectrade .results .r.capped .out {
+  color: var(--danger);
+}
+.mgt2.stoptraffic .mail,
+.mgt2.card.stoptraffic .mail,
+.mgt2.spectrade .mail,
+.mgt2.card.spectrade .mail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 7px 10px 8px;
+  border: 1px solid var(--rule);
+}
+.mgt2.stoptraffic .mail .v,
+.mgt2.card.stoptraffic .mail .v,
+.mgt2.spectrade .mail .v,
+.mgt2.card.spectrade .mail .v {
+  font-family: var(--cond);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+}
+.mgt2.stoptraffic .mail .v.yes,
+.mgt2.card.stoptraffic .mail .v.yes,
+.mgt2.spectrade .mail .v.yes,
+.mgt2.card.spectrade .mail .v.yes {
+  color: var(--accent-text);
+}
+.mgt2.stoptraffic .mail .v.no,
+.mgt2.card.stoptraffic .mail .v.no,
+.mgt2.spectrade .mail .v.no,
+.mgt2.card.spectrade .mail .v.no {
+  color: var(--faint);
+}
+.mgt2.stoptraffic .mail .cr,
+.mgt2.card.stoptraffic .mail .cr,
+.mgt2.spectrade .mail .cr,
+.mgt2.card.spectrade .mail .cr {
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+.mgt2.stoptraffic .mail .terms,
+.mgt2.card.stoptraffic .mail .terms,
+.mgt2.spectrade .mail .terms,
+.mgt2.card.spectrade .mail .terms {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.mgt2.stoptraffic .mail .terms .dm,
+.mgt2.card.stoptraffic .mail .terms .dm,
+.mgt2.spectrade .mail .terms .dm,
+.mgt2.card.spectrade .mail .terms .dm {
+  padding: 0 4px 1px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--mute);
+  border: 1px solid var(--rule-soft);
+  border-radius: 2px;
+}
+.mgt2.stoptraffic .mail .terms .dm.pos,
+.mgt2.card.stoptraffic .mail .terms .dm.pos,
+.mgt2.spectrade .mail .terms .dm.pos,
+.mgt2.card.spectrade .mail .terms .dm.pos {
+  color: var(--good);
+  border-color: color-mix(in oklab, var(--good) 40%, transparent);
+}
+.mgt2.stoptraffic .mail .terms .dm.neg,
+.mgt2.card.stoptraffic .mail .terms .dm.neg,
+.mgt2.spectrade .mail .terms .dm.neg,
+.mgt2.card.spectrade .mail .terms .dm.neg {
+  color: var(--danger);
+  border-color: color-mix(in oklab, var(--danger) 40%, transparent);
+}
+.mgt2.stoptraffic .codes,
+.mgt2.card.stoptraffic .codes,
+.mgt2.spectrade .codes,
+.mgt2.card.spectrade .codes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 6px;
+  padding: 7px 10px 8px;
+  border: 1px solid var(--rule);
+}
+.mgt2.stoptraffic .codes .code,
+.mgt2.card.stoptraffic .codes .code,
+.mgt2.spectrade .codes .code,
+.mgt2.card.spectrade .codes .code {
+  padding: 1px 6px 2px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  border: 1px solid var(--accent-line);
+}
+.mgt2.stoptraffic .codes .code.zone,
+.mgt2.card.stoptraffic .codes .code.zone,
+.mgt2.spectrade .codes .code.zone,
+.mgt2.card.spectrade .codes .code.zone {
+  color: var(--mute);
+  border-style: dashed;
+}
+.mgt2.stoptraffic .codes .none,
+.mgt2.card.stoptraffic .codes .none,
+.mgt2.spectrade .codes .none,
+.mgt2.card.spectrade .codes .none {
+  font-family: var(--cond);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.mgt2.stoptraffic .codes .terms,
+.mgt2.card.stoptraffic .codes .terms,
+.mgt2.spectrade .codes .terms,
+.mgt2.card.spectrade .codes .terms {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.mgt2.stoptraffic .codes .terms .dm,
+.mgt2.card.stoptraffic .codes .terms .dm,
+.mgt2.spectrade .codes .terms .dm,
+.mgt2.card.spectrade .codes .terms .dm {
+  padding: 0 4px 1px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--mute);
+  border: 1px solid var(--rule-soft);
+  border-radius: 2px;
+}
+.mgt2.stoptraffic .codes .terms .dm.pos,
+.mgt2.card.stoptraffic .codes .terms .dm.pos,
+.mgt2.spectrade .codes .terms .dm.pos,
+.mgt2.card.spectrade .codes .terms .dm.pos {
+  color: var(--good);
+}
+.mgt2.stoptraffic .codes .terms .dm.neg,
+.mgt2.card.stoptraffic .codes .terms .dm.neg,
+.mgt2.spectrade .codes .terms .dm.neg,
+.mgt2.card.spectrade .codes .terms .dm.neg {
+  color: var(--danger);
+}
+.mgt2.stoptraffic .shelf,
+.mgt2.card.stoptraffic .shelf,
+.mgt2.spectrade .shelf,
+.mgt2.card.spectrade .shelf {
+  display: flex;
+  flex-direction: column;
+}
+.mgt2.stoptraffic .shelf .r,
+.mgt2.card.stoptraffic .shelf .r,
+.mgt2.spectrade .shelf .r,
+.mgt2.card.spectrade .shelf .r {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) 4.2rem 5.4rem 3rem 3rem;
+  align-items: baseline;
+  gap: 0 8px;
+  padding: 3px 4px;
+  border-bottom: 1px solid var(--rule-soft);
+  cursor: var(--cursor-pointer);
+}
+.mgt2.stoptraffic .shelf .r:last-child,
+.mgt2.card.stoptraffic .shelf .r:last-child,
+.mgt2.spectrade .shelf .r:last-child,
+.mgt2.card.spectrade .shelf .r:last-child {
+  border-bottom: 0;
+}
+.mgt2.stoptraffic .shelf .ix,
+.mgt2.stoptraffic .shelf .sz,
+.mgt2.stoptraffic .shelf .cr,
+.mgt2.stoptraffic .shelf .d,
+.mgt2.card.stoptraffic .shelf .ix,
+.mgt2.card.stoptraffic .shelf .sz,
+.mgt2.card.stoptraffic .shelf .cr,
+.mgt2.card.stoptraffic .shelf .d,
+.mgt2.spectrade .shelf .ix,
+.mgt2.spectrade .shelf .sz,
+.mgt2.spectrade .shelf .cr,
+.mgt2.spectrade .shelf .d,
+.mgt2.card.spectrade .shelf .ix,
+.mgt2.card.spectrade .shelf .sz,
+.mgt2.card.spectrade .shelf .cr,
+.mgt2.card.spectrade .shelf .d {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mgt2.stoptraffic .shelf .sz,
+.mgt2.stoptraffic .shelf .cr,
+.mgt2.stoptraffic .shelf .d,
+.mgt2.card.stoptraffic .shelf .sz,
+.mgt2.card.stoptraffic .shelf .cr,
+.mgt2.card.stoptraffic .shelf .d,
+.mgt2.spectrade .shelf .sz,
+.mgt2.spectrade .shelf .cr,
+.mgt2.spectrade .shelf .d,
+.mgt2.card.spectrade .shelf .sz,
+.mgt2.card.spectrade .shelf .cr,
+.mgt2.card.spectrade .shelf .d {
+  text-align: right;
+}
+.mgt2.stoptraffic .shelf .ix,
+.mgt2.card.stoptraffic .shelf .ix,
+.mgt2.spectrade .shelf .ix,
+.mgt2.card.spectrade .shelf .ix {
+  color: var(--faint);
+}
+.mgt2.stoptraffic .shelf .nm,
+.mgt2.card.stoptraffic .shelf .nm,
+.mgt2.spectrade .shelf .nm,
+.mgt2.card.spectrade .shelf .nm {
+  font-family: var(--cond);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mgt2.stoptraffic .shelf .d.pos,
+.mgt2.card.stoptraffic .shelf .d.pos,
+.mgt2.spectrade .shelf .d.pos,
+.mgt2.card.spectrade .shelf .d.pos {
+  color: var(--good);
+}
+.mgt2.stoptraffic .shelf .d.neg,
+.mgt2.card.stoptraffic .shelf .d.neg,
+.mgt2.spectrade .shelf .d.neg,
+.mgt2.card.spectrade .shelf .d.neg {
+  color: var(--danger);
+}
+.mgt2.stoptraffic .shelf .d.nil,
+.mgt2.card.stoptraffic .shelf .d.nil,
+.mgt2.spectrade .shelf .d.nil,
+.mgt2.card.spectrade .shelf .d.nil {
+  color: var(--faint);
+}
+.mgt2.stoptraffic .shelf .r.hdr,
+.mgt2.card.stoptraffic .shelf .r.hdr,
+.mgt2.spectrade .shelf .r.hdr,
+.mgt2.card.spectrade .shelf .r.hdr {
+  cursor: default;
+}
+.mgt2.stoptraffic .shelf .r.hdr span,
+.mgt2.card.stoptraffic .shelf .r.hdr span,
+.mgt2.spectrade .shelf .r.hdr span,
+.mgt2.card.spectrade .shelf .r.hdr span {
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2.stoptraffic .shelf .r.on,
+.mgt2.card.stoptraffic .shelf .r.on,
+.mgt2.spectrade .shelf .r.on,
+.mgt2.card.spectrade .shelf .r.on {
+  background: var(--accent-soft);
+}
+.mgt2.stoptraffic .shelf .r.bad .nm,
+.mgt2.card.stoptraffic .shelf .r.bad .nm,
+.mgt2.spectrade .shelf .r.bad .nm,
+.mgt2.card.spectrade .shelf .r.bad .nm {
+  color: var(--danger);
+}
+.mgt2.stoptraffic .shelf .r.none .nm,
+.mgt2.stoptraffic .shelf .r.none .sz,
+.mgt2.card.stoptraffic .shelf .r.none .nm,
+.mgt2.card.stoptraffic .shelf .r.none .sz,
+.mgt2.spectrade .shelf .r.none .nm,
+.mgt2.spectrade .shelf .r.none .sz,
+.mgt2.card.spectrade .shelf .r.none .nm,
+.mgt2.card.spectrade .shelf .r.none .sz {
+  color: var(--faint);
+}
+.mgt2.stoptraffic .sect.sub,
+.mgt2.card.stoptraffic .sect.sub,
+.mgt2.spectrade .sect.sub,
+.mgt2.card.spectrade .sect.sub {
+  margin-top: 8px;
+}
+.mgt2.stoptraffic .cols .out,
+.mgt2.card.stoptraffic .cols .out,
+.mgt2.spectrade .cols .out,
+.mgt2.card.spectrade .cols .out {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.stoptraffic .cols .out .v,
+.mgt2.card.stoptraffic .cols .out .v,
+.mgt2.spectrade .cols .out .v,
+.mgt2.card.spectrade .cols .out .v {
+  font-family: var(--cond);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent-text);
+}
+.mgt2.stoptraffic .cols .out .v.no,
+.mgt2.card.stoptraffic .cols .out .v.no,
+.mgt2.spectrade .cols .out .v.no,
+.mgt2.card.spectrade .cols .out .v.no {
+  color: var(--faint);
+}
+.mgt2.stoptraffic .cols .out .cr,
+.mgt2.card.stoptraffic .cols .out .cr,
+.mgt2.spectrade .cols .out .cr,
+.mgt2.card.spectrade .cols .out .cr {
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.mgt2.stoptraffic .cols .out .at,
+.mgt2.card.stoptraffic .cols .out .at,
+.mgt2.spectrade .cols .out .at,
+.mgt2.card.spectrade .cols .out .at {
+  flex-basis: 100%;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--faint);
+}
+.mgt2.stoptraffic .foot,
+.mgt2.card.stoptraffic .foot,
+.mgt2.spectrade .foot,
+.mgt2.card.spectrade .foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  padding-top: 2px;
+}
+.mgt2.stoptraffic .foot .why,
+.mgt2.card.stoptraffic .foot .why,
+.mgt2.spectrade .foot .why,
+.mgt2.card.spectrade .foot .why {
+  font-family: var(--cond);
+  font-size: 9.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+@container (max-width: 700px) {
+  .mgt2.stoptraffic .inputs,
+  .mgt2.card.stoptraffic .inputs,
+  .mgt2.spectrade .inputs,
+  .mgt2.card.spectrade .inputs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mgt2.stoptraffic .inputs .row4,
+  .mgt2.card.stoptraffic .inputs .row4,
+  .mgt2.spectrade .inputs .row4,
+  .mgt2.card.spectrade .inputs .row4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mgt2.stoptraffic .cols,
+  .mgt2.card.stoptraffic .cols,
+  .mgt2.spectrade .cols,
+  .mgt2.card.spectrade .cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mgt2.stoptraffic .cols .c + .c,
+  .mgt2.card.stoptraffic .cols .c + .c,
+  .mgt2.spectrade .cols .c + .c,
+  .mgt2.card.spectrade .cols .c + .c {
+    border-left: 0;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .mgt2.stoptraffic .shelf .r,
+  .mgt2.card.stoptraffic .shelf .r,
+  .mgt2.spectrade .shelf .r,
+  .mgt2.card.spectrade .shelf .r {
+    grid-template-columns: 2.2rem minmax(0, 1fr) 4.2rem 3rem 3rem;
+  }
+  .mgt2.stoptraffic .shelf .cr,
+  .mgt2.card.stoptraffic .shelf .cr,
+  .mgt2.spectrade .shelf .cr,
+  .mgt2.card.spectrade .shelf .cr {
+    display: none;
+  }
+}
+
 .mgt2 {
   --cond: "Barlow Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
   --body: "Barlow", "Segoe UI", system-ui, sans-serif;
@@ -1233,6 +2031,52 @@ body {
   text-align: right;
   font-family: var(--mono);
   font-size: 12px;
+}
+.mgt2 formula-input.f {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: auto;
+  padding: 0 3px 0 0;
+  background: var(--hover);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  box-shadow: none;
+}
+.mgt2 formula-input.f:focus-within {
+  outline: none;
+  background: var(--paper);
+  border-color: var(--accent-text);
+}
+.mgt2 formula-input.f > input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: auto;
+  padding: 2px 5px;
+  font: inherit;
+  font-family: var(--body);
+  font-size: 13px;
+  color: var(--ink);
+  background: none;
+  border: none;
+}
+.mgt2 formula-input.f > input:focus {
+  outline: none;
+}
+.mgt2 formula-input.f > button {
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  min-height: 0;
+  padding: 0;
+  font-size: 11px;
+  color: var(--faint);
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+.mgt2 formula-input.f > button:hover {
+  color: var(--accent-text);
 }
 .mgt2 .grid {
   display: grid;
@@ -1447,6 +2291,14 @@ body {
   font-weight: 500;
   color: var(--mute);
 }
+.mgt2 .statline dd .why {
+  margin-left: 6px;
+  font-family: var(--cond);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
 .mgt2 .statline dd .word {
   font-size: 13px;
   font-weight: 600;
@@ -1574,7 +2426,7 @@ body {
   width: 5.5rem;
   text-align: right;
 }
-.mgt2 .budget .brows td .why {
+.mgt2 .budget .why {
   margin-left: 8px;
   font-family: var(--cond);
   font-size: 10px;
@@ -2231,6 +3083,97 @@ body {
 
 .mgt2 .roster tr.vacant td.who {
   border: 1px dashed var(--rule);
+}
+
+.mgt2 .valid {
+  display: flex;
+  flex-direction: column;
+  margin-top: 9px;
+}
+.mgt2 .valid .v {
+  display: grid;
+  grid-template-columns: 1.2rem minmax(0, 1fr) auto;
+  gap: 0 8px;
+  align-items: baseline;
+  padding: 4px 2px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .valid .v:last-child {
+  border-bottom: 0;
+}
+.mgt2 .valid .mk {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--faint);
+}
+.mgt2 .valid .v.ok .mk {
+  color: var(--good);
+}
+.mgt2 .valid .v.no .mk {
+  color: var(--danger);
+}
+.mgt2 .valid .nm {
+  font-family: var(--cond);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.mgt2 .valid .nm .g {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--faint);
+}
+.mgt2 .valid .num {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mgt2 .valid .v.no .num {
+  color: var(--danger);
+}
+.mgt2 .valid .v.na .nm, .mgt2 .valid .v.na .num {
+  color: var(--faint);
+}
+
+.mgt2 table.rows tr.hit td:first-child {
+  box-shadow: inset 2px 0 0 var(--danger);
+}
+
+.mgt2 table.rows td.num.good {
+  color: var(--good);
+}
+
+.mgt2 .roster .times {
+  margin-right: 1px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--mute);
+}
+
+.mgt2 .roster .need .each {
+  display: block;
+  margin-top: 1px;
+  font-style: normal;
+  font-size: 9.5px;
+  color: var(--faint);
+}
+
+.mgt2 .roster .baytons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+}
+.mgt2 .roster .baytons input.f.num {
+  width: 4rem;
+}
+.mgt2 .roster .baytons input.f.num:first-child {
+  width: 3rem;
 }
 
 .mgt2 {
@@ -3065,6 +4008,66 @@ ul.softwares li:hover a {
   border-color: var(--accent-line);
 }
 
+.mgt2 ul.deltas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 ul.deltas li {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.mgt2 ul.deltas .k {
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 ul.deltas .v {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--good);
+}
+.mgt2 ul.deltas li.bad .v {
+  color: var(--danger);
+}
+
+.mgt2 .dlg.loss .row3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.mgt2 .dlg.loss .drow.bill {
+  gap: 7px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .dlg.loss .drow.bill input {
+  margin: 0;
+  accent-color: var(--accent-text);
+}
+.mgt2 .dlg.loss .drow.bill .lbl {
+  flex: 0 0 auto;
+}
+.mgt2 .dlg.loss .dm.move {
+  min-width: 4.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .dlg.loss .dm.good {
+  color: var(--good);
+}
+.mgt2 .dlg.loss input.locked {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .active-effect-config .tab.changes.mgt2-changes header,
 .active-effect-config .tab.changes.mgt2-changes ol {
   grid-template-columns: 11rem 6rem 6rem 6rem 3.5rem 1rem;
@@ -3151,6 +4154,387 @@ ul.softwares li:hover a {
   }
   .mgt2 .mgt2-panel {
     padding: 14px 22px 20px;
+  }
+}
+.mgt2.application.world {
+  container-type: inline-size;
+  container-name: sheet;
+}
+.mgt2.application.world > .window-content {
+  display: grid;
+  grid-template-columns: 20rem minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "header header" "rail panel";
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--body);
+  font-size: 14px;
+}
+.mgt2.application.world > .window-content > [data-application-part=header] {
+  grid-area: header;
+}
+.mgt2.application.world > .window-content > [data-application-part=rail] {
+  grid-area: rail;
+  min-height: 0;
+}
+.mgt2.application.world > .window-content > [data-application-part=panel] {
+  grid-area: panel;
+  min-height: 0;
+}
+
+.mgt2 .mgt2-world-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.mgt2 .mgt2-header .portrait.world {
+  width: 84px;
+  height: 84px;
+}
+
+.mgt2 .uwp {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  margin: 12px 0 0;
+  border: 1px solid var(--rule-soft);
+}
+.mgt2 .uwp .u {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding: 5px 6px 6px;
+  border-right: 1px solid var(--rule-soft);
+}
+.mgt2 .uwp .u:last-child {
+  border-right: 0;
+}
+.mgt2 .uwp .u dt {
+  overflow: hidden;
+  font-family: var(--cond);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--faint);
+}
+.mgt2 .uwp .u dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 17px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .uwp .u .g {
+  overflow: hidden;
+  font-family: var(--cond);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--mute);
+}
+.mgt2 .uwp .u.port {
+  background: var(--accent-soft);
+}
+.mgt2 .uwp .u.port dd {
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.mgt2 .paste {
+  grid-column: 1/-1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  padding-top: 9px;
+}
+.mgt2 .paste input.f {
+  width: 11rem;
+  font-family: var(--mono);
+}
+.mgt2 .paste .src {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--faint);
+}
+
+.mgt2 .ledger {
+  display: flex;
+  flex-direction: column;
+}
+.mgt2 .ledger .lr {
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1fr) auto auto;
+  gap: 0 9px;
+  align-items: baseline;
+  padding: 3px 2px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .ledger .lr:last-child {
+  border-bottom: 0;
+}
+.mgt2 .ledger .lr .c {
+  font-family: var(--cond);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.mgt2 .ledger .lr .cond {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 10px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--faint);
+}
+.mgt2 .ledger .lr .st {
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.mgt2 .ledger .lr .ov {
+  display: inline-flex;
+  gap: 3px;
+}
+.mgt2 .ledger .lr .ov button {
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: 1px 6px 2px;
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .ledger .lr .ov button:hover {
+  color: var(--ink);
+  background: var(--hover);
+}
+.mgt2 .ledger .lr .ov button.on {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+}
+.mgt2 .ledger .lr.on .c {
+  color: var(--accent-text);
+}
+.mgt2 .ledger .lr.on .st {
+  color: var(--good);
+}
+.mgt2 .ledger .lr.off {
+  opacity: 0.42;
+}
+.mgt2 .ledger .lr.forced .st {
+  color: var(--danger);
+}
+.mgt2 .ledger .lr.forced .c {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
+
+.mgt2 .berth {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 9px;
+}
+.mgt2 .berth .v {
+  font-family: var(--cond);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .berth .v i {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mute);
+}
+.mgt2 .berth .v.unrolled {
+  color: var(--faint);
+}
+.mgt2 .berth .band {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.mgt2 .berth button {
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin-left: auto;
+  padding: 3px 9px 4px;
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--accent-text);
+  border: 1px solid var(--accent-text);
+  border-radius: 2px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .berth button[disabled] {
+  color: var(--faint);
+  background: none;
+  border-color: var(--rule);
+  cursor: not-allowed;
+}
+
+.mgt2 .lock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mgt2 .lock .row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.mgt2 .lock .row .v {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .lock .row .v.shut {
+  color: var(--danger);
+}
+.mgt2 .lock .why {
+  font-family: var(--cond);
+  font-size: 9.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.mgt2 .halves {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--rule-soft);
+}
+.mgt2 .halves .h {
+  min-width: 0;
+  padding: 8px 11px 10px;
+}
+.mgt2 .halves .h h4 {
+  margin: 0 0 4px;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: none;
+}
+.mgt2 .halves .h + .h {
+  border-left: 1px solid var(--rule-soft);
+}
+.mgt2 .halves table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.mgt2 .halves td {
+  padding: 1px 0;
+  font-size: 12px;
+}
+.mgt2 .halves td.w {
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .halves td.d {
+  width: 1px;
+  padding-left: 8px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.mgt2 .halves td.d.pos {
+  color: var(--good);
+}
+.mgt2 .halves td.d.neg {
+  color: var(--danger);
+}
+.mgt2 .halves td.d.nil {
+  color: var(--faint);
+}
+.mgt2 .halves tr.sum td {
+  padding-top: 3px;
+  font-family: var(--cond);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-top: 1px solid var(--rule-soft);
+}
+
+.mgt2 p.hint.forbidden {
+  padding-left: 9px;
+  color: var(--danger);
+  border-left: 2px solid var(--danger);
+}
+
+@container sheet (max-width: 880px) {
+  .mgt2 .uwp {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .mgt2 .uwp .u {
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .mgt2 .uwp .u:nth-child(4) {
+    border-right: 0;
+  }
+  .mgt2 .halves {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mgt2 .halves .h + .h {
+    border-top: 1px solid var(--rule-soft);
+    border-left: 0;
+  }
+}
+@container sheet (max-width: 640px) {
+  .mgt2.application.world > .window-content {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "header" "rail" "panel";
+  }
+  .mgt2 .uwp {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mgt2 .uwp .u:nth-child(4) {
+    border-right: 1px solid var(--rule-soft);
+  }
+  .mgt2 .uwp .u:nth-child(2n) {
+    border-right: 0;
+  }
+  .mgt2 .ledger .lr {
+    grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+  }
+  .mgt2 .ledger .lr .ov {
+    grid-column: 2/-1;
+    justify-content: flex-end;
   }
 }
 .mgt2 .mgt2-damage-order {
@@ -3528,6 +4912,31 @@ ul.softwares li:hover a {
   margin-left: 0;
 }
 
+.mgt2 .rollbar select.loadedround {
+  flex: 0 1 12rem;
+  min-width: 0;
+  font-family: var(--cond);
+  font-size: 11px;
+}
+
+.mgt2 .rollbar.dose-take .why {
+  flex: 1 1 auto;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.mgt2 .rows .onset {
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
 .mgt2 .specs {
   display: flex;
   flex-wrap: wrap;
@@ -3613,6 +5022,10 @@ ul.softwares li:hover a {
 .mgt2 .imain prose-mirror {
   min-height: 8rem;
   border: 1px solid var(--rule);
+}
+.mgt2 .imain document-tags {
+  min-width: 0;
+  font-size: 12px;
 }
 .mgt2 .imain .pair {
   display: flex;
@@ -3951,6 +5364,18 @@ ul.softwares li:hover a {
 }
 .mgt2.card .cbtns button i {
   margin-right: 5px;
+}
+
+.mgt2.card.dose .dose-line {
+  margin: 0;
+  padding: 8px 11px 9px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+
+.mgt2.card.misjump .block {
+  padding: 9px 11px 11px;
 }
 
 .mgt2.card.ok .eff {
@@ -4359,6 +5784,1004 @@ ul.softwares li:hover a {
   }
   .mgt2 .bands .band:nth-child(2n) {
     border-right: 0;
+  }
+}
+.mgt2.application.voyage {
+  container-type: inline-size;
+  container-name: sheet;
+}
+.mgt2.application.voyage > .window-content {
+  display: grid;
+  grid-template-columns: 21rem minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "header header" "rail panel";
+  height: 100%;
+  overflow: hidden;
+}
+.mgt2.application.voyage > .window-content > [data-application-part=header] {
+  grid-area: header;
+}
+.mgt2.application.voyage > .window-content > [data-application-part=rail] {
+  grid-area: rail;
+  min-height: 0;
+}
+.mgt2.application.voyage > .window-content > [data-application-part=panel] {
+  grid-area: panel;
+  min-height: 0;
+}
+
+.mgt2 .mgt2-voyage-head {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 11px 16px 13px;
+  border-bottom: 1px solid var(--rule);
+}
+.mgt2 .mgt2-voyage-head .top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+.mgt2 .mgt2-voyage-head .top h2 {
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.mgt2 .mgt2-voyage-head .top .of {
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .mgt2-voyage-head .top .ship {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+
+.mgt2 .leg {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  border: 1px solid var(--rule-soft);
+}
+.mgt2 .leg .end {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 11px 9px;
+}
+.mgt2 .leg .end .role {
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .leg .end b {
+  overflow: hidden;
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.mgt2 .leg .end a[data-action] {
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .leg .end .uwp {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--mute);
+}
+.mgt2 .leg .end .uwp input.f {
+  width: 100%;
+}
+.mgt2 .leg .end .zone {
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--danger) 70%, var(--ink));
+}
+.mgt2 .leg .end .zone.bad {
+  color: var(--danger);
+}
+.mgt2 .leg .end .rm {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 11px;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .leg .end .rm:hover {
+  color: var(--danger);
+}
+.mgt2 .leg .end.to {
+  border-left: 1px solid var(--rule-soft);
+}
+.mgt2 .leg .end.here b {
+  color: var(--accent-text);
+}
+.mgt2 .leg .end.vacant {
+  border: 1px dashed var(--rule);
+}
+.mgt2 .leg .end.vacant b {
+  color: var(--faint);
+}
+.mgt2 .leg .hop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 6px 13px;
+  border-left: 1px solid var(--rule-soft);
+  border-right: 1px solid var(--rule-soft);
+  background: var(--accent-soft);
+}
+.mgt2 .leg .hop input.f {
+  width: 2.8rem;
+  text-align: center;
+}
+.mgt2 .leg .hop .v {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-text);
+}
+.mgt2 .leg .hop .u {
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.mgt2 .queue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 1.6rem;
+}
+.mgt2 .queue .lbl {
+  letter-spacing: 0.16em;
+  font-size: 9.5px;
+  color: var(--faint);
+}
+.mgt2 .queue .q {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 7px 2px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--paper);
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.mgt2 .queue .q .nm[data-action] {
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .queue .q .nm[data-action]:hover {
+  color: var(--accent-text);
+}
+.mgt2 .queue .q .x {
+  font-size: 10px;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .queue .q .x:hover {
+  color: var(--danger);
+}
+.mgt2 .queue .q.amber {
+  border-color: color-mix(in oklab, var(--danger) 45%, transparent);
+  color: color-mix(in oklab, var(--danger) 70%, var(--ink));
+}
+.mgt2 .queue .q.red {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.mgt2 .queue .none {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+
+.mgt2 .advance {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.mgt2 .advance button {
+  height: auto;
+  padding: 5px 12px 6px;
+  border: 1px solid var(--accent-text);
+  border-radius: 2px;
+  background: var(--accent-text);
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .advance button[disabled] {
+  border-color: var(--rule);
+  background: none;
+  color: var(--faint);
+  cursor: default;
+}
+.mgt2 .advance .why {
+  font-family: var(--cond);
+  font-size: 9.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.mgt2 .tank {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+.mgt2 .tank input.f {
+  width: 5rem;
+  text-align: right;
+}
+
+.mgt2 .stage2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+.mgt2 .stage2 .st {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 8px 7px;
+  border: 1px solid var(--rule);
+}
+.mgt2 .stage2 button.nm {
+  height: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .stage2 button.nm:hover {
+  text-decoration: underline;
+}
+.mgt2 .stage2 button.nm[disabled] {
+  color: var(--faint);
+  cursor: default;
+  text-decoration: none;
+}
+.mgt2 .stage2 .tgt {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+.mgt2 .stage2 .dms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 1px;
+}
+.mgt2 .stage2 .dm {
+  padding: 0 4px 1px;
+  border: 1px solid var(--rule-soft);
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--mute);
+}
+.mgt2 .stage2 .dm.inert {
+  opacity: 0.55;
+}
+.mgt2 .stage2 .dm.neg {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.mgt2 p.hint.bad {
+  color: var(--danger);
+}
+
+.mgt2 .block.misjump .effects {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 12px;
+  margin-bottom: 9px;
+}
+.mgt2 .block.misjump .effects .fld {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.mgt2 .block.misjump .effects .fld .lbl {
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .block.misjump .effects .fld .f {
+  font-family: var(--mono);
+}
+.mgt2 .block.misjump .effects .fld .f.n {
+  text-align: right;
+}
+.mgt2 .block.misjump .effects .fld.wide {
+  grid-column: span 2;
+}
+.mgt2 .block.misjump ul.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .block.misjump ul.verdict .v {
+  padding: 1px 7px 2px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .block.misjump ul.verdict .v.warn {
+  border-color: color-mix(in oklab, var(--danger) 45%, transparent);
+  color: color-mix(in oklab, var(--danger) 70%, var(--ink));
+}
+.mgt2 .block.misjump ul.verdict .v.bad {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.mgt2 .block.misjump table.rows.variance {
+  margin-top: 9px;
+}
+.mgt2 .block.misjump table.rows.variance td.n {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mgt2 .block.misjump table.rows.variance td.n.dim {
+  color: var(--faint);
+}
+.mgt2 .block.misjump table.rows.variance td.outcome {
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.mgt2 .block.misjump table.rows.variance td.nm .src {
+  display: block;
+  margin-top: 1px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--faint);
+}
+.mgt2 .block.misjump table.rows.variance tr.bad td.nm {
+  color: var(--danger);
+}
+.mgt2 .block.misjump table.rows.variance .chip {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 0 4px 1px;
+  border: 1px solid var(--rule-soft);
+  border-radius: 2px;
+  font-size: 9.5px;
+  color: var(--mute);
+}
+.mgt2 .block.misjump table.rows.variance .chip.bad {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.mgt2 .block.misjump p.outcome {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.mgt2 .block.misjump p.outcome.bad {
+  color: var(--danger);
+}
+.mgt2 .block.misjump .aftermath {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2 .block.misjump .aftermath p {
+  margin: 0 0 5px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.mgt2 .block.misjump .aftermath p:last-child {
+  margin-bottom: 0;
+}
+
+@container sheet (max-width: 880px) {
+  .mgt2.application.voyage > .window-content {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "header" "rail" "panel";
+  }
+  .mgt2 .mgt2-rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+}
+@container sheet (max-width: 560px) {
+  .mgt2 .leg {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mgt2 .leg .end.to {
+    border-left: 0;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .mgt2 .leg .hop {
+    flex-direction: row;
+    gap: 6px;
+    border-left: 0;
+    border-right: 0;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .mgt2 .stage2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mgt2 .block.misjump .effects {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mgt2 .block.misjump .effects .fld.wide {
+    grid-column: span 2;
+  }
+}
+.mgt2.application.explorer {
+  container-type: inline-size;
+  container-name: sheet;
+}
+.mgt2.application.explorer > .window-content {
+  display: grid;
+  grid-template-columns: 17.5rem minmax(0, 1fr);
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+}
+.mgt2.application.explorer > .window-content > [data-application-part=rail],
+.mgt2.application.explorer > .window-content > [data-application-part=results] {
+  min-height: 0;
+}
+
+.mgt2 .rail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid var(--rule);
+  overflow-y: auto;
+}
+.mgt2 .rail .filters {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px 13px 13px;
+  border-bottom: 1px solid var(--rule);
+}
+.mgt2 .rail .fld {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.mgt2 .rail .fld > span {
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .rail .fld input.f.n {
+  text-align: right;
+  font-family: var(--mono);
+}
+.mgt2 .rail .fld.tl .rng {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+.mgt2 .rail .reset {
+  align-self: flex-start;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 2px 9px 3px;
+  width: auto;
+}
+
+.mgt2 .rail .sources {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 11px 13px 14px;
+}
+.mgt2 .rail .sources .ghd {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 3px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--rule-soft);
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .rail .sources .ghd i {
+  color: var(--faint);
+}
+.mgt2 .rail .sources .ghd a {
+  font-size: 9px;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .rail .sources .ghd a:first-of-type {
+  margin-left: auto;
+}
+.mgt2 .rail .sources .ghd a:hover {
+  color: var(--accent-text);
+}
+.mgt2 .rail .sources .pk {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 3px 6px;
+  padding: 2px 0;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .rail .sources .pk input {
+  margin: 0;
+  accent-color: var(--accent-text);
+}
+.mgt2 .rail .sources .pk .t {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mgt2 .rail .sources .pk .m {
+  grid-column: 2/-1;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--faint);
+}
+.mgt2 .rail .sources .pk > i {
+  font-size: 9px;
+  color: var(--faint);
+}
+.mgt2 .rail .sources .pk .t::before {
+  content: "✓";
+  display: inline-block;
+  width: 1em;
+  margin-right: 3px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--good);
+}
+.mgt2 .rail .sources .pk.waiting .t::before,
+.mgt2 .rail .sources .pk.loading .t::before {
+  content: "⋯";
+  color: var(--accent-text);
+}
+.mgt2 .rail .sources .pk.failed .t::before {
+  content: "!";
+  color: var(--danger);
+}
+
+.mgt2 .found {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.mgt2 .found .cnt {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  padding: 9px 14px 10px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.mgt2 .found .cnt .c {
+  color: var(--accent-text);
+}
+.mgt2 .found .cnt .wait {
+  color: var(--mute);
+}
+.mgt2 .found .rows {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+.mgt2 .found table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.mgt2 .found th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  padding: 6px 9px 7px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .found th i {
+  margin-left: 4px;
+}
+.mgt2 .found th.on {
+  color: var(--accent-text);
+}
+.mgt2 .found th.im {
+  width: 2.4rem;
+  cursor: default;
+}
+.mgt2 .found th.type {
+  width: 8rem;
+}
+.mgt2 .found th.tl {
+  width: 4.4rem;
+}
+.mgt2 .found th.pack {
+  width: 11rem;
+}
+.mgt2 .found td {
+  padding: 3px 9px 4px;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--rule-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mgt2 .found tr[draggable=true] {
+  cursor: grab;
+}
+.mgt2 .found tbody tr:hover {
+  background: var(--hover);
+}
+.mgt2 .found td.im {
+  padding: 2px 0 2px 9px;
+}
+.mgt2 .found td.im img {
+  display: block;
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+  border: 1px solid var(--rule-soft);
+  border-radius: 2px;
+}
+.mgt2 .found td.im i {
+  color: var(--faint);
+}
+.mgt2 .found td.nm {
+  white-space: normal;
+}
+.mgt2 .found td.nm a {
+  font-weight: 600;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .found td.nm a:hover {
+  color: var(--accent-text);
+}
+.mgt2 .found td.nm .sub {
+  margin-left: 7px;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .found td.type {
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .found td.tl {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .found td.tl.pending {
+  color: var(--accent-text);
+}
+.mgt2 .found td.pack {
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.mgt2 .found td.pack i {
+  margin-right: 5px;
+}
+.mgt2 .found tr.none td {
+  padding: 18px;
+  text-align: center;
+  color: var(--faint);
+}
+
+#compendium .header-actions .mgt2-explorer {
+  flex: 1;
+}
+
+.mgt2.application.stash {
+  container-type: inline-size;
+  container-name: sheet;
+}
+.mgt2.application.stash > .window-content {
+  display: grid;
+  grid-template-columns: 19rem minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "header header" "rail panel";
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--body);
+  font-size: 14px;
+}
+.mgt2.application.stash > .window-content > [data-application-part=header] {
+  grid-area: header;
+}
+.mgt2.application.stash > .window-content > [data-application-part=rail] {
+  grid-area: rail;
+  min-height: 0;
+}
+.mgt2.application.stash > .window-content > [data-application-part=panel] {
+  grid-area: panel;
+  min-height: 0;
+}
+
+.mgt2 .mgt2-stash-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.mgt2 .mgt2-header .portrait.stash {
+  width: 84px;
+  height: 84px;
+}
+
+.mgt2.application.stash .reg .code {
+  font-family: var(--cond);
+  font-size: 17px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.mgt2.application.stash .reg .code.shut {
+  color: var(--danger);
+}
+
+.mgt2 .own {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  margin: 12px 0 0;
+  border: 1px solid var(--rule-soft);
+}
+.mgt2 .own .r {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px 9px 7px;
+  border-right: 1px solid var(--rule-soft);
+}
+.mgt2 .own .r:last-child {
+  border-right: 0;
+}
+.mgt2 .own .r .who {
+  overflow: hidden;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mgt2 .own .r b {
+  font-family: var(--cond);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.mgt2 .own .r .g {
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 9px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--faint);
+}
+.mgt2 .own .r.none b {
+  color: var(--faint);
+}
+.mgt2 .own .r.limited b {
+  color: #c98a2b;
+}
+.mgt2 .own .r.observer b {
+  color: var(--good);
+}
+.mgt2 .own .r.owner b {
+  color: var(--accent-text);
+}
+.mgt2 .own .r.fallback {
+  background: var(--hover);
+}
+.mgt2 .own .r[data-action] {
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .own .r[data-action]:hover {
+  background: var(--accent-soft);
+}
+
+.mgt2 .asseen {
+  padding: 8px 11px 10px;
+  border: 1px dashed var(--rule);
+}
+.mgt2 .asseen .tag {
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .asseen p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+
+.mgt2 .lockrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 9px;
+}
+.mgt2 .lockrow .v {
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.mgt2 .lockrow .v.shut {
+  color: var(--danger);
+}
+.mgt2 .lockrow .v.open {
+  color: var(--good);
+}
+.mgt2 .lockrow button {
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin-left: auto;
+  padding: 3px 9px 4px;
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .lockrow button:hover {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+}
+
+.mgt2 p.hint.shut {
+  padding-left: 9px;
+  color: var(--mute);
+  border-left: 2px solid var(--danger);
+}
+
+.mgt2.application.stash .vs {
+  display: flex;
+  flex-direction: column;
+}
+.mgt2.application.stash .vs .v {
+  padding: 5px 2px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2.application.stash .vs .v:last-child {
+  border-bottom: 0;
+}
+.mgt2.application.stash .vs .nm {
+  font-family: var(--cond);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.mgt2.application.stash .vs .g {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--faint);
+}
+
+@container sheet (max-width: 640px) {
+  .mgt2.application.stash > .window-content {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "header" "rail" "panel";
   }
 }
 .mgt2 nav.tabs {

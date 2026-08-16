@@ -1,0 +1,46 @@
+{{! Core p.243 prices a speculative lot from two columns of trade-code DMs, and applies the LARGEST
+    applicable one rather than their sum — which is why each column is a list of (code, DM) pairs and
+    not a number. One block per column, the way the trait rows do it. }}
+{{#each trade as |column|}}
+<div class="block" data-property="{{column.property}}">
+	<div class="sect">
+		<h3>{{localize column.label}}</h3>
+		<span class="count">{{column.rows.length}}</span>
+		<a class="add edit-only" data-action="tradeDMCreate" data-tooltip="{{localize 'MGT2.Items.AddTradeDM'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	{{#if column.rows.length}}
+	<table class="rows">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Items.TradeCode'}}</th>
+				<th class="c">{{localize 'MGT2.Items.DM'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each column.rows as |row i|}}
+			<tr data-dm-index="{{i}}">
+				<td>
+					<span class="play-only">{{#if row.code}}{{localize (concat "MGT2.TradeCodes." row.code)}}{{else}}&mdash;{{/if}}</span>
+					<select class="f edit-only" name="system.{{column.property}}.{{i}}.code">
+						<option value=""></option>
+						{{selectOptions @root.config.TradeCodes selected=row.code valueAttr="code" labelAttr="label" localize=true}}
+					</select>
+				</td>
+				<td class="c num">
+					<span class="play-only">{{showDM row.dm}}</span>
+					<input class="f num edit-only" type="number" step="1" name="system.{{column.property}}.{{i}}.dm" value="{{row.dm}}" data-dtype="Number" />
+				</td>
+				<td class="r">
+					<div class="acts edit-only">
+						<a data-action="tradeDMDelete" data-tooltip="{{localize 'MGT2.Items.DeleteTradeDM'}}"><i class="fas fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</div>
+{{/each}}
+<p class="hint">{{localize 'MGT2.Items.TradeDMHint'}}</p>

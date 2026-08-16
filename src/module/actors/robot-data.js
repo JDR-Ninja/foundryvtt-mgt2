@@ -81,6 +81,14 @@ export class RobotData extends ActorBaseData {
     /** RH folio 115: the three the brain's task ceiling reaches, and no others. */
     static CEILING_KEYS = ["intellect", "education", "social"];
 
+    /**
+     * None of the three standing states is a robot's. It is never fatigued and never nauseated, and
+     * Core p.98's STR+END carrying threshold does not read across: RH p.115 makes a robot's END a
+     * power-pack rating rather than stamina, so a second battery would buy carrying capacity.
+     * `prepareEncumbrance` still fills `states.encumbrance`, as a readout with no DM behind it.
+     */
+    static CHECK_STATES = Object.freeze([]);
+
     static defineSchema() {
         const schema = super.defineSchema();
         schema.traits = createTraitsField("robot");
@@ -552,13 +560,13 @@ export class RobotData extends ActorBaseData {
         this.speed.band = this.speed.vehicleBand;
         this.#prepareEndurance();
         this.#prepareBrain();
-        this.#prepareCheckModifiers();
 
         this.inventory = { armor: 0, weight: 0, encumbrance: { normal: 0, heavy: 0 } };
         this.prepareArmor();
         this.prepareWeight();
         this.prepareEncumbrance();
         this.#prepareArmour();
+        this.prepareCheckModifiers(this.#brainDamageModifiers());
 
         // RH p.16, p.23: each mode grants its own traits, and a robot carrying two carries both.
         this.locomotionTraits = [...new Set(this.locomotion
@@ -632,15 +640,11 @@ export class RobotData extends ActorBaseData {
      * Named rather than folded anonymously into `auto`, which is what puts it on the roll prompt as
      * a row the referee can waive.
      */
-    #prepareCheckModifiers() {
-        const sources = [];
+    #brainDamageModifiers() {
         const dm = ((this.radiationLoss > 0) && DEGRADED_GRADES.includes(this.brain.grade))
             ? (DEGRADED_BRAIN_DM[this.characteristics.intellect.value] ?? 0) : 0;
-        if (dm !== 0) sources.push({ key: "brainDamage", label: "MGT2.Actor.robot.BrainDamageDM", dm });
-
-        this.modifiers.check.auto += dm;
-        this.modifiers.check.sources = sources;
-        this.sumModifiers();
+        return (dm === 0) ? []
+            : [{ key: "brainDamage", label: "MGT2.Actor.robot.BrainDamageDM", dm }];
     }
 
     /**

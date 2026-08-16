@@ -296,10 +296,7 @@ export class VehicleData extends CraftData {
         this.speed.effective = this.criticalEffects.speedZero
             ? 0 : Math.max(0, this.speed.max - this.criticalEffects.speedBands);
 
-        // §3.4: a critical's ongoing DMs are folded into the accumulators rather than made into
-        // Active Effects, and `sumModifiers` assigns rather than adds so this is safe after it ran.
-        this.modifiers.check.auto += this.criticalEffects.controlDM + this.criticalEffects.systemsDM;
-        this.#prepareCombatModifiers();
+        this.#prepareCheckModifiers();
         this.sumModifiers();
 
         this.toHit = this.toHitBonus;
@@ -308,17 +305,26 @@ export class VehicleData extends CraftData {
     }
 
     /**
-     * Core folio 138's two standing DMs, as **named** sources so the roll prompt lists them and the
-     * referee can waive one — which is how a round moving on is said, there being nothing on the
-     * sheet that can watch for it.
+     * The standing DMs that belong to an **attack made from this vehicle**, each a named source so
+     * the prompt lists it and the referee can waive it. `auto` is assigned from the finished list
+     * rather than added to, which keeps `auto === sum(sources)`: a DM in the total and absent from
+     * the list is one nobody can see, print or waive (§9.77).
      *
-     * Only the half that is this vehicle's own roll is applied: the dogfight's "DM+2 to all their
-     * attack rolls", and evasive action's "negative DM to any attacks made from the vehicle too".
-     * What either costs an attacker shooting **at** the vehicle is stated on the chat card and never
-     * applied, because applying it would mean the attack roll reading its target (Appendix B, and
-     * §1 C's Reactions, which are the same shape).
+     * **This list is the mounted weapon's**, and that is why it holds only these two. The sheet
+     * extends `TravellerActorSheet`, so a mounted weapon rolls through a Traveller's own path and
+     * `#checkModifiers` reads exactly this array. Core folio 138 scopes both to that roll: the
+     * dogfight's "DM+2 to all their attack rolls", and evasive action's "negative DM to any attacks
+     * made from the vehicle too". What either costs an attacker shooting **at** the vehicle is
+     * stated on the chat card and never applied, because applying it would mean the attack roll
+     * reading its target (Appendix B, and §1 C's Reactions, which are the same shape).
+     *
+     * **A critical's Control and Systems DMs are deliberately NOT here.** Folio 141 scopes them to
+     * control checks and to comms, sensors and computer checks — neither is an attack, so putting
+     * them in this array would stand them on every shot the vehicle fires. They travel on
+     * `criticalEffects` instead: the action roll takes the control half (`vehicle-sheet.js`), a
+     * station's own check is made on the crewman's sheet, and the panel prints both.
      */
-    #prepareCombatModifiers() {
+    #prepareCheckModifiers() {
         const sources = [];
         if (this.combat.dogfight !== 0) {
             sources.push({ key: "dogfight", label: "MGT2.Actor.vehicle.DogfightDM",
@@ -328,7 +334,7 @@ export class VehicleData extends CraftData {
             sources.push({ key: "evasive", label: "MGT2.Actor.vehicle.EvasiveDM",
                 dm: -this.combat.evasive });
         }
-        this.modifiers.check.auto += sources.reduce((total, source) => total + source.dm, 0);
+        this.modifiers.check.auto = sources.reduce((total, source) => total + source.dm, 0);
         this.modifiers.check.sources = sources;
     }
 

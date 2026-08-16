@@ -1,4 +1,4 @@
-import { CHECK } from "../chat-message.js";
+import { Checks } from "../checks.js";
 import { MGT2 } from "../config.js";
 import { MGT2Helper } from "../helper.js";
 import { RollPromptHelper } from "../roll-prompt.js";
@@ -99,9 +99,16 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             mounts: SpacecraftActorSheet.#mounts(system, context.weapons),
             crew: this.#crew(system),
             bays: this.#bays(system),
+            // Craft and bays are two counts now: a clamp rack of ten fighters is one row (§9.95).
+            craftCount: system.smallCraftCount,
             criticals: this.#criticals(system),
             manoeuvre: system.manoeuvre,
-            finance: SpacecraftActorSheet.#finance(system)
+            finance: SpacecraftActorSheet.#finance(system),
+            design: SpacecraftActorSheet.#design(system),
+            // Which of §4.1's six the book is answering for. The panel marks each beside its own
+            // readout; the two budget blocks carry theirs on the row and the header.
+            printed: system.printedFigures,
+            derived: SpacecraftActorSheet.#derived(system)
         };
         return context;
     }
@@ -115,9 +122,13 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
      * which is the block's own contract.
      * @param {number} cap
      * @param {Array<{key: string, value: number, why?: string, powered?: boolean}>} rows
+     * @param {number} [stated]   A printed total displacing the sum of the rows (§4.1). The rows
+     *                            then no longer add up to the header, which is exactly what the
+     *                            block's `why` gloss is there to say
      */
-    static #budget(cap, rows) {
-        const total = rows.reduce((sum, row) => sum + ((row.powered === false) ? 0 : row.value), 0);
+    static #budget(cap, rows, stated) {
+        const total = stated
+            ?? rows.reduce((sum, row) => sum + ((row.powered === false) ? 0 : row.value), 0);
         const over = total > cap;
         const fill = cap > 0 ? Math.min(100, (total / cap) * 100) : 0;
         const round = value => Math.round(value * 100) / 100;
@@ -128,6 +139,36 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             fill: Math.round(fill * 10) / 10,
             mark: over ? 100 : Math.round(fill * 10) / 10,
             remaining: round(Math.abs(cap - total))
+        };
+    }
+
+    /**
+     * The parts list and the design check beside it (§9.92). Every figure is `system.components`
+     * and `system.design` read back — the arithmetic is the model's, and this names it.
+     *
+     * A check that does not APPLY is drawn and greyed rather than dropped: an empty ledger says
+     * nothing, and a ledger of four lines with two of them silent says exactly which two rules this
+     * parts list is complete enough to answer.
+     */
+    static #design(system) {
+        const design = system.design;
+        return {
+            ...system.components,
+            failed: design.failed,
+            checks: design.checks.map(check => ({
+                ...check,
+                label: `MGT2.Design.Checks.${check.key}`,
+                why: `MGT2.Design.Why.${check.key}`,
+                // The two transcription lines read as a match rather than as a cap, so the reading
+                // is `used = cap` and not `used / cap`.
+                match: check.key.startsWith("stated")
+            })),
+            rows: system.components.rows.map(row => ({
+                ...row,
+                categoryLabel: MGT2.ComponentCategories[row.category] ?? row.category,
+                // A power plant states what it makes; every other row states what it takes.
+                power: row.generates > 0 ? row.generates : -row.draw
+            }))
         };
     }
 
@@ -144,9 +185,34 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         };
     }
 
+    /** The gloss that says a printed figure is answering, in the slot `mortgageOverride` already uses. */
+    static #printedWhy(on) {
+        return on ? "MGT2.Actor.spacecraft.Printed" : undefined;
+    }
+
+    /**
+     * The formula's own answer for each of §4.1's six, whether or not an override is displacing it.
+     * The edit form prompts with these, so an empty box already says what "derive" will give — which
+     * is the cheapest way to make a nullable field's two states legible.
+     */
+    static #derived(system) {
+        const round = value => Math.round(value * 100) / 100;
+        return {
+            hullPoints: system.hullPoints,
+            armourTons: round(system.armourTons),
+            bridgeTons: round(system.bridgeTons),
+            bridgeCost: system.bridgeCost,
+            jumpTons: round(system.fuelPerMaxJump),
+            powerDraw: system.power.fullDraw
+        };
+    }
+
     static #tonnage(system) {
+        const printed = system.printedFigures;
+        const why = { armour: printed.armourTons, bridge: printed.bridgeTons };
         return SpacecraftActorSheet.#budget(system.hull.tons,
-            system.budget.rows.map(row => ({ key: row.key, value: row.tons })));
+            system.budget.rows.map(row => ({ key: row.key, value: row.tons,
+                why: SpacecraftActorSheet.#printedWhy(why[row.key]) })));
     }
 
     /**
@@ -155,11 +221,13 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
      */
     static #power(system) {
         const budget = SpacecraftActorSheet.#budget(system.power.available,
-            system.power.rows.map(row => ({ key: row.key, value: row.draw, powered: row.powered })));
+            system.power.rows.map(row => ({ key: row.key, value: row.draw, powered: row.powered })),
+            system.power.requirements.total);
         budget.surplus = system.power.surplus;
         budget.plant = system.power.plant;
         // A critical that cut the plant's output is why `available` and `plant` can differ.
         budget.damaged = system.power.available < system.power.plant;
+        budget.why = SpacecraftActorSheet.#printedWhy(system.printedFigures.powerDraw);
         return budget;
     }
 
@@ -199,8 +267,10 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         for (const [key, berth] of Object.entries(MGT2.LowBerths)) {
             rows.push({ path: `lowBerths.${key}`, label: berth.label, value: system.lowBerths[key] });
         }
-        for (const [key, label] of Object.entries(MGT2.PassageClasses)) {
-            rows.push({ path: `passengers.${key}`, label, value: system.passengers[key] });
+        for (const [key, passage] of Object.entries(MGT2.PassageClasses)) {
+            // A working passage is paid in labour, not booked into a berth the ship counts.
+            if (!(key in system.passengers)) continue;
+            rows.push({ path: `passengers.${key}`, label: passage.label, value: system.passengers[key] });
         }
         return rows;
     }
@@ -323,12 +393,18 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 try { actor = foundry.utils.fromUuidSync(bay.craft); } catch { actor = null; }
             }
             const kind = MGT2.CraftBays[bay.kind] ?? {};
+            const count = Math.max(1, bay.count);
             return {
-                index, kind: bay.kind, capacity: bay.capacity, craft: bay.craft,
+                index, kind: bay.kind, capacity: bay.capacity, craft: bay.craft, count,
                 kindLabel: kind.label ?? "", external: kind.external === true,
                 transfer: kind.transfer ?? null,
                 name: actor?.name ?? null,
                 img: actor?.img ?? null,
+                // `capacity` is per craft (§9.95), so the row's own tonnage is the product — and it
+                // is the figure the tonnage budget sums, which is why the sheet prints it and not
+                // the stored number.
+                tons: Math.round(count * bay.capacity * 100) / 100,
+                many: count > 1,
                 purchase: actor?.system?.finance?.purchase ?? 0,
                 vacant: !bay.craft
             };
@@ -421,7 +497,10 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             delta: money(finance.maintenanceCatalogue - finance.maintenance),
             lifeSupport: money(finance.lifeSupport),
             salaries: money(finance.salaries),
-            fuel: money(finance.fuel),
+            // Outside the five periodic rows above, and rendered apart from them: fuel is a unit
+            // price the crew pays when they buy some (§9.33.7 c).
+            fuelPerTon: money(finance.fuelPerTon),
+            tankFill: money(finance.tankFill),
             refined: system.fuel.refined
         };
     }
@@ -549,8 +628,10 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
      * @param {object} [options]
      * @param {Actor|null} [options.crew]  Whoever is at the station, or null
      * @param {string} [options.dutyTarget]
+     * @param {object[]} [options.extraModifiers]  The caller's own waivable modifiers
      */
-    static async rollStationAction(ship, action, { crew: actor = null, dutyTarget = "" } = {}) {
+    static async rollStationAction(ship, action,
+        { crew: actor = null, dutyTarget = "", extraModifiers = [] } = {}) {
         if ((action.kind !== "special") && !actor) {
             return ui.notifications.warn(game.i18n.localize("MGT2.Actor.spacecraft.NoCrewSheet"));
         }
@@ -575,8 +656,10 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
 
         // The ship's own contributions ride the prompt as waivable modifiers, which is what they
         // are: a referee who rules that a critical has knocked the fire control out says so by
-        // unticking it rather than by editing the ship.
-        const shipModifiers = [];
+        // unticking it rather than by editing the ship. A caller's own join them HERE, before the
+        // prompt is built: `RollPromptHelper.terms`' fourth argument pushes its entries in AFTER
+        // the checkbox filter, so a term passed there could never be unticked (§9.33.4).
+        const shipModifiers = [...extraModifiers];
         if (action.dm) {
             shipModifiers.push({ key: "station", label: "MGT2.Actor.spacecraft.StationDM", dm: action.dm });
         }
@@ -625,40 +708,27 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             rollOptions.difficulty = userRollData.difficulty;
         }
 
-        if (!Roll.validate(formula)) {
-            return ui.notifications.error(game.i18n.localize("MGT2.Errors.InvalidRollFormula"));
-        }
-        const roll = await new Roll(formula, actor.getRollData()).roll();
-        // Core p.61 via `getEffectTarget`: a check with no stated difficulty is measured against
-        // Average (8+) rather than scoring no Effect at all — which is what this path used to do.
-        const against = MGT2Helper.getEffectTarget(rollOptions.difficulty);
-        const effect = roll.total - against.value;
-        const band = MGT2Helper.getEffectBand(effect);
-        const opposed = RollPromptHelper.opposedResult(userRollData, effect);
+        // A station action scores an Effect like any other check, so it can feed a chain too —
+        // Core p.166's Aid Gunners is exactly that shape.
+        const scored = await Checks.resolve({
+            formula, rollData: actor.getRollData(),
+            difficulty: rollOptions.difficulty, prompt: userRollData
+        });
+        if (!scored) return;
 
-        const message = {
-            speaker: ChatMessage.getSpeaker({ actor }),
-            // A station action scores an Effect like any other check, so it can feed a chain too —
-            // Core p.166's Aid Gunners is exactly that shape.
-            type: CHECK,
-            system: {
-                effect, target: against.value, assumed: against.assumed,
-                label: action.label, previous: chainSources.map(source => source.id), opposed
-            },
-            flags: { mgt2: {} }
-        };
+        const flags = { mgt2: {} };
 
         // A fired mount carries the whole damage payload, so the card the defender resolves knows
         // what the mount is worth. HG p.29's multiple and Core p.168's linked weapons both live
         // here because both are properties of the MOUNT, not of the weapon.
         if (weapon?.system.damage) {
             const traits = weapon.system.traits;
-            message.flags.mgt2.damage = {
+            flags.mgt2.damage = {
                 formula: mount.linkedBonus
                     ? `${weapon.system.damage} + ${mount.linkedBonus}` : weapon.system.damage,
                 rollObjectName: weapon.name,
                 rollTypeName: game.i18n.localize(mount.typeLabel),
-                effect,
+                effect: scored.effect,
                 strengthDM: 0,
                 scale: weapon.system.scale ?? "spacecraft",
                 multiple: mount.multiple,
@@ -670,42 +740,26 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             };
         }
 
-        // The same card every other check posts. This path used to render a one-line flavour, which
-        // cost it three things: the Effect band, the terms that produced the roll, and — because the
-        // Roll damage button lives on that card and nowhere else — any way at all to roll the damage
-        // payload above. A gunner could fire and never resolve the hit.
-        message.content = await foundry.applications.handlebars.renderTemplate(
-            "systems/mgt2/templates/chat/roll.html", {
-                formula: roll.formula,
-                tooltip: await roll.getTooltip(),
-                total: Math.round(roll.total * 100) / 100,
-                showButtons: true,
-                // The ship names the context the action was taken in; the crewman is already the
-                // message's speaker.
-                rollTypeName: ship.name,
-                rollObjectName: action.label,
-                rollModifiers: modifiers,
-                rollDifficulty: rollOptions.difficulty,
-                rollDifficultyLabel: MGT2Helper.getDifficultyDisplay(rollOptions.difficulty),
-                rollTarget: against.value,
-                rollTargetAssumed: against.assumed,
-                effect,
-                effectDisplay: MGT2Helper.signed(effect, "+0"),
-                effectBand: band.label,
-                effectTone: band.tone,
-                rollMessage: opposed ? game.i18n.format("MGT2.Chat.Roll.OpposedLine", {
-                    source: opposed.label || game.i18n.localize("MGT2.RollPrompt.Opposed"),
-                    effect: MGT2Helper.signed(opposed.effect, "+0"),
-                    outcome: game.i18n.localize(`MGT2.Chat.Roll.Opposed.${opposed.outcome}`)
-                }) : null,
-                opposedMessage: opposed?.message ?? null,
-                chainedFrom: chainSources,
-                chainTotal: MGT2Helper.signed(chainSources.reduce((sum, s) => sum + s.dm, 0), "+0"),
-                showRollDamage: Boolean(message.flags.mgt2.damage),
-                damageCarriesEffect: true
-            });
-
-        return roll.toMessage(message, { messageMode: userRollData.rollMode });
+        // The same card every other check posts. A one-line flavour cost this path three things: the
+        // Effect band, the terms that produced the roll, and — because the Roll damage button lives
+        // on that card and nowhere else — any way at all to roll the damage payload above. A gunner
+        // could fire and never resolve the hit.
+        return Checks.post(scored, {
+            actor,
+            label: action.label,
+            flags,
+            mode: userRollData.rollMode,
+            // The ship names the context the action was taken in; the crewman is already the
+            // message's speaker.
+            rollTypeName: ship.name,
+            rollObjectName: action.label,
+            difficulty: rollOptions.difficulty,
+            modifiers,
+            chainSources,
+            showButtons: true,
+            showRollDamage: Boolean(flags.mgt2.damage),
+            damageCarriesEffect: true
+        });
     }
 
     /**

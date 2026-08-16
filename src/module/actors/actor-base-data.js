@@ -1,11 +1,18 @@
 import { MGT2 } from "../config.js";
 import { MGT2Helper } from "../helper.js";
-import { buildTraitMap, createTraitsField, resolveDamageResponse } from "../traits.js";
+import { buildHazardItem, buildTraitMap, createTraitsField, hazardTraits, resolveDamageResponse } from "../traits.js";
 
 const fields = foundry.data.fields;
 
 // DM ladder indexed by characteristic value; 15+ is off the end of the table.
 const DM_LADDER = [-3, -2, -2, -1, -1, -1, 0, 0, 0, 1, 1, 1, 2, 2, 2];
+
+// Core folio 228: the reserve stands still for three hours after the last talent, and only then
+// starts coming back at a point an hour.
+const PSI_RECOVERY_DELAY = 3;
+
+// The only Active-Effect sink for a standing check DM; `region-behaviors.js` is what writes it.
+const CHECK_EFFECT_PATH = "system.modifiers.check.effect";
 
 // One warning per sub-type and key: the chain is walked on every prepare.
 const warnedLinks = new Set();
@@ -136,6 +143,10 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
 
             modifiers: new fields.SchemaField({
                 check: createModifierField(),
+                // Core p.74 makes Initiative the Effect of a DEX or INT check, so a species printed
+                // `Initiative -2` has no sink in either accumulator beside it: `check` would hit
+                // every check that species ever makes, and a skill slug is not what it is keyed on.
+                initiative: createModifierField(),
                 // Keyed by the slug of a free-text skill Item's name; `validateKey` drops a typo
                 // instead of quietly creating a modifier nothing will ever read.
                 skills: new fields.TypedObjectField(createModifierField(),
@@ -223,11 +234,16 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
      * The Protection this particular attack meets. One number for a person, who is armoured all
      * round; a vehicle answers with the facing the attack came from (Core p.140), and a critical
      * meets none at all.
+     *
+     * `ignoreArmour` is the one spelling for every rule that says an attack meets no Protection —
+     * Core p.140 and p.169's critical, RH folio 106's ion hit, and Core folio 78's grapple damage,
+     * which "ignores any armour". It is not `raw`: the rest of the pipeline still runs, so scale, the
+     * mount's multiple and a defender's damage-type immunity all still decide the wound.
      * @param {object} [options]   `applyDamage`'s options — `facing`, `ignoreArmour`
      * @returns {number}
      */
     protectionAgainst(options = {}) {
-        return this.protection;
+        return options.ignoreArmour ? 0 : this.protection;
     }
 
     /**
@@ -275,7 +291,8 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
 
     /** Every accumulator the actor carries, the general check first. @type {object[]} */
     get modifierAccumulators() {
-        return [this.modifiers.check, ...Object.values(this.modifiers.skills)];
+        return [this.modifiers.check, this.modifiers.initiative,
+            ...Object.values(this.modifiers.skills)];
     }
 
     /**
@@ -384,8 +401,17 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         }
     }
 
+    /**
+     * The last chance to add to `auto` before `max` reads it. Anything derived from an embedded
+     * document lands here rather than in `prepareBaseData`, which runs before the items exist —
+     * a species modifier and the permanent-loss log are both of that kind.
+     * @protected
+     */
+    prepareCharacteristicAuto() {}
+
     /** @inheritDoc */
     prepareDerivedData() {
+        this.prepareCharacteristicAuto();
         for (const c of Object.values(this.characteristics)) {
             c.max = Math.max(0, c.base + c.auto + c.effect);
             c.value = Math.max(0, c.max - c.damage);
@@ -424,10 +450,16 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         }
         Object.assign(this.states ??= {}, states);
 
-        const initiative = this.config.initiative;
-        this.initiative = this.characteristics[initiative.characteristic]?.dm ?? initiative.flat ?? 0;
-        this.traitMap = buildTraitMap(this.traits);
+        // Before the initiative below, which is the first derivation here to read a `dm`: `dm` is
+        // stored, so totalling after the read leaves it a prepare behind — 0 on the first, the
+        // previous total after every change, and settling to the right answer on its own (§9.94).
+        // Summing assigns, so a sub-type running it again once its own `auto` has landed costs
+        // nothing.
         this.sumModifiers();
+        const initiative = this.config.initiative;
+        this.initiative = (this.characteristics[initiative.characteristic]?.dm ?? initiative.flat ?? 0)
+            + this.modifiers.initiative.dm;
+        this.traitMap = buildTraitMap(this.traits);
     }
 
     /* -------------------------------------------- */
@@ -450,6 +482,13 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         for (const item of this.parent.items) {
             if ((item.type === "armor") && (item.system.equipped === true) && !isNaN(item.system.protection)) {
                 armor += (+item.system.protection || 0);
+            }
+            // Core p.107: subdermal armour "stacks with other protection", so an augment adds here
+            // rather than competing with a worn suit — and `equipped` is the fitted gate, not a
+            // worn one (§9.84).
+            if ((item.type === "equipment") && (item.system.subType === "augment")
+                && (item.system.equipped === true)) {
+                armor += (+item.system.augment?.protection || 0);
             }
         }
         this.inventory.armor = armor;
@@ -489,6 +528,190 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         return this.parent.items
             .filter(i => i.type === "talent" && i.system.subType === "skill" && i.system.skill.reduceEncumbrance === true)
             .reduce((sum, i) => sum + i.system.level, 0);
+    }
+
+    /* -------------------------------------------- */
+    /*  Check modifiers                             */
+    /* -------------------------------------------- */
+
+    /**
+     * The states that stand on a check whatever it is of, in the order the prompt lists them. A
+     * sub-type that does not declare one never sets it and so contributes no source — `npc` has no
+     * `nausea`, because nothing on it takes a radiation dose.
+     */
+    static CHECK_STATES = Object.freeze([
+        // Core folio 80: a fatigued Traveller "suffers DM-2 to all checks until they rest" — all of
+        // them, which is why this one names no characteristic.
+        { state: "fatigue", key: "fatigue", label: "MGT2.Actor.Fatigue", dm: -2 },
+        // Core folio 81's Nausea, the same shape and the same reason.
+        { state: "nausea", key: "nausea", label: "MGT2.Radiation.Nausea", dm: -1 },
+        // Core folio 98 is narrower: the second encumbrance band is "DM-2 on all physical actions".
+        // No skill in this system is flagged physical and no book prints such a flag — but folio 9
+        // heads STR, DEX and END the physical characteristics, so the check's own characteristic is
+        // the printed answer. The prompt follows it and the player can still overrule.
+        { state: "encumbrance", key: "encumbrance", label: "MGT2.Actor.Encumbrance", dm: -2,
+            characteristics: MGT2.PhysicalCharacteristics }
+    ]);
+
+    /**
+     * The standing DMs a check carries before anything situational. Each stays named beside the
+     * accumulator it feeds: the roll prompt prints them and lets the player waive one, which an
+     * anonymous `auto` total could not support.
+     *
+     * `auto` is **assigned** from the list rather than incremented, because the list is the whole of
+     * it. The prompt reads `sources` and never `auto`, so a DM in one and not the other is a modifier
+     * nobody can see or waive — assigning is what keeps the two from drifting apart.
+     *
+     * Runs after `prepareEncumbrance`, whose state is one of the sources.
+     * @param {object[]} [extra]   The sub-type's own sources, appended after the shared ones
+     * @protected
+     */
+    prepareCheckModifiers(extra = []) {
+        const sources = [
+            ...this.stateCheckModifiers(),
+            ...this.armorSkillModifiers(),
+            ...this.augmentSkillModifiers(),
+            ...this.scopedEffectModifiers(),
+            ...extra
+        ];
+        this.modifiers.check.auto = sources.reduce((sum, source) => sum + source.dm, 0);
+        this.modifiers.check.sources = sources;
+        this.sumModifiers();
+    }
+
+    /** @protected */
+    stateCheckModifiers() {
+        const sources = [];
+        for (const { state, ...source } of this.constructor.CHECK_STATES) {
+            if (this.states?.[state] === true) sources.push({ ...source });
+        }
+        return sources;
+    }
+
+    /**
+     * Core p.100: armour with a required skill costs DM-1 to every check per level the wearer is
+     * short, and the flat DM-3 unskilled penalty to a wearer who has no such skill at all.
+     *
+     * Jack-of-All-Trades does NOT reduce that -3 (§9.58). Folio 100 names "the usual DM-3 unskilled
+     * penalty" as a magnitude, not as the same penalty: folio 59's applies to checks OF that skill,
+     * this one to EVERY check made while the suit is worn. Letting folio 69 cancel it would also
+     * invert the rule, since no skill at all plus JoT 3 would beat Skill-0 plus JoT 3.
+     * @protected
+     */
+    armorSkillModifiers() {
+        const sources = [];
+        for (const item of this.parent.items) {
+            if ((item.type !== "armor") || (item.system.equipped !== true)) continue;
+            const required = item.system.requireSkill?.trim();
+            if (!required) continue;
+
+            const level = this.skillLevel(required);
+            const dm = (level === null) ? -3
+                : -Math.max(0, (Math.trunc(item.system.requireSkillLevel) || 0) - level);
+            if (dm === 0) continue;
+            // Hyphenated, never dotted: the prompt names a form control after this key.
+            sources.push({ key: `armor-${item.id}`, label: "MGT2.Actor.ArmorSkill", dm,
+                params: { armor: item.name, skill: required } });
+        }
+        return sources;
+    }
+
+    /**
+     * Core p.107: a skill augmentation gives DM+1 "when using that specific skill". The printed
+     * table names no skill because the augment is bought FOR one, so the buyer names it (§9.84) —
+     * which makes this the first source in the system scoped to a *skill* rather than to a
+     * characteristic roster.
+     *
+     * Two gates the table does not show and the same paragraph does. The wearer "must initially
+     * possess that skill at least at level 0 to benefit", which is exactly `skillLevel` answering
+     * null; and "a Traveller can only have one skill augmentation", which no schema can enforce
+     * because it cannot count siblings — so every one is offered and `augmentIssues` flags the
+     * extras, the shape `MGT2Combat#dutyIssues` already uses.
+     * @protected
+     */
+    augmentSkillModifiers() {
+        const sources = [];
+        for (const item of this.parent.items) {
+            if (!ActorBaseData.#isFittedAugment(item)) continue;
+            const named = item.system.augment.skill?.name?.trim();
+            const dm = Math.trunc(item.system.augment.skill?.value) || 0;
+            // The augment does nothing for a skill the Traveller does not have at all.
+            if (!named || (dm === 0) || (this.skillLevel(named) === null)) continue;
+
+            // The prompt's skill select is keyed by Item id, so the name is resolved to ids here,
+            // where the items are in reach and `matchesSkill` already settles the speciality form.
+            const skills = this.parent.items.filter(skill => (skill.type === "talent")
+                && (skill.system.subType === "skill")
+                && MGT2Helper.matchesSkill(skill.name, named)).map(skill => skill.id);
+            // Hyphenated, never dotted: the prompt names a form control after this key.
+            sources.push({ key: `augment-${item.id}`, label: "MGT2.Actor.AugmentSkill", dm,
+                params: { augment: item.name, skill: named }, skills });
+        }
+        return sources;
+    }
+
+    /** Fitted, not carried: Core p.106 improves nobody through a bag (§9.84). */
+    static #isFittedAugment(item) {
+        return (item.type === "equipment") && (item.system.subType === "augment")
+            && (item.system.equipped === true);
+    }
+
+    /**
+     * Core p.107 allows a Traveller **one** skill augmentation. The one fitted first holds it
+     * legitimately, so only the ones after it are flagged — and none is suppressed, because a
+     * referee who fitted two meant something by it and the prompt lets either be waived.
+     * @type {{skillDuplicates: string[], any: boolean}}
+     */
+    get augmentIssues() {
+        const skillDuplicates = [];
+        let held = false;
+        for (const item of this.parent.items) {
+            if (!ActorBaseData.#isFittedAugment(item)) continue;
+            if (!item.system.augment.skill?.name?.trim()) continue;
+            if (held) skillDuplicates.push(item.id);
+            else held = true;
+        }
+        return { skillDuplicates, any: skillDuplicates.length > 0 };
+    }
+
+    /**
+     * Core p.80-81: a low-gravity band is DM−1 to the *physical* checks alone. `modifiers.check`
+     * is the only accumulator an Active Effect can reach and it stands on every check, so an effect
+     * that recorded the narrower scope has its share moved out of that sink and re-offered as a
+     * named source carrying the roster encumbrance already scopes by — which is what lets the prompt
+     * follow the characteristic instead of standing on INT and EDU too. The standing total does not
+     * move: what leaves `effect` arrives in `auto`.
+     * @protected
+     */
+    scopedEffectModifiers() {
+        const sources = [];
+        for (const effect of this.parent.allApplicableEffects()) {
+            if (!effect.active || (effect.flags?.mgt2?.region?.physicalOnly !== true)) continue;
+            // Only an additive change can be attributed: an override says what the sink IS, and no
+            // share of it belongs to this effect alone.
+            const dm = (effect.system.changes ?? []).reduce((sum, change) =>
+                ((change.key === CHECK_EFFECT_PATH) && (change.type === "add"))
+                    ? sum + (Number(change.value) || 0) : sum, 0);
+            if (dm === 0) continue;
+
+            this.modifiers.check.effect -= dm;
+            // The effect's own name, which is already a localised string rather than a key — and
+            // hyphenated, never dotted: the prompt names a form control after this key.
+            sources.push({ key: `effect-${effect.id}`, label: effect.name, dm,
+                characteristics: MGT2.PhysicalCharacteristics });
+        }
+        return sources;
+    }
+
+    /** The best level in a named skill, or null when the actor does not have that skill at all. */
+    skillLevel(name) {
+        let best = null;
+        for (const item of this.parent.items) {
+            if ((item.type !== "talent") || (item.system.subType !== "skill")) continue;
+            if (!MGT2Helper.matchesSkill(item.name, name)) continue;
+            best = Math.max(best ?? 0, item.system.level ?? 0);
+        }
+        return best;
     }
 
     /* -------------------------------------------- */
@@ -629,6 +852,49 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         // instance and the one running this method is already the previous prepare.
         if (result.damage > 0) await this.parent.system.applyDamage(result.damage, { raw: true });
         return result;
+    }
+
+    /**
+     * Put the hazards an attack carried onto whoever it hit (§9.4). Template and instance: the
+     * Poison or Diseased trait stays on the attacker and this is the `disease` Item the defender
+     * now owns. Nothing dedupes — bitten twice is two doses, and each rolls its own resist check.
+     * @param {object[]} entries      The attacker's stored traits, hazards or not
+     * @param {string} [sourceName]   What carried them, for the Item's name
+     * @returns {Promise<Item[]>}
+     */
+    async applyHazards(entries, sourceName) {
+        const items = hazardTraits(entries).map(entry => buildHazardItem(entry, sourceName));
+        if (items.length === 0) return [];
+        return this.parent.createEmbeddedDocuments("Item", items);
+    }
+
+    /**
+     * Core folio 228: "Expended PSI points are recovered at the rate of one point per hour,
+     * beginning three hours after the Traveller last used a psionic talent." The three hours delay
+     * the rate rather than granting the first point, so the first one lands on the fourth hour.
+     *
+     * The elapsed time is an argument and never a stored timestamp: §9.35 leaves the system no clock
+     * to measure one against, so the player counts the hours and the rule turns them into points.
+     * @param {number} hours   Hours since the last talent use
+     * @returns {number}
+     */
+    static psiRecovered(hours) {
+        return Math.max(0, (Math.trunc(hours) || 0) - PSI_RECOVERY_DELAY);
+    }
+
+    /**
+     * Give the reserve back what those hours are worth. PSI is in no damage chain and Core p.83 names
+     * it the exception to the mental track, so this is the only procedure that reaches it at all.
+     * @returns {Promise<{recovered: number, left: number}|null>}   Null when nothing was spent
+     */
+    async restPsi(hours) {
+        const psi = this.characteristics.psionic;
+        if ( !psi || (psi.damage <= 0) ) return null;
+        const recovered = Math.min(psi.damage, ActorBaseData.psiRecovered(hours));
+        if ( recovered > 0 ) {
+            await this.parent.update({ "system.characteristics.psionic.damage": psi.damage - recovered });
+        }
+        return { recovered, left: psi.value + recovered };
     }
 
     /**

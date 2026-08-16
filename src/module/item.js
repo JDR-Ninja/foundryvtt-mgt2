@@ -194,7 +194,8 @@ export class TravellerItem extends Item {
     // the same way. Only a skill talent carries a speciality, and a psionic one leaves it blank.
     if (this.type === "talent") {
       const speciality = this.system.skill.speciality;
-      let label = speciality ? `${this.name} (${speciality})` : this.name;
+      let label = (speciality && !MGT2Helper.nameStatesSpeciality(this.name, speciality))
+        ? `${this.name} (${speciality})` : this.name;
       if (level && (this.system.level !== 0)) label += ` (${MGT2Helper.signed(this.system.level)})`;
       return label;
     }

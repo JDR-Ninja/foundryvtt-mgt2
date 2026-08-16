@@ -74,9 +74,51 @@ export class CharacterData extends ActorBaseData {
                 cashOnHand: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
                 debt: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
                 livingCost: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
+                // What THIS Traveller pays towards a hull the crew owns collectively (Core p.155):
+                // the mortgage belongs to the ship and how the crew splits it is a table agreement.
                 monthlyShipPayments: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
+                // Core p.150: earned in careers, each worth MCr1 and deducted from a ship's purchase
+                // price BEFORE the mortgage is calculated. They exist before any ship does, which is
+                // why they cannot live on one (§9.13).
+                shipShares: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
                 notes: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             }),
+
+            // Ageing, creation injuries and the medical care that undoes them, in ONE signed log
+            // whose sum derives into `characteristics.<k>.auto` — so `base` holds the characteristics
+            // as first rolled and nothing ever writes it again (§9.39). Ageing repeats every term
+            // from the fourth on and the PLAYER chooses which characteristic takes each loss, so
+            // after the fact there is no way to infer what a roll took: record the choice, derive the
+            // total, and removal is correct by construction. A restoration is a new entry, never an
+            // edit to a previous one.
+            characteristicLog: new fields.ArrayField(new fields.SchemaField({
+                source: new fields.StringField({
+                    required: false, blank: false, initial: "ageing",
+                    choices: MGT2.CharacteristicLossSources }),
+                term: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                age: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                // What was rolled, kept beside the outcome so a mis-rolled row can be recognised.
+                roll: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                // Signed, keyed by characteristic: −2 is a loss and +1 a point bought back.
+                changes: new fields.TypedObjectField(
+                    new fields.NumberField({ required: true, nullable: false, integer: true, initial: 0 }),
+                    { initial: {}, validateKey: key => key in MGT2.Characteristics }),
+                // Cr paid, where a source has a price: Cr5000 per point restored, or the rolled
+                // 1D × Cr10000 of an ageing crisis. What the Traveller could not pay becomes debt.
+                cost: new fields.NumberField({ required: false, nullable: false, min: 0, integer: true, initial: 0 }),
+                note: new fields.StringField({ required: false, blank: true, trim: true })
+            }), { initial: [] }),
+
+            // State that outlives a dose and therefore cannot live on the `drug` Item: stims escalate
+            // per dose since sleep, anti-rad counts doses taken that day (Core p.115). Hand-held like
+            // every other counter in the system — nothing schedules the reset (§9.35).
+            drugCounters: new fields.ArrayField(new fields.SchemaField({
+                drug: new fields.StringField({ required: false, blank: true, trim: true }),
+                doses: new fields.NumberField({
+                    required: false, nullable: false, min: 0, integer: true, initial: 0 }),
+                resetOn: new fields.StringField({
+                    required: false, blank: false, initial: "never", choices: MGT2.DoseResets })
+            }), { initial: [] }),
 
             states: new fields.SchemaField({
                 fatigue: new fields.BooleanField({ required: false, initial: false }),
@@ -169,6 +211,33 @@ export class CharacterData extends ActorBaseData {
     }
 
     /**
+     * A species modifier and the permanent-loss log both move the score, and neither may ever be
+     * written to it. An Active Effect would be the wrong machinery for either: an effect is for
+     * things that start and stop, and a species is a fact of character generation while a lost point
+     * is gone (§9.18, §9.39). Derived here, both are removable by construction — delete the Item or
+     * the row and the number goes with it.
+     * @inheritDoc
+     */
+    prepareCharacteristicAuto() {
+        for ( const item of this.parent.items ) {
+            // Core p.106: an augment is a fact of the body, but only once it is fitted — carrying one
+            // in a bag improves nothing, which is what `equipped` already distinguishes.
+            const modifiers = (item.type === "species") ? item.system.modifiers
+                : ((item.system.subType === "augment") && item.system.equipped)
+                    ? item.system.augment?.modifiers : null;
+            for ( const modifier of modifiers ?? [] ) {
+                const c = this.characteristics[modifier.characteristic];
+                if ( c && Number.isFinite(modifier.value) ) c.auto += modifier.value;
+            }
+        }
+        for ( const entry of this.characteristicLog ) {
+            for ( const [key, delta] of Object.entries(entry.changes ?? {}) ) {
+                if ( this.characteristics[key] ) this.characteristics[key].auto += delta;
+            }
+        }
+    }
+
+    /**
      * Everything below is recomputed from the characteristics and the carried items on every
      * prepare, so none of it is written to the database and none of it can go stale.
      * Runs after prepareEmbeddedDocuments, so the items are ready.
@@ -176,6 +245,7 @@ export class CharacterData extends ActorBaseData {
      */
     prepareDerivedData() {
         super.prepareDerivedData();
+        this.#prepareLossLog();
 
         // The identity code is the six canonical maxima, not a stored string: a typed one and six
         // typed characteristics are two sources of truth for the same fact.
@@ -190,69 +260,32 @@ export class CharacterData extends ActorBaseData {
         this.#prepareComputers();
         this.prepareWeight();
         this.prepareEncumbrance();
-        this.#prepareCheckModifiers();
+        this.prepareCheckModifiers();
     }
 
     /* -------------------------------------------- */
 
     /**
-     * The standing DMs a check carries before anything situational. Each stays named beside the
-     * accumulator it feeds: the roll prompt prints them and lets the player waive one, which an
-     * anonymous `auto` total could not support.
+     * Folio 49: a characteristic reduced to 0 by ageing is death unless 1D × Cr10000 buys medical
+     * care, and a Traveller who has suffered such a crisis automatically fails every later
+     * qualification roll. That is *visible in the log*, so it derives rather than being a second
+     * stored flag — which is the whole return on storing the log signed and in order.
+     *
+     * Replayed rather than summed: only a running total can say which entry took a score to zero.
      */
-    #prepareCheckModifiers() {
-        const sources = [];
-        // Core folio 80: a fatigued Traveller "suffers DM-2 to all checks until they rest" — all of
-        // them, which is why this one names no characteristic.
-        if (this.states.fatigue) sources.push({ key: "fatigue", label: "MGT2.Actor.Fatigue", dm: -2 });
-        // Core folio 81's Nausea, the same shape and the same reason.
-        if (this.states.nausea) sources.push({ key: "nausea", label: "MGT2.Radiation.Nausea", dm: -1 });
-        // Core folio 98 is narrower: the second encumbrance band is "DM-2 on all physical actions".
-        // No skill in this system is flagged physical and no book prints such a flag — but folio 9
-        // heads STR, DEX and END the physical characteristics, so the check's own characteristic is
-        // the printed answer. The prompt follows it and the player can still overrule.
-        if (this.states.encumbrance) {
-            sources.push({ key: "encumbrance", label: "MGT2.Actor.Encumbrance", dm: -2,
-                characteristics: MGT2.PhysicalCharacteristics });
+    #prepareLossLog() {
+        const running = {};
+        let crisis = false;
+        for ( const entry of this.characteristicLog ) {
+            for ( const [key, delta] of Object.entries(entry.changes ?? {}) ) {
+                const c = this.characteristics[key];
+                if ( !c ) continue;
+                running[key] = (running[key] ?? c.base) + delta;
+                if ( (entry.source === "ageing") && (running[key] <= 0) ) crisis = true;
+            }
         }
-        sources.push(...this.#armorSkillModifiers());
-
-        this.modifiers.check.auto = sources.reduce((sum, source) => sum + source.dm, 0);
-        this.modifiers.check.sources = sources;
-        this.sumModifiers();
-    }
-
-    /**
-     * Core p.100: armour with a required skill costs DM-1 to every check per level the wearer is
-     * short, and the flat DM-3 unskilled penalty to a wearer who has no such skill at all.
-     */
-    #armorSkillModifiers() {
-        const sources = [];
-        for (const item of this.parent.items) {
-            if ((item.type !== "armor") || (item.system.equipped !== true)) continue;
-            const required = item.system.requireSkill?.trim();
-            if (!required) continue;
-
-            const level = this.#skillLevel(required);
-            const dm = (level === null) ? -3
-                : -Math.max(0, (Math.trunc(item.system.requireSkillLevel) || 0) - level);
-            if (dm === 0) continue;
-            // Hyphenated, never dotted: the prompt names a form control after this key.
-            sources.push({ key: `armor-${item.id}`, label: "MGT2.Actor.ArmorSkill", dm,
-                params: { armor: item.name, skill: required } });
-        }
-        return sources;
-    }
-
-    /** The best level in a named skill, or null when the actor does not have that skill at all. */
-    #skillLevel(name) {
-        let best = null;
-        for (const item of this.parent.items) {
-            if ((item.type !== "talent") || (item.system.subType !== "skill")) continue;
-            if (!MGT2Helper.matchesSkill(item.name, name)) continue;
-            best = Math.max(best ?? 0, item.system.level ?? 0);
-        }
-        return best;
+        this.states.ageingCrisis = crisis;
+        this.characteristicLoss = { crisis, entries: this.characteristicLog.length };
     }
 
     /* -------------------------------------------- */
@@ -286,7 +319,7 @@ export class CharacterData extends ActorBaseData {
      */
     #prepareStudy() {
         const period = CharacterData.STUDY_PERIOD_WEEKS;
-        const level = this.study.skill ? this.#skillLevel(this.study.skill) : null;
+        const level = this.study.skill ? this.skillLevel(this.study.skill) : null;
 
         this.study.hasSkill = level !== null;
         this.study.target = (level === null) ? 0 : level + 1;
@@ -301,21 +334,24 @@ export class CharacterData extends ActorBaseData {
 
     /** Software occupies bandwidth on the computer it is installed in. */
     #prepareComputers() {
-        const computers = new Map();
+        // A host is a `computer` Item or a fitted augment carrying Processing — Core p.107's wafer
+        // jack is both a computer and an implant, and `computerId` is a bare Item id that never
+        // required the target to be one type (§9.84).
+        const hosts = new Map();
         for (const item of this.parent.items) {
-            if (item.type !== "computer") continue;
+            if (!MGT2Helper.runsSoftware(item)) continue;
             item.system.processingUsed = 0;
-            computers.set(item.id, item);
+            hosts.set(item.id, item);
         }
 
         for (const item of this.parent.items) {
             if (item.type !== "item" || item.system.subType !== "software") continue;
-            const computer = computers.get(item.system.software.computerId);
-            if (computer) computer.system.processingUsed += item.system.software.bandwidth;
+            const host = hosts.get(item.system.software.computerId);
+            if (host) host.system.processingUsed += item.system.software.bandwidth;
         }
 
-        for (const computer of computers.values()) {
-            computer.system.overload = computer.system.processingUsed > computer.system.processing;
+        for (const host of hosts.values()) {
+            host.system.overload = host.system.processingUsed > MGT2Helper.processing(host);
         }
     }
 
@@ -392,9 +428,9 @@ export class CharacterData extends ActorBaseData {
         return this.parent.items.filter(i => i.type === "container").sort(MGT2Helper.compareByName);
     }
 
-    /** @type {Item[]} */
+    /** Everything software can be loaded onto, which is what the software select offers. @type {Item[]} */
     get computers() {
-        return this.parent.items.filter(i => i.type === "computer").sort(MGT2Helper.compareByName);
+        return this.parent.items.filter(i => MGT2Helper.runsSoftware(i)).sort(MGT2Helper.compareByName);
     }
 
     /* -------------------------------------------- */
@@ -419,7 +455,7 @@ export class CharacterData extends ActorBaseData {
                 for (const item of this.parent.items) {
                     if (item.system.container?.id === d._id) toDeleteIds.push(item.id);
                 }
-            } else if (d.type === "computer") {
+            } else if (MGT2Helper.runsSoftware(d)) {
                 for (const item of this.parent.items) {
                     if (item.system.software?.computerId === d._id) {
                         itemToUpdates.push({ _id: item.id, "system.software.computerId": "" });

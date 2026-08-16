@@ -374,6 +374,76 @@ export function resolveDamageResponse(has) {
     return { transform, exceptions: exceptions ?? [] };
 }
 
+/* -------------------------------------------- */
+/*  Hazards (Core folio 80)                     */
+/* -------------------------------------------- */
+
+/**
+ * The two traits that leave something behind on whoever was hit, and the `disease` sub-type each
+ * one becomes. The trait belongs to the attacker — a creature's venom sac — and the Item to the
+ * thing now suffering it, so applying one **constructs** the victim's Item from the slots rather
+ * than linking a document the creature would have to own (§9.4).
+ */
+export const HAZARD_TRAITS = Object.freeze({ poison: "poison", diseased: "disease" });
+
+/**
+ * `Very Difficult (12+)` → `VeryDifficult`. The registry's `difficulty` slot round-trips the book
+ * verbatim and the books sometimes print the target beside the name, while `DiseaseData.difficulty`
+ * is the bare key `MGT2.DifficultyTargets` then supplies the number for.
+ * @returns {string|null}   Null for anything the ladder does not name
+ */
+function difficultyKey(value) {
+    const folded = fold(value).replace(/\(.*/, "").replace(/[^a-z]/g, "");
+    if (folded === "") return null;
+    return Object.keys(CONFIG.MGT2?.DifficultyTargets ?? {}).find(key => fold(key) === folded) ?? null;
+}
+
+/**
+ * The `disease` Item a Poison or Diseased trait inflicts, as creation data. The four slots map one
+ * for one, `DiseaseData.effect` being the field §9.4 added for the third of them — and **nothing
+ * about what the hazard does is written here**: the name is the trait's own and the description is
+ * whatever note its owner typed. The Item is what already knows how to roll the resist check and
+ * apply the interval damage, so no rule is re-implemented on this side.
+ * @param {object} entry          A stored trait
+ * @param {string} [sourceName]   What carried it — the weapon, or the creature that bit
+ * @returns {object|null}         Null for any trait that is not a hazard
+ */
+export function buildHazardItem(entry, sourceName) {
+    const subType = HAZARD_TRAITS[entry?.key];
+    if (!subType) return null;
+
+    const slots = {};
+    for (const param of entry.params ?? []) {
+        if (param.slot && (param.value !== "")) slots[param.slot] = param.value;
+    }
+    const difficulty = difficultyKey(slots.difficulty);
+    const label = traitLabel(entry);
+
+    return {
+        type: "disease",
+        name: sourceName
+            ? game.i18n.format("MGT2.Hazard.Name", { trait: label, source: sourceName })
+            : label,
+        system: {
+            subType,
+            // A name the ladder does not carry is left to the field's own default rather than
+            // guessed: the disease sheet states its check on a select with no empty option.
+            ...(difficulty ? { difficulty } : {}),
+            damage: slots.damage ?? "",
+            effect: slots.effect ?? "",
+            interval: slots.interval ?? "",
+            description: entry.note ?? ""
+        }
+    };
+}
+
+/** Every hazard a trait list carries, in stored order — Tezheerekti carries both. */
+export function hazardTraits(entries) {
+    return Object.values(entries ?? []).filter(entry => Boolean(HAZARD_TRAITS[entry?.key]));
+}
+
+/* -------------------------------------------- */
+
 /**
  * The one field that replaces six identical `{name, description}` arrays.
  *

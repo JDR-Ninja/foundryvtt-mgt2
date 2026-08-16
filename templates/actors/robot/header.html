@@ -127,7 +127,7 @@
 		<div class="stat"><dt>{{localize 'MGT2.Actor.robot.Manipulators'}}</dt><dd>{{robot.statblock.manipulators}}</dd></div>
 		<div class="stat{{#unless system.cost}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.robot.Cost'}}</dt>
-			<dd>{{#if system.cost}}<i>Cr</i>{{system.cost}}{{else}}&mdash;{{/if}}</dd>
+			<dd>{{#if system.cost}}<i>Cr</i>{{credits system.cost}}{{else}}&mdash;{{/if}}</dd>
 		</div>
 		<div class="stat{{#unless robot.statblock.halfLife}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.robot.HalfLife'}}</dt>

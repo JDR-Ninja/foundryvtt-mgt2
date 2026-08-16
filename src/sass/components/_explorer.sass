@@ -1,0 +1,286 @@
+// The compendium explorer — docs/sketch-explorer.html, §37 and §85. Two columns: a rail that holds
+// the filters over the pack list, and the results. The rail is one control and not two — the pack
+// list is the source filter AND the index-progress readout, because a pack switched off is a
+// round-trip that bought nothing and a pack still arriving is one whose rows cannot answer a TL.
+//
+// The window grid is a seventh copy of the six in `utils/_window.sass` and `components/_voyage.sass`,
+// and it lives here for the same reason: the screen is not a sheet.
+
+.mgt2.application.explorer
+	container-type: inline-size
+	container-name: sheet
+
+	> .window-content
+		display: grid
+		grid-template-columns: 17.5rem minmax(0, 1fr)
+		height: 100%
+		padding: 0
+		overflow: hidden
+
+		> [data-application-part="rail"],
+		> [data-application-part="results"]
+			min-height: 0
+
+// --------------------------------------------
+//  THE RAIL
+// --------------------------------------------
+
+.mgt2 .rail
+	display: flex
+	flex-direction: column
+	min-width: 0
+	border-right: 1px solid var(--rule)
+	overflow-y: auto
+
+	.filters
+		flex: none
+		display: flex
+		flex-direction: column
+		gap: 9px
+		padding: 12px 13px 13px
+		border-bottom: 1px solid var(--rule)
+
+	.fld
+		display: flex
+		flex-direction: column
+		gap: 2px
+		min-width: 0
+		> span
+			font-family: var(--cond)
+			font-size: 9px
+			font-weight: 700
+			letter-spacing: 0.15em
+			text-transform: uppercase
+			color: var(--faint)
+		input.f.n
+			text-align: right
+			font-family: var(--mono)
+
+	.fld.tl .rng
+		display: grid
+		grid-template-columns: repeat(2, minmax(0, 1fr))
+		gap: 7px
+
+	.reset
+		align-self: flex-start
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 700
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		padding: 2px 9px 3px
+		width: auto
+
+// --------------------------------------------
+//  THE PACK LIST — the source filter and the index readout at once
+// --------------------------------------------
+
+.mgt2 .rail .sources
+	flex: 1 1 auto
+	display: flex
+	flex-direction: column
+	gap: 11px
+	padding: 11px 13px 14px
+
+	.ghd
+		display: flex
+		align-items: center
+		gap: 6px
+		padding-bottom: 3px
+		margin-bottom: 4px
+		border-bottom: 1px solid var(--rule-soft)
+		font-family: var(--cond)
+		font-size: 9.5px
+		font-weight: 700
+		letter-spacing: 0.15em
+		text-transform: uppercase
+		color: var(--mute)
+		i
+			color: var(--faint)
+		a
+			font-size: 9px
+			color: var(--faint)
+			cursor: var(--cursor-pointer)
+		a:first-of-type
+			margin-left: auto
+		a:hover
+			color: var(--accent-text)
+
+	.pk
+		display: grid
+		grid-template-columns: auto minmax(0, 1fr) auto
+		align-items: center
+		gap: 3px 6px
+		padding: 2px 0
+		cursor: var(--cursor-pointer)
+		input
+			margin: 0
+			accent-color: var(--accent-text)
+		.t
+			font-size: 12px
+			overflow: hidden
+			text-overflow: ellipsis
+			white-space: nowrap
+		.m
+			grid-column: 2 / -1
+			font-family: var(--mono)
+			font-size: 9px
+			color: var(--faint)
+		> i
+			font-size: 9px
+			color: var(--faint)
+
+	// The state marker sits before the name, so the list reads as a progress bar down the rail.
+	.pk .t::before
+		content: "✓"
+		display: inline-block
+		width: 1em
+		margin-right: 3px
+		font-family: var(--mono)
+		font-size: 10px
+		color: var(--good)
+	.pk.waiting .t::before,
+	.pk.loading .t::before
+		content: "⋯"
+		color: var(--accent-text)
+	.pk.failed .t::before
+		content: "!"
+		color: var(--danger)
+
+// --------------------------------------------
+//  THE RESULTS
+// --------------------------------------------
+
+.mgt2 .found
+	display: flex
+	flex-direction: column
+	min-width: 0
+	min-height: 0
+
+	.cnt
+		flex: none
+		display: flex
+		flex-wrap: wrap
+		align-items: baseline
+		gap: 6px 14px
+		padding: 9px 14px 10px
+		border-bottom: 1px solid var(--rule)
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--faint)
+		.c
+			color: var(--accent-text)
+		// What the screen does not yet know, said rather than hidden.
+		.wait
+			color: var(--mute)
+
+	.rows
+		flex: 1 1 auto
+		min-height: 0
+		overflow: auto
+
+	table
+		width: 100%
+		border-collapse: collapse
+		table-layout: fixed
+
+	th
+		position: sticky
+		top: 0
+		z-index: 1
+		text-align: left
+		padding: 6px 9px 7px
+		background: var(--paper)
+		border-bottom: 1px solid var(--rule)
+		font-family: var(--cond)
+		font-size: 9px
+		font-weight: 700
+		letter-spacing: 0.15em
+		text-transform: uppercase
+		color: var(--faint)
+		cursor: var(--cursor-pointer)
+		i
+			margin-left: 4px
+	th.on
+		color: var(--accent-text)
+	th.im
+		width: 2.4rem
+		cursor: default
+	th.type
+		width: 8rem
+	th.tl
+		width: 4.4rem
+	th.pack
+		width: 11rem
+
+	td
+		padding: 3px 9px 4px
+		font-size: 12.5px
+		border-bottom: 1px solid var(--rule-soft)
+		overflow: hidden
+		text-overflow: ellipsis
+		white-space: nowrap
+
+	tr[draggable="true"]
+		cursor: grab
+	tbody tr:hover
+		background: var(--hover)
+
+	td.im
+		padding: 2px 0 2px 9px
+		img
+			display: block
+			width: 20px
+			height: 20px
+			object-fit: cover
+			border: 1px solid var(--rule-soft)
+			border-radius: 2px
+		i
+			color: var(--faint)
+
+	td.nm
+		white-space: normal
+		a
+			font-weight: 600
+			cursor: var(--cursor-pointer)
+		a:hover
+			color: var(--accent-text)
+		.sub
+			margin-left: 7px
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 600
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--faint)
+
+	td.type
+		font-family: var(--cond)
+		font-size: 11px
+		font-weight: 600
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		color: var(--mute)
+
+	td.tl
+		font-family: var(--mono)
+		font-size: 11px
+		font-variant-numeric: tabular-nums
+	// "Not read yet", which is not the same statement as "has none".
+	td.tl.pending
+		color: var(--accent-text)
+
+	td.pack
+		font-size: 10.5px
+		color: var(--faint)
+		i
+			margin-right: 5px
+
+	tr.none td
+		padding: 18px
+		text-align: center
+		color: var(--faint)
+
+// The tab's own control, which is where a referee looks for "browse the compendiums" (§85).
+#compendium .header-actions .mgt2-explorer
+	flex: 1

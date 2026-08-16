@@ -1,0 +1,113 @@
+<section class="mgt2-panel mgt2-voyage-panel">
+
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Voyage.TheShip'}}</h3>
+			<span class="count">{{localize 'MGT2.Voyage.FuelPrice' cr=ship.fuelPerTon fill=ship.tankFill}}</span>
+		</div>
+		<dl class="statline grid" data-derived="spacecraft.voyage">
+			<div class="stat lead{{#unless fuel.enough}} hurt{{/unless}}">
+				<dt>{{localize 'MGT2.Voyage.Fuel'}}</dt>
+				<dd>{{fuel.level}}<span class="of">/{{fuel.cap}}</span></dd>
+			</div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Jump'}}</dt><dd>{{ship.jump}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Thrust'}}</dt><dd>{{ship.thrust}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Cargo'}}</dt><dd>{{ship.cargo}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Voyage.Staterooms'}}</dt><dd>{{ship.staterooms}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Voyage.LowBerths'}}</dt><dd>{{ship.lowBerths}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.SpaceCombat.Aboard'}}</dt><dd>{{ship.aboard}}</dd></div>
+		</dl>
+	</div>
+
+	{{! Both ends, as the world Actors publish them. Every code is derived from the eight digits and
+	    none of it is typed here — the ONE thing this screen may not do is compute a world's numbers
+	    itself: a stop can be a compendium Actor, and no number derived from another document may
+	    live on the ship's data model (§9.33.4). }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Voyage.BothEnds'}}</h3>
+			<span class="count">{{localize 'MGT2.Voyage.FromTheUwp'}}</span>
+		</div>
+		{{#if route.here.linked}}
+		<ul class="codes" data-family="world">
+			<li class="code hot">
+				<b>{{route.here.name}}</b>
+				<span class="ps">
+					<span class="p">{{route.here.profile}}</span>
+					<span class="p">{{localize 'MGT2.Voyage.PortFuel' grade=(localize (concat 'MGT2.Actor.world.FuelGrade.' route.here.fuelGrade))}}</span>
+				</span>
+			</li>
+			{{#each route.here.codes as |code|}}<li class="code"><b>{{code}}</b></li>{{/each}}
+		</ul>
+		{{/if}}
+		{{#if route.next.linked}}
+		<ul class="codes" data-family="world">
+			<li class="code hot">
+				<b>{{route.next.name}}</b>
+				<span class="ps">
+					<span class="p">{{route.next.profile}}</span>
+					<span class="p">{{localize 'MGT2.Voyage.PortFuel' grade=(localize (concat 'MGT2.Actor.world.FuelGrade.' route.next.fuelGrade))}}</span>
+				</span>
+			</li>
+			{{#each route.next.codes as |code|}}<li class="code"><b>{{code}}</b></li>{{/each}}
+		</ul>
+		{{/if}}
+		{{#unless route.here.linked}}{{#unless route.next.linked}}
+		<p class="hint">{{localize 'MGT2.Voyage.NoWorldDocuments'}}</p>
+		{{/unless}}{{/unless}}
+	</div>
+
+	{{! BLOCK 3 — the roster, and the last column is the point: this screen reads three of these rows
+	    and writes one field on one of them, from a drop. The crew belongs to the ship, because a
+	    ship has a crew when no jump is running (§9.26). A `skill` check needs a sheet to read the
+	    level off, so the two chain buttons are refused on a vacant or unstatted slot. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Voyage.Stations'}}</h3>
+			<span class="count">{{localize 'MGT2.Voyage.RosterLivesOnTheShip'}}</span>
+		</div>
+		<table class="roster">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Actor.spacecraft.Station'}}</th>
+					<th>{{localize 'MGT2.Actor.spacecraft.Who'}}</th>
+					<th>{{localize 'MGT2.Voyage.Reads'}}</th>
+				</tr>
+			</thead>
+			<tbody data-accept="{{crewTypes}}">
+				{{#each crew as |row|}}
+				<tr data-accept="{{../crewTypes}}" data-row-index="{{row.index}}"{{#if row.vacant}} class="vacant"{{/if}}>
+					<td class="station">
+						<b>{{#if row.station}}{{row.station}}{{else}}&mdash;{{/if}}</b>
+						{{#if row.department}}<span class="dept">{{localize row.department}}</span>{{/if}}
+					</td>
+					<td class="who{{#if row.uuid}} linked{{/if}}">
+						{{#if row.uuid}}
+						<span class="av"></span><a data-action="openDocument" data-uuid="{{row.uuid}}">{{row.name}}</a>
+						<i class="src">{{localize 'MGT2.Actor.spacecraft.LinkedActor'}}</i>
+						{{else if row.name}}
+						<em>{{row.name}}</em><i class="src">{{localize 'MGT2.Actor.spacecraft.NameOnly'}}</i>
+						{{else}}{{localize 'MGT2.SpaceCombat.DropActor'}}{{/if}}
+					</td>
+					<td>
+						<div class="todo">
+							{{#if row.step}}
+							<button type="button" class="btn" data-action="jumpStep" data-step="{{row.step}}"{{#unless row.statted}} disabled{{/unless}}>
+								{{#if (eq row.step 'plot')}}{{localize 'MGT2.Voyage.Plot'}}{{else}}{{localize 'MGT2.Voyage.Jump'}}{{/if}}<i>4+</i>
+							</button>
+							{{else}}<span class="need">{{localize 'MGT2.Voyage.NothingHere'}}</span>{{/if}}
+						</div>
+					</td>
+				</tr>
+				{{/each}}
+				<tr class="vacant" data-accept="{{crewTypes}}">
+					<td class="station"><b>+ {{localize 'MGT2.Voyage.AddAboard'}}</b></td>
+					<td class="who">{{localize 'MGT2.SpaceCombat.DropActor'}}</td>
+					<td><div class="todo"><span class="need">{{localize 'MGT2.Voyage.NothingHere'}}</span></div></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	{{> systems/mgt2/templates/voyage/misjump.html}}
+</section>

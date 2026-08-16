@@ -1,3 +1,5 @@
+import { Doses, DOSE_FLAG } from "./doses.js";
+
 const { ActiveEffectConfig } = foundry.applications.sheets;
 
 /**
@@ -44,7 +46,35 @@ export class MGT2ActiveEffect extends foundry.documents.ActiveEffect {
    * @inheritDoc
    */
   get isSuppressed() {
+    // A drug's own effects are the TEMPLATE a dose copies onto the Traveller, so carrying the box
+    // changes nothing: the trigger is consumption, not equipment (§9.90). Guarded here rather than
+    // by asking the author to untick `transfer`, because a ticked box would silently apply a dose
+    // nobody took — and that is the single most-repeated complaint against `mgt2e`'s inventory.
+    if ( this.parent?.type === "drug" ) return true;
     return (this.flags?.mgt2?.suspended === true) || super.isSuppressed;
+  }
+
+  /**
+   * An effect transferred from an Item resolves its `@` expressions against the Actor and nothing
+   * else — `Actor#getRollData` returns `system` (`client/documents/actor.mjs:238`), so the number a
+   * trait actually scales on, the armour's protection or the talent's level, is invisible to the
+   * change carrying it. The parent Item's system is offered as `@item`.
+   *
+   * The base data is a live DataModel, so it is inherited rather than copied: `replaceFormulaData`
+   * reads through `getProperty`, which walks the prototype chain.
+   *
+   * **Needs 14.366**, where core added the call (issue 14531). On an earlier build the method is
+   * never invoked, and because the sink is a declared field the change goes through
+   * `DataField#applyChange`, whose `_replaceDataRefs` throws on the unresolved reference: it
+   * catches its own throw, warns, and returns the value untouched
+   * (`common/data/fields.mjs:686-693`). The change is dropped whole — not miscomputed — and
+   * nothing reaches the sheet.
+   * @inheritDoc
+   */
+  getReplacementData(baseData) {
+    const item = (this.parent?.documentName === "Item") ? this.parent : null;
+    if ( !item ) return baseData;
+    return Object.assign(Object.create(baseData), { item: item.system });
   }
 }
 
@@ -121,6 +151,7 @@ export function prepareEffects(doc) {
   const rows = [];
   for ( const effect of source ) {
     const mirrored = MIRRORED_IDS.some(id => effect.statuses.has(id));
+    const dose = effect.flags?.mgt2?.[DOSE_FLAG] ?? null;
     rows.push({
       uuid: effect.uuid,
       name: effect.name,
@@ -131,6 +162,11 @@ export function prepareEffects(doc) {
       suspended: effect.flags?.mgt2?.suspended === true,
       active: effect.active,
       mirrored,
+      // A dose, which is the one kind of effect that ends in something rather than just ending
+      // (§9.90). While it is disabled AND carries an onset, "off" means "not yet" rather than
+      // "switched off" — the two states look identical on the row and are not the same thing.
+      dose,
+      onset: (dose && effect.disabled) ? dose.onset : null,
       // A permanent effect's label is "None", which says nothing worth a column.
       duration: effect.isTemporary ? effect.duration.label : null,
       changes: (effect.system.changes ?? []).map(change => ({
@@ -183,13 +219,19 @@ async function onEffectSuspend(event, target) {
   return effect.setFlag("mgt2", "suspended", effect.flags?.mgt2?.suspended !== true);
 }
 
+/** A dose does not merely stop: CSC p.93-97 lets it end in a condition or in damage (§9.90). */
+async function onDoseEnd(event, target) {
+  return Doses.end(effectOf(target));
+}
+
 
 export const EFFECT_ACTIONS = Object.freeze({
   effectCreate: onEffectCreate,
   effectEdit: onEffectEdit,
   effectDelete: onEffectDelete,
   effectToggle: onEffectToggle,
-  effectSuspend: onEffectSuspend
+  effectSuspend: onEffectSuspend,
+  doseEnd: onDoseEnd
 });
 
 /* -------------------------------------------- */

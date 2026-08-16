@@ -1,0 +1,380 @@
+// The world screen. Everything it can take from the shared kit it takes — `.statline`, `.codes`,
+// `.block`, `.sect`, `.hint` and the header/rail/panel skeleton are _blocks.sass and _character.sass
+// unchanged. What is here is the window grid, and the three components this type owns: the UWP
+// strip, the derivation ledger and the two traffic halves.
+
+// `world` extends TypeDataModel rather than ActorBaseData, so its sheet is not a subclass of the
+// character sheet and does not inherit the `character` class ApplicationV2 concatenates up the chain
+// — which is where the other four types get their query container and their grid. Restated here,
+// and only what the grid needs.
+.mgt2.application.world
+	container-type: inline-size
+	container-name: sheet
+
+	> .window-content
+		display: grid
+		grid-template-columns: 20rem minmax(0, 1fr)
+		grid-template-rows: auto minmax(0, 1fr)
+		grid-template-areas: "header header" "rail panel"
+		height: 100%
+		overflow: hidden
+		font-family: var(--body)
+		font-size: 14px
+
+		> [data-application-part="header"]
+			grid-area: header
+		> [data-application-part="rail"]
+			grid-area: rail
+			min-height: 0
+		> [data-application-part="panel"]
+			grid-area: panel
+			min-height: 0
+
+.mgt2 .mgt2-world-panel
+	display: flex
+	flex-direction: column
+
+// A world's portrait is a plate of the globe, not a person's head-and-shoulders.
+.mgt2 .mgt2-header .portrait.world
+	width: 84px
+	height: 84px
+
+// --------------------------------------------
+//  THE UWP STRIP
+// --------------------------------------------
+// `A788899-C` is eight stored values written as one line a referee copies off a printed table
+// (Core p.248), and everything else on the sheet derives from them. The eight cells are the stored
+// values and the line is a reading of them: a stored string would make every consumer parse it
+// again, and one of them would parse it differently.
+
+.mgt2 .uwp
+	grid-column: 1 / -1
+	display: grid
+	grid-template-columns: repeat(8, minmax(0, 1fr))
+	margin: 12px 0 0
+	border: 1px solid var(--rule-soft)
+
+	.u
+		display: flex
+		flex-direction: column
+		gap: 1px
+		min-width: 0
+		padding: 5px 6px 6px
+		border-right: 1px solid var(--rule-soft)
+		&:last-child
+			border-right: 0
+
+		dt
+			overflow: hidden
+			font-family: var(--cond)
+			font-size: 8.5px
+			font-weight: 700
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			white-space: nowrap
+			text-overflow: ellipsis
+			color: var(--faint)
+
+		dd
+			margin: 0
+			font-family: var(--mono)
+			font-size: 17px
+			line-height: 1.1
+			font-variant-numeric: tabular-nums
+
+		.g
+			overflow: hidden
+			font-family: var(--cond)
+			font-size: 9px
+			letter-spacing: 0.06em
+			white-space: nowrap
+			text-overflow: ellipsis
+			color: var(--mute)
+
+	// The starport letter is the busiest digit on the sheet — fuel, berthing, both traffic DMs and
+	// the supplier search all key off it — so it reads as the heading it is.
+	.u.port
+		background: var(--accent-soft)
+		dd
+			color: var(--accent-text)
+			font-weight: 600
+
+.mgt2 .paste
+	grid-column: 1 / -1
+	display: flex
+	flex-wrap: wrap
+	align-items: center
+	gap: 7px
+	padding-top: 9px
+
+	input.f
+		width: 11rem
+		font-family: var(--mono)
+
+	.src
+		font-family: var(--mono)
+		font-size: 9.5px
+		color: var(--faint)
+
+// --------------------------------------------
+//  THE DERIVATION LEDGER
+// --------------------------------------------
+// Every code with the condition that produced it, on or off. A code the referee has forced keeps its
+// condition visible beside the override, which is the only way a derivation and a typo stay apart.
+
+.mgt2 .ledger
+	display: flex
+	flex-direction: column
+
+	.lr
+		display: grid
+		grid-template-columns: 2.4rem minmax(0, 1fr) auto auto
+		gap: 0 9px
+		align-items: baseline
+		padding: 3px 2px
+		border-bottom: 1px solid var(--rule-soft)
+		&:last-child
+			border-bottom: 0
+
+		.c
+			font-family: var(--cond)
+			font-size: 12.5px
+			font-weight: 700
+			letter-spacing: 0.1em
+			text-transform: uppercase
+
+		.cond
+			min-width: 0
+			overflow: hidden
+			font-family: var(--mono)
+			font-size: 10px
+			white-space: nowrap
+			text-overflow: ellipsis
+			color: var(--faint)
+
+		.st
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 600
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			white-space: nowrap
+
+		.ov
+			display: inline-flex
+			gap: 3px
+			button
+				width: auto
+				height: auto
+				min-height: 0
+				padding: 1px 6px 2px
+				font: inherit
+				font-family: var(--cond)
+				font-size: 9px
+				font-weight: 700
+				letter-spacing: 0.1em
+				text-transform: uppercase
+				color: var(--mute)
+				background: none
+				border: 1px solid var(--rule)
+				border-radius: 2px
+				cursor: var(--cursor-pointer)
+				&:hover
+					color: var(--ink)
+					background: var(--hover)
+				&.on
+					color: var(--accent-text)
+					border-color: var(--accent-line)
+
+	.lr.on .c
+		color: var(--accent-text)
+	.lr.on .st
+		color: var(--good)
+	.lr.off
+		opacity: 0.42
+	.lr.forced .st
+		color: var(--danger)
+	.lr.forced .c
+		text-decoration: underline
+		text-decoration-style: dotted
+
+// --------------------------------------------
+//  THE BERTHING CELL
+// --------------------------------------------
+// Three states, and a naive `0` collapses two of them: `null` is NOT YET ROLLED, class E charges
+// nothing and class X has no port at all (Core p.259).
+
+.mgt2 .berth
+	display: flex
+	flex-wrap: wrap
+	align-items: baseline
+	gap: 9px
+
+	.v
+		font-family: var(--cond)
+		font-size: 22px
+		font-weight: 700
+		line-height: 1
+		font-variant-numeric: tabular-nums
+		i
+			font-style: normal
+			font-size: 12px
+			font-weight: 500
+			color: var(--mute)
+	.v.unrolled
+		color: var(--faint)
+
+	.band
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--faint)
+
+	button
+		width: auto
+		height: auto
+		min-height: 0
+		margin-left: auto
+		padding: 3px 9px 4px
+		font: inherit
+		font-family: var(--cond)
+		font-size: 9.5px
+		font-weight: 700
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--paper)
+		background: var(--accent-text)
+		border: 1px solid var(--accent-text)
+		border-radius: 2px
+		cursor: var(--cursor-pointer)
+		&[disabled]
+			color: var(--faint)
+			background: none
+			border-color: var(--rule)
+			cursor: not-allowed
+
+// The supplier lockout: per-world state that outlives any voyage, which is why it sits on this
+// document and not on the ship's leg.
+.mgt2 .lock
+	display: flex
+	flex-direction: column
+	gap: 4px
+
+	.row
+		display: flex
+		align-items: baseline
+		gap: 8px
+		.v
+			margin-left: auto
+			font-family: var(--mono)
+			font-size: 12px
+			font-variant-numeric: tabular-nums
+		.v.shut
+			color: var(--danger)
+
+	.why
+		font-family: var(--cond)
+		font-size: 9.5px
+		letter-spacing: 0.11em
+		text-transform: uppercase
+		color: var(--faint)
+
+// --------------------------------------------
+//  THE TWO TRAFFIC HALVES
+// --------------------------------------------
+// The world's own half of each table. The sheet does not roll them — a leg does, with the other end
+// — but the opposite signs are the thing to see.
+
+.mgt2 .halves
+	display: grid
+	grid-template-columns: repeat(2, minmax(0, 1fr))
+	border: 1px solid var(--rule-soft)
+
+	.h
+		min-width: 0
+		padding: 8px 11px 10px
+		h4
+			margin: 0 0 4px
+			font-family: var(--cond)
+			font-size: 11px
+			font-weight: 700
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			border: none
+	.h + .h
+		border-left: 1px solid var(--rule-soft)
+
+	table
+		width: 100%
+		border-collapse: collapse
+	td
+		padding: 1px 0
+		font-size: 12px
+	td.w
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.08em
+		text-transform: uppercase
+		color: var(--mute)
+	td.d
+		width: 1px
+		padding-left: 8px
+		font-family: var(--mono)
+		font-size: 11.5px
+		font-variant-numeric: tabular-nums
+		text-align: right
+	td.d.pos
+		color: var(--good)
+	td.d.neg
+		color: var(--danger)
+	td.d.nil
+		color: var(--faint)
+	tr.sum td
+		padding-top: 3px
+		font-family: var(--cond)
+		font-weight: 700
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		border-top: 1px solid var(--rule-soft)
+
+// A Red Zone is not a modifier, it is a refusal (Core p.261).
+.mgt2 p.hint.forbidden
+	padding-left: 9px
+	color: var(--danger)
+	border-left: 2px solid var(--danger)
+
+// Eight cells stop being legible well before the sheet stops being wide, so the strip and the two
+// halves reflow one breakpoint ahead of the column split the other four types share at 640.
+@container sheet (max-width: 880px)
+	.mgt2 .uwp
+		grid-template-columns: repeat(4, minmax(0, 1fr))
+		.u
+			border-bottom: 1px solid var(--rule-soft)
+		.u:nth-child(4)
+			border-right: 0
+
+	.mgt2 .halves
+		grid-template-columns: minmax(0, 1fr)
+		.h + .h
+			border-top: 1px solid var(--rule-soft)
+			border-left: 0
+
+@container sheet (max-width: 640px)
+	.mgt2.application.world > .window-content
+		grid-template-columns: minmax(0, 1fr)
+		grid-template-rows: auto auto minmax(0, 1fr)
+		grid-template-areas: "header" "rail" "panel"
+
+	.mgt2 .uwp
+		grid-template-columns: repeat(2, minmax(0, 1fr))
+		.u:nth-child(4)
+			border-right: 1px solid var(--rule-soft)
+		.u:nth-child(2n)
+			border-right: 0
+
+	// Three buttons and a condition do not share 640 px: the override moves under its own row.
+	.mgt2 .ledger .lr
+		grid-template-columns: 2.4rem minmax(0, 1fr) auto
+		.ov
+			grid-column: 2 / -1
+			justify-content: flex-end
