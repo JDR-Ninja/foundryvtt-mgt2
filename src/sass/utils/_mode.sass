@@ -11,11 +11,17 @@
 	display: none !important
 
 // The toggle sits in the window header, a chrome island, so it reads the re-anchored tokens.
+// It leads the band: toggle, then the hatch, then the title. The hatch is the header's own
+// `::before`, which a flex container always lays out FIRST whatever the DOM order — so the
+// toggle only gets ahead of it with `order`, never by moving the node. The header zeroes its
+// left padding for the flush hatch, so the toggle carries its own inset instead.
 .mgt2 .window-header .mgt2-mode
+	order: -1
 	flex: 0 0 auto
 	display: inline-flex
 	align-items: center
 	gap: 6px
+	margin-left: 9px
 	height: auto
 	min-height: 0
 	padding: 2px 7px

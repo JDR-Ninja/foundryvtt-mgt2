@@ -381,10 +381,12 @@ body {
 }
 
 .mgt2 .window-header .mgt2-mode {
+  order: -1;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  margin-left: 9px;
   height: auto;
   min-height: 0;
   padding: 2px 7px;
