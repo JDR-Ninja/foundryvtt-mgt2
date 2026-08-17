@@ -414,6 +414,13 @@ MGT2.DamageTransforms = Object.freeze({
 // `MGT2Helper.isFirstAidSkill` lowercases only the ROLLED name before its `startsWith`.
 MGT2.FirstAidSkills = Object.freeze(["medic", "médecine"]);
 
+// CSC folio 66 is a later printing of Core folio 110's section and adds one exception the Core does
+// not carry: "The exception to this is the Interface program … it will run in conjunction with one
+// other Bandwidth 0 program on other Computer/0 devices." Which program it is, is a name and nothing
+// else — same shape as `FirstAidSkills` above, and Modül's Catalogue prints it *Interface* too, so
+// one entry serves both languages (§9.130).
+MGT2.InterfaceSoftware = Object.freeze(["interface"]);
+
 // Core folio 81, the Radiation Effects table. One row carries both of its columns, because both are
 // read off the same thresholds: `damage` and `condition` are what ONE exposure of that size inflicts
 // at once, `endurance` what the RUNNING TOTAL costs permanently. That second figure is a total and

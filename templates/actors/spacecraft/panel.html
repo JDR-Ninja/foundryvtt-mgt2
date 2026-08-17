@@ -105,11 +105,13 @@
 			</label>
 		</div>
 
-		{{! §4.1's overrides: transcription is what this type is mostly for, and the six figures below
-		    are the ones the formulas derive AND the books print per ship. Empty derives; a number is
-		    what the page says, and the readouts above mark which is in force. Every field is
-		    `{{formInput}}` rather than hand-written markup, because a NumberField with no `integer`
-		    renders `step="any"` and a hand-typed `step="1"` would refuse a 16.5-ton drive (§1.12). }}
+		{{!-- §4.1's overrides: transcription is what this type is mostly for, and the six figures
+		    below are the ones the formulas derive AND the books print per ship. Empty derives; a
+		    number is what the page says, and the readouts above mark which is in force. Every field
+		    is `{{formInput}}` rather than hand-written markup, because a NumberField with no
+		    `integer` renders `step="any"` and a hand-typed `step="1"` would refuse a 16.5-ton drive
+		    (§1.12). The long form: a `{{! }}` comment ends at the FIRST `}}`, including one inside
+		    it, and the tail renders as page text. --}}
 		<div class="sect edit-only">
 			<h3>{{localize 'MGT2.Actor.spacecraft.PrintedFigures'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.spacecraft.PrintedCount'}}</span>
@@ -640,18 +642,24 @@
 
 	{{! The `computer` Item pattern for the third time: ship software spends Processing exactly as
 	    personal software spends bandwidth (HG p.20), and it inherits all four of Core folio 110's
-	    clauses with it — the gate reading the HULL's Tech Level and never the computer's. }}
+	    clauses with it — the gate reading the HULL's Tech Level and never the computer's. The budget
+	    sums both carriers and the control makes the ship's one — a `component` of category
+	    `software`, which is also the only one that can carry a rating (§9.131). }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.spacecraft.Computer'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.spacecraft.ComputerCount'}}</span>
-			<a class="add edit-only" data-action="itemCreate" data-type-item="item" data-subtype="software" data-create-name="{{localize 'MGT2.Actor.spacecraft.NewSoftware'}}" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddSoftware'}}"><i class="fa-solid fa-plus"></i></a>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="component" data-category="software" data-create-name="{{localize 'MGT2.Actor.spacecraft.NewSoftware'}}" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddSoftware'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{> systems/mgt2/templates/actors/spacecraft/budget.html
 			b=ship.computer
+			switched="softwareToggle"
 			title=(localize 'MGT2.Actor.spacecraft.Processing')
 			flag=(localize 'MGT2.Actor.spacecraft.Overload')
 			derived="system.computer"}}
+		{{#if ship.computer.carried}}
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.CarriedHint' installed=ship.computer.installed cap=ship.computer.cap}}</p>
+		{{/if}}
 		{{#if ship.computer.blockedSoftware}}
 		<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.BlockedHint' count=ship.computer.blockedSoftware tl=system.tl}}</p>
 		{{/if}}

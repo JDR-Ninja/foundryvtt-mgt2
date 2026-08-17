@@ -1,6 +1,8 @@
 {{! BLOCK 2 — one budget panel, four times over on this sheet at four different scales. The total,
     the bar and the over-state are computed and never authored, which is the block's contract.
-    `switched` is the power variant: a consumer taken offline frees its draw (Core p.171).
+    `switched` is the switchable variant, and it holds the NAME of the toggle action: a consumer
+    taken offline frees its draw (Core p.171), and a ship's program stopped frees its Bandwidth
+    (HG p.73, §9.132).
     `under` is the opposite reading, and it is `REDESIGN-PLAN.md` defect 15: the block was written
     for caps you must stay under, so being below one prints `N free`. A Thrust bank is capped by
     what a band change costs (Core p.166) and being below THAT is the problem, so the panel opts in
@@ -24,7 +26,7 @@
 			<tr{{#if (eq row.powered false)}} class="off"{{/if}}>
 				{{#if ../switched}}
 				<td class="sw">
-					<input type="checkbox" data-action="powerToggle" data-consumer="{{row.key}}" {{checked row.powered}} />
+					<input type="checkbox" data-action="{{../switched}}" data-consumer="{{row.key}}" {{checked row.powered}} />
 				</td>
 				{{/if}}
 				<td>

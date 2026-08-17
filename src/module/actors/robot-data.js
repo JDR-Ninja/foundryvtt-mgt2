@@ -598,6 +598,7 @@ export class RobotData extends ActorBaseData {
         let used = INTELLECT_BANDWIDTH[brain.intellect] ?? 0;
         const packages = [];
         let downgradesIgnored = 0;
+        let freeSkills = 0;
         for (const entry of this.parent.items) {
             if ((entry.type !== "item") || (entry.system.subType !== "software")) continue;
             // The PRINTED figure and never `bandwidthRun`: where Core p.110 lets a Traveller run
@@ -608,6 +609,7 @@ export class RobotData extends ActorBaseData {
             // reach for ever (§9.128).
             const bandwidth = entry.system.software.bandwidth ?? 0;
             if (entry.system.software.downgraded) downgradesIgnored += 1;
+            if (bandwidth === 0) freeSkills += 1;
             used += bandwidth;
             packages.push({ _id: entry.id, name: entry.name, bandwidth });
         }
@@ -617,10 +619,19 @@ export class RobotData extends ActorBaseData {
         // damage done to the core Bandwidth" — which is exactly what a brain Item already does to
         // the total below, so the loss is subtracted here and the Item's own figure still stands.
         const inherent = Math.max(0, this.inherentBandwidth - this.radiationLoss);
+        // RH p.73: "A brain can hold as many Bandwidth 0 level 0 skills as its base brain Bandwidth
+        // score; beyond this, additional Bandwidth 0 skills require Bandwidth 1." Countable with no
+        // new field, because a brain's software IS its skill packages (RH p.73 is the packages
+        // chapter) — so every Bandwidth 0 package here is one of the level 0 skills that sentence
+        // counts, and the allowance is the same `inherent` figure `freeSkills` already published.
+        const surcharged = Math.max(0, freeSkills - inherent);
+        used += surcharged;
         brain.bandwidth = {
             inherent,
             total: item ? item.system.processing : inherent,
             used,
+            freeSkillsUsed: freeSkills,
+            surcharged,
             // The inherent figure is an absolute limit on any SINGLE package, whatever storage
             // modules have raised the total to (RH p.67).
             oversized: packages.filter(entry => entry.bandwidth > inherent).map(entry => entry.name),

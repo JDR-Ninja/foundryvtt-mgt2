@@ -1709,6 +1709,11 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     if (target.dataset.subtype) {
       data.system = { subType: target.dataset.subtype };
     }
+    // A `component` discriminates on `category` where every other type uses `subType`, and the ship's
+    // Computer block creates one of those (§9.131).
+    if (target.dataset.category) {
+      data.system = { ...data.system, category: target.dataset.category };
+    }
 
     return getDocumentClass("Item").create(data, { parent: this.actor });
   }

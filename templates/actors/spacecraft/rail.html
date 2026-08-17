@@ -36,7 +36,7 @@
 	{{! The power panel is the one with a state, which is why it is a panel and not a number. }}
 	{{> systems/mgt2/templates/actors/spacecraft/budget.html
 		b=ship.power
-		switched=true
+		switched="powerToggle"
 		title=(localize 'MGT2.Actor.spacecraft.Power')
 		flag=(localize 'MGT2.Actor.spacecraft.Brownout')
 		prefix="MGT2.Actor.spacecraft.DrawRows."

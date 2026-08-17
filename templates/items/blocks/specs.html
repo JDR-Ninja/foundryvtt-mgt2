@@ -189,6 +189,12 @@
 		{{#if system.rating}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Rating'}}</span><b>{{system.rating}}</b></li>
 		{{/if}}
+		{{#if (eq system.category "software")}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Bandwidth'}}</span><b>{{system.bandwidth}}</b></li>
+		{{#if system.downgraded}}
+		<li><span class="lbl">{{localize 'MGT2.Items.RunAt'}}</span><b>{{system.bandwidthRun}}</b></li>
+		{{/if}}
+		{{/if}}
 		<li{{#unless system.dm}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Critical'}}</span><b>{{#if system.dm}}&minus;{{system.dm}}{{else}}&mdash;{{/if}}</b></li>
 		{{/if}}
 
@@ -512,6 +518,18 @@
 			<span class="lbl">{{localize 'MGT2.Items.Rating'}}</span>
 			{{formInput systemFields.rating name="system.rating" value=system.rating classes="f num"}}
 		</label>
+		{{! What this row spends of the ship's Processing, and Core p.110's downgrade beside it — the
+		    `subType` gate above for the personal carrier, on the field a component discriminates by. }}
+		{{#if (eq system.category "software")}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Bandwidth'}}</span>
+			{{formInput systemFields.bandwidth name="system.bandwidth" value=system.bandwidth classes="f num"}}
+		</label>
+		<label data-tooltip="{{localize 'MGT2.Items.RunAtHint'}}">
+			<span class="lbl">{{localize 'MGT2.Items.RunAt'}}</span>
+			{{formInput systemFields.runAt name="system.runAt" value=source.runAt classes="f num" placeholder=system.bandwidth}}
+		</label>
+		{{/if}}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Qty'}}</span>
 			{{formInput systemFields.quantity name="system.quantity" value=system.quantity classes="f num"}}

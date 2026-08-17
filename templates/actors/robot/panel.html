@@ -266,7 +266,12 @@
 			</div>
 			{{/if}}
 			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.SkillCap'}}</dt><dd>{{robot.brain.skillCap}}</dd></div>
-			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.FreeSkills'}}</dt><dd>{{robot.brain.freeSkills}}</dd></div>
+			{{! RH folio 73: the allowance is a count of Bandwidth 0 packages, so the figure states what
+			    is spent of it — a bare allowance nobody counts against reads as unlimited. }}
+			<div class="stat{{#if robot.bandwidth.surcharged}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Actor.robot.FreeSkills'}}</dt>
+				<dd>{{robot.bandwidth.freeSkillsUsed}}/{{robot.brain.freeSkills}}</dd>
+			</div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.EducationCap'}}</dt><dd>{{robot.brain.educationCap}}</dd></div>
 			{{! RH folio 106. The count is the stored number and both losses read off it, so the two
 			    print together and neither is ever written to a score. }}
@@ -295,6 +300,9 @@
 		    Item's own sheet shows the figure the brain is ignoring. }}
 		{{#if robot.bandwidth.downgradesIgnored}}
 		<p class="hint">{{localize 'MGT2.Actor.robot.DowngradeIgnored' count=robot.bandwidth.downgradesIgnored}}</p>
+		{{/if}}
+		{{#if robot.bandwidth.surcharged}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.Surcharged' count=robot.bandwidth.surcharged}}</p>
 		{{/if}}
 		<div class="grid cols2 edit-only">
 			<label class="check">

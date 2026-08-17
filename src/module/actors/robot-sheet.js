@@ -196,7 +196,18 @@ export class RobotActorSheet extends TravellerActorSheet {
         const rows = brain.packages.map(entry => ({
             key: entry._id, label: entry.name, value: entry.bandwidth
         }));
-        const intellect = brain.bandwidth.used
+        // RH p.73's surcharge is a cost like any other and rides `used`, so it gets a row of its own
+        // — folded into the INT figure below it would read as an upgrade nobody bought.
+        if (brain.bandwidth.surcharged > 0) {
+            rows.push({
+                key: "surcharge",
+                label: game.i18n.format("MGT2.Actor.robot.SurchargeRow",
+                    { count: brain.bandwidth.surcharged }),
+                why: game.i18n.localize("MGT2.Actor.robot.SurchargeWhy"),
+                value: brain.bandwidth.surcharged
+            });
+        }
+        const intellect = brain.bandwidth.used - brain.bandwidth.surcharged
             - brain.packages.reduce((sum, entry) => sum + entry.bandwidth, 0);
         if (intellect > 0) {
             rows.unshift({
@@ -210,6 +221,8 @@ export class RobotActorSheet extends TravellerActorSheet {
         budget.inherent = brain.bandwidth.inherent;
         budget.oversized = brain.bandwidth.oversized;
         budget.downgradesIgnored = brain.bandwidth.downgradesIgnored;
+        budget.freeSkillsUsed = brain.bandwidth.freeSkillsUsed;
+        budget.surcharged = brain.bandwidth.surcharged;
         budget.item = brain.item;
         return budget;
     }

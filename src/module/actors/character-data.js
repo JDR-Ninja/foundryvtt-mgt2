@@ -445,7 +445,9 @@ export class CharacterData extends ActorBaseData {
             }
 
             host.system.processingUsed += item.system.software.bandwidthRun;
-            running.set(host.id, running.get(host.id) + 1);
+            // CSC folio 66's exception: Interface runs "in conjunction with one other Bandwidth 0
+            // program", so it is not one of the packages the count below is counting (§9.130).
+            if (!MGT2Helper.isInterfaceSoftware(item.name)) running.set(host.id, running.get(host.id) + 1);
         }
 
         for (const host of hosts.values()) {

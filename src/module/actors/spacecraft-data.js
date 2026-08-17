@@ -183,9 +183,20 @@ export class SpacecraftData extends CraftData {
             }),
 
             // HG p.20: a ship's computer has a Processing score and consumes no tonnage. Ship
-            // software is `item`/`software` and spends it exactly as personal software spends
-            // bandwidth, which is the machinery `ComputerData` already carries.
-            computer: new fields.SchemaField({ processing: count(5) }),
+            // software spends it exactly as personal software spends bandwidth, which is the
+            // machinery `ComputerData` already carries.
+            computer: new fields.SchemaField({
+                processing: count(5),
+                // HG p.73: "not all of a ship's software needs to run simultaneously, enabling the
+                // designer to select a cheaper computer with less Bandwidth" — so what a hull CARRIES
+                // and what it is RUNNING are two figures, and the budget is against the second
+                // (§9.132). The set holds what is IN SERVICE and starts empty, the inverse of
+                // `power.offline`: a printed statblock states an inventory and never an operating
+                // state, so nothing is running until someone says it is. Item ids rather than fixed
+                // keys, the programs being documents; a stale id from a deleted package costs nothing.
+                running: new fields.SetField(new fields.StringField({ required: true, blank: false }),
+                    { required: false, initial: [] })
+            }),
 
             sensors: new fields.SchemaField({
                 grade: new fields.StringField({
@@ -1253,38 +1264,71 @@ export class SpacecraftData extends CraftData {
      * same way as normal computer software" — so the sum, the downgrade, the Tech Level gate and
      * the count at Processing 0 are all the ship's too (§9.128). Advisory like the character's: a
      * package the ship cannot run is marked and never unbound.
+     *
+     * **Both carriers are read** (§9.131). The ship's own programs are `component`s of category
+     * `software` — §9.100 B2's decision, and what every packed hull and the compendium use — and the
+     * same folio 161 sentence that carries the clauses across ends *"ship computers are fully
+     * capable of running normal software as well"*, which is the personal `item` in so many words.
+     *
+     * **The sum is what is IN SERVICE and not what is aboard** (§9.132). HG p.73 designs to a hull
+     * carrying more Bandwidth than its computer runs at once, so `installed` and `used` are two
+     * figures and only the second is held against Processing — `power.offline`'s pattern exactly.
      */
     #prepareComputer() {
         // HG p.20: "the operating Tech Level is that of the starship in which it is installed;
         // therefore, ships can use software limited to the Tech Level of the ship, not the
         // computer" — which is why `computer` carries a Processing score and no TL of its own.
         const hullTL = MGT2Helper.tlNumber(this.tl);
-        let used = 0, running = 0, blocked = 0;
+        const started = this.computer.running;
+        let used = 0, installed = 0, running = 0, blocked = 0;
         const software = [];
         for (const item of this.parent.items) {
-            if ((item.type !== "item") || (item.system.subType !== "software")) continue;
-            const program = item.system.software;
+            const program = SpacecraftData.#programOf(item);
+            if (!program) continue;
             const softwareTL = MGT2Helper.tlNumber(item.system.tl);
             program.tlBlocked = (softwareTL !== null) && (hullTL !== null) && (softwareTL > hullTL);
+            // A package not started is aboard and not running: it spends nothing, and neither does
+            // one the hull's Tech Level blocks outright.
+            const inService = !program.tlBlocked && started.has(item.id);
             if (program.tlBlocked) blocked += 1;
-            else {
+            else installed += program.bandwidthRun;
+            if (inService) {
                 used += program.bandwidthRun;
-                running += 1;
+                // CSC folio 66's exception, which reaches a ship for the same reason folio 110 does
+                // (§9.128): Interface runs beside one other Bandwidth 0 program (§9.130).
+                if (!MGT2Helper.isInterfaceSoftware(item.name)) running += 1;
             }
             software.push({
                 _id: item.id, name: item.name,
                 bandwidth: program.tlBlocked ? 0 : program.bandwidthRun,
-                printed: program.bandwidth,
+                printed: program.bandwidth, powered: inService,
                 downgraded: program.downgraded, tlBlocked: program.tlBlocked
             });
         }
         this.computer.used = used;
+        this.computer.installed = installed;
         this.computer.software = software;
         this.computer.overload = used > this.computer.processing;
+        // Whether the hint under the budget applies, and it covers the two states that need saying:
+        // more aboard than the computer can run at once — which HG p.73 designs to and is not a
+        // defect — and anything aboard that is not started, which is every hull until someone does.
+        this.computer.carried = (installed > this.computer.processing) || (installed > used);
         this.computer.blockedSoftware = blocked;
         // HG's smallest model is a Computer/5, so this only ever fires on a hand-typed 0 — a ship
         // with no working computer, which is the state the clause describes.
         this.computer.overCrowded = (this.computer.processing === 0) && (running > 1);
+    }
+
+    /**
+     * The program block of an Item on either carrier, or null for anything that is not software.
+     * `ComponentData` carries the four fields flat and `ItemData` nests them under `software`; both
+     * derive `bandwidthRun`, `downgraded` and `tlBlocked` in their own `prepareBaseData`, so the
+     * caller never has to know which one it has.
+     */
+    static #programOf(item) {
+        if ((item.type === "component") && (item.system.category === "software")) return item.system;
+        if ((item.type === "item") && (item.system.subType === "software")) return item.system.software;
+        return null;
     }
 
     /**

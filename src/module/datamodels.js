@@ -1308,6 +1308,18 @@ export class PassageData extends ItemBaseData {
  * @extends {ItemBaseData}
  */
 export class ComponentData extends ItemBaseData {
+
+    /**
+     * Only a `software` component uses these, and they are reset for every component for the reason
+     * `ItemData` gives — the owning ship decides `tlBlocked`, so a loose part has to read sanely
+     * without one. `bandwidthRun` is not one of those: it is a fact of the package alone.
+     */
+    prepareBaseData() {
+        this.bandwidthRun = Math.min(this.runAt ?? this.bandwidth, this.bandwidth);
+        this.downgraded = this.bandwidthRun < this.bandwidth;
+        this.tlBlocked = false;
+    }
+
     static defineSchema() {
         const schema = super.defineSchema();
 
@@ -1337,6 +1349,17 @@ export class ComponentData extends ItemBaseData {
         schema.powerPerTon = new fields.NumberField({ required: false, nullable: false, min: 0, initial: 0 });
         // Thrust-N, Jump-N, Computer/N, Armour-N, Power-N — whichever the category means.
         schema.rating = new fields.NumberField({ required: false, nullable: false, min: 0, initial: 0 });
+        // What a `software` row spends of the ship's Processing. §9.100 B2 made the component the
+        // ship's software carrier for the sake of `rating`, which left the four clauses of Core
+        // p.110 reading a carrier no ship uses; these two are the pair §9.128 named as the price of
+        // the reconciliation, and they mean nothing on any other category. Same shape as
+        // `ItemData.software`, deliberately — one concept, and the ship reads both (§9.131).
+        schema.bandwidth = new fields.NumberField({
+            required: false, nullable: false, min: 0, integer: true, initial: 0 });
+        // Core p.110's downgrade: a choice and never an inference, so it is stored, and null is the
+        // package running at its printed figure (§9.126).
+        schema.runAt = new fields.NumberField({
+            required: false, initial: null, nullable: true, min: 0, integer: true });
         schema.quantity = new fields.NumberField({
             required: false, nullable: false, min: 0, integer: true, initial: 1 });
         // A grade, not a `damaged` flag: ship criticals run severity 1-6, so a turret at DM−1 is a

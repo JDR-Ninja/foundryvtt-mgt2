@@ -150,13 +150,30 @@ export class MGT2Helper {
     }
 
     /**
+     * A free-text Item name against a registry list: lowercased, prefix-insensitive, blank never
+     * matching. Both callers below name something the books identify and the data cannot (§9.47).
+     */
+    static #namedAs(name, registry) {
+        const text = String(name ?? "").trim().toLowerCase();
+        return (text !== "") && registry.some(entry => text.startsWith(entry));
+    }
+
+    /**
      * Whether a rolled skill is the Medic skill Core p.82 drives first aid off. A skill is a
      * free-text Item with no registry behind it, so this is a name match and nothing more — a world
      * that renames the skill loses the card button and uses the sheet's own control instead.
      */
     static isFirstAidSkill(name) {
-        const text = String(name ?? "").trim().toLowerCase();
-        return (text !== "") && MGT2.FirstAidSkills.some(skill => text.startsWith(skill));
+        return MGT2Helper.#namedAs(name, MGT2.FirstAidSkills);
+    }
+
+    /**
+     * CSC p.66's exception to the Processing 0 count: Interface "will run in conjunction with one
+     * other Bandwidth 0 program". The same name match, and the same failure mode — a world that
+     * renames it loses one advisory flag and nothing else (§9.130).
+     */
+    static isInterfaceSoftware(name) {
+        return MGT2Helper.#namedAs(name, MGT2.InterfaceSoftware);
     }
 
     /**

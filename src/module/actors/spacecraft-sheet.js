@@ -32,6 +32,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             criticalRoll: SpacecraftActorSheet.#onCriticalRoll,
             criticalClear: SpacecraftActorSheet.#onCriticalClear,
             powerToggle: SpacecraftActorSheet.#onPowerToggle,
+            softwareToggle: SpacecraftActorSheet.#onSoftwareToggle,
             hullOptionToggle: SpacecraftActorSheet.#onHullOptionToggle,
             rowCreate: SpacecraftActorSheet.#onRowCreate,
             rowDelete: SpacecraftActorSheet.#onRowDelete,
@@ -254,13 +255,17 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     static #computer(system) {
         const budget = SpacecraftActorSheet.#budget(system.computer.processing,
             system.computer.software.map(row => ({
-                key: row._id, label: row.name, value: row.bandwidth,
+                key: row._id, label: row.name, value: row.bandwidth, powered: row.powered,
                 why: row.tlBlocked ? "MGT2.Actor.spacecraft.SoftwareBlocked"
                     : (row.downgraded ? "MGT2.Actor.spacecraft.SoftwareDowngraded" : undefined)
             })));
         budget.overload = system.computer.overload;
         budget.overCrowded = system.computer.overCrowded;
         budget.blockedSoftware = system.computer.blockedSoftware;
+        // What is aboard, beside what is running: the hint under the budget is the only place the
+        // design figure appears, and it is the one HG p.73 is about (§9.132).
+        budget.installed = system.computer.installed;
+        budget.carried = system.computer.carried;
         return budget;
     }
 
@@ -603,11 +608,25 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
 
     /** Core p.171: cutting power to a system is an Engineer's action, and it is reversible. */
     static async #onPowerToggle(event, target) {
-        const key = target.dataset.consumer;
-        const offline = new Set(this.actor.system.power.offline);
-        if (offline.has(key)) offline.delete(key);
-        else offline.add(key);
-        return this.actor.update({ "system.power.offline": Array.from(offline) });
+        return this.#toggleMember("system.power.offline", this.actor.system.power.offline,
+            target.dataset.consumer);
+    }
+
+    /**
+     * HG p.73: a package is started when it is wanted and stopped when it is not, and only what is
+     * running spends Processing (§9.132). The set is the inverse of power's — what is IN service.
+     */
+    static async #onSoftwareToggle(event, target) {
+        return this.#toggleMember("system.computer.running", this.actor.system.computer.running,
+            target.dataset.consumer);
+    }
+
+    /** @this {SpacecraftActorSheet} */
+    async #toggleMember(path, current, key) {
+        const members = new Set(current);
+        if (members.has(key)) members.delete(key);
+        else members.add(key);
+        return this.actor.update({ [path]: Array.from(members) });
     }
 
     /**
