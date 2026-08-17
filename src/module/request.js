@@ -887,7 +887,8 @@ export async function postRequest(system, { whisper = [], content } = {}) {
         author: game.user.id,
         type: REQUEST,
         whisper,
-        content: content ?? `<p>${Handlebars.Utils.escapeExpression(recentLabel(system))}</p>`,
+        content: content ?? `<div class="mgt2 theme-light card"><p class="bare">${
+            Handlebars.Utils.escapeExpression(recentLabel(system))}</p></div>`,
         system
     });
     if ( message ) rememberRequest(system);

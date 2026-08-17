@@ -87,6 +87,31 @@ body.theme-dark .mgt2:not(.theme-light),
     @include derived
     @include legacy-names
 
+// A chat card's frame is on the `li`, not on `.mgt2.card`, because core emits the head and the
+// body as SIBLINGS (`templates/sidebar/chat-message.hbs`) and nothing inside the card can enclose
+// both. That makes the list item a third re-anchoring site: `mgt2` is on the card, one level down
+// inside `.message-content`, so the `li` inherits none of the anchors. Light only — core hard-codes
+// `themed theme-light` on `ol.chat-log`, so a card never meets the dark ground.
+li.chat-message:has(> .message-content > .mgt2.card)
+    --chrome: #0a0405
+    --paper: #ffffff
+    --ink: #16110f
+    --danger: #c8372a
+    --good: #1f7a4d
+    --lgt: min(l, 0.55)
+    --lgt-hot: min(l, 0.40)
+    @include derived
+
+// The band re-anchors on the chrome exactly as the window bar does, and for the same reason.
+li.chat-message > .message-header:has(~ .message-content > .mgt2.card)
+    --paper: var(--chrome)
+    --ink: #{$ink-dark}
+    --danger: #e86152
+    --good: #4fbe8b
+    --lgt: max(l, 0.72)
+    --lgt-hot: max(l, 0.86)
+    @include derived
+
 // A theme is now just its accent, carried by the body so one class swap reaches every sheet,
 // every dialog and the chat sidebar. `body` alone holds the default, which a theme class on that
 // same element outranks.

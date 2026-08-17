@@ -8,10 +8,24 @@
 //  - core styles `button` and `input` with a height and a background, so the controls below restate
 //    `height: auto` and `background` to win.
 
-.mgt2
+// The chat message's `li` is listed beside `.mgt2` rather than repeating the three stacks: the
+// card's band is core's own `.message-header`, a SIBLING of the content and therefore outside
+// `.mgt2`, so it reaches these from the list item or not at all.
+.mgt2,
+li.chat-message:has(> .message-content > .mgt2.card)
 	--cond: "Barlow Condensed", "Roboto Condensed", "Arial Narrow", sans-serif
 	--body: "Barlow", "Segoe UI", system-ui, sans-serif
 	--mono: "JetBrains Mono", ui-monospace, Consolas, monospace
+	// The hatch every band carries, as a MASK and not a background image, so `currentColor` still
+	// tints it and the tone rule stays one declaration.
+	//
+	// It has to be four explicit parallelograms. A `repeating-linear-gradient` cannot draw this
+	// shape at all: a slanted stripe clipped by a vertical box edge always ends in a triangle, so
+	// the first and last bars come out as slivers whatever the box width. Geometry measured at
+	// 900 dpi off two Referee Screen panels, which agree — **30° off vertical, leaning `\`**, bar
+	// 0.345 × the band height, period 0.565, four bars. The viewBox is 262 × 100, which is that
+	// arithmetic: 3 periods + one bar + the slant.
+	--hatch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 262 100' preserveAspectRatio='none'%3E%3Cpath d='M0 0h34.5L92.2 100H57.7Z M56.5 0h34.5L148.7 100H114.2Z M113 0h34.5L205.2 100H170.7Z M169.5 0h34.5L261.7 100H227.2Z'/%3E%3C/svg%3E")
 
 // --------------------------------------------
 //  Primitives

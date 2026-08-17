@@ -1,21 +1,151 @@
-// The chat card. Ported from docs/sketch-dialogs-chat.html.
+// The chat card. Bodies ported from docs/sketch-dialogs-chat.html, frame and band from
+// docs/sketch-chat-cards.html.
 // ONE GROUND ONLY: Foundry hard-codes `themed theme-light` on ol.chat-log, so a card never renders
 // on the dark ground whatever the viewer's colour scheme says. The card element carries
 // `theme-light` itself, which the `:not(.theme-light)` guard in _colors.sass then honours.
 // Status colours never use the accent — on the black-and-red theme a success band would read as
 // its opposite.
 
+// --------------------------------------------
+//  THE FRAME — the Referee Screen panel, as a chat message
+//
+//  The silhouette is on the `li` and not on `.card`, because core emits the head and the body as
+//  SIBLINGS (`templates/sidebar/chat-message.hbs`): nothing inside the card can enclose both, and
+//  putting the frame one level up is what lets the black band BE core's own `.message-header`
+//  rather than a second head drawn underneath it. Nothing below asks a template for anything —
+//  every selector matches what core and the system already emit, so the three chat templates and
+//  the eight cards built as inline HTML strings are untouched.
+//
+//  THE CHAMFER IS TWO CLIPS, NEVER A BORDER. `clip-path` crops a border away, and an inset shadow
+//  follows the border box, so the 45° edge comes out bare. The `li` paints the ink and its padding
+//  IS the trait; the head and the body paint over it, each clipped `--cham-in` smaller. The head
+//  cuts only its top-right and the body only its bottom-left, which is the printed panel's own
+//  180° symmetry and falls out of the split for free.
+// --------------------------------------------
+
+li.chat-message:has(> .message-content > .mgt2.card)
+	--cham: 15px
+	--cham-in: 11px
+	// What core gives every message and what has to go (`public/css/foundry2.css`): 8px of padding,
+	// a 2px #6f6c66 border, a 6px radius and `url(ui/parchment.jpg)`. Against them the system's card
+	// was a white rounded box floating inside a brown rounded one — two frames, two radii, two
+	// border colours, and a parchment texture in the gutter between.
+	margin: 0 4px 9px
+	// The trait, plus the heavier right and bottom edges the printed panel has. Not a detached
+	// shadow: the panel's frame is simply thicker on two sides.
+	padding: 2px 5px 5px 2px
+	background: var(--ink)
+	border: 0
+	border-radius: 0
+	color: var(--ink)
+	font-family: var(--body)
+	clip-path: polygon(0 0, calc(100% - var(--cham)) 0, 100% var(--cham), 100% 100%, var(--cham) 100%, 0 calc(100% - var(--cham)))
+
+	> .message-header
+		display: flex
+		align-items: center
+		gap: 9px
+		padding: 4px 9px 5px 0
+		line-height: 1.2
+		background: var(--paper)
+		color: var(--mute)
+		border: 0
+		clip-path: polygon(0 0, calc(100% - var(--cham-in)) 0, 100% var(--cham-in), 100% 100%, 0 100%)
+
+		// The hatch. Four bars, the mark every Referee Screen panel and every section band of the
+		// printed character sheet carries. Painted as `currentColor` through the `--hatch` mask,
+		// which is what makes the tone rule below one declaration per band. Fixed 42 × 16 rather
+		// than stretched to the band: the mark is the same size on a card and on a window header,
+		// which is the point of one grammar over two hosts.
+		&::before
+			content: ""
+			flex: none
+			width: 42px
+			height: 16px
+			color: var(--faint)
+			background: currentColor
+			mask-image: var(--hatch)
+			mask-size: 100% 100%
+			mask-repeat: no-repeat
+			-webkit-mask-image: var(--hatch)
+			-webkit-mask-size: 100% 100%
+			-webkit-mask-repeat: no-repeat
+
+		.message-sender
+			flex: 0 1 auto
+			margin: 0
+			font-family: var(--cond)
+			font-size: 12px
+			font-weight: 600
+			letter-spacing: 0.15em
+			text-transform: uppercase
+			white-space: nowrap
+			overflow: hidden
+			text-overflow: ellipsis
+
+		// The time and the delete control keep the corner the printed panel gives its `PG. 58`.
+		// No page citation of ours goes on a card, so the slot the metadata already holds is the
+		// slot it keeps.
+		.message-metadata
+			flex: none
+			margin-left: auto
+			gap: 7px
+			font-family: var(--cond)
+			font-size: 10px
+			font-weight: 600
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--faint)
+			a:hover
+				color: var(--accent-text)
+
+		// A whisper or a flavour line would break the single row the band is; both are full-width
+		// flex items in core's template. Neither is used by any MGT2 card — the Docket's own reason
+		// goes in the body — so they wrap under the band rather than being hidden.
+		.whisper-to,
+		.flavor-text
+			flex: 0 0 100%
+			padding-left: 43px
+			font-family: var(--cond)
+			font-size: 10px
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--faint)
+
+	> .message-content
+		padding: 0 0 7px
+		background: var(--paper)
+		// The 7px above keeps the cut in empty paper rather than through the last control. Measured
+		// on the sketch's ten bodies: the tightest clearance is 10px.
+		clip-path: polygon(0 0, 100% 0, 100% 100%, var(--cham-in) 100%, 0 calc(100% - var(--cham-in)))
+
+// The tone reaches the band from the card, which is where `roll.html` already prints it from
+// `outcome.band.tone`. No new data and no template edit — only a `:has()` to cross the sibling.
+// The cards that score no Effect at all keep the neutral grey, the damage OFFER included: an
+// offer is not a verdict.
+li.chat-message:has(> .message-content > .mgt2.card.ok) > .message-header::before
+	color: var(--good)
+li.chat-message:has(> .message-content > .mgt2.card.bad) > .message-header::before
+	color: var(--danger)
+li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::before
+	color: var(--mute)
+
 .mgt2.card
-	overflow: hidden
 	font-family: var(--body)
 	font-size: 14px
 	color: var(--ink)
-	background: var(--paper)
-	border: 1px solid var(--rule)
-	border-radius: 3px
+
+	// A bare `<p>` message, dressed. `combatant.js` posts two and `docket.js` a third; they read as
+	// unstyled text today and would read as broken beside a neighbour with a band.
+	// `.bare` and not `.plain`: the kit already owns `.roster .who.plain`.
+	.bare
+		margin: 0
+		padding: 9px 11px 4px
+		font-size: 13px
+		line-height: 1.5
 
 	.chd
-		padding: 8px 11px 7px
+		padding: 7px 11px 6px
 		border-bottom: 1px solid var(--rule)
 
 	.who
@@ -231,11 +361,22 @@
 		.neg
 			color: var(--danger)
 
+	// Separated by the printed sheet's double-dash rule rather than a hairline. The ONE place the
+	// mark is used, because it earns its keep exactly once: everything above the row is a reading,
+	// everything below it is an act.
 	.cbtns
+		position: relative
 		display: flex
 		gap: 5px
-		padding: 8px 11px
-		border-top: 1px solid var(--rule-soft)
+		padding: 11px 11px 3px
+		&::before
+			content: ""
+			position: absolute
+			left: 11px
+			right: 11px
+			top: 0
+			height: 3px
+			background: repeating-linear-gradient(90deg, var(--rule) 0 4px, transparent 4px 8px) 0 0/100% 1px no-repeat, repeating-linear-gradient(90deg, var(--rule) 0 4px, transparent 4px 8px) 2px 2px/100% 1px no-repeat
 		button
 			flex: 1 1 0
 			height: auto
@@ -423,8 +564,9 @@
 		color: var(--mute)
 
 // The jump target of a lineage link. On the chat log's own `li`, which is outside the card, and
-// deliberately brief: it answers "which one" and then gets out of the way.
+// deliberately brief: it answers "which one" and then gets out of the way. It recolours the FRAME
+// rather than drawing an outline, because the frame is now painted by the `li`'s own background
+// and `clip-path` would crop an outline at both chamfers.
 .mgt2-jumped
-	outline: 2px solid var(--accent-line)
-	outline-offset: -2px
-	transition: outline-color 0.5s ease-out
+	background: var(--accent-text)
+	transition: background-color 0.5s ease-out

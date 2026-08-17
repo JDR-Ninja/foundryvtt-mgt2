@@ -924,9 +924,11 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         const summary = this.#summary(reading);
         const reason = this.#demand.flavor.trim();
         const escape = foundry.utils.escapeHTML;
-        return `<p class="mgt2-request-fallback"><b>${
+        // Wrapped in the card so a world that has lost the sub-type still gets the log's frame
+        // rather than naked text; `mgt2-request-fallback` stays as the hook that identifies it.
+        return `<div class="mgt2 theme-light card"><p class="bare mgt2-request-fallback"><b>${
             escape(game.i18n.localize("MGT2.Request.Card"))}</b> ${escape(summary.demand)}</p>${
-            reason ? `<p>${escape(reason)}</p>` : ""}`;
+            reason ? `<p class="bare">${escape(reason)}</p>` : ""}</div>`;
     }
 
     /* -------------------------------------------- */

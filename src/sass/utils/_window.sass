@@ -1,14 +1,42 @@
 // ApplicationV2 roots are `.application` (V1 used `.window-app`) and the window title
 // is an <h1> (V1 used <h4>).
 .mgt2
-	&.sheet
-		header
-			&.window-header
-				color: var(--mgt2-color-primary)
-				background-color: var(--mgt2-bgcolor-primary)
-		.window-title
-			font-weight: bold
-			text-transform: uppercase
+	// The band, on EVERY MGT2 window and not only the document sheets. `_colors.sass` already
+	// re-anchors `.mgt2 .window-header` on the chrome for all of them; painting the fill on
+	// `.sheet` alone left the other twelve — the Docket, the roll prompt, voyage, chargen, both
+	// combat screens, the three trade windows, the rules menu, the explorer, the pack browser —
+	// computing colours for a dark ground they never had.
+	.window-header
+		color: var(--mute)
+		background-color: var(--mgt2-bgcolor-primary)
+		padding-left: 0
+		gap: 9px
+		// The hatch, the same 42 × 16 mark the chat band carries — `--hatch` is declared once in
+		// `components/_blocks.sass` and both hosts paint it in `currentColor` through a mask.
+		// Core sets `overflow: hidden` on the header, so it cannot spill.
+		&::before
+			content: ""
+			flex: none
+			width: 42px
+			height: 16px
+			color: var(--faint)
+			background: currentColor
+			mask-image: var(--hatch)
+			mask-size: 100% 100%
+			mask-repeat: no-repeat
+			-webkit-mask-image: var(--hatch)
+			-webkit-mask-size: 100% 100%
+			-webkit-mask-repeat: no-repeat
+	// The title is the muted ink, as the printed panel's title is quieter than its body. The colour
+	// has to be set HERE and not inherited from the band: core declares
+	// `.application .window-header .window-title { color: var(--color-light-1) }`, and a value
+	// applied directly beats an inherited one whatever the band says. Measured 14.366 — which also
+	// means the title was never the accent `--mgt2-color-primary` on the header suggested; it has
+	// been core's near-white all along.
+	.window-title
+		color: var(--mute)
+		font-weight: bold
+		text-transform: uppercase
 	// The ground only — core's `padding: var(--spacer-16)` on `.application .window-content` stays.
 	// Zeroing it here also zeroed it on every DialogV2 the system opens: those carry `mgt2` and
 	// nothing else, and their content is drawn against core's padding (see `components/_dialog.sass`).

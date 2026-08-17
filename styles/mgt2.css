@@ -87,6 +87,47 @@ body.theme-dark .mgt2:not(.theme-light),
   --mgt2-color-warning: var(--danger);
 }
 
+li.chat-message:has(> .message-content > .mgt2.card) {
+  --chrome: #0a0405;
+  --paper: #ffffff;
+  --ink: #16110f;
+  --danger: #c8372a;
+  --good: #1f7a4d;
+  --lgt: min(l, 0.55);
+  --lgt-hot: min(l, 0.40);
+  --rule: color-mix(in oklab, var(--ink) 22%, transparent);
+  --rule-soft: color-mix(in oklab, var(--ink) 11%, transparent);
+  --mute: color-mix(in oklab, var(--ink) 60%, var(--paper));
+  --faint: color-mix(in oklab, var(--ink) 40%, var(--paper));
+  --hover: color-mix(in oklab, var(--ink) 6%, transparent);
+  --track: color-mix(in oklab, var(--ink) 13%, transparent);
+  --fill: color-mix(in oklab, var(--ink) 45%, var(--paper));
+  --accent-text: oklch(from var(--accent) var(--lgt) c h);
+  --accent-hot: oklch(from var(--accent) var(--lgt-hot) c h);
+  --accent-line: color-mix(in oklab, var(--accent-text) 45%, transparent);
+  --accent-soft: color-mix(in oklab, var(--accent-text) 13%, transparent);
+}
+
+li.chat-message > .message-header:has(~ .message-content > .mgt2.card) {
+  --paper: var(--chrome);
+  --ink: #e9e7e4;
+  --danger: #e86152;
+  --good: #4fbe8b;
+  --lgt: max(l, 0.72);
+  --lgt-hot: max(l, 0.86);
+  --rule: color-mix(in oklab, var(--ink) 22%, transparent);
+  --rule-soft: color-mix(in oklab, var(--ink) 11%, transparent);
+  --mute: color-mix(in oklab, var(--ink) 60%, var(--paper));
+  --faint: color-mix(in oklab, var(--ink) 40%, var(--paper));
+  --hover: color-mix(in oklab, var(--ink) 6%, transparent);
+  --track: color-mix(in oklab, var(--ink) 13%, transparent);
+  --fill: color-mix(in oklab, var(--ink) 45%, var(--paper));
+  --accent-text: oklch(from var(--accent) var(--lgt) c h);
+  --accent-hot: oklch(from var(--accent) var(--lgt-hot) c h);
+  --accent-line: color-mix(in oklab, var(--accent-text) 45%, transparent);
+  --accent-soft: color-mix(in oklab, var(--accent-text) 13%, transparent);
+}
+
 body {
   --accent: #d13b46;
 }
@@ -153,11 +194,28 @@ body {
   width: 5rem;
 }
 
-.mgt2.sheet header.window-header {
-  color: var(--mgt2-color-primary);
+.mgt2 .window-header {
+  color: var(--mute);
   background-color: var(--mgt2-bgcolor-primary);
+  padding-left: 0;
+  gap: 9px;
 }
-.mgt2.sheet .window-title {
+.mgt2 .window-header::before {
+  content: "";
+  flex: none;
+  width: 42px;
+  height: 16px;
+  color: var(--faint);
+  background: currentColor;
+  mask-image: var(--hatch);
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: var(--hatch);
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+}
+.mgt2 .window-title {
+  color: var(--mute);
   font-weight: bold;
   text-transform: uppercase;
 }
@@ -2207,10 +2265,12 @@ body {
   }
 }
 
-.mgt2 {
+.mgt2,
+li.chat-message:has(> .message-content > .mgt2.card) {
   --cond: "Barlow Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
   --body: "Barlow", "Segoe UI", system-ui, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --hatch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 262 100' preserveAspectRatio='none'%3E%3Cpath d='M0 0h34.5L92.2 100H57.7Z M56.5 0h34.5L148.7 100H114.2Z M113 0h34.5L205.2 100H170.7Z M169.5 0h34.5L261.7 100H227.2Z'/%3E%3C/svg%3E");
 }
 
 .mgt2 .lbl {
@@ -5397,17 +5457,110 @@ ul.softwares li:hover a {
   color: var(--danger);
 }
 
-.mgt2.card {
+li.chat-message:has(> .message-content > .mgt2.card) {
+  --cham: 15px;
+  --cham-in: 11px;
+  margin: 0 4px 9px;
+  padding: 2px 5px 5px 2px;
+  background: var(--ink);
+  border: 0;
+  border-radius: 0;
+  color: var(--ink);
+  font-family: var(--body);
+  clip-path: polygon(0 0, calc(100% - var(--cham)) 0, 100% var(--cham), 100% 100%, var(--cham) 100%, 0 calc(100% - var(--cham)));
+}
+li.chat-message:has(> .message-content > .mgt2.card) > .message-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 9px 5px 0;
+  line-height: 1.2;
+  background: var(--paper);
+  color: var(--mute);
+  border: 0;
+  clip-path: polygon(0 0, calc(100% - var(--cham-in)) 0, 100% var(--cham-in), 100% 100%, 0 100%);
+}
+li.chat-message:has(> .message-content > .mgt2.card) > .message-header::before {
+  content: "";
+  flex: none;
+  width: 42px;
+  height: 16px;
+  color: var(--faint);
+  background: currentColor;
+  mask-image: var(--hatch);
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: var(--hatch);
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+}
+li.chat-message:has(> .message-content > .mgt2.card) > .message-header .message-sender {
+  flex: 0 1 auto;
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
+}
+li.chat-message:has(> .message-content > .mgt2.card) > .message-header .message-metadata {
+  flex: none;
+  margin-left: auto;
+  gap: 7px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+li.chat-message:has(> .message-content > .mgt2.card) > .message-header .message-metadata a:hover {
+  color: var(--accent-text);
+}
+li.chat-message:has(> .message-content > .mgt2.card) > .message-header .whisper-to,
+li.chat-message:has(> .message-content > .mgt2.card) > .message-header .flavor-text {
+  flex: 0 0 100%;
+  padding-left: 43px;
+  font-family: var(--cond);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+li.chat-message:has(> .message-content > .mgt2.card) > .message-content {
+  padding: 0 0 7px;
+  background: var(--paper);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, var(--cham-in) 100%, 0 calc(100% - var(--cham-in)));
+}
+
+li.chat-message:has(> .message-content > .mgt2.card.ok) > .message-header::before {
+  color: var(--good);
+}
+
+li.chat-message:has(> .message-content > .mgt2.card.bad) > .message-header::before {
+  color: var(--danger);
+}
+
+li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::before {
+  color: var(--mute);
+}
+
+.mgt2.card {
   font-family: var(--body);
   font-size: 14px;
   color: var(--ink);
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 3px;
+}
+.mgt2.card .bare {
+  margin: 0;
+  padding: 9px 11px 4px;
+  font-size: 13px;
+  line-height: 1.5;
 }
 .mgt2.card .chd {
-  padding: 8px 11px 7px;
+  padding: 7px 11px 6px;
   border-bottom: 1px solid var(--rule);
 }
 .mgt2.card .who {
@@ -5647,10 +5800,19 @@ ul.softwares li:hover a {
   color: var(--danger);
 }
 .mgt2.card .cbtns {
+  position: relative;
   display: flex;
   gap: 5px;
-  padding: 8px 11px;
-  border-top: 1px solid var(--rule-soft);
+  padding: 11px 11px 3px;
+}
+.mgt2.card .cbtns::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  right: 11px;
+  top: 0;
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--rule) 0 4px, transparent 4px 8px) 0 0/100% 1px no-repeat, repeating-linear-gradient(90deg, var(--rule) 0 4px, transparent 4px 8px) 2px 2px/100% 1px no-repeat;
 }
 .mgt2.card .cbtns button {
   flex: 1 1 0;
@@ -5849,9 +6011,8 @@ ul.softwares li:hover a {
 }
 
 .mgt2-jumped {
-  outline: 2px solid var(--accent-line);
-  outline-offset: -2px;
-  transition: outline-color 0.5s ease-out;
+  background: var(--accent-text);
+  transition: background-color 0.5s ease-out;
 }
 
 .mgt2 .mgt2-combat-head {

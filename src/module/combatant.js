@@ -345,14 +345,17 @@ export class MGT2Combatant extends Combatant {
         const against = this.constructor.reactionPenalty(this.actor, key);
         return ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ actor: this.actor, token: this.token }),
-            content: `<p>${game.i18n.format("MGT2.Combatant.ReactionTaken", {
-                name: this.name,
-                reaction: game.i18n.localize(reaction.label),
-                against: MGT2Helper.signed(against),
-                // `update` has already refreshed the model, so this is the running total after
-                // the Reaction just taken rather than before it.
-                own: MGT2Helper.signed(this.system.reactionDM)
-            })}</p>`
+            // The card wrapper is what puts this message in the log's own frame — a bare <p> now
+            // reads as broken beside a neighbour with a band.
+            content: `<div class="mgt2 theme-light card"><p class="bare">${
+                game.i18n.format("MGT2.Combatant.ReactionTaken", {
+                    name: this.name,
+                    reaction: game.i18n.localize(reaction.label),
+                    against: MGT2Helper.signed(against),
+                    // `update` has already refreshed the model, so this is the running total after
+                    // the Reaction just taken rather than before it.
+                    own: MGT2Helper.signed(this.system.reactionDM)
+                })}</p></div>`
         });
     }
 
@@ -403,11 +406,12 @@ export class MGT2Combatant extends Combatant {
 
         return ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ actor: this.actor, token: this.token }),
-            content: `<p>${game.i18n.format("MGT2.Combatant.TacticsTaken", {
-                name: this.name,
-                effect: MGT2Helper.signed(value, "+0"),
-                side: game.i18n.localize(MGT2.CombatSides[side])
-            })}</p>`
+            content: `<div class="mgt2 theme-light card"><p class="bare">${
+                game.i18n.format("MGT2.Combatant.TacticsTaken", {
+                    name: this.name,
+                    effect: MGT2Helper.signed(value, "+0"),
+                    side: game.i18n.localize(MGT2.CombatSides[side])
+                })}</p></div>`
         });
     }
 
