@@ -303,4 +303,22 @@
 		{{/each}}
 		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Track'}}</a>
 	</div>
+
+	{{! Last, because it reads everything above it. A ladder id and a track key are declared and
+	    pointed at INSIDE this one Item, which is why they can be checked at all — §9.47 leaves a
+	    career name and a species name free text at both ends and that stays untouched. Advisory on
+	    the `system.design` ruling: the template is stored exactly as it was typed. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Template.Integrity'}}</h3>
+	</div>
+	<div class="valid" data-derived="system.templateIssues">
+		{{#each careerIssues.checks as |check|}}
+		<div class="v {{#unless check.applies}}na{{else}}{{#if check.ok}}ok{{else}}no{{/if}}{{/unless}}">
+			<span class="mk">{{#unless check.applies}}&middot;{{else}}{{#if check.ok}}&check;{{else}}&times;{{/if}}{{/unless}}</span>
+			<span class="nm">{{localize check.label}}<span class="g">{{#if check.applies}}{{localize check.why}}{{#if check.named}} &mdash; {{check.named}}{{/if}}{{else}}{{localize 'MGT2.Chargen.Template.NothingToRead'}}{{/if}}</span></span>
+			<span class="num">{{#if check.applies}}{{check.used}}/{{check.cap}}{{else}}&mdash;{{/if}}</span>
+		</div>
+		{{/each}}
+	</div>
+	<p class="hint{{#if careerIssues.failed}} bad{{/if}}">{{#if careerIssues.failed}}{{localize 'MGT2.Chargen.Template.IntegrityFailed' n=careerIssues.failed}}{{else}}{{localize 'MGT2.Chargen.Template.IntegrityAdvisory'}}{{/if}}</p>
 </div>

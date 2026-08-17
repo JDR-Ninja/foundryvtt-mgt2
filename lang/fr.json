@@ -442,7 +442,25 @@
         "Formula": "formule",
         "Speciality": "spécialité",
         "Family": "toutes",
-        "FamilyHint": "Armes à feu (toutes) — la famille plutôt qu'une spécialité"
+        "FamilyHint": "Armes à feu (toutes) — la famille plutôt qu'une spécialité",
+        "Integrity": "Renvois",
+        "IntegrityAdvisory": "Chaque ligne est indicative. Un modèle se saisit en plusieurs fois, et la moitié que vous n'avez pas encore atteinte n'est pas une erreur — rien ici ne refuse une écriture.",
+        "IntegrityFailed": "{n} de ces lignes nomment ce que ce modèle ne déclare pas. Indicatif, jamais bloquant : le modèle est enregistré tel qu'il a été saisi.",
+        "NothingToRead": "rien de saisi à confronter",
+        "Checks": {
+          "ladderIds": "Id des échelles",
+          "assignmentLadder": "Échelles des affectations",
+          "officerLadder": "Échelles d'officier",
+          "exitTrack": "Règle de sortie",
+          "rowTrack": "Pistes des événements et incidents"
+        },
+        "Why": {
+          "ladderIds": "chaque échelle a besoin de son propre id pour qu'on puisse la désigner",
+          "assignmentLadder": "l'échelle nommée par chaque affectation, face aux échelles déclarées ci-dessus",
+          "officerLadder": "déclarée ci-dessus, et cochée officier",
+          "exitTrack": "la piste que lit la règle de sortie, face aux pistes déclarées ci-dessus",
+          "rowTrack": "la piste que déplace une ligne, face aux pistes déclarées ci-dessus"
+        }
       },
       "Frame": {
         "Term": "La période que ce cadre fait courir",

@@ -347,6 +347,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       trade: this.#tradeColumns(),
       nested: this.#prepareNested(actor),
       careerTables: this.#careerTables(),
+      careerIssues: this.#careerIssues(),
       eventTables: this.#eventTables(),
       speciesFrame: this.#speciesFrame()
     });
@@ -390,6 +391,27 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     return Object.keys(tables).map(key => ({
       key, label: `MGT2.Chargen.Template.Tables.${key}`, ...tables[key]
     }));
+  }
+
+  /**
+   * The reference ledger, on the `system.design` model (§9.92): one line per name this template
+   * points at, and the names that resolve to nothing spelled out beside it. A check with nothing to
+   * read is drawn and silent rather than green — a career declaring no ladders answers no question
+   * about ladders, and saying so is the point.
+   */
+  #careerIssues() {
+    if ( (this.item.type !== "career") || !this.item.system.isTemplate ) return null;
+    const issues = this.item.system.templateIssues;
+    return {
+      failed: issues.failed,
+      checks: issues.checks.map(check => ({
+        ...check,
+        label: `MGT2.Chargen.Template.Checks.${check.key}`,
+        why: `MGT2.Chargen.Template.Why.${check.key}`,
+        // Handlebars cannot join, and the names are worth more than the count they came from.
+        named: check.missing.join(", ")
+      }))
+    };
   }
 
   /** Events and Mishaps are the same row shape twice over, differing only in what `ejects` defaults to. */

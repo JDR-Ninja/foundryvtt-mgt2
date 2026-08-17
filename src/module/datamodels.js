@@ -839,6 +839,61 @@ export class CareerData extends ItemBaseData {
 
         return schema;
     }
+
+    /**
+     * Whether the names this template points at are names it declares. Advisory, never a block — the
+     * `system.design` ledger's ruling (§9.92) arrived at again from the other end: a career is typed
+     * over several sittings and a half-filled form is as common as a mistake.
+     *
+     * **These are references INSIDE one Item, which is the only reason they can be checked at all.**
+     * §9.47 leaves a career name, a species name and a skill name free text at both ends on purpose —
+     * the referee types their own careers and nothing in this system may hold a registry of names. A
+     * ladder id and a track key are a different kind of thing: both ends are declared in this same
+     * document, so resolving one costs that invariant nothing.
+     *
+     * Blank is never an issue. A career with no ranks names no ladder and a career with no track names
+     * no track; what is reported is a name that was typed and resolves to nothing.
+     * @type {{checks: object[], failed: number}}
+     */
+    get templateIssues() {
+        const ladders = new Map(this.rankLadders.filter(one => one.id).map(one => [one.id, one]));
+        const tracks = new Set(this.tracks.map(one => one.key).filter(Boolean));
+        const named = (rows, read) => rows.map(read).filter(Boolean);
+        const check = (key, wanted, resolves) => ({
+            key,
+            applies: wanted.length > 0,
+            ok: wanted.every(resolves),
+            used: wanted.filter(resolves).length,
+            cap: wanted.length,
+            missing: [...new Set(wanted.filter(one => !resolves(one)))]
+        });
+
+        // A ladder nobody can point at, which is the one issue whose name is the missing thing.
+        const blankIds = this.rankLadders.filter(one => !one.id).length;
+        const duplicated = this.rankLadders.map(one => one.id).filter((id, index, all) =>
+            id && (all.indexOf(id) !== index));
+        const rows = [...this.eventTable, ...this.mishapTable];
+
+        const checks = [
+            {
+                key: "ladderIds", applies: this.rankLadders.length > 0,
+                ok: (blankIds === 0) && (duplicated.length === 0),
+                used: this.rankLadders.length - blankIds - duplicated.length,
+                cap: this.rankLadders.length,
+                missing: [...new Set(duplicated)]
+            },
+            check("assignmentLadder", named(this.assignments, one => one.ladder),
+                id => ladders.has(id)),
+            // An officer ladder must also BE one: a commission that moves the record onto an enlisted
+            // ladder is the defect this half catches and the one above cannot.
+            check("officerLadder", named(this.assignments, one => one.officerLadder),
+                id => ladders.get(id)?.officer === true),
+            check("exitTrack", this.exitRule.track ? [this.exitRule.track] : [],
+                key => tracks.has(key)),
+            check("rowTrack", named(rows, one => one.track?.key), key => tracks.has(key))
+        ];
+        return { checks, failed: checks.filter(one => one.applies && !one.ok).length };
+    }
 }
 
 export class TalentData extends ItemBaseData {

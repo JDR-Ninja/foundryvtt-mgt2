@@ -442,7 +442,25 @@
         "Formula": "formula",
         "Speciality": "speciality",
         "Family": "any",
-        "FamilyHint": "Gun Combat (any) — the family rather than one speciality"
+        "FamilyHint": "Gun Combat (any) — the family rather than one speciality",
+        "Integrity": "References",
+        "IntegrityAdvisory": "Every line is advisory. A template is typed over several sittings and the half you have not reached yet is not a mistake — nothing here refuses a write.",
+        "IntegrityFailed": "{n} of these name something this template does not declare. Advisory, never a block: the template is stored exactly as it was typed.",
+        "NothingToRead": "nothing typed to read this against",
+        "Checks": {
+          "ladderIds": "Ladder ids",
+          "assignmentLadder": "Assignment ladders",
+          "officerLadder": "Officer ladders",
+          "exitTrack": "Exit rule",
+          "rowTrack": "Event and mishap tracks"
+        },
+        "Why": {
+          "ladderIds": "each ladder needs an id of its own before anything can point at it",
+          "assignmentLadder": "the ladder each assignment names, against the ladders declared above",
+          "officerLadder": "declared above, and marked officer",
+          "exitTrack": "the track the exit rule reads, against the tracks declared above",
+          "rowTrack": "the track a row moves, against the tracks declared above"
+        }
       },
       "Frame": {
         "Term": "The term this frame runs",
