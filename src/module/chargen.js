@@ -1,5 +1,6 @@
 import { MGT2 } from "./config.js";
 import { createTrayEntryField } from "./datamodels.js";
+import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
 
 const fields = foundry.data.fields;
@@ -148,7 +149,11 @@ export const Chargen = {
 
     async start(actor, state = {}) {
         if ( this.isInCreation(actor) ) return actor;
-        return actor.setFlag(CHARGEN_SCOPE, CHARGEN_KEY, new ChargenState(state, { strict: false }).toObject());
+        await actor.setFlag(CHARGEN_SCOPE, CHARGEN_KEY, new ChargenState(state, { strict: false }).toObject());
+        // The frame's tracks are born here, because a caste number rolled at the first step it is read
+        // at would be rolled after the check that reads it (§9.120).
+        await this.ensureTracks(actor);
+        return actor;
     },
 
     /** The whole model is written back, so an array field replaces rather than merges. */
@@ -316,6 +321,81 @@ export const Chargen = {
     },
 
     /**
+     * The check the frame runs at a named step, or null (§9.120). Read off the model so the item
+     * sheet's readout and the term loop cannot disagree, exactly as `steps` is.
+     * @param {Actor} actor
+     * @param {string} key   A `MGT2.CreationSteps` key
+     * @returns {object|null}
+     */
+    stepCheck(actor, key) {
+        return this.frame(actor)?.system.stepCheck(key) ?? null;
+    },
+
+    /**
+     * The frame's declared tracks, materialised on the ledger (§9.120).
+     *
+     * **A track was declared and never born.** §9.54 puts the DECLARATION on the frame and the value on
+     * the ledger, and nothing ever rolled the declaration's initial — so a Droyne caste number read as a
+     * DM was silently zero from the day the field shipped. Called when creation starts and again before
+     * any step touches a track, because a Traveller can be given their species Item after starting.
+     *
+     * Idempotent: a key that already has a row is left exactly as it is, initial and all.
+     * @param {Actor} actor
+     * @returns {Promise<object>}   The tracks, whether or not anything was written
+     */
+    async ensureTracks(actor) {
+        const declared = this.frame(actor)?.system.frame.tracks ?? [];
+        const tracks = foundry.utils.deepClone(this.read(actor).tracks);
+        let wrote = false;
+        for ( const definition of declared ) {
+            if ( !definition.key || tracks[definition.key] ) continue;
+            tracks[definition.key] = await initialTrack(definition);
+            wrote = true;
+        }
+        if ( wrote ) await this.update(actor, { tracks });
+        return tracks;
+    },
+
+    /**
+     * One Traveller-scoped track as it stands. Never null: a track nothing has written reads as an
+     * empty rung and a zero, which is what a DM composed from it has to be able to add.
+     * @param {Actor} actor
+     * @param {string} key
+     * @returns {{value: number, rung: string, high: number|null}}
+     */
+    track(actor, key) {
+        const held = this.read(actor).tracks[key];
+        return { value: held?.value ?? 0, rung: held?.rung ?? "", high: held?.high ?? null };
+    },
+
+    /**
+     * Move a frame-declared track, by rungs on an enumerated one and by points on a numeric one — the
+     * single reading that lets a caste degree and a parole threshold share one field (§9.120).
+     *
+     * The high-water mark is kept whatever the direction, because a track that falls cannot reconstruct
+     * it afterwards and §9.40's *"highest rank reached"* has to read it (§9.54).
+     * @param {Actor} actor
+     * @param {string} key
+     * @param {number} delta
+     * @returns {Promise<{value: number, rung: string, label: string, moved: boolean}|null>}   Null
+     *          where no frame declares the track: a career-scoped one is moved by its own record.
+     */
+    async moveTrack(actor, key, delta) {
+        const definition = this.frame(actor)?.system.frame.tracks.find(entry => entry.key === key);
+        if ( !definition ) return null;
+        const next = foundry.utils.deepClone(await this.ensureTracks(actor));
+        const held = next[key];
+        const value = clampToTrack((held.value ?? 0) + delta, definition);
+        next[key] = {
+            value,
+            rung: (definition.kind === "enumerated") ? (definition.values[value] ?? held.rung) : held.rung,
+            high: Math.max(held.high ?? value, value)
+        };
+        await this.update(actor, { tracks: next });
+        return { ...next[key], label: definition.label || key, moved: value !== held.value };
+    },
+
+    /**
      * The Benefit-roll total: a LEDGER and not a derivation (§9.50). Optionally scoped to one career
      * record, which is what a row that wipes a career's rolls needs.
      * @param {Actor} actor
@@ -471,6 +551,37 @@ function plain(entry) {
     const copy = { ...entry };
     if ( copy.appliesTo instanceof Set ) copy.appliesTo = [...copy.appliesTo];
     return copy;
+}
+
+/**
+ * A declared track's opening value (§9.120). A numeric one rolls its initial — the Droyne caste number
+ * is `1D` and is read as a DM for the rest of creation — and an enumerated one starts at the rung the
+ * declaration names, or at the first one it lists.
+ * @returns {Promise<{value: number, rung: string, high: number|null}>}
+ */
+async function initialTrack(definition) {
+    if ( definition.kind === "enumerated" ) {
+        const at = Math.max(definition.values.indexOf(definition.initial), 0);
+        return { value: at, rung: definition.values[at] ?? definition.initial ?? "", high: at };
+    }
+    // The declaration carries the book's own `1D`, which the parser reads as an unresolved term and
+    // throws on — the normalisation every transcribed page goes through (§9.120).
+    const rolled = definition.initial
+        ? (await new Roll(MGT2Helper.damageFormula(definition.initial)).roll()).total : 0;
+    const value = clampToTrack(rolled, definition);
+    return { value, rung: "", high: value };
+}
+
+/**
+ * An enumerated track is bounded by its own rungs at both ends — the value IS the index — while a
+ * numeric one has only the cap its declaration prints.
+ * @returns {number}
+ */
+function clampToTrack(value, definition) {
+    if ( definition.kind === "enumerated" ) {
+        return Math.min(Math.max(value, 0), Math.max(definition.values.length - 1, 0));
+    }
+    return (definition.cap === null) ? value : Math.min(value, definition.cap);
 }
 
 /** @returns {number} */

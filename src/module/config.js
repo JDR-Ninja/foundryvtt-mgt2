@@ -2106,6 +2106,23 @@ MGT2.CreationSteps = Object.freeze({
     household: "MGT2.Chargen.Steps.household"
 });
 
+// What a declared step's printed ladder of targets is read against (§9.120). **Two, because two are
+// printed**: a household timetable indexed by term number, and a promotion difficulty indexed by a SOC
+// band off a rank table. Blank is a check with one target and no ladder at all, which is most of them.
+MGT2.StepCheckIndices = Object.freeze({
+    term: "MGT2.Chargen.StepCheckIndices.term",
+    characteristic: "MGT2.Chargen.StepCheckIndices.characteristic"
+});
+
+// When a declared step's check fires (§9.120). A step is a position in the term and most checks are
+// simply made there — but one published frame prints *"any time a Mishap occurs the Droyne must make a
+// continuation check"*, and a check made every term instead would be a wrong rule rather than a partial
+// one. Read off the term log, which is where a mishap is already recorded as a fact and not a phrase.
+MGT2.StepCheckTriggers = Object.freeze({
+    everyTerm: "MGT2.Chargen.StepCheckTriggers.everyTerm",
+    afterMishap: "MGT2.Chargen.StepCheckTriggers.afterMishap"
+});
+
 // The default frame's sequence. The book prints no ordered list of a term's steps anywhere — this is
 // the design's reconstruction from folio 8's section headings, which is why the order is a decision
 // the book will never confirm. A frame that drops ranks drops `commission` with them, and the cut is
@@ -2330,6 +2347,22 @@ MGT2.TrayChecks = Object.freeze({
     benefit: "MGT2.Chargen.TrayChecks.benefit",
     graduation: "MGT2.Chargen.TrayChecks.graduation",
     elections: "MGT2.Chargen.TrayChecks.elections"
+});
+
+// Every check a standing modifier can bear on (§9.121) — the tray's seven, plus the frame-owned steps
+// that carry a check of their own (§9.120). **The seven were not enough and one printed rule proves
+// it**: a Droyne's Black Skills penalty applies *"on all checks for advancement and continuation"*,
+// and `continuation` is a step a frame declares, not a check a tray entry is spent on. The four are
+// listed rather than derived from `CreationSteps` because the Core steps already answer to a tray
+// check under their own name — `advance` is `advancement` here — and a vocabulary with both spellings
+// of one thing is a vocabulary nobody can pick from. Their labels are the steps' own, so this adds no
+// string.
+MGT2.CreationChecks = Object.freeze({
+    ...MGT2.TrayChecks,
+    nest: MGT2.CreationSteps.nest,
+    status: MGT2.CreationSteps.status,
+    continuation: MGT2.CreationSteps.continuation,
+    household: MGT2.CreationSteps.household
 });
 
 MGT2.TrayScopes = Object.freeze({

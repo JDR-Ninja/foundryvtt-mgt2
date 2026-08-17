@@ -10,10 +10,10 @@
 	<div class="entryhead">
 		<input class="f num edit-only" type="number" step="1" name="system.{{path}}.dm" value="{{mod.dm}}" data-dtype="Number" />
 		<select class="f edit-only" name="system.{{path}}.appliesTo" multiple size="3" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayApplies'}}">
-			{{selectOptions @root.config.TrayChecks selected=mod.appliesTo localize=true}}
+			{{selectOptions @root.config.CreationChecks selected=mod.appliesTo localize=true}}
 		</select>
 		<input class="f wide edit-only" type="text" name="system.{{path}}.note" value="{{mod.note}}" placeholder="{{localize 'MGT2.Chargen.Template.TrayNote'}}" />
-		<b class="play-only">{{mod.dm}} &middot; {{mod.note}}</b>
+		<b class="play-only">{{#if mod.dm}}{{mod.dm}} {{/if}}{{#if mod.per}}{{mod.per}}{{localize 'MGT2.Chargen.Template.StandingPerLevelShort'}} {{/if}}&middot; {{mod.note}}</b>
 		<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
 	</div>
 	<div class="pfields edit-only">
@@ -29,5 +29,13 @@
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.OtherCareer'}}</span>
 			<input class="f" type="text" name="system.{{path}}.career" value="{{mod.career}}" />
 		</label>
+		{{! "A negative DM equal to the highest Black Skill level" — a DM read off a skill the Traveller
+		    may not have yet, so it is measured at the roll and never stored. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.StandingPerLevel'}}</span>
+			<input class="f num" type="number" step="1" name="system.{{path}}.per" value="{{mod.per}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.StandingPerLevelHint'}}" />
+		</label>
 	</div>
+	{{> systems/mgt2/templates/items/parts/string-list.html list=mod.skills path=(concat path ".skills")
+		label='MGT2.Chargen.Template.StandingSkills' add='MGT2.Items.Skill'}}
 </div>

@@ -417,6 +417,10 @@
         "Standing": "Standing modifiers",
         "StandingEntry": "Standing modifier",
         "StandingGate": "Only while",
+        "StandingPerLevel": "DM per level",
+        "StandingPerLevelShort": "/level",
+        "StandingPerLevelHint": "A DM read off a skill at the moment of the roll — the highest level held among the skills below. Adds to the fixed DM; a Traveller holding none of them takes nothing.",
+        "StandingSkills": "Read off these skills",
         "Tracks": "Tracks",
         "Track": "Track",
         "TrackKey": "track key",
@@ -454,6 +458,22 @@
         "Cuts": "Cuts:",
         "CutsNone": "Declares the Core term entire — nothing is cut.",
         "Adds": "adds:",
+        "CheckRolls": "The check",
+        "CheckTarget": "target",
+        "CheckIndex": "Table read against",
+        "CheckWhen": "The check fires",
+        "CheckSkills": "Skills it may roll",
+        "CheckTrackDMs": "DMs off a track",
+        "CheckTrackDM": "Track DM",
+        "CheckPerHint": "DM per point of the track — −1 is the printed line.",
+        "CheckLadderRows": "Printed targets",
+        "CheckLadderRow": "Row",
+        "CheckRowAward": "This row awards",
+        "CheckOnPass": "On a pass",
+        "CheckOnFail": "On a failure",
+        "CheckEjects": "Ends the career",
+        "CheckLadder": "by {index}",
+        "CheckHint": "Folio 11's 2D and nothing else: a named term, the printed target, and the DMs no characteristic supplies. Leave the target blank and fill the rows where the book prints a table — a hole in that table is a Traveller with no printed difficulty, and it stays a hole.",
         "TermKinds": "Term kinds",
         "TermKind": "Term kind",
         "KindKey": "key",
@@ -884,7 +904,18 @@
         "AssignmentNewCareer": "This career counts an assignment change as a new career: leave, then drop the template on again.",
         "SubRollPassed": "The row's own check passed.",
         "SubRollFailed": "The row's own check failed.",
-        "RefereeStep": "{step} is this frame's own step: the referee resolves it."
+        "RefereeStep": "{step} is this frame's own step: the referee resolves it.",
+        "NoStepTarget": "{step}: the printed table gives no target for this Traveller.",
+        "StepNotTriggered": "{step} does not fire this term.",
+        "TrackAtCap": "{track} is already at its last rung."
+      },
+      "StepCheckTriggers": {
+        "everyTerm": "Every term",
+        "afterMishap": "When a Mishap occurs"
+      },
+      "StepCheckIndices": {
+        "term": "Term number",
+        "characteristic": "Characteristic band"
       }
     },
     "Packs": {

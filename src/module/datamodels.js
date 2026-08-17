@@ -249,8 +249,19 @@ function createCareerTableField() {
 function createStandingModifierField() {
     return new fields.SchemaField({
         dm: new fields.NumberField({ required: false, initial: 0, integer: true }),
+        // **A printed DM is not always a number** (§9.121): *"a negative DM equal to the highest skill
+        // level the Droyne has in a Black Skill"* is read at the moment of the roll, off a value that
+        // moves during creation — a skill the Traveller may not even have yet. `per` multiplies the
+        // HIGHEST level held among `skills`, so the printed *"highest"* is the shape and not a
+        // convention, and it adds to `dm` rather than replacing it: a rule with both halves is
+        // sayable, and a Traveller holding none of the named skills adds nothing at all.
+        per: new fields.NumberField({ required: false, initial: 0, integer: true }),
+        skills: new fields.ArrayField(
+            new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] }),
+        // The tray's seven plus the frame-owned steps (§9.120), because the one printed rule that
+        // needed a variable DM also names a check no tray entry can be spent on.
         appliesTo: new fields.SetField(new fields.StringField({
-            required: true, blank: false, choices: MGT2.TrayChecks }), { initial: [] }),
+            required: true, blank: false, choices: MGT2.CreationChecks }), { initial: [] }),
         // A template id the referee typed; blank is every career.
         career: new fields.StringField({ required: false, blank: true, trim: true }),
         // Blank is ungated, which is what every frame entry written before this field meant.
@@ -438,6 +449,132 @@ function createTrackDefinitionField() {
         values: new fields.ArrayField(
             new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] })
     });
+}
+
+/**
+ * One declared step of a frame's term, and the check the printed frame runs at it (§9.120).
+ *
+ * **A step was a bare key.** The sequence said where a species' own step fires and nothing said what
+ * it rolls, so the Droyne continuation check's `2+`, the K'kree household timetable and the promotion
+ * difficulty off the SOC Rank table lived in prose while the schema pretended the step was whole. The
+ * key stays the row's identity — the sequence, the derived cut and the term cursor all read it — and
+ * the check hangs off it, which is where a check already lives one level down: `assignments[].survival`
+ * and an event row's own `check` are the same move (§9.48, §9.49).
+ *
+ * **The check is folio 11's and nothing more**: `2D + the named term's DM against a target`. There is
+ * no dice field because no printed step check rolls anything else, and a step that indexes a table is
+ * not a check at all.
+ */
+function createStepField() {
+    return new fields.SchemaField({
+        key: new fields.StringField({
+            required: true, blank: false, initial: "elect", choices: MGT2.CreationSteps }),
+        check: new fields.SchemaField({
+            // A step is a position in the term and most checks are simply made there. One is not:
+            // *"any time a Mishap occurs the Droyne must make a continuation check"*, which the step
+            // list can place but cannot condition.
+            when: new fields.StringField({
+                required: false, blank: false, initial: "everyTerm", choices: MGT2.StepCheckTriggers }),
+            // The named term. A step check names a SKILL more often than a characteristic — Patriarchy,
+            // Caste, "Diplomat or Persuade" — and the list is the shape `qualification.characteristics`
+            // already carries for "DEX or INT 5+": the best of them is what rolls. Free text for the
+            // same reason every other skill reference is (§9.45): no skill list ships.
+            characteristic: new fields.StringField({
+                required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
+            skills: new fields.ArrayField(
+                new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] }),
+            // The printed target, where the line prints one number. **0 is a rung that takes anyone** —
+            // the SOC Rank table prints "Automatic" against one band — which is what a career
+            // template's `difficulty` already means by 0. Null is a check whose target is elsewhere:
+            // the ladder below, or the career's own line.
+            target: new fields.NumberField({
+                required: false, nullable: true, initial: null, integer: true }),
+
+            // What the LADDER is read against, blank for a check with one printed target. Two states
+            // because two are printed: a household timetable indexed by term number, and a promotion
+            // difficulty indexed by a SOC band.
+            index: new fields.StringField({
+                required: false, blank: true, initial: "", choices: MGT2.StepCheckIndices }),
+            indexCharacteristic: new fields.StringField({
+                required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
+            // The printed table, one row as printed. `from`/`to` mirror the index column exactly as
+            // `termKinds` does (§9.119), so a last row reading `8+` is `to` left null — and a table
+            // with a HOLE in it keeps its hole: the SOC Rank table skips SOC 10 entirely, and a
+            // Traveller at that score matches no row, which is the printed state and not an error.
+            ladder: new fields.ArrayField(new fields.SchemaField({
+                from: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                to: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                target: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                // What this row of the table awards, over what the check awards on every row: the
+                // household timetable alternates a skill roll against a level in Patriarchy.
+                //
+                // **Not conditioned on the roll, and the book is what says so**: one row of that table
+                // separates its two clauses — *"Gains basic training in career. **If the Patriarchy
+                // check is successful**, gain Senior Wife and D3 family members"* — so a column the
+                // book conditions where it means to is read as unconditional where it does not. What
+                // the roll buys is the check's own `onPass`.
+                award: createStepOutcomeField()
+            }), { initial: [] }),
+
+            // A DM the named term does not supply and no characteristic derives: *"caste number as a
+            // negative DM"* reads a track the frame itself declared. `per` is signed and is a
+            // multiplier over the track's value, so −1 is the printed line and −2 would be sayable.
+            trackModifiers: new fields.ArrayField(new fields.SchemaField({
+                track: new fields.StringField({ required: false, blank: true, trim: true }),
+                per: new fields.NumberField({ required: false, initial: 1, integer: true })
+            }), { initial: [] }),
+
+            onPass: createStepOutcomeField(),
+            onFail: createStepOutcomeField()
+        })
+    });
+}
+
+/**
+ * What one arm of a declared step's check does (§9.120).
+ *
+ * **The vocabulary is the event row's, deliberately and not by coincidence**: a printed row is a line
+ * with a check and consequences, and a step check's arms are the same list — this ends the career, that
+ * moves a named track, a third grants a cell or writes an outcome the later steps already read (§9.49,
+ * §9.109). A second vocabulary for the same four facts is how two readers silently stop agreeing.
+ *
+ * **Three call sites**, which is why it is a factory: the pass arm, the fail arm, and a ladder row's
+ * own award. No `reroll` beside the track move — an event row has one because prison rows re-roll a
+ * parole threshold, and no step check prints anything of the kind.
+ */
+function createStepOutcomeField() {
+    return new fields.SchemaField({
+        ejects: new fields.StringField({
+            required: false, blank: false, initial: "stays", choices: MGT2.EjectionOutcomes }),
+        outcomes: new fields.SetField(new fields.StringField({
+            required: true, blank: false, choices: MGT2.TermOutcomes }), { initial: [] }),
+        // *"Elevated one degree"*: `value` is RUNGS on an enumerated track and points on a numeric one,
+        // which is the one reading that lets a caste degree and a parole threshold share a field.
+        track: new fields.SchemaField({
+            key: new fields.StringField({ required: false, blank: true, trim: true }),
+            value: new fields.NumberField({ required: false, initial: 0, integer: true }),
+            formula: new FormulaField({ required: false, blank: true })
+        }),
+        // A cell with text and no grants is legitimate and is what the unwritable half looks like: the
+        // K'kree household's *"gain Senior Wife and D3 family members"* emits dependent Actors, and
+        // §9.40's output map still has no row for them.
+        //
+        // Required, unlike an event row's, because the editor for an arm is drawn for every arm: an
+        // optional SchemaField initialises to `undefined` and the cell would render off a nothing.
+        grant: createCellField()
+    });
+}
+
+/**
+ * `frame.steps` was a bare `string[]` and each entry is now a row carrying its own check (§9.120).
+ * Every stored frame written before that — three packed species and whatever a world has typed —
+ * hydrates through here, and a row that is already an object is left alone.
+ */
+function migrateStepArray(steps) {
+    if ( !Array.isArray(steps) ) return;
+    for ( let i = 0; i < steps.length; i++ ) {
+        if ( typeof steps[i] === "string" ) steps[i] = { key: steps[i] };
+    }
 }
 
 /**
@@ -1267,6 +1404,7 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
     /** @inheritDoc */
     static migrateData(source, options) {
         migrateTraitArray(source.traits, "species");
+        migrateStepArray(source.frame?.steps);
         return super.migrateData(source, options);
     }
 
@@ -1282,12 +1420,24 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
      * @type {{sequence: string[], own: Set<string>, cut: Set<string>}}
      */
     get termSequence() {
-        const sequence = this.frame.steps.length ? [...this.frame.steps] : [...MGT2.CoreTermSequence];
+        const declared = this.frame.steps.map(step => step.key);
+        const sequence = declared.length ? declared : [...MGT2.CoreTermSequence];
         return {
             sequence,
             own: new Set(sequence.filter(step => !MGT2.CoreTermSequence.includes(step))),
             cut: new Set(MGT2.CoreTermSequence.filter(step => !sequence.includes(step)))
         };
+    }
+
+    /**
+     * The check this frame runs at a named step, or null where the frame declares no such step (§9.120).
+     * A step declared twice answers at its first row: the sequence is a list of steps, and which of two
+     * identical keys the cursor is on is a question it cannot ask.
+     * @param {string} key   A `MGT2.CreationSteps` key
+     * @returns {object|null}
+     */
+    stepCheck(key) {
+        return this.frame.steps.find(step => step.key === key)?.check ?? null;
     }
 
     static defineSchema() {
@@ -1309,9 +1459,9 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
             frame: new fields.SchemaField({
                 // Empty runs the Core sequence. What a frame CUTS is derived against that sequence and
                 // never authored beside it: a frame that drops ranks drops the commission step with
-                // them, without anyone having to remember to list it.
-                steps: new fields.ArrayField(new fields.StringField({
-                    required: true, blank: false, choices: MGT2.CreationSteps }), { initial: [] }),
+                // them, without anyone having to remember to list it. A row rather than a key since
+                // §9.120: the check a species' own step runs is the step's, not the prose's.
+                steps: new fields.ArrayField(createStepField(), { initial: [] }),
                 startAge: new fields.NumberField({ required: false, initial: 18, min: 0, integer: true }),
                 termYears: new fields.NumberField({ required: false, initial: 4, min: 0, integer: true }),
                 // The frame's own justification, shown beside the step strip. A frame that deletes

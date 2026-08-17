@@ -1,0 +1,26 @@
+{{! One arm of a declared step's check (§9.120). **The vocabulary is the event row's** — ends the
+    career, moves a named track, grants a cell, writes a term outcome — because a printed row is a line
+    with a check and consequences, and a step check's arms are the same four facts.
+
+    Three call sites: the pass arm, the fail arm, and a ladder row's own award, which is what a printed
+    timetable alternating two awards by term number needs. **One dense row rather than a field grid**,
+    the convention a tray entry already uses: a nine-rung ladder draws nine of these, and a label per
+    control would make the shortest printed table a page long.
+
+    Callers pass `outcome`, `path` — the dotted route under `system.` — and a localisation key. }}
+<div class="nest edit-only">
+	<span class="nlbl">{{localize label}}</span>
+	<div class="trayrow">
+		<select class="f" name="system.{{path}}.ejects" data-tooltip="{{localize 'MGT2.Chargen.Frame.CheckEjects'}}">
+			{{selectOptions @root.config.EjectionOutcomes selected=outcome.ejects localize=true}}
+		</select>
+		<select class="f" name="system.{{path}}.outcomes" multiple size="3" data-tooltip="{{localize 'MGT2.Chargen.Template.Awards'}}">
+			{{selectOptions @root.config.TermOutcomes selected=outcome.outcomes localize=true}}
+		</select>
+		{{! "Elevated one degree": the value is RUNGS on an enumerated track and points on a numeric one. }}
+		<input class="f" type="text" name="system.{{path}}.track.key" value="{{outcome.track.key}}" placeholder="{{localize 'MGT2.Chargen.Template.TrackKey'}}" data-tooltip="{{localize 'MGT2.Chargen.Template.TrackMove'}}" />
+		<input class="f num" type="number" step="1" name="system.{{path}}.track.value" value="{{outcome.track.value}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.TrackMove'}}" />
+		<input class="f" type="text" name="system.{{path}}.track.formula" value="{{outcome.track.formula}}" placeholder="{{localize 'MGT2.Chargen.Template.Formula'}}" />
+	</div>
+	{{> systems/mgt2/templates/items/parts/career-cell.html cell=outcome.grant path=(concat path ".grant")}}
+</div>

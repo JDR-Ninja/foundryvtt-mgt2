@@ -417,6 +417,10 @@
         "Standing": "Modificateurs permanents",
         "StandingEntry": "Modificateur permanent",
         "StandingGate": "Seulement tant que",
+        "StandingPerLevel": "MD par niveau",
+        "StandingPerLevelShort": "/niveau",
+        "StandingPerLevelHint": "Un MD lu sur une compétence au moment du jet — le plus haut niveau détenu parmi les compétences ci-dessous. S'ajoute au MD fixe ; un Voyageur qui n'en détient aucune ne subit rien.",
+        "StandingSkills": "Lu sur ces compétences",
         "Tracks": "Pistes",
         "Track": "Piste",
         "TrackKey": "clé de piste",
@@ -454,6 +458,22 @@
         "Cuts": "Retire :",
         "CutsNone": "Déclare la période de base entière — rien n'est retiré.",
         "Adds": "ajoute :",
+        "CheckRolls": "Le jet",
+        "CheckTarget": "seuil",
+        "CheckIndex": "Table lue selon",
+        "CheckWhen": "Le jet se fait",
+        "CheckSkills": "Compétences possibles",
+        "CheckTrackDMs": "MD tirés d'une piste",
+        "CheckTrackDM": "MD de piste",
+        "CheckPerHint": "MD par point de la piste — −1 est la ligne imprimée.",
+        "CheckLadderRows": "Seuils imprimés",
+        "CheckLadderRow": "Ligne",
+        "CheckRowAward": "Cette ligne accorde",
+        "CheckOnPass": "En cas de réussite",
+        "CheckOnFail": "En cas d'échec",
+        "CheckEjects": "Met fin à la carrière",
+        "CheckLadder": "selon {index}",
+        "CheckHint": "Le 2D du folio 11 et rien d'autre : un terme nommé, le seuil imprimé et les MD qu'aucune caractéristique ne fournit. Laissez le seuil vide et remplissez les lignes là où le livre imprime une table — un trou dans cette table est un Voyageur sans difficulté imprimée, et il le reste.",
         "TermKinds": "Types de période",
         "TermKind": "Type de période",
         "KindKey": "clé",
@@ -884,7 +904,18 @@
         "AssignmentNewCareer": "Pour cette carrière, un changement d'affectation compte comme une nouvelle carrière : partez, puis redéposez le modèle.",
         "SubRollPassed": "Le jet propre à cette ligne est réussi.",
         "SubRollFailed": "Le jet propre à cette ligne a échoué.",
-        "RefereeStep": "{step} est une étape propre à ce cadre : c'est au référent de la résoudre."
+        "RefereeStep": "{step} est une étape propre à ce cadre : c'est au référent de la résoudre.",
+        "NoStepTarget": "{step} : la table imprimée ne donne aucun seuil pour ce Voyageur.",
+        "StepNotTriggered": "{step} ne se déclenche pas cette période.",
+        "TrackAtCap": "{track} est déjà à son dernier échelon."
+      },
+      "StepCheckTriggers": {
+        "everyTerm": "À chaque période",
+        "afterMishap": "Quand un Aléa survient"
+      },
+      "StepCheckIndices": {
+        "term": "Numéro de période",
+        "characteristic": "Palier de caractéristique"
       }
     },
     "Packs": {

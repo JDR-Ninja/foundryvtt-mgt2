@@ -33,19 +33,93 @@
 	</div>
 	{{#if speciesFrame.declared}}
 	<div class="stack" data-property="frame.steps">
-		{{#each system.frame.steps as |step i|}}
-		<span class="nrow inline" data-entry-index="{{i}}">
-			<span class="ord">{{inc i}}</span>
-			{{! The appended step must be a real one: the field is `blank: false`, so an empty string
-			    would clean away and the update would never fire (§9.110). }}
-			<select class="f edit-only" name="system.frame.steps.{{i}}">{{selectOptions @root.config.CreationSteps selected=step localize=true}}</select>
-			<b class="play-only word">{{localize (lookup @root.config.CreationSteps step)}}</b>
-			<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
-		</span>
+		{{#each speciesFrame.steps as |step i|}}
+		<div class="entry" data-entry-index="{{i}}">
+			<div class="entryhead">
+				<span class="ord">{{inc i}}</span>
+				<select class="f edit-only" name="system.frame.steps.{{i}}.key">{{selectOptions @root.config.CreationSteps selected=step.key localize=true}}</select>
+				<b class="play-only word">{{step.label}}</b>
+				{{#if step.summary}}<span class="play-only">{{step.summary}}</span>{{/if}}
+				<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+			</div>
+
+			{{! **The check the step runs**, which used to live only in the frame's prose (§9.120): a
+			    named term, the printed target, and the DMs no characteristic supplies. Folio 11's 2D
+			    is the whole of the dice, so there is no formula to type. }}
+			<div class="pfields edit-only">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Frame.CheckRolls'}}</span>
+					<select class="f" name="system.frame.steps.{{i}}.check.characteristic">
+						<option value="">&mdash;</option>
+						{{selectOptions @root.config.Characteristics selected=step.check.characteristic localize=true}}
+					</select>
+					<input class="f num" type="number" step="1" name="system.frame.steps.{{i}}.check.target" value="{{step.check.target}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Frame.CheckTarget'}}" />
+				</label>
+				{{! A step is a position in the term, and one printed check fires on a mishap instead. }}
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Frame.CheckWhen'}}</span>
+					<select class="f" name="system.frame.steps.{{i}}.check.when">{{selectOptions @root.config.StepCheckTriggers selected=step.check.when localize=true}}</select>
+				</label>
+				{{! The ladder's index, blank for a check that prints one target. }}
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Frame.CheckIndex'}}</span>
+					<select class="f" name="system.frame.steps.{{i}}.check.index">
+						<option value="">&mdash;</option>
+						{{selectOptions @root.config.StepCheckIndices selected=step.check.index localize=true}}
+					</select>
+					<select class="f" name="system.frame.steps.{{i}}.check.indexCharacteristic">
+						<option value="">&mdash;</option>
+						{{selectOptions @root.config.Characteristics selected=step.check.indexCharacteristic localize=true}}
+					</select>
+				</label>
+			</div>
+			{{! A skill more often than a characteristic, and the list is "Diplomat or Persuade": the
+			    best of them is what rolls. }}
+			{{> systems/mgt2/templates/items/parts/string-list.html list=step.check.skills
+				path=(concat "frame.steps." i ".check.skills") label='MGT2.Chargen.Frame.CheckSkills' add='MGT2.Items.Skill'}}
+
+			{{! "Caste number as a negative DM" — a DM read off a track the frame itself declares. }}
+			<div class="nest edit-only" data-property="frame.steps.{{i}}.check.trackModifiers">
+				<span class="nlbl">{{localize 'MGT2.Chargen.Frame.CheckTrackDMs'}}</span>
+				{{#each step.check.trackModifiers as |modifier m|}}
+				<span class="nrow inline" data-entry-index="{{m}}">
+					<input class="f" type="text" name="system.frame.steps.{{i}}.check.trackModifiers.{{m}}.track" value="{{modifier.track}}" placeholder="{{localize 'MGT2.Chargen.Template.TrackKey'}}" />
+					<input class="f num" type="number" step="1" name="system.frame.steps.{{i}}.check.trackModifiers.{{m}}.per" value="{{modifier.per}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Frame.CheckPerHint'}}" />
+					<a class="del" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+				</span>
+				{{/each}}
+				<a class="add" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Frame.CheckTrackDM'}}</a>
+			</div>
+
+			{{! The printed table, one row as printed: `8+` is a last row with no upper bound, and a
+			    table that SKIPS a value keeps the hole rather than having it filled in. }}
+			<div class="nest edit-only" data-property="frame.steps.{{i}}.check.ladder">
+				<span class="nlbl">{{localize 'MGT2.Chargen.Frame.CheckLadderRows'}}</span>
+				{{#each step.check.ladder as |rung l|}}
+				<div class="entry" data-entry-index="{{l}}">
+					<div class="entryhead">
+						<input class="f num" type="number" step="1" name="system.frame.steps.{{i}}.check.ladder.{{l}}.from" value="{{rung.from}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Frame.KindAnyTerm'}}" />
+						<input class="f num" type="number" step="1" name="system.frame.steps.{{i}}.check.ladder.{{l}}.to" value="{{rung.to}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Frame.KindOnward'}}" />
+						<input class="f num" type="number" step="1" name="system.frame.steps.{{i}}.check.ladder.{{l}}.target" value="{{rung.target}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Frame.CheckTarget'}}" />
+						<a class="del" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+					</div>
+					{{> systems/mgt2/templates/items/parts/step-outcome.html outcome=rung.award
+						path=(concat "frame.steps." i ".check.ladder." l ".award") label='MGT2.Chargen.Frame.CheckRowAward'}}
+				</div>
+				{{/each}}
+				<a class="add" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Frame.CheckLadderRow'}}</a>
+			</div>
+
+			{{> systems/mgt2/templates/items/parts/step-outcome.html outcome=step.check.onPass
+				path=(concat "frame.steps." i ".check.onPass") label='MGT2.Chargen.Frame.CheckOnPass'}}
+			{{> systems/mgt2/templates/items/parts/step-outcome.html outcome=step.check.onFail
+				path=(concat "frame.steps." i ".check.onFail") label='MGT2.Chargen.Frame.CheckOnFail'}}
+		</div>
 		{{/each}}
-		<a class="add edit-only" data-action="entryCreate" data-blank="&quot;elect&quot;"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Frame.Step'}}</a>
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Frame.Step'}}</a>
 		<a class="add edit-only" data-action="stepsDefault"><i class="fa-solid fa-rotate-left"></i> {{localize 'MGT2.Chargen.Frame.UseCore'}}</a>
 	</div>
+	<p class="hint edit-only">{{localize 'MGT2.Chargen.Frame.CheckHint'}}</p>
 	<p class="hint">
 		{{#if speciesFrame.cut.length}}{{localize 'MGT2.Chargen.Frame.Cuts'}} {{#each speciesFrame.cut}}{{#unless @first}}, {{/unless}}{{localize (lookup @root.config.CreationSteps this)}}{{/each}}{{else}}{{localize 'MGT2.Chargen.Frame.CutsNone'}}{{/if}}
 		{{#if speciesFrame.own.length}} &middot; {{localize 'MGT2.Chargen.Frame.Adds'}} {{#each speciesFrame.own}}{{#unless @first}}, {{/unless}}{{localize (lookup @root.config.CreationSteps this)}}{{/each}}{{/if}}

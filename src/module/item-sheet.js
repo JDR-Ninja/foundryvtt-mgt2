@@ -64,8 +64,28 @@ const STRING_LISTS = ["rules", "qualificationOverride.exceptCareers", "backgroun
 /** The same convention one level down, where the list is a track's rungs inside an indexed track. */
 const TRACK_LISTS = ["tracks", "frame.tracks"];
 
+/** And again, where it is the skills a standing modifier reads its DM off (§9.121). */
+const STANDING_LISTS = ["standingModifiers", "frame.standingModifiers"];
+
 /** A submitted list arrives keyed by index, so it is an object here and an array afterwards. */
 const compact = list => Object.values(list ?? {}).filter(entry => entry?.trim());
+
+/**
+ * A declared step's check as the book prints it — `Patriarchy 4+`, `Caste 2+`, `Patriarchy, by SOC` —
+ * or nothing at all where the frame declares no check (§9.120). Composed here rather than in the
+ * template because a summary is three optional parts and Handlebars cannot join them.
+ * @returns {string}
+ */
+function stepCheckSummary(check) {
+  const named = check.skills.length ? check.skills.join(" / ")
+    : (check.characteristic ? game.i18n.localize(MGT2.Characteristics[check.characteristic]) : "");
+  if ( !named ) return "";
+  const target = check.index
+    ? game.i18n.format("MGT2.Chargen.Frame.CheckLadder",
+      { index: game.i18n.localize(MGT2.StepCheckIndices[check.index]) })
+    : ((check.target === null) ? "" : game.i18n.format("MGT2.Chargen.Term.Target", { n: check.target }));
+  return [named, target].filter(part => part).join(" ");
+}
 
 /** The sub-type dictionary that names each type, where it has one. */
 const SUBTYPES = {
@@ -134,7 +154,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         "systems/mgt2/templates/items/parts/career-cell.html",
         "systems/mgt2/templates/items/parts/string-list.html",
         "systems/mgt2/templates/items/parts/track-definition.html",
-        "systems/mgt2/templates/items/parts/standing-modifier.html"),
+        "systems/mgt2/templates/items/parts/standing-modifier.html",
+        "systems/mgt2/templates/items/parts/step-outcome.html"),
       // The masthead never scrolls, so the open tab is the only scroller — and `submitOnChange`
       // re-renders the whole sheet on every keystroke.
       scrollable: ['.tab[data-group="item"].active']
@@ -344,6 +365,15 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       own: [...own],
       cut: [...cut],
       declared: this.item.system.frame.steps.length > 0,
+      // The step's own label and the one-line reading of its check, composed here because a play-time
+      // row prints what the book prints — `Patriarchy 4+` — and Handlebars cannot assemble that.
+      steps: this.item.system.frame.steps.map((step, index) => ({
+        index,
+        key: step.key,
+        check: step.check,
+        label: game.i18n.localize(MGT2.CreationSteps[step.key] ?? step.key),
+        summary: stepCheckSummary(step.check)
+      })),
       without: Array.from(this.item.system.withoutCharacteristics,
         key => game.i18n.localize(MGT2.Characteristics[key]))
     };
@@ -691,6 +721,16 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         if ( track?.values ) track.values = compact(track.values);
       }
     }
+    // The same convention one level down again: the skills a declared step's check names (§9.120),
+    // and the ones a standing modifier reads its DM off (§9.121).
+    for ( const step of Object.values(system?.frame?.steps ?? {}) ) {
+      if ( step?.check?.skills ) step.check.skills = compact(step.check.skills);
+    }
+    for ( const path of STANDING_LISTS ) {
+      for ( const entry of Object.values(foundry.utils.getProperty(system ?? {}, path) ?? {}) ) {
+        if ( entry?.skills ) entry.skills = compact(entry.skills);
+      }
+    }
 
     // The chip row lets a printed parameter be retyped; the number a rule reads follows from it.
     for ( const property of ["traits", "options"] ) refreshTraitNumbers(system?.[property]);
@@ -806,7 +846,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
    */
   static async #onStepsDeclare() {
     await this.submit();
-    return this.item.update({ "system.frame.steps": [...MGT2.CoreTermSequence] });
+    return this.item.update({
+      "system.frame.steps": MGT2.CoreTermSequence.map(key => ({ key })) });
   }
 
   /** @this {TravellerItemSheet} */

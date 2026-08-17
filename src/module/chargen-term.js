@@ -77,10 +77,11 @@ export class ChargenTerm {
         const key = step ?? this.current(actor);
         if ( !this.sequence(actor).includes(key) ) return null;
 
-        // A step the frame declares and this build has no procedure for is the referee's own — the
-        // nest transition, the status check, the continuation check (§9.54). Recorded as played
-        // rather than resolved, because inventing a procedure for it would be worse than saying so.
-        const handler = STEPS[key] ?? refereeStep;
+        // A step the frame declares and this build has no procedure of its own for — the nest
+        // transition, the status check, the continuation check (§9.54). It is rolled where the frame
+        // states a check (§9.120) and otherwise recorded as played rather than resolved, because
+        // inventing a procedure for it would be worse than saying so.
+        const handler = STEPS[key] ?? declaredStep;
         const result = await handler(reading(actor), key) ?? {};
         if ( result.advance === false ) return result;
         await this.#advance(actor, key, result.skip ?? []);
@@ -501,7 +502,8 @@ async function applyRow(view, row, { mishap }) {
     // §9.50: rows keep, lose, wipe or grant Benefit rolls, and two let a player wager them — which
     // needs the pending total to exist mid-term and is the whole reason the count is a ledger. One row
     // awards `D3` of them, so the count may be rolled (§9.109).
-    const count = row.benefitFormula ? (await new Roll(row.benefitFormula).roll()).total : row.benefitCount;
+    const count = row.benefitFormula
+        ? (await new Roll(MGT2Helper.damageFormula(row.benefitFormula)).roll()).total : row.benefitCount;
     if ( row.benefit === "grant" ) {
         await credit(actor, "benefitRolls", { value: count, career: record.id, term,
             note: row.text || game.i18n.localize("MGT2.Chargen.Term.BenefitGranted") });
@@ -696,11 +698,13 @@ async function adjustTrack(view, move) {
     if ( move.reroll ) {
         const definition = system.tracks.find(entry => entry.key === move.key);
         const rerolled = definition?.initial
-            ? (await new Roll(definition.initial).roll()).total : (system.track.value ?? 0);
+            ? (await new Roll(MGT2Helper.damageFormula(definition.initial)).roll()).total
+            : (system.track.value ?? 0);
         await record.update({ "system.track.value": clampTrack(rerolled, system.track.cap) });
         return game.i18n.format("MGT2.Chargen.Term.TrackReroll", { track: move.key, value: rerolled });
     }
-    const delta = move.formula ? (await new Roll(move.formula).roll()).total : move.value;
+    const delta = move.formula
+        ? (await new Roll(MGT2Helper.damageFormula(move.formula)).roll()).total : move.value;
     const value = clampTrack((system.track.value ?? 0) + delta, system.track.cap);
     const adjustments = system.track.adjustments.map(entry => ({ ...entry }));
     adjustments.push({ value: delta, term, note: game.i18n.localize("MGT2.Chargen.Term.TrackMoved") });
@@ -818,8 +822,14 @@ async function advance(view) {
     const tracked = !!system.exitRule.track && (system.exitRule.track === system.track.key);
     const threshold = system.track.value ?? 0;
 
+    // **A frame may govern advancement with a characteristic of its own**, whatever each career's line
+    // prints — one published species advances on the same score in every career it can enter. That is
+    // §9.54's *"an advancement rule with its own governing characteristic"*, and it is the `advance`
+    // step's own check (§9.120). The TARGET stays the career's: no frame prints one, because it is
+    // printed per assignment.
+    const framed = Chargen.stepCheck(view.actor, "advance");
     const rolled = await roll(view, { check: "advancement", step: "advance",
-        characteristic: assignment.advancement.characteristic, target });
+        characteristic: framed?.characteristic || assignment.advancement.characteristic, target });
     if ( !rolled ) return { advance: false };
 
     const outcomes = [];
@@ -1203,12 +1213,157 @@ async function changeAssignment(view, rule) {
 
 /* -------------------------------------------- */
 
-/** A step the frame declares and this build has no procedure for — the referee's, and recorded as such. */
-async function refereeStep(view, key) {
+/**
+ * A step the frame declares and this build has no procedure of its own for — the nest transition, the
+ * status check, the continuation check, the household timetable (§9.54).
+ *
+ * **What the frame declares, the loop rolls** (§9.120). A step used to be a bare key, so all four were
+ * announced and left to the referee; a step that carries a check is rolled here against its own printed
+ * target, and each arm's consequences are applied from the same vocabulary an event row uses. A step
+ * with no check declared is still the referee's, and is recorded as played rather than resolved —
+ * inventing a procedure for it would be worse than saying so.
+ */
+async function declaredStep(view, key) {
     const label = game.i18n.localize(MGT2.CreationSteps[key] ?? key);
-    ui.notifications.info(game.i18n.format("MGT2.Chargen.Term.RefereeStep", { step: label }));
-    if ( view.record ) await logTerm(view.record, view.term, { note: label });
+    const check = Chargen.stepCheck(view.actor, key);
+    if ( !check || !checkRolls(check) ) {
+        ui.notifications.info(game.i18n.format("MGT2.Chargen.Term.RefereeStep", { step: label }));
+        if ( view.record ) await logTerm(view.record, view.term, { note: label });
+        return { advance: true };
+    }
+
+    // A check the term did not trigger is not a check that was passed, and not one the referee owes
+    // either: it simply does not fire. A mishap is a fact on the term log and never a phrase (§9.49).
+    if ( (check.when === "afterMishap") && !logEntry(view.record, view.term).outcomes.has("mishap") ) {
+        ui.notifications.info(game.i18n.format("MGT2.Chargen.Term.StepNotTriggered", { step: label }));
+        return { advance: true };
+    }
+
+    const { target, row, missing } = stepTarget(view, check);
+    // A printed table with a hole in it — the SOC Rank table skips one score entirely — leaves a
+    // Traveller at that score with no printed difficulty. Said out loud rather than assumed away.
+    if ( missing ) {
+        ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.NoStepTarget", { step: label }));
+        if ( view.record ) await logTerm(view.record, view.term, { note: label });
+        return { advance: true };
+    }
+
+    await Chargen.ensureTracks(view.actor);
+    // The step key IS the check key here, which is what lets a standing modifier printed against a
+    // frame-owned step reach it — `MGT2.CreationChecks` carries the four (§9.121).
+    const rolled = await roll(view, {
+        check: key, step: key, target,
+        characteristic: check.characteristic,
+        skill: bestSkill(view.actor, check.skills),
+        rows: trackRows(view.actor, check.trackModifiers)
+    });
+    if ( !rolled ) return { advance: false };
+
+    // The row's award is the printed table's own column and is NOT conditioned on the roll — what the
+    // roll buys is the check's arm — so it applies either way and the two are read together.
+    const arms = [rolled.passed ? check.onPass : check.onFail, row?.award];
+    const lines = [];
+    for ( const arm of arms ) lines.push(...await applyStepOutcome(view, arm, key));
+    const note = [label, ...lines].filter(line => line).join(" · ");
+    if ( view.record ) await logTerm(view.record, view.term, { note });
     return { advance: true };
+}
+
+/** Enough of a check to roll: a named term, and a target the ladder or the line supplies. */
+function checkRolls(check) {
+    return !!(check.characteristic || check.skills.length)
+        && ((check.target !== null) || (check.ladder.length > 0));
+}
+
+/**
+ * The target this term's check is measured against. A ladder is read at its index — the term number,
+ * or a characteristic score — and `missing` is a ladder that prints no row for where the Traveller is.
+ * @returns {{target: number|null, row: object|null, missing: boolean}}
+ */
+function stepTarget(view, check) {
+    if ( !check.ladder.length ) return { target: check.target, row: null, missing: false };
+    const index = (check.index === "characteristic")
+        ? (view.actor.system.characteristics[check.indexCharacteristic]?.value ?? null)
+        : view.term;
+    const row = (index === null) ? null : check.ladder.find(entry =>
+        ((entry.from === null) || (index >= entry.from)) && ((entry.to === null) || (index <= entry.to)));
+    if ( !row ) return { target: check.target, row: null, missing: check.target === null };
+    return { target: row.target ?? check.target, row, missing: (row.target === null) && (check.target === null) };
+}
+
+/** The best of the skills a printed line offers — *"a Diplomat or Persuade check"* is the Traveller's pick. */
+function bestSkill(actor, skills) {
+    if ( skills.length < 2 ) return skills[0] ?? "";
+    return skills.reduce((best, skill) =>
+        ((CreationRoll.skillLevel(actor, skill) ?? -Infinity) > (CreationRoll.skillLevel(actor, best) ?? -Infinity))
+            ? skill : best);
+}
+
+/**
+ * The DMs a printed step check reads off a track — *"caste number as a negative DM"* — which no
+ * characteristic and no skill supplies (§9.120).
+ * @returns {[string, number][]}
+ */
+function trackRows(actor, modifiers) {
+    const declared = Chargen.frame(actor)?.system.frame.tracks ?? [];
+    const rows = [];
+    for ( const modifier of modifiers ) {
+        if ( !modifier.track || !modifier.per ) continue;
+        const value = Chargen.track(actor, modifier.track).value;
+        if ( !value ) continue;
+        const label = declared.find(entry => entry.key === modifier.track)?.label;
+        rows.push([label || modifier.track, modifier.per * value]);
+    }
+    return rows;
+}
+
+/**
+ * One arm of a step check, applied. The four consequences are the event row's own (§9.49, §9.109), so
+ * a track moved by a status check and a track moved by a prison event go through one vocabulary.
+ * @returns {Promise<string[]>}
+ */
+async function applyStepOutcome(view, arm, key) {
+    if ( !arm ) return [];
+    const { actor, record, term } = view;
+    const lines = [];
+
+    if ( arm.track.key ) {
+        const delta = arm.track.formula
+            ? (await new Roll(MGT2Helper.damageFormula(arm.track.formula)).roll()).total : arm.track.value;
+        const moved = delta ? await Chargen.moveTrack(actor, arm.track.key, delta) : null;
+        // A track at its last rung is a printed state — *"one attempt at promotion each term until the
+        // Traveller reaches the status of rankholder"* — and it is said rather than logged as a move
+        // that did not happen.
+        if ( moved?.moved ) {
+            lines.push(game.i18n.format("MGT2.Chargen.Term.TrackAdjusted", { track: moved.label,
+                dm: MGT2Helper.signed(delta), value: moved.rung || moved.value }));
+        }
+        else if ( moved ) lines.push(game.i18n.format("MGT2.Chargen.Term.TrackAtCap", { track: moved.label }));
+    }
+    const granted = await applyCell(actor, arm.grant,
+        { provenance: { term, career: record?.id ?? "", table: key } });
+    if ( granted.length ) lines.push(granted.join(", "));
+    if ( arm.outcomes.size && record ) {
+        lines.push(...await applyAwards(view, { outcomes: arm.outcomes, mode: "all", optional: false }));
+    }
+
+    // Ejection is the same fact here as on a row, and `neverEjects` on the career flips it for the same
+    // reason: a career that cannot eject cannot be left by a species' own check either (§9.52).
+    if ( record && (arm.ejects !== "stays") ) {
+        const ejected = (arm.ejects === "ejects") || (await DialogV2.confirm({
+            window: { title: "MGT2.Chargen.Term.EjectChoice" },
+            content: `<p>${game.i18n.localize("MGT2.Chargen.Term.EjectChoiceHint")}</p>`,
+            rejectClose: false
+        }) === true);
+        if ( ejected && view.system.neverEjects ) lines.push(game.i18n.localize("MGT2.Chargen.Term.CannotEject"));
+        else if ( ejected ) {
+            await logTerm(record, term, { ejected: true });
+            await record.update({ "system.exitMode": "ejectedByMishap" });
+            ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.Ejected", { career: record.name }));
+            lines.push(game.i18n.format("MGT2.Chargen.Term.Ejected", { career: record.name }));
+        }
+    }
+    return lines;
 }
 
 function needCareer() {
@@ -1332,7 +1487,8 @@ async function applyGrant(actor, grant, { level, provenance }) {
     if ( grant.kind === "characteristic" ) return grantCharacteristic(actor, grant, provenance);
     if ( (grant.kind === "cash") || (grant.kind === "shipShare") ) return grantFinance(actor, grant);
     if ( grant.kind === "contact" ) {
-        const count = grant.formula ? (await new Roll(grant.formula).roll()).total : grant.value;
+        const count = grant.formula
+            ? (await new Roll(MGT2Helper.damageFormula(grant.formula)).roll()).total : grant.value;
         for ( let i = 0; i < count; i++ ) await Grants.contact(actor, { provenance });
         return `${game.i18n.localize(MGT2.CreationGrantKinds.contact)} ×${count}`;
     }
@@ -1358,7 +1514,8 @@ async function grantCharacteristic(actor, grant, provenance) {
 }
 
 async function grantFinance(actor, grant) {
-    const amount = grant.formula ? (await new Roll(grant.formula).roll()).total : grant.value;
+    const amount = grant.formula
+        ? (await new Roll(MGT2Helper.damageFormula(grant.formula)).roll()).total : grant.value;
     if ( !amount ) return "";
     const key = (grant.kind === "cash") ? "credits" : "shipShares";
     await actor.update({ [`system.finance.${key}`]: (actor.system.finance[key] ?? 0) + amount });

@@ -119,14 +119,28 @@ export const CreationRoll = {
             [record, record?.system.standingModifiers]];
         for ( const [source, entries] of sources ) {
             for ( const entry of entries ?? [] ) {
-                if ( !entry.dm ) continue;
                 if ( check && entry.appliesTo.size && !entry.appliesTo.has(check) ) continue;
                 if ( entry.career && career && (entry.career !== career) ) continue;
                 if ( !CreationRoll.gated(actor, entry.gate) ) continue;
-                rows.push([entry.note || source.name, entry.dm]);
+                const dm = entry.dm + (entry.per * CreationRoll.highestLevel(actor, entry.skills));
+                if ( !dm ) continue;
+                rows.push([entry.note || source.name, dm]);
             }
         }
         return rows;
+    },
+
+    /**
+     * The highest level held among a named list of skills, and **0 for a Traveller who holds none** —
+     * *"a Droyne **with any levels in** Black Skills suffers…"*, so not holding one is not a penalty of
+     * zero, it is no penalty (§9.121). The untrained DM is not this: a skill nobody has is not being
+     * rolled here, it is being measured.
+     * @returns {number}
+     */
+    highestLevel(actor, skills) {
+        let best = 0;
+        for ( const skill of skills ?? [] ) best = Math.max(best, CreationRoll.skillLevel(actor, skill) ?? 0);
+        return best;
     },
 
     /** A precondition over a characteristic, evaluated now: blank is ungated and passes. */
