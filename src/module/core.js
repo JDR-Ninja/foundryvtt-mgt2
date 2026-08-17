@@ -49,6 +49,7 @@ import {
 import { answerRequest, registerRequestAnswer } from "./request-answer.js";
 import { Docket } from "./docket.js";
 import { registerActiveEffects } from "./effects.js";
+import { registerSpaceCanvas } from "./space-canvas.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
 import { TravellerActor } from "./actors/actor.js";
@@ -377,6 +378,9 @@ Hooks.once("init", async function () {
   // is left alone, because core already declares `changes` there.
   registerActiveEffects();
   registerCombatantContextOptions();
+  // The token ruler, which reads the range band off a scene flagged for space. Global by nature —
+  // the flag is what leaves every other scene measuring exactly as core does.
+  registerSpaceCanvas();
   // The screen is opened from the tracker's two context menus, and the drag watcher is what lets a
   // drop zone refuse at the pointer — `dataTransfer` is unreadable for the whole of `dragover`.
   registerSpaceCombatScreen();

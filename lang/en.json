@@ -3021,6 +3021,36 @@
       "veryLong": "Very Long",
       "distant": "Distant"
     },
+    "Canvas": {
+      "RangeLabel": "{band} · {km} km",
+      "RangeCrossLevel": "No range — the path crosses levels",
+      "RangeElevation": "No range — the path changes elevation",
+      "SetBand": "Set the range band from two tokens",
+      "BandSet": "{a} ↔ {b} — {range}",
+      "NeedTwo": "Select exactly two tokens: a range band is measured between two.",
+      "NotSpaceScene": "This scene is not a space scene, so its distances are not kilometres.",
+      "LevelSplit": "The two tokens are on different levels of this scene, which are drawn at different scales.",
+      "ElevationSplit": "The two tokens are at different elevations, which on a space scene orders the levels rather than measuring a height.",
+      "NoCombat": "No space combat or fleet battle is being viewed, and the range band belongs to one.",
+      "NotInCombat": "{name} is not a contact of the encounter being viewed.",
+      "SalvoPosition": "{name} is a salvo in flight: it is where it is, not where the fleet that fired it is.",
+      "NoGroup": "{name} belongs to no ship and no fleet, and a range band is measured between two of those.",
+      "SameGroup": "Both tokens belong to {name}, and a range band is measured between two.",
+      "ConfigureScene": "Configure for space combat",
+      "ConfigureSceneHint": "{name} becomes a gridless {size} × {size} pixel scene measured in kilometres, with one level per scale: {levels}, and two regions that offer a token the next scale out or in. Its dimensions, its grid, those four levels and those two regions are overwritten; its background, its tokens and everything else on it are not.",
+      "SceneConfigured": "{name} is now a space scene: {levels}.",
+      "NotGM": "Only the referee can configure a scene for space combat.",
+      "Levels": {
+        "contact": "Contact",
+        "approach": "Approach",
+        "engagement": "Engagement",
+        "theatre": "Theatre"
+      },
+      "Regions": {
+        "edge": "Edge — scale outward",
+        "centre": "Centre — scale inward"
+      }
+    },
     "SpaceCombat": {
       "Create": "New space combat",
       "Open": "Space combat screen",

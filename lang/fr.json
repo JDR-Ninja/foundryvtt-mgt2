@@ -2277,6 +2277,36 @@
       "actions": "Actions",
       "reaction": "Réaction"
     },
+    "Canvas": {
+      "RangeLabel": "{band} · {km} km",
+      "RangeCrossLevel": "Pas de portée — le trajet change de niveau",
+      "RangeElevation": "Pas de portée — le trajet change d’altitude",
+      "SetBand": "Fixer la zone de portée d’après deux jetons",
+      "BandSet": "{a} ↔ {b} — {range}",
+      "NeedTwo": "Sélectionnez exactement deux jetons : une zone de portée se mesure entre deux.",
+      "NotSpaceScene": "Cette scène n’est pas une scène spatiale : ses distances ne sont pas des kilomètres.",
+      "LevelSplit": "Les deux jetons sont sur des niveaux différents de cette scène, dessinés à des échelles différentes.",
+      "ElevationSplit": "Les deux jetons sont à des altitudes différentes, or l’altitude ordonne les niveaux d’une scène spatiale au lieu d’y mesurer une hauteur.",
+      "NoCombat": "Aucun combat spatial ni bataille entre flottes n’est affiché, or la zone de portée appartient à l’un d’eux.",
+      "NotInCombat": "{name} n’est pas un contact de la rencontre affichée.",
+      "SalvoPosition": "{name} est une salve en vol : elle est là où elle est, pas là où est la flotte qui l’a tirée.",
+      "NoGroup": "{name} n’appartient à aucun vaisseau ni à aucune flotte, or une zone de portée se mesure entre deux d’entre eux.",
+      "SameGroup": "Les deux jetons appartiennent à {name}, or une zone de portée se mesure entre deux.",
+      "ConfigureScene": "Configurer pour le combat spatial",
+      "ConfigureSceneHint": "{name} devient une scène sans quadrillage de {size} × {size} pixels mesurée en kilomètres, avec un niveau par échelle : {levels}, et deux régions qui proposent à un jeton l’échelle suivante vers l’extérieur ou vers l’intérieur. Ses dimensions, son quadrillage, ces quatre niveaux et ces deux régions sont écrasés ; son arrière-plan, ses jetons et tout le reste ne le sont pas.",
+      "SceneConfigured": "{name} est désormais une scène spatiale : {levels}.",
+      "NotGM": "Seul l’arbitre peut configurer une scène pour le combat spatial.",
+      "Levels": {
+        "contact": "Contact",
+        "approach": "Approche",
+        "engagement": "Engagement",
+        "theatre": "Théâtre"
+      },
+      "Regions": {
+        "edge": "Bord — échelle vers l’extérieur",
+        "centre": "Centre — échelle vers l’intérieur"
+      }
+    },
     "SpaceCombat": {
       "Create": "Nouveau combat spatial",
       "Open": "Écran de combat spatial",
