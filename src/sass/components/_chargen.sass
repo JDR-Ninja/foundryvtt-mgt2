@@ -1,0 +1,625 @@
+// The creation screen. Ported from docs/sketch-chargen.html: the masthead, the term grid, the step
+// strip and the tray, in that order down the window.
+//
+// THE HEIGHT BUDGET, measured at the default 700 px: window bar 36, masthead 40, strip 107, tray 94 —
+// leaving the grid 422, which is five term rows before it scrolls. The grid is THE ONLY SCROLLER, and
+// that is the decision the layout exists to hold: the strip and the tray say what happens next for the
+// column just clicked, so a table that grows a row per term must never push them off the bottom.
+//
+// `.termgrid` and NOT `.ledger`, which the sketch used. `.mgt2 .ledger` is already the world sheet's
+// derivation block and carries `display: flex` — inherited onto a <table> it makes `thead` and `tbody`
+// two independent flex items, the column model collapses, and the header row sizes to its own content
+// while the body sizes to the table. Measured: a 1148 px table whose header row came out 674 px wide,
+// every column heading landing over the wrong column. It renders, so nothing errors. Same trap the
+// sketch records for `.grid`, one name further along.
+
+.mgt2.application.chargen
+	container-type: inline-size
+	container-name: chargen
+
+	> .window-content
+		display: flex
+		flex-direction: column
+		gap: 0
+		height: 100%
+		padding: 0
+		overflow: hidden
+
+		> [data-application-part="masthead"]
+			flex: none
+		// The one scroller, on both screens: the term grid on the creation window and the muster-out
+		// table on the closing one. Everything below it says what happens next and must stay visible.
+		> [data-application-part="ledger"],
+		> [data-application-part="roster"]
+			flex: 1 1 auto
+			min-height: 0
+			overflow: auto
+		> [data-application-part="strip"],
+		> [data-application-part="tray"],
+		> [data-application-part="ship"],
+		> [data-application-part="package"]
+			flex: none
+
+// --------------------------------------------
+//  The masthead — the session's own state, which is not a document
+// --------------------------------------------
+
+.mgt2 .mgt2-chargen-head
+	display: flex
+	flex-wrap: wrap
+	align-items: baseline
+	gap: 10px 16px
+	padding: 10px 14px 11px
+	border-bottom: 1px solid var(--rule)
+
+	h2
+		margin: 0
+		font-family: var(--cond)
+		font-size: 16px
+		font-weight: 700
+		letter-spacing: 0.12em
+		text-transform: uppercase
+	.clock
+		font-family: var(--mono)
+		font-size: 12px
+		font-weight: 600
+		color: var(--accent-text)
+	.count
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--faint)
+	// The door onto §9.40's close, and the close's own teardown button. Pushed right so the masthead
+	// reads left to right as state, then action.
+	.closing,
+	.finishall
+		margin-left: auto
+		flex: none
+		width: auto
+		padding: 2px 9px 3px
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 700
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		line-height: 1.6
+
+// --------------------------------------------
+//  THE LEDGER
+// --------------------------------------------
+// Fixed layout, because the point of the grid is seeing every column at once: with auto layout one
+// verbose cell widens its whole column and pushes the fourth Traveller off the edge, which is the one
+// thing this screen must not do.
+
+.mgt2 .termgridwrap
+	overflow: auto
+	padding: 0 0 4px
+
+.mgt2 table.termgrid
+	border-collapse: separate
+	border-spacing: 0
+	width: 100%
+	table-layout: fixed
+
+	th,
+	td
+		vertical-align: top
+
+	thead th
+		position: sticky
+		top: 0
+		z-index: 2
+		background: var(--mgt2-bgcolor-form)
+		border-bottom: 1px solid var(--rule)
+		padding: 8px 9px 9px
+		text-align: left
+	thead th.tcol
+		width: 4.2rem
+	thead th.sel
+		background: var(--accent-soft)
+
+	.who
+		position: relative
+		cursor: pointer
+		b
+			display: block
+			font-family: var(--cond)
+			font-size: 12.5px
+			font-weight: 700
+			letter-spacing: 0.07em
+			text-transform: uppercase
+			a
+				color: inherit
+		.sp
+			display: block
+			font-family: var(--mono)
+			font-size: 9.5px
+			color: var(--faint)
+		.ag
+			display: block
+			font-family: var(--mono)
+			font-size: 10px
+			color: var(--mute)
+		// A Traveller who has stopped, and has not yet been torn down: mustering out CONSUMES the
+		// ledger, so the teardown is strictly after it (§9.50).
+		&.done b
+			color: var(--faint)
+		.out
+			display: inline-block
+			margin-top: 3px
+			padding: 1px 5px
+			font-family: var(--cond)
+			font-size: 8.5px
+			font-weight: 700
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--faint)
+			border: 1px solid var(--rule)
+			border-radius: 2px
+		a.out
+			cursor: pointer
+			&:hover
+				color: var(--accent-text)
+				border-color: var(--accent-text)
+		.x
+			position: absolute
+			top: 0
+			right: 0
+			font-size: 13px
+			line-height: 1
+			color: var(--faint)
+			opacity: 0
+			&:hover
+				color: var(--danger)
+		&:hover .x
+			opacity: 1
+
+	td.tno
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--faint)
+		padding: 7px 9px
+		border-bottom: 1px solid var(--rule-soft)
+		white-space: nowrap
+	td.cell
+		padding: 6px 9px 7px
+		border-bottom: 1px solid var(--rule-soft)
+		border-left: 1px solid var(--rule-soft)
+		overflow-wrap: anywhere
+		cursor: pointer
+	tbody tr:last-child td
+		border-bottom: 0
+
+.mgt2 .termgrid .cell
+	.car
+		display: block
+		font-family: var(--cond)
+		font-size: 11.5px
+		font-weight: 700
+		letter-spacing: 0.06em
+		text-transform: uppercase
+	.asg
+		display: block
+		font-family: var(--mono)
+		font-size: 9.5px
+		color: var(--faint)
+	// A named track: the Prisoner's parole threshold, a species status. Its value is reconstructed
+	// per term by unwinding the adjustments made after it, so the column reads as a history.
+	.trk
+		display: flex
+		align-items: baseline
+		gap: 6px
+		margin-top: 4px
+		i
+			font-style: normal
+			font-family: var(--cond)
+			font-size: 9px
+			font-weight: 700
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--faint)
+		b
+			font-family: var(--mono)
+			font-size: 12px
+			font-weight: 600
+			color: var(--accent-text)
+	ul
+		margin: 4px 0 0
+		padding: 0
+		list-style: none
+		display: flex
+		flex-direction: column
+		gap: 2px
+	li
+		display: flex
+		gap: 5px
+		font-family: var(--mono)
+		font-size: 10.5px
+		line-height: 1.45
+		color: var(--mute)
+		i
+			flex: 0 0 auto
+			width: 1.05rem
+			font-style: normal
+			color: var(--faint)
+	li.good i
+		color: var(--good)
+	li.bad i
+		color: var(--danger)
+
+// A cell that no longer exists is not an empty cell: the Traveller left.
+.mgt2 .termgrid td.cell.gone
+	background: repeating-linear-gradient(135deg, transparent 0 5px, var(--rule-soft) 5px 6px)
+	cursor: default
+.mgt2 .termgrid td.cell.now
+	box-shadow: inset 0 0 0 1px var(--accent-text)
+	background: var(--accent-soft)
+
+// The drop row is one cell across the whole width: split over the columns it would land in a cell
+// the width of a term number and wrap to three lines.
+.mgt2 .termgrid tr.drop td
+	padding: 7px 9px 9px
+	border-top: 1px solid var(--rule-soft)
+	text-align: center
+	.hint
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+	&.over
+		background: var(--accent-soft)
+		.hint
+			color: var(--accent-text)
+	&.deny
+		.hint
+			color: var(--danger)
+
+// --------------------------------------------
+//  The step strip — the term as the frame declares it
+// --------------------------------------------
+
+.mgt2.chargen .steps
+	border-top: 1px solid var(--rule)
+	padding: 9px 14px 11px
+
+	.lbl
+		font-family: var(--cond)
+		font-size: 9px
+		font-weight: 700
+		letter-spacing: 0.16em
+		text-transform: uppercase
+		color: var(--faint)
+	ol
+		margin: 5px 0 0
+		padding: 0
+		list-style: none
+		display: flex
+		flex-wrap: wrap
+		gap: 4px
+	li
+		padding: 2px 7px 3px
+		font-family: var(--mono)
+		font-size: 10px
+		color: var(--mute)
+		border: 1px solid var(--rule)
+		border-radius: 2px
+	// A chip is a BUTTON for a column the viewer may write to and a readout for every other, so the
+	// button is stripped back to the chip rather than the chip restyled around a button.
+	li button
+		all: unset
+		cursor: pointer
+		font: inherit
+		color: inherit
+		&:hover
+			color: var(--accent-text)
+	// A step this frame ADDS to the Core sequence, and one it DELETES from it. Both derived.
+	li.own
+		border-color: var(--accent-text)
+		color: var(--accent-text)
+	// Where the loop is, which is the flag's own cursor and not a position in this list.
+	li.now
+		background: var(--accent-soft)
+		border-color: var(--accent-text)
+		color: var(--accent-text)
+		font-weight: 600
+	li.cut
+		text-decoration: line-through
+		opacity: 0.45
+	.why
+		margin: 6px 0 0
+		font-size: 12px
+		line-height: 1.5
+		color: var(--mute)
+	.src
+		margin: 3px 0 0
+		font-family: var(--mono)
+		font-size: 10px
+		color: var(--faint)
+
+// --------------------------------------------
+//  The tray — §9.51 says an entry is never just a value
+// --------------------------------------------
+
+.mgt2.chargen .tray2
+	border-top: 1px solid var(--rule)
+	padding: 9px 14px 11px
+
+	.lbl
+		font-family: var(--cond)
+		font-size: 9px
+		font-weight: 700
+		letter-spacing: 0.16em
+		text-transform: uppercase
+		color: var(--faint)
+	// §9.50's two counters, beside the tray's caption because the tray is where they are stored.
+	.counts
+		margin-left: 10px
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--accent-text)
+	table
+		width: 100%
+		border-collapse: collapse
+		margin-top: 4px
+	th
+		text-align: left
+		padding: 0 7px 3px 0
+		font-family: var(--cond)
+		font-size: 9px
+		font-weight: 700
+		letter-spacing: 0.15em
+		text-transform: uppercase
+		color: var(--faint)
+		border-bottom: 1px solid var(--rule)
+	td
+		padding: 3px 7px 3px 0
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--mute)
+		border-bottom: 1px solid var(--rule-soft)
+	td.k
+		color: var(--mgt2-color-form)
+	tr:last-child td
+		border-bottom: 0
+	.none
+		margin: 4px 0 0
+		font-size: 12px
+		color: var(--faint)
+
+// --------------------------------------------
+//  THE CLOSING SCREEN — §9.40's two group-level steps and the teardown
+// --------------------------------------------
+// Same four-block shape as the creation grid and the same single scroller: the muster-out table grows
+// a row per Traveller, and the ship election and the package draft must never be pushed off the
+// bottom, because those two are the whole reason this screen exists rather than four sheets.
+
+.mgt2 .mustergrid
+	padding: 0 0 4px
+
+	> .none
+		margin: 14px
+		font-size: 12px
+		color: var(--faint)
+	table
+		width: 100%
+		border-collapse: separate
+		border-spacing: 0
+		table-layout: fixed
+	th
+		position: sticky
+		top: 0
+		z-index: 2
+		background: var(--mgt2-bgcolor-form)
+		border-bottom: 1px solid var(--rule)
+		padding: 8px 9px 9px
+		text-align: left
+		font-family: var(--cond)
+		font-size: 9px
+		font-weight: 700
+		letter-spacing: 0.15em
+		text-transform: uppercase
+		color: var(--faint)
+	th.n,
+	td.n
+		text-align: right
+	th.a
+		width: 7.4rem
+	td
+		vertical-align: top
+		padding: 7px 9px 8px
+		border-bottom: 1px solid var(--rule-soft)
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--mute)
+		overflow-wrap: anywhere
+	td.big
+		font-size: 15px
+		font-weight: 600
+		color: var(--accent-text)
+	tbody tr:last-child td
+		border-bottom: 0
+
+	.who
+		b
+			display: block
+			font-family: var(--cond)
+			font-size: 12.5px
+			font-weight: 700
+			letter-spacing: 0.07em
+			text-transform: uppercase
+			a
+				color: inherit
+		.ag
+			display: block
+			font-size: 9.5px
+			color: var(--faint)
+		.warn
+			display: inline-block
+			margin-top: 3px
+			font-size: 9.5px
+			color: var(--danger)
+	ul
+		margin: 0
+		padding: 0
+		list-style: none
+	.careers li
+		margin-bottom: 3px
+		b
+			font-weight: 600
+			color: var(--mgt2-color-form)
+		span
+			display: block
+			font-size: 9.5px
+			color: var(--faint)
+		.pen
+			color: var(--accent-text)
+	.sh
+		display: block
+		font-size: 9.5px
+		color: var(--faint)
+	.vouchers li
+		display: flex
+		gap: 5px
+		align-items: baseline
+		margin-bottom: 2px
+		i
+			flex: 0 0 auto
+			font-style: normal
+			font-family: var(--cond)
+			font-size: 8.5px
+			font-weight: 700
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--faint)
+		a
+			cursor: pointer
+			color: var(--faint)
+			&:hover
+				color: var(--good)
+		.up
+			font-size: 9px
+			color: var(--danger)
+	// Redeemed or given up: kept on the row rather than removed, because what a Traveller was owed is
+	// part of their history and a referee auditing a sheet needs the row that paid for it (§9.40).
+	.vouchers li.spent
+		opacity: 0.5
+		text-decoration: line-through
+	.none
+		font-size: 10px
+		color: var(--faint)
+	td.a button
+		display: block
+		width: 100%
+		margin-bottom: 3px
+		padding: 2px 6px 3px
+		font-family: var(--cond)
+		font-size: 9.5px
+		font-weight: 600
+		letter-spacing: 0.08em
+		text-transform: uppercase
+		line-height: 1.6
+
+// --------------------------------------------
+//  The ship election and the package draft
+// --------------------------------------------
+
+.mgt2.chargen-close .election,
+.mgt2.chargen-close .packagedraft
+	border-top: 1px solid var(--rule)
+	padding: 9px 14px 11px
+
+	.lbl
+		font-family: var(--cond)
+		font-size: 9px
+		font-weight: 700
+		letter-spacing: 0.16em
+		text-transform: uppercase
+		color: var(--faint)
+		b
+			margin-left: 8px
+			color: var(--accent-text)
+	.edit
+		margin-left: 10px
+		cursor: pointer
+		font-family: var(--mono)
+		font-size: 10px
+		color: var(--faint)
+		&:hover
+			color: var(--accent-text)
+	.why,
+	.none,
+	.settled
+		margin: 5px 0 0
+		font-size: 11.5px
+		line-height: 1.5
+		color: var(--mute)
+	.tally
+		margin-left: 10px
+		font-family: var(--mono)
+		font-size: 10px
+		color: var(--faint)
+	.none
+		color: var(--faint)
+	.settled
+		color: var(--accent-text)
+	ul,
+	ol
+		margin: 5px 0 0
+		padding: 0
+		list-style: none
+		display: flex
+		flex-wrap: wrap
+		gap: 5px 14px
+
+.mgt2.chargen-close .election li
+	display: flex
+	align-items: baseline
+	gap: 7px
+	padding: 2px 8px 3px
+	border: 1px solid var(--rule)
+	border-radius: 2px
+	b
+		font-family: var(--cond)
+		font-size: 11px
+		font-weight: 700
+		letter-spacing: 0.06em
+		text-transform: uppercase
+	span
+		font-family: var(--mono)
+		font-size: 10px
+		color: var(--faint)
+	.up
+		color: var(--danger)
+	button
+		width: auto
+		flex: none
+		padding: 0 6px 1px
+		font-family: var(--cond)
+		font-size: 9px
+		font-weight: 600
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		line-height: 1.7
+
+// The Traveller who starts the campaign owning the ship. One of them, by construction.
+.mgt2.chargen-close .election li.keeps
+	border-color: var(--accent-text)
+	background: var(--accent-soft)
+	b
+		color: var(--accent-text)
+
+.mgt2.chargen-close .packagedraft li
+	padding: 0
+	button
+		all: unset
+		cursor: pointer
+		padding: 2px 8px 3px
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--mute)
+		border: 1px solid var(--rule)
+		border-radius: 2px
+		&:hover
+			color: var(--accent-text)
+			border-color: var(--accent-text)

@@ -123,17 +123,24 @@ export class PersonCombatantData extends foundry.abstract.TypeDataModel {
 export class CrewCombatantData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         return {
-            // The `role` Item the station is. `role.actions[]` is the only place that says what this
-            // crew member may do and in which step, so the Combatant has to name the row it came from.
-            station: new fields.DocumentIdField({
-                required: false, nullable: true, initial: null, readonly: false }),
+            // Which row of `spacecraft.system.crew[]` this is, by index — the same handle the ship
+            // sheet uses everywhere (`data-row-index`, `system.crew.<i>.role`). It held the `role`
+            // Item id until 2026-08-16 and that could not identify a row: two turret gunners share
+            // one Gunner role Item, so both resolved to the first row (§9.98). An index has no
+            // reordering or deletion control to go stale against — the roster's only mutation is a
+            // drop, which fills a row in place or appends.
+            station: new fields.NumberField({
+                required: false, nullable: true, initial: null, integer: true, min: 0 }),
             // Core folio 164: everyone aboard who takes part is assigned a duty, and anyone without
             // one is a Passenger — so that is the initial value rather than a blank. Folio 172 lets
             // anyone reassign, at the cost of their action and taking effect the following round.
             duty: new fields.StringField({
                 required: true, blank: false, initial: "passenger", choices: MGT2.CombatDuties }),
             // Core folio 164: a turret gunner chooses their turret at the start of the combat, which
-            // is what makes this the encounter's answer; the roster's own is the standing one.
+            // is what makes this the encounter's answer; the roster's own is the standing one. Blank
+            // is therefore the right initial value and joining a fight must NOT seed it from the
+            // roster — a seeded copy is a snapshot, and the ship sheet's mount stops reaching the
+            // dice the moment one is taken (§9.98).
             dutyTarget: new fields.StringField({
                 required: false, blank: true, initial: "", trim: true }),
             spent: new fields.SchemaField({
@@ -148,15 +155,38 @@ export class CrewCombatantData extends foundry.abstract.TypeDataModel {
         };
     }
 
+    /**
+     * `station` held a `role` Item id before 2026-08-16 and holds a row index after it. The id
+     * cannot be resolved to an index from here — a DataModel migrating has no parent to read the
+     * ship from — so a combat already running when the system updates loses the link and its crew
+     * read as unmounted. That is visible rather than silently wrong, and re-adding the ship rebuilds
+     * it; a combat does not outlive an upgrade in practice.
+     * @inheritDoc
+     */
+    static migrateData(source) {
+        if ( typeof source.station === "string" ) source.station = null;
+        return super.migrateData(source);
+    }
+
     /** The ship this crew member is aboard, through the group that is the ship. */
     get ship() {
         return this.parent.group?.system?.ship ?? null;
     }
 
-    /** The roster row this Combatant came from, matched on the `role` Item that names the station. */
+    /** The roster row this Combatant came from. */
     get rosterRow() {
-        if ( !this.station ) return null;
-        return this.ship?.system.crew.find(row => row.role === this.station) ?? null;
+        if ( !Number.isInteger(this.station) ) return null;
+        return this.ship?.system.crew[this.station] ?? null;
+    }
+
+    /**
+     * The `role` Item id the station is, read through the row rather than stored. `role.actions[]` is
+     * the only place that says what this crew member may do and in which step, and it is a property
+     * of the station, not of the encounter — so a role reassigned on the ship sheet is picked up by
+     * a fight already running.
+     */
+    get role() {
+        return this.rosterRow?.role ?? null;
     }
 
     /** Core folio 164, via `MGT2.CombatDuties`: only the two gunner duties bind to a mount. */
@@ -206,6 +236,12 @@ export class MGT2Combatant extends Combatant {
         if ( this.type === CREW ) {
             return this.group?.system?.initiativeFormula ?? super._getInitiativeFormula();
         }
+        // A sub-type that knows its own formula answers for itself: HG folio 115 rolls a fleet ship
+        // and a squadron off figures no Actor carries. Duck-typed rather than keyed on the type,
+        // which is what keeps `combat.js` and `fleet.js` two engines and not one import cycle.
+        const own = this.system?.initiativeFormula;
+        if ( typeof own === "string" ) return own;
+
         const actor = this.actor;
         if ( !actor || !PERSON_TYPES.has(actor.type) ) return super._getInitiativeFormula();
 
@@ -232,7 +268,11 @@ export class MGT2Combatant extends Combatant {
      * @inheritDoc
      */
     async rollInitiative(formula) {
-        if ( (this.type === CREW) && this.group ) {
+        // A fleet ship HAS a number of its own until its fleet is rolled — HG folio 115 prints two
+        // Initiative procedures and they are alternatives — so it defers only once the group holds
+        // one, which is exactly when `_prepareGroup` would discard what was rolled here (§9.100 B3).
+        const grouped = (this.type === CREW) || (this.system?.rollsWithGroup === true);
+        if ( grouped && this.group ) {
             await this.group.rollInitiative();
             return this;
         }

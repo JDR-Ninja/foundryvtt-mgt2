@@ -1,0 +1,34 @@
+{{! One named track, as a template or a frame DECLARES it (§9.54). `createTrackDefinitionField()` has
+    two call sites — a career's own tracks and a species frame's — so the editor has two as well, and
+    a second copy of this markup is how the two would silently stop agreeing.
+
+    `monotone` is the field §9.40 needed and did not have: a track moves in BOTH directions, so "the
+    highest rank reached" is a high-water mark only where the declaration says it climbs.
+
+    Callers pass `track`, `path` — the dotted route under `system.` — and the row `index`. }}
+<div class="entry" data-entry-index="{{index}}">
+	<div class="entryhead">
+		<input class="f edit-only" type="text" name="system.{{path}}.key" value="{{track.key}}" placeholder="{{localize 'MGT2.Chargen.Template.TrackKey'}}" />
+		<input class="f edit-only" type="text" name="system.{{path}}.label" value="{{track.label}}" placeholder="{{localize 'MGT2.Chargen.Template.TrackLabel'}}" />
+		<b class="play-only word">{{track.label}}</b>
+		<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+	</div>
+	<div class="pfields edit-only">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.TrackKind'}}</span>
+			<select class="f" name="system.{{path}}.kind">{{selectOptions @root.config.TrackKinds selected=track.kind localize=true}}</select>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.TrackInitial'}}</span>
+			<input class="f" type="text" name="system.{{path}}.initial" value="{{track.initial}}" placeholder="{{localize 'MGT2.Chargen.Template.Formula'}}" />
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.TrackCap'}}</span>
+			<input class="f num" type="number" step="1" name="system.{{path}}.cap" value="{{track.cap}}" data-dtype="Number" />
+		</label>
+		<label class="chk"><input type="checkbox" name="system.{{path}}.monotone" {{checked track.monotone}} /><span>{{localize 'MGT2.Chargen.Template.Monotone'}}</span></label>
+	</div>
+	{{! The rungs of an enumerated track, in order, so "fell to the one below" is computable. }}
+	{{> systems/mgt2/templates/items/parts/string-list.html list=track.values path=(concat path ".values")
+		label='MGT2.Chargen.Template.TrackValues' add='MGT2.Chargen.Template.AddRung'}}
+</div>

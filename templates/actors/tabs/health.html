@@ -1,7 +1,9 @@
 <section class="tab mgt2-panel{{#if tabs.sidebar.health.active}} active{{/if}}" data-group="sidebar" data-tab="health">
 	{{! Core folio 81. The count is bound because "accumulated rads can only be removed by using
 	    anti-rad drugs" — the field is that dose, and nothing else lowers it. The standing END
-	    penalty beside it is derived from the count and is stated, never typed. }}
+	    penalty beside it is derived from the count and is stated, never typed. With the rule off the
+	    whole block goes and the stored count survives it: an unrendered control submits nothing. }}
+	{{#if (rule 'radiation')}}
 	<div class="block">
 		<div class="sect"><h3>{{localize 'MGT2.Actor.Health'}}</h3></div>
 		<div class="grid">
@@ -26,6 +28,7 @@
 		</div>
 		{{/if}}
 	</div>
+	{{/if}}
 
 	{{! The four rulebook procedures, as controls. Live in both modes — like the damage control, this
 	    is the session loop rather than structure. Each button carries the rate it will use; the

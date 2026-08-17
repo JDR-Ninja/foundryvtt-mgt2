@@ -48,7 +48,8 @@
 				<thead>
 					<tr>
 						<th>{{localize 'MGT2.Items.Armor'}}</th>
-						<th class="c">{{localize 'MGT2.Items.Rads'}}</th>
+						{{! Folio 100's Rad score only ever deducts from a dose, so it goes with the rule. }}
+						{{#if (rule 'radiation')}}<th class="c">{{localize 'MGT2.Items.Rads'}}</th>{{/if}}
 						<th class="c">{{localize 'MGT2.Items.Protection'}}</th>
 						<th class="r">{{localize 'MGT2.Items.Weight'}}</th>
 						<th></th>
@@ -61,7 +62,7 @@
 							<button type="button" class="roll" data-action="roll" data-roll="item" data-item-id="{{armor._id}}">{{armor.name}}</button>
 							{{#if armor.subInfo}}<span class="sub">{{armor.subInfo}}</span>{{/if}}
 						</td>
-						<td class="c num">{{armor.system.radiations}}</td>
+						{{#if (rule 'radiation')}}<td class="c num">{{armor.system.radiations}}</td>{{/if}}
 						<td class="c num">{{armor.system.protection}}</td>
 						<td class="r num">{{armor.weight}}</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=armor.toggleClass store=true edit="MGT2.Actor.EditArmor" del="MGT2.Actor.DeleteArmor"}}
@@ -324,6 +325,18 @@
 				<label>
 					<span class="lbl">{{localize 'MGT2.Actor.Debt'}}</span>
 					{{formInput systemFields.finance.fields.debt name="system.finance.debt" value=system.finance.debt classes="f num"}}
+				</label>
+				{{! Core p.150: MCr1 each, deducted from a ship's price BEFORE the mortgage is worked
+				    out — they are earned before any ship exists, which is why they live here (§9.13). }}
+				<label>
+					<span class="lbl">{{localize 'MGT2.Actor.ShipShares'}}</span>
+					{{formInput systemFields.finance.fields.shipShares name="system.finance.shipShares" value=system.finance.shipShares classes="f num"}}
+				</label>
+				{{! What THIS Traveller pays towards a hull the crew owns together. Typed, never
+				    computed: p.155 bills "the crew" and leaves the split to the table (§9.13). }}
+				<label>
+					<span class="lbl">{{localize 'MGT2.Actor.MonthlyShipPayments'}}</span>
+					{{formInput systemFields.finance.fields.monthlyShipPayments name="system.finance.monthlyShipPayments" value=system.finance.monthlyShipPayments classes="f num"}}
 				</label>
 				<label class="wide">
 					<span class="lbl">{{localize 'MGT2.Actor.Notes'}}</span>

@@ -1,0 +1,30 @@
+{{! THE STEP STRIP — §9.54's whole argument made visible, and the term loop's only control. Every chip
+    is read off the selected Traveller's FRAME, which is their species Item, and the struck-through
+    ones are DERIVED against the Core sequence rather than authored: a frame that drops ranks drops the
+    commission step with them without anyone having to list it. No step name appears in any line of
+    logic.
+
+    A chip is a BUTTON for a column the viewer may write to and a readout for every other, which is
+    what "the owner rolls" means on a screen the whole table is looking at (§9.38). The chip clicked is
+    the step run: the cursor is where the frame's sequence says the loop is, not a gate on it. }}
+<div class="steps" data-actor-id="{{strip.id}}">
+	{{#if strip}}
+	<span class="lbl">{{localize 'MGT2.Chargen.Screen.StepsFor' name=strip.name frame=strip.frameName}}</span>
+	<ol>
+		{{#each strip.steps as |step|}}
+		<li class="{{#if step.own}}own{{/if}} {{#if step.now}}now{{/if}}">
+			{{#if ../strip.canRun}}
+			<button type="button" data-action="runStep" data-step="{{step.key}}">{{step.order}}. {{step.label}}</button>
+			{{else}}{{step.order}}. {{step.label}}{{/if}}
+		</li>
+		{{/each}}
+		{{#each strip.cut as |step|}}
+		<li class="cut">{{step.label}}</li>
+		{{/each}}
+	</ol>
+	{{#if strip.why}}<p class="why">{{strip.why}}</p>{{/if}}
+	{{#if strip.source}}<p class="src">{{strip.source}}</p>{{/if}}
+	{{else}}
+	<p class="why">{{localize 'MGT2.Chargen.Screen.NoColumn'}}</p>
+	{{/if}}
+</div>

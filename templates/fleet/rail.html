@@ -1,0 +1,249 @@
+<aside class="mgt2-rail">
+
+	{{! HG p.115's three steps, which carry Core p.164's names and none of its content: the mover is
+	    a fleet, the attack resolves on a factor, and the Actions Step holds dispersal, morale and
+	    jumping out. Advancing past Actions ends the round, which is what p.115 says it does. }}
+	<div class="block">
+		<div class="roundno">
+			<span class="lbl">{{localize 'MGT2.SpaceCombat.Round'}}</span><b>{{round}}</b>
+			<span class="step">{{localize stepLabel}}</span>
+		</div>
+		<div class="seg fill" role="radiogroup" aria-label="{{localize 'MGT2.CombatSteps.label'}}">
+			{{#each steps as |entry|}}
+			<label><input type="radio" name="step" value="{{entry.key}}"{{#if entry.active}} checked{{/if}}{{#unless ../canEdit}} disabled{{/unless}} /><span>{{localize entry.label}}</span></label>
+			{{/each}}
+		</div>
+		{{#if canEdit}}
+		<div class="fbtns">
+			<button type="button" class="btn" data-action="advanceStep">{{localize 'MGT2.Fleet.Screen.AdvanceStep'}}</button>
+			<button type="button" class="btn" data-action="endRound">{{localize 'MGT2.SpaceCombat.EndRound'}}</button>
+		</div>
+		{{/if}}
+	</div>
+
+	{{! THE ORDER. p.115 resolves every step in Initiative order and a fleet is one line even though
+	    a score of ships fight inside it — which is what the CombatantGroup is for. The two printed
+	    Initiative procedures are alternatives: rolling the FLEET is the streamlined one and rolling
+	    its ships is the detailed one, and `_prepareGroup` overwriting members is the difference. }}
+	{{#each fleets as |fleet|}}
+	<div class="block fleetblock{{#if fleet.selected}} on{{/if}}" data-fleet-id="{{fleet.id}}">
+		<div class="sect">
+			<h3 data-action="selectFleet">{{fleet.name}}</h3>
+			<span class="count">{{localize 'MGT2.Fleet.Screen.Strength' left=fleet.strength.left of=fleet.strength.total}}</span>
+			{{#if ../canEdit}}
+			<a class="rm" data-action="removeFleet" data-tooltip="{{localize 'MGT2.Fleet.Screen.RemoveFleet'}}"><i class="fa-solid fa-trash"></i></a>
+			{{/if}}
+		</div>
+		<div class="fleethead">
+			<span class="i" data-action="rollFleet" data-tooltip="{{localize 'MGT2.Fleet.Screen.RollFleet'}}">{{#if fleet.hasInitiative}}{{fleet.initiative}}{{else}}&mdash;{{/if}}</span>
+			<span class="who">
+				<span class="nm">{{fleet.mode}}</span>
+				<span class="sub">{{fleet.formula}}</span>
+			</span>
+			<a class="need" data-action="rollShips" data-tooltip="{{localize 'MGT2.Fleet.Screen.RollShipsHint'}}">{{localize 'MGT2.Fleet.Screen.RollShips'}}</a>
+		</div>
+
+		<ul class="order" data-accept="{{../shipTypes}}" data-join="line">
+			{{#each fleet.contacts as |row|}}
+			<li class="{{#if row.selected}}on{{/if}}{{#if row.eliminated}} gone{{/if}}" data-combatant-id="{{row.id}}">
+				<span class="i">{{#if row.hasInitiative}}{{row.initiative}}{{else}}&mdash;{{/if}}</span>
+				<span class="who" data-action="selectContact">
+					<span class="nm">{{#if row.flag}}<i class="fa-solid fa-flag"></i> {{/if}}{{row.name}}{{#if row.reserve}} <i class="tag">{{localize 'MGT2.Fleet.Screen.Reserve'}}</i>{{/if}}</span>
+					<span class="sub">{{row.sub}}</span>
+				</span>
+				{{#if row.arriving}}<span class="st"><i class="done" data-tooltip="{{localize 'MGT2.Fleet.Screen.Arriving'}}"></i></span>{{/if}}
+			</li>
+			{{/each}}
+		</ul>
+		{{#unless fleet.contacts.length}}<p class="hint">{{localize 'MGT2.Fleet.Screen.DropShipHint'}}</p>{{/unless}}
+		{{! Two zones, because a drag cannot carry a number: a hull dropped on the line joins as a
+		    ship, one dropped here joins as a wing of one and p.114's count is edited in the panel. }}
+		<p class="hint drop" data-accept="{{../shipTypes}}" data-join="wing">{{localize 'MGT2.Fleet.Screen.DropWingHint'}}</p>
+	</div>
+	{{/each}}
+
+	{{#if canEdit}}
+	<button type="button" class="btn" data-action="addFleet">{{localize 'MGT2.Fleet.Screen.AddFleet'}}</button>
+	{{/if}}
+
+	{{#if fleet}}
+	{{! THE COMMAND BLOCK — everything p.105-124 lets a fleet's commander decide, for the one fleet
+	    the screen is reading from. All of it belongs to the fleet and to no ship in it. }}
+	<div class="block" data-fleet-id="{{fleet.id}}">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Fleet.Screen.Command'}}</h3>
+			<span class="count">{{fleet.name}}</span>
+		</div>
+		<div class="fleet">
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.FlagShip'}}</span>
+				<span class="v">{{#if fleet.flagship}}{{fleet.flagship.name}}{{else}}&mdash;{{/if}}<i> {{localize 'MGT2.Fleet.Screen.MoraleDM' dm=fleet.flagShipDM}}</i></span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.TacticsTerm'}}</span>
+				<span class="v">
+					{{#if fleet.editable}}
+					<input class="f n" type="number" step="1" name="tacticsEffect" value="{{fleet.tacticsEffect}}"
+						aria-label="{{localize 'MGT2.Fleet.TacticsTerm'}}" />
+					{{else}}{{fleet.tacticsEffect}}{{/if}}
+				</span>
+			</div>
+			{{! p.117's three operational ranges are the fleet's INTERNAL spacing and not the range to
+			    the enemy: Adjacent-to-Close is +1 Defensive for every ship, Short is the plane of
+			    battle, Medium disperses. The band map answers the other question and cannot hold
+			    this one — it is keyed by two fleets. }}
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.Formation'}}</span>
+				<span class="v">
+					{{#if fleet.editable}}
+					<select class="f" name="formation" aria-label="{{localize 'MGT2.Fleet.Screen.Formation'}}">
+						{{#each fleet.formations as |band|}}
+						<option value="{{band.key}}"{{#if band.selected}} selected{{/if}}>{{localize band.label}}</option>
+						{{/each}}
+					</select>
+					{{else}}{{localize fleet.formationLabel}}{{/if}}
+				</span>
+			</div>
+			<span class="why">{{localize 'MGT2.Fleet.Screen.FormationWhy' dm=fleet.formationDM}}{{#if fleet.dispersing}} &middot; {{localize 'MGT2.Fleet.Screen.Dispersing' n=fleet.scattered}}{{/if}}{{#if fleet.mustDisperse}} &middot; {{localize 'MGT2.Fleet.Screen.MustDisperse'}}{{/if}}</span>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Thrust'}}</span>
+				<span class="v">{{fleet.thrust}}<i> {{localize 'MGT2.Fleet.Screen.ThrustDerived' n=fleet.thrustDerived}}</i></span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.ThrustOverride'}}</span>
+				<span class="v">
+					{{#if fleet.editable}}
+					<input class="f n" type="number" min="0" step="1" name="thrustOverride" value="{{fleet.thrustOverride}}"
+						aria-label="{{localize 'MGT2.Fleet.Screen.ThrustOverride'}}" />
+					{{else}}{{#if fleet.thrustOverride}}{{fleet.thrustOverride}}{{else}}&mdash;{{/if}}{{/if}}
+				</span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.CrewSkill'}}</span>
+				<span class="v">{{fleet.crewSkill}}<i> {{localize 'MGT2.Fleet.Screen.OffensiveMean' dm=fleet.offensiveDM}}</i></span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.Terrain'}}</span>
+				<span class="v">
+					<input type="checkbox" name="terrain" {{checked fleet.terrain}}{{#unless fleet.editable}} disabled{{/unless}} />
+					<i> {{localize 'MGT2.Fleet.Screen.TerrainDM' dm=fleet.terrainDM}}</i>
+				</span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.BreakingOff'}}</span>
+				<span class="v">
+					<input type="checkbox" name="breakingOff" {{checked fleet.breakingOff}}{{#unless fleet.editable}} disabled{{/unless}} />
+					<i> {{localize 'MGT2.Fleet.Screen.BreakingOffWhy'}}</i>
+				</span>
+			</div>
+			{{! p.122's Fleet Dispersal table, read off the Effect of the Leadership -> Tactics (naval)
+			    chain the chapter itself prints. The chain is §9.25's and is rolled through it; what
+			    lands here is its Effect. }}
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.Dispersal'}}</span>
+				<span class="v">
+					{{#if fleet.editable}}
+					<input class="f n" type="number" step="1" name="dispersalEffect" value=""
+						placeholder="{{localize 'MGT2.Fleet.Screen.EffectPlaceholder'}}"
+						aria-label="{{localize 'MGT2.Fleet.Screen.Dispersal'}}" />
+					{{/if}}
+					<i> {{localize 'MGT2.Fleet.Screen.DispersalState' rounds=fleet.dispersal.rounds dm=fleet.dispersalDM}}</i>
+				</span>
+			</div>
+		</div>
+
+		{{! p.116 reprints Core p.166 word for word and the only change is that the mover is a fleet.
+		    The cap is what LEAVING the current band costs, and being under it is the problem. }}
+		<div class="fleet">
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.SpaceCombat.Against'}}</span>
+				<span class="v">
+					{{#if fleet.editable}}
+					<select class="f" name="closingTarget" aria-label="{{localize 'MGT2.SpaceCombat.Against'}}">
+						<option value="">&mdash;</option>
+						{{#each fleet.targets as |other|}}
+						<option value="{{other.id}}"{{#if other.selected}} selected{{/if}}>{{other.name}}</option>
+						{{/each}}
+					</select>
+					{{else}}&mdash;{{/if}}
+				</span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.SpaceCombat.Toward'}}</span>
+				<span class="v">
+					{{#if fleet.editable}}
+					<select class="f" name="closingBand" aria-label="{{localize 'MGT2.SpaceCombat.Toward'}}">
+						<option value="">&mdash;</option>
+						{{#each fleet.bands as |band|}}
+						<option value="{{band.key}}"{{#if band.selected}} selected{{/if}}>{{localize band.label}}</option>
+						{{/each}}
+					</select>
+					{{else}}&mdash;{{/if}}
+				</span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.Allocate'}}</span>
+				<span class="v">
+					{{#if fleet.editable}}
+					<input class="f n" type="number" min="0" step="1" name="allocate" value="{{fleet.movement.thrust}}"
+						aria-label="{{localize 'MGT2.Fleet.Screen.Allocate'}}" />
+					{{else}}{{fleet.movement.thrust}}{{/if}}
+				</span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.SpaceCombat.Banked'}}</span>
+				<span class="v">
+					{{#if fleet.editable}}
+					<input class="f n" type="number" min="0" step="1" name="banked" value="{{fleet.movement.banked}}"
+						aria-label="{{localize 'MGT2.SpaceCombat.Banked'}}" />
+					{{else}}{{fleet.movement.banked}}{{/if}}
+				</span>
+			</div>
+			<span class="why">{{localize 'MGT2.SpaceCombat.ClosingRate' rate=fleet.closingRate}} &middot; {{localize 'MGT2.Fleet.Screen.Held' n=fleet.held}}</span>
+		</div>
+		{{> systems/mgt2/templates/actors/spacecraft/budget.html
+			b=fleet.closing
+			under="short"
+			over="soft"
+			title=(localize 'MGT2.SpaceCombat.Banked')
+			flag=(localize 'MGT2.SpaceCombat.BandChange')
+			derived="system.movement.banked"}}
+	</div>
+
+	{{! p.122's Morale check, made each round. The book prints its four DMs and NEITHER a target nor
+	    a consequence — only that it "potentially result[s] in changes to the Crew Skill score of all
+	    of the ships in a fleet for that round" — so the dice are rolled, the card is posted and
+	    nothing is written. The Morale field below is where the referee states what it cost. }}
+	<div class="block" data-fleet-id="{{fleet.id}}">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Fleet.Morale'}}</h3>
+			<span class="count">{{localize 'MGT2.Fleet.Screen.EachRound'}}</span>
+		</div>
+		<div class="reacts">
+			{{#each morale.rows as |row|}}
+			<div class="r{{#if row.zero}} spent{{/if}}">
+				<span class="nm">{{row.label}}</span>
+				<span class="cap">{{row.dm}}</span>
+			</div>
+			{{/each}}
+		</div>
+		<div class="fleet">
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.MoraleTotal'}}</span>
+				<span class="v">{{morale.total}}</span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.MoraleApplied'}}</span>
+				<span class="v">
+					{{#if fleet.editable}}
+					<input class="f n" type="number" step="1" name="morale" value="{{morale.morale}}"
+						aria-label="{{localize 'MGT2.Fleet.Screen.MoraleApplied'}}" />
+					{{else}}{{morale.morale}}{{/if}}
+				</span>
+			</div>
+			<span class="why">{{localize 'MGT2.Fleet.Screen.MoraleWhy'}}</span>
+		</div>
+		<button type="button" class="btn" data-action="moraleCheck">{{localize 'MGT2.Fleet.Screen.RollMorale'}}</button>
+	</div>
+	{{/if}}
+</aside>

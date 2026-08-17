@@ -1,0 +1,55 @@
+{{! THE RANGE STRIP, one level up from the space screen's. HG p.115 measures range between FLEETS,
+    so the pins are fleets and not hulls — and the seven cells are Core p.166's own table, shared
+    verbatim (§9.100 A). Clicking a cell moves the pinned fleet, which is the only way a band
+    changes here; a fleet's INTERNAL spacing is p.117's formation and lives on the fleet itself. }}
+<header class="mgt2-combat-head">
+	<div class="top">
+		<h2>{{#if strip.from}}{{localize 'MGT2.Fleet.Screen.RangeFrom'}} <i>{{strip.from.name}}</i>{{else}}{{localize 'MGT2.Fleet.Screen.NoFleets'}}{{/if}}</h2>
+		<span class="of">{{#if strip.to}}{{localize 'MGT2.Fleet.Screen.To' name=strip.to.name}}{{else}}{{localize 'MGT2.Fleet.Screen.AddFleetHint'}}{{/if}}</span>
+		{{#unless enabled}}<span class="of gm">{{localize 'MGT2.Fleet.RuleOff'}}</span>{{/unless}}
+	</div>
+
+	<div class="bands">
+		{{#each strip.cells as |cell|}}
+		<div class="band{{#if cell.here}} here{{/if}}" data-band="{{cell.key}}"{{#if ../canEdit}} data-action="setBand"{{/if}}>
+			<span class="pins">
+				{{#each cell.pins as |pin|}}
+				<span class="pin{{#if pin.measured}} on{{/if}}" data-fleet-id="{{pin.id}}" data-action="measureTo">{{pin.name}}</span>
+				{{/each}}
+			</span>
+			<b>{{localize cell.label}}</b>
+			<span class="km">{{cell.km}}</span>
+			<span class="fig">
+				{{#if cell.noDM}}<i class="none">{{localize 'MGT2.SpaceCombat.NoDM'}}</i>
+				{{else}}<i{{#if cell.negative}} class="neg"{{/if}}>{{localize 'MGT2.SpaceCombat.CellDM' dm=cell.dm}}</i>{{/if}}
+				<i>{{localize 'MGT2.SpaceCombat.CellThrust' thrust=cell.thrust}}</i>
+			</span>
+		</div>
+		{{/each}}
+	</div>
+
+	{{! What the band between the two fleets is worth. p.118 prints no Distant row, which is why the
+	    attack path zeroes Core p.167's -6 there and this line still shows the band's own figure. }}
+	<dl class="statline" data-derived="system.bands">
+		<div class="stat{{#unless strip.band}} none{{/unless}}">
+			<dt>{{localize 'MGT2.SpaceCombat.Band'}}</dt>
+			<dd class="word">{{#if strip.band}}{{localize strip.bandLabel}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat{{#if strip.noDM}} none{{/if}}">
+			<dt>{{localize 'MGT2.SpaceCombat.AttackDM'}}</dt>
+			<dd>{{#if strip.noDM}}&mdash;{{else}}{{strip.dm}}{{/if}}</dd>
+		</div>
+		<div class="stat{{#unless strip.band}} none{{/unless}}">
+			<dt>{{localize 'MGT2.SpaceCombat.ToClose'}}</dt>
+			<dd>{{#if strip.band}}{{strip.thrust}}<i>{{localize 'MGT2.SpaceCombat.ThrustUnit'}}</i>{{else}}&mdash;{{/if}}</dd>
+		</div>
+		<div class="stat">
+			<dt>{{localize 'MGT2.SpaceCombat.Round'}}</dt>
+			<dd>{{round}}<span class="of">/ {{localize stepLabel}}</span></dd>
+		</div>
+	</dl>
+
+	{{#if strip.unplaced}}
+	<p class="hint">{{localize 'MGT2.Fleet.Screen.Unplaced' names=strip.unplaced}}</p>
+	{{/if}}
+</header>

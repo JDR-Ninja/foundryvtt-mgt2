@@ -44,9 +44,11 @@
 
 		{{! States are the session loop, not structure: they stay live in both modes. }}
 		<div class="states">
+			{{#if (rule 'encumbrance')}}
 			<label data-tooltip="{{localize 'MGT2.Actor.EncumbranceHint'}}">
 				<input type="checkbox" {{checked system.states.encumbrance}} disabled />{{localize 'MGT2.Actor.Encumbrance'}}
 			</label>
+			{{/if}}
 			<label data-tooltip="{{localize 'MGT2.Actor.FatigueHint'}}">
 				{{formInput systemFields.states.fields.fatigue name="system.states.fatigue" value=system.states.fatigue}}{{localize 'MGT2.Actor.Fatigue'}}
 			</label>
@@ -110,10 +112,12 @@
 			<dt>{{localize 'MGT2.Actor.Armor'}}</dt>
 			<dd>{{system.inventory.armor}}</dd>
 		</div>
+		{{#if (rule 'radiation')}}
 		<div class="stat{{#unless system.health.radiations}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.Rads'}}</dt>
 			<dd>{{system.health.radiations}}</dd>
 		</div>
+		{{/if}}
 		{{! `showLife` off hides the Life entry AND the track, so the door is always rendered here too:
 		    without it that configuration has no way to wound a character at all. }}
 		<div class="ends">

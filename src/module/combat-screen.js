@@ -196,7 +196,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
             const band = MGT2.ShipRangeBands[key];
             return {
                 key, label: band.label,
-                km: SpaceCombatScreen.#bandKm(band),
+                km: SpaceCombatScreen.bandKm(band),
                 // Adjacent and Close carry null rather than zero: the book prints no DM for them
                 // at all, and a dash is not a zero.
                 noDM: band.attackDM === null,
@@ -245,7 +245,8 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return reach;
     }
 
-    static #bandKm(band) {
+    /** Public because the fleet strip prints the same seven bands from the same table (§9.100 A). */
+    static bandKm(band) {
         const say = (key, data) => game.i18n.format(`MGT2.SpaceCombat.${key}`, data);
         const number = value => value.toLocaleString(game.i18n.lang);
         if ( band.maxKm === null ) return say("BandOver", { min: number(band.minKm - 1) });
@@ -388,8 +389,8 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
     #crew(group) {
         const step = this.#combat.system.step;
         return group.system.crew.map(combatant => {
-            const role = combatant.system.station
-                ? group.system.ship.items.get(combatant.system.station) : null;
+            const role = combatant.system.role
+                ? group.system.ship.items.get(combatant.system.role) : null;
             const actor = combatant.actor;
             const spent = combatant.system.spent.action;
             return {
@@ -431,8 +432,8 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
     #reactions(group) {
         const rows = [];
         for ( const combatant of group.system.crew ) {
-            const role = combatant.system.station
-                ? group.system.ship.items.get(combatant.system.station) : null;
+            const role = combatant.system.role
+                ? group.system.ship.items.get(combatant.system.role) : null;
             (role?.system.actions ?? []).forEach((action, index) => {
                 if ( action.step !== "reaction" ) return;
                 rows.push({
@@ -610,18 +611,22 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         }
         const combatant = row ? this.#combat.combatants.get(row.dataset.combatantId) : null;
         const crew = ship.system.crew.map(station => ({ ...station }));
-        const index = combatant
-            ? crew.findIndex(station => station.role === combatant.system.station) : -1;
+        // The row the Combatant already names. Matching on the `role` Item id instead wrote the
+        // second gunner's actor onto the first gunner's row, both sharing one Gunner role (§9.98).
+        const index = combatant?.system.station ?? -1;
 
-        if ( index >= 0 ) crew[index].actor = actor.uuid;
+        if ( crew[index] ) crew[index].actor = actor.uuid;
         else crew.push({ actor: actor.uuid, name: actor.name });
         await ship.update({ "system.crew": crew });
 
         if ( combatant ) {
             return combatant.update({ actorId: actor.id, name: actor.name, img: actor.img });
         }
+        // The push above gave them a roster row, so the new Combatant names it: without a station
+        // there is no `role`, and a crew member with no role has no actions to take.
         return this.#combat.createEmbeddedDocuments("Combatant", [{
-            type: CREW, group: group.id, actorId: actor.id, name: actor.name, img: actor.img
+            type: CREW, group: group.id, actorId: actor.id, name: actor.name, img: actor.img,
+            system: { station: crew.length - 1 }
         }]);
     }
 
@@ -703,7 +708,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
     static async #onStationAction(event, target) {
         const combatant = this.#combat.combatants.get(target.closest("[data-combatant-id]").dataset.combatantId);
         const ship = combatant?.system.ship;
-        const action = ship?.items.get(combatant.system.station)
+        const action = ship?.items.get(combatant.system.role)
             ?.system.actions[Number(target.dataset.actionIndex)];
         if ( !action ) return;
         return SpacecraftActorSheet.rollStationAction(ship, action,

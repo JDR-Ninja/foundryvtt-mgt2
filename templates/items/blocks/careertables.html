@@ -1,0 +1,306 @@
+{{! The printed tables of a career template (§9.48). Every collection here carries `data-property`
+    with its own dotted path and every row a `data-entry-index`, which is what lets two generic
+    handlers serve eighteen arrays — four of them nested two deep. }}
+<div class="block careertbl">
+
+	{{! Rank ladders are a NAMED SET the assignments point at, and that one generalisation dissolves
+	    four apparent exceptions: three services run one enlisted plus one officer ladder shared by
+	    every assignment, one runs two ladders for three assignments, and one runs three whose rank
+	    numbers do not line up. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Template.RankLadders'}}</h3>
+		<span class="count">{{system.rankLadders.length}}</span>
+	</div>
+	<div class="stack" data-property="rankLadders">
+		{{#each system.rankLadders as |ladder l|}}
+		<div class="entry" data-entry-index="{{l}}">
+			<div class="entryhead">
+				<input class="f edit-only" type="text" name="system.rankLadders.{{l}}.id" value="{{ladder.id}}" placeholder="{{localize 'MGT2.Chargen.Template.LadderId'}}" />
+				<input class="f edit-only" type="text" name="system.rankLadders.{{l}}.name" value="{{ladder.name}}" placeholder="{{localize 'MGT2.Chargen.Template.LadderName'}}" />
+				<label class="chk edit-only"><input type="checkbox" name="system.rankLadders.{{l}}.officer" {{checked ladder.officer}} /><span>{{localize 'MGT2.Chargen.Template.Officer'}}</span></label>
+				<b class="play-only word">{{ladder.name}}{{#if ladder.officer}} &middot; {{localize 'MGT2.Chargen.Template.Officer'}}{{/if}}</b>
+				<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+			</div>
+			<div class="nest" data-property="rankLadders.{{l}}.rows">
+				{{#each ladder.rows as |row r|}}
+				<div class="nrow" data-entry-index="{{r}}">
+					<input class="f num edit-only" type="number" step="1" min="0" name="system.rankLadders.{{l}}.rows.{{r}}.rank" value="{{row.rank}}" data-dtype="Number" />
+					<input class="f edit-only" type="text" name="system.rankLadders.{{l}}.rows.{{r}}.title" value="{{row.title}}" placeholder="{{localize 'MGT2.Chargen.Template.RankTitle'}}" />
+					<span class="play-only word">{{row.rank}} &middot; {{row.title}}</span>
+					{{! Rank 0 can carry a bonus, granted on entry — which the design never placed
+					    relative to basic training. }}
+					{{> systems/mgt2/templates/items/parts/career-cell.html cell=row.bonus path=(concat "rankLadders." l ".rows." r ".bonus")}}
+					<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+				</div>
+				{{/each}}
+				<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Rank'}}</a>
+			</div>
+		</div>
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Ladder'}}</a>
+	</div>
+
+	{{! Survival and advancement are per ASSIGNMENT and not per career, and Assignment Skills is one
+	    sub-table each — which is why the tables number up to seven rather than five. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Template.Assignments'}}</h3>
+		<span class="count">{{system.assignments.length}}</span>
+	</div>
+	<div class="stack" data-property="assignments">
+		{{#each system.assignments as |asg a|}}
+		<div class="entry" data-entry-index="{{a}}">
+			<div class="entryhead">
+				<input class="f edit-only" type="text" name="system.assignments.{{a}}.name" value="{{asg.name}}" placeholder="{{localize 'MGT2.Chargen.Template.AssignmentName'}}" />
+				<input class="f edit-only" type="text" name="system.assignments.{{a}}.ladder" value="{{asg.ladder}}" placeholder="{{localize 'MGT2.Chargen.Template.LadderId'}}" />
+				<input class="f edit-only" type="text" name="system.assignments.{{a}}.officerLadder" value="{{asg.officerLadder}}" placeholder="{{localize 'MGT2.Chargen.Template.OfficerLadderId'}}" />
+				<b class="play-only word">{{asg.name}}</b>
+				<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+			</div>
+			<div class="pfields">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Template.Survival'}}</span>
+					<select class="f edit-only" name="system.assignments.{{a}}.survival.characteristic">
+						<option value="">&mdash;</option>
+						{{selectOptions @root.config.Characteristics selected=asg.survival.characteristic localize=true}}
+					</select>
+					<input class="f num edit-only" type="number" step="1" name="system.assignments.{{a}}.survival.target" value="{{asg.survival.target}}" data-dtype="Number" />
+					<b class="play-only word">{{localize (lookup @root.config.Characteristics asg.survival.characteristic)}} {{asg.survival.target}}+</b>
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Template.Advancement'}}</span>
+					<select class="f edit-only" name="system.assignments.{{a}}.advancement.characteristic">
+						<option value="">&mdash;</option>
+						{{selectOptions @root.config.Characteristics selected=asg.advancement.characteristic localize=true}}
+					</select>
+					<input class="f num edit-only" type="number" step="1" name="system.assignments.{{a}}.advancement.target" value="{{asg.advancement.target}}" data-dtype="Number" />
+					<b class="play-only word">{{localize (lookup @root.config.Characteristics asg.advancement.characteristic)}} {{asg.advancement.target}}+</b>
+				</label>
+			</div>
+			<div class="nest" data-property="assignments.{{a}}.skills">
+				<span class="nlbl">{{localize 'MGT2.Chargen.Template.AssignmentSkills'}}</span>
+				{{#each asg.skills as |cell s|}}
+				<div class="nrow" data-entry-index="{{s}}">
+					<span class="ord">{{inc s}}</span>
+					{{> systems/mgt2/templates/items/parts/career-cell.html cell=cell path=(concat "assignments." a ".skills." s)}}
+					<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+				</div>
+				{{/each}}
+				<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Row'}}</a>
+			</div>
+		</div>
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Assignment'}}</a>
+	</div>
+
+	{{! A table may be MISSING — the Drifter has no Advanced Education at all — and a present one may
+	    be GATED, on EDU 8 or EDU 10 depending on the career, or on holding a commission. So the four
+	    are fixed slots and `present` is the field that says which exist. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Template.SkillTables'}}</h3>
+	</div>
+	{{#each careerTables as |tbl|}}
+	<div class="entry">
+		<div class="entryhead">
+			<label class="chk edit-only"><input type="checkbox" name="system.tables.{{tbl.key}}.present" {{checked tbl.present}} /><span>{{localize tbl.label}}</span></label>
+			<b class="play-only word">{{localize tbl.label}}{{#unless tbl.present}} &middot; {{localize 'MGT2.Chargen.Template.Absent'}}{{/unless}}</b>
+			<span class="lbl edit-only">{{localize 'MGT2.Chargen.Template.Gate'}}</span>
+			<select class="f edit-only" name="system.tables.{{tbl.key}}.gate.characteristic">
+				<option value="">&mdash;</option>
+				{{selectOptions @root.config.Characteristics selected=tbl.gate.characteristic localize=true}}
+			</select>
+			<input class="f num edit-only" type="number" step="1" name="system.tables.{{tbl.key}}.gate.min" value="{{tbl.gate.min}}" data-dtype="Number" />
+			<label class="chk edit-only"><input type="checkbox" name="system.tables.{{tbl.key}}.requiresCommission" {{checked tbl.requiresCommission}} /><span>{{localize 'MGT2.Chargen.Template.RequiresCommission'}}</span></label>
+		</div>
+		<div class="nest" data-property="tables.{{tbl.key}}.rows">
+			{{#each tbl.rows as |cell r|}}
+			<div class="nrow" data-entry-index="{{r}}">
+				<span class="ord">{{inc r}}</span>
+				{{> systems/mgt2/templates/items/parts/career-cell.html cell=cell path=(concat "tables." tbl.key ".rows." r)}}
+				<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+			</div>
+			{{/each}}
+			<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Row'}}</a>
+		</div>
+	</div>
+	{{/each}}
+
+	{{! §9.38's own test — is the entry a text or an effect? — makes `Cr50000`, `SOC +1`, `Ship Share`
+	    and `Gun` effects, so the roll-to-row map is structured like the skill tables. Cash is the one
+	    column that is genuinely a number, hence `data-blank`. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Template.Benefits'}}</h3>
+	</div>
+	<div class="entry">
+		<div class="nest cashrow" data-property="benefits.cash">
+			<span class="nlbl">{{localize 'MGT2.Chargen.Template.Cash'}}</span>
+			{{#each system.benefits.cash as |amount c|}}
+			<span class="nrow inline" data-entry-index="{{c}}">
+				<span class="ord">{{inc c}}</span>
+				<input class="f num edit-only" type="number" step="1" min="0" name="system.benefits.cash.{{c}}" value="{{amount}}" data-dtype="Number" />
+				<b class="play-only">{{amount}}</b>
+				<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+			</span>
+			{{/each}}
+			<a class="add edit-only" data-action="entryCreate" data-blank="0"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		<div class="nest" data-property="benefits.other">
+			<span class="nlbl">{{localize 'MGT2.Chargen.Template.OtherBenefits'}}</span>
+			{{#each system.benefits.other as |cell o|}}
+			<div class="nrow" data-entry-index="{{o}}">
+				<span class="ord">{{inc o}}</span>
+				{{> systems/mgt2/templates/items/parts/career-cell.html cell=cell path=(concat "benefits.other." o)}}
+				<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+			</div>
+			{{/each}}
+			<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Row'}}</a>
+		</div>
+	</div>
+
+	{{! The prose stays the referee's and nothing parses it — but three facts printed INSIDE it are
+	    decisions the ledger makes automatically, so they ride beside it. `ejects` defaults per TABLE:
+	    a mishap forces you out "unless otherwise stated" while an event does not. }}
+	{{#each eventTables as |et|}}
+	<div class="sect">
+		<h3>{{localize et.label}}</h3>
+		<span class="count">{{et.rows.length}}</span>
+	</div>
+	<div class="stack" data-property="{{et.key}}">
+		{{#each et.rows as |row r|}}
+		<div class="entry" data-entry-index="{{r}}">
+			<div class="entryhead">
+				<input class="f num edit-only" type="number" step="1" name="system.{{et.key}}.{{r}}.roll" value="{{row.roll}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Template.Roll'}}" />
+				<input class="f wide edit-only" type="text" name="system.{{et.key}}.{{r}}.text" value="{{row.text}}" placeholder="{{localize 'MGT2.Chargen.Template.RowText'}}" />
+				<b class="play-only">{{row.roll}} &middot; {{row.text}}</b>
+				<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+			</div>
+			<div class="pfields edit-only">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Template.Ejects'}}</span>
+					<select class="f" name="system.{{et.key}}.{{r}}.ejects">{{selectOptions @root.config.EjectionOutcomes selected=row.ejects localize=true}}</select>
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Template.BenefitEffect'}}</span>
+					<select class="f" name="system.{{et.key}}.{{r}}.benefit">{{selectOptions @root.config.BenefitRowEffects selected=row.benefit localize=true}}</select>
+					<input class="f num" type="number" step="1" name="system.{{et.key}}.{{r}}.benefitCount" value="{{row.benefitCount}}" data-dtype="Number" />
+					{{! One row awards `D3 Benefit rolls`, so the formula sits beside the count and wins
+					    where it is filled. }}
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.benefitFormula" value="{{row.benefitFormula}}" placeholder="{{localize 'MGT2.Chargen.Template.Formula'}}" />
+				</label>
+				{{! A template id the referee typed, so §9.47's invariant is untouched — and WHICH of
+				    §9.49's three senses it carries, because one field answering all three made every
+				    compulsion into an offer. }}
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Template.OtherCareer'}}</span>
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.career" value="{{row.career}}" />
+					<select class="f" name="system.{{et.key}}.{{r}}.careerMode">{{selectOptions @root.config.RowCareerModes selected=row.careerMode localize=true}}</select>
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Template.SubTable'}}</span>
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.subTable" value="{{row.subTable}}" />
+				</label>
+			</div>
+			<div class="pfields edit-only">
+				{{! The one place a creation check names a SKILL rather than a characteristic, and
+				    therefore the one place the untrained DM can apply at all. }}
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Template.SubCheck'}}</span>
+					<select class="f" name="system.{{et.key}}.{{r}}.check.characteristic">
+						<option value="">&mdash;</option>
+						{{selectOptions @root.config.Characteristics selected=row.check.characteristic localize=true}}
+					</select>
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.check.skill" value="{{row.check.skill}}" placeholder="{{localize 'MGT2.Items.Skill'}}" />
+					<input class="f num" type="number" step="1" name="system.{{et.key}}.{{r}}.check.target" value="{{row.check.target}}" data-dtype="Number" />
+				</label>
+				{{! Prison events shift a parole threshold by +2, +1, -1, -2, -1D or a full re-roll,
+				    which is neither a tray entry nor a characteristic (§9.52). }}
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Template.TrackMove'}}</span>
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.track.key" value="{{row.track.key}}" placeholder="{{localize 'MGT2.Chargen.Template.TrackKey'}}" />
+					<input class="f num" type="number" step="1" name="system.{{et.key}}.{{r}}.track.value" value="{{row.track.value}}" data-dtype="Number" />
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.track.formula" value="{{row.track.formula}}" placeholder="{{localize 'MGT2.Chargen.Template.Formula'}}" />
+					<label class="chk"><input type="checkbox" name="system.{{et.key}}.{{r}}.track.reroll" {{checked row.track.reroll}} /><span>{{localize 'MGT2.Chargen.Template.Reroll'}}</span></label>
+				</label>
+				{{! Row 12 on six careers promotes or commissions outright, with no roll. The mode is
+				    load-bearing: one career prints "a promotion OR a commission", while the errata is
+				    that the two may both fall in one term. }}
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Template.Awards'}}</span>
+					<select class="f" name="system.{{et.key}}.{{r}}.awards.outcomes" multiple size="3">
+						{{selectOptions @root.config.TermOutcomes selected=row.awards.outcomes localize=true}}
+					</select>
+					<select class="f" name="system.{{et.key}}.{{r}}.awards.mode">{{selectOptions @root.config.CellModes selected=row.awards.mode localize=true}}</select>
+					{{! "You MAY gain a promotion or a commission": declining both arms is a different
+					    fact from which arm is taken, and `mode` has no value for it. }}
+					<label class="chk"><input type="checkbox" name="system.{{et.key}}.{{r}}.awards.optional" {{checked row.awards.optional}} /><span>{{localize 'MGT2.Chargen.Template.AwardOptional'}}</span></label>
+				</label>
+			</div>
+			<div class="nest">
+				<span class="nlbl">{{localize 'MGT2.Chargen.Template.RowGrant'}}</span>
+				{{> systems/mgt2/templates/items/parts/career-cell.html cell=row.grant path=(concat et.key "." r ".grant")}}
+			</div>
+			{{! A DM on a Benefit roll modifies a roll rather than awarding one, so it is none of the
+			    five Benefit effects — it is a tray entry, which the ledger already holds. }}
+			<div class="nest edit-only" data-property="{{et.key}}.{{r}}.tray">
+				<span class="nlbl">{{localize 'MGT2.Chargen.Template.Tray'}}</span>
+				{{#each row.tray as |pending p|}}
+				<div class="trayrow" data-entry-index="{{p}}">
+					<select class="f kind" name="system.{{et.key}}.{{r}}.tray.{{p}}.kind">{{selectOptions @root.config.TrayKinds selected=pending.kind localize=true}}</select>
+					{{! What EARNS the entry, which is not what `expiresWhen` says: most printed entries
+					    belong to one branch of the row, and the loop pushed them all. }}
+					<select class="f" name="system.{{et.key}}.{{r}}.tray.{{p}}.condition" data-tooltip="{{localize 'MGT2.Chargen.Template.TrayCondition'}}">{{selectOptions @root.config.TrayConditions selected=pending.condition localize=true}}</select>
+					<input class="f num" type="number" step="1" name="system.{{et.key}}.{{r}}.tray.{{p}}.dm" value="{{pending.dm}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayValue'}}" />
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.tray.{{p}}.value" value="{{pending.value}}" placeholder="{{localize 'MGT2.Chargen.Screen.TrayValue'}}" />
+					<select class="f" name="system.{{et.key}}.{{r}}.tray.{{p}}.appliesTo" multiple size="3" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayApplies'}}">
+						{{selectOptions @root.config.TrayChecks selected=pending.appliesTo localize=true}}
+					</select>
+					<select class="f" name="system.{{et.key}}.{{r}}.tray.{{p}}.scope" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayScope'}}">{{selectOptions @root.config.TrayScopes selected=pending.scope localize=true}}</select>
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.tray.{{p}}.career" value="{{pending.career}}" placeholder="{{localize 'MGT2.Chargen.Template.OtherCareer'}}" />
+					<select class="f" name="system.{{et.key}}.{{r}}.tray.{{p}}.duration" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayDuration'}}">{{selectOptions @root.config.TrayDurations selected=pending.duration localize=true}}</select>
+					<input class="f num" type="number" step="1" min="0" name="system.{{et.key}}.{{r}}.tray.{{p}}.uses" value="{{pending.uses}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayUses'}}" />
+					<select class="f" name="system.{{et.key}}.{{r}}.tray.{{p}}.expiresWhen" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayExpires'}}">
+						<option value="">&mdash;</option>
+						{{selectOptions @root.config.CareerExitModes selected=pending.expiresWhen localize=true}}
+					</select>
+					<input class="f wide" type="text" name="system.{{et.key}}.{{r}}.tray.{{p}}.note" value="{{pending.note}}" placeholder="{{localize 'MGT2.Chargen.Template.TrayNote'}}" />
+					<label class="chk"><input type="checkbox" name="system.{{et.key}}.{{r}}.tray.{{p}}.overridesOncePerLifetime" {{checked pending.overridesOncePerLifetime}} /><span>{{localize 'MGT2.Chargen.Template.OverridesDraftLimit'}}</span></label>
+					<a class="del" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+				</div>
+				{{/each}}
+				<a class="add" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.TrayEntry'}}</a>
+			</div>
+		</div>
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Row'}}</a>
+	</div>
+	{{/each}}
+
+	{{! A career may print a standing FOOTNOTE rather than an event row — "Travellers with FOL 10+ add
+	    +1 to their Benefit rolls" — which is career-level, never granted and never spent. The gate is
+	    a precondition read at the moment of each roll, so it switches off again when the score falls;
+	    that is what `uses` and `expiresWhen` could not model and why this is §9.54's shape and not the
+	    tray's. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Template.Standing'}}</h3>
+		<span class="count">{{system.standingModifiers.length}}</span>
+	</div>
+	<div class="stack" data-property="standingModifiers">
+		{{#each system.standingModifiers as |mod m|}}
+		{{> systems/mgt2/templates/items/parts/standing-modifier.html mod=mod path=(concat "standingModifiers." m) index=m}}
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.StandingEntry'}}</a>
+	</div>
+
+	{{! Career-scoped tracks, which `exitRule.track` names. `monotone` is the field §9.40 needed and
+	    did not have: a track moves in BOTH directions — a Hiver's status falls as readily as it
+	    rises — so "the highest rank reached" is a high-water mark only where the frame says it climbs. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Template.Tracks'}}</h3>
+		<span class="count">{{system.tracks.length}}</span>
+	</div>
+	<div class="stack" data-property="tracks">
+		{{#each system.tracks as |track t|}}
+		{{> systems/mgt2/templates/items/parts/track-definition.html track=track path=(concat "tracks." t) index=t}}
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Track'}}</a>
+	</div>
+</div>

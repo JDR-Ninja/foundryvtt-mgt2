@@ -860,7 +860,19 @@ ul.softwares
 		display: grid
 		grid-template-columns: repeat(3, minmax(0, 1fr))
 		gap: 8px
+		// A third of the dialog is narrower than the stacked form's label track alone, so these rows
+		// cannot keep it: the input column solved to 0 and the line spilled past the frame. Label to
+		// its own width, no readout track — these three rows carry no DM.
+		.drow
+			grid-template-columns: auto minmax(0, 1fr)
+			gap: 6px
+	// The switch and its caption are one control. On the shared grid the box sat alone in the label
+	// track with the words 120px away from it, which is what the `flex` declarations below were
+	// always written for — the row just never became one.
 	.drow.bill
+		display: flex
+		flex-wrap: wrap
+		align-items: center
 		gap: 7px
 		cursor: var(--cursor-pointer)
 		input
@@ -868,10 +880,25 @@ ul.softwares
 			accent-color: var(--accent-text)
 		.lbl
 			flex: 0 0 auto
+		.dm.purse
+			flex: 1 1 12rem
+			min-width: 0
+	// "10 → 9" does not fit the default readout track, and widening the span instead of the track is
+	// what pushed every delta row past the frame.
+	.dblock:has(.dm.move)
+		--dm-col: 4.5rem
 	.dm.move
-		min-width: 4.5rem
 		text-align: right
 		font-variant-numeric: tabular-nums
+	// Both are a sentence, not a DM: squeezed into the readout track they set one word to the line
+	// and cost the dialog 130px of height each. The price takes the line under the field it prices;
+	// the purse rides the bill row above.
+	.dm.price,
+	.dm.purse
+		text-align: left
+		white-space: normal
+	.dm.price
+		grid-column: 2 / -1
 	.dm.good
 		color: var(--good)
 	// The crisis fills these itself. Read-only rather than disabled, because a disabled input

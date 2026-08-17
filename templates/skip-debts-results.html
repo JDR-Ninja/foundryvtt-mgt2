@@ -1,0 +1,54 @@
+<div class="panel">
+
+	{{! The ladder, drawn whole. A term worth nothing prints a dash rather than vanishing: a referee
+	    checking the sheet against folio 153 needs to see the line was read and came to zero, which
+	    is not the same as a line the system forgot. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.SkipDebts.Ladder'}}</h3>
+			<span class="count">{{localize 'MGT2.SkipDebts.Source'}}</span>
+		</div>
+		<div class="cols one">
+			<div class="c">
+				<table>
+					{{#each terms as |term|}}
+					<tr><td class="w">{{term.label}}</td>
+						<td class="d {{term.tone}}">{{#if term.dm}}{{showDM term.dm}}{{else}}&mdash;{{/if}}</td></tr>
+					{{/each}}
+					<tr class="sum"><td>{{localize 'MGT2.SkipDebts.Total'}}</td>
+						<td class="d">{{showDM dm}}</td></tr>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.SkipDebts.Check'}}</h3>
+			<span class="count">{{localize 'MGT2.SkipDebts.Against' n=target}}</span>
+		</div>
+		<div class="results">
+			<div class="r">
+				<span class="nm">{{localize 'MGT2.SkipDebts.PerSystem'}}
+					<span class="g">{{localize 'MGT2.SkipDebts.PerSystemWhy'}}</span></span>
+				<span class="dm">2D {{showDM dm}}</span>
+				<span class="at">{{#if check}}{{#each check.dice}}{{this}} {{/each}}&rarr;{{/if}}</span>
+				<span class="out">{{#if check}}{{check.total}}{{else}}&mdash;{{/if}}</span>
+			</div>
+		</div>
+		{{#if check}}
+		<p class="outcome">
+			<b{{#if check.hunted}} class="on"{{/if}}>{{#if check.hunted}}{{localize 'MGT2.SkipDebts.Hunted'}}{{else}}{{localize 'MGT2.SkipDebts.Clear'}}{{/if}}</b>
+		</p>
+		<p class="hint">{{#if check.hunted}}{{localize 'MGT2.SkipDebts.HuntedHint'}}{{else}}{{localize 'MGT2.SkipDebts.ClearHint'}}{{/if}}</p>
+		{{/if}}
+	</div>
+
+	{{! The card is the same readout with nothing left to press. }}
+	{{#unless card}}
+	<div class="foot">
+		<button type="button" class="btn hot" data-action="rollSkip">{{localize 'MGT2.SkipDebts.Roll'}}</button>
+		<button type="button" class="btn" data-action="post" {{#unless check}}disabled{{/unless}}>{{localize 'MGT2.SkipDebts.Post'}}</button>
+	</div>
+	{{/unless}}
+</div>

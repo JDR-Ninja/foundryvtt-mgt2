@@ -9,11 +9,14 @@
 		.window-title
 			font-weight: bold
 			text-transform: uppercase
+	// The ground only — core's `padding: var(--spacer-16)` on `.application .window-content` stays.
+	// Zeroing it here also zeroed it on every DialogV2 the system opens: those carry `mgt2` and
+	// nothing else, and their content is drawn against core's padding (see `components/_dialog.sass`).
+	// A screen that lays out its own window takes `nopad`, or zeroes it on its own root.
 	&.application
 		.window-content
 			background: var(--mgt2-bgcolor-form)
 			color: var(--mgt2-color-form)
-			padding: 0
 
 .nopad
 	.window-content
@@ -120,6 +123,30 @@
 	> .window-content
 		display: grid
 		grid-template-columns: 21rem minmax(0, 1fr)
+		grid-template-rows: auto minmax(0, 1fr)
+		grid-template-areas: "header header" "rail panel"
+		height: 100%
+		overflow: hidden
+
+		> [data-application-part="header"]
+			grid-area: header
+		> [data-application-part="rail"]
+			grid-area: rail
+			min-height: 0
+		> [data-application-part="panel"]
+			grid-area: panel
+			min-height: 0
+
+// The fleet battle screen is the same grid a sixth time, and the two levels shift up by one: the
+// header is the range strip between FLEETS, the rail is the round and the fleets, and the panel is
+// one contact — a hull, a wing or a salvo.
+.mgt2.application.fleet-combat
+	container-type: inline-size
+	container-name: sheet
+
+	> .window-content
+		display: grid
+		grid-template-columns: 25rem minmax(0, 1fr)
 		grid-template-rows: auto minmax(0, 1fr)
 		grid-template-areas: "header header" "rail panel"
 		height: 100%

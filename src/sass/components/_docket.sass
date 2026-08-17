@@ -1,0 +1,352 @@
+// The Docket — the GM's compose window (docs/ROLL-REQUEST.md §3). Almost all of it is the kit
+// unchanged: the gutter form `.pdlg` / `.pline` / `.pgut` / `.pfields` from `_dialog.sass`, the
+// CONFIG-fixed strips as `.seg`, the chips as `.tog`, and `.roster` from `_blocks.sass` with its
+// three occupancy states and its drop refusal. What is here is the window skeleton, the roster's
+// four Docket-specific cells, and the one genuinely new block — `.spread`.
+//
+// The roster is THE ONLY SCROLLER, because a referee must never hunt for the difficulty ladder.
+
+.mgt2.application.docket
+	container-type: inline-size
+	container-name: docket
+
+	> .window-content
+		display: flex
+		flex-direction: column
+		gap: 0
+		height: 100%
+		padding: 0
+		overflow: hidden
+
+		> [data-application-part="form"]
+			flex: none
+			padding: 8px 14px 9px
+			border-bottom: 1px solid var(--rule)
+		> [data-application-part="roster"]
+			flex: 1 1 auto
+			min-height: 0
+			overflow-y: auto
+		> [data-application-part="foot"]
+			flex: none
+			padding: 7px 14px 9px
+			border-top: 1px solid var(--rule)
+
+// The gutter rows are tighter here than in the prompt, and they have to be: the prompt composes its
+// blocks away and shows four rows, while the Docket shows all six every time and still owes the
+// roster the height. The rule between two rows is kept — it is what makes the gutter word read as a
+// heading — and the 7 px of air either side of it is what goes.
+.mgt2 .dcompose,
+.mgt2 .dfoot
+	gap: 0
+	.pline + .pline
+		padding-top: 5px
+
+// --------------------------------------------
+//  THE COMPOSE ROWS
+// --------------------------------------------
+
+.mgt2 .dcompose
+	// The reason and the DM label are the two fields that carry a sentence, so they take the slack
+	// rather than sitting at the `.pfields` default of 8rem.
+	input.f.wide
+		flex: 1 1 14rem
+	// Three rows of a multi-select at this size is 5 characteristics visible without scrolling, and
+	// a select that is the width of its longest label reads as a list rather than as a field.
+	select.f.chars
+		flex: 0 1 13rem
+		height: auto
+		padding: 2px 4px
+		font-size: 12px
+
+	.skillfld
+		display: inline-flex
+		flex: 1 1 9rem
+		min-width: 0
+		input.f
+			width: 100%
+	// A demand that names no skill has no name to type, and a greyed field says so better than a
+	// field that accepts text nothing will ever read.
+	.skillfld.off
+		opacity: 0.4
+
+	// What the characteristic cardinality MEANS, in words, live: 0 = the player picks, 1 = fixed,
+	// 2+ = offered. §12 question 4 answered yes to this instead of a third mode strip.
+	.echo
+		font-family: var(--cond)
+		font-size: 11px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--accent-text)
+
+	.hint
+		margin: 0
+		font-size: 11px
+		color: var(--faint)
+
+	// The count rides the gutter word, as the Range block's weapon score does.
+	.wholine .pgut b
+		display: inline
+		margin-left: 6px
+		font-family: var(--mono)
+		font-size: 11px
+		font-weight: 400
+		letter-spacing: 0
+		color: var(--accent-text)
+
+	.seeds
+		justify-content: flex-end
+		.btn
+			padding: 2px 8px
+			font-size: 9.5px
+		.btn.clear
+			margin-left: auto
+			&:hover
+				color: var(--danger)
+				border-color: color-mix(in oklab, var(--danger) 45%, transparent)
+
+// --------------------------------------------
+//  THE ROSTER — `.roster` plus four cells this window owns
+// --------------------------------------------
+
+.mgt2 .droster
+	padding: 0 14px
+
+	.roster
+		// Fixed, so a long untrained label cannot widen a column and push the table past the window.
+		table-layout: fixed
+		td
+			padding: 3px 6px
+			vertical-align: middle
+		th
+			padding: 4px 6px 3px
+
+	// Who answers this row, as one click: filled means somebody else does, hollow means the referee
+	// takes it (Companion p.7). It is a state and its own control, which is why it is not a menu.
+	// `table-layout: fixed` reads the first row, so every column states its own width. The two
+	// flexible ones — the name and the resolution — take what is left.
+	td.mark,
+	th.mark
+		width: 1.5rem
+		padding-right: 0
+	.self
+		display: inline-block
+		width: 1.1rem
+		font-size: 13px
+		line-height: 1
+		text-align: center
+		color: var(--accent-text)
+		text-decoration: none
+		cursor: var(--cursor-pointer)
+	.self.on
+		color: var(--mute)
+
+	.who
+		width: 30%
+		overflow: hidden
+		text-overflow: ellipsis
+		a
+			text-decoration: none
+
+	.addressee
+		width: 22%
+		overflow: hidden
+		text-overflow: ellipsis
+		font-family: var(--cond)
+		font-size: 11px
+		font-weight: 600
+		letter-spacing: 0.1em
+		white-space: nowrap
+		color: var(--mute)
+		.gm
+			color: var(--accent-text)
+			text-transform: uppercase
+		.none
+			font-style: italic
+			color: var(--faint)
+
+	// The resolution, printed before Post. This cell is the feature.
+	//
+	// It wraps, and it has to: "Not proficient · Jack-of-All-Trades 1 -2" beside a characteristic is
+	// wider than the column, and `nowrap` on the cell pushed the whole table past the window.
+	.reads
+		font-family: var(--mono)
+		font-size: 11px
+		line-height: 1.35
+		.sk,
+		.ch
+			white-space: nowrap
+		.sk
+			margin-right: 8px
+		// Core p.59's DM-3, said out loud rather than folded into the total.
+		.sk.untrained
+			color: var(--danger)
+		// This client could not match the name. Not red — nothing is wrong yet — but marked, because
+		// the line will post as open-skill and the answering player picks their own.
+		.sk.unresolved
+			font-style: italic
+			color: var(--accent-text)
+			text-decoration: underline dotted
+		.ch
+			color: var(--faint)
+
+	td.dm,
+	th.dm
+		width: 3.2rem
+		padding-right: 10px
+		text-align: right
+		white-space: nowrap
+		b
+			font-family: var(--cond)
+			font-size: 15px
+			font-weight: 700
+			font-variant-numeric: tabular-nums
+		b.neg
+			color: var(--danger)
+
+	td.act,
+	th.act
+		width: 1.5rem
+		.x
+			font-size: 14px
+			line-height: 1
+			color: var(--faint)
+			text-decoration: none
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--danger)
+
+	// The drop row carries p.73's collapse, because both are about the roster as a whole.
+	tr.drop td
+		display: flex
+		align-items: center
+		gap: 10px
+		.hint
+			flex: 0 1 auto
+			overflow: hidden
+			white-space: nowrap
+			text-overflow: ellipsis
+			font-style: italic
+			color: var(--faint)
+		// A flex item shrinks by default, and a chip squeezed to its own padding wraps to three
+		// lines and takes the roster's last row with it.
+		.tog
+			flex: none
+			margin-left: auto
+			white-space: nowrap
+
+// --------------------------------------------
+//  `.spread` — THE ONE NEW BLOCK
+// --------------------------------------------
+// Core p.61's six bands with one marker per roster row, at `7 + rowDM - target`. Drawn compact —
+// 34 px, no caption row — precisely because it is a second reading of numbers the roster already
+// prints. The tones are `MGT2.EffectBands`' own `ok | edge | bad`: -1 and 0 render `edge`, never
+// red and never green, because those two are explicit referee-decision states (p.61). No new colour.
+
+.mgt2 .spread
+	// Beside its caption rather than above it: `flex-basis: 100%` bought a second line for a
+	// sentence, on a window whose budget is measured.
+	flex: 1 1 19rem
+	min-width: 0
+	display: grid
+	grid-template-columns: repeat(6, minmax(0, 1fr))
+	border: 1px solid var(--rule-soft)
+
+	.cell
+		display: flex
+		flex-direction: column
+		align-items: center
+		gap: 1px
+		min-width: 0
+		padding: 2px 2px 3px
+		border-right: 1px solid var(--rule-soft)
+		&:last-child
+			border-right: 0
+
+	.b
+		font-family: var(--mono)
+		font-size: 9px
+		line-height: 1.2
+		white-space: nowrap
+		color: var(--faint)
+
+	// The markers stack, and a band holding four of them must not grow the strip.
+	.marks
+		display: flex
+		flex-wrap: wrap
+		justify-content: center
+		gap: 2px
+		min-height: 9px
+		i
+			width: 7px
+			height: 7px
+			border-radius: 50%
+			background: var(--mute)
+
+	.cell.bad
+		background: color-mix(in oklab, var(--danger) 8%, transparent)
+		.marks i
+			background: var(--danger)
+	.cell.ok
+		background: color-mix(in oklab, var(--good) 8%, transparent)
+		.marks i
+			background: var(--good)
+	// Marginal, either way: the rules attach a referee decision to it and no tone claims otherwise.
+	.cell.edge .marks i
+		background: var(--accent-text)
+
+.mgt2 .dfoot
+	.why
+		flex: 0 1 auto
+		min-width: 0
+		font-family: var(--cond)
+		font-size: 9px
+		line-height: 1.25
+		letter-spacing: 0.08em
+		text-transform: uppercase
+		color: var(--faint)
+
+	// One block in §3's own drawing: the tally and the visibility are both about the sending, and a
+	// rule between them would claim they are two subjects.
+	.pline.tallyline + .pline
+		padding-top: 3px
+		border-top: 0
+
+	// The demand in one sentence, and the roster counted. Two lines, because the first is what was
+	// composed and the second is what it costs.
+	.dsummary
+		margin-top: 6px
+		padding-top: 6px
+		border-top: 1px solid var(--rule-soft)
+		p
+			margin: 0
+		.what
+			font-family: var(--cond)
+			font-size: 12px
+			font-weight: 700
+			letter-spacing: 0.1em
+			text-transform: uppercase
+		.tally
+			margin-top: 2px
+			font-family: var(--cond)
+			font-size: 10px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--faint)
+
+	.dsend
+		display: flex
+		justify-content: flex-end
+		margin-top: 6px
+		.btn.post
+			padding: 5px 18px
+			font-size: 11.5px
+
+// Narrow: the spread keeps its six cells — they are the reading — and the roster drops the column
+// a referee can recover from the name.
+@container docket (max-width: 480px)
+	.mgt2 .droster .addressee
+		display: none
+	.mgt2 .dcompose .seeds
+		justify-content: flex-start

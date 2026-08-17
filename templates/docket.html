@@ -1,0 +1,127 @@
+{{! The compose form. Gutter rows throughout — `.pline` / `.pgut` / `.pfields`, the arbitrated shape
+    for every small dialog — and CONFIG-fixed lists as `.seg` strips, which is the pattern that got
+    the roll prompt to 515 px. This part renders ONCE: everything below it is a reading of it.
+
+    No control carries an unprefixed name. These radios sit in no <form>, so a group named
+    `difficulty` would merge with any other form-less `difficulty` radios in the document. }}
+<div class="pdlg dcompose">
+
+	{{! Cardinality is the meaning (Core p.59): 0 = the player picks, 1 = fixed, 2+ = offered. The
+	    echo under the select says which of the three it is, in words, before anything is sent. }}
+	<div class="pline" role="group" aria-label="{{localize 'MGT2.Request.Ask'}}">
+		<span class="pgut">{{localize 'MGT2.Request.Ask'}}</span>
+		<div class="pfields">
+			<span class="seg" data-name="{{field}}SkillMode" role="radiogroup"
+				aria-label="{{localize 'MGT2.Request.SkillModeLabel'}}">
+				{{#each skillModes as |m|}}
+				<label title="{{m.label}}"><input type="radio" name="{{../field}}SkillMode"
+					value="{{m.key}}"{{#if m.active}} checked{{/if}} /><span>{{m.label}}</span></label>
+				{{/each}}
+			</span>
+			{{! Frozen to a per-line Item id at Post, and matched once, here. The datalist is the union
+			    of the DOCKETED actors' own skills — there is no global skill list in this system, and
+			    a name autocompleted from real data is a name that resolves. }}
+			<span class="skillfld">
+				<input class="f" type="text" name="{{field}}Skill" list="mgt2-docket-skills"
+					value="{{demand.skill}}" placeholder="{{localize 'MGT2.Request.SkillPlaceholder'}}"
+					aria-label="{{localize 'MGT2.Request.SkillName'}}" />
+			</span>
+			<datalist id="mgt2-docket-skills">
+				{{#each vocabulary as |name|}}<option value="{{name}}"></option>{{/each}}
+			</datalist>
+
+			<span class="brk"></span>
+			{{! A demand with no fiction attached is the one thing every comparable tool ships. }}
+			<input class="f wide" type="text" name="{{field}}Flavor" value="{{demand.flavor}}"
+				placeholder="{{localize 'MGT2.Request.ReasonPlaceholder'}}"
+				aria-label="{{localize 'MGT2.Request.Reason'}}" />
+
+			<span class="brk"></span>
+			{{! A select and not a strip, by the provenance rule: the characteristic list belongs to
+			    the actor, and a CONFIG grid would offer MRL or LCK to tables that have neither. }}
+			<select class="f chars" name="{{field}}Chars" multiple size="3"
+				aria-label="{{localize 'MGT2.Request.Characteristics'}}">
+				{{#each characteristics as |c|}}
+				<option value="{{c.key}}"{{#if c.selected}} selected{{/if}}>{{c.label}}</option>
+				{{/each}}
+			</select>
+			{{! Always emitted and hidden by hand: this part renders once, and the union it reports on
+			    is the roster's, which moves after that. }}
+			<span class="hint"{{#if characteristics.length}} hidden{{/if}}>{{localize 'MGT2.Request.NoCharacteristics'}}</span>
+			{{! Beside the select rather than under it: the echo is the reading OF that control. }}
+			<span class="echo" data-readout="chars"></span>
+		</div>
+	</div>
+
+	{{! Eight rungs and the cell that states none. Core p.61 permits omitting the difficulty, so `—`
+	    is the default and there is no refusal for it — the assumption is recorded per answer. }}
+	<div class="pline" role="group" aria-label="{{localize 'MGT2.Request.Target'}}">
+		<span class="pgut">{{localize 'MGT2.Request.Target'}}</span>
+		<div class="pfields">
+			<span class="seg num" data-name="{{field}}Difficulty" role="radiogroup"
+				aria-label="{{localize 'MGT2.RollPrompt.Difficulty'}}">
+				<label class="off" title="{{localize 'MGT2.Difficulty.NA'}}"
+					data-name="{{localize 'MGT2.Difficulty.NA'}}"><input type="radio"
+					name="{{field}}Difficulty" value=""{{#unless demand.difficulty}} checked{{/unless}} /><span>&mdash;</span></label>
+				{{#each difficulties as |d|}}
+				<label title="{{d.label}}" data-name="{{d.label}}"><input type="radio"
+					name="{{../field}}Difficulty" value="{{d.key}}"{{#if d.active}} checked{{/if}} /><span>{{d.target}}+</span></label>
+				{{/each}}
+			</span>
+			<span class="segname" data-readout="difficultyName"></span>
+		</div>
+	</div>
+
+	{{! Core p.61's Boon and Bane: tri-state, never a count and never a stack. Beside the timeframe
+	    because both describe how the dice are thrown rather than what they are thrown against. }}
+	<div class="pline" role="group" aria-label="{{localize 'MGT2.Request.Dice'}}">
+		<span class="pgut">{{localize 'MGT2.Request.Dice'}}</span>
+		<div class="pfields">
+			<span class="seg" data-name="{{field}}Stance" role="radiogroup"
+				aria-label="{{localize 'MGT2.Request.Dice'}}">
+				{{#each stances as |s|}}
+				<label title="{{s.label}}"><input type="radio" name="{{../field}}Stance"
+					value="{{s.key}}"{{#if s.active}} checked{{/if}} /><span>{{s.label}}</span></label>
+				{{/each}}
+			</span>
+			<span class="seggrp">
+				<span class="seglbl">{{localize 'MGT2.RollPrompt.Timeframes'}}</span>
+				<span class="seg" data-name="{{field}}Timeframe" role="radiogroup"
+					aria-label="{{localize 'MGT2.RollPrompt.Timeframes'}}">
+					{{#each timeframes as |t|}}
+					<label><input type="radio" name="{{../field}}Timeframe" value="{{t.key}}"{{#if t.active}} checked{{/if}} /><span>{{t.label}}</span>{{#if t.dm}}<span class="v">{{t.display}}</span>{{/if}}</label>
+					{{/each}}
+				</span>
+			</span>
+		</div>
+	</div>
+
+	{{! Core p.64 constrains a DM's PROVENANCE, not who applies it — low gravity -1, weather -1,
+	    fatigue -2 are printed and unknowable to the player's own sheet. So the label is the row's
+	    whole job, and a value carrying none is refused at Post. }}
+	<div class="pline" role="group" aria-label="{{localize 'MGT2.Request.DM'}}">
+		<span class="pgut">{{localize 'MGT2.Request.DM'}}</span>
+		<div class="pfields">
+			<input class="f wide" type="text" name="{{field}}DMLabel" value="{{demand.dm.label}}"
+				placeholder="{{localize 'MGT2.Request.DMPlaceholder'}}"
+				aria-label="{{localize 'MGT2.Request.DMLabel'}}" />
+			<span class="numunit">
+				<input class="f n" type="text" name="{{field}}DMValue" maxlength="4"
+					value="{{demand.dm.value}}" aria-label="{{localize 'MGT2.Request.DMValue'}}" />
+			</span>
+		</div>
+	</div>
+
+	{{! The four seeding commands as four controls rather than one menu: at 620 px there is room, and
+	    a menu is a component this system does not have. Dropping an Actor on the table is the fifth. }}
+	<div class="pline wholine" role="group" aria-label="{{localize 'MGT2.Request.Who'}}">
+		{{! Patched by hand: the count is the roster's and this part renders once. }}
+		<span class="pgut">{{localize 'MGT2.Request.Who'}}<b data-readout="asked">{{counts.asked}}</b></span>
+		<div class="pfields seeds">
+			<button type="button" class="btn" data-action="seedCombatants">{{localize 'MGT2.Request.AddCombatants'}}</button>
+			<button type="button" class="btn" data-action="seedControlled">{{localize 'MGT2.Request.AddControlled'}}</button>
+			<button type="button" class="btn" data-action="seedParty">{{localize 'MGT2.Request.AddParty'}}</button>
+			<button type="button" class="btn clear" data-action="clearRoster">{{localize 'MGT2.Request.ClearRoster'}}</button>
+		</div>
+	</div>
+</div>

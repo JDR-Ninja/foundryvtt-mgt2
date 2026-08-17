@@ -311,6 +311,42 @@
 			letter-spacing: 0.18em
 			text-transform: uppercase
 
+	// ROLL-REQUEST.md §6: what the referee fixed. Shaped like the `.seg` cell it stands in for, so
+	// the row still reads as a strip, and inert — an imposed value has a hidden mirror and no
+	// control, because `.voided` leaves radios reachable and `disabled` never reaches the form data.
+	.imp
+		display: inline-flex
+		align-items: baseline
+		gap: 5px
+		padding: 1px 6px 2px
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		white-space: nowrap
+		border: 1px solid var(--rule)
+		border-radius: 2px
+		.v
+			font-family: var(--mono)
+			font-size: 9.5px
+			letter-spacing: 0
+			color: var(--faint)
+	.imp.neg
+		color: var(--danger)
+
+	// Whose hand this is. The same pill as a block header's `.sect .gm`, redeclared rather than
+	// shared because that one carries the header's `margin-left: auto`.
+	.gm
+		padding: 0 4px
+		font-family: var(--cond)
+		font-size: 9px
+		font-weight: 600
+		letter-spacing: 0.16em
+		text-transform: uppercase
+		color: var(--faint)
+		border: 1px solid var(--rule)
+
 	// Narrow window: the gutter stacks above its fields rather than squeezing them.
 	@container (max-width: 400px)
 		.pline
@@ -680,10 +716,14 @@
 //  the block and none may narrow it.
 // --------------------------------------------
 
+// The skip check joins them rather than growing a block of its own: it is the same frame a third
+// time — typed values over a readout, and a card rendering that readout unchanged (§9.116).
 .mgt2.stoptraffic,
 .mgt2.card.stoptraffic,
 .mgt2.spectrade,
-.mgt2.card.spectrade
+.mgt2.card.spectrade,
+.mgt2.skipdebts,
+.mgt2.card.skipdebts
 
 	// The header is fixed and the readout takes the slack: `scrollable` on the results part then
 	// keeps the scroll position across the re-render every keystroke causes.
@@ -806,6 +846,11 @@
 		display: grid
 		grid-template-columns: repeat(2, minmax(0, 1fr))
 		border: 1px solid var(--rule-soft)
+
+		// One ladder rather than two columns of the same lines: the skip check reads its six terms
+		// once, so a two-column grid would leave the right half empty.
+		&.one
+			grid-template-columns: minmax(0, 1fr)
 
 		.c
 			min-width: 0

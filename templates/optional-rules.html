@@ -1,0 +1,60 @@
+<div class="dlg rules">
+	<p class="hint">{{localize 'MGT2.Rules.Hint'}}</p>
+
+	{{#each groups as |group|}}
+	<fieldset>
+		<legend>{{localize group.label}}</legend>
+		{{#each group.rules as |rule|}}
+		{{! Four shapes on one row. A switch is its own control; a picker states the rule once and
+		    puts the choice in a strip under it, because the five it offers are five separate
+		    adoptions rather than one rule with parameters; a choice is a select; and a count is a
+		    number the referee sets, which no box or list can express. }}
+		<div class="rule">
+			{{#if rule.choices}}
+			<span class="nm">{{localize rule.name}}</span>
+			{{else if rule.options}}
+			<span class="nm">{{localize rule.name}}</span>
+			{{else if rule.number}}
+			<span class="nm">{{localize rule.name}}</span>
+			{{else}}
+			<label class="nm sw">
+				<input type="checkbox" name="{{rule.key}}" {{checked rule.checked}} />
+				<span>{{localize rule.name}}</span>
+			</label>
+			{{/if}}
+			{{#if rule.source}}<span class="src">{{rule.source}}</span>{{/if}}
+			<p class="hint">{{localize rule.hint}}</p>
+			{{#if rule.choices}}
+			<div class="picker">
+				{{#each rule.choices as |choice|}}
+				<label>
+					<input type="checkbox" name="{{choice.name}}" {{checked choice.checked}} />
+					<span>{{localize choice.label}}</span>
+				</label>
+				{{/each}}
+			</div>
+			{{/if}}
+			{{! A choice between printed procedures: neither is the absence of the other, so it is a
+			    select and not a box. }}
+			{{#if rule.options}}
+			<div class="picker">
+				<select name="{{rule.key}}">
+					{{#each rule.options as |option|}}
+					<option value="{{option.value}}"{{#if option.selected}} selected{{/if}}>{{localize option.label}}</option>
+					{{/each}}
+				</select>
+			</div>
+			{{/if}}
+			{{#if rule.number}}
+			<div class="picker">
+				<input type="number" name="{{rule.key}}" value="{{rule.number.value}}"
+					min="{{rule.number.min}}" max="{{rule.number.max}}" step="{{rule.number.step}}" />
+			</div>
+			{{/if}}
+		</div>
+		{{/each}}
+	</fieldset>
+	{{/each}}
+
+	<p class="hint">{{localize 'MGT2.Rules.Footer'}}</p>
+</div>

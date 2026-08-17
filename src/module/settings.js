@@ -1,4 +1,8 @@
+import { registerChargenSettings } from "./chargen-close.js";
 import { PACKS_SETTING, WorldPacksMenu } from "./packs.js";
+import { registerRequestSettings } from "./request.js";
+import { refreshRuleUI, registerRules } from "./rules.js";
+import { OptionalRulesMenu } from "./rules-menu.js";
 
 const THEMES = {
     "black-and-red": "MGT2.Themes.BlackAndRed",
@@ -37,6 +41,8 @@ export const registerSettings = function () {
         onChange: applyTheme
     });
 
+    // The three display settings below are read into the render context and nowhere else, so without
+    // an onChange a flipped one did nothing until every sheet was reopened.
     game.settings.register('mgt2', 'usePronouns', {
         name: "MGT2.Settings.usePronouns.name",
         hint: "MGT2.Settings.usePronouns.hint",
@@ -44,7 +50,8 @@ export const registerSettings = function () {
         scope: 'world',
         type: Boolean,
         config: true,
-        requiresReload: false
+        requiresReload: false,
+        onChange: refreshRuleUI
     });
 
     game.settings.register('mgt2', 'useGender', {
@@ -54,7 +61,8 @@ export const registerSettings = function () {
         scope: 'world',
         type: Boolean,
         config: true,
-        requiresReload: false
+        requiresReload: false,
+        onChange: refreshRuleUI
     });
 
     // The campaign's *now*, in days, and nothing schedules it (§9.35): speculative trade needs a day
@@ -78,14 +86,30 @@ export const registerSettings = function () {
         scope: 'world',
         type: Boolean,
         config: true,
-        requiresReload: false
+        requiresReload: false,
+        onChange: refreshRuleUI
     });
+
+    registerRules();
+    registerRequestSettings();
+    // Folio 50's shared skills package: the pool the table chose, edited from the closing screen and
+    // never shown in the settings pane, because it is data the referee typed and not a rule.
+    registerChargenSettings();
 
     // Not user-facing: the folder and the collection ids the compendium button has created.
     game.settings.register("mgt2", PACKS_SETTING, {
         scope: "world",
         config: false,
         type: new foundry.data.fields.ObjectField()
+    });
+
+    game.settings.registerMenu("mgt2", "rules", {
+        name: "MGT2.Rules.Title",
+        hint: "MGT2.Rules.MenuHint",
+        label: "MGT2.Rules.MenuLabel",
+        icon: "fa-solid fa-sliders",
+        type: OptionalRulesMenu,
+        restricted: true
     });
 
     game.settings.registerMenu("mgt2", "packs", {

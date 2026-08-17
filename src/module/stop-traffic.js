@@ -249,6 +249,9 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
      */
     #dice = null;
 
+    /** The `Roll` objects behind `#dice`, kept so the posted card can carry them (§9.117). */
+    #rolls = [];
+
     /** One window: a second one would answer the same stop twice with different dice. */
     static open() {
         const existing = foundry.applications.instances.get("mgt2-stop-traffic");
@@ -379,6 +382,10 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
         const traffic = await new Roll("16d6").roll();
         const quantity = await new Roll(`${ROWS * DICE_PER_ROW}d6`).roll();
         const containers = await new Roll(MGT2.MailTraffic.containers).roll();
+        // What the card carries (§9.117): the dice that DECIDE — the eight 2D and mail's containers
+        // — and not the seventy-die quantity pool, which is sliced per row and mostly never read.
+        // Attaching that one would have Dice So Nice throw seventy dice for figures no row uses.
+        this.#rolls = [traffic, containers];
 
         const faces = roll => roll.dice[0].results.map(result => result.result);
         const pairs = faces(traffic);
@@ -415,6 +422,9 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,
             speaker: ChatMessage.getSpeaker(),
+            // v14 appends no display of its own once `content` is set, so this costs the card
+            // nothing and buys Dice So Nice and an auditable record (§9.117).
+            rolls: this.#rolls,
             content: `<div class="mgt2 theme-light card stoptraffic">
                 <div class="chd"><div class="what"><h4>${
                     foundry.utils.escapeHTML(game.i18n.localize("MGT2.Trade.StopTraffic"))

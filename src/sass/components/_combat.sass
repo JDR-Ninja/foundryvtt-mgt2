@@ -63,6 +63,10 @@
 	border: 1px solid var(--rule-soft)
 
 	.band
+		// Stated rather than left to the default: `_dialog.sass` styles a bare `.mgt2 .band` as a
+		// baseline flex row, which matched every cell of this strip and laid the name, the distance
+		// and the two figures out side by side — clipping "10,001 – 25,000 km" to 62 px of 133.
+		display: block
 		position: relative
 		min-width: 0
 		padding: 23px 7px 7px

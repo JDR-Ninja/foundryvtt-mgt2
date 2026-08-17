@@ -1229,3 +1229,30 @@
 		width: 4rem
 	input.f.num:first-child
 		width: 3rem
+
+// A mount that names a weapon in its label and holds no weapon Item (§9.106). One tone for both
+// screens, because it is one state: the ship panel's damage cell and the fleet sheet's battery row
+// are two views of the same half-armed mount, and a reader who learns the colour on one should not
+// have to learn it again on the other.
+.mgt2
+	.noarm
+		color: var(--danger)
+		font-family: var(--cond)
+		font-size: 10.5px
+		letter-spacing: 0.06em
+		text-transform: uppercase
+		cursor: help
+	td.noarm i
+		font-style: normal
+
+	// Not a warning strip: the ship is not broken and the figure it defends with is right. It sits
+	// under the roster it is about, at the weight of a caption.
+	.noarmnote
+		margin: 4px 0 0
+		font-family: var(--body)
+		font-size: 11px
+		line-height: 1.3
+		color: var(--danger)
+		b
+			font-family: var(--mono)
+			font-variant-numeric: tabular-nums

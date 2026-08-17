@@ -1,9 +1,12 @@
 <div class="mgt2-dialog flexcol">
-    {{! Psionic talents are a `character` idea; the field is absent on every other sub-type. }}
+    {{! Psionic talents are a `character` idea; the field is absent on every other sub-type. The
+        world's rule comes first: a table that has not adopted psionics is not offered the flag. }}
+    {{#if (rule 'psionics')}}
     {{#if system.schema.fields.config.fields.psionic}}
     <div class="form-group">
         <label class="mgt2-checkbox"><input type="checkbox" name="psionic" data-dtype="Boolean" {{checked system.config.psionic}} />{{ localize 'MGT2.Actor.ShowPsionicTalents' }}</label>
     </div>
+    {{/if}}
     {{/if}}
     <fieldset>
         <legend>{{ localize 'MGT2.Actor.Initiative' }}</legend>

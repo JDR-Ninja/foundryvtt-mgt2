@@ -1,0 +1,66 @@
+// The optional-rules switchboard. One section per group, one row per rule — and the source line is
+// the reason the row is three lines rather than a checkbox: a referee deciding whether a rule is in
+// force is deciding whether to open a book, so the book and page sit where the eye lands next.
+
+.mgt2.mgt2-rules
+	.rules
+		gap: 10px
+
+	fieldset
+		margin: 0
+		border: 1px solid var(--rule-soft)
+		legend
+			font-family: var(--cond)
+			font-size: 12px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--mute)
+
+	.rule
+		display: grid
+		grid-template-columns: minmax(0, 1fr) auto
+		align-items: baseline
+		column-gap: 10px
+		padding: 6px 0
+		& + .rule
+			border-top: 1px solid var(--rule-soft)
+		// The name spans both columns when the row carries no citation, so a rule this system states
+		// rather than one a book prints does not leave a hole where the page would be.
+		.nm
+			font-weight: 600
+		.nm.sw
+			display: flex
+			align-items: center
+			gap: 7px
+			cursor: pointer
+			input
+				margin: 0
+				flex: 0 0 auto
+		.src
+			font-family: var(--mono)
+			font-size: 11px
+			color: var(--faint)
+			white-space: nowrap
+		.hint
+			grid-column: 1 / -1
+
+	// Two shapes share the row under the hint: a set of separate adoptions drawn as cells, and a
+	// choice between printed procedures drawn as a select — neither of which is the other's negation.
+	.picker
+		grid-column: 1 / -1
+		display: flex
+		flex-wrap: wrap
+		gap: 4px 14px
+		margin-top: 5px
+		label
+			display: flex
+			align-items: center
+			gap: 6px
+			font-size: 12px
+			cursor: pointer
+			input
+				margin: 0
+		select
+			font-size: 12px
+			max-width: 22rem

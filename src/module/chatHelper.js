@@ -3,6 +3,8 @@ import { checkOf, jumpToMessage } from "./chat-message.js";
 import { renderRollCard } from "./checks.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
+import { injectAskTheSame, REQUEST, setupRequestCard } from "./request.js";
+import { injectAskedStrip } from "./request-answer.js";
 import { armChain } from "./roll-prompt.js";
 
 export class ChatHelper {
@@ -17,6 +19,17 @@ export class ChatHelper {
         if (!message || !html) {
             return;
         }
+
+        // The request card owns its own controls, and it is the only sub-type that renders its
+        // whole `li` — so it takes the branch before anything reaches for a `.card` inside it.
+        if (message.type === REQUEST) {
+            return setupRequestCard(message, html);
+        }
+        // The third door onto the Docket, and — on a check that answered one — the strip naming the
+        // request it came from. Both injected rather than added to `roll.html`, which §8 keeps
+        // unchanged; the strip's link is picked up by the `chainSource` binding further down.
+        injectAskTheSame(message, html);
+        injectAskedStrip(message, html);
 
         const rollDamage = html.querySelector('button[data-action="rollDamage"]');
         if (rollDamage) {

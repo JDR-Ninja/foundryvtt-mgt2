@@ -1,6 +1,7 @@
 import { MGT2 } from "../config.js";
 import { MGT2Helper } from "../helper.js";
 import { ActorBaseData, createCharacteristicField, withPersonal } from "./actor-base-data.js";
+import { Rules } from "../rules.js";
 import { migrateTraitArray } from "../traits.js";
 
 const fields = foundry.data.fields;
@@ -70,6 +71,11 @@ export class CharacterData extends ActorBaseData {
             }),
             finance: new fields.SchemaField({
                 pension: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
+                // `credits` IS the cash on hand — the inventory tab draws it under that label, and it
+                // is the field mustering out banks into, a medical bill is paid from and a creation
+                // event's cash grant raises. `cashOnHand` beside it is a second name for the same
+                // money that no sheet ever drew: three writers had reached for it and the player could
+                // see none of them. Nothing writes it now and it wants deleting in a migration pass.
                 credits: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
                 cashOnHand: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
                 debt: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
@@ -107,6 +113,55 @@ export class CharacterData extends ActorBaseData {
                 // 1D × Cr10000 of an ageing crisis. What the Traveller could not pay becomes debt.
                 cost: new fields.NumberField({ required: false, nullable: false, min: 0, integer: true, initial: 0 }),
                 note: new fields.StringField({ required: false, blank: true, trim: true })
+            }), { initial: [] }),
+
+            // §9.40's Other Benefits are RIGHTS WITH LIMITS and not objects — "any armour up to
+            // Cr10000 and TL12", "any augmentation up to Cr75000" — and the system cannot create
+            // those, because it has no catalogue and never will (§9.36). So a benefit is recorded as
+            // a VOUCHER the player redeems against the referee's own library, which is also what
+            // lets a group finish creation and shop afterwards.
+            //
+            // **It lives on the actor and not on `flags.mgt2.chargen`**, and that is the whole
+            // reason it is here: mustering out CONSUMES the flag and the teardown follows it
+            // (§9.50), so anything the flag held is gone one action later. A voucher outlives
+            // creation by definition.
+            entitlements: new fields.ArrayField(new fields.SchemaField({
+                kind: new fields.StringField({
+                    required: false, blank: false, initial: "voucher", choices: MGT2.BenefitKinds }),
+                // What the row entitles you to, as the book prints it — "any common or military
+                // ranged weapon", "one piece of scientific equipment". Free text and never a closed
+                // list: the categories are the referee's benefit definitions, which ride in the
+                // library file rather than in this system (§9.40).
+                category: new fields.StringField({ required: false, blank: true, trim: true }),
+                // The two ceilings, null where the row prints none. An improved cybernetic implant
+                // explicitly exceeds both, which is why they are nullable rather than 0.
+                credits: new fields.NumberField({
+                    required: false, nullable: true, initial: null, min: 0, integer: true }),
+                tl: new fields.NumberField({
+                    required: false, nullable: true, initial: null, min: 0, integer: true }),
+                // "Unarmed" on the Personal Vehicle is neither a credit nor a TL ceiling (§9.40).
+                constraint: new fields.StringField({ required: false, blank: true, trim: true }),
+                // How a second roll of the same row reads (§9.40's four shapes, not one).
+                onRepeat: new fields.StringField({
+                    required: false, blank: false, initial: "another", choices: MGT2.BenefitRepeats }),
+                count: new fields.NumberField({ required: false, initial: 1, min: 0, integer: true }),
+                // Redeemed rather than deleted: what a Traveller was owed is part of their history,
+                // and a referee auditing a sheet mid-campaign needs the row that paid for the gun.
+                redeemed: new fields.BooleanField({ required: false, initial: false }),
+                // Given up rather than taken, which is a different state from redeemed and exists for
+                // one printed rule: *only one Traveller may start the campaign owning a ship*, and each
+                // of the others takes Cr25000 a year instead, per ship rolled (folio 48). It is a
+                // FIELD because the group's decision has to be re-readable — the pension arithmetic
+                // counts these rows — and a note saying "gave it up" would have to be matched as text.
+                surrendered: new fields.BooleanField({ required: false, initial: false }),
+                note: new fields.StringField({ required: false, blank: true, trim: true }),
+                provenance: new fields.SchemaField({
+                    term: new fields.NumberField({
+                        required: false, nullable: true, initial: null, min: 0, integer: true }),
+                    career: new fields.StringField({ required: false, blank: true, trim: true }),
+                    table: new fields.StringField({ required: false, blank: true, trim: true }),
+                    note: new fields.StringField({ required: false, blank: true, trim: true })
+                })
             }), { initial: [] }),
 
             // State that outlives a dose and therefore cannot live on the `drug` Item: stims escalate
@@ -207,6 +262,9 @@ export class CharacterData extends ActorBaseData {
      */
     prepareBaseData() {
         super.prepareBaseData();
+        // With the rule off the penalty is not drawn and not applied; `health.radiations` is stored
+        // and untouched, so switching it back on restores the loss exactly.
+        if ( !Rules.on("radiation") ) return;
         this.characteristics.endurance.auto += CharacterData.radiationBand(this.health.radiations).endurance;
     }
 
@@ -219,13 +277,30 @@ export class CharacterData extends ActorBaseData {
      * @inheritDoc
      */
     prepareCharacteristicAuto() {
+        // §9.56 item 8: **replace, not stack** — no volume states which, one published line is a
+        // third bespoke set that is neither parent nor sum, and the corpus says "ADDITIONAL
+        // modifiers" on the one occasion it means to add. So off, only the first species Item speaks,
+        // which is the same Item `Chargen.frame` reads as the creation frame (§9.54).
+        const species = this.parent.items.filter(item => item.type === "species");
+        const speaking = Rules.on("speciesModifiersStack") ? species : species.slice(0, 1);
+        for ( const item of speaking ) {
+            for ( const modifier of item.system.modifiers ?? [] ) {
+                const c = this.characteristics[modifier.characteristic];
+                if ( !c || !Number.isFinite(modifier.value) ) continue;
+                // Folio 52: species modifiers may take a characteristic ABOVE 15 but never below 1,
+                // so the ceiling does not bind them at all and the floor is a second clamp the shared
+                // `max` never had — it is floored at 0, which is right for a damage track and wrong
+                // here (§9.54). A base of 0 is a characteristic the species does not have, and the
+                // floor must not conjure one.
+                const floor = (c.base > 0) ? 1 - c.base : c.auto + modifier.value;
+                c.auto = Math.max(floor, c.auto + modifier.value);
+            }
+        }
         for ( const item of this.parent.items ) {
             // Core p.106: an augment is a fact of the body, but only once it is fitted — carrying one
             // in a bag improves nothing, which is what `equipped` already distinguishes.
-            const modifiers = (item.type === "species") ? item.system.modifiers
-                : ((item.system.subType === "augment") && item.system.equipped)
-                    ? item.system.augment?.modifiers : null;
-            for ( const modifier of modifiers ?? [] ) {
+            if ( (item.system.subType !== "augment") || !item.system.equipped ) continue;
+            for ( const modifier of item.system.augment?.modifiers ?? [] ) {
                 const c = this.characteristics[modifier.characteristic];
                 if ( c && Number.isFinite(modifier.value) ) c.auto += modifier.value;
             }
@@ -384,6 +459,11 @@ export class CharacterData extends ActorBaseData {
      * @returns {Promise<{dose: number, total: number, immediate: object, before: object, after: object}|null>}
      */
     async applyRadiation(rads) {
+        // The one sink every dose passes through — the exposure control, a Radiation-trait weapon
+        // (`chatHelper.js`) and a radiation region (`region-behaviors.js`) all end here. Gating it
+        // rather than each caller is what stops a table that switched the rule off from accumulating
+        // a count it is never shown.
+        if ( !Rules.on("radiation") ) return null;
         const dose = Math.max(0, Math.trunc(rads) || 0);
         if (dose === 0) return null;
         const before = CharacterData.radiationBand(this.health.radiations);

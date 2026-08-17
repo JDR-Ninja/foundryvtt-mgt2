@@ -1,0 +1,75 @@
+{{! WHO — `.roster` verbatim. It already ships the three occupancy states, the disabled-action rule
+    and the drop refusal at the pointer, so the block is reused and not re-drawn.
+
+    Every row prints the demand RESOLVED AGAINST THAT ACTOR before anything is posted. That is the
+    only real mitigation there is for a skill name silently becoming Core p.59's DM-3: the failure
+    looks exactly like the rule working, so it would never be reported as a bug. }}
+<div class="droster">
+	<table class="roster">
+		<thead>
+			<tr>
+				<th class="mark" aria-label="{{localize 'MGT2.Request.WhoAnswers'}}"></th>
+				<th>{{localize 'MGT2.Request.Traveller'}}</th>
+				<th>{{localize 'MGT2.Request.Addressee'}}</th>
+				<th>{{localize 'MGT2.Request.Resolves'}}</th>
+				<th class="dm">{{localize 'MGT2.Request.Total'}}</th>
+				<th class="act"></th>
+			</tr>
+		</thead>
+		<tbody data-accept="{{rosterTypes}}">
+			{{#each rows as |row|}}
+			<tr data-row-id="{{row.id}}" data-accept="{{../rosterTypes}}"{{#unless row.actor}} class="vacant"{{/unless}}>
+				{{! Companion p.7: the referee takes a row and answers it themselves, whispered. One
+				    click on the marker, because the marker already says which state the row is in. }}
+				<td class="mark">
+					<a data-action="toggleSelf" class="self {{#if row.self}}on{{/if}}"
+						data-tooltip="{{#if row.self}}{{localize 'MGT2.Request.GMRollsThis'}}{{else}}{{localize 'MGT2.Request.PlayerAnswers'}}{{/if}}">{{#if row.self}}&#9675;{{else}}&#9673;{{/if}}</a>
+				</td>
+				<td class="who{{#if row.actor}} linked{{else}} plain{{/if}}">
+					{{#if row.actor}}
+					<span class="av"></span><a data-action="openDocument" data-uuid="{{row.uuid}}">{{row.name}}</a>
+					{{else}}<em>{{row.name}}</em>{{/if}}
+				</td>
+				<td class="addressee">
+					{{#if row.self}}<span class="gm">{{localize 'MGT2.Request.GMRolls'}}</span>
+					{{else if row.userName}}{{row.userName}}
+					{{else}}<span class="none">{{localize 'MGT2.Request.Unclaimed'}}</span>{{/if}}
+				</td>
+				{{! Three states, never two: `Recon 2` is an Item id frozen, `untrained -3` is the
+				    referee's own untrained, and `unresolved` is this client failing to match the name
+				    — that line posts as open-skill rather than taking a silent -3. }}
+				<td class="reads">
+					{{#if (eq row.status 'unable')}}
+					<span class="need short">{{row.why}}</span>
+					{{else}}
+					{{#if row.skillDisplay}}<span class="sk{{#if row.untrained}} untrained{{/if}}{{#if (eq row.skillItem 'unresolved')}} unresolved{{/if}}">{{row.skillDisplay}}</span>{{/if}}
+					<span class="ch">{{row.charShort}} {{row.charDM}}</span>
+					{{/if}}
+				</td>
+				<td class="dm">
+					{{#unless (eq row.status 'unable')}}
+					<b class="{{#if row.negative}}neg{{/if}}">{{row.totalDisplay}}</b>
+					{{/unless}}
+				</td>
+				<td class="act">
+					<a data-action="dropRow" class="x" data-tooltip="{{localize 'MGT2.Request.Remove'}}">&times;</a>
+				</td>
+			</tr>
+			{{/each}}
+			{{! One cell across the whole width. Split over the columns above, the chip lands in a
+			    cell sized to a `×` and wraps to three lines. }}
+			<tr class="vacant drop" data-accept="{{rosterTypes}}">
+				<td colspan="6">
+					<span class="hint">{{localize 'MGT2.Request.DropActor'}}</span>
+					{{! Core p.73's OPPOSING FORCES, restricted to the case p.73 prints: whose skill
+					    level a collapsed SKILLED roll would use is a number no book states. }}
+					<label class="tog{{#unless canSideRoll}} disabled{{/unless}}"
+						data-tooltip="{{localize 'MGT2.Request.SideRollHint'}}">
+						<input type="checkbox" name="{{field}}SideRoll"{{#if demand.sideRoll}} checked{{/if}}{{#unless canSideRoll}} disabled{{/unless}} />
+						<span>{{localize 'MGT2.Request.SideRoll'}}</span>
+					</label>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

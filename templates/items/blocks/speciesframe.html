@@ -1,0 +1,128 @@
+{{! The creation FRAME (§9.54): the term this species runs, declared the way a `career` template
+    declares a career's behaviour. The Core sequence is simply the default frame, which is why an
+    empty step list is not an unfinished one — and no gating on where the Item sits, because a species
+    is one schema in one Item and the copy embedded in a Traveller is the one the loop reads. }}
+<div class="block speciesfrm">
+
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Frame.Term'}}</h3>
+		<span class="count">{{speciesFrame.sequence.length}}</span>
+	</div>
+	<div class="pfields">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Frame.StartAge'}}</span>
+			{{formInput systemFields.frame.fields.startAge name="system.frame.startAge" value=system.frame.startAge classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Frame.TermYears'}}</span>
+			{{formInput systemFields.frame.fields.termYears name="system.frame.termYears" value=system.frame.termYears classes="f num"}}
+		</label>
+		{{! A frame that deletes three steps of the term owes the table a sentence saying why. }}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Chargen.Frame.Why'}}</span>
+			<input class="f edit-only" type="text" name="system.frame.why" value="{{system.frame.why}}" placeholder="{{localize 'MGT2.Chargen.Frame.WhyHint'}}" />
+			<b class="play-only">{{#if system.frame.why}}{{system.frame.why}}{{else}}&mdash;{{/if}}</b>
+		</label>
+	</div>
+
+	{{! EMPTY IS THE CORE SEQUENCE, so the default is shown and never typed. Declaring one seeds the
+	    ten steps because a frame that cuts one would otherwise retype the other nine — and what it
+	    cuts is still DERIVED against the Core sequence rather than authored beside it. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Frame.Steps'}}</h3>
+	</div>
+	{{#if speciesFrame.declared}}
+	<div class="stack" data-property="frame.steps">
+		{{#each system.frame.steps as |step i|}}
+		<span class="nrow inline" data-entry-index="{{i}}">
+			<span class="ord">{{inc i}}</span>
+			{{! The appended step must be a real one: the field is `blank: false`, so an empty string
+			    would clean away and the update would never fire (§9.110). }}
+			<select class="f edit-only" name="system.frame.steps.{{i}}">{{selectOptions @root.config.CreationSteps selected=step localize=true}}</select>
+			<b class="play-only word">{{localize (lookup @root.config.CreationSteps step)}}</b>
+			<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+		</span>
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate" data-blank="&quot;elect&quot;"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Frame.Step'}}</a>
+		<a class="add edit-only" data-action="stepsDefault"><i class="fa-solid fa-rotate-left"></i> {{localize 'MGT2.Chargen.Frame.UseCore'}}</a>
+	</div>
+	<p class="hint">
+		{{#if speciesFrame.cut.length}}{{localize 'MGT2.Chargen.Frame.Cuts'}} {{#each speciesFrame.cut}}{{#unless @first}}, {{/unless}}{{localize (lookup @root.config.CreationSteps this)}}{{/each}}{{else}}{{localize 'MGT2.Chargen.Frame.CutsNone'}}{{/if}}
+		{{#if speciesFrame.own.length}} &middot; {{localize 'MGT2.Chargen.Frame.Adds'}} {{#each speciesFrame.own}}{{#unless @first}}, {{/unless}}{{localize (lookup @root.config.CreationSteps this)}}{{/each}}{{/if}}
+	</p>
+	{{else}}
+	<div class="nest">
+		{{#each speciesFrame.sequence as |step i|}}
+		<span class="nrow inline"><span class="ord">{{inc i}}</span><b>{{localize (lookup @root.config.CreationSteps step)}}</b></span>
+		{{/each}}
+	</div>
+	<p class="hint">{{localize 'MGT2.Chargen.Frame.CoreDefault'}}</p>
+	<a class="add edit-only" data-action="stepsDeclare"><i class="fa-solid fa-pen"></i> {{localize 'MGT2.Chargen.Frame.Declare'}}</a>
+	{{/if}}
+
+	{{! A term declares what it YIELDS, which the pre-career was the first case of and not the only
+	    one: one printed kind burns terms and yields nothing, and another "is not counted toward your
+	    physical age". Blank years is the frame's own term length.
+
+	    The term numbers are the other axis: blank, a kind is one a term DECLARES; numbered, it is one
+	    a term IS, which is what a species mandating its first term needs. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Frame.TermKinds'}}</h3>
+		<span class="count">{{system.frame.termKinds.length}}</span>
+	</div>
+	<div class="stack" data-property="frame.termKinds">
+		{{#each system.frame.termKinds as |kind k|}}
+		<div class="entry" data-entry-index="{{k}}">
+			<div class="entryhead">
+				<input class="f edit-only" type="text" name="system.frame.termKinds.{{k}}.key" value="{{kind.key}}" placeholder="{{localize 'MGT2.Chargen.Frame.KindKey'}}" />
+				<input class="f edit-only" type="text" name="system.frame.termKinds.{{k}}.label" value="{{kind.label}}" placeholder="{{localize 'MGT2.Chargen.Frame.KindLabel'}}" />
+				<b class="play-only word">{{#if kind.fromTerm}}{{kind.fromTerm}}{{#if kind.toTerm}}{{#unless (eq kind.toTerm kind.fromTerm)}}&ndash;{{kind.toTerm}}{{/unless}}{{else}}+{{/if}} &middot; {{/if}}{{kind.label}}</b>
+				<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+			</div>
+			<div class="pfields edit-only">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Frame.KindTerms'}}</span>
+					<input class="f num" type="number" step="1" min="1" name="system.frame.termKinds.{{k}}.fromTerm" value="{{kind.fromTerm}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Frame.KindAnyTerm'}}" />
+					<input class="f num" type="number" step="1" min="1" name="system.frame.termKinds.{{k}}.toTerm" value="{{kind.toTerm}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Frame.KindOnward'}}" />
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Frame.KindYears'}}</span>
+					<input class="f num" type="number" step="1" min="0" name="system.frame.termKinds.{{k}}.years" value="{{kind.years}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Frame.TermYears'}}" />
+				</label>
+				<label class="chk"><input type="checkbox" name="system.frame.termKinds.{{k}}.ages" {{checked kind.ages}} /><span>{{localize 'MGT2.Chargen.Frame.Ages'}}</span></label>
+				<label class="chk"><input type="checkbox" name="system.frame.termKinds.{{k}}.yieldsBenefit" {{checked kind.yieldsBenefit}} /><span>{{localize 'MGT2.Chargen.Frame.YieldsBenefit'}}</span></label>
+				<label class="chk"><input type="checkbox" name="system.frame.termKinds.{{k}}.yieldsAdvancement" {{checked kind.yieldsAdvancement}} /><span>{{localize 'MGT2.Chargen.Frame.YieldsAdvancement'}}</span></label>
+				<label class="chk"><input type="checkbox" name="system.frame.termKinds.{{k}}.yieldsSkills" {{checked kind.yieldsSkills}} /><span>{{localize 'MGT2.Chargen.Frame.YieldsSkills'}}</span></label>
+			</div>
+		</div>
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Frame.TermKind'}}</a>
+	</div>
+	<p class="hint edit-only">{{localize 'MGT2.Chargen.Frame.TermKindsHint'}}</p>
+
+	{{! Species-owned tracks: a caste degree, a class, a status that falls as readily as it rises. Same
+	    factory as a career's, so the same editor. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Template.Tracks'}}</h3>
+		<span class="count">{{system.frame.tracks.length}}</span>
+	</div>
+	<div class="stack" data-property="frame.tracks">
+		{{#each system.frame.tracks as |track t|}}
+		{{> systems/mgt2/templates/items/parts/track-definition.html track=track path=(concat "frame.tracks." t) index=t}}
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Track'}}</a>
+	</div>
+
+	{{! One species' racial background, another's sex matrix and a third's per-career DMs are all this
+	    and nothing more: the tray with the tray's lifetime removed. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Template.Standing'}}</h3>
+		<span class="count">{{system.frame.standingModifiers.length}}</span>
+	</div>
+	<div class="stack" data-property="frame.standingModifiers">
+		{{#each system.frame.standingModifiers as |mod m|}}
+		{{> systems/mgt2/templates/items/parts/standing-modifier.html mod=mod path=(concat "frame.standingModifiers." m) index=m}}
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.StandingEntry'}}</a>
+	</div>
+</div>

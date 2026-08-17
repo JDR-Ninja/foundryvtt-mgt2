@@ -1,6 +1,8 @@
 import { MGT2 } from "../config.js";
 import { MGT2Helper } from "../helper.js";
+import { Rules } from "../rules.js";
 import { CraftData } from "./craft-data.js";
+import { createModifierField } from "./actor-base-data.js";
 
 const fields = foundry.data.fields;
 
@@ -20,6 +22,36 @@ const WEEKS_PER_PERIOD = 4;
 
 /** The power consumers the panel can switch off, in the order the catalogue prints them. */
 const POWER_CONSUMERS = ["basic", "mDrive", "jDrive", "sensors", "weapons", "screens", "other"];
+
+/**
+ * HG p.111 divides Armour and Hull points by this and never says why: it is the mean of 1D. Fleet
+ * combat is Core space combat with the dice taken out, and every quantity in it is the ordinary one
+ * divided by the average roll (§9.100).
+ */
+const FLEET_DIVISOR = 3.5;
+
+/** HG p.110: the Tech Level step every fleet DM adds — +1 at TL12-14, +2 at TL15. */
+const FLEET_TL_STEPS = [{ tl: 15, dm: 2 }, { tl: 12, dm: 1 }];
+
+/** HG p.120's Crew column, Severity 3: "Crew Skill score reduced by -1". Core p.170 has no such cell. */
+const FLEET_CREW_CRITICAL = { severity: 3, dm: -1 };
+
+/** HG p.113's screen pool: `(Crew Skill + 3.5) x 10` per screen, the 3.5 being the same mean of 1D. */
+const SCREEN_MULTIPLE = 10;
+
+/**
+ * The jump procedure a NEW hull is created with. A function, because it is read when the document is
+ * built rather than when this module loads, and it answers only for a hull that has none stored — an
+ * existing ship keeps what it declared and may still differ from the world, so a Companion-built ship
+ * can sail a Core campaign (§9.97).
+ *
+ * The guard is what lets the schema be cleaned outside a running world, where the pack tools validate
+ * generated hulls against it and no setting is registered.
+ */
+function initialRuleset() {
+    return game.settings?.settings?.has("mgt2.rule.jumpRuleset")
+        ? Rules.get("jumpRuleset") : "core";
+}
 
 /** Where a band table answers for a tonnage; the last entry carries `maxTons: null`. */
 function band(table, tons) {
@@ -171,6 +203,15 @@ export class SpacecraftData extends CraftData {
             role: new fields.StringField({
                 required: false, blank: false, initial: "commercial", choices: MGT2.ShipService }),
 
+            // HG p.110: "the average skill level of the crew across all duties and positions" — and
+            // it is TYPED, not averaged. The roster below is a list of stations rather than of
+            // people, so it cannot produce the number: the Pantheress is crewed in the thousands and
+            // printed at Crew Skill 1. `crewSkillObserved` derives beside it as a hint, which is
+            // §9.20's shape and the deliberate inverse of §9.93's overrides (§9.100 B1). Stored
+            // whatever the fleet-battles switch says, so a table that tries the chapter for a month
+            // and drops it does not lose what it typed on forty ships.
+            crewSkill: count(0),
+
             // A roster of stations, not of people: `role` points at a `role` Item because the eight
             // combat duties are a closed list and the stations on a ship are not (§4.6, §6.5).
             crew: new fields.ArrayField(new fields.SchemaField({
@@ -242,7 +283,26 @@ export class SpacecraftData extends CraftData {
                 // shares, or taken as a career Benefit have three different legitimate mortgages
                 // (§9.13), so the elected number wins when it is set.
                 mortgageOverride: new fields.NumberField({
-                    required: false, nullable: true, min: 0, initial: null })
+                    required: false, nullable: true, min: 0, initial: null }),
+                // Core p.149: every Benefit roll of the same ship pays off a quarter, to outright
+                // ownership at four (§9.40). It elects nothing on its own — it is what makes the
+                // page's two elections computable, and either one answers through the override.
+                benefitQuarters: new fields.NumberField({
+                    required: false, nullable: false, min: 0, max: 4, integer: true, initial: 0 }),
+                // Periods already paid. The referee types it and NOTHING here writes it (§9.35) —
+                // the same shape as the Study Period counter and the campaign day.
+                periodsPaid: new fields.NumberField({
+                    required: false, nullable: false, min: 0, integer: true, initial: 0 }),
+                // Core p.153's two persistent properties of a skip: the distance run, which the folio
+                // resets "every time the Travellers are discovered", and what has been done to the
+                // hull to disguise it. Only the skip check writes them, and only when the referee
+                // rolls one — nothing accumulates either on its own.
+                skipParsecs: new fields.NumberField({
+                    required: false, nullable: false, min: 0, integer: true, initial: 0 }),
+                // POSITIVE, 0-6: how much the ship has been altered. The folio's "-1 to -6" is the
+                // ladder's business, so a referee never types a minus sign to mean an advantage.
+                skipDisguise: new fields.NumberField({
+                    required: false, nullable: false, min: 0, max: 6, integer: true, initial: 0 })
             }),
 
             // A free string nobody reads, kept deliberately (§9.33.10 q3). Anything that RESOLVES a
@@ -276,10 +336,13 @@ export class SpacecraftData extends CraftData {
                         type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
                     name: new fields.StringField({ required: false, blank: true, trim: true })
                 }), { initial: [] }),
-                // Per hull rather than per world, because the screen that shows it reads one hull
-                // and a jump procedure is a property of the drive being fired (§9.33.10 Q1).
+                // Stored per hull, because the screen that shows it reads one hull and a jump
+                // procedure is a property of the drive being fired (§9.33.10 Q1). The world supplies
+                // only the value a NEW hull starts at, so the two never contradict: a Companion-built
+                // ship can sail a Core campaign (§9.97).
                 ruleset: new fields.StringField({
-                    required: false, blank: false, initial: "core", choices: MGT2.JumpRulesets })
+                    required: false, blank: false, initial: initialRuleset,
+                    choices: MGT2.JumpRulesets })
             }),
 
             // One scalar (Core p.154-155). `periodsSkipped` was the second until §9.33.10 Q4 declined
@@ -292,6 +355,14 @@ export class SpacecraftData extends CraftData {
                 fuel: tons(0)
             })
         });
+
+        // HG p.120's Crew critical and p.121's Radiation both take Crew Skill down, so §9.100 B1's
+        // accumulator finally has a writer and is declared here rather than in `ActorBaseData` — no
+        // other Actor type has a Crew Skill to modify. `extendFields` is v14's own door for this
+        // (`common/data/fields.mjs`, `extendFields(fields) { Object.assign(this.fields, …)`), and
+        // reconstructing the SchemaField instead would throw: `_initialize` refuses a field that
+        // "already belongs to some other parent and may not be reused".
+        schema.modifiers.extendFields({ crewSkill: createModifierField() });
         return schema;
     }
 
@@ -388,6 +459,34 @@ export class SpacecraftData extends CraftData {
     /** Every mount's class record, in roster order. */
     get mountClasses() {
         return this.mounts.map(mount => MGT2.ShipMounts[mount.type] ?? MGT2.ShipMounts.fixed);
+    }
+
+    /**
+     * Which mounts NAME a weapon and resolve none — the state §9.106 found by fighting a hand-built
+     * Pantheress and reading `0/1` on every battery.
+     *
+     * **A label carries a class and never a quantity, and that is why the two halves of fleet combat
+     * disagree about it.** Defence is counted by class off `MGT2.FleetDefences` — HG p.113 prices a
+     * *sandcaster* as a sandcaster — so `#mountText`'s fall back to the label is correct and the
+     * printed 600/300/220/300 came out of it. An attack needs a **die count**, which no name can
+     * supply and which this system cannot look up: it ships no weapon content and §9.36 makes that
+     * permanent. So a labelled mount is genuinely half-armed, and the half that is missing is the
+     * half that is silent.
+     *
+     * Surfaced and never blocked, on `unmounted`'s model (§9.26): a half-filled ship is as common as
+     * a mistake, and typing the label first is how a referee transcribes a printed statblock.
+     * @returns {boolean[]}   One per mount, in roster order
+     */
+    get mountsInert() {
+        return this.mounts.map(mount => {
+            const arms = (mount.weapons ?? []).some(id => this.parent?.items?.get(id));
+            return !arms && Boolean(mount.label?.trim());
+        });
+    }
+
+    /** How many mounts say something and shoot nothing — the panel's count and the block's warning. */
+    get inertMountCount() {
+        return this.mountsInert.filter(Boolean).length;
     }
 
     /**
@@ -510,6 +609,189 @@ export class SpacecraftData extends CraftData {
     }
 
     /**
+     * The rating of a named software package fitted to this ship — `Evade/2` answers `evade` with 2.
+     *
+     * Ship software is a `component` Item of category `software`, and `ComponentData.rating` already
+     * IS the rating: no new field, and the work was in the content rather than the schema (§9.100
+     * B2). `item`/`software` is deliberately not read — that carrier is PERSONAL software, and every
+     * ship the packs ship carries its programs as components.
+     *
+     * @param {string} key   A key of `MGT2.ShipSoftware`
+     * @returns {number} The highest rating fitted, or 0
+     */
+    softwareRating(key) {
+        const entry = MGT2.ShipSoftware[key];
+        if (!entry) return 0;
+        let best = 0;
+        for (const item of this.parent?.items ?? []) {
+            if ((item.type !== "component") || (item.system.category !== "software")) continue;
+            const name = SpacecraftData.#plainName(item.name);
+            if (!entry.names.some(match => name.includes(match))) continue;
+            if (entry.unless?.some(match => name.includes(match))) continue;
+            best = Math.max(best, item.system.rating ?? 0);
+        }
+        return best;
+    }
+
+    /**
+     * Everything a mount says about what is bolted to it: the linked weapons where a world has
+     * linked any, and the mount's own label otherwise. **The label is the carrier the content
+     * uses** — `mounts[].weapons` is empty on all 341 packed hulls and the weapon is printed in the
+     * label — so a fleet-defence class is recognised by name, which is §9.75's rule.
+     */
+    #mountText(mount) {
+        const weapons = (mount.weapons ?? [])
+            .map(id => this.parent?.items?.get(id)?.name).filter(name => name);
+        return SpacecraftData.#plainName(weapons.length ? weapons.join(", ") : mount.label);
+    }
+
+    /**
+     * How many of a mount's weapon slots each entry of its label claims. A label lists its weapons
+     * inside brackets — `Triple Turret (missile racks x 2, sandcaster)` — so an `xN` beside an entry
+     * is that entry's own count and whatever is left divides evenly among the rest, remainder to the
+     * first. Only a per-weapon class needs this: HG p.113 counts laser TURRETS and repulsor BAYS,
+     * where the class merely has to be named.
+     * @returns {{text: string, count: number}[]}
+     */
+    static #mountShares(text, slots) {
+        const inside = /\(([^)]*)\)/.exec(text);
+        const entries = (inside?.[1] ?? text).split(",").map(part => part.trim()).filter(part => part);
+        if (entries.length <= 1) return [{text: entries[0] ?? text, count: slots}];
+
+        const shares = entries.map(entry => {
+            const stated = /\bx\s*(\d+)\b/.exec(entry);
+            return {text: entry, count: stated ? Number(stated[1]) : null};
+        });
+        const unstated = shares.filter(share => share.count === null);
+        let left = Math.max(0, slots - shares.reduce((sum, share) => sum + (share.count ?? 0), 0));
+        for (const [index, share] of unstated.entries()) {
+            const each = Math.floor(left / (unstated.length - index));
+            share.count = (index === 0) ? left - (each * (unstated.length - 1)) : each;
+            left -= share.count;
+        }
+        return shares;
+    }
+
+    /**
+     * HG p.113's salvo-defence inventory, counted off the hull once. What each row is worth in
+     * points is `MGT2.FleetDefences`; what depends on Crew Skill is deliberately NOT folded in here,
+     * because Morale changes that figure per round for every ship in a fleet (p.122) — so the laser
+     * term is stored as its two halves and multiplied at the point of use.
+     */
+    #fleetCounts() {
+        const defences = MGT2.FleetDefences;
+        const counts = {pointDefence: 0, repulsors: 0, laserTurrets: 0, laserBonus: 0, sandcasters: 0};
+
+        for (const [index, mount] of this.mounts.entries()) {
+            const shape = this.mountClasses[index];
+            const text = this.#mountText(mount);
+            const named = key => defences[key].names.some(name => text.includes(name));
+
+            // HG p.40's batteries are designated by Type and nothing else in the ship-weapon
+            // vocabulary is, so a bare `Type III` on a mount naming no other class is one.
+            const roman = /\btype\s*(iii|ii|i)\b/.exec(text)?.[1];
+            const others = ["laser", "repulsor", "sandcaster"].some(named);
+            if (roman && (named("pointDefence") || !others)) {
+                counts.pointDefence += defences.pointDefence.types[roman] ?? 0;
+            }
+
+            if (shape.turret && named("laser")) {
+                counts.laserTurrets++;
+                counts.laserBonus += defences.laser.perMount[mount.type] ?? 0;
+            }
+            if (named("repulsor")) counts.repulsors += defences.repulsor.perMount[mount.type] ?? 0;
+
+            if (shape.turret && named("sandcaster")) {
+                counts.sandcasters += SpacecraftData.#mountShares(text, shape.weapons ?? 1)
+                    .filter(share => defences.sandcaster.names.some(name => share.text.includes(name)))
+                    .reduce((sum, share) => sum + share.count, 0);
+            }
+        }
+
+        // p.113's electronic-warfare base: "divide the number of sensor operators by three, rounding
+        // up". A station stands for however many bodies `count` says, which is what the roster holds.
+        counts.sensorOperators = this.crew.reduce((sum, station) =>
+            sum + ((this.parent?.items?.get(station.role)?.system.crewRoleKey === "sensorOperator")
+                ? station.count : 0), 0);
+        counts.screens = Object.fromEntries(Object.keys(MGT2.ShipScreens).map(key => [key,
+            this.screens.reduce((sum, row) => sum + ((row.type === key) ? row.count : 0), 0)]));
+        return counts;
+    }
+
+    /**
+     * HG p.113's DEFENCES panel at a stated Crew Skill — the ship's own for the sheet, and the
+     * per-round figure Morale and Radiation leave for the battle (p.121, p.122). One function and
+     * two callers, because the two must never disagree.
+     *
+     * `radiation` is p.121's fraction struck off the laser, repulsor and electronic-warfare terms;
+     * the table does not name point defence and neither does this.
+     * @param {number} crewSkill
+     * @param {object} [options]
+     * @param {number} [options.radiation]   0-1, the fraction lost
+     * @returns {object|null}                null while the rule is off
+     */
+    fleetDefences(crewSkill, {radiation = 0} = {}) {
+        const counts = this.fleet?.counts;
+        if (!counts) return null;
+        const skill = Math.max(0, crewSkill);
+        const keep = value => Math.floor(value * (1 - Math.min(1, Math.max(0, radiation))));
+
+        const lasers = keep((counts.laserTurrets * skill) + counts.laserBonus);
+        const repulsors = keep(counts.repulsors);
+        const ew = keep(Math.ceil(counts.sensorOperators / 3)
+            * (skill + this.softwareRating("electronicWarfare")));
+        // p.113: "add Crew Skill score to 3.5, multiply that by 10 and then multiply […] by the
+        // number of screens" — the same mean-of-1D the rest of the chapter divides by (§9.100).
+        const screen = key =>
+            Math.floor((skill + FLEET_DIVISOR) * SCREEN_MULTIPLE * counts.screens[key]);
+
+        return {
+            pointDefence: counts.pointDefence, lasers, repulsors, ew,
+            salvo: counts.pointDefence + lasers + repulsors + ew,
+            mesonScreen: screen("mesonScreen"), nuclearDamper: screen("nuclearDamper"),
+            sandcasters: counts.sandcasters,
+            // p.121: "twice its Crew Skill score plus its Auto-Repair score", per round.
+            repairPoints: (2 * skill) + this.softwareRating("autoRepair")
+        };
+    }
+
+    /** HG p.119's Sandcaster Effectiveness — the only pool an opposing ship is a term of. */
+    sandcasterPool(crewSkill, defensive, against = 0) {
+        const total = this.fleet?.counts.sandcasters ?? 0;
+        const score = crewSkill + defensive - against;
+        const row = MGT2.SandcasterEffect.find(entry => (entry.min === null) || (score >= entry.min));
+        return {score, multiplier: row.multiplier, points: Math.floor(total * row.multiplier)};
+    }
+
+    /** The fourth accumulator is this type's own, and `prepareBaseData` resets it through here. */
+    get modifierAccumulators() {
+        return [...super.modifierAccumulators, this.modifiers.crewSkill];
+    }
+
+    /**
+     * HG p.111's five ship Traits, read off the fittings its own table names as their requirements.
+     * `traits.js` gains no ship family for them: every row of the printed table is a component, a
+     * program or a coating the design already carries, so a fleet Trait is a reading of the ship and
+     * never a second place to type one.
+     */
+    #fleetTraits() {
+        const fitted = [];
+        for (const item of this.parent?.items ?? []) {
+            if (item.type === "component") fitted.push(SpacecraftData.#plainName(item.name));
+        }
+        const carried = ([key, entry]) => (entry.software
+            ? (this.softwareRating(entry.software) > 0)
+            : fitted.some(name => entry.names.some(match => name.includes(match))));
+        return Object.entries(MGT2.FleetTraits).filter(carried)
+            .map(([key, entry]) => ({ key, label: entry.label }));
+    }
+
+    /** Lower-cased and stripped of diacritics, so `Evitement` answers for `Évitement` (§9.75). */
+    static #plainName(name) {
+        return String(name ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+
+    /**
      * Which of §4.1's figures the book is answering for rather than the formula. A READ over the
      * six stored fields and never a write: the sheet marks what is in force, and no derivation
      * anywhere may put a number into an override.
@@ -553,6 +835,11 @@ export class SpacecraftData extends CraftData {
         super.prepareDerivedData();
 
         this.criticalEffects = this.#foldCriticals();
+        // Here and not in `#prepareFleet`, which is a reader: §9.94's ordering rule makes every
+        // accumulator total before anything in `prepareDerivedData` reads one. `auto` is assigned,
+        // so a second writer — HG p.121's Radiation is the one coming — joins this line.
+        this.modifiers.crewSkill.auto = this.criticalEffects.crewSkill;
+        this.sumModifiers();
         this.#prepareArmour();
         this.#prepareDrives();
         this.#prepareSystems();
@@ -567,6 +854,9 @@ export class SpacecraftData extends CraftData {
         this.#prepareCrew();
         this.#prepareManoeuvre();
         this.#prepareFinance();
+        // After the armour, the hull pool and the crew: every figure it prints is one of theirs
+        // divided by 3.5, and it reads them rather than recomputing them.
+        this.#prepareFleet();
 
         // Core p.165: 2D + the pilot's Pilot skill + the ship's CURRENT Thrust, so an M-Drive
         // critical feeds initiative directly. The manifest formula stays `2d6 + @initiative`.
@@ -584,11 +874,20 @@ export class SpacecraftData extends CraftData {
     #foldCriticals() {
         const totals = {
             powerFactor: 1, thrustLoss: 0, thrustZero: false,
-            sensorDM: 0, controlDM: 0, jumpDM: 0, sensorRange: undefined, jump: null
+            sensorDM: 0, controlDM: 0, jumpDM: 0, sensorRange: undefined, jump: null,
+            crewSkill: 0
         };
         for (const location of this.criticalLocations) {
             const cell = this.criticalEffect(location);
             if (!cell) continue;
+            // HG p.120's Crew column carries a rider Core p.170's does not: at Severity 3 the cell
+            // reads "3D% of crew take 3D damage. Crew Skill score reduced by -1." It is printed once
+            // and kept from there up, because p.121 climbs a location one step at a time — a ship at
+            // Severity 5 has been through 3 and its crew are still short. `MGT2.ShipCriticals` is
+            // Core's table and stays Core's; the rider lives here, where the fleet chapter puts it.
+            if ((location === "crew") && (this.criticals.crew >= FLEET_CREW_CRITICAL.severity)) {
+                totals.crewSkill += FLEET_CREW_CRITICAL.dm;
+            }
             if (cell.power === 0) totals.powerFactor = 0;
             else if (Number.isInteger(cell.power)) totals.powerFactor *= 1 + (cell.power / 100);
             if (cell.thrust === 0) totals.thrustZero = true;
@@ -860,7 +1159,10 @@ export class SpacecraftData extends CraftData {
         const budgetTons = this.budget.rows
             .filter(row => mapped.has(row.key)).reduce((sum, row) => sum + row.tons, 0);
 
-        const checks = [
+        // A table that does not check its designs is offered no ledger at all — the parts list above
+        // is a transcription and stays, because it is what the ship carries rather than a verdict on
+        // it. On or off the checks remain advisory: nothing here has ever blocked a write (§9.92).
+        const checks = !Rules.on("designValidation") ? [] : [
             // The design's own red lines, each read off the parts and nothing else.
             { key: "power", applies: (draw > 0) || (generates > 0),
                 ok: draw <= generates, used: round(draw), cap: round(generates) },
@@ -1031,6 +1333,108 @@ export class SpacecraftData extends CraftData {
 
         // The one number §4.6 allows to be read off a linked actor: the pilot's own Pilot skill.
         this.pilotSkill = this.#pilotSkill();
+        this.crewSkillObserved = this.#observedCrewSkill();
+    }
+
+    /**
+     * HG p.110's "average skill level of the crew across all duties and positions", as far as a
+     * roster of STATIONS can answer it — which is not far, and that is the point (§9.100 B1). A row
+     * stands for however many bodies `count` says and carries no skills of its own, so only a station
+     * with a linked Actor **and** a role naming a skill can be read at all; everything else is
+     * counted as unread rather than averaged in as a zero.
+     *
+     * Advisory, exactly like `crewRequired` one method up: the stored `crewSkill` wins, and this is
+     * the hint beside it. `bodies` is what makes that legible — an average over two of nine hundred
+     * crew is a different claim from an average over all of them.
+     */
+    #observedCrewSkill() {
+        let bodies = 0, unread = 0, total = 0;
+        for (const station of this.crew) {
+            const count = Math.max(1, station.count);
+            const role = station.role ? this.parent?.items?.get(station.role) : null;
+            // By the role Item's own key and never by its name, which is user text in whatever
+            // language the world runs in — the same rule `#pilotSkill` follows.
+            const wanted = MGT2.CrewRoles[role?.system.crewRoleKey]?.skill;
+            let actor = null;
+            if (station.actor) {
+                try { actor = foundry.utils.fromUuidSync(station.actor); } catch { actor = null; }
+            }
+            if (!actor || !wanted) {
+                unread += count;
+                continue;
+            }
+            const skill = actor.items?.find(item => (item.type === "talent")
+                && (item.system.subType === "skill") && MGT2Helper.matchesSkill(item.name, wanted));
+            total += (skill?.system.level ?? 0) * count;
+            bodies += count;
+        }
+        return { level: bodies ? (Math.round((total / bodies) * 10) / 10) : null, bodies, unread };
+    }
+
+    /**
+     * HG p.110-111's Fleet Ship Sheet, as a readout. The chapter makes the evaluation the
+     * prerequisite for everything else in it (p.105), and it is pure arithmetic over figures this
+     * type already holds: Armour and Hull points divided by the mean of 1D, half the Crew Skill
+     * rounded up, a software rating and the Tech Level step.
+     *
+     * **The switch gates this and never `crewSkill`** (§9.100 C, §9.97 trap 2). Off, no fleet
+     * statblock is computed — the rule stops applying rather than the sheet merely hiding a number
+     * somebody typed, which is the test C5 failed.
+     */
+    #prepareFleet() {
+        if (!Rules.on("fleetBattles")) {
+            this.fleet = null;
+            return;
+        }
+
+        // The accumulator and not the stored field: HG p.120's Crew critical takes Crew Skill down
+        // and p.121's Radiation takes it down further, and both are standing facts about this ship's
+        // company. Morale is neither — p.122 moves it "for that round" for a whole fleet, and §9.100
+        // B1 rules it is read off the fleet group at the point of use and never written down here.
+        const skill = Math.max(0, this.crewSkill + this.modifiers.crewSkill.dm);
+        const half = Math.ceil(skill / 2);
+        const tl = FLEET_TL_STEPS.find(step => this.tl >= step.tl)?.dm ?? 0;
+        // HG p.73: Advanced Fire Control does not stack with Fire Control, so the pair is a max and
+        // not a sum — which is also how p.110 phrases it, "Fire Control or Advanced Fire Control".
+        const fireControl = Math.max(this.softwareRating("fireControl"),
+            this.softwareRating("advancedFireControl"));
+        const evade = this.softwareRating("evade");
+        const launchSolution = this.softwareRating("launchSolution");
+
+        const hull = Math.ceil(this.characteristics.hull.max / FLEET_DIVISOR);
+        const damage = Math.ceil(this.characteristics.hull.damage / FLEET_DIVISOR);
+        const remaining = Math.max(0, hull - damage);
+        const fraction = this.constructor.SUSTAINED_FRACTION;
+
+        this.fleet = {
+            crewSkill: skill, half, tl,
+            // What p.110's typed figure became once the criticals were folded in — printed beside
+            // the derived block so a crew reading 1 where the sheet says 2 says why.
+            crewSkillTyped: this.crewSkill, crewSkillDM: this.modifiers.crewSkill.dm,
+            fireControl, evade, launchSolution,
+            // p.111's Traits column, derived from the fittings its own table names (§9.100 A).
+            traits: this.#fleetTraits(),
+            // p.110 prints the pair slashed, and the two are NOT the same shape: the missile DM
+            // starts at nothing, with no Crew Skill term at all.
+            offensive: { standard: half + fireControl + tl, missile: launchSolution + tl },
+            defensive: half + evade + tl,
+            autoRepair: this.softwareRating("autoRepair"),
+            armour: Math.ceil(this.protection / FLEET_DIVISOR),
+            hull, damage, remaining,
+            // p.111's own column, and it is Core p.169's Sustained Damage over a different pool —
+            // `SUSTAINED_FRACTION` is that ladder and this reuses it rather than declaring a second.
+            thresholds: Array.fromRange(this.sustainedSteps - 1, 1).reverse().map(step => {
+                const points = Math.ceil(hull * step * fraction);
+                return { percent: Math.round(step * fraction * 100), points, passed: remaining <= points };
+            }),
+            // Only what is actually fitted: a list of seven packages a ship does not carry is noise.
+            software: Object.entries(MGT2.ShipSoftware)
+                .map(([key, entry]) => ({ key, label: entry.label, rating: this.softwareRating(key) }))
+                .filter(row => row.rating > 0),
+            counts: this.#fleetCounts()
+        };
+        // p.113's DEFENCES panel at the ship's own Crew Skill. Second, because it reads `counts`.
+        this.fleet.defences = this.fleetDefences(skill);
     }
 
     /**
@@ -1073,6 +1477,7 @@ export class SpacecraftData extends CraftData {
         finance.mortgage = finance.mortgageOverride
             ?? (finance.purchase / MGT2.ShipCosts.mortgageDivisor);
         finance.mortgageDerived = finance.purchase / MGT2.ShipCosts.mortgageDivisor;
+        this.#prepareMortgageTerm(finance);
 
         // Core p.154 bills life support three times over: per stateroom, again per person NOT in a
         // low berth, and a tenth of that per occupied low berth — which is why `awake` excludes them.
@@ -1090,6 +1495,56 @@ export class SpacecraftData extends CraftData {
         finance.fuelPerTon = this.fuel.refined
             ? MGT2.ShipCosts.fuelRefined : MGT2.ShipCosts.fuelUnrefined;
         finance.tankFill = this.fuel.tons * finance.fuelPerTon;
+    }
+
+    /**
+     * How long the mortgage runs and what it therefore costs — the reading Core p.149 owes and never
+     * gives. It prints the payment and the 40-year term and never multiplies them out; p.154 does the
+     * division, for maintenance, and counts **twelve** periods in a year. So the term is 480 periods
+     * and a mortgage repays **exactly twice** the purchase price. `mortgageFourWeekPeriods` reads
+     * p.153's four-week period literally instead (13 a year, 520, x2.17), and every figure below
+     * carries its basis to the sheet, because a total whose assumption is hidden cannot be checked
+     * against the book (§9.115).
+     *
+     * p.149's two elections after a career Benefit are told apart by the override alone, and no third
+     * field is needed: *continuing* keeps the calculated payment and shortens the term, so it needs no
+     * override at all — a null override on a hull with quarters IS the continued mortgage. Anything
+     * elected is a re-mortgage, or a referee's own figure, over the full term.
+     */
+    #prepareMortgageTerm(finance) {
+        const costs = MGT2.ShipCosts;
+        const perYear = Rules.on("mortgageFourWeekPeriods")
+            ? costs.mortgagePeriodsPerYearFourWeek : costs.mortgagePeriodsPerYear;
+        const fullTerm = costs.mortgageYears * perYear;
+        const quarters = finance.benefitQuarters;
+        const shortened = Math.max(0, fullTerm - (quarters * costs.mortgageBenefitYears * perYear));
+
+        finance.periodsPerYear = perYear;
+        finance.mortgagePeriods = (finance.mortgageOverride === null) ? shortened : fullTerm;
+        finance.mortgageTotal = finance.mortgage * finance.mortgagePeriods;
+        // Both read the COST OF THE CREDIT, so both answer nothing when there is no credit — a term
+        // paid out to zero by Benefit quarters would otherwise report the whole price as money saved,
+        // which is not what the row means. Null rather than 0 for the multiple, on the same ground: a
+        // multiple of nothing is not a multiple, and the row drops its gloss rather than print one.
+        const running = finance.mortgagePeriods > 0;
+        finance.mortgageOvercost = running ? (finance.mortgageTotal - finance.purchase) : 0;
+        finance.mortgageMultiple = (running && finance.purchase)
+            ? (finance.mortgageTotal / finance.purchase) : null;
+
+        finance.periodsRemaining = Math.max(0, finance.mortgagePeriods - finance.periodsPaid);
+        finance.balance = finance.periodsRemaining * finance.mortgage;
+        finance.paidFraction = finance.mortgagePeriods
+            ? Math.min(1, finance.periodsPaid / finance.mortgagePeriods) : 1;
+
+        // Both elections as suggestions the sheet can apply; each writes (or clears) the override,
+        // which stays the only stored answer (§9.13).
+        const remortgaged = (finance.purchase * (1 - (costs.mortgageBenefitFraction * quarters)))
+            / costs.mortgageDivisor;
+        finance.elections = quarters ? {
+            keep: { payment: finance.mortgageDerived, periods: shortened,
+                total: finance.mortgageDerived * shortened },
+            remortgage: { payment: remortgaged, periods: fullTerm, total: remortgaged * fullTerm }
+        } : null;
     }
 
     /* -------------------------------------------- */

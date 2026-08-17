@@ -2,6 +2,7 @@ import { Checks } from "../checks.js";
 import { MGT2 } from "../config.js";
 import { MGT2Helper } from "../helper.js";
 import { RollPromptHelper } from "../roll-prompt.js";
+import { SkipDebtsDialog } from "../skip-debts.js";
 import { CraftData } from "./craft-data.js";
 import { TravellerActorSheet } from "./character-sheet.js";
 
@@ -35,7 +36,9 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             rowCreate: SpacecraftActorSheet.#onRowCreate,
             rowDelete: SpacecraftActorSheet.#onRowDelete,
             stationAction: SpacecraftActorSheet.#onStationAction,
-            openCraft: SpacecraftActorSheet.#onOpenCraft
+            openCraft: SpacecraftActorSheet.#onOpenCraft,
+            electMortgage: SpacecraftActorSheet.#onElectMortgage,
+            skipDebts: SpacecraftActorSheet.#onSkipDebts
         }
     };
 
@@ -108,7 +111,10 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             // Which of §4.1's six the book is answering for. The panel marks each beside its own
             // readout; the two budget blocks carry theirs on the row and the header.
             printed: system.printedFigures,
-            derived: SpacecraftActorSheet.#derived(system)
+            derived: SpacecraftActorSheet.#derived(system),
+            // Null where the table does not play fleet battles: the rule is off and no statblock was
+            // computed. The stored Crew Skill it reads is drawn with the roster either way (§9.100).
+            fleet: system.fleet
         };
         return context;
     }
@@ -281,6 +287,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     static #mounts(system, weapons) {
         const byId = new Map(weapons.map(weapon => [weapon._id, weapon]));
         const claimed = new Set();
+        const inert = system.mountsInert;
         const rows = system.mounts.map((mount, index) => {
             const type = MGT2.ShipMounts[mount.type] ?? MGT2.ShipMounts.fixed;
             const held = [];
@@ -303,6 +310,9 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             return {
                 index, type: mount.type, label: mount.label, popup: mount.popup,
                 typeLabel: type.label,
+                // Names a weapon and resolves none: correct for the defensive counts, which read the
+                // class off the label, and silently zero for anything offensive (§9.106).
+                inert: inert[index],
                 // Core p.165-167: the furthest band the mounted weapon reaches. What the band is
                 // worth to an attack belongs to the range the exchange happens at, not to the
                 // weapon, so only the reach is carried here.
@@ -326,6 +336,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return {
             rows,
             unmounted: weapons.filter(weapon => !claimed.has(weapon._id)),
+            inertCount: system.inertMountCount,
             spinal: system.mounts.some(mount => mount.type === "spinal"),
             scansUnarmed: system.scansUnarmed,
             tons: system.hull.tons
@@ -380,7 +391,11 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             })),
             totals: system.crewTotals,
             military: system.role === "military",
-            hasRoles: this.actor.items.some(item => item.type === "role")
+            hasRoles: this.actor.items.some(item => item.type === "role"),
+            // The typed Crew Skill and the average the roster can see. Not the same claim: the
+            // roster holds stations, so the observed figure is over `bodies` and not over the crew.
+            skill: system.crewSkill,
+            observed: system.crewSkillObserved
         };
     }
 
@@ -487,10 +502,29 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     static #finance(system) {
         const finance = system.finance;
         const money = value => Math.round(value);
+        const election = row => row && {
+            payment: money(row.payment), periods: row.periods, total: money(row.total) };
         return {
             purchase: money(finance.purchase),
             mortgage: money(finance.mortgage),
             mortgageOverridden: finance.mortgageOverride !== null,
+            // Core p.149's term, and the total it was never multiplied out to. `multiple` is what
+            // makes the overcost legible — at the book's twelve periods a year it reads x2.00, which
+            // is to say the crew buys the hull twice (§9.115).
+            periods: finance.mortgagePeriods,
+            periodsPerYear: finance.periodsPerYear,
+            total: money(finance.mortgageTotal),
+            overcost: money(finance.mortgageOvercost),
+            multiple: finance.mortgageMultiple?.toFixed(2) ?? null,
+            paid: finance.periodsPaid,
+            remaining: finance.periodsRemaining,
+            balance: money(finance.balance),
+            percent: Math.round(finance.paidFraction * 100),
+            quarters: finance.benefitQuarters,
+            elections: finance.elections && {
+                keep: election(finance.elections.keep),
+                remortgage: election(finance.elections.remortgage)
+            },
             maintenance: money(finance.maintenance),
             catalogue: money(finance.maintenanceCatalogue),
             carried: money(finance.carried),
@@ -567,6 +601,27 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         if (offline.has(key)) offline.delete(key);
         else offline.add(key);
         return this.actor.update({ "system.power.offline": Array.from(offline) });
+    }
+
+    /**
+     * Core p.149's two elections after a career Benefit. Continuing keeps the calculated payment, so
+     * it CLEARS the override rather than writing the same number back — that null is what tells the
+     * two elections apart afterwards.
+     * @this {SpacecraftActorSheet}
+     */
+    static async #onElectMortgage(event, target) {
+        const payment = target.dataset.election === "remortgage"
+            ? Math.round(this.actor.system.finance.elections.remortgage.payment) : null;
+        return this.actor.update({ "system.finance.mortgageOverride": payment });
+    }
+
+    /**
+     * Core p.153's check, for this hull. Its own window rather than a block on the panel: it is
+     * asked once per system arrived at, and half its ladder is per-check rather than per-ship.
+     * @this {SpacecraftActorSheet}
+     */
+    static async #onSkipDebts(event, target) {
+        return SkipDebtsDialog.open(this.actor);
     }
 
     /** @this {SpacecraftActorSheet} */

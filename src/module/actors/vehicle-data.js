@@ -312,7 +312,7 @@ export class VehicleData extends CraftData {
      *
      * **This list is the mounted weapon's**, and that is why it holds only these two. The sheet
      * extends `TravellerActorSheet`, so a mounted weapon rolls through a Traveller's own path and
-     * `#checkModifiers` reads exactly this array. Core folio 138 scopes both to that roll: the
+     * `checkModifiers` reads exactly this array. Core folio 138 scopes both to that roll: the
      * dogfight's "DM+2 to all their attack rolls", and evasive action's "negative DM to any attacks
      * made from the vehicle too". What either costs an attacker shooting **at** the vehicle is
      * stated on the chat card and never applied, because applying it would mean the attack roll

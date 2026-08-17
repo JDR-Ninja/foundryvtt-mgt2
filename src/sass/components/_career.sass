@@ -1,0 +1,198 @@
+// The two creation forms — a career template (§9.48) and a species frame (§9.54). One stylesheet,
+// because the frame declares its term the way a template declares a career and three of the editors
+// are literally the same partial. Scoped under its own four blocks throughout: `.cell` is already
+// three other things in this stylesheet — a chargen grid cell, a chat sidebar cell and a docket
+// roster cell — and a career's is none of them.
+
+.mgt2 .careerblk, .mgt2 .careertbl, .mgt2 .speciesblk, .mgt2 .speciesfrm
+	.pfields
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 5px 8px
+		min-width: 0
+		margin: 4px 0
+		> label
+			display: inline-flex
+			align-items: center
+			gap: 5px
+			flex: 1 1 14rem
+			min-width: 0
+		> label.wide
+			flex: 1 1 100%
+		.lbl
+			flex: 0 0 auto
+		.f
+			flex: 1 1 5rem
+			min-width: 0
+		.f.num
+			flex: 0 0 3.4rem
+			text-align: right
+			font-family: var(--mono)
+			font-variant-numeric: tabular-nums
+
+	// A checkbox reads as a statement, so the label follows the box and the pair does not stretch.
+	label.chk
+		display: inline-flex
+		align-items: center
+		gap: 4px
+		flex: 0 0 auto
+		font-size: 11.5px
+		color: var(--faint)
+		input
+			margin: 0
+
+	.flags
+		display: flex
+		flex-wrap: wrap
+		gap: 4px 14px
+		margin: 6px 0 2px
+
+	.del
+		flex: 0 0 auto
+		margin-left: auto
+		font-size: 11px
+		color: var(--faint)
+		&:hover
+			color: var(--accent-text)
+
+	.add
+		display: inline-flex
+		align-items: center
+		gap: 4px
+		margin-top: 3px
+		font-family: var(--cond)
+		font-size: 10.5px
+		letter-spacing: 0.08em
+		text-transform: uppercase
+		color: var(--faint)
+		&:hover
+			color: var(--accent-text)
+
+.mgt2 .careertbl, .mgt2 .speciesblk, .mgt2 .speciesfrm
+	.stack
+		display: flex
+		flex-direction: column
+		gap: 6px
+
+	// One ladder, one assignment, one table, one event row — the unit that carries a delete.
+	.entry
+		border: 1px solid var(--line)
+		border-radius: 3px
+		padding: 5px 7px
+		background: var(--sunk)
+
+	.entryhead
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 5px
+		.f
+			flex: 1 1 6rem
+			min-width: 0
+		.f.num
+			flex: 0 0 3rem
+			text-align: right
+		.f.wide
+			flex: 4 1 16rem
+
+	// The second level. Nesting is capped at two by the schema, so one indent is the whole story.
+	.nest
+		margin: 5px 0 0 10px
+		padding-left: 8px
+		border-left: 1px solid var(--line)
+
+	.nlbl
+		display: block
+		font-family: var(--cond)
+		font-size: 10px
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		color: var(--faint)
+
+	.nrow
+		display: flex
+		align-items: flex-start
+		gap: 5px
+		padding: 2px 0
+		.f
+			flex: 1 1 6rem
+			min-width: 0
+		.f.num
+			flex: 0 0 3rem
+			text-align: right
+	.nrow.inline
+		display: inline-flex
+		align-items: center
+		margin-right: 8px
+
+	// The printed row number, which is what the referee matches against the book in front of them.
+	.ord
+		flex: 0 0 1.3rem
+		font-family: var(--mono)
+		font-size: 11px
+		font-variant-numeric: tabular-nums
+		color: var(--faint)
+		text-align: right
+
+	// A row-authored tray entry carries all eleven of the ledger's own fields, so it wraps like a
+	// grant rather than sitting on the one line a `.nrow` gives.
+	.trayrow
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 4px
+		padding: 2px 0
+		.f
+			flex: 1 1 5rem
+			min-width: 0
+		.f.kind
+			flex: 0 0 7rem
+		.f.num
+			flex: 0 0 3rem
+			text-align: right
+		.f.wide
+			flex: 1 1 100%
+
+	.cell
+		flex: 1 1 auto
+		min-width: 0
+
+	.cellhead
+		display: flex
+		align-items: center
+		gap: 5px
+		.f
+			flex: 1 1 auto
+			min-width: 0
+
+	// The count is the whole affordance: a cell with printed text and no grants is legitimate, so a
+	// zero must read as a fact rather than as something missing.
+	.grantcount
+		flex: 0 0 auto
+		min-width: 1.1rem
+		font-family: var(--mono)
+		font-size: 10.5px
+		text-align: center
+		color: var(--accent-text)
+	.grantcount.none
+		color: var(--faint)
+		opacity: 0.5
+
+	.grants
+		margin-left: 6px
+
+	.grant
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 4px
+		padding: 2px 0
+		.f
+			flex: 1 1 5rem
+			min-width: 0
+		.f.kind
+			flex: 0 0 7rem
+		.f.num
+			flex: 0 0 3rem
+			text-align: right

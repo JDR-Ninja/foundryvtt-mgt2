@@ -1,0 +1,63 @@
+{{! One printed cell of a creation table, which is a small EXPRESSION and not a scalar (§9.48).
+    `text` is the cell as the book prints it and is always inline, because that is what a referee
+    types first and a cell with text and no grants is legitimate. The grants that make it mechanical
+    unfold underneath, so a table of six rows is six lines until somebody opens one.
+
+    Callers pass `cell` and `path`; `path` is the dotted route to this cell under `system.`, which is
+    what lets the same editor sit in a rank ladder, an assignment's skills, a career table, the
+    benefits column and either event table. }}
+<div class="cell" data-cell-path="{{path}}">
+	<div class="cellhead">
+		<span class="play-only">{{#if cell.text}}{{cell.text}}{{else}}&mdash;{{/if}}</span>
+		<input class="f edit-only" type="text" name="system.{{path}}.text" value="{{cell.text}}"
+			placeholder="{{localize 'MGT2.Chargen.Template.CellText'}}" />
+		<span class="grantcount{{#unless cell.grants.length}} none{{/unless}}"
+			data-tooltip="{{localize 'MGT2.Chargen.Template.GrantsHint'}}">{{cell.grants.length}}</span>
+	</div>
+
+	<div class="grants" data-property="{{path}}.grants">
+		{{#if cell.grants.length}}
+		<label class="mode edit-only">
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.CellMode'}}</span>
+			<select class="f" name="system.{{path}}.mode">
+				{{selectOptions @root.config.CellModes selected=cell.mode localize=true}}
+			</select>
+		</label>
+		{{/if}}
+
+		{{#each cell.grants as |grant g|}}
+		<div class="grant" data-entry-index="{{g}}">
+			<select class="f kind edit-only" name="system.{{../path}}.grants.{{g}}.kind">
+				{{selectOptions @root.config.CreationGrantKinds selected=grant.kind localize=true}}
+			</select>
+			<span class="play-only word">{{localize (lookup @root.config.CreationGrantKinds grant.kind)}}</span>
+
+			{{! Free text and never a choices list: the system ships no skill list, a skill being a
+			    `talent` Item and no content shipping at all (§9.45). }}
+			<input class="f edit-only" type="text" name="system.{{../path}}.grants.{{g}}.skill"
+				value="{{grant.skill}}" placeholder="{{localize 'MGT2.Items.Skill'}}" />
+			<input class="f edit-only" type="text" name="system.{{../path}}.grants.{{g}}.speciality"
+				value="{{grant.speciality}}" placeholder="{{localize 'MGT2.Chargen.Template.Speciality'}}" />
+			<select class="f edit-only" name="system.{{../path}}.grants.{{g}}.characteristic">
+				<option value="">&mdash;</option>
+				{{selectOptions @root.config.Characteristics selected=grant.characteristic localize=true}}
+			</select>
+			<input class="f num edit-only" type="number" step="1" name="system.{{../path}}.grants.{{g}}.value"
+				value="{{grant.value}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.GrantValue'}}" />
+			{{! `1D Ship Shares`, `D3 Enemies` — a quantity rolled rather than counted. }}
+			<input class="f edit-only" type="text" name="system.{{../path}}.grants.{{g}}.formula"
+				value="{{grant.formula}}" placeholder="{{localize 'MGT2.Chargen.Template.Formula'}}" />
+			<select class="f edit-only" name="system.{{../path}}.grants.{{g}}.mode">
+				{{selectOptions @root.config.GrantModes selected=grant.mode localize=true}}
+			</select>
+			<label class="chk edit-only" data-tooltip="{{localize 'MGT2.Chargen.Template.FamilyHint'}}">
+				<input type="checkbox" name="system.{{../path}}.grants.{{g}}.family" {{checked grant.family}} />
+				<span>{{localize 'MGT2.Chargen.Template.Family'}}</span>
+			</label>
+			<a class="del edit-only" data-action="entryDelete" data-tooltip="{{localize 'MGT2.Chargen.Template.RemoveGrant'}}"><i class="fa-solid fa-xmark"></i></a>
+		</div>
+		{{/each}}
+
+		<a class="add edit-only" data-action="entryCreate" data-tooltip="{{localize 'MGT2.Chargen.Template.AddGrant'}}"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Grant'}}</a>
+	</div>
+</div>

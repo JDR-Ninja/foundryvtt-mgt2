@@ -1,6 +1,7 @@
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { Jump } from "./jump.js";
+import { Rules } from "./rules.js";
 import { checkOf } from "./chat-message.js";
 import { SpacecraftActorSheet } from "./actors/spacecraft-sheet.js";
 
@@ -335,9 +336,21 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         };
     }
 
-    /** A table row as one sentence: the printed outcome with the dice it asked for filled in. */
+    /**
+     * A table row as one sentence: the printed outcome with the dice it asked for filled in.
+     *
+     * A clause whose figure was never rolled is DROPPED rather than printed with a hole in it —
+     * Core folio 158's perceived time is the one that can be missing, and `perceivedTime` off means
+     * the row's `{perceived}` has no answer. Matched on the placeholder and not on the words around
+     * it, because that is the only handle a translated string offers.
+     */
     static #outcome(entry) {
-        return game.i18n.format(entry.row.label, entry.values ?? {});
+        const values = entry.values ?? {};
+        const answered = clause => !clause.match(/{\w+}/g)
+            ?.some(token => values[token.slice(1, -1)] === undefined);
+        return game.i18n.localize(entry.row.label)
+            .split(/(?<=\.)\s+/).filter(answered).join(" ")
+            .replace(/{(\w+)}/g, (token, key) => values[key]);
     }
 
     /** `2D 7 −1 = 6` — the read, so the table can be checked against the page it came from. */
@@ -355,7 +368,10 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
                 core: true,
                 effect: MGT2Helper.signed(reading.effect, "+0"),
                 misjumped: reading.misjumped,
-                merciful: reading.row.merciful === true,
+                // Folio 158 hands the worst band's substitute to "a merciful referee", so a world
+                // that has not adopted it is not offered the hint — read here rather than at roll
+                // time, because it names an option and not a figure the dice already answered.
+                merciful: (reading.row.merciful === true) && Rules.on("mercifulReferee"),
                 outcome: VoyageScreen.#outcome(reading)
             };
         }
@@ -737,6 +753,10 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor: this.#ship }),
+            // The dice the reading was produced from, so the card is a roll and not a report of one
+            // (§9.117). v14 appends no display of its own once `content` is set — the body below
+            // already prints every figure — so this buys Dice So Nice and an auditable record.
+            rolls: this.#reading.rolls ?? [],
             content: `<div class="mgt2 theme-light card misjump">
                 <div class="chd"><div class="what"><h4>${title}</h4>
                     <span class="tgt">${ship}</span></div></div>${body}</div>`

@@ -1,0 +1,133 @@
+{{! What a Traveller of this species ROLLS — §9.54's species-level parameters, which sit beside the
+    frame rather than inside it and are the half that substitutes a value into a step the Core already
+    runs. The frame proper is the other block. Every collection here carries `data-property` with its
+    own dotted path and every row a `data-entry-index`, so the two generic handlers serve them all. }}
+<div class="block speciesblk">
+
+	{{! The list REPLACES folio 9's outright and is easy to get backwards: a species that rolls a
+	    seventh characteristic restates the other six beside it. `replaces` is the alien slot standing
+	    in for one of the six; a characteristic the species does not have at all is the field below,
+	    and replaced is not absent. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Frame.Rolls'}}</h3>
+		<span class="count">{{system.characteristicRolls.length}}</span>
+	</div>
+	<div class="stack" data-property="characteristicRolls">
+		{{#each system.characteristicRolls as |roll i|}}
+		<div class="entry" data-entry-index="{{i}}">
+			<div class="entryhead">
+				<select class="f edit-only" name="system.characteristicRolls.{{i}}.characteristic">
+					<option value="">&mdash;</option>
+					{{selectOptions @root.config.Characteristics selected=roll.characteristic localize=true}}
+				</select>
+				<input class="f edit-only" type="text" name="system.characteristicRolls.{{i}}.formula" value="{{roll.formula}}" placeholder="{{localize 'MGT2.Chargen.Template.Formula'}}" />
+				<span class="lbl edit-only">{{localize 'MGT2.Chargen.Frame.Replaces'}}</span>
+				<select class="f edit-only" name="system.characteristicRolls.{{i}}.replaces">
+					<option value="">&mdash;</option>
+					{{selectOptions @root.config.Characteristics selected=roll.replaces localize=true}}
+				</select>
+				<b class="play-only word">{{localize (lookup @root.config.Characteristics roll.characteristic)}} {{roll.formula}}{{#if roll.replaces}} &rarr; {{localize (lookup @root.config.Characteristics roll.replaces)}}{{/if}}</b>
+				<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+			</div>
+		</div>
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Frame.Roll'}}</a>
+	</div>
+	<p class="hint edit-only">{{localize 'MGT2.Chargen.Frame.RollsHint'}}</p>
+
+	<div class="pfields">
+		{{! A SET, so the readout is built in the sheet: Handlebars cannot walk one (§9.111). }}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Chargen.Frame.Without'}}</span>
+			{{formInput systemFields.withoutCharacteristics name="system.withoutCharacteristics" value=system.withoutCharacteristics localize=true classes="edit-only"}}
+			<b class="play-only word">{{#each speciesFrame.without}}{{#unless @first}}, {{/unless}}{{this}}{{else}}&mdash;{{/each}}</b>
+		</label>
+		{{! NO racial maximum is printed for any non-human species, so blank is the honest state and it
+		    means the general ceiling rather than "unlimited". }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Frame.RacialMaximum'}}</span>
+			{{formInput systemFields.racialMaximum name="system.racialMaximum" value=source.racialMaximum classes="f num" placeholder=(localize 'MGT2.Chargen.Frame.GeneralCeiling')}}
+		</label>
+		{{! The Core rule is only that you may not return to the career you just left; one species must
+		    serve three terms before attempting another at all. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Frame.CareerChange'}}</span>
+			{{formInput systemFields.careerChange.fields.minimumTerms name="system.careerChange.minimumTerms" value=system.careerChange.minimumTerms classes="f num"}}
+		</label>
+	</div>
+
+	<div class="flags edit-only">
+		{{! The general rule is `2D − the terms served so far`, and one species is printed exempt. }}
+		<label class="chk"><input type="checkbox" name="system.psiWithoutTermPenalty" {{checked system.psiWithoutTermPenalty}} /><span>{{localize 'MGT2.Chargen.Frame.PsiWithoutTermPenalty'}}</span></label>
+	</div>
+	<p class="hint edit-only">{{localize 'MGT2.Chargen.Frame.WithoutHint'}}</p>
+
+	{{! The law is an EXPRESSION, `a × terms + b`, and not a switch — the published values run −1, −2,
+	    −½, +1 and ±1 by sex. Its trigger takes four states and not two, the fourth being none printed
+	    anywhere, which is the state of one whole published species. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Frame.Ageing'}}</h3>
+	</div>
+	<div class="pfields">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Frame.AgeingFrom'}}</span>
+			{{formInput systemFields.ageing.fields.fromTerm name="system.ageing.fromTerm" value=source.ageing.fromTerm classes="f num" placeholder=(localize 'MGT2.Chargen.Frame.NotPrinted')}}
+			{{formInput systemFields.ageing.fields.fromAge name="system.ageing.fromAge" value=source.ageing.fromAge classes="f num" placeholder=(localize 'MGT2.Chargen.Frame.NotPrinted')}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Frame.AgeingLaw'}}</span>
+			{{formInput systemFields.ageing.fields.perTerm name="system.ageing.perTerm" value=system.ageing.perTerm classes="f num"}}
+			{{formInput systemFields.ageing.fields.flat name="system.ageing.flat" value=system.ageing.flat classes="f num"}}
+		</label>
+	</div>
+	<p class="hint edit-only">{{localize 'MGT2.Chargen.Frame.AgeingHint'}}</p>
+
+	{{! Four kinds, because a species may substitute the whole roll, substitute only the characteristic
+	    supplying the DM, ADD a DM to the usual one, or remove the roll entirely — each printed with
+	    its own list of careers it does not touch. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Frame.Qualification'}}</h3>
+	</div>
+	<div class="pfields">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Frame.QualKind'}}</span>
+			<select class="f edit-only" name="system.qualificationOverride.kind">{{selectOptions config.QualificationOverrides selected=system.qualificationOverride.kind localize=true}}</select>
+			<b class="play-only word">{{localize (lookup config.QualificationOverrides system.qualificationOverride.kind)}}</b>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Frame.QualCharacteristic'}}</span>
+			<select class="f edit-only" name="system.qualificationOverride.characteristic">
+				<option value="">&mdash;</option>
+				{{selectOptions config.Characteristics selected=system.qualificationOverride.characteristic localize=true}}
+			</select>
+			<b class="play-only word">{{#if system.qualificationOverride.characteristic}}{{localize (lookup config.Characteristics system.qualificationOverride.characteristic)}}{{else}}&mdash;{{/if}}</b>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.Formula'}}</span>
+			<input class="f edit-only" type="text" name="system.qualificationOverride.formula" value="{{system.qualificationOverride.formula}}" />
+			<b class="play-only word">{{#if system.qualificationOverride.formula}}{{system.qualificationOverride.formula}}{{else}}&mdash;{{/if}}</b>
+		</label>
+	</div>
+	{{! Template ids the referee typed, so §9.47's invariant is untouched. }}
+	{{> systems/mgt2/templates/items/parts/string-list.html list=system.qualificationOverride.exceptCareers
+		path="qualificationOverride.exceptCareers" label='MGT2.Chargen.Frame.ExceptCareers' add='MGT2.Chargen.Frame.CareerId'}}
+
+	{{! `EDU DM + 3` is a DEFAULT and not arithmetic: every published species prints its own count and
+	    its own mandatory skills, and the Core's seventeen are the HUMAN list. Empty choices means the
+	    referee's whole library is open, which is the honest state of a world that has typed no list. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Frame.BackgroundSkills'}}</h3>
+	</div>
+	<div class="pfields">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Frame.SkillCount'}}</span>
+			<input class="f edit-only" type="text" name="system.backgroundSkills.formula" value="{{system.backgroundSkills.formula}}" placeholder="{{localize 'MGT2.Chargen.Frame.DefaultCount'}}" />
+			<b class="play-only word">{{#if system.backgroundSkills.formula}}{{system.backgroundSkills.formula}}{{else}}{{localize 'MGT2.Chargen.Frame.DefaultCount'}}{{/if}}</b>
+		</label>
+	</div>
+	{{> systems/mgt2/templates/items/parts/string-list.html list=system.backgroundSkills.mandatory
+		path="backgroundSkills.mandatory" label='MGT2.Chargen.Frame.Mandatory' add='MGT2.Items.Skill'}}
+	{{> systems/mgt2/templates/items/parts/string-list.html list=system.backgroundSkills.choices
+		path="backgroundSkills.choices" label='MGT2.Chargen.Frame.SkillChoices' add='MGT2.Items.Skill'}}
+	<p class="hint edit-only">{{localize 'MGT2.Chargen.Frame.BackgroundHint'}}</p>
+</div>

@@ -164,7 +164,6 @@ body {
 .mgt2.application .window-content {
   background: var(--mgt2-bgcolor-form);
   color: var(--mgt2-color-form);
-  padding: 0;
 }
 
 .nopad .window-content {
@@ -279,6 +278,30 @@ body {
   min-height: 0;
 }
 .mgt2.application.space-combat > .window-content > [data-application-part=panel] {
+  grid-area: panel;
+  min-height: 0;
+}
+
+.mgt2.application.fleet-combat {
+  container-type: inline-size;
+  container-name: sheet;
+}
+.mgt2.application.fleet-combat > .window-content {
+  display: grid;
+  grid-template-columns: 25rem minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "header header" "rail panel";
+  height: 100%;
+  overflow: hidden;
+}
+.mgt2.application.fleet-combat > .window-content > [data-application-part=header] {
+  grid-area: header;
+}
+.mgt2.application.fleet-combat > .window-content > [data-application-part=rail] {
+  grid-area: rail;
+  min-height: 0;
+}
+.mgt2.application.fleet-combat > .window-content > [data-application-part=panel] {
   grid-area: panel;
   min-height: 0;
 }
@@ -748,6 +771,39 @@ body {
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
+.mgt2 .pdlg .imp {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 1px 6px 2px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.mgt2 .pdlg .imp .v {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0;
+  color: var(--faint);
+}
+.mgt2 .pdlg .imp.neg {
+  color: var(--danger);
+}
+.mgt2 .pdlg .gm {
+  padding: 0 4px;
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--rule);
+}
 @container (max-width: 400px) {
   .mgt2 .pdlg .pline {
     grid-template-columns: minmax(0, 1fr);
@@ -1146,7 +1202,9 @@ body {
 .mgt2.stoptraffic .window-content,
 .mgt2.card.stoptraffic .window-content,
 .mgt2.spectrade .window-content,
-.mgt2.card.spectrade .window-content {
+.mgt2.card.spectrade .window-content,
+.mgt2.skipdebts .window-content,
+.mgt2.card.skipdebts .window-content {
   display: flex;
   flex-direction: column;
   padding: 0;
@@ -1155,13 +1213,17 @@ body {
 .mgt2.stoptraffic,
 .mgt2.card.stoptraffic,
 .mgt2.spectrade,
-.mgt2.card.spectrade {
+.mgt2.card.spectrade,
+.mgt2.skipdebts,
+.mgt2.card.skipdebts {
   container-type: inline-size;
 }
 .mgt2.stoptraffic .hd,
 .mgt2.card.stoptraffic .hd,
 .mgt2.spectrade .hd,
-.mgt2.card.spectrade .hd {
+.mgt2.card.spectrade .hd,
+.mgt2.skipdebts .hd,
+.mgt2.card.skipdebts .hd {
   flex: none;
   display: flex;
   flex-direction: column;
@@ -1172,7 +1234,9 @@ body {
 .mgt2.stoptraffic .hd h2,
 .mgt2.card.stoptraffic .hd h2,
 .mgt2.spectrade .hd h2,
-.mgt2.card.spectrade .hd h2 {
+.mgt2.card.spectrade .hd h2,
+.mgt2.skipdebts .hd h2,
+.mgt2.card.skipdebts .hd h2 {
   margin: 0;
   font-family: var(--cond);
   font-size: 15px;
@@ -1184,7 +1248,9 @@ body {
 .mgt2.stoptraffic .inputs,
 .mgt2.card.stoptraffic .inputs,
 .mgt2.spectrade .inputs,
-.mgt2.card.spectrade .inputs {
+.mgt2.card.spectrade .inputs,
+.mgt2.skipdebts .inputs,
+.mgt2.card.skipdebts .inputs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px 14px;
@@ -1192,7 +1258,9 @@ body {
 .mgt2.stoptraffic .inputs .end,
 .mgt2.card.stoptraffic .inputs .end,
 .mgt2.spectrade .inputs .end,
-.mgt2.card.spectrade .inputs .end {
+.mgt2.card.spectrade .inputs .end,
+.mgt2.skipdebts .inputs .end,
+.mgt2.card.skipdebts .inputs .end {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 6.4rem;
   gap: 9px 10px;
@@ -1201,7 +1269,9 @@ body {
 .mgt2.stoptraffic .inputs .fld,
 .mgt2.card.stoptraffic .inputs .fld,
 .mgt2.spectrade .inputs .fld,
-.mgt2.card.spectrade .inputs .fld {
+.mgt2.card.spectrade .inputs .fld,
+.mgt2.skipdebts .inputs .fld,
+.mgt2.card.skipdebts .inputs .fld {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1210,7 +1280,9 @@ body {
 .mgt2.stoptraffic .inputs .fld > span,
 .mgt2.card.stoptraffic .inputs .fld > span,
 .mgt2.spectrade .inputs .fld > span,
-.mgt2.card.spectrade .inputs .fld > span {
+.mgt2.card.spectrade .inputs .fld > span,
+.mgt2.skipdebts .inputs .fld > span,
+.mgt2.card.skipdebts .inputs .fld > span {
   font-family: var(--cond);
   font-size: 9px;
   font-weight: 700;
@@ -1221,19 +1293,25 @@ body {
 .mgt2.stoptraffic .inputs .fld input.f,
 .mgt2.card.stoptraffic .inputs .fld input.f,
 .mgt2.spectrade .inputs .fld input.f,
-.mgt2.card.spectrade .inputs .fld input.f {
+.mgt2.card.spectrade .inputs .fld input.f,
+.mgt2.skipdebts .inputs .fld input.f,
+.mgt2.card.skipdebts .inputs .fld input.f {
   font-family: var(--mono);
 }
 .mgt2.stoptraffic .inputs .fld input.f.n,
 .mgt2.card.stoptraffic .inputs .fld input.f.n,
 .mgt2.spectrade .inputs .fld input.f.n,
-.mgt2.card.spectrade .inputs .fld input.f.n {
+.mgt2.card.spectrade .inputs .fld input.f.n,
+.mgt2.skipdebts .inputs .fld input.f.n,
+.mgt2.card.skipdebts .inputs .fld input.f.n {
   text-align: right;
 }
 .mgt2.stoptraffic .inputs .fld .g,
 .mgt2.card.stoptraffic .inputs .fld .g,
 .mgt2.spectrade .inputs .fld .g,
-.mgt2.card.spectrade .inputs .fld .g {
+.mgt2.card.spectrade .inputs .fld .g,
+.mgt2.skipdebts .inputs .fld .g,
+.mgt2.card.skipdebts .inputs .fld .g {
   font-family: var(--mono);
   font-size: 9.5px;
   color: var(--faint);
@@ -1244,13 +1322,17 @@ body {
 .mgt2.stoptraffic .inputs .fld.bad input.f,
 .mgt2.card.stoptraffic .inputs .fld.bad input.f,
 .mgt2.spectrade .inputs .fld.bad input.f,
-.mgt2.card.spectrade .inputs .fld.bad input.f {
+.mgt2.card.spectrade .inputs .fld.bad input.f,
+.mgt2.skipdebts .inputs .fld.bad input.f,
+.mgt2.card.skipdebts .inputs .fld.bad input.f {
   border-color: var(--danger);
 }
 .mgt2.stoptraffic .inputs .pair,
 .mgt2.card.stoptraffic .inputs .pair,
 .mgt2.spectrade .inputs .pair,
-.mgt2.card.spectrade .inputs .pair {
+.mgt2.card.spectrade .inputs .pair,
+.mgt2.skipdebts .inputs .pair,
+.mgt2.card.skipdebts .inputs .pair {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -1258,20 +1340,26 @@ body {
 .mgt2.stoptraffic .inputs .pair input.f,
 .mgt2.card.stoptraffic .inputs .pair input.f,
 .mgt2.spectrade .inputs .pair input.f,
-.mgt2.card.spectrade .inputs .pair input.f {
+.mgt2.card.spectrade .inputs .pair input.f,
+.mgt2.skipdebts .inputs .pair input.f,
+.mgt2.card.skipdebts .inputs .pair input.f {
   min-width: 0;
 }
 .mgt2.stoptraffic .inputs .pair .btn,
 .mgt2.card.stoptraffic .inputs .pair .btn,
 .mgt2.spectrade .inputs .pair .btn,
-.mgt2.card.spectrade .inputs .pair .btn {
+.mgt2.card.spectrade .inputs .pair .btn,
+.mgt2.skipdebts .inputs .pair .btn,
+.mgt2.card.skipdebts .inputs .pair .btn {
   flex: none;
   padding: 3px 7px;
 }
 .mgt2.stoptraffic .inputs .fld.ck,
 .mgt2.card.stoptraffic .inputs .fld.ck,
 .mgt2.spectrade .inputs .fld.ck,
-.mgt2.card.spectrade .inputs .fld.ck {
+.mgt2.card.spectrade .inputs .fld.ck,
+.mgt2.skipdebts .inputs .fld.ck,
+.mgt2.card.skipdebts .inputs .fld.ck {
   flex-direction: row;
   align-items: center;
   align-self: end;
@@ -1282,21 +1370,27 @@ body {
 .mgt2.stoptraffic .inputs .fld.ck input,
 .mgt2.card.stoptraffic .inputs .fld.ck input,
 .mgt2.spectrade .inputs .fld.ck input,
-.mgt2.card.spectrade .inputs .fld.ck input {
+.mgt2.card.spectrade .inputs .fld.ck input,
+.mgt2.skipdebts .inputs .fld.ck input,
+.mgt2.card.skipdebts .inputs .fld.ck input {
   margin: 0;
   accent-color: var(--accent-text);
 }
 .mgt2.stoptraffic .inputs .fld.ck > span,
 .mgt2.card.stoptraffic .inputs .fld.ck > span,
 .mgt2.spectrade .inputs .fld.ck > span,
-.mgt2.card.spectrade .inputs .fld.ck > span {
+.mgt2.card.spectrade .inputs .fld.ck > span,
+.mgt2.skipdebts .inputs .fld.ck > span,
+.mgt2.card.skipdebts .inputs .fld.ck > span {
   font-size: 10px;
   color: var(--mute);
 }
 .mgt2.stoptraffic .inputs .row4,
 .mgt2.card.stoptraffic .inputs .row4,
 .mgt2.spectrade .inputs .row4,
-.mgt2.card.spectrade .inputs .row4 {
+.mgt2.card.spectrade .inputs .row4,
+.mgt2.skipdebts .inputs .row4,
+.mgt2.card.skipdebts .inputs .row4 {
   grid-column: 1/-1;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1305,7 +1399,9 @@ body {
 .mgt2.stoptraffic .panel,
 .mgt2.card.stoptraffic .panel,
 .mgt2.spectrade .panel,
-.mgt2.card.spectrade .panel {
+.mgt2.card.spectrade .panel,
+.mgt2.skipdebts .panel,
+.mgt2.card.skipdebts .panel {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
@@ -1317,35 +1413,53 @@ body {
 .mgt2.stoptraffic.card .panel,
 .mgt2.card.stoptraffic.card .panel,
 .mgt2.spectrade.card .panel,
-.mgt2.card.spectrade.card .panel {
+.mgt2.card.spectrade.card .panel,
+.mgt2.skipdebts.card .panel,
+.mgt2.card.skipdebts.card .panel {
   flex: none;
   overflow: visible;
 }
 .mgt2.stoptraffic .cols,
 .mgt2.card.stoptraffic .cols,
 .mgt2.spectrade .cols,
-.mgt2.card.spectrade .cols {
+.mgt2.card.spectrade .cols,
+.mgt2.skipdebts .cols,
+.mgt2.card.skipdebts .cols {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   border: 1px solid var(--rule-soft);
 }
+.mgt2.stoptraffic .cols.one,
+.mgt2.card.stoptraffic .cols.one,
+.mgt2.spectrade .cols.one,
+.mgt2.card.spectrade .cols.one,
+.mgt2.skipdebts .cols.one,
+.mgt2.card.skipdebts .cols.one {
+  grid-template-columns: minmax(0, 1fr);
+}
 .mgt2.stoptraffic .cols .c,
 .mgt2.card.stoptraffic .cols .c,
 .mgt2.spectrade .cols .c,
-.mgt2.card.spectrade .cols .c {
+.mgt2.card.spectrade .cols .c,
+.mgt2.skipdebts .cols .c,
+.mgt2.card.skipdebts .cols .c {
   min-width: 0;
   padding: 8px 11px 10px;
 }
 .mgt2.stoptraffic .cols .c + .c,
 .mgt2.card.stoptraffic .cols .c + .c,
 .mgt2.spectrade .cols .c + .c,
-.mgt2.card.spectrade .cols .c + .c {
+.mgt2.card.spectrade .cols .c + .c,
+.mgt2.skipdebts .cols .c + .c,
+.mgt2.card.skipdebts .cols .c + .c {
   border-left: 1px solid var(--rule-soft);
 }
 .mgt2.stoptraffic .cols h4,
 .mgt2.card.stoptraffic .cols h4,
 .mgt2.spectrade .cols h4,
-.mgt2.card.spectrade .cols h4 {
+.mgt2.card.spectrade .cols h4,
+.mgt2.skipdebts .cols h4,
+.mgt2.card.skipdebts .cols h4 {
   display: flex;
   align-items: baseline;
   gap: 6px;
@@ -1360,7 +1474,9 @@ body {
 .mgt2.stoptraffic .cols h4 .src,
 .mgt2.card.stoptraffic .cols h4 .src,
 .mgt2.spectrade .cols h4 .src,
-.mgt2.card.spectrade .cols h4 .src {
+.mgt2.card.spectrade .cols h4 .src,
+.mgt2.skipdebts .cols h4 .src,
+.mgt2.card.skipdebts .cols h4 .src {
   margin-left: auto;
   font-size: 9px;
   font-weight: 600;
@@ -1369,21 +1485,27 @@ body {
 .mgt2.stoptraffic .cols table,
 .mgt2.card.stoptraffic .cols table,
 .mgt2.spectrade .cols table,
-.mgt2.card.spectrade .cols table {
+.mgt2.card.spectrade .cols table,
+.mgt2.skipdebts .cols table,
+.mgt2.card.skipdebts .cols table {
   width: 100%;
   border-collapse: collapse;
 }
 .mgt2.stoptraffic .cols td,
 .mgt2.card.stoptraffic .cols td,
 .mgt2.spectrade .cols td,
-.mgt2.card.spectrade .cols td {
+.mgt2.card.spectrade .cols td,
+.mgt2.skipdebts .cols td,
+.mgt2.card.skipdebts .cols td {
   padding: 1px 0;
   font-size: 12px;
 }
 .mgt2.stoptraffic .cols td.w,
 .mgt2.card.stoptraffic .cols td.w,
 .mgt2.spectrade .cols td.w,
-.mgt2.card.spectrade .cols td.w {
+.mgt2.card.spectrade .cols td.w,
+.mgt2.skipdebts .cols td.w,
+.mgt2.card.skipdebts .cols td.w {
   font-family: var(--cond);
   font-size: 10.5px;
   font-weight: 600;
@@ -1394,7 +1516,9 @@ body {
 .mgt2.stoptraffic .cols td.d,
 .mgt2.card.stoptraffic .cols td.d,
 .mgt2.spectrade .cols td.d,
-.mgt2.card.spectrade .cols td.d {
+.mgt2.card.spectrade .cols td.d,
+.mgt2.skipdebts .cols td.d,
+.mgt2.card.skipdebts .cols td.d {
   width: 1px;
   padding-left: 8px;
   font-family: var(--mono);
@@ -1405,31 +1529,41 @@ body {
 .mgt2.stoptraffic .cols td.d.pos,
 .mgt2.card.stoptraffic .cols td.d.pos,
 .mgt2.spectrade .cols td.d.pos,
-.mgt2.card.spectrade .cols td.d.pos {
+.mgt2.card.spectrade .cols td.d.pos,
+.mgt2.skipdebts .cols td.d.pos,
+.mgt2.card.skipdebts .cols td.d.pos {
   color: var(--good);
 }
 .mgt2.stoptraffic .cols td.d.neg,
 .mgt2.card.stoptraffic .cols td.d.neg,
 .mgt2.spectrade .cols td.d.neg,
-.mgt2.card.spectrade .cols td.d.neg {
+.mgt2.card.spectrade .cols td.d.neg,
+.mgt2.skipdebts .cols td.d.neg,
+.mgt2.card.skipdebts .cols td.d.neg {
   color: var(--danger);
 }
 .mgt2.stoptraffic .cols td.d.nil,
 .mgt2.card.stoptraffic .cols td.d.nil,
 .mgt2.spectrade .cols td.d.nil,
-.mgt2.card.spectrade .cols td.d.nil {
+.mgt2.card.spectrade .cols td.d.nil,
+.mgt2.skipdebts .cols td.d.nil,
+.mgt2.card.skipdebts .cols td.d.nil {
   color: var(--faint);
 }
 .mgt2.stoptraffic .cols td.d.split,
 .mgt2.card.stoptraffic .cols td.d.split,
 .mgt2.spectrade .cols td.d.split,
-.mgt2.card.spectrade .cols td.d.split {
+.mgt2.card.spectrade .cols td.d.split,
+.mgt2.skipdebts .cols td.d.split,
+.mgt2.card.skipdebts .cols td.d.split {
   box-shadow: inset 0 -2px 0 var(--accent-line);
 }
 .mgt2.stoptraffic .cols tr.end td,
 .mgt2.card.stoptraffic .cols tr.end td,
 .mgt2.spectrade .cols tr.end td,
-.mgt2.card.spectrade .cols tr.end td {
+.mgt2.card.spectrade .cols tr.end td,
+.mgt2.skipdebts .cols tr.end td,
+.mgt2.card.skipdebts .cols tr.end td {
   padding-top: 4px;
   font-family: var(--cond);
   font-weight: 700;
@@ -1440,7 +1574,9 @@ body {
 .mgt2.stoptraffic .cols tr.sum td,
 .mgt2.card.stoptraffic .cols tr.sum td,
 .mgt2.spectrade .cols tr.sum td,
-.mgt2.card.spectrade .cols tr.sum td {
+.mgt2.card.spectrade .cols tr.sum td,
+.mgt2.skipdebts .cols tr.sum td,
+.mgt2.card.skipdebts .cols tr.sum td {
   padding-top: 3px;
   font-family: var(--cond);
   font-weight: 700;
@@ -1451,7 +1587,9 @@ body {
 .mgt2.stoptraffic .cols tr.sum td.d,
 .mgt2.card.stoptraffic .cols tr.sum td.d,
 .mgt2.spectrade .cols tr.sum td.d,
-.mgt2.card.spectrade .cols tr.sum td.d {
+.mgt2.card.spectrade .cols tr.sum td.d,
+.mgt2.skipdebts .cols tr.sum td.d,
+.mgt2.card.skipdebts .cols tr.sum td.d {
   font-family: var(--mono);
   font-size: 13px;
   font-weight: 600;
@@ -1459,14 +1597,18 @@ body {
 .mgt2.stoptraffic .results,
 .mgt2.card.stoptraffic .results,
 .mgt2.spectrade .results,
-.mgt2.card.spectrade .results {
+.mgt2.card.spectrade .results,
+.mgt2.skipdebts .results,
+.mgt2.card.skipdebts .results {
   display: flex;
   flex-direction: column;
 }
 .mgt2.stoptraffic .results .r,
 .mgt2.card.stoptraffic .results .r,
 .mgt2.spectrade .results .r,
-.mgt2.card.spectrade .results .r {
+.mgt2.card.spectrade .results .r,
+.mgt2.skipdebts .results .r,
+.mgt2.card.skipdebts .results .r {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto auto;
   align-items: baseline;
@@ -1477,13 +1619,17 @@ body {
 .mgt2.stoptraffic .results .r:last-child,
 .mgt2.card.stoptraffic .results .r:last-child,
 .mgt2.spectrade .results .r:last-child,
-.mgt2.card.spectrade .results .r:last-child {
+.mgt2.card.spectrade .results .r:last-child,
+.mgt2.skipdebts .results .r:last-child,
+.mgt2.card.skipdebts .results .r:last-child {
   border-bottom: 0;
 }
 .mgt2.stoptraffic .results .nm,
 .mgt2.card.stoptraffic .results .nm,
 .mgt2.spectrade .results .nm,
-.mgt2.card.spectrade .results .nm {
+.mgt2.card.spectrade .results .nm,
+.mgt2.skipdebts .results .nm,
+.mgt2.card.skipdebts .results .nm {
   font-family: var(--cond);
   font-size: 12px;
   font-weight: 700;
@@ -1493,7 +1639,9 @@ body {
 .mgt2.stoptraffic .results .nm .g,
 .mgt2.card.stoptraffic .results .nm .g,
 .mgt2.spectrade .results .nm .g,
-.mgt2.card.spectrade .results .nm .g {
+.mgt2.card.spectrade .results .nm .g,
+.mgt2.skipdebts .results .nm .g,
+.mgt2.card.skipdebts .results .nm .g {
   display: block;
   font-family: var(--mono);
   font-size: 9.5px;
@@ -1508,7 +1656,11 @@ body {
 .mgt2.spectrade .results .dm,
 .mgt2.spectrade .results .at,
 .mgt2.card.spectrade .results .dm,
-.mgt2.card.spectrade .results .at {
+.mgt2.card.spectrade .results .at,
+.mgt2.skipdebts .results .dm,
+.mgt2.skipdebts .results .at,
+.mgt2.card.skipdebts .results .dm,
+.mgt2.card.skipdebts .results .at {
   font-family: var(--mono);
   font-size: 10.5px;
   color: var(--faint);
@@ -1517,7 +1669,9 @@ body {
 .mgt2.stoptraffic .results .out,
 .mgt2.card.stoptraffic .results .out,
 .mgt2.spectrade .results .out,
-.mgt2.card.spectrade .results .out {
+.mgt2.card.spectrade .results .out,
+.mgt2.skipdebts .results .out,
+.mgt2.card.skipdebts .results .out {
   min-width: 3.4rem;
   font-family: var(--cond);
   font-size: 15px;
@@ -1529,7 +1683,9 @@ body {
 .mgt2.stoptraffic .results .out .u,
 .mgt2.card.stoptraffic .results .out .u,
 .mgt2.spectrade .results .out .u,
-.mgt2.card.spectrade .results .out .u {
+.mgt2.card.spectrade .results .out .u,
+.mgt2.skipdebts .results .out .u,
+.mgt2.card.skipdebts .results .out .u {
   font-family: var(--mono);
   font-size: 10px;
   font-weight: 400;
@@ -1542,19 +1698,27 @@ body {
 .mgt2.spectrade .results .r.none .nm,
 .mgt2.spectrade .results .r.none .out,
 .mgt2.card.spectrade .results .r.none .nm,
-.mgt2.card.spectrade .results .r.none .out {
+.mgt2.card.spectrade .results .r.none .out,
+.mgt2.skipdebts .results .r.none .nm,
+.mgt2.skipdebts .results .r.none .out,
+.mgt2.card.skipdebts .results .r.none .nm,
+.mgt2.card.skipdebts .results .r.none .out {
   color: var(--faint);
 }
 .mgt2.stoptraffic .results .r.capped .out,
 .mgt2.card.stoptraffic .results .r.capped .out,
 .mgt2.spectrade .results .r.capped .out,
-.mgt2.card.spectrade .results .r.capped .out {
+.mgt2.card.spectrade .results .r.capped .out,
+.mgt2.skipdebts .results .r.capped .out,
+.mgt2.card.skipdebts .results .r.capped .out {
   color: var(--danger);
 }
 .mgt2.stoptraffic .mail,
 .mgt2.card.stoptraffic .mail,
 .mgt2.spectrade .mail,
-.mgt2.card.spectrade .mail {
+.mgt2.card.spectrade .mail,
+.mgt2.skipdebts .mail,
+.mgt2.card.skipdebts .mail {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -1565,7 +1729,9 @@ body {
 .mgt2.stoptraffic .mail .v,
 .mgt2.card.stoptraffic .mail .v,
 .mgt2.spectrade .mail .v,
-.mgt2.card.spectrade .mail .v {
+.mgt2.card.spectrade .mail .v,
+.mgt2.skipdebts .mail .v,
+.mgt2.card.skipdebts .mail .v {
   font-family: var(--cond);
   font-size: 17px;
   font-weight: 700;
@@ -1574,26 +1740,34 @@ body {
 .mgt2.stoptraffic .mail .v.yes,
 .mgt2.card.stoptraffic .mail .v.yes,
 .mgt2.spectrade .mail .v.yes,
-.mgt2.card.spectrade .mail .v.yes {
+.mgt2.card.spectrade .mail .v.yes,
+.mgt2.skipdebts .mail .v.yes,
+.mgt2.card.skipdebts .mail .v.yes {
   color: var(--accent-text);
 }
 .mgt2.stoptraffic .mail .v.no,
 .mgt2.card.stoptraffic .mail .v.no,
 .mgt2.spectrade .mail .v.no,
-.mgt2.card.spectrade .mail .v.no {
+.mgt2.card.spectrade .mail .v.no,
+.mgt2.skipdebts .mail .v.no,
+.mgt2.card.skipdebts .mail .v.no {
   color: var(--faint);
 }
 .mgt2.stoptraffic .mail .cr,
 .mgt2.card.stoptraffic .mail .cr,
 .mgt2.spectrade .mail .cr,
-.mgt2.card.spectrade .mail .cr {
+.mgt2.card.spectrade .mail .cr,
+.mgt2.skipdebts .mail .cr,
+.mgt2.card.skipdebts .mail .cr {
   font-family: var(--mono);
   font-size: 11.5px;
 }
 .mgt2.stoptraffic .mail .terms,
 .mgt2.card.stoptraffic .mail .terms,
 .mgt2.spectrade .mail .terms,
-.mgt2.card.spectrade .mail .terms {
+.mgt2.card.spectrade .mail .terms,
+.mgt2.skipdebts .mail .terms,
+.mgt2.card.skipdebts .mail .terms {
   flex-basis: 100%;
   display: flex;
   flex-wrap: wrap;
@@ -1602,7 +1776,9 @@ body {
 .mgt2.stoptraffic .mail .terms .dm,
 .mgt2.card.stoptraffic .mail .terms .dm,
 .mgt2.spectrade .mail .terms .dm,
-.mgt2.card.spectrade .mail .terms .dm {
+.mgt2.card.spectrade .mail .terms .dm,
+.mgt2.skipdebts .mail .terms .dm,
+.mgt2.card.skipdebts .mail .terms .dm {
   padding: 0 4px 1px;
   font-family: var(--mono);
   font-size: 9.5px;
@@ -1613,21 +1789,27 @@ body {
 .mgt2.stoptraffic .mail .terms .dm.pos,
 .mgt2.card.stoptraffic .mail .terms .dm.pos,
 .mgt2.spectrade .mail .terms .dm.pos,
-.mgt2.card.spectrade .mail .terms .dm.pos {
+.mgt2.card.spectrade .mail .terms .dm.pos,
+.mgt2.skipdebts .mail .terms .dm.pos,
+.mgt2.card.skipdebts .mail .terms .dm.pos {
   color: var(--good);
   border-color: color-mix(in oklab, var(--good) 40%, transparent);
 }
 .mgt2.stoptraffic .mail .terms .dm.neg,
 .mgt2.card.stoptraffic .mail .terms .dm.neg,
 .mgt2.spectrade .mail .terms .dm.neg,
-.mgt2.card.spectrade .mail .terms .dm.neg {
+.mgt2.card.spectrade .mail .terms .dm.neg,
+.mgt2.skipdebts .mail .terms .dm.neg,
+.mgt2.card.skipdebts .mail .terms .dm.neg {
   color: var(--danger);
   border-color: color-mix(in oklab, var(--danger) 40%, transparent);
 }
 .mgt2.stoptraffic .codes,
 .mgt2.card.stoptraffic .codes,
 .mgt2.spectrade .codes,
-.mgt2.card.spectrade .codes {
+.mgt2.card.spectrade .codes,
+.mgt2.skipdebts .codes,
+.mgt2.card.skipdebts .codes {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -1638,7 +1820,9 @@ body {
 .mgt2.stoptraffic .codes .code,
 .mgt2.card.stoptraffic .codes .code,
 .mgt2.spectrade .codes .code,
-.mgt2.card.spectrade .codes .code {
+.mgt2.card.spectrade .codes .code,
+.mgt2.skipdebts .codes .code,
+.mgt2.card.skipdebts .codes .code {
   padding: 1px 6px 2px;
   font-family: var(--cond);
   font-size: 10.5px;
@@ -1651,14 +1835,18 @@ body {
 .mgt2.stoptraffic .codes .code.zone,
 .mgt2.card.stoptraffic .codes .code.zone,
 .mgt2.spectrade .codes .code.zone,
-.mgt2.card.spectrade .codes .code.zone {
+.mgt2.card.spectrade .codes .code.zone,
+.mgt2.skipdebts .codes .code.zone,
+.mgt2.card.skipdebts .codes .code.zone {
   color: var(--mute);
   border-style: dashed;
 }
 .mgt2.stoptraffic .codes .none,
 .mgt2.card.stoptraffic .codes .none,
 .mgt2.spectrade .codes .none,
-.mgt2.card.spectrade .codes .none {
+.mgt2.card.spectrade .codes .none,
+.mgt2.skipdebts .codes .none,
+.mgt2.card.skipdebts .codes .none {
   font-family: var(--cond);
   font-size: 10.5px;
   color: var(--faint);
@@ -1666,7 +1854,9 @@ body {
 .mgt2.stoptraffic .codes .terms,
 .mgt2.card.stoptraffic .codes .terms,
 .mgt2.spectrade .codes .terms,
-.mgt2.card.spectrade .codes .terms {
+.mgt2.card.spectrade .codes .terms,
+.mgt2.skipdebts .codes .terms,
+.mgt2.card.skipdebts .codes .terms {
   flex-basis: 100%;
   display: flex;
   flex-wrap: wrap;
@@ -1675,7 +1865,9 @@ body {
 .mgt2.stoptraffic .codes .terms .dm,
 .mgt2.card.stoptraffic .codes .terms .dm,
 .mgt2.spectrade .codes .terms .dm,
-.mgt2.card.spectrade .codes .terms .dm {
+.mgt2.card.spectrade .codes .terms .dm,
+.mgt2.skipdebts .codes .terms .dm,
+.mgt2.card.skipdebts .codes .terms .dm {
   padding: 0 4px 1px;
   font-family: var(--mono);
   font-size: 9.5px;
@@ -1686,26 +1878,34 @@ body {
 .mgt2.stoptraffic .codes .terms .dm.pos,
 .mgt2.card.stoptraffic .codes .terms .dm.pos,
 .mgt2.spectrade .codes .terms .dm.pos,
-.mgt2.card.spectrade .codes .terms .dm.pos {
+.mgt2.card.spectrade .codes .terms .dm.pos,
+.mgt2.skipdebts .codes .terms .dm.pos,
+.mgt2.card.skipdebts .codes .terms .dm.pos {
   color: var(--good);
 }
 .mgt2.stoptraffic .codes .terms .dm.neg,
 .mgt2.card.stoptraffic .codes .terms .dm.neg,
 .mgt2.spectrade .codes .terms .dm.neg,
-.mgt2.card.spectrade .codes .terms .dm.neg {
+.mgt2.card.spectrade .codes .terms .dm.neg,
+.mgt2.skipdebts .codes .terms .dm.neg,
+.mgt2.card.skipdebts .codes .terms .dm.neg {
   color: var(--danger);
 }
 .mgt2.stoptraffic .shelf,
 .mgt2.card.stoptraffic .shelf,
 .mgt2.spectrade .shelf,
-.mgt2.card.spectrade .shelf {
+.mgt2.card.spectrade .shelf,
+.mgt2.skipdebts .shelf,
+.mgt2.card.skipdebts .shelf {
   display: flex;
   flex-direction: column;
 }
 .mgt2.stoptraffic .shelf .r,
 .mgt2.card.stoptraffic .shelf .r,
 .mgt2.spectrade .shelf .r,
-.mgt2.card.spectrade .shelf .r {
+.mgt2.card.spectrade .shelf .r,
+.mgt2.skipdebts .shelf .r,
+.mgt2.card.skipdebts .shelf .r {
   display: grid;
   grid-template-columns: 2.2rem minmax(0, 1fr) 4.2rem 5.4rem 3rem 3rem;
   align-items: baseline;
@@ -1717,7 +1917,9 @@ body {
 .mgt2.stoptraffic .shelf .r:last-child,
 .mgt2.card.stoptraffic .shelf .r:last-child,
 .mgt2.spectrade .shelf .r:last-child,
-.mgt2.card.spectrade .shelf .r:last-child {
+.mgt2.card.spectrade .shelf .r:last-child,
+.mgt2.skipdebts .shelf .r:last-child,
+.mgt2.card.skipdebts .shelf .r:last-child {
   border-bottom: 0;
 }
 .mgt2.stoptraffic .shelf .ix,
@@ -1735,7 +1937,15 @@ body {
 .mgt2.card.spectrade .shelf .ix,
 .mgt2.card.spectrade .shelf .sz,
 .mgt2.card.spectrade .shelf .cr,
-.mgt2.card.spectrade .shelf .d {
+.mgt2.card.spectrade .shelf .d,
+.mgt2.skipdebts .shelf .ix,
+.mgt2.skipdebts .shelf .sz,
+.mgt2.skipdebts .shelf .cr,
+.mgt2.skipdebts .shelf .d,
+.mgt2.card.skipdebts .shelf .ix,
+.mgt2.card.skipdebts .shelf .sz,
+.mgt2.card.skipdebts .shelf .cr,
+.mgt2.card.skipdebts .shelf .d {
   font-family: var(--mono);
   font-size: 10.5px;
   font-variant-numeric: tabular-nums;
@@ -1752,19 +1962,29 @@ body {
 .mgt2.spectrade .shelf .d,
 .mgt2.card.spectrade .shelf .sz,
 .mgt2.card.spectrade .shelf .cr,
-.mgt2.card.spectrade .shelf .d {
+.mgt2.card.spectrade .shelf .d,
+.mgt2.skipdebts .shelf .sz,
+.mgt2.skipdebts .shelf .cr,
+.mgt2.skipdebts .shelf .d,
+.mgt2.card.skipdebts .shelf .sz,
+.mgt2.card.skipdebts .shelf .cr,
+.mgt2.card.skipdebts .shelf .d {
   text-align: right;
 }
 .mgt2.stoptraffic .shelf .ix,
 .mgt2.card.stoptraffic .shelf .ix,
 .mgt2.spectrade .shelf .ix,
-.mgt2.card.spectrade .shelf .ix {
+.mgt2.card.spectrade .shelf .ix,
+.mgt2.skipdebts .shelf .ix,
+.mgt2.card.skipdebts .shelf .ix {
   color: var(--faint);
 }
 .mgt2.stoptraffic .shelf .nm,
 .mgt2.card.stoptraffic .shelf .nm,
 .mgt2.spectrade .shelf .nm,
-.mgt2.card.spectrade .shelf .nm {
+.mgt2.card.spectrade .shelf .nm,
+.mgt2.skipdebts .shelf .nm,
+.mgt2.card.skipdebts .shelf .nm {
   font-family: var(--cond);
   font-size: 11.5px;
   font-weight: 700;
@@ -1777,31 +1997,41 @@ body {
 .mgt2.stoptraffic .shelf .d.pos,
 .mgt2.card.stoptraffic .shelf .d.pos,
 .mgt2.spectrade .shelf .d.pos,
-.mgt2.card.spectrade .shelf .d.pos {
+.mgt2.card.spectrade .shelf .d.pos,
+.mgt2.skipdebts .shelf .d.pos,
+.mgt2.card.skipdebts .shelf .d.pos {
   color: var(--good);
 }
 .mgt2.stoptraffic .shelf .d.neg,
 .mgt2.card.stoptraffic .shelf .d.neg,
 .mgt2.spectrade .shelf .d.neg,
-.mgt2.card.spectrade .shelf .d.neg {
+.mgt2.card.spectrade .shelf .d.neg,
+.mgt2.skipdebts .shelf .d.neg,
+.mgt2.card.skipdebts .shelf .d.neg {
   color: var(--danger);
 }
 .mgt2.stoptraffic .shelf .d.nil,
 .mgt2.card.stoptraffic .shelf .d.nil,
 .mgt2.spectrade .shelf .d.nil,
-.mgt2.card.spectrade .shelf .d.nil {
+.mgt2.card.spectrade .shelf .d.nil,
+.mgt2.skipdebts .shelf .d.nil,
+.mgt2.card.skipdebts .shelf .d.nil {
   color: var(--faint);
 }
 .mgt2.stoptraffic .shelf .r.hdr,
 .mgt2.card.stoptraffic .shelf .r.hdr,
 .mgt2.spectrade .shelf .r.hdr,
-.mgt2.card.spectrade .shelf .r.hdr {
+.mgt2.card.spectrade .shelf .r.hdr,
+.mgt2.skipdebts .shelf .r.hdr,
+.mgt2.card.skipdebts .shelf .r.hdr {
   cursor: default;
 }
 .mgt2.stoptraffic .shelf .r.hdr span,
 .mgt2.card.stoptraffic .shelf .r.hdr span,
 .mgt2.spectrade .shelf .r.hdr span,
-.mgt2.card.spectrade .shelf .r.hdr span {
+.mgt2.card.spectrade .shelf .r.hdr span,
+.mgt2.skipdebts .shelf .r.hdr span,
+.mgt2.card.skipdebts .shelf .r.hdr span {
   font-family: var(--cond);
   font-size: 9px;
   font-weight: 700;
@@ -1812,13 +2042,17 @@ body {
 .mgt2.stoptraffic .shelf .r.on,
 .mgt2.card.stoptraffic .shelf .r.on,
 .mgt2.spectrade .shelf .r.on,
-.mgt2.card.spectrade .shelf .r.on {
+.mgt2.card.spectrade .shelf .r.on,
+.mgt2.skipdebts .shelf .r.on,
+.mgt2.card.skipdebts .shelf .r.on {
   background: var(--accent-soft);
 }
 .mgt2.stoptraffic .shelf .r.bad .nm,
 .mgt2.card.stoptraffic .shelf .r.bad .nm,
 .mgt2.spectrade .shelf .r.bad .nm,
-.mgt2.card.spectrade .shelf .r.bad .nm {
+.mgt2.card.spectrade .shelf .r.bad .nm,
+.mgt2.skipdebts .shelf .r.bad .nm,
+.mgt2.card.skipdebts .shelf .r.bad .nm {
   color: var(--danger);
 }
 .mgt2.stoptraffic .shelf .r.none .nm,
@@ -1828,19 +2062,27 @@ body {
 .mgt2.spectrade .shelf .r.none .nm,
 .mgt2.spectrade .shelf .r.none .sz,
 .mgt2.card.spectrade .shelf .r.none .nm,
-.mgt2.card.spectrade .shelf .r.none .sz {
+.mgt2.card.spectrade .shelf .r.none .sz,
+.mgt2.skipdebts .shelf .r.none .nm,
+.mgt2.skipdebts .shelf .r.none .sz,
+.mgt2.card.skipdebts .shelf .r.none .nm,
+.mgt2.card.skipdebts .shelf .r.none .sz {
   color: var(--faint);
 }
 .mgt2.stoptraffic .sect.sub,
 .mgt2.card.stoptraffic .sect.sub,
 .mgt2.spectrade .sect.sub,
-.mgt2.card.spectrade .sect.sub {
+.mgt2.card.spectrade .sect.sub,
+.mgt2.skipdebts .sect.sub,
+.mgt2.card.skipdebts .sect.sub {
   margin-top: 8px;
 }
 .mgt2.stoptraffic .cols .out,
 .mgt2.card.stoptraffic .cols .out,
 .mgt2.spectrade .cols .out,
-.mgt2.card.spectrade .cols .out {
+.mgt2.card.spectrade .cols .out,
+.mgt2.skipdebts .cols .out,
+.mgt2.card.skipdebts .cols .out {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -1852,7 +2094,9 @@ body {
 .mgt2.stoptraffic .cols .out .v,
 .mgt2.card.stoptraffic .cols .out .v,
 .mgt2.spectrade .cols .out .v,
-.mgt2.card.spectrade .cols .out .v {
+.mgt2.card.spectrade .cols .out .v,
+.mgt2.skipdebts .cols .out .v,
+.mgt2.card.skipdebts .cols .out .v {
   font-family: var(--cond);
   font-size: 19px;
   font-weight: 700;
@@ -1862,20 +2106,26 @@ body {
 .mgt2.stoptraffic .cols .out .v.no,
 .mgt2.card.stoptraffic .cols .out .v.no,
 .mgt2.spectrade .cols .out .v.no,
-.mgt2.card.spectrade .cols .out .v.no {
+.mgt2.card.spectrade .cols .out .v.no,
+.mgt2.skipdebts .cols .out .v.no,
+.mgt2.card.skipdebts .cols .out .v.no {
   color: var(--faint);
 }
 .mgt2.stoptraffic .cols .out .cr,
 .mgt2.card.stoptraffic .cols .out .cr,
 .mgt2.spectrade .cols .out .cr,
-.mgt2.card.spectrade .cols .out .cr {
+.mgt2.card.spectrade .cols .out .cr,
+.mgt2.skipdebts .cols .out .cr,
+.mgt2.card.skipdebts .cols .out .cr {
   font-family: var(--mono);
   font-size: 11px;
 }
 .mgt2.stoptraffic .cols .out .at,
 .mgt2.card.stoptraffic .cols .out .at,
 .mgt2.spectrade .cols .out .at,
-.mgt2.card.spectrade .cols .out .at {
+.mgt2.card.spectrade .cols .out .at,
+.mgt2.skipdebts .cols .out .at,
+.mgt2.card.skipdebts .cols .out .at {
   flex-basis: 100%;
   font-family: var(--mono);
   font-size: 9.5px;
@@ -1884,7 +2134,9 @@ body {
 .mgt2.stoptraffic .foot,
 .mgt2.card.stoptraffic .foot,
 .mgt2.spectrade .foot,
-.mgt2.card.spectrade .foot {
+.mgt2.card.spectrade .foot,
+.mgt2.skipdebts .foot,
+.mgt2.card.skipdebts .foot {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1894,7 +2146,9 @@ body {
 .mgt2.stoptraffic .foot .why,
 .mgt2.card.stoptraffic .foot .why,
 .mgt2.spectrade .foot .why,
-.mgt2.card.spectrade .foot .why {
+.mgt2.card.spectrade .foot .why,
+.mgt2.skipdebts .foot .why,
+.mgt2.card.skipdebts .foot .why {
   font-family: var(--cond);
   font-size: 9.5px;
   letter-spacing: 0.11em;
@@ -1905,38 +2159,50 @@ body {
   .mgt2.stoptraffic .inputs,
   .mgt2.card.stoptraffic .inputs,
   .mgt2.spectrade .inputs,
-  .mgt2.card.spectrade .inputs {
+  .mgt2.card.spectrade .inputs,
+  .mgt2.skipdebts .inputs,
+  .mgt2.card.skipdebts .inputs {
     grid-template-columns: minmax(0, 1fr);
   }
   .mgt2.stoptraffic .inputs .row4,
   .mgt2.card.stoptraffic .inputs .row4,
   .mgt2.spectrade .inputs .row4,
-  .mgt2.card.spectrade .inputs .row4 {
+  .mgt2.card.spectrade .inputs .row4,
+  .mgt2.skipdebts .inputs .row4,
+  .mgt2.card.skipdebts .inputs .row4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .mgt2.stoptraffic .cols,
   .mgt2.card.stoptraffic .cols,
   .mgt2.spectrade .cols,
-  .mgt2.card.spectrade .cols {
+  .mgt2.card.spectrade .cols,
+  .mgt2.skipdebts .cols,
+  .mgt2.card.skipdebts .cols {
     grid-template-columns: minmax(0, 1fr);
   }
   .mgt2.stoptraffic .cols .c + .c,
   .mgt2.card.stoptraffic .cols .c + .c,
   .mgt2.spectrade .cols .c + .c,
-  .mgt2.card.spectrade .cols .c + .c {
+  .mgt2.card.spectrade .cols .c + .c,
+  .mgt2.skipdebts .cols .c + .c,
+  .mgt2.card.skipdebts .cols .c + .c {
     border-left: 0;
     border-top: 1px solid var(--rule-soft);
   }
   .mgt2.stoptraffic .shelf .r,
   .mgt2.card.stoptraffic .shelf .r,
   .mgt2.spectrade .shelf .r,
-  .mgt2.card.spectrade .shelf .r {
+  .mgt2.card.spectrade .shelf .r,
+  .mgt2.skipdebts .shelf .r,
+  .mgt2.card.skipdebts .shelf .r {
     grid-template-columns: 2.2rem minmax(0, 1fr) 4.2rem 3rem 3rem;
   }
   .mgt2.stoptraffic .shelf .cr,
   .mgt2.card.stoptraffic .shelf .cr,
   .mgt2.spectrade .shelf .cr,
-  .mgt2.card.spectrade .shelf .cr {
+  .mgt2.card.spectrade .shelf .cr,
+  .mgt2.skipdebts .shelf .cr,
+  .mgt2.card.skipdebts .shelf .cr {
     display: none;
   }
 }
@@ -3176,6 +3442,29 @@ body {
   width: 3rem;
 }
 
+.mgt2 .noarm {
+  color: var(--danger);
+  font-family: var(--cond);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: help;
+}
+.mgt2 td.noarm i {
+  font-style: normal;
+}
+.mgt2 .noarmnote {
+  margin: 4px 0 0;
+  font-family: var(--body);
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--danger);
+}
+.mgt2 .noarmnote b {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
 .mgt2 {
   --mgt2-cond: var(--cond);
   --mgt2-rule: 1px solid var(--rule);
@@ -4044,7 +4333,14 @@ ul.softwares li:hover a {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
+.mgt2 .dlg.loss .row3 .drow {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px;
+}
 .mgt2 .dlg.loss .drow.bill {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 7px;
   cursor: var(--cursor-pointer);
 }
@@ -4055,10 +4351,24 @@ ul.softwares li:hover a {
 .mgt2 .dlg.loss .drow.bill .lbl {
   flex: 0 0 auto;
 }
+.mgt2 .dlg.loss .drow.bill .dm.purse {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+.mgt2 .dlg.loss .dblock:has(.dm.move) {
+  --dm-col: 4.5rem;
+}
 .mgt2 .dlg.loss .dm.move {
-  min-width: 4.5rem;
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+.mgt2 .dlg.loss .dm.price,
+.mgt2 .dlg.loss .dm.purse {
+  text-align: left;
+  white-space: normal;
+}
+.mgt2 .dlg.loss .dm.price {
+  grid-column: 2/-1;
 }
 .mgt2 .dlg.loss .dm.good {
   color: var(--good);
@@ -5362,8 +5672,144 @@ ul.softwares li:hover a {
   background: var(--accent-soft);
   border-color: var(--accent-text);
 }
+.mgt2.card .cbtns button.hot {
+  background: var(--accent-soft);
+  border-color: var(--accent-text);
+}
 .mgt2.card .cbtns button i {
   margin-right: 5px;
+}
+.mgt2.card .spread {
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+.mgt2.card .spread .cell {
+  padding: 5px 2px 6px;
+}
+.mgt2.card .spread .marks i.self {
+  box-shadow: inset 0 0 0 2px var(--paper);
+}
+.mgt2.card .dline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 8px;
+  padding: 5px 11px 6px;
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.card .dline .n {
+  grid-column: 1;
+  font-family: var(--cond);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mgt2.card .dline .w {
+  grid-column: 1;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mgt2.card .dline .v {
+  grid-column: 2;
+  grid-row: 1/span 2;
+  min-width: 2.1rem;
+  font-family: var(--cond);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.mgt2.card .dline .s {
+  grid-column: 2;
+  grid-row: 1/span 2;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--faint);
+}
+.mgt2.card .dline .late {
+  margin-left: 5px;
+  font-family: var(--cond);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--danger);
+}
+.mgt2.card .dline.ok .v {
+  color: var(--good);
+}
+.mgt2.card .dline.bad .v {
+  color: var(--danger);
+}
+.mgt2.card .dline.edge .v {
+  color: var(--mute);
+}
+.mgt2.card .dline.jump {
+  cursor: var(--cursor-pointer);
+}
+.mgt2.card .dline.jump:hover {
+  background: var(--hover);
+}
+.mgt2.card .dline.mine {
+  box-shadow: inset 2px 0 0 var(--accent-text);
+}
+.mgt2.card .dline a.pk {
+  margin-right: 5px;
+  font-size: 11px;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2.card .dline a.pk:hover {
+  color: var(--accent-text);
+}
+.mgt2.card .dline.res {
+  border-top: 1px solid var(--rule);
+}
+.mgt2.card .dline.res a.pk {
+  color: var(--accent-text);
+}
+.mgt2.card .dline.res .n::after {
+  content: " ▸";
+  color: var(--accent-text);
+}
+.mgt2.card .dline a.dm {
+  grid-column: 2;
+  grid-row: 1/span 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  justify-self: end;
+  padding: 3px 7px;
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-text);
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px var(--accent-line);
+  cursor: var(--cursor-pointer);
+}
+.mgt2.card .dline a.dm:hover {
+  color: var(--accent-hot);
+  background: var(--hover);
+  box-shadow: inset 0 0 0 1px var(--accent-text);
+}
+.mgt2.card .dline a.dm i {
+  font-size: 11px;
 }
 
 .mgt2.card.dose .dose-line {
@@ -5463,6 +5909,7 @@ ul.softwares li:hover a {
   border: 1px solid var(--rule-soft);
 }
 .mgt2 .bands .band {
+  display: block;
   position: relative;
   min-width: 0;
   padding: 23px 7px 7px;
@@ -5783,6 +6230,218 @@ ul.softwares li:hover a {
     border-right: 1px solid var(--rule-soft);
   }
   .mgt2 .bands .band:nth-child(2n) {
+    border-right: 0;
+  }
+}
+.mgt2 .fleetblock h3[data-action] {
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .fleetblock h3[data-action]:hover {
+  color: var(--accent-text);
+}
+
+.mgt2 .fleetblock.on > .sect h3 {
+  color: var(--accent-text);
+}
+
+.mgt2 .fleethead {
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+  gap: 0 9px;
+  align-items: center;
+  padding: 5px 4px 7px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .fleethead .i {
+  font-family: var(--cond);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .fleethead .i:hover {
+  color: var(--accent-text);
+}
+.mgt2 .fleethead .who {
+  min-width: 0;
+}
+.mgt2 .fleethead .nm {
+  display: block;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .fleethead .sub {
+  display: block;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--faint);
+}
+
+.mgt2 .order .tag {
+  margin-left: 4px;
+  font-style: normal;
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .order li.gone .nm,
+.mgt2 .order li.gone .sub {
+  color: var(--faint);
+}
+.mgt2 .order li.gone .nm {
+  text-decoration: line-through;
+}
+
+.mgt2 .fbtns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.mgt2 .fbtns .btn {
+  flex: 1 1 auto;
+}
+.mgt2 .fbtns .need {
+  margin-left: auto;
+  cursor: var(--cursor-pointer);
+}
+
+.mgt2 .hint.drop {
+  margin: 0;
+  padding: 5px 7px;
+  border: 1px dashed var(--rule);
+}
+
+.mgt2 .poolrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 2px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .poolrow:last-of-type {
+  border-bottom: 0;
+}
+.mgt2 .poolrow .lbl {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .poolrow .v {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mgt2 .poolrow .v .of {
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.mgt2 .poolrow input.f {
+  width: 4.6rem;
+}
+.mgt2 .poolrow select.f {
+  flex: 0 1 11rem;
+  min-width: 0;
+  font-size: 12px;
+}
+.mgt2 .poolrow .btn {
+  flex: 0 0 auto;
+  padding: 2px 9px;
+}
+
+.mgt2 .opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+  padding: 6px 0;
+}
+.mgt2 .opts label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+  cursor: var(--cursor-pointer);
+}
+
+.mgt2 table.batteries td.act {
+  width: 1px;
+  white-space: nowrap;
+}
+.mgt2 table.batteries td.act .btn {
+  padding: 2px 8px;
+}
+.mgt2 table.batteries td .why {
+  display: block;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 table.batteries input.f.num {
+  width: 4rem;
+  font-size: 12px;
+  padding: 1px 4px;
+}
+
+.mgt2 .mgt2-fleet-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+@container sheet (max-width: 940px) {
+  .mgt2.application.fleet-combat > .window-content {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "header" "rail" "panel";
+  }
+  .mgt2.fleet-combat .mgt2-rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .mgt2.fleet-combat .bands {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .mgt2.fleet-combat .bands .band {
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .mgt2.fleet-combat .bands .band:nth-child(4) {
+    border-right: 0;
+  }
+}
+@container sheet (max-width: 560px) {
+  .mgt2.fleet-combat .bands {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mgt2.fleet-combat .bands .band:nth-child(4) {
+    border-right: 1px solid var(--rule-soft);
+  }
+  .mgt2.fleet-combat .bands .band:nth-child(2n) {
     border-right: 0;
   }
 }
@@ -6568,6 +7227,1297 @@ ul.softwares li:hover a {
 
 #compendium .header-actions .mgt2-explorer {
   flex: 1;
+}
+
+.mgt2.mgt2-rules .rules {
+  gap: 10px;
+}
+.mgt2.mgt2-rules fieldset {
+  margin: 0;
+  border: 1px solid var(--rule-soft);
+}
+.mgt2.mgt2-rules fieldset legend {
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2.mgt2-rules .rule {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 10px;
+  padding: 6px 0;
+}
+.mgt2.mgt2-rules .rule + .rule {
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.mgt2-rules .rule .nm {
+  font-weight: 600;
+}
+.mgt2.mgt2-rules .rule .nm.sw {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+.mgt2.mgt2-rules .rule .nm.sw input {
+  margin: 0;
+  flex: 0 0 auto;
+}
+.mgt2.mgt2-rules .rule .src {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--faint);
+  white-space: nowrap;
+}
+.mgt2.mgt2-rules .rule .hint {
+  grid-column: 1/-1;
+}
+.mgt2.mgt2-rules .picker {
+  grid-column: 1/-1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 5px;
+}
+.mgt2.mgt2-rules .picker label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.mgt2.mgt2-rules .picker label input {
+  margin: 0;
+}
+.mgt2.mgt2-rules .picker select {
+  font-size: 12px;
+  max-width: 22rem;
+}
+
+.mgt2.application.docket {
+  container-type: inline-size;
+  container-name: docket;
+}
+.mgt2.application.docket > .window-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+}
+.mgt2.application.docket > .window-content > [data-application-part=form] {
+  flex: none;
+  padding: 8px 14px 9px;
+  border-bottom: 1px solid var(--rule);
+}
+.mgt2.application.docket > .window-content > [data-application-part=roster] {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+.mgt2.application.docket > .window-content > [data-application-part=foot] {
+  flex: none;
+  padding: 7px 14px 9px;
+  border-top: 1px solid var(--rule);
+}
+
+.mgt2 .dcompose,
+.mgt2 .dfoot {
+  gap: 0;
+}
+.mgt2 .dcompose .pline + .pline,
+.mgt2 .dfoot .pline + .pline {
+  padding-top: 5px;
+}
+
+.mgt2 .dcompose input.f.wide {
+  flex: 1 1 14rem;
+}
+.mgt2 .dcompose select.f.chars {
+  flex: 0 1 13rem;
+  height: auto;
+  padding: 2px 4px;
+  font-size: 12px;
+}
+.mgt2 .dcompose .skillfld {
+  display: inline-flex;
+  flex: 1 1 9rem;
+  min-width: 0;
+}
+.mgt2 .dcompose .skillfld input.f {
+  width: 100%;
+}
+.mgt2 .dcompose .skillfld.off {
+  opacity: 0.4;
+}
+.mgt2 .dcompose .echo {
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.mgt2 .dcompose .hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--faint);
+}
+.mgt2 .dcompose .wholine .pgut b {
+  display: inline;
+  margin-left: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--accent-text);
+}
+.mgt2 .dcompose .seeds {
+  justify-content: flex-end;
+}
+.mgt2 .dcompose .seeds .btn {
+  padding: 2px 8px;
+  font-size: 9.5px;
+}
+.mgt2 .dcompose .seeds .btn.clear {
+  margin-left: auto;
+}
+.mgt2 .dcompose .seeds .btn.clear:hover {
+  color: var(--danger);
+  border-color: color-mix(in oklab, var(--danger) 45%, transparent);
+}
+
+.mgt2 .droster {
+  padding: 0 14px;
+}
+.mgt2 .droster .roster {
+  table-layout: fixed;
+}
+.mgt2 .droster .roster td {
+  padding: 3px 6px;
+  vertical-align: middle;
+}
+.mgt2 .droster .roster th {
+  padding: 4px 6px 3px;
+}
+.mgt2 .droster td.mark,
+.mgt2 .droster th.mark {
+  width: 1.5rem;
+  padding-right: 0;
+}
+.mgt2 .droster .self {
+  display: inline-block;
+  width: 1.1rem;
+  font-size: 13px;
+  line-height: 1;
+  text-align: center;
+  color: var(--accent-text);
+  text-decoration: none;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .droster .self.on {
+  color: var(--mute);
+}
+.mgt2 .droster .who {
+  width: 30%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mgt2 .droster .who a {
+  text-decoration: none;
+}
+.mgt2 .droster .addressee {
+  width: 22%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  color: var(--mute);
+}
+.mgt2 .droster .addressee .gm {
+  color: var(--accent-text);
+  text-transform: uppercase;
+}
+.mgt2 .droster .addressee .none {
+  font-style: italic;
+  color: var(--faint);
+}
+.mgt2 .droster .reads {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.35;
+}
+.mgt2 .droster .reads .sk,
+.mgt2 .droster .reads .ch {
+  white-space: nowrap;
+}
+.mgt2 .droster .reads .sk {
+  margin-right: 8px;
+}
+.mgt2 .droster .reads .sk.untrained {
+  color: var(--danger);
+}
+.mgt2 .droster .reads .sk.unresolved {
+  font-style: italic;
+  color: var(--accent-text);
+  text-decoration: underline dotted;
+}
+.mgt2 .droster .reads .ch {
+  color: var(--faint);
+}
+.mgt2 .droster td.dm,
+.mgt2 .droster th.dm {
+  width: 3.2rem;
+  padding-right: 10px;
+  text-align: right;
+  white-space: nowrap;
+}
+.mgt2 .droster td.dm b,
+.mgt2 .droster th.dm b {
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .droster td.dm b.neg,
+.mgt2 .droster th.dm b.neg {
+  color: var(--danger);
+}
+.mgt2 .droster td.act,
+.mgt2 .droster th.act {
+  width: 1.5rem;
+}
+.mgt2 .droster td.act .x,
+.mgt2 .droster th.act .x {
+  font-size: 14px;
+  line-height: 1;
+  color: var(--faint);
+  text-decoration: none;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .droster td.act .x:hover,
+.mgt2 .droster th.act .x:hover {
+  color: var(--danger);
+}
+.mgt2 .droster tr.drop td {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mgt2 .droster tr.drop td .hint {
+  flex: 0 1 auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-style: italic;
+  color: var(--faint);
+}
+.mgt2 .droster tr.drop td .tog {
+  flex: none;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.mgt2 .spread {
+  flex: 1 1 19rem;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border: 1px solid var(--rule-soft);
+}
+.mgt2 .spread .cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 0;
+  padding: 2px 2px 3px;
+  border-right: 1px solid var(--rule-soft);
+}
+.mgt2 .spread .cell:last-child {
+  border-right: 0;
+}
+.mgt2 .spread .b {
+  font-family: var(--mono);
+  font-size: 9px;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--faint);
+}
+.mgt2 .spread .marks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  min-height: 9px;
+}
+.mgt2 .spread .marks i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mute);
+}
+.mgt2 .spread .cell.bad {
+  background: color-mix(in oklab, var(--danger) 8%, transparent);
+}
+.mgt2 .spread .cell.bad .marks i {
+  background: var(--danger);
+}
+.mgt2 .spread .cell.ok {
+  background: color-mix(in oklab, var(--good) 8%, transparent);
+}
+.mgt2 .spread .cell.ok .marks i {
+  background: var(--good);
+}
+.mgt2 .spread .cell.edge .marks i {
+  background: var(--accent-text);
+}
+
+.mgt2 .dfoot .why {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-family: var(--cond);
+  font-size: 9px;
+  line-height: 1.25;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .dfoot .pline.tallyline + .pline {
+  padding-top: 3px;
+  border-top: 0;
+}
+.mgt2 .dfoot .dsummary {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2 .dfoot .dsummary p {
+  margin: 0;
+}
+.mgt2 .dfoot .dsummary .what {
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.mgt2 .dfoot .dsummary .tally {
+  margin-top: 2px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .dfoot .dsend {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+.mgt2 .dfoot .dsend .btn.post {
+  padding: 5px 18px;
+  font-size: 11.5px;
+}
+
+@container docket (max-width: 480px) {
+  .mgt2 .droster .addressee {
+    display: none;
+  }
+  .mgt2 .dcompose .seeds {
+    justify-content: flex-start;
+  }
+}
+.mgt2.application.chargen {
+  container-type: inline-size;
+  container-name: chargen;
+}
+.mgt2.application.chargen > .window-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+}
+.mgt2.application.chargen > .window-content > [data-application-part=masthead] {
+  flex: none;
+}
+.mgt2.application.chargen > .window-content > [data-application-part=ledger],
+.mgt2.application.chargen > .window-content > [data-application-part=roster] {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+.mgt2.application.chargen > .window-content > [data-application-part=strip],
+.mgt2.application.chargen > .window-content > [data-application-part=tray],
+.mgt2.application.chargen > .window-content > [data-application-part=ship],
+.mgt2.application.chargen > .window-content > [data-application-part=package] {
+  flex: none;
+}
+
+.mgt2 .mgt2-chargen-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px 16px;
+  padding: 10px 14px 11px;
+  border-bottom: 1px solid var(--rule);
+}
+.mgt2 .mgt2-chargen-head h2 {
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.mgt2 .mgt2-chargen-head .clock {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+.mgt2 .mgt2-chargen-head .count {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.mgt2 .mgt2-chargen-head .closing,
+.mgt2 .mgt2-chargen-head .finishall {
+  margin-left: auto;
+  flex: none;
+  width: auto;
+  padding: 2px 9px 3px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+
+.mgt2 .termgridwrap {
+  overflow: auto;
+  padding: 0 0 4px;
+}
+
+.mgt2 table.termgrid {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  table-layout: fixed;
+}
+.mgt2 table.termgrid th,
+.mgt2 table.termgrid td {
+  vertical-align: top;
+}
+.mgt2 table.termgrid thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--mgt2-bgcolor-form);
+  border-bottom: 1px solid var(--rule);
+  padding: 8px 9px 9px;
+  text-align: left;
+}
+.mgt2 table.termgrid thead th.tcol {
+  width: 4.2rem;
+}
+.mgt2 table.termgrid thead th.sel {
+  background: var(--accent-soft);
+}
+.mgt2 table.termgrid .who {
+  position: relative;
+  cursor: pointer;
+}
+.mgt2 table.termgrid .who b {
+  display: block;
+  font-family: var(--cond);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.mgt2 table.termgrid .who b a {
+  color: inherit;
+}
+.mgt2 table.termgrid .who .sp {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--faint);
+}
+.mgt2 table.termgrid .who .ag {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--mute);
+}
+.mgt2 table.termgrid .who.done b {
+  color: var(--faint);
+}
+.mgt2 table.termgrid .who .out {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 1px 5px;
+  font-family: var(--cond);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.mgt2 table.termgrid .who a.out {
+  cursor: pointer;
+}
+.mgt2 table.termgrid .who a.out:hover {
+  color: var(--accent-text);
+  border-color: var(--accent-text);
+}
+.mgt2 table.termgrid .who .x {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--faint);
+  opacity: 0;
+}
+.mgt2 table.termgrid .who .x:hover {
+  color: var(--danger);
+}
+.mgt2 table.termgrid .who:hover .x {
+  opacity: 1;
+}
+.mgt2 table.termgrid td.tno {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--rule-soft);
+  white-space: nowrap;
+}
+.mgt2 table.termgrid td.cell {
+  padding: 6px 9px 7px;
+  border-bottom: 1px solid var(--rule-soft);
+  border-left: 1px solid var(--rule-soft);
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.mgt2 table.termgrid tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.mgt2 .termgrid .cell .car {
+  display: block;
+  font-family: var(--cond);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.mgt2 .termgrid .cell .asg {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--faint);
+}
+.mgt2 .termgrid .cell .trk {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 4px;
+}
+.mgt2 .termgrid .cell .trk i {
+  font-style: normal;
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .termgrid .cell .trk b {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+.mgt2 .termgrid .cell ul {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mgt2 .termgrid .cell li {
+  display: flex;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--mute);
+}
+.mgt2 .termgrid .cell li i {
+  flex: 0 0 auto;
+  width: 1.05rem;
+  font-style: normal;
+  color: var(--faint);
+}
+.mgt2 .termgrid .cell li.good i {
+  color: var(--good);
+}
+.mgt2 .termgrid .cell li.bad i {
+  color: var(--danger);
+}
+
+.mgt2 .termgrid td.cell.gone {
+  background: repeating-linear-gradient(135deg, transparent 0 5px, var(--rule-soft) 5px 6px);
+  cursor: default;
+}
+
+.mgt2 .termgrid td.cell.now {
+  box-shadow: inset 0 0 0 1px var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.mgt2 .termgrid tr.drop td {
+  padding: 7px 9px 9px;
+  border-top: 1px solid var(--rule-soft);
+  text-align: center;
+}
+.mgt2 .termgrid tr.drop td .hint {
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .termgrid tr.drop td.over {
+  background: var(--accent-soft);
+}
+.mgt2 .termgrid tr.drop td.over .hint {
+  color: var(--accent-text);
+}
+.mgt2 .termgrid tr.drop td.deny .hint {
+  color: var(--danger);
+}
+
+.mgt2.chargen .steps {
+  border-top: 1px solid var(--rule);
+  padding: 9px 14px 11px;
+}
+.mgt2.chargen .steps .lbl {
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2.chargen .steps ol {
+  margin: 5px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.mgt2.chargen .steps li {
+  padding: 2px 7px 3px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--mute);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.mgt2.chargen .steps li button {
+  all: unset;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.mgt2.chargen .steps li button:hover {
+  color: var(--accent-text);
+}
+.mgt2.chargen .steps li.own {
+  border-color: var(--accent-text);
+  color: var(--accent-text);
+}
+.mgt2.chargen .steps li.now {
+  background: var(--accent-soft);
+  border-color: var(--accent-text);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+.mgt2.chargen .steps li.cut {
+  text-decoration: line-through;
+  opacity: 0.45;
+}
+.mgt2.chargen .steps .why {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+.mgt2.chargen .steps .src {
+  margin: 3px 0 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+
+.mgt2.chargen .tray2 {
+  border-top: 1px solid var(--rule);
+  padding: 9px 14px 11px;
+}
+.mgt2.chargen .tray2 .lbl {
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2.chargen .tray2 .counts {
+  margin-left: 10px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--accent-text);
+}
+.mgt2.chargen .tray2 table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+}
+.mgt2.chargen .tray2 th {
+  text-align: left;
+  padding: 0 7px 3px 0;
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border-bottom: 1px solid var(--rule);
+}
+.mgt2.chargen .tray2 td {
+  padding: 3px 7px 3px 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--mute);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2.chargen .tray2 td.k {
+  color: var(--mgt2-color-form);
+}
+.mgt2.chargen .tray2 tr:last-child td {
+  border-bottom: 0;
+}
+.mgt2.chargen .tray2 .none {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.mgt2 .mustergrid {
+  padding: 0 0 4px;
+}
+.mgt2 .mustergrid > .none {
+  margin: 14px;
+  font-size: 12px;
+  color: var(--faint);
+}
+.mgt2 .mustergrid table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+.mgt2 .mustergrid th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--mgt2-bgcolor-form);
+  border-bottom: 1px solid var(--rule);
+  padding: 8px 9px 9px;
+  text-align: left;
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .mustergrid th.n,
+.mgt2 .mustergrid td.n {
+  text-align: right;
+}
+.mgt2 .mustergrid th.a {
+  width: 7.4rem;
+}
+.mgt2 .mustergrid td {
+  vertical-align: top;
+  padding: 7px 9px 8px;
+  border-bottom: 1px solid var(--rule-soft);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--mute);
+  overflow-wrap: anywhere;
+}
+.mgt2 .mustergrid td.big {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+.mgt2 .mustergrid tbody tr:last-child td {
+  border-bottom: 0;
+}
+.mgt2 .mustergrid .who b {
+  display: block;
+  font-family: var(--cond);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.mgt2 .mustergrid .who b a {
+  color: inherit;
+}
+.mgt2 .mustergrid .who .ag {
+  display: block;
+  font-size: 9.5px;
+  color: var(--faint);
+}
+.mgt2 .mustergrid .who .warn {
+  display: inline-block;
+  margin-top: 3px;
+  font-size: 9.5px;
+  color: var(--danger);
+}
+.mgt2 .mustergrid ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .mustergrid .careers li {
+  margin-bottom: 3px;
+}
+.mgt2 .mustergrid .careers li b {
+  font-weight: 600;
+  color: var(--mgt2-color-form);
+}
+.mgt2 .mustergrid .careers li span {
+  display: block;
+  font-size: 9.5px;
+  color: var(--faint);
+}
+.mgt2 .mustergrid .careers li .pen {
+  color: var(--accent-text);
+}
+.mgt2 .mustergrid .sh {
+  display: block;
+  font-size: 9.5px;
+  color: var(--faint);
+}
+.mgt2 .mustergrid .vouchers li {
+  display: flex;
+  gap: 5px;
+  align-items: baseline;
+  margin-bottom: 2px;
+}
+.mgt2 .mustergrid .vouchers li i {
+  flex: 0 0 auto;
+  font-style: normal;
+  font-family: var(--cond);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .mustergrid .vouchers li a {
+  cursor: pointer;
+  color: var(--faint);
+}
+.mgt2 .mustergrid .vouchers li a:hover {
+  color: var(--good);
+}
+.mgt2 .mustergrid .vouchers li .up {
+  font-size: 9px;
+  color: var(--danger);
+}
+.mgt2 .mustergrid .vouchers li.spent {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+.mgt2 .mustergrid .none {
+  font-size: 10px;
+  color: var(--faint);
+}
+.mgt2 .mustergrid td.a button {
+  display: block;
+  width: 100%;
+  margin-bottom: 3px;
+  padding: 2px 6px 3px;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+
+.mgt2.chargen-close .election,
+.mgt2.chargen-close .packagedraft {
+  border-top: 1px solid var(--rule);
+  padding: 9px 14px 11px;
+}
+.mgt2.chargen-close .election .lbl,
+.mgt2.chargen-close .packagedraft .lbl {
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2.chargen-close .election .lbl b,
+.mgt2.chargen-close .packagedraft .lbl b {
+  margin-left: 8px;
+  color: var(--accent-text);
+}
+.mgt2.chargen-close .election .edit,
+.mgt2.chargen-close .packagedraft .edit {
+  margin-left: 10px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+.mgt2.chargen-close .election .edit:hover,
+.mgt2.chargen-close .packagedraft .edit:hover {
+  color: var(--accent-text);
+}
+.mgt2.chargen-close .election .why,
+.mgt2.chargen-close .election .none,
+.mgt2.chargen-close .election .settled,
+.mgt2.chargen-close .packagedraft .why,
+.mgt2.chargen-close .packagedraft .none,
+.mgt2.chargen-close .packagedraft .settled {
+  margin: 5px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+.mgt2.chargen-close .election .tally,
+.mgt2.chargen-close .packagedraft .tally {
+  margin-left: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+.mgt2.chargen-close .election .none,
+.mgt2.chargen-close .packagedraft .none {
+  color: var(--faint);
+}
+.mgt2.chargen-close .election .settled,
+.mgt2.chargen-close .packagedraft .settled {
+  color: var(--accent-text);
+}
+.mgt2.chargen-close .election ul,
+.mgt2.chargen-close .election ol,
+.mgt2.chargen-close .packagedraft ul,
+.mgt2.chargen-close .packagedraft ol {
+  margin: 5px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 14px;
+}
+
+.mgt2.chargen-close .election li {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 2px 8px 3px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.mgt2.chargen-close .election li b {
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.mgt2.chargen-close .election li span {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+.mgt2.chargen-close .election li .up {
+  color: var(--danger);
+}
+.mgt2.chargen-close .election li button {
+  width: auto;
+  flex: none;
+  padding: 0 6px 1px;
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.7;
+}
+
+.mgt2.chargen-close .election li.keeps {
+  border-color: var(--accent-text);
+  background: var(--accent-soft);
+}
+.mgt2.chargen-close .election li.keeps b {
+  color: var(--accent-text);
+}
+
+.mgt2.chargen-close .packagedraft li {
+  padding: 0;
+}
+.mgt2.chargen-close .packagedraft li button {
+  all: unset;
+  cursor: pointer;
+  padding: 2px 8px 3px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--mute);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.mgt2.chargen-close .packagedraft li button:hover {
+  color: var(--accent-text);
+  border-color: var(--accent-text);
+}
+
+.mgt2 .careerblk .pfields, .mgt2 .careertbl .pfields, .mgt2 .speciesblk .pfields, .mgt2 .speciesfrm .pfields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 8px;
+  min-width: 0;
+  margin: 4px 0;
+}
+.mgt2 .careerblk .pfields > label, .mgt2 .careertbl .pfields > label, .mgt2 .speciesblk .pfields > label, .mgt2 .speciesfrm .pfields > label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+.mgt2 .careerblk .pfields > label.wide, .mgt2 .careertbl .pfields > label.wide, .mgt2 .speciesblk .pfields > label.wide, .mgt2 .speciesfrm .pfields > label.wide {
+  flex: 1 1 100%;
+}
+.mgt2 .careerblk .pfields .lbl, .mgt2 .careertbl .pfields .lbl, .mgt2 .speciesblk .pfields .lbl, .mgt2 .speciesfrm .pfields .lbl {
+  flex: 0 0 auto;
+}
+.mgt2 .careerblk .pfields .f, .mgt2 .careertbl .pfields .f, .mgt2 .speciesblk .pfields .f, .mgt2 .speciesfrm .pfields .f {
+  flex: 1 1 5rem;
+  min-width: 0;
+}
+.mgt2 .careerblk .pfields .f.num, .mgt2 .careertbl .pfields .f.num, .mgt2 .speciesblk .pfields .f.num, .mgt2 .speciesfrm .pfields .f.num {
+  flex: 0 0 3.4rem;
+  text-align: right;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .careerblk label.chk, .mgt2 .careertbl label.chk, .mgt2 .speciesblk label.chk, .mgt2 .speciesfrm label.chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  color: var(--faint);
+}
+.mgt2 .careerblk label.chk input, .mgt2 .careertbl label.chk input, .mgt2 .speciesblk label.chk input, .mgt2 .speciesfrm label.chk input {
+  margin: 0;
+}
+.mgt2 .careerblk .flags, .mgt2 .careertbl .flags, .mgt2 .speciesblk .flags, .mgt2 .speciesfrm .flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 6px 0 2px;
+}
+.mgt2 .careerblk .del, .mgt2 .careertbl .del, .mgt2 .speciesblk .del, .mgt2 .speciesfrm .del {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--faint);
+}
+.mgt2 .careerblk .del:hover, .mgt2 .careertbl .del:hover, .mgt2 .speciesblk .del:hover, .mgt2 .speciesfrm .del:hover {
+  color: var(--accent-text);
+}
+.mgt2 .careerblk .add, .mgt2 .careertbl .add, .mgt2 .speciesblk .add, .mgt2 .speciesfrm .add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .careerblk .add:hover, .mgt2 .careertbl .add:hover, .mgt2 .speciesblk .add:hover, .mgt2 .speciesfrm .add:hover {
+  color: var(--accent-text);
+}
+
+.mgt2 .careertbl .stack, .mgt2 .speciesblk .stack, .mgt2 .speciesfrm .stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mgt2 .careertbl .entry, .mgt2 .speciesblk .entry, .mgt2 .speciesfrm .entry {
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 5px 7px;
+  background: var(--sunk);
+}
+.mgt2 .careertbl .entryhead, .mgt2 .speciesblk .entryhead, .mgt2 .speciesfrm .entryhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+.mgt2 .careertbl .entryhead .f, .mgt2 .speciesblk .entryhead .f, .mgt2 .speciesfrm .entryhead .f {
+  flex: 1 1 6rem;
+  min-width: 0;
+}
+.mgt2 .careertbl .entryhead .f.num, .mgt2 .speciesblk .entryhead .f.num, .mgt2 .speciesfrm .entryhead .f.num {
+  flex: 0 0 3rem;
+  text-align: right;
+}
+.mgt2 .careertbl .entryhead .f.wide, .mgt2 .speciesblk .entryhead .f.wide, .mgt2 .speciesfrm .entryhead .f.wide {
+  flex: 4 1 16rem;
+}
+.mgt2 .careertbl .nest, .mgt2 .speciesblk .nest, .mgt2 .speciesfrm .nest {
+  margin: 5px 0 0 10px;
+  padding-left: 8px;
+  border-left: 1px solid var(--line);
+}
+.mgt2 .careertbl .nlbl, .mgt2 .speciesblk .nlbl, .mgt2 .speciesfrm .nlbl {
+  display: block;
+  font-family: var(--cond);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .careertbl .nrow, .mgt2 .speciesblk .nrow, .mgt2 .speciesfrm .nrow {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 2px 0;
+}
+.mgt2 .careertbl .nrow .f, .mgt2 .speciesblk .nrow .f, .mgt2 .speciesfrm .nrow .f {
+  flex: 1 1 6rem;
+  min-width: 0;
+}
+.mgt2 .careertbl .nrow .f.num, .mgt2 .speciesblk .nrow .f.num, .mgt2 .speciesfrm .nrow .f.num {
+  flex: 0 0 3rem;
+  text-align: right;
+}
+.mgt2 .careertbl .nrow.inline, .mgt2 .speciesblk .nrow.inline, .mgt2 .speciesfrm .nrow.inline {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+}
+.mgt2 .careertbl .ord, .mgt2 .speciesblk .ord, .mgt2 .speciesfrm .ord {
+  flex: 0 0 1.3rem;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+  text-align: right;
+}
+.mgt2 .careertbl .trayrow, .mgt2 .speciesblk .trayrow, .mgt2 .speciesfrm .trayrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+}
+.mgt2 .careertbl .trayrow .f, .mgt2 .speciesblk .trayrow .f, .mgt2 .speciesfrm .trayrow .f {
+  flex: 1 1 5rem;
+  min-width: 0;
+}
+.mgt2 .careertbl .trayrow .f.kind, .mgt2 .speciesblk .trayrow .f.kind, .mgt2 .speciesfrm .trayrow .f.kind {
+  flex: 0 0 7rem;
+}
+.mgt2 .careertbl .trayrow .f.num, .mgt2 .speciesblk .trayrow .f.num, .mgt2 .speciesfrm .trayrow .f.num {
+  flex: 0 0 3rem;
+  text-align: right;
+}
+.mgt2 .careertbl .trayrow .f.wide, .mgt2 .speciesblk .trayrow .f.wide, .mgt2 .speciesfrm .trayrow .f.wide {
+  flex: 1 1 100%;
+}
+.mgt2 .careertbl .cell, .mgt2 .speciesblk .cell, .mgt2 .speciesfrm .cell {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.mgt2 .careertbl .cellhead, .mgt2 .speciesblk .cellhead, .mgt2 .speciesfrm .cellhead {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.mgt2 .careertbl .cellhead .f, .mgt2 .speciesblk .cellhead .f, .mgt2 .speciesfrm .cellhead .f {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.mgt2 .careertbl .grantcount, .mgt2 .speciesblk .grantcount, .mgt2 .speciesfrm .grantcount {
+  flex: 0 0 auto;
+  min-width: 1.1rem;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-align: center;
+  color: var(--accent-text);
+}
+.mgt2 .careertbl .grantcount.none, .mgt2 .speciesblk .grantcount.none, .mgt2 .speciesfrm .grantcount.none {
+  color: var(--faint);
+  opacity: 0.5;
+}
+.mgt2 .careertbl .grants, .mgt2 .speciesblk .grants, .mgt2 .speciesfrm .grants {
+  margin-left: 6px;
+}
+.mgt2 .careertbl .grant, .mgt2 .speciesblk .grant, .mgt2 .speciesfrm .grant {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+}
+.mgt2 .careertbl .grant .f, .mgt2 .speciesblk .grant .f, .mgt2 .speciesfrm .grant .f {
+  flex: 1 1 5rem;
+  min-width: 0;
+}
+.mgt2 .careertbl .grant .f.kind, .mgt2 .speciesblk .grant .f.kind, .mgt2 .speciesfrm .grant .f.kind {
+  flex: 0 0 7rem;
+}
+.mgt2 .careertbl .grant .f.num, .mgt2 .speciesblk .grant .f.num, .mgt2 .speciesfrm .grant .f.num {
+  flex: 0 0 3rem;
+  text-align: right;
 }
 
 .mgt2.application.stash {

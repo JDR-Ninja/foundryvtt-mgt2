@@ -1,5 +1,6 @@
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
+import { Rules } from "./rules.js";
 
 /**
  * What a jump did, under whichever procedure the hull declares (§9.89).
@@ -25,11 +26,13 @@ export class Jump {
      */
     static async core(effect) {
         const row = MGT2.readTable(MGT2.Misjumps.core.outcomes, effect);
+        const rolls = [];
         return {
             ruleset: "core", effect,
             misjumped: !row.clean,
             row,
-            values: await Jump.#values(row)
+            values: await Jump.#values(row, rolls),
+            rolls
         };
     }
 
@@ -48,9 +51,10 @@ export class Jump {
     static async companion({ astrogator, engineer, gravity = "none" } = {}) {
         const rules = MGT2.Misjumps.companion;
         const sum = astrogator + engineer;
+        const rolls = [];
 
-        const distance = await Jump.#distance(astrogator);
-        const time = await Jump.#time(engineer);
+        const distance = await Jump.#distance(astrogator, rolls);
+        const time = await Jump.#time(engineer, rolls);
 
         // Folio 152. A misjump is the sum, a SERIOUS misjump is both checks failed, and a misjump
         // averted is one failure the other roll outran — which still costs a Bad Jump.
@@ -72,8 +76,10 @@ export class Jump {
             astrogator, engineer, sum, gravity,
             distance, time,
             misjumped, serious, averted, badJump, veryBad,
-            misjump: misjumped ? await Jump.#misjump(sum) : null,
-            veryBadJump: veryBad ? await Jump.#veryBad({ distance, time, misjumped, gravity }) : null
+            misjump: misjumped ? await Jump.#misjump(sum, rolls) : null,
+            veryBadJump: veryBad
+                ? await Jump.#veryBad({ distance, time, misjumped, gravity }, rolls) : null,
+            rolls
         };
         return reading;
     }
@@ -85,12 +91,12 @@ export class Jump {
      * so a low roll can put the ship inside the limit — and folio 150 precipitates it back out at
      * exactly 100 diameters rather than letting it arrive closer.
      */
-    static async #distance(effect) {
+    static async #distance(effect, sink) {
         const rules = MGT2.Misjumps.companion;
-        const roll = await Jump.#dice(2);
+        const roll = await Jump.#dice(2, sink);
         const total = roll + effect;
         const row = MGT2.readTable(rules.distance, total);
-        const diameters = await Jump.#roll(row.diameters);
+        const diameters = await Jump.#roll(row.diameters, sink);
         return {
             roll, effect, total, row, bad: row.bad === true,
             diameters,
@@ -103,13 +109,13 @@ export class Jump {
      * Folio 151, 2D + the engineer's Effect, and this one IS a variance: the hours are added to or
      * taken off the 160-hour baseline, on a 1D that the folio reads odd for long and even for short.
      */
-    static async #time(effect) {
+    static async #time(effect, sink) {
         const rules = MGT2.Misjumps.companion;
-        const roll = await Jump.#dice(2);
+        const roll = await Jump.#dice(2, sink);
         const total = roll + effect;
         const row = MGT2.readTable(rules.time, total);
-        const hours = await Jump.#roll(row.hours) ?? 0;
-        const swing = await Jump.#dice(1);
+        const hours = await Jump.#roll(row.hours, sink) ?? 0;
+        const swing = await Jump.#dice(1, sink);
         const long = (swing % 2 === 1) === rules.longOnOdd;
         return {
             roll, effect, total, row, bad: row.bad === true,
@@ -119,11 +125,11 @@ export class Jump {
     }
 
     /** Folio 153, 2D with the combined Effect as a DM. The trigger caps the sum, so it reads low. */
-    static async #misjump(sum) {
-        const roll = await Jump.#dice(2);
+    static async #misjump(sum, sink) {
+        const roll = await Jump.#dice(2, sink);
         const total = roll + sum;
         const row = MGT2.readTable(MGT2.Misjumps.companion.table, total);
-        return { roll, dm: sum, total, row, values: await Jump.#values(row) };
+        return { roll, dm: sum, total, row, values: await Jump.#values(row, sink) };
     }
 
     /**
@@ -132,7 +138,7 @@ export class Jump {
      * than the sum every other modifier list in this system is. Two of the four are read off the
      * jump; gravity is typed, because nothing tracks where the drive was fired.
      */
-    static async #veryBad({ distance, time, misjumped, gravity }) {
+    static async #veryBad({ distance, time, misjumped, gravity }, sink) {
         const dms = MGT2.Misjumps.companion.veryBadDMs;
         const applicable = [];
         if ( distance.bad && time.bad ) applicable.push(["bothVariances", dms.bothVariances]);
@@ -142,20 +148,24 @@ export class Jump {
 
         const [source, dm] = applicable.reduce((worst, entry) =>
             (entry[1] > worst[1]) ? entry : worst, applicable[0] ?? ["misjump", 0]);
-        const roll = await Jump.#dice(2);
+        const roll = await Jump.#dice(2, sink);
         const total = roll + dm;
         const row = MGT2.readTable(MGT2.Misjumps.companion.veryBad, total);
-        return { roll, dm, source, total, row, values: await Jump.#values(row) };
+        return { roll, dm, source, total, row, values: await Jump.#values(row, sink) };
     }
 
     /* -------------------------------------------- */
 
     /** Every dice expression a table row carries, rolled once and keyed as the row names them. */
-    static async #values(row) {
+    static async #values(row, sink) {
         const values = {};
         for ( const key of ["parsecs", "days", "hours", "diameters", "work", "perceived", "hullPerDay"] ) {
             if ( !row[key] ) continue;
-            const value = await Jump.#roll(row[key]);
+            // Core folio 158 OFFERS the time the crew perceives rather than imposing it, so a world
+            // that has not adopted it never rolls the die — and the clause reporting it goes with the
+            // figure, in `VoyageScreen#outcome`.
+            if ( (key === "perceived") && !Rules.on("perceivedTime") ) continue;
+            const value = await Jump.#roll(row[key], sink);
             if ( value !== null ) values[key] = value;
         }
         return values;
@@ -165,15 +175,23 @@ export class Jump {
      * A printed expression, rolled. The books write `2D`, `1D3` and `100+2Dx10`; the multiplication
      * sign is the one thing the tables here spell as Foundry needs it, because `x` is not an
      * operator in any dice grammar and normalising it would hide which figure is a die.
+     *
+     * `sink` collects the `Roll` behind each figure so the card the referee posts can carry them
+     * (§9.117). A misjump is a dozen small rolls and the reading keeps only their totals, so without
+     * the sink there is nothing left to attach by the time anything is posted.
      */
-    static async #roll(expression) {
+    static async #roll(expression, sink) {
         if ( !expression ) return null;
         const formula = MGT2Helper.damageFormula(expression);
         if ( !Roll.validate(formula) ) return null;
-        return (await new Roll(formula).roll()).total;
+        const roll = await new Roll(formula).roll();
+        sink?.push(roll);
+        return roll.total;
     }
 
-    static async #dice(count) {
-        return (await new Roll(`${count}d6`).roll()).total;
+    static async #dice(count, sink) {
+        const roll = await new Roll(`${count}d6`).roll();
+        sink?.push(roll);
+        return roll.total;
     }
 }

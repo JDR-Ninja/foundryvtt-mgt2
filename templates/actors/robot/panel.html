@@ -259,22 +259,28 @@
 			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.BaseIntellect'}}</dt><dd>{{robot.brain.baseIntellect}}</dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.SkillDM'}}</dt><dd>{{showDM robot.brain.skillDM}}</dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.Inherent'}}</dt><dd>{{robot.bandwidth.inherent}}</dd></div>
+			{{#if (rule 'taskCeiling')}}
 			<div class="stat{{#unless robot.brain.ceiling}} none{{/unless}}">
 				<dt>{{localize 'MGT2.Actor.robot.TaskCeiling'}}</dt>
 				<dd class="word">{{#if robot.brain.ceiling}}{{localize robot.brain.ceiling}}{{else}}&mdash;{{/if}}</dd>
 			</div>
+			{{/if}}
 			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.SkillCap'}}</dt><dd>{{robot.brain.skillCap}}</dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.FreeSkills'}}</dt><dd>{{robot.brain.freeSkills}}</dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.EducationCap'}}</dt><dd>{{robot.brain.educationCap}}</dd></div>
 			{{! RH folio 106. The count is the stored number and both losses read off it, so the two
 			    print together and neither is ever written to a score. }}
+			{{#if (rule 'radiation')}}
 			<div class="stat{{#unless robot.brain.rads}} none{{/unless}}{{#if robot.brain.radiationLoss}} hurt{{/if}}">
 				<dt>{{localize 'MGT2.Actor.robot.Rads'}}</dt>
 				<dd>{{#if robot.brain.rads}}{{robot.brain.rads}}{{else}}&mdash;{{/if}}</dd>
 			</div>
+			{{/if}}
 		</dl>
+		{{#if (rule 'radiation')}}
 		{{#if robot.brain.radiationLoss}}
 		<p class="hint">{{localize 'MGT2.Actor.robot.RadiationHint' n=robot.brain.radiationLoss}}</p>
+		{{/if}}
 		{{/if}}
 		{{#if robot.brain.item}}
 		<p class="hint">{{localize 'MGT2.Actor.robot.BrainItem' name=robot.brain.item.name n=robot.brain.item.processing}}</p>
@@ -291,10 +297,12 @@
 			</label>
 			{{! Editable, because RH folio 106's only repair is a new brain and that is this number
 			    going back to zero — there is no procedure to offer. }}
+			{{#if (rule 'radiation')}}
 			<label>
 				<span class="lbl">{{localize 'MGT2.Actor.robot.Rads'}}</span>
 				{{formInput systemFields.brain.fields.rads name="system.brain.rads" value=system.brain.rads classes="f num"}}
 			</label>
+			{{/if}}
 		</div>
 	</div>
 

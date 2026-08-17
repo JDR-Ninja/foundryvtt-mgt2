@@ -66,16 +66,21 @@ export class Checks {
      * @param {string} options.formula
      * @param {object} [options.rollData]     `@` references for the formula
      * @param {string} [options.difficulty]   A `MGT2.DifficultyTargets` key
+     * @param {number} [options.target]       A bare number to measure against, where the rule states
+     *                                        one instead of naming a rung — character creation rolls
+     *                                        against 5+, 7+ and 9+, which no rung expresses
      * @param {object} [options.prompt]       The prompt's answer, for its Opposed row
      * @returns {Promise<object|null>}        null when the formula does not parse
      */
-    static async resolve({ formula, rollData = {}, difficulty = null, prompt = null } = {}) {
+    static async resolve({ formula, rollData = {}, difficulty = null, target: stated = null,
+        prompt = null } = {}) {
         if ( !Roll.validate(formula) ) {
             ui.notifications.error(game.i18n.localize("MGT2.Errors.InvalidRollFormula"));
             return null;
         }
         const roll = await new Roll(formula, rollData).roll();
-        const target = MGT2Helper.getEffectTarget(difficulty);
+        const target = Number.isFinite(stated)
+            ? { value: stated, assumed: false } : MGT2Helper.getEffectTarget(difficulty);
         const effect = roll.total - target.value;
         return {
             roll,
@@ -100,9 +105,10 @@ export class Checks {
      * @param {string} [options.label]      What `system.label` calls this check
      * @param {object} [options.flags]      Offers resolved later and on another actor
      * @param {string} [options.mode]       A `CONFIG.ChatMessage.modes` key
+     * @param {boolean} [options.secret]    Companion p.7's referee roll — see below
      * @returns {Promise<ChatMessage>}
      */
-    static async post(outcome, { actor = null, label = "", flags = null, mode, ...card } = {}) {
+    static async post(outcome, { actor = null, label = "", flags = null, mode, secret = false, ...card } = {}) {
         const message = {
             author: game.user.id,
             speaker: actor ? ChatMessage.getSpeaker({ actor }) : null,
@@ -118,6 +124,17 @@ export class Checks {
             content: await renderRollCard({ roll: outcome.roll, outcome, ...card })
         };
         if ( flags ) message.flags = flags;
+
+        // Companion p.7's secret referee check. A whispered message that CARRIES rolls is visible to
+        // everyone as `???`, which announces the secret roll — so the dice are left out of `rolls`
+        // and rendered into the body instead, where `buildRollCardContext` has already put the
+        // formula, the tooltip and the total. The cost is Dice So Nice; the Effect is unaffected,
+        // because every later rule reads `system`.
+        if ( secret ) {
+            message.rolls = [];
+            message.whisper = ChatMessage.getWhisperRecipients("GM").map(user => user.id);
+            return getDocumentClass("ChatMessage").create(message);
+        }
         return outcome.roll.toMessage(message, { messageMode: mode });
     }
 }

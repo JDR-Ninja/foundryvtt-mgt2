@@ -1,0 +1,66 @@
+{{! THE GRID — one column per Traveller, one row per term. `.termgrid` and not the sketch's `.ledger`:
+    that class is already the world sheet's derivation block, and its `display: flex` inherited onto a
+    <table> silently breaks the column model. See `_chargen.sass` for the measurement.
+
+    The tail is ragged on purpose and it is the whole argument for a grid over four sheets: a Traveller
+    who has stopped has no cell where the others still have one, and a VACATED cell is not an empty
+    one. A term simply not played yet stays blank. }}
+<div class="termgridwrap">
+	<table class="termgrid">
+		<thead>
+			<tr>
+				<th class="tcol">{{localize 'MGT2.Chargen.Screen.TermColumn'}}</th>
+				{{#each columns as |column|}}
+				<th data-actor-id="{{column.id}}" class="{{#if column.selected}}sel{{/if}}">
+					<div class="who {{#if column.done}}done{{/if}}" data-action="selectColumn">
+						<b><a data-action="openActor">{{column.name}}</a></b>
+						<span class="sp">{{#if column.species}}{{column.species}}{{else}}{{localize 'MGT2.Chargen.Screen.NoSpecies'}}{{/if}}</span>
+						<span class="ag">{{localize 'MGT2.Chargen.Screen.Age' n=column.age}}</span>
+						{{#if column.done}}
+						{{! A column that has stopped is the one with business at the close, so its own
+						    badge is the door: mustering out runs after the last career and before the
+						    teardown (§9.50). }}
+						<a class="out" data-action="openClose" data-tooltip="{{localize 'MGT2.Chargen.Screen.ClosingHint'}}">{{localize 'MGT2.Chargen.Screen.LeftAfter' n=column.lastTerm}} · {{column.exitMode}}</a>
+						{{/if}}
+						{{#if column.canEdit}}
+						<a class="x" data-action="leave" data-tooltip="{{localize 'MGT2.Chargen.Screen.Leave'}}">&times;</a>
+						{{/if}}
+					</div>
+				</th>
+				{{/each}}
+			</tr>
+		</thead>
+		<tbody>
+			{{#each rows as |row|}}
+			<tr>
+				<td class="tno">{{row.n}}</td>
+				{{#each row.cells as |cell|}}
+				<td class="cell {{cell.state}}" data-actor-id="{{cell.id}}" data-action="selectColumn">
+					{{#if cell.gone}}{{else if cell.live}}
+					<span class="asg">{{localize 'MGT2.Chargen.Screen.InProgress'}}</span>
+					{{else if cell.career}}
+					<span class="car">{{cell.career}}</span>
+					<span class="asg">{{cell.assignment}}</span>
+					{{#if cell.track}}
+					<span class="trk"><i>{{cell.track.key}}</i> <b>{{cell.track.display}}</b></span>
+					{{/if}}
+					<ul>
+						{{#each cell.lines as |line|}}
+						<li class="{{line.tone}}"><i>{{line.mark}}</i>{{line.text}}</li>
+						{{/each}}
+					</ul>
+					{{/if}}
+				</td>
+				{{/each}}
+			</tr>
+			{{/each}}
+			{{! Putting a Traveller on the roster is writing the flag and nothing else. A player drags
+			    their own Traveller here, which is what "the owner rolls" needs to be true of. }}
+			<tr class="drop" data-accept="{{rosterTypes}}">
+				<td colspan="{{colspan}}" data-accept="{{rosterTypes}}">
+					<span class="hint">{{localize 'MGT2.Chargen.Screen.DropHint'}}</span>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

@@ -4,6 +4,7 @@ import { EFFECT_ACTIONS, prepareEffects } from "./effects.js";
 import { MGT2Helper } from "./helper.js";
 import { copyItemWithContents } from "./item.js";
 import { RollPromptHelper } from "./roll-prompt.js";
+import { Rules } from "./rules.js";
 import { SheetModeMixin } from "./sheet-mode.js";
 import { appendTraitText, bindTraitInput, prepareTraitBlock, refreshTraitNumbers } from "./traits.js";
 
@@ -12,7 +13,8 @@ const { ItemSheetV2 } = foundry.applications.sheets;
 
 /** Every block the sheet can compose from; each one is a partial of the same name. */
 const BLOCKS = ["roll", "hazard", "specs", "carried", "traits", "rules", "relationship", "description",
-  "detail", "notes", "software", "contents", "trade", "events", "station", "actions", "effects"];
+  "detail", "notes", "software", "contents", "trade", "events", "station", "actions", "effects",
+  "career", "careertables", "species", "speciesframe"];
 
 const blockPath = id => `systems/mgt2/templates/items/blocks/${id}.html`;
 
@@ -23,11 +25,12 @@ const blockPath = id => `systems/mgt2/templates/items/blocks/${id}.html`;
  */
 const SLOT = {
   roll: "masthead", hazard: "masthead",
-  specs: "details", relationship: "details", station: "details",
+  specs: "details", relationship: "details", station: "details", career: "details",
+  species: "details",
   // A round's printed rules are what the trait vocabulary cannot say, so they sit beside it.
   traits: "traits", rules: "traits",
   contents: "contents", software: "contents", events: "contents", actions: "contents",
-  trade: "contents", carried: "contents",
+  trade: "contents", carried: "contents", careertables: "contents", speciesframe: "contents",
   effects: "effects",
   description: "description", detail: "description", notes: "description"
 };
@@ -36,8 +39,33 @@ for ( const id of BLOCKS ) {
   if ( !(id in SLOT) ) throw new Error(`MGT2 | the item sheet block "${id}" has no tab slot.`);
 }
 
+/**
+ * `CareerData` is two schemas in one Item and `isTemplate` is which — the Item having no Actor
+ * parent, read and never stored. Drawing both halves at once would offer a referee writing a career
+ * the fields recording what one Traveller did with it, and offer a Traveller's own record the tables
+ * they are not allowed to edit. So each half draws only where it means something.
+ */
+const TEMPLATE_ONLY = new Set(["career", "careertables"]);
+const RECORD_ONLY = new Set(["events"]);
+
 /** Blocks whose heading only repeats the nav entry above it, so alone in a tab they drop it. */
 const EPONYMOUS = new Set(["effects", "description", "contents"]);
+
+/**
+ * Every array of NON-BLANK strings a sheet draws, and the reason they are listed together: the
+ * element is `blank: false`, so an appended empty string cleans away, the diff comes out empty and no
+ * update fires — adding a track rung silently did nothing (§9.110). So none of these takes an add
+ * control at all. **A trailing input is how one is added and emptying a row is how it is deleted**,
+ * which is the convention `rules[]` has always used, and the blanks are dropped here on the way in.
+ */
+const STRING_LISTS = ["rules", "qualificationOverride.exceptCareers", "backgroundSkills.mandatory",
+  "backgroundSkills.choices"];
+
+/** The same convention one level down, where the list is a track's rungs inside an indexed track. */
+const TRACK_LISTS = ["tracks", "frame.tracks"];
+
+/** A submitted list arrives keyed by index, so it is an object here and an array afterwards. */
+const compact = list => Object.values(list ?? {}).filter(entry => entry?.trim());
 
 /** The sub-type dictionary that names each type, where it has one. */
 const SUBTYPES = {
@@ -72,6 +100,10 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       modifierDelete: TravellerItemSheet.#onModifierDelete,
       actionCreate: TravellerItemSheet.#onRoleActionCreate,
       actionDelete: TravellerItemSheet.#onRoleActionDelete,
+      entryCreate: TravellerItemSheet.#onEntryCreate,
+      entryDelete: TravellerItemSheet.#onEntryDelete,
+      stepsDeclare: TravellerItemSheet.#onStepsDeclare,
+      stepsDefault: TravellerItemSheet.#onStepsDefault,
       tradeDMCreate: TravellerItemSheet.#onTradeDMCreate,
       tradeDMDelete: TravellerItemSheet.#onTradeDMDelete,
       ruleDelete: TravellerItemSheet.#onRuleDelete,
@@ -95,7 +127,14 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     sheet: {
       root: true,
       template: "systems/mgt2/templates/items/item-sheet.html",
-      templates: BLOCKS.map(blockPath).concat("systems/mgt2/templates/actors/parts/tabs-nav.html"),
+      templates: BLOCKS.map(blockPath).concat("systems/mgt2/templates/actors/parts/tabs-nav.html",
+        // A printed cell is the same editor in six places on a career template (§9.48). The three
+        // below are the same editor on a career template and on a species frame, because the schema
+        // builds both from one factory (§9.54).
+        "systems/mgt2/templates/items/parts/career-cell.html",
+        "systems/mgt2/templates/items/parts/string-list.html",
+        "systems/mgt2/templates/items/parts/track-definition.html",
+        "systems/mgt2/templates/items/parts/standing-modifier.html"),
       // The masthead never scrolls, so the open tab is the only scroller — and `submitOnChange`
       // re-renders the whole sheet on every keystroke.
       scrollable: ['.tab[data-group="item"].active']
@@ -140,9 +179,13 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     disease: ["hazard", "effects", "description"],
     computer: ["specs", "carried", "traits", "effects", "description", "software"],
     container: ["carried", "effects", "description", "contents"],
-    career: ["specs", "effects", "description", "events"],
+    // Both halves are listed and `#composition` drops the one this Item is not (§9.48, §9.103).
+    career: ["specs", "career", "effects", "description", "careertables", "events"],
     contact: ["relationship", "effects", "description", "notes"],
-    species: ["specs", "traits", "effects", "description", "detail"],
+    // The split is where the schema already splits: `frame.*` is the term this species runs and
+    // everything beside it is what a Traveller of it rolls. Neither half is gated — unlike a career,
+    // a species is one schema in one Item and the EMBEDDED copy is the one the loop reads (§9.54).
+    species: ["specs", "species", "traits", "speciesframe", "effects", "description", "detail"],
     role: ["station", "actions", "effects", "description"],
     // The three ship-owned types are not carried by anyone, so none of them takes `carried` and none
     // shows a supply cell. `drug` is deliberately absent: a dose is carried, priced and counted, so
@@ -173,6 +216,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     let supply = false;
 
     for ( const id of list ) {
+      if ( TEMPLATE_ONLY.has(id) && !item.system.isTemplate ) continue;
+      if ( RECORD_ONLY.has(id) && item.system.isTemplate ) continue;
       if ( id === "carried" ) {
         supply = true;
         if ( item.type !== "container" ) continue;
@@ -279,8 +324,51 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       citation: this.#citation(),
       componentTons: this.#componentTons(),
       trade: this.#tradeColumns(),
-      nested: this.#prepareNested(actor)
+      nested: this.#prepareNested(actor),
+      careerTables: this.#careerTables(),
+      eventTables: this.#eventTables(),
+      speciesFrame: this.#speciesFrame()
     });
+  }
+
+  /**
+   * What a species frame reads as rather than what it stores: the term sequence derived against the
+   * Core one (§9.54), and the Set of characteristics it does without — a Set being neither an array
+   * nor a plain object, so Handlebars cannot walk it and `.join` on it throws (§9.111).
+   */
+  #speciesFrame() {
+    if ( this.item.type !== "species" ) return null;
+    const { sequence, own, cut } = this.item.system.termSequence;
+    return {
+      sequence,
+      own: [...own],
+      cut: [...cut],
+      declared: this.item.system.frame.steps.length > 0,
+      without: Array.from(this.item.system.withoutCharacteristics,
+        key => game.i18n.localize(MGT2.Characteristics[key]))
+    };
+  }
+
+  /**
+   * The four skill tables as a list the template can walk, because `tables` is a SchemaField and not
+   * an array — a career has these four slots or fewer, never a fifth, and `present` is what says
+   * which exist rather than the key being absent (§9.48).
+   */
+  #careerTables() {
+    if ( (this.item.type !== "career") || !this.item.system.isTemplate ) return null;
+    const tables = this.item.system.tables;
+    return Object.keys(tables).map(key => ({
+      key, label: `MGT2.Chargen.Template.Tables.${key}`, ...tables[key]
+    }));
+  }
+
+  /** Events and Mishaps are the same row shape twice over, differing only in what `ejects` defaults to. */
+  #eventTables() {
+    if ( (this.item.type !== "career") || !this.item.system.isTemplate ) return null;
+    return [
+      { key: "eventTable", label: "MGT2.Chargen.Template.EventTable", rows: this.item.system.eventTable },
+      { key: "mishapTable", label: "MGT2.Chargen.Template.MishapTable", rows: this.item.system.mishapTable }
+    ];
   }
 
   /** The spine reads the sub-type where there is one, because that is the name on the character sheet. */
@@ -403,6 +491,10 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     // and every number on the weapon's own line is wrong while it is in there (§9.90).
     const magazine = system.effective?.magazine ?? system.magazine;
     if ( (type !== "weapon") || !(magazine > 0) ) return null;
+    // One null closes the whole count: the loaded readout, the Reload button and the round selector
+    // all render off this. The weapon's printed magazine stays on its spec line — that is the
+    // catalogue figure, not a tally.
+    if ( !Rules.on("magazines") ) return null;
     return {
       value: system.ammo,
       magazine,
@@ -590,9 +682,15 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         ? MGT2Helper.getIntegerFromInput(system.cost) : MGT2Helper.getNumberFromInput(system.cost);
     }
 
-    // `rules[]` refuses a blank entry, so emptying a row is how it is deleted and the trailing input
-    // is how one is added — otherwise clearing the text raises a validation error nobody can act on.
-    if ( system?.rules ) system.rules = Object.values(system.rules).filter(rule => rule?.trim());
+    for ( const path of STRING_LISTS ) {
+      const list = foundry.utils.getProperty(system ?? {}, path);
+      if ( list ) foundry.utils.setProperty(system, path, compact(list));
+    }
+    for ( const path of TRACK_LISTS ) {
+      for ( const track of Object.values(foundry.utils.getProperty(system ?? {}, path) ?? {}) ) {
+        if ( track?.values ) track.values = compact(track.values);
+      }
+    }
 
     // The chip row lets a printed parameter be retyped; the number a rule reads follows from it.
     for ( const property of ["traits", "options"] ) refreshTraitNumbers(system?.[property]);
@@ -612,8 +710,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
    */
   static async #appendEntry(property, blank) {
     await this.submit();
-    const current = foundry.utils.getProperty(this.item.system, property) ?? [];
-    return this.item.update({ [`system.${property}`]: [...Object.values(current), blank] });
+    const source = this.item.toObject().system;
+    const current = Object.values(foundry.utils.getProperty(source, property) ?? []);
+    return TravellerItemSheet.#writeCollection.call(this, source, property, [...current, blank]);
   }
 
   /**
@@ -624,8 +723,33 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
    */
   static async #removeEntry(property, index) {
     await this.submit();
-    const current = Object.values(foundry.utils.getProperty(this.item.system, property) ?? []);
-    return this.item.update({ [`system.${property}`]: current.filter((_v, i) => i !== index) });
+    const source = this.item.toObject().system;
+    const current = Object.values(foundry.utils.getProperty(source, property) ?? []);
+    return TravellerItemSheet.#writeCollection.call(this, source, property,
+      current.filter((_v, i) => i !== index));
+  }
+
+  /**
+   * Write a collection back, addressed at the **outermost array on its path** and carrying that array
+   * whole.
+   *
+   * `ArrayField._cast` rebuilds an array from only the submitted keys (`common/data/fields.mjs`,
+   * `if ( Number.isInteger(i) && (i >= 0) ) arr[i] = v;`), so an update sent as
+   * `system.rankLadders.0.rows` arrives as `{0: {rows}}` and leaves **one** ladder, stripped of its own
+   * id and name — §9.101's hazard reached through the update rather than through the form. Four of a
+   * career template's collections nest inside an indexed one, so the path is re-rooted here rather than
+   * written as given.
+   * @param {object} source     The item's system source, mutated and then written
+   * @param {string} property   The dotted path of the collection
+   * @param {Array} next        What it becomes
+   * @this {TravellerItemSheet}
+   */
+  static async #writeCollection(source, property, next) {
+    foundry.utils.setProperty(source, property, next);
+    const parts = property.split(".");
+    const indexed = parts.findIndex(part => /^\d+$/.test(part));
+    const root = (indexed < 0) ? property : parts.slice(0, indexed).join(".");
+    return this.item.update({ [`system.${root}`]: foundry.utils.getProperty(source, root) });
   }
 
   /* -------------------------------------------- */
@@ -646,6 +770,49 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   static #onCareerEventDelete(event, target) {
     const element = target.closest(".events-part");
     return TravellerItemSheet.#removeEntry.call(this, "events", Number(element.dataset.eventsPart));
+  }
+
+  /**
+   * Add a row to any indexed collection, the path coming from the DOM rather than from a handler per
+   * array — a career template has eighteen of them and four are nested two deep (§9.48). `closest`
+   * walking up from the control is what makes the nesting work: the innermost `[data-property]`
+   * above the button is always the collection that button belongs to.
+   *
+   * A blank of `{}` cleans to every sub-field's own `initial`, so only an array of scalars needs
+   * `data-blank` — `benefits.cash` is the one.
+   * @this {TravellerItemSheet}
+   */
+  static #onEntryCreate(event, target) {
+    const property = target.closest("[data-property]")?.dataset.property;
+    if ( !property ) return;
+    const blank = target.dataset.blank;
+    return TravellerItemSheet.#appendEntry.call(this, property,
+      (blank === undefined) ? {} : JSON.parse(blank));
+  }
+
+  /** @this {TravellerItemSheet} */
+  static #onEntryDelete(event, target) {
+    const row = target.closest("[data-entry-index]");
+    const property = row?.closest("[data-property]")?.dataset.property;
+    if ( !property ) return;
+    return TravellerItemSheet.#removeEntry.call(this, property, Number(row.dataset.entryIndex));
+  }
+
+  /**
+   * Seed the frame's step list with the Core sequence so a referee editing one term step does not
+   * retype the other nine. **Empty stays the default** — this is offered, never required — and what
+   * a frame cuts is still derived rather than authored (§9.54).
+   * @this {TravellerItemSheet}
+   */
+  static async #onStepsDeclare() {
+    await this.submit();
+    return this.item.update({ "system.frame.steps": [...MGT2.CoreTermSequence] });
+  }
+
+  /** @this {TravellerItemSheet} */
+  static async #onStepsDefault() {
+    await this.submit();
+    return this.item.update({ "system.frame.steps": [] });
   }
 
   /** @this {TravellerItemSheet} */

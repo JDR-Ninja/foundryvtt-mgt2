@@ -105,7 +105,11 @@
 				],
 				"gmOnlyFields": [
 					"finance.purchase",
-					"finance.mortgageOverride"
+					"finance.mortgageOverride",
+					"finance.benefitQuarters",
+					"finance.periodsPaid",
+					"finance.skipParsecs",
+					"finance.skipDisguise"
 				]
 			},
 			"robot": {
@@ -161,16 +165,22 @@
 		},
 		"Combatant": {
 			"person": {},
-			"crew": {}
+			"crew": {},
+			"fleetShip": {},
+			"squadron": {},
+			"salvo": {}
 		},
 		"ChatMessage": {
-			"check": {}
+			"check": {},
+			"request": {}
 		},
 		"Combat": {
-			"space": {}
+			"space": {},
+			"fleet": {}
 		},
 		"CombatantGroup": {
-			"ship": {}
+			"ship": {},
+			"fleet": {}
 		},
 		"RegionBehavior": {
 			"gravity": {},

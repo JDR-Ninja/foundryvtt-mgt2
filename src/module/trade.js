@@ -208,6 +208,9 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
      */
     #price = null;
 
+    /** The `Roll` behind `#price`, kept so the posted card can carry it (§9.117). */
+    #priceRoll = null;
+
     /** One window: a second would answer the same market twice with different dice. */
     static open() {
         const existing = foundry.applications.instances.get("mgt2-spec-trade");
@@ -380,6 +383,9 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         const faces = roll.dice[0].results.map(result => result.result);
         const sum = from => faces.slice(from, from + dice).reduce((total, die) => total + die, 0);
         this.#price = { purchase: sum(0), sale: sum(dice) };
+        // The two 3D the card is actually about (§9.117). The shelf's pools are left out for the
+        // same reason as the traffic dialog's: they are sliced per row and mostly never read.
+        this.#priceRoll = roll;
         this.render({ parts: ["results"] });
     }
 
@@ -399,6 +405,9 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,
             speaker: ChatMessage.getSpeaker(),
+            // v14 appends no display of its own once `content` is set, so this costs the card
+            // nothing and buys Dice So Nice and an auditable record (§9.117).
+            rolls: this.#priceRoll ? [this.#priceRoll] : [],
             content: `<div class="mgt2 theme-light card spectrade">
                 <div class="chd"><div class="what"><h4>${
                     foundry.utils.escapeHTML(game.i18n.localize("MGT2.Trade.Speculative"))

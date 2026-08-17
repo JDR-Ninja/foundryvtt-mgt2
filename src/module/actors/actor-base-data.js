@@ -1,5 +1,6 @@
 import { MGT2 } from "../config.js";
 import { MGT2Helper } from "../helper.js";
+import { Rules } from "../rules.js";
 import { buildHazardItem, buildTraitMap, createTraitsField, hazardTraits, resolveDamageResponse } from "../traits.js";
 
 const fields = foundry.data.fields;
@@ -74,7 +75,7 @@ export function withPersonal() {
  * one stored; `effect` is declared so an Active Effect aimed at it is coerced rather than written
  * raw, and none of the four carries `min` or `max` because applyChange reverts instead of clamping.
  */
-function createModifierField() {
+export function createModifierField() {
     return new fields.SchemaField({
         custom: new fields.NumberField({ required: true, nullable: false, integer: true, initial: 0 }),
         auto: new fields.NumberField({ required: true, nullable: false, integer: true, initial: 0 }),
@@ -181,6 +182,19 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     }
 
     /**
+     * Whether this actor shows a characteristic — two questions, and both have to say yes. The world
+     * decides whether the characteristic exists at this table at all (PSI and the five the Core
+     * Rulebook never defines are each a rule a referee adopts), the actor decides whether it shows
+     * one that does. The stored flag is never written by either: a hidden characteristic keeps its
+     * score and comes back unchanged.
+     * @param {string} key
+     * @returns {boolean}
+     */
+    isCharacteristicShown(key) {
+        return (this.characteristics[key]?.show === true) && Rules.characteristic(key);
+    }
+
+    /**
      * Which of them a check may be *rolled on*, which is not the same question as which the sheet
      * shows. A damage pool is the difference: `hull` and `hits` run the DM ladder like every other
      * characteristic, so the prompt was offering "Hull — 240 (+3)" as though a ship had a score.
@@ -188,7 +202,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
      */
     get rollableCharacteristics() {
         return this.characteristicKeys.filter(key =>
-            this.characteristics[key].show && !(key in MGT2.DamageTracks));
+            this.isCharacteristicShown(key) && !(key in MGT2.DamageTracks));
     }
 
     /**
@@ -520,7 +534,9 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         const normal = this.constructor.ENCUMBRANCE_LINKS
             .reduce((sum, key) => sum + (this.characteristics[key]?.value ?? 0), this.encumbranceSkillBonus);
         this.inventory.encumbrance = { normal, heavy: normal * 2 };
-        this.states.encumbrance = this.inventory.weight > normal;
+        // The cap is stated whatever the world does with it; the band it imposes is the rule, and
+        // gating the flag is what keeps the DM-2 below, the header tick and the token icon together.
+        this.states.encumbrance = Rules.on("encumbrance") && (this.inventory.weight > normal);
     }
 
     /** Total levels of skills flagged as reducing encumbrance. */

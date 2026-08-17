@@ -1,0 +1,72 @@
+{{! READ, TALLY, SEND and the demand in words. Everything here is a reading of the form above, so
+    the whole part is re-rendered rather than patched. }}
+<div class="pdlg dfoot">
+
+	{{! Item 5 — one marker per roster row on Core p.61's six bands, at `7 + rowDM - target`. It
+	    restates numbers the roster already prints, and that IS its job: the roster prints per-row DMs
+	    with the target a row away, so the referee otherwise does five subtractions to answer the one
+	    question they have — is 6+ too soft for these four, given one is untrained. Compact, 34 px,
+	    no caption row, because it is a second reading. }}
+	<div class="pline" role="group" aria-label="{{localize 'MGT2.Request.Read'}}">
+		<span class="pgut">{{localize 'MGT2.Request.Read'}}</span>
+		<div class="pfields">
+			<div class="spread">
+				{{#each spread as |band|}}
+				<div class="cell {{band.tone}}">
+					<span class="b">{{band.label}}</span>
+					<span class="marks">
+						{{#each band.marks as |mark|}}<i data-tooltip="{{mark.name}} {{mark.effect}}"></i>{{/each}}
+					</span>
+				</div>
+				{{/each}}
+			</div>
+			<span class="why">{{localize 'MGT2.Request.OnAverage'}}</span>
+		</div>
+	</div>
+
+	{{! Binary, because Traveller prints exactly one "everyone rolls the same check" (Initiative,
+	    p.73) and no aggregation rule for it. Anything that sums Effects is a rule the books lack. }}
+	<div class="pline tallyline" role="group" aria-label="{{localize 'MGT2.Request.TallyLabel'}}">
+		<span class="pgut">{{localize 'MGT2.Request.TallyLabel'}}</span>
+		<div class="pfields">
+			<span class="seg fill" data-name="{{field}}Tally" role="radiogroup"
+				aria-label="{{localize 'MGT2.Request.TallyLabel'}}">
+				{{#each tallies as |t|}}
+				<label><input type="radio" name="{{../field}}Tally" value="{{t.key}}"{{#if t.active}} checked{{/if}} /><span>{{t.label}}</span></label>
+				{{/each}}
+			</span>
+		</div>
+	</div>
+
+	{{! Two modes and only two: `ChatMessage#visible` hides a whispered message WITHOUT rolls from
+	    non-recipients, and a request card has no rolls — so gm/blind/self would post a demand nobody
+	    could see or answer. }}
+	<div class="pline" role="group" aria-label="{{localize 'MGT2.Request.Send'}}">
+		<span class="pgut">{{localize 'MGT2.Request.Send'}}</span>
+		<div class="pfields">
+			<span class="seg" data-name="{{field}}Visibility" role="radiogroup"
+				aria-label="{{localize 'MGT2.Request.Send'}}">
+				{{#each visibilities as |v|}}
+				<label><input type="radio" name="{{../field}}Visibility" value="{{v.key}}"{{#if v.active}} checked{{/if}} /><span>{{v.label}}</span></label>
+				{{/each}}
+			</span>
+			<label class="tog" data-tooltip="{{localize 'MGT2.Request.ShowTargetHint'}}">
+				<input type="checkbox" name="{{field}}ShowTarget"{{#if demand.showTarget}} checked{{/if}} />
+				<span>{{localize 'MGT2.Request.ShowTarget'}}</span>
+			</label>
+			<label class="tog" data-tooltip="{{localize 'MGT2.Request.RollMineHint'}}">
+				<input type="checkbox" name="{{field}}RollMine"{{#if send.roll}} checked{{/if}} />
+				<span>{{localize 'MGT2.Request.RollMine'}}</span>
+			</label>
+		</div>
+	</div>
+
+	<div class="dsummary">
+		<p class="what">{{summary.demand}}</p>
+		<p class="tally">{{summary.tally}}</p>
+	</div>
+
+	<div class="dsend">
+		<button type="button" class="btn hot post" data-action="post">{{localize 'MGT2.Request.Post'}}</button>
+	</div>
+</div>

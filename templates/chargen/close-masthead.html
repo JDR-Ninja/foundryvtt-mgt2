@@ -1,0 +1,15 @@
+{{! The closing screen's own state, which like the grid's is not a document: the roster is the set of
+    actors still carrying `flags.mgt2.chargen`, and the two counts are read off them (§9.38). }}
+<div class="mgt2-chargen-head">
+	<h2>{{localize 'MGT2.Chargen.Close.Heading'}}</h2>
+	<span class="count">
+		{{#if empty}}{{localize 'MGT2.Chargen.Close.NobodyYet'}}
+		{{else}}{{localize 'MGT2.Chargen.Close.Standing' serving=serving total=columns.length owed=owed}}{{/if}}
+	</span>
+	{{#if canFinishAll}}
+	<button type="button" class="finishall" data-action="finishAll">
+		<i class="fa-solid fa-flag-checkered" inert></i>
+		<span>{{localize 'MGT2.Chargen.Close.FinishAll'}}</span>
+	</button>
+	{{/if}}
+</div>

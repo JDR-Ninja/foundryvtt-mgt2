@@ -28,7 +28,7 @@ const ID = /^[a-zA-Z0-9]{16}$/;
  * ascending and joined with a pipe. That ordering is the whole guarantee: `TypedObjectField` drops
  * any key this refuses, so "b|a" can never be written beside "a|b".
  */
-function validPairKey(key) {
+export function validPairKey(key) {
     const [a, b] = String(key).split("|");
     return ID.test(a ?? "") && ID.test(b ?? "") && (a < b);
 }
@@ -120,11 +120,15 @@ export class SpaceCombatData extends foundry.abstract.TypeDataModel {
         return this.parent.update({ system: { bands: { [key]: value } } });
     }
 
-    /** Drop every pair a group was half of — what a ship leaving the fight takes with it. */
+    /**
+     * Drop every pair a group was half of — what a ship leaving the fight takes with it. The map is
+     * read back off the DOCUMENT rather than off `this`: a caller holding a model from before a
+     * `setBand` would sweep the keys as they were then and leave the new ones orphaned.
+     */
     async clearGroup(group) {
         const id = group?.id ?? group;
         const bands = {};
-        for ( const key of Object.keys(this.bands) ) {
+        for ( const key of Object.keys(this.parent.system.bands) ) {
             if ( key.split("|").includes(id) ) bands[key] = new foundry.data.operators.ForcedDeletion();
         }
         if ( !Object.keys(bands).length ) return this.parent;
@@ -203,11 +207,9 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
      * particular, so the order is imposed here rather than left to whoever reads it.
      */
     get crew() {
-        const roster = this.ship?.system.crew.map(row => row.role) ?? [];
-        const at = combatant => {
-            const index = roster.indexOf(combatant.system.station);
-            return (index < 0) ? Number.MAX_SAFE_INTEGER : index;
-        };
+        // `station` IS the roster index, so it is the order. It used to be looked up by `role` Item
+        // id, which put two gunners sharing one Gunner role at the same position (§9.98).
+        const at = combatant => combatant.system.station ?? Number.MAX_SAFE_INTEGER;
         return this.combatants.filter(combatant => combatant.type === CREW)
             .sort((a, b) => at(a) - at(b));
     }
@@ -345,22 +347,44 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * End of round. Core folio 166 lets Thrust accumulate across rounds to pay for a band change one
-     * round cannot afford, so what this round bought is added to the bank; once the bank covers the
-     * cost the pair moves one band and the remainder carries into the next change.
+     * What this round's manoeuvre comes to, read while every ship still holds what it allocated.
+     * Core folio 166 lets Thrust accumulate across rounds to pay for a band change one round cannot
+     * afford, so what this round bought is added to the bank; once the bank covers the cost the pair
+     * moves one band and the remainder carries into the next change.
      */
-    async endRound() {
-        if ( this.parent.type !== SHIP ) return this.parent;
-        let banked = Math.max(0, this.thrust.banked + this.closingRate);
+    get movementPlan() {
+        const rate = this.closingRate;
+        const banked = Math.max(0, this.thrust.banked + rate);
         const cost = this.cost;
-        const other = this.opponent;
+        const opponent = this.opponent;
         const wanted = this.thrust.target.band;
-        if ( other && cost && wanted && (banked >= cost) ) {
-            const moved = SpaceCombatData.bandToward(this.currentBand, wanted);
-            await this.parent.parent.system?.setBand?.(this.parent, other, moved);
-            banked -= cost;
+        // A pair that has arrived pays nothing more: `bandToward` answers the band it is already at
+        // once the target is reached, so without this test the bank is charged the cost of a change
+        // that never happens, every round the declaration stands.
+        const moves = Boolean(opponent && cost && wanted
+            && (wanted !== this.currentBand) && (banked >= cost));
+        return { rate, cost, opponent, moves,
+            banked: moves ? (banked - cost) : banked,
+            band: moves ? SpaceCombatData.bandToward(this.currentBand, wanted) : null };
+    }
+
+    /**
+     * End of round for one ship. The plan is passed IN rather than read here, because both halves of
+     * folio 166's closing arithmetic are properties of a PAIR: `closingRate` reads the other ship's
+     * allocation and this method clears its own, so a ship settled first contributed nothing to the
+     * second's rate. Measured before the fix: two ships closing at 4 Thrust each banked 8 and 4.
+     * @param {object} [plan]   `movementPlan`, taken before any ship was written
+     */
+    async endRound(plan) {
+        if ( this.parent.type !== SHIP ) return this.parent;
+        const settled = plan ?? this.movementPlan;
+        // Ended on its own rather than by the Combat, this ship has to apply its own change or it
+        // would bank past the cost forever.
+        if ( !plan && settled.moves ) {
+            await this.parent.parent.system?.setBand?.(this.parent, settled.opponent, settled.band);
         }
-        return this.parent.update({ system: { thrust: { banked, spent: [] }, resolved: [] } });
+        return this.parent.update({
+            system: { thrust: { banked: settled.banked, spent: [] }, resolved: [] } });
     }
 
     /** Tick a step off, or back on — the referee's own mark, the way the tracker's turn pointer is. */
@@ -413,7 +437,7 @@ export class MGT2Combat extends Combat {
             [{ type: SHIP, name: actor.name, img: actor.img }]);
 
         const combatants = [{ actorId: actor.id, group: group.id, name: actor.name, img: actor.img }];
-        for ( const station of actor.system.crew ) {
+        for ( const [index, station] of actor.system.crew.entries() ) {
             let crew = null;
             if ( station.actor ) {
                 try { crew = foundry.utils.fromUuidSync(station.actor); } catch { crew = null; }
@@ -421,12 +445,16 @@ export class MGT2Combat extends Combat {
             // Core folio 164 calls anyone aboard without a duty a Passenger, which is the schema's
             // initial value — the book has the referee assign duties as the battle begins, so
             // guessing one off the station's name would be inventing an answer.
+            //
+            // `dutyTarget` is deliberately NOT seeded from the roster: blank means "whatever mount
+            // the station is at", which keeps reading the ship sheet, and a value means the gunner
+            // moved this encounter. Seeding it made every join a snapshot (§9.98).
             combatants.push({
                 type: CREW,
                 group: group.id,
                 actorId: game.actors.has(crew?.id) ? crew.id : null,
                 name: crew?.name || station.name || actor.items.get(station.role)?.name || "",
-                system: { station: station.role, dutyTarget: station.dutyTarget }
+                system: { station: index }
             });
         }
         await this.createEmbeddedDocuments("Combatant", combatants);
@@ -461,8 +489,22 @@ export class MGT2Combat extends Combat {
      */
     async _onEndRound(context) {
         await super._onEndRound(context);
-        if ( this.type !== SPACE ) return;
-        for ( const group of this.system.shipGroups ) await group.system.endRound();
+        // A second engine on the same document family ends its own round: HG folio 115's fleet
+        // sub-type carries `endRound` on its Combat model, and `space` on each ship group (§9.100 C).
+        if ( this.type !== SPACE ) return this.system?.endRound?.();
+        // Every reading is taken BEFORE any ship is written, and one pair changes band once: folio
+        // 166 adds two closing ships' movement together, so both ledgers have to pay the same cost
+        // against the band they are both still in.
+        const plans = this.system.shipGroups.map(group => ({ group, ...group.system.movementPlan }));
+        const changed = new Set();
+        for ( const plan of plans ) {
+            const key = plan.opponent ? SpaceCombatData.pairKey(plan.group, plan.opponent) : null;
+            if ( plan.moves && key && !changed.has(key) ) {
+                changed.add(key);
+                await this.system.setBand(plan.group, plan.opponent, plan.band);
+            }
+            await plan.group.system.endRound(plan);
+        }
         const updates = this.combatants.filter(combatant => combatant.type === CREW)
             .map(combatant => ({ _id: combatant.id, system: { spent: { action: false, reactions: [] } } }));
         if ( updates.length ) await this.updateEmbeddedDocuments("Combatant", updates);

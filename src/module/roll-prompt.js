@@ -2,6 +2,7 @@ import { checkOf } from "./chat-message.js";
 import { Checks } from "./checks.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
+import { Rules } from "./rules.js";
 
 const { DialogV2 } = foundry.applications.api;
 const { FormDataExtended } = foundry.applications.ux;
@@ -18,12 +19,43 @@ const LADDER_REACH = 6;
  * each of them clicks their own card. Per-client and never persisted: this is the state of an open
  * window, the same boundary the rail and the sheet's play/edit mode sit behind.
  */
-const armed = new Set();
+const armedHere = new Set();
 
 /** Offer a check to whatever is rolled next. @param {string} id   A ChatMessage id */
 export function armChain(id) {
-    armed.add(id);
-    return armed.size;
+    armedHere.add(id);
+    return armedHere.size;
+}
+
+/**
+ * Core p.61's tri-state as a number, so the imposed one and the chosen one can be resolved against
+ * each other by arithmetic rather than by a table: a Boon is +1, a Bane is −1, and 2D is neither.
+ */
+function stanceValue(stance) {
+    return (stance === "boon") ? 1 : ((stance === "bane") ? -1 : 0);
+}
+
+/** The same tri-state as the footer's own dice modifier — `dh` drops the high die, `dl` the low. */
+function chosenStance(diceModifier) {
+    return (diceModifier === "dl") ? 1 : ((diceModifier === "dh") ? -1 : 0);
+}
+
+/**
+ * Core p.61: "if a Traveller has both a Boon and a Bane on the same check, they cancel each other
+ * out and the check is rolled normally". Tri-state and non-stacking, so the sum's sign is the whole
+ * rule — two of a kind stay that kind, one of each cancels, and either alone stands.
+ * @param {string} imposed        What the referee asked for
+ * @param {string} diceModifier   What the footer button chose
+ */
+export function resolveStance(imposed, diceModifier) {
+    const asked = stanceValue(imposed);
+    const chosen = chosenStance(diceModifier);
+    const value = Math.sign(asked + chosen);
+    return {
+        value,
+        dice: value ? ((value < 0) ? "dh" : "dl") : null,
+        cancelled: (asked !== 0) && (chosen !== 0) && (value === 0)
+    };
 }
 
 /**
@@ -76,6 +108,11 @@ export class RollPromptHelper {
                     target,
                     label: game.i18n.localize(CONFIG.MGT2.Difficulty[key])
                 })),
+                // What the referee fixed, stated and not offered. Never a control: `.voided` leaves
+                // radios keyboard-reachable, `disabled` is skipped outright by `FormDataExtended`
+                // (`ux/form-data-extended.mjs`, "if ( !name || disabled ) continue"), and a hidden
+                // mirror sharing a name yields an array. So: a static readout plus one hidden input.
+                imposed: this.#imposedContext(options),
                 traits: MGT2Helper.weaponTraitRows(options.weapon, options.strengthDM),
                 // Core folio 78 and folio 75, both folded into the Modifiers row rather than given
                 // rows of their own — and never both at once, since one belongs to a weapon attack
@@ -88,7 +125,7 @@ export class RollPromptHelper {
                 } : null,
                 extended: options.blocks?.extended
                     ? { dm: MGT2.ExtendedAction.dm, per: MGT2.ExtendedAction.per } : null,
-                priorChecks: this.#priorChecks(),
+                priorChecks: this.#priorChecks(6, options.armed),
                 ...this.#ceilingContext(options.ceiling),
                 ...this.#reachContext(options.blocks?.psionic ? options.talent : null),
                 // Core p.74's table is headed "Common Modifiers to Ranged Attacks"; a melee weapon
@@ -145,8 +182,87 @@ export class RollPromptHelper {
         // An offer is consumed by the roll it was made into, not by a window opening. A prompt
         // opened and dismissed leaves every contributor's card still armed, which matters when
         // three people have offered into one check and the fourth mis-clicks.
-        if ( result ) armed.clear();
+        if ( result ) armedHere.clear();
         return result;
+    }
+
+    /* -------------------------------------------- */
+
+    /**
+     * What a roll request fixed, resolved against the roller's own numbers so the readout and the
+     * formula read the same source (`ROLL-REQUEST.md` §6). Each entry that carries a DM is drawn as
+     * an `[data-applied-dm]` node — the shape `#readout` already has for a term with no control of
+     * its own — and each entry the form must send back carries one `<input type="hidden">`.
+     *
+     * **The imposed DM is the one exception and carries no hidden input**: it reaches the formula
+     * through `terms()`'s documented `extra` slot, so nothing reads it off the form.
+     *
+     * Cardinality is Core p.59's meaning: one characteristic is fixed and becomes a readout, two or
+     * more is the referee narrowing a choice the player still makes, so the pill goes on the select.
+     */
+    static #imposedContext(options) {
+        const imposed = options.imposed;
+        if ( !imposed ) return null;
+        const sign = value => MGT2Helper.signed(value, "+0");
+        const context = { flavor: imposed.flavor ?? "", stance: imposed.stance ?? "none" };
+
+        const chars = imposed.chars ?? [];
+        const characteristic = (chars.length === 1)
+            ? options.characteristics?.find(entry => entry._id === chars[0]) : null;
+        if ( characteristic ) {
+            context.characteristic = { key: characteristic._id, label: characteristic.name,
+                term: characteristic.term, dm: characteristic.dm, display: sign(characteristic.dm) };
+        }
+        else context.narrowChars = chars.length > 1;
+
+        // `null` is the referee choosing untrained, which is the prompt's own `NP` sentinel; an id is
+        // a resolution frozen on the referee's client. An open or unresolved skill sends no
+        // `skillItem` at all, so the select stays live and that line picks from its own vocabulary.
+        if ( imposed.skillItem !== undefined ) {
+            const key = (imposed.skillItem === null) ? "NP" : imposed.skillItem;
+            const skill = options.skills?.find(entry => entry._id === key);
+            if ( skill ) {
+                context.skill = { key, label: skill.name, term: skill.term, dm: skill.dm,
+                    display: sign(skill.dm) };
+            }
+        }
+
+        if ( imposed.timeframe ) {
+            const dm = MGT2Helper.getTimeframeDM(imposed.timeframe);
+            context.timeframe = {
+                key: imposed.timeframe,
+                label: game.i18n.localize(MGT2.Timeframes[imposed.timeframe]),
+                term: game.i18n.localize("MGT2.RollPrompt.Timeframes"),
+                dm, display: sign(dm)
+            };
+        }
+
+        // Core p.61 permits a check with no stated difficulty, and that is itself imposed: leaving
+        // the ladder live would let the answer pick a rung the referee declined to state.
+        if ( imposed.difficulty !== undefined ) {
+            context.difficulty = { key: imposed.difficulty ?? "",
+                label: MGT2Helper.getDifficultyDisplay(imposed.difficulty)
+                    ?? game.i18n.localize("MGT2.Difficulty.NA") };
+        }
+
+        // Core p.64 constrains a DM's provenance, so the label IS the row.
+        if ( imposed.dm?.value ) {
+            context.dm = {
+                term: imposed.dm.label,
+                label: `${imposed.dm.label} ${MGT2Helper.signed(imposed.dm.value)}`,
+                dm: imposed.dm.value,
+                negative: imposed.dm.value < 0
+            };
+        }
+
+        // What pressing ROLL rolls, which is what the readout has to say — the stance is imposed by
+        // the form and the footer only ever adds to it.
+        if ( context.stance !== "none" ) {
+            context.dice = game.i18n.localize((context.stance === "bane")
+                ? "MGT2.RollPrompt.BaneDice" : "MGT2.RollPrompt.BoonDice");
+        }
+        context.asked = Boolean(context.flavor || context.dm || context.dice);
+        return context;
     }
 
     /* -------------------------------------------- */
@@ -226,14 +342,19 @@ export class RollPromptHelper {
      * @param {Actor} actor              Whose characteristics and skills the prompt offered
      * @param {object[]} checkModifiers  The sources the prompt listed, with their `key`
      * @param {[string, number][]} extra
-     * @returns {{formula: string, modifiers: string[], chainSources: object[]}}
+     * @returns {{formula: string, modifiers: string[], chainSources: object[], stance: object}}
      */
     static terms(data, actor, checkModifiers = [], extra = []) {
         const modifiers = [];
         const parts = [];
-        if ( data.diceModifier ) {
+        // Core p.61's tri-state, resolved once: the referee's own Boon or Bane rides the form as
+        // `imposedStance`, the player's rides the footer button, and one of each cancels. Without
+        // this an imposed Bane was discarded the moment ROLL was pressed, because the stance only
+        // ever entered through the button callback.
+        const stance = resolveStance(data.imposedStance, data.diceModifier);
+        if ( stance.dice ) {
             parts.push("3d6");
-            parts.push(data.diceModifier);
+            parts.push(stance.dice);
         }
         else parts.push("2d6");
 
@@ -308,7 +429,7 @@ export class RollPromptHelper {
             parts.push(typed);
         }
 
-        return { formula: parts.join(""), modifiers, chainSources };
+        return { formula: parts.join(""), modifiers, chainSources, stance };
     }
 
     /**
@@ -320,9 +441,15 @@ export class RollPromptHelper {
      * An **armed** source is exempt from the cap and comes first, already selected: the card asked
      * for it by name, and a source that had scrolled past the window would otherwise be unreachable
      * from here at all.
+     *
+     * `extra` is arming that did not come from a click on this client — Core p.63-64's working
+     * together, where the contributors' answers are armed onto the resolver's prompt by the request
+     * itself. `armChain`'s set is per-client and could never carry that.
+     * @param {string[]} [extra]
      */
-    static #priorChecks(limit = 6) {
+    static #priorChecks(limit = 6, extra = []) {
         const messages = game.messages?.contents ?? [];
+        const armed = new Set([...armedHere, ...(extra ?? [])]);
         // A source that has already fed a check is still legal to reuse — the rule says nothing —
         // so this is a note beside the option and never a reason to withhold it.
         const consumed = new Set(messages.flatMap(m => checkOf(m)?.previous ?? []));
@@ -360,7 +487,7 @@ export class RollPromptHelper {
      * difficulty by one level, which can bring a task back inside.
      */
     static #ceilingContext(ceiling) {
-        if (!ceiling?.target) return {};
+        if (!ceiling?.target || !Rules.on("taskCeiling")) return {};
         const params = {
             grade: game.i18n.localize(ceiling.grade),
             ceiling: game.i18n.localize(MGT2.Difficulty[ceiling.key])
@@ -407,9 +534,11 @@ export class RollPromptHelper {
 
     /**
      * What the Range block needs: the weapon's own Range score, the aiming ladder, the two
-     * thresholds Core folio 77 names and — for a weapon with Auto — the fire mode. **The 100 m
-     * threshold is checked**, because that is the rule; the 300 m cell and the empty one are the
-     * concessions the folio and the referee grant, and Scope voids the whole row from its own chip.
+     * thresholds Core folio 77 names and — for a weapon with Auto — the fire mode. **Which cell
+     * starts checked is the world's `extremeRange` rule**: folio 77's 100 m, the 300 m it grants a
+     * no-stress environment, or the empty cell where the referee waives it. The strip itself stays —
+     * the threshold is a fact about this shot, and the rule only supplies its default — and Scope
+     * voids the whole row from its own chip.
      *
      * `measured` is the caller's own snapshot of the canvas and is the only thing here that ever
      * came off it: this prompt takes no actor and no token, and seeding a text field is not
@@ -417,6 +546,7 @@ export class RollPromptHelper {
      */
     static #rangeContext(weapon, measured = null) {
         if (!weapon) return {};
+        const inForce = Rules.get("extremeRange");
         const range = weapon.system.range;
         const unit = range.unit ? game.i18n.localize(MGT2.MetricRange[range.unit]).toLowerCase() : "";
         const aimTerm = game.i18n.localize(MGT2.AttackModifiers.aiming.label);
@@ -438,9 +568,11 @@ export class RollPromptHelper {
                 thresholds: (range.unit === "kilometer") ? null
                     : Object.entries(MGT2.ExtremeRangeThresholds).map(([key, threshold]) => ({
                         metres: threshold.metres,
-                        checked: key === "combat",
+                        checked: key === inForce,
                         label: game.i18n.format(threshold.label, { metres: threshold.metres })
-                    }))
+                    })),
+                // The waived reading has no threshold to name, so it is the strip's empty cell.
+                thresholdWaived: inForce === "none"
             },
             metre: game.i18n.localize(MGT2.MetricRange.meter).toLowerCase(),
             // A snapshot can go stale, so the band says where the figure came from until the field
@@ -482,17 +614,17 @@ export class RollPromptHelper {
         const form = root.querySelector("form");
         if ( !form ) return;
 
-        const dice = {
-            bane: "MGT2.RollPrompt.BaneDice",
-            submit: "MGT2.RollPrompt.RollDice",
-            boon: "MGT2.RollPrompt.BoonDice"
-        };
-        for ( const [action, key] of Object.entries(dice) ) {
+        // Each button says what IT rolls, which on a request is the referee's stance resolved
+        // against that button's own (Core p.61). A BOON button reading "3D drop low" beside an
+        // imposed Bane would be a lie on the most-used surface in the system.
+        const imposed = form.elements.imposedStance?.value ?? "";
+        const dice = { bane: "dh", submit: "", boon: "dl" };
+        for ( const [action, chosen] of Object.entries(dice) ) {
             const button = form.querySelector(`button[data-action="${action}"]`);
             if ( !button || button.querySelector(".d") ) continue;
             const sub = document.createElement("span");
             sub.className = "d";
-            sub.textContent = game.i18n.localize(key);
+            sub.textContent = game.i18n.localize(this.#diceLabel(imposed, chosen));
             button.append(sub);
         }
 
@@ -529,6 +661,16 @@ export class RollPromptHelper {
         form.addEventListener("change", update);
         form.addEventListener("input", update);
         update();
+    }
+
+    /* -------------------------------------------- */
+
+    /** The dice one stance pairing actually rolls, as an i18n key. */
+    static #diceLabel(imposed, diceModifier) {
+        const { value } = resolveStance(imposed, diceModifier);
+        if ( value < 0 ) return "MGT2.RollPrompt.BaneDice";
+        if ( value > 0 ) return "MGT2.RollPrompt.BoonDice";
+        return "MGT2.RollPrompt.RollDice";
     }
 
     /* -------------------------------------------- */
@@ -692,9 +834,11 @@ export class RollPromptHelper {
         // and the number rolled cannot drift apart.
         const { total } = Checks.modifiers(terms);
 
-        out("formula").textContent = total === 0
-            ? game.i18n.localize("MGT2.RollPrompt.RollDice")
-            : `${game.i18n.localize("MGT2.RollPrompt.RollDice")} ${sign(total)}`;
+        // The dice the formula reads are the ones ROLL would roll, so an imposed Bane shows as
+        // 3D drop high before a button is touched rather than only after one is.
+        const diceName = game.i18n.localize(
+            this.#diceLabel(form.elements.imposedStance?.value ?? "", ""));
+        out("formula").textContent = (total === 0) ? diceName : `${diceName} ${sign(total)}`;
 
         const target = MGT2Helper.getEffectTarget(form.elements.difficulty?.value);
         out("target").textContent = `${target.value}+`;

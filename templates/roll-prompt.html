@@ -1,4 +1,30 @@
 <div class="pdlg">
+	{{! ROLL-REQUEST.md §6. What the referee fixed is a static readout plus one hidden input, never a
+	    control: `.voided` leaves radios keyboard-reachable, `disabled` is skipped outright by
+	    FormDataExtended, and a same-named hidden mirror yields an array. A readout that carries a DM
+	    is an `[data-applied-dm]` node — the shape the live readout already has for a term with no
+	    control of its own — so the preview and the formula read the same number. The imposed DM has
+	    no hidden input: it reaches the formula through `terms()`'s own `extra` slot. }}
+	{{#if imposed.asked}}
+	<div class="pline" role="group" aria-label="{{ localize 'MGT2.Request.Prompt.Asked' }}">
+		<span class="pgut">{{ localize 'MGT2.Request.Prompt.Asked' }}</span>
+		<div class="pfields">
+			{{#if imposed.flavor}}<span class="hint">{{imposed.flavor}}</span><span class="brk"></span>{{/if}}
+			{{#if imposed.dm}}
+			<span class="imp{{#if imposed.dm.negative}} neg{{/if}}" data-term="{{imposed.dm.term}}"
+				data-applied-dm="{{imposed.dm.dm}}"><span>{{imposed.dm.label}}</span><span class="gm">{{ localize 'MGT2.Request.Prompt.GM' }}</span></span>
+			{{/if}}
+			{{! Core p.61: the stance rides the FORM, because the footer button callback is the only
+			    other place a stance has ever entered and an imposed one would be discarded there. }}
+			{{#if imposed.dice}}
+			<span class="imp"><span>{{imposed.dice}}</span><span class="gm">{{ localize 'MGT2.Request.Prompt.GM' }}</span></span>
+			{{/if}}
+		</div>
+	</div>
+	{{/if}}
+	{{! Only where there is one: "none" resolves to whatever the button chose, which is the default. }}
+	{{#if imposed.dice}}<input type="hidden" name="imposedStance" value="{{imposed.stance}}" />{{/if}}
+
 	{{! The section name lives in a left gutter and takes the per-field labels with it: a select
 	    already reading "Dexterity 10" does not need a label saying Characteristic. Losing that
 	    column is what lets two controls share a line. Every unlabelled control carries an
@@ -6,14 +32,20 @@
 	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.Check' }}">
 		<span class="pgut">{{ localize 'MGT2.RollPrompt.Check' }}</span>
 		<div class="pfields">
+			{{#unless imposed.characteristic}}
 			<select class="f dm-source" name="characteristic"
 				aria-label="{{ localize 'MGT2.RollPrompt.CharacteristicDM' }}">
 				{{#each characteristics as |c|}}
 				<option value="{{c._id}}" data-dm="{{c.dm}}" data-term="{{c.term}}"{{#if (eq c._id ../characteristic)}} selected{{/if}}>{{c.name}}</option>
 				{{/each}}
 			</select>
+			{{! Core p.59's `INT or EDU`: the referee narrowed the list and the player still picks
+			    from it, so the pill goes on the control rather than replacing it. }}
+			{{#if imposed.narrowChars}}<span class="gm">{{ localize 'MGT2.Request.Prompt.GM' }}</span>{{/if}}
 			<span class="pdm zero" data-readout="characteristic">+0</span>
+			{{/unless}}
 			{{#if blocks.skill}}
+			{{#unless imposed.skill}}
 			{{! Core folio 58 makes characteristic checks and skill checks two different kinds of task
 			    check, and the first option is the first of them: no skill is used, so none is missing
 			    and DM+0 is right. It is named rather than blank because an unnamed row reads as a
@@ -26,9 +58,20 @@
 				{{/each}}
 			</select>
 			<span class="pdm zero" data-readout="skill">+0</span>
+			{{/unless}}
+			{{/if}}
+			{{#if imposed.characteristic}}
+			<span class="imp" data-term="{{imposed.characteristic.term}}"
+				data-applied-dm="{{imposed.characteristic.dm}}"><span>{{imposed.characteristic.label}}</span><span class="v">{{imposed.characteristic.display}}</span><span class="gm">{{ localize 'MGT2.Request.Prompt.GM' }}</span></span>
+			{{/if}}
+			{{#if imposed.skill}}
+			<span class="imp" data-term="{{imposed.skill.term}}"
+				data-applied-dm="{{imposed.skill.dm}}"><span>{{imposed.skill.label}}</span><span class="v">{{imposed.skill.display}}</span><span class="gm">{{ localize 'MGT2.Request.Prompt.GM' }}</span></span>
 			{{/if}}
 		</div>
 	</div>
+	{{#if imposed.characteristic}}<input type="hidden" name="characteristic" value="{{imposed.characteristic.key}}" />{{/if}}
+	{{#if imposed.skill}}<input type="hidden" name="skill" value="{{imposed.skill.key}}" />{{/if}}
 
 	{{! Core p.63. One source, singular: the rule chains THE previous check, which is what a select
 	    with an empty first option says and a row of checkboxes does not. The row renders only when
@@ -171,7 +214,7 @@
 				<span class="seg" data-name="rangeThreshold" role="radiogroup"
 					aria-label="{{ localize 'MGT2.RollPrompt.ExtremeRange' }}">
 					<label title="{{ localize 'MGT2.RollPrompt.ThresholdNone' }}"><input type="radio"
-						name="rangeThreshold" value="0" /><span>&mdash;</span></label>
+						name="rangeThreshold" value="0"{{#if weapon.thresholdWaived}} checked{{/if}} /><span>&mdash;</span></label>
 					{{#each weapon.thresholds as |t|}}
 					<label title="{{t.label}}"><input type="radio" name="rangeThreshold"
 						value="{{t.metres}}"{{#if t.checked}} checked{{/if}} /><span>{{t.metres}}&nbsp;{{../metre}}</span></label>
@@ -268,6 +311,12 @@
 			{{/if}}
 
 			<span class="brk"></span>
+			{{#if imposed.timeframe}}
+			<span class="seglbl">{{ localize 'MGT2.RollPrompt.Timeframes' }}</span>
+			<span class="imp" data-term="{{imposed.timeframe.term}}"
+				data-applied-dm="{{imposed.timeframe.dm}}"><span>{{imposed.timeframe.label}}</span>{{#if imposed.timeframe.dm}}<span class="v">{{imposed.timeframe.display}}</span>{{/if}}<span class="gm">{{ localize 'MGT2.Request.Prompt.GM' }}</span></span>
+			<input type="hidden" name="timeframes" value="{{imposed.timeframe.key}}" />
+			{{else}}
 			<span class="seggrp">
 				<span class="seglbl">{{ localize 'MGT2.RollPrompt.Timeframes' }}</span>
 				<span class="seg dm-source" data-name="timeframes" role="radiogroup"
@@ -278,6 +327,7 @@
 					{{/each}}
 				</span>
 			</span>
+			{{/if}}
 		</div>
 	</div>
 
@@ -287,6 +337,12 @@
 	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.Target' }}">
 		<span class="pgut">{{ localize 'MGT2.RollPrompt.Target' }}</span>
 		<div class="pfields">
+			{{! An imposed rung is the referee's, and so is an imposed BLANK one: Core p.61 lets a
+			    check go unstated, and leaving the ladder live would let the answer choose one. }}
+			{{#if imposed.difficulty}}
+			<span class="imp"><span>{{imposed.difficulty.label}}</span><span class="gm">{{ localize 'MGT2.Request.Prompt.GM' }}</span></span>
+			<input type="hidden" name="difficulty" value="{{imposed.difficulty.key}}" />
+			{{else}}
 			<span class="seg num" data-name="difficulty" role="radiogroup"
 				aria-label="{{ localize 'MGT2.RollPrompt.Difficulty' }}">
 				<label class="off" title="{{ localize 'MGT2.Difficulty.NA' }}"
@@ -298,6 +354,7 @@
 				{{/each}}
 			</span>
 			<span class="segname" data-readout="difficultyName"></span>
+			{{/if}}
 			{{! RH folio 115. Beside the ladder because that is the number it judges, and a caption
 			    rather than a gate: the folio itself lets external modifiers bring a task back within
 			    the brain's capability, so the rung is stated and the referee still picks it. }}

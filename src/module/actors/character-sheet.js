@@ -6,6 +6,7 @@ import { MGT2Helper } from "../helper.js";
 import { MGT2Combatant } from "../combatant.js";
 import { copyItemWithContents } from "../item.js";
 import { RollPromptHelper } from "../roll-prompt.js";
+import { Rules } from "../rules.js";
 import { SheetModeMixin } from "../sheet-mode.js";
 import { appendTraitText, bindTraitInput, formatTrait, hazardTraits, prepareTraitBlock, refreshTraitNumbers } from "../traits.js";
 import { CharacterPrompts } from "./character-prompts.js";
@@ -325,7 +326,10 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         short: `MGT2.Characteristics.${key}.short`,
         fields: schema[key].fields,
         base: c.base, damage: c.damage, value: c.value, max: c.max, dm: c.dm,
-        show: c.show,
+        // Both halves: the actor's own flag, and whether the world has adopted the rule that makes
+        // this characteristic exist. Every collection below filters on it, so the two switches reach
+        // the damage track, the chain readout and the static line from one place.
+        show: this.actor.system.isCharacteristicShown(key),
         modifier: c.auto + c.effect,
         percent: c.max > 0 ? Math.round((c.value / c.max) * 100) : 0,
         hurt: c.damage > 0,
@@ -372,7 +376,10 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       damageTrack: characteristics.filter(c => c.show && chain.includes(c.key)),
       chainOrder: chain.map(key => byKey.get(key)).filter(c => c?.show),
       psionic: psionic?.show ? psionic : null,
-      statics: characteristics.filter(c => c.show && (c.key !== "psionic") && !chain.includes(c.key))
+      statics: characteristics.filter(c => c.show && (c.key !== "psionic") && !chain.includes(c.key)),
+      // The talent list is the per-actor flag under the world's rule: with psionics not adopted, the
+      // section is not drawn and the flag that would draw it is not offered (`actor-config-sheet`).
+      showPsionicTalents: Rules.on("psionics") && (actor.system.config.psionic === true)
     };
 
     // One view per item, created once so that the container and computer entries keep their
@@ -966,7 +973,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   static async #onLossAdd() {
     const system = this.actor.system;
     const result = await CharacterPrompts.openCharacteristicLoss({
-      cash: system.finance.cashOnHand,
+      cash: system.finance.credits,
       rows: system.rollableCharacteristics.map(key => ({
         key,
         label: game.i18n.localize(MGT2.Characteristics[key]),
@@ -1009,8 +1016,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     // Folio 52: what the Traveller cannot pay becomes debt carried into play. Only on request —
     // a referee recording history is not making a transaction.
     if (result.billed && (cost > 0)) {
-      const paid = Math.min(system.finance.cashOnHand, cost);
-      update["system.finance.cashOnHand"] = system.finance.cashOnHand - paid;
+      const paid = Math.min(system.finance.credits, cost);
+      update["system.finance.credits"] = system.finance.credits - paid;
       update["system.finance.debt"] = system.finance.debt + (cost - paid);
     }
     return this.actor.update(update);
@@ -1094,9 +1101,12 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
    * Everything standing against `modifiers.check`, each entry still named. The three provenances
    * are offered separately because they are waived separately: a referee's own entry and an Active
    * Effect are one standing figure, while fatigue or armour is a state the player can argue out of.
+   *
+   * Public and actor-first for the same reason `roll` is: a roll request answered with one click
+   * has no sheet and no prompt, and it must still carry what the answering Traveller is standing in.
    * @returns {{key: string, label: string, dm: number, params?: object}[]}
    */
-  static #checkModifiers(actor, token) {
+  static checkModifiers(actor, token = null) {
     const check = actor.system.modifiers.check;
     const sources = [...(check.sources ?? [])];
     const standing = check.custom + check.effect;
@@ -1242,7 +1252,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       characteristic: "",
       skills: RollPromptHelper.actorSkills(actor),
       skill: "",
-      checkModifiers: TravellerActorSheet.#checkModifiers(actor, token),
+      checkModifiers: TravellerActorSheet.checkModifiers(actor, token),
       difficulty: null,
       damageFormula: null,
       // The prompt renders its blocks from what is being rolled, so a bare characteristic check
@@ -1308,7 +1318,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         // past zero can only exist when there was a reserve to start from. Enforced only where the
         // sheet shows PSI: hiding the reserve is how a table opts out of tracking it.
         const reserve = actor.system.characteristics.psionic;
-        if (reserve?.show && (reserve.value <= 0)) {
+        const tracked = actor.system.isCharacteristicShown("psionic");
+        if (tracked && (reserve.value <= 0)) {
           return ui.notifications.warn(
             game.i18n.format("MGT2.Errors.NoPsiPoints", { name: actor.name }));
         }
@@ -1317,7 +1328,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         rollOptions.talent = itemObj;
         // Core folio 229 pays for reach with the same points the power costs, so the strip belongs
         // beside the roll rather than on the item: it is a choice per use, like the fire mode.
-        rollOptions.blocks.psionic = reserve?.show === true;
+        rollOptions.blocks.psionic = tracked;
         // Core p.229: activating a power is "a skill check using the appropriate skill, adding
         // their PSI DM" — the talent IS that skill, so it joins the list the prompt offers and is
         // preselected. It sits behind "Not proficient" rather than at the end, which would read as
@@ -1370,7 +1381,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       // Core p.229: the PSI DM is added to every power, so a talent that names no characteristic
       // of its own still gets one — but only where the sheet shows PSI at all.
       if ((roll === "psionic") && (rollOptions.characteristic === "")
-        && actor.system.characteristics.psionic?.show) {
+        && actor.system.isCharacteristicShown("psionic")) {
         rollOptions.characteristic = "psionic";
       }
 
@@ -1631,6 +1642,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
    * @returns {{ammo: number, magazine: number}|null}
    */
   static #magazine(weapon) {
+    // The one gate for the rule: counting nothing is what makes an attack roll and spend nothing,
+    // refuse nothing and say nothing about ammunition on the card.
+    if (!Rules.on("magazines")) return null;
     const system = weapon?.system;
     // The loaded round's magazine, where there is one: a grenade takes a 40-round rifle to 1, so
     // the capacity the shot is counted against is the round's and not the weapon's (§9.90).

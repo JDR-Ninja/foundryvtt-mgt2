@@ -1,0 +1,63 @@
+{{! Pinned light for the same reason as roll.html: Foundry hard-codes `themed theme-light` on
+    ol.chat-log, so a card never renders on the dark ground whatever the viewer's scheme says.
+
+    NOTHING BELOW IS STORED. Every line's status, the markers and the foot are derived from
+    `game.messages` each time this renders (`ROLL-REQUEST.md` §8, *who is authoritative — nobody*),
+    which is why N players answering costs N messages and zero updates. The stored `lines` cache is
+    read only once the referee has concluded. }}
+<div class="mgt2 theme-light card">
+	<div class="chd">
+		<div class="who">{{who}}</div>
+		<div class="what">
+			<h4>{{demand}}</h4>
+			{{! Not emitted at all when the referee hid the rung — no duplicate label, no CSS pair. }}
+			{{#if target}}<span class="tgt">{{target}}</span>{{/if}}
+		</div>
+	</div>
+	{{#if reason}}
+	<div class="cmsg">{{reason}}</div>
+	{{/if}}
+	{{#if terms.length}}
+	<div class="cmods">
+		{{#each terms}}<span{{#if negative}} class="neg"{{/if}}>{{label}}</span>{{/each}}
+	</div>
+	{{/if}}
+	{{! Core p.61's six bands, one marker per answer. `.spread` is ONE class over two grounds — the
+	    Docket foot at 620 px and this card at 320 — so the markup is the Docket's own
+	    (`.cell` / `.b` / `.marks`) and only the frame differs. A referee's own roll is hollow, and
+	    it is on the referee's copy only. }}
+	{{#if spread}}
+	<div class="spread">
+		{{#each spread}}
+		<div class="cell {{tone}}" data-tooltip aria-label="{{band}}">
+			<span class="b">{{range}}</span>
+			<div class="marks">{{#each markers}}<i{{#if self}} class="self"{{/if}}></i>{{/each}}</div>
+		</div>
+		{{/each}}
+	</div>
+	{{/if}}
+	{{#each lines}}
+	<div class="dline{{#if tone}} {{tone}}{{/if}}{{#if mine}} mine{{/if}}{{#if resolver}} res{{/if}}{{#if message}} jump{{/if}}"{{#if message}} data-action="chainSource" data-message-id="{{message}}"{{/if}}>
+		{{! Core p.63-64's final check. The marker IS the control, as the Docket's own `self` marker
+		    is — it is a state, and a state with two values needs no menu. }}
+		<span class="n">{{#if pick}}<a class="pk" data-action="requestResolver" data-line="{{id}}"
+			data-tooltip aria-label="{{@root.resolverHint}}">{{#if resolver}}&#9673;{{else}}&#9675;{{/if}}</a>{{/if}}{{name}}{{#if late}}<span class="late">{{@root.lateLabel}}</span>{{/if}}</span>
+		<span class="w">{{detail}}</span>
+		{{! The affordance is the DM and never a die: the three-state skill rule has to be legible at
+		    the moment of decision. Shift-click always opens the prompt. }}
+		{{#if chit}}
+		<a class="dm" data-action="requestRoll" data-line="{{id}}">{{chit}}<i class="fa-solid fa-caret-right"></i></a>
+		{{else}}
+		{{#if value}}<span class="v">{{value}}</span>{{else}}<span class="s">{{state}}</span>{{/if}}
+		{{/if}}
+	</div>
+	{{/each}}
+	{{#if foot}}
+	<div class="cmods"><span>{{foot}}</span></div>
+	{{/if}}
+	{{#if buttons.length}}
+	<div class="cbtns">
+		{{#each buttons}}<button data-action="{{action}}"{{#if hot}} class="hot"{{/if}}>{{label}}</button>{{/each}}
+	</div>
+	{{/if}}
+</div>

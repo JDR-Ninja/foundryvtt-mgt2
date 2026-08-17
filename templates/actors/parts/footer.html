@@ -1,10 +1,18 @@
 <footer class="mgt2-footer">
-	{{! The budget block's compact face — the same component the ship's power panel will be. }}
+	{{! The budget block's compact face — the same component the ship's power panel will be. The gauge
+	    is Core p.98's cap and goes with the rule; the gear stays outside it, because this is the only
+	    way the character sheet reaches the damage chain. }}
 	<section class="budget compact{{#if encumbranceOver}} over{{/if}}" data-over="hard">
+		{{#if (rule 'encumbrance')}}
 		<span class="lbl">{{localize 'MGT2.Actor.Encumbrance'}}</span>
 		<div class="gauge"><i style="--g: {{encumbrancePercent}}%"></i><u style="--m: {{encumbranceTick}}%"></u></div>
 		<span class="tot"><b>{{system.inventory.weight}}</b><span class="of">/ {{encumbranceNormal}} {{settings.weightUnit}}</span></span>
 		{{#if encumbranceOver}}<span class="flag" data-tooltip="{{localize 'MGT2.Actor.EncumbranceHint'}}">{{localize 'MGT2.Actor.EncumbranceFlag'}}</span>{{/if}}
+		{{else}}
+		{{! The carried weight is a fact of the inventory and not the rule, so it survives the cap. }}
+		<span class="lbl">{{localize 'MGT2.Actor.TotalWeight'}}</span>
+		<span class="tot"><b>{{system.inventory.weight}}</b><span class="of"> {{settings.weightUnit}}</span></span>
+		{{/if}}
 		<a class="cfg edit-only" data-action="openConfig" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
 	</section>
 </footer>

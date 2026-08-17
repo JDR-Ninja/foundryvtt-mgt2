@@ -88,9 +88,11 @@
 	<div class="reg">
 		<span class="lbl">{{localize 'MGT2.Actor.robot.Programming'}}</span>
 		<div class="code play-only" data-derived="system.brain">{{localize robot.brain.label}}</div>
+		{{#if (rule 'taskCeiling')}}
 		<div class="ref play-only">
 			{{#if robot.brain.ceiling}}{{localize 'MGT2.Actor.robot.Ceiling'}} {{robot.brain.ceilingTarget}}+{{else}}{{localize 'MGT2.Actor.robot.NoCeiling'}}{{/if}}
 		</div>
+		{{/if}}
 	</div>
 
 	{{! BLOCK 1, .grid — the thirteen printed statblock rows, and NINE of them are computed. Every

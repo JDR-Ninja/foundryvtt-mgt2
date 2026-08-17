@@ -1,4 +1,5 @@
 import { MGT2Helper } from "./helper.js";
+import { seedRules } from "./rules.js";
 
 /**
  * World migrations.
@@ -28,7 +29,7 @@ const NPC_CHAIN_FIXED = ["endurance", "strength", "dexterity"];
 const MIGRATIONS = [
   {
     version: "0.2.0",
-    label: "damageOrder, protection, view state, crew duty, NPC damage chain, species unwind, ucp, durationUnit",
+    label: "damageOrder, protection, view state, crew duty, NPC damage chain, species unwind, ucp, durationUnit, career damage/interval",
     async migrate() {
       // Before the sweep: it rewrites `characteristics.<k>.base`, which the sweep then persists.
       for ( const actor of game.actors ) await unwindSpecies(actor);
@@ -241,6 +242,17 @@ function collectItemUpdate(item) {
     update["system.psionic.durationUnit"] = "Hours";
     dirty = true;
   }
+  // `damage` and `interval` were `DiseaseData`'s, copied onto `CareerData` and never given a career
+  // meaning: no control wrote them, no code read them, and every career Item carried the pair blank.
+  // `difficulty` stays — it is the qualification target and is not the same field as the disease's.
+  if ( item.type === "career" ) {
+    for ( const key of ["damage", "interval"] ) {
+      if ( key in source ) {
+        update[`system.${key}`] = new foundry.data.operators.ForcedDeletion();
+        dirty = true;
+      }
+    }
+  }
 
   return dirty ? update : null;
 }
@@ -255,6 +267,11 @@ export async function migrateWorld() {
   if ( !game.user.isGM ) return;
 
   const last = game.settings.get("mgt2", "migrationVersion");
+  // Before anything stamps the version: an empty `migrationVersion` is the only thing that tells a
+  // world which has never loaded from one that was playing before a rule switch existed, and the
+  // second must keep the behaviour it had (`rules.js`, `seed`).
+  await seedRules(Boolean(last));
+
   const pending = MIGRATIONS.filter(m => !last || foundry.utils.isNewerVersion(m.version, last));
 
   if ( !pending.length ) {

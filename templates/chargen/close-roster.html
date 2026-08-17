@@ -1,0 +1,74 @@
+{{! MUSTERING OUT, the whole table at once — §9.40. What each Traveller is OWED and what they have
+    TAKEN, side by side, because the two counters that matter are a ledger and a lifetime cap and
+    neither reads off one career.
+
+    A Benefit roll is one gesture and not two: rolling posts a public card and spends the tray's
+    one-shot DM, and recording is what writes the voucher and spends the roll off the ledger. }}
+<div class="mustergrid">
+	{{#if empty}}
+	<p class="none">{{localize 'MGT2.Chargen.Close.NobodyHint'}}</p>
+	{{else}}
+	<table>
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Chargen.Close.Traveller'}}</th>
+				<th>{{localize 'MGT2.Chargen.Close.Service'}}</th>
+				<th class="n">{{localize 'MGT2.Chargen.Close.Rolls'}}</th>
+				<th class="n">{{localize 'MGT2.Chargen.Close.Cash'}}</th>
+				<th class="n">{{localize 'MGT2.Chargen.Close.Pension'}}</th>
+				<th>{{localize 'MGT2.Chargen.Close.Taken'}}</th>
+				<th class="a"></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each columns as |column|}}
+			<tr data-actor-id="{{column.id}}">
+				<td class="who">
+					<b><a data-action="openActor">{{column.name}}</a></b>
+					<span class="ag">{{localize 'MGT2.Chargen.Close.AgeTerms' age=column.age terms=column.terms}}</span>
+					{{#if column.serving}}<span class="warn">{{localize 'MGT2.Chargen.Close.StillServing'}}</span>{{/if}}
+				</td>
+				<td>
+					<ul class="careers">
+						{{#each column.careers as |career|}}
+						<li>
+							<b>{{career.name}}</b>
+							<span>{{localize 'MGT2.Chargen.Close.RankTerms' rank=career.rank terms=career.terms}}</span>
+							{{#if career.pension}}<span class="pen">{{localize 'MGT2.Chargen.Close.PensionOf' credits=career.pension}}</span>{{/if}}
+						</li>
+						{{/each}}
+					</ul>
+				</td>
+				<td class="n big">{{column.rolls}}</td>
+				<td class="n">{{localize 'MGT2.Chargen.Close.CashOf' taken=column.cash.taken limit=column.cash.limit}}</td>
+				<td class="n">
+					{{localize 'MGT2.Chargen.Close.PerYear' credits=column.pensionText}}
+					{{#if column.shipShares}}<span class="sh">{{localize 'MGT2.Chargen.Close.Shares' n=column.shipShares}}</span>{{/if}}
+				</td>
+				<td>
+					{{#if column.benefits.length}}
+					<ul class="vouchers">
+						{{#each column.benefits as |row|}}
+						<li class="{{#unless row.open}}spent{{/unless}}">
+							<i>{{row.kind}}</i>{{row.label}}
+							{{#if row.open}}
+							<a data-action="redeem" data-index="{{row.index}}" data-tooltip="{{localize 'MGT2.Chargen.Close.Redeem'}}">✓</a>
+							{{/if}}
+							{{#if row.surrendered}}<span class="up">{{localize 'MGT2.Chargen.Close.GivenUp'}}</span>{{/if}}
+						</li>
+						{{/each}}
+					</ul>
+					{{else}}<span class="none">{{localize 'MGT2.Chargen.Close.NothingYet'}}</span>{{/if}}
+				</td>
+				<td class="a">
+					{{#if column.canEdit}}
+					<button type="button" data-action="benefit">{{localize 'MGT2.Chargen.Close.RollBenefit'}}</button>
+					<button type="button" data-action="finish">{{localize 'MGT2.Chargen.Close.Finish'}}</button>
+					{{/if}}
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</div>

@@ -1,0 +1,394 @@
+<section class="mgt2-panel mgt2-fleet-panel"{{#if panel.id}} data-combatant-id="{{panel.id}}" data-fleet-id="{{panel.fleetId}}"{{/if}}>
+{{#if panel}}
+
+	<div class="block">
+		<div class="sect">
+			<h3>{{panel.name}}</h3>
+			<span class="count">{{panel.fleetName}}{{#if panel.shipClass}} &middot; {{panel.shipClass}}{{/if}}{{#if panel.tons}} &middot; {{localize 'MGT2.SpaceCombat.Tons' tons=panel.tons}}{{/if}}</span>
+			{{#if panel.editable}}
+			<a class="rm" data-action="removeContact" data-tooltip="{{localize 'MGT2.Fleet.Screen.RemoveContact'}}"><i class="fa-solid fa-trash"></i></a>
+			{{/if}}
+		</div>
+
+		{{#if panel.gated}}
+		<p class="hint">{{localize 'MGT2.Fleet.RuleOff'}}</p>
+		{{else}}
+
+		{{#if (eq panel.kind 'ship')}}
+		{{! FOLIOS 110-111's Fleet Ship Sheet, every figure derived on the Actor by §9.102 — except
+		    the two DMs, which the Combatant RECOMPOSES because Morale and Radiation move the Crew
+		    Skill they start at. `system.fleet` is the ship's standing sheet; this is the round's. }}
+		<dl class="statline grid" data-derived="system.fleet">
+			<div class="stat lead{{#if panel.hull.damage}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Actor.spacecraft.Fleet.HullPoints'}}</dt>
+				<dd>{{panel.hull.remaining}}<span class="of">/{{panel.hull.max}}</span></dd>
+			</div>
+			<div class="stat"><dt>{{localize 'MGT2.Fleet.Screen.CrewSkill'}}</dt><dd>{{panel.crewSkill}}<span class="of">/{{panel.crewSkillTyped}}</span></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Fleet.Attack.Offensive'}}</dt><dd>{{panel.offensive.standard}}<span class="of">/{{panel.offensive.missile}}</span></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Fleet.Attack.Defensive'}}</dt><dd>{{panel.defensive}}<span class="of">/{{panel.defensiveAgainst}}</span></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Armour'}}</dt><dd>{{panel.armour}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Thrust'}}</dt><dd>{{panel.thrust}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Jump'}}</dt><dd>{{panel.jump}}</dd></div>
+			<div class="stat{{#unless panel.autoRepair}} none{{/unless}}"><dt>{{localize 'MGT2.ShipSoftware.autoRepair'}}</dt><dd>{{panel.autoRepair}}</dd></div>
+		</dl>
+		<ul class="codes" data-derived="system.fleet.traits">
+			{{#each panel.traits as |trait|}}<li class="code"><b>{{localize trait}}</b></li>{{/each}}
+			{{#each panel.software as |row|}}<li class="code"><b>{{localize row.label}}</b><span class="ps"><span class="p">{{localize 'MGT2.Design.Rating' n=row.rating}}</span></span></li>{{/each}}
+			{{#if panel.spinalLocked}}<li class="code hot"><b>{{localize 'MGT2.Fleet.Screen.SpinalLocked'}}</b></li>{{/if}}
+			{{#if panel.disabled}}<li class="code hot"><b>{{localize 'MGT2.Fleet.Screen.CrewDisabled'}}</b></li>{{/if}}
+		</ul>
+
+		{{! FOLIO 111's own column: a Critical Hit after each tenth of the adjusted pool is gone. Core
+		    p.169's Sustained Damage over a different pool, which is one ladder and not two. }}
+		<section class="budget check" data-over="soft">
+			<header>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Fleet.Thresholds'}}</span>
+				<span class="rem">{{localize 'MGT2.Actor.spacecraft.Fleet.ThresholdsRem'}}</span>
+			</header>
+			<table class="rows brows" data-derived="system.fleet.thresholds">
+				<tbody>
+					{{#each panel.hull.thresholds as |row|}}
+					<tr{{#if row.passed}} class="mismatch"{{/if}}>
+						<td>{{row.percent}}%</td>
+						<td class="num">{{row.points}}</td>
+						<td class="d">{{#if row.passed}}{{localize 'MGT2.Actor.spacecraft.Fleet.Passed'}}{{else}}&mdash;{{/if}}</td>
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+		</section>
+		<div class="fbtns">
+			{{#if panel.editable}}
+			<button type="button" class="btn" data-action="setFlag"{{#unless panel.canFlag}} disabled{{/unless}}>{{#if panel.isFlagShip}}{{localize 'MGT2.Fleet.Screen.StrikeFlag'}}{{else}}{{localize 'MGT2.Fleet.Screen.FlyFlag'}}{{/if}}</button>
+			<button type="button" class="btn" data-action="toggleReserve">{{#if panel.reserve}}{{localize 'MGT2.Fleet.Screen.LeaveReserve'}}{{else}}{{localize 'MGT2.Fleet.Screen.JoinReserve'}}{{/if}}</button>
+			<button type="button" class="btn" data-action="detach" data-tooltip="{{localize 'MGT2.Fleet.Screen.DetachHint'}}">{{localize 'MGT2.Fleet.Screen.Detach'}}</button>
+			{{/if}}
+			{{#if panel.uuid}}<a class="need" data-action="openActor" data-uuid="{{panel.uuid}}">{{localize 'MGT2.Fleet.Screen.OpenSheet'}}</a>{{/if}}
+		</div>
+		{{/if}}
+
+		{{#if (eq panel.kind 'wing')}}
+		{{! FOLIO 114's Fighter Squadron Sheet. A wing starts at its FULL Crew Skill where a ship
+		    starts at half, so its DMs are recomposed from the fighter's parts and never read off
+		    `system.fleet.offensive` whole — which would be wrong by half the Crew Skill. }}
+		<dl class="statline grid" data-derived="system.fleet">
+			<div class="stat lead{{#if panel.hull.damage}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Fleet.Screen.Fighters'}}</dt>
+				<dd>{{panel.hull.strength}}<span class="of">/{{panel.count}}</span></dd>
+			</div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.HullPoints'}}</dt><dd>{{panel.hull.remaining}}<span class="of">/{{panel.hull.max}}</span></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Fleet.Screen.CrewSkill'}}</dt><dd>{{panel.crewSkill}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Fleet.Attack.Offensive'}}</dt><dd>{{panel.offensive.standard}}<span class="of">/{{panel.offensive.missile}}</span></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Fleet.Attack.Defensive'}}</dt><dd>{{panel.defensive}}<span class="of">/{{panel.defensiveAgainst}}</span></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Armour'}}</dt><dd>{{panel.armour}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Thrust'}}</dt><dd>{{panel.thrust}}</dd></div>
+		</dl>
+		<div class="fleet">
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.WingCount'}}</span>
+				<span class="v">
+					{{#if panel.editable}}
+					<input class="f n" type="number" min="1" step="1" name="squadronCount" value="{{panel.count}}"
+						aria-label="{{localize 'MGT2.Fleet.Screen.WingCount'}}" />
+					{{else}}{{panel.count}}{{/if}}
+				</span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.WingSkill'}}</span>
+				<span class="v">
+					{{#if panel.editable}}
+					<input class="f n" type="number" min="0" step="1" name="crewSkillOverride" value="{{panel.crewSkillOverride}}"
+						aria-label="{{localize 'MGT2.Fleet.Screen.WingSkill'}}" />
+					{{else}}{{#if panel.crewSkillOverride}}{{panel.crewSkillOverride}}{{else}}&mdash;{{/if}}{{/if}}
+				</span>
+			</div>
+			<span class="why">{{localize 'MGT2.Fleet.Screen.WingWhy' per=panel.hull.perFighter}}</span>
+		</div>
+		{{#if panel.uuid}}<div class="fbtns"><a class="need" data-action="openActor" data-uuid="{{panel.uuid}}">{{localize 'MGT2.Fleet.Screen.OpenSheet'}}</a></div>{{/if}}
+		{{/if}}
+
+		{{#if (eq panel.kind 'salvo')}}
+		{{! §9.78's actorless Combatant, on FOLIO 119's clock: a salvo has a position, a target and an
+		    age, and its position is the flight time from the band it was FIRED at — not an entry in
+		    the band map, which is keyed by two fleets. }}
+		<dl class="statline grid" data-derived="system.count">
+			<div class="stat lead"><dt>{{localize 'MGT2.Fleet.Screen.InFlight'}}</dt><dd>{{panel.remaining}}<span class="of">/{{panel.count}}</span></dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Fleet.Screen.Warhead'}}</dt><dd>{{panel.damage}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Fleet.Screen.FiredAt'}}</dt><dd class="word">{{localize panel.launchBand}}</dd></div>
+			<div class="stat{{#if panel.arriving}} hurt{{/if}}"><dt>{{localize 'MGT2.Fleet.Screen.Impact'}}</dt><dd>{{panel.roundsLeft}}<span class="of">/{{localize 'MGT2.Fleet.Screen.RoundN' n=panel.impactRound}}</span></dd></div>
+			<div class="stat{{#unless panel.salvoPenalty}} none{{/unless}}"><dt>{{localize 'MGT2.Fleet.Screen.SalvoPenalty'}}</dt><dd>{{#if panel.salvoPenalty}}&minus;{{panel.salvoPenalty}}%{{else}}&mdash;{{/if}}</dd></div>
+			<div class="stat"><dt>{{localize 'MGT2.Fleet.Screen.PointCost'}}</dt><dd>{{panel.cost}}</dd></div>
+		</dl>
+		<div class="fleet">
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.Warhead'}}</span>
+				<span class="v">
+					{{#if panel.editable}}
+					<select class="f" name="salvoWarhead" aria-label="{{localize 'MGT2.Fleet.Screen.Warhead'}}">
+						{{#each panel.warheads as |head|}}
+						<option value="{{head.key}}"{{#if head.selected}} selected{{/if}}>{{localize head.label}}</option>
+						{{/each}}
+					</select>
+					{{/if}}
+				</span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.Launched'}}</span>
+				<span class="v">
+					{{#if panel.editable}}
+					<input class="f n" type="number" min="0" step="1" name="salvoCount" value="{{panel.count}}"
+						aria-label="{{localize 'MGT2.Fleet.Screen.Launched'}}" />
+					{{else}}{{panel.count}}{{/if}}
+				</span>
+			</div>
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.SalvoTarget'}}</span>
+				<span class="v">{{#if panel.target}}{{panel.target.name}}{{else}}&mdash;{{/if}}</span>
+			</div>
+			{{! FOLIO 110 derives the missile Offensive DM on the HULL, so a flight has to remember who
+			    fired it — a salvo answering for itself carries none. }}
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.FiredBy'}}</span>
+				<span class="v">{{#if panel.shooter}}{{panel.shooter}}{{else}}&mdash;{{/if}}</span>
+			</div>
+			{{#if panel.halvesDefensive}}<span class="why">{{localize 'MGT2.Fleet.Screen.Antiradiation'}}</span>{{/if}}
+		</div>
+		{{#if panel.editable}}
+		{{! FOLIO 113: each point of Salvo Defence removes one missile, and a torpedo costs two. The
+		    points come out of the DEFENDER's own pool, which is what makes this the pool's sink. }}
+		<div class="poolrow" data-pool-row>
+			<span class="lbl">{{localize 'MGT2.Fleet.Screen.Intercept'}}</span>
+			<input class="f n" type="number" min="0" step="1" name="poolPoints" value="0"
+				aria-label="{{localize 'MGT2.Fleet.Screen.Intercept'}}" />
+			<button type="button" class="btn" data-action="intercept">{{localize 'MGT2.Fleet.Screen.Spend'}}</button>
+			<button type="button" class="btn" data-action="impact"{{#unless panel.arriving}} disabled{{/unless}}>{{localize 'MGT2.Fleet.Screen.Impact'}}</button>
+		</div>
+		{{/if}}
+		{{/if}}
+
+		{{/if}}
+	</div>
+
+{{#if (eq panel.kind 'ship')}}
+{{#unless panel.gated}}
+	{{! FOLIO 113's DEFENCES panel, spent. Four pools are the ship's own; the sandcaster is the odd
+	    one out and folio 119 makes its size a function of who is shooting, so it is read against the
+	    target the WEAPONS block is aimed at. Every pool refills when the round turns over. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Fleet.Screen.Defences'}}</h3>
+			<span class="count">{{localize 'MGT2.Fleet.Screen.PerRound'}}</span>
+		</div>
+		{{#each panel.pools as |pool|}}
+		<div class="poolrow" data-pool-row>
+			<span class="lbl">{{localize pool.label}}</span>
+			<span class="v">{{pool.left}}<span class="of">/ {{pool.max}}</span></span>
+			{{#if ../panel.editable}}
+			<input class="f n" type="number" min="0" step="1" name="poolPoints" value="0" aria-label="{{localize pool.label}}" />
+			<button type="button" class="btn" data-action="spend" data-pool="{{pool.key}}">{{localize 'MGT2.Fleet.Screen.Spend'}}</button>
+			{{/if}}
+		</div>
+		{{/each}}
+		<div class="poolrow" data-pool-row>
+			<span class="lbl">{{localize panel.sand.label}}</span>
+			<span class="v">{{panel.sand.left}}<span class="of">/ {{panel.sand.max}}</span></span>
+			{{#if panel.editable}}
+			<input class="f n" type="number" min="0" step="1" name="poolPoints" value="0" aria-label="{{localize panel.sand.label}}" />
+			<button type="button" class="btn" data-action="spend" data-pool="sand">{{localize 'MGT2.Fleet.Screen.Spend'}}</button>
+			{{/if}}
+		</div>
+		<span class="why">{{localize 'MGT2.Fleet.Screen.SandWhy' score=panel.sand.score multiplier=panel.sand.multiplier}}{{#if panel.sand.against}} &middot; {{localize 'MGT2.Fleet.Screen.SandAgainst' name=panel.sand.against}}{{/if}}</span>
+
+		{{! FOLIO 121: an exposure is something that happened in THIS battle, so it is counted on the
+		    Combatant — a spacecraft carries no radiation track at all. }}
+		<div class="poolrow">
+			<span class="lbl">{{localize 'MGT2.Fleet.Screen.Radiation'}}</span>
+			<span class="v">{{panel.radiation}}</span>
+			{{#if panel.editable}}
+			<button type="button" class="btn" data-action="expose" data-step="down">&minus;</button>
+			<button type="button" class="btn" data-action="expose">+</button>
+			{{/if}}
+		</div>
+		{{#if panel.radiationRow}}
+		<span class="why">{{localize 'MGT2.Fleet.Screen.RadiationWhy' skill=panel.radiationRow.crewSkill weapons=panel.radiationRow.weapons}}</span>
+		{{/if}}
+	</div>
+
+	{{! FOLIO 121's Repair System: Repair Points clear critical severities point for point. The
+	    severity lives on the Actor, which is where `applyCritical` put it. }}
+	{{#if panel.criticals.length}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.spacecraft.Criticals'}}</h3>
+			<span class="count">{{localize 'MGT2.Fleet.Screen.RepairWhy'}}</span>
+		</div>
+		{{#each panel.criticals as |crit|}}
+		<div class="poolrow">
+			<span class="lbl">{{localize crit.label}}</span>
+			<span class="v">{{crit.severity}}</span>
+			{{#if ../panel.editable}}
+			<button type="button" class="btn" data-action="repair" data-location="{{crit.location}}">{{localize 'MGT2.Fleet.Screen.Repair'}}</button>
+			{{/if}}
+		</div>
+		{{/each}}
+	</div>
+	{{/if}}
+{{/unless}}
+{{/if}}
+
+{{! THE ATTACK. FOLIO 117 has the attacker declare every target and battery before any of them fire,
+    and FOLIO 118 resolves the shot with no dice at all — the Attack Factor read against the Attack
+    Effectiveness table. Only a spinal mount rolls, and it is the one door that goes through
+    `Checks.resolve`. Nothing here does the arithmetic: `fleet-attack.js` does, once. }}
+{{#if panel.batteries.length}}
+{{#unless panel.gated}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Fleet.Screen.Weapons'}}</h3>
+			<span class="count">{{localize 'MGT2.Fleet.Screen.WeaponsWhy'}}</span>
+		</div>
+		<div class="fleet">
+			<div class="row">
+				<span class="lbl">{{localize 'MGT2.Fleet.Screen.Target'}}</span>
+				<span class="v">
+					<select class="f" name="attackTarget" aria-label="{{localize 'MGT2.Fleet.Screen.Target'}}">
+						{{#each attack.targets as |row|}}
+						<option value="{{row.id}}"{{#if row.selected}} selected{{/if}}>{{row.name}} &mdash; {{row.fleet}}</option>
+						{{/each}}
+					</select>
+				</span>
+			</div>
+			{{#unless attack.targets.length}}<p class="hint">{{localize 'MGT2.Fleet.Screen.NoTarget'}}</p>{{/unless}}
+		</div>
+
+		{{! FOLIO 118's three riders name a weapon by the words on its page, and §9.75 forbids matching
+		    a name against a table that does not list both languages — so all three are ticked, never
+		    guessed. `AP ∞` does not survive `traits.js`'s int slot either, which is why meson is here
+		    rather than derived. }}
+		<div class="opts">
+			<label><input type="checkbox" name="attackOption" data-option="ignoresArmour" {{checked attack.options.ignoresArmour}} /><span>{{localize 'MGT2.Fleet.Screen.OptMeson'}}</span></label>
+			<label><input type="checkbox" name="attackOption" data-option="armourPiercing" {{checked attack.options.armourPiercing}} /><span>{{localize 'MGT2.Fleet.Screen.OptPiercing'}}</span></label>
+			<label><input type="checkbox" name="attackOption" data-option="customised" {{checked attack.options.customised}} /><span>{{localize 'MGT2.Fleet.Screen.OptCustom'}}</span></label>
+			<label><input type="checkbox" name="attackOption" data-option="effectiveness" {{checked attack.options.effectiveness}} /><span>{{localize 'MGT2.Fleet.Screen.OptEffectiveness'}}</span></label>
+		</div>
+
+		<table class="rows brows batteries">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Fleet.Screen.Battery'}}</th>
+					<th class="num">{{localize 'MGT2.Fleet.Screen.DamageMultiple'}}</th>
+					<th class="num">{{localize 'MGT2.Fleet.Screen.Firing'}}</th>
+					<th class="num">{{localize 'MGT2.SpaceCombat.Action'}}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each panel.batteries as |row|}}
+				<tr>
+					<td>
+						{{row.count}} &times; {{row.name}}
+						<span class="why">{{row.mountLabel}}{{#if row.bandLabel}} &middot; {{localize row.bandLabel}}{{/if}}</span>
+					</td>
+					{{! `0/N` on a mount whose label named a weapon is the one figure on this sheet
+					    that is wrong rather than absent: the ship's DEFENCES were counted off that
+					    same label and are right, because a class can be priced and a die count
+					    cannot be guessed (§9.106). }}
+					<td class="num{{#if row.inert}} noarm{{/if}}"
+						{{#if row.inert}}data-tooltip="{{localize 'MGT2.Actor.spacecraft.InertMountHint'}}"{{/if}}>
+						{{row.damage}}/{{row.multiple}}{{#if row.inert}} <i>{{localize 'MGT2.Actor.spacecraft.InertMount'}}</i>{{/if}}
+					</td>
+					<td class="num">
+						<input class="f num" type="number" min="0" step="1" max="{{row.count}}"
+							name="battery" data-battery="{{row.key}}" value="{{row.firing}}"
+							aria-label="{{localize 'MGT2.Fleet.Screen.Firing'}}" />
+					</td>
+					<td class="num act">
+						{{#if ../panel.editable}}
+						<button type="button" class="btn" data-action="fire" data-battery="{{row.key}}">{{#if row.spinal}}{{localize 'MGT2.Fleet.Screen.FireSpinal'}}{{else}}{{localize 'MGT2.Fleet.Screen.Fire'}}{{/if}}</button>
+						{{#if row.ion}}<button type="button" class="btn" data-action="fire" data-kind="ion" data-battery="{{row.key}}">{{localize 'MGT2.Fleet.Ion.Title'}}</button>{{/if}}
+						{{/if}}
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+
+		{{! FOLIO 115 launches a salvo in the Attack Step and FOLIO 119 flies it on a clock rather than
+		    on the dice, so the flight becomes its own contact and resolves when it arrives. }}
+		{{#if (and panel.warheads panel.editable)}}
+		<div class="poolrow" data-salvo-form>
+			<span class="lbl">{{localize 'MGT2.Fleet.Screen.LaunchSalvo'}}</span>
+			<select class="f" name="launchWarhead" aria-label="{{localize 'MGT2.Fleet.Screen.Warhead'}}">
+				{{#each panel.warheads as |head|}}
+				<option value="{{head.key}}">{{localize head.label}}</option>
+				{{/each}}
+			</select>
+			<input class="f n" type="number" min="1" step="1" name="launchCount" value="1"
+				aria-label="{{localize 'MGT2.Fleet.Screen.Launched'}}" />
+			<button type="button" class="btn" data-action="launchSalvo">{{localize 'MGT2.Fleet.Screen.Launch'}}</button>
+		</div>
+		{{/if}}
+	</div>
+{{/unless}}
+{{/if}}
+
+{{! WHAT THE SHOT CAME TO. Reported, not applied — FOLIO 117 declares every battery before any of
+    them fire, so the referee applies. This is also the one moment FOLIO 119's screens and
+    sandcasters are spent: the points come out of the DEFENDER's ledger and reduce the figure before
+    it reaches the hull. }}
+{{#if attack.last}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Fleet.Screen.Resolved'}}</h3>
+			<span class="count">{{attack.last.count}} &times; {{attack.last.weapon}} &rarr; {{attack.last.target.name}}</span>
+			<a class="rm" data-action="clearAttack" data-tooltip="{{localize 'MGT2.Fleet.Screen.ClearAttack'}}"><i class="fa-solid fa-xmark"></i></a>
+		</div>
+		<dl class="statline">
+			<div class="stat{{#unless attack.last.factor}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Fleet.Screen.Factor'}}</dt>
+				<dd>{{#if attack.last.factor}}{{attack.last.factor}}<i>&times;{{attack.last.multiple}}</i>{{else}}&mdash;{{/if}}</dd>
+			</div>
+			<div class="stat lead{{#if attack.last.impervious}} none{{/if}}">
+				<dt>{{localize 'MGT2.Fleet.Screen.Damage'}}</dt>
+				<dd>{{attack.last.damage}}</dd>
+			</div>
+			{{#if attack.last.ion}}
+			<div class="stat"><dt>{{localize 'MGT2.Fleet.Ion.Title'}}</dt><dd>{{attack.last.ion}}<i>/{{attack.last.rounds}}</i></dd></div>
+			{{/if}}
+		</dl>
+		{{#unless attack.last.hit}}<p class="hint">{{localize 'MGT2.Fleet.Spinal.Missed'}}</p>{{/unless}}
+		{{#if attack.last.impervious}}<p class="hint">{{localize 'MGT2.Fleet.Screen.ImperviousHint'}}</p>{{/if}}
+		{{#if attack.last.halved}}<p class="hint">{{localize 'MGT2.Fleet.Screen.Antiradiation'}}</p>{{/if}}
+
+		{{#if canEdit}}
+		<div class="poolrow">
+			<span class="lbl">{{localize 'MGT2.Fleet.Screen.Mitigate'}}</span>
+			<select class="f" name="mitigatePool" aria-label="{{localize 'MGT2.Fleet.Screen.Mitigate'}}">
+				<option value="">&mdash;</option>
+				{{#each attack.pools as |pool|}}
+				<option value="{{pool.key}}"{{#if (eq ../attack.mitigate.pool pool.key)}} selected{{/if}}>{{localize pool.label}} ({{pool.left}})</option>
+				{{/each}}
+			</select>
+			<input class="f n" type="number" min="0" step="1" name="mitigatePoints" value="{{attack.mitigate.points}}"
+				aria-label="{{localize 'MGT2.Fleet.Screen.Mitigate'}}" />
+			<button type="button" class="btn" data-action="applyDamage">{{localize 'MGT2.Fleet.Screen.Apply'}}</button>
+		</div>
+		<span class="why">{{localize 'MGT2.Fleet.Screen.MitigateWhy'}}</span>
+		{{/if}}
+
+		{{#if attack.last.applied}}
+		<dl class="statline">
+			<div class="stat"><dt>{{localize 'MGT2.Fleet.Screen.Dealt'}}</dt><dd>{{attack.last.applied.dealt}}</dd></div>
+			<div class="stat{{#unless attack.last.applied.reduction}} none{{/unless}}"><dt>{{localize 'MGT2.Fleet.Screen.Reduced'}}</dt><dd>{{#if attack.last.applied.reduction}}&minus;{{attack.last.applied.reduction}}{{else}}&mdash;{{/if}}</dd></div>
+			<div class="stat{{#unless attack.last.criticals.count}} none{{/unless}}"><dt>{{localize 'MGT2.Fleet.Screen.Criticals'}}</dt><dd>{{attack.last.criticals.count}}<i>/{{attack.last.criticals.wanted}}</i></dd></div>
+		</dl>
+		{{#each attack.last.criticals.hits as |hit|}}
+		<span class="why">{{localize 'MGT2.Fleet.Screen.CriticalHit' roll=hit.roll location=(localize hit.label) severity=hit.severity}}</span>
+		{{/each}}
+		{{/if}}
+	</div>
+{{/if}}
+
+{{else}}
+	<p class="hint">{{localize 'MGT2.Fleet.Screen.NoContact'}}</p>
+{{/if}}
+</section>

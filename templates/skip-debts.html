@@ -1,0 +1,38 @@
+<div class="hd">
+	<h2>{{localize 'MGT2.SkipDebts.Title'}}</h2>
+
+	{{! Core folio 153's six lines, in the order it prints them. Two of the six are read off the hull
+	    and never typed — the MCr10 rate off the purchase price, and the Law Level off the `world`
+	    Actor the voyage leg names when there is one. No field carries a `name`: the two the folio
+	    persists are written by the die, and the rest belong to this check alone. }}
+	<div class="inputs">
+		<div class="row4">
+			<label class="fld">
+				<span>{{localize 'MGT2.SkipDebts.Parsecs'}}</span>
+				<input class="f n" type="number" step="1" min="0" data-field="parsecs" value="{{input.parsecs}}" />
+			</label>
+			<label class="fld">
+				<span>{{localize 'MGT2.SkipDebts.Disguise'}}</span>
+				<input class="f n" type="number" step="1" min="0" max="{{disguiseMax}}" data-field="disguise" value="{{input.disguise}}" />
+			</label>
+			<label class="fld">
+				<span>{{localize 'MGT2.SkipDebts.LawLevel'}}</span>
+				<input class="f n" type="number" step="1" min="0" data-field="lawLevel" value="{{input.lawLevel}}" />
+			</label>
+			<label class="fld ck">
+				<input type="checkbox" data-field="revisited" {{checked input.revisited}} />
+				<span>{{localize 'MGT2.SkipDebts.Revisited'}}</span>
+			</label>
+		</div>
+
+		<label class="fld">
+			<span>{{localize 'MGT2.SkipDebts.OverdueBy'}}</span>
+			<select class="f" data-field="overdue">{{selectOptions overdueBands selected=input.overdue localize=true}}</select>
+		</label>
+
+		<label class="fld">
+			<span>{{localize 'MGT2.SkipDebts.Hull'}}</span>
+			<span class="g">{{ship}} &middot; Cr{{purchase}}</span>
+		</label>
+	</div>
+</div>

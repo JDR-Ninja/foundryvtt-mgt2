@@ -1,0 +1,220 @@
+// The fleet battle screen (HG p.105-124). The strip, the order, the reaction ledger and every block
+// it draws are `components/_combat.sass`'s and the kit's — the two engines print the same seven
+// bands and the same round, one level apart. What is here is only what the fleet level adds: a
+// roster grouped by fleet, a pool row that spends, and the battery table.
+
+// --------------------------------------------
+//  A FLEET IS A BLOCK, AND ITS SHIPS ARE ITS ROWS
+// --------------------------------------------
+// One level up from the space screen, where a ship is a row. A fleet is selected as a whole because
+// p.115 moves it as a unit and rolls its Initiative once; its contacts are selected individually
+// because p.117 has each of them declare targets.
+
+.mgt2 .fleetblock
+	h3[data-action]
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--accent-text)
+
+.mgt2 .fleetblock.on > .sect h3
+	color: var(--accent-text)
+
+.mgt2 .fleethead
+	display: grid
+	grid-template-columns: 2.4rem minmax(0, 1fr) auto
+	gap: 0 9px
+	align-items: center
+	padding: 5px 4px 7px
+	border-bottom: 1px solid var(--rule-soft)
+
+	.i
+		font-family: var(--cond)
+		font-size: 20px
+		font-weight: 700
+		line-height: 1
+		text-align: right
+		font-variant-numeric: tabular-nums
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--accent-text)
+
+	.who
+		min-width: 0
+	.nm
+		display: block
+		font-family: var(--cond)
+		font-size: 11px
+		font-weight: 700
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		color: var(--mute)
+	.sub
+		display: block
+		overflow: hidden
+		font-family: var(--mono)
+		font-size: 9.5px
+		white-space: nowrap
+		text-overflow: ellipsis
+		color: var(--faint)
+
+// A reserve ship is part of the fleet and not part of the line (p.117), and a wrecked one stays on
+// the roster because Morale counts it (p.122) — so neither is hidden, both are marked.
+.mgt2 .order
+	.tag
+		margin-left: 4px
+		font-style: normal
+		font-family: var(--cond)
+		font-size: 9px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+
+	li.gone
+		.nm,
+		.sub
+			color: var(--faint)
+		.nm
+			text-decoration: line-through
+
+.mgt2 .fbtns
+	display: flex
+	flex-wrap: wrap
+	align-items: center
+	gap: 6px
+	.btn
+		flex: 1 1 auto
+	.need
+		margin-left: auto
+		cursor: var(--cursor-pointer)
+
+.mgt2 .hint.drop
+	margin: 0
+	padding: 5px 7px
+	border: 1px dashed var(--rule)
+
+// --------------------------------------------
+//  THE POOL ROW — the one genuinely new component
+// --------------------------------------------
+// p.113's four pools, p.119's sandcaster and p.121's Repair Points are all the same gesture: a
+// figure, a number of points, and a spend that is REFUSED rather than clamped when the pool cannot
+// cover it. The refusal is the rule (`FleetShipData#spend`), so the row never disables its button —
+// a referee has to be told what the pool actually held.
+
+.mgt2 .poolrow
+	display: flex
+	align-items: center
+	gap: 8px
+	padding: 5px 2px
+	border-bottom: 1px solid var(--rule-soft)
+	&:last-of-type
+		border-bottom: 0
+
+	.lbl
+		flex: 1 1 auto
+		min-width: 0
+		overflow: hidden
+		font-family: var(--cond)
+		font-size: 11px
+		font-weight: 600
+		letter-spacing: 0.12em
+		white-space: nowrap
+		text-overflow: ellipsis
+		text-transform: uppercase
+		color: var(--mute)
+
+	.v
+		font-family: var(--mono)
+		font-size: 12.5px
+		font-variant-numeric: tabular-nums
+		white-space: nowrap
+		.of
+			font-size: 10.5px
+			color: var(--faint)
+
+	input.f
+		width: 4.6rem
+	select.f
+		flex: 0 1 11rem
+		min-width: 0
+		font-size: 12px
+	.btn
+		flex: 0 0 auto
+		padding: 2px 9px
+
+// The three riders p.118 names by the words on a weapon's page. §9.75 forbids matching a name
+// against a table that does not list both languages, so they are ticks and never derivations.
+.mgt2 .opts
+	display: flex
+	flex-wrap: wrap
+	gap: 3px 12px
+	padding: 6px 0
+
+	label
+		display: inline-flex
+		align-items: center
+		gap: 5px
+		font-family: var(--cond)
+		font-size: 10.5px
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		color: var(--mute)
+		cursor: var(--cursor-pointer)
+
+// --------------------------------------------
+//  THE BATTERIES — p.107's WEAPONS panel, one line per battery
+// --------------------------------------------
+// `mounts[]` has no count field, so a hundred laser turrets are a hundred rows on the ship — the
+// battery is the grouping the printed sheet already does, and it is also p.117's unit of
+// declaration: how many of a like weapon fire is the attacker's to say.
+
+.mgt2 table.batteries
+	td.act
+		width: 1px
+		white-space: nowrap
+		.btn
+			padding: 2px 8px
+	td .why
+		display: block
+		font-family: var(--cond)
+		font-size: 9.5px
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		color: var(--faint)
+	input.f.num
+		width: 4rem
+		font-size: 12px
+		padding: 1px 4px
+
+.mgt2 .mgt2-fleet-panel
+	display: flex
+	flex-direction: column
+
+// --------------------------------------------
+//  Adaptive — the rail becomes a band above the panel
+// --------------------------------------------
+
+@container sheet (max-width: 940px)
+	.mgt2.application.fleet-combat > .window-content
+		grid-template-columns: minmax(0, 1fr)
+		grid-template-rows: auto auto minmax(0, 1fr)
+		grid-template-areas: "header" "rail" "panel"
+
+	.mgt2.fleet-combat .mgt2-rail
+		border-right: 0
+		border-bottom: 1px solid var(--rule)
+
+	.mgt2.fleet-combat .bands
+		grid-template-columns: repeat(4, minmax(0, 1fr))
+		.band
+			border-bottom: 1px solid var(--rule-soft)
+		.band:nth-child(4)
+			border-right: 0
+
+@container sheet (max-width: 560px)
+	.mgt2.fleet-combat .bands
+		grid-template-columns: repeat(2, minmax(0, 1fr))
+		.band:nth-child(4)
+			border-right: 1px solid var(--rule-soft)
+		.band:nth-child(2n)
+			border-right: 0

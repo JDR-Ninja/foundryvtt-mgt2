@@ -1,4 +1,5 @@
 import { MGT2 } from "../config.js";
+import { Rules } from "../rules.js";
 
 /**
  * The characteristics as the damage-order editor needs them: the chain first, in order, then
@@ -27,7 +28,11 @@ export function prepareDamageOrder(system) {
         };
     };
 
-    const rest = roster.filter(k => !chain.includes(k));
+    // A characteristic the world has not adopted cannot be added to the chain — but one already in a
+    // stored chain stays listed, because a rule switched off must not silently reroute damage. The
+    // actor's own `show` flag is not consulted: hiding a characteristic has never stopped it taking
+    // damage, and this is the control that decides that.
+    const rest = roster.filter(k => !chain.includes(k) && Rules.characteristic(k));
     return chain.filter(k => roster.includes(k)).map(entry).concat(rest.map(entry));
 }
 

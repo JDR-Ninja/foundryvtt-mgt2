@@ -1,0 +1,19 @@
+{{! The session's own state — which is not a document. The term is the furthest cursor on the
+    roster and the count is the roster's own length, because the set of actors carrying
+    `flags.mgt2.chargen` IS the session (§9.38). Nothing here is stored. }}
+<div class="mgt2-chargen-head">
+	<h2>{{localize 'MGT2.Chargen.Screen.Heading'}}</h2>
+	{{#if term}}<span class="clock">{{localize 'MGT2.Chargen.Screen.Term' n=term}}</span>{{/if}}
+	<span class="count">
+		{{#if empty}}{{localize 'MGT2.Chargen.Screen.NobodyYet'}}
+		{{else}}{{localize 'MGT2.Chargen.Screen.Serving' serving=serving total=columns.length}}{{/if}}
+	</span>
+	{{! The hand-off to §9.40: mustering out reads the whole roster and consumes this ledger, so it is
+	    a second reading of the same actors and not a step of anybody's term. }}
+	{{#unless empty}}
+	<button type="button" class="closing" data-action="openClose">
+		<i class="fa-solid fa-flag-checkered" inert></i>
+		<span>{{localize 'MGT2.Chargen.Screen.Closing' n=done}}</span>
+	</button>
+	{{/unless}}
+</div>

@@ -254,8 +254,140 @@
 			&:hover
 				background: var(--accent-soft)
 				border-color: var(--accent-text)
+			// §7: Conclude goes hot when every line is in. Nothing auto-closes — -1 and 0 are
+			// referee-decision states (Core p.61), so this says "ready", never "done".
+			&.hot
+				background: var(--accent-soft)
+				border-color: var(--accent-text)
 			i
 				margin-right: 5px
+
+	// `.spread` is ONE class over two grounds (`_docket.sass` owns it): in a 620 px window it is a
+	// bordered strip inside a flex foot; in a 320 px card it is a full-bleed band between two
+	// rules, and the cells breathe because there is no roster above them repeating the numbers.
+	.spread
+		border: 0
+		border-top: 1px solid var(--rule)
+		.cell
+			padding: 5px 2px 6px
+		// A referee's secret roll is on the referee's copy and on nobody else's. Punched out of the
+		// band's own tone rather than recoloured, so it costs no colour and follows all three.
+		.marks i.self
+			box-shadow: inset 0 0 0 2px var(--paper)
+
+	// One answer row: who, what the demand cost them, and the one cell that is an Effect, a state
+	// word, or the roll affordance. The affordance is the DM and never a die — the kit already
+	// settled that on the characteristics block, and it makes Core p.58-59's three-state skill rule
+	// legible at the moment of decision.
+	.dline
+		display: grid
+		grid-template-columns: minmax(0, 1fr) auto
+		align-items: center
+		gap: 0 8px
+		padding: 5px 11px 6px
+		border-top: 1px solid var(--rule-soft)
+		.n
+			grid-column: 1
+			font-family: var(--cond)
+			font-size: 14px
+			font-weight: 600
+			line-height: 1.15
+			overflow: hidden
+			text-overflow: ellipsis
+			white-space: nowrap
+		.w
+			grid-column: 1
+			font-family: var(--cond)
+			font-size: 10px
+			font-weight: 600
+			letter-spacing: 0.11em
+			text-transform: uppercase
+			color: var(--faint)
+			overflow: hidden
+			text-overflow: ellipsis
+			white-space: nowrap
+		.v
+			grid-column: 2
+			grid-row: 1 / span 2
+			min-width: 2.1rem
+			font-family: var(--cond)
+			font-size: 20px
+			font-weight: 700
+			line-height: 1
+			font-variant-numeric: tabular-nums
+			text-align: right
+		.s
+			grid-column: 2
+			grid-row: 1 / span 2
+			font-family: var(--cond)
+			font-size: 10px
+			font-weight: 600
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			text-align: right
+			white-space: nowrap
+			color: var(--faint)
+		// A late answer landed after the referee concluded. It shows; it changes nothing.
+		.late
+			margin-left: 5px
+			font-family: var(--cond)
+			font-size: 9px
+			letter-spacing: 0.14em
+			color: var(--danger)
+		&.ok .v
+			color: var(--good)
+		&.bad .v
+			color: var(--danger)
+		&.edge .v
+			color: var(--mute)
+		// An answered row jumps to its own card, so it takes the pointer the chain links take. A
+		// waiting row is not a link and must not look like one.
+		&.jump
+			cursor: var(--cursor-pointer)
+			&:hover
+				background: var(--hover)
+		// Yours. A rule and not a fill: the accent is the affordance and nothing else.
+		&.mine
+			box-shadow: inset 2px 0 0 var(--accent-text)
+		// Core p.63-64: which row the others feed. The marker is the control, so it is only ever
+		// on the referee's copy of a `together` request.
+		a.pk
+			margin-right: 5px
+			font-size: 11px
+			color: var(--faint)
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
+		// Core p.63-64's resolver, last and separated: everyone else feeds this row.
+		&.res
+			border-top: 1px solid var(--rule)
+			a.pk
+				color: var(--accent-text)
+			.n::after
+				content: " \25B8"
+				color: var(--accent-text)
+		a.dm
+			grid-column: 2
+			grid-row: 1 / span 2
+			display: inline-flex
+			align-items: center
+			gap: 5px
+			justify-self: end
+			padding: 3px 7px
+			font-family: var(--cond)
+			font-size: 15px
+			font-weight: 700
+			font-variant-numeric: tabular-nums
+			color: var(--accent-text)
+			border-radius: 2px
+			box-shadow: inset 0 0 0 1px var(--accent-line)
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-hot)
+				background: var(--hover)
+				box-shadow: inset 0 0 0 1px var(--accent-text)
+			i
+				font-size: 11px
 
 // A dose card: three moments on one line, and what it left behind on another (§9.90). No block
 // wrapper — the card head already says which drug, so the body is a sentence.
