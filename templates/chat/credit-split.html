@@ -1,0 +1,29 @@
+{{! Pinned light for the same reason as roll.html: Foundry hard-codes `themed theme-light` on
+    ol.chat-log. This card is the audit of a write that already happened — §9.35's doctrine is that
+    the referee types it and nothing here writes it, and this is the one screen that bends it, so
+    every credit it moved is named. }}
+<div class="mgt2 theme-light card creditsplit">
+	<div class="chd">
+		<div class="what">
+			<h4>{{localize 'MGT2.CreditSplit.Title'}}</h4>
+			<span class="tgt">{{localize direction}} &middot; Cr{{total}}</span>
+		</div>
+	</div>
+	{{#if reason}}<p class="bare">{{reason}}</p>{{/if}}
+	<table class="ledger">
+		<tbody>
+			{{#each rows as |row|}}
+			<tr{{#if row.debt}} class="short"{{/if}}>
+				<td class="nm">{{row.name}}</td>
+				<td class="cr">Cr{{row.amountDisplay}}</td>
+				<td class="dbt">{{#if row.debt}}{{localize 'MGT2.CreditSplit.Card.Debt' credits=row.debtDisplay}}{{/if}}</td>
+				<td class="aft">{{localize 'MGT2.CreditSplit.Card.Left' credits=row.afterDisplay}}</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{! Shown and never touched: no book prints a rule that repays debt out of a windfall. }}
+	{{#if hasDebt}}
+	<div class="pipe"><span class="hot">{{localize 'MGT2.CreditSplit.Card.DebtTotal' credits=debt}}</span></div>
+	{{/if}}
+</div>

@@ -922,7 +922,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     /**
      * A ship takes parts, not luggage. The inherited handler is the Traveller's inventory — containers,
      * loading software into a machine, stacking — and none of it applies to a hull, so the four types
-     * a ship actually reads are embedded plainly and everything else is refused (§9.133).
+     * a ship actually reads are embedded plainly and everything else is refused (§9.135).
      * @param {DragEvent} event
      * @param {object} data   The drop payload, already parsed
      */

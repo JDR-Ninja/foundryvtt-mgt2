@@ -1,0 +1,43 @@
+{{! What the split comes to, what rounding did with it, and who cannot pay. Every line is a reading
+    of the roster above, so all four are patched from the one `#reading()` the roster renders from. }}
+<div class="pdlg csfoot">
+
+	<div class="pline" role="group" aria-label="{{localize 'MGT2.CreditSplit.Assigned'}}">
+		<span class="pgut">{{localize 'MGT2.CreditSplit.Assigned'}}</span>
+		<div class="pfields">
+			<span class="tally" data-readout="assignedLine">{{assignedLine}}</span>
+			<span class="why bad" data-readout="unassignedLine">{{unassignedLine}}</span>
+		</div>
+	</div>
+
+	{{! Whole credits do not divide three ways, so the odd one is NAMED rather than absorbed: a referee
+	    who cannot see where it went cannot argue with it, and a player who counts finds it missing. }}
+	<div class="pline roundline" data-block="rounding"{{#unless orphanCount}} hidden{{/unless}}>
+		<span class="pgut">{{localize 'MGT2.CreditSplit.Rounding'}}</span>
+		<div class="pfields">
+			<span class="why" data-readout="roundingLine"
+				data-tooltip="{{localize 'MGT2.CreditSplit.RoundingHint'}}">{{roundingLine}}</span>
+		</div>
+	</div>
+
+	{{! Core folio 52: what a Traveller cannot pay is carried as debt. The button offers the other
+	    reading of the same table — the crew covers one of their own — and moves nothing that is
+	    pinned, in either direction. }}
+	<div class="pline shortline" data-block="short"{{#unless debt}} hidden{{/unless}}>
+		<span class="pgut">{{localize 'MGT2.CreditSplit.Short'}}</span>
+		<div class="pfields">
+			<span class="why bad" data-readout="debtLine">{{debtLine}}</span>
+			<button type="button" class="btn" data-action="cover"
+				data-tooltip="{{localize 'MGT2.CreditSplit.CoverHint'}}"
+				{{#unless canCover}}disabled{{/unless}}>{{localize 'MGT2.CreditSplit.Cover'}}</button>
+		</div>
+	</div>
+
+	{{! One press, and it is the only thing here that writes. Dead until the split is exactly the sum:
+	    a transfer that does not add up is a transfer nobody can audit afterwards. }}
+	<div class="csend">
+		<span class="what" data-readout="whatLine">{{whatLine}}</span>
+		<button type="button" class="btn hot apply" data-action="apply"
+			{{#unless ready}}disabled{{/unless}}>{{localize applyLabel}}</button>
+	</div>
+</div>

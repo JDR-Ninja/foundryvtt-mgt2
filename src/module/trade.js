@@ -1,9 +1,23 @@
 import { MGT2 } from "./config.js";
+import { CreditSplit } from "./credit-split.js";
 import { CargoData } from "./datamodels.js";
 import { MGT2Helper } from "./helper.js";
 import { StopTraffic } from "./stop-traffic.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+const { DragDrop } = foundry.applications.ux;
+
+/** One market and one hull: the screen reads a world and delivers into a ship, and takes nothing else. */
+const WORLD_TYPE = "Actor.world";
+const SHIP_TYPE = "Actor.spacecraft";
+
+/**
+ * The `mgt2-data` module ships the same thirty-six rows as `cargo` Items, keyed by their D66 and
+ * carrying an icon and the printed blurb. Consulted and never required: with the module absent a lot
+ * is built from `MGT2.TradeGoods` alone and differs only in its artwork.
+ */
+const GOODS_PACK = "mgt2-data.items";
+const GOODS_KEY = "flags.mgt2-data.d66";
 
 /** The Trade Goods table in D66 order, so a row can own a fixed slot of the dice pool. */
 const D66_KEYS = Object.freeze(Object.keys(MGT2.TradeGoods));
@@ -129,9 +143,12 @@ export class SpecTrade {
     /**
      * Finding the supplier at all. The starport's size helps (Core p.242) and every search already
      * made here this month costs a further DM−1 (Core p.241) — the count `world.system.trade.attempts`
-     * keeps, and which is typed here because the dialog is built to need no `world` Actor.
+     * keeps, which a dropped world supplies and which is typed where there is no document at all.
+     *
+     * `attempts` is a parameter and not a reading of *now* because a roll already made must survive
+     * its own stamp: the count the dice answered is one lower than the count the next search reads.
      */
-    static search(uwp, attempts) {
+    static search(uwp, attempts, roll = null) {
         const port = MGT2.Starports[uwp.starport] ?? MGT2.Starports.X;
         const terms = [StopTraffic.term(
             game.i18n.format("MGT2.Trade.Terms.Starport", { port: uwp.starport }), port.searchDM)];
@@ -139,8 +156,11 @@ export class SpecTrade {
             terms.push(StopTraffic.term(game.i18n.format("MGT2.Trade.Terms.Attempts", { n: attempts }),
                 attempts * MGT2.SpeculativeTrade.attemptDM));
         }
-        return { terms, dm: terms.reduce((sum, term) => sum + term.dm, 0),
-            target: MGT2.DifficultyTargets.Average };
+        const dm = terms.reduce((sum, term) => sum + term.dm, 0);
+        const target = MGT2.DifficultyTargets.Average;
+        if ( roll === null ) return { terms, dm, target };
+        const total = roll + dm;
+        return { terms, dm, target, roll, total, effect: total - target, found: total >= target };
     }
 }
 
@@ -154,9 +174,15 @@ export class SpecTrade {
  * because the same trade codes feed them with opposite signs, which is the fact a referee reads off
  * the printed table wrong.
  *
- * It owns no document and creates none. The per-planet, per-month state that Core p.241 and p.243
- * describe lives on the `world` Actor and nowhere else; the attempt count is typed here so that a
- * table with no documents at all still gets the DM.
+ * It owns no document: the shelf is never persisted, and a stop is answered once (§9.35). The
+ * per-planet, per-month state that Core p.241 and p.243 describe lives on the `world` Actor and
+ * nowhere else — so a world may be DROPPED here, which fills the same typed fields and buys the two
+ * write-backs the books make persistent. Without one the count is typed and nothing is written, so a
+ * table with no documents at all still gets every DM.
+ *
+ * The counter at the bottom is the exception, and it is deliberate: a settled price BUYS a lot into
+ * the hold and a lot in the hold SELLS back, each in one press. Both go through `CreditSplit`, money
+ * first and cargo second — cancelling the split is the common case, and it has to cost nothing.
  *
  * @extends {ApplicationV2}
  * @mixes HandlebarsApplication
@@ -167,12 +193,18 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
         id: "mgt2-spec-trade",
         classes: ["mgt2", "spectrade"],
-        position: { width: 780, height: 820 },
+        position: { width: 780, height: 860 },
         window: { resizable: true, icon: "fa-solid fa-scale-balanced",
             title: "MGT2.Trade.Speculative" },
         actions: {
+            rollSearch: SpecTradeDialog.#onRollSearch,
             rollStock: SpecTradeDialog.#onRollStock,
             rollPrice: SpecTradeDialog.#onRollPrice,
+            buyLot: SpecTradeDialog.#onBuyLot,
+            sellLot: SpecTradeDialog.#onSellLot,
+            walkAway: SpecTradeDialog.#onWalkAway,
+            slotClear: SpecTradeDialog.#onSlotClear,
+            openDocument: SpecTradeDialog.#onOpenDocument,
             pick: SpecTradeDialog.#onPick,
             post: SpecTradeDialog.#onPost
         }
@@ -211,10 +243,150 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     /** The `Roll` behind `#price`, kept so the posted card can carry it (§9.117). */
     #priceRoll = null;
 
-    /** One window: a second would answer the same market twice with different dice. */
-    static open() {
-        const existing = foundry.applications.instances.get("mgt2-spec-trade");
-        return (existing ?? new SpecTradeDialog()).render({ force: true });
+    /**
+     * The supplier search, kept as the 2D AND the attempt count it was rolled at. Stamping the world
+     * moves that count, so a reading re-derived from *now* would silently worsen a roll already made.
+     * @type {{attempts: number, roll: number}|null}
+     */
+    #search = null;
+
+    /** The `Roll` behind `#search`, on the card for the same reason as the price's (§9.117). */
+    #searchRoll = null;
+
+    /**
+     * The market, when one was dropped. It FILLS the typed fields and does not replace them — every
+     * reading below still comes off the line in the box. What the handle buys is the write-back: the
+     * search stamp (Core p.241) and the refusal (Core p.243), which are the only two facts of a stop
+     * the books make outlive it.
+     * @type {Actor|null}
+     */
+    #world = null;
+
+    /**
+     * The hull that takes delivery. Written only by the two acts at the bottom of the screen: a lot
+     * bought becomes a `cargo` Item on it, and a lot sold is deleted off it.
+     * @type {Actor|null}
+     */
+    #ship = null;
+
+    /**
+     * What this supplier has already sold, by D66. Core p.242 rolls the tonnage as the stock the
+     * supplier HAS, so a lot bought is a lot gone — a second press would buy cargo that is not there.
+     * @type {Set<string>}
+     */
+    #bought = new Set();
+
+    /** One counter, one transaction: a second split window open beside the first would debit twice. */
+    #busy = false;
+
+    /** @type {Actor|null} */
+    get world() {
+        return this.#world;
+    }
+
+    /** @type {Actor|null} */
+    get ship() {
+        return this.#ship;
+    }
+
+    /**
+     * One window: a second would answer the same market twice with different dice.
+     * @param {object} [options]
+     * @param {Actor} [options.world]   A `world` to put in the slot before the window opens
+     */
+    static open({ world } = {}) {
+        const screen = foundry.applications.instances.get("mgt2-spec-trade") ?? new SpecTradeDialog();
+        if ( world ) screen.seed(world);
+        return screen.render({ force: true });
+    }
+
+    /**
+     * Put a world in the slot, which fills the typed fields from it and keeps the handle. A DIFFERENT
+     * world drops the dice with the market they were rolled for: `#dice` is kept so that a corrected
+     * digit re-reads the same shelf, and another planet is not a correction.
+     * @param {Actor} actor
+     * @returns {Actor|null}
+     */
+    seed(actor) {
+        if ( actor?.type !== "world" ) return null;
+        if ( actor.uuid !== this.#world?.uuid ) this.#forget();
+        this.#world = actor;
+        this.#input.world = actor.system.profile;
+        this.#input.zone = actor.system.zone;
+        return actor;
+    }
+
+    /** Back to hand mode. The typed count inherits what the world was showing, so no DM moves. */
+    #unseed() {
+        this.#input.attempts = this.standing?.attemptsThisMonth ?? this.#input.attempts;
+        this.#world = null;
+    }
+
+    /** A different market is a different shelf, a different price and a different supplier. */
+    #forget() {
+        this.#dice = null;
+        this.#price = null;
+        this.#priceRoll = null;
+        this.#search = null;
+        this.#searchRoll = null;
+        this.#bought.clear();
+    }
+
+    /* -------------------------------------------- */
+
+    /** Every document this screen has written into `apps`, which is not the same as the two slots. */
+    #registered = new Set();
+
+    /**
+     * `document.apps` is the only re-render mechanism there is, and here it is what keeps the two
+     * counters from being two: a stamp made on the world sheet redraws this screen's standing, so
+     * the count that drives the DM is never a stale copy of the document's.
+     */
+    #syncRegistrations(documents) {
+        const wanted = new Set(documents.filter(document => document));
+        for ( const document of this.#registered ) {
+            if ( !wanted.has(document) ) delete document.apps[this.id];
+        }
+        for ( const document of wanted ) document.apps[this.id] = this;
+        this.#registered = wanted;
+    }
+
+    /**
+     * `_tearDown` and not `_onClose`: it runs synchronously before the state flips to CLOSED, while
+     * `_onClose` is dispatched unawaited.
+     * @inheritDoc
+     */
+    _tearDown(options) {
+        super._tearDown(options);
+        for ( const document of this.#registered ) delete document.apps[this.id];
+        this.#registered = new Set();
+    }
+
+    /* -------------------------------------------- */
+
+    /** What the dropped world says about its suppliers, against the campaign's own *now*. */
+    get standing() {
+        return this.#world ? this.#world.system.tradeStanding(campaignDay()) : null;
+    }
+
+    /**
+     * The gate the world sheet's own four buttons take, said out loud: `DocumentSheetV2` disables the
+     * whole form below OWNER, and a `world` hands the players OBSERVER (§9.33.5). So the screen is
+     * everyone's — Core p.238 gives the chapter to the Travellers — and the two stamps are the
+     * referee's.
+     */
+    get canWrite() {
+        return Boolean(this.#world?.canUserModify(game.user, "update"));
+    }
+
+    /**
+     * The gate on the two acts that move money. `CreditSplit` refuses a non-GM outright — it writes
+     * other people's purses — and the lot itself is written onto the hull, so both halves of the
+     * counter take the referee. The screen stays everyone's (Core p.238): the buttons grey, and
+     * nothing else on the page changes.
+     */
+    get canTrade() {
+        return game.user.isGM && Boolean(this.#ship?.canUserModify(game.user, "update"));
     }
 
     /* -------------------------------------------- */
@@ -225,13 +397,17 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     get reading() {
         const parsed = StopTraffic.parseLine(this.#input.world);
         const banned = String(this.#input.bannedAt).trim();
+        const standing = this.standing;
         return {
             ...parsed,
             zone: parsed.zone ?? this.#input.zone,
             goods: this.#input.goods,
             broker: Math.trunc(Number(this.#input.broker) || 0),
             otherBroker: Math.trunc(Number(this.#input.otherBroker) || 0),
-            attempts: Math.max(0, Math.trunc(Number(this.#input.attempts) || 0)),
+            // A dropped world OWNS the count: Core p.241 keys it to the planet and the month, and two
+            // independent counters for one rule is what stamps a single search twice.
+            attempts: standing ? standing.attemptsThisMonth
+                : Math.max(0, Math.trunc(Number(this.#input.attempts) || 0)),
             blackMarket: this.#input.blackMarket === true,
             // Blank is "nobody bans this", which is a different statement from Law Level 0.
             bannedAt: banned === "" ? null : Math.max(0, Math.trunc(Number(banned) || 0))
@@ -242,13 +418,21 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     async _prepareContext(options) {
         const context = await super._prepareContext(options);
         const input = this.reading;
+        this.#syncRegistrations([this.#world, this.#ship]);
         Object.assign(context, {
             config: MGT2,
-            input: this.#input,
+            // The count is the world's while one is in the slot, so the box shows what drives the DM.
+            input: { ...this.#input, attempts: input.attempts },
             zones: MGT2.TravelZones,
             goodsList: Object.fromEntries(Object.values(MGT2.TradeGoods)
                 .map(row => [row.d66, `${row.d66} · ${game.i18n.localize(row.label)}`])),
             gloss: marketGloss(input),
+            worldType: WORLD_TYPE,
+            shipType: SHIP_TYPE,
+            slot: this.#slot(),
+            hold: SpecTradeDialog.#hold(this.#ship),
+            linked: this.#world !== null,
+            canWrite: this.canWrite,
             ready: Boolean(input.uwp),
             rolled: this.#dice !== null,
             priced: this.#price !== null
@@ -262,17 +446,123 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
         context.codes = codes.map(code => ({ code, label: SpecTrade.codeLabel(code),
             zone: !MGT2.TradeCodes.some(row => row.code === code) }));
+        // Two readings of the same rule: what the NEXT search costs, and the one already rolled read
+        // against the count it was rolled at.
         context.search = SpecTrade.search(input.uwp, input.attempts);
+        context.searched = this.#search
+            ? SpecTrade.search(input.uwp, this.#search.attempts, this.#search.roll) : null;
         context.shelf = SpecTrade.stock(codes, input.blackMarket)
             .map(row => this.#shelfRow(row, input, codes));
         context.drawn = (this.#dice?.stock ?? [])
             .map(d66 => this.#shelfRow(MGT2.TradeGoods[d66], input, codes));
         context.goods = goods;
-        context.readings = ["purchase", "sale"].map(side => SpecTrade.reading(side, goods, columns,
+        const readings = ["purchase", "sale"].map(side => SpecTrade.reading(side, goods, columns,
             input, this.#price ? this.#price[side] : null));
+        context.readings = readings;
         context.lot = this.#shelfRow(goods, input, codes);
-        context.canPost = context.rolled || context.priced;
+        context.offer = this.#offer(goods, input, readings.find(read => read.side === "purchase"));
+        context.lots = this.#lots(input, codes);
+        context.canTrade = this.canTrade;
+        context.canPost = context.rolled || context.priced || (context.searched !== null);
         return context;
+    }
+
+    /**
+     * The lot on the table: the rolled tonnage of the selected good, and what the settled purchase
+     * percentage makes it cost. `total` is `CargoData#prepareDerivedData`'s own expression for `paid`
+     * — the same three figures in the same order — so the sum debited and the sum the sheet prints
+     * afterwards cannot disagree.
+     *
+     * Priced without a hull, gated on one: a crew reading what a lot costs has not decided to buy it.
+     */
+    #offer(goods, input, purchase) {
+        if ( !this.#dice || !this.#price || (goods.exotic === true) ) return null;
+        const slot = D66_KEYS.indexOf(goods.d66) * DICE_PER_ROW;
+        const { tons } = SpecTrade.tons(goods, input.uwp.population,
+            this.#dice.quantity.slice(slot, slot + DICE_PER_ROW));
+        const total = Math.round(tons * goods.basePrice * purchase.percent / 100);
+        const hold = this.#ship ? this.#ship.system.cargo : null;
+        // What stops the purchase, in the order a referee would fix it. A greyed button that does not
+        // say why is a button pressed twice.
+        const blocked = !hold ? "MGT2.Trade.NeedAShip"
+            : (total <= 0) ? "MGT2.Trade.NoneInStock"
+                : this.#bought.has(goods.d66) ? "MGT2.Trade.LotTaken"
+                    : !this.canTrade ? "MGT2.Trade.RefereeTrades" : null;
+        return {
+            tons, total, percent: purchase.percent, credits: MGT2Helper.credits(total), blocked,
+            capacity: hold?.capacity ?? 0, free: hold?.free ?? 0,
+            // Core p.241: a lot cannot be broken up, so a hold with room for part of it has room for
+            // none of it. Both readings warn and neither refuses — an oversized lot is a legal
+            // purchase and a problem the crew has to solve.
+            overFree: Boolean(hold) && (tons > hold.free),
+            overHold: Boolean(hold) && (tons > hold.capacity),
+            ready: !blocked && !this.#busy
+        };
+    }
+
+    /**
+     * What the hold is carrying, each lot priced against THIS market. The percentage is re-derived
+     * from the lot's OWN stored Sale DM column and not from the row selected above: the crew sells
+     * what is aboard, and that is exactly why `CargoData` stores the two columns at all.
+     *
+     * A freight consignment is listed and never offered — it is carried for a fare (Core p.239) and
+     * is not the crew's to sell — so the hold reads whole while only speculation is on the block.
+     */
+    #lots(input, codes) {
+        if ( !this.#ship ) return [];
+        const capacity = this.#ship.system.cargo.capacity;
+        return this.#ship.items.filter(item => item.type === "cargo").map(item => {
+            const lot = item.system;
+            const row = { purchase: lot.purchaseDM, sale: lot.saleDM, basePrice: lot.basePrice };
+            const columns = SpecTrade.columns(row, codes,
+                // Blank on the form falls back to what the lot itself records, which is the same
+                // statement stored rather than typed.
+                { lawLevel: input.uwp.lawLevel, bannedAt: input.bannedAt ?? lot.legality });
+            const read = SpecTrade.reading("sale", row, columns, input,
+                this.#price ? this.#price.sale : null);
+            const priced = lot.speculative && read.percent;
+            const total = priced ? Math.round(lot.tons * lot.basePrice * read.percent / 100) : 0;
+            return {
+                id: item.id, name: item.name, tons: lot.tons, speculative: lot.speculative,
+                sale: SpecTradeDialog.tone(read.dm), percent: priced ? read.percent : null,
+                total, credits: MGT2Helper.credits(total),
+                over: lot.tons > capacity,
+                sellable: (total > 0) && !this.#busy && this.canTrade
+            };
+        });
+    }
+
+    /**
+     * The market slot: which document is in it, and the two facts this screen can write to it. The
+     * standing is printed here rather than only on the world sheet so that a stamp is visibly landing
+     * — the referee has no second button to remember, and no reason to press one.
+     */
+    #slot() {
+        const standing = this.standing;
+        if ( !standing ) return { linked: false };
+        const system = this.#world.system;
+        return {
+            linked: true,
+            uuid: this.#world.uuid,
+            name: this.#world.name,
+            profile: system.profile,
+            codes: system.codes.join(" "),
+            attempts: standing.attemptsThisMonth,
+            searchDM: standing.searchDM,
+            closedUntil: standing.closedUntil
+        };
+    }
+
+    /**
+     * The hull slot: the designed `cargo.capacity` against the tonnage the ship's own manifest sums
+     * out of its `cargo` Items. It is what a purchase has to fit into and what a sale empties, and a
+     * lot cannot be broken up (Core p.241) — so the free figure is a warning and never a refusal.
+     */
+    static #hold(ship) {
+        if ( !ship ) return { linked: false };
+        const cargo = ship.system.cargo;
+        return { linked: true, uuid: ship.uuid, name: ship.name,
+            capacity: cargo.capacity, used: cargo.used, free: cargo.free, over: cargo.over === true };
     }
 
     /** One shelf line: what it is, how much of it there is and what the two columns say. */
@@ -323,6 +613,15 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         });
     }
 
+    /** @inheritDoc */
+    async _onRender(context, options) {
+        await super._onRender(context, options);
+        // Re-bound on every render because the form part carries the slots and is replaced.
+        // `DragDrop#bind` ASSIGNS `element.ondragover` rather than adding a listener, so it never
+        // stacks.
+        this.dragDrop.bind(this.element);
+    }
+
     /** The readout beside the profile field lives in the part that never re-renders, so it is patched. */
     #syncGloss() {
         const parsed = StopTraffic.parseLine(this.#input.world);
@@ -346,6 +645,52 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         const select = this.element.querySelector('[data-field="goods"]');
         if ( select ) select.value = this.#input.goods;
         this.render({ parts: ["results"] });
+    }
+
+    /**
+     * Finding a supplier at all: an Average (8+) check at the Starport DM (Core p.242), less one per
+     * search already made here this month (Core p.241). That second term is a fact about the PLANET,
+     * so the roll and the stamp are one press — the referee never has to remember the world sheet's
+     * own button, which is what made a single search count twice.
+     *
+     * The count is read before the write, because the penalty counts PREVIOUS attempts; and it is
+     * stored beside the dice, so the stamp that follows does not re-price the roll that earned it.
+     * @this {SpecTradeDialog}
+     */
+    static async #onRollSearch() {
+        const input = this.reading;
+        if ( !input.uwp ) return;
+        this.#searchRoll = await new Roll("2d6").roll();
+        this.#search = { attempts: input.attempts, roll: this.#searchRoll.total };
+        // The stamp redraws every client through `apps`; with no world there is nothing to write and
+        // the typed count keeps driving the DM.
+        if ( this.canWrite ) await this.#world.system.recordSearch(campaignDay());
+        else this.render({ parts: ["results"] });
+    }
+
+    /**
+     * Core p.243: a crew unwilling to pay may walk away, and cannot deal with that supplier again for
+     * at least a month. The second of the two facts the books make persistent, and the reason the
+     * screen keeps a handle on the document at all.
+     * @this {SpecTradeDialog}
+     */
+    static async #onWalkAway() {
+        if ( !this.canWrite ) return;
+        return this.#world.system.refuseSupplier(campaignDay());
+    }
+
+    /** Back to hand mode for that slot; nothing is written and nothing rolled is discarded. */
+    static #onSlotClear(event, target) {
+        if ( target.dataset.slot === "ship" ) this.#ship = null;
+        else this.#unseed();
+        return this.render();
+    }
+
+    /** @this {SpecTradeDialog} */
+    static async #onOpenDocument(event, target) {
+        const uuid = target.closest("[data-uuid]")?.dataset.uuid;
+        const document = uuid ? await fromUuid(uuid) : null;
+        return document?.sheet?.render({ force: true });
     }
 
     /**
@@ -373,6 +718,8 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             }
         }
         this.#dice = { quantity, stock };
+        // A re-rolled shelf is a new stock list, so what an earlier one sold is on offer again.
+        this.#bought.clear();
         this.render({ parts: ["results"] });
     }
 
@@ -390,8 +737,244 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /* -------------------------------------------- */
+    /*  The counter                                 */
+    /* -------------------------------------------- */
+
+    /**
+     * The purchase. ONE press: the crew is debited through `CreditSplit`, and the lot lands in the
+     * hold.
+     *
+     * **Money first and cargo second**, which is the whole order. The split screen is one the referee
+     * closes unbought more often than not, so a cancel has to cost nothing at all — no Item, no stamp,
+     * no card. A failure after the debit leaves a paid crew with no cargo, which is visible on the log
+     * and fixable by hand; the reverse would be a hold nobody paid for.
+     *
+     * This is not a supplier search and stamps nothing on the world: Core p.241's count is the search's
+     * and is written where the dice are rolled.
+     * @this {SpecTradeDialog}
+     */
+    static async #onBuyLot() {
+        if ( this.#busy ) return;
+        const context = await this._prepareContext({});
+        const offer = context.offer;
+        if ( !offer?.ready ) return;
+        const goods = context.goods;
+        const name = game.i18n.localize(goods.label);
+
+        this.#busy = true;
+        this.render({ parts: ["results"] });
+        try {
+            const split = await CreditSplit.open({
+                total: offer.total,
+                direction: "debit",
+                spacecraft: this.#ship.uuid,
+                reason: game.i18n.format("MGT2.Trade.BuyReason", { tons: offer.tons, goods: name,
+                    world: this.#marketName(), percent: offer.percent })
+            });
+            if ( !split ) return;
+            // Marked before the Item exists: the money is gone either way, so the supplier's stock of
+            // that good is spent whatever happens next.
+            this.#bought.add(goods.d66);
+            const item = await this.#createLot(goods, offer).catch(error => {
+                console.error(error);
+                ui.notifications.error(game.i18n.format("MGT2.Trade.Errors.LotFailed", { goods: name }));
+                return null;
+            });
+            if ( item ) await this.#postLot({ goods: name, tons: offer.tons, percent: offer.percent,
+                base: goods.basePrice, total: offer.total, sold: false });
+        }
+        finally {
+            this.#busy = false;
+            this.render({ parts: ["results"] });
+        }
+    }
+
+    /**
+     * The mirror, and the reason the screen draws a sale reading at all: the crew sells the hold and
+     * buys the next cargo at the same counter (Core p.241). A whole lot at a time, because a lot
+     * cannot be broken up.
+     *
+     * Same order as the purchase — the credit lands first and the lot leaves the hold second, so a
+     * cancelled split cannot destroy cargo the crew still owns.
+     * @this {SpecTradeDialog}
+     */
+    static async #onSellLot(event, target) {
+        if ( this.#busy ) return;
+        const id = target.closest("[data-lot]")?.dataset.lot;
+        const item = this.#ship?.items.get(id);
+        const context = await this._prepareContext({});
+        const row = context.lots?.find(lot => lot.id === id);
+        if ( !item || !row?.sellable ) return;
+        // Read off the lot before it is deleted, because the card describes what left the hold.
+        const name = item.name;
+        const base = item.system.basePrice;
+
+        this.#busy = true;
+        this.render({ parts: ["results"] });
+        try {
+            const split = await CreditSplit.open({
+                total: row.total,
+                direction: "credit",
+                spacecraft: this.#ship.uuid,
+                reason: game.i18n.format("MGT2.Trade.SellReason", { tons: row.tons, goods: name,
+                    world: this.#marketName(), percent: row.percent })
+            });
+            if ( !split ) return;
+            await item.delete();
+            await this.#postLot({ goods: name, tons: row.tons, percent: row.percent,
+                base, total: row.total, sold: true });
+        }
+        finally {
+            this.#busy = false;
+            this.render({ parts: ["results"] });
+        }
+    }
+
+    /**
+     * The lot, on the ship. Every number and the name come from the system's own row, so the Item
+     * reads in the client's language and carries exactly the two DM columns Core p.243 scores it on
+     * later; the compendium document is consulted for its icon and its blurb and for nothing else.
+     */
+    async #createLot(goods, offer) {
+        const packed = await SpecTradeDialog.#goodsDocument(goods.d66);
+        const data = {
+            name: game.i18n.localize(goods.label),
+            type: "cargo",
+            system: {
+                tons: offer.tons,
+                basePrice: goods.basePrice,
+                // What was actually paid, as a percentage: the margin at the next port is unreadable
+                // without it (Core p.243).
+                purchasePct: offer.percent,
+                purchaseDM: goods.purchase.map(row => ({ ...row })),
+                saleDM: goods.sale.map(row => ({ ...row })),
+                // The Trade Goods table prints no Law Level. A stored 0 would read on the sheet as
+                // Law Level 0 and manufacture a smuggler's Sale DM the book never prints.
+                legality: null
+            }
+        };
+        // `destination`, `dueDay` and `farePerTon` are left at their defaults: having no destination
+        // at all IS being speculative, which is what `CargoData` derives `speculative` from.
+        if ( packed ) {
+            data.img = packed.img;
+            data.system.description = packed.system.description;
+            data.system.source = packed.system.source;
+        }
+        const [item] = await this.#ship.createEmbeddedDocuments("Item", [data]);
+        return item ?? null;
+    }
+
+    /**
+     * The same row as an Item, where the module is installed. Its flags carry the D66 and flags sit
+     * outside the default compendium index, so the one field is requested explicitly rather than
+     * loading thirty-six documents to read one key off each.
+     * @returns {Promise<object|null>}   The Item's source data, or null wherever the lookup fails
+     */
+    static async #goodsDocument(d66) {
+        const pack = game.packs.get(GOODS_PACK);
+        if ( pack?.documentName !== "Item" ) return null;
+        try {
+            const index = await pack.getIndex({ fields: [GOODS_KEY] });
+            const entry = index.find(row => (row.type === "cargo")
+                && (foundry.utils.getProperty(row, GOODS_KEY) === d66));
+            const document = entry ? await pack.getDocument(entry._id) : null;
+            return document ? document.toObject() : null;
+        }
+        catch ( error ) {
+            console.error(error);
+            return null;
+        }
+    }
+
+    /* -------------------------------------------- */
+    /*  Drag and drop                               */
+    /* -------------------------------------------- */
+
+    /**
+     * A plain `ApplicationV2` inherits no drag-drop plumbing, so the controller is supplied here as
+     * the chargen and voyage screens' are. No permission gate on the drop: reading a world is not
+     * writing to one, and `canWrite` is what the two stamps test.
+     * @type {DragDrop}
+     */
+    get dragDrop() {
+        return this.#dragDrop ??= new DragDrop.implementation({
+            dropSelector: "[data-accept]",
+            callbacks: {
+                dragover: this.#onDragOver.bind(this),
+                dragleave: this.#onDragLeave.bind(this),
+                drop: this.#onDrop.bind(this)
+            }
+        });
+    }
+
+    /** @type {DragDrop|null} */
+    #dragDrop = null;
+
+    /** A zone refuses at the pointer or not at all — after the drop is too late to be feedback. */
+    #onDragOver(event) {
+        const zone = event.target.closest("[data-accept]");
+        for ( const node of this.element.querySelectorAll(".over, .deny") ) {
+            if ( node !== zone ) node.classList.remove("over", "deny");
+        }
+        if ( !zone ) return;
+        zone.classList.add(MGT2Helper.dropAccepted(zone) ? "over" : "deny");
+    }
+
+    #onDragLeave(event) {
+        const zone = event.target.closest("[data-accept]");
+        if ( zone && !zone.contains(event.relatedTarget) ) zone.classList.remove("over", "deny");
+    }
+
+    /** Two zones, two documents: the market this stop is at, and the hull that will take delivery. */
+    async #onDrop(event) {
+        const zone = event.target.closest("[data-accept]");
+        const data = MGT2Helper.getDataFromDropEvent(event);
+        zone?.classList.remove("over", "deny");
+        if ( !zone || !MGT2Helper.dropAccepted(zone, data) ) return;
+        // Awaited end to end: a packed Actor answers `fromUuidSync` with an index entry.
+        const actor = data.uuid ? await fromUuid(data.uuid) : null;
+        if ( !actor ) return;
+        if ( zone.dataset.slot === "ship" ) {
+            if ( actor.type !== "spacecraft" ) return;
+            this.#ship = actor;
+        }
+        else if ( !this.seed(actor) ) return;
+        return this.render();
+    }
+
+    /* -------------------------------------------- */
     /*  Chat                                        */
     /* -------------------------------------------- */
+
+    /** A dropped world is named; a typed one is only ever its own profile line. */
+    #marketName() {
+        return this.#world?.name || this.#input.world;
+    }
+
+    /**
+     * ONE card, and it is about the CARGO. `CreditSplit` posted the transfer a moment earlier and
+     * named every share, so nothing here repeats one: what this adds is the lot — the tonnage, the
+     * percentage of base it went at, and the hold it arrived in or left, which is where a lot too big
+     * for the hull becomes visible to the whole table rather than only to whoever pressed the button.
+     */
+    async #postLot({ goods, tons, percent, base, total, sold }) {
+        const hold = this.#ship.system.cargo;
+        const content = await foundry.applications.handlebars.renderTemplate(
+            "systems/mgt2/templates/chat/trade-lot.html", {
+                title: sold ? "MGT2.Trade.Card.Sold" : "MGT2.Trade.Card.Bought",
+                where: game.i18n.format("MGT2.Trade.At", { world: this.#marketName(), goods }),
+                goods, tons, percent,
+                base: MGT2Helper.credits(base),
+                credits: MGT2Helper.credits(total),
+                ship: this.#ship.name,
+                used: hold.used, capacity: hold.capacity, over: hold.over === true
+            });
+        return getDocumentClass("ChatMessage").create({
+            author: game.user.id,
+            speaker: ChatMessage.getSpeaker(),
+            content
+        });
+    }
 
     /** The same readout with nothing left to press, so the card and the dialog cannot drift. */
     static async #onPost(event, target) {
@@ -400,14 +983,15 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         const body = await foundry.applications.handlebars.renderTemplate(
             SpecTradeDialog.PARTS.results.template, { ...context, card: true });
         const where = foundry.utils.escapeHTML(game.i18n.format("MGT2.Trade.At", {
-            world: context.input.world, goods: game.i18n.localize(context.goods.label) }));
+            world: this.#marketName(),
+            goods: game.i18n.localize(context.goods.label) }));
 
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,
             speaker: ChatMessage.getSpeaker(),
             // v14 appends no display of its own once `content` is set, so this costs the card
             // nothing and buys Dice So Nice and an auditable record (§9.117).
-            rolls: this.#priceRoll ? [this.#priceRoll] : [],
+            rolls: [this.#searchRoll, this.#priceRoll].filter(roll => roll),
             content: `<div class="mgt2 theme-light card spectrade">
                 <div class="chd"><div class="what"><h4>${
                     foundry.utils.escapeHTML(game.i18n.localize("MGT2.Trade.Speculative"))
@@ -417,6 +1001,11 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 }
 
 /* -------------------------------------------- */
+
+/** The campaign's own *now*, in days, and the only clock the system has (§9.35). */
+function campaignDay() {
+    return game.settings.get("mgt2", "campaignDay");
+}
 
 /** What the digits that matter here say — the port, the market's size and the law. */
 function marketGloss(parsed) {

@@ -1881,6 +1881,7 @@
         "ClearSearches": "Clear searches",
         "Refuse": "Walk away",
         "ClearRefusal": "Clear refusal",
+        "TradeHere": "Trade here",
         "FIELDS": {
           "uwp": {
             "starport": {
@@ -2803,6 +2804,65 @@
           "name": "Roll requests: tell me one arrived",
           "hint": "What happens on your screen when the referee asks you for a check. Flashing does not scroll the log. Yours alone, and nothing is lost if it never reaches you — the request is already in your chat."
         }
+      }
+    },
+    "CreditSplit": {
+      "Title": "Credit transfer",
+      "Sum": "Sum",
+      "Way": "Direction",
+      "Reason": "What for",
+      "ReasonPlaceholder": "What the money is for — carried onto the chat card",
+      "Who": "Who",
+      "Traveller": "Traveller",
+      "Share": "Share",
+      "Credits": "Credits",
+      "Purse": "Purse",
+      "CashOnHand": "Cash on hand",
+      "Assigned": "Split",
+      "Rounding": "Rounding",
+      "Short": "Short",
+      "AddControlled": "+ Selected",
+      "AddParty": "+ Party",
+      "AddCrew": "+ Crew",
+      "AddCrewHint": "The crew roster of the ship this transfer was opened for. Drop a spacecraft on the list to point it at another hull.",
+      "Even": "Even",
+      "EvenHint": "Equal shares over the unlocked rows, of whatever the locked ones leave. Adding or removing a Traveller does the same, so lock a share you want protected.",
+      "ClearRoster": "Clear",
+      "DropActor": "Drop a Traveller here, or a ship to take its crew.",
+      "Remove": "Take off the list",
+      "Lock": "Fix this share — no other row's move will change it",
+      "Unlock": "Release this share",
+      "ShortHint": "More than this Traveller has. The difference becomes debt when the transfer is applied.",
+      "OfTotal": "Cr{assigned} of Cr{total}",
+      "Unassigned": "Cr{credits} unassigned",
+      "Orphans": "Cr{credits} to {names}",
+      "RoundingHint": "Whole credits do not always divide. What the division leaves over goes one credit each to the largest fraction dropped, then to the largest share, then down the list — so Cr1000 three ways is 334/333/333 and never 333/333/333.",
+      "DebtLine": "Cr{credits} would become debt, on {n} of them",
+      "Cover": "Cover the shortfall",
+      "CoverHint": "Moves what the short payers cannot cover onto the unlocked payers who have the cash. A locked share is never moved, in either direction.",
+      "Direction": {
+        "debit": "Debit",
+        "credit": "Credit"
+      },
+      "DirectionHint": {
+        "debit": "Take the sum out of their purses. What a Traveller cannot pay becomes debt (Core folio 52).",
+        "credit": "Pay the sum into their purses. Nothing repays a debt on its own — no book prints that rule."
+      },
+      "What": {
+        "debit": "Debit Cr{credits} from {n}",
+        "credit": "Credit Cr{credits} to {n}"
+      },
+      "Card": {
+        "Debt": "Cr{credits} to debt",
+        "Left": "Cr{credits} left",
+        "DebtTotal": "Cr{credits} carried as debt"
+      },
+      "Errors": {
+        "GMOnly": "The credit transfer is the referee's window.",
+        "NoRoster": "Nobody is on the list. Drop a Traveller on it, or seed it from the tokens, the party or a ship's crew.",
+        "NoSum": "Type the sum to transfer first.",
+        "Unreachable": "A Traveller on the list cannot be reached from here, so their share would go nowhere.",
+        "Unassigned": "The split does not come to the sum. Move a gauge, or release a lock."
       }
     },
     "Errors": {
@@ -3935,7 +3995,7 @@
       "Attempts": "Searches this month",
       "BannedAt": "Banned at law",
       "BlackMarket": "Black market supplier",
-      "NeedAWorld": "Type a profile: the trade codes, and everything read off them, come from it.",
+      "NeedAWorld": "Drop a world above, or type a profile: the trade codes, and everything read off them, come from it.",
       "Codes": "Trade codes here",
       "NoCodes": "no codes — common goods only",
       "SearchLine": "finding a supplier: {dm} against {target}+",
@@ -3957,6 +4017,51 @@
       "RollPrice": "Roll both prices",
       "At": "{world} · {goods}",
       "MarketGloss": "port {port} · pop {pop} · law {law}",
+      "WorldSlot": "World",
+      "ShipSlot": "Ship",
+      "DropWorld": "Drop a world",
+      "DropShip": "Drop a ship",
+      "TypedInstead": "or type the profile below",
+      "ShipHint": "for the hold a lot has to fit",
+      "ClearSlot": "Take it out of the slot",
+      "SearchedHere": "{n} searches this month · {dm}",
+      "Hold": "hold {used} / {capacity} t",
+      "HoldFree": "{tons} t free",
+      "AttemptsFromWorld": "The count is {world}'s own — every search made here this month, stamped on the document.",
+      "RollSearch": "Find a supplier",
+      "SearchFound": "Supplier found — {roll} {dm} = {total} against {target}+, Effect {effect}.",
+      "SearchMissed": "No supplier — {roll} {dm} = {total}, needed {target}+.",
+      "WalkAway": "Walk away",
+      "WritesBack": "the search and the refusal are written to {world}; nothing else is stored",
+      "RefereeWrites": "{world} is the referee's — nothing here writes to it",
+      "BuyLot": "Buy the lot",
+      "BuyHint": "The crew is debited first, through the split screen; the lot lands in the hold second. Cancelling the split buys nothing.",
+      "BuyLine": "This lot: {tons} t for Cr{credits}, at {percent}% of base.",
+      "LotTaken": "This supplier's stock of it is sold.",
+      "NeedAShip": "Drop a ship above: a lot has to be bought into a hold.",
+      "NoneInStock": "The supplier has none of it — the tonnage rolled at zero.",
+      "RefereeTrades": "Buying and selling are the referee's: both move the crew's purses and write to the ship.",
+      "HoldTight": "{tons} t into {free} t free — the hold goes over capacity, and a lot cannot be broken up.",
+      "HoldTooSmall": "{tons} t into a {capacity} t hold — this lot will never fit this hull, and a lot cannot be broken up.",
+      "InTheHold": "In the hold",
+      "HoldCount": "{n} lots · {used} / {capacity} t",
+      "HoldEmpty": "The hold is empty — nothing to sell at this counter.",
+      "LotColumn": "Lot",
+      "Fetches": "Fetches",
+      "SellLot": "Sell",
+      "FreightLot": "Freight, carried for a fare — not the crew's to sell.",
+      "BuyReason": "{tons} t of {goods} bought at {world}, at {percent}% of base.",
+      "SellReason": "{tons} t of {goods} sold at {world}, at {percent}% of base.",
+      "Card": {
+        "Bought": "Cargo bought",
+        "Sold": "Cargo sold",
+        "Lot": "{tons} t of {goods} at {percent}% of a Cr{base} base — Cr{credits}.",
+        "Hold": "{ship} · hold {used} / {capacity} t",
+        "Over": "over capacity — a lot cannot be broken up"
+      },
+      "Errors": {
+        "LotFailed": "{goods} could not be stowed aboard: the crew has already paid, so add the lot to the hold by hand."
+      },
       "Side": {
         "purchase": "Purchase",
         "sale": "Sale"

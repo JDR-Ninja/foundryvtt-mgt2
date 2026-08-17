@@ -1,0 +1,344 @@
+// The credit transfer screen — the one window in this system that writes money on demand.
+// Almost all of it is the kit unchanged: the gutter form `.pdlg` / `.pline` / `.pgut` / `.pfields`
+// from `_dialog.sass`, the direction as a `.seg` strip, and `.roster` from `_blocks.sass` with its
+// occupancy states and its drop refusal. What is here is the window skeleton, the roster's three
+// transfer cells, and the foot's three readings.
+//
+// The roster is THE ONLY SCROLLER: the sum and the validation must never be scrolled away from.
+
+.mgt2.application.creditsplit
+	container-type: inline-size
+	container-name: creditsplit
+
+	> .window-content
+		display: flex
+		flex-direction: column
+		gap: 0
+		height: 100%
+		padding: 0
+		overflow: hidden
+
+		> [data-application-part="form"]
+			flex: none
+			padding: 8px 14px 9px
+			border-bottom: 1px solid var(--rule)
+		> [data-application-part="roster"]
+			flex: 1 1 auto
+			min-height: 0
+			overflow-y: auto
+		> [data-application-part="foot"]
+			flex: none
+			padding: 7px 14px 9px
+			border-top: 1px solid var(--rule)
+
+.mgt2 .csform,
+.mgt2 .csfoot
+	gap: 0
+	.pline + .pline
+		padding-top: 5px
+	// The two conditional rows are shown by hand. `[hidden]` is a UA rule and `.pdlg .pline` sets
+	// `display: grid` at higher specificity, so without this the attribute is set and does nothing.
+	.pline[hidden]
+		display: none
+
+// --------------------------------------------
+//  THE SUM AND THE SEEDS
+// --------------------------------------------
+
+.mgt2 .csform
+	// The sum is the largest number on the window and reads as one: everything under it is a
+	// fraction of this figure.
+	.numunit.sum
+		input.f
+			width: 7.5rem
+			font-size: 15px
+			font-weight: 600
+		i.pre
+			color: var(--accent-text)
+
+	input.f.wide
+		flex: 1 1 12rem
+
+	.wholine .pgut b
+		display: inline
+		margin-left: 6px
+		font-family: var(--mono)
+		font-size: 11px
+		font-weight: 400
+		letter-spacing: 0
+		color: var(--accent-text)
+
+	.seeds
+		justify-content: flex-end
+		.btn
+			padding: 2px 8px
+			font-size: 9.5px
+		.btn.clear
+			margin-left: auto
+			&:hover
+				color: var(--danger)
+				border-color: color-mix(in oklab, var(--danger) 45%, transparent)
+
+// --------------------------------------------
+//  THE ROSTER — `.roster` plus the three cells this window owns
+// --------------------------------------------
+
+.mgt2 .csroster
+	padding: 0 14px
+
+	.roster
+		// Fixed, so a long Traveller name cannot widen a column and push the gauges off the window.
+		table-layout: fixed
+		td
+			padding: 3px 6px
+			vertical-align: middle
+		th
+			padding: 4px 6px 3px
+
+	td.pin,
+	th.pin
+		width: 1.6rem
+		padding-right: 0
+		.lock
+			display: inline-block
+			width: 1.1rem
+			font-size: 11px
+			line-height: 1
+			text-align: center
+			color: var(--faint)
+			text-decoration: none
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
+		.lock.on
+			color: var(--accent-text)
+
+	.who
+		width: 22%
+		overflow: hidden
+		text-overflow: ellipsis
+		white-space: nowrap
+		a
+			text-decoration: none
+
+	// The gauge. One row dragged rescales the unlocked others in proportion, so the whole column
+	// moves together and the reading is the shape of the split rather than five separate numbers.
+	td.gauge,
+	th.gauge
+		width: 26%
+		input
+			display: block
+			width: 100%
+			height: 14px
+			margin: 0
+			accent-color: var(--accent-text)
+			cursor: var(--cursor-pointer)
+
+	td.pct,
+	th.pct,
+	td.cr,
+	th.cr
+		text-align: right
+		white-space: nowrap
+		input.f
+			height: auto
+			padding: 1px 4px
+			text-align: right
+			font-family: var(--mono)
+			font-size: 11.5px
+			font-variant-numeric: tabular-nums
+	td.pct,
+	th.pct
+		width: 4.4rem
+		input.f
+			width: 100%
+	td.cr,
+	th.cr
+		width: 7.4rem
+		// The unit rides beside the field rather than inside it: a `number` input carrying `Cr` in
+		// its own value is a string the referee has to retype around.
+		i.pre
+			margin-right: 3px
+			font-family: var(--cond)
+			font-size: 9px
+			font-style: normal
+			font-weight: 700
+			letter-spacing: 0.16em
+			text-transform: uppercase
+			color: var(--faint)
+		input.f
+			width: calc(100% - 1.7rem)
+
+	// What they have, beside what they owe. The shortfall is the number the referee is deciding
+	// about, so it sits under the purse rather than in a column of its own.
+	td.purse,
+	th.purse
+		width: 6.6rem
+		text-align: right
+		font-family: var(--mono)
+		font-size: 11px
+		font-variant-numeric: tabular-nums
+		color: var(--mute)
+		b
+			display: block
+			font-size: 10px
+			font-weight: 600
+			color: var(--danger)
+			&:empty
+				display: none
+
+	// The purse cannot cover the share. Not an error — folio 52 has an answer for it — but it is the
+	// one state on this window that a referee must not press through without seeing.
+	tr.short
+		td.purse
+			color: var(--danger)
+		td.cr input.f
+			color: var(--danger)
+
+	// This client cannot reach the sheet, so the credits would go nowhere. That one IS a refusal.
+	tr.lost td.who
+		color: var(--danger)
+
+	// Who took the credit the division could not split. Marked on the row as well as named in the
+	// foot, because the foot names it and the roster is where it is being read.
+	tr.orphan td.cr input.f
+		box-shadow: inset 0 -2px 0 var(--accent-line)
+
+	td.act,
+	th.act
+		width: 1.4rem
+		.x
+			font-size: 14px
+			line-height: 1
+			color: var(--faint)
+			text-decoration: none
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--danger)
+
+	tr.drop td .hint
+		font-style: italic
+		color: var(--faint)
+
+// --------------------------------------------
+//  THE FOOT — what it comes to, what rounding did, and who cannot pay
+// --------------------------------------------
+
+.mgt2 .csfoot
+	.tally
+		font-family: var(--cond)
+		font-size: 13px
+		font-weight: 700
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		font-variant-numeric: tabular-nums
+
+	.why
+		flex: 0 1 auto
+		min-width: 0
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		color: var(--faint)
+		&:empty
+			display: none
+	.why.bad
+		color: var(--danger)
+
+	.roundline .why
+		border-bottom: 1px dotted var(--accent-line)
+		color: var(--accent-text)
+
+	.shortline .btn
+		margin-left: auto
+		padding: 2px 9px
+		font-size: 9.5px
+
+	// The one press that writes. Set apart from the readings above it by a rule, because everything
+	// else on this window can be undone by moving a gauge and this cannot.
+	.csend
+		display: flex
+		align-items: center
+		gap: 10px
+		margin-top: 6px
+		padding-top: 6px
+		border-top: 1px solid var(--rule-soft)
+		.what
+			flex: 1 1 auto
+			min-width: 0
+			font-family: var(--cond)
+			font-size: 12px
+			font-weight: 700
+			letter-spacing: 0.1em
+			text-transform: uppercase
+		.btn.apply
+			flex: none
+			padding: 5px 20px
+			font-size: 11.5px
+
+// Narrow: the gauge is the reading and stays, and the columns a referee can recover from the
+// credits figure are the ones that go.
+@container creditsplit (max-width: 560px)
+	.mgt2 .csroster td.pct,
+	.mgt2 .csroster th.pct
+		display: none
+	.mgt2 .csform .seeds
+		justify-content: flex-start
+
+// --------------------------------------------
+//  THE CARD — the audit of the write
+// --------------------------------------------
+
+.mgt2.card.creditsplit
+	.ledger
+		width: 100%
+		padding: 4px 11px 8px
+		border-collapse: collapse
+		td
+			padding: 2px 0
+			border-bottom: 1px solid var(--rule-soft)
+		tr:last-child td
+			border-bottom: 0
+		.nm
+			font-family: var(--cond)
+			font-size: 12px
+			font-weight: 700
+			letter-spacing: 0.08em
+			text-transform: uppercase
+		.cr
+			width: 6rem
+			padding-left: 8px
+			font-family: var(--mono)
+			font-size: 12px
+			font-variant-numeric: tabular-nums
+			text-align: right
+		.dbt,
+		.aft
+			padding-left: 10px
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 600
+			letter-spacing: 0.1em
+			text-transform: uppercase
+			white-space: nowrap
+			text-align: right
+			color: var(--faint)
+		.dbt
+			color: var(--danger)
+		tr.short .nm
+			color: var(--danger)
+
+	.pipe
+		display: flex
+		gap: 10px
+		padding: 5px 11px 8px
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		color: var(--mute)
+		.hot
+			color: var(--danger)

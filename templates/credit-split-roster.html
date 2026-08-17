@@ -1,0 +1,70 @@
+{{! WHO PAYS — `.roster` from the kit, with the three columns this window owns.
+
+    The gauge, the percent and the credits are ONE control spelled three ways: each writes the same
+    share and the other two follow. That is what makes "Alice puts in Cr50000, split the rest" a
+    keystroke instead of a division done in the referee's head.
+
+    The rows are patched in place rather than re-rendered on every move — a range input replaced
+    mid-drag loses the pointer — so every live cell carries a `data-readout` or a `data-gauge`. }}
+<div class="csroster">
+	<table class="roster">
+		<thead>
+			<tr>
+				<th class="pin" aria-label="{{localize 'MGT2.CreditSplit.Lock'}}"></th>
+				<th>{{localize 'MGT2.CreditSplit.Traveller'}}</th>
+				<th class="gauge">{{localize 'MGT2.CreditSplit.Share'}}</th>
+				<th class="pct">%</th>
+				<th class="cr">{{localize 'MGT2.CreditSplit.Credits'}}</th>
+				<th class="purse">{{#if debit}}{{localize 'MGT2.CreditSplit.CashOnHand'}}{{else}}{{localize 'MGT2.CreditSplit.Purse'}}{{/if}}</th>
+				<th class="act"></th>
+			</tr>
+		</thead>
+		<tbody data-accept="{{rosterTypes}}">
+			{{#each rows as |row|}}
+			<tr data-row-id="{{row.id}}" data-accept="{{../rosterTypes}}"
+				class="{{#unless row.actor}}vacant{{/unless}}{{#if row.lost}} lost{{/if}}{{#if row.short}} short{{/if}}{{#if row.orphan}} orphan{{/if}}">
+				{{! The pin fixes THIS share against every other row's move. The row itself stays live,
+				    because re-pinning it is the same act as pinning it. }}
+				<td class="pin">
+					<a data-action="toggleLock" class="lock{{#if row.locked}} on{{/if}}"
+						data-tooltip="{{#if row.locked}}{{localize 'MGT2.CreditSplit.Unlock'}}{{else}}{{localize 'MGT2.CreditSplit.Lock'}}{{/if}}"><i
+						class="fa-solid {{#if row.locked}}fa-lock{{else}}fa-lock-open{{/if}}"></i></a>
+				</td>
+				<td class="who{{#if row.actor}} linked{{else}} plain{{/if}}">
+					{{#if row.actor}}<a data-action="openDocument" data-uuid="{{row.uuid}}">{{row.name}}</a>
+					{{else}}<em>{{row.name}}</em>{{/if}}
+				</td>
+				<td class="gauge">
+					<input type="range" min="0" max="100" step="0.1" value="{{row.percent}}"
+						data-gauge="share" data-row="{{row.id}}" aria-label="{{row.name}}" />
+				</td>
+				<td class="pct">
+					<input class="f n" type="number" min="0" max="100" step="0.1"
+						value="{{row.percent}}" data-gauge="percent" data-row="{{row.id}}"
+						aria-label="{{localize 'MGT2.CreditSplit.Share'}}" />
+				</td>
+				<td class="cr">
+					<i class="pre">Cr</i><input class="f n" type="number" min="0" step="1"
+						value="{{row.amount}}" data-gauge="credits" data-row="{{row.id}}"
+						aria-label="{{localize 'MGT2.CreditSplit.Credits'}}" />
+				</td>
+				{{! What they have, beside what they owe. On a debit a purse that cannot cover the
+				    share is marked here and the difference becomes debt at the write — Core folio 52's
+				    rule, and the only outcome the books print for a Traveller who cannot pay. }}
+				<td class="purse">
+					<span data-readout="purse">{{#if row.cashDisplay}}{{row.cashDisplay}}{{else}}&mdash;{{/if}}</span>
+					<b data-readout="shortfall" data-tooltip="{{localize 'MGT2.CreditSplit.ShortHint'}}">{{#if row.short}}{{row.shortfallDisplay}}{{/if}}</b>
+				</td>
+				<td class="act">
+					<a data-action="dropRow" class="x" data-tooltip="{{localize 'MGT2.CreditSplit.Remove'}}">&times;</a>
+				</td>
+			</tr>
+			{{/each}}
+			{{! One cell across the whole width: split over the columns above, the hint lands in a cell
+			    sized to a `×` and wraps to three lines. }}
+			<tr class="vacant drop" data-accept="{{rosterTypes}}">
+				<td colspan="7"><span class="hint">{{localize 'MGT2.CreditSplit.DropActor'}}</span></td>
+			</tr>
+		</tbody>
+	</table>
+</div>

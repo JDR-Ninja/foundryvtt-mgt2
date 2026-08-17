@@ -9,6 +9,8 @@ export const preloadHandlebarsTemplates = async function() {
     "systems/mgt2/templates/roll-prompt.html",
     "systems/mgt2/templates/chat/roll.html",
     "systems/mgt2/templates/chat/request.html",
+    "systems/mgt2/templates/chat/credit-split.html",
+    "systems/mgt2/templates/chat/trade-lot.html",
     "systems/mgt2/templates/actors/actor-config-sheet.html",
     "systems/mgt2/templates/actors/actor-config-characteristic-sheet.html",
     "systems/mgt2/templates/actors/actor-damage-sheet.html",

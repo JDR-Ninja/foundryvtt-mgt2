@@ -1,0 +1,48 @@
+{{! The sum and which way it goes. Gutter rows throughout — `.pline` / `.pgut` / `.pfields`, the
+    arbitrated shape for every small dialog — and the direction as a `.seg` strip.
+
+    This part renders ONCE: everything under it is a reading of it, and its own two live readouts are
+    patched by hand. No control carries an unprefixed name — these radios sit in no <form>, so a group
+    named `direction` would merge with any other form-less `direction` radios in the document. }}
+<div class="pdlg csform">
+
+	{{! Debit and credit are not symmetrical and the strip does not pretend they are: a debit reads
+	    every purse and can end in debt, a credit reads none and repays none. }}
+	<div class="pline" role="group" aria-label="{{localize 'MGT2.CreditSplit.Sum'}}">
+		<span class="pgut">{{localize 'MGT2.CreditSplit.Sum'}}</span>
+		<div class="pfields">
+			<span class="numunit sum">
+				<i class="pre">Cr</i>
+				<input class="f n" type="number" min="0" step="1" name="{{field}}Total"
+					value="{{total}}" aria-label="{{localize 'MGT2.CreditSplit.Sum'}}" />
+			</span>
+			<span class="seg" data-name="{{field}}Direction" role="radiogroup"
+				aria-label="{{localize 'MGT2.CreditSplit.Way'}}">
+				{{#each directions as |d|}}
+				<label data-tooltip="{{d.hint}}"><input type="radio" name="{{../field}}Direction"
+					value="{{d.key}}"{{#if d.active}} checked{{/if}} /><span>{{d.label}}</span></label>
+				{{/each}}
+			</span>
+			<input class="f wide" type="text" name="{{field}}Reason" value="{{reason}}"
+				placeholder="{{localize 'MGT2.CreditSplit.ReasonPlaceholder'}}"
+				aria-label="{{localize 'MGT2.CreditSplit.Reason'}}" />
+		</div>
+	</div>
+
+	{{! The three seeds plus EVEN, as controls rather than a menu: at 720 px there is room, and a menu
+	    is a component this system does not have. Dropping a Traveller on the table is the fourth seed,
+	    and dropping a ship is the crew roster — which is the ship picker this window does not build. }}
+	<div class="pline wholine" role="group" aria-label="{{localize 'MGT2.CreditSplit.Who'}}">
+		<span class="pgut">{{localize 'MGT2.CreditSplit.Who'}}<b data-readout="asked">{{rows.length}}</b></span>
+		<div class="pfields seeds">
+			<button type="button" class="btn" data-action="seedControlled">{{localize 'MGT2.CreditSplit.AddControlled'}}</button>
+			<button type="button" class="btn" data-action="seedParty">{{localize 'MGT2.CreditSplit.AddParty'}}</button>
+			<button type="button" class="btn" data-action="seedCrew"
+				data-tooltip="{{localize 'MGT2.CreditSplit.AddCrewHint'}}"
+				{{#unless hasShip}}disabled{{/unless}}>{{localize 'MGT2.CreditSplit.AddCrew'}}</button>
+			<button type="button" class="btn" data-action="evenSplit"
+				data-tooltip="{{localize 'MGT2.CreditSplit.EvenHint'}}">{{localize 'MGT2.CreditSplit.Even'}}</button>
+			<button type="button" class="btn clear" data-action="clearRoster">{{localize 'MGT2.CreditSplit.ClearRoster'}}</button>
+		</div>
+	</div>
+</div>

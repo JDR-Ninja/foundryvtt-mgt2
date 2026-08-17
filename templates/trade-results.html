@@ -14,6 +14,13 @@
 			{{#each codes as |code|}}<span class="code{{#if code.zone}} zone{{/if}}">{{localize code.label}}</span>{{else}}<span class="none">{{localize 'MGT2.Trade.NoCodes'}}</span>{{/each}}
 			<span class="terms">{{#each search.terms as |term|}}<span class="dm {{term.tone}}">{{term.label}} {{showDM term.dm}}</span>{{/each}}</span>
 		</div>
+		{{! The search already made, read against the count it was rolled at — stamping the world moves
+		    that count, and a reading re-derived from now would worsen the roll that earned it. }}
+		{{#if searched}}
+		<p class="hint">
+			{{~#if searched.found}}{{localize 'MGT2.Trade.SearchFound' roll=searched.roll dm=(showDM searched.dm) total=searched.total target=searched.target effect=(showDM searched.effect)}}{{else}}{{localize 'MGT2.Trade.SearchMissed' roll=searched.roll dm=(showDM searched.dm) total=searched.total target=searched.target}}{{/if~}}
+		</p>
+		{{/if}}
 	</div>
 
 	{{! THE SHELF. Common goods plus whatever the codes match, and the two DM columns side by side —
@@ -99,17 +106,81 @@
 			{{/each}}
 		</div>
 		<p class="hint">{{localize 'MGT2.Trade.LotLine' size=lot.size base=lot.basePrice}}</p>
+		{{! What the lot actually costs, once both the tonnage and the percentage are on the table.
+		    The capacity clause WARNS and never refuses: a lot cannot be broken up (Core p.241), so a
+		    hold with room for part of it has room for none of it — which is a legal purchase and a
+		    problem for the crew, not for this screen. }}
+		{{#if offer}}
+		<p class="hint{{#if offer.overFree}} bad{{/if}}">
+			{{localize 'MGT2.Trade.BuyLine' tons=offer.tons percent=offer.percent credits=offer.credits}}
+			{{#if offer.blocked}}{{localize offer.blocked}}{{/if}}
+			{{#if offer.overHold}}{{localize 'MGT2.Trade.HoldTooSmall' tons=offer.tons capacity=offer.capacity}}
+			{{else if offer.overFree}}{{localize 'MGT2.Trade.HoldTight' tons=offer.tons free=offer.free}}{{/if}}
+		</p>
+		{{/if}}
 		{{/if}}
 	</div>
+
+	{{! THE HOLD — the other half of the same counter (Core p.241): a crew sells what is aboard and
+	    buys the next cargo at one stop. Each lot is priced off its OWN stored Sale DM column against
+	    this market's codes, because the row selected above is what the crew is buying and not what it
+	    is carrying. A freight consignment is listed and never offered: it is carried for a fare
+	    (Core p.239) and is not the crew's to sell. }}
+	{{#if hold.linked}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Trade.InTheHold'}}</h3>
+			<span class="count">{{localize 'MGT2.Trade.HoldCount' n=lots.length used=hold.used capacity=hold.capacity}}</span>
+		</div>
+		{{#if lots.length}}
+		<div class="shelf hold">
+			<div class="r hdr">
+				<span class="nm">{{localize 'MGT2.Trade.LotColumn'}}</span>
+				<span class="sz">{{localize 'MGT2.Trade.Tons'}}</span>
+				<span class="d">{{localize 'MGT2.Trade.SaleDM'}}</span>
+				<span class="pc">%</span>
+				<span class="cr">{{localize 'MGT2.Trade.Fetches'}}</span>
+				<span class="act"></span>
+			</div>
+			{{#each lots as |lot|}}
+			<div class="r{{#unless lot.speculative}} frt{{/unless}}{{#if lot.over}} bad{{/if}}"
+			     {{#unless lot.speculative}}data-tooltip="{{localize 'MGT2.Trade.FreightLot'}}"{{/unless}}>
+				<span class="nm">{{lot.name}}</span>
+				<span class="sz">{{lot.tons}}</span>
+				<span class="d {{lot.sale.tone}}">{{showDM lot.sale.dm}}</span>
+				<span class="pc">{{#if lot.percent}}{{lot.percent}}%{{else}}&mdash;{{/if}}</span>
+				<span class="cr">{{#if lot.total}}{{lot.credits}}{{else}}&mdash;{{/if}}</span>
+				<span class="act">
+					{{~#unless ../card}}<button type="button" class="btn sell" data-action="sellLot"
+					        data-lot="{{lot.id}}" {{disabled (not lot.sellable)}}>{{localize 'MGT2.Trade.SellLot'}}</button>{{/unless~}}
+				</span>
+			</div>
+			{{/each}}
+		</div>
+		{{#unless card}}{{#unless canTrade}}<p class="hint">{{localize 'MGT2.Trade.RefereeTrades'}}</p>{{/unless}}{{/unless}}
+		{{else}}
+		<p class="hint">{{localize 'MGT2.Trade.HoldEmpty'}}</p>
+		{{/if}}
+	</div>
+	{{/if}}
 	{{/unless}}
 
-	{{! Absent on the chat card, which is this same readout with nothing left to press. }}
+	{{! Absent on the chat card, which is this same readout with nothing left to press. The row is the
+	    stop in order: find the supplier, see the shelf, hear the price, and pay it or walk. Only the
+	    first and the last touch a document, and only when one is in the slot. }}
 	{{#unless card}}
 	<div class="foot">
+		<button type="button" class="btn hot" data-action="rollSearch">{{localize 'MGT2.Trade.RollSearch'}}</button>
 		<button type="button" class="btn hot" data-action="rollStock">{{localize 'MGT2.Trade.RollShelf'}}</button>
 		<button type="button" class="btn hot" data-action="rollPrice">{{localize 'MGT2.Trade.RollPrice'}}</button>
+		{{! ONE press: the crew is debited through the split screen, and the lot lands in the hold. }}
+		<button type="button" class="btn hot" data-action="buyLot" {{disabled (not offer.ready)}}
+		        data-tooltip="{{localize 'MGT2.Trade.BuyHint'}}">{{localize 'MGT2.Trade.BuyLot'}}</button>
+		<button type="button" class="btn" data-action="walkAway" {{disabled (not canWrite)}}>{{localize 'MGT2.Trade.WalkAway'}}</button>
 		<button type="button" class="btn" data-action="post" {{#unless canPost}}disabled{{/unless}}>{{localize 'MGT2.Trade.Post'}}</button>
-		<span class="why">{{localize 'MGT2.Trade.NoDocument'}}</span>
+		<span class="why">
+			{{~#if canWrite}}{{localize 'MGT2.Trade.WritesBack' world=slot.name}}{{else if linked}}{{localize 'MGT2.Trade.RefereeWrites' world=slot.name}}{{else}}{{localize 'MGT2.Trade.NoDocument'}}{{/if~}}
+		</span>
 	</div>
 	{{/unless}}
 </div>

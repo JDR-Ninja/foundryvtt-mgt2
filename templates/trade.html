@@ -1,9 +1,43 @@
 <div class="hd">
 	<h2>{{localize 'MGT2.Trade.Speculative'}}</h2>
 
+	{{! THE TWO SLOTS. A dropped world FILLS the fields below rather than replacing them — a table with
+	    no documents at all still gets every DM — and what the handle buys is the write-back: the
+	    search stamp (Core p.241) and the refusal (Core p.243) are the only two facts of a stop that
+	    outlive it. The hull is read and never written; it is here for the hold a purchase must fit. }}
+	<div class="slots">
+		<div class="slot{{#unless slot.linked}} vacant{{/unless}}" data-accept="{{worldType}}" data-slot="world">
+			<span class="role">{{localize 'MGT2.Trade.WorldSlot'}}</span>
+			{{#if slot.linked}}
+			<b data-uuid="{{slot.uuid}}" data-action="openDocument">{{slot.name}}</b>
+			<span class="uwp">{{slot.profile}}{{#if slot.codes}} &middot; {{slot.codes}}{{/if}}</span>
+			<span class="st{{#if slot.closedUntil}} shut{{/if}}">
+				{{~#if slot.closedUntil}}{{localize 'MGT2.Actor.world.ShutUntil' day=slot.closedUntil}}{{else}}{{localize 'MGT2.Trade.SearchedHere' n=slot.attempts dm=(showDM slot.searchDM)}}{{/if~}}
+			</span>
+			<a class="rm" data-action="slotClear" data-slot="world" data-tooltip="{{localize 'MGT2.Trade.ClearSlot'}}"><i class="fa-solid fa-xmark"></i></a>
+			{{else}}
+			<b>{{localize 'MGT2.Trade.DropWorld'}}</b>
+			<span class="uwp">{{localize 'MGT2.Trade.TypedInstead'}}</span>
+			{{/if}}
+		</div>
+
+		<div class="slot{{#unless hold.linked}} vacant{{/unless}}" data-accept="{{shipType}}" data-slot="ship">
+			<span class="role">{{localize 'MGT2.Trade.ShipSlot'}}</span>
+			{{#if hold.linked}}
+			<b data-uuid="{{hold.uuid}}" data-action="openDocument">{{hold.name}}</b>
+			<span class="uwp">{{localize 'MGT2.Trade.Hold' used=hold.used capacity=hold.capacity}}</span>
+			<span class="st{{#if hold.over}} shut{{/if}}">{{localize 'MGT2.Trade.HoldFree' tons=hold.free}}</span>
+			<a class="rm" data-action="slotClear" data-slot="ship" data-tooltip="{{localize 'MGT2.Trade.ClearSlot'}}"><i class="fa-solid fa-xmark"></i></a>
+			{{else}}
+			<b>{{localize 'MGT2.Trade.DropShip'}}</b>
+			<span class="uwp">{{localize 'MGT2.Trade.ShipHint'}}</span>
+			{{/if}}
+		</div>
+	</div>
+
 	{{! One world, not two: traffic is a route and a market is a counter. No field carries a `name` —
-	    the dialog owns no document and submits nowhere, and the per-planet month state it would
-	    otherwise want already lives on the `world` Actor. }}
+	    the dialog submits nowhere, and the per-planet month state it would otherwise want lives on
+	    the `world` Actor, typed here only when none is in the slot above. }}
 	<div class="inputs">
 		<div class="end">
 			<label class="fld world">
@@ -31,9 +65,12 @@
 				<span>{{localize 'MGT2.Trade.OtherBroker'}}</span>
 				<input class="f n" type="number" step="1" data-field="otherBroker" value="{{input.otherBroker}}" />
 			</label>
-			<label class="fld">
+			{{! One counter or two: a world in the slot owns the count, and typing a second one beside
+			    it is what stamps a single search twice. }}
+			<label class="fld{{#if slot.linked}} lent{{/if}}"{{#if slot.linked}} data-tooltip="{{localize 'MGT2.Trade.AttemptsFromWorld' world=slot.name}}"{{/if}}>
 				<span>{{localize 'MGT2.Trade.Attempts'}}</span>
-				<input class="f n" type="number" step="1" min="0" data-field="attempts" value="{{input.attempts}}" />
+				<input class="f n" type="number" step="1" min="0" data-field="attempts" value="{{input.attempts}}"
+				       {{disabled slot.linked}} />
 			</label>
 			{{! Blank is "nobody bans this", which is not the same statement as Law Level 0. }}
 			<label class="fld">

@@ -89,7 +89,10 @@
 				</span>
 			</div>
 		</div>
+		{{! The screen seeded with this world, because the two buttons below are the same two acts it
+		    makes — and a retyped profile silently changes every DM on that page. }}
 		<div class="vacts">
+			<button type="button" class="btn hot" data-action="tradeScreen">{{localize 'MGT2.Actor.world.TradeHere'}}</button>
 			<button type="button" class="btn" data-action="searchRecord">{{localize 'MGT2.Actor.world.RecordSearch'}}</button>
 			<button type="button" class="btn" data-action="searchClear" {{disabled (not world.trade.attempts)}}>{{localize 'MGT2.Actor.world.ClearSearches'}}</button>
 			<button type="button" class="btn" data-action="supplierRefuse">{{localize 'MGT2.Actor.world.Refuse'}}</button>

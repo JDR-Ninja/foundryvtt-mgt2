@@ -1880,6 +1880,7 @@
         "ClearSearches": "Effacer les recherches",
         "Refuse": "Quitter la table",
         "ClearRefusal": "Effacer le refus",
+        "TradeHere": "Commercer ici",
         "FIELDS": {
           "uwp": {
             "starport": {
@@ -2910,7 +2911,7 @@
       "Attempts": "Recherches ce mois-ci",
       "BannedAt": "Interdit au niveau de loi",
       "BlackMarket": "Fournisseur du marché noir",
-      "NeedAWorld": "Saisissez un profil : les codes commerciaux, et tout ce qui s'en déduit, en viennent.",
+      "NeedAWorld": "Déposez un monde ci-dessus, ou saisissez un profil : les codes commerciaux, et tout ce qui s'en déduit, en viennent.",
       "Codes": "Codes commerciaux ici",
       "NoCodes": "aucun code — marchandises communes seulement",
       "SearchLine": "trouver un fournisseur : {dm} contre {target}+",
@@ -2932,6 +2933,51 @@
       "RollPrice": "Lancer les deux prix",
       "At": "{world} · {goods}",
       "MarketGloss": "astroport {port} · pop {pop} · loi {law}",
+      "WorldSlot": "Monde",
+      "ShipSlot": "Vaisseau",
+      "DropWorld": "Déposez un monde",
+      "DropShip": "Déposez un vaisseau",
+      "TypedInstead": "ou saisissez le profil ci-dessous",
+      "ShipHint": "pour la soute où devra tenir un lot",
+      "ClearSlot": "Retirer de l'emplacement",
+      "SearchedHere": "{n} recherches ce mois-ci · {dm}",
+      "Hold": "soute {used} / {capacity} t",
+      "HoldFree": "{tons} t libres",
+      "AttemptsFromWorld": "Le compte est celui de {world} — chaque recherche faite ici ce mois-ci, inscrite sur le document.",
+      "RollSearch": "Trouver un fournisseur",
+      "SearchFound": "Fournisseur trouvé — {roll} {dm} = {total} contre {target}+, Effet {effect}.",
+      "SearchMissed": "Aucun fournisseur — {roll} {dm} = {total}, il fallait {target}+.",
+      "WalkAway": "Quitter la table",
+      "WritesBack": "la recherche et le refus sont inscrits sur {world} ; rien d'autre n'est enregistré",
+      "RefereeWrites": "{world} appartient au MJ — rien ici n'y écrit",
+      "BuyLot": "Acheter le lot",
+      "BuyHint": "L'équipage est débité d'abord, par l'écran de partage ; le lot arrive en soute ensuite. Annuler le partage n'achète rien.",
+      "BuyLine": "Ce lot : {tons} t pour {credits} Cr, à {percent} % de la base.",
+      "LotTaken": "Le stock de ce fournisseur est écoulé.",
+      "NeedAShip": "Déposez un vaisseau ci-dessus : un lot s'achète dans une soute.",
+      "NoneInStock": "Le fournisseur n'en a pas — le tonnage est tombé à zéro.",
+      "RefereeTrades": "L'achat et la vente reviennent au MJ : tous deux déplacent les bourses de l'équipage et écrivent sur le vaisseau.",
+      "HoldTight": "{tons} t pour {free} t libres — la soute passe en surcharge, et un lot ne peut pas être divisé.",
+      "HoldTooSmall": "{tons} t pour une soute de {capacity} t — ce lot ne tiendra jamais dans cette coque, et un lot ne peut pas être divisé.",
+      "InTheHold": "En soute",
+      "HoldCount": "{n} lots · {used} / {capacity} t",
+      "HoldEmpty": "La soute est vide — rien à vendre à ce comptoir.",
+      "LotColumn": "Lot",
+      "Fetches": "Rapporte",
+      "SellLot": "Vendre",
+      "FreightLot": "Cargaison transportée contre un fret — elle n'appartient pas à l'équipage.",
+      "BuyReason": "{tons} t de {goods} achetées à {world}, à {percent} % de la base.",
+      "SellReason": "{tons} t de {goods} vendues à {world}, à {percent} % de la base.",
+      "Card": {
+        "Bought": "Cargaison achetée",
+        "Sold": "Cargaison vendue",
+        "Lot": "{tons} t de {goods} à {percent} % d'une base de {base} Cr — {credits} Cr.",
+        "Hold": "{ship} · soute {used} / {capacity} t",
+        "Over": "soute en surcharge — un lot ne peut pas être divisé"
+      },
+      "Errors": {
+        "LotFailed": "{goods} n'a pas pu être arrimé : l'équipage a déjà payé, ajoutez donc le lot en soute à la main."
+      },
       "Side": {
         "purchase": "Achat",
         "sale": "Vente"
@@ -3833,6 +3879,65 @@
           "name": "Demandes de jet : me signaler leur arrivée",
           "hint": "Ce qui se passe sur votre écran quand l'Arbitre vous demande un test. Le clignotement ne fait pas défiler le journal. Réglage personnel, et rien n'est perdu s'il ne vous parvient jamais — la demande est déjà dans votre discussion."
         }
+      }
+    },
+    "CreditSplit": {
+      "Title": "Transfert de crédits",
+      "Sum": "Somme",
+      "Way": "Sens",
+      "Reason": "Motif",
+      "ReasonPlaceholder": "À quoi sert cet argent — repris sur la carte de discussion",
+      "Who": "Qui",
+      "Traveller": "Voyageur",
+      "Share": "Part",
+      "Credits": "Crédits",
+      "Purse": "Bourse",
+      "CashOnHand": "Crédits en main",
+      "Assigned": "Réparti",
+      "Rounding": "Arrondi",
+      "Short": "À découvert",
+      "AddControlled": "+ Sélection",
+      "AddParty": "+ Équipe",
+      "AddCrew": "+ Équipage",
+      "AddCrewHint": "L'équipage du vaisseau pour lequel ce transfert a été ouvert. Déposez un vaisseau sur la liste pour viser une autre coque.",
+      "Even": "Égaliser",
+      "EvenHint": "Des parts égales sur les lignes non verrouillées, de ce que les lignes verrouillées laissent. Ajouter ou retirer un Voyageur fait de même : verrouillez une part que vous voulez protéger.",
+      "ClearRoster": "Vider",
+      "DropActor": "Déposez un Voyageur ici, ou un vaisseau pour en prendre l'équipage.",
+      "Remove": "Retirer de la liste",
+      "Lock": "Fixer cette part — le déplacement d'une autre ligne ne la changera plus",
+      "Unlock": "Libérer cette part",
+      "ShortHint": "Plus que ce que ce Voyageur possède. La différence devient une dette au moment du transfert.",
+      "OfTotal": "Cr{assigned} sur Cr{total}",
+      "Unassigned": "Cr{credits} non répartis",
+      "Orphans": "Cr{credits} à {names}",
+      "RoundingHint": "Les crédits entiers ne se divisent pas toujours. Ce que la division laisse va, un crédit à la fois, à la plus grande fraction perdue, puis à la plus grande part, puis dans l'ordre de la liste — Cr1000 en trois donne donc 334/333/333 et jamais 333/333/333.",
+      "DebtLine": "Cr{credits} deviendraient une dette, sur {n} d'entre eux",
+      "Cover": "Combler le manque",
+      "CoverHint": "Reporte ce que les payeurs à découvert ne peuvent pas couvrir sur les payeurs non verrouillés qui ont le liquide. Une part verrouillée n'est jamais déplacée, dans un sens comme dans l'autre.",
+      "Direction": {
+        "debit": "Débiter",
+        "credit": "Créditer"
+      },
+      "DirectionHint": {
+        "debit": "Prélever la somme sur leurs bourses. Ce qu'un Voyageur ne peut pas payer devient une dette (Livre de base folio 52).",
+        "credit": "Verser la somme sur leurs bourses. Rien ne rembourse une dette tout seul — aucun livre n'imprime cette règle."
+      },
+      "What": {
+        "debit": "Débiter Cr{credits} à {n}",
+        "credit": "Créditer Cr{credits} à {n}"
+      },
+      "Card": {
+        "Debt": "Cr{credits} en dette",
+        "Left": "Cr{credits} restants",
+        "DebtTotal": "Cr{credits} portés en dette"
+      },
+      "Errors": {
+        "GMOnly": "Le transfert de crédits est la fenêtre de l'Arbitre.",
+        "NoRoster": "Personne n'est sur la liste. Déposez-y un Voyageur, ou remplissez-la depuis les jetons, l'équipe ou l'équipage d'un vaisseau.",
+        "NoSum": "Saisissez d'abord la somme à transférer.",
+        "Unreachable": "Un Voyageur de la liste est inaccessible d'ici : sa part n'irait nulle part.",
+        "Unassigned": "La répartition ne fait pas la somme. Déplacez une jauge, ou libérez un verrou."
       }
     },
     "Errors": {

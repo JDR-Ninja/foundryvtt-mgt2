@@ -1,5 +1,6 @@
 import { MGT2 } from "../config.js";
 import { SheetModeMixin } from "../sheet-mode.js";
+import { SpecTradeDialog } from "../trade.js";
 import { WorldData } from "./world-data.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -48,7 +49,8 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
             searchRecord: WorldActorSheet.#onSearchRecord,
             searchClear: WorldActorSheet.#onSearchClear,
             supplierRefuse: WorldActorSheet.#onSupplierRefuse,
-            supplierClear: WorldActorSheet.#onSupplierClear
+            supplierClear: WorldActorSheet.#onSupplierClear,
+            tradeScreen: WorldActorSheet.#onTradeScreen
         }
     };
 
@@ -279,31 +281,35 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
     }
 
     /**
-     * A search is stamped with the day it happened, never counted: Core p.241's DM-1 per previous
-     * attempt this month is then a filter, with no counter to clear at a month boundary.
+     * The four supplier writes are the model's, because the speculative trade screen makes two of
+     * them too and a second implementation would double-stamp.
      * @this {WorldActorSheet}
      */
     static async #onSearchRecord() {
-        const day = game.settings.get("mgt2", "campaignDay");
-        return this.actor.update({
-            "system.trade.attempts": [...this.actor.system.trade.attempts, day]
-        });
+        return this.actor.system.recordSearch(game.settings.get("mgt2", "campaignDay"));
     }
 
     /** @this {WorldActorSheet} */
     static async #onSearchClear() {
-        return this.actor.update({ "system.trade.attempts": [] });
+        return this.actor.system.clearSearches();
     }
 
-    /** "Cannot deal with that supplier again for at least a month" (Core p.243). @this {WorldActorSheet} */
+    /** @this {WorldActorSheet} */
     static async #onSupplierRefuse() {
-        return this.actor.update({
-            "system.trade.refusedOn": game.settings.get("mgt2", "campaignDay")
-        });
+        return this.actor.system.refuseSupplier(game.settings.get("mgt2", "campaignDay"));
     }
 
     /** @this {WorldActorSheet} */
     static async #onSupplierClear() {
-        return this.actor.update({ "system.trade.refusedOn": null });
+        return this.actor.system.clearRefusal();
+    }
+
+    /**
+     * The market, opened on this world rather than on a retyped profile — a mistyped digit silently
+     * changes every DM on that page, and the two write-backs need the document anyway.
+     * @this {WorldActorSheet}
+     */
+    static #onTradeScreen() {
+        return SpecTradeDialog.open({ world: this.actor });
     }
 }

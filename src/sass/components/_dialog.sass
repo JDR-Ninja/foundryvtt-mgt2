@@ -753,12 +753,76 @@
 			text-transform: uppercase
 			border: none
 
+	// THE TWO DROP SLOTS. A dropped document FILLS the typed values below rather than replacing them,
+	// so the strip is a readout with a handle on it — and a vacant slot costs the screen nothing,
+	// which is what keeps a table with no documents at all working. The `.over` / `.deny` states come
+	// off the shared drop-feedback rules in the kit.
+	.slots
+		display: grid
+		grid-template-columns: repeat(2, minmax(0, 1fr))
+		gap: 9px 14px
+
+		.slot
+			position: relative
+			display: flex
+			flex-direction: column
+			gap: 1px
+			min-width: 0
+			padding: 5px 24px 6px 9px
+			border: 1px solid var(--rule)
+			> span,
+			b
+				overflow: hidden
+				text-overflow: ellipsis
+				white-space: nowrap
+			.role
+				font-family: var(--cond)
+				font-size: 9px
+				font-weight: 700
+				letter-spacing: 0.15em
+				text-transform: uppercase
+				color: var(--faint)
+			b
+				font-family: var(--cond)
+				font-size: 13px
+				font-weight: 700
+				letter-spacing: 0.06em
+			b[data-action]
+				color: var(--accent-text)
+				cursor: var(--cursor-pointer)
+			.uwp,
+			.st
+				font-family: var(--mono)
+				font-size: 9.5px
+				color: var(--faint)
+			.st.shut
+				color: var(--danger)
+			.rm
+				position: absolute
+				top: 4px
+				right: 6px
+				font-size: 11px
+				color: var(--faint)
+				cursor: var(--cursor-pointer)
+				&:hover
+					color: var(--danger)
+
+		.slot.vacant
+			border-style: dashed
+			b
+				color: var(--faint)
+
 	// The seven typed values, in the order a referee has them to hand: the two ends first, because
 	// every DM below is read off them twice.
 	.inputs
 		display: grid
 		grid-template-columns: repeat(2, minmax(0, 1fr))
 		gap: 9px 14px
+
+		// A field the document in the slot owns: it still prints the number that drives the DM, and
+		// typing a second one beside it is what would stamp a single search twice.
+		.fld.lent > span
+			color: var(--accent-text)
 
 		// A profile, and the travel zone a sector table prints beside it rather than inside it.
 		.end
@@ -1133,6 +1197,30 @@
 		.r.none .sz
 			color: var(--faint)
 
+	// THE HOLD, on the shelf's own shape because it is the same reading from the other side: what is
+	// aboard, scored against this market's codes. The last cell is the act, so the row is not itself
+	// clickable — a misclick on the shelf costs a re-read and a misclick here would sell a cargo.
+	.shelf.hold
+		.r
+			grid-template-columns: minmax(0, 1fr) 3.6rem 3rem 3.4rem 6.4rem 4.4rem
+			cursor: default
+		.pc
+			font-family: var(--mono)
+			font-size: 10.5px
+			font-variant-numeric: tabular-nums
+			text-align: right
+		.act
+			text-align: right
+		.btn.sell
+			padding: 1px 8px
+			font-size: 10px
+		// A freight consignment is carried for a fare and is not the crew's to sell, so it is listed
+		// and never priced: the hold reads whole while only speculation is on the block.
+		.r.frt .nm,
+		.r.frt .pc,
+		.r.frt .cr
+			color: var(--faint)
+
 	.sect.sub
 		margin-top: 8px
 
@@ -1179,6 +1267,7 @@
 	// The windows are drawn at 760 and 780px; under 700 the paired layouts stack rather than squeeze,
 	// and the shelf drops the two columns that are readable from the goods name alone.
 	@container (max-width: 700px)
+		.slots,
 		.inputs
 			grid-template-columns: minmax(0, 1fr)
 		.inputs .row4
@@ -1192,3 +1281,10 @@
 			grid-template-columns: 2.2rem minmax(0, 1fr) 4.2rem 3rem 3rem
 		.shelf .cr
 			display: none
+		// The hold drops the percentage instead: its money column IS the answer, not a reference.
+		.shelf.hold .r
+			grid-template-columns: minmax(0, 1fr) 3.6rem 3rem 6.4rem 4.4rem
+		.shelf.hold .pc
+			display: none
+		.shelf.hold .cr
+			display: block

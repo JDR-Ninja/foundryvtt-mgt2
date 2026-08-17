@@ -161,6 +161,34 @@ export class WorldData extends foundry.abstract.TypeDataModel {
     }
 
     /* -------------------------------------------- */
+    /*  Supplier state                              */
+    /* -------------------------------------------- */
+
+    /**
+     * A search is stamped with the day it happened, never counted: Core p.241's DM−1 per previous
+     * attempt this month is then a filter over the stamps, with no counter to clear at a month
+     * boundary. The four writers live on the model rather than on the sheet because the speculative
+     * trade screen makes the same two acts, and one rule may not have two implementations.
+     * @param {number} day   `mgt2.campaignDay`
+     */
+    async recordSearch(day) {
+        return this.parent.update({ "system.trade.attempts": [...this.trade.attempts, day] });
+    }
+
+    async clearSearches() {
+        return this.parent.update({ "system.trade.attempts": [] });
+    }
+
+    /** "Cannot deal with that supplier again for at least a month" (Core p.243). */
+    async refuseSupplier(day) {
+        return this.parent.update({ "system.trade.refusedOn": day });
+    }
+
+    async clearRefusal() {
+        return this.parent.update({ "system.trade.refusedOn": null });
+    }
+
+    /* -------------------------------------------- */
     /*  Document Lifecycle                          */
     /* -------------------------------------------- */
 

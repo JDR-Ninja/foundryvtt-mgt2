@@ -31,7 +31,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
   /**
    * The Item types this sheet accepts on a drop, declared so a subclass can say what it takes
-   * instead of the inventory's list being the system's (§9.133).
+   * instead of the inventory's list being the system's (§9.135).
    *
    * This one is the **inventory**: everything a Traveller can be carrying. A ship's parts are not
    * on it, which is why `SpacecraftActorSheet` declares its own — and why `component`, `cargo`,

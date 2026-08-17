@@ -1,0 +1,20 @@
+{{! Pinned light like every other card: Foundry hard-codes `themed theme-light` on ol.chat-log.
+
+    The transfer is NOT here. `credit-split.html` posted it a moment earlier and named every share,
+    every shortfall and every purse; this card carries the lot, and repeats none of that — the
+    tonnage, the percentage of base it went at, and the hold it arrived in or left. }}
+<div class="mgt2 theme-light card spectrade">
+	<div class="chd">
+		<div class="what">
+			<h4>{{localize title}}</h4>
+			<span class="tgt">{{where}}</span>
+		</div>
+	</div>
+	<p class="bare">{{localize 'MGT2.Trade.Card.Lot' tons=tons goods=goods percent=percent base=base credits=credits}}</p>
+	{{! Core p.241: a lot cannot be broken up, so an overfull hold is a fact the table has to solve
+	    rather than something the purchase could have refused. }}
+	<div class="pipe">
+		<span>{{localize 'MGT2.Trade.Card.Hold' ship=ship used=used capacity=capacity}}</span>
+		{{#if over}}<span class="hot">{{localize 'MGT2.Trade.Card.Over'}}</span>{{/if}}
+	</div>
+</div>

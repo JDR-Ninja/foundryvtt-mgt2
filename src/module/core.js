@@ -38,6 +38,7 @@ import { FleetCombatScreen, registerFleetCombatScreen } from "./fleet-screen.js"
 import { CompendiumExplorer, registerCompendiumExplorer } from "./compendium-explorer.js";
 import { registerStopTraffic, StopTrafficDialog } from "./stop-traffic.js";
 import { registerSpecTrade, SpecTradeDialog } from "./trade.js";
+import { CreditSplit, registerCreditSplit } from "./credit-split.js";
 import { registerVoyageScreen } from "./voyage-screen.js";
 import {
   postRequest,
@@ -331,6 +332,10 @@ Hooks.once("init", async function () {
     formatUwp: WorldData.formatUwp,
     stopTraffic: StopTrafficDialog.open,
     specTrade: SpecTradeDialog.open,
+    // The referee's transfer screen, and the only thing in this system that writes purses on demand.
+    // It awaits its own validation and hands back what it applied, so a screen that has priced
+    // something can open it pre-filled and chain on the result (`CreditSplitResult`).
+    creditSplit: CreditSplit.open,
     explorer: CompendiumExplorer.open,
     // The GM's roll-request compose window, and the three doors onto it: the chat-log control, the
     // tracker's *Ask for Initiative* preset and *Ask the same* on any check card. It refuses a
@@ -390,6 +395,9 @@ Hooks.once("init", async function () {
   // Core p.238 hands the trade chapter to the Travellers, so the tool is not GM-gated.
   registerStopTraffic();
   registerSpecTrade();
+  // Beside them and unlike them, GM-gated: those hand a chapter to the Travellers, this one moves
+  // other people's purses.
+  registerCreditSplit();
   registerVoyageScreen();
   // Three doors onto the creation grid: a Traveller's own sheet, the Actor directory's context menu
   // and its header, because resuming a session three hours in is opening the window with nobody
