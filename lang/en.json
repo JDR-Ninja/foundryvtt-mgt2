@@ -2795,6 +2795,7 @@
     },
     "Errors": {
       "DocketGMOnly": "The docket is the referee's window.",
+      "NotForThisSheet": "This sheet does not take a {type}.",
       "RosterEmpty": "Nobody is on the docket. Drop a Traveller on the roster, or seed it from the tokens or the party.",
       "RequestNotYours": "That line of the request was asked of somebody else.",
       "RequestClosed": "That request is no longer open.",

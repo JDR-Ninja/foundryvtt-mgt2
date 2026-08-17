@@ -43,6 +43,17 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         }
     };
 
+    /**
+     * What a hull takes on a drop: the four types `SpacecraftData` reads off its own Items. A weapon
+     * is here because a mount links embedded `weapon` Items (§9.114); the Traveller's inventory types
+     * are not, a ship having no pockets.
+     * @inheritDoc
+     */
+    static DROP_ITEM_TYPES = new Set(["component", "cargo", "passage", "role", "weapon"]);
+
+    /** @inheritDoc */
+    static DROP_ITEM_SIMPLE = new Set();
+
     /** @inheritDoc */
     static PARTS = {
         header: { template: `${PARTS_PATH}/spacecraft/header.html` },
@@ -255,7 +266,9 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     static #computer(system) {
         const budget = SpacecraftActorSheet.#budget(system.computer.processing,
             system.computer.software.map(row => ({
-                key: row._id, label: row.name, value: row.bandwidth, powered: row.powered,
+                // `item` is what tells the budget partial this row is a document and not a fixed
+                // consumer key, so it draws the open and delete controls.
+                key: row._id, item: true, label: row.name, value: row.bandwidth, powered: row.powered,
                 why: row.tlBlocked ? "MGT2.Actor.spacecraft.SoftwareBlocked"
                     : (row.downgraded ? "MGT2.Actor.spacecraft.SoftwareDowngraded" : undefined)
             })));
@@ -887,7 +900,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
      */
     async _onDrop(event) {
         const data = MGT2Helper.getDataFromDropEvent(event);
-        if (data?.type !== "Actor") return super._onDrop(event);
+        if (data?.type !== "Actor") return this.#onDropItem(event, data);
         if (!this.isEditable) return false;
 
         const actor = await fromUuid(data.uuid);
@@ -903,6 +916,28 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         if (crew[index]) crew[index].actor = actor.uuid;
         else crew.push({ actor: actor.uuid, name: actor.name });
         await this.actor.update({ "system.crew": crew });
+        return true;
+    }
+
+    /**
+     * A ship takes parts, not luggage. The inherited handler is the Traveller's inventory — containers,
+     * loading software into a machine, stacking — and none of it applies to a hull, so the four types
+     * a ship actually reads are embedded plainly and everything else is refused (§9.133).
+     * @param {DragEvent} event
+     * @param {object} data   The drop payload, already parsed
+     */
+    async #onDropItem(event, data) {
+        if (!data) return false;
+        if (Hooks.call("dropActorSheetData", this.actor, this, data) === false) return false;
+        if (!this.isEditable) return false;
+        const item = await MGT2Helper.getItemDataFromDropData(data);
+        if (!item) return false;
+        if (!SpacecraftActorSheet.DROP_ITEM_TYPES.has(item.type)) {
+            ui.notifications.warn(game.i18n.format("MGT2.Errors.NotForThisSheet",
+                { type: game.i18n.localize(CONFIG.Item.typeLabels[item.type] ?? item.type) }));
+            return false;
+        }
+        await this.actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(item)]);
         return true;
     }
 

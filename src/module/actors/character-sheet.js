@@ -29,6 +29,21 @@ const PARTS_PATH = "systems/mgt2/templates/actors";
  */
 export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(ActorSheetV2)) {
 
+  /**
+   * The Item types this sheet accepts on a drop, declared so a subclass can say what it takes
+   * instead of the inventory's list being the system's (§9.133).
+   *
+   * This one is the **inventory**: everything a Traveller can be carrying. A ship's parts are not
+   * on it, which is why `SpacecraftActorSheet` declares its own — and why `component`, `cargo`,
+   * `passage` and `role` had never been droppable anywhere.
+   * @type {Set<string>}
+   */
+  static DROP_ITEM_TYPES = new Set(["armor", "weapon", "ammunition", "computer", "container", "item",
+    "equipment", "drug"]);
+
+  /** Types with placement of their own, handled before the inventory branch below. */
+  static DROP_ITEM_SIMPLE = new Set(["contact", "disease", "career", "talent"]);
+
   /** @inheritDoc */
   static DEFAULT_OPTIONS = {
     classes: ["mgt2", "actor", "character", "nopad"],
@@ -1860,16 +1875,13 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     }
 
     // Simple drop
-    if (sourceItemData.type === "contact" || sourceItemData.type === "disease" ||
-      sourceItemData.type === "career" || sourceItemData.type === "talent") {
+    if (this.constructor.DROP_ITEM_SIMPLE.has(sourceItemData.type)) {
       await this.actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(sourceItemData)]);
       return true;
     }
 
-    // Supported drop (don't drop vehicle stuff)
-    if (sourceItemData.type !== "armor" && sourceItemData.type !== "weapon" &&
-      sourceItemData.type !== "computer" && sourceItemData.type !== "container" &&
-      sourceItemData.type !== "item" && sourceItemData.type !== "equipment") return false;
+    // What is left is the inventory, which places into containers and loads into machines.
+    if (!this.constructor.DROP_ITEM_TYPES.has(sourceItemData.type)) return false;
 
     // Every inventory row carries the id, whether it is a drag source or a drop target.
     const target = event.target.closest("[data-item-id]");

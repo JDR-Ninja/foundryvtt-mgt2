@@ -654,6 +654,8 @@
 		{{> systems/mgt2/templates/actors/spacecraft/budget.html
 			b=ship.computer
 			switched="softwareToggle"
+			edit="MGT2.Actor.EditSoftware"
+			del="MGT2.Actor.DeleteSoftware"
 			title=(localize 'MGT2.Actor.spacecraft.Processing')
 			flag=(localize 'MGT2.Actor.spacecraft.Overload')
 			derived="system.computer"}}

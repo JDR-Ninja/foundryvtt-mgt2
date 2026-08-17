@@ -3824,6 +3824,7 @@
     },
     "Errors": {
       "DocketGMOnly": "Le dossier est la fenêtre de l'Arbitre.",
+      "NotForThisSheet": "Cette fiche n'accepte pas un objet de type {type}.",
       "RosterEmpty": "Personne n'est au dossier. Déposez un Voyageur sur la liste, ou remplissez-la depuis les jetons ou l'équipe.",
       "RequestNotYours": "Cette ligne de la demande a été adressée à quelqu'un d'autre.",
       "RequestClosed": "Cette demande n'est plus ouverte.",
