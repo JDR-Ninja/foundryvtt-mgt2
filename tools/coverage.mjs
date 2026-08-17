@@ -4,12 +4,12 @@
  * language**, each with one page per audited screen, all in the same pack.
  *
  *   node tools/coverage.mjs check    parse and verify the contract; write nothing
- *   node tools/coverage.mjs build    check, then write packs/_source and compile the LevelDB
- *   node tools/coverage.mjs pack     compile the LevelDB from packs/_source alone
+ *   node tools/coverage.mjs build    check, then write packs/_source
  *
- * The audit lives in the workspace and never ships, so only `build` needs it. `pack` reads
- * `packs/_source/`, which is committed, and is therefore what a bare clone, the CI and the release
- * run. The compiled database is derived and is not committed — see `.gitignore`.
+ * The audit lives in the workspace and never ships, so only this tool needs it — and it stops at the
+ * source. `tools/packs.mjs compile` turns `packs/_source/`, which is committed, into the LevelDB, and
+ * is therefore what a bare clone, the CI and the release run. The database is derived and is not
+ * committed — see `.gitignore`.
  *
  * LANGUAGES, and why not Babele. Babele translates documents at load time from a module, which means
  * a dependency, a second document identity to keep aligned, and nothing in the pack a reader can open
@@ -40,17 +40,19 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { ClassicLevel } from "classic-level";
+import { PACK_BY_NAME } from "./packs.config.mjs";
+import { stableId } from "./lib/ids.mjs";
 
 const SYSTEM = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const WORKSPACE = path.resolve(SYSTEM, "..");
 const AUDIT = path.join(WORKSPACE, "docs", "RULES-AUDIT.md");
 const LANG_DIR = path.join(WORKSPACE, "docs", "rules-audit-lang");
-const PACK = { name: "docs", type: "JournalEntry" };
+const PACK = PACK_BY_NAME.docs;
 const SOURCE_DIR = path.join(SYSTEM, "packs", "_source", PACK.name);
-const PACK_DIR = path.join(SYSTEM, "packs", PACK.name);
+
+/** The id namespace, frozen: renaming the pack must not change what its documents are. */
+const ID_SPACE = "docs";
 
 /** Everything the generator says itself, as opposed to what it lifts out of the audit. */
 const CHROME = {
@@ -76,29 +78,21 @@ const CHROME = {
 };
 
 const SEVERITIES = ["A", "B", "C", "D"];
-const ID_LENGTH = 16;
-const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 const command = process.argv[2] ?? "build";
-if ( !["check", "build", "pack"].includes(command) ) {
-    console.error("Usage: node tools/coverage.mjs check|build|pack");
+if ( !["check", "build"].includes(command) ) {
+    console.error("Usage: node tools/coverage.mjs check|build");
     process.exit(1);
 }
 
-if ( command === "pack" ) await compile(readSource());
-else {
-    const parsed = parse(read());
-    report(parsed);
-    verify(parsed);
+const parsed = parse(read());
+report(parsed);
+verify(parsed);
 
-    const languages = readLanguages();
-    const journals = languages.map(language => buildJournal(parsed, language));
-    reportLanguages(languages);
-    if ( command === "build" ) {
-        writeSource(journals);
-        await compile(journals);
-    }
-}
+const languages = readLanguages();
+const journals = languages.map(language => buildJournal(parsed, language));
+reportLanguages(languages);
+if ( command === "build" ) writeSource(journals);
 
 /* -------------------------------------------- */
 /*  Reading                                     */
@@ -111,17 +105,6 @@ function read() {
             "and does not need to: `pack` compiles the same database from the committed packs/_source.");
     }
     return fs.readFileSync(AUDIT, "utf8");
-}
-
-/** The journals `writeSource` left behind: committed, and all `pack` needs. */
-function readSource() {
-    const files = fs.existsSync(SOURCE_DIR)
-        ? fs.readdirSync(SOURCE_DIR).filter(name => name.endsWith(".json")).sort() : [];
-    if ( !files.length ) {
-        fail(`No journals in ${path.relative(SYSTEM, SOURCE_DIR)}.`,
-            "They are committed — a checkout missing them is incomplete. Run `build` from the workspace.");
-    }
-    return files.map(file => JSON.parse(fs.readFileSync(path.join(SOURCE_DIR, file), "utf8")));
 }
 
 /**
@@ -357,7 +340,7 @@ function buildJournal(parsed, language) {
     for ( const screen of parsed.screens ) pages.push(screenPage(screen, language));
     countOrphans(parsed, language);
     return {
-        _id: id(`journal:coverage:${language.code}`),
+        _id: stableId(ID_SPACE, `journal:coverage:${language.code}`),
         name: chrome(language, "journal"),
         pages: pages.map((page, sort) => ({ ...page, sort: (sort + 1) * 100 })),
         folder: null,
@@ -447,7 +430,7 @@ function countOrphans({ screens }, language) {
 
 function page(name, content, language) {
     return {
-        _id: id(`page:${language.code}:${name}`),
+        _id: stableId(ID_SPACE, `page:${language.code}:${name}`),
         name,
         type: "text",
         title: { show: true, level: 1 },
@@ -504,15 +487,6 @@ function strip(text) {
     return text.replace(/\s+$/, "").replace(/^\s+/, "");
 }
 
-function id(key) {
-    const digest = createHash("sha256").update(`mgt2 docs ${key}`).digest();
-    let value = 0n;
-    for ( const byte of digest.subarray(0, 12) ) value = (value << 8n) | BigInt(byte);
-    let out = "";
-    for ( let i = 0; i < ID_LENGTH; i++ ) { out = ALPHABET[Number(value % 62n)] + out; value /= 62n; }
-    return out;
-}
-
 /* -------------------------------------------- */
 /*  Writing                                     */
 /* -------------------------------------------- */
@@ -525,37 +499,4 @@ function writeSource(journals) {
         fs.writeFileSync(file, `${JSON.stringify(journal, null, 2)}\n`, "utf8");
     }
     console.log(`wrote ${journals.length} journals to ${path.relative(WORKSPACE, SOURCE_DIR)}`);
-}
-
-/**
- * A compendium is a LevelDB directory since v11, and an embedded document lives under its own key
- * (`!journal.pages!<parent>.<child>`) with the parent holding only the ids.
- */
-async function compile(journals) {
-    // Foundry keeps every pack's database open for as long as it runs, and Windows will not let the
-    // directory go while it does. The bare EPERM is unreadable, so it is caught and named.
-    try {
-        fs.rmSync(PACK_DIR, { recursive: true, force: true });
-    } catch ( error ) {
-        if ( !["EPERM", "EBUSY"].includes(error.code) ) throw error;
-        fail(`Cannot rewrite ${path.relative(WORKSPACE, PACK_DIR)} — the database is locked.`,
-            "Foundry holds its compendiums open while it runs. Quit Foundry and build again.");
-    }
-    fs.mkdirSync(PACK_DIR, { recursive: true });
-    const db = new ClassicLevel(PACK_DIR, { keyEncoding: "utf8", valueEncoding: "json" });
-    await db.open();
-    const batch = db.batch();
-    let keys = 0;
-    for ( const journal of journals ) {
-        const { pages, ...parent } = journal;
-        for ( const page of pages ) {
-            batch.put(`!journal.pages!${journal._id}.${page._id}`, page);
-            keys++;
-        }
-        batch.put(`!journal!${journal._id}`, { ...parent, pages: pages.map(p => p._id) });
-        keys++;
-    }
-    await batch.write();
-    await db.close();
-    console.log(`compiled ${path.relative(WORKSPACE, PACK_DIR)} — ${keys} keys`);
 }

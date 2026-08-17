@@ -407,26 +407,53 @@ export class CharacterData extends ActorBaseData {
 
     /* -------------------------------------------- */
 
-    /** Software occupies bandwidth on the computer it is installed in. */
+    /**
+     * Core folio 110's four clauses about running software. The Bandwidth sum is one of them; the
+     * Tech Level gate, the downgrade and the package count at Processing 0 are the other three.
+     *
+     * Every one of them is **advisory**: a package the host cannot run keeps its `computerId` and is
+     * marked, the way a design check reports rather than refuses (§9.92) and an inert mount is
+     * surfaced rather than emptied (§9.114).
+     */
     #prepareComputers() {
         // A host is a `computer` Item or a fitted augment carrying Processing — Core p.107's wafer
         // jack is both a computer and an implant, and `computerId` is a bare Item id that never
         // required the target to be one type (§9.84).
         const hosts = new Map();
+        const running = new Map();
         for (const item of this.parent.items) {
             if (!MGT2Helper.runsSoftware(item)) continue;
             item.system.processingUsed = 0;
+            item.system.blockedSoftware = 0;
             hosts.set(item.id, item);
+            running.set(item.id, 0);
         }
 
         for (const item of this.parent.items) {
             if (item.type !== "item" || item.system.subType !== "software") continue;
             const host = hosts.get(item.system.software.computerId);
-            if (host) host.system.processingUsed += item.system.software.bandwidth;
+            if (!host) continue;
+
+            // "regardless of available Bandwidth" — under the software's Tech Level the host does not
+            // run it at all, so it spends no Processing. A TL neither side states gates nothing.
+            const softwareTL = MGT2Helper.tlNumber(item.system.tl);
+            const hostTL = MGT2Helper.tlNumber(host.system.tl);
+            item.system.software.tlBlocked = (softwareTL !== null) && (hostTL !== null) && (softwareTL > hostTL);
+            if (item.system.software.tlBlocked) {
+                host.system.blockedSoftware += 1;
+                continue;
+            }
+
+            host.system.processingUsed += item.system.software.bandwidthRun;
+            running.set(host.id, running.get(host.id) + 1);
         }
 
         for (const host of hosts.values()) {
-            host.system.overload = host.system.processingUsed > MGT2Helper.processing(host);
+            const processing = MGT2Helper.processing(host);
+            host.system.overload = host.system.processingUsed > processing;
+            // "A computer with Processing 0 can only run one software package of Bandwidth 0 at a
+            // time" — a count, and the sum cannot reach it: two Bandwidth-0 packages still sum to 0.
+            host.system.overCrowded = (processing === 0) && (running.get(host.id) > 1);
         }
     }
 
@@ -496,8 +523,8 @@ export class CharacterData extends ActorBaseData {
         let best = null;
         for (const item of this.parent.items) {
             if ((item.type !== "equipment") || (item.system.subType !== "augment")) continue;
-            const tl = Number(/(\d+)/.exec(item.system.tl ?? "")?.[1]);
-            if (isNaN(tl)) continue;
+            const tl = MGT2Helper.tlNumber(item.system.tl);
+            if (tl === null) continue;
             if (!best || (tl > best.tl)) best = { tl, name: item.name };
         }
         return best;

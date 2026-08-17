@@ -96,14 +96,14 @@
 					<tr class="drag-item-list{{#if augment.hostsSoftware}} drop-item-list{{/if}}" data-item-id="{{augment._id}}">
 						<td>{{augment.name}}</td>
 						<td>{{augment.system.improvement}}
-							{{#if augment.hostsSoftware}}<span class="sub {{augment.overloadClass}}">{{augment.system.processingUsed}}/{{augment.system.augment.processing}}{{#if augment.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}</span>{{/if}}
+							{{#if augment.hostsSoftware}}<span class="sub {{augment.overloadClass}}">{{augment.system.processingUsed}}/{{augment.system.augment.processing}}{{#if augment.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if augment.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if augment.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=augment.system.blockedSoftware}}"></i>{{/if}}</span>{{/if}}
 						</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=augment.toggleClass store=true edit="MGT2.Actor.EditAugment" del="MGT2.Actor.DeleteAugment"}}
 					</tr>
 					{{#each augment.subItems as |subItem|}}
 					<tr class="drag-item-list" data-item-id="{{subItem._id}}">
 						<td><i class="fa-brands fa-usb"></i> {{subItem.name}}</td>
-						<td class="num">{{subItem.system.software.bandwidth}}</td>
+						<td class="num"{{#if subItem.system.software.downgraded}} data-tooltip="{{localize 'MGT2.Items.SoftwareDowngraded'}}"{{/if}}>{{#if subItem.system.software.downgraded}}{{subItem.system.software.bandwidthRun}}/{{/if}}{{subItem.system.software.bandwidth}}{{#if subItem.system.software.tlBlocked}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.SoftwareBlocked'}}"></i>{{/if}}</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html eject=true edit="MGT2.Actor.EditSoftware"}}
 					</tr>
 					{{/each}}
@@ -136,14 +136,14 @@
 							<button type="button" class="roll" data-action="roll" data-roll="item" data-item-id="{{computer._id}}">{{computer.name}}</button>
 							{{#if computer.subInfo}}<span class="sub">{{computer.subInfo}}</span>{{/if}}
 						</td>
-						<td class="c num {{computer.overloadClass}}">{{computer.system.processingUsed}}/{{computer.system.processing}}{{#if computer.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}</td>
+						<td class="c num {{computer.overloadClass}}">{{computer.system.processingUsed}}/{{computer.system.processing}}{{#if computer.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if computer.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if computer.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=computer.system.blockedSoftware}}"></i>{{/if}}</td>
 						<td class="r num">{{computer.weight}}</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=computer.toggleClass store=true edit="MGT2.Actor.EditComputer" del="MGT2.Actor.DeleteComputer"}}
 					</tr>
 					{{#each computer.subItems as |subItem|}}
 					<tr class="drag-item-list" data-item-id="{{subItem._id}}">
 						<td><i class="fa-brands fa-usb"></i> {{subItem.name}}</td>
-						<td class="c num">{{subItem.system.software.bandwidth}}</td>
+						<td class="c num"{{#if subItem.system.software.downgraded}} data-tooltip="{{localize 'MGT2.Items.SoftwareDowngraded'}}"{{/if}}>{{#if subItem.system.software.downgraded}}{{subItem.system.software.bandwidthRun}}/{{/if}}{{subItem.system.software.bandwidth}}{{#if subItem.system.software.tlBlocked}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.SoftwareBlocked'}}"></i>{{/if}}</td>
 						<td class="r num"></td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html eject=true edit="MGT2.Actor.EditSoftware"}}
 					</tr>

@@ -639,7 +639,8 @@
 	</div>
 
 	{{! The `computer` Item pattern for the third time: ship software spends Processing exactly as
-	    personal software spends bandwidth (HG p.20). }}
+	    personal software spends bandwidth (HG p.20), and it inherits all four of Core folio 110's
+	    clauses with it — the gate reading the HULL's Tech Level and never the computer's. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.spacecraft.Computer'}}</h3>
@@ -651,6 +652,12 @@
 			title=(localize 'MGT2.Actor.spacecraft.Processing')
 			flag=(localize 'MGT2.Actor.spacecraft.Overload')
 			derived="system.computer"}}
+		{{#if ship.computer.blockedSoftware}}
+		<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.BlockedHint' count=ship.computer.blockedSoftware tl=system.tl}}</p>
+		{{/if}}
+		{{#if ship.computer.overCrowded}}
+		<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.OverCrowdedHint'}}</p>
+		{{/if}}
 	</div>
 
 	{{! HG p.110-113's Fleet Evaluation, printed in the book's own order. The chapter makes this the

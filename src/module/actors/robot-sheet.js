@@ -209,6 +209,7 @@ export class RobotActorSheet extends TravellerActorSheet {
         const budget = RobotActorSheet.#budget(brain.bandwidth.total, rows, "hard");
         budget.inherent = brain.bandwidth.inherent;
         budget.oversized = brain.bandwidth.oversized;
+        budget.downgradesIgnored = brain.bandwidth.downgradesIgnored;
         budget.item = brain.item;
         return budget;
     }

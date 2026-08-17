@@ -5,15 +5,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npm run styles && node tools/coverage.mjs build",
+    "build": "npm run styles && npm run docs && npm run compile",
     "styles": "sass src/sass/mgt2.sass styles/mgt2.css --no-source-map",
     "watch": "sass --watch src/sass/mgt2.sass styles/mgt2.css --no-source-map",
-    "compile": "node tools/coverage.mjs pack",
+    "compile": "node tools/packs.mjs compile",
     "package": "npm run styles && npm run compile && node tools/package.mjs",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "docs": "node tools/coverage.mjs build",
-    "docs:check": "node tools/coverage.mjs check"
+    "docs:check": "node tools/coverage.mjs check",
+    "packs": "node tools/packs.mjs list",
+    "packs:extract": "node tools/packs.mjs extract",
+    "validate": "node tools/packs.mjs validate"
   },
   "devDependencies": {
     "eslint": "^9.0.0",

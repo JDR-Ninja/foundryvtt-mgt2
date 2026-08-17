@@ -136,6 +136,9 @@
 
 		{{#if (eq system.subType "software")}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Bandwidth'}}</span><b>{{system.software.bandwidth}}</b></li>
+		{{#if system.software.downgraded}}
+		<li><span class="lbl">{{localize 'MGT2.Items.RunAt'}}</span><b>{{system.software.bandwidthRun}}</b></li>
+		{{/if}}
 		{{#if system.software.effect}}
 		<li><span class="lbl">{{localize 'MGT2.Items.SoftwareEffect'}}</span><b class="word">{{system.software.effect}}</b></li>
 		{{/if}}
@@ -392,6 +395,13 @@
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Bandwidth'}}</span>
 			{{formInput systemFields.software.fields.bandwidth name="system.software.bandwidth" value=system.software.bandwidth classes="f num"}}
+		</label>
+		{{! Core p.110's downgrade. Blank is the package running at its printed figure, which is what
+		    the placeholder shows; the floor the rule names belongs to the software family, and no one
+		    Item states it, so the tooltip asks for it rather than the schema enforcing it. }}
+		<label data-tooltip="{{localize 'MGT2.Items.RunAtHint'}}">
+			<span class="lbl">{{localize 'MGT2.Items.RunAt'}}</span>
+			{{formInput systemFields.software.fields.runAt name="system.software.runAt" value=source.software.runAt classes="f num" placeholder=system.software.bandwidth}}
 		</label>
 		<label class="wide">
 			<span class="lbl">{{localize 'MGT2.Items.SoftwareEffect'}}</span>

@@ -4,6 +4,7 @@
 		<h3>{{localize 'MGT2.Items.Softwares'}}</h3>
 		<span class="count">{{nested.length}}</span>
 		{{#if system.overload}}<span class="flag">{{localize 'MGT2.Items.Overload'}}</span>{{/if}}
+		{{#if system.overCrowded}}<span class="flag" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}">{{localize 'MGT2.Items.OverCrowdedFlag'}}</span>{{/if}}
 	</div>
 	{{#if nested.length}}
 	<table class="rows">
@@ -18,7 +19,7 @@
 			{{#each nested as |entry|}}
 			<tr data-item-id="{{entry._id}}">
 				<td>{{entry.name}}</td>
-				<td class="c num">{{entry.bandwidth}}</td>
+				<td class="c num"{{#if entry.downgraded}} data-tooltip="{{localize 'MGT2.Items.SoftwareDowngraded'}}"{{/if}}>{{#if entry.downgraded}}{{entry.bandwidthRun}}/{{/if}}{{entry.bandwidth}}{{#if entry.tlBlocked}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.SoftwareBlocked'}}"></i>{{/if}}</td>
 				<td class="r">
 					<div class="acts edit-only">
 						<a data-action="nestedRemove" data-tooltip="{{localize 'MGT2.Actor.UnloadSoftware'}}"><i class="fa-solid fa-eject"></i></a>

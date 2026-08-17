@@ -250,10 +250,17 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return budget;
     }
 
+    /** A package the ship cannot run spends nothing, so its row reads 0 and says why (§9.128). */
     static #computer(system) {
         const budget = SpacecraftActorSheet.#budget(system.computer.processing,
-            system.computer.software.map(row => ({ key: row._id, label: row.name, value: row.bandwidth })));
+            system.computer.software.map(row => ({
+                key: row._id, label: row.name, value: row.bandwidth,
+                why: row.tlBlocked ? "MGT2.Actor.spacecraft.SoftwareBlocked"
+                    : (row.downgraded ? "MGT2.Actor.spacecraft.SoftwareDowngraded" : undefined)
+            })));
         budget.overload = system.computer.overload;
+        budget.overCrowded = system.computer.overCrowded;
+        budget.blockedSoftware = system.computer.blockedSoftware;
         return budget;
     }
 

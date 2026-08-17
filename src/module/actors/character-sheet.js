@@ -405,7 +405,10 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         // A flag rather than `subItems.length`, because Handlebars reads an empty array as false
         // and a host with nothing loaded still has to draw as one.
         v.hostsSoftware = true;
-        if (v.system.overload === true) v.overloadClass = "computer-overload";
+        // The ratio reddens for the two rules that are about it — the Bandwidth sum and folio 110's
+        // one package at Processing 0. A package the host's TL cannot run marks itself instead: the
+        // number beside it is honest, and colouring it would name the wrong culprit.
+        if ((v.system.overload === true) || (v.system.overCrowded === true)) v.overloadClass = "computer-overload";
       }
     }
 
@@ -493,6 +496,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
             if (host !== undefined) host.subItems.push(v);
             else softwares.push(v);
           } else {
+            // The PRINTED figure, alone among the readouts, and deliberately: this parenthesis is
+            // the package's name — Core folio 111's own column, the thing that makes it Intrusion/3
+            // — while `runAt` is a property of running, and a package bound to no host runs nowhere.
             v.display = sys.software.bandwidth > 0 ? `${v.name} (${sys.software.bandwidth})` : v.name;
             softwares.push(v);
           }

@@ -1246,19 +1246,45 @@ export class SpacecraftData extends CraftData {
             passengers: bookings ? booked : {...this.passengers}};
     }
 
-    /** HG p.20: ship software consumes Processing exactly as personal software consumes bandwidth. */
+    /**
+     * Core folio 110's four clauses at ship scale. Two cross-references carry them across whole —
+     * HG p.20, "the computers installed in a ship work just like personal computers (see the
+     * Traveller Core Rulebook page 110)", and Core p.161, "ship software operates in exactly the
+     * same way as normal computer software" — so the sum, the downgrade, the Tech Level gate and
+     * the count at Processing 0 are all the ship's too (§9.128). Advisory like the character's: a
+     * package the ship cannot run is marked and never unbound.
+     */
     #prepareComputer() {
-        let used = 0;
+        // HG p.20: "the operating Tech Level is that of the starship in which it is installed;
+        // therefore, ships can use software limited to the Tech Level of the ship, not the
+        // computer" — which is why `computer` carries a Processing score and no TL of its own.
+        const hullTL = MGT2Helper.tlNumber(this.tl);
+        let used = 0, running = 0, blocked = 0;
         const software = [];
         for (const item of this.parent.items) {
             if ((item.type !== "item") || (item.system.subType !== "software")) continue;
-            const bandwidth = item.system.software.bandwidth ?? 0;
-            used += bandwidth;
-            software.push({ _id: item.id, name: item.name, bandwidth });
+            const program = item.system.software;
+            const softwareTL = MGT2Helper.tlNumber(item.system.tl);
+            program.tlBlocked = (softwareTL !== null) && (hullTL !== null) && (softwareTL > hullTL);
+            if (program.tlBlocked) blocked += 1;
+            else {
+                used += program.bandwidthRun;
+                running += 1;
+            }
+            software.push({
+                _id: item.id, name: item.name,
+                bandwidth: program.tlBlocked ? 0 : program.bandwidthRun,
+                printed: program.bandwidth,
+                downgraded: program.downgraded, tlBlocked: program.tlBlocked
+            });
         }
         this.computer.used = used;
         this.computer.software = software;
         this.computer.overload = used > this.computer.processing;
+        this.computer.blockedSoftware = blocked;
+        // HG's smallest model is a Computer/5, so this only ever fires on a hand-typed 0 — a ship
+        // with no working computer, which is the state the clause describes.
+        this.computer.overCrowded = (this.computer.processing === 0) && (running > 1);
     }
 
     /**

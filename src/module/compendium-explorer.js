@@ -1,4 +1,5 @@
 import { MGT2 } from "./config.js";
+import { MGT2Helper } from "./helper.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { SearchFilter } = foundry.applications.ux;
@@ -185,20 +186,6 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
     /*  Reading the index                           */
     /* -------------------------------------------- */
 
-    /**
-     * One number out of the three shapes a Tech Level is stored in. A personal item holds an
-     * `MGT2.TL` **key** — `TL09` — while a ship, a vehicle, a robot and a `component` hold a bare
-     * number; and `NA`, `Unknow` and `NotIdentified` are not Tech Levels at all, so they must read
-     * as absent rather than as zero.
-     * @param {string|number} value
-     * @returns {number|null}
-     */
-    static tlNumber(value) {
-        if ( typeof value === "number" ) return Number.isFinite(value) ? value : null;
-        const digits = /(\d+)/.exec(value ?? "");
-        return digits ? Number(digits[1]) : null;
-    }
-
     /** The printed Tech Level, through `MGT2.TL` where the stored value is one of its keys. */
     static tlLabel(value) {
         if ( (value === undefined) || (value === null) || (value === "") ) return null;
@@ -268,7 +255,7 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
                 const type = entry.type ?? null;
                 const subType = entry.system?.subType ?? null;
                 const scale = entry.system?.scale ?? null;
-                const tl = CompendiumExplorer.tlNumber(entry.system?.tl);
+                const tl = MGT2Helper.tlNumber(entry.system?.tl);
                 const okType = !filters.type || (type === filters.type);
                 const okSub = !filters.subType || (subType === filters.subType);
                 const okScale = !filters.scale || (scale === filters.scale);

@@ -290,6 +290,12 @@
 		{{#if robot.bandwidth.oversized.length}}
 		<p class="hint">{{localize 'MGT2.Actor.robot.Oversized' n=robot.bandwidth.inherent}}</p>
 		{{/if}}
+		{{! Core folio 110's downgrade is a Traveller's choice and a brain does not get it, so a
+		    package carrying one still costs its printed Bandwidth here — said out loud, because the
+		    Item's own sheet shows the figure the brain is ignoring. }}
+		{{#if robot.bandwidth.downgradesIgnored}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.DowngradeIgnored' count=robot.bandwidth.downgradesIgnored}}</p>
+		{{/if}}
 		<div class="grid cols2 edit-only">
 			<label class="check">
 				{{formInput systemFields.brain.fields.hardened name="system.brain.hardened" value=system.brain.hardened}}

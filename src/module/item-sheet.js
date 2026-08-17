@@ -199,6 +199,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     "talent:psionic": ["roll", "specs", "effects", "description"],
     disease: ["hazard", "effects", "description"],
     computer: ["specs", "carried", "traits", "effects", "description", "software"],
+    // A wafer jack is a computer as much as an implant, so it lists what it runs; `#composition`
+    // drops the block again on an augment that hosts nothing (§9.84).
+    "equipment:augment": ["specs", "carried", "effects", "description", "software"],
     container: ["carried", "effects", "description", "contents"],
     // Both halves are listed and `#composition` drops the one this Item is not (§9.48, §9.103).
     career: ["specs", "career", "effects", "description", "careertables", "events"],
@@ -243,6 +246,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         supply = true;
         if ( item.type !== "container" ) continue;
       }
+      // An augment is a host only while it is fitted and states Processing (§9.84); one that is
+      // neither has no software to list, and a `computer` always passes.
+      if ( (id === "software") && !MGT2Helper.runsSoftware(item) ) continue;
       // A weapon declares both trait arrays and the sheet had one code row to spend, so the block
       // renders once per array rather than once per type.
       const rows = ((id === "traits") && traits) ? traits : [null];
@@ -649,6 +655,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       img: sibling.img,
       type: game.i18n.localize(`TYPES.Item.${sibling.type}`),
       bandwidth: sibling.system.software?.bandwidth ?? null,
+      bandwidthRun: sibling.system.software?.bandwidthRun ?? null,
+      downgraded: sibling.system.software?.downgraded === true,
+      tlBlocked: sibling.system.software?.tlBlocked === true,
       quantity: sibling.system.quantity ?? null,
       weight: MGT2Helper.roundWeight(sibling.getTotalWeight())
     })).sort(MGT2Helper.compareByName);

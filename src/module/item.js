@@ -34,26 +34,52 @@ export async function copyItemWithContents(item, containerId = "", depth = 0) {
   return created;
 }
 
+/**
+ * The two rules a singular item obeys whatever wrote it, returned as an update rather than applied:
+ * a create writes through `updateSource` and an update through the `changed` object it was handed.
+ *
+ * *Qty max 1* names only `computer` and software. A `container` is singular too and used to be
+ * listed here, but `ItemContainerData` descends from `ItemBaseData` and has no `quantity` at all —
+ * the schema is what makes it one, and a second rule saying so could only ever disagree (§9.127).
+ *
+ * @param {string} type            The Item type
+ * @param {object} system          The system data the write would leave behind
+ * @returns {object|null}          Flat update paths, or null when nothing is out of bounds
+ */
+function singularItemLimits(type, system) {
+  const isSoftware = (type === "item") && (system.subType === "software");
+  const limits = {};
+
+  // Qty max 1
+  if ((type === "computer" || isSoftware) && (system.quantity > 1)) limits["system.quantity"] = 1;
+  // No Weight
+  if (isSoftware && (system.weight > 0)) limits["system.weight"] = 0;
+
+  return foundry.utils.isEmpty(limits) ? null : limits;
+}
+
 export class TravellerItem extends Item {
+
+  /**
+   * The item rules hold on a create as much as on an update: nothing on the sheet builds a stack of
+   * computers, but a pack, a macro or a drop from another collection can (§9.127).
+   * @inheritDoc
+   */
+  async _preCreate(data, options, user) {
+    if ((await super._preCreate(data, options, user)) === false) return false;
+    const limits = singularItemLimits(this.type, this.system);
+    if (limits) this.updateSource(limits);
+  }
 
   async _preUpdate(changed, options, user) {
     if ((await super._preUpdate(changed, options, user)) === false) return false;
 
-    // Qty max 1
-    if (this.type === "computer" || this.type === "container" || (this.type === "item" && this.system.subType === "software")) {
-      const newQty = foundry.utils.getProperty(changed, "system.quantity") ?? this.system.quantity;
-      if (newQty !== this.system.quantity && newQty > 1) {
-        foundry.utils.setProperty(changed, "system.quantity", 1);
-      }
-    }
-
-    // No Weight
-    if (this.type === "item" && this.system.subType === "software") {
-      const newWeight = foundry.utils.getProperty(changed, "system.weight") ?? this.system.weight;
-      if (newWeight !== this.system.weight && newWeight > 0) {
-        foundry.utils.setProperty(changed, "system.weight", 0);
-      }
-    }
+    const limits = singularItemLimits(this.type, {
+      subType: foundry.utils.getProperty(changed, "system.subType") ?? this.system.subType,
+      quantity: foundry.utils.getProperty(changed, "system.quantity") ?? this.system.quantity,
+      weight: foundry.utils.getProperty(changed, "system.weight") ?? this.system.weight
+    });
+    for (const [path, value] of Object.entries(limits ?? {})) foundry.utils.setProperty(changed, path, value);
 
     // The container it leaves has to be redrawn too, and by then the reference is already the new one.
     if (foundry.utils.hasProperty(changed, "system.container")) {

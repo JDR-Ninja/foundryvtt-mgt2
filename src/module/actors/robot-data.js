@@ -587,8 +587,9 @@ export class RobotData extends ActorBaseData {
     /**
      * The `computer` pattern at a third scale. The brain Item's `processing` is the total Bandwidth
      * when one is present, so a storage module raises it by raising the Item (RH p.67); with no Item
-     * the grade's own `Computer/X` stands. Skill packages are `item`/`software` and spend it exactly
-     * as a starship's software spends Processing.
+     * the grade's own `Computer/X` stands. Skill packages are `item`/`software`, and this is the one
+     * host of the three that spends their **printed** Bandwidth: the Robot Handbook prints its own
+     * limits for a brain and never cross-references Core folio 110 the way HG p.20 does (§9.128).
      */
     #prepareBrain() {
         const brain = this.brain;
@@ -596,9 +597,17 @@ export class RobotData extends ActorBaseData {
 
         let used = INTELLECT_BANDWIDTH[brain.intellect] ?? 0;
         const packages = [];
+        let downgradesIgnored = 0;
         for (const entry of this.parent.items) {
             if ((entry.type !== "item") || (entry.system.subType !== "software")) continue;
+            // The PRINTED figure and never `bandwidthRun`: where Core p.110 lets a Traveller run
+            // high-Bandwidth software lower, RH p.67 makes the inherent Bandwidth "an absolute limit
+            // on the size of any singular skill package" and RH p.73 says "robot brains cannot
+            // process skills that require more than a brain's inherent (not expanded) Bandwidth" —
+            // a refusal, not a downgrade, and honouring one here would put `oversized` below out of
+            // reach for ever (§9.128).
             const bandwidth = entry.system.software.bandwidth ?? 0;
+            if (entry.system.software.downgraded) downgradesIgnored += 1;
             used += bandwidth;
             packages.push({ _id: entry.id, name: entry.name, bandwidth });
         }
@@ -614,7 +623,8 @@ export class RobotData extends ActorBaseData {
             used,
             // The inherent figure is an absolute limit on any SINGLE package, whatever storage
             // modules have raised the total to (RH p.67).
-            oversized: packages.filter(entry => entry.bandwidth > inherent).map(entry => entry.name)
+            oversized: packages.filter(entry => entry.bandwidth > inherent).map(entry => entry.name),
+            downgradesIgnored
         };
         brain.packages = packages;
         brain.item = item ? { _id: item.id, name: item.name, processing: item.system.processing } : null;

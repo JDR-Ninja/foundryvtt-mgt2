@@ -85,6 +85,19 @@ class PhysicalItemData extends ItemBaseData {
 }
 
 export class ItemData extends PhysicalItemData {
+
+    /**
+     * Only a software package uses these, and they are reset for every `item` for the reason
+     * `ComputerData` gives — the owning actor decides `tlBlocked`, so a loose package has to read
+     * sanely without one. `bandwidthRun` is not one of those: it is a fact of the package alone.
+     */
+    prepareBaseData() {
+        const bandwidth = this.software.bandwidth;
+        this.software.bandwidthRun = Math.min(this.software.runAt ?? bandwidth, bandwidth);
+        this.software.downgraded = this.software.bandwidthRun < bandwidth;
+        this.software.tlBlocked = false;
+    }
+
     static defineSchema() {
         const schema = super.defineSchema();
         schema.subType.initial = "loot";
@@ -94,6 +107,11 @@ export class ItemData extends PhysicalItemData {
             // validates — so HG p.73's Advanced Fire Control/3 stored as Bandwidth 10 with no error
             // at all, and 15 of the library's 59 programs had their figure stranded in prose (§1.12).
             bandwidth: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true }),
+            // Core p.110: "a Traveller can use any high-Bandwidth software at a lower Bandwidth, to a
+            // minimum of the lowest Bandwidth shown" — a choice and never an inference, so it is
+            // stored. Null is the package running at its printed figure. The floor the rule names is
+            // the software *family*'s and no single Item states it, so `min` is 0 (§9.126).
+            runAt: new fields.NumberField({ required: false, initial: null, nullable: true, min: 0, integer: true }),
             effect: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             computerId: new fields.StringField({ required: false, blank: true, initial: "" })
         });
@@ -111,6 +129,8 @@ export class EquipmentData extends PhysicalItemData {
     prepareBaseData() {
         this.processingUsed = 0;
         this.overload = false;
+        this.overCrowded = false;
+        this.blockedSoftware = 0;
     }
 
     static defineSchema() {
@@ -142,9 +162,9 @@ export class EquipmentData extends PhysicalItemData {
             // term over worn armour and never an alternative to an `armor` Item.
             protection: new fields.NumberField({ required: false, initial: 0, integer: true, min: 0 }),
             // Core p.110 glosses `Computer/N` as the Processing score, so this is the same scale as
-            // `ComputerData.processing` rather than a unit of its own. A READOUT: software is
-            // assigned to a computer Item by id, so nothing runs on this figure — whether a wafer
-            // jack should instead BE a `computer` Item is the road §9.84 left open.
+            // `ComputerData.processing` rather than a unit of its own — and it is spent as one: a
+            // fitted augment stating a figure here is a host `MGT2Helper.runsSoftware` accepts, and
+            // `CharacterData#prepareComputers` runs software against it (§9.84).
             processing: new fields.NumberField({ required: false, initial: 0, integer: true, min: 0 })
         });
 
@@ -1156,6 +1176,8 @@ export class ComputerData extends PhysicalItemData {
     prepareBaseData() {
         this.processingUsed = 0;
         this.overload = false;
+        this.overCrowded = false;
+        this.blockedSoftware = 0;
     }
 
     prepareDerivedData() {

@@ -229,6 +229,20 @@ export class MGT2Helper {
     }
 
     /**
+     * One number out of the three shapes a Tech Level is stored in. A personal item holds an
+     * `MGT2.TL` **key** — `TL09` — while a ship, a vehicle, a robot and a `component` hold a bare
+     * number; and `NA`, `Unknow` and `NotIdentified` are not Tech Levels at all, so they must read
+     * as absent rather than as zero.
+     * @param {string|number} value
+     * @returns {number|null}
+     */
+    static tlNumber(value) {
+        if (typeof value === "number") return Number.isFinite(value) ? value : null;
+        const digits = /(\d+)/.exec(value ?? "");
+        return digits ? Number(digits[1]) : null;
+    }
+
+    /**
      * Whether software can run on this thing — a `computer` Item always, and a **fitted augment
      * carrying a Processing figure** too (§9.84). Core p.107's wafer jack *is* a computer, and
      * Core p.110 gives `Computer/N` and a computer's Processing the one scale, so the only thing
