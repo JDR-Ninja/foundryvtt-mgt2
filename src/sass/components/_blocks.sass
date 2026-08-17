@@ -821,6 +821,15 @@ li.chat-message:has(> .message-content > .mgt2.card)
 			text-transform: uppercase
 			white-space: nowrap
 			color: var(--faint)
+
+	// A centred label overhangs the bar by half its width at either end: in a rail that scrolls that
+	// half is a horizontal scrollbar on a column with no horizontal content, and in the header —
+	// `overflow: hidden` — it is cut off instead. The end marks anchor to their tick; every mark
+	// between them stays centred on it.
+	.mk[data-anchor="start"] span
+		transform: none
+	.mk[data-anchor="end"] span
+		transform: translateX(-100%)
 	.mk[data-hit]
 		width: 2px
 		background: var(--danger)

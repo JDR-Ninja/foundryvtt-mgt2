@@ -181,7 +181,7 @@
 			<div class="fill" style="--g: {{npc.track.wound}}%"></div>
 			{{#if system.stun}}<div class="stun" data-tooltip="{{localize 'MGT2.Actor.StunHint'}}" style="--s0: {{npc.track.stunFrom}}%; --s: {{npc.track.stun}}%"></div>{{/if}}
 			{{#each npc.track.marks}}
-			<div class="mk"{{#if hit}} data-hit="1"{{/if}} style="--x: {{at}}%"><span>{{localize label}}</span></div>
+			<div class="mk"{{#if (eq at 100)}} data-anchor="end"{{else if (eq at 0)}} data-anchor="start"{{/if}}{{#if hit}} data-hit="1"{{/if}} style="--x: {{at}}%"><span>{{localize label}}</span></div>
 			{{/each}}
 		</div>
 	</div>

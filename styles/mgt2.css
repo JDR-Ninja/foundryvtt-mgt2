@@ -3085,6 +3085,12 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   white-space: nowrap;
   color: var(--faint);
 }
+.mgt2 .track .mk[data-anchor=start] span {
+  transform: none;
+}
+.mgt2 .track .mk[data-anchor=end] span {
+  transform: translateX(-100%);
+}
 .mgt2 .track .mk[data-hit] {
   width: 2px;
   background: var(--danger);
@@ -4515,7 +4521,7 @@ ul.softwares li:hover a {
   }
 }
 @container sheet (min-width: 980px) {
-  .mgt2.application.character > .window-content,
+  .mgt2.application.character:not(.vehicle, .spacecraft, .robot) > .window-content,
   .mgt2.application.npc > .window-content {
     grid-template-columns: 17rem minmax(0, 1fr);
   }

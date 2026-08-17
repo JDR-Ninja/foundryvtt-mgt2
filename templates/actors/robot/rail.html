@@ -38,7 +38,7 @@
 			<div class="track{{#if robot.hits.damage}} hurt{{/if}}" data-derived="system.life.damage">
 				<div class="fill" style="--g: {{robot.hits.wound}}%"></div>
 				{{#each robot.hits.marks}}
-				<div class="mk"{{#if hit}} data-hit="1"{{/if}} style="--x: {{at}}%"><span>{{localize label}}</span></div>
+				<div class="mk"{{#if (eq at 100)}} data-anchor="end"{{else if (eq at 0)}} data-anchor="start"{{/if}}{{#if hit}} data-hit="1"{{/if}} style="--x: {{at}}%"><span>{{localize label}}</span></div>
 				{{/each}}
 			</div>
 		</div>

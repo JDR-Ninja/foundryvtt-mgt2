@@ -983,8 +983,13 @@ ul.softwares
 		i
 			margin-right: 0
 
+// ApplicationV2 concatenates `classes` up the inheritance chain, so the vehicle, spacecraft and
+// robot roots also carry `character` — and this selector has the same specificity as the rules in
+// `utils/_window.sass` that give those three their own wider rail, but comes later. Unscoped it
+// squeezed all three back to 17rem past 980px: the ship lost 64px of a column its budget panels
+// need, and the mark labels on its damage track then overhung the rail.
 @container sheet (min-width: 980px)
-	.mgt2.application.character > .window-content,
+	.mgt2.application.character:not(.vehicle, .spacecraft, .robot) > .window-content,
 	.mgt2.application.npc > .window-content
 		grid-template-columns: 17rem minmax(0, 1fr)
 
