@@ -85,6 +85,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.npc.Attacks'}}</h3>
 			<span class="count">{{naturals.length}}</span>
+			{{#if isCreature}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.npc.NaturalHint'}}"></i>{{/if}}
 			<a class="add edit-only" data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{#if naturals.length}}
@@ -109,7 +110,6 @@
 			</tbody>
 		</table>
 		{{/if}}
-		{{#if isCreature}}<p class="hint">{{localize 'MGT2.Actor.npc.NaturalHint'}}</p>{{/if}}
 	</div>
 
 	{{#if carried.length}}
@@ -137,6 +137,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.Skills'}}</h3>
 			<span class="count">{{skills.length}}</span>
+			{{#if isCreature}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.npc.SkillDefaults'}}"></i>{{/if}}
 			<a class="add edit-only" data-action="itemCreate" data-type-item="talent" data-subtype="skill" data-create-name="{{localize 'MGT2.Actor.NewSkill'}}" data-tooltip="{{localize 'MGT2.Actor.AddSkill'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{#if skills.length}}
@@ -152,8 +153,6 @@
 			</tbody>
 		</table>
 		{{/if}}
-		{{#if isCreature}}<p class="hint">{{localize 'MGT2.Actor.npc.SkillDefaults'}}</p>{{/if}}
-		{{#if npc.experience}}<p class="hint">{{localize 'MGT2.Actor.npc.ExperienceHint' level=npc.experience.skillLevel}}</p>{{/if}}
 	</div>
 
 	{{! The shared code row: NAME(param, param) and no definition text. }}
@@ -173,14 +172,11 @@
 			<dt>{{localize 'MGT2.Actor.npc.ArmourConditional'}}</dt>
 			<dd class="word">{{#if npc.armourConditional}}{{npc.armourConditional.score}} {{npc.armourConditional.condition}}{{else}}&mdash;{{/if}}</dd>
 		</div>
-		<div class="stat{{#unless npc.size.band}} none{{/unless}}">
+		<div class="stat{{#unless npc.size.band}} none{{/unless}}"{{#if npc.size.band}} data-tooltip="{{localize (ifThen npc.size.agrees 'MGT2.Actor.npc.SizeAgrees' 'MGT2.Actor.npc.SizeAdvisory')}}"{{/if}}>
 			<dt>{{localize 'MGT2.Actor.npc.SizeRecommended'}}</dt>
 			<dd class="word">{{#if npc.size.band}}{{showDM npc.size.band.dm}} · {{npc.size.band.damage}}{{else}}&mdash;{{/if}}</dd>
 		</div>
 	</dl>
-	{{#if npc.size.band}}
-	<p class="hint">{{localize (ifThen npc.size.agrees 'MGT2.Actor.npc.SizeAgrees' 'MGT2.Actor.npc.SizeAdvisory')}}</p>
-	{{/if}}
 	{{/if}}
 
 	<div class="block">

@@ -8,6 +8,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.world.TradeCodes'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.world.LedgerCount' derived=world.ledger.derivedCount published=world.ledger.publishedCount}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.world.LedgerHint'}}"></i>
 		</div>
 		<dl class="statline" data-derived="system.codes">
 			<div class="stat{{#unless world.ledger.derivedCount}} none{{/unless}}">
@@ -35,7 +36,6 @@
 			</div>
 			{{/each}}
 		</div>
-		<p class="hint">{{localize 'MGT2.Actor.world.LedgerHint'}}</p>
 	</div>
 
 	{{! This world's own half of the two traffic tables, and only the half it can answer for. The
@@ -45,9 +45,10 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.world.Traffic'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.world.TrafficCount'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.world.TrafficHint'}}"></i>
 		</div>
 		{{#if world.forbidden}}
-		<p class="hint forbidden">{{localize 'MGT2.Actor.world.Forbidden'}}</p>
+		<p class="hint forbidden">{{localize 'MGT2.Actor.world.Forbidden'}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.world.ForbiddenWhy'}}"></i></p>
 		{{/if}}
 		<div class="halves" data-derived="system.travel">
 			<div class="h">
@@ -69,7 +70,6 @@
 				</table>
 			</div>
 		</div>
-		<p class="hint">{{localize 'MGT2.Actor.world.TrafficHint'}}</p>
 	</div>
 
 	<div class="block">

@@ -853,10 +853,17 @@ export class CharacterPrompts {
                 const delta = Number(f.value) || 0;
                 return (delta < 0) && ((Number(f.dataset.now) + delta) <= 0);
             });
-            why.textContent = (zeroed && (kind === "ageing"))
-                ? game.i18n.localize("MGT2.Loss.CrisisWarning")
-                : game.i18n.localize(`MGT2.CharacteristicLossHints.${kind}`);
-            why.classList.toggle("bad", zeroed && (kind === "ageing"));
+            // What the chosen source means is a rule, so it hangs off the control as a tooltip; the
+            // line below it stays for the one thing that is a state — a score about to reach 0.
+            const crisis0 = zeroed && (kind === "ageing");
+            source.dataset.tooltip = game.i18n.localize(`MGT2.CharacteristicLossHints.${kind}`);
+            why.replaceChildren();
+            if ( crisis0 ) {
+                why.textContent = game.i18n.localize("MGT2.Loss.CrisisWarning");
+                why.insertAdjacentHTML("beforeend",
+                    `<i class="fa-solid fa-circle-info note" data-tooltip="${esc(game.i18n.localize("MGT2.Loss.CrisisWarningWhy"))}"></i>`);
+            }
+            why.classList.toggle("bad", crisis0);
         };
 
         source.addEventListener("change", sync);

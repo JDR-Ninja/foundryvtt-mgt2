@@ -7,6 +7,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Armour'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.vehicle.ArmourCount'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.ArmourHint'}}"></i>
 		</div>
 		<div class="facings">
 			{{#each vehicle.armour.facings as |facing|}}
@@ -42,7 +43,6 @@
 			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.ToHit'}}</dt><dd>{{showDM vehicle.armour.toHit}}</dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.Maintenance'}}</dt><dd><i>Cr</i>{{credits vehicle.armour.maintenance}}<i>/{{localize 'MGT2.Actor.vehicle.Month'}}</i></dd></div>
 		</dl>
-		<p class="hint">{{localize 'MGT2.Actor.vehicle.ArmourHint'}}</p>
 	</div>
 
 	{{! Six lines, six kinds of number (VH p.12). The two `opposed` rows are a negative DM applied to
@@ -189,6 +189,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Criticals'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.vehicle.CriticalsCount'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.CriticalHint'}}"></i>
 			<a class="rm edit-only" data-action="criticalClear" data-tooltip="{{localize 'MGT2.Actor.vehicle.ClearCriticals'}}"><i class="fa-solid fa-eraser"></i></a>
 		</div>
 		<div class="crits">
@@ -239,7 +240,6 @@
 			<input class="f num" type="number" data-crit="effect" min="0" step="1" value="6" aria-label="{{localize 'MGT2.Actor.vehicle.Effect'}}" />
 			<button type="button" class="btn b-dmg" data-action="criticalRoll">{{localize 'MGT2.Actor.vehicle.ApplyCritical'}}</button>
 		</div>
-		<p class="hint">{{localize 'MGT2.Actor.vehicle.CriticalHint'}}</p>
 	</div>
 
 	{{> systems/mgt2/templates/items/blocks/traits.html}}
@@ -250,6 +250,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.SubTypeDetail'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.vehicle.SubTypeCount'}}</span>
+			{{#if system.remote}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.RemoteHint'}}"></i>{{/if}}
 		</div>
 		<div class="grid">
 			<label class="check">
@@ -305,7 +306,6 @@
 				{{formInput systemFields.remote.fields.telemetryRange name="system.remote.telemetryRange" value=system.remote.telemetryRange classes="f num"}}
 			</label>
 		</div>
-		<p class="hint">{{localize 'MGT2.Actor.vehicle.RemoteHint'}}</p>
 		{{/if}}
 	</div>
 

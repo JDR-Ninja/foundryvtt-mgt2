@@ -6,6 +6,7 @@
 	{{> systems/mgt2/templates/actors/robot/budget.html
 		b=robot.slots
 		title=(localize 'MGT2.Actor.robot.Slots')
+		note=(localize 'MGT2.Actor.robot.SlotHint')
 		flag=(localize 'MGT2.Actor.robot.OverBudget')
 		derived="system.slots"}}
 	<dl class="statline" data-derived="system.slots">
@@ -16,16 +17,15 @@
 			<dd>{{#if robot.slots.removed}}{{robot.slots.removed}}{{else}}&mdash;{{/if}}</dd>
 		</div>
 	</dl>
-	<p class="hint">{{localize 'MGT2.Actor.robot.SlotHint'}}</p>
 
 	{{! The second budget, in a different currency, and the two are coupled: past the Default Suite's
 	    allowance each further zero-slot option costs a real Slot in the panel above. }}
 	{{> systems/mgt2/templates/actors/robot/budget.html
 		b=robot.zero
 		title=(localize 'MGT2.Actor.robot.ZeroSlot')
+		note=(localize 'MGT2.Actor.robot.ZeroHint' n=robot.zero.cap)
 		flag=(localize 'MGT2.Actor.robot.ZeroFlag')
 		derived="system.zeroSlot"}}
-	<p class="hint">{{localize 'MGT2.Actor.robot.ZeroHint' n=robot.zero.cap}}</p>
 
 	{{! The pool. The scale is TWICE the maximum, because `damage` can exceed `max` and that overrun
 	    is the Destroyed state — the same bar a creature's Hits use, with two marks instead of four. }}
@@ -33,6 +33,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.DamageTracks.hits'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.robot.HitsChain'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.DamageHint'}}"></i>
 		</div>
 		<div class="trackwrap">
 			<div class="track{{#if robot.hits.damage}} hurt{{/if}}" data-derived="system.life.damage">
@@ -49,6 +50,5 @@
 				<dd class="word">{{localize (concat 'MGT2.Actor.robot.States.' robot.hits.state)}}</dd>
 			</div>
 		</dl>
-		<p class="hint">{{localize 'MGT2.Actor.robot.DamageHint'}}</p>
 	</div>
 </aside>

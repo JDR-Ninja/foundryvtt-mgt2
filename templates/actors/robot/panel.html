@@ -7,6 +7,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.robot.Derivations'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.robot.DerivationsCount'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.ChainHint'}}"></i>
 		</div>
 
 		<span class="lbl">{{localize 'MGT2.Actor.robot.ChainEndurance'}}</span>
@@ -34,9 +35,7 @@
 		</div>
 
 		{{#if robot.chains.vehicle}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.VehicleSpeedHint' hours=robot.chains.vehicle}}</p>
-		{{else}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.ChainHint'}}</p>
+		<p class="hint">{{localize 'MGT2.Actor.robot.VehicleSpeedOn' hours=robot.chains.vehicle}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.VehicleSpeedHint' hours=robot.chains.vehicle}}"></i></p>
 		{{/if}}
 
 		<div class="grid edit-only">
@@ -84,6 +83,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.robot.Locomotion'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.robot.LocomotionCount'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.LocomotionHint'}}"></i>
 			<a class="add edit-only" data-action="rowCreate" data-rows="locomotion" data-tooltip="{{localize 'MGT2.Actor.robot.AddLocomotion'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{#if robot.locomotion.length}}
@@ -128,7 +128,6 @@
 			</tbody>
 		</table>
 		{{/if}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.LocomotionHint'}}</p>
 	</div>
 
 	{{! STR and DEX are stored and not derived even though both have a formula: each limb may be
@@ -137,6 +136,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.robot.Manipulators'}}</h3>
 			<span class="count">{{robot.statblock.manipulators}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.ManipulatorHint'}}"></i>
 			<a class="add edit-only" data-action="rowCreate" data-rows="manipulators" data-tooltip="{{localize 'MGT2.Actor.robot.AddManipulator'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{#if robot.manipulators.length}}
@@ -186,7 +186,6 @@
 			</tbody>
 		</table>
 		{{/if}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.ManipulatorHint'}}</p>
 	</div>
 
 	{{! Options are the slot budget's rows. §6.1 would make them `equipment` Items with a `slots`
@@ -196,6 +195,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.robot.Options'}}</h3>
 			<span class="count">{{system.options.length}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.OptionHint'}}"></i>
 			<a class="add edit-only" data-action="rowCreate" data-rows="options" data-tooltip="{{localize 'MGT2.Actor.robot.AddOption'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{#if system.options.length}}
@@ -237,7 +237,6 @@
 			</tbody>
 		</table>
 		{{/if}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.OptionHint'}}</p>
 	</div>
 
 	{{! The brain is a `computer` Item, for the third time after a handcomp and a starship's
@@ -293,16 +292,16 @@
 		<p class="hint">{{localize 'MGT2.Actor.robot.NoBrainItem' n=robot.bandwidth.inherent}}</p>
 		{{/if}}
 		{{#if robot.bandwidth.oversized.length}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.Oversized' n=robot.bandwidth.inherent}}</p>
+		<p class="hint">{{localize 'MGT2.Actor.robot.Oversized' count=robot.bandwidth.oversized.length n=robot.bandwidth.inherent}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.OversizedWhy' n=robot.bandwidth.inherent}}"></i></p>
 		{{/if}}
 		{{! Core folio 110's downgrade is a Traveller's choice and a brain does not get it, so a
 		    package carrying one still costs its printed Bandwidth here — said out loud, because the
 		    Item's own sheet shows the figure the brain is ignoring. }}
 		{{#if robot.bandwidth.downgradesIgnored}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.DowngradeIgnored' count=robot.bandwidth.downgradesIgnored}}</p>
+		<p class="hint">{{localize 'MGT2.Actor.robot.DowngradeIgnored' count=robot.bandwidth.downgradesIgnored}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.DowngradeIgnoredWhy' count=robot.bandwidth.downgradesIgnored}}"></i></p>
 		{{/if}}
 		{{#if robot.bandwidth.surcharged}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.Surcharged' count=robot.bandwidth.surcharged}}</p>
+		<p class="hint">{{localize 'MGT2.Actor.robot.Surcharged' count=robot.bandwidth.surcharged}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.SurchargedWhy' count=robot.bandwidth.surcharged}}"></i></p>
 		{{/if}}
 		<div class="grid cols2 edit-only">
 			<label class="check">
@@ -326,6 +325,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.robot.Characteristics'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.robot.TravellerCount'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.TravellerHint'}}"></i>
 		</div>
 		<div class="chars">
 			<div class="char-list">
@@ -340,7 +340,6 @@
 				{{formInput systemFields.traveller.fields.society name="system.traveller.society" value=system.traveller.society localize=true classes="f"}}
 			</label>
 		</div>
-		<p class="hint">{{localize 'MGT2.Actor.robot.TravellerHint'}}</p>
 	</div>
 	{{/if}}
 
@@ -349,6 +348,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.robot.Attacks'}}</h3>
 			<span class="count">{{naturals.length}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.AttackHint'}}"></i>
 			<a class="add edit-only" data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{#if naturals.length}}
@@ -373,7 +373,6 @@
 			</tbody>
 		</table>
 		{{/if}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.AttackHint'}}</p>
 	</div>
 
 	{{#if carried.length}}
@@ -398,6 +397,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.Skills'}}</h3>
 			<span class="count">{{skills.length}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.SkillHint' n=robot.brain.skillCap}}"></i>
 			<a class="add edit-only" data-action="itemCreate" data-type-item="talent" data-subtype="skill" data-create-name="{{localize 'MGT2.Actor.NewSkill'}}" data-tooltip="{{localize 'MGT2.Actor.AddSkill'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{#if skills.length}}
@@ -413,7 +413,6 @@
 			</tbody>
 		</table>
 		{{/if}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.SkillHint' n=robot.brain.skillCap}}</p>
 	</div>
 
 	{{! The shared code row: NAME(param, param) and no definition text. }}

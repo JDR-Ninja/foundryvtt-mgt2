@@ -30,6 +30,7 @@
 	    cuts is still DERIVED against the Core sequence rather than authored beside it. }}
 	<div class="sect">
 		<h3>{{localize 'MGT2.Chargen.Frame.Steps'}}</h3>
+		{{#if speciesFrame.declared}}<i class="fa-solid fa-circle-info note edit-only" data-tooltip="{{localize 'MGT2.Chargen.Frame.CheckHint'}}"></i>{{/if}}
 	</div>
 	{{#if speciesFrame.declared}}
 	<div class="stack" data-property="frame.steps">
@@ -119,7 +120,6 @@
 		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Frame.Step'}}</a>
 		<a class="add edit-only" data-action="stepsDefault"><i class="fa-solid fa-rotate-left"></i> {{localize 'MGT2.Chargen.Frame.UseCore'}}</a>
 	</div>
-	<p class="hint edit-only">{{localize 'MGT2.Chargen.Frame.CheckHint'}}</p>
 	<p class="hint">
 		{{#if speciesFrame.cut.length}}{{localize 'MGT2.Chargen.Frame.Cuts'}} {{#each speciesFrame.cut}}{{#unless @first}}, {{/unless}}{{localize (lookup @root.config.CreationSteps this)}}{{/each}}{{else}}{{localize 'MGT2.Chargen.Frame.CutsNone'}}{{/if}}
 		{{#if speciesFrame.own.length}} &middot; {{localize 'MGT2.Chargen.Frame.Adds'}} {{#each speciesFrame.own}}{{#unless @first}}, {{/unless}}{{localize (lookup @root.config.CreationSteps this)}}{{/each}}{{/if}}
@@ -143,6 +143,7 @@
 	<div class="sect">
 		<h3>{{localize 'MGT2.Chargen.Frame.TermKinds'}}</h3>
 		<span class="count">{{system.frame.termKinds.length}}</span>
+		<i class="fa-solid fa-circle-info note edit-only" data-tooltip="{{localize 'MGT2.Chargen.Frame.TermKindsHint'}}"></i>
 	</div>
 	<div class="stack" data-property="frame.termKinds">
 		{{#each system.frame.termKinds as |kind k|}}
@@ -172,7 +173,6 @@
 		{{/each}}
 		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Frame.TermKind'}}</a>
 	</div>
-	<p class="hint edit-only">{{localize 'MGT2.Chargen.Frame.TermKindsHint'}}</p>
 
 	{{! Species-owned tracks: a caste degree, a class, a status that falls as readily as it rises. Same
 	    factory as a career's, so the same editor. }}

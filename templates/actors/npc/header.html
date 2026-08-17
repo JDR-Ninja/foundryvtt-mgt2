@@ -49,7 +49,7 @@
 				<span class="lbl">{{localize 'MGT2.Actor.npc.Attitude'}}</span>
 				{{formInput systemFields.attitude name="system.attitude" value=system.attitude localize=true classes="f"}}
 			</label>
-			<label>
+			<label{{#if npc.experience}} data-tooltip="{{localize 'MGT2.Actor.npc.ExperienceHint' level=npc.experience.skillLevel}}"{{/if}}>
 				<span class="lbl">{{localize 'MGT2.Actor.npc.Experience'}}</span>
 				{{formInput systemFields.experience name="system.experience" value=system.experience localize=true blank="" classes="f"}}
 			</label>

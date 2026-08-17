@@ -124,9 +124,9 @@
 		{{! Two facts, not one: having suffered a crisis is permanent and costs every later
 		    qualification roll (folio 49), while standing at 0 is what a doctor can still change. }}
 		{{#if loss.zeroed}}
-		<p class="hint bad">{{localize 'MGT2.Loss.Crisis'}}</p>
+		<p class="hint bad">{{localize 'MGT2.Loss.Crisis'}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Loss.CrisisWhy'}}"></i></p>
 		{{else if loss.crisis}}
-		<p class="hint">{{localize 'MGT2.Loss.CrisisPast'}}</p>
+		<p class="hint">{{localize 'MGT2.Loss.CrisisPast'}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Loss.CrisisPastWhy'}}"></i></p>
 		{{/if}}
 		{{#if loss.rows.length}}
 		<table class="rows">

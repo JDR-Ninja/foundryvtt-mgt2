@@ -82,12 +82,12 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Voyage.Ruleset'}}</h3>
 			<span class="count">{{localize 'MGT2.Voyage.Declared'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{#if (eq jump.ruleset 'core')}}{{localize 'MGT2.Voyage.CoreWhy'}}{{else}}{{localize 'MGT2.Voyage.CompanionWhy'}}{{/if}}"></i>
 		</div>
 		<div class="seg fill" role="radiogroup" aria-label="{{localize 'MGT2.Voyage.Ruleset'}}">
 			{{#each rulesets as |entry|}}
 			<label><input type="radio" name="ruleset" value="{{entry.key}}"{{#if entry.active}} checked{{/if}}{{#unless ../canEdit}} disabled{{/unless}} /><span>{{localize entry.label}}</span></label>
 			{{/each}}
 		</div>
-		<p class="hint">{{#if (eq jump.ruleset 'core')}}{{localize 'MGT2.Voyage.CoreWhy'}}{{else}}{{localize 'MGT2.Voyage.CompanionWhy'}}{{/if}}</p>
 	</div>
 </aside>

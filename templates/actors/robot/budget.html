@@ -6,6 +6,7 @@
 <section class="budget{{#if b.over}} over{{/if}}" data-over="{{b.kind}}">
 	<header>
 		<span class="lbl">{{title}}</span>
+		{{#if note}}<i class="fa-solid fa-circle-info note" data-tooltip="{{note}}"></i>{{/if}}
 		{{#if b.over}}<span class="flag">{{flag}}</span>{{/if}}
 		<span class="tot" data-derived="{{derived}}"><b>{{b.total}}</b><span class="of">/ {{b.cap}}{{#if unit}} {{unit}}{{/if}}</span></span>
 		<span class="rem">{{#if b.over}}{{localize 'MGT2.Actor.robot.OverN' n=b.remaining}}{{else}}{{localize 'MGT2.Actor.robot.FreeN' n=b.remaining}}{{/if}}</span>

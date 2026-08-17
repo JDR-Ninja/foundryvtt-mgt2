@@ -2328,6 +2328,15 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   color: var(--faint);
   border: 1px solid var(--rule);
 }
+.mgt2 .note {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--faint);
+  cursor: help;
+}
+.mgt2 .note:hover {
+  color: var(--accent-text);
+}
 .mgt2 .block {
   display: flex;
   flex-direction: column;
@@ -3937,6 +3946,9 @@ li.chat-message:has(> .message-content > .mgt2.card) {
 .mgt2 p.hint b {
   font-weight: 600;
   color: var(--mute);
+}
+.mgt2 p.hint .note {
+  margin-left: 5px;
 }
 
 .mgt2 .mgt2-npc-panel {

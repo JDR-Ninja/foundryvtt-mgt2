@@ -5,6 +5,12 @@
 		{{#if (eq item.type "species")}}<span class="count">{{system.modifiers.length}}</span>
 		<a class="add edit-only" data-action="modifierCreate" data-tooltip="{{localize 'MGT2.Items.AddModifier'}}"><i class="fa-solid fa-plus"></i></a>{{/if}}
 		{{#if (eq item.type "weapon")}}<span class="count edit-only">{{localize 'MGT2.Items.ScaleHint'}}</span>{{/if}}
+		{{! What a field means where its control cannot say it — one per type, and never body text. }}
+		{{#if (eq item.type "cargo")}}<i class="fa-solid fa-circle-info note edit-only" data-tooltip="{{localize 'MGT2.Items.SpeculativeHint'}}"></i>{{/if}}
+		{{#if (eq item.type "passage")}}<i class="fa-solid fa-circle-info note edit-only" data-tooltip="{{localize 'MGT2.Items.PassageHint'}}"></i>{{/if}}
+		{{#if (eq item.type "component")}}<i class="fa-solid fa-circle-info note edit-only" data-tooltip="{{localize 'MGT2.Items.ComponentHint'}}"></i>{{/if}}
+		{{#if (eq item.type "drug")}}<i class="fa-solid fa-circle-info note edit-only" data-tooltip="{{localize 'MGT2.Items.AddictionHint'}}"></i>{{/if}}
+		{{#if (eq item.type "ammunition")}}<i class="fa-solid fa-circle-info note edit-only" data-tooltip="{{localize 'MGT2.Items.OverrideHint'}}"></i>{{/if}}
 	</div>
 
 	{{! A dose is taken, and taking it is the whole of what a drug does: it copies the drug's own
@@ -627,11 +633,5 @@
 		{{/if}}
 	</div>
 
-	{{! One line per type, where a field means something its control cannot say on its own. }}
-	{{#if (eq item.type "cargo")}}<p class="hint edit-only">{{localize 'MGT2.Items.SpeculativeHint'}}</p>{{/if}}
-	{{#if (eq item.type "passage")}}<p class="hint edit-only">{{localize 'MGT2.Items.PassageHint'}}</p>{{/if}}
-	{{#if (eq item.type "component")}}<p class="hint edit-only">{{localize 'MGT2.Items.ComponentHint'}}</p>{{/if}}
-	{{#if (eq item.type "drug")}}<p class="hint edit-only">{{localize 'MGT2.Items.AddictionHint'}}</p>{{/if}}
-	{{#if (eq item.type "ammunition")}}<p class="hint edit-only">{{localize 'MGT2.Items.OverrideHint'}}</p>{{/if}}
 	{{/if}}
 </div>

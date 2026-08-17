@@ -24,7 +24,7 @@
         </div>
     </fieldset>
     <fieldset class="mgt2-damage-order">
-        <legend>{{ localize 'MGT2.Actor.DamageOrder' }}</legend>
+        <legend>{{ localize 'MGT2.Actor.DamageOrder' }} <i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.DamageOrderHint'}}"></i></legend>
         <p class="mgt2-label">{{ localize 'MGT2.Actor.DamageChain' }}</p>
         <ol>
             {{#each ordered as |c|}}
@@ -43,7 +43,6 @@
             <button type="button" class="chip" data-key="{{c.key}}"{{#if c.inChain}} hidden{{/if}}{{#unless c.addable}} disabled data-tooltip="{{localize 'MGT2.Actor.DamageOrderNeedsMax'}}"{{/unless}}>+ {{localize c.label}}</button>
             {{/each}}
         </div>
-        <p class="hint">{{ localize 'MGT2.Actor.DamageOrderHint' }}</p>
         <input type="hidden" name="damageOrder" value="{{damageOrder}}" />
     </fieldset>
 </div>

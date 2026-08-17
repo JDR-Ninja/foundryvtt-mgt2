@@ -6,6 +6,7 @@
 	<div class="sect">
 		<h3>{{localize column.label}}</h3>
 		<span class="count">{{column.rows.length}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Items.TradeDMHint'}}"></i>
 		<a class="add edit-only" data-action="tradeDMCreate" data-tooltip="{{localize 'MGT2.Items.AddTradeDM'}}"><i class="fa-solid fa-plus"></i></a>
 	</div>
 	{{#if column.rows.length}}
@@ -43,4 +44,3 @@
 	{{/if}}
 </div>
 {{/each}}
-<p class="hint">{{localize 'MGT2.Items.TradeDMHint'}}</p>

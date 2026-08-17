@@ -21,7 +21,7 @@
 		</label>
 	</div>
 	{{! Where the maximum came from. Derived readings only — the block may hold no form control. }}
-	<dl class="statline" data-derived="system.characteristics.{{key}}">
+	<dl class="statline" data-derived="system.characteristics.{{key}}" data-tooltip="{{localize 'MGT2.Actor.CharacteristicHint'}}">
 		<div class="stat"><dt>{{ localize 'MGT2.Actor.CharacteristicAuto' }}</dt><dd>{{showDM characteristic.auto}}</dd></div>
 		<div class="stat"><dt>{{ localize 'MGT2.Actor.CharacteristicEffect' }}</dt><dd>{{showDM characteristic.effect}}</dd></div>
 		<div class="stat"><dt>{{ localize 'MGT2.Actor.CharacteristicMax' }}</dt><dd>{{characteristic.max}}</dd></div>
@@ -35,5 +35,4 @@
 		<label><input type="checkbox" name="showAll" data-dtype="Boolean" /><span>{{ localize 'MGT2.Actor.ShowHiddenFields' }}</span></label>
 	</div>
 	{{/if}}
-	<p class="hint">{{ localize 'MGT2.Actor.CharacteristicHint' }}</p>
 </div>

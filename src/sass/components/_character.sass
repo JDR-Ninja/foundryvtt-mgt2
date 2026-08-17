@@ -407,8 +407,8 @@
 //  NPC — what the shared skeleton does not already carry
 // --------------------------------------------
 
-// A statement about the rule, under the block it qualifies. Never a definition: the hints say what
-// the sheet is doing, not what the trait does.
+// What the sheet is doing right now, under the block it qualifies — a state, never a rule and never
+// a definition. The rule behind the state hangs off the `.note` marker at the end of the line.
 .mgt2 p.hint
 	margin: 0
 	font-size: 12px
@@ -417,6 +417,8 @@
 	b
 		font-weight: 600
 		color: var(--mute)
+	.note
+		margin-left: 5px
 
 .mgt2 .mgt2-npc-panel
 	display: flex

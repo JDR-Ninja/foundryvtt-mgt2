@@ -26,6 +26,7 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.stash.Lock'}}</h3>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.stash.LockHint'}}"></i>
 			<span class="gm">{{localize 'MGT2.Actor.stash.GM'}}</span>
 		</div>
 		<div class="lockrow">
@@ -42,7 +43,6 @@
 				{{formInput systemFields.lockedDescription name="system.lockedDescription" value=system.lockedDescription classes="f"}}
 			</label>
 		</div>
-		<p class="hint">{{localize 'MGT2.Actor.stash.LockHint'}}</p>
 	</div>
 	{{/if}}
 

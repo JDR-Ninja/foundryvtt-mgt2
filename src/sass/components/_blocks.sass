@@ -80,6 +80,17 @@ li.chat-message:has(> .message-content > .mgt2.card)
 			color: var(--faint)
 			border: 1px solid var(--rule)
 
+	// A rule, and the book page it comes from, are never body text on a sheet: they hang off this
+	// marker as a tooltip on the thing they qualify — a section header, a budget, a warning line, a
+	// label. The sheet states what it is doing; the marker says why, to whoever asks (§9.134).
+	.note
+		flex: 0 0 auto
+		font-size: 11px
+		color: var(--faint)
+		cursor: help
+		&:hover
+			color: var(--accent-text)
+
 	.block
 		display: flex
 		flex-direction: column

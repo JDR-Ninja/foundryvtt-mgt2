@@ -12,6 +12,7 @@
 			<span class="count">
 				{{~#if stash.open}}{{stash.contents.length}}{{else}}{{localize 'MGT2.Actor.stash.Withheld'}}{{/if~}}
 			</span>
+			{{#if stash.open}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.stash.NoEncumbranceHint'}}"></i>{{/if}}
 		</div>
 
 		{{#if stash.open}}
@@ -51,7 +52,6 @@
 		{{else}}
 		<p class="hint">{{localize 'MGT2.Actor.stash.EmptyHint'}}</p>
 		{{/if}}
-		<p class="hint">{{localize 'MGT2.Actor.stash.NoEncumbranceHint'}}</p>
 		{{else}}
 		{{! The sheet stays open and the rows do not arrive — the state a `container` Item has no way
 		    to produce, and the one an adventure actually wants. }}

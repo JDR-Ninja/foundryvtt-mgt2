@@ -43,8 +43,7 @@
 	<dl class="statline" data-derived="spacecraft.voyage.misjump">
 		<div class="stat lead"><dt>{{localize 'MGT2.Jump.EngineerEffect'}}</dt><dd>{{misjump.reading.effect}}</dd></div>
 	</dl>
-	<p class="outcome{{#if misjump.reading.misjumped}} bad{{/if}}">{{misjump.reading.outcome}}</p>
-	{{#if misjump.reading.merciful}}<p class="hint">{{localize 'MGT2.Jump.Merciful'}}</p>{{/if}}
+	<p class="outcome{{#if misjump.reading.misjumped}} bad{{/if}}">{{misjump.reading.outcome}}{{#if misjump.reading.merciful}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Jump.Merciful'}}"></i>{{/if}}</p>
 	{{/if}}
 
 	{{#if misjump.reading.companion}}

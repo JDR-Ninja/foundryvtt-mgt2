@@ -10,6 +10,7 @@
 <section class="budget{{#if switched}} switched{{/if}}{{#if b.over}} over{{/if}}" data-over="{{#if over}}{{over}}{{else}}hard{{/if}}"{{#if under}} data-under="short"{{/if}}>
 	<header>
 		<span class="lbl">{{title}}</span>
+		{{#if note}}<i class="fa-solid fa-circle-info note" data-tooltip="{{note}}"></i>{{/if}}
 		{{! Where the total came from, when it is not the sum of the rows below (§4.1). }}
 		{{#if b.why}}<span class="why">{{localize b.why}}</span>{{/if}}
 		{{#if b.over}}<span class="flag">{{flag}}</span>{{/if}}

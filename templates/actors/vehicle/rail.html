@@ -20,7 +20,7 @@
 				<dd class="word">{{#if vehicle.hull.wrecked}}{{localize 'MGT2.Actor.vehicle.Wrecked'}}{{else if vehicle.hull.damage}}{{localize 'MGT2.Actor.vehicle.Damaged'}}{{else}}{{localize 'MGT2.Actor.vehicle.Intact'}}{{/if}}</dd>
 			</div>
 		</dl>
-		<p class="hint">{{localize 'MGT2.Actor.vehicle.SustainedHint' crossed=vehicle.hull.crossed steps=vehicle.hull.steps}}</p>
+		<p class="hint">{{localize 'MGT2.Actor.vehicle.SustainedHint' crossed=vehicle.hull.crossed steps=vehicle.hull.steps}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.SustainedWhy'}}"></i></p>
 	</div>
 
 	{{! One number plus modes, not a base plus a table: the printed AGILITY is the value in the
@@ -71,6 +71,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Combat'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.vehicle.CombatCount'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.CombatHint'}}"></i>
 			<a class="rm" data-action="combatClear" data-tooltip="{{localize 'MGT2.Actor.vehicle.ClearCombat'}}"><i class="fa-solid fa-rotate-left"></i></a>
 		</div>
 		<dl class="statline" data-derived="system.combat">
@@ -95,7 +96,6 @@
 			<button type="button" class="btn" data-action="vehicleAction" data-vehicle-action="dogfight">{{localize 'MGT2.Actor.vehicle.Dogfight'}}</button>
 			<button type="button" class="btn" data-action="vehicleAction" data-vehicle-action="evasive">{{localize 'MGT2.Actor.vehicle.Evasive'}}</button>
 		</div>
-		<p class="hint">{{localize 'MGT2.Actor.vehicle.CombatHint'}}</p>
 	</div>
 
 	{{! Store the integer, render the label: collision damage is 1D per band, Weave picks a negative
@@ -174,6 +174,7 @@
 	<section class="budget check" data-over="soft">
 		<header>
 			<span class="lbl">{{localize 'MGT2.Actor.vehicle.CrossCheck'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.CrossCheckHint'}}"></i>
 			{{#if vehicle.crossCheck.mismatch}}<span class="flag">{{localize 'MGT2.Actor.vehicle.Mismatch'}}</span>{{/if}}
 		</header>
 		<table class="rows brows" data-derived="system.crossCheck">
@@ -188,9 +189,8 @@
 			</tbody>
 		</table>
 		{{#if vehicle.crossCheck.envelope}}
-		<p class="hint">{{localize 'MGT2.Actor.vehicle.EnvelopeHint' spaces=vehicle.crossCheck.envelope}}</p>
+		<p class="hint">{{localize 'MGT2.Actor.vehicle.EnvelopeHint' spaces=vehicle.crossCheck.envelope}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.EnvelopeWhy' spaces=vehicle.crossCheck.envelope}}"></i></p>
 		{{/if}}
-		<p class="hint">{{localize 'MGT2.Actor.vehicle.CrossCheckHint'}}</p>
 	</section>
 	{{/if}}
 </aside>

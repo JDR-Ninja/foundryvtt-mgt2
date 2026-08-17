@@ -34,6 +34,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.world.Berthing'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.world.BerthingCount'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{~#if world.berthing.noPort}}{{localize 'MGT2.Actor.world.BerthingNoPortHint'}}{{else if world.berthing.free}}{{localize 'MGT2.Actor.world.BerthingFreeHint'}}{{else if world.berthing.unrolled}}{{localize 'MGT2.Actor.world.BerthingUnrolledHint'}}{{else}}{{localize 'MGT2.Actor.world.BerthingKeptHint'}}{{/if~}}"></i>
 			<span class="gm">{{localize 'MGT2.Actor.world.GM'}}</span>
 		</div>
 		<div class="berth">
@@ -57,9 +58,6 @@
 				<button type="button" class="btn" data-action="berthingClear" {{disabled (not world.berthing.rolled)}}>{{localize 'MGT2.Actor.world.BerthingClear'}}</button>
 			</div>
 		</div>
-		<p class="hint">
-			{{~#if world.berthing.noPort}}{{localize 'MGT2.Actor.world.BerthingNoPortHint'}}{{else if world.berthing.free}}{{localize 'MGT2.Actor.world.BerthingFreeHint'}}{{else if world.berthing.unrolled}}{{localize 'MGT2.Actor.world.BerthingUnrolledHint'}}{{else}}{{localize 'MGT2.Actor.world.BerthingKeptHint'}}{{/if~}}
-		</p>
 	</div>
 
 	{{! Per-world state that OUTLIVES any voyage — walk away here and the door is still shut two legs
@@ -68,6 +66,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.world.Suppliers'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.world.SuppliersCount'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.world.SuppliersHint'}}"></i>
 			<span class="gm">{{localize 'MGT2.Actor.world.GM'}}</span>
 		</div>
 		<div class="lock">
@@ -89,7 +88,6 @@
 					{{~#if world.trade.closedUntil}}{{localize 'MGT2.Actor.world.ShutUntil' day=world.trade.closedUntil}}{{else if world.trade.refused}}{{localize 'MGT2.Actor.world.Expired' day=world.trade.refusedOn}}{{else}}{{localize 'MGT2.Actor.world.Never'}}{{/if~}}
 				</span>
 			</div>
-			<span class="why">{{localize 'MGT2.Actor.world.SuppliersHint'}}</span>
 		</div>
 		<div class="vacts">
 			<button type="button" class="btn" data-action="searchRecord">{{localize 'MGT2.Actor.world.RecordSearch'}}</button>

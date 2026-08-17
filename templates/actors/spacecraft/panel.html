@@ -115,6 +115,7 @@
 		<div class="sect edit-only">
 			<h3>{{localize 'MGT2.Actor.spacecraft.PrintedFigures'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.spacecraft.PrintedCount'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.PrintedHint'}}"></i>
 		</div>
 		<div class="grid edit-only">
 			<label>
@@ -142,18 +143,16 @@
 				{{formInput systemFields.power.fields.drawOverride name="system.power.drawOverride" value=system.power.drawOverride placeholder=ship.derived.powerDraw classes="f num"}}
 			</label>
 		</div>
-		<p class="hint edit-only">{{localize 'MGT2.Actor.spacecraft.PrintedHint'}}</p>
 
 		{{! BLOCK 4. Hull options are options, not traits: the registry has no ship family, so a
 		    spacecraft carries no traits[] at all and this block replaces it (§1.4). }}
-		<ul class="codes" data-family="hull">
+		<ul class="codes" data-family="hull" data-tooltip="{{localize 'MGT2.Actor.spacecraft.OptionsHint'}}">
 			{{#each ship.options as |option|}}
 			<li class="code{{#unless option.on}} off{{/unless}}" data-action="hullOptionToggle" data-option="{{option.key}}">
 				<b>{{localize option.label}}</b>
 			</li>
 			{{/each}}
 		</ul>
-		<p class="hint">{{localize 'MGT2.Actor.spacecraft.OptionsHint'}}</p>
 	</div>
 
 	{{! Berths and passengers. Four numbers with three consumers each — tonnage, life support and the
@@ -326,6 +325,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.spacecraft.Crew'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.spacecraft.CrewCount' stations=ship.crew.totals.stations aboard=ship.crew.totals.aboard}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.CrewHint'}}"></i>
 			<a class="add edit-only" data-action="rowCreate" data-rows="crew" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddStation'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 
@@ -448,7 +448,6 @@
 					</tr>
 				</tbody>
 			</table>
-			<p class="hint">{{localize 'MGT2.Actor.spacecraft.CrewHint'}}</p>
 		</section>
 	</div>
 
@@ -529,6 +528,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.spacecraft.Criticals'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.spacecraft.CriticalsCount'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.CriticalHint'}}"></i>
 			<a class="rm edit-only" data-action="criticalClear" data-tooltip="{{localize 'MGT2.Actor.spacecraft.ClearCriticals'}}"><i class="fa-solid fa-eraser"></i></a>
 		</div>
 		<div class="crits">
@@ -577,7 +577,6 @@
 			<input class="f num" type="number" data-crit="effect" min="0" step="1" value="6" aria-label="{{localize 'MGT2.Actor.spacecraft.Effect'}}" />
 			<button type="button" class="btn b-dmg" data-action="criticalRoll">{{localize 'MGT2.Actor.spacecraft.ApplyCritical'}}</button>
 		</div>
-		<p class="hint">{{localize 'MGT2.Actor.spacecraft.CriticalHint'}}</p>
 	</div>
 
 	{{! §6.2's expensive half. The parts list feeds NOTHING above — §4.1 stores the statblock on the
@@ -588,6 +587,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Design.Title'}}</h3>
 			<span class="count">{{#if ship.design.fitted}}{{localize 'MGT2.Design.Count' n=ship.design.count tons=ship.design.tons}}{{else}}{{localize 'MGT2.Design.Optional'}}{{/if}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Design.Advisory'}}"></i>
 			<a class="add edit-only" data-action="itemCreate" data-type-item="component" data-create-name="{{localize 'MGT2.Design.NewComponent'}}" data-tooltip="{{localize 'MGT2.Design.AddComponent'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 
@@ -636,7 +636,9 @@
 			</div>
 			{{/each}}
 		</div>
-		<p class="hint{{#if ship.design.failed}} bad{{/if}}">{{#if ship.design.failed}}{{localize 'MGT2.Design.Failed' n=ship.design.failed}}{{else}}{{localize 'MGT2.Design.Advisory'}}{{/if}}</p>
+		{{#if ship.design.failed}}
+		<p class="hint bad">{{localize 'MGT2.Design.Failed' n=ship.design.failed}}</p>
+		{{/if}}
 		{{/if}}
 	</div>
 
@@ -660,13 +662,13 @@
 			flag=(localize 'MGT2.Actor.spacecraft.Overload')
 			derived="system.computer"}}
 		{{#if ship.computer.carried}}
-		<p class="hint">{{localize 'MGT2.Actor.spacecraft.CarriedHint' installed=ship.computer.installed cap=ship.computer.cap}}</p>
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.CarriedHint' installed=ship.computer.installed cap=ship.computer.cap}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.CarriedWhy'}}"></i></p>
 		{{/if}}
 		{{#if ship.computer.blockedSoftware}}
-		<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.BlockedHint' count=ship.computer.blockedSoftware tl=system.tl}}</p>
+		<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.BlockedHint' count=ship.computer.blockedSoftware tl=system.tl}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BlockedWhy'}}"></i></p>
 		{{/if}}
 		{{#if ship.computer.overCrowded}}
-		<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.OverCrowdedHint'}}</p>
+		<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.OverCrowdedHint'}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.OverCrowdedWhy'}}"></i></p>
 		{{/if}}
 	</div>
 
@@ -680,6 +682,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.spacecraft.Fleet.Title'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.spacecraft.Fleet.Count'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.Fleet.Hint'}}"></i>
 		</div>
 		<dl class="statline grid" data-derived="system.fleet">
 			<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.CrewSkill'}}</dt><dd>{{ship.fleet.crewSkill}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.Typed'}}</i></dd></div>
@@ -705,7 +708,7 @@
 			{{/each}}
 		</ul>
 		{{else}}
-		<p class="hint">{{localize 'MGT2.Actor.spacecraft.Fleet.NoSoftware'}}</p>
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.Fleet.NoSoftware'}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.Fleet.NoSoftwareWhy'}}"></i></p>
 		{{/if}}
 
 		{{! p.111's own column: a critical after each tenth of the adjusted pool is gone. Core p.169's
@@ -727,7 +730,6 @@
 					{{/each}}
 				</tbody>
 			</table>
-			<p class="hint">{{localize 'MGT2.Actor.spacecraft.Fleet.Hint'}}</p>
 		</section>
 	</div>
 	{{/if}}
@@ -816,6 +818,7 @@
 		<section class="budget check" data-over="soft">
 			<header>
 				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Elections'}}</span>
+				<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.ElectionsHint'}}"></i>
 				<span class="rem">{{localize 'MGT2.Actor.spacecraft.ElectionsRem' n=ship.finance.quarters}}</span>
 			</header>
 			<table class="rows brows">
@@ -832,7 +835,6 @@
 					</tr>
 				</tbody>
 			</table>
-			<p class="hint">{{localize 'MGT2.Actor.spacecraft.ElectionsHint'}}</p>
 		</section>
 		{{/if}}
 
@@ -843,10 +845,10 @@
 		<section class="budget check" data-over="soft">
 			<header>
 				<span class="lbl">{{localize 'MGT2.SkipDebts.Title'}}</span>
+				<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.SkipDebts.PanelHint'}}"></i>
 				<span class="rem">{{localize 'MGT2.SkipDebts.Run' n=system.finance.skipParsecs}}</span>
 				<a class="flag" data-action="skipDebts">{{localize 'MGT2.SkipDebts.Open'}}</a>
 			</header>
-			<p class="hint">{{localize 'MGT2.SkipDebts.PanelHint'}}</p>
 		</section>
 		{{/if}}
 		{{/if}}
@@ -860,6 +862,7 @@
 		<section class="budget check" data-over="soft">
 			<header>
 				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.CrossCheck'}}</span>
+				<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.MaintenanceHint'}}"></i>
 				<span class="rem">{{localize 'MGT2.Actor.spacecraft.PrintedVsDerived'}}</span>
 			</header>
 			<table class="rows brows">
@@ -871,7 +874,6 @@
 					</tr>
 				</tbody>
 			</table>
-			<p class="hint">{{localize 'MGT2.Actor.spacecraft.MaintenanceHint'}}</p>
 		</section>
 		{{/if}}
 		{{/if}}
