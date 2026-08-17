@@ -29,6 +29,11 @@
 
 mgt2.zip
 
+# Compiled LevelDB compendiums — rebuilt from packs/_source by `npm run compile`.
+# Binary, renumbered on every build, and written to by Foundry merely opening them.
+packs/*/
+!packs/_source/
+
 # Node
 node_modules/
 package-lock.json

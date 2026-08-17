@@ -5,8 +5,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "sass src/sass/mgt2.sass styles/mgt2.css --no-source-map && node tools/coverage.mjs build",
+    "build": "npm run styles && node tools/coverage.mjs build",
+    "styles": "sass src/sass/mgt2.sass styles/mgt2.css --no-source-map",
     "watch": "sass --watch src/sass/mgt2.sass styles/mgt2.css --no-source-map",
+    "compile": "node tools/coverage.mjs pack",
+    "package": "npm run styles && npm run compile && node tools/package.mjs",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "docs": "node tools/coverage.mjs build",

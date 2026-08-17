@@ -21,8 +21,13 @@ jobs:
       - run: npm run lint
 
       - name: Build stylesheet
-        run: npm run build
+        run: npm run styles
 
       # styles/mgt2.css is committed; a drift means the build output was not regenerated.
       - name: Verify committed stylesheet is up to date
         run: git diff --exit-code -- styles/mgt2.css
+
+      # The compiled compendiums are not committed. `npm run build` would need the workspace audit,
+      # which is not in this repo; `compile` proves the committed packs/_source still builds.
+      - name: Compile compendiums
+        run: npm run compile

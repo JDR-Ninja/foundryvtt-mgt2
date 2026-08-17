@@ -20,8 +20,6 @@ jobs:
 
       - run: npm install
 
-      - run: npm run build
-
       - name: Read version from tag
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
 
@@ -37,19 +35,11 @@ jobs:
             fs.writeFileSync("system.json", JSON.stringify(m, null, "\t") + "\n");
           '
 
-      # Explicit include list: src/sass, web/ and the tooling files are not part of the package.
+      # Builds the stylesheet, compiles the compendiums and zips them. The include list lives in
+      # tools/package.mjs, so this archive is the one `npm run package` builds locally. Stamping
+      # comes first: the manifest inside the ZIP is the stamped one.
       - name: Package
-        run: |
-          zip -r mgt2.zip \
-            system.json \
-            README.md \
-            CHANGELOG.md \
-            LICENSE \
-            src/module \
-            templates \
-            styles \
-            lang \
-            assets
+        run: npm run package
 
       - name: Create release
         env:

@@ -5,9 +5,11 @@
  *
  *   node tools/coverage.mjs check    parse and verify the contract; write nothing
  *   node tools/coverage.mjs build    check, then write packs/_source and compile the LevelDB
+ *   node tools/coverage.mjs pack     compile the LevelDB from packs/_source alone
  *
- * The source lives in the workspace and never ships, so the compiled pack under
- * `foundryvtt-mgt2/packs/` is what a clone gets. Regenerating needs the workspace.
+ * The audit lives in the workspace and never ships, so only `build` needs it. `pack` reads
+ * `packs/_source/`, which is committed, and is therefore what a bare clone, the CI and the release
+ * run. The compiled database is derived and is not committed — see `.gitignore`.
  *
  * LANGUAGES, and why not Babele. Babele translates documents at load time from a module, which means
  * a dependency, a second document identity to keep aligned, and nothing in the pack a reader can open
@@ -78,22 +80,24 @@ const ID_LENGTH = 16;
 const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 const command = process.argv[2] ?? "build";
-if ( !["check", "build"].includes(command) ) {
-    console.error("Usage: node tools/coverage.mjs check|build");
+if ( !["check", "build", "pack"].includes(command) ) {
+    console.error("Usage: node tools/coverage.mjs check|build|pack");
     process.exit(1);
 }
 
-const audit = read();
-const parsed = parse(audit);
-report(parsed);
-verify(parsed);
+if ( command === "pack" ) await compile(readSource());
+else {
+    const parsed = parse(read());
+    report(parsed);
+    verify(parsed);
 
-const languages = readLanguages();
-const journals = languages.map(language => buildJournal(parsed, language));
-reportLanguages(languages);
-if ( command === "build" ) {
-    writeSource(journals);
-    await compile(journals);
+    const languages = readLanguages();
+    const journals = languages.map(language => buildJournal(parsed, language));
+    reportLanguages(languages);
+    if ( command === "build" ) {
+        writeSource(journals);
+        await compile(journals);
+    }
 }
 
 /* -------------------------------------------- */
@@ -102,12 +106,22 @@ if ( command === "build" ) {
 
 function read() {
     if ( !fs.existsSync(AUDIT) ) {
-        console.error(`Cannot find ${AUDIT}.`);
-        console.error("The audit lives in the workspace, not in the system repo — a bare clone cannot");
-        console.error("regenerate this pack, and does not need to: the compiled pack is committed.");
-        process.exit(1);
+        fail(`Cannot find ${AUDIT}.`,
+            "The audit lives in the workspace, not in the system repo. A bare clone cannot run `build`,",
+            "and does not need to: `pack` compiles the same database from the committed packs/_source.");
     }
     return fs.readFileSync(AUDIT, "utf8");
+}
+
+/** The journals `writeSource` left behind: committed, and all `pack` needs. */
+function readSource() {
+    const files = fs.existsSync(SOURCE_DIR)
+        ? fs.readdirSync(SOURCE_DIR).filter(name => name.endsWith(".json")).sort() : [];
+    if ( !files.length ) {
+        fail(`No journals in ${path.relative(SYSTEM, SOURCE_DIR)}.`,
+            "They are committed — a checkout missing them is incomplete. Run `build` from the workspace.");
+    }
+    return files.map(file => JSON.parse(fs.readFileSync(path.join(SOURCE_DIR, file), "utf8")));
 }
 
 /**
