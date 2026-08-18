@@ -395,7 +395,7 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 			&:hover
 				background: var(--accent-soft)
 				border-color: var(--accent-text)
-			// §7: Conclude goes hot when every line is in. Nothing auto-closes — -1 and 0 are
+			// Conclude goes hot when every line is in. Nothing auto-closes — -1 and 0 are
 			// referee-decision states (Core p.61), so this says "ready", never "done".
 			&.hot
 				background: var(--accent-soft)
@@ -530,8 +530,8 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 			i
 				font-size: 11px
 
-// A dose card: three moments on one line, and what it left behind on another (§9.90). No block
-// wrapper — the card head already says which drug, so the body is a sentence.
+// A dose card: three moments on one line, and what it left behind on another. No block wrapper —
+// the card head already says which drug, so the body is a sentence.
 .mgt2.card.dose .dose-line
 	margin: 0
 	padding: 8px 11px 9px
@@ -539,8 +539,8 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 	line-height: 1.5
 	color: var(--mute)
 
-// The misjump reading, posted (§9.89). The block inside is the screen's own, so only the padding
-// the card's other bodies carry is added here.
+// The misjump reading, posted. The block inside is the screen's own, so only the padding the card's
+// other bodies carry is added here.
 .mgt2.card.misjump .block
 	padding: 9px 11px 11px
 

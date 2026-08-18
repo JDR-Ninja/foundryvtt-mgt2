@@ -31,6 +31,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             powerToggle: SpacecraftActorSheet.#onPowerToggle,
             softwareToggle: SpacecraftActorSheet.#onSoftwareToggle,
             backupToggle: SpacecraftActorSheet.#onBackupToggle,
+            burnToggle: SpacecraftActorSheet.#onBurnToggle,
             ionClear: SpacecraftActorSheet.#onIonClear,
             hullOptionToggle: SpacecraftActorSheet.#onHullOptionToggle,
             rowCreate: SpacecraftActorSheet.#onRowCreate,
@@ -118,6 +119,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             criticals: this.#criticals(system),
             manifest: this.#manifest(),
             manoeuvre: system.manoeuvre,
+            drives: SpacecraftActorSheet.#drives(system),
             finance: SpacecraftActorSheet.#finance(system),
             design: SpacecraftActorSheet.#design(system),
             // Which of the six headline figures the book is answering for.
@@ -232,6 +234,26 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         budget.ionDrain = system.power.ionDrain;
         budget.why = SpacecraftActorSheet.#printedWhy(system.printedFigures.powerDraw);
         return budget;
+    }
+
+    /** The second drive and the G-force it costs the crew, resolved to what the hint prints. */
+    static #drives(system) {
+        const drives = system.drives;
+        const rung = drives.gLoc;
+        return {
+            fitted: drives.reactionThrust !== null,
+            reactionThrust: drives.reactionThrust,
+            lit: drives.lit,
+            thrust: drives.thrust,
+            total: drives.totalThrust,
+            uncompensated: drives.uncompensated,
+            gLoc: !rung ? null : {
+                special: rung.special,
+                trained: rung.trained,
+                difficulty: rung.difficulty ? MGT2.Difficulty[rung.difficulty] : null,
+                increment: rung.increment ? `MGT2.Actor.spacecraft.GLoc.${rung.increment}` : null
+            }
+        };
     }
 
     static #hardpoints(system) {
@@ -758,6 +780,11 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
      */
     static async #onBackupToggle(event, target) {
         return this.actor.update({ "system.computer.onBackup": !this.actor.system.computer.onBackup });
+    }
+
+    /** HG p.45 makes the second drive a temporary boost, so lighting it is the pilot's declaration. */
+    static async #onBurnToggle(event, target) {
+        return this.actor.update({ "system.drives.burning": !this.actor.system.drives.burning });
     }
 
     /** HG p.30 gives the deduction a duration and no recovery step: it is given back by hand. */

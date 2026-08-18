@@ -89,9 +89,8 @@
 					</tr>
 				</thead>
 				<tbody>
-					{{! A wafer jack is an implant that is also a computer (§9.84), so a hosting augment
-					    keeps its row here and gains the two things a computer row has: it accepts a
-					    software drop, and it prints what is loaded against its Processing. }}
+					{{! A wafer jack is an implant that is also a computer, so a hosting augment keeps its
+					    row here: it accepts a software drop and prints what is loaded against its Processing. }}
 					{{#each augments as |augment|}}
 					<tr class="drag-item-list{{#if augment.hostsSoftware}} drop-item-list{{/if}}" data-item-id="{{augment._id}}">
 						<td>{{augment.name}}</td>
@@ -342,13 +341,13 @@
 					{{formInput systemFields.finance.fields.debt name="system.finance.debt" value=system.finance.debt classes="f num"}}
 				</label>
 				{{! Core p.150: MCr1 each, deducted from a ship's price BEFORE the mortgage is worked
-				    out — they are earned before any ship exists, which is why they live here (§9.13). }}
+				    out — they are earned before any ship exists. }}
 				<label>
 					<span class="lbl">{{localize 'MGT2.Actor.ShipShares'}}</span>
 					{{formInput systemFields.finance.fields.shipShares name="system.finance.shipShares" value=system.finance.shipShares classes="f num"}}
 				</label>
 				{{! What THIS Traveller pays towards a hull the crew owns together. Typed, never
-				    computed: p.155 bills "the crew" and leaves the split to the table (§9.13). }}
+				    computed: p.155 bills "the crew" and leaves the split to the table. }}
 				<label>
 					<span class="lbl">{{localize 'MGT2.Actor.MonthlyShipPayments'}}</span>
 					{{formInput systemFields.finance.fields.monthlyShipPayments name="system.finance.monthlyShipPayments" value=system.finance.monthlyShipPayments classes="f num"}}

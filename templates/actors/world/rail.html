@@ -47,8 +47,8 @@
 			<button type="button" data-action="berthingRoll" {{disabled (not world.berthing.rollable)}}>{{localize 'MGT2.Actor.world.BerthingRoll'}}</button>
 		</div>
 		{{! Deliberately an explicit number input: a NumberField carrying both `min` and `max` renders
-		    as a <range-picker>, which cannot express null, so the schema declares neither (§1.9). An
-		    emptied number input submits null, which is the third state getting back. }}
+		    as a <range-picker>, which cannot express null, so the schema declares neither. An emptied
+		    number input submits null, which is the third state getting back. }}
 		<div class="grid cols2 edit-only">
 			<label>
 				<span class="lbl">{{systemFields.berthing.label}}</span>

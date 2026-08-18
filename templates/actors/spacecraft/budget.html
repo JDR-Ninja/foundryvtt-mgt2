@@ -1,17 +1,11 @@
-{{! BLOCK 2 — one budget panel, four times over on this sheet at four different scales. The total,
-    the bar and the over-state are computed and never authored, which is the block's contract.
-    `switched` is the switchable variant, and it holds the NAME of the toggle action: a consumer
-    taken offline frees its draw (Core p.171), and a ship's program stopped frees its Bandwidth
-    (HG p.73, §9.132).
-    `under` is the opposite reading, and it is `REDESIGN-PLAN.md` defect 15: the block was written
-    for caps you must stay under, so being below one prints `N free`. A Thrust bank is capped by
-    what a band change costs (Core p.166) and being below THAT is the problem, so the panel opts in
-    and the same number reads `N short`. Power and tonnage genuinely want `free`, so it is opt-in. }}
+{{! BLOCK 2 — one budget panel, four times over at four scales. Total, bar and over-state are
+    computed and never authored. `switched` holds the NAME of the toggle action: a consumer taken
+    offline frees its draw (Core p.171). `under` is opt-in — a Thrust bank reads `N short`, not `N free`. }}
 <section class="budget{{#if switched}} switched{{/if}}{{#if b.over}} over{{/if}}" data-over="{{#if over}}{{over}}{{else}}hard{{/if}}"{{#if under}} data-under="short"{{/if}}>
 	<header>
 		<span class="lbl">{{title}}</span>
 		{{#if note}}<i class="fa-solid fa-circle-info note" data-tooltip="{{note}}"></i>{{/if}}
-		{{! Where the total came from, when it is not the sum of the rows below (§4.1). }}
+		{{! Where the total came from, when it is not the sum of the rows below. }}
 		{{#if b.why}}<span class="why">{{localize b.why}}</span>{{/if}}
 		{{#if b.over}}<span class="flag">{{flag}}</span>{{/if}}
 		<span class="tot" data-derived="{{derived}}"><b>{{b.total}}</b><span class="of">/ {{b.cap}}{{#if unit}} {{unit}}{{/if}}</span></span>

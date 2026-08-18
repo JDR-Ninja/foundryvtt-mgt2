@@ -1,11 +1,6 @@
 {{! A modifier with the tray's lifetime removed: permanent, per-Traveller, career-scoped, and GATED
-    rather than spent (§9.54). `createStandingModifierField()` has two call sites — a species frame's
-    racial background and a career's printed footnote — so this editor has two as well.
-
-    The gate is what makes it not a tray entry: it is read at the moment of each roll, so it switches
-    off again when the score falls, which is what `uses` and `expiresWhen` could not model.
-
-    Callers pass `mod`, `path` — the dotted route under `system.` — and the row `index`. }}
+    rather than spent. The gate is read at the moment of each roll, so it switches off when the score
+    falls. Callers pass `mod`, `path` — the dotted route under `system.` — and the row `index`. }}
 <div class="entry" data-entry-index="{{index}}">
 	<div class="entryhead">
 		<input class="f num edit-only" type="number" step="1" name="system.{{path}}.dm" value="{{mod.dm}}" data-dtype="Number" />

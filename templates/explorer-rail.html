@@ -27,8 +27,7 @@
 				labelAttr="text" selected=filters.subType blank=(localize 'MGT2.Explorer.Any')}}</select>
 		</label>
 
-		{{! Only `weapon` carries a scale, so this appears when there is one to read and is absent
-		    otherwise — a permanently empty select is worse than no select (§88). }}
+		{{! Only `weapon` carries a scale, so this appears when there is one to read, absent otherwise. }}
 		{{#if scales.length}}
 		<label class="fld">
 			<span>{{localize 'MGT2.Explorer.Scale'}}</span>
@@ -55,9 +54,8 @@
 		</button>
 	</div>
 
-	{{! THE PACK LIST IS THE SOURCE FILTER AND THE INDEX READOUT AT ONCE, because they are the same
-	    list: a pack switched off is a round-trip that bought nothing, and a pack still arriving is
-	    one whose rows cannot answer a Tech Level yet (§85). }}
+	{{! THE PACK LIST IS THE SOURCE FILTER AND THE INDEX READOUT AT ONCE: a pack switched off is a
+	    round-trip that bought nothing, and a pack still arriving cannot answer a Tech Level yet. }}
 	<div class="sources">
 		{{#each sources}}
 		<div class="grp">

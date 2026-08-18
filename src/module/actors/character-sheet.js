@@ -1912,7 +1912,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
     const sourceItemData = await MGT2Helper.getItemDataFromDropData(dropData);
 
-    // Simple drop — a species included: `SpeciesData`'s own hooks own the link (§9.147).
+    // Simple drop — a species included: `SpeciesData`'s own hooks own the link.
     if (this.constructor.DROP_ITEM_SIMPLE.has(sourceItemData.type)) {
       await this.actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(sourceItemData)]);
       return true;

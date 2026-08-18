@@ -1,11 +1,9 @@
-{{! THE TRAY — §9.51, and the word *one-shot* §9.38 used for it was wrong. An entry is never a bare
-    value: it carries a kind, a duration, a use count, the checks it may be spent on, a scope and an
-    expiry that is a predicate over the record's EXIT MODE rather than a term count. Seven columns,
-    because seven is what the printed entries need. }}
+{{! THE TRAY. An entry is never a bare value: it carries a kind, a duration, a use count, the checks
+    it may be spent on, a scope and an expiry that is a predicate over the record's EXIT MODE. }}
 <div class="tray2">
 	{{#if tray}}
 	<span class="lbl">{{localize 'MGT2.Chargen.Screen.TrayFor' name=tray.name}}</span>
-	{{! §9.50's two counters. Ledgers and not derivations, and they live here because the tray is where
+	{{! The two counters. Ledgers and not derivations, and they live here because the tray is where
 	    they are stored — a wager needs the pending total to exist before mustering out. }}
 	<span class="counts">{{localize 'MGT2.Chargen.Screen.Counters' benefit=tray.benefitRolls skill=tray.skillRolls}}</span>
 	{{#if tray.entries.length}}

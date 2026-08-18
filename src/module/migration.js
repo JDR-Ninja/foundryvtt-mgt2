@@ -144,7 +144,7 @@ function collectActorUpdate(actor) {
     update["system.crew"] = actor.system.crew.map(row => ({ ...row }));
     dirty = true;
   }
-  // §9.147. `personal.speciesText` is NOT deleted: `DataField#clean` prunes an undeclared key, so
+  // `personal.speciesText` is NOT deleted: `DataField#clean` prunes an undeclared key, so
   // no condition here can see one to fire on — the same reason the deletions above never fire.
   const species = actor.items.find(item => item.type === "species");
   if ( species ) {

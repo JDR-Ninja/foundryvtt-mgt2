@@ -83,9 +83,7 @@ li.chat-message:has(> .message-content > .mgt2.card)
 			color: var(--faint)
 			border: 1px solid var(--rule)
 
-	// A rule, and the book page it comes from, are never body text on a sheet: they hang off this
-	// marker as a tooltip on the thing they qualify — a section header, a budget, a warning line, a
-	// label. The sheet states what it is doing; the marker says why, to whoever asks (§9.134).
+	// A rule and the book page it comes from hang off this marker as a tooltip, never as body text.
 	.note
 		flex: 0 0 auto
 		font-size: 11px
@@ -379,8 +377,7 @@ li.chat-message:has(> .message-content > .mgt2.card)
 			font-size: 11px
 			font-weight: 500
 			color: var(--mute)
-		// The same provenance gloss the budget rows carry, in the one other place a derived figure
-		// can be standing in for a printed one (§4.1). `i` beside it is the unit and stays the unit.
+		// Provenance gloss: a derived figure standing in for a printed one. `i` beside it is the unit.
 		.why
 			margin-left: 6px
 			font-family: var(--cond)
@@ -513,9 +510,8 @@ li.chat-message:has(> .message-content > .mgt2.card)
 			width: 5.5rem
 			text-align: right
 
-	// Where a figure came from. On a row it glosses the row; in the header it glosses the TOTAL,
-	// which is how a printed statblock says it is answering instead of the formula (§4.1) — and the
-	// only case in which the rows below do not add up to the number above them.
+	// Where a figure came from. On a row it glosses the row; in the header it glosses the TOTAL —
+	// the only case in which the rows below do not add up to the number above them.
 	.why
 		margin-left: 8px
 		font-family: var(--cond)
@@ -1177,12 +1173,8 @@ li.chat-message:has(> .message-content > .mgt2.card)
 .mgt2 .roster tr.vacant td.who
 	border: 1px dashed var(--rule)
 
-// --------------------------------------------
-//  The design ledger — §6.2's expensive half
-// --------------------------------------------
-// Ported from docs/sketch-component.html. One line per rule the design either meets or does not,
-// and a third state the sketch did not have: a check with nothing to read (§9.92). Silent is not
-// green — a partial parts list answers fewer rules, and saying which is the point.
+// The design ledger: one line per rule the design meets or does not, and a third state — a check
+// with nothing to read. Silent is not green; a partial parts list simply answers fewer rules.
 
 .mgt2 .valid
 	display: flex
@@ -1239,8 +1231,8 @@ li.chat-message:has(> .message-content > .mgt2.card)
 .mgt2 table.rows td.num.good
 	color: var(--good)
 
-// A bay carrying identical craft: ten fighters on ten clamps are one Actor carried ten times
-// (§9.95), so the count sits against the name and the two stored halves sit under the total.
+// A bay carrying identical craft: ten fighters on ten clamps are one Actor carried ten times, so
+// the count sits against the name and the two stored halves sit under the total.
 
 .mgt2 .roster .times
 	margin-right: 1px
@@ -1267,10 +1259,7 @@ li.chat-message:has(> .message-content > .mgt2.card)
 	input.f.num:first-child
 		width: 3rem
 
-// A mount that names a weapon in its label and holds no weapon Item (§9.106). One tone for both
-// screens, because it is one state: the ship panel's damage cell and the fleet sheet's battery row
-// are two views of the same half-armed mount, and a reader who learns the colour on one should not
-// have to learn it again on the other.
+// A mount that names a weapon in its label and holds no weapon Item. One tone on both screens.
 .mgt2
 	.noarm
 		color: var(--danger)

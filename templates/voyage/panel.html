@@ -19,10 +19,8 @@
 		</dl>
 	</div>
 
-	{{! Both ends, as the world Actors publish them. Every code is derived from the eight digits and
-	    none of it is typed here — the ONE thing this screen may not do is compute a world's numbers
-	    itself: a stop can be a compendium Actor, and no number derived from another document may
-	    live on the ship's data model (§9.33.4). }}
+	{{! Both ends, as the world Actors publish them. The ONE thing this screen may not do is compute a
+	    world's numbers itself: no figure derived from another document may live on the ship's model. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Voyage.BothEnds'}}</h3>
@@ -57,10 +55,8 @@
 		{{/unless}}{{/unless}}
 	</div>
 
-	{{! BLOCK 3 — the roster, and the last column is the point: this screen reads three of these rows
-	    and writes one field on one of them, from a drop. The crew belongs to the ship, because a
-	    ship has a crew when no jump is running (§9.26). A `skill` check needs a sheet to read the
-	    level off, so the two chain buttons are refused on a vacant or unstatted slot. }}
+	{{! BLOCK 3 — the roster. The crew belongs to the ship: a ship has a crew when no jump is running.
+	    A `skill` check needs a sheet to read a level off, so the chain buttons refuse a vacant slot. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Voyage.Stations'}}</h3>

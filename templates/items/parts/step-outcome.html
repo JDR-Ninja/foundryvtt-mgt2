@@ -1,13 +1,6 @@
-{{! One arm of a declared step's check (§9.120). **The vocabulary is the event row's** — ends the
-    career, moves a named track, grants a cell, writes a term outcome — because a printed row is a line
-    with a check and consequences, and a step check's arms are the same four facts.
-
-    Three call sites: the pass arm, the fail arm, and a ladder row's own award, which is what a printed
-    timetable alternating two awards by term number needs. **One dense row rather than a field grid**,
-    the convention a tray entry already uses: a nine-rung ladder draws nine of these, and a label per
-    control would make the shortest printed table a page long.
-
-    Callers pass `outcome`, `path` — the dotted route under `system.` — and a localisation key. }}
+{{! One arm of a declared step's check. The vocabulary is the event row's — ends the career, moves a
+    named track, grants a cell, writes a term outcome. Three call sites: the pass arm, the fail arm,
+    and a ladder row's award. Callers pass `outcome`, `path` under `system.`, and a localisation key. }}
 <div class="nest edit-only">
 	<span class="nlbl">{{localize label}}</span>
 	<div class="trayrow">

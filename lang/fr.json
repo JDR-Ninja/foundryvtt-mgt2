@@ -1347,6 +1347,7 @@
           "bottom": "moitié de l'arrière"
         },
         "Reactive": "réactif",
+        "IonDisrupted": "{name} — impact ionique : aucun dégât de coque. Le Catalogue d'Équipement Général p. 151 perturbe à la place l'équipement électronique du véhicule pendant 1D rounds, et une arme à ions de NT14 n'atteint pas un Blindage de 4+ là où une NT15 s'arrête à 9+. Le Blindage de ce véhicule est de {armour}.",
         "VsLight": "contre les armes légères",
         "ToHit": "Pour la toucher",
         "Maintenance": "Maintenance",
@@ -1475,6 +1476,8 @@
         "HullDrives": "Coque & propulseurs",
         "DesignInputs": "les valeurs enregistrées que tout le reste lit",
         "ReactionDrive": "Propulseur à réaction",
+        "ReactionThrust": "Poussée du Propulseur-R",
+        "ReactionThrustWhy": "Garde Haute p. 16 : un vaisseau qui porte à la fois un Propulseur-M et un propulseur à réaction peut additionner leurs Poussées, mais la part du propulseur à réaction n'est pas compensée. Indiquez ici le niveau propre du second propulseur ; laissez vide pour une coque qui n'en porte qu'un. Cochez Propulseur à réaction ci-dessus quand le niveau du champ Poussée est lui-même celui d'un propulseur à réaction.",
         "Refined": "raffiné",
         "Unrefined": "non raffiné",
         "OptionsHint": "Les coques ont des options, pas des traits — le registre des traits n'a aucune famille de vaisseau, un vaisseau n'en porte donc aucun. Cliquez sur une option pour l'activer ou la désactiver.",
@@ -1571,6 +1574,17 @@
         "BandThrust": "P {thrust}",
         "BandRounds": "{rounds} rounds",
         "Dogfight": "combat rapproché",
+        "Burning": "Propulseur à réaction allumé — Poussée +{n}, {total} en tout",
+        "BurnWhy": "Garde Haute p. 16 : les deux propulseurs s'additionnent. La p. 45 fait du second une accélération temporaire qui consomme du carburant : il reste allumé aussi longtemps que le pilote le dit, et rien ici ne le programme.",
+        "Uncompensated": "{g} G non compensés.",
+        "UncompensatedWhy": "Garde Haute p. 16 : les compensateurs gravitiques sont limités au niveau propre du Propulseur-M, et la poussée d'un propulseur à réaction n'est pas compensée. Tout l'équipage subit la différence, et la table PIC-g de la p. 47 est le test d'END qu'elle lui coûte.",
+        "GLoc": {
+          "check": "Test d'END {difficulty}, {increment}.",
+          "turn": "une fois par round de combat spatial",
+          "minute": "une fois par minute",
+          "trained": "personnel formé seulement",
+          "special": "à la discrétion de l'Arbitre — voir Garde Haute p. 46"
+        },
         "CarriedCraft": "Appareils embarqués",
         "BayCount": "{bays} baies · {craft} appareils",
         "Each": "chacun",
@@ -1679,6 +1693,7 @@
         "TonnageRows": {
           "armour": "Blindage",
           "mDrive": "Propulseur-M",
+          "rDrive": "Propulseur-R",
           "jDrive": "Propulseur-S",
           "powerPlant": "Générateur",
           "fuel": "Carburant",
@@ -3381,7 +3396,8 @@
         "jumpFuel": "Carburant de saut",
         "statedTons": "Face au tonnage déclaré",
         "statedPower": "Face au générateur déclaré",
-        "backupComputer": "Ordinateur de secours"
+        "backupComputer": "Ordinateur de secours",
+        "hardened": "Systèmes blindés"
       },
       "Why": {
         "power": "consommée face à produite",
@@ -3390,13 +3406,15 @@
         "jumpFuel": "10 % de la coque par parsec à l'indice du propulseur",
         "statedTons": "les pièces face aux lignes de budget qu'elles recouvrent",
         "statedPower": "les générateurs face à la production du vaisseau",
-        "backupComputer": "Processeur inférieur à celui du principal"
+        "backupComputer": "Processeur inférieur à celui du principal",
+        "hardened": "au moins 75 % des pièces qui consomment de l'Énergie, pour le Trait de flotte"
       }
     },
     "ComponentCategories": {
       "hull": "Coque",
       "armour": "Blindage",
       "mDrive": "Propulseur de manœuvre",
+      "rDrive": "Propulseur à réaction",
       "jDrive": "Propulseur de saut",
       "powerPlant": "Générateur",
       "fuel": "Carburant",
@@ -3984,6 +4002,7 @@
       "OnThisHull": "Sur cette coque",
       "CostMCr": "Coût (MCr)",
       "PowerPerTon": "Énergie / tonneau",
+      "Hardened": "Blindage EM contre les armes à ions",
       "Rating": "Indice",
       "Critical": "Critique",
       "ComponentHint": "Un composant alimente le budget du vaisseau et rien d'autre : un vaisseau sans aucun composant est complet. Le tonnage est un chiffre fixe, un pourcentage de la coque ou un pourcentage avec un plancher — le plus grand l'emporte. Un critique est un degré de 1 à 6 : une tourelle à MD−1 tire encore.",

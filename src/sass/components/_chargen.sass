@@ -68,8 +68,8 @@
 		font-family: var(--mono)
 		font-size: 10.5px
 		color: var(--faint)
-	// The door onto §9.40's close, and the close's own teardown button. Pushed right so the masthead
-	// reads left to right as state, then action.
+	// The door onto the closing screen, and the close's own teardown button. Pushed right so the
+	// masthead reads left to right as state, then action.
 	.closing,
 	.finishall
 		margin-left: auto
@@ -140,7 +140,7 @@
 			font-size: 10px
 			color: var(--mute)
 		// A Traveller who has stopped, and has not yet been torn down: mustering out CONSUMES the
-		// ledger, so the teardown is strictly after it (§9.50).
+		// ledger, so the teardown is strictly after it.
 		&.done b
 			color: var(--faint)
 		.out
@@ -337,9 +337,7 @@
 		font-size: 10px
 		color: var(--faint)
 
-// --------------------------------------------
-//  The tray — §9.51 says an entry is never just a value
-// --------------------------------------------
+// The tray: an entry is never just a value.
 
 .mgt2.chargen .tray2
 	border-top: 1px solid var(--rule)
@@ -352,7 +350,7 @@
 		letter-spacing: 0.16em
 		text-transform: uppercase
 		color: var(--faint)
-	// §9.50's two counters, beside the tray's caption because the tray is where they are stored.
+	// The two ledger counters, beside the tray's caption: the tray is where they are stored.
 	.counts
 		margin-left: 10px
 		font-family: var(--mono)
@@ -387,12 +385,8 @@
 		font-size: 12px
 		color: var(--faint)
 
-// --------------------------------------------
-//  THE CLOSING SCREEN — §9.40's two group-level steps and the teardown
-// --------------------------------------------
-// Same four-block shape as the creation grid and the same single scroller: the muster-out table grows
-// a row per Traveller, and the ship election and the package draft must never be pushed off the
-// bottom, because those two are the whole reason this screen exists rather than four sheets.
+// The closing screen — the group-level steps and the teardown. One scroller: the muster-out table
+// grows a row per Traveller and must never push the ship election and package draft off the bottom.
 
 .mgt2 .mustergrid
 	padding: 0 0 4px
@@ -500,8 +494,7 @@
 		.up
 			font-size: 9px
 			color: var(--danger)
-	// Redeemed or given up: kept on the row rather than removed, because what a Traveller was owed is
-	// part of their history and a referee auditing a sheet needs the row that paid for it (§9.40).
+	// Redeemed or given up: kept on the row rather than removed — a referee auditing a sheet needs it.
 	.vouchers li.spent
 		opacity: 0.5
 		text-decoration: line-through

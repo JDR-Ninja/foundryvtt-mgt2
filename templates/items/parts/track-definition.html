@@ -1,11 +1,6 @@
-{{! One named track, as a template or a frame DECLARES it (§9.54). `createTrackDefinitionField()` has
-    two call sites — a career's own tracks and a species frame's — so the editor has two as well, and
-    a second copy of this markup is how the two would silently stop agreeing.
-
-    `monotone` is the field §9.40 needed and did not have: a track moves in BOTH directions, so "the
-    highest rank reached" is a high-water mark only where the declaration says it climbs.
-
-    Callers pass `track`, `path` — the dotted route under `system.` — and the row `index`. }}
+{{! One named track, as a template or a frame DECLARES it. `monotone`: a track moves in BOTH
+    directions, so "the highest rank reached" is a high-water mark only where the declaration says it
+    climbs. Callers pass `track`, `path` — the dotted route under `system.` — and the row `index`. }}
 <div class="entry" data-entry-index="{{index}}">
 	<div class="entryhead">
 		<input class="f edit-only" type="text" name="system.{{path}}.key" value="{{track.key}}" placeholder="{{localize 'MGT2.Chargen.Template.TrackKey'}}" />

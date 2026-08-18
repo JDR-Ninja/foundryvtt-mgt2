@@ -1,11 +1,8 @@
 <section class="mgt2-panel active mgt2-stash-panel">
 
 	{{! THE CONTENTS. No encumbrance column, because nobody carries this. The Cr column is a readout
-	    and not a till — a sum of stored costs, with no buy, sell or price control anywhere on the
-	    sheet; stock a player transacts against is the trade loop's supplier (§9.34/§9.66).
-	    `stash.contents` exists only when the viewer is entitled to it, so a withheld inventory is an
-	    absent key rather than a hidden table — nothing here is styled out of sight, because a row
-	    that reaches the markup has already been handed over. }}
+	    and not a till. `stash.contents` exists only when the viewer is entitled to it, so a withheld
+	    inventory is an absent key rather than a hidden table — nothing is styled out of sight. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.stash.Contents'}}</h3>
@@ -40,9 +37,8 @@
 					{{#if @root.stash.showWeight}}<td class="c num">{{entry.weight}}</td>{{/if}}
 					<td class="c num">{{entry.value}}</td>
 					<td class="r">
-						{{! The actor's two faces for one action (§9.143). Reading is the point of a cache and
-						    an observer never leaves play mode, so the eye is the row's only control there;
-						    writing stays edit-only, which is where this table's permission gate lives. }}
+						{{! The actor's two faces for one action. Reading is the point of a cache and an
+						    observer never leaves play mode, so the eye is the row's only control there. }}
 						<div class="acts">
 							<a class="play-only" data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.View'}}"><i class="fas fa-eye"></i></a>
 							<a class="edit-only" data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.EditItem'}}"><i class="fas fa-edit"></i></a>

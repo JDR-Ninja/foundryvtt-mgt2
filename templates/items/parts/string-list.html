@@ -1,10 +1,6 @@
-{{! An ordered list of NON-BLANK strings — a track's rungs, the careers an override exempts, the
-    skills a species always takes. The element refuses to be blank, so an add control appending ""
-    cleans it away, the diff comes out empty and nothing happens at all (§9.110). **The trailing
-    input is how one is added and emptying a row is how it is deleted**, which is the convention
-    `rules[]` has always used; `_processFormData` drops the blanks on the way in.
-
-    Callers pass `list`, `path` — the dotted route to it under `system.` — and two localisation keys. }}
+{{! An ordered list of NON-BLANK strings. The element refuses to be blank, so an add control appending
+    "" cleans it away, the diff comes out empty and nothing happens at all; `_processFormData` drops
+    them on the way in. Callers pass `list`, `path` under `system.`, and two localisation keys. }}
 <div class="nest" data-property="{{path}}">
 	<span class="nlbl">{{localize label}}</span>
 	{{#each list as |entry i|}}

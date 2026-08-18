@@ -1,10 +1,5 @@
-// The Docket — the GM's compose window (docs/ROLL-REQUEST.md §3). Almost all of it is the kit
-// unchanged: the gutter form `.pdlg` / `.pline` / `.pgut` / `.pfields` from `_dialog.sass`, the
-// CONFIG-fixed strips as `.seg`, the chips as `.tog`, and `.roster` from `_blocks.sass` with its
-// three occupancy states and its drop refusal. What is here is the window skeleton, the roster's
-// four Docket-specific cells, and the one genuinely new block — `.spread`.
-//
-// The roster is THE ONLY SCROLLER, because a referee must never hunt for the difficulty ladder.
+// The Docket — the GM's compose window. Almost all of it is the kit unchanged: the gutter form from
+// `_dialog.sass` and `.roster` from `_blocks.sass`. The roster is THE ONLY SCROLLER.
 
 .mgt2.application.docket
 	container-type: inline-size
@@ -69,8 +64,7 @@
 	.skillfld.off
 		opacity: 0.4
 
-	// What the characteristic cardinality MEANS, in words, live: 0 = the player picks, 1 = fixed,
-	// 2+ = offered. §12 question 4 answered yes to this instead of a third mode strip.
+	// What the characteristic cardinality MEANS, live: 0 = the player picks, 1 = fixed, 2+ = offered.
 	.echo
 		font-family: var(--cond)
 		font-size: 11px
@@ -306,8 +300,7 @@
 		text-transform: uppercase
 		color: var(--faint)
 
-	// One block in §3's own drawing: the tally and the visibility are both about the sending, and a
-	// rule between them would claim they are two subjects.
+	// One block: the tally and the visibility are both about the sending, not two subjects.
 	.pline.tallyline + .pline
 		padding-top: 3px
 		border-top: 0

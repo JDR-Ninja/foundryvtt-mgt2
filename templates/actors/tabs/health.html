@@ -72,7 +72,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.Wounds'}}</h3>
 			<span class="count">{{wounds.length}}</span>
-			{{! The one create that stays edit-only where its neighbours no longer are (§9.143): a wound
+			{{! The one create that stays edit-only where its neighbours no longer are: a wound
 			    is a door and not a control — the damage dialog is how one arrives in play. }}
 			<a class="add edit-only" data-action="itemCreate" data-type-item="disease" data-subtype="wound" data-create-name="{{localize 'MGT2.Actor.NewWound'}}" data-tooltip="{{localize 'MGT2.Actor.AddWound'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
@@ -102,11 +102,9 @@
 		{{/if}}
 	</div>
 
-	{{! §9.39: ageing, creation injuries and the medical care that undoes them are ONE signed log, and
-	    its sum derives into `characteristics.<k>.auto` — so `base` holds the characteristics as first
-	    rolled and nothing ever writes it again. A row is added and removed; it is never edited, and
-	    a restoration is a new row rather than a correction to an old one. The control is live in both
-	    modes and never scheduled: a Traveller ages when the table says so (§9.35, §9.91). }}
+	{{! Ageing, creation injuries and the medical care that undoes them are ONE signed log, and its
+	    sum derives into `characteristics.<k>.auto` — so `base` holds the characteristics as first
+	    rolled and nothing ever writes it again. A row is added and removed, never edited. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Loss.Title'}}</h3>

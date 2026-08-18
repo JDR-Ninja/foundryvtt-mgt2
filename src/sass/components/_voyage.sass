@@ -65,11 +65,8 @@
 // --------------------------------------------
 //  THE LEG — the one genuinely new component
 // --------------------------------------------
-// A voyage is not an ordered array with a cursor. No printed rule looks past the next jump: the
-// jump cuts the ship off entirely and the Plot is made on the way out to the 100-diameter limit
-// (Core p.158). So exactly one pair exists at a time, and the parsec count between them is a
-// property of THAT PAIR — which is why the hop is drawn between the two ends and belongs to
-// neither. There is no current-index pip to draw, because there is no index (§9.33.2).
+// A voyage is not an ordered array with a cursor: no printed rule looks past the next jump (Core
+// p.158). One pair exists at a time, so there is no index and no current-index pip to draw.
 
 .mgt2 .leg
 	display: grid
@@ -221,8 +218,8 @@
 // --------------------------------------------
 //  The rail's three controls
 // --------------------------------------------
-// The clock is the referee's: nothing subscribes to worldTime and no roll advances the leg
-// (§9.35). This button does, and only this.
+// The clock is the referee's: nothing subscribes to worldTime and no roll advances the leg. This
+// button does, and only this.
 
 .mgt2 .advance
 	display: flex
@@ -314,8 +311,7 @@
 		font-family: var(--mono)
 		font-size: 9.5px
 		color: var(--mute)
-		// A modifier the system states and deliberately does not compute — the 100-diameter limit
-		// is a position nothing tracks, and the maintenance counter was declined (§9.33.10 Q4).
+		// Stated and deliberately not computed: the 100-diameter limit is a position nothing tracks.
 		&.inert
 			opacity: 0.55
 		&.neg
@@ -331,9 +327,8 @@
 // --------------------------------------------
 //  The misjump block
 // --------------------------------------------
-// The one place the `ruleset` enum decides anything (§9.89). Everything below the inputs is a
-// reading of dice already rolled: no state, no colour of its own, and the two grades of trouble
-// share `--danger` with every other warning in the system.
+// The one place the `ruleset` enum decides anything. Everything below the inputs is a reading of
+// dice already rolled: no state and no colour of its own.
 
 .mgt2 .block.misjump
 	.effects
@@ -426,8 +421,7 @@
 	p.outcome.bad
 		color: var(--danger)
 
-	// Stated and never rolled: everyone aboard makes these, and none of those Actors is this
-	// screen's (§9.35).
+	// Stated and never rolled: everyone aboard makes these, and none of those Actors is this screen's.
 	.aftermath
 		margin-top: 10px
 		padding-top: 9px

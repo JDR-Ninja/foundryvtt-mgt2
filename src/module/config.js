@@ -1050,7 +1050,22 @@ MGT2.ArmourTonnage = Object.freeze([
 
 // Drives as a percentage of hull by rating (HG p.16); a jump drive adds five tons and floors at ten.
 MGT2.ThrustPotential = Object.freeze([0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11]);
+// A reaction drive reads its own row of the same table and runs to rating 16 (HG p.16).
+MGT2.ReactionPotential = Object.freeze([0.01, 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18,
+    0.20, 0.22, 0.24, 0.26, 0.28, 0.30, 0.32]);
 MGT2.JumpPotential = Object.freeze([0, 0.025, 0.05, 0.075, 0.10, 0.125, 0.15, 0.175, 0.20, 0.225]);
+
+// The g-LOC ladder (HG p.47), read by the G-force a ship's compensators do not cover.
+MGT2.GLoc = Object.freeze([
+    {maxG: 1, difficulty: null, increment: null, trained: false, special: false},
+    {maxG: 2, difficulty: "Easy", increment: "turn", trained: false, special: false},
+    {maxG: 3, difficulty: "Routine", increment: "turn", trained: false, special: false},
+    {maxG: 4, difficulty: "Average", increment: "turn", trained: false, special: false},
+    {maxG: 6, difficulty: "Difficult", increment: "minute", trained: false, special: false},
+    {maxG: 10, difficulty: "VeryDifficult", increment: "minute", trained: false, special: false},
+    {maxG: 15, difficulty: "VeryDifficult", increment: "minute", trained: true, special: false},
+    {maxG: null, difficulty: null, increment: null, trained: false, special: true}
+]);
 
 // Bridges (HG p.19). `tons` is the ladder by hull size; the cost is MCr0.5 per 100 tons of ship.
 MGT2.BridgeSizes = Object.freeze([
@@ -1103,8 +1118,8 @@ MGT2.PassageClasses = Object.freeze({
 
 // Screens (HG p.41). A count, not a flag: every five nuclear dampers strike off a further 1DD.
 MGT2.ShipScreens = Object.freeze({
-    nuclearDamper: {label: "MGT2.ShipScreens.nuclearDamper", tl: 12, tons: 10, power: 20, cost: 60000000},
-    mesonScreen: {label: "MGT2.ShipScreens.mesonScreen", tl: 13, tons: 10, power: 30, cost: 60000000},
+    nuclearDamper: {label: "MGT2.ShipScreens.nuclearDamper", tl: 12, tons: 10, power: 20, cost: 10000000},
+    mesonScreen: {label: "MGT2.ShipScreens.mesonScreen", tl: 13, tons: 10, power: 30, cost: 20000000},
     blackGlobe: {label: "MGT2.ShipScreens.blackGlobe", tl: 15, tons: 50, power: 30, cost: 100000000}
 });
 
@@ -1741,6 +1756,7 @@ MGT2.ComponentCategories = Object.freeze({
     hull: "MGT2.ComponentCategories.hull",
     armour: "MGT2.ComponentCategories.armour",
     mDrive: "MGT2.ComponentCategories.mDrive",
+    rDrive: "MGT2.ComponentCategories.rDrive",
     jDrive: "MGT2.ComponentCategories.jDrive",
     powerPlant: "MGT2.ComponentCategories.powerPlant",
     fuel: "MGT2.ComponentCategories.fuel",

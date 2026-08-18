@@ -1,8 +1,7 @@
 <aside class="mgt2-rail">
 
-	{{! The referee's clock, and the only writer of the leg (§9.35). Nothing subscribes to
-	    `updateWorldTime` and no roll moves the stop: `next` becomes `here` and the head of the
-	    queue becomes `next`, in one write. }}
+	{{! The referee's clock, and the only writer of the leg. Nothing subscribes to `updateWorldTime`
+	    and no roll moves the stop: `next` becomes `here` and the head of the queue becomes `next`. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Voyage.Advance'}}</h3>
@@ -18,8 +17,7 @@
 
 	{{! The cap is `fuel.tons`, design tonnage that never moves; the one row is `ops.fuel`, the real
 	    level. The ship needs both, because Poor Maintenance leaks a percentage of CAPACITY (Core
-	    p.155). Nothing derives off `ops.fuel` on the model — "can I make this jump" is the reading
-	    below, made against the leg the screen already holds (§9.33.3). }}
+	    p.155). Nothing derives off `ops.fuel` on the model. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Voyage.Fuel'}}</h3>
@@ -75,9 +73,8 @@
 		<p class="hint">{{localize 'MGT2.Voyage.DebitWhy'}}</p>
 	</div>
 
-	{{! §9.33.10 Q1: the two procedures differ in shape, not in numbers, and the precedence rule the
-	    books print only holds if something declares which is in force. Only the Core branch is
-	    built — Companion's is not a chain and cannot ride the delivered roll path. }}
+	{{! The two procedures differ in shape, not in numbers, and the precedence rule the books print
+	    only holds if something declares which is in force. Only the Core branch is built. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Voyage.Ruleset'}}</h3>

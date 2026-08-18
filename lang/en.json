@@ -1347,6 +1347,7 @@
           "bottom": "half rear"
         },
         "Reactive": "reactive",
+        "IonDisrupted": "{name} — ion hit: no hull damage. Central Supply Catalogue p.151 disrupts a vehicle's electronic equipment for 1D rounds instead, and a TL14 ion weapon does not reach Armour 4+ where a TL15 one stops at Armour 9+. This vehicle's Armour is {armour}.",
         "VsLight": "vs. light weapons",
         "ToHit": "To-hit against it",
         "Maintenance": "Maintenance",
@@ -1475,6 +1476,8 @@
         "HullDrives": "Hull & drives",
         "DesignInputs": "the stored ratings everything reads",
         "ReactionDrive": "Reaction drive",
+        "ReactionThrust": "R-drive Thrust",
+        "ReactionThrustWhy": "High Guard p.16: a ship carrying both a manoeuvre and a reaction drive may add their Thrust together, but the reaction drive's share is not compensated. Type the second drive's own rating here; leave it empty for a hull with only one drive. Tick Reaction drive above when the rating in the Thrust field is itself a reaction drive.",
         "Refined": "refined",
         "Unrefined": "unrefined",
         "OptionsHint": "Hulls get options, not traits — the trait registry has no ship family at all, so a spacecraft carries none. Click one to switch it on or off.",
@@ -1571,6 +1574,17 @@
         "BandThrust": "T {thrust}",
         "BandRounds": "{rounds} rounds",
         "Dogfight": "dogfight",
+        "Burning": "Reaction drive lit — Thrust +{n}, {total} in all",
+        "BurnWhy": "High Guard p.16: the two drives add. p.45 calls the second one a temporary speed boost that burns fuel, so it is lit for as long as the pilot says and nothing here schedules it.",
+        "Uncompensated": "{g} G uncompensated.",
+        "UncompensatedWhy": "High Guard p.16: gravitic compensators are limited to the manoeuvre drive's own rating, and the thrust of a reaction drive is not compensated. Everyone aboard feels the difference, and p.47's g-LOC table is the END check it costs them.",
+        "GLoc": {
+          "check": "{difficulty} END check, {increment}.",
+          "turn": "once per space combat round",
+          "minute": "once per minute",
+          "trained": "trained pilots only",
+          "special": "Referee's call — see High Guard p.46"
+        },
         "CarriedCraft": "Carried craft",
         "BayCount": "{bays} bays · {craft} craft",
         "Each": "each",
@@ -1679,6 +1693,7 @@
         "TonnageRows": {
           "armour": "Armour",
           "mDrive": "M-drive",
+          "rDrive": "R-drive",
           "jDrive": "J-drive",
           "powerPlant": "Power plant",
           "fuel": "Fuel",
@@ -2823,6 +2838,7 @@
       "OnThisHull": "On this hull",
       "CostMCr": "Cost (MCr)",
       "PowerPerTon": "Power / ton",
+      "Hardened": "Hardened against ion weapons",
       "Rating": "Rating",
       "Critical": "Critical",
       "ComponentHint": "A component feeds the ship's budget and nothing else, so a spacecraft with no components is complete. Tonnage is flat, a percentage of the hull, or a percentage with a floor — whichever is largest wins. A critical is a grade from 1 to 6: a turret at DM−1 still fires.",
@@ -4486,7 +4502,8 @@
         "jumpFuel": "Jump fuel",
         "statedTons": "Against the stated tonnage",
         "statedPower": "Against the stated plant",
-        "backupComputer": "Backup computer"
+        "backupComputer": "Backup computer",
+        "hardened": "Hardened systems"
       },
       "Why": {
         "power": "drawn against generated",
@@ -4495,13 +4512,15 @@
         "jumpFuel": "10% of hull per parsec at the drive's rating",
         "statedTons": "the parts against the budget rows they map to",
         "statedPower": "the plants against the ship's own output",
-        "backupComputer": "lower Processing than the primary"
+        "backupComputer": "lower Processing than the primary",
+        "hardened": "at least 75% of the parts that draw Power, for the fleet Trait"
       }
     },
     "ComponentCategories": {
       "hull": "Hull",
       "armour": "Armour",
       "mDrive": "Manoeuvre drive",
+      "rDrive": "Reaction drive",
       "jDrive": "Jump drive",
       "powerPlant": "Power plant",
       "fuel": "Fuel",

@@ -45,9 +45,7 @@
 	</div>
 
 	{{! THE UWP STRIP. The eight cells are STORED and the line above is a reading of them, not the
-	    other way round (§9.33.5): a stored string would make every consumer parse it again, and one
-	    of them would parse it differently. Pasting a line fills the cells once; after that a cell is
-	    edited on its own and the line re-renders. }}
+	    other way round. Pasting a line fills the cells once; after that a cell is edited on its own. }}
 	<dl class="uwp">
 		{{#each world.cells as |cell|}}
 		<div class="u{{#if cell.port}} port{{/if}}">

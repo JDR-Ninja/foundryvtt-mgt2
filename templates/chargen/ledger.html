@@ -18,8 +18,7 @@
 						<span class="ag">{{localize 'MGT2.Chargen.Screen.Age' n=column.age}}</span>
 						{{#if column.done}}
 						{{! A column that has stopped is the one with business at the close, so its own
-						    badge is the door: mustering out runs after the last career and before the
-						    teardown (§9.50). }}
+						    badge is the door: mustering out runs after the last career, before the teardown. }}
 						<a class="out" data-action="openClose" data-tooltip="{{localize 'MGT2.Chargen.Screen.ClosingHint'}}">{{localize 'MGT2.Chargen.Screen.LeftAfter' n=column.lastTerm}} · {{column.exitMode}}</a>
 						{{/if}}
 						{{#if column.canEdit}}

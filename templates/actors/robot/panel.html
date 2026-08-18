@@ -188,9 +188,8 @@
 		{{/if}}
 	</div>
 
-	{{! Options are the slot budget's rows. §6.1 would make them `equipment` Items with a `slots`
-	    field; until that field exists they are rows the referee transcribes, and a robot option has
-	    no use for weight, quantity or an equipped flag anyway. }}
+	{{! Options are the slot budget's rows, transcribed by the referee rather than `equipment` Items:
+	    a robot option has no use for weight, quantity or an equipped flag. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.robot.Options'}}</h3>
@@ -319,7 +318,7 @@
 		</div>
 	</div>
 
-	{{! §5.8 — one type with a flag, not a chassis Item and not a second sub-type. }}
+	{{! One type with a flag, not a chassis Item and not a second sub-type. }}
 	{{#if system.traveller.enabled}}
 	<div class="block">
 		<div class="sect">

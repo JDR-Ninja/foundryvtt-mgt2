@@ -17,11 +17,9 @@
 		</div>
 	</div>
 
-	{{! THE LOCK, and the one screen in the system that enforces it. `locked` and
-	    `lockedDescription` have been on `container` since the start, documented GM-only and read by
-	    nothing (`datamodels.js:389-390`, §1.7). A stash is the first document a player can see
-	    without being able to open, so here the flag has a job — and only here: retrofitting it onto
-	    every `container` would shut inventories referees have been treating as open (§9.34). }}
+	{{! THE LOCK, and the one screen in the system that enforces it. `locked` and `lockedDescription`
+	    have been on `container` since the start and read by nothing (`datamodels.js`). Only
+	    here: retrofitting it onto every `container` would shut inventories referees treat as open. }}
 	{{#if isGM}}
 	<div class="block">
 		<div class="sect">

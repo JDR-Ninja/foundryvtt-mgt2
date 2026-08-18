@@ -36,7 +36,7 @@ export function withPersonal() {
     return {
         personal: new fields.SchemaField({
             title: new fields.StringField({ required: false, blank: true, trim: true }),
-            // The embedded Item, or the name a table shipping no content typed instead (§9.147).
+            // The embedded Item, or the name a table shipping no content typed instead.
             species: new LocalDocumentField(foundry.documents.BaseItem, {
                 required: false, blank: true, trim: true, initial: "", fallback: true }),
             age: new fields.StringField({ required: false, blank: true, trim: true }),

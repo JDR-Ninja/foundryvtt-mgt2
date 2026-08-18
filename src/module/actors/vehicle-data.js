@@ -352,6 +352,13 @@ export class VehicleData extends CraftData {
         return ((dice > 0) && (dice < LIGHT_WEAPON_DICE)) ? this.armour.vsLight : 0;
     }
 
+    /** CSC p.151: an ion weapon disrupts a vehicle's electronics; no book wounds its hull. @inheritDoc */
+    async applyDamage(amount, options = {}) {
+        if (!options.ion || options.raw || !(amount > 0)) return super.applyDamage(amount, options);
+        return { wound: 0, rounds: 0, crossings: 0,
+            disrupted: true, armour: this.armourAt(options.facing ?? "front") };
+    }
+
     /**
      * A vehicle is a thing on the map, not a person: several of the same model are dropped at once
      * and each takes its own damage, so its token is unlinked.

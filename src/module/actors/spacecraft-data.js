@@ -102,7 +102,13 @@ export class SpacecraftData extends CraftData {
                 thrust: count(1),
                 jump: count(0),
                 // A reaction drive burns fuel instead of drawing Power (HG p.17-18).
-                reaction: new fields.BooleanField({ required: false, initial: false })
+                reaction: new fields.BooleanField({ required: false, initial: false }),
+                // HG p.16: "Ships with both a manoeuvre and reaction drive may add their thrust
+                // together." Null is a hull with no second drive, which is most of them.
+                reactionThrust: new fields.NumberField({
+                    required: false, nullable: true, integer: true, min: 0, initial: null }),
+                // HG p.45 makes the second drive "a temporary speed boost", so lighting it is state.
+                burning: new fields.BooleanField({ required: false, initial: false })
             }),
 
             power: new fields.SchemaField({
@@ -365,11 +371,26 @@ export class SpacecraftData extends CraftData {
 
     /** HG p.16: a percentage of the hull by rating, and a jump drive adds five tons on top. */
     get driveTons() {
-        const thrust = MGT2.ThrustPotential[this.drives.thrust] ?? 0;
+        // The two drives read different rows of the same table, and `reaction` says which row the
+        // ship's own Thrust rating belongs to.
+        const table = this.drives.reaction ? MGT2.ReactionPotential : MGT2.ThrustPotential;
+        const thrust = table[this.drives.thrust] ?? 0;
+        const fitted = this.drives.reactionThrust !== null;
+        const second = fitted ? (MGT2.ReactionPotential[this.drives.reactionThrust] ?? 0) : 0;
         const jumpPct = MGT2.JumpPotential[this.drives.jump] ?? 0;
         const jump = this.drives.jump > 0
             ? Math.max(MIN_JUMP_DRIVE_TONS, (this.hull.tons * jumpPct) + 5) : 0;
-        return { mDrive: this.hull.tons * thrust, jDrive: jump };
+        return {
+            mDrive: this.hull.tons * thrust,
+            rDrive: this.hull.tons * second,
+            jDrive: jump
+        };
+    }
+
+    /** HG p.16, p.45: the compensators cover the manoeuvre drive's rating and nothing above it. */
+    get uncompensatedG() {
+        const second = this.drives.burning ? (this.drives.reactionThrust ?? 0) : 0;
+        return (this.drives.reaction ? this.drives.thrust : 0) + second;
     }
 
     /** HG p.19: a ladder on hull size, one step down for a smaller bridge, +40 for a command deck. */
@@ -794,8 +815,15 @@ export class SpacecraftData extends CraftData {
     #prepareDrives() {
         const drives = this.drives;
         const critical = this.criticalEffects;
+        // HG p.16: the two drives add, and the second only contributes while it is lit.
+        drives.lit = drives.burning && (drives.reactionThrust !== null);
+        drives.totalThrust = drives.thrust + (drives.lit ? drives.reactionThrust : 0);
         drives.effectiveThrust = critical.thrustZero
-            ? 0 : Math.max(0, drives.thrust - critical.thrustLoss);
+            ? 0 : Math.max(0, drives.totalThrust - critical.thrustLoss);
+        // Never more G than the ship can still apply: a wrecked drive costs the crew nothing.
+        drives.uncompensated = Math.min(this.uncompensatedG, drives.effectiveThrust);
+        drives.gLoc = MGT2.GLoc.find(rung =>
+            (rung.maxG === null) || (drives.uncompensated <= rung.maxG)) ?? null;
         Object.assign(drives, this.driveTons);
         drives.plant = this.plantTons;
     }
@@ -862,7 +890,8 @@ export class SpacecraftData extends CraftData {
 
         const requirements = {
             basic: hull * 0.20 * nonGravity,
-            // A reaction drive draws no Power at all; Thrust 0 draws a quarter (HG p.17).
+            // A reaction drive draws no Power at all, so only the manoeuvre half of a ship carrying
+            // both is charged; Thrust 0 draws a quarter (HG p.17).
             mDrive: this.drives.reaction ? 0
                 : hull * 0.10 * (this.drives.thrust === 0 ? 0.25 : this.drives.thrust),
             jDrive: hull * 0.10 * this.drives.jump,
@@ -931,6 +960,7 @@ export class SpacecraftData extends CraftData {
         const rows = [
             { key: "armour", tons: this.armour.tons },
             { key: "mDrive", tons: this.drives.mDrive },
+            { key: "rDrive", tons: this.drives.rDrive },
             { key: "jDrive", tons: this.drives.jDrive },
             { key: "powerPlant", tons: this.drives.plant },
             { key: "fuel", tons: this.fuel.tons },
@@ -960,9 +990,10 @@ export class SpacecraftData extends CraftData {
         const hullTons = this.hull.tons;
         const rows = [];
         let tons = 0, cost = 0, draw = 0, generates = 0, weapons = 0, fuel = 0;
+        let powered = 0, hardened = 0;
 
         // Which `budget` row each category is the parts-list spelling of.
-        const budgetRow = { armour: "armour", mDrive: "mDrive", jDrive: "jDrive",
+        const budgetRow = { armour: "armour", mDrive: "mDrive", rDrive: "rDrive", jDrive: "jDrive",
             powerPlant: "powerPlant", fuel: "fuel", bridge: "bridge", sensors: "sensors",
             weapon: "mounts", screen: "screens", stateroom: "staterooms", cargo: "cargo" };
         const mapped = new Set();
@@ -986,6 +1017,11 @@ export class SpacecraftData extends CraftData {
             cost += row.cost;
             draw += row.draw;
             generates += row.generates;
+            // HG p.111's "systems that use Power": one printed design line that draws is one system.
+            if (row.draw > 0) {
+                powered++;
+                if (part.hardened) hardened++;
+            }
             // HG p.26 counts hardpoints against turrets, and a component's `quantity` is how many
             // of that row the design fits.
             if (part.category === "weapon") weapons += quantity;
@@ -1027,7 +1063,10 @@ export class SpacecraftData extends CraftData {
             // HG p.20: "the second must have a lower Processing score than the primary".
             { key: "backupComputer", applies: this.computer.backup !== null,
                 ok: this.computer.backup < this.computer.processing,
-                used: this.computer.backup ?? 0, cap: this.computer.processing }
+                used: this.computer.backup ?? 0, cap: this.computer.processing },
+            // HG p.111: "at least 75% of systems that use Power are Hardened", a floor on a ratio.
+            { key: "hardened", applies: powered > 0, ok: (hardened * 4) >= (powered * 3),
+                used: hardened, cap: powered }
         ];
 
         this.components = {
@@ -1037,6 +1076,7 @@ export class SpacecraftData extends CraftData {
             draw: round(draw), generates: round(generates),
             surplus: round(generates - draw),
             weapons, fuel: round(fuel),
+            powered, hardened,
             unaccounted: round(hullTons - tons)
         };
         this.design = {
@@ -1198,7 +1238,8 @@ export class SpacecraftData extends CraftData {
         const tons = this.hull.tons;
         const carried = this.bayTons;
         const craft = this.smallCraftCount;
-        const drives = this.drives.mDrive + this.drives.jDrive + this.drives.plant;
+        const drives = this.drives.mDrive + this.drives.rDrive + this.drives.jDrive
+            + this.drives.plant;
         const booked = this.manifest.passengers;
 
         let turrets = 0, barbettes = 0, smallBays = 0, mediumBays = 0, largeBays = 0, spinalTons = 0;

@@ -1,7 +1,4 @@
-{{! What a career DOES — the template half of §9.48, drawn only on a template (an Item with no Actor
-    parent). Nineteen design entries specified what this Item contains and none asked how a referee
-    puts it there, because §9.38 answered "the referee types their own" and that read as a decision
-    rather than as work. This block is the work. }}
+{{! What a career DOES, drawn only on a template — an Item with no Actor parent. }}
 <div class="block careerblk">
 	<div class="sect">
 		<h3>{{localize 'MGT2.Chargen.Template.Career'}}</h3>
@@ -46,8 +43,7 @@
 			</select>
 			{{formInput systemFields.qualification.fields.autoIf.fields.min name="system.qualification.autoIf.min" value=system.qualification.autoIf.min classes="f num"}}
 		</label>
-		{{! ABSENT from two of the twelve, which is why §9.38 was wrong to promote it to a general
-		    rule — so 0 is the honest initial and this field is per template. }}
+		{{! ABSENT from two of the twelve, so 0 is the honest initial and this field is per template. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.PerPrevious'}}</span>
 			{{formInput systemFields.qualification.fields.perPreviousCareer name="system.qualification.perPreviousCareer" value=system.qualification.perPreviousCareer classes="f num"}}
@@ -55,15 +51,13 @@
 	</div>
 
 	<div class="pfields">
-		{{! "The Army and Marines at 30+, the Navy at 34+" — two numbers §9.38 had written into prose.
-		    Blank `from` is a career the DM is not printed on. }}
+		{{! "The Army and Marines at 30+, the Navy at 34+". Blank `from` = the DM is not printed. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.AgeDM'}}</span>
 			{{formInput systemFields.ageDM.fields.from name="system.ageDM.from" value=system.ageDM.from classes="f num"}}
 			{{formInput systemFields.ageDM.fields.dm name="system.ageDM.dm" value=system.ageDM.dm classes="f num"}}
 		</label>
-		{{! The boolean says whether the step exists at all; a frame deleting the step deletes it for
-		    every career at once (§9.54), which is a different fact and lives elsewhere. }}
+		{{! The boolean says whether the step exists at all; a frame deletes it for every career at once. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.Commission'}}</span>
 			<select class="f edit-only" name="system.commissionCheck.characteristic">
@@ -83,8 +77,8 @@
 	</div>
 
 	<div class="pfields">
-		{{! BLANK is a template that declares no rule, which is the real state §9.56 item 6 decides
-		    for: the book groups the careers two ways and leaves one in neither list. }}
+		{{! BLANK is a template that declares no rule: the book groups the careers two ways and leaves
+		    one in neither list. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.AssignmentChange'}}</span>
 			<select class="f edit-only" name="system.assignmentChange">
@@ -111,7 +105,7 @@
 		<label class="chk"><input type="checkbox" name="system.commission" {{checked system.commission}} /><span>{{localize 'MGT2.Chargen.Template.HasCommission'}}</span></label>
 		<label class="chk"><input type="checkbox" name="system.pensionable" {{checked system.pensionable}} /><span>{{localize 'MGT2.Chargen.Template.Pensionable'}}</span></label>
 		{{! Beats the generic no-return check rather than being filtered by it, and it must: this is
-		    the fallback, and closing it leaves a Traveller with nowhere to go (§9.47). }}
+		    the fallback, and closing it leaves a Traveller with nowhere to go. }}
 		<label class="chk"><input type="checkbox" name="system.alwaysAvailable" {{checked system.alwaysAvailable}} /><span>{{localize 'MGT2.Chargen.Template.AlwaysAvailable'}}</span></label>
 		<label class="chk"><input type="checkbox" name="system.neverEjects" {{checked system.neverEjects}} /><span>{{localize 'MGT2.Chargen.Template.NeverEjects'}}</span></label>
 		<label class="chk"><input type="checkbox" name="system.blocksAnagathics" {{checked system.blocksAnagathics}} /><span>{{localize 'MGT2.Chargen.Template.BlocksAnagathics'}}</span></label>
@@ -120,7 +114,7 @@
 
 	<div class="pfields">
 		{{! Species careers are ordinary templates carrying a restriction, and for the Aslan a gender
-		    gate as well. Both free text, because a species is an Item the referee typed (§9.42). }}
+		    gate as well. Both free text, because a species is an Item the referee typed. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.RestrictedSpecies'}}</span>
 			<input class="f edit-only" type="text" name="system.restrictedTo.species" value="{{system.restrictedTo.species}}" />
@@ -131,7 +125,7 @@
 			<input class="f edit-only" type="text" name="system.restrictedTo.gender" value="{{system.restrictedTo.gender}}" />
 			<b class="play-only word">{{#if system.restrictedTo.gender}}{{system.restrictedTo.gender}}{{else}}&mdash;{{/if}}</b>
 		</label>
-		{{! The leaving rule that DISPLACES the generic outcomes rather than layering on them (§9.52).
+		{{! The leaving rule that DISPLACES the generic outcomes rather than layering on them.
 		    `track` names one of the tracks below. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.ExitRule'}}</span>

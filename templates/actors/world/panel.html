@@ -1,9 +1,7 @@
 <section class="mgt2-panel active mgt2-world-panel">
 
-	{{! THE DERIVATION LEDGER. Every code with the condition that produced it, and what the digits say
-	    printed beside what the referee publishes — never merged (§9.20). mgt2e shipped automatic codes
-	    and then had to add a manual override; §9.33.5 took that lesson pre-emptively, and an override
-	    with no visible condition beside it cannot be told from a typo. }}
+	{{! THE DERIVATION LEDGER. Every code with the condition that produced it, printed beside what the
+	    referee publishes and never merged: an override with no condition beside it reads as a typo. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.world.TradeCodes'}}</h3>
@@ -78,8 +76,7 @@
 	</div>
 
 	{{! Core p.238 hands the trade chapter to the players, so the profile is player-readable and this
-	    is not: the world Actor is the referee's, with OBSERVER to the players (§9.33.5). Withheld
-	    rather than badged — a chip is decoration, and the block is what carries the secret (§9.65). }}
+	    is not: the world Actor is the referee's, with OBSERVER to the players. Withheld, not badged. }}
 	{{#if isGM}}
 	<div class="block">
 		<div class="sect">

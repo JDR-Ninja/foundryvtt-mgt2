@@ -1,7 +1,5 @@
-{{! What a Traveller of this species ROLLS — §9.54's species-level parameters, which sit beside the
-    frame rather than inside it and are the half that substitutes a value into a step the Core already
-    runs. The frame proper is the other block. Every collection here carries `data-property` with its
-    own dotted path and every row a `data-entry-index`, so the two generic handlers serve them all. }}
+{{! What a Traveller of this species ROLLS — the species-level parameters, which sit beside the frame
+    rather than inside it. Every collection carries `data-property`, every row a `data-entry-index`. }}
 <div class="block speciesblk">
 
 	{{! The list REPLACES folio 9's outright and is easy to get backwards: a species that rolls a
@@ -36,7 +34,7 @@
 	<p class="hint edit-only">{{localize 'MGT2.Chargen.Frame.RollsHint'}}</p>
 
 	<div class="pfields">
-		{{! A SET, so the readout is built in the sheet: Handlebars cannot walk one (§9.111). }}
+		{{! A SET, so the readout is built in the sheet: Handlebars cannot walk one. }}
 		<label class="wide">
 			<span class="lbl">{{localize 'MGT2.Chargen.Frame.Without'}}</span>
 			{{formInput systemFields.withoutCharacteristics name="system.withoutCharacteristics" value=system.withoutCharacteristics localize=true classes="edit-only"}}
@@ -108,7 +106,7 @@
 			<b class="play-only word">{{#if system.qualificationOverride.formula}}{{system.qualificationOverride.formula}}{{else}}&mdash;{{/if}}</b>
 		</label>
 	</div>
-	{{! Template ids the referee typed, so §9.47's invariant is untouched. }}
+	{{! Template ids the referee typed; nothing validates them against a list. }}
 	{{> systems/mgt2/templates/items/parts/string-list.html list=system.qualificationOverride.exceptCareers
 		path="qualificationOverride.exceptCareers" label='MGT2.Chargen.Frame.ExceptCareers' add='MGT2.Chargen.Frame.CareerId'}}
 

@@ -1,3 +1,5 @@
+// Compendium packs marked `authored` in tools/packs.config.mjs are JSON written by hand against
+// these schemas: a field renamed here leaves a dead key there, which Foundry discards in SILENCE.
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
@@ -1113,6 +1115,8 @@ export class ComponentData extends ItemBaseData {
         // generation as a negative draw would put the plant's output in two fields at once.
         schema.power = new fields.NumberField({ required: false, nullable: false, min: 0, initial: 0 });
         schema.powerPerTon = new fields.NumberField({ required: false, nullable: false, min: 0, initial: 0 });
+        // HG p.61: any system drawing from the power plant can be Hardened against Ion weapons.
+        schema.hardened = new fields.BooleanField({ required: false, initial: false });
         // Thrust-N, Jump-N, Computer/N, Armour-N, Power-N — whichever the category means.
         schema.rating = new fields.NumberField({ required: false, nullable: false, min: 0, initial: 0 });
         // What a `software` row spends of the ship's Processing.

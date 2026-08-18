@@ -15,9 +15,8 @@
 		{{else}}
 
 		{{#if (eq panel.kind 'ship')}}
-		{{! FOLIOS 110-111's Fleet Ship Sheet, every figure derived on the Actor by §9.102 — except
-		    the two DMs, which the Combatant RECOMPOSES because Morale and Radiation move the Crew
-		    Skill they start at. `system.fleet` is the ship's standing sheet; this is the round's. }}
+		{{! FOLIOS 110-111's Fleet Ship Sheet, derived on the Actor except the two DMs, which the
+		    Combatant RECOMPOSES. `system.fleet` is the ship's standing sheet; this is the round's. }}
 		<dl class="statline grid" data-derived="system.fleet">
 			<div class="stat lead{{#if panel.hull.damage}} hurt{{/if}}">
 				<dt>{{localize 'MGT2.Actor.spacecraft.Fleet.HullPoints'}}</dt>
@@ -108,9 +107,8 @@
 		{{/if}}
 
 		{{#if (eq panel.kind 'salvo')}}
-		{{! §9.78's actorless Combatant, on FOLIO 119's clock: a salvo has a position, a target and an
-		    age, and its position is the flight time from the band it was FIRED at — not an entry in
-		    the band map, which is keyed by two fleets. }}
+		{{! An actorless Combatant, on FOLIO 119's clock: a salvo has a position, a target and an age,
+		    and its position is the flight time from the band it was FIRED at. }}
 		<dl class="statline grid" data-derived="system.count">
 			<div class="stat lead"><dt>{{localize 'MGT2.Fleet.Screen.InFlight'}}</dt><dd>{{panel.remaining}}<span class="of">/{{panel.count}}</span></dd></div>
 			<div class="stat"><dt>{{localize 'MGT2.Fleet.Screen.Warhead'}}</dt><dd>{{panel.damage}}</dd></div>
@@ -261,10 +259,9 @@
 			{{#unless attack.targets.length}}<p class="hint">{{localize 'MGT2.Fleet.Screen.NoTarget'}}</p>{{/unless}}
 		</div>
 
-		{{! FOLIO 118's three riders name a weapon by the words on its page, and §9.75 forbids matching
-		    a name against a table that does not list both languages — so all three are ticked, never
-		    guessed. `AP ∞` does not survive `traits.js`'s int slot either, which is why meson is here
-		    rather than derived. }}
+		{{! FOLIO 118's three riders name a weapon by the words on its page, and a name cannot be matched
+		    against a table that does not list both languages — so all three are ticked, never guessed.
+		    `AP ∞` does not survive `traits.js`'s int slot either, which is why meson is here. }}
 		<div class="opts">
 			<label><input type="checkbox" name="attackOption" data-option="ignoresArmour" {{checked attack.options.ignoresArmour}} /><span>{{localize 'MGT2.Fleet.Screen.OptMeson'}}</span></label>
 			<label><input type="checkbox" name="attackOption" data-option="armourPiercing" {{checked attack.options.armourPiercing}} /><span>{{localize 'MGT2.Fleet.Screen.OptPiercing'}}</span></label>
@@ -289,9 +286,7 @@
 						<span class="why">{{row.mountLabel}}{{#if row.bandLabel}} &middot; {{localize row.bandLabel}}{{/if}}</span>
 					</td>
 					{{! `0/N` on a mount whose label named a weapon is the one figure on this sheet
-					    that is wrong rather than absent: the ship's DEFENCES were counted off that
-					    same label and are right, because a class can be priced and a die count
-					    cannot be guessed (§9.106). }}
+					    that is wrong rather than absent: a class can be priced, a die count cannot. }}
 					<td class="num{{#if row.inert}} noarm{{/if}}"
 						{{#if row.inert}}data-tooltip="{{localize 'MGT2.Actor.spacecraft.InertMountHint'}}"{{/if}}>
 						{{row.damage}}/{{row.multiple}}{{#if row.inert}} <i>{{localize 'MGT2.Actor.spacecraft.InertMount'}}</i>{{/if}}

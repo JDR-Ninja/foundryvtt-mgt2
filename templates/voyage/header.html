@@ -1,10 +1,6 @@
-{{! THE ROUTE. Drawn as `here → next → queue[]` and NOT as a pointer into an array, because there
-    is no array: exactly one pair of worlds exists at a time and the parsec count belongs to that
-    pair (§9.33.2). A current-index pip would put the ordered list back at the UI level, and the
-    moment an index exists, deleting a stop falsifies its neighbour and moves the ship silently.
-    Everything under the strip is a reading of the three stored numbers plus the two world Actors —
-    a leg still reads with a typed name and no `world` document at all. The two ends are written
-    out rather than looped for the same reason the schema names them: they are not a list. }}
+{{! THE ROUTE. Drawn as `here → next → queue[]` and NOT as a pointer into an array, because there is
+    no array: exactly one pair of worlds exists at a time and the parsec count belongs to that pair.
+    Everything under the strip reads the three stored numbers plus the two world Actors. }}
 <header class="mgt2-voyage-head">
 	<div class="top">
 		<h2>{{localize 'MGT2.Voyage.Leg'}}</h2>
@@ -34,9 +30,8 @@
 			{{#if route.here.zoneLabel}}<span class="zone{{#if route.here.forbidden}} bad{{/if}}">{{localize route.here.zoneLabel}}</span>{{/if}}
 		</div>
 
-		{{! The hop sits BETWEEN the two ends because it belongs to neither: it is the pair's own
-		    property, typed by hand, since no stored coordinate has a frame of reference across
-		    subsectors (§9.33.5). It is the only stored figure on the strip. }}
+		{{! The hop sits BETWEEN the two ends because it belongs to neither: the pair's own property,
+		    typed by hand, since no coordinate has a frame of reference across subsectors. }}
 		<div class="hop">
 			{{#if canEdit}}
 			<input class="f n" type="number" min="1" step="1" name="parsecs" value="{{route.parsecs}}"

@@ -1,10 +1,5 @@
-// The compendium explorer — docs/sketch-explorer.html, §37 and §85. Two columns: a rail that holds
-// the filters over the pack list, and the results. The rail is one control and not two — the pack
-// list is the source filter AND the index-progress readout, because a pack switched off is a
-// round-trip that bought nothing and a pack still arriving is one whose rows cannot answer a TL.
-//
-// The window grid is a seventh copy of the six in `utils/_window.sass` and `components/_voyage.sass`,
-// and it lives here for the same reason: the screen is not a sheet.
+// The compendium explorer. Two columns: a rail holding the filters over the pack list, and the
+// results. The pack list is one control — the source filter AND the index-progress readout.
 
 .mgt2.application.explorer
 	container-type: inline-size
@@ -281,6 +276,6 @@
 		text-align: center
 		color: var(--faint)
 
-// The tab's own control, which is where a referee looks for "browse the compendiums" (§85).
+// The tab's own control, which is where a referee looks for "browse the compendiums".
 #compendium .header-actions .mgt2-explorer
 	flex: 1

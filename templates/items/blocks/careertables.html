@@ -1,6 +1,5 @@
-{{! The printed tables of a career template (§9.48). Every collection here carries `data-property`
-    with its own dotted path and every row a `data-entry-index`, which is what lets two generic
-    handlers serve eighteen arrays — four of them nested two deep. }}
+{{! The printed tables of a career template. Every collection carries `data-property` with its own
+    dotted path and every row a `data-entry-index`, so two generic handlers serve eighteen arrays. }}
 <div class="block careertbl">
 
 	{{! Rank ladders are a NAMED SET the assignments point at, and that one generalisation dissolves
@@ -124,9 +123,8 @@
 	</div>
 	{{/each}}
 
-	{{! §9.38's own test — is the entry a text or an effect? — makes `Cr50000`, `SOC +1`, `Ship Share`
-	    and `Gun` effects, so the roll-to-row map is structured like the skill tables. Cash is the one
-	    column that is genuinely a number, hence `data-blank`. }}
+	{{! Is the entry a text or an effect? `Cr50000`, `SOC +1`, `Ship Share` and `Gun` are effects, so
+	    the roll-to-row map is structured like the skill tables. Cash is a number, hence `data-blank`. }}
 	<div class="sect">
 		<h3>{{localize 'MGT2.Chargen.Template.Benefits'}}</h3>
 	</div>
@@ -186,9 +184,8 @@
 					    where it is filled. }}
 					<input class="f" type="text" name="system.{{et.key}}.{{r}}.benefitFormula" value="{{row.benefitFormula}}" placeholder="{{localize 'MGT2.Chargen.Template.Formula'}}" />
 				</label>
-				{{! A template id the referee typed, so §9.47's invariant is untouched — and WHICH of
-				    §9.49's three senses it carries, because one field answering all three made every
-				    compulsion into an offer. }}
+				{{! A template id the referee typed, and WHICH of the three senses it carries: one field
+				    answering all three made every compulsion into an offer. }}
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Template.OtherCareer'}}</span>
 					<input class="f" type="text" name="system.{{et.key}}.{{r}}.career" value="{{row.career}}" />
@@ -212,7 +209,7 @@
 					<input class="f num" type="number" step="1" name="system.{{et.key}}.{{r}}.check.target" value="{{row.check.target}}" data-dtype="Number" />
 				</label>
 				{{! Prison events shift a parole threshold by +2, +1, -1, -2, -1D or a full re-roll,
-				    which is neither a tray entry nor a characteristic (§9.52). }}
+				    which is neither a tray entry nor a characteristic. }}
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Template.TrackMove'}}</span>
 					<input class="f" type="text" name="system.{{et.key}}.{{r}}.track.key" value="{{row.track.key}}" placeholder="{{localize 'MGT2.Chargen.Template.TrackKey'}}" />
@@ -276,9 +273,7 @@
 
 	{{! A career may print a standing FOOTNOTE rather than an event row — "Travellers with FOL 10+ add
 	    +1 to their Benefit rolls" — which is career-level, never granted and never spent. The gate is
-	    a precondition read at the moment of each roll, so it switches off again when the score falls;
-	    that is what `uses` and `expiresWhen` could not model and why this is §9.54's shape and not the
-	    tray's. }}
+	    a precondition read at each roll, so it switches off again when the score falls. }}
 	<div class="sect">
 		<h3>{{localize 'MGT2.Chargen.Template.Standing'}}</h3>
 		<span class="count">{{system.standingModifiers.length}}</span>
@@ -290,9 +285,8 @@
 		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.StandingEntry'}}</a>
 	</div>
 
-	{{! Career-scoped tracks, which `exitRule.track` names. `monotone` is the field §9.40 needed and
-	    did not have: a track moves in BOTH directions — a Hiver's status falls as readily as it
-	    rises — so "the highest rank reached" is a high-water mark only where the frame says it climbs. }}
+	{{! Career-scoped tracks, which `exitRule.track` names. `monotone`: a track moves in BOTH directions
+	    — a Hiver's status falls as readily as it rises — so a high-water mark applies only where set. }}
 	<div class="sect">
 		<h3>{{localize 'MGT2.Chargen.Template.Tracks'}}</h3>
 		<span class="count">{{system.tracks.length}}</span>
@@ -305,9 +299,8 @@
 	</div>
 
 	{{! Last, because it reads everything above it. A ladder id and a track key are declared and
-	    pointed at INSIDE this one Item, which is why they can be checked at all — §9.47 leaves a
-	    career name and a species name free text at both ends and that stays untouched. Advisory on
-	    the `system.design` ruling: the template is stored exactly as it was typed. }}
+	    pointed at INSIDE this one Item, which is why they can be checked at all; a career name and a
+	    species name stay free text at both ends. }}
 	<div class="sect">
 		<h3>{{localize 'MGT2.Chargen.Template.Integrity'}}</h3>
 	</div>

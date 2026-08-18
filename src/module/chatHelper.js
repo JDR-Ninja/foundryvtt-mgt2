@@ -339,6 +339,10 @@ export class ChatHelper {
             }
             // HG folio 30, one scale up: the hit moves no hull damage at all — it comes off Power
             // and off the computer bandwidth, both of which the ship's own sheet then prints.
+            if (result?.disrupted) {
+                ui.notifications.info(game.i18n.format("MGT2.Actor.vehicle.IonDisrupted",
+                    { name: token.actor.name, armour: result.armour }));
+            }
             if (result?.hardened) {
                 ui.notifications.info(game.i18n.format("MGT2.Actor.spacecraft.IonImmune",
                     { name: token.actor.name }));

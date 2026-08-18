@@ -1,10 +1,6 @@
-{{! Pinned light for the same reason as roll.html: Foundry hard-codes `themed theme-light` on
-    ol.chat-log, so a card never renders on the dark ground whatever the viewer's scheme says.
-
-    NOTHING BELOW IS STORED. Every line's status, the markers and the foot are derived from
-    `game.messages` each time this renders (`ROLL-REQUEST.md` §8, *who is authoritative — nobody*),
-    which is why N players answering costs N messages and zero updates. The stored `lines` cache is
-    read only once the referee has concluded. }}
+{{! Pinned light: Foundry hard-codes `themed theme-light` on ol.chat-log, so a card never renders
+    on the dark ground. NOTHING BELOW IS STORED — every line's status, the markers and the foot are
+    derived from `game.messages` each render, so N players answering costs N messages and no updates. }}
 <div class="mgt2 theme-light card">
 	<div class="chd">
 		<div class="who">{{who}}</div>

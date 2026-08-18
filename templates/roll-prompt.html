@@ -1,10 +1,7 @@
 <div class="pdlg">
-	{{! ROLL-REQUEST.md §6. What the referee fixed is a static readout plus one hidden input, never a
-	    control: `.voided` leaves radios keyboard-reachable, `disabled` is skipped outright by
-	    FormDataExtended, and a same-named hidden mirror yields an array. A readout that carries a DM
-	    is an `[data-applied-dm]` node — the shape the live readout already has for a term with no
-	    control of its own — so the preview and the formula read the same number. The imposed DM has
-	    no hidden input: it reaches the formula through `terms()`'s own `extra` slot. }}
+	{{! What the referee fixed is a static readout plus one hidden input, never a control: `.voided`
+	    leaves radios keyboard-reachable, `disabled` is skipped outright by FormDataExtended, and a
+	    same-named hidden mirror yields an array. The imposed DM reaches the formula via `terms()`. }}
 	{{#if imposed.asked}}
 	<div class="pline" role="group" aria-label="{{ localize 'MGT2.Request.Prompt.Asked' }}">
 		<span class="pgut">{{ localize 'MGT2.Request.Prompt.Asked' }}</span>

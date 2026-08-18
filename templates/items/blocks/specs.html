@@ -13,9 +13,8 @@
 		{{#if (eq item.type "ammunition")}}<i class="fa-solid fa-circle-info note edit-only" data-tooltip="{{localize 'MGT2.Items.OverrideHint'}}"></i>{{/if}}
 	</div>
 
-	{{! A dose is taken, and taking it is the whole of what a drug does: it copies the drug's own
-	    Active Effects onto the Traveller, spends one of the doses carried, and counts it (§9.90). A
-	    drug nobody owns has nobody to take it, and an empty box has nothing to take. }}
+	{{! A dose is taken, and taking it is the whole of what a drug does: it copies the drug's own Active
+	    Effects onto the Traveller, spends one of the doses carried, and counts it. }}
 	{{#if (eq item.type "drug")}}
 	<div class="rollbar dose-take">
 		<span class="why">{{localize 'MGT2.Doses.NotEquipped'}}</span>
@@ -64,9 +63,8 @@
 	{{else}}
 	<ul class="specs play-only">
 		{{#if (eq item.type "weapon")}}
-		{{! `system.effective` and not `system.*`: while a round is loaded the weapon's own printed
-		    line is unchanged and every number on it is wrong (§9.90). The round is named below so
-		    the reader can see WHY the figure is not the catalogue's. }}
+		{{! `system.effective` and not `system.*`: while a round is loaded the weapon's own printed line
+		    is unchanged and every number on it is wrong. The round is named below. }}
 		<li{{#unless system.effective.damage}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Damage'}}</span><b>{{#if system.effective.damage}}{{system.effective.damage}}{{else}}—{{/if}}</b></li>
 		<li><span class="lbl">{{localize 'MGT2.Items.Range'}}</span><b>{{#if system.range.isMelee}}{{localize 'MGT2.Melee'}}{{else}}{{system.range.value}}{{#if system.range.unit}}<span class="u">{{localize (concat "MGT2.MetricRange." system.range.unit)}}</span>{{/if}}{{/if}}</b></li>
 		{{#if damageTypes}}
@@ -385,8 +383,8 @@
 		</label>
 		{{/if}}
 
-		{{! Core p.106's IMPROVEMENTS cell in the three kinds the system can compute (§9.84). The
-		    printed cell above stays whatever the book prints; these are what a rule can read. }}
+		{{! Core p.106's IMPROVEMENTS cell in the three kinds the system can compute. The printed cell
+		    above stays whatever the book prints; these are what a rule can read. }}
 		{{#if (eq system.subType "augment")}}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Skill'}}</span>
@@ -528,6 +526,11 @@
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.PowerPerTon'}}</span>
 			{{formInput systemFields.powerPerTon name="system.powerPerTon" value=system.powerPerTon classes="f num"}}
+		</label>
+		{{! HG p.61: only a system that draws from the power plant can be Hardened. }}
+		<label class="check">
+			{{formInput systemFields.hardened name="system.hardened" value=system.hardened}}
+			<span>{{localize 'MGT2.Items.Hardened'}}</span>
 		</label>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Rating'}}</span>

@@ -24,7 +24,7 @@
 	</div>
 
 	{{! Three budgets, not one — a ship is constrained by tonnage, by power and by hardpoints, and
-	    the third is easy to miss because no catalogue entry prints it (§4.3). }}
+	    the third is easy to miss because no catalogue entry prints it. }}
 	{{> systems/mgt2/templates/actors/spacecraft/budget.html
 		b=ship.tonnage
 		title=(localize 'MGT2.Actor.spacecraft.Tonnage')
@@ -87,5 +87,17 @@
 			</li>
 			{{/each}}
 		</ul>
+		{{! HG p.16: the two drives add, and HG p.45 makes the second one a temporary boost — so the
+		    chip lights it and the hint under it is the G-force the compensators do not cover. }}
+		{{#if ship.drives.fitted}}
+		<ul class="codes" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BurnWhy'}}">
+			<li class="code{{#unless ship.drives.lit}} off{{/unless}}" data-action="burnToggle">
+				<b>{{localize 'MGT2.Actor.spacecraft.Burning' n=ship.drives.reactionThrust total=ship.drives.total}}</b>
+			</li>
+		</ul>
+		{{/if}}
+		{{#if ship.drives.uncompensated}}
+		<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.Uncompensated' g=ship.drives.uncompensated}}{{#if ship.drives.gLoc.special}} {{localize 'MGT2.Actor.spacecraft.GLoc.special'}}{{/if}}{{#if ship.drives.gLoc.difficulty}} {{localize 'MGT2.Actor.spacecraft.GLoc.check' difficulty=(localize ship.drives.gLoc.difficulty) increment=(localize ship.drives.gLoc.increment)}}{{/if}}{{#if ship.drives.gLoc.trained}} — {{localize 'MGT2.Actor.spacecraft.GLoc.trained'}}{{/if}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.UncompensatedWhy'}}"></i></p>
+		{{/if}}
 	</div>
 </aside>

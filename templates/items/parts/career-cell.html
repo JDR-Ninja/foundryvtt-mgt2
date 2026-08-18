@@ -1,11 +1,6 @@
-{{! One printed cell of a creation table, which is a small EXPRESSION and not a scalar (§9.48).
-    `text` is the cell as the book prints it and is always inline, because that is what a referee
-    types first and a cell with text and no grants is legitimate. The grants that make it mechanical
-    unfold underneath, so a table of six rows is six lines until somebody opens one.
-
-    Callers pass `cell` and `path`; `path` is the dotted route to this cell under `system.`, which is
-    what lets the same editor sit in a rank ladder, an assignment's skills, a career table, the
-    benefits column and either event table. }}
+{{! One printed cell of a creation table, which is a small EXPRESSION and not a scalar. `text` is the
+    cell as the book prints it and is always inline; the grants that make it mechanical unfold under it.
+    Callers pass `cell` and `path`, the dotted route to this cell under `system.`. }}
 <div class="cell" data-cell-path="{{path}}">
 	<div class="cellhead">
 		<span class="play-only">{{#if cell.text}}{{cell.text}}{{else}}&mdash;{{/if}}</span>
@@ -33,7 +28,7 @@
 			<span class="play-only word">{{localize (lookup @root.config.CreationGrantKinds grant.kind)}}</span>
 
 			{{! Free text and never a choices list: the system ships no skill list, a skill being a
-			    `talent` Item and no content shipping at all (§9.45). }}
+			    `talent` Item and no content shipping at all. }}
 			<input class="f edit-only" type="text" name="system.{{../path}}.grants.{{g}}.skill"
 				value="{{grant.skill}}" placeholder="{{localize 'MGT2.Items.Skill'}}" />
 			<input class="f edit-only" type="text" name="system.{{../path}}.grants.{{g}}.speciality"

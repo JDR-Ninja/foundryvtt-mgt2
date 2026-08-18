@@ -182,9 +182,8 @@
 		</ul>
 	</div>
 
-	{{! Severity is stored, the effect is a lookup (§1.11). A critical is written on every hit and is
-	    parameterised where a status is boolean, so an embedded document per hit would be both
-	    expensive and racy. }}
+	{{! Severity is stored, the effect is a lookup. A critical is written on every hit and is
+	    parameterised where a status is boolean, so an embedded document per hit would be racy. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Criticals'}}</h3>
@@ -245,7 +244,7 @@
 	{{> systems/mgt2/templates/items/blocks/traits.html}}
 
 	{{! Submersibles, airships and drones are one type with two nullable sub-objects, not three
-	    types: no behaviour differs at the type level (§9.8). Absent is a state, not zeroes. }}
+	    types: no behaviour differs at the type level. Absent is a state, not zeroes. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.SubTypeDetail'}}</h3>

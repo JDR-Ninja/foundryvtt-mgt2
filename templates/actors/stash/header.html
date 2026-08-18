@@ -34,12 +34,8 @@
 		<div class="ref play-only">{{localize 'MGT2.Actor.stash.Ref'}}</div>
 	</div>
 
-	{{! THE OWNERSHIP STRIP, and the only reason this type exists. An Item's ownership is its
-	    parent's, so showing players the party's loot means showing them whoever carries it; an
-	    Actor carries its own (§9.34). The strip is the stored state and everything below is a
-	    reading of it — including whether the sheet opens at all, which Foundry refuses under
-	    LIMITED before this template runs. `default` leads because it is what a user with no entry
-	    of their own gets; referees are omitted, being OWNER of every document by role. }}
+	{{! THE OWNERSHIP STRIP, and the only reason this type exists: an Item's ownership is its parent's,
+	    and an Actor carries its own. `default` leads — it is what a user with no entry of their own gets. }}
 	<dl class="own">
 		{{#each stash.ownership as |row|}}
 		<div class="r {{row.rung}}{{#if row.fallback}} fallback{{/if}}"{{#if @root.isGM}} data-action="configureOwnership" data-tooltip="{{localize 'MGT2.Actor.stash.ConfigureOwnership'}}"{{/if}}>
@@ -61,9 +57,8 @@
 			<dd>{{#if stash.open}}{{stash.weight}}<i>{{stash.unit}}</i>{{else}}&mdash;{{/if}}</dd>
 		</div>
 		{{/if}}
-		{{! A readout, not a till: the sum of what the contents cost, with no control on this sheet
-		    that writes money (§9.34/§9.66). Withheld exactly as its two neighbours are — the value is
-		    as sensitive as the inventory it sums, so a locked stash sends no number at all. }}
+		{{! A readout, not a till: the sum of what the contents cost, with no control on this sheet that
+		    writes money. Withheld as its two neighbours are — a locked stash sends no number at all. }}
 		<div class="stat{{#unless stash.open}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.stash.Value'}}</dt>
 			<dd>{{#if stash.open}}<i>Cr</i>{{credits stash.value}}{{else}}&mdash;{{/if}}</dd>
