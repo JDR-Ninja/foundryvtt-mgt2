@@ -91,9 +91,13 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
     }, 120);
 
     /** One window: two would fetch every index twice for the same question. */
-    static open() {
+    static open(filters = {}) {
         const existing = foundry.applications.instances.get("mgt2-compendium-explorer");
-        return (existing ?? new CompendiumExplorer()).render({ force: true });
+        const explorer = existing ?? new CompendiumExplorer();
+        for ( const [key, value] of Object.entries(filters) ) {
+            if ( key in explorer.#filters ) explorer.#filters[key] = value;
+        }
+        return explorer.render({ force: true });
     }
 
     /** Every pack this user may see. @type {CompendiumCollection[]} */

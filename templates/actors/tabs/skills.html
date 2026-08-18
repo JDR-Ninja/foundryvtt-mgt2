@@ -1,10 +1,5 @@
 <section class="tab mgt2-panel{{#if tabs.sidebar.skills.active}} active{{/if}}" data-group="sidebar" data-tab="skills">
-	{{#if system.personal.speciesText.description}}
-	<p class="mgt2-species">
-		<a data-action="openEditor" data-tooltip="{{localize 'MGT2.Items.DetailedDescription'}}"><i class="fa-solid fa-book"></i></a>
-		<span>{{system.personal.speciesText.description}}</span>
-	</p>
-	{{/if}}
+	{{> systems/mgt2/templates/actors/parts/species.html}}
 
 	{{! The same code row the item sheets use — one shared field, one component. No definition text:
 	    the registry ships names, parameter shapes, families and citations only. }}

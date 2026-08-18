@@ -1006,6 +1006,10 @@
     "Gender": "Genre",
     "Pronouns": "Pronoms",
     "Actor": {
+      "SpeciesSingleton": "Ce voyageur a déjà une espèce : {species}. Retirez-la avant d'en ajouter une autre.",
+      "SpeciesEmpty": "Aucun Objet espèce. Déposez-en un ici, ou",
+      "SpeciesFind": "parcourez la bibliothèque.",
+      "SpeciesRemove": "Retirer l'espèce",
       "Weeks": "Semaines",
       "NewCareer": "Nouvelle Carrière",
       "AddComputer": "Ajouter un ordinateur",

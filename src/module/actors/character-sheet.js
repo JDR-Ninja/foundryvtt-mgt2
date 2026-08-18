@@ -1,6 +1,7 @@
 import { ChatHelper } from "../chatHelper.js";
 import { checkOf } from "../chat-message.js";
 import { Checks, renderRollCard } from "../checks.js";
+import { CompendiumExplorer } from "../compendium-explorer.js";
 import { MGT2 } from "../config.js";
 import { EFFECT_ACTIONS, prepareEffects } from "../effects.js";
 import { MGT2Helper } from "../helper.js";
@@ -30,7 +31,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     "equipment", "drug"]);
 
   /** Types with placement of their own, handled before the inventory branch below. */
-  static DROP_ITEM_SIMPLE = new Set(["contact", "disease", "career", "talent"]);
+  static DROP_ITEM_SIMPLE = new Set(["contact", "disease", "career", "talent", "species"]);
 
   /** @inheritDoc */
   static DEFAULT_OPTIONS = {
@@ -71,6 +72,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       openCharacteristic: TravellerActorSheet.#onOpenCharacteristic,
       traitDelete: TravellerActorSheet.#onTraitDelete,
       openEditor: TravellerActorSheet.#onOpenEditor,
+      speciesFind: TravellerActorSheet.#onSpeciesFind,
       ...EFFECT_ACTIONS
     }
   };
@@ -94,7 +96,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     },
     skills: {
       template: `${PARTS_PATH}/tabs/skills.html`,
-      templates: [`${PARTS_PATH}/parts/row-controls.html`,
+      templates: [`${PARTS_PATH}/parts/row-controls.html`, `${PARTS_PATH}/parts/species.html`,
         "systems/mgt2/templates/items/blocks/traits.html"],
       scrollable: [""]
     },
@@ -593,13 +595,36 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         || a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
     });
 
-    model.traits = prepareTraitBlock(actor.system.traits, "traits",
+    model.traits = prepareTraitBlock(actor.system.ownTraits, "traits",
       actor.system.traitFamily, "MGT2.Items.Traits");
+    model.species = this.#prepareSpecies();
     model.effects = prepareEffects(actor);
     model.loss = this.#prepareLoss();
     model.training = this.#prepareProgrammes();
 
     return model;
+  }
+
+  /** @returns {object|null}   Null where no Item is linked, which is the panel's empty state. */
+  #prepareSpecies() {
+    const item = this.actor.system.species;
+    if ( !item ) return null;
+    const source = item.system.source;
+    return {
+      id: item.id,
+      name: item.name,
+      img: item.img,
+      source: [source?.book, source?.page].filter(Boolean).join(" "),
+      description: item.system.description,
+      hasLong: Boolean(item.system.descriptionLong),
+      modifiers: (item.system.modifiers ?? [])
+        .filter(modifier => modifier.characteristic && Number.isFinite(modifier.value))
+        .map(modifier => ({
+          label: game.i18n.localize(CONFIG.MGT2.Characteristics[modifier.characteristic]),
+          value: modifier.value
+        })),
+      traits: this.actor.system.speciesTraits.map(formatTrait)
+    };
   }
 
   /** @inheritDoc */
@@ -618,24 +643,28 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
   /** @this {TravellerActorSheet} */
   static async #onOpenEditor() {
-    await CharacterPrompts.openEditorFullView(
-      this.actor.system.personal.species,
-      this.actor.system.personal.speciesText.descriptionLong
-    );
+    const item = this.actor.system.species;
+    if ( !item ) return;
+    await CharacterPrompts.openEditorFullView(item.name, item.system.descriptionLong);
+  }
+
+  static #onSpeciesFind() {
+    return CompendiumExplorer.open({ cls: "Item", type: "species" });
   }
 
   /** @this {TravellerActorSheet} */
   static async #onTraitDelete(event, target) {
     await this.submit();
     const index = Number(target.closest(".code").dataset.traitIndex);
-    const traits = Object.values(this.actor.system.traits ?? []);
+    // `ownTraits` and never `traits`: the merged list carries the species' at the tail.
+    const traits = Object.values(this.actor.system.ownTraits ?? []);
     return this.actor.update({ "system.traits": traits.filter((_v, i) => i !== index) });
   }
 
   /** The typed or picked trait, parsed against the family the actor's own list speaks. */
   async #addTrait(text) {
     await this.submit();
-    const traits = appendTraitText(this.actor.system.traits, text, this.actor.system.traitFamily);
+    const traits = appendTraitText(this.actor.system.ownTraits, text, this.actor.system.traitFamily);
     if ( traits ) await this.actor.update({ "system.traits": traits });
   }
 
@@ -1861,33 +1890,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
     const sourceItemData = await MGT2Helper.getItemDataFromDropData(dropData);
 
-    if (sourceItemData.type === "species") {
-      const update = {
-        system: {
-          personal: {
-            species: sourceItemData.name,
-            speciesText: {
-              description: sourceItemData.system.description,
-              descriptionLong: sourceItemData.system.descriptionLong
-            },
-          }
-        }
-      };
-
-      update.system.traits = Object.values(this.actor.system.traits ?? [])
-        .concat(Object.values(sourceItemData.system.traits ?? []));
-
-      // The characteristic modifiers are NOT written.
-      const previous = this.actor.items.filter(item => item.type === "species").map(item => item.id);
-      if (previous.length) await this.actor.deleteEmbeddedDocuments("Item", previous);
-
-      await this.actor.update(update);
-      await this.actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(sourceItemData)]);
-
-      return true;
-    }
-
-    // Simple drop
+    // Simple drop — a species included: `SpeciesData`'s own hooks own the link (§9.147).
     if (this.constructor.DROP_ITEM_SIMPLE.has(sourceItemData.type)) {
       await this.actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(sourceItemData)]);
       return true;
@@ -1988,7 +1991,7 @@ export class NpcActorSheet extends TravellerActorSheet {
     },
     panel: {
       template: `${PARTS_PATH}/npc/panel.html`,
-      templates: [`${PARTS_PATH}/parts/row-controls.html`,
+      templates: [`${PARTS_PATH}/parts/row-controls.html`, `${PARTS_PATH}/parts/species.html`,
         "systems/mgt2/templates/items/blocks/traits.html"],
       scrollable: [""]
     }

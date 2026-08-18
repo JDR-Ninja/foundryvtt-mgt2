@@ -1,4 +1,5 @@
 import { MGT2 } from "../config.js";
+import { LocalDocumentField } from "../datamodels.js";
 import { MGT2Helper } from "../helper.js";
 import { Rules } from "../rules.js";
 import { buildHazardItem, buildTraitMap, createTraitsField, hazardTraits, resolveDamageResponse } from "../traits.js";
@@ -35,11 +36,9 @@ export function withPersonal() {
     return {
         personal: new fields.SchemaField({
             title: new fields.StringField({ required: false, blank: true, trim: true }),
-            species: new fields.StringField({ required: false, blank: true, trim: true }),
-            speciesText: new fields.SchemaField({
-                description: new fields.StringField({ required: false, blank: true, trim: true, nullable: true }),
-                descriptionLong: new fields.HTMLField({ required: false, blank: true, trim: true })
-            }),
+            // The embedded Item, or the name a table shipping no content typed instead (§9.147).
+            species: new LocalDocumentField(foundry.documents.BaseItem, {
+                required: false, blank: true, trim: true, initial: "", fallback: true }),
             age: new fields.StringField({ required: false, blank: true, trim: true }),
             gender: new fields.StringField({ required: false, blank: true, trim: true }),
             pronouns: new fields.StringField({ required: false, blank: true, trim: true }),
@@ -128,6 +127,19 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
                 })
             })
         };
+    }
+
+    /** The lookup behind the pointer is what makes a world whose pointer was never written work. */
+    get species() {
+        const linked = this.personal?.species;
+        if ( linked instanceof foundry.documents.BaseItem ) return linked;
+        return this.parent?.items.find(item => item.type === "species") ?? null;
+    }
+
+    /** Which of them SPEAK: one, unless a sub-variant is allowed to add to its parent species. */
+    get speciesItems() {
+        const all = this.parent?.items.filter(item => item.type === "species") ?? [];
+        return Rules.on("speciesModifiersStack") ? all : all.slice(0, 1);
     }
 
     /** The roster, off the schema — a config dictionary only ever describes one sub-type's. */
@@ -290,10 +302,22 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             c.effect = 0;
         }
         this.#declareSkillModifiers();
+        this.#declareTraits();
         for (const modifier of this.modifierAccumulators) {
             modifier.auto = 0;
             modifier.effect = 0;
         }
+    }
+
+    /**
+     * Sliced and not pushed: `prepareData` may run over a model that was not re-initialised, and
+     * appending would double the list each time.
+     */
+    #declareTraits() {
+        this.ownTraits = this.traits.slice(0, this._source.traits.length);
+        this.speciesTraits = this.speciesItems.flatMap(item => item.system.traits ?? []);
+        this.traits = this.speciesTraits.length
+            ? [...this.ownTraits, ...this.speciesTraits] : this.ownTraits;
     }
 
     /** One accumulator per skill the actor carries. */

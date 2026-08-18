@@ -1006,6 +1006,10 @@
     "Gender": "Gender",
     "Pronouns": "Pronouns",
     "Actor": {
+      "SpeciesSingleton": "This Traveller already has a species: {species}. Remove it before adding another.",
+      "SpeciesEmpty": "No species Item. Drop one here, or",
+      "SpeciesFind": "browse the library.",
+      "SpeciesRemove": "Remove the species",
       "Weeks": "Weeks",
       "NewCareer": "New Career",
       "AddComputer": "Add Computer",

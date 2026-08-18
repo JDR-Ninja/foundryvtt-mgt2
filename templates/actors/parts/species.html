@@ -1,0 +1,33 @@
+{{! Read live off the Item, which is where all of it is edited: what this panel owns is the link,
+    which the trash breaks and a drop makes. }}
+<div class="block mgt2-species"{{#if species}} data-item-id="{{species.id}}"{{/if}}>
+	<div class="sect">
+		<h3>{{localize 'MGT2.Specie'}}</h3>
+		{{#if species}}
+		<span class="count">{{species.name}}</span>
+		{{#if species.source}}<span class="src">{{species.source}}</span>{{/if}}
+		<div class="acts">
+			{{#if species.hasLong}}<a data-action="openEditor" data-tooltip="{{localize 'MGT2.Items.DetailedDescription'}}"><i class="fa-solid fa-book"></i></a>{{/if}}
+			<a data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.View'}}"><i class="fas fa-eye"></i></a>
+			<a class="edit-only" data-action="itemDelete" data-tooltip="{{localize 'MGT2.Actor.SpeciesRemove'}}"><i class="fas fa-trash"></i></a>
+		</div>
+		{{/if}}
+	</div>
+	{{#if species}}
+	{{#if species.description}}<p class="txt">{{species.description}}</p>{{/if}}
+	{{#if species.modifiers.length}}
+	<ul class="mods">
+		{{#each species.modifiers}}<li><span class="lbl">{{label}}</span><b>{{showDM value}}</b></li>{{/each}}
+	</ul>
+	{{/if}}
+	{{! Apart from the chip row above: these are the species' and not the referee's to edit. }}
+	{{#if species.traits.length}}
+	<ul class="codes ro">
+		{{#each species.traits}}<li class="code"><b>{{this}}</b></li>{{/each}}
+	</ul>
+	{{/if}}
+	{{else}}
+	<p class="empty">{{localize 'MGT2.Actor.SpeciesEmpty'}}
+		<a data-action="speciesFind">{{localize 'MGT2.Actor.SpeciesFind'}}</a></p>
+	{{/if}}
+</div>

@@ -78,15 +78,13 @@
 			"character": {
 				"htmlFields": [
 					"biography",
-					"notes",
-					"personal.speciesText.descriptionLong"
+					"notes"
 				]
 			},
 			"npc": {
 				"htmlFields": [
 					"biography",
-					"notes",
-					"personal.speciesText.descriptionLong"
+					"notes"
 				],
 				"gmOnlyFields": [
 					"group"

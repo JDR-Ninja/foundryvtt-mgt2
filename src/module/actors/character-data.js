@@ -275,9 +275,7 @@ export class CharacterData extends ActorBaseData {
     prepareCharacteristicAuto() {
         // Replace, not stack: no volume states which, and the corpus says "ADDITIONAL modifiers" on
         // the one occasion it means to add.
-        const species = this.parent.items.filter(item => item.type === "species");
-        const speaking = Rules.on("speciesModifiersStack") ? species : species.slice(0, 1);
-        for ( const item of speaking ) {
+        for ( const item of this.speciesItems ) {
             for ( const modifier of item.system.modifiers ?? [] ) {
                 const c = this.characteristics[modifier.characteristic];
                 if ( !c || !Number.isFinite(modifier.value) ) continue;

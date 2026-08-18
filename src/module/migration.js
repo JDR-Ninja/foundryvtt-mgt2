@@ -11,7 +11,7 @@ const NPC_CHAIN_FIXED = ["endurance", "strength", "dexterity"];
 const MIGRATIONS = [
   {
     version: "0.2.0",
-    label: "damageOrder, protection, view state, crew duty, NPC damage chain, species unwind, ucp, durationUnit, career damage/interval, world geometry, training programmes",
+    label: "damageOrder, protection, view state, crew duty, NPC damage chain, species unwind, species link, ucp, durationUnit, career damage/interval, world geometry, training programmes",
     async migrate() {
       // Before the sweep: it rewrites `characteristics.<k>.base`, which the sweep then persists.
       for ( const actor of game.actors ) await unwindSpecies(actor);
@@ -90,6 +90,27 @@ async function unwindSpecies(actor) {
   await actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(species)]);
 }
 
+/**
+ * One occurrence per species trait and never every match: a referee who typed the same one keeps it.
+ * @returns {object[]|null}   The shortened list, or null where nothing matched
+ */
+function withoutSpeciesTraits(stored, speciesTraits) {
+  const remaining = [...stored];
+  let removed = 0;
+  for ( const trait of speciesTraits ) {
+    const index = remaining.findIndex(entry => traitKey(entry) === traitKey(trait));
+    if ( index < 0 ) continue;
+    remaining.splice(index, 1);
+    removed++;
+  }
+  return removed ? remaining : null;
+}
+
+function traitKey(entry) {
+  const params = (entry?.params ?? []).map(p => `${p.slot ?? ""}=${p.value ?? ""}`).join("|");
+  return `${entry?.family ?? ""}/${entry?.key ?? ""}/${params}/${entry?.note ?? ""}`;
+}
+
 /** Drop the fields the 0.2.0 schema no longer declares. @returns {object|null} */
 function collectActorUpdate(actor) {
   const source = actor._source.system;
@@ -122,6 +143,23 @@ function collectActorUpdate(actor) {
   if ( (actor.type === "spacecraft") && source.crew?.some(row => "duty" in row) ) {
     update["system.crew"] = actor.system.crew.map(row => ({ ...row }));
     dirty = true;
+  }
+  // §9.147. `personal.speciesText` is NOT deleted: `DataField#clean` prunes an undeclared key, so
+  // no condition here can see one to fire on — the same reason the deletions above never fire.
+  const species = actor.items.find(item => item.type === "species");
+  if ( species ) {
+    if ( source.personal?.species !== species.id ) {
+      update["system.personal.species"] = species.id;
+      dirty = true;
+    }
+    const traits = withoutSpeciesTraits(source.traits ?? [], species.system.traits ?? []);
+    if ( traits ) {
+      // eslint-disable-next-line no-console
+      console.log(`mgt2 | "${actor.name}": ${(source.traits?.length ?? 0) - traits.length} trait(s) `
+        + `copied from "${species.name}" taken back off the Actor — they are read off the Item now`);
+      update["system.traits"] = traits;
+      dirty = true;
+    }
   }
   // The UPP is the six canonical maxima and derives; a typed one beside them was a second source of
   // truth for one fact.

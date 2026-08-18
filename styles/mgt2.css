@@ -3969,6 +3969,14 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   flex-direction: column;
   gap: 2px;
 }
+.mgt2 .mgt2-header .meta.edit-only span.f.ro {
+  padding: 2px 5px;
+  font-size: 13px;
+  color: var(--mute);
+  background: var(--hover);
+  border: 1px dashed var(--rule-soft);
+  border-radius: 2px;
+}
 .mgt2 .mgt2-header .statline {
   grid-column: 1/-1;
   margin-top: 12px;
@@ -4185,16 +4193,50 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   gap: 0.5rem;
 }
 
-.mgt2 .mgt2-species {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  gap: 8px;
+.mgt2 .mgt2-species .sect .src {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+.mgt2 .mgt2-species .sect .acts {
+  margin-left: auto;
+}
+.mgt2 .mgt2-species .txt {
+  margin: 0;
   font-size: 13px;
   text-align: justify;
 }
-.mgt2 .mgt2-species a {
+.mgt2 .mgt2-species .mods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .mgt2-species .mods li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.mgt2 .mgt2-species .mods b {
+  font-family: var(--mono);
+  font-size: 12px;
   color: var(--accent-text);
+}
+.mgt2 .mgt2-species .codes.ro .code {
+  color: var(--mute);
+  border-style: dashed;
+}
+.mgt2 .mgt2-species .empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--faint);
+}
+.mgt2 .mgt2-species .empty a {
+  margin-left: 5px;
+  color: var(--accent-text);
+  cursor: var(--cursor-pointer);
 }
 
 .mgt2 .mgt2-editor-panel .block {

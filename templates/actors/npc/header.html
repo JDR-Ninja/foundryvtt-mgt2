@@ -43,7 +43,8 @@
 			</label>
 			<label>
 				<span class="lbl">{{localize 'MGT2.Specie'}}</span>
-				{{formInput systemFields.personal.fields.species name="system.personal.species" value=system.personal.species classes="f"}}
+				{{#if species}}<span class="f ro">{{species.name}}</span>
+				{{else}}{{formInput systemFields.personal.fields.species name="system.personal.species" value=system.personal.species classes="f"}}{{/if}}
 			</label>
 			<label>
 				<span class="lbl">{{localize 'MGT2.Actor.npc.Attitude'}}</span>

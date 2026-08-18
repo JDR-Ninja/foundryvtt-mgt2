@@ -158,6 +158,11 @@
 	{{! The shared code row: NAME(param, param) and no definition text. }}
 	{{> systems/mgt2/templates/items/blocks/traits.html}}
 
+	{{! A creature is not somebody, so it names no species. }}
+	{{#unless isCreature}}
+	{{> systems/mgt2/templates/actors/parts/species.html}}
+	{{/unless}}
+
 	{{#if isCreature}}
 	{{! Both derived from the trait list, and both read by the damage pipeline rather than here. The
 	    size ladder is advisory: the table says a referee need not be bound by it, and the published

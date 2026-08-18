@@ -20,9 +20,11 @@
 				<span class="lbl">{{localize 'MGT2.Items.Title'}}</span>
 				{{formInput systemFields.personal.fields.title name="system.personal.title" value=system.personal.title classes="f"}}
 			</label>
+			{{! A linked Item is not typed over; the field falls back to free text without one. }}
 			<label>
 				<span class="lbl">{{localize 'MGT2.Specie'}}</span>
-				{{formInput systemFields.personal.fields.species name="system.personal.species" value=system.personal.species classes="f"}}
+				{{#if species}}<span class="f ro">{{species.name}}</span>
+				{{else}}{{formInput systemFields.personal.fields.species name="system.personal.species" value=system.personal.species classes="f"}}{{/if}}
 			</label>
 			<label>
 				<span class="lbl">{{localize 'MGT2.Items.Age'}}</span>

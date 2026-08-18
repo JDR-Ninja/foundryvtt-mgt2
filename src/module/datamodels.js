@@ -1,5 +1,6 @@
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
+import { Rules } from "./rules.js";
 import { buildTraitMap, createTraitsField, migrateTraitArray } from "./traits.js";
 
 const fields = foundry.data.fields;
@@ -16,6 +17,50 @@ export class FormulaField extends fields.StringField {
         // `create` writes through `setAttribute`, so a null would reach the control as the text "null".
         config.value = config.value ?? this.getInitialValue({}) ?? "";
         return foundry.applications.elements.HTMLFormulaInputElement.create(config);
+    }
+}
+
+/**
+ * An id for a Document embedded in the same parent, reading back as that Document. `fallback` hands
+ * an unresolved id back as the stored string, and a resolved one stringifies to its name.
+ */
+export class LocalDocumentField extends fields.DocumentIdField {
+    constructor(model, options = {}, context = {}) {
+        super(options, context);
+        this.model = model;
+    }
+
+    /** @inheritDoc */
+    static get _defaults() {
+        return Object.assign(super._defaults, { nullable: true, readonly: false, fallback: false });
+    }
+
+    /** @override */
+    _cast(value) {
+        if ( value instanceof foundry.abstract.Document ) return value._id;
+        return String(value);
+    }
+
+    /** A typed name is not an id, and with `fallback` it is a legal value. @override */
+    _validateType(value, options) {
+        if ( !this.fallback ) super._validateType(value, options);
+    }
+
+    /** @override */
+    initialize(value, model) {
+        const collection = model?.parent?.getEmbeddedCollection?.(this.model.metadata.collection);
+        return () => {
+            const document = collection?.get(value);
+            if ( !document ) return this.fallback ? value : null;
+            Object.defineProperty(document, "toString", {
+                value: () => document.name, configurable: true, enumerable: false });
+            return document;
+        };
+    }
+
+    /** @override */
+    toObject(value) {
+        return value?._id ?? value;
     }
 }
 
@@ -1184,6 +1229,37 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
 
     prepareDerivedData() {
         this.traitMap = buildTraitMap(this.traits);
+    }
+
+    get #owner() {
+        const actor = this.parent?.actor;
+        return (actor && ("personal" in actor.system)) ? actor : null;
+    }
+
+    /** One per Traveller: a second is refused rather than replacing the first in silence. @inheritDoc */
+    async _preCreate(data, options, user) {
+        // The sub-variant rule is the one case where a second entry is meant to speak.
+        if ( Rules.on("speciesModifiersStack") ) return;
+        const existing = this.#owner?.items.find(item => item.type === "species");
+        if ( !existing ) return;
+        ui.notifications.error(game.i18n.format("MGT2.Actor.SpeciesSingleton", { species: existing.name }));
+        return false;
+    }
+
+    /** Here and not in the sheet's drop handler, so every creation path points the field at this
+     *  Item — a drop, a macro, an import, the creation screen. @inheritDoc */
+    _onCreate(data, options, userId) {
+        const actor = this.#owner;
+        if ( (game.user.id !== userId) || !actor ) return;
+        if ( actor.system.personal.species?.id === this.parent.id ) return;
+        actor.update({ "system.personal.species": this.parent.id });
+    }
+
+    /** @inheritDoc */
+    async _preDelete(options, user) {
+        const actor = this.#owner;
+        if ( !actor || (actor.system.personal.species?.id !== this.parent.id) ) return;
+        await actor.update({ "system.personal.species": "" });
     }
 
     /**
