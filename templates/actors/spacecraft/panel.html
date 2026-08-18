@@ -111,6 +111,20 @@
 				{{formInput systemFields.computer.fields.bis name="system.computer.bis" value=system.computer.bis}}
 				<span>{{localize 'MGT2.Actor.spacecraft.Bis'}}</span>
 			</label>
+			<label class="check" data-tooltip="{{localize 'MGT2.Actor.spacecraft.FibWhy'}}">
+				{{formInput systemFields.computer.fields.fib name="system.computer.fib" value=system.computer.fib}}
+				<span>{{localize 'MGT2.Actor.spacecraft.Fib'}}</span>
+			</label>
+			{{#if ship.computer.hasBackup}}
+			<label class="check" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BisWhy'}}">
+				{{formInput systemFields.computer.fields.backupBis name="system.computer.backupBis" value=system.computer.backupBis}}
+				<span>{{localize 'MGT2.Actor.spacecraft.BackupBis'}}</span>
+			</label>
+			<label class="check" data-tooltip="{{localize 'MGT2.Actor.spacecraft.FibWhy'}}">
+				{{formInput systemFields.computer.fields.backupFib name="system.computer.backupFib" value=system.computer.backupFib}}
+				<span>{{localize 'MGT2.Actor.spacecraft.BackupFib'}}</span>
+			</label>
+			{{/if}}
 		</div>
 
 		{{!-- §4.1's overrides: transcription is what this type is mostly for, and the six figures
@@ -729,6 +743,12 @@
 				<b>{{localize 'MGT2.Actor.spacecraft.OnBackup' n=ship.computer.backup}}</b>
 			</li>
 		</ul>
+		{{/if}}
+		{{#if ship.computer.liveFib}}
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.FibHint'}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.FibWhy'}}"></i></p>
+		{{/if}}
+		{{#if ship.computer.ionDrain}}
+		<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.IonBandwidth' n=ship.computer.ionDrain rated=ship.computer.rated available=ship.computer.available}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.IonWhy'}}"></i><a class="rm" data-action="ionClear" data-track="computer" data-tooltip="{{localize 'MGT2.Actor.spacecraft.IonClear'}}"><i class="fa-solid fa-eraser"></i></a></p>
 		{{/if}}
 		{{#if ship.computer.jumpBonus}}
 		<p class="hint">{{localize 'MGT2.Actor.spacecraft.BisHint' n=ship.computer.jumpBonus base=ship.computer.available}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BisWhy'}}"></i></p>

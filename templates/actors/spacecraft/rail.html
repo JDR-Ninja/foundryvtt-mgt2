@@ -42,7 +42,11 @@
 		prefix="MGT2.Actor.spacecraft.DrawRows."
 		derived="system.power.requirements"}}
 	{{#if ship.power.damaged}}
-	<p class="hint">{{localize 'MGT2.Actor.spacecraft.PlantDamaged' plant=ship.power.plant available=ship.power.cap}}</p>
+	<p class="hint">{{localize 'MGT2.Actor.spacecraft.PlantDamaged' plant=ship.power.plant available=ship.power.rated}}</p>
+	{{/if}}
+	{{#if ship.power.ionDrain}}
+	<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.IonPower' n=ship.power.ionDrain rated=ship.power.rated available=ship.power.cap}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.IonWhy'}}"></i><a class="rm" data-action="ionClear" data-track="power" data-tooltip="{{localize 'MGT2.Actor.spacecraft.IonClear'}}"><i class="fa-solid fa-eraser"></i></a></p>
+	<p class="hint">{{localize 'MGT2.Actor.spacecraft.IonAllocate'}}</p>
 	{{/if}}
 
 	{{> systems/mgt2/templates/actors/spacecraft/budget.html

@@ -119,7 +119,9 @@ export class SpacecraftData extends CraftData {
                 // The panel's bottom line AT FULL POWER, which is what a catalogue entry prints:
                 // switching a consumer off is play state and goes on subtracting its own derived
                 // draw from whichever figure is in force.
-                drawOverride: printed()
+                drawOverride: printed(),
+                // HG p.30: an ion hit is "temporarily deducted from the target's Power".
+                ionDrain: count(0)
             }),
 
             fuel: new fields.SchemaField({
@@ -158,14 +160,22 @@ export class SpacecraftData extends CraftData {
                 // HG p.20: "A computer's Processing score is increased by +5 for the purposes of
                 // running Jump Control programs only."
                 bis: new fields.BooleanField({ required: false, initial: false }),
+                // HG p.20: "A hardened computer is immune to Ion weapons but costs +50% more."
+                fib: new fields.BooleanField({ required: false, initial: false }),
                 // HG p.20: "A ship may have a maximum of two computers (a primary and a backup) but
                 // the second must have a lower Processing score than the primary." Null is a hull
                 // with no backup fitted.
                 backup: new fields.NumberField({
                     required: false, nullable: true, integer: true, min: 0, initial: null }),
+                // HG p.20 fits both options per COMPUTER: Aliens 4 p.129 prints a Computer/10fib
+                // over a Backup Computer/5fib,bis.
+                backupBis: new fields.BooleanField({ required: false, initial: false }),
+                backupFib: new fields.BooleanField({ required: false, initial: false }),
                 // "The primary and backup computers cannot be operated simultaneously" — which one
                 // is live is a state the referee sets, since no book gives the fallback a trigger.
-                onBackup: new fields.BooleanField({ required: false, initial: false })
+                onBackup: new fields.BooleanField({ required: false, initial: false }),
+                // HG p.30: "Deduct the same amount of damage from the computer bandwidth."
+                ionDrain: count(0)
             }),
 
             sensors: new fields.SchemaField({
@@ -895,7 +905,8 @@ export class SpacecraftData extends CraftData {
 
         // A damaged plant is a percentage of its rating (Core p.170); `available` is declared in
         // the schema so a `final`-phase Active Effect on it is coerced rather than written raw.
-        this.power.available = Math.floor(this.power.plant * this.criticalEffects.powerFactor);
+        this.power.rated = Math.floor(this.power.plant * this.criticalEffects.powerFactor);
+        this.power.available = Math.max(0, this.power.rated - this.power.ionDrain);
         this.power.requirements = Object.assign(requirements, { total });
         this.power.rows = rows;
         this.power.surplus = round(this.power.available - total);
@@ -1111,17 +1122,22 @@ export class SpacecraftData extends CraftData {
                 downgraded: program.downgraded, tlBlocked: program.tlBlocked
             });
         }
-        // Only one of the two computers is ever operating (HG p.20), so only one Processing score
-        // is ever the budget's.
-        const available = (this.computer.onBackup && (this.computer.backup !== null))
-            ? this.computer.backup : this.computer.processing;
+        // Only one of the two computers is ever operating (HG p.20), so one Processing score and
+        // one pair of designations are ever the budget's: both options are fitted per computer.
+        const onBackup = this.computer.onBackup && (this.computer.backup !== null);
+        const rated = onBackup ? this.computer.backup : this.computer.processing;
+        const liveBis = onBackup ? this.computer.backupBis : this.computer.bis;
+        const available = Math.max(0, rated - this.computer.ionDrain);
         // HG p.20's /bis is a ring-fenced pool rather than a bigger one: the +5 is spendable by
         // Jump Control and by nothing else, so only what Jump Control claims of it raises the cap.
-        const bonus = this.computer.bis ? Math.min(BIS_PROCESSING, jump) : 0;
+        const bonus = liveBis ? Math.min(BIS_PROCESSING, jump) : 0;
 
         this.computer.used = used;
         this.computer.installed = installed;
         this.computer.software = software;
+        this.computer.rated = rated;
+        this.computer.liveBis = liveBis;
+        this.computer.liveFib = onBackup ? this.computer.backupFib : this.computer.fib;
         this.computer.available = available;
         this.computer.jumpBonus = bonus;
         this.computer.cap = available + bonus;
@@ -1133,7 +1149,29 @@ export class SpacecraftData extends CraftData {
         this.computer.blockedSoftware = blocked;
         // HG's smallest model is a Computer/5, so this only ever fires on a hand-typed 0 — a ship
         // with no working computer, which is the state the clause describes.
-        this.computer.overCrowded = (available === 0) && (running > 1);
+        this.computer.overCrowded = (rated === 0) && (running > 1);
+    }
+
+    /** HG p.30: "Hardened computers (those with the /fib designation) are immune to Ion weapons." */
+    get hardened() {
+        return this.computer.liveFib === true;
+    }
+
+    /**
+     * HG p.30: an ion hit "ignore[s] any armour" and moves no hull damage — it comes off Power and
+     * off the computer bandwidth instead. @inheritDoc
+     */
+    async applyDamage(amount, options = {}) {
+        if (!options.ion || options.raw || !(amount > 0)) return super.applyDamage(amount, options);
+        if (this.hardened) return { wound: 0, rounds: 0, ion: 0, hardened: true };
+
+        const drain = this.reduceDamage(amount, { ...options, ignoreArmour: true });
+        if (drain <= 0) return { wound: 0, rounds: 0, ion: 0 };
+        await this.parent.update({ system: {
+            power: { ionDrain: this.power.ionDrain + drain },
+            computer: { ionDrain: this.computer.ionDrain + drain }
+        } });
+        return { wound: 0, rounds: 0, ion: drain };
     }
 
     /** HG p.20 scopes /bis to "Jump Control programs only", and a program is a free-text name. */

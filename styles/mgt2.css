@@ -4509,6 +4509,14 @@ li.chat-message:has(> .message-content > .mgt2.card) {
 .mgt2 p.hint .note {
   margin-left: 5px;
 }
+.mgt2 p.hint .rm {
+  margin-left: 6px;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 p.hint .rm:hover {
+  color: var(--danger);
+}
 
 .mgt2 .mgt2-npc-panel {
   display: flex;

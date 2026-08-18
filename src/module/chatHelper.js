@@ -337,6 +337,17 @@ export class ChatHelper {
                 ui.notifications.info(game.i18n.format("MGT2.Actor.robot.IonImmune",
                     { name: token.actor.name }));
             }
+            // HG folio 30, one scale up: the hit moves no hull damage at all — it comes off Power
+            // and off the computer bandwidth, both of which the ship's own sheet then prints.
+            if (result?.hardened) {
+                ui.notifications.info(game.i18n.format("MGT2.Actor.spacecraft.IonImmune",
+                    { name: token.actor.name }));
+            } else if (result?.ion > 0) {
+                const lasting = (payload.effect ?? 0) >= 6;
+                ui.notifications.info(game.i18n.format(
+                    lasting ? "MGT2.Actor.spacecraft.IonDrainRounds" : "MGT2.Actor.spacecraft.IonDrain",
+                    { name: token.actor.name, n: result.ion }));
+            }
             if (payload.radiation) await ChatHelper.#applyRadiation(token.actor, payload.scale);
             if (payload.hazards?.length) {
                 await token.actor.system.applyHazards(payload.hazards, payload.sourceName);

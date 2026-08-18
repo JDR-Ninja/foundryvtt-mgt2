@@ -31,6 +31,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             powerToggle: SpacecraftActorSheet.#onPowerToggle,
             softwareToggle: SpacecraftActorSheet.#onSoftwareToggle,
             backupToggle: SpacecraftActorSheet.#onBackupToggle,
+            ionClear: SpacecraftActorSheet.#onIonClear,
             hullOptionToggle: SpacecraftActorSheet.#onHullOptionToggle,
             rowCreate: SpacecraftActorSheet.#onRowCreate,
             rowDelete: SpacecraftActorSheet.#onRowDelete,
@@ -225,8 +226,10 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             system.power.requirements.total);
         budget.surplus = system.power.surplus;
         budget.plant = system.power.plant;
-        // A critical that cut the plant's output is why `available` and `plant` can differ.
-        budget.damaged = system.power.available < system.power.plant;
+        // A critical cut the plant's output; an ion hit is deducted after it, off `rated`.
+        budget.rated = system.power.rated;
+        budget.damaged = system.power.rated < system.power.plant;
+        budget.ionDrain = system.power.ionDrain;
         budget.why = SpacecraftActorSheet.#printedWhy(system.printedFigures.powerDraw);
         return budget;
     }
@@ -268,6 +271,11 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         budget.backup = system.computer.backup;
         budget.hasBackup = system.computer.backup !== null;
         budget.onBackup = system.computer.onBackup;
+        // The designations belong to the computer in service, so falling back changes them with it.
+        budget.rated = system.computer.rated;
+        budget.liveBis = system.computer.liveBis;
+        budget.liveFib = system.computer.liveFib;
+        budget.ionDrain = system.computer.ionDrain;
         return budget;
     }
 
@@ -750,6 +758,14 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
      */
     static async #onBackupToggle(event, target) {
         return this.actor.update({ "system.computer.onBackup": !this.actor.system.computer.onBackup });
+    }
+
+    /** HG p.30 gives the deduction a duration and no recovery step: it is given back by hand. */
+    static async #onIonClear(event, target) {
+        const tracks = { power: "system.power.ionDrain", computer: "system.computer.ionDrain" };
+        const path = tracks[target.dataset.track];
+        if (!path) return;
+        return this.actor.update({ [path]: 0 });
     }
 
     /** @this {SpacecraftActorSheet} */

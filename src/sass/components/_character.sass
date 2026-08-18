@@ -619,6 +619,13 @@
 		color: var(--mute)
 	.note
 		margin-left: 5px
+	// A state the referee has to undo carries its own eraser, the shape `.sect .rm` already has.
+	.rm
+		margin-left: 6px
+		color: var(--faint)
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--danger)
 
 .mgt2 .mgt2-npc-panel
 	display: flex
