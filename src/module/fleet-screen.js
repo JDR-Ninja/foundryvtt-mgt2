@@ -721,6 +721,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         if ( !fleet ) return;
         const confirmed = await DialogV2.confirm({
             window: { title: "MGT2.Fleet.Screen.RemoveFleet" },
+            classes: ["mgt2"],
             content: `<p>${game.i18n.format("MGT2.Fleet.Screen.RemoveFleetHint", {
                 name: fleet.name, count: fleet.system.combatants.length })}</p>`
         });

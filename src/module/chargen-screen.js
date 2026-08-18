@@ -301,6 +301,7 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         const confirmed = await DialogV2.confirm({
             window: { title: "MGT2.Chargen.Screen.Leave" },
+            classes: ["mgt2"],
             content: `<p>${game.i18n.format("MGT2.Chargen.Screen.LeaveHint", { name: actor.name })}</p>`
         });
         if ( !confirmed ) return;

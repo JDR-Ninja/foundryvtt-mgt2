@@ -661,6 +661,23 @@
 			margin-left: auto
 
 // --------------------------------------------
+//  DIALOG FOOTERS — the kit's button voice on core's own footer
+// --------------------------------------------
+// Core declares `button { font-family: var(--font-sans); font-size: var(--font-size-14) }`, and a
+// value declared on the element beats the base the window content inherits — so a DialogV2 footer
+// reads in core's Signika at a rem size whatever the window around it says. The chrome stays
+// core's; only the voice is taken back, and it is the `.btn` voice every other control uses.
+//
+// This rule and the prompt's below have the SAME specificity, so it has to sit first.
+
+.mgt2 .form-footer button
+	font-family: var(--cond)
+	font-size: 10.5px
+	font-weight: 600
+	letter-spacing: 0.14em
+	text-transform: uppercase
+
+// --------------------------------------------
 //  PROMPT BUTTONS — DialogV2's footer, carrying the dice each one rolls
 // --------------------------------------------
 

@@ -112,6 +112,7 @@ async function elect(view) {
     }
     const take = await DialogV2.confirm({
         window: { title: "MGT2.Chargen.Steps.elect" },
+        classes: ["mgt2"],
         content: `<p>${game.i18n.localize("MGT2.Chargen.Term.AnagathicsAsk")}</p>`,
         rejectClose: false
     });
@@ -407,6 +408,7 @@ async function applyRow(view, row, { mishap }) {
     else if ( row.ejects === "choice" ) {
         ejected = await DialogV2.confirm({
             window: { title: "MGT2.Chargen.Term.EjectChoice" },
+            classes: ["mgt2"],
             content: `<p>${foundry.utils.escapeHTML(row.text || "")}</p>
                 <p>${game.i18n.localize("MGT2.Chargen.Term.EjectChoiceHint")}</p>`,
             rejectClose: false
@@ -508,6 +510,7 @@ async function earned(entry, row, subPassed) {
     const what = game.i18n.localize(MGT2.TrayKinds[entry.kind] ?? entry.kind);
     return await DialogV2.confirm({
         window: { title: "MGT2.Chargen.Term.TrayConditionTitle" },
+        classes: ["mgt2"],
         content: `<p>${foundry.utils.escapeHTML(row.text || "")}</p>
             <p>${game.i18n.format("MGT2.Chargen.Term.TrayConditionAsk",
         { what, detail: entry.note || what })}</p>`,
@@ -538,6 +541,7 @@ async function applyAwards(view, awards) {
     else if ( awards.optional && keys.length ) {
         const take = await DialogV2.confirm({
             window: { title: "MGT2.Chargen.Term.PickAward" },
+            classes: ["mgt2"],
             content: `<p>${game.i18n.format("MGT2.Chargen.Term.OptionalAwardAsk",
                 { what: keys.map(key => game.i18n.localize(MGT2.TermOutcomes[key])).join(", ") })}</p>`,
             rejectClose: false
@@ -630,6 +634,7 @@ async function commission(view) {
     // Trying for a commission is optional (folio 19), so it is asked rather than rolled.
     const attempt = await DialogV2.confirm({
         window: { title: "MGT2.Chargen.Steps.commission" },
+        classes: ["mgt2"],
         content: `<p>${game.i18n.localize("MGT2.Chargen.Term.CommissionAsk")}</p>`,
         rejectClose: false
     });
@@ -1164,6 +1169,7 @@ async function applyStepOutcome(view, arm, key) {
     if ( record && (arm.ejects !== "stays") ) {
         const ejected = (arm.ejects === "ejects") || (await DialogV2.confirm({
             window: { title: "MGT2.Chargen.Term.EjectChoice" },
+            classes: ["mgt2"],
             content: `<p>${game.i18n.localize("MGT2.Chargen.Term.EjectChoiceHint")}</p>`,
             rejectClose: false
         }) === true);

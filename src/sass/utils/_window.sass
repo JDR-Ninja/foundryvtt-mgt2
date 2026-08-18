@@ -41,8 +41,16 @@
 	// Zeroing it here also zeroed it on every DialogV2 the system opens: those carry `mgt2` and
 	// nothing else, and their content is drawn against core's padding (see `components/_dialog.sass`).
 	// A screen that lays out its own window takes `nopad`, or zeroes it on its own root.
+	//
+	// The kit's base sits here for the same reason the ground does: core dresses `.application`
+	// with its own Signika at `--font-size-14`, and that is a **rem** — it follows the user's Font
+	// Scale. A window that does not restate this renders every string it does not size itself in
+	// the wrong face, at a size none of its own px numbers follow. The sheet roots each carried a
+	// copy of it and the twelve other screens carried none; one declaration covers both.
 	&.application
 		.window-content
+			font-family: var(--body)
+			font-size: 14px
 			background: var(--mgt2-bgcolor-form)
 			color: var(--mgt2-color-form)
 

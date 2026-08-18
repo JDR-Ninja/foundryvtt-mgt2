@@ -607,6 +607,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         if ( !group ) return;
         const confirmed = await DialogV2.confirm({
             window: { title: "MGT2.SpaceCombat.RemoveShip" },
+            classes: ["mgt2"],
             content: `<p>${game.i18n.format("MGT2.SpaceCombat.RemoveShipHint", { name: group.name })}</p>`
         });
         if ( !confirmed ) return;

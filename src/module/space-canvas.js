@@ -301,6 +301,7 @@ export async function configureSpaceScene(scene) {
     const levels = levelNames().join(" · ");
     const confirmed = await DialogV2.confirm({
         window: { title: "MGT2.Canvas.ConfigureScene" },
+        classes: ["mgt2"],
         content: `<p>${game.i18n.format("MGT2.Canvas.ConfigureSceneHint", {
             name: scene.name, size: SPACE_SCENE.size, levels
         })}</p>`

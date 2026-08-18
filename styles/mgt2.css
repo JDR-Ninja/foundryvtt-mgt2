@@ -220,6 +220,8 @@ body {
   text-transform: uppercase;
 }
 .mgt2.application .window-content {
+  font-family: var(--body);
+  font-size: 14px;
   background: var(--mgt2-bgcolor-form);
   color: var(--mgt2-color-form);
 }
@@ -1213,6 +1215,14 @@ body {
 }
 .mgt2 .eladder .cap .band {
   margin-left: auto;
+}
+
+.mgt2 .form-footer button {
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .mgt2-prompt .form-footer {
@@ -3893,15 +3903,6 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   --mgt2-rule: 1px solid var(--rule);
 }
 
-.mgt2.application.character > .window-content,
-.mgt2.application.npc > .window-content,
-.mgt2.application.vehicle > .window-content,
-.mgt2.application.spacecraft > .window-content,
-.mgt2.application.robot > .window-content {
-  font-family: var(--body);
-  font-size: 14px;
-}
-
 .mgt2 .mgt2-label {
   font-family: var(--cond);
   font-size: 11px;
@@ -5089,8 +5090,6 @@ ul.softwares li:hover a {
   grid-template-areas: "header header" "rail panel";
   height: 100%;
   overflow: hidden;
-  font-family: var(--body);
-  font-size: 14px;
 }
 .mgt2.application.world > .window-content > [data-application-part=header] {
   grid-area: header;
@@ -5572,8 +5571,6 @@ ul.softwares li:hover a {
   display: grid;
   grid-template-columns: 2.1rem minmax(0, 1fr);
   align-content: start;
-  font-family: var(--body);
-  font-size: 14px;
   --item-chrome: 250px;
 }
 
@@ -10062,8 +10059,6 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
   grid-template-areas: "header header" "rail panel";
   height: 100%;
   overflow: hidden;
-  font-family: var(--body);
-  font-size: 14px;
 }
 .mgt2.application.stash > .window-content > [data-application-part=header] {
   grid-area: header;
