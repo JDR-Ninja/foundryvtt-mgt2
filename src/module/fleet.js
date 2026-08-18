@@ -538,7 +538,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
     /**
      * Folio 115: "as long as the flag ship remains in the battle, its fleet receives DM+1 during the
      * Morale check that is made each round." A wreck has left it — folio 111 wrecks a ship at zero
-     * adjusted Hull points. The Morale check itself is folio 122's and is not built.
+     * adjusted Hull points. This DM is one row of `moraleRows` below, which is where it is spent.
      */
     get flagShipDM() {
         const flag = this.flagShip;

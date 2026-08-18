@@ -12,7 +12,7 @@
       },
       "text": {
         "format": 1,
-        "content": "<p><em>Generated from the system's own rules audit. It records what each screen does with the printed rules and where it has diverged — it is not a checklist of the rulebook.</em></p>\n<p><strong>The survey is finished: no entry is open on any screen.</strong> What it found and what it left are two different lists, and both are worth stating.</p>\n<p>The resolution core was faithful and well cited from the start: the DM ladder, the eight difficulties, the six Effect bands, Boon/Bane, timeframes, range bands, the p.75 attack modifiers, Bulky/Very Bulky, Scope/Auto, the whole Core p.83-84 recovery chain, encumbrance, the armour skill penalty, Stun and the Effect-6 floor all match the books.</p>\n<p>The divergences clustered in four places: the <strong>NPC person preset</strong>, the <strong>damage pipeline after the roll</strong>, <strong>psionics</strong>, and the <strong>initiative formula</strong>. All four are worked: initiative is done, the NPC person preset drains END first and its stored chains are migrated, the damage pipeline is closed end to end — Auto's three fire modes included — and <strong>psionics now spends</strong>: the listed cost on a success, one point on a failure, the excess below zero as damage, and reach paid for at twice or four times the price. The pipeline now <strong>spends ammunition</strong> too: a weapon records what is loaded, an attack takes its rounds out of it, a magazine that cannot pay refuses the shot, and a spare magazine puts the whole capacity back for the Minor Action Core folio 75 charges.</p>\n<p>Two habits account for most of what the audit found, and both should outlive it. <strong>Verify against the corpus, never against the skill</strong> — two entries were graded against the <code>mgt2-rules</code> skill's paraphrase and were wrong for it, and both were withdrawn with the printed quote rather than \"fixed\" in code that was already right. And <strong>measure the payload, not the code</strong> — the one real defect found late (§8 D's <code>ion</code> reaching the attack payload and not the apply payload) was invisible to reading and obvious to a measurement, because the damage pipeline names a target-side trait in two places.</p>\n<h2>Severity</h2>\n<table><thead><tr><th></th><th>Meaning</th></tr></thead><tbody><tr><td><strong>A</strong></td><td>Produces a wrong number at the table. Fix before anything else.</td></tr><tr><td><strong>B</strong></td><td>A printed rule the system never applies, where the data to apply it is already present.</td></tr><tr><td><strong>C</strong></td><td>A gap: the rule is absent and the screen offers no route to it.</td></tr><tr><td><strong>D</strong></td><td>Friction, stale comment, or dead code. No wrong number, but it misleads.</td></tr></tbody></table>\n<h2>By screen</h2>\n<table><thead><tr><th>Screen</th><th>Open</th><th>Settled</th></tr></thead><tbody><tr><td>Roll prompt</td><td>—</td><td>7</td></tr><tr><td>Chat card — roll result</td><td>—</td><td>2</td></tr><tr><td>Chat card — damage</td><td>—</td><td>6</td></tr><tr><td>Character sheet</td><td>—</td><td>6</td></tr><tr><td>NPC sheet</td><td>—</td><td>1</td></tr><tr><td>Vehicle sheet</td><td>—</td><td>2</td></tr><tr><td>Spacecraft sheet</td><td>—</td><td>4</td></tr><tr><td>Robot sheet</td><td>—</td><td>4</td></tr><tr><td>Item sheets</td><td>—</td><td>4</td></tr><tr><td>Combat tracker</td><td>—</td><td>2</td></tr></tbody></table>\n<p>38 entries over 10 screens; 0 open.</p>"
+        "content": "<p><em>Generated from the system's own rules audit. It records what each screen does with the printed rules and where it has diverged — it is not a checklist of the rulebook.</em></p>\n<p><strong>The first survey is finished: no entry is open on any of its ten screens.</strong> What it found and what it left are two different lists, and both are worth stating.</p>\n<p><strong>The second pass, 2026-08-17, is the one to read for what the system does today.</strong> The audit graded ten screens and the system had grown to twenty: everything built after 2026-08-12 — character creation, the world sheet, the voyage, both trade halves, ship finance, space combat, fleet battles, training and the environment regions — had never been graded at all, and the shipped journal therefore described a system half this size. Ten pages are added, 19 entries, and <strong>the result is the reverse of the first pass</strong>: sixteen of the nineteen were settled the moment they were written, because these screens were built with the books open and their citations in the code, and what the pass found is three things the system does not do.</p>\n<p><strong>Those three are worth naming here rather than in a table.</strong> A low passage's revival check is printed on the card and never rolled, with every modifier but one already on a document (§15); a missile salvo has no existence in Core space combat, so Point Defence and Electronic Warfare have nothing to be aimed at (§17); and folio 120's percentage Hull critical is computed, printed and not applied (§18). <strong>All three are a control that was never added rather than a rule that was misread</strong>, which is what a build era leaves behind.</p>\n<p><strong>A fourth was written and then withdrawn, and it is the most useful thing the pass produced.</strong> This audit graded the fleet screen's Morale check as unbuilt because a docstring forty lines above the implementation said so. It is built — five DM rows, a posted card, the consequence left to the referee — and so is the dispersal chain the same entry called missing. The comment is corrected and the entry is kept, struck through, at §18: <strong>read the code, not the comment beside it</strong>, which is the first pass's <em>verify against the corpus, never against the skill</em> pointed one layer inward.</p>\n<p><strong>And a fifth thing the pass did not find, because it is a decision and not a defect.</strong> Where §9.35 refuses a clock, a printed rule is stated on the screen and left to the referee — skipped maintenance, the 100-diameter limit, a study week, every hazard interval but the combat round. Each of those is an entry too, struck through and marked <em>by design</em>, because a referee reading the shipped journal needs to know the system deliberately stopped there.</p>\n<p>The resolution core was faithful and well cited from the start: the DM ladder, the eight difficulties, the six Effect bands, Boon/Bane, timeframes, range bands, the p.75 attack modifiers, Bulky/Very Bulky, Scope/Auto, the whole Core p.83-84 recovery chain, encumbrance, the armour skill penalty, Stun and the Effect-6 floor all match the books.</p>\n<p>The divergences clustered in four places: the <strong>NPC person preset</strong>, the <strong>damage pipeline after the roll</strong>, <strong>psionics</strong>, and the <strong>initiative formula</strong>. All four are worked: initiative is done, the NPC person preset drains END first and its stored chains are migrated, the damage pipeline is closed end to end — Auto's three fire modes included — and <strong>psionics now spends</strong>: the listed cost on a success, one point on a failure, the excess below zero as damage, and reach paid for at twice or four times the price. The pipeline now <strong>spends ammunition</strong> too: a weapon records what is loaded, an attack takes its rounds out of it, a magazine that cannot pay refuses the shot, and a spare magazine puts the whole capacity back for the Minor Action Core folio 75 charges.</p>\n<p>Two habits account for most of what the audit found, and both should outlive it. <strong>Verify against the corpus, never against the skill</strong> — two entries were graded against the <code>mgt2-rules</code> skill's paraphrase and were wrong for it, and both were withdrawn with the printed quote rather than \"fixed\" in code that was already right. And <strong>measure the payload, not the code</strong> — the one real defect found late (§8 D's <code>ion</code> reaching the attack payload and not the apply payload) was invisible to reading and obvious to a measurement, because the damage pipeline names a target-side trait in two places.</p>\n<h2>Severity</h2>\n<table><thead><tr><th></th><th>Meaning</th></tr></thead><tbody><tr><td><strong>A</strong></td><td>Produces a wrong number at the table. Fix before anything else.</td></tr><tr><td><strong>B</strong></td><td>A printed rule the system never applies, where the data to apply it is already present.</td></tr><tr><td><strong>C</strong></td><td>A gap: the rule is absent and the screen offers no route to it.</td></tr><tr><td><strong>D</strong></td><td>Friction, stale comment, or dead code. No wrong number, but it misleads.</td></tr></tbody></table>\n<h2>By screen</h2>\n<table><thead><tr><th>Screen</th><th>Open</th><th>Settled</th></tr></thead><tbody><tr><td>Roll prompt</td><td>—</td><td>7</td></tr><tr><td>Chat card — roll result</td><td>—</td><td>2</td></tr><tr><td>Chat card — damage</td><td>—</td><td>6</td></tr><tr><td>Character sheet</td><td>—</td><td>6</td></tr><tr><td>NPC sheet</td><td>—</td><td>1</td></tr><tr><td>Vehicle sheet</td><td>—</td><td>2</td></tr><tr><td>Spacecraft sheet</td><td>—</td><td>4</td></tr><tr><td>Robot sheet</td><td>—</td><td>4</td></tr><tr><td>Item sheets</td><td>—</td><td>4</td></tr><tr><td>Combat tracker</td><td>—</td><td>2</td></tr><tr><td>Character creation</td><td>—</td><td>2</td></tr><tr><td>World sheet</td><td>—</td><td>2</td></tr><tr><td>Voyage screen</td><td>—</td><td>2</td></tr><tr><td>Speculative trade</td><td>—</td><td>2</td></tr><tr><td>Passengers, freight and mail</td><td>1</td><td>1</td></tr><tr><td>Ship finance</td><td>—</td><td>2</td></tr><tr><td>Space combat screen</td><td>1</td><td>0</td></tr><tr><td>Fleet battles</td><td>1</td><td>2</td></tr><tr><td>Training</td><td>—</td><td>2</td></tr><tr><td>Environment regions</td><td>—</td><td>1</td></tr></tbody></table>\n<p>57 entries over 20 screens; 3 open.</p>"
       },
       "ownership": {
         "default": -2
@@ -188,6 +188,176 @@
         "default": -2
       },
       "sort": 1100
+    },
+    {
+      "_id": "witU80sxgrpMSfw0",
+      "name": "11. Character creation",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>What this screen gets right</h2>\n<ul><li>A creation check is <em>2D + the named term's DM and nothing else</em> [Core folio 11]. This is the one place the system deliberately refuses its own roll prompt: the play-time modifier stack has no business in a qualification roll.</li><li>Both creation limits, and they are not the same shape [Core folio 18, Core folio 55]. Level 4 is a <strong>ceiling</strong> and the excess is discarded silently, as printed; the <code>3 × (INT + EDU)</code> cap <strong>degrades</strong> instead, landing the skill at level 0 — folio 55 prints the only on-breach procedure the books have, and a refusal would leave the table with a printed grant and nowhere to put it.</li><li>Background skills are <code>EDU DM + 3</code>, clamped to 0-6 by the book's own parenthesis [Core folio 18].</li><li>The Connections Rule [Core folio 19]: at most two, each with a different Traveller, never above level 3 and never Jack-of-All-Trades. A connection and a contact are two outcomes of one agreement and both sides are written, which is the transaction a single sheet cannot express.</li><li>Ageing: the DM is the frame's own law read against the eight printed rows [Core folio 49], the <strong>player</strong> chooses which characteristics take the loss [Core folio 48], and an ageing crisis fails every later qualification roll automatically.</li><li>Advancement reads the <strong>highest rank reached</strong> [Core folio 46], not the rank held now.</li><li>Mustering out [Core folio 46-48]: the Cash column at most three times across all careers, and the Benefit count is a stored ledger rather than a derivation, because some thirty printed rows wipe, grant, remove or retain rolls and two let a player wager any number of them mid-term.</li><li>The shared skills package is drained in turn, one entry per Traveller [Core folio 50], with a trailing number read as the level and its absence read as the folio's own default.</li><li>Psionics needs no machinery of its own [Core folio 228]: the PSI test is <code>2D − the terms served</code>, the two Core openings differ only in scope, and the Psion career is a <code>career</code> template whose three flags the generic loop already answers.</li><li>Age is a <strong>sum over the characteristic log</strong> and never <code>18 + 4 × terms</code> (§9.53) — a Companion pre-career starts at 22 + 2D3 and one printed term is not always four years. The same two-term log reads 28, 26 and 22 on three different frames.</li></ul>\n<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>B</td><td>a frame's declared steps were bare keys, so five printed checks stayed in prose</td><td>✅ built 2026-08-17</td><td>Core folio 11</td></tr><tr><td>C</td><td>no career table ships, so the loop starts with nothing to run</td><td>⚖ by design</td><td>Core folio 50</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 1200
+    },
+    {
+      "_id": "JnMgsxxhAT2Q3eO3",
+      "name": "12. World sheet",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>What this screen gets right</h2>\n<ul><li>The printed profile parses in eHex, <code>0-9</code> then <code>A</code> onwards skipping <code>I</code> and <code>O</code> [Core folio 248], with <code>X</code> read as a starport that does not exist rather than as a digit. A sector-table line may carry its travel zone as a suffix — <code>A788899-C A</code> — because that is how a referee copies one.</li><li>The <strong>eighteen trade codes</strong> are tested off the profile rather than typed [Core folio 261], and the travel zone joins them on the trade columns, because Amber and Red price Advanced Weapons without being facts about the world's economy [Core folio 244].</li><li>All three cells whose digit means nothing alone are glossed — atmosphere, population and government, 45 entries [Core folio 250, folio 252, folio 253].</li><li>Fuel follows the starport letter: A and B refine, C and D do not, E and X sell none [Core folio 257].</li><li>The berthing rate is <strong>rolled once per starport and recorded</strong>, prices being stable at any given port [Core folio 258]. Null is a third state — not yet rolled — distinct from E, a port that charges nothing, and X, no port at all.</li><li>The per-planet, per-month trade state lives here and outlives any dialog: the search stamp that makes each further attempt this month DM−1 [Core folio 241] and the refusal that locks a supplier out for a month [Core folio 243].</li><li><code>sector</code> and <code>hex</code> are the pair the books print, with the subsector and the one absolute coordinate derived from them (§9.142). Checked against 1 165 packed worlds with <strong>0 mismatches</strong>, and against the only two distances the books state outright. An unknown sector is a homebrew map, not a validation failure.</li></ul>\n<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>C</td><td>a Law Level's prohibitions are not on the sheet</td><td>⚖ declined</td><td>Core folio 255</td></tr><tr><td>D</td><td>a world's jump neighbours are not indexed</td><td>⚖ declined</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 1300
+    },
+    {
+      "_id": "a7u4ZYfqDdfanasu",
+      "name": "13. Voyage screen",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>What this screen gets right</h2>\n<ul><li>The two printed checks are a <strong>task chain</strong>, in the order the folio runs them: Easy (4+) Astrogation (EDU) to plot, then Easy (4+) Engineer (j-drive) modified by that chain [Core folio 157].</li><li>Plotting takes <strong>DM−1 per parsec</strong>, entered as a waivable source that reads <em>DM−1 per parsec ×3</em> rather than as an anonymous station DM [Core folio 157].</li><li>Unrefined fuel is <strong>DM−2</strong> on the jump check, read off the tank rather than typed [Core folio 157].</li><li>Fuel is a flat 10 % of the hull per parsec whatever the drive is rated, and a jump of less than one parsec counts as jump-1 for both the fuel and the DM [Core folio 157].</li><li>Both misjump procedures ship, and the referee's world setting says which is in force (§9.89): Core reads the failed Engineer check's Effect against three outcomes [Core folio 158], the Companion reads the <strong>sum</strong> of both Effects for the trigger and each Effect on a variance table of its own [Companion folios 150-153]. The folio's <em>\"at the referee's option\"</em> third outcome and its merciful substitute are flagged as options rather than promoted to results.</li><li>The day counter is the referee's and the screen is its single writer; nothing schedules a jump and nothing ticks (§9.35).</li></ul>\n<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>C</td><td>the other two jump modifiers are stated and never applied</td><td>⚖ by design</td><td>Core folio 157</td></tr><tr><td>D</td><td>a bad jump rolls nothing for the people aboard</td><td>⚖ by design</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 1400
+    },
+    {
+      "_id": "SFI1ny5GJHXsURdr",
+      "name": "14. Speculative trade",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>What this screen gets right</h2>\n<ul><li>Finding a supplier at all: the starport's size helps, and <strong>every search already made on this planet this month costs a further DM−1</strong> [Core folio 241], counted off stamps on the world rather than off a number somebody remembers to reset.</li><li>The shelf is every Common good plus every good one of the world's codes matches, and rows 61-65 are a black market's alone [Core folio 242].</li><li>The tonnage is banded onto the <strong>roll</strong> and not onto the result [Core folio 242], and the whole shelf is one <code>72d6</code> pool with a fixed slot per row, so correcting a profile digit re-reads dice already rolled instead of re-rolling them.</li><li>One transaction is <code>3D + the trader's Broker − the other side's</code> [Core folio 243], with the hired local broker's own DM printed as a term of its own so a table can see whether it has already been typed into the box beside it [Core folio 242].</li><li>A DM column takes the <strong>largest applicable and never the sum</strong> [Core folio 243].</li><li>The smuggler's overlay: a locally banned good takes the world's Law Level minus the Level it is banned at, and the <strong>higher</strong> of the two Sale DMs wins [Core folio 243].</li><li>The broker's fee is levied on the <strong>gross</strong> — 10 % for the local broker, 20 % for a fixer handling illegal goods [Core folio 242] — so a brokered deal that only breaks even loses money twice, as printed.</li><li>Walking away stamps the refusal: no dealing with that supplier again for at least a month [Core folio 243].</li><li>The screen stays everyone's [Core folio 238]: a player reads it, and the two writes — the search stamp and the refusal — take the referee.</li></ul>\n<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>C</td><td>a lot the Imperium bans outright had no field</td><td>✅ built 2026-08-17</td><td>Core folio 255; Core folio 243</td></tr><tr><td>D</td><td>the two supplier tables could not be rolled</td><td>✅ built 2026-08-17</td><td>Core folio 242</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 1500
+    },
+    {
+      "_id": "ffvo7vXmbRq6tDfL",
+      "name": "15. Passengers, freight and mail",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>What this screen gets right</h2>\n<ul><li>Two columns from <strong>both ends of the route</strong>, because population, Tech Level and the travel zone score differently for passengers and for freight [Core folio 239, folio 240]. Traffic is a route and needs both worlds; a speculative market is one counter and needs one.</li><li>The Effect of one Average (8+) check leads both tables, and the printed skill lists differ: Broker, Carouse or Streetwise for passengers, Broker or Streetwise for freight [Core folio 239, folio 240].</li><li>The number of passengers available <em>\"cannot usually exceed the number of people resident\"</em> [Core folio 239], and a Steward aboard adds the printed DM.</li><li>Freight comes in lots of 1D, 1D×5 and 1D×10 tons, and <strong>a lot cannot be broken up</strong> [Core folio 240, folio 241]: a hold with room for part of one has no room for it.</li><li>Mail is offered on 12+ with the DM banded off the freight total, plus the armed-ship and low-TL terms, and it becomes an ordinary freight lot once taken — the folio calls it <em>\"a special form of freight\"</em> [Core folio 241].</li><li>Berths are consumed as printed: one stateroom per high passage, two basic passages sharing one, a low passenger taking a low berth, and an emergency low berth holding four [Core folio 158, HG folio 24].</li><li>A passage's baggage allowance is summed into the hold on the book's own conversion (§9.141), so a full passenger deck costs cargo space rather than being free.</li><li>Lateness is measured <strong>at the moment of delivery</strong> [Core folio 241] — the day is read when the consignment is settled, and no timer ever moves it (§9.35).</li><li>Who pays when is the folio's: a passage is collected when the berth is taken [Core folio 239] and freight on delivery, which is why arrival moves money for one and not for the other.</li></ul>\n<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>B</td><td>a low passage's revival check is stated and never rolled</td><td>open</td><td>Core folio 158</td></tr><tr><td>C</td><td>a booking wrote no documents at either end</td><td>✅ built 2026-08-17</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 1600
+    },
+    {
+      "_id": "uPQCRs0DoP6OCPis",
+      "name": "16. Ship finance",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>What this screen gets right</h2>\n<ul><li>The mortgage is the purchase price over the printed divisor, <strong>net of any Ship Shares contributed before it was calculated</strong> [Core folio 149], with an override beside it because a hull bought outright, part-financed or taken as a career Benefit have three different legitimate mortgages.</li><li>How long it runs, and therefore what it costs in total, is read from the printed payment count [Core folio 154] — the reading the purchase page owes and never states, and the one that shows the crew buying the hull roughly twice.</li><li>Every periodic figure runs on the four-week Maintenance Period [Core folio 149, folio 154, folio 183; HG folio 23].</li><li>Life support is billed three ways as printed: per stateroom, again per person <strong>not</strong> in a low berth, and a tenth of that per occupied low berth [Core folio 154].</li><li>Fuel is a <strong>unit price and never a periodic charge</strong> [Core folio 155], so it is priced where it is bought and never appears in the period's bill.</li><li><em>Skipping on Debts</em> is one 2D against 8+ per new system entered, with all six printed terms drawn even when a term comes to zero [Core folio 153] — two of them rates, one a referee's judgement over a printed span, one a four-way band, and one the local Law Level offset by a constant. It is not a task check and does not pretend to be one: no characteristic, no skill, no Effect.</li><li>The two facts the folio says persist — the distance run since the crew were last discovered, and the overdue band — are the only two the dialog writes.</li><li>The transfer screen is the one place in the system that writes money on demand, and it does so on one explicit validation with the chat card as the record: direction, sum, every share, and every shortfall that became debt.</li></ul>\n<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>C</td><td>skipped maintenance is not counted, so the Poor Maintenance roll never fires</td><td>⚖ declined</td><td>Core folio 154; Core folio 157</td></tr><tr><td>D</td><td>a hull carries no cash balance</td><td>⚖ declined</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 1700
+    },
+    {
+      "_id": "bFEDFsUtbv7q0grP",
+      "name": "17. Space combat screen",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>What this screen gets right</h2>\n<ul><li>A round resolves in the three named steps, and <strong>every ship takes a step before any ship takes the next</strong> [Core folio 164].</li><li>The seven range bands are the state and the kilometres derive from them, never the other way round [Core folio 165]; the table is also read backwards for a referee who would rather type a distance.</li><li>Initiative is <code>2D + the pilot's Pilot skill + the ship's Thrust</code>, rolled <strong>once for each ship</strong> and read back by every crew member, plus the commander's Tactics (naval) Effect scoped to that ship because the folio scopes it there [Core folio 165].</li><li>Thrust splits between movement and combat manoeuvring, only movement pays for a band change, and Thrust may be <strong>accumulated across rounds</strong> to pay for a change one round cannot afford [Core folio 165, folio 166]. Two ships closing add what each puts into movement.</li><li>Evasive action is paid for with Thrust the pilot did <strong>not</strong> spend [Core folio 171].</li><li>Pilot and captain are closed to one holder each and the gunner duties are bound to a named mount; anyone aboard without a duty is a Passenger [Core folio 164]. Warned rather than blocked — a half-filled roster is as common as a mistake.</li><li>Reactions are a list beside the strip rather than a fourth step, each carrying its own printed cap: Point Defence once per round, Electronic Warfare once per salvo [Core folio 171, folio 173].</li><li>Two or more weapons <strong>of the same type</strong> in one mount fire as one attack at +1 per damage die, and missiles are excluded from both that bonus and the mount multiple [Core folio 168; HG folio 29].</li><li>Criticals: severity is Effect − 5, a repeat takes <code>max(new, old + 1)</code>, the cap is 6, and the location table is transcribed unchanged [Core folio 169].</li></ul>\n<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>C</td><td>a missile salvo has no existence here</td><td>open</td><td>Core folio 167</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 1800
+    },
+    {
+      "_id": "VVVVmUQUUkFFkI0n",
+      "name": "18. Fleet battles",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>What this screen gets right</h2>\n<ul><li>The attack path <strong>does not roll to hit</strong>: <em>\"only spinal mount weapons require a roll to hit. All other attacks are assumed to hit with varying degrees of success\"</em> [HG folio 118], so an Attack Factor is read against the Attack Effectiveness table and only the spinal path goes through the check resolver. All seven table rows reproduce.</li><li>Fleet figures are Core space combat with the dice divided out: damage is the die count of the ordinary expression, and Armour and Hull Points are the printed ones over 3.5, the mean of 1D (§9.100). Verified across eleven weapon rows including the nuclear missile's <code>1DD</code>.</li><li>Folio 119's four critical immunities by tonnage, stated as what a hull ignores, are implemented as the complement — what still lands [HG folio 119] — and an offensively superior ship scores its extra critical.</li><li>The critical location is folio 121's 2D table, which is Core folio 169's table unchanged, and the severity is 1 because folio 119's ladder is Core's Sustained Damage over a different pool.</li><li>The five pools a round refills — salvo, meson, damper, sand and repair — are one shape with one clear [HG folios 113, 119, 121]. Folio 121's worked example, Crew Skill 2 plus Auto-Repair/2 giving 6 Repair Points, reproduces.</li><li>Formation is a fleet's own spread: Adjacent-to-Close gives every ship Defensive DM+1, Short is the plane of battle, and a fleet that strays to Medium has <strong>one turn's grace</strong> to return [HG folios 115, 117].</li><li>The flag ship gives its fleet DM+1 while it remains in the battle, and a hull with no command bridge is refused the role rather than warned about it [HG folios 105, 115].</li><li>A fleet's Thrust is the slowest ship of the battle line, with the reserve and the squadrons out of it [HG folios 115, 117] — a referee-facing ruling, because the folio uses <em>\"the fleet's Thrust score\"</em> once and never defines it. <code>thrustOverride</code> is where a referee who rules otherwise types theirs.</li><li>The range DM column is Core folio 167's, with the one exception the chapter prints: no row at Distant, where Core carries −6.</li><li>A squadron is <code>{actor, count}</code>, and a fighter's Armour 2 becomes squadron Armour 1 [HG folio 114].</li><li>The Morale check is rolled each round off the battle rather than typed, with its four printed events and the flag ship's DM+1 as five named rows — each drawn even when it is worth nothing [HG folios 115, 122]. <strong>The book prints DMs and neither a target nor a consequence</strong>, saying only that the check <em>\"potentially result[s] in changes to the Crew Skill score\"</em>, so the dice are rolled, the card is posted and the referee states what it cost.</li><li>Dispersal is the chapter's own task chain — Average (8+) Leadership, then Difficult (10+) Tactics (naval) — with the Fleet Dispersal table read off its Effect, the rounds and DM it charges both of a ship's DMs, and folio 122's <em>\"other actions cannot be taken by ships participating in a dispersal\"</em> [HG folio 122].</li><li>Breaking off costs the fleet Defensive DM−1 and locks its spinal mounts, and a fleet holding a planet as an obstruction gains Defensive DM+1 per point of Thrust superiority [HG folios 122, 124].</li><li>A missile salvo is a contact with a position, a target and an age and no hull at all: launched by a ship or a wing, flown on folio 119's Missile Flight table, thinned by Salvo Defence at one missile per point, and resolved on the warheads that survive [HG folios 113, 119, 124].</li></ul>\n<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>B</td><td>folio 120's percentage Hull critical is reported and never applied</td><td>open</td><td>HG folio 120; Core folio 170</td></tr><tr><td>D</td><td>a docstring said the Morale check was not built</td><td>✅ corrected 2026-08-17: it is</td><td>—</td></tr><tr><td>D</td><td>folio 107's sample Electronic Warfare figure does not reproduce</td><td>❌ withdrawn: the sample is the book's error</td><td>HG folio 74</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 1900
+    },
+    {
+      "_id": "ExoXBUShLS4WsyqY",
+      "name": "19. Training",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>What this screen gets right</h2>\n<ul><li>A Study Period is <strong>eight weeks</strong>, they need not be consecutive, and each week must be fully dedicated [Core folio 55] — which is why a period is drawn as eight boxes and not as a bar.</li><li>Improving to the next level takes <strong>as many periods as the level being reached</strong> [Core folio 55].</li><li>The period ends on an Average (8+) check against the programme's own characteristic — EDU, except that <strong>Athletics does not use EDU</strong> and takes the physical characteristic its speciality names [Core folio 55].</li><li>Past <code>3 × (INT + EDU)</code> skill levels, a further skill can only be learned at level 0 [Core folio 55]. This is the same printed procedure the creation cap degrades to (§11).</li><li>The Companion's engine shares the programme: a <em>domaine d'apprentissage</em> is a programme, and dedicated points are allocated to one and cannot be moved [Companion folios 39-40].</li><li>Its price tables are transcribed as printed: a skill level costs its own level and doubles past the sixth; a physical characteristic costs its new value and a mental one twice that [Companion folio 40].</li><li><strong>SOC cannot be trained</strong>, and neither can PSI [Companion folio 40] — the page names five characteristics, and psionic strength has training rules of its own.</li><li>A teacher is another Actor: reaching level N needs a teacher at N+1, and the student rolls an Average (8+) INT check at DM−N [Companion folios 41-42]. The teacher's level is read <strong>at the roll</strong> and never copied onto the programme, because a number taken off another sheet and stored is stale the moment that sheet changes.</li><li>General Experience has <strong>no pool</strong>, which is a field the schema deliberately refuses to have: a General point is awarded and allocated in the same act [Companion folio 39].</li></ul>\n<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>C</td><td>the exclusive week cannot be enforced</td><td>⚖ by design</td><td>Core folio 55</td></tr><tr><td>D</td><td>a stored total said how far a programme had come</td><td>✅ deleted 2026-08-17</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 2000
+    },
+    {
+      "_id": "DKhNXQNE35FIfm0d",
+      "name": "20. Environment regions",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<h2>What this screen gets right</h2>\n<ul><li>High gravity is <strong>DM−1 until acclimatised, over 1D weeks</strong> [Core folio 80], so the effect is standing: it is applied on entry and deliberately <strong>not</strong> removed on exit. Foundry's own <code>applyActiveEffect</code> deletes on exit and is therefore not merely insufficient here but wrong.</li><li>Radiation is a one-shot dose on entry; temperature and vacuum are per-round rows on the round start.</li><li>Hazard damage goes onto the chain <strong>raw</strong>, from END, because Protection is what an attack meets and a hot plain is not attacking anyone [Core folio 82].</li><li>Every handler is guarded on <code>event.user.isSelf</code> or it fires once per connected client, and anything that awaits pauses the token's movement first — two Foundry traps that both fail silently.</li></ul>\n<h2>Audited</h2>\n<table><thead><tr><th></th><th>What</th><th>State</th><th>Pages</th></tr></thead><tbody><tr><td>C</td><td>every interval but the combat round is stated and never scheduled</td><td>⚖ by design</td><td>—</td></tr></tbody></table>"
+      },
+      "ownership": {
+        "default": -2
+      },
+      "sort": 2100
     }
   ],
   "folder": null,
