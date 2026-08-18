@@ -303,9 +303,10 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
 
     /** Hull options are options, not traits: the registry has no ship family. */
     static #hullOptions(system) {
-        return Object.entries(MGT2.HullOptions).map(([key, option]) => ({
+        const rows = Object.entries(MGT2.HullOptions).map(([key, option]) => ({
             key, label: option.label, on: system.hull.options.has(key)
         }));
+        return { rows, on: rows.filter(row => row.on) };
     }
 
     /** Berths and passengers as one list: three consumers read them and none of them is a pool. */

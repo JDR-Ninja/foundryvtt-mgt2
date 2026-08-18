@@ -145,7 +145,7 @@
 					</td>
 					<td class="r">
 						<div class="acts">
-							<a data-action="mountDelete" data-tooltip="{{localize 'MGT2.Actor.vehicle.DeleteMount'}}"><i class="fas fa-trash"></i></a>
+							<a class="edit-only" data-action="mountDelete" data-tooltip="{{localize 'MGT2.Actor.vehicle.DeleteMount'}}"><i class="fas fa-trash"></i></a>
 						</div>
 					</td>
 				</tr>
@@ -245,13 +245,13 @@
 
 	{{! Submersibles, airships and drones are one type with two nullable sub-objects, not three
 	    types: no behaviour differs at the type level. Absent is a state, not zeroes. }}
-	<div class="block">
+	<div class="block{{#unless (or system.submersible system.remote)}} edit-only{{/unless}}">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.SubTypeDetail'}}</h3>
 			<span class="count">{{localize 'MGT2.Actor.vehicle.SubTypeCount'}}</span>
 			{{#if system.remote}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.RemoteHint'}}"></i>{{/if}}
 		</div>
-		<div class="grid">
+		<div class="grid edit-only">
 			<label class="check">
 				<input type="checkbox" data-action="blockToggle" data-block="submersible" {{checked system.submersible}} />
 				<span>{{localize 'MGT2.Actor.vehicle.Submersible'}}</span>

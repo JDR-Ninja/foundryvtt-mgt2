@@ -100,14 +100,21 @@
 		</div>
 	</div>
 
-	{{! What the world carries besides its profile. A chip is a picker as well as a readout, the same
-	    control the ship's hull options use. }}
+	{{! What the world carries besides its profile. A chip reads out in play and picks in edit, the
+	    same control the ship's hull options use. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.world.Bases'}}</h3>
 			<span class="count">{{world.bases.on.length}}</span>
 		</div>
-		<ul class="codes" data-family="world">
+		{{#if world.bases.on.length}}
+		<ul class="codes play-only" data-family="world">
+			{{#each world.bases.on as |base|}}
+			<li class="code"><b>{{localize base.label}}</b></li>
+			{{/each}}
+		</ul>
+		{{/if}}
+		<ul class="codes edit-only" data-family="world">
 			{{#each world.bases.rows as |base|}}
 			<li class="code{{#unless base.on}} off{{/unless}}" data-action="baseToggle" data-base="{{base.key}}">
 				<b>{{localize base.label}}</b>

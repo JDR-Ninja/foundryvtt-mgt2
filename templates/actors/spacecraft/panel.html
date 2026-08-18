@@ -166,8 +166,15 @@
 
 		{{! BLOCK 4. Hull options are options, not traits: the registry has no ship family, so a
 		    spacecraft carries no traits[] at all and this block replaces it. }}
-		<ul class="codes" data-family="hull" data-tooltip="{{localize 'MGT2.Actor.spacecraft.OptionsHint'}}">
-			{{#each ship.options as |option|}}
+		{{#if ship.options.on.length}}
+		<ul class="codes play-only" data-family="hull" data-tooltip="{{localize 'MGT2.Actor.spacecraft.Options'}}">
+			{{#each ship.options.on as |option|}}
+			<li class="code"><b>{{localize option.label}}</b></li>
+			{{/each}}
+		</ul>
+		{{/if}}
+		<ul class="codes edit-only" data-family="hull" data-tooltip="{{localize 'MGT2.Actor.spacecraft.OptionsHint'}}">
+			{{#each ship.options.rows as |option|}}
 			<li class="code{{#unless option.on}} off{{/unless}}" data-action="hullOptionToggle" data-option="{{option.key}}">
 				<b>{{localize option.label}}</b>
 			</li>
