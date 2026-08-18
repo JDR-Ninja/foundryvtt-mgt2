@@ -11,7 +11,7 @@ export const ruleSetting = key => ["mgt2", `${PREFIX}.${key}`];
 export const MENU_ID = "mgt2-optional-rules";
 
 /** Which rules have already been through `seedRules`. */
-const SEEDED = "seededRules";
+export const SEEDED_SETTING = "seededRules";
 
 /** The five the Core Rulebook never defines. */
 export const EXTRA_CHARACTERISTICS = Object.freeze(["morale", "luck", "sanity", "charm", "other"]);
@@ -264,46 +264,6 @@ export const RULES = Object.freeze({
     }
 });
 
-/**
- * The stored field of a picker, a choice or a **count**; a switch needs none and registers as a
- * plain Boolean.
- */
-function ruleField(rule) {
-    if ( rule.options ) return new fields.StringField({
-        required: true, blank: false, choices: rule.options, initial: rule.default });
-    if ( rule.number ) return new fields.NumberField({
-        required: true, nullable: false, integer: true, initial: rule.default, ...rule.number });
-    return new fields.SetField(
-        new fields.StringField({ required: true, blank: false, choices: rule.choices }),
-        { initial: () => [...rule.default] });
-}
-
-export const registerRules = function () {
-
-    // Not user-facing: which rules this world has already been through seeding for.
-    game.settings.register("mgt2", SEEDED, {
-        scope: "world",
-        config: false,
-        type: new fields.SetField(new fields.StringField({ required: true, blank: false }),
-            { initial: () => [] })
-    });
-
-    for ( const [key, rule] of Object.entries(RULES) ) {
-        game.settings.register(...ruleSetting(key), {
-            name: `MGT2.Rules.${key}.name`,
-            hint: `MGT2.Rules.${key}.hint`,
-            scope: "world",
-            // The grouped menu below is where these are set: Foundry's settings pane cannot group,
-            // and an ungrouped list of switches is the noise this whole feature exists to remove.
-            config: false,
-            type: (rule.choices || rule.options || rule.number) ? ruleField(rule) : Boolean,
-            default: rule.default,
-            requiresReload: false,
-            onChange: refreshRuleUI
-        });
-    }
-};
-
 export const Rules = {
 
     /** The stored value: a boolean for a switch, a Set for a picker, a key for a choice. */
@@ -358,7 +318,7 @@ export const refreshRuleUI = foundry.utils.debounce(() => {
  */
 export async function seedRules(existing) {
     if ( !game.user.isGM ) return;
-    const seeded = new Set(game.settings.get("mgt2", SEEDED));
+    const seeded = new Set(game.settings.get("mgt2", SEEDED_SETTING));
     const pending = Object.entries(RULES).filter(([key]) => !seeded.has(key));
     if ( !pending.length ) return;
 
@@ -371,5 +331,5 @@ export async function seedRules(existing) {
         }
         seeded.add(key);
     }
-    await game.settings.set("mgt2", SEEDED, [...seeded]);
+    await game.settings.set("mgt2", SEEDED_SETTING, [...seeded]);
 }

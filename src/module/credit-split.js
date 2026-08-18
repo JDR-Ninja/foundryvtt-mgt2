@@ -1,5 +1,4 @@
 import { MGT2Helper } from "./helper.js";
-import { VISIBILITY_MODES } from "./request.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { DragDrop } = foundry.applications.ux;
@@ -18,22 +17,6 @@ const FIELD = "cs";
 /** A player owns one purse, so the write is asked of a referee's client — `request-answer.js`'s seam. */
 export const GIFT_QUERY = "mgt2.gift";
 const GIFT_TIMEOUT = 15000;
-
-/** What the table's cards say by default; either is overridden on any one transfer. */
-export function registerCreditSettings() {
-    game.settings.register("mgt2", "credit.balances", {
-        name: "MGT2.CreditSplit.Settings.balances.name",
-        hint: "MGT2.CreditSplit.Settings.balances.hint",
-        scope: "world", config: true, type: Boolean, default: false, requiresReload: false
-    });
-
-    game.settings.register("mgt2", "credit.visibility", {
-        name: "MGT2.CreditSplit.Settings.visibility.name",
-        hint: "MGT2.CreditSplit.Settings.visibility.hint",
-        scope: "world", config: true, type: String,
-        choices: VISIBILITY_MODES, default: "public", requiresReload: false
-    });
-}
 
 /**
  * One transfer, as it was applied.

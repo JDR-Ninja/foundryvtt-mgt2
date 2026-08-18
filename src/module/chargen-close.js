@@ -522,17 +522,3 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
         ChargenClose.#actorOf(target)?.sheet?.render({ force: true });
     }
 }
-
-/**
- * The package is world-scoped and never shown in the settings pane: it is the table's own list,
- * edited from the closing screen where it is used, on the precedent of `migrationVersion` and the
- * world-packs ids.
- */
-export function registerChargenSettings() {
-    game.settings.register("mgt2", PACKAGE_SETTING, {
-        scope: "world",
-        config: false,
-        type: new foundry.data.fields.ObjectField(),
-        default: { name: "", skills: [] }
-    });
-}

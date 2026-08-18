@@ -265,42 +265,6 @@ export function requestFlagOf(message) {
     return (flag?.message && flag?.line) ? flag : null;
 }
 
-/** Three settings, and each scope is an argument. */
-export function registerRequestSettings() {
-
-    game.settings.register("mgt2", "request.visibility", {
-        name: "MGT2.Request.Settings.visibility.name",
-        hint: "MGT2.Request.Settings.visibility.hint",
-        scope: "world",
-        config: true,
-        type: String,
-        choices: VISIBILITY_MODES,
-        default: "public",
-        requiresReload: false
-    });
-
-    // Not user-facing: the last demands, held as their own PAYLOAD rather than as message ids.
-    game.settings.register("mgt2", "request.recent", {
-        scope: "world",
-        config: false,
-        type: new fields.ArrayField(new fields.ObjectField()),
-        default: []
-    });
-
-    // Client scope, and that is the direct correction of the module this design was read against: a
-    // world-scoped alert with no opt-out.
-    game.settings.register("mgt2", "request.nudge", {
-        name: "MGT2.Request.Settings.nudge.name",
-        hint: "MGT2.Request.Settings.nudge.hint",
-        scope: "client",
-        config: true,
-        type: String,
-        choices: NUDGE_MODES,
-        default: "flash",
-        requiresReload: false
-    });
-}
-
 /** The ladder cell a given Effect falls in, as a key into `MGT2.EffectBands`. */
 function bandKeyOf(effect) {
     const band = MGT2Helper.getEffectBand(effect);
