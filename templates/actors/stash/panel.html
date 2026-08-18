@@ -40,9 +40,13 @@
 					{{#if @root.stash.showWeight}}<td class="c num">{{entry.weight}}</td>{{/if}}
 					<td class="c num">{{entry.value}}</td>
 					<td class="r">
-						<div class="acts edit-only">
-							<a data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.EditItem'}}"><i class="fas fa-edit"></i></a>
-							<a data-action="itemDelete" data-tooltip="{{localize 'MGT2.Actor.DeleteItem'}}"><i class="fas fa-trash"></i></a>
+						{{! The actor's two faces for one action (§9.143). Reading is the point of a cache and
+						    an observer never leaves play mode, so the eye is the row's only control there;
+						    writing stays edit-only, which is where this table's permission gate lives. }}
+						<div class="acts">
+							<a class="play-only" data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.View'}}"><i class="fas fa-eye"></i></a>
+							<a class="edit-only" data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.EditItem'}}"><i class="fas fa-edit"></i></a>
+							<a class="edit-only" data-action="itemDelete" data-tooltip="{{localize 'MGT2.Actor.DeleteItem'}}"><i class="fas fa-trash"></i></a>
 						</div>
 					</td>
 				</tr>

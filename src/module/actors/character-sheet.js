@@ -368,7 +368,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   #prepareViewModel() {
     const actor = this.actor;
     const settings = {
-      weightUnit: "kg",
+      weightUnit: MGT2Helper.getWeightLabel(),
       usePronouns: game.settings.get("mgt2", "usePronouns"),
       useGender: game.settings.get("mgt2", "useGender"),
       showLife: game.settings.get("mgt2", "showLife")
@@ -433,7 +433,10 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
     actorContainers.sort(MGT2Helper.compareByName);
 
-    const containers = [{ name: "(tous)", _id: "" }].concat(actorContainers);
+    // The picker reads `display`, so the "every container" entry had neither a label nor a language:
+    // it rendered as a blank option. `MGT2.Items.SelectAll` was written for it and never wired up.
+    const everyContainer = game.i18n.localize("MGT2.Items.SelectAll");
+    const containers = [{ name: everyContainer, display: everyContainer, _id: "" }].concat(actorContainers);
     const containerIndex = new Map();
     for (const c of actorContainers) {
       containerIndex.set(c._id, c);
@@ -451,8 +454,15 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const { view: viewId, dropIn: dropInId } = this.viewState;
     const currentContainerView = containerIndex.get(viewId);
     model.containerView = currentContainerView;
-    model.containerWeight = currentContainerView?.system.weight ?? 0;
     model.containerShowAll = viewId === "";
+    // With every container shown there is none to ask for the total, and asking nothing read 0 under
+    // a list of rows. The sum is over the containers that are not inside another: a container's
+    // weight is already its contents recursively, so the top level counts everything exactly once.
+    // A locked one is left out of the sum for the same viewer whose rows it withholds (§9.143).
+    model.containerWeight = model.containerShowAll
+      ? MGT2Helper.roundWeight(actorContainers.reduce((sum, c) =>
+        (c.system.container?.id || (c.system.locked && !game.user.isGM)) ? sum : sum + c.system.weight, 0))
+      : (currentContainerView?.system.weight ?? 0);
     model.containerViewId = viewId;
     model.containerDropInId = dropInId;
 
@@ -460,9 +470,11 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       const sys = v.system;
 
       // `in`, not `hasOwn`: a container's weight is a getter, and it lives on the prototype.
+      // Rounded because the product is a float: 0.1 kg × 3 prints 0.30000000000000004 raw, and one
+      // decimal is what the aggregates and the item sheets already show (§9.143).
       if (("weight" in sys) && sys.weight > 0) {
         const total = isNaN(sys.quantity) ? sys.weight : sys.weight * sys.quantity;
-        v.weight = `${total} ${settings.weightUnit}`;
+        v.weight = `${MGT2Helper.roundWeight(total)} ${settings.weightUnit}`;
       }
 
       // Item in storage
@@ -530,6 +542,12 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
           if (sys.traits?.length > 0) v.subInfo = sys.traits.map(formatTrait).join(", ");
           weapons.push(v);
           break;
+
+        // Both are `PhysicalItemData` and both are in `DROP_ITEM_TYPES`, so with no case here a
+        // dropped one landed on the actor and drew nowhere. The blocks they earn are
+        // `DOCUMENT-TYPES.md` §12-§13's work; until then the generic list is where they belong.
+        case "drug":
+        case "ammunition": items.push(v); break;
 
         case "career": careers.push(v); break;
         case "contact": contacts.push(v); break;
@@ -1938,7 +1956,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   /* -------------------------------------------- */
 
   /** @this {TravellerActorSheet} */
-  static #onItemCreate(event, target) {
+  static async #onItemCreate(event, target) {
     const data = {
       name: target.dataset.createName,
       type: target.dataset.typeItem
@@ -1953,7 +1971,13 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       data.system = { ...data.system, category: target.dataset.category };
     }
 
-    return getDocumentClass("Item").create(data, { parent: this.actor });
+    const item = await getDocumentClass("Item").create(data, { parent: this.actor });
+    // A play-mode row offers the eye and not the pencil, so a blank Item created there would be a
+    // dead end: the create carries the whole of the authoring and opens the sheet to take it (§9.143).
+    if (item && !this.isEditMode) {
+      await item.sheet.render({ force: true, mode: this.constructor.MODES.EDIT });
+    }
+    return item;
   }
 
   /** @this {TravellerActorSheet} */

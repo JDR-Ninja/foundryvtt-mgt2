@@ -7,7 +7,9 @@
 	<div class="sect{{#if bare}} bare{{/if}}">
 		{{#unless bare}}<h3>{{localize 'MGT2.Effects.Title'}}</h3>{{/unless}}
 		<span class="count">{{effects.length}}</span>
-		<a class="add edit-only" data-action="effectCreate" data-tooltip="{{localize 'MGT2.Effects.Add'}}"><i class="fa-solid fa-plus"></i></a>
+		{{! `live` is the actor's tab and only the actor's (§9.143): an effect on an Actor is a condition
+		    it has acquired, an effect on an Item is what the Item does. }}
+		<a class="add{{#unless live}} edit-only{{/unless}}" data-action="effectCreate" data-tooltip="{{localize 'MGT2.Effects.Add'}}"><i class="fa-solid fa-plus"></i></a>
 	</div>
 	{{#if effects.length}}
 	<table class="rows">

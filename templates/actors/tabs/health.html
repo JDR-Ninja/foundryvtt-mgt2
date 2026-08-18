@@ -72,6 +72,8 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.Wounds'}}</h3>
 			<span class="count">{{wounds.length}}</span>
+			{{! The one create that stays edit-only where its neighbours no longer are (§9.143): a wound
+			    is a door and not a control — the damage dialog is how one arrives in play. }}
 			<a class="add edit-only" data-action="itemCreate" data-type-item="disease" data-subtype="wound" data-create-name="{{localize 'MGT2.Actor.NewWound'}}" data-tooltip="{{localize 'MGT2.Actor.AddWound'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{#if wounds.length}}
@@ -172,7 +174,7 @@
 		<div class="sect">
 			<h3>{{localize 'MGT2.Items.Diseases'}}</h3>
 			<span class="count">{{diseases.length}}</span>
-			<a class="add edit-only" data-action="itemCreate" data-type-item="disease" data-subtype="disease" data-create-name="{{localize 'MGT2.Actor.NewDisease'}}" data-tooltip="{{localize 'MGT2.Actor.AddDisease'}}"><i class="fa-solid fa-plus"></i></a>
+			<a class="add" data-action="itemCreate" data-type-item="disease" data-subtype="disease" data-create-name="{{localize 'MGT2.Actor.NewDisease'}}" data-tooltip="{{localize 'MGT2.Actor.AddDisease'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{#if diseases.length}}
 		<table class="rows">
