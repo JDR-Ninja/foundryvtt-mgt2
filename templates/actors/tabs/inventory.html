@@ -273,6 +273,14 @@
 			<div class="sect">
 				<h3>{{localize 'MGT2.Items.Items'}}</h3>
 				<span class="count">{{containerItems.length}}</span>
+				{{! `data-store` puts the new row in the picker's container — created on hand it would
+				    vanish from the panel that made it. }}
+				<div class="acts">
+					<a data-action="itemCreate" data-store="true" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-crosshairs"></i></a>
+					<a data-action="itemCreate" data-store="true" data-type-item="armor" data-create-name="{{localize 'MGT2.Actor.NewArmor'}}" data-tooltip="{{localize 'MGT2.Actor.AddArmor'}}"><i class="fa-solid fa-shield-halved"></i></a>
+					<a data-action="itemCreate" data-store="true" data-type-item="equipment" data-create-name="{{localize 'MGT2.Actor.NewEquipment'}}" data-tooltip="{{localize 'MGT2.Actor.AddEquipment'}}"><i class="fa-solid fa-toolbox"></i></a>
+					<a data-action="itemCreate" data-store="true" data-type-item="item" data-create-name="{{localize 'MGT2.Actor.NewItem'}}" data-tooltip="{{localize 'MGT2.Actor.AddItem'}}"><i class="fa-solid fa-plus"></i></a>
+				</div>
 			</div>
 			{{#if containerItems.length}}
 			<table class="rows">
@@ -308,7 +316,14 @@
 
 	<div class="tab mgt2-panel{{#if tabs.inventory.finance.active}} active{{/if}}" data-group="inventory" data-tab="finance">
 		<div class="block">
-			<div class="sect"><h3>{{localize 'MGT2.Actor.Finance'}}</h3></div>
+			{{! The giving door, and only that: taking another Traveller's money is the referee's
+			    screen, which lives on the token controls. }}
+			<div class="sect">
+				<h3>{{localize 'MGT2.Actor.Finance'}}</h3>
+				{{#if canGive}}
+				<a class="add" data-action="creditTransfer" data-tooltip="{{localize 'MGT2.CreditSplit.Give'}}"><i class="fa-solid fa-money-bill-transfer"></i></a>
+				{{/if}}
+			</div>
 			<div class="grid">
 				<label>
 					<span class="lbl">{{localize 'MGT2.Actor.CashOnHand'}}</span>

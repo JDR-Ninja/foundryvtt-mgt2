@@ -4168,14 +4168,34 @@
       "Card": {
         "Debt": "Cr{credits} en dette",
         "Left": "Cr{credits} restants",
-        "DebtTotal": "Cr{credits} portés en dette"
+        "DebtTotal": "Cr{credits} portés en dette",
+        "GiverLeft": "Il reste Cr{credits} à {name}"
       },
       "Errors": {
-        "GMOnly": "Le transfert de crédits est la fenêtre de l'Arbitre.",
+        "GMOnly": "Seul l'arbitre peut déplacer l'argent des autres voyageurs.",
         "NoRoster": "Personne n'est sur la liste. Déposez-y un Voyageur, ou remplissez-la depuis les jetons, l'équipe ou l'équipage d'un vaisseau.",
         "NoSum": "Saisissez d'abord la somme à transférer.",
         "Unreachable": "Un Voyageur de la liste est inaccessible d'ici : sa part n'irait nulle part.",
-        "Unassigned": "La répartition ne fait pas la somme. Déplacez une jauge, ou libérez un verrou."
+        "Unassigned": "La répartition ne fait pas la somme. Déplacez une jauge, ou libérez un verrou.",
+        "Overdrawn": "Plus que ce que ce voyageur a en main.",
+        "NoGM": "Aucun arbitre n'est connecté, et seul le client d'un arbitre peut créditer un autre voyageur.",
+        "GiftRefused": "Le client de l'arbitre a refusé le don ; rien n'a été déplacé."
+      },
+      "Give": "Donner",
+      "Holds": "possède Cr{credits}",
+      "Balances": "Afficher les soldes",
+      "BalancesHint": "Indiquer sur la carte ce que chaque bourse contient ensuite. Décoché, et demandé à chaque transfert : ce qu'un voyageur possède ne regarde que lui.",
+      "Private": "Privé",
+      "PrivateHint": "Envoyer la carte à l'arbitre et à qui possède une bourse concernée, plutôt qu'à toute la table.",
+      "Settings": {
+        "balances": {
+          "name": "Les cartes de crédit affichent les soldes",
+          "hint": "Si une carte de transfert démarre avec « afficher les soldes » coché. Dans les deux cas la question est reposée à chaque transfert."
+        },
+        "visibility": {
+          "name": "Visibilité des cartes de crédit",
+          "hint": "Si une carte de transfert démarre publique ou adressée à l'arbitre et aux bourses concernées. Dans les deux cas la question est reposée à chaque transfert."
+        }
       }
     },
     "Errors": {

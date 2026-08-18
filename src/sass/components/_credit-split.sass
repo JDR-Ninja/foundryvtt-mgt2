@@ -59,6 +59,45 @@
 	input.f.wide
 		flex: 1 1 12rem
 
+	// The pair wraps together or not at all: one orphaned below the other reads as a stray control.
+	.says
+		display: inline-flex
+		flex: 0 0 auto
+		gap: 12px
+
+	label.chk
+		display: inline-flex
+		align-items: center
+		flex: 0 0 auto
+		gap: 5px
+		font-size: 10.5px
+		color: var(--faint)
+		white-space: nowrap
+		cursor: var(--cursor-pointer)
+		input
+			margin: 0
+			accent-color: var(--accent-text)
+
+	// Gift mode stands where the direction strip would: the purse the sum leaves, which is also the
+	// ceiling on it, so an over-draw is marked on the source rather than on a row.
+	.giver
+		display: inline-flex
+		align-items: baseline
+		gap: 7px
+		white-space: nowrap
+		b
+			font-family: var(--cond)
+			font-size: 12.5px
+			font-weight: 700
+			letter-spacing: 0.1em
+			text-transform: uppercase
+		span
+			font-family: var(--mono)
+			font-size: 11px
+			color: var(--faint)
+		&.bad span
+			color: var(--danger)
+
 	.wholine .pgut b
 		display: inline
 		margin-left: 6px

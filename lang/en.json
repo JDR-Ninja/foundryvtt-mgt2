@@ -3009,14 +3009,34 @@
       "Card": {
         "Debt": "Cr{credits} to debt",
         "Left": "Cr{credits} left",
-        "DebtTotal": "Cr{credits} carried as debt"
+        "DebtTotal": "Cr{credits} carried as debt",
+        "GiverLeft": "{name} has Cr{credits} left"
       },
       "Errors": {
-        "GMOnly": "The credit transfer is the referee's window.",
+        "GMOnly": "Only the referee may move other Travellers' money.",
         "NoRoster": "Nobody is on the list. Drop a Traveller on it, or seed it from the tokens, the party or a ship's crew.",
         "NoSum": "Type the sum to transfer first.",
         "Unreachable": "A Traveller on the list cannot be reached from here, so their share would go nowhere.",
-        "Unassigned": "The split does not come to the sum. Move a gauge, or release a lock."
+        "Unassigned": "The split does not come to the sum. Move a gauge, or release a lock.",
+        "Overdrawn": "More than this Traveller has on hand.",
+        "NoGM": "No referee is connected, and only a referee's client may credit another Traveller.",
+        "GiftRefused": "The referee's client refused the gift; nothing was moved."
+      },
+      "Give": "Give",
+      "Holds": "holds Cr{credits}",
+      "Balances": "Show balances",
+      "BalancesHint": "Print what each purse holds afterwards on the card. Off, and asked once per transfer: what a Traveller is worth is their own business.",
+      "Private": "Private",
+      "PrivateHint": "Send the card to the referee and to whoever owns a purse it touched, instead of to the whole table.",
+      "Settings": {
+        "balances": {
+          "name": "Credit cards show balances",
+          "hint": "Whether a transfer card starts with 'show balances' ticked. Either way it is asked again on every transfer."
+        },
+        "visibility": {
+          "name": "Credit card visibility",
+          "hint": "Whether a transfer card starts public or addressed to the referee and the purses it touched. Either way it is asked again on every transfer."
+        }
       }
     },
     "Errors": {

@@ -1,4 +1,5 @@
 import { MGT2Helper } from "./helper.js";
+import { VISIBILITY_MODES } from "./request.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { DragDrop } = foundry.applications.ux;
@@ -13,6 +14,26 @@ const DIRECTIONS = ["debit", "credit"];
 
 /** These controls live in no `<form>`: the screen submits nowhere and reads its own state. */
 const FIELD = "cs";
+
+/** A player owns one purse, so the write is asked of a referee's client — `request-answer.js`'s seam. */
+export const GIFT_QUERY = "mgt2.gift";
+const GIFT_TIMEOUT = 15000;
+
+/** What the table's cards say by default; either is overridden on any one transfer. */
+export function registerCreditSettings() {
+    game.settings.register("mgt2", "credit.balances", {
+        name: "MGT2.CreditSplit.Settings.balances.name",
+        hint: "MGT2.CreditSplit.Settings.balances.hint",
+        scope: "world", config: true, type: Boolean, default: false, requiresReload: false
+    });
+
+    game.settings.register("mgt2", "credit.visibility", {
+        name: "MGT2.CreditSplit.Settings.visibility.name",
+        hint: "MGT2.CreditSplit.Settings.visibility.hint",
+        scope: "world", config: true, type: String,
+        choices: VISIBILITY_MODES, default: "public", requiresReload: false
+    });
+}
 
 /**
  * One transfer, as it was applied.
@@ -81,10 +102,13 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
      * @param {string} [seed.spacecraft]   A spacecraft uuid — its crew roster seeds the roster, and
      *     the CREW button stays live against that hull afterwards
      * @param {string} [seed.reason]       A line carried onto the chat card
+     * @param {string} [seed.source]       An Actor uuid — GIFT MODE: the sum leaves that purse and
+     *     the roster receives it. Its owner may open the screen.
      * @returns {Promise<CreditSplitResult|null>}  What was applied, or `null` where the referee closed
      */
     static async open(seed = {}) {
-        if ( !game.user.isGM ) {
+        const source = seed.source ? await CreditSplit.#resolve(seed.source) : null;
+        if ( !game.user.isGM && !source?.isOwner ) {
             ui.notifications.warn(game.i18n.localize("MGT2.CreditSplit.Errors.GMOnly"));
             return null;
         }
@@ -101,12 +125,26 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         if ( DIRECTIONS.includes(seed.direction) ) this.#direction = seed.direction;
         this.#reason = String(seed.reason ?? "");
         this.#ship = seed.spacecraft ?? null;
+        this.#source = seed.source ?? null;
+        this.#balances = seed.balances ?? game.settings.get("mgt2", "credit.balances");
+        this.#visibility = seed.visibility ?? game.settings.get("mgt2", "credit.visibility");
     }
 
-    /** It never renders for anyone else, and the entry points are GM-gated too. @inheritDoc */
+    /** @inheritDoc */
     _canRender(options) {
-        if ( !game.user.isGM ) return false;
+        if ( !this.canEdit ) return false;
         return super._canRender(options);
+    }
+
+    #source = null;
+
+    get source() {
+        return this.#source ? CreditSplit.#actorOf(this.#source) : null;
+    }
+
+    /** A gift is its owner's to make; anything else moves other people's money. @type {boolean} */
+    get canEdit() {
+        return game.user.isGM || (this.source?.isOwner === true);
     }
 
     /** The sum to move, in whole credits. */
@@ -117,6 +155,10 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /** What the transfer is for, carried onto the card and nowhere else. */
     #reason = "";
+
+    /** Both asked per transfer: neither answer holds for every payment a Traveller makes. */
+    #balances = false;
+    #visibility = "public";
 
     /** The hull the CREW button seeds from, if one was named or dropped. @type {string|null} */
     #ship = null;
@@ -186,6 +228,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         let added = false;
         for ( const actor of actors ) {
             if ( (actor?.type !== "character") || held.has(actor.uuid) ) continue;
+            if ( actor.uuid === this.#source ) continue;   // giving to yourself moves nothing
             held.add(actor.uuid);
             this.#rows.push({ id: foundry.utils.randomID(), uuid: actor.uuid, name: actor.name,
                 share: 0, locked: false });
@@ -274,7 +317,12 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
     /** The transfer resolved against every row, once. */
     #reading() {
         const total = this.#total;
-        const debit = this.#direction === "debit";
+        const source = this.source;
+        const gift = Boolean(this.#source);
+        // A gift reads exactly one purse and never ends in debt: nobody gives what they do not have.
+        const purse = source ? source.system.finance.credits : null;
+        const overdrawn = gift && (total > (purse ?? 0));
+        const debit = !gift && (this.#direction === "debit");
         const held = this.#rows.map(row => {
             const actor = CreditSplit.#actorOf(row.uuid);
             return { ...row, actor, name: actor?.name || row.name,
@@ -307,6 +355,9 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
 
         return {
             debit, total, rows, assigned, debt,
+            gift, overdrawn,
+            sourceName: source?.name ?? null,
+            sourceCash: (purse === null) ? null : MGT2Helper.credits(purse),
             unassigned: total - assigned,
             orphans: orphans.map(index => rows[index].name),
             orphanCount: orphans.length,
@@ -316,7 +367,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
             canCover: debit && (Math.min(add(rows, owed), add(rows, spare)) > 0),
             lost: rows.some(row => row.lost),
             ready: Boolean(rows.length) && (total > 0) && (assigned === total)
-                && !rows.some(row => row.lost)
+                && !rows.some(row => row.lost) && !overdrawn && (!gift || Boolean(source))
         };
     }
 
@@ -338,7 +389,11 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
             reason: this.#reason,
             rosterTypes: ROSTER_TYPES,
             hasShip: Boolean(this.#ship),
-            applyLabel: `MGT2.CreditSplit.Direction.${this.#direction}`,
+            showPurses: game.user.isGM,
+            balances: this.#balances,
+            addressed: this.#visibility === "addressed",
+            applyLabel: this.#source
+                ? "MGT2.CreditSplit.Give" : `MGT2.CreditSplit.Direction.${this.#direction}`,
             directions: DIRECTIONS.map(key => ({
                 key,
                 label: game.i18n.localize(`MGT2.CreditSplit.Direction.${key}`),
@@ -411,6 +466,8 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
                 break;
             // Nothing derives from it: it is carried onto the card and read by no arithmetic.
             case "Reason": this.#reason = input.value; return;
+            case "Balances": this.#balances = input.checked; return;
+            case "Private": this.#visibility = input.checked ? "addressed" : "public"; return;
             // The direction changes what every purse cell MEANS, so the roster is redrawn rather
             // than patched — and it is a click, with no caret to protect.
             case "Direction":
@@ -454,6 +511,12 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         const asked = this.element.querySelector('[data-readout="asked"]');
         if ( asked ) asked.textContent = String(reading.rows.length);
+        const giver = this.element.querySelector(".giver");
+        if ( giver ) {
+            giver.classList.toggle("bad", reading.overdrawn);
+            giver.querySelector('[data-readout="sourceCash"]').textContent =
+                game.i18n.format("MGT2.CreditSplit.Holds", { credits: reading.sourceCash ?? "0" });
+        }
         this.#show("rounding", reading.orphanCount > 0);
         this.#show("short", reading.debt > 0);
         this.#enable("seedCrew", Boolean(this.#ship));
@@ -553,7 +616,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
     get dragDrop() {
         return this.#dragDrop ??= new DragDrop.implementation({
             dropSelector: "[data-accept]",
-            permissions: { drop: () => game.user.isGM },
+            permissions: { drop: () => this.canEdit },
             callbacks: {
                 dragover: this.#onDragOver.bind(this),
                 dragleave: this.#onDragLeave.bind(this),
@@ -589,7 +652,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         const data = MGT2Helper.getDataFromDropEvent(event);
         this.#clearDropState();
         // No `preventDefault`: `DragDrop#_handleDrop` has already called it before dispatching.
-        if ( !zone || !game.user.isGM || !MGT2Helper.dropAccepted(zone, data) ) return;
+        if ( !zone || !this.canEdit || !MGT2Helper.dropAccepted(zone, data) ) return;
         // Awaited end to end: a packed Actor answers `fromUuidSync` with an index entry.
         const actor = data.uuid ? await fromUuid(data.uuid) : null;
         if ( !actor ) return;
@@ -615,6 +678,14 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         this.#applying = true;
         this.#sync();
+
+        if ( reading.gift ) {
+            const result = await CreditSplit.#giveAway(
+                this.#source, reading, this.#reason, this.#balances, this.#visibility);
+            if ( !result ) { this.#applying = false; return void this.#sync(); }
+            this.#result = result;
+            return this.close();
+        }
 
         const debit = reading.debit;
         const entries = [];
@@ -642,12 +713,110 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.close();
     }
 
+    static #giftPayload(source, reading, reason, balances, visibility) {
+        return { source, reason: String(reason ?? "").trim(), balances: balances === true, visibility,
+            entries: reading.rows.filter(row => row.amount > 0)
+                .map(row => ({ uuid: row.uuid, amount: row.amount })) };
+    }
+
+    /**
+     * A player owns their own purse and nobody else's, so the write happens on a referee's client.
+     * @returns {Promise<CreditSplitResult|null>}
+     */
+    static async #giveAway(source, reading, reason, balances, visibility) {
+        const payload = CreditSplit.#giftPayload(source, reading, reason, balances, visibility);
+        if ( game.user.isGM ) return CreditSplit.applyGift(payload, { user: game.user });
+
+        const gm = game.users.activeGM;
+        if ( !gm ) {
+            ui.notifications.error(game.i18n.localize("MGT2.CreditSplit.Errors.NoGM"));
+            return null;
+        }
+        try {
+            return await gm.query(GIFT_QUERY, payload, { timeout: GIFT_TIMEOUT });
+        } catch(err) {
+            ui.notifications.error(game.i18n.localize("MGT2.CreditSplit.Errors.GiftRefused"));
+            console.warn(`mgt2 | the gift was refused by the referee's client: ${err.message}`);
+            return null;
+        }
+    }
+
+    /**
+     * The only place a gift is written, and it re-checks everything the sending client claimed —
+     * that client is trusted with no purse but its own.
+     * @param {object} context   The query context; `user` is the server's word for who asked
+     * @returns {Promise<CreditSplitResult|null>}
+     */
+    static async applyGift({ source, reason, entries, balances, visibility } = {}, { user } = {}) {
+        const giver = source ? await CreditSplit.#resolve(source) : null;
+        if ( (giver?.type !== "character") || !user ) throw new Error("the giver is not a Traveller");
+        if ( !giver.testUserPermission(user, "OWNER") ) throw new Error(`${user.name} does not own ${giver.name}`);
+
+        const rows = [];
+        let total = 0;
+        for ( const entry of entries ?? [] ) {
+            const actor = await CreditSplit.#resolve(entry.uuid);
+            const amount = Math.max(0, Math.trunc(Number(entry.amount) || 0));
+            if ( (actor?.type !== "character") || !amount ) continue;
+            rows.push({ actor, amount });
+            total += amount;
+        }
+        const purse = giver.system.finance.credits;
+        // Re-read here: the purse may have moved since the window opened, and a gift owes no debt.
+        if ( !rows.length || (total > purse) ) throw new Error("the purse no longer covers the gift");
+
+        await giver.update({ "system.finance.credits": purse - total });
+        const applied = [];
+        for ( const row of rows ) {
+            const before = row.actor.system.finance.credits;
+            await row.actor.update({ "system.finance.credits": before + row.amount });
+            applied.push({ uuid: row.actor.uuid, name: row.actor.name, amount: row.amount,
+                paid: row.amount, debt: 0, before, after: before + row.amount });
+        }
+
+        const message = await CreditSplit.#postGift(
+            giver, purse - total, applied, reason, balances === true, visibility);
+        return { direction: "gift", total, entries: applied, message: message?.id ?? null };
+    }
+
     /** What stops the transfer, in the order a referee would fix it. */
     static #refusal(reading) {
+        if ( reading.gift && reading.overdrawn ) return "MGT2.CreditSplit.Errors.Overdrawn";
         if ( !reading.rows.length ) return "MGT2.CreditSplit.Errors.NoRoster";
         if ( reading.total <= 0 ) return "MGT2.CreditSplit.Errors.NoSum";
         if ( reading.lost ) return "MGT2.CreditSplit.Errors.Unreachable";
         return "MGT2.CreditSplit.Errors.Unassigned";
+    }
+
+    /** `Addressed` reaches the referees and whoever owns a purse the transfer touched. */
+    static #audience(visibility, actors) {
+        if ( visibility !== "addressed" ) return {};
+        const recipients = new Set(ChatMessage.getWhisperRecipients("GM").map(user => user.id));
+        for ( const user of game.users ) {
+            if ( actors.some(actor => actor?.testUserPermission(user, "OWNER")) ) recipients.add(user.id);
+        }
+        return { whisper: [...recipients] };
+    }
+
+    static async #postGift(giver, left, entries, reason, balances, visibility) {
+        const money = value => MGT2Helper.credits(value);
+        const content = await foundry.applications.handlebars.renderTemplate(
+            `${TEMPLATES}/chat/credit-split.html`, {
+                gift: true,
+                balances,
+                giver: giver.name,
+                giverLeft: balances ? money(left) : null,
+                direction: "MGT2.CreditSplit.Give",
+                total: money(entries.reduce((sum, entry) => sum + entry.amount, 0)),
+                reason: String(reason ?? "").trim(),
+                rows: entries.map(entry => ({ ...entry,
+                    amountDisplay: money(entry.amount),
+                    afterDisplay: money(entry.after) }))
+            });
+        const touched = [giver, ...entries.map(entry => CreditSplit.#actorOf(entry.uuid))];
+        return getDocumentClass("ChatMessage").create({
+            author: game.user.id, speaker: ChatMessage.getSpeaker({ actor: giver }), content,
+            ...CreditSplit.#audience(visibility, touched) });
     }
 
     /** The card, and it is what makes the write honest. */
@@ -657,6 +826,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         const content = await foundry.applications.handlebars.renderTemplate(
             `${TEMPLATES}/chat/credit-split.html`, {
                 debit: this.#direction === "debit",
+                balances: this.#balances,
                 direction: `MGT2.CreditSplit.Direction.${this.#direction}`,
                 total: money(entries.reduce((sum, entry) => sum + entry.amount, 0)),
                 reason: this.#reason.trim(),
@@ -670,7 +840,8 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,
             speaker: ChatMessage.getSpeaker(),
-            content
+            content,
+            ...CreditSplit.#audience(this.#visibility, entries.map(entry => CreditSplit.#actorOf(entry.uuid)))
         });
     }
 
@@ -687,6 +858,8 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
  * the Travellers (Core p.238), and this one moves other people's purses.
  */
 export function registerCreditSplit() {
+    CONFIG.queries[GIFT_QUERY] = CreditSplit.applyGift;
+
     Hooks.on("getSceneControlButtons", controls => {
         const tools = controls.tokens?.tools;
         if ( !tools || !game.user.isGM ) return;

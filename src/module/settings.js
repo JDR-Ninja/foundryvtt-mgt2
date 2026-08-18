@@ -1,4 +1,5 @@
 import { registerChargenSettings } from "./chargen-close.js";
+import { registerCreditSettings } from "./credit-split.js";
 import { PACKS_SETTING, WorldPacksMenu } from "./packs.js";
 import { registerRequestSettings } from "./request.js";
 import { refreshRuleUI, registerRules } from "./rules.js";
@@ -92,6 +93,7 @@ export const registerSettings = function () {
 
     registerRules();
     registerRequestSettings();
+    registerCreditSettings();
     // Folio 50's shared skills package: the pool the table chose, edited from the closing screen
     // and never shown in the settings pane, because it is data the referee typed and not a rule.
     registerChargenSettings();

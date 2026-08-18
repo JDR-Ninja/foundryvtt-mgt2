@@ -15,7 +15,7 @@
 				<th class="gauge">{{localize 'MGT2.CreditSplit.Share'}}</th>
 				<th class="pct">%</th>
 				<th class="cr">{{localize 'MGT2.CreditSplit.Credits'}}</th>
-				<th class="purse">{{#if debit}}{{localize 'MGT2.CreditSplit.CashOnHand'}}{{else}}{{localize 'MGT2.CreditSplit.Purse'}}{{/if}}</th>
+				{{#if showPurses}}<th class="purse">{{#if debit}}{{localize 'MGT2.CreditSplit.CashOnHand'}}{{else}}{{localize 'MGT2.CreditSplit.Purse'}}{{/if}}</th>{{/if}}
 				<th class="act"></th>
 			</tr>
 		</thead>
@@ -51,10 +51,12 @@
 				{{! What they have, beside what they owe. On a debit a purse that cannot cover the
 				    share is marked here and the difference becomes debt at the write — Core folio 52's
 				    rule, and the only outcome the books print for a Traveller who cannot pay. }}
+				{{#if ../showPurses}}
 				<td class="purse">
 					<span data-readout="purse">{{#if row.cashDisplay}}{{row.cashDisplay}}{{else}}&mdash;{{/if}}</span>
 					<b data-readout="shortfall" data-tooltip="{{localize 'MGT2.CreditSplit.ShortHint'}}">{{#if row.short}}{{row.shortfallDisplay}}{{/if}}</b>
 				</td>
+				{{/if}}
 				<td class="act">
 					<a data-action="dropRow" class="x" data-tooltip="{{localize 'MGT2.CreditSplit.Remove'}}">&times;</a>
 				</td>
@@ -63,7 +65,7 @@
 			{{! One cell across the whole width: split over the columns above, the hint lands in a cell
 			    sized to a `×` and wraps to three lines. }}
 			<tr class="vacant drop" data-accept="{{rosterTypes}}">
-				<td colspan="7"><span class="hint">{{localize 'MGT2.CreditSplit.DropActor'}}</span></td>
+				<td colspan="{{#if showPurses}}7{{else}}6{{/if}}"><span class="hint">{{localize 'MGT2.CreditSplit.DropActor'}}</span></td>
 			</tr>
 		</tbody>
 	</table>

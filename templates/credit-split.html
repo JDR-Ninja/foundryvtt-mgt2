@@ -16,6 +16,14 @@
 				<input class="f n" type="number" min="0" step="1" name="{{field}}Total"
 					value="{{total}}" aria-label="{{localize 'MGT2.CreditSplit.Sum'}}" />
 			</span>
+			{{! A gift has one way to go, so the strip that chooses one is not drawn: what replaces
+			    it is the purse the sum comes out of, which is also the ceiling on it. }}
+			{{#if gift}}
+			<span class="giver{{#if overdrawn}} bad{{/if}}">
+				<b>{{sourceName}}</b>
+				<span data-readout="sourceCash">{{localize 'MGT2.CreditSplit.Holds' credits=sourceCash}}</span>
+			</span>
+			{{else}}
 			<span class="seg" data-name="{{field}}Direction" role="radiogroup"
 				aria-label="{{localize 'MGT2.CreditSplit.Way'}}">
 				{{#each directions as |d|}}
@@ -23,9 +31,21 @@
 					value="{{d.key}}"{{#if d.active}} checked{{/if}} /><span>{{d.label}}</span></label>
 				{{/each}}
 			</span>
+			{{/if}}
 			<input class="f wide" type="text" name="{{field}}Reason" value="{{reason}}"
 				placeholder="{{localize 'MGT2.CreditSplit.ReasonPlaceholder'}}"
 				aria-label="{{localize 'MGT2.CreditSplit.Reason'}}" />
+			{{! Asked per transfer; the world settings only decide where the two start. }}
+			<span class="says">
+				<label class="chk" data-tooltip="{{localize 'MGT2.CreditSplit.BalancesHint'}}">
+					<input type="checkbox" name="{{field}}Balances"{{#if balances}} checked{{/if}} />
+					<span>{{localize 'MGT2.CreditSplit.Balances'}}</span>
+				</label>
+				<label class="chk" data-tooltip="{{localize 'MGT2.CreditSplit.PrivateHint'}}">
+					<input type="checkbox" name="{{field}}Private"{{#if addressed}} checked{{/if}} />
+					<span>{{localize 'MGT2.CreditSplit.Private'}}</span>
+				</label>
+			</span>
 		</div>
 	</div>
 
@@ -35,7 +55,7 @@
 	<div class="pline wholine" role="group" aria-label="{{localize 'MGT2.CreditSplit.Who'}}">
 		<span class="pgut">{{localize 'MGT2.CreditSplit.Who'}}<b data-readout="asked">{{rows.length}}</b></span>
 		<div class="pfields seeds">
-			<button type="button" class="btn" data-action="seedControlled">{{localize 'MGT2.CreditSplit.AddControlled'}}</button>
+			{{#unless gift}}<button type="button" class="btn" data-action="seedControlled">{{localize 'MGT2.CreditSplit.AddControlled'}}</button>{{/unless}}
 			<button type="button" class="btn" data-action="seedParty">{{localize 'MGT2.CreditSplit.AddParty'}}</button>
 			<button type="button" class="btn" data-action="seedCrew"
 				data-tooltip="{{localize 'MGT2.CreditSplit.AddCrewHint'}}"

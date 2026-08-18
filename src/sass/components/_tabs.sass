@@ -60,8 +60,11 @@
 		a.item
 			padding: 3px 7px
 
+	// `column` and not the flex default: these hold the same stacked blocks as every other panel,
+	// and `row` laid the sections out side by side.
 	.tab[data-group="inventory"].active
 		display: flex
+		flex-direction: column
 		flex: 1 1 auto
 		min-height: 0
 

@@ -6,7 +6,7 @@
 	<div class="chd">
 		<div class="what">
 			<h4>{{localize 'MGT2.CreditSplit.Title'}}</h4>
-			<span class="tgt">{{localize direction}} &middot; Cr{{total}}</span>
+			<span class="tgt">{{localize direction}} &middot; Cr{{total}}{{#if gift}} &middot; {{giver}}{{/if}}</span>
 		</div>
 	</div>
 	{{#if reason}}<p class="bare">{{reason}}</p>{{/if}}
@@ -16,12 +16,18 @@
 			<tr{{#if row.debt}} class="short"{{/if}}>
 				<td class="nm">{{row.name}}</td>
 				<td class="cr">Cr{{row.amountDisplay}}</td>
+				{{! What became debt is what THIS transfer did, so it stays whatever the toggle says.
+				    What a Traveller has left is their standing, and it is published only on request. }}
 				<td class="dbt">{{#if row.debt}}{{localize 'MGT2.CreditSplit.Card.Debt' credits=row.debtDisplay}}{{/if}}</td>
-				<td class="aft">{{localize 'MGT2.CreditSplit.Card.Left' credits=row.afterDisplay}}</td>
+				{{#if ../balances}}<td class="aft">{{localize 'MGT2.CreditSplit.Card.Left' credits=row.afterDisplay}}</td>{{/if}}
 			</tr>
 			{{/each}}
 		</tbody>
 	</table>
+	{{! A gift's own last line: what the giver has left, which is the half the ledger above omits. }}
+	{{#if giverLeft}}
+	<div class="pipe"><span>{{localize 'MGT2.CreditSplit.Card.GiverLeft' name=giver credits=giverLeft}}</span></div>
+	{{/if}}
 	{{! Shown and never touched: no book prints a rule that repays debt out of a windfall. }}
 	{{#if hasDebt}}
 	<div class="pipe"><span class="hot">{{localize 'MGT2.CreditSplit.Card.DebtTotal' credits=debt}}</span></div>

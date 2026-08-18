@@ -2673,6 +2673,9 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   width: 13px;
   height: 13px;
 }
+.mgt2 .sect .acts {
+  margin-left: auto;
+}
 .mgt2 .sect .gm {
   margin-left: auto;
   padding: 0 5px;
@@ -4197,9 +4200,6 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   font-family: var(--mono);
   font-size: 10px;
   color: var(--faint);
-}
-.mgt2 .mgt2-species .sect .acts {
-  margin-left: auto;
 }
 .mgt2 .mgt2-species .txt {
   margin: 0;
@@ -8901,6 +8901,46 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 .mgt2 .csform input.f.wide {
   flex: 1 1 12rem;
 }
+.mgt2 .csform .says {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 12px;
+}
+.mgt2 .csform label.chk {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 5px;
+  font-size: 10.5px;
+  color: var(--faint);
+  white-space: nowrap;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .csform label.chk input {
+  margin: 0;
+  accent-color: var(--accent-text);
+}
+.mgt2 .csform .giver {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+}
+.mgt2 .csform .giver b {
+  font-family: var(--cond);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.mgt2 .csform .giver span {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--faint);
+}
+.mgt2 .csform .giver.bad span {
+  color: var(--danger);
+}
 .mgt2 .csform .wholine .pgut b {
   display: inline;
   margin-left: 6px;
@@ -10360,6 +10400,7 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 }
 .mgt2 .tab[data-group=inventory].active {
   display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
 }

@@ -3,6 +3,7 @@ import { checkOf } from "../chat-message.js";
 import { Checks, renderRollCard } from "../checks.js";
 import { CompendiumExplorer } from "../compendium-explorer.js";
 import { MGT2 } from "../config.js";
+import { CreditSplit } from "../credit-split.js";
 import { EFFECT_ACTIONS, prepareEffects } from "../effects.js";
 import { MGT2Helper } from "../helper.js";
 import { MGT2Combatant } from "../combatant.js";
@@ -73,6 +74,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       traitDelete: TravellerActorSheet.#onTraitDelete,
       openEditor: TravellerActorSheet.#onOpenEditor,
       speciesFind: TravellerActorSheet.#onSpeciesFind,
+      creditTransfer: TravellerActorSheet.#onCreditTransfer,
       ...EFFECT_ACTIONS
     }
   };
@@ -342,6 +344,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       system: actor.system,
       systemFields: actor.system.schema.fields,
       isGM: game.user.isGM,
+      canGive: actor.isOwner,
       settings,
       initiative: actor.system.initiative,
       characteristics,
@@ -650,6 +653,15 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
   static #onSpeciesFind() {
     return CompendiumExplorer.open({ cls: "Item", type: "species" });
+  }
+
+  /**
+   * The sheet's door is the GIVING one, whoever presses it: a Traveller may hand their own money
+   * over, and taking anybody else's is the referee's screen on the token controls.
+   * @this {TravellerActorSheet}
+   */
+  static #onCreditTransfer() {
+    return CreditSplit.open({ source: this.actor.uuid, actors: [] });
   }
 
   /** @this {TravellerActorSheet} */
@@ -1774,6 +1786,13 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     if (target.dataset.category) {
       data.system = { ...data.system, category: target.dataset.category };
     }
+    // Storage creates INTO the picker's container; without this the row would land on hand and
+    // vanish from the panel that made it.
+    if (target.dataset.store) {
+      const container = await this.#dropInContainer();
+      if (!container) return;
+      data.system = { ...data.system, container: { id: container._id } };
+    }
 
     const item = await getDocumentClass("Item").create(data, { parent: this.actor });
     // A play-mode row offers the eye and not the pencil, so a blank Item created there would be a
@@ -1809,28 +1828,31 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     if (item.type === "container") {
       item.system.onHand = false;
     } else {
-      let container;
-      const containers = this.actor.getContainers();
-      if (!this.viewState.dropIn) {
-        // Place into the first container, creating one if the actor has none.
-        if (containers.length === 0) {
-          container = (await getDocumentClass("Item").create({ name: "New container", type: "container" }, { parent: this.actor }));
-        } else {
-          container = containers[0];
-        }
-      } else {
-        container = containers.find(x => x._id === this.viewState.dropIn);
-      }
-
+      const container = await this.#dropInContainer();
       if (!container) return;
-
-      if (container.system.locked && !game.user.isGM) {
-        return ui.notifications.error(game.i18n.localize("MGT2.Errors.LockedContainer"));
-      }
-
       item.system.container.id = container._id;
     }
     return this.actor.updateEmbeddedDocuments("Item", [item]);
+  }
+
+  /**
+   * Where a stored item lands: the picker's choice, or the first container, or a new one where the
+   * Traveller has none.
+   * @returns {Promise<object|null>}   Null once the refusal has been reported
+   */
+  async #dropInContainer() {
+    const containers = this.actor.getContainers();
+    const container = this.viewState.dropIn
+      ? containers.find(x => x._id === this.viewState.dropIn)
+      : containers[0] ?? await getDocumentClass("Item").create(
+        { name: game.i18n.localize("MGT2.Actor.NewContainer"), type: "container" }, { parent: this.actor });
+
+    if (!container) return null;
+    if (container.system.locked && !game.user.isGM) {
+      ui.notifications.error(game.i18n.localize("MGT2.Errors.LockedContainer"));
+      return null;
+    }
+    return container;
   }
 
   /** @this {TravellerActorSheet} */
