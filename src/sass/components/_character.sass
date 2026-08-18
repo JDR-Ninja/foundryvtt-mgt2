@@ -371,6 +371,180 @@
 	opacity: 1
 
 // --------------------------------------------
+//  Training strip — a readout, and one verb at most
+// --------------------------------------------
+
+// `.tsk` carries `data-derived` and holds no form control in either mode: the stored numbers are
+// repaired in `.hatch` below it, or in the window. The verb changes with the state and is never
+// doubled — a week while the period fills, the check once it is full (§9.133).
+
+// `.block` puts an 8px gap between its children, which would take the hatch off the row it belongs
+// to and leave its missing top border hanging. The strip is one child instead, spaced by its own
+// `.tsk + .tsk`.
+.mgt2 .tsks
+	display: block
+
+.mgt2 .tsk
+	display: grid
+	grid-template-columns: minmax(9rem, 1fr) auto auto auto
+	align-items: center
+	gap: 4px 14px
+	padding: 7px 10px 8px
+	border: 1px solid var(--rule-soft)
+	border-left: 2px solid var(--rule)
+
+	& + .tsk
+		margin-top: 6px
+
+	&.due
+		border-left-color: var(--accent-text)
+
+	.what
+		display: flex
+		align-items: baseline
+		gap: 7px
+		min-width: 0
+		a
+			// A flex item floors at its content width, so the ellipsis above never fires without it —
+			// and a speciality name is what pushes the verb off the row.
+			min-width: 0
+			overflow: hidden
+			font-family: var(--cond)
+			font-size: 13px
+			font-weight: 700
+			letter-spacing: 0.1em
+			text-overflow: ellipsis
+			text-transform: uppercase
+			text-decoration: none
+			white-space: nowrap
+			color: var(--ink)
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
+
+	// `1 → 2` is the whole rule in four characters: what they have, what this buys.
+	.lv
+		font-family: var(--mono)
+		font-size: 11px
+		white-space: nowrap
+		color: var(--mute)
+		b
+			font-weight: 600
+			color: var(--ink)
+		.new
+			font-style: italic
+			color: var(--faint)
+
+	// Which book runs this record. Stored per programme, so a mixed list says so on every row —
+	// otherwise two progressions counting different things look alike.
+	.eng
+		flex: 0 0 auto
+		padding: 0 4px
+		font-family: var(--cond)
+		font-size: 8.5px
+		font-weight: 700
+		letter-spacing: 0.16em
+		text-transform: uppercase
+		color: var(--faint)
+		border: 1px solid var(--rule)
+		border-radius: 2px
+
+	> .cnt
+		justify-self: end
+
+	.cnt
+		font-family: var(--mono)
+		font-size: 10.5px
+		white-space: nowrap
+		color: var(--faint)
+
+	.go
+		display: flex
+		align-items: center
+		gap: 6px
+		justify-self: end
+		.btn
+			white-space: nowrap
+
+	.more
+		display: inline-flex
+		font-size: 12px
+		color: var(--faint)
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--accent-text)
+
+	&.idle
+		grid-template-columns: minmax(0, 1fr) auto
+		border-style: dashed
+		border-left-color: var(--rule-soft)
+		.what em
+			font-style: italic
+			font-size: 12.5px
+			color: var(--faint)
+
+// Eight boxes, because eight weeks is the rule and a reader should not have to be told it. A number
+// in a box says `8`; eight boxes say what eight means — and boxes rather than a bar because the
+// weeks need not be consecutive (Core p.55).
+.mgt2 .wks
+	display: flex
+	gap: 3px
+	i
+		width: 13px
+		height: 10px
+		border: 1px solid var(--rule)
+	i.on
+		background: var(--fill)
+		border-color: var(--fill)
+
+// Periods are the outer loop and they are stacked, not filled: a failed one is spent time that
+// bought nothing, which the rule is explicit about.
+.mgt2 .pds
+	display: flex
+	align-items: center
+	gap: 4px
+	i
+		width: 9px
+		height: 9px
+		border: 1px solid var(--rule)
+		border-radius: 50%
+	i.pass
+		background: var(--fill)
+		border-color: var(--fill)
+	i.fail
+		background: repeating-linear-gradient(135deg, var(--faint) 0 1px, transparent 1px 3px)
+		border-style: dashed
+
+// The Companion's progression is a balance against a cost, not a fill of a fixed size: the cost
+// doubles per level (1, 1, 2, 4, 8, 16, 32) and eight boxes stop meaning anything at level 5.
+.mgt2 .pts
+	min-width: 4.5rem
+	.gauge
+		position: relative
+		height: 4px
+		background: var(--track)
+		i
+			display: block
+			width: var(--g, 0%)
+			max-width: 100%
+			height: 100%
+			background: var(--fill)
+
+// Stored numbers must stay repairable, but they are not the interface: edit mode only, beneath the
+// strip and labelled as what they are.
+.mgt2 .hatch
+	display: grid
+	grid-template-columns: repeat(3, minmax(5rem, 1fr))
+	gap: 6px 10px
+	padding: 7px 10px 8px
+	border: 1px dashed var(--rule)
+	border-top: 0
+	label
+		display: flex
+		flex-direction: column
+		gap: 2px
+
+// --------------------------------------------
 //  Footer — the budget block's compact face
 // --------------------------------------------
 
@@ -984,6 +1158,15 @@ ul.softwares
 			text-align: left
 		.g
 			margin-top: 3px
+
+	// The tab column goes under ~26rem here and the strip's four cells collide. The name keeps the
+	// first row; the two progressions and the verb share the second, in that order, so the verb stays
+	// where the thumb already is. The idle line is two cells and needs none of it.
+	.mgt2 .tsk:not(.idle)
+		grid-template-columns: auto auto minmax(0, 1fr)
+		row-gap: 7px
+		.what
+			grid-column: 1 / -1
 
 	// Scoped to the sheet that declares the container: the item sheet is 630 px wide, under this
 	// breakpoint, and the day it gains `container-type` — tempting, its specs grid wants to reflow —

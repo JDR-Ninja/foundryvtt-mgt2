@@ -4249,6 +4249,176 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   opacity: 1;
 }
 
+.mgt2 .tsks {
+  display: block;
+}
+
+.mgt2 .tsk {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) auto auto auto;
+  align-items: center;
+  gap: 4px 14px;
+  padding: 7px 10px 8px;
+  border: 1px solid var(--rule-soft);
+  border-left: 2px solid var(--rule);
+}
+.mgt2 .tsk + .tsk {
+  margin-top: 6px;
+}
+.mgt2 .tsk.due {
+  border-left-color: var(--accent-text);
+}
+.mgt2 .tsk .what {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+.mgt2 .tsk .what a {
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--cond);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--ink);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .tsk .what a:hover {
+  color: var(--accent-text);
+}
+.mgt2 .tsk .lv {
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--mute);
+}
+.mgt2 .tsk .lv b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.mgt2 .tsk .lv .new {
+  font-style: italic;
+  color: var(--faint);
+}
+.mgt2 .tsk .eng {
+  flex: 0 0 auto;
+  padding: 0 4px;
+  font-family: var(--cond);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.mgt2 .tsk > .cnt {
+  justify-self: end;
+}
+.mgt2 .tsk .cnt {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  white-space: nowrap;
+  color: var(--faint);
+}
+.mgt2 .tsk .go {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: end;
+}
+.mgt2 .tsk .go .btn {
+  white-space: nowrap;
+}
+.mgt2 .tsk .more {
+  display: inline-flex;
+  font-size: 12px;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .tsk .more:hover {
+  color: var(--accent-text);
+}
+.mgt2 .tsk.idle {
+  grid-template-columns: minmax(0, 1fr) auto;
+  border-style: dashed;
+  border-left-color: var(--rule-soft);
+}
+.mgt2 .tsk.idle .what em {
+  font-style: italic;
+  font-size: 12.5px;
+  color: var(--faint);
+}
+
+.mgt2 .wks {
+  display: flex;
+  gap: 3px;
+}
+.mgt2 .wks i {
+  width: 13px;
+  height: 10px;
+  border: 1px solid var(--rule);
+}
+.mgt2 .wks i.on {
+  background: var(--fill);
+  border-color: var(--fill);
+}
+
+.mgt2 .pds {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.mgt2 .pds i {
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+}
+.mgt2 .pds i.pass {
+  background: var(--fill);
+  border-color: var(--fill);
+}
+.mgt2 .pds i.fail {
+  background: repeating-linear-gradient(135deg, var(--faint) 0 1px, transparent 1px 3px);
+  border-style: dashed;
+}
+
+.mgt2 .pts {
+  min-width: 4.5rem;
+}
+.mgt2 .pts .gauge {
+  position: relative;
+  height: 4px;
+  background: var(--track);
+}
+.mgt2 .pts .gauge i {
+  display: block;
+  width: var(--g, 0%);
+  max-width: 100%;
+  height: 100%;
+  background: var(--fill);
+}
+
+.mgt2 .hatch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(5rem, 1fr));
+  gap: 6px 10px;
+  padding: 7px 10px 8px;
+  border: 1px dashed var(--rule);
+  border-top: 0;
+}
+.mgt2 .hatch label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .mgt2 .mgt2-footer {
   padding: 7px 16px;
   border-top: 1px solid var(--rule);
@@ -4878,6 +5048,13 @@ ul.softwares li:hover a {
   .mgt2[data-mode=play] .char .g,
   .mgt2 .char .g {
     margin-top: 3px;
+  }
+  .mgt2 .tsk:not(.idle) {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    row-gap: 7px;
+  }
+  .mgt2 .tsk:not(.idle) .what {
+    grid-column: 1/-1;
   }
   .mgt2.application.character nav.horizontal-tabs a.item {
     padding: 8px 12px;
@@ -7478,6 +7655,457 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
     grid-column: span 2;
   }
 }
+.mgt2.application.training {
+  container-type: inline-size;
+  container-name: sheet;
+}
+.mgt2.application.training > .window-content {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  height: 100%;
+  overflow: hidden;
+}
+.mgt2.application.training > .window-content > [data-application-part=rail],
+.mgt2.application.training > .window-content > [data-application-part=panel] {
+  min-height: 0;
+}
+
+.mgt2 .training-rail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  border-right: 1px solid var(--rule);
+}
+.mgt2 .training-rail .rhd {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 9px 12px 6px;
+}
+.mgt2 .training-rail .rhd .lbl {
+  flex: 1 1 auto;
+}
+.mgt2 .training-rail .rhd .add {
+  display: inline-flex;
+  font-size: 11px;
+  color: var(--accent-text);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .training-rail .rtot {
+  padding: 0 12px 9px;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--faint);
+}
+.mgt2 .training-rail > .hint {
+  padding: 0 12px 12px;
+}
+.mgt2 .training-rail .prog {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 12px 8px;
+  cursor: var(--cursor-pointer);
+  border-top: 1px solid var(--rule-soft);
+  border-left: 2px solid transparent;
+}
+.mgt2 .training-rail .prog:hover {
+  background: var(--hover);
+}
+.mgt2 .training-rail .prog.on {
+  background: var(--hover);
+  border-left-color: var(--accent-text);
+}
+.mgt2 .training-rail .prog b {
+  overflow: hidden;
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mgt2 .training-rail .prog .st {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+.mgt2 .training-rail .prog .st .eng {
+  font-size: 8px;
+}
+.mgt2 .training-rail .prog.done b {
+  color: var(--mute);
+}
+
+.mgt2 .training-rail .eng,
+.mgt2 .training-pick .eng {
+  flex: 0 0 auto;
+  padding: 0 4px;
+  font-family: var(--cond);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+
+.mgt2 .training-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding: 12px 15px 15px;
+}
+.mgt2 .training-panel .hd {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mgt2 .training-panel .hd .top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+.mgt2 .training-panel .hd .top h2 {
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.mgt2 .training-panel .hd .top .of {
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .training-panel .hd .top .who {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.mgt2 .training-panel .idle {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.mgt2 .training-panel .foot {
+  display: flex;
+  gap: 7px;
+  justify-content: flex-end;
+  padding-top: 2px;
+}
+.mgt2 .training-panel .foot .kill:hover {
+  color: var(--danger);
+  border-color: color-mix(in oklab, var(--danger) 55%, transparent);
+}
+.mgt2 .training-panel table.rows td.out {
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.mgt2 .training-panel table.rows td.out.pass {
+  color: var(--good);
+}
+.mgt2 .training-panel table.rows td.out.fail {
+  color: var(--danger);
+}
+.mgt2 .training-panel table.rows td.txt {
+  font-size: 12.5px;
+  color: var(--mute);
+}
+
+.mgt2 .training-panel .ladder {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.mgt2 .training-panel .ladder .cnt {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+
+.mgt2 .training-panel .pds {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.mgt2 .training-panel .pds i {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+}
+.mgt2 .training-panel .pds i.pass {
+  background: var(--fill);
+  border-color: var(--fill);
+}
+.mgt2 .training-panel .pds i.fail {
+  background: repeating-linear-gradient(135deg, var(--faint) 0 1px, transparent 1px 3px);
+  border-style: dashed;
+}
+
+.mgt2 .training-panel .will {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding: 8px 11px;
+  background: var(--accent-soft);
+  border-left: 2px solid var(--accent-line);
+}
+.mgt2 .training-panel .will .lbl {
+  flex: 0 0 auto;
+}
+.mgt2 .training-panel .will p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.mgt2 .training-panel .will .btn {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+.mgt2 .training-panel .will.barred {
+  background: color-mix(in oklab, var(--danger) 8%, transparent);
+  border-left-color: color-mix(in oklab, var(--danger) 55%, transparent);
+}
+.mgt2 .training-panel .will.barred p {
+  color: var(--danger);
+}
+
+.mgt2 .training-panel .period {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 10px 12px 11px;
+  border: 1px solid var(--rule-soft);
+}
+.mgt2 .training-panel .period .prow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.mgt2 .training-panel .period label.pnote {
+  display: flex;
+  flex: 1 1 12rem;
+  flex-direction: column;
+  gap: 3px;
+}
+.mgt2 .training-panel .period select.pick {
+  flex: 0 0 auto;
+  width: auto;
+}
+.mgt2 .training-panel .period .cnt {
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.mgt2 .training-panel .period .cnt .of {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--mute);
+}
+.mgt2 .training-panel .period .roll {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+.mgt2 .training-panel .period .roll .why {
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: right;
+  color: var(--faint);
+}
+.mgt2 .training-panel .period .roll .btn {
+  padding: 5px 12px;
+  font-size: 11px;
+}
+.mgt2 .training-panel .period .gauge {
+  position: relative;
+  flex: 1 1 7rem;
+  height: 4px;
+  background: var(--track);
+}
+.mgt2 .training-panel .period .gauge i {
+  display: block;
+  width: var(--g, 0%);
+  max-width: 100%;
+  height: 100%;
+  background: var(--fill);
+}
+
+.mgt2 .training-panel .wks {
+  display: flex;
+  gap: 3px;
+}
+.mgt2 .training-panel .wks i {
+  width: 24px;
+  height: 17px;
+  border: 1px solid var(--rule);
+}
+.mgt2 .training-panel .wks i.on {
+  background: var(--fill);
+  border-color: var(--fill);
+}
+.mgt2 .training-panel .wks i[data-action] {
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .training-panel .wks i[data-action]:hover {
+  border-color: var(--accent-text);
+}
+.mgt2 .training-panel .wks i.on[data-action]:hover {
+  background: var(--accent-text);
+}
+
+.mgt2 .training-panel .awards {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+.mgt2 .training-panel .awards .btn {
+  padding: 3px 9px;
+  font-size: 9.5px;
+}
+.mgt2 .training-panel .awards .btn i {
+  margin-left: 6px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-style: normal;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--faint);
+}
+
+.mgt2 .training-panel .teach {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--faint);
+}
+.mgt2 .training-panel .teach a {
+  color: var(--accent-text);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .training-panel .teach a.x {
+  margin-left: 5px;
+  color: var(--faint);
+}
+.mgt2 .training-panel .teach a.x:hover {
+  color: var(--danger);
+}
+.mgt2 .training-panel .teach b {
+  font-weight: 400;
+  color: var(--mute);
+}
+
+.mgt2 .training-panel .hint.drop {
+  padding: 7px 9px;
+  border: 1px dashed var(--rule);
+}
+
+.mgt2 .training-panel [data-accept].over {
+  outline: 1px dashed var(--accent-text);
+}
+
+.mgt2 .training-panel [data-accept].deny {
+  outline: 1px dashed var(--danger);
+}
+
+.mgt2 .training-pick .opts {
+  display: flex;
+  flex-direction: column;
+  max-height: 24rem;
+  overflow-y: auto;
+}
+.mgt2 .training-pick .opts .opt {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding: 5px 8px;
+  font-size: 13px;
+  cursor: var(--cursor-pointer);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .training-pick .opts .opt:last-child {
+  border-bottom: 0;
+}
+.mgt2 .training-pick .opts .opt:hover {
+  background: var(--hover);
+}
+.mgt2 .training-pick .opts .opt input[type=radio] {
+  margin: 0;
+  accent-color: var(--accent-text);
+}
+.mgt2 .training-pick .opts .opt b {
+  font-family: var(--cond);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.mgt2 .training-pick .opts .opt .why {
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .training-pick .opts .opt .lv {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--mute);
+}
+.mgt2 .training-pick .opts .opt.new input.f {
+  flex: 1 1 9rem;
+  width: auto;
+}
+.mgt2 .training-pick .opts .opt.new .why {
+  margin-left: auto;
+}
+.mgt2 .training-pick .opts .opt.barred {
+  cursor: not-allowed;
+}
+.mgt2 .training-pick .opts .opt.barred:hover {
+  background: none;
+}
+.mgt2 .training-pick .opts .opt.barred b {
+  color: var(--faint);
+  text-decoration: line-through;
+}
+.mgt2 .training-pick .opts .opt.barred .why {
+  color: var(--danger);
+}
+
 .mgt2.application.explorer {
   container-type: inline-size;
   container-name: sheet;

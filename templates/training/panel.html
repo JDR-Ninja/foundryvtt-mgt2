@@ -1,0 +1,182 @@
+<section class="training-panel">
+{{#if programme}}
+
+	<div class="hd">
+		<div class="top">
+			<h2>{{programme.name}}</h2>
+			<span class="of">{{programme.range}}</span>
+			<span class="who">{{actorName}}</span>
+		</div>
+		{{! The window is where the rule is quoted; the sheet strip stays silent, because it is read
+		    fifty times a session and this is opened when someone is actually studying. }}
+		<p class="hint">{{localize programme.rule}}{{#if programme.costRule}} {{localize programme.costRule}}{{/if}}</p>
+	</div>
+
+	<dl class="statline" data-derived="system.training.programmes">
+		{{#each programme.stats as |stat|}}
+		<div class="stat{{#if stat.lead}} lead{{/if}}{{#if stat.good}} good{{/if}}">
+			<dt>{{localize stat.label}}</dt>
+			<dd>{{#if stat.word}}<span class="word">{{stat.word}}</span>{{else}}{{stat.value}}{{#if stat.of}}<span class="of">/ {{stat.of}}</span>{{/if}}{{/if}}</dd>
+		</div>
+		{{/each}}
+	</dl>
+
+	{{! The one place a failed period is visible as a thing that happened rather than as a missing
+	    tick: the pips STACK, because spent time that bought nothing is what the rule is made of. }}
+	{{#if programme.core}}
+	<div class="ladder">
+		<span class="lbl">{{localize 'MGT2.Training.SuccessfulPeriods'}}</span>
+		<div class="pds">
+			{{#each programme.pips as |pip|}}<i class="{{#if pip.pass}}pass{{/if}}{{#if pip.fail}}fail{{/if}}"></i>{{/each}}
+		</div>
+		<span class="cnt">{{programme.failed}}</span>
+	</div>
+	{{/if}}
+
+	{{! What the success will WRITE, said before it happens — the one thing the shipped block never
+	    did. A document write that follows a die roll is confirmed here, not behind a chat card. }}
+	<div class="will{{#if programme.will.barred}} barred{{/if}}">
+		{{#if programme.will.label}}<span class="lbl">{{localize programme.will.label}}</span>{{/if}}
+		<p>{{programme.will.text}}</p>
+		{{#if programme.will.button}}{{#if canEdit}}
+		<button class="btn hot" type="button" data-action="grant">{{programme.will.button}}</button>
+		{{/if}}{{/if}}
+	</div>
+
+	{{#unless programme.closed}}{{#unless programme.barred}}
+	{{#if programme.core}}
+	{{! THIS PERIOD — the eight boxes are the control and not a readout of one. A week is logged by
+	    ticking the box it happened in, and un-ticking is the only undo there is; they are boxes and
+	    not a bar because Core p.55's weeks need not be consecutive. }}
+	<div class="period">
+		<div class="prow">
+			<span class="lbl">{{localize 'MGT2.Training.ThisPeriod'}}</span>
+			<div class="wks">
+				{{#each programme.boxes as |box|}}
+				<i class="{{#if box.on}}on{{/if}}"{{#if ../canEdit}} data-action="logWeek" data-week="{{box.index}}"{{/if}}></i>
+				{{/each}}
+			</div>
+			<span class="cnt">{{programme.weeks}}<span class="of">/{{programme.period}}</span></span>
+		</div>
+		<div class="prow">
+			<label class="pnote">
+				<span class="lbl">{{localize 'MGT2.Training.NoteLabel'}}</span>
+				<input class="f" type="text" name="note" value="{{programme.note}}"
+					placeholder="{{localize 'MGT2.Training.NotePlaceholder'}}"{{#unless canEdit}} disabled{{/unless}} />
+			</label>
+			{{! Core p.55 excepts Athletics from EDU, so the characteristic belongs to the player. The
+			    control binds `characteristic`, the stored override — `checkCharacteristic` beside it
+			    is derived and may never be bound to a control. }}
+			{{#if programme.athletics}}
+			<select class="f pick" name="characteristic"
+				aria-label="{{localize 'MGT2.Training.AthleticsNote'}}"
+				data-tooltip="{{localize 'MGT2.Training.AthleticsNote'}}"{{#unless canEdit}} disabled{{/unless}}>
+				<option value=""></option>
+				{{#each programme.physical as |c|}}<option value="{{c.key}}"{{#if c.active}} selected{{/if}}>{{localize c.label}}</option>{{/each}}
+			</select>
+			{{/if}}
+			<div class="roll">
+				<span class="why">{{programme.why}}<br />{{programme.formula}}</span>
+				<button class="btn hot" type="button" data-action="trainingCheck"{{#unless programme.checkDue}} disabled{{/unless}}{{#unless canEdit}} disabled{{/unless}}>{{programme.check}}</button>
+			</div>
+		</div>
+		{{#if programme.last}}
+		<p class="hint"><b>{{programme.last.total}}</b>
+			{{#if programme.last.ok}}{{localize 'MGT2.Training.Banked'}}{{else}}{{localize 'MGT2.Training.NothingUseful'}}{{/if}}</p>
+		{{/if}}
+	</div>
+	{{else}}
+	{{! The same block with points where the weeks were. Two differences are the rule and not the
+	    styling: the awards sit behind a referee label, because Companion p.41 gives them to the
+	    Arbitre, and there is no pool anywhere — a General point is awarded INTO a programme. }}
+	<div class="period xp">
+		<div class="prow">
+			<span class="lbl">{{localize 'MGT2.Training.DedicatedExperience'}}</span>
+			<div class="gauge"><i style="--g:{{programme.percent}}%"></i></div>
+			<span class="cnt">{{programme.xp}}<span class="of">/{{programme.cost}}</span></span>
+		</div>
+		{{#if canEdit}}
+		<div class="prow">
+			<span class="lbl">{{localize 'MGT2.Training.RefereeAwards'}}</span>
+			<div class="awards">
+				{{#each programme.awards as |award|}}
+				<button class="btn" type="button" data-action="award" data-award="{{award.kind}}">{{localize award.label}}<i>{{localize award.rate}}</i></button>
+				{{/each}}
+			</div>
+		</div>
+		{{/if}}
+		{{#if programme.teacher}}
+		<div class="prow" data-accept="{{teacherTypes}}" data-uuid="{{programme.teacher.uuid}}">
+			<span class="teach">
+				<a data-action="openDocument">{{programme.teacher.name}}</a>
+				{{#if canEdit}}<a class="x" data-action="teacherClear"><i class="fa-solid fa-xmark"></i></a>{{/if}}
+				{{#if programme.teacher.cap}}<br /><b>{{programme.teacher.cap}}</b>{{/if}}
+			</span>
+			<div class="roll">
+				<span class="why">{{programme.formula}}<br />{{programme.why}}</span>
+				<button class="btn hot" type="button" data-action="trainingCheck"{{#unless canEdit}} disabled{{/unless}}>{{programme.check}}</button>
+			</div>
+		</div>
+		{{else}}
+		{{! A player with no comrade teaching has nothing here to roll, so the block says so instead
+		    of showing a disabled button. Dropping an Actor on it names the teacher. }}
+		<p class="hint drop" data-accept="{{teacherTypes}}">{{localize 'MGT2.Training.NoTeacher'}}</p>
+		{{/if}}
+		{{#if programme.last}}
+		<p class="hint"><b>{{programme.last.total}}</b>
+			{{#if programme.last.ok}}{{localize 'MGT2.Training.OneDedicatedPoint'}}{{else}}{{localize 'MGT2.Training.NotAGoodStudent'}}{{/if}}</p>
+		{{/if}}
+	</div>
+	{{/if}}
+	{{/unless}}{{/unless}}
+
+	{{! One log, both engines, one view — which is also why a closed programme shows the same table
+	    it showed while it ran. }}
+	{{#if programme.log.length}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Training.Record'}}</h3>
+			<span class="count">{{programme.count}}</span>
+		</div>
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Training.Col.Entry'}}</th>
+					<th class="c">{{localize 'MGT2.Training.Col.Moved'}}</th>
+					<th>{{localize 'MGT2.Training.Col.What'}}</th>
+					<th class="r">{{localize 'MGT2.Training.Col.Check'}}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each programme.log as |row|}}
+				<tr>
+					<td>{{localize row.kind}}</td>
+					<td class="c num">{{row.moved}}</td>
+					<td class="txt">{{row.note}}</td>
+					<td class="r out{{#if row.passed}} pass{{/if}}{{#if row.failed}} fail{{/if}}">{{#if row.outcome}}{{localize row.outcome}}{{/if}}</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+	{{/if}}
+
+	{{#if canEdit}}
+	<div class="foot">
+		{{#if programme.closed}}
+		<button class="btn kill" type="button" data-action="programmeRemove">{{localize 'MGT2.Training.DeleteRecord'}}</button>
+		{{else}}
+		<button class="btn kill" type="button" data-action="programmeAbandon">{{localize 'MGT2.Training.Abandon'}}</button>
+		{{/if}}
+	</div>
+	{{/if}}
+
+{{else}}
+	<div class="idle">
+		<p class="hint">{{localize 'MGT2.Training.Idle'}}</p>
+		{{#if canEdit}}
+		<button class="btn hot" type="button" data-action="programmeAdd">{{localize 'MGT2.Training.Start'}}</button>
+		{{/if}}
+	</div>
+{{/if}}
+</section>

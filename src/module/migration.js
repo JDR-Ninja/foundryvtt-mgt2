@@ -29,7 +29,7 @@ const NPC_CHAIN_FIXED = ["endurance", "strength", "dexterity"];
 const MIGRATIONS = [
   {
     version: "0.2.0",
-    label: "damageOrder, protection, view state, crew duty, NPC damage chain, species unwind, ucp, durationUnit, career damage/interval, world geometry",
+    label: "damageOrder, protection, view state, crew duty, NPC damage chain, species unwind, ucp, durationUnit, career damage/interval, world geometry, training programmes",
     async migrate() {
       // Before the sweep: it rewrites `characteristics.<k>.base`, which the sweep then persists.
       for ( const actor of game.actors ) await unwindSpecies(actor);
@@ -180,6 +180,14 @@ function collectActorUpdate(actor) {
         + `it now derives as "${actor.system.upp}"`);
     }
     update["system.personal.ucp"] = new foundry.data.operators.ForcedDeletion();
+    dirty = true;
+  }
+  // `study.{skill, total, completed}` became one keyed `training` programme (§9.133). `CharacterData`
+  // has already produced it in `_source`, so persisting is a write of what the shim built — and once
+  // `study` is gone the test fails and the step is a no-op.
+  if ( (actor.type === "character") && source.study ) {
+    update["system.training"] = foundry.utils.deepClone(source.training ?? { programmes: {} });
+    update["system.study"] = new foundry.data.operators.ForcedDeletion();
     dirty = true;
   }
   // A world imported from the `mgt2-data` module carried its geometry in that module's flag

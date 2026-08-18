@@ -320,6 +320,13 @@
       "taskCeiling": {
         "name": "Robot task ceiling",
         "hint": "The hardest check a robot's brain can attempt, stated beside the difficulty ladder. A caption, not a gate — external modifiers can still bring a task back within reach."
+      },
+      "advancementSystem": {
+        "name": "How a Traveller advances after creation",
+        "hint": "The Core Rulebook runs Study Periods — eight weeks of study settled by an Average (8+) EDU check. The Traveller Companion runs Experience Points instead, awarded by the referee and spent on skill levels and characteristics. Both lets one table run the two at once, and each programme stores the book that runs it, so changing this never re-reads a record written under the other one.",
+        "core": "Core Rulebook — Study Periods",
+        "companion": "Traveller Companion — Experience Points",
+        "both": "Both, chosen for each programme"
       }
     },
     "Chargen": {
@@ -999,15 +1006,7 @@
     "Gender": "Gender",
     "Pronouns": "Pronouns",
     "Actor": {
-      "StudyPeriod": "Study Period",
-      "TrainingInSkill": "Training In Skill",
-      "StudyPeriodsDone": "Periods done",
       "Weeks": "Weeks",
-      "StudyTowardPeriod": "Toward next period",
-      "StudyCheckDue": "EDU check due",
-      "StudyCheckHint": "Roll the check this period calls for.",
-      "StudyTarget": "Target",
-      "StudyNewSkill": "New skill",
       "NewCareer": "New Career",
       "AddComputer": "Add Computer",
       "AddSkill": "Add Skill",
@@ -2037,6 +2036,129 @@
           }
         }
       }
+    },
+    "Training": {
+      "Title": "Training: {name}",
+      "Open": "Training screen",
+      "Programmes": "Programmes",
+      "Closed": "Closed",
+      "Record": "Record",
+      "ThisPeriod": "This period",
+      "DedicatedExperience": "Dedicated experience",
+      "RefereeAwards": "Referee awards",
+      "SuccessfulPeriods": "Successful periods",
+      "TrainWhat": "Train what?",
+      "LogWeek": "Log a week",
+      "Start": "Start training…",
+      "Idle": "Nothing is being trained.",
+      "Weeks": "weeks",
+      "WeeksAbbr": "wk",
+      "Periods": "periods",
+      "WeeksSpent": "{n} weeks spent",
+      "Entries": "{n} entries",
+      "FailedCount": "{n} failed",
+      "EngineIs": "engine: {engine}",
+      "Engine": {
+        "core": "Core",
+        "companion": "Companion"
+      },
+      "Badge": {
+        "core": "Core",
+        "companion": "Comp"
+      },
+      "Target": {
+        "skill": "Skill",
+        "characteristic": "Characteristic"
+      },
+      "LogKind": {
+        "period": "Study period",
+        "study": "Casual study",
+        "fullTime": "Full-time study",
+        "teaching": "Taught by a comrade",
+        "adventure": "Adventure",
+        "grant": "Level gained"
+      },
+      "AwardRate": {
+        "study": "+1 / 6 months",
+        "fullTime": "+1 / 4 months",
+        "adventure": "+1 general"
+      },
+      "Check": "Average (8+) {characteristic}",
+      "CheckDue": "check due",
+      "PeriodComplete": "Period complete",
+      "WeeksShort": "{n} weeks short",
+      "Formula": "2D {dm} vs 8+",
+      "TeachingDM": "DM is −the level learned",
+      "Passed": "Passed",
+      "Failed": "Failed",
+      "Banked": "the period is banked.",
+      "NothingUseful": "nothing useful came of it; the eight weeks are spent.",
+      "OneDedicatedPoint": "one Dedicated point.",
+      "NotAGoodStudent": "nothing learned; some people are just not good students.",
+      "Grant": "Grant level {n}",
+      "Buy": "Buy level {n}",
+      "OnSuccess": "On the {ordinal} success",
+      "AtPoints": "At {n} points",
+      "Ready": "Ready",
+      "Written": "Written",
+      "AddedAtZero": "{name} is added to the sheet at level 0",
+      "RisesTo": "{name} rises to {n}",
+      "MoreToGo": "{n} more to go.",
+      "Ordinal": {
+        "1": "first",
+        "2": "second",
+        "3": "third",
+        "4": "fourth",
+        "5": "fifth",
+        "6": "sixth",
+        "n": "{n}th"
+      },
+      "TaughtBy": "Taught by {name}",
+      "TeacherCap": "a teacher caps the level at {n}",
+      "NoTeacher": "No comrade is teaching this, so nothing here is the player's to roll — points arrive when the referee awards them. Companion p.41",
+      "Barred": {
+        "jackOfAllTrades": "Jack-of-all-Trades may never be learned or improved (Core p.55)",
+        "social": "SOC cannot be trained (Companion p.42)",
+        "psionic": "PSI is not on the Companion's table and has training rules of its own, so the system bars it here (Companion p.42)",
+        "alreadyTraining": "already being trained",
+        "skillCap": "level 0 only — the skill cap is full (Core p.55)"
+      },
+      "AthleticsNote": "rolls a physical characteristic, not EDU (Core p.55)",
+      "Rule": {
+        "core": "Eight weeks of study make a Study Period; the weeks need not be consecutive, but each must be fully dedicated. A completed period is settled by an Average (8+) check, and reaching a level takes as many successful periods as the level itself. Core p.55",
+        "companion": "Dedicated Experience is allocated to one endeavour and can never be moved to another; a General point must be allocated the moment it is awarded, and may not be held in a pool. Companion p.41-42",
+        "skillCost": "Each level is bought in turn, including level 0.",
+        "charCost": "A physical characteristic costs its new value, a mental one twice it."
+      },
+      "Cost": "{periods} periods · {weeks} weeks",
+      "CostPhysical": "{n} points — the new value",
+      "CostMental": "{n} points — a mental one costs double",
+      "RailCore": "{count} core · {weeks} weeks logged",
+      "RailCompanion": "{count} companion · {points} points dedicated",
+      "RailWeekRule": "a week belongs to one programme (Core p.55)",
+      "NoteLabel": "Where the weeks went",
+      "NotePlaceholder": "Jump to Regina, ship's library…",
+      "MigratedWeeks": "{weeks} weeks beyond the period were dropped when this was migrated.",
+      "NewSkill": "new skill",
+      "LevelRange": "level {from} → {to}",
+      "ValueRange": "value {from} → {to}",
+      "Col": {
+        "Entry": "Entry",
+        "Moved": "Moved",
+        "What": "What it was",
+        "Check": "Check"
+      },
+      "Stat": {
+        "Periods": "Periods",
+        "ThisPeriod": "This period",
+        "WeeksSpent": "Weeks spent",
+        "Dedicated": "Dedicated",
+        "Buys": "Buys",
+        "Awarded": "Awarded",
+        "Entries": "Entries"
+      },
+      "Abandon": "Abandon",
+      "DeleteRecord": "Delete record"
     },
     "RobotPower": {
       "internal": "Internal",
@@ -4380,7 +4502,8 @@
       "event": "Event",
       "medicalCare": "Medical care",
       "ageingCrisisCare": "Ageing crisis care",
-      "referee": "Referee"
+      "referee": "Referee",
+      "training": "Training"
     },
     "CharacteristicLossHints": {
       "ageing": "Core p.48. It repeats every term from the fourth on, and the player chooses which characteristics take it — so the choice is recorded and the total derived.",
@@ -4388,7 +4511,8 @@
       "event": "A characteristic a career event or mishap took or gave, several of which are the player's choice.",
       "medicalCare": "Core p.49. Restoring a lost point costs Cr5000, and an employer may cover part of it — the Medical Bills roll is the referee's and only the outcome is recorded here.",
       "ageingCrisisCare": "Core p.49. One rolled price whatever it restores, and it sets every zeroed characteristic back to 1 — not to where it was.",
-      "referee": "A permanent change nothing printed covers. It is recorded like any other, so it can be undone by deleting the row."
+      "referee": "A permanent change nothing printed covers. It is recorded like any other, so it can be undone by deleting the row.",
+      "training": "Companion p.42. A characteristic bought with Experience Points: a physical one costs its new value, a mental one twice it, and each value is bought in turn. SOC cannot be trained at all."
     },
     "Loss": {
       "Title": "Permanent changes",
@@ -4429,30 +4553,59 @@
         "AllChecks": "DM {dm} to all skill checks until acclimatised — 1D weeks, or 1D days with Athletics (strength). Leaving the region does not end it.",
         "PhysicalChecks": "DM {dm} to all physical skill checks until acclimatised — 1D weeks, or 1D days with Athletics (dexterity). Leaving the region does not end it.",
         "FIELDS": {
-          "band": { "label": "Band" },
-          "gees": { "label": "Gravity (g)", "hint": "The printed figure, for a world denser than its band. Left blank, the band's nominal value applies." },
-          "recoil": { "label": "Recoil spins the shooter", "hint": "In zero G, firing without an Average (8+) Athletics (dexterity) check sets the shooter spinning." }
+          "band": {
+            "label": "Band"
+          },
+          "gees": {
+            "label": "Gravity (g)",
+            "hint": "The printed figure, for a world denser than its band. Left blank, the band's nominal value applies."
+          },
+          "recoil": {
+            "label": "Recoil spins the shooter",
+            "hint": "In zero G, firing without an Average (8+) Athletics (dexterity) check sets the shooter spinning."
+          }
         }
       },
       "temperature": {
         "FIELDS": {
-          "celsius": { "label": "Temperature" },
-          "damage": { "label": "Damage" },
-          "interval": { "label": "Interval", "hint": "Only Per round is applied on its own. Any longer interval is stated here and applied by the referee." },
-          "protectedBy": { "label": "Negated by", "hint": "Equipped gear whose name is listed here removes the hazard outright." }
+          "celsius": {
+            "label": "Temperature"
+          },
+          "damage": {
+            "label": "Damage"
+          },
+          "interval": {
+            "label": "Interval",
+            "hint": "Only Per round is applied on its own. Any longer interval is stated here and applied by the referee."
+          },
+          "protectedBy": {
+            "label": "Negated by",
+            "hint": "Equipped gear whose name is listed here removes the hazard outright."
+          }
         }
       },
       "vacuum": {
         "FIELDS": {
-          "pressure": { "label": "Pressure" },
-          "damage": { "label": "Damage" },
-          "breach": { "label": "Suit breach" }
+          "pressure": {
+            "label": "Pressure"
+          },
+          "damage": {
+            "label": "Damage"
+          },
+          "breach": {
+            "label": "Suit breach"
+          }
         }
       },
       "radiation": {
         "FIELDS": {
-          "rads": { "label": "Dose" },
-          "shielded": { "label": "Absorbed by the region", "hint": "Rads stopped before the Traveller's own Rad score is deducted." }
+          "rads": {
+            "label": "Dose"
+          },
+          "shielded": {
+            "label": "Absorbed by the region",
+            "hint": "Rads stopped before the Traveller's own Rad score is deducted."
+          }
         }
       }
     },

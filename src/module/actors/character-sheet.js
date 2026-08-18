@@ -1,4 +1,5 @@
 import { ChatHelper } from "../chatHelper.js";
+import { checkOf } from "../chat-message.js";
 import { Checks, renderRollCard } from "../checks.js";
 import { MGT2 } from "../config.js";
 import { EFFECT_ACTIONS, prepareEffects } from "../effects.js";
@@ -75,6 +76,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       radiation: TravellerActorSheet.#onRadiation,
       lossAdd: TravellerActorSheet.#onLossAdd,
       lossDelete: TravellerActorSheet.#onLossDelete,
+      trainingWeek: TravellerActorSheet.#onTrainingWeek,
+      trainingCheck: TravellerActorSheet.#onTrainingCheck,
+      trainingOpen: TravellerActorSheet.#onTrainingOpen,
       roll: TravellerActorSheet.#onRoll,
       openConfig: TravellerActorSheet.#onOpenConfig,
       openCharacteristic: TravellerActorSheet.#onOpenCharacteristic,
@@ -162,7 +166,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     ["system.config", ["characteristics", "skills", "header"]],
     ["system.states", ["header", "health"]],
     ["system.stun", ["header"]],
-    ["system.study", ["skills"]],
+    ["system.training", ["skills"]],
     ["system.notes", ["biography"]],
     ["name", ["header"]],
     ["img", ["header"]]
@@ -626,6 +630,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       actor.system.traitFamily, "MGT2.Items.Traits");
     model.effects = prepareEffects(actor);
     model.loss = this.#prepareLoss();
+    model.training = this.#prepareProgrammes();
 
     return model;
   }
@@ -1119,6 +1124,219 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   /* -------------------------------------------- */
 
   /**
+   * The training strip: one row per live programme, and the edit-only hatch onto the stored fields
+   * of the row at the top. Every figure a row prints is read off `system.training` and none of it is
+   * recomputed (§9.133) — the one exception is the count of periods failed since the last grant,
+   * which nothing else needs and which the struck pips are.
+   *
+   * **Null on anything that is not a `character`.** This runs from the shared view model, which the
+   * craft sheets inherit, and only `CharacterData` declares the subtree: an NPC does not study.
+   */
+  #prepareProgrammes() {
+    const training = this.actor.system.training;
+    if ( !training ) return null;
+
+    const rows = [];
+    for ( const [id, programme] of Object.entries(training.programmes) ) {
+      if ( programme.closed ) continue;
+      const skill = programme.target.kind === "skill";
+      // Core p.55: a failed period is eight weeks that bought nothing, and the ones before the last
+      // grant belong to a level already reached.
+      const since = programme.log.slice(
+        programme.log.findLastIndex(row => row.kind === "grant") + 1);
+      const failed = since.filter(row => (row.kind === "period") && (row.ok === false)).length;
+
+      rows.push({
+        id,
+        companion: programme.engine === "companion",
+        badge: `MGT2.Training.Badge.${programme.engine}`,
+        name: skill ? programme.target.key
+          : game.i18n.localize(MGT2.Characteristics[programme.target.key] ?? programme.target.key),
+        isNew: programme.held === null,
+        held: programme.held,
+        next: programme.next,
+        range: game.i18n.format(skill ? "MGT2.Training.LevelRange" : "MGT2.Training.ValueRange", {
+          from: (programme.held === null)
+            ? game.i18n.localize("MGT2.Training.NewSkill") : programme.held,
+          to: programme.next
+        }),
+        xp: programme.xp,
+        cost: programme.cost,
+        percent: programme.percent,
+        boxes: Array.fromRange(training.weeksPerPeriod).map(week => week < programme.weeks),
+        pips: [...Array.fromRange(programme.periodsPassed).map(() => "pass"),
+          ...Array.fromRange(programme.periodsLeft).map(() => ""),
+          ...Array.fromRange(failed).map(() => "fail")],
+        barred: programme.barred ? TravellerActorSheet.#barredReason(programme.target) : null,
+        // What is actually waiting on the player: it sorts to the top and takes the accent rail. A
+        // barred programme is waiting on nobody — nothing it banks can ever be spent.
+        waiting: !programme.barred && (programme.ready || programme.checkDue),
+        verb: TravellerActorSheet.#trainingVerb(programme),
+        targetLabel: MGT2.TrainingTargets[programme.target.kind],
+        key: programme.target.key,
+        weeks: programme.weeks,
+        characteristic: programme.characteristic
+      });
+    }
+    rows.sort((a, b) => Number(b.waiting) - Number(a.waiting));
+
+    const first = rows[0];
+    return {
+      rows,
+      // The stored fields stay repairable, but they are not the interface: edit mode only, beneath
+      // the strip and never inside it, and for one programme — more than that is what the window is
+      // for. `characteristic` is the override Core p.55's Athletics exception needs; the resolved
+      // `checkCharacteristic` beside it is derived and must never be bound to a control.
+      hatch: first ? {
+        fields: this.actor.system.schema.fields.training.fields.programmes.element.fields,
+        label: first.targetLabel,
+        key: first.key,
+        weeks: first.weeks,
+        characteristic: first.characteristic,
+        names: {
+          key: `system.training.programmes.${first.id}.target.key`,
+          weeks: `system.training.programmes.${first.id}.weeks`,
+          characteristic: `system.training.programmes.${first.id}.characteristic`
+        }
+      } : null
+    };
+  }
+
+  /**
+   * Why neither book lets this programme reach anything: Core p.55 bars Jack-of-all-Trades outright,
+   * and Compagnon p.40's table names five characteristics — SOC by name, PSI because psionic
+   * strength has training rules of its own.
+   */
+  static #barredReason(target) {
+    if ( target.kind !== "characteristic" ) return "MGT2.Training.Barred.jackOfAllTrades";
+    return (target.key === "psionic")
+      ? "MGT2.Training.Barred.psionic" : "MGT2.Training.Barred.social";
+  }
+
+  /**
+   * The one verb a row offers, and never two. Under Core the player drives — log a week, then roll
+   * the period's own check. Under the Companion the award is the referee's (p.39), so a row grows a
+   * verb only where the book gives the player a move: the teaching check where a comrade is linked,
+   * and the purchase once the balance covers the level. Both the grant and the purchase open the
+   * window rather than firing, because each creates or raises a document and consults
+   * `skillCapBreach` (§9.133).
+   * @returns {{action: string, label: string, hot: boolean}|null}
+   */
+  static #trainingVerb(programme) {
+    if ( programme.barred ) return null;
+    const companion = programme.engine === "companion";
+    if ( programme.ready ) {
+      return { action: "trainingOpen", hot: true,
+        label: game.i18n.format(companion ? "MGT2.Training.Buy" : "MGT2.Training.Grant",
+          { n: programme.next }) };
+    }
+    if ( programme.checkDue ) {
+      return { action: "trainingCheck", hot: true,
+        label: game.i18n.format("MGT2.Training.Check", {
+          characteristic: game.i18n.localize(
+            `MGT2.Characteristics.${programme.checkCharacteristic}.short`)
+        }) };
+    }
+    return companion
+      ? null : { action: "trainingWeek", hot: false,
+        label: game.i18n.localize("MGT2.Training.LogWeek") };
+  }
+
+  /** The programme key carried by the clicked strip row. */
+  static #programmeId(target) {
+    return target.closest("[data-programme-id]")?.dataset.programmeId;
+  }
+
+  /**
+   * Core p.55: one more week of the open Study Period. Written at its own key rather than over the
+   * map, so two clients logging a week on two different programmes cannot overwrite one another.
+   * @this {TravellerActorSheet}
+   */
+  static async #onTrainingWeek(event, target) {
+    const id = TravellerActorSheet.#programmeId(target);
+    const training = this.actor.system.training;
+    const programme = training?.programmes[id];
+    if ( !programme ) return;
+
+    const weeks = Math.min(training.weeksPerPeriod, programme.weeks + 1);
+    if ( weeks === programme.weeks ) return;
+    return this.actor.update({ [`system.training.programmes.${id}.weeks`]: weeks });
+  }
+
+  /**
+   * The check that settles what is open, and the only thing either engine rolls from the strip.
+   * Core p.55 closes a full Study Period on an Average (8+) EDU check — or on Athletics' own
+   * physical characteristic — and the eight weeks are spent whichever way it goes. Compagnon p.39
+   * has a taught Traveller roll Average (8+) INT at DM−the level being learned for one Dedicated
+   * point.
+   *
+   * The voyage screen's pattern exactly (§9.33.7): the system's own prompt is awaited so boons,
+   * banes and situational DMs all apply, the outcome is read off the returned message rather than
+   * from the roll, and **a prompt that came back as anything but a `ChatMessage` writes nothing**.
+   * @this {TravellerActorSheet}
+   */
+  static async #onTrainingCheck(event, target) {
+    const id = TravellerActorSheet.#programmeId(target);
+    const programme = this.actor.system.training?.programmes[id];
+    if ( !programme?.checkDue || programme.barred || programme.closed ) return;
+
+    const companion = programme.engine === "companion";
+    // Compagnon p.39: the teacher's own level caps what can be learned, and the check is taken at
+    // DM−the level being reached. Waivable, like every other source the prompt lists.
+    const modifiers = companion
+      ? [{ key: "training", label: "MGT2.Training.TeachingDM", dm: -programme.next }] : [];
+    const message = await TravellerActorSheet.roll(this.actor, {
+      roll: "characteristic",
+      characteristic: programme.checkCharacteristic,
+      difficulty: "Average",
+      modifiers
+    }, this.token);
+    if ( !(message instanceof ChatMessage) ) return message;
+
+    const effect = checkOf(message)?.effect;
+    if ( !Number.isInteger(effect) ) return message;
+    const total = message.rolls?.[0]?.total;
+    const ok = effect >= 0;
+
+    // Re-read off the document: the prompt was open across other people's writes, so the model
+    // captured before it is a different instance answering with the old numbers.
+    const current = this.actor.system.training.programmes[id];
+    if ( !current ) return message;
+    const log = current.log.map(row => ({ ...row }));
+    const update = { [`system.training.programmes.${id}.log`]: log };
+
+    if ( companion ) {
+      log.push({ kind: "teaching", ok, amount: ok ? 1 : 0,
+        roll: Number.isInteger(total) ? total : null });
+    } else {
+      // The open period's note is promoted into the row that closes it, and the counter goes back
+      // to zero: a period is spent whether it passed or failed.
+      log.push({ kind: "period", ok, amount: current.weeks,
+        roll: Number.isInteger(total) ? total : null, note: current.note });
+      update[`system.training.programmes.${id}.weeks`] = 0;
+      update[`system.training.programmes.${id}.note`] = "";
+    }
+    return this.actor.update(update);
+  }
+
+  /**
+   * The training window, on the programme the clicked row names. Reached through `game.mgt2` rather
+   * than by import: the screen is a standalone `ApplicationV2` registered in `core.js`, the way the
+   * creation grid and the docket are.
+   * @this {TravellerActorSheet}
+   */
+  static #onTrainingOpen(event, target) {
+    const open = game.mgt2?.trainingScreen;
+    if ( typeof open !== "function" ) {
+      return void console.warn(
+        "MGT2 | game.mgt2.trainingScreen is not registered, so the training strip has no window to open.");
+    }
+    return open(this.actor, { programme: TravellerActorSheet.#programmeId(target) });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
    * Everything standing against `modifiers.check`, each entry still named. The three provenances
    * are offered separately because they are waived separately: a referee's own entry and an Active
    * Effect are one standing figure, while fatigue or armour is a state the player can argue out of.
@@ -1262,10 +1480,13 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
    * @param {string} [what.characteristic]  A characteristic key, for `roll: "characteristic"`
    * @param {string} [what.skill]           A `talent` Item id, for `roll: "skill"`
    * @param {string} [what.itemId]          Whatever else is being rolled
+   * @param {string|null} [what.difficulty] A `MGT2.Difficulty` key the caller's rule states
+   * @param {object[]} [what.modifiers]     The caller's own waivable modifiers
    * @param {TokenDocument|null} [token]    The token this was rolled from, where there is one
    * @returns {Promise<ChatMessage|undefined>}
    */
-  static async roll(actor, { roll = "", characteristic = "", skill = "", itemId = "" } = {}, token = null) {
+  static async roll(actor, { roll = "", characteristic = "", skill = "", itemId = "",
+    difficulty = null, modifiers = [] } = {}, token = null) {
     const rollOptions = {
       rollTypeName: game.i18n.localize("MGT2.RollPrompt.Roll"),
       rollObjectName: "",
@@ -1273,8 +1494,10 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       characteristic: "",
       skills: RollPromptHelper.actorSkills(actor),
       skill: "",
-      checkModifiers: TravellerActorSheet.checkModifiers(actor, token),
-      difficulty: null,
+      // A caller's own sources join the actor's BEFORE the prompt is built, which is what leaves
+      // them un-tickable beside it rather than pushed in past the checkbox filter (§9.33.4).
+      checkModifiers: [...TravellerActorSheet.checkModifiers(actor, token), ...modifiers],
+      difficulty,
       damageFormula: null,
       // The prompt renders its blocks from what is being rolled, so a bare characteristic check
       // is shorter than a weapon attack.

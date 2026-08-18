@@ -10,52 +10,6 @@
 	    the registry ships names, parameter shapes, families and citations only. }}
 	{{> systems/mgt2/templates/items/blocks/traits.html}}
 
-	{{! Both counters stay live in play: accumulating a week is the session loop, not structure. }}
-	<div class="block">
-		<div class="sect">
-			<h3>{{localize 'MGT2.Actor.StudyPeriod'}}</h3>
-			{{#if system.study.skill}}<span class="count">{{system.study.skill}}</span>{{/if}}
-		</div>
-		<div class="grid">
-			<label class="wide">
-				<span class="lbl">{{localize 'MGT2.Actor.TrainingInSkill'}}</span>
-				{{formInput systemFields.study.fields.skill name="system.study.skill" value=system.study.skill classes="f"}}
-			</label>
-			<label>
-				<span class="lbl">{{localize 'MGT2.Actor.StudyPeriodsDone'}}</span>
-				{{formInput systemFields.study.fields.completed name="system.study.completed" value=system.study.completed classes="f num"}}
-			</label>
-			<label>
-				<span class="lbl">{{localize 'MGT2.Actor.Weeks'}}</span>
-				{{formInput systemFields.study.fields.total name="system.study.total" value=system.study.total classes="f num"}}
-			</label>
-		</div>
-		{{! Weeks answer "when is the check", periods "how many more" — and neither total is stored,
-		    because the trained skill is what sets both (Core p.55). The flag is the check: the line
-		    that says one has fallen due is the one you click to make it. }}
-		{{#if system.study.skill}}
-		<section class="budget compact" data-over="soft" data-derived="system.study.percent">
-			<span class="lbl">{{localize 'MGT2.Actor.StudyTowardPeriod'}}</span>
-			<div class="gauge"><i style="--g: {{system.study.percent}}%"></i></div>
-			<span class="tot"><b>{{system.study.total}}</b><span class="of">/ {{system.study.weeksPerPeriod}}</span></span>
-			{{#if system.study.checkDue}}
-			<a class="flag" data-action="roll" data-roll="characteristic" data-roll-characteristic="education"
-				data-tooltip="{{localize 'MGT2.Actor.StudyCheckHint'}}">{{localize 'MGT2.Actor.StudyCheckDue'}}</a>
-			{{/if}}
-		</section>
-		<dl class="statline" data-derived="system.study.periodsLeft">
-			<div class="stat">
-				<dt>{{localize 'MGT2.Actor.StudyPeriodsDone'}}</dt>
-				<dd>{{system.study.completed}}<span class="of">/ {{system.study.periodsNeeded}}</span></dd>
-			</div>
-			<div class="stat">
-				<dt>{{localize 'MGT2.Actor.StudyTarget'}}</dt>
-				<dd class="word">{{#if system.study.hasSkill}}{{localize 'MGT2.Items.Level'}} {{system.study.target}}{{else}}{{localize 'MGT2.Actor.StudyNewSkill'}}{{/if}}</dd>
-			</div>
-		</dl>
-		{{/if}}
-	</div>
-
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Items.Careers'}}</h3>
@@ -92,6 +46,63 @@
 			<span class="count">{{skills.length}}</span>
 			<a class="add edit-only" data-action="itemCreate" data-type-item="talent" data-subtype="skill" data-create-name="{{localize 'MGT2.Actor.NewSkill'}}" data-tooltip="{{localize 'MGT2.Actor.AddSkill'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
+
+		{{! A programme is a skill arriving, so it sits with the skills it feeds. A readout and at most
+		    one verb: the loop itself lives in the training window (§9.133). }}
+		{{#if training}}
+		<div class="tsks">
+			{{#each training.rows as |programme|}}
+			<div class="tsk{{#if programme.waiting}} due{{/if}}" data-programme-id="{{programme.id}}" data-derived="system.training.programmes.{{programme.id}}">
+				<div class="what">
+					<span class="eng">{{localize programme.badge}}</span>
+					<a data-action="trainingOpen" data-tooltip="{{localize 'MGT2.Training.Open'}}">{{programme.name}}</a>
+					<span class="lv" data-tooltip="{{programme.range}}">{{#if programme.isNew}}<span class="new">{{localize 'MGT2.Training.NewSkill'}}</span>{{else}}<b>{{programme.held}}</b>{{/if}} → <b>{{programme.next}}</b></span>
+					{{#if programme.barred}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize programme.barred}}"></i>{{/if}}
+				</div>
+				{{#if programme.companion}}
+				{{! Compagnon p.40's cost doubles per level, so sixteen boxes would mean nothing: a bar
+				    and a balance against the price. }}
+				<div class="pts" data-tooltip="{{localize 'MGT2.Training.DedicatedExperience'}}">
+					<div class="gauge"><i style="--g: {{programme.percent}}%"></i></div>
+				</div>
+				<div class="cnt">{{programme.xp}}/{{programme.cost}}</div>
+				{{else}}
+				{{! Eight boxes and not the number 8, because the weeks need not be consecutive. }}
+				<div class="wks" data-tooltip="{{localize 'MGT2.Training.Rule.core'}}">{{#each programme.boxes}}<i class="{{#if this}}on{{/if}}"></i>{{/each}}</div>
+				<div class="pds" data-tooltip="{{localize 'MGT2.Training.SuccessfulPeriods'}}">{{#each programme.pips}}<i class="{{this}}"></i>{{/each}}</div>
+				{{/if}}
+				<div class="go">
+					{{#if programme.verb}}<button type="button" class="btn{{#if programme.verb.hot}} hot{{/if}}" data-action="{{programme.verb.action}}">{{programme.verb.label}}</button>{{/if}}
+					<a class="more" data-action="trainingOpen" data-tooltip="{{localize 'MGT2.Training.Open'}}"><i class="fa-solid fa-ellipsis"></i></a>
+				</div>
+			</div>
+			{{else}}
+			<div class="tsk idle">
+				<div class="what"><em>{{localize 'MGT2.Training.Idle'}}</em></div>
+				<div class="go"><button type="button" class="btn" data-action="trainingOpen">{{localize 'MGT2.Training.Start'}}</button></div>
+			</div>
+			{{/each}}
+
+			{{! The strip is derived and holds no control; the stored numbers stay repairable here. }}
+			{{#if training.hatch}}
+			<div class="hatch edit-only">
+				<label>
+					<span class="lbl">{{localize training.hatch.label}}</span>
+					{{formInput training.hatch.fields.target.fields.key name=training.hatch.names.key value=training.hatch.key classes="f"}}
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Training.Weeks'}}</span>
+					{{formInput training.hatch.fields.weeks name=training.hatch.names.weeks value=training.hatch.weeks classes="f num"}}
+				</label>
+				<label data-tooltip="{{localize 'MGT2.Training.AthleticsNote'}}">
+					<span class="lbl">{{localize 'MGT2.Training.Target.characteristic'}}</span>
+					{{formInput training.hatch.fields.characteristic name=training.hatch.names.characteristic value=training.hatch.characteristic localize=true blank="" classes="f"}}
+				</label>
+			</div>
+			{{/if}}
+		</div>
+		{{/if}}
+
 		{{#if skills.length}}
 		<table class="rows">
 			<thead>

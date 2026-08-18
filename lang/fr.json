@@ -320,6 +320,13 @@
       "taskCeiling": {
         "name": "Plafond de tâche des robots",
         "hint": "Le jet le plus difficile que le cerveau d'un robot peut tenter, indiqué à côté de l'échelle de difficulté. Une mention, pas un blocage : des modificateurs externes peuvent ramener la tâche à sa portée."
+      },
+      "advancementSystem": {
+        "name": "Comment un Voyageur progresse après la création",
+        "hint": "Le Livre de base fait tourner les périodes d'étude — huit semaines réglées par un test d'ÉDU Moyenne (8+). Le Compagnon y substitue les points d'Expérience, accordés par l'arbitre et dépensés en niveaux de compétence et en caractéristiques. « Les deux » laisse une table faire tourner les deux à la fois, et chaque programme garde l'ouvrage qui le régit : changer ce réglage ne réinterprète jamais un registre écrit sous l'autre.",
+        "core": "Livre de base — périodes d'étude",
+        "companion": "Compagnon — points d'Expérience",
+        "both": "Les deux, au choix pour chaque programme"
       }
     },
     "Chargen": {
@@ -999,15 +1006,7 @@
     "Gender": "Genre",
     "Pronouns": "Pronoms",
     "Actor": {
-      "StudyPeriod": "Période d'étude",
-      "TrainingInSkill": "Compétence en formation",
-      "StudyPeriodsDone": "Périodes complétées",
       "Weeks": "Semaines",
-      "StudyTowardPeriod": "Vers la prochaine période",
-      "StudyCheckDue": "Test d'ÉDU à faire",
-      "StudyCheckHint": "Lancez le test que cette période demande.",
-      "StudyTarget": "Objectif",
-      "StudyNewSkill": "Nouvelle compétence",
       "NewCareer": "Nouvelle Carrière",
       "AddComputer": "Ajouter un ordinateur",
       "AddSkill": "Ajouter une compétence",
@@ -2036,6 +2035,129 @@
           }
         }
       }
+    },
+    "Training": {
+      "Title": "Formation : {name}",
+      "Open": "Écran de formation",
+      "Programmes": "Programmes",
+      "Closed": "Clos",
+      "Record": "Registre",
+      "ThisPeriod": "Période en cours",
+      "DedicatedExperience": "Expérience dédiée",
+      "RefereeAwards": "Attributions de l'arbitre",
+      "SuccessfulPeriods": "Périodes d'étude réussies",
+      "TrainWhat": "Quelle formation ?",
+      "LogWeek": "Noter une semaine",
+      "Start": "Commencer une formation…",
+      "Idle": "Aucune formation en cours.",
+      "Weeks": "semaines",
+      "WeeksAbbr": "sem.",
+      "Periods": "périodes",
+      "WeeksSpent": "{n} semaines passées",
+      "Entries": "{n} entrées",
+      "FailedCount": "{n} échouées",
+      "EngineIs": "ouvrage : {engine}",
+      "Engine": {
+        "core": "Livre de base",
+        "companion": "Compagnon"
+      },
+      "Badge": {
+        "core": "Base",
+        "companion": "Comp"
+      },
+      "Target": {
+        "skill": "Compétence",
+        "characteristic": "Caractéristique"
+      },
+      "LogKind": {
+        "period": "Période d'étude",
+        "study": "Étude occasionnelle",
+        "fullTime": "Formation à temps plein",
+        "teaching": "Enseigné par un camarade",
+        "adventure": "Aventure",
+        "grant": "Niveau obtenu"
+      },
+      "AwardRate": {
+        "study": "+1 / 6 mois",
+        "fullTime": "+1 / 4 mois",
+        "adventure": "+1 Exp. générale"
+      },
+      "Check": "Moyenne (8+) {characteristic}",
+      "CheckDue": "test à faire",
+      "PeriodComplete": "Période achevée",
+      "WeeksShort": "encore {n} semaines",
+      "Formula": "2D {dm} contre 8+",
+      "TeachingDM": "le MD vaut −le niveau appris",
+      "Passed": "Réussi",
+      "Failed": "Échoué",
+      "Banked": "la période est acquise.",
+      "NothingUseful": "il n'a rien pu en tirer d'utile ; les huit semaines sont dépensées.",
+      "OneDedicatedPoint": "un point d'Expérience dédiée.",
+      "NotAGoodStudent": "rien d'appris ; certains individus ne sont tout simplement pas de bons élèves.",
+      "Grant": "Accorder le niveau {n}",
+      "Buy": "Acheter le niveau {n}",
+      "OnSuccess": "À la {ordinal} réussite",
+      "AtPoints": "À {n} points",
+      "Ready": "Prêt",
+      "Written": "Inscrit",
+      "AddedAtZero": "Ajout de {name} à la fiche au niveau 0",
+      "RisesTo": "{name} passe à {n}",
+      "MoreToGo": "encore {n}.",
+      "Ordinal": {
+        "1": "première",
+        "2": "deuxième",
+        "3": "troisième",
+        "4": "quatrième",
+        "5": "cinquième",
+        "6": "sixième",
+        "n": "{n}e"
+      },
+      "TaughtBy": "Enseigné par {name}",
+      "TeacherCap": "un enseignant ne peut former que jusqu'au niveau {n}",
+      "NoTeacher": "Aucun camarade n'enseigne cette formation : il n'y a donc rien à lancer ici — les points arrivent quand l'arbitre les accorde. Compagnon p.39",
+      "Barred": {
+        "jackOfAllTrades": "La compétence Polyvalent ne peut jamais être apprise ou améliorée (Livre de base p.54)",
+        "social": "Le SOC ne peut pas s'entraîner (Compagnon p.40)",
+        "psionic": "La PSI ne figure pas dans la table du Compagnon et relève de sa propre Formation psionique : le système l'exclut ici (Compagnon p.40)",
+        "alreadyTraining": "déjà en formation",
+        "skillCap": "niveau 0 seulement — le plafond de compétences est atteint (Livre de base p.54)"
+      },
+      "AthleticsNote": "utilise une caractéristique physique, pas l'ÉDU (Livre de base p.54)",
+      "Rule": {
+        "core": "Huit semaines d'étude font une période d'étude ; elles ne doivent pas nécessairement être consécutives, mais chaque semaine doit être entièrement consacrée à l'étude. Une période achevée se règle par un test Moyenne (8+), et atteindre un niveau demande autant de périodes d'étude réussies que le niveau lui-même. Livre de base p.54",
+        "companion": "Les points d'Expérience dédiée sont alloués à un domaine d'apprentissage précis et ne peuvent en aucun cas être réattribués ailleurs ; un point d'Expérience générale doit être alloué dès qu'il est accordé et ne peut pas être mis de côté dans une « réserve ». Compagnon p.39-40",
+        "skillCost": "Chaque niveau de compétence doit être acheté de manière séquentielle, y compris le niveau 0.",
+        "charCost": "Une caractéristique physique coûte sa nouvelle valeur, une mentale le double."
+      },
+      "Cost": "{periods} périodes · {weeks} semaines",
+      "CostPhysical": "{n} points — la nouvelle valeur",
+      "CostMental": "{n} points — une mentale coûte le double",
+      "RailCore": "{count} base · {weeks} semaines notées",
+      "RailCompanion": "{count} compagnon · {points} points dédiés",
+      "RailWeekRule": "une semaine appartient à un seul programme (Livre de base p.54)",
+      "NoteLabel": "Où sont passées les semaines",
+      "NotePlaceholder": "Saut vers Regina, bibliothèque du bord…",
+      "MigratedWeeks": "{weeks} semaines au-delà de la période ont été abandonnées lors de la migration.",
+      "NewSkill": "nouvelle compétence",
+      "LevelRange": "niveau {from} → {to}",
+      "ValueRange": "valeur {from} → {to}",
+      "Col": {
+        "Entry": "Entrée",
+        "Moved": "Mouvement",
+        "What": "Ce que c'était",
+        "Check": "Test"
+      },
+      "Stat": {
+        "Periods": "Périodes",
+        "ThisPeriod": "Période en cours",
+        "WeeksSpent": "Semaines passées",
+        "Dedicated": "Dédiée",
+        "Buys": "Achat",
+        "Awarded": "Accordés",
+        "Entries": "Entrées"
+      },
+      "Abandon": "Abandonner",
+      "DeleteRecord": "Supprimer le registre"
     },
     "RobotPower": {
       "internal": "Interne",
@@ -3295,7 +3417,8 @@
       "event": "Événement",
       "medicalCare": "Soins médicaux",
       "ageingCrisisCare": "Soins de crise de vieillissement",
-      "referee": "Arbitre"
+      "referee": "Arbitre",
+      "training": "Formation"
     },
     "CharacteristicLossHints": {
       "ageing": "Livre de base p.48. Il se répète à chaque terme à partir du quatrième, et le joueur choisit quelles caractéristiques l'encaissent — le choix est donc consigné et le total dérivé.",
@@ -3303,7 +3426,8 @@
       "event": "Une caractéristique qu'un événement ou un revers de carrière a prise ou donnée, souvent au choix du joueur.",
       "medicalCare": "Livre de base p.49. Rendre un point perdu coûte Cr5000, et un employeur peut en couvrir une part — le jet de Frais Médicaux appartient à l'arbitre et seul le résultat est consigné ici.",
       "ageingCrisisCare": "Livre de base p.49. Un seul prix lancé quoi qu'il rende, et il remet chaque caractéristique tombée à 0 à 1 — pas là où elle était.",
-      "referee": "Un changement permanent qu'aucune règle imprimée ne couvre. Il se consigne comme les autres, et se défait en supprimant la ligne."
+      "referee": "Un changement permanent qu'aucune règle imprimée ne couvre. Il se consigne comme les autres, et se défait en supprimant la ligne.",
+      "training": "Compagnon p.40. Une caractéristique achetée avec des points d'Expérience : une physique coûte sa nouvelle valeur, une mentale le double, et chaque valeur s'achète l'une après l'autre. Le SOC ne peut pas s'entraîner."
     },
     "Loss": {
       "Title": "Changements permanents",
@@ -3344,30 +3468,59 @@
         "AllChecks": "MD {dm} à tous les tests de compétence jusqu'à l'acclimatation — 1D semaines, ou 1D jours avec Athlétisme (force). Quitter la région n'y met pas fin.",
         "PhysicalChecks": "MD {dm} à tous les tests de compétence physique jusqu'à l'acclimatation — 1D semaines, ou 1D jours avec Athlétisme (dextérité). Quitter la région n'y met pas fin.",
         "FIELDS": {
-          "band": { "label": "Bande" },
-          "gees": { "label": "Gravité (g)", "hint": "La valeur imprimée, pour un monde plus dense que sa bande. Laissé vide, la valeur nominale de la bande s'applique." },
-          "recoil": { "label": "Le recul fait tournoyer le tireur", "hint": "En gravité zéro, tirer sans un test d'Athlétisme (dextérité) Moyen (8+) met le tireur en rotation." }
+          "band": {
+            "label": "Bande"
+          },
+          "gees": {
+            "label": "Gravité (g)",
+            "hint": "La valeur imprimée, pour un monde plus dense que sa bande. Laissé vide, la valeur nominale de la bande s'applique."
+          },
+          "recoil": {
+            "label": "Le recul fait tournoyer le tireur",
+            "hint": "En gravité zéro, tirer sans un test d'Athlétisme (dextérité) Moyen (8+) met le tireur en rotation."
+          }
         }
       },
       "temperature": {
         "FIELDS": {
-          "celsius": { "label": "Température" },
-          "damage": { "label": "Dégâts" },
-          "interval": { "label": "Intervalle", "hint": "Seul Par round s'applique de lui-même. Tout intervalle plus long est indiqué ici et appliqué par l'arbitre." },
-          "protectedBy": { "label": "Annulé par", "hint": "L'équipement porté dont le nom figure ici supprime entièrement le danger." }
+          "celsius": {
+            "label": "Température"
+          },
+          "damage": {
+            "label": "Dégâts"
+          },
+          "interval": {
+            "label": "Intervalle",
+            "hint": "Seul Par round s'applique de lui-même. Tout intervalle plus long est indiqué ici et appliqué par l'arbitre."
+          },
+          "protectedBy": {
+            "label": "Annulé par",
+            "hint": "L'équipement porté dont le nom figure ici supprime entièrement le danger."
+          }
         }
       },
       "vacuum": {
         "FIELDS": {
-          "pressure": { "label": "Pression" },
-          "damage": { "label": "Dégâts" },
-          "breach": { "label": "Brèche de combinaison" }
+          "pressure": {
+            "label": "Pression"
+          },
+          "damage": {
+            "label": "Dégâts"
+          },
+          "breach": {
+            "label": "Brèche de combinaison"
+          }
         }
       },
       "radiation": {
         "FIELDS": {
-          "rads": { "label": "Dose" },
-          "shielded": { "label": "Absorbé par la région", "hint": "Rads arrêtés avant la déduction du score de Rad du voyageur." }
+          "rads": {
+            "label": "Dose"
+          },
+          "shielded": {
+            "label": "Absorbé par la région",
+            "hint": "Rads arrêtés avant la déduction du score de Rad du voyageur."
+          }
         }
       }
     },

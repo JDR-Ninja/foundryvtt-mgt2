@@ -1,0 +1,430 @@
+// The training window. Ported from docs/sketch-training.html, panel C. Everything the kit already
+// carries — `.block`, `.sect`, `.statline`, `table.rows`, `.btn`, `p.hint` — is used unchanged, so
+// what is here is the window skeleton plus the four things this screen owns: the rail of programmes,
+// the week ledger, the points ledger, and the sentence that says what a success will write.
+//
+// Every selector is scoped to one of the three roots this feature owns (`.training-rail`,
+// `.training-panel`, `.training-pick`). The sheet strip drawn by panel B of the same sketch shares
+// four of these class names and lives in `_character.sass`, so an unscoped rule here would reach it.
+
+.mgt2.application.training
+	container-type: inline-size
+	container-name: sheet
+
+	> .window-content
+		display: grid
+		grid-template-columns: 15rem minmax(0, 1fr)
+		height: 100%
+		overflow: hidden
+
+		> [data-application-part="rail"],
+		> [data-application-part="panel"]
+			min-height: 0
+
+// --------------------------------------------
+//  The rail
+// --------------------------------------------
+
+.mgt2 .training-rail
+	display: flex
+	flex-direction: column
+	min-height: 0
+	overflow-y: auto
+	scrollbar-gutter: stable
+	border-right: 1px solid var(--rule)
+
+	.rhd
+		display: flex
+		align-items: baseline
+		gap: 8px
+		padding: 9px 12px 6px
+		.lbl
+			flex: 1 1 auto
+		.add
+			display: inline-flex
+			font-size: 11px
+			color: var(--accent-text)
+			cursor: var(--cursor-pointer)
+
+	// Core p.55 dedicates a week wholly to ONE programme and no clock can check that (§9.35), so the
+	// cross-programme sum is printed where the referee who CAN check it is looking.
+	.rtot
+		padding: 0 12px 9px
+		font-family: var(--mono)
+		font-size: 10px
+		line-height: 1.5
+		color: var(--faint)
+
+	> .hint
+		padding: 0 12px 12px
+
+	.prog
+		display: flex
+		flex-direction: column
+		gap: 2px
+		padding: 7px 12px 8px
+		cursor: var(--cursor-pointer)
+		border-top: 1px solid var(--rule-soft)
+		border-left: 2px solid transparent
+		&:hover
+			background: var(--hover)
+		&.on
+			background: var(--hover)
+			border-left-color: var(--accent-text)
+		b
+			overflow: hidden
+			font-family: var(--cond)
+			font-size: 12px
+			font-weight: 700
+			letter-spacing: 0.1em
+			text-transform: uppercase
+			text-overflow: ellipsis
+			white-space: nowrap
+		.st
+			display: flex
+			align-items: center
+			gap: 7px
+			font-family: var(--mono)
+			font-size: 10px
+			color: var(--faint)
+			.eng
+				font-size: 8px
+		&.done b
+			color: var(--mute)
+
+// Which book runs this record. It is stored per programme, so a mixed list has to say so on every
+// row — otherwise two progressions that count different things look alike.
+.mgt2 .training-rail .eng,
+.mgt2 .training-pick .eng
+	flex: 0 0 auto
+	padding: 0 4px
+	font-family: var(--cond)
+	font-size: 8.5px
+	font-weight: 700
+	letter-spacing: 0.16em
+	text-transform: uppercase
+	color: var(--faint)
+	border: 1px solid var(--rule)
+	border-radius: 2px
+
+// --------------------------------------------
+//  The panel
+// --------------------------------------------
+
+.mgt2 .training-panel
+	display: flex
+	flex-direction: column
+	gap: 14px
+	min-height: 0
+	overflow-y: auto
+	scrollbar-gutter: stable
+	padding: 12px 15px 15px
+
+	.hd
+		display: flex
+		flex-direction: column
+		gap: 6px
+		.top
+			display: flex
+			flex-wrap: wrap
+			align-items: baseline
+			gap: 10px
+			h2
+				margin: 0
+				font-family: var(--cond)
+				font-size: 16px
+				font-weight: 700
+				letter-spacing: 0.12em
+				text-transform: uppercase
+			.of
+				font-family: var(--cond)
+				font-size: 11px
+				font-weight: 600
+				letter-spacing: 0.14em
+				text-transform: uppercase
+				color: var(--faint)
+			.who
+				margin-left: auto
+				font-family: var(--mono)
+				font-size: 10.5px
+				color: var(--faint)
+
+	.idle
+		display: flex
+		flex-direction: column
+		align-items: flex-start
+		gap: 10px
+
+	.foot
+		display: flex
+		gap: 7px
+		justify-content: flex-end
+		padding-top: 2px
+		.kill:hover
+			color: var(--danger)
+			border-color: color-mix(in oklab, var(--danger) 55%, transparent)
+
+	table.rows
+		td.out
+			font-family: var(--cond)
+			font-size: 11px
+			font-weight: 700
+			letter-spacing: 0.12em
+			text-transform: uppercase
+		td.out.pass
+			color: var(--good)
+		td.out.fail
+			color: var(--danger)
+		td.txt
+			font-size: 12.5px
+			color: var(--mute)
+
+// The ladder repeats the strip's pips at reading size, and it is the one place a failed period is
+// visible as a thing that happened rather than as a missing tick — so they STACK rather than fill.
+.mgt2 .training-panel .ladder
+	display: flex
+	align-items: center
+	gap: 11px
+	.cnt
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--faint)
+
+.mgt2 .training-panel .pds
+	display: flex
+	align-items: center
+	gap: 4px
+	i
+		width: 12px
+		height: 12px
+		border: 1px solid var(--rule)
+		border-radius: 50%
+	i.pass
+		background: var(--fill)
+		border-color: var(--fill)
+	i.fail
+		background: repeating-linear-gradient(135deg, var(--faint) 0 1px, transparent 1px 3px)
+		border-style: dashed
+
+// WHAT IT WILL WRITE. The window says the consequence before it happens, because the one thing the
+// shipped block never did was apply an outcome.
+.mgt2 .training-panel .will
+	display: flex
+	align-items: baseline
+	gap: 9px
+	padding: 8px 11px
+	background: var(--accent-soft)
+	border-left: 2px solid var(--accent-line)
+	.lbl
+		flex: 0 0 auto
+	p
+		margin: 0
+		font-size: 12.5px
+		line-height: 1.4
+	.btn
+		flex: 0 0 auto
+		margin-left: auto
+	&.barred
+		background: color-mix(in oklab, var(--danger) 8%, transparent)
+		border-left-color: color-mix(in oklab, var(--danger) 55%, transparent)
+		p
+			color: var(--danger)
+
+// --------------------------------------------
+//  The two ledgers
+// --------------------------------------------
+// One block, two engines. Core fills eight boxes and rolls; the Companion counts points against a
+// cost that doubles per level, so eight boxes would stop meaning anything at level 5 and it gets a
+// bar instead. The awards sit behind a referee label because Companion p.41 gives them to the
+// Arbitre, and there is no pool anywhere on the page.
+
+.mgt2 .training-panel .period
+	display: flex
+	flex-direction: column
+	gap: 9px
+	padding: 10px 12px 11px
+	border: 1px solid var(--rule-soft)
+
+	.prow
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 12px
+
+	label.pnote
+		display: flex
+		flex: 1 1 12rem
+		flex-direction: column
+		gap: 3px
+
+	select.pick
+		flex: 0 0 auto
+		width: auto
+
+	.cnt
+		font-family: var(--cond)
+		font-size: 15px
+		font-weight: 700
+		font-variant-numeric: tabular-nums
+		color: var(--ink)
+		.of
+			font-size: 11px
+			font-weight: 500
+			color: var(--mute)
+
+	.roll
+		display: flex
+		align-items: center
+		gap: 10px
+		margin-left: auto
+		.why
+			font-family: var(--cond)
+			font-size: 10px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			text-align: right
+			color: var(--faint)
+		.btn
+			padding: 5px 12px
+			font-size: 11px
+
+	.gauge
+		position: relative
+		flex: 1 1 7rem
+		height: 4px
+		background: var(--track)
+		i
+			display: block
+			width: var(--g, 0%)
+			max-width: 100%
+			height: 100%
+			background: var(--fill)
+
+// Eight boxes, because eight weeks is the rule and a reader should not have to be told it. They are
+// boxes and not a bar because the weeks need not be consecutive, and clicking a ticked one is the
+// only undo there is.
+.mgt2 .training-panel .wks
+	display: flex
+	gap: 3px
+	i
+		width: 24px
+		height: 17px
+		border: 1px solid var(--rule)
+	i.on
+		background: var(--fill)
+		border-color: var(--fill)
+	i[data-action]
+		cursor: var(--cursor-pointer)
+		&:hover
+			border-color: var(--accent-text)
+	i.on[data-action]:hover
+		background: var(--accent-text)
+
+.mgt2 .training-panel .awards
+	display: flex
+	flex-wrap: wrap
+	align-items: center
+	gap: 5px
+	.btn
+		padding: 3px 9px
+		font-size: 9.5px
+		i
+			margin-left: 6px
+			font-family: var(--mono)
+			font-size: 9px
+			font-style: normal
+			letter-spacing: 0
+			text-transform: none
+			color: var(--faint)
+
+.mgt2 .training-panel .teach
+	font-family: var(--mono)
+	font-size: 10.5px
+	line-height: 1.5
+	color: var(--faint)
+	a
+		color: var(--accent-text)
+		cursor: var(--cursor-pointer)
+	a.x
+		margin-left: 5px
+		color: var(--faint)
+		&:hover
+			color: var(--danger)
+	b
+		font-weight: 400
+		color: var(--mute)
+
+// The comrade is dropped rather than picked from a list, so the sentence that says nobody teaches
+// this is also the target that names one.
+.mgt2 .training-panel .hint.drop
+	padding: 7px 9px
+	border: 1px dashed var(--rule)
+
+.mgt2 .training-panel [data-accept].over
+	outline: 1px dashed var(--accent-text)
+.mgt2 .training-panel [data-accept].deny
+	outline: 1px dashed var(--danger)
+
+// --------------------------------------------
+//  The picker
+// --------------------------------------------
+// Refusals are content: a Traveller who goes looking for Jack-of-all-Trades is answered with the
+// citation and a strike-through rather than with an empty list.
+
+.mgt2 .training-pick .opts
+	display: flex
+	flex-direction: column
+	max-height: 24rem
+	overflow-y: auto
+
+	.opt
+		display: flex
+		align-items: baseline
+		gap: 9px
+		padding: 5px 8px
+		font-size: 13px
+		cursor: var(--cursor-pointer)
+		border-bottom: 1px solid var(--rule-soft)
+		&:last-child
+			border-bottom: 0
+		&:hover
+			background: var(--hover)
+		input[type="radio"]
+			margin: 0
+			accent-color: var(--accent-text)
+		b
+			font-family: var(--cond)
+			font-size: 12.5px
+			font-weight: 700
+			letter-spacing: 0.09em
+			text-transform: uppercase
+		.why
+			font-family: var(--cond)
+			font-size: 10px
+			font-weight: 600
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--faint)
+		.lv
+			margin-left: auto
+			font-family: var(--mono)
+			font-size: 11px
+			color: var(--mute)
+
+	.opt.new
+		input.f
+			flex: 1 1 9rem
+			width: auto
+		.why
+			margin-left: auto
+
+	.opt.barred
+		cursor: not-allowed
+		&:hover
+			background: none
+		b
+			color: var(--faint)
+			text-decoration: line-through
+		.why
+			color: var(--danger)

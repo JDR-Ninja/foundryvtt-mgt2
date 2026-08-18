@@ -73,6 +73,18 @@ export const RULES = Object.freeze({
         choices: EXTRA_CHARACTERISTICS, choiceLabel: "MGT2.Characteristics.{key}.name",
         default: [], seed: EXTRA_CHARACTERISTICS
     },
+    // Not a flag, because a table may legitimately run the Companion's Experience Points *and*
+    // Core's Study Periods — one Traveller at a downport university, another taught by a comrade.
+    // `both` is what makes the picker ask which engine a new programme uses; on either single option
+    // it does not ask, and a programme of the other kind still reads and still resolves, because the
+    // engine is stored on the record (§9.133).
+    advancementSystem: {
+        group: "travellers", book: "core", page: "55",
+        options: { core: "MGT2.Rules.advancementSystem.core",
+            companion: "MGT2.Rules.advancementSystem.companion",
+            both: "MGT2.Rules.advancementSystem.both" },
+        default: "core"
+    },
 
     /* Character creation, §9.56's sixteen. Every question §9.48-§9.55 left open, each with the default
      * the user chose on 2026-08-14. **None of these is a printed rule** — there is no comprehensive

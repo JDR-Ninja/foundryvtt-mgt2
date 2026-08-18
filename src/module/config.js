@@ -2110,7 +2110,10 @@ MGT2.CharacteristicLossSources = Object.freeze({
     event: "MGT2.CharacteristicLossSources.event",
     medicalCare: "MGT2.CharacteristicLossSources.medicalCare",
     ageingCrisisCare: "MGT2.CharacteristicLossSources.ageingCrisisCare",
-    referee: "MGT2.CharacteristicLossSources.referee"
+    referee: "MGT2.CharacteristicLossSources.referee",
+    // Compagnon p.40 lets a programme BUY a characteristic, and the point bought goes here as a
+    // signed +1 rather than into `base` — which §9.39 reserves for what was first rolled (§9.133).
+    training: "MGT2.CharacteristicLossSources.training"
 });
 
 // Core folio 49's two prices, and they buy different things (§9.39, §9.91). `perPoint` is what one
@@ -2569,6 +2572,66 @@ MGT2.PsionicTraining = Object.freeze({
     formula: "2D",
     // A learned talent arrives at level 0.
     level: 0
+});
+
+/* -------------------------------------------- */
+
+/* Post-career training, §9.133. Core p.55's Study Periods and Compagnon p.39-40's Experience Points
+ * are two ways of moving one record, so the vocabulary below is shared and the engine is a property
+ * of the programme rather than of the world. */
+
+// Core p.55: "A Study Period is equal to eight weeks (or two months) of study and practice."
+MGT2.TrainingPeriodWeeks = 8;
+
+// Which book runs a programme. Stored per programme rather than read off the world setting: `both` is
+// a legal setting, and a table that switches mid-campaign must not re-interpret a log written under
+// the other engine.
+MGT2.AdvancementEngines = Object.freeze({
+    core: "MGT2.Training.Engine.core",
+    companion: "MGT2.Training.Engine.companion"
+});
+
+// Core trains skills; Compagnon p.40 also buys characteristics.
+MGT2.TrainingTargets = Object.freeze({
+    skill: "MGT2.Training.Target.skill",
+    characteristic: "MGT2.Training.Target.characteristic"
+});
+
+// ONE log, both engines, because every row is the same sentence: something happened, it may have
+// involved a check, and it moved the programme by an amount. `period` is Core's eight weeks, the
+// middle four are the Companion's ways of earning a point, and `grant` is the reset both write when
+// a level arrives.
+MGT2.TrainingLogKinds = Object.freeze({
+    period: "MGT2.Training.LogKind.period",
+    study: "MGT2.Training.LogKind.study",
+    fullTime: "MGT2.Training.LogKind.fullTime",
+    teaching: "MGT2.Training.LogKind.teaching",
+    adventure: "MGT2.Training.LogKind.adventure",
+    grant: "MGT2.Training.LogKind.grant"
+});
+
+// Compagnon p.40's two price tables. `skill` is indexed by the LEVEL being bought and doubles per
+// level past the sixth; a characteristic costs its new value, and a mental one twice that. SOC and
+// PSI are in neither list and are trainable by neither table — the page names five characteristics,
+// and psionic strength has training rules of its own. Spelled out rather than read off
+// `MGT2.PhysicalCharacteristics`: that one is folio 9's heading, and a price table is its own rule.
+MGT2.TrainingCosts = Object.freeze({
+    skill: Object.freeze([1, 1, 2, 4, 8, 16, 32]),
+    mental: Object.freeze(["intellect", "education"]),
+    physical: Object.freeze(["strength", "dexterity", "endurance"])
+});
+
+// Core p.55: "The Athletics skill may be learned or improved but does not use EDU. Instead, use the
+// appropriate physical characteristics (STR, DEX or END)." Which one is what the SPECIALITY names, so
+// the printed word is read back off the skill name. Every language the system targets is listed, the
+// device `MGT2.FirstAidSkills` already uses (§9.75): a skill is free text with no registry behind it.
+MGT2.AthleticsTraining = Object.freeze({
+    skills: Object.freeze(["athletics", "athlétisme"]),
+    specialities: Object.freeze({
+        strength: Object.freeze(["strength", "force"]),
+        dexterity: Object.freeze(["dexterity", "dextérité"]),
+        endurance: Object.freeze(["endurance"])
+    })
 });
 
 /* -------------------------------------------- */

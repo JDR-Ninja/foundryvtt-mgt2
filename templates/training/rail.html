@@ -1,0 +1,51 @@
+<aside class="training-rail">
+
+	{{! Not `.mgt2-rail`: the sheet's rail carries a 16px gap and a 12px inset, and these rows are
+	    edge-to-edge with their own padding and a selected-row border down the left.
+
+	    Core p.55 dedicates a week wholly to ONE programme, and the system has no calendar to check
+	    that against (§9.35) — so the cross-programme sum below is printed where the referee who CAN
+	    check it is looking. }}
+	<div class="rhd">
+		<span class="lbl">{{localize 'MGT2.Training.Programmes'}}</span>
+		{{#if canEdit}}
+		<a class="add" data-action="programmeAdd" data-tooltip="{{localize 'MGT2.Training.Start'}}"
+			aria-label="{{localize 'MGT2.Training.Start'}}"><i class="fa-solid fa-plus"></i></a>
+		{{/if}}
+	</div>
+	<div class="rtot">
+		{{totals.core}}<br />
+		{{totals.companion}}<br />
+		{{localize 'MGT2.Training.RailWeekRule'}}
+	</div>
+
+	{{#each live as |row|}}
+	<div class="prog{{#if row.selected}} on{{/if}}" data-programme="{{row.id}}" data-action="programmeSelect">
+		<b>{{row.name}}</b>
+		<span class="st">
+			<span class="eng">{{localize row.badge}}</span>
+			{{row.range}} <i>·</i> {{row.state}}
+		</span>
+	</div>
+	{{/each}}
+
+	{{#if closed.length}}
+	{{! Partitioned rather than flagged mid-loop: a programme closes wherever it happens to sit in
+	    the map, and a header emitted on the first closed row would drag every later live one
+	    under it. }}
+	<div class="rhd"><span class="lbl">{{localize 'MGT2.Training.Closed'}}</span></div>
+	{{#each closed as |row|}}
+	<div class="prog done{{#if row.selected}} on{{/if}}" data-programme="{{row.id}}" data-action="programmeSelect">
+		<b>{{row.name}}</b>
+		<span class="st">
+			<span class="eng">{{localize row.badge}}</span>
+			{{row.range}} <i>·</i> {{row.state}}
+		</span>
+	</div>
+	{{/each}}
+	{{/if}}
+
+	{{#unless live.length}}{{#unless closed.length}}
+	<p class="hint">{{localize 'MGT2.Training.Idle'}}</p>
+	{{/unless}}{{/unless}}
+</aside>

@@ -28,8 +28,11 @@ export class CharacterData extends ActorBaseData {
     // PSI as the exception.
     static MENTAL_LINKS = ["intellect", "education"];
 
-    // Core p.55: "A Study Period is equal to eight weeks (or two months) of study and practice."
-    static STUDY_PERIOD_WEEKS = 8;
+    // The key the one pre-0.2.0 Study Period lands on: sixteen alphanumerics, as
+    // `training.programmes` validates, and DETERMINISTIC. A fresh `randomID` would give two clients
+    // two different keys for the same Traveller until the world migration persisted one of them, and
+    // a week logged on one would not reach the other.
+    static LEGACY_PROGRAMME = "studyPeriod00000";
 
     /** The six the core rulebook defines, in the order the UPP prints them. */
     static UPP_ORDER = ["strength", "dexterity", "endurance", "intellect", "education", "social"];
@@ -64,10 +67,58 @@ export class CharacterData extends ActorBaseData {
             health: new fields.SchemaField({
                 radiations: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true })
             }),
-            study: new fields.SchemaField({
-                skill: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-                total: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true }),
-                completed: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true })
+            // What the Traveller has under way, one record per endeavour, keyed by a randomID and
+            // never indexed: a week is logged at `training.programmes.<id>.weeks`, so two clients
+            // moving two programmes cannot overwrite one another the way an array rewrite would
+            // (§9.133). A closed programme stays in the same map behind `closed`, so one record
+            // shape means one view.
+            training: new fields.SchemaField({
+                programmes: new fields.TypedObjectField(new fields.SchemaField({
+                    // Which book runs this one. Stored per programme rather than read off the world
+                    // setting: `both` is a legal setting, and a table that switches mid-campaign must
+                    // not silently re-interpret a log written under the other engine.
+                    engine: new fields.StringField({ required: true, blank: false, initial: "core",
+                        choices: MGT2.AdvancementEngines }),
+                    // Core trains skills; the Companion also buys characteristics (p.40), so the
+                    // target is a pair. `key` is the printed skill name, speciality included — a skill
+                    // has no registry behind it (§9.75) — or a characteristic key. Stored as a name
+                    // and not a uuid because the Item this programme is about may not exist yet:
+                    // creating it is what the programme is for.
+                    target: new fields.SchemaField({
+                        kind: new fields.StringField({ required: true, blank: false, initial: "skill",
+                            choices: MGT2.TrainingTargets }),
+                        key: new fields.StringField({ required: true, blank: false, trim: true })
+                    }),
+                    // ONE log, both engines, because every row is the same sentence: something
+                    // happened, it may have involved a check, and it moved the programme by an amount.
+                    //   core       `period`     ok = the EDU check, amount = the weeks it cost
+                    //   companion  `study` `fullTime` `teaching` `adventure`   amount = points
+                    //   both       `grant`      amount = 0 (core) or −cost (companion)
+                    // `ok` is nullable because an award that rolls nothing is neither passed nor failed.
+                    log: new fields.ArrayField(new fields.SchemaField({
+                        kind: new fields.StringField({ required: true, blank: false, initial: "period",
+                            choices: MGT2.TrainingLogKinds }),
+                        ok: new fields.BooleanField({ required: false, nullable: true, initial: null }),
+                        amount: new fields.NumberField({ required: false, initial: 0, integer: true }),
+                        roll: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                        note: new fields.StringField({ required: false, blank: true, trim: true })
+                    }), { initial: [] }),
+                    // The open Study Period's weeks, capped at the period. Core only, and the ONLY
+                    // stored counter in either engine — everything else is the log summed.
+                    weeks: new fields.NumberField({ required: false, initial: 0, min: 0, max: 8, integer: true }),
+                    // The open period's note, promoted into its `period` row when the check closes it.
+                    note: new fields.StringField({ required: false, blank: true, trim: true }),
+                    // Core p.55 excepts Athletics from EDU and lets ANY physical characteristic buy
+                    // Athletics 0, so the choice belongs to the player and has to be stored. Blank
+                    // means derive, which `checkCharacteristic` does.
+                    characteristic: new fields.StringField({ required: false, blank: true, trim: true,
+                        choices: MGT2.Characteristics }),
+                    // Companion p.39's comrade. Their level caps what may be learned, so the link is
+                    // read at the roll and the number is never copied here.
+                    teacher: new fields.DocumentUUIDField({ required: false, nullable: true, initial: null,
+                        type: "Actor" }),
+                    closed: new fields.BooleanField({ required: false, initial: false })
+                }), { initial: {}, validateKey: key => /^[a-zA-Z0-9]{16}$/.test(key) })
             }),
             finance: new fields.SchemaField({
                 pension: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
@@ -196,8 +247,8 @@ export class CharacterData extends ActorBaseData {
     }
 
     /**
-     * Reads the pre-0.2.0 shape three times over. `damages` held three named ranks that could name the
-     * same characteristic twice, which applyDamage silently collapsed; the ordered list makes that
+     * Reads the pre-0.2.0 shape several times over. `damages` held three named ranks that could name
+     * the same characteristic twice, which applyDamage silently collapsed; the ordered list makes that
      * collapse explicit instead. `MGT2.Characteristics` is the right filter there: it is the
      * twelve-key `character` roster the old field was written against.
      *
@@ -219,6 +270,28 @@ export class CharacterData extends ActorBaseData {
         // and on the partial updates v14 also runs this over.
         if (typeof source.config?.initiative === "string") {
             source.config.initiative = { characteristic: source.config.initiative, flat: 0 };
+        }
+
+        // §9.133: the one Study Period becomes one Core programme. Guarded on the old subtree being
+        // present AND `training` being absent, because v14 runs this over update payloads as well as
+        // stored documents (see the characteristics loop below) — without it,
+        // `{"system.training.programmes.<id>.weeks": 6}` re-runs the conversion against a partial
+        // source on every week logged.
+        if (source.study?.skill && !source.training) {
+            const period = MGT2.TrainingPeriodWeeks;
+            const total = Math.max(0, Math.trunc(source.study.total) || 0);
+            const passed = Math.max(0, Math.trunc(source.study.completed) || 0);
+            // Lossy in one direction, and the note says so: the old shape recorded no failures, so a
+            // Traveller who failed four periods migrates as though they never happened, and the
+            // weeks past the eighth have nowhere to go.
+            const dropped = Math.max(0, total - period);
+            source.training = { programmes: { [CharacterData.LEGACY_PROGRAMME]: {
+                engine: "core",
+                target: { kind: "skill", key: source.study.skill },
+                log: Array.from({ length: passed }, () => ({ kind: "period", ok: true, amount: period })),
+                weeks: Math.min(total, period),
+                note: dropped ? game.i18n.format("MGT2.Training.MigratedWeeks", { weeks: dropped }) : ""
+            } } };
         }
 
         const damages = source.config?.damages;
@@ -328,7 +401,7 @@ export class CharacterData extends ActorBaseData {
             .map(key => MGT2Helper.uppDigit(this.characteristics[key].max)).join("");
 
         this.#prepareTreatment();
-        this.#prepareStudy();
+        this.#prepareTraining();
 
         this.inventory = { armor: 0, weight: 0, encumbrance: { normal: 0, heavy: 0 } };
         this.prepareArmor();
@@ -385,24 +458,119 @@ export class CharacterData extends ActorBaseData {
     /* -------------------------------------------- */
 
     /**
-     * Core p.55: eight weeks make a Study Period, a completed one is settled by an Average (8+) EDU
-     * check, and reaching a level costs as many *successful* periods as the level itself — one for a
-     * skill the Traveller does not have at all, which the first success grants at level 0.
+     * Core p.55's Study Periods and Compagnon p.39-40's Experience Points move the same record, so one
+     * pass derives both (§9.133). **Nothing here is a stored total**: Core counts the successful
+     * periods in the log and the Companion's balance is the log summed, purchases included as negative
+     * `grant` rows, so a balance cannot drift from the awards that produced it.
      *
-     * The two stored counters mean nothing apart: weeks answer "when is the check", periods answer
-     * "how many more". Neither is a total, so both totals derive from the trained skill instead.
+     * The `grant` row is the reset — under Core the periods before it no longer count — which is what
+     * lets one programme carry a Traveller from level to level. And `target` derives from the LIVE
+     * level: a Traveller who gains the level elsewhere keeps their banked periods and the goal moves
+     * up, rather than running a programme toward a level they already have.
      */
-    #prepareStudy() {
-        const period = CharacterData.STUDY_PERIOD_WEEKS;
-        const level = this.study.skill ? this.skillLevel(this.study.skill) : null;
+    #prepareTraining() {
+        const period = MGT2.TrainingPeriodWeeks;
+        Object.assign(this.training, {
+            weeksPerPeriod: period, live: 0, due: 0, weeksLogged: 0, pointsDedicated: 0 });
 
-        this.study.hasSkill = level !== null;
-        this.study.target = (level === null) ? 0 : level + 1;
-        this.study.periodsNeeded = Math.max(1, this.study.target);
-        this.study.periodsLeft = Math.max(0, this.study.periodsNeeded - this.study.completed);
-        this.study.weeksPerPeriod = period;
-        this.study.percent = Math.min(100, Math.round((this.study.total / period) * 100));
-        this.study.checkDue = this.study.total >= period;
+        for ( const programme of Object.values(this.training.programmes) ) {
+            const companion = programme.engine === "companion";
+            const target = programme.target;
+
+            programme.held = (target.kind === "characteristic")
+                ? (this.characteristics[target.key]?.max ?? null) : this.skillLevel(target.key);
+            programme.next = (programme.held === null) ? 0 : programme.held + 1;
+            programme.cost = CharacterData.trainingCost(target, programme.next);
+            // Compagnon p.39's teaching check is INT whatever the programme is buying; the stored
+            // override is Core's Athletics device (p.55) and has nothing to say about it. Resolved
+            // here rather than at each caller: two callers branching on the engine is two chances
+            // to roll EDU for a check the book puts on INT.
+            programme.checkCharacteristic = companion ? "intellect"
+                : (programme.characteristic || CharacterData.trainingCharacteristic(target));
+            programme.barred = CharacterData.trainingBarred(target);
+
+            const since = programme.log.slice(
+                programme.log.findLastIndex(row => row.kind === "grant") + 1);
+            programme.periodsNeeded = Math.max(1, programme.next);
+            programme.periodsPassed = since.filter(row => (row.kind === "period") && row.ok).length;
+            programme.periodsLeft = Math.max(0, programme.periodsNeeded - programme.periodsPassed);
+            programme.weeksSpent = programme.weeks + programme.log.reduce((sum, row) =>
+                sum + ((row.kind === "period") ? (row.amount || 0) : 0), 0);
+            // Every amount, grants included — which is the Companion's reading. A Core programme sums
+            // its own weeks here and never has the number read.
+            programme.xp = programme.log.reduce((sum, row) => sum + (row.amount || 0), 0);
+
+            // Where the verb is. Core: the check falls due on the eighth week. Companion: the award
+            // is the referee's (p.39), so the only check the player rolls is the teaching one, and it
+            // exists only where a comrade is actually teaching.
+            programme.checkDue = companion ? !!programme.teacher : (programme.weeks >= period);
+            programme.complete = companion ? (programme.cost > 0) && (programme.xp >= programme.cost)
+                : (programme.periodsPassed >= programme.periodsNeeded);
+            programme.ready = programme.complete && !programme.closed && !programme.barred;
+            const [done, of] = companion
+                ? [programme.xp, programme.cost] : [programme.weeks, period];
+            programme.percent = of > 0 ? Math.min(100, Math.round((done / of) * 100)) : 0;
+
+            if ( programme.closed ) continue;
+            this.training.live += 1;
+            // `checkDue` says a check is AVAILABLE; `due` counts what is waiting on someone, and the
+            // two part company under the Companion. A linked teacher makes a check available for as
+            // long as the link lasts, so counting it here would light a badge that never goes out —
+            // what actually waits there is a balance that can buy its level.
+            if ( programme.ready || ((programme.engine !== "companion") && programme.checkDue) ) {
+                this.training.due += 1;
+            }
+            this.training.weeksLogged += programme.weeksSpent;
+            if ( companion ) this.training.pointsDedicated += programme.xp;
+        }
+    }
+
+    /* -------------------------------------------- */
+
+    /**
+     * Compagnon p.40's two price tables: a skill costs by the level being bought and doubles per level
+     * past the sixth; a characteristic costs its new value, and a mental one twice that.
+     * @param {{kind: string, key: string}} target
+     * @param {number} next   The level or score being bought
+     * @returns {number}
+     */
+    static trainingCost(target, next) {
+        if ( target.kind === "characteristic" ) {
+            return MGT2.TrainingCosts.mental.includes(target.key) ? next * 2 : next;
+        }
+        const table = MGT2.TrainingCosts.skill;
+        return table[next] ?? (table.at(-1) * (2 ** (next - table.length + 1)));
+    }
+
+    /**
+     * What the Core check is rolled on where the programme states nothing. Core p.55: Athletics "does
+     * not use EDU. Instead, use the appropriate physical characteristics", and the speciality is what
+     * names which — so the printed name is read back rather than the exception being a branch.
+     * @param {{kind: string, key: string}} target
+     * @returns {string}   A characteristic key
+     */
+    static trainingCharacteristic(target) {
+        const athletics = MGT2.AthleticsTraining;
+        if ( (target.kind !== "skill")
+            || !athletics.skills.some(name => MGT2Helper.matchesSkill(target.key, name)) ) return "education";
+        const speciality = /\(([^)]*)\)\s*$/.exec(target.key)?.[1].trim().toLowerCase() ?? "";
+        return Object.keys(athletics.specialities).find(key =>
+            athletics.specialities[key].includes(speciality)) ?? "education";
+    }
+
+    /**
+     * What neither book lets a programme reach: Jack-of-all-Trades "may never be learned or improved"
+     * (Core p.55), and Compagnon p.40's table names five characteristics — so SOC, PSI and the six the
+     * Core Rulebook never defines are not buyable either.
+     * @param {{kind: string, key: string}} target
+     * @returns {boolean}
+     */
+    static trainingBarred(target) {
+        if ( target.kind === "characteristic" ) {
+            return !MGT2.TrainingCosts.physical.includes(target.key)
+                && !MGT2.TrainingCosts.mental.includes(target.key);
+        }
+        return MGT2.Untrained.skills.some(name => MGT2Helper.matchesSkill(target.key, name));
     }
 
     /* -------------------------------------------- */

@@ -1,0 +1,40 @@
+{{! DialogV2 builds its own <form>, and a nested one is dropped by the parser — hence the wrapper.
+    Refusals are drawn rather than hidden: a Traveller who goes looking for Jack-of-all-Trades has a
+    question, and an empty list answers it with silence where a struck row answers with the page. }}
+<div class="mgt2-dialog training-pick">
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Training.TrainWhat'}}</h3>
+			<span class="gm">{{engine}}</span>
+		</div>
+
+		{{! The cap speaks only where it binds: 3 × (INT + EDU) never comes near a typical Traveller,
+		    and a limit that never binds is noise on every sheet that is not this one. }}
+		{{#if capped}}<p class="hint">{{capped}}</p>{{/if}}
+
+		<div class="opts">
+			{{#each rows as |row|}}
+			<label class="opt{{#if row.barred}} barred{{/if}}">
+				<input type="radio" name="choice" value="{{row.value}}"{{#if row.barred}} disabled{{/if}} />
+				<span class="eng">{{localize row.badge}}</span>
+				<b>{{row.name}}</b>
+				<span class="why">{{row.why}}</span>
+				<span class="lv">{{row.range}}</span>
+			</label>
+			{{/each}}
+
+			{{! The Item a programme is about may not exist yet — creating it is what the programme
+			    is for — so a name is typed rather than picked. }}
+			{{#each typed as |row|}}
+			<label class="opt new">
+				<input type="radio" name="choice" value="{{row.value}}" />
+				<span class="eng">{{localize row.badge}}</span>
+				<input class="f" type="text" name="new-{{row.engine}}"
+					placeholder="{{localize 'MGT2.Training.NewSkill'}}"
+					aria-label="{{localize 'MGT2.Training.NewSkill'}}" />
+				<span class="why">{{row.why}}</span>
+			</label>
+			{{/each}}
+		</div>
+	</div>
+</div>

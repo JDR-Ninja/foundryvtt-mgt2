@@ -40,6 +40,7 @@ import { registerStopTraffic, StopTrafficDialog } from "./stop-traffic.js";
 import { registerSpecTrade, SpecTradeDialog } from "./trade.js";
 import { CreditSplit, registerCreditSplit } from "./credit-split.js";
 import { registerVoyageScreen } from "./voyage-screen.js";
+import { registerTrainingScreen, TrainingScreen } from "./training-screen.js";
 import {
   postRequest,
   registerRequestControls,
@@ -344,6 +345,9 @@ Hooks.once("init", async function () {
     // The request card's own two sides: what posts a demand, and what answers one line of it
     // through the seeded prompt.
     request: { post: postRequest, answer: answerRequest },
+    // The training window, and the door the sheet strip uses: it takes the programme the clicked row
+    // names, so a Grant button pressed on one row cannot open the window on another.
+    trainingScreen: TrainingScreen.open,
     // The creation ledger's read side: `flags.mgt2.chargen` is a convention rather than a schema, so
     // the helper that reads the roster off it is the only place that convention is stated (§9.38).
     chargen: Chargen,
@@ -399,6 +403,10 @@ Hooks.once("init", async function () {
   // other people's purses.
   registerCreditSplit();
   registerVoyageScreen();
+  // Two doors onto the training window, on the voyage screen's model: the Traveller's own sheet and
+  // the Actor directory. The loop it owns — a week logged, a check rolled, a skill Item written —
+  // has no place on a tab (§9.133).
+  registerTrainingScreen();
   // Three doors onto the creation grid: a Traveller's own sheet, the Actor directory's context menu
   // and its header, because resuming a session three hours in is opening the window with nobody
   // selected (§9.38).
