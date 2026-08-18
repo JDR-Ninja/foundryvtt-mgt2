@@ -41,7 +41,8 @@ const RADS_PER_BRAIN_POINT = 1000;
 /**
  * RH folio 106: "Basic or Hunter/Killer brains suffer DM-1 on all checks when INT is reduced to 2
  * and DM-2 when INT is reduced to 1." The two grades the sentence names, and the INT it names them
- * at; an Advanced brain's deterioration is a lowered skill the same paragraph leaves to the referee.
+ * at; an Advanced brain's deterioration is a lowered skill the same paragraph leaves to the
+ * referee.
  */
 const DEGRADED_GRADES = Object.freeze(["basic", "hunterKiller"]);
 const DEGRADED_BRAIN_DM = Object.freeze({ 1: -2, 2: -1 });
@@ -52,19 +53,7 @@ const TRAVELLER_ENDURANCE = Object.freeze({ floor: 6, packs: [9, 12, 15], effici
 /** RH p.19-20: the endurance multiplier for the robot's own Tech Level, best band first. */
 const ENDURANCE_TL = Object.freeze([{ minTL: 15, factor: 2 }, { minTL: 12, factor: 1.5 }]);
 
-/**
- * Schema and behaviour of the `robot` Actor sub-type. Four of the thirteen printed statblock rows
- * are design picks and the other nine are computed (§5.1), so this model is mostly derivations
- * hanging off `size`, `tl`, the locomotion list, the manipulators and the brain.
- *
- * Two things separate it from every other type. `characteristics.{str,dex,end,int}` are
- * **projections of design fields** and land in `auto`, the same accumulator a species modifier
- * feeds — an Active Effect on a robot's STR still targets `.effect` in the `initial` phase, so no
- * key changes phase by Actor type. And the slot budget is a design-time warning with no rule behind
- * it: the Robot Handbook states no penalty for exceeding Slots.
- *
- * @extends {ActorBaseData}
- */
+/** Schema and behaviour of the `robot` Actor sub-type. @extends {ActorBaseData} */
 export class RobotData extends ActorBaseData {
 
     static DEFAULT_DAMAGE_ORDER = ["hits"];
@@ -72,21 +61,16 @@ export class RobotData extends ActorBaseData {
     /** Every robot has manipulators, so the DEX projection is the one score always worth rolling. */
     static DEFAULT_INITIATIVE = "dexterity";
 
-    /** The six the flag reveals, in the order the UPP prints them (§5.8). */
+    /** The six the flag reveals, in the order the UPP prints them. */
     static TRAVELLER_KEYS = ["strength", "dexterity", "endurance", "intellect", "education", "social"];
 
-    /** The four the design computes into `auto` on every robot, flag or no flag (§1.3). */
+    /** The four the design computes into `auto` on every robot, flag or no flag. */
     static PROJECTED_KEYS = ["strength", "dexterity", "endurance", "intellect"];
 
     /** RH folio 115: the three the brain's task ceiling reaches, and no others. */
     static CEILING_KEYS = ["intellect", "education", "social"];
 
-    /**
-     * None of the three standing states is a robot's. It is never fatigued and never nauseated, and
-     * Core p.98's STR+END carrying threshold does not read across: RH p.115 makes a robot's END a
-     * power-pack rating rather than stamina, so a second battery would buy carrying capacity.
-     * `prepareEncumbrance` still fills `states.encumbrance`, as a readout with no DM behind it.
-     */
+    /** None of the three standing states is a robot's. */
     static CHECK_STATES = Object.freeze([]);
 
     static defineSchema() {
@@ -98,9 +82,7 @@ export class RobotData extends ActorBaseData {
 
         Object.assign(schema, {
             // `hits` carries the whole pool and the six canonical characteristics are declared on
-            // every robot but hidden until `traveller.enabled` (§1.3). STR, DEX, END and INT project
-            // from the design into `auto`; EDU and SOC carry an authored `base`, because a Bandwidth
-            // cap is not a value and a 2D roll has no hardware field to write back to (RH p.115-117).
+            // every robot but hidden until `traveller.enabled`.
             characteristics: new fields.SchemaField({
                 hits: createCharacteristicField(true),
                 strength: createCharacteristicField(false),
@@ -121,14 +103,14 @@ export class RobotData extends ActorBaseData {
             slots: new fields.SchemaField({
                 // Permanently deleted at design time, −Cr100 each and unrestorable (RH p.13).
                 removed: count(0),
-                // Declared although derived, so a chassis modification reaching it as a `final`-phase
-                // Active Effect is coerced and validated rather than written raw (§1.5, §1.6).
+                // Declared although derived, so a chassis modification reaching it as a
+                // `final`-phase Active Effect is coerced and validated rather than written raw
+                //.
                 total: count(0)
             }),
 
-            // Options are rows rather than `equipment` Items: §6.1's `slots` field on the Item type
-            // does not exist yet, and a robot option has no use for weight, quantity or an equipped
-            // flag. `zeroSlot` rows spend the Default Suite's budget instead (RH p.31).
+            // Options are rows rather than `equipment` Items: a robot option has no use for weight,
+            // quantity or an equipped flag.
             options: new fields.ArrayField(new fields.SchemaField({
                 name: new fields.StringField({ required: false, blank: true, trim: true }),
                 slots: new fields.NumberField({ required: false, nullable: false, min: 0, initial: 1 }),
@@ -136,8 +118,8 @@ export class RobotData extends ActorBaseData {
                 note: new fields.StringField({ required: false, blank: true, trim: true })
             }), { initial: [] }),
 
-            // A robot may carry a primary and a secondary mode, each granting its own traits
-            // (RH p.23), so this is an array and not an enum — and the primary is what Agility, the
+            // A robot may carry a primary and a secondary mode, each granting its own traits (RH
+            // p.23), so this is an array and not an enum — and the primary is what Agility, the
             // base endurance and the chassis cost multiplier all read.
             locomotion: new fields.ArrayField(new fields.SchemaField({
                 type: new fields.StringField({
@@ -162,8 +144,8 @@ export class RobotData extends ActorBaseData {
                 // of the endurance, a reduction sells one back (RH p.22).
                 tactical: new fields.NumberField({
                     required: false, nullable: false, integer: true, initial: 0 }),
-                // Vehicle Speed Movement replaces metres with a Speed Band entirely (RH p.23), so the
-                // two readouts below are exclusive. Null is "this robot moves in metres".
+                // Vehicle Speed Movement replaces metres with a Speed Band entirely (RH p.23), so
+                // the two readouts below are exclusive.
                 vehicleBand: new fields.NumberField({
                     required: false, nullable: true, integer: true, min: 0, max: 10, initial: null })
             }),
@@ -190,15 +172,11 @@ export class RobotData extends ActorBaseData {
                 // The `/fib` designation (RH p.67).
                 hardened: new fields.BooleanField({ required: false, initial: false }),
                 // RH folio 106: the rads that have reached the brain, cumulative and unrepairable.
-                // Only the count is stored — both losses are priced per 1,000 rads and derive from
-                // it, so "cannot be repaired without replacing the brain" is this field cleared.
                 rads: new fields.NumberField({
                     required: false, nullable: false, integer: true, min: 0, initial: 0 })
             }),
 
-            // §5.8: one type with a flag, not a chassis Item and not a second sub-type. Every
-            // Traveller characteristic of a robot PC is a projection of a design field it already
-            // owns, so a `character` carrying a chassis would have to shadow all six.
+            // One type with a flag, not a chassis Item and not a second sub-type.
             traveller: new fields.SchemaField({
                 enabled: new fields.BooleanField({ required: false, initial: false }),
                 // SOC is 0 where robots are property and 2D where one is a citizen (RH p.117); this
@@ -208,7 +186,7 @@ export class RobotData extends ActorBaseData {
             }),
 
             // Increased Resiliency buys a point of Hits for a Slot; Decreased Resiliency sells one
-            // back (RH p.20). Signed, and folded into the Size table's figure.
+            // back (RH p.20).
             resiliency: new fields.NumberField({
                 required: false, nullable: false, integer: true, initial: 0 }),
             // The Agility Enhancement the DEX projection adds on top of the manipulator (RH p.115).
@@ -221,10 +199,6 @@ export class RobotData extends ActorBaseData {
         });
         return schema;
     }
-
-    /* -------------------------------------------- */
-    /*  The design spine                            */
-    /* -------------------------------------------- */
 
     /** The Robot Size row (RH p.13) — Base Slots, Base Hits, the attack DM, Spaces and the cost. */
     get sizeRow() {
@@ -247,8 +221,8 @@ export class RobotData extends ActorBaseData {
     }
 
     /**
-     * RH p.16. The denominator for armour reduction, resiliency, efficiency, agility, tactical speed
-     * and vehicle speed — a named field, because otherwise five derivations recompute it.
+     * RH p.16. The denominator for armour reduction, resiliency, efficiency, agility, tactical
+     * speed and vehicle speed — a named field, because otherwise five derivations recompute it.
      */
     get baseChassisCost() {
         return this.sizeRow.cost * (this.primaryLocomotion?.costMultiplier ?? 1);
@@ -265,10 +239,7 @@ export class RobotData extends ActorBaseData {
         return MGT2.RobotBrains[this.brain.grade] ?? MGT2.RobotBrains.basic;
     }
 
-    /**
-     * Which step of the grade the robot's Tech Level buys. The ladder lists Bandwidth and INT per
-     * TL step (RH p.66), so a Very Advanced brain is Computer/3 at TL 12 and Computer/5 at TL 14.
-     */
+    /** Which step of the grade the robot's Tech Level buys. */
     get brainStep() {
         const row = this.brainRow;
         if (!row.tl?.length) return -1;
@@ -288,17 +259,12 @@ export class RobotData extends ActorBaseData {
     }
 
     /**
-     * The `computer` Item standing in for the brain — the third use of the type, after a Traveller's
-     * handcomp and a starship's Computer/25 (§5.4). Its `processing` is the total Bandwidth, so a
-     * storage module raises it by raising the Item.
+     * The `computer` Item standing in for the brain — the third use of the type, after a
+     * Traveller's handcomp and a starship's Computer/25.
      */
     get brainItem() {
         return this.parent.items.find(item => item.type === "computer") ?? null;
     }
-
-    /* -------------------------------------------- */
-    /*  Manipulators, speed, endurance              */
-    /* -------------------------------------------- */
 
     /** RH p.115: STR is the strongest manipulator's, and per check it is the limb actually used. */
     get strongestManipulator() {
@@ -351,10 +317,6 @@ export class RobotData extends ActorBaseData {
         ];
     }
 
-    /* -------------------------------------------- */
-    /*  The slot budget (§5.3)                      */
-    /* -------------------------------------------- */
-
     /**
      * RH p.13, p.31. `slots.base` is the Size table's figure and never moves: it stays the
      * multiplier for every "per Base Slot" cost and every "% of Slots" rounding, even when
@@ -371,8 +333,8 @@ export class RobotData extends ActorBaseData {
             if (option.zeroSlot) zeroUsed += 1;
             else used += option.slots;
         }
-        // Past the Default Suite's allowance every further zero-slot option costs a real Slot
-        // (RH p.31), which is what couples the two panels.
+        // Past the Default Suite's allowance every further zero-slot option costs a real Slot (RH
+        // p.31), which is what couples the two panels.
         const zeroBudget = ZERO_SLOT_BASE + this.size + this.tl;
         const overrun = Math.max(0, zeroUsed - zeroBudget);
         used += overrun;
@@ -390,11 +352,7 @@ export class RobotData extends ActorBaseData {
         return Math.max(1, Math.ceil((percent / 100) * this.sizeRow.slots * points));
     }
 
-    /**
-     * What a given number of added Protection points costs in Slots (RH p.19). Two rules, and the
-     * book's own StarTek needs both: `6 × 0.4 % × 16` is 0.384 and rounds to one Slot, but a TL 14
-     * band holds at most three points per Slot, so six points take two.
-     */
+    /** What a given number of added Protection points costs in Slots (RH p.19). */
     armourSlots(points) {
         const band = this.armourBand;
         if (!band || !(points > 0)) return 0;
@@ -403,17 +361,8 @@ export class RobotData extends ActorBaseData {
             Math.ceil(points / band.maxPerSlot));
     }
 
-    /* -------------------------------------------- */
-    /*  Accessors                                   */
-    /* -------------------------------------------- */
-
     /**
-     * RH p.13: wrecked at Hits 0, irreparably destroyed at cumulative damage twice its Hits. With
-     * the wound stored those are `damage >= max` and `damage >= 2 × max` — **the creature's two
-     * expressions** (Core p.85), stated the other way round, so there is no third damage model.
-     *
-     * Both comparisons are behind `max > 0`: a fresh robot has no Hits until its Size projects them
-     * and `0 >= 0` would read as destroyed on creation.
+     * RH p.13: wrecked at Hits 0, irreparably destroyed at cumulative damage twice its Hits.
      * @inheritDoc
      */
     damageStatesFor(characteristics) {
@@ -430,8 +379,7 @@ export class RobotData extends ActorBaseData {
     }
 
     /**
-     * A robot is wrecked and then destroyed; it is never unconscious and never dead. `inoperable` is
-     * off the roster because it comes off the rad count, and no wound moves it.
+     * A robot is wrecked and then destroyed; it is never unconscious and never dead.
      * @inheritDoc
      */
     get damageStateLabels() {
@@ -439,8 +387,8 @@ export class RobotData extends ActorBaseData {
     }
 
     /**
-     * RH p.8, p.13: Size 4 and below is Small, Size 6 and above is Large, and the figure is the same
-     * attacker-side ranged DM a creature's size trait carries.
+     * RH p.8, p.13: Size 4 and below is Small, Size 6 and above is Large, and the figure is the
+     * same attacker-side ranged DM a creature's size trait carries.
      */
     get attackDM() {
         return this.sizeRow.attackDM;
@@ -458,9 +406,6 @@ export class RobotData extends ActorBaseData {
 
     /**
      * RH folio 8's printed `Hardened` trait — "the robot's brain is immune to ion weapons.
-     * Additionally, all radiation damage inflicted on the robot is halved" — and folio 67's `/fib`
-     * design flag are one hardening said twice, the statblock's transcription and the build's own
-     * field. Either answers, so a transcribed robot and a designed one behave alike.
      * @type {boolean}
      */
     get hardened() {
@@ -475,10 +420,7 @@ export class RobotData extends ActorBaseData {
     /**
      * RH folio 66: "For skills normally modified by INT or EDU, the skill DM of a robot brain is
      * associated with its INT modifier" — and an intellect upgrade raises that DM, which is why the
-     * characteristic and not `brain.skillDM` is the number a check reads. The four projections come
-     * together because they are one fact: every one of them is computed from the design on every
-     * robot (§1.3), so `traveller.enabled` reveals a *column*, not a score. EDU and SOC stay behind
-     * the flag, where they have an authored base rather than a projected one.
+     * characteristic and not `brain.skillDM` is the number a check reads.
      * @inheritDoc
      */
     get rollableCharacteristics() {
@@ -486,18 +428,9 @@ export class RobotData extends ActorBaseData {
     }
 
     /**
-     * RH folio 115, quoted whole because both qualifications live in the same sentence: "An Advanced
-     * brain can only attempt Difficult (10+) and simpler tasks, a Very Advanced brain can attempt
-     * Very Difficult (12+) and a Self-Aware brain, Formidable (14+). Take note of two things: first,
-     * performing a task more slowly can lower difficulty by one level and second, this restriction
-     * only applies to INT, EDU or SOC-based checks. A robot Traveller is free to try an Impossible
-     * (16+) feat of STR."
-     *
-     * **Reported and never enforced.** The same folio ends the rule with "although external
-     * modifiers may modify a task to an equivalent complexity within the capability of the robot's
-     * brain" — a referee's judgement over modifiers no dictionary enumerates — so a refusal would
-     * contradict the page it came from. The prompt states the ceiling against the check being made
-     * and leaves the call where the folio leaves it.
+     * RH folio 115, quoted whole because both qualifications live in the same sentence: "An
+     * Advanced brain can only attempt Difficult (10+) and simpler tasks, a Very Advanced brain can
+     * attempt Very Difficult (12+) and a Self-Aware brain, Formidable (14+).
      * @inheritDoc
      */
     get taskCeiling() {
@@ -507,20 +440,7 @@ export class RobotData extends ActorBaseData {
         return { key, target, grade: this.brainRow.label, characteristics: RobotData.CEILING_KEYS };
     }
 
-    /* -------------------------------------------- */
-    /*  Data Preparation                            */
-    /* -------------------------------------------- */
-
-    /**
-     * The four projections. They are things the system computes rather than an author entering, so
-     * they land in `auto` exactly as a species modifier does (§9.9) — which is why nothing here is a
-     * phase exception: an Active Effect on a robot's STR targets `.effect` in the `initial` phase,
-     * like every other characteristic on every other Actor type.
-     *
-     * Here rather than in `prepareDerivedData` because the base reads `auto` on its first line, and
-     * because `super.prepareBaseData()` is what zeroes it.
-     * @inheritDoc
-     */
+    /** The four projections. @inheritDoc */
     prepareBaseData() {
         super.prepareBaseData();
         const c = this.characteristics;
@@ -584,13 +504,7 @@ export class RobotData extends ActorBaseData {
             ? null : Math.round(endurance.hours / VEHICLE_SPEED_DIVISOR);
     }
 
-    /**
-     * The `computer` pattern at a third scale. The brain Item's `processing` is the total Bandwidth
-     * when one is present, so a storage module raises it by raising the Item (RH p.67); with no Item
-     * the grade's own `Computer/X` stands. Skill packages are `item`/`software`, and this is the one
-     * host of the three that spends their **printed** Bandwidth: the Robot Handbook prints its own
-     * limits for a brain and never cross-references Core folio 110 the way HG p.20 does (§9.128).
-     */
+    /** The `computer` pattern at a third scale. */
     #prepareBrain() {
         const brain = this.brain;
         const item = this.brainItem;
@@ -602,11 +516,11 @@ export class RobotData extends ActorBaseData {
         for (const entry of this.parent.items) {
             if ((entry.type !== "item") || (entry.system.subType !== "software")) continue;
             // The PRINTED figure and never `bandwidthRun`: where Core p.110 lets a Traveller run
-            // high-Bandwidth software lower, RH p.67 makes the inherent Bandwidth "an absolute limit
-            // on the size of any singular skill package" and RH p.73 says "robot brains cannot
-            // process skills that require more than a brain's inherent (not expanded) Bandwidth" —
-            // a refusal, not a downgrade, and honouring one here would put `oversized` below out of
-            // reach for ever (§9.128).
+            // high-Bandwidth software lower, RH p.67 makes the inherent Bandwidth "an absolute
+            // limit on the size of any singular skill package" and RH p.73 says "robot brains
+            // cannot process skills that require more than a brain's inherent (not expanded)
+            // Bandwidth" — a refusal, not a downgrade, and honouring one here would put `oversized`
+            // below out of reach for ever.
             const bandwidth = entry.system.software.bandwidth ?? 0;
             if (entry.system.software.downgraded) downgradesIgnored += 1;
             if (bandwidth === 0) freeSkills += 1;
@@ -646,20 +560,17 @@ export class RobotData extends ActorBaseData {
         brain.freeSkills = inherent;
         brain.skillDM = this.brainRow.skillDM ?? 0;
         // The hardest difficulty the grade may attempt, surviving every INT upgrade (RH folio 115).
-        // What it reaches and how it is escaped is `taskCeiling` below.
         brain.taskCeiling = this.brainRow.taskCeiling ?? "";
         brain.taskCeilingTarget = brain.taskCeiling
             ? (MGT2.DifficultyTargets[brain.taskCeiling] ?? null) : null;
         // RH p.115: EDU equals INT for package skills and is otherwise capped at what Bandwidth the
-        // INT upgrades left. A cap is not a value, so it is shown beside the authored score.
+        // INT upgrades left.
         brain.educationCap = Math.max(0, brain.bandwidth.total - (INTELLECT_BANDWIDTH[brain.intellect] ?? 0));
     }
 
     /**
      * RH folio 106: a Basic or Hunter/Killer brain whose INT radiation has cut to 2 or 1 takes a DM
      * on **all** checks — so this modifier names no characteristic, the same way fatigue does not.
-     * Named rather than folded anonymously into `auto`, which is what puts it on the roll prompt as
-     * a row the referee can waive.
      */
     #brainDamageModifiers() {
         const dm = ((this.radiationLoss > 0) && DEGRADED_GRADES.includes(this.brain.grade))
@@ -668,12 +579,7 @@ export class RobotData extends ActorBaseData {
             : [{ key: "brainDamage", label: "MGT2.Actor.robot.BrainDamageDM", dm }];
     }
 
-    /**
-     * RH p.19: a robot has a base Protection from its TL band, and the design buys more on top. The
-     * printed `Armour (+X)` trait is the **total** — the StarTek prints +10 at TL 14, where the band
-     * gives +4 and six points were bought — so the trait wins outright wherever one is written and
-     * the band answers only when none is. Adding both would double-count every transcription.
-     */
+    /** RH p.19: a robot has a base Protection from its TL band, and the design buys more on top. */
     #prepareArmour() {
         const band = this.armourBand;
         const printed = MGT2Helper.hasTrait(this.traits, "armour");
@@ -688,21 +594,7 @@ export class RobotData extends ActorBaseData {
         };
     }
 
-    /* -------------------------------------------- */
-    /*  Rules (RH folio 106)                        */
-    /* -------------------------------------------- */
-
-    /**
-     * Two robot-only readings of the Protection a wound meets. "Armour does not protect against ion
-     * attacks", and against an electromagnetic stunner "a normal robot's Protection is only half
-     * effective" — rounded down, as the same paragraph rounds its own environment-protection figure.
-     *
-     * An android or biological robot's armour is fully effective against Stun, and hostile and
-     * radiation environment protection add their own scores back. Neither is modelled: the special
-     * robot types are not a sub-type here, and the protection options are free-text rows with no
-     * rating to read.
-     * @inheritDoc
-     */
+    /** Two robot-only readings of the Protection a wound meets. @inheritDoc */
     protectionAgainst(options = {}) {
         if (options.ion) return 0;
         const protection = super.protectionAgainst(options);
@@ -712,17 +604,6 @@ export class RobotData extends ActorBaseData {
     /**
      * The two rules that change what the pipeline *does* rather than what it is handed, so both
      * reduce the wound here and hand the result to the base raw.
-     *
-     * **Ion** — "Ion weapons cause Stun damage, shutting down the robot brain for a number of rounds
-     * equal to the ion damage inflicted. Armour does not protect against ion attacks but hardened
-     * components are immune." The stunner paragraph below it is what settles the reading: a stunner
-     * causes Hits "not temporary damage to robots", so ion is the temporary one — it takes no Hits
-     * at all and the whole score that landed is the shutdown.
-     *
-     * **Electromagnetic stunner** — "A stunner causes physical Hits, not temporary damage to
-     * robots", so Core p.79's Stun branch must not run: the wound is an ordinary one and only
-     * `protectionAgainst` above knows the difference. A sonic stunner does nothing to a robot at
-     * all, and the trait vocabulary cannot tell the two apart, so that exception stays the referee's.
      * @returns {Promise<{wound: number, rounds: number, shutdown?: number, immune?: boolean}|undefined>}
      */
     async applyDamage(amount, options = {}) {
@@ -740,13 +621,10 @@ export class RobotData extends ActorBaseData {
     /**
      * "Radiation weapons cause permanent damage to a robot's brain … A hardened brain halves the
      * effective radiation dose that penetrates this shielding … Every 1,000 rads affecting the
-     * robot's brain removes INT -1 and Bandwidth -1. Robots reduced to INT 0 are inoperable."
-     *
-     * A different ladder from Core folio 81's, reached through the same door: `resolveExposure` is
-     * the one notion of a dose arriving, and it has already taken the armour's Rad score off — which
-     * is the shielding the halving comes after. The hostile and radiation environment protection
-     * options the folio also names are free-text rows on this sheet with no rating to read, so an
-     * equipped armour Item is the whole of what a robot can deduct.
+     * robot's brain removes INT -1 and Bandwidth -1. Robots reduced to INT 0 are inoperable." A
+     * different ladder from Core folio 81's, reached through the same door: `resolveExposure` is
+     * the one notion of a dose arriving, and it has already taken the armour's Rad score off —
+     * which is the shielding the halving comes after.
      * @param {number} rads   The dose after the armour deduction
      * @returns {Promise<{dose: number, total: number, lines: string[]}|null>}
      */
@@ -766,21 +644,13 @@ export class RobotData extends ActorBaseData {
         return { dose, total, lines };
     }
 
-    /* -------------------------------------------- */
-    /*  Document Lifecycle                          */
-    /* -------------------------------------------- */
-
     /**
      * RH p.26: two manipulators at the robot's own Size come free, so a blank robot starts with the
      * pair rather than with none — and their scores are the formulas' output, which is exactly the
      * starting point the design rules then let a builder buy up from.
      * @inheritDoc
      */
-    /**
-     * The six are declared on every robot and hidden until the flag is set (§1.3). `show` is what
-     * carries that: it gates the characteristics column, the roll prompt's dropdown and the config
-     * dialog alike, and none of the three has any business knowing what a robot is.
-     */
+    /** The six are declared on every robot and hidden until the flag is set. */
     travellerSource(enabled) {
         const characteristics = {};
         for (const key of RobotData.TRAVELLER_KEYS) characteristics[key] = { show: enabled };
@@ -803,11 +673,7 @@ export class RobotData extends ActorBaseData {
         this.parent.updateSource(source);
     }
 
-    /**
-     * Setting the flag reveals the six in the same update. Without this the checkbox would change a
-     * boolean and nothing else, since `_preCreate` is the only other place `show` is written.
-     * @inheritDoc
-     */
+    /** Setting the flag reveals the six in the same update. @inheritDoc */
     async _preUpdate(changes, options, user) {
         const enabled = changes.system?.traveller?.enabled;
         if ((enabled === undefined) || (enabled === this.traveller.enabled)) return;

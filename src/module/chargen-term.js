@@ -7,43 +7,15 @@ import { Rules } from "./rules.js";
 
 const { DialogV2 } = foundry.applications.api;
 
-/**
- * The term loop: one Traveller, one term, walked **entirely from the frame's declared steps**.
- *
- * Nothing here decides the order. `Chargen.steps` reads the sequence off the species Item (§9.54) and
- * this module holds one procedure per step key; a frame that deletes survival never calls the survival
- * procedure, and a frame that adds a step of its own gets a referee step the loop records rather than
- * pretends to resolve. **No career name and no species name is compared anywhere in this file**
- * (§9.47): every rule the book states as a list of names — the commission's three services, the
- * qualification age DM, basic training's two exceptions, the assignment-change groups, the row-7
- * routing, the career that cannot eject and the track that releases it — is read off a field.
- *
- * **The owner rolls, and that is why creation needs no socket** (§9.38). Every write below is to the
- * player's own actor and its embedded Items, so a player drives their own column and every other
- * client redraws through the ordinary document update.
- *
- * **Three modules and one of each thing.** `CreationRoll` composes and posts every check — folio 11's
- * *2D + the named term's DM and nothing else*, never the play-time modifier stack (§9.40); `Grants`
- * writes every skill, contact and characteristic, with folio 18's two limits inside it (§9.45); and
- * this file is the control flow between them. Nothing here rolls or grants on its own.
- */
+/** The term loop: one Traveller, one term, walked **entirely from the frame's declared steps**. */
 export class ChargenTerm {
 
-    /**
-     * The steps this Traveller's term runs, in the frame's own order.
-     * @param {Actor} actor
-     * @returns {string[]}
-     */
+    /** The steps this Traveller's term runs, in the frame's own order. @returns {string[]} */
     static sequence(actor) {
         return Chargen.steps(actor).sequence;
     }
 
-    /**
-     * Where the loop is. Blank — a term not yet started — reads as the frame's first step, so a
-     * Traveller who has just joined the roster has somewhere to click before anything is written.
-     * @param {Actor} actor
-     * @returns {string}
-     */
+    /** Where the loop is. @returns {string} */
     static current(actor) {
         const sequence = this.sequence(actor);
         const stored = Chargen.read(actor).step;
@@ -57,19 +29,12 @@ export class ChargenTerm {
 
     /**
      * Run one step and leave the cursor on the next the frame declares.
-     *
-     * A step answers `{advance}` — false where it could not proceed, which leaves the table where it
-     * was rather than silently skipping a rule. `skip` is §9.50's control flow: a failed Survival
-     * costs three steps and the rest of the term still runs.
-     *
-     * @param {Actor} actor
      * @param {string} [step]   Defaults to the cursor
      * @returns {Promise<object|null>}
      */
     static async run(actor, step = null) {
         if ( !Chargen.isInCreation(actor) ) return null;
-        // The owner rolls. A referee may act for an absent player because they own every actor, and a
-        // player may not act on a column that is not theirs.
+        // The owner rolls.
         if ( !actor.canUserModify(game.user, "update") ) {
             ui.notifications.warn(game.i18n.format("MGT2.Chargen.Screen.NoPermission", { name: actor.name }));
             return null;
@@ -78,9 +43,7 @@ export class ChargenTerm {
         if ( !this.sequence(actor).includes(key) ) return null;
 
         // A step the frame declares and this build has no procedure of its own for — the nest
-        // transition, the status check, the continuation check (§9.54). It is rolled where the frame
-        // states a check (§9.120) and otherwise recorded as played rather than resolved, because
-        // inventing a procedure for it would be worse than saying so.
+        // transition, the status check, the continuation check.
         const handler = STEPS[key] ?? declaredStep;
         const result = await handler(reading(actor), key) ?? {};
         if ( result.advance === false ) return result;
@@ -90,8 +53,7 @@ export class ChargenTerm {
 
     /**
      * The cursor walks the frame's own sequence and empties at its end, which is what `decide` then
-     * turns into the next term. `skip` removes steps from what is left of this term without touching
-     * the frame — §9.50's *skip 4, 5 and 6, run 7, 8 and 9*, named rather than numbered.
+     * turns into the next term.
      */
     static async #advance(actor, from, skip = []) {
         const sequence = this.sequence(actor);
@@ -100,11 +62,8 @@ export class ChargenTerm {
     }
 
     /**
-     * Close the term: write what it was worth, credit the Benefit roll it earned, move the clock, and
-     * expire whatever the ending of a career expires. Called by `decide`, and separately by the screen
-     * for a frame that declares no such step.
-     * @param {Actor} actor
-     * @param {object} [options]
+     * Close the term: write what it was worth, credit the Benefit roll it earned, move the clock,
+     * and expire whatever the ending of a career expires.
      * @param {string} [options.exitMode]   Where the term also ended the career
      */
     static async closeTerm(actor, { exitMode = "" } = {}) {
@@ -119,23 +78,24 @@ export class ChargenTerm {
                 kind: kind?.key ?? ""
             });
             // Folio 18: a term whose Survival failed loses that term's Benefit roll — unless the
-            // mishap row said to keep it, which is `benefit: keep` and is credited back where the row
-            // is read (§9.49, §9.50). A frame's own term kind may yield none at all.
+            // mishap row said to keep it, which is `benefit: keep` and is credited back where the
+            // row is read.
             const earns = (entry.survived !== false) && (kind ? kind.yieldsBenefit : true);
             if ( earns ) {
                 await credit(actor, "benefitRolls", { value: 1, career: record.id, term,
                     note: game.i18n.localize("MGT2.Chargen.Term.BenefitTermServed") });
             }
             // `terms` is kept beside `termLog` and is what a record written before the log had
-            // (§9.103), so the loop keeps the two agreeing rather than leaving one stale.
+            //, so the loop keeps the two agreeing rather than leaving one stale.
             await record.update({ "system.terms": record.system.termLog.length,
                 ...(exitMode ? { "system.exitMode": exitMode } : {}) });
         }
         await Chargen.update(actor, { term: term + 1, step: "" });
         await Chargen.expirePending(actor, record?.id, exitMode);
-        // The hand-off, and it is a sentence rather than a screen: mustering out CONSUMES this ledger
-        // and the teardown follows it (§9.50), so a Traveller whose last career has closed is not
-        // finished — they are owed the closing screen, and nothing else in the loop would say so.
+        // The hand-off, and it is a sentence rather than a screen: mustering out CONSUMES this
+        // ledger and the teardown follows it, so a Traveller whose last career has closed
+        // is not finished — they are owed the closing screen, and nothing else in the loop would
+        // say so.
         if ( exitMode && Chargen.isDone(actor) ) {
             ui.notifications.info(game.i18n.format("MGT2.Chargen.Close.Ready", { name: actor.name }));
         }
@@ -143,19 +103,7 @@ export class ChargenTerm {
     }
 }
 
-/* -------------------------------------------- */
-/*  The steps                                   */
-/* -------------------------------------------- */
-
-/**
- * §9.50's start-of-term elections. The book prints this as a sentence about anagathics rather than as
- * a step, and it is a step because three of its clauses are loop mechanics: the roll happens *at the
- * start of a career term*, an exact 2 forces a career change that term, and a career may forbid the
- * drug outright — which is `blocksAnagathics`, the one restriction the Core prints (§9.52).
- *
- * What it deliberately does not carry is the anagathic state itself: that is a `drug` Item with its own
- * per-term cost and its second Survival check, which §9.39 deferred and this build does not open.
- */
+/** The start-of-term elections. */
 async function elect(view) {
     const { system, record, term } = view;
     if ( system?.blocksAnagathics ) {
@@ -173,9 +121,7 @@ async function elect(view) {
     const rolled = await roll(view, { check: "elections", step: "elect",
         characteristic: gate.characteristic, target: 10 });
     if ( !rolled ) return { advance: false };
-    // An exact 2 sends the Traveller to a forced-entry career this term. WHICH career is the referee's
-    // data — a template whose qualification entry is `forcedOnly` — so the loop says what happened and
-    // never names one.
+    // An exact 2 sends the Traveller to a forced-entry career this term.
     const note = (rolled.natural === 2) ? "MGT2.Chargen.Term.AnagathicsForced"
         : (rolled.passed ? "MGT2.Chargen.Term.AnagathicsTaken" : "MGT2.Chargen.Term.AnagathicsRefused");
     ui.notifications.info(game.i18n.localize(note));
@@ -183,13 +129,10 @@ async function elect(view) {
     return { advance: true };
 }
 
-/* -------------------------------------------- */
-
 /**
- * Qualification, and five of §9.53's six modes reach it as data rather than as a branch: a target with
- * one or more characteristics, an unconditional automatic, a score threshold that bypasses the roll, a
- * forced-only entry, and the referee's permission. The sixth — a choice of two characteristics — is
- * the length of the list.
+ * Qualification. Five of the six modes reach it as data rather than as a branch: a target
+ * with one or more characteristics, an unconditional automatic, a score threshold that bypasses the
+ * roll, a forced-only entry, and the referee's permission.
  */
 async function qualify(view) {
     const { actor, record, system, term } = view;
@@ -199,8 +142,7 @@ async function qualify(view) {
         ui.notifications.info(game.i18n.format("MGT2.Chargen.Term.Continuing", { career: record.name }));
         return { advance: true };
     }
-    // §9.39: an ageing crisis fails every later qualification roll automatically. Derived from the
-    // signed loss log rather than stored, so deleting the row that caused it undoes this too.
+    // An ageing crisis fails every later qualification roll automatically.
     if ( actor.system.states?.ageingCrisis ) {
         return failQualification(view, game.i18n.localize("MGT2.Chargen.Term.CrisisFails"));
     }
@@ -216,8 +158,9 @@ async function qualify(view) {
     if ( system.qualification.requiresPermission ) {
         ui.notifications.info(game.i18n.localize("MGT2.Chargen.Term.NeedsPermission"));
     }
-    // Folio 18: you may not return to the career you just left, and both exceptions are fields rather
-    // than names — a template that is always available beats the check, and so does a draft entry.
+    // Folio 18: you may not return to the career you just left, and both exceptions are fields
+    // rather than names — a template that is always available beats the check, and so does a draft
+    // entry.
     if ( leftLastTerm(view) && !system.alwaysAvailable
         && !["drafted", "draftedByEvent"].includes(system.entryMode) ) {
         ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.NoReturn", { career: record.name }));
@@ -226,14 +169,13 @@ async function qualify(view) {
 
     const rows = [];
     // "DM-1 for every previous career", printed on this career's own Qualification line and absent
-    // from two of the twelve — which is why it is a field and not the general rule §9.38 made of it.
+    // from two of the twelve — which is why it is a field rather than a general rule.
     const previous = Chargen.previousCareers(actor, record);
     if ( previous && system.qualification.perPreviousCareer ) {
         rows.push([game.i18n.format("MGT2.Chargen.Term.PreviousCareers", { n: previous }),
             system.qualification.perPreviousCareer * previous]);
     }
-    // "DM-2 if you are aged 30 or more" — three career names and two numbers §9.38 wrote into prose
-    // and §9.53 turned into this pair.
+    // "DM-2 if you are aged 30 or more" — three career names and two numbers, as one typed pair.
     if ( (system.ageDM.from !== null) && (Chargen.age(actor) >= system.ageDM.from) && system.ageDM.dm ) {
         rows.push([game.i18n.format("MGT2.Chargen.Term.AgeDM", { age: system.ageDM.from }), system.ageDM.dm]);
     }
@@ -250,9 +192,8 @@ async function qualify(view) {
 
     await record.update({ "system.entryMode": "qualified" });
     await logTerm(record, term, { note: game.i18n.localize("MGT2.Chargen.Term.Qualified") });
-    // **Rank 0 can carry a bonus, granted on entry**, which §9.48 noticed and never placed relative to
-    // basic training. It is placed here: entering is when the rank is attained, and folio 19 says a
-    // rank bonus is acquired immediately on attaining the rank.
+    // **Rank 0 can carry a bonus, granted on entry**, and the books never place it relative to
+    // basic training.
     await applyRankBonus(view, system.ladder, 0);
     return { advance: true };
 }
@@ -262,13 +203,14 @@ function automaticEntry({ actor, system }) {
     if ( system.qualification.entry === "automatic" ) {
         return { mode: "automatic", note: "MGT2.Chargen.Term.AutomaticEntry" };
     }
-    // "One does not qualify for prison — you were sentenced there" (§9.52).
+    // "One does not qualify for prison — you were sentenced there".
     if ( system.qualification.entry === "forcedOnly" ) {
         return { mode: "automatic", note: "MGT2.Chargen.Term.ForcedEntry" };
     }
     if ( system.alwaysAvailable ) return { mode: "automatic", note: "MGT2.Chargen.Term.AlwaysOpen" };
-    // "Automatic qualification if your SOC is 10 or higher", printed on the same line as that career's
-    // own target — both clauses the book's own, so this is populated and needs no ruling marker.
+    // "Automatic qualification if your SOC is 10 or higher", printed on the same line as that
+    // career's own target — both clauses the book's own, so this is populated and needs no ruling
+    // marker.
     const auto = system.qualification.autoIf;
     if ( auto.characteristic && (auto.min !== null)
         && ((actor.system.characteristics[auto.characteristic]?.value ?? 0) >= auto.min) ) {
@@ -278,16 +220,13 @@ function automaticEntry({ actor, system }) {
 }
 
 /**
- * A failed qualification means the career was never entered, so the record goes: a Traveller must not
- * carry a career they were refused, and it holds no term to lose. The dice survive in chat, which is
- * creation's audit trail (§9.38), and the two options the book gives are named on the notification
- * because neither can be automated without content the system does not ship.
+ * A failed qualification means the career was never entered, so the record goes: a Traveller must
+ * not carry a career they were refused, and it holds no term to lose.
  */
 async function failQualification({ actor, record }, reason) {
     const state = Chargen.read(actor);
     // Two budgets and not one: the draft is once per lifetime "unless otherwise stated", and the
-    // errata prints the otherwise as a general statement (§9.51, §9.56 item 16). With the rule off
-    // they share one allowance, so an event-forced draft has already spent it.
+    // errata prints the otherwise as a general statement.
     const spent = Rules.on("eventDraftBudget")
         ? state.draft.applied : (state.draft.applied + state.draft.byEvent);
     const key = spent ? "MGT2.Chargen.Term.QualifyFailedNoDraft" : "MGT2.Chargen.Term.QualifyFailedDraft";
@@ -297,10 +236,9 @@ async function failQualification({ actor, record }, reason) {
 }
 
 /**
- * §9.54's four qualification overrides, and they are four shapes rather than one parameter: substitute
- * the whole roll, substitute the characteristic that supplies the DM, ADD a DM to the usual one, or
- * none. Each carries its own list of careers it does not touch, typed by the referee — so the
- * exception is matched against the record's own identity and no name is written here.
+ * Four qualification overrides, and they are four shapes rather than one parameter:
+ * substitute the whole roll, substitute the characteristic that supplies the DM, ADD a DM to the
+ * usual one, or none.
  */
 function speciesQualification(view) {
     const none = { characteristic: null, formula: "", rows: [] };
@@ -322,20 +260,13 @@ function speciesQualification(view) {
     return none;
 }
 
-/* -------------------------------------------- */
-
-/**
- * Basic training. `basicFrom` says which table it reads — the Assignment table rather than Service for
- * two careers, which §9.47 made a field — and blank is a career that grants none at all, which a frame
- * with no such step needs. **For the first career it is *instead of* the term's skill roll** (folio 18);
- * for a later one it is one skill, and whether the roll still happens is `secondCareerBasicTraining`.
- */
+/** Basic training. */
 async function basic(view) {
     const { actor, record, system, assignment, term } = view;
     if ( !record ) return needCareer();
-    // **Once per CAREER and not once per term**, even though the frame lists it as a step of the term:
-    // folio 18 gives basic training on entering a career, and every later term of that career simply
-    // rolls for a skill. The record's own log is what says whether it has already happened.
+    // **Once per CAREER and not once per term**, even though the frame lists it as a step of the
+    // term: folio 18 gives basic training on entering a career, and every later term of that career
+    // simply rolls for a skill.
     if ( system.termLog.some(entry => entry.outcomes.has("basicTraining")) ) return { advance: true };
     if ( !system.basicFrom ) {
         ui.notifications.info(game.i18n.localize("MGT2.Chargen.Term.NoBasicTraining"));
@@ -360,9 +291,10 @@ async function basic(view) {
         applied.push(...await applyCell(actor, rows[Number(picked)], { level: 0, provenance }));
     }
 
-    // §9.56 item 1: *"instead of rolling"* binds only the first-career sentence, so ON is ADDITIONAL —
-    // a later career's basic training is beside the term's own skill roll rather than in place of it,
-    // which hands one extra skill per career after the first and is one of the two a player will feel.
+    // *"instead of rolling"* binds only the first-career sentence, so the option is
+    // ADDITIONAL — a later career's basic training is beside the term's own skill roll rather than
+    // in place of it, which hands one extra skill per career after the first and is one of the two
+    // a player will feel.
     if ( !first && Rules.on("secondCareerBasicTraining") ) {
         await credit(actor, "skillRolls", { value: 1, career: record.id, term,
             note: game.i18n.localize("MGT2.Chargen.Term.SkillTermRoll") });
@@ -375,13 +307,10 @@ async function basic(view) {
     return { advance: true };
 }
 
-/* -------------------------------------------- */
-
 /**
- * Survival, and the branch §9.50 calls content-free: *"if still in the career after Survival, roll on
- * the Events table"*, so a failure costs the Event, the Commission and the Advancement and the rest of
- * the term still runs. A natural 2 is always a failure (folio 18) and is read off the dice rather than
- * off the total, which is the one place the two differ.
+ * Survival, and a branch that is content-free: *"if still in the career after Survival, roll
+ * on the Events table"*, so a failure costs the Event, the Commission and the Advancement and the
+ * rest of the term still runs.
  */
 async function survival(view) {
     const { record, assignment, term } = view;
@@ -389,8 +318,8 @@ async function survival(view) {
     if ( logEntry(record, term).survived !== null ) return { advance: true };
     const target = assignment?.survival.target ?? null;
     if ( target === null ) {
-        // A frame with no printed survival number anywhere is a published case and not an error: the
-        // term has no check, which is NOT the same fact as one that was passed (§9.54).
+        // A frame with no printed survival number anywhere is a published case and not an error:
+        // the term has no check, which is NOT the same fact as one that was passed.
         ui.notifications.info(game.i18n.localize("MGT2.Chargen.Term.NoSurvivalTarget"));
         return { advance: true };
     }
@@ -405,10 +334,8 @@ async function survival(view) {
                 : "MGT2.Chargen.Term.SurvivalFailed")) });
     if ( survived ) return { advance: true };
 
-    // §9.46's Iron Man: a failed Survival **kills** the Traveller rather than causing a Mishap, so the
-    // mishap roll does not happen at all. Nothing is deleted — under the write-as-you-go policy the
-    // whole history is already on the actor, so what to do with that document is the referee's call and
-    // the system says so instead of making it.
+    // Iron Man: a failed Survival **kills** the Traveller rather than causing a Mishap, so
+    // the mishap roll does not happen at all.
     if ( CreationOptions.ironMan() ) {
         const died = game.i18n.format("MGT2.Chargen.Term.IronMan", { name: view.actor.name });
         await logTerm(record, term, { note: died });
@@ -419,15 +346,7 @@ async function survival(view) {
     return { advance: true, skip: SURVIVAL_SKIPS };
 }
 
-/* -------------------------------------------- */
-
-/**
- * The Events table, and the routing §9.38 first wrote as three lines of hard-coded code. **Row 7 is a
- * template field**: its default content is the shared Life Events table and one career owns its own row
- * instead (§9.49, §9.52). Row 2's *Disaster!* — roll on the Mishap table but you are not ejected — is
- * the same mechanic from the other side and is likewise per row: the row addresses the mishap
- * sub-table and says `stays`.
- */
+/** The Events table, and its routing as data rather than as hard-coded branches. */
 async function event(view) {
     const { record, term } = view;
     if ( !record ) return needCareer();
@@ -435,11 +354,7 @@ async function event(view) {
     return rollTable(view, "event");
 }
 
-/**
- * One roll on a career's own Events or Mishaps table, and everything the row then does. The prose stays
- * the referee's and nothing parses it — the decisions printed inside it ride beside it as fields
- * (§9.49), and this is their one reader.
- */
+/** One roll on a career's own Events or Mishaps table, and everything the row then does. */
 async function rollTable(view, which) {
     const { system } = view;
     const mishap = which === "mishap";
@@ -454,9 +369,8 @@ async function rollTable(view, which) {
     if ( !rolled ) return { advance: false };
 
     const row = rows.find(entry => entry.roll === rolled.total);
-    // §9.49's routing, as data: a 7 is the shared Life Events table unless the template says this
-    // career owns that row. The shared block does not ship (§9.36), so the loop names the sub-table
-    // and the referee reads it.
+    // The routing is data: a 7 is the shared Life Events table unless the template says this
+    // career owns that row.
     if ( !mishap && (rolled.total === 7) && (system.eventRow7 !== "own") ) {
         const named = row?.subTable || game.i18n.localize("MGT2.Chargen.Term.LifeEvents");
         const line = game.i18n.format("MGT2.Chargen.Term.RollShared", { table: named });
@@ -471,8 +385,9 @@ async function rollTable(view, which) {
     }
 
     await applyRow(view, row, { mishap });
-    // A row that sends the Traveller to the Mishap table WITHOUT ejecting is row 2 everywhere and two
-    // more rows in some careers — the row says so, and this reads it rather than testing for a 2.
+    // A row that sends the Traveller to the Mishap table WITHOUT ejecting is row 2 everywhere and
+    // two more rows in some careers — the row says so, and this reads it rather than testing for a
+    // 2.
     if ( !mishap && (row.subTable === OWN_MISHAP_TABLE) ) await rollTable(view, "mishap");
     return { advance: true };
 }
@@ -482,9 +397,8 @@ async function applyRow(view, row, { mishap }) {
     const { actor, record, system, term } = view;
     const lines = [row.text].filter(text => text);
 
-    // Ejection is a per-row FACT and not a rule with exceptions (§9.49), and `neverEjects` on the
-    // template flips the default for every row at once (§9.52). `choice` is the printed form where a
-    // Traveller is ejected only if they refuse what the row offers.
+    // Ejection is a per-row FACT and not a rule with exceptions, and `neverEjects` on the
+    // template flips the default for every row at once.
     let ejected = false;
     if ( system.neverEjects ) {
         if ( row.ejects !== "stays" ) lines.push(game.i18n.localize("MGT2.Chargen.Term.CannotEject"));
@@ -499,9 +413,8 @@ async function applyRow(view, row, { mishap }) {
         }) === true;
     }
 
-    // §9.50: rows keep, lose, wipe or grant Benefit rolls, and two let a player wager them — which
-    // needs the pending total to exist mid-term and is the whole reason the count is a ledger. One row
-    // awards `D3` of them, so the count may be rolled (§9.109).
+    // Rows keep, lose, wipe or grant Benefit rolls, and two let a player wager them — which
+    // needs the pending total to exist mid-term and is the whole reason the count is a ledger.
     const count = row.benefitFormula
         ? (await new Roll(MGT2Helper.damageFormula(row.benefitFormula)).roll()).total : row.benefitCount;
     if ( row.benefit === "grant" ) {
@@ -519,18 +432,15 @@ async function applyRow(view, row, { mishap }) {
                 note: row.text || game.i18n.localize("MGT2.Chargen.Term.BenefitWiped") });
         }
     }
-    // A term whose Survival failed loses its Benefit roll unless the row retains it, so `keep` credits
-    // the roll `closeTerm` will not.
+    // A term whose Survival failed loses its Benefit roll unless the row retains it, so `keep`
+    // credits the roll `closeTerm` will not.
     else if ( (row.benefit === "keep") && mishap ) {
         await credit(actor, "benefitRolls", { value: 1, career: record.id, term,
             note: row.text || game.i18n.localize("MGT2.Chargen.Term.BenefitKept") });
     }
 
-    // §9.49's three senses, now that `careerMode` says which: send the Traveller there, offer it with
-    // qualification waived, or borrow its tables for a single roll without entering it. Borrowing is
-    // resolved this term and reaches no tray — the loop names the table and the referee rolls it,
-    // because the shared block does not ship (§9.36). The reference is a template id the REFEREE
-    // typed, so §9.47's invariant is untouched either way.
+    // Three senses, now that `careerMode` says which: send the Traveller there, offer it
+    // with qualification waived, or borrow its tables for a single roll without entering it.
     if ( row.career && (row.careerMode === "borrow") ) {
         lines.push(game.i18n.format("MGT2.Chargen.Term.CareerBorrowed", { career: row.career }));
     }
@@ -543,9 +453,7 @@ async function applyRow(view, row, { mishap }) {
             { career: row.career }));
     }
 
-    // §9.49's sub-roll, and the only creation check that names a skill (folio 11). The untrained DM is
-    // §9.56 item 2 and it reaches the formula through the shared composer, so Jack-of-All-Trades reads
-    // the same number here as at the table (§9.57).
+    // The row's own sub-roll, and the only creation check that names a skill (folio 11).
     let subPassed = null;
     if ( row.check.target !== null ) {
         const sub = await roll(view, { check: mishap ? "survival" : "advancement",
@@ -562,9 +470,8 @@ async function applyRow(view, row, { mishap }) {
         { provenance: { term, career: record.id, table: mishap ? "mishap" : "event" } });
     if ( granted.length ) lines.push(granted.join(", "));
 
-    // *DM+1 to one Benefit roll* modifies a roll rather than awarding one, so the row hands the ledger
-    // a tray entry (§9.109). A `thisCareer` entry the template left unscoped means the career being
-    // served, and only the record knows which that is.
+    // *DM+1 to one Benefit roll* modifies a roll rather than awarding one, so the row hands the
+    // ledger a tray entry.
     for ( const pending of row.tray ) {
         if ( !await earned(pending, row, subPassed) ) continue;
         await Chargen.pushPending(actor, { ...pending, appliesTo: [...pending.appliesTo],
@@ -593,19 +500,7 @@ async function applyRow(view, row, { mishap }) {
  */
 const SELF_SCOPES = new Set(["thisCareer", "nextCareer"]);
 
-/**
- * Whether the branch that earns this tray entry was taken (§9.111's second-generation gap 2).
- *
- * **The entry is not a fact about the row, it is a fact about one branch of it.** Roughly a third of
- * the printed entries are branch-bound and their condition had nowhere to go but `note`, so the loop
- * pushed them all: two mutually exclusive DMs from one row both applied, a career block fired on the
- * branch that succeeded, and a DM offered as the alternative to a skill was handed over beside it.
- *
- * A condition the loop cannot decide is **asked** rather than assumed — the row's own prose is what
- * the question shows, which is the same call `ejects: choice` makes one field away. That covers the
- * doubly-conditional rows too (*"if you accept, roll 1D: on a 5–6…"*), where the field says only that
- * the entry is not automatic and the printed sentence says what decides it.
- */
+/** Whether the branch that earns this tray entry was taken. */
 async function earned(entry, row, subPassed) {
     if ( entry.condition === "always" ) return true;
     if ( (entry.condition === "checkPassed") && (subPassed !== null) ) return subPassed;
@@ -621,23 +516,16 @@ async function earned(entry, row, subPassed) {
 }
 
 /**
- * What a row awards OUTRIGHT, with no roll — row 12 on six careers promotes or commissions (§9.109).
- *
- * **Recording the outcome is most of the mechanism**, because every later step already reads the term
- * log: `forcedOut` and `mustContinue` reach the decide step, `basicTraining` and `aged` make their own
- * steps stand down. Only the ones that also write outside the log do more than that here.
- *
- * `mode` is the printed *"a promotion **or** a commission"* — a choice and not both — while §9.55's
- * errata is that the two may fall in the same term, which is why the set has to allow both. `optional`
- * is the *"You **may** gain"* the same sentence opens with, which `mode` cannot say.
+ * What a row awards OUTRIGHT, with no roll — row 12 on six careers promotes or commissions
+ *.
  */
 async function applyAwards(view, awards) {
     // The vocabulary's own order, so a commission is granted before the promotion that follows it,
     // which is the order the term's own steps run in.
     let keys = Object.keys(MGT2.TermOutcomes).filter(key => awards.outcomes.has(key));
-    // An arm the Traveller cannot legally take is not an arm: "a promotion or a commission" collapses
-    // to the promotion for an officer, and offering the other one would be an illegal choice about
-    // half the time. Same predicate the commission STEP already refuses on (folio 19).
+    // An arm the Traveller cannot legally take is not an arm: "a promotion or a commission"
+    // collapses to the promotion for an officer, and offering the other one would be an illegal
+    // choice about half the time.
     if ( keys.includes("commissioned") && !commissionAvailable(view) ) {
         keys = keys.filter(key => key !== "commissioned");
     }
@@ -658,8 +546,8 @@ async function applyAwards(view, awards) {
     }
     const lines = [];
     for ( const key of keys ) {
-        // Re-read between awards: both write to the record, and a commission that has just reset the
-        // rank to 1 is what the promotion after it must count from.
+        // Re-read between awards: both write to the record, and a commission that has just reset
+        // the rank to 1 is what the promotion after it must count from.
         const fresh = reading(view.actor);
         if ( !fresh.record ) break;
         if ( key === "commissioned" ) lines.push(await commissionRecord(fresh));
@@ -667,8 +555,8 @@ async function applyAwards(view, awards) {
         else if ( key === "demoted" ) lines.push(await demote(fresh));
         else {
             await logTerm(fresh.record, fresh.term, { outcomes: [key] });
-            // The one outcome whose meaning lives in the ledger rather than in the log: several rows
-            // grant a free roll on the Skills and Training tables (§9.50).
+            // The one outcome whose meaning lives in the ledger rather than in the log: several
+            // rows grant a free roll on the Skills and Training tables.
             if ( key === "skillRoll" ) {
                 await credit(view.actor, "skillRolls", { value: 1, career: fresh.record.id,
                     term: fresh.term, note: game.i18n.localize("MGT2.Chargen.Term.SkillFromRow") });
@@ -687,11 +575,7 @@ async function noteEvent({ actor, record }, description) {
     return record.update({ "system.events": events });
 }
 
-/**
- * §9.52's named track, moved by a row. The Parole Threshold shifts by +2, +1, -1, -2, -1D or a full
- * re-roll, and every adjustment carries the term it was made in — which is what lets the grid
- * reconstruct the value as of any past term by unwinding the later ones.
- */
+/** A named track, moved by a row. */
 async function adjustTrack(view, move) {
     const { record, system, term } = view;
     if ( system.track.key !== move.key ) return "";
@@ -717,23 +601,16 @@ function clampTrack(value, cap) {
     return (cap === null) ? value : Math.min(value, cap);
 }
 
-/* -------------------------------------------- */
-
 /**
  * The commission, and `commission` is the field that replaced *"this only applies to the military
- * careers of Army, Navy and Marines"* (§9.53). Two gates are general rules and stay in code: the
- * attempt is the first term of the career unless the named characteristic is high enough, and every
- * term after the first costs a DM. **The errata reverses what §9.38 adopted** — a commission gained
- * does not block that term's advancement — so this step never touches the one after it (§9.55), and
- * `termLog[].outcomes` carrying both is what makes that assertable as a field.
+ * careers of Army, Navy and Marines"*.
  */
 async function commission(view) {
     const { actor, record, system, term } = view;
     if ( !record ) return needCareer();
     if ( logEntry(record, term).outcomes.has("commissioned") ) return { advance: true };
-    // The career prints no commission, or the record is already an officer and there is nothing left
-    // to gain (folio 19). One predicate, because a row that awards a commission outright refuses on
-    // the same terms and a second copy is how the two silently stop agreeing.
+    // The career prints no commission, or the record is already an officer and there is nothing
+    // left to gain (folio 19).
     if ( !commissionAvailable(view) ) return { advance: true };
     if ( system.commissionCheck.target === null ) {
         ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Term.NoCommissionTarget"));
@@ -776,9 +653,7 @@ async function commission(view) {
 }
 
 /**
- * The commission itself, reached by the roll above and by a row that awards one outright (§9.109). The
- * enlisted rank is kept because the commission resets `rank` to 1 and the number is otherwise gone the
- * moment `officerRankNumbering` needs it (§9.56 item 4).
+ * The commission itself, reached by the roll above and by a row that awards one outright.
  */
 async function commissionRecord(view) {
     const { record, system, assignment, term } = view;
@@ -789,18 +664,10 @@ async function commissionRecord(view) {
     return game.i18n.localize("MGT2.Chargen.Term.Commissioned");
 }
 
-/* -------------------------------------------- */
-
 /**
- * Advancement, which is three separate outcomes on one roll (folio 18): success promotes and grants an
- * extra skill roll, a result at or under the terms served in this career ends it after this term, and a
- * natural 12 forces the Traveller to stay.
- *
- * **A career whose exit is governed by a track displaces all three rather than layering on them**
- * (§9.52) — every result that is not *greater than the threshold* produces continue, so a roll under
- * the terms served cannot end it and a natural 12 releases nothing. Whether such a career also promotes
- * is `trackedAdvancementPromotes`: its ladder prints bonuses that would have no other use, which is why
- * the default is yes.
+ * Advancement, which is three separate outcomes on one roll (folio 18): success promotes and grants
+ * an extra skill roll, a result at or under the terms served in this career ends it after this
+ * term, and a natural 12 forces the Traveller to stay.
  */
 async function advance(view) {
     const { record, system, assignment, term } = view;
@@ -822,11 +689,8 @@ async function advance(view) {
     const tracked = !!system.exitRule.track && (system.exitRule.track === system.track.key);
     const threshold = system.track.value ?? 0;
 
-    // **A frame may govern advancement with a characteristic of its own**, whatever each career's line
-    // prints — one published species advances on the same score in every career it can enter. That is
-    // §9.54's *"an advancement rule with its own governing characteristic"*, and it is the `advance`
-    // step's own check (§9.120). The TARGET stays the career's: no frame prints one, because it is
-    // printed per assignment.
+    // **A frame may govern advancement with a characteristic of its own**, whatever each career's
+    // line prints — one published species advances on the same score in every career it can enter.
     const framed = Chargen.stepCheck(view.actor, "advance");
     const rolled = await roll(view, { check: "advancement", step: "advance",
         characteristic: framed?.characteristic || assignment.advancement.characteristic, target });
@@ -839,7 +703,7 @@ async function advance(view) {
     }
     if ( tracked ) {
         // The printed sentence is exhaustive: greater than the threshold releases, everything else
-        // continues. So the generic outcomes are displaced and are not evaluated at all.
+        // continues.
         if ( rolled.total > threshold ) {
             outcomes.push("released");
             lines.push(game.i18n.format("MGT2.Chargen.Term.Released", { track: system.track.key }));
@@ -861,8 +725,8 @@ async function advance(view) {
 }
 
 /**
- * A promotion: the next rung, the extra skill roll folio 18 attaches to it, and the ladder's own bonus
- * row. Reached by the advancement roll above and by a row that promotes outright (§9.109).
+ * A promotion: the next rung, the extra skill roll folio 18 attaches to it, and the ladder's own
+ * bonus row.
  */
 async function promote(view) {
     const { actor, record, system, term } = view;
@@ -875,17 +739,7 @@ async function promote(view) {
     return game.i18n.format("MGT2.Chargen.Term.Advanced", { rank: Chargen.effectiveRank(record) });
 }
 
-/**
- * A demotion: *"Lose 1 rank … but you are not ejected from this career"* (§9.111's gap 3). One rung,
- * because that is what every printed demotion moves and `promote` moves one the other way.
- *
- * **Three things it deliberately does not do.** It does not take back the rung's bonus — folio 19
- * grants that on attaining the rank and no rule ungrants a skill. It does not go below 0, because the
- * Core's rank ladders start there; a species frame whose rank falls *through* zero and ejects is
- * §9.54's own track and not this. And it must not cost the Traveller their Benefits of Rank, which
- * folio 46 reads against the **highest rank reached** — so the high-water mark `rankBonus` already
- * looks for is written here, which is the first time anything writes it.
- */
+/** A demotion: *"Lose 1 rank … but you are not ejected from this career"*. */
 async function demote(view) {
     const { actor, record, system, term } = view;
     const rank = Math.max(0, system.rank - 1);
@@ -903,8 +757,7 @@ async function demote(view) {
 
 /**
  * Whether a commission is still there to be gained — the career prints one and the record is not
- * already on its officer ladder (folio 19). The commission step refuses on exactly this, and a row
- * that awards one outright has to refuse on the same terms or it offers an illegal arm.
+ * already on its officer ladder (folio 19).
  */
 function commissionAvailable({ system, assignment }) {
     if ( !system.commission ) return false;
@@ -921,21 +774,15 @@ async function applyRankBonus(view, ladder, rank) {
     return applyCell(actor, row.bonus, { provenance: { term, career: record.id, table: "rank" } });
 }
 
-/* -------------------------------------------- */
-
 /**
- * The skill roll: one per term plus one for each successful advancement, spent from §9.50's ledger. The
- * table is the player's choice among the ones this career has and this Traveller may use — a table may
- * be MISSING (§9.47) and a present one may be GATED, on a characteristic or on holding a commission
- * (§9.48).
+ * The skill roll: one per term plus one per successful advancement, spent from the ledger.
  */
 async function skill(view) {
     const { actor, record, term } = view;
     if ( !record ) return needCareer();
     const kind = termKind(view);
     if ( kind && !kind.yieldsSkills ) return { advance: true };
-    // The term's own roll, credited here where no basic-training step claimed it. Idempotent by
-    // provenance, so re-running the step does not pay twice.
+    // The term's own roll, credited here where no basic-training step claimed it.
     if ( !logEntry(record, term).outcomes.has("basicTraining") ) {
         await credit(actor, "skillRolls", { value: 1, career: record.id, term,
             note: game.i18n.localize("MGT2.Chargen.Term.SkillTermRoll") });
@@ -956,7 +803,7 @@ async function skill(view) {
     if ( picked === null ) return { advance: false };
     const rows = tables.find(table => table.key === picked).rows;
 
-    // §9.46's skill selection: the table is chosen as always and gated as always — only the die is
+    // The table is chosen as always and gated as always — only the die is
     // removed, which is the whole of what the option changes.
     let row;
     if ( CreationOptions.pickedSkills() ) {
@@ -1003,16 +850,9 @@ function skillTables({ actor, system, assignment }) {
     return tables;
 }
 
-/* -------------------------------------------- */
-
 /**
  * Ageing, and the roll is a table index rather than a pass or a fail: `2D` with the Traveller's own
- * ageing law as its DM, read against Core p.49's eight rows. **Two of §9.56's sixteen land here** —
- * which trigger is authoritative where a frame prints a term count and an age that do not produce each
- * other, and whether the bottom row reads *"-6 or less"*.
- *
- * **The player chooses which characteristics take the loss** (folio 48), so the choice is recorded and
- * the total derived, which is the whole return on §9.39's signed log.
+ * ageing law as its DM, read against Core p.49's eight rows.
  */
 async function ageing(view) {
     const { actor, record, term } = view;
@@ -1027,9 +867,8 @@ async function ageing(view) {
     const law = Chargen.frame(actor)?.system.ageing;
     const defaults = MGT2.CreationDefaults;
     const terms = Chargen.termsServed(actor);
-    // The law is an EXPRESSION and not a switch: the published values run -1, -2, -1/2, +1 and ±1 by
-    // sex (§9.54). Truncated toward zero, because no printed row is a fraction and the book gives no
-    // rounding rule — stated here rather than hidden, like §9.39's clamp.
+    // The law is an EXPRESSION and not a switch: the published values run -1, -2, -1/2, +1 and ±1
+    // by sex.
     const dm = Math.trunc(((law ? law.perTerm : defaults.ageingPerTerm) * terms)
         + (law ? law.flat : defaults.ageingFlat));
     // Target 1 because the table's top row IS "1+, no effect": the pass line is the book's own.
@@ -1056,7 +895,7 @@ async function ageing(view) {
                 { n: rolled.total, changes: describeChanges(changes) }) });
     }
     // The crisis is derived from the log the moment it is written, so it is read back rather than
-    // decided here: any characteristic at 0 means death unless the care is paid for (§9.39).
+    // decided here: any characteristic at 0 means death unless the care is paid for.
     if ( actor.system.states?.ageingCrisis ) {
         ui.notifications.error(game.i18n.localize("MGT2.Chargen.Term.AgeingCrisis"));
     }
@@ -1064,10 +903,9 @@ async function ageing(view) {
 }
 
 /**
- * §9.56 item 10. The table stops at -6, printed bare — while the DM is the total terms served, so a
+ * The table stops at -6, printed bare — while the DM is the total terms served, so a
  * nine-term Traveller rolling snake-eyes sits at -7 and the book prints neither a row nor an
- * instruction to floor. ON reads the bottom row as *"-6 or less"*; OFF says the table has no such row,
- * which is the literal truth and hands the outcome back to the referee.
+ * instruction to floor.
  */
 function ageingRow(total) {
     const rows = MGT2.AgeingEffects;
@@ -1116,14 +954,7 @@ function describeChanges(changes) {
         `${game.i18n.localize(MGT2.Characteristics[key])} ${MGT2Helper.signed(value)}`).join(", ") || "—";
 }
 
-/* -------------------------------------------- */
-
-/**
- * Continue or leave — the step that closes the term and the only one that moves the clock. Every
- * decision it can take was already written by an earlier step as a term OUTCOME, so this reads facts
- * and never prose: a natural 12 forces a stay, a roll under the terms served forces an ending, a track
- * released the Traveller, a mishap ejected them.
- */
+/** Continue or leave — the step that closes the term and the only one that moves the clock. */
 async function decide(view) {
     const { actor, record, system, term } = view;
     if ( !record ) {
@@ -1143,16 +974,14 @@ async function decide(view) {
     }
 
     const forced = entry.outcomes.has("forcedOut");
-    // §9.46's maximum-terms cap, which is the table's own ceiling rather than an outcome of this term:
-    // it takes the offer of another term away without making the ending a forced one, so the exit mode
-    // below stays voluntary.
+    // The maximum-terms cap is the table's own ceiling rather than an outcome of this
+    // term: it takes the offer of another term away without making the ending a forced one, so the
+    // exit mode below stays voluntary.
     const cap = CreationOptions.maximumTerms();
     const capped = (cap > 0) && (Chargen.termsServed(actor) >= cap);
     if ( capped ) ui.notifications.info(game.i18n.format("MGT2.Chargen.Term.MaximumTerms", { n: cap }));
     const done = forced || capped;
-    // §9.47's three-valued field plus the fourth the book's own two groups do not contain. BLANK is a
-    // template that declares no rule at all — the state one Core career is in, and no rule is printed
-    // for it anywhere — and `undeclaredAssignmentChange` is the referee's answer (§9.56 item 6).
+    // The book's own two groups leave one career in neither, hence the fourth value.
     const changeRule = system.assignmentChange || Rules.get("undeclaredAssignmentChange");
     const buttons = [];
     if ( !done ) buttons.push({ action: "stay", label: "MGT2.Chargen.Term.Continue", default: true });
@@ -1182,12 +1011,7 @@ async function decide(view) {
     return { advance: true };
 }
 
-/**
- * Changing assignment, whose behaviour is a field with four values (§9.47). `free` moves with no roll
- * and no penalty; `requalifyKeepRank` fails harmlessly back into the old assignment; the other two are
- * a fresh qualification, which means a new record and therefore the player dragging a template — the
- * loop says so rather than forging one.
- */
+/** Changing assignment, whose behaviour is a field with four values. */
 async function changeAssignment(view, rule) {
     const { actor, record, system } = view;
     const picked = await pickOne(system.assignments
@@ -1201,8 +1025,8 @@ async function changeAssignment(view, rule) {
             characteristic: bestCharacteristic(actor, system.qualification.characteristics),
             target: system.difficulty });
         if ( !rolled ) return;
-        // Succeed and you adopt the new assignment KEEPING your rank; fail and you simply continue in
-        // the old one, without penalty (folio 20).
+        // Succeed and you adopt the new assignment KEEPING your rank; fail and you simply continue
+        // in the old one, without penalty (folio 20).
         if ( rolled.passed ) {
             return record.update({ "system.assignment": picked, "system.entryMode": "assignmentChange" });
         }
@@ -1211,17 +1035,9 @@ async function changeAssignment(view, rule) {
     ui.notifications.info(game.i18n.localize("MGT2.Chargen.Term.AssignmentNewCareer"));
 }
 
-/* -------------------------------------------- */
-
 /**
- * A step the frame declares and this build has no procedure of its own for — the nest transition, the
- * status check, the continuation check, the household timetable (§9.54).
- *
- * **What the frame declares, the loop rolls** (§9.120). A step used to be a bare key, so all four were
- * announced and left to the referee; a step that carries a check is rolled here against its own printed
- * target, and each arm's consequences are applied from the same vocabulary an event row uses. A step
- * with no check declared is still the referee's, and is recorded as played rather than resolved —
- * inventing a procedure for it would be worse than saying so.
+ * A step the frame declares and this build has no procedure of its own for — the nest transition,
+ * the status check, the continuation check, the household timetable.
  */
 async function declaredStep(view, key) {
     const label = game.i18n.localize(MGT2.CreationSteps[key] ?? key);
@@ -1233,7 +1049,7 @@ async function declaredStep(view, key) {
     }
 
     // A check the term did not trigger is not a check that was passed, and not one the referee owes
-    // either: it simply does not fire. A mishap is a fact on the term log and never a phrase (§9.49).
+    // either: it simply does not fire.
     if ( (check.when === "afterMishap") && !logEntry(view.record, view.term).outcomes.has("mishap") ) {
         ui.notifications.info(game.i18n.format("MGT2.Chargen.Term.StepNotTriggered", { step: label }));
         return { advance: true };
@@ -1241,7 +1057,7 @@ async function declaredStep(view, key) {
 
     const { target, row, missing } = stepTarget(view, check);
     // A printed table with a hole in it — the SOC Rank table skips one score entirely — leaves a
-    // Traveller at that score with no printed difficulty. Said out loud rather than assumed away.
+    // Traveller at that score with no printed difficulty.
     if ( missing ) {
         ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.NoStepTarget", { step: label }));
         if ( view.record ) await logTerm(view.record, view.term, { note: label });
@@ -1250,7 +1066,7 @@ async function declaredStep(view, key) {
 
     await Chargen.ensureTracks(view.actor);
     // The step key IS the check key here, which is what lets a standing modifier printed against a
-    // frame-owned step reach it — `MGT2.CreationChecks` carries the four (§9.121).
+    // frame-owned step reach it — `MGT2.CreationChecks` carries the four.
     const rolled = await roll(view, {
         check: key, step: key, target,
         characteristic: check.characteristic,
@@ -1259,8 +1075,8 @@ async function declaredStep(view, key) {
     });
     if ( !rolled ) return { advance: false };
 
-    // The row's award is the printed table's own column and is NOT conditioned on the roll — what the
-    // roll buys is the check's arm — so it applies either way and the two are read together.
+    // The row's award is the printed table's own column and is NOT conditioned on the roll — what
+    // the roll buys is the check's arm — so it applies either way and the two are read together.
     const arms = [rolled.passed ? check.onPass : check.onFail, row?.award];
     const lines = [];
     for ( const arm of arms ) lines.push(...await applyStepOutcome(view, arm, key));
@@ -1276,8 +1092,7 @@ function checkRolls(check) {
 }
 
 /**
- * The target this term's check is measured against. A ladder is read at its index — the term number,
- * or a characteristic score — and `missing` is a ladder that prints no row for where the Traveller is.
+ * The target this term's check is measured against.
  * @returns {{target: number|null, row: object|null, missing: boolean}}
  */
 function stepTarget(view, check) {
@@ -1301,7 +1116,7 @@ function bestSkill(actor, skills) {
 
 /**
  * The DMs a printed step check reads off a track — *"caste number as a negative DM"* — which no
- * characteristic and no skill supplies (§9.120).
+ * characteristic and no skill supplies.
  * @returns {[string, number][]}
  */
 function trackRows(actor, modifiers) {
@@ -1317,11 +1132,7 @@ function trackRows(actor, modifiers) {
     return rows;
 }
 
-/**
- * One arm of a step check, applied. The four consequences are the event row's own (§9.49, §9.109), so
- * a track moved by a status check and a track moved by a prison event go through one vocabulary.
- * @returns {Promise<string[]>}
- */
+/** One arm of a step check, applied. @returns {Promise<string[]>} */
 async function applyStepOutcome(view, arm, key) {
     if ( !arm ) return [];
     const { actor, record, term } = view;
@@ -1331,9 +1142,9 @@ async function applyStepOutcome(view, arm, key) {
         const delta = arm.track.formula
             ? (await new Roll(MGT2Helper.damageFormula(arm.track.formula)).roll()).total : arm.track.value;
         const moved = delta ? await Chargen.moveTrack(actor, arm.track.key, delta) : null;
-        // A track at its last rung is a printed state — *"one attempt at promotion each term until the
-        // Traveller reaches the status of rankholder"* — and it is said rather than logged as a move
-        // that did not happen.
+        // A track at its last rung is a printed state — *"one attempt at promotion each term until
+        // the Traveller reaches the status of rankholder"* — and it is said rather than logged as a
+        // move that did not happen.
         if ( moved?.moved ) {
             lines.push(game.i18n.format("MGT2.Chargen.Term.TrackAdjusted", { track: moved.label,
                 dm: MGT2Helper.signed(delta), value: moved.rung || moved.value }));
@@ -1347,8 +1158,9 @@ async function applyStepOutcome(view, arm, key) {
         lines.push(...await applyAwards(view, { outcomes: arm.outcomes, mode: "all", optional: false }));
     }
 
-    // Ejection is the same fact here as on a row, and `neverEjects` on the career flips it for the same
-    // reason: a career that cannot eject cannot be left by a species' own check either (§9.52).
+    // Ejection is the same fact here as on a row, and `neverEjects` on the career flips it for the
+    // same reason: a career that cannot eject cannot be left by a species' own check either
+    //.
     if ( record && (arm.ejects !== "stays") ) {
         const ejected = (arm.ejects === "ejects") || (await DialogV2.confirm({
             window: { title: "MGT2.Chargen.Term.EjectChoice" },
@@ -1376,33 +1188,22 @@ const STEPS = Object.freeze({
 });
 
 /**
- * §9.50: *"if still in the career after Survival, roll on the Events table"* — so a failed Survival
- * costs the Event, the Commission and the Advancement, and the rest of the term still runs. These are
- * STEP keys out of `MGT2.CreationSteps`, a closed vocabulary; §9.47's invariant is about career names,
- * and a frame that does not declare one of these never had it to skip.
+ * *"if still in the career after Survival, roll on the Events table"* — so a failed Survival
+ * costs the Event, the Commission and the Advancement, and the rest of the term still runs.
  */
 const SURVIVAL_SKIPS = Object.freeze(["event", "commission", "advance"]);
 
 /** The endings no one chooses, read off the term's own facts and in the order they displace each other. */
 const FORCED_EXITS = Object.freeze([["ejected", "ejectedByMishap"], ["released", "paroled"]]);
 
-/** The one sub-table a record carries itself; every other name addresses the shared block (§9.49). */
+/** The one sub-table a record carries itself; every other name addresses the shared block. */
 const OWN_MISHAP_TABLE = "mishap";
-
-/* -------------------------------------------- */
-/*  The roll                                    */
-/* -------------------------------------------- */
 
 /**
  * One creation check, composed and posted by `CreationRoll` so that the ledger has exactly one
- * modifier set and the system exactly one card (§9.40). Everything this adds is the loop's own: which
- * step is speaking, the printed target the card prints in place of a difficulty rung, and the natural
- * roll three rules read off the dice rather than off the total.
- *
- * @param {object} view
- * @param {object} options
+ * modifier set and the system exactly one card.
  * @param {string} [options.check]      A `MGT2.TrayChecks` key — what the tray and the standing
- *                                      modifiers are filtered by
+ *     modifiers are filtered by
  * @param {string} options.step         A `MGT2.CreationSteps` key, for the card's headline
  * @param {number|null} options.target  The number the rule prints, or null for a roll that indexes a table
  * @returns {Promise<{total: number, natural: number, passed: boolean}|null>}
@@ -1412,9 +1213,7 @@ async function roll(view, { check = "", step, target = null, characteristic = ""
     const { actor, record } = view;
     const composed = CreationRoll.compose(actor, {
         characteristic, skill: named, check, career: record?.id, target, rows });
-    // A table roll indexes rather than passes: 1D on a Mishap table, 2D on an Events table. It keeps
-    // the composer's DM rows — an event bonus is a DM on a roll like any other — and replaces only
-    // the dice.
+    // A table roll indexes rather than passes: 1D on a Mishap table, 2D on an Events table.
     if ( formula ) composed.formula = [formula, ...composed.parts].join("");
 
     const label = game.i18n.localize(MGT2.CreationSteps[step] ?? step);
@@ -1426,27 +1225,15 @@ async function roll(view, { check = "", step, target = null, characteristic = ""
     if ( target !== null ) await Chargen.spendPending(actor, check, record?.id);
     return {
         total,
-        // Three rules read the DICE and not the total: a natural 2 always fails Survival, a natural 12
-        // forces a stay, and an exact 2 on the anagathics roll forces a career change.
+        // Three rules read the DICE and not the total: a natural 2 always fails Survival, a natural
+        // 12 forces a stay, and an exact 2 on the anagathics roll forces a career change.
         natural: posted.outcome.roll.dice[0]?.total ?? total,
         passed: posted.passed === true
     };
 }
 
-/* -------------------------------------------- */
-/*  Grants                                      */
-/* -------------------------------------------- */
-
 /**
- * One printed cell applied, which is a small EXPRESSION and not a scalar (§9.48). `oneOf` is a choice
- * the player makes; a family wildcard and a `choose` speciality are the same, one level down. A cell
- * with text and no grants is legitimate and is what an unstructured row looks like — it is read aloud
- * rather than applied.
- *
- * Every write goes through `Grants`, which owns folio 18's two limits: level 4 is a ceiling and the
- * excess is discarded as printed, while the `3 × (INT + EDU)` cap degrades the grant to level 0 instead
- * (§9.56 items 3 and 9).
- *
+ * One printed cell applied, which is a small EXPRESSION and not a scalar.
  * @returns {Promise<string[]>}   What was granted, already localised, for the term log
  */
 async function applyCell(actor, cell, { level = null, provenance = {} } = {}) {
@@ -1493,16 +1280,16 @@ async function applyGrant(actor, grant, { level, provenance }) {
         return `${game.i18n.localize(MGT2.CreationGrantKinds.contact)} ×${count}`;
     }
     // A voucher and a bare note are the referee's to resolve: the system has no catalogue and never
-    // will (§9.36, §9.40).
+    // will.
     return grantLabel(grant);
 }
 
-/** A characteristic change is a signed row in §9.39's log and never a write to `base`. */
+/** A characteristic change is a signed row in the log and never a write to `base`. */
 async function grantCharacteristic(actor, grant, provenance) {
     if ( !grant.characteristic ) return "";
     const current = actor.system.characteristics[grant.characteristic]?.value ?? 0;
-    // The one form that lives on rank rows: `SOC 10 or SOC +1, whichever is higher` is
-    // max(current + 1, floor), and the floor is per ROW because one ladder prints 10 then 12.
+    // The one form that lives on rank rows: `SOC 10 or SOC +1, whichever is higher` is max(current
+    // + 1, floor), and the floor is per ROW because one ladder prints 10 then 12.
     const delta = (grant.mode === "floor")
         ? Math.max(current + 1, grant.floor ?? 0) - current : grant.value;
     if ( !delta ) return "";
@@ -1523,9 +1310,9 @@ async function grantFinance(actor, grant) {
 }
 
 /**
- * The skill a grant names, once the player has answered whatever the printed cell leaves open: a family
- * wildcard (`Gun Combat (any)`) and a `choose` speciality are the two, and both are the book's own way
- * of writing a choice rather than a value.
+ * The skill a grant names, once the player has answered whatever the printed cell leaves open: a
+ * family wildcard (`Gun Combat (any)`) and a `choose` speciality are the two, and both are the
+ * book's own way of writing a choice rather than a value.
  * @returns {Promise<{name: string, speciality: string}|null>}
  */
 async function resolveSkill(grant) {
@@ -1538,8 +1325,7 @@ async function resolveSkill(grant) {
             "MGT2.Chargen.Term.PickSpeciality");
         return picked === null ? null : { name: base, speciality: picked };
     }
-    // A family wildcard names no shortlist at all, so the player types the member. The system ships no
-    // skill list to pick from and never will (§9.45).
+    // A family wildcard names no shortlist at all, so the player types the member.
     const typed = await DialogV2.prompt({
         window: { title: "MGT2.Chargen.Term.PickSpeciality" },
         classes: ["mgt2"],
@@ -1570,10 +1356,6 @@ function cellLabel(cell) {
         || "—";
 }
 
-/* -------------------------------------------- */
-/*  Shared readings                             */
-/* -------------------------------------------- */
-
 /** One reading of everything a step needs, taken once so that no two steps can disagree. */
 function reading(actor) {
     const state = Chargen.read(actor);
@@ -1586,7 +1368,7 @@ function reading(actor) {
     };
 }
 
-/** What the frame says this kind of term yields — benefit rolls, advancement, skills, years (§9.54). */
+/** What the frame says this kind of term yields — benefit rolls, advancement, skills, years. */
 function termKind(view) {
     const key = logEntry(view.record, view.term).kind;
     if ( !key ) return null;
@@ -1602,10 +1384,8 @@ function logEntry(record, term) {
 }
 
 /**
- * Upsert one term of the log, which is where every step writes its own outcome the moment it is decided
- * (§9.38). **`term` is the ledger's own cursor and therefore global across careers**, matching the
- * sketch's second career starting at t:3 — so a record's terms and the grid's rows are the same numbers
- * even for a Traveller who changed career mid-creation, which is the question §9.103 left open.
+ * Upsert one term of the log, which is where every step writes its own outcome the moment it is
+ * decided.
  */
 async function logTerm(record, term, patch) {
     const log = record.system.termLog.map(entry => ({ ...entry, outcomes: [...entry.outcomes] }));
@@ -1622,11 +1402,7 @@ async function logTerm(record, term, patch) {
     return row;
 }
 
-/**
- * One signed row of a counter ledger — a delta and never a total (§9.50). **Idempotent by provenance**:
- * a step re-run in the same term must not pay twice, and the term, the career, the reason and the value
- * together are what identify one credit.
- */
+/** One signed row of a counter ledger — a delta and never a total. */
 async function credit(actor, ledger, entry) {
     const rows = Chargen.read(actor)[ledger].map(row => ({ ...row }));
     if ( rows.some(row => (row.career === entry.career) && (row.term === entry.term)
@@ -1651,11 +1427,7 @@ function leftLastTerm({ actor, record }) {
     return namesThisCareer(record, [previous.name, previous._stats?.compendiumSource ?? ""]);
 }
 
-/**
- * Whether a referee-typed list of template ids names this record. **Data against data** — the list is
- * the referee's own and the record's identity is its own — so §9.47 is untouched: no literal here is a
- * career name, and the same function answers for a species' exception list and for a no-return check.
- */
+/** Whether a referee-typed list of template ids names this record. */
 function namesThisCareer(record, ids) {
     if ( !record ) return false;
     const source = record._stats?.compendiumSource ?? "";

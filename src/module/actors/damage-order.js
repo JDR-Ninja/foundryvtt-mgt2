@@ -3,8 +3,7 @@ import { Rules } from "../rules.js";
 
 /**
  * The characteristics as the damage-order editor needs them: the chain first, in order, then
- * everything else. Both lists are rendered up front and the editor only moves nodes between
- * them, so no markup is built in JavaScript.
+ * everything else.
  * @param {object} system   The actor's system data
  * @returns {object[]}
  */
@@ -22,25 +21,20 @@ export function prepareDamageOrder(system) {
             value: c.value,
             max: c.max,
             inChain,
-            // Without a maximum there is no way to know how far to drain it or where healing
-            // stops, so it cannot be added. Chains stored before this rule are left alone.
+            // Without a maximum there is no way to know how far to drain it or where healing stops,
+            // so it cannot be added.
             addable: c.max > 0
         };
     };
 
-    // A characteristic the world has not adopted cannot be added to the chain — but one already in a
-    // stored chain stays listed, because a rule switched off must not silently reroute damage. The
-    // actor's own `show` flag is not consulted: hiding a characteristic has never stopped it taking
-    // damage, and this is the control that decides that.
+    // A characteristic the world has not adopted cannot be added to the chain — but one already in
+    // a stored chain stays listed, because a rule switched off must not silently reroute damage.
     const rest = roster.filter(k => !chain.includes(k) && Rules.characteristic(k));
     return chain.filter(k => roster.includes(k)).map(entry).concat(rest.map(entry));
 }
 
-/* -------------------------------------------- */
-
 /**
- * Make the damage-order block interactive: drag to reorder, remove a link, add one from the
- * pool. The chain is mirrored into a hidden input so the dialog submits it like any other field.
+ * Make the damage-order block interactive: drag to reorder, remove a link, add one from the pool.
  * @param {HTMLElement} root   The rendered dialog element
  */
 export function activateDamageOrder(root) {

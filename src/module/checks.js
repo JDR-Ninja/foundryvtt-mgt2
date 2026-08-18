@@ -6,16 +6,13 @@ const CARD = "systems/mgt2/templates/chat/roll.html";
 
 /**
  * A task check once the prompt has been answered: the dice, the number Core p.61 measures them
- * against, and the card that states both. Four callers score one — a Traveller's sheet, a ship's
- * station roster, a vehicle's folio 138 actions and a hotbar macro — and none of them may hold a
- * copy of the arithmetic, because the Effect is what every later rule reads.
+ * against, and the card that states both.
  */
 export class Checks {
 
     /**
      * The rows of a check, reduced once: the terms the formula reads, the labels the card prints,
-     * and the total the prompt previews. Both totalling paths end here, which is what makes the
-     * preview and the roll the same arithmetic rather than two that happen to agree.
+     * and the total the prompt previews.
      * @param {[string, number][]} rows   Each name already localised, with its DM
      * @returns {{parts: string[], labels: string[], total: number}}
      */
@@ -32,14 +29,10 @@ export class Checks {
         return { parts, labels, total };
     }
 
-    /* -------------------------------------------- */
-
     /**
      * Core p.62: both sides roll as normal and the higher Effect wins; a draw is a standstill in
-     * which neither gains an advantage. Nothing is modified — this is a comparison, and it runs
-     * after the dice because that is when both numbers exist.
+     * which neither gains an advantage.
      * @param {object} data      What `RollPromptHelper.roll` came back with
-     * @param {number} effect
      * @returns {object|null}
      */
     static opposed(data, effect) {
@@ -54,21 +47,13 @@ export class Checks {
         };
     }
 
-    /* -------------------------------------------- */
-
     /**
-     * Roll the formula and score it. Effect is what the NEXT action reads — initiative, damage,
-     * first aid, psionic duration — and those run later, on another actor, with no sheet rendered,
-     * so it is computed here beside the dice. Core p.61: a check with no stated difficulty is
-     * measured against Average (8+) rather than scoring no Effect at all.
-     *
-     * @param {object} options
-     * @param {string} options.formula
+     * Roll the formula and score it.
      * @param {object} [options.rollData]     `@` references for the formula
      * @param {string} [options.difficulty]   A `MGT2.DifficultyTargets` key
-     * @param {number} [options.target]       A bare number to measure against, where the rule states
-     *                                        one instead of naming a rung — character creation rolls
-     *                                        against 5+, 7+ and 9+, which no rung expresses
+     * @param {number} [options.target]       A bare number to measure against, where the rule
+     *     states one instead of naming a rung — character creation rolls against 5+, 7+ and 9+,
+     *     which no rung expresses
      * @param {object} [options.prompt]       The prompt's answer, for its Opposed row
      * @returns {Promise<object|null>}        null when the formula does not parse
      */
@@ -92,13 +77,8 @@ export class Checks {
         };
     }
 
-    /* -------------------------------------------- */
-
     /**
-     * Post what `resolve` scored. The Effect is the message's own validated data rather than a
-     * reading of the rendered card, which is what makes a chain auditable after the fact
-     * (`DOCUMENT-TYPES.md` #16).
-     *
+     * Post what `resolve` scored. @returns {Promise<ChatMessage>}
      * @param {object} outcome              What `resolve` returned
      * @param {object} options              The rest goes to `buildRollCardContext`
      * @param {Actor} [options.actor]       Whose name the card speaks under
@@ -106,7 +86,6 @@ export class Checks {
      * @param {object} [options.flags]      Offers resolved later and on another actor
      * @param {string} [options.mode]       A `CONFIG.ChatMessage.modes` key
      * @param {boolean} [options.secret]    Companion p.7's referee roll — see below
-     * @returns {Promise<ChatMessage>}
      */
     static async post(outcome, { actor = null, label = "", flags = null, mode, secret = false, ...card } = {}) {
         const message = {
@@ -125,11 +104,7 @@ export class Checks {
         };
         if ( flags ) message.flags = flags;
 
-        // Companion p.7's secret referee check. A whispered message that CARRIES rolls is visible to
-        // everyone as `???`, which announces the secret roll — so the dice are left out of `rolls`
-        // and rendered into the body instead, where `buildRollCardContext` has already put the
-        // formula, the tooltip and the total. The cost is Dice So Nice; the Effect is unaffected,
-        // because every later rule reads `system`.
+        // Companion p.7's secret referee check.
         if ( secret ) {
             message.rolls = [];
             message.whisper = ChatMessage.getWhisperRecipients("GM").map(user => user.id);
@@ -139,21 +114,12 @@ export class Checks {
     }
 }
 
-/* -------------------------------------------- */
-
 /**
- * The context `templates/chat/roll.html` reads. Seven callers build one and only three of them
- * score anything: a duration roll, a recovery, a reaction and a grapple outcome are the same card
- * with the Effect block missing, which is why every part of it is optional.
- *
- * @param {object} options
+ * The context `templates/chat/roll.html` reads. @returns {Promise<object>}
  * @param {Roll} [options.roll]           The dice, where any were rolled
  * @param {object} [options.outcome]      What `Checks.resolve` returned
- * @param {string} [options.difficulty]
  * @param {string[]} [options.modifiers]  The named terms, in the order the formula reads them
- * @param {object[]} [options.chainSources]
  * @param {string[]} [options.lines]      Sentences appended to the opposed verdict
- * @returns {Promise<object>}
  */
 export async function buildRollCardContext({
     roll = null, outcome = null, difficulty = null,
@@ -185,9 +151,7 @@ export async function buildRollCardContext({
         context.effect = outcome.effect;
         context.effectDisplay = MGT2Helper.signed(outcome.effect, "+0");
         context.effectBand = outcome.band.label;
-        // The tone stays the roll's OWN band. An opposed check that was lost can still have been a
-        // success against its difficulty, and both facts are true — colouring the card by the
-        // verdict would hide the one the rules actually scored.
+        // The tone stays the roll's OWN band.
         context.effectTone = outcome.band.tone;
     }
 

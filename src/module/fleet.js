@@ -7,9 +7,7 @@ import { Rules } from "./rules.js";
 const fields = foundry.data.fields;
 
 // A sub-type a SYSTEM declares is not namespaced, so these are the literal strings `system.json`
-// and `CONFIG.<Doc>.dataModels` both key on. `FLEET` keys TWO registries — a fleet Combat and a
-// fleet CombatantGroup — because HG folio 115's two levels sit one above the `space` sub-type's and
-// the word is the same at both (§9.100 B3).
+// and `CONFIG.<Doc>.dataModels` both key on.
 export const FLEET = "fleet";
 export const FLEET_SHIP = "fleetShip";
 export const SQUADRON = "squadron";
@@ -18,7 +16,7 @@ export const SALVO = "salvo";
 /** The two things that FIGHT: one hull, or one wing. A salvo is a contact and not one of them. */
 export const FLEET_COMBATANTS = Object.freeze([FLEET_SHIP, SQUADRON]);
 
-/** Everything on the chart. Folio 124 tracks salvoes "as if they were ships", which is §9.78's shape. */
+/** Everything on the chart. Folio 124 tracks salvoes "as if they were ships". */
 export const FLEET_CONTACTS = Object.freeze([...FLEET_COMBATANTS, SALVO]);
 
 /** HG folio 117's tightest operational range, and folio 114's — both worth Defensive DM+1. */
@@ -53,18 +51,7 @@ function fleetOf(combatant) {
     return (group?.type === FLEET) ? group : null;
 }
 
-/* -------------------------------------------- */
-
-/**
- * A fleet battle (HG folios 105-124). The second engine on the same document family as `space`, and
- * not a mode of it: the round keeps Core folio 164's three step NAMES and changes the content of
- * every one — the mover is a fleet, the attack resolves on a factor instead of a check, and the
- * Actions Step carries dispersal, morale and jumping out (§9.100 C).
- *
- * The two levels shift up by one. A `CombatantGroup` is a FLEET and a `Combatant` is a ship or a
- * squadron, which is forced rather than chosen: `CombatantGroup` has no `group` field, so groups do
- * not nest and "a fleet of ship-groups" is not expressible.
- */
+/** A fleet battle (HG folios 105-124). */
 export class FleetCombatData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         return {
@@ -73,16 +60,14 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
             step: new fields.StringField({
                 required: true, blank: false, initial: "manoeuvre", choices: STEPS }),
             // Folio 115 measures range between FLEETS, so the pair is two CombatantGroup ids — the
-            // same key and the same validator the `space` sub-type uses one level down (§9.100 B3).
+            // same key and the same validator the `space` sub-type uses one level down.
             bands: new fields.TypedObjectField(new fields.StringField({
                 required: true, blank: false, choices: MGT2.ShipRangeBands
             }), { validateKey: validPairKey })
         };
     }
 
-    /* -------------------------------------------- */
-
-    /** `OPTIONAL-RULES.md` §3.4 D5. Off, the engine refuses to build; the ships keep what they hold. */
+    /** The optional-rule gate. Off, the engine refuses to build; the ships keep what they hold. */
     get enabled() {
         return Rules.on("fleetBattles");
     }
@@ -114,8 +99,6 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
         return this.parent.combatants.filter(combatant => combatant.type === SALVO);
     }
 
-    /* -------------------------------------------- */
-
     /** The band between two fleets, or null while they have never been placed. */
     bandBetween(a, b) {
         return this.bands[SpaceCombatData.pairKey(a, b)] ?? null;
@@ -135,11 +118,7 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
         return this.parent.update({ system: { bands: { [key]: value } } });
     }
 
-    /**
-     * Drop every pair a fleet was half of — what a fleet leaving the battle takes with it. The map
-     * is read back off the DOCUMENT rather than off `this`: a caller holding a model from before a
-     * `setBand` would sweep the keys as they were then and leave the new ones orphaned.
-     */
+    /** Drop every pair a fleet was half of — what a fleet leaving the battle takes with it. */
     async clearGroup(group) {
         const id = group?.id ?? group;
         const bands = {};
@@ -150,17 +129,10 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
         return this.parent.update({ system: { bands } });
     }
 
-    /* -------------------------------------------- */
-
     /**
-     * Put a fleet in the battle. Its name, image, ownership and Initiative are `CombatantGroup`'s
-     * own fields, so a fleet declares only what the chapter adds to them.
-     * @param {object} [options]
-     * @param {string} [options.name]
-     * @param {string} [options.img]
+     * Put a fleet in the battle. @returns {Promise<CombatantGroup|null>}
      * @param {string} [options.band]              A key of `MGT2.ShipRangeBands`
      * @param {CombatantGroup} [options.relativeTo]  The fleet the band is measured against
-     * @returns {Promise<CombatantGroup|null>}
      */
     async addFleet({ name, img, band, relativeTo } = {}) {
         if ( !this.#gate() ) return null;
@@ -175,13 +147,10 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * One hull, flying for one fleet. No crew Combatants: folio 115 says "the crew take few specific
-     * actions", which is the whole reason the two levels shift up by one.
+     * One hull, flying for one fleet. @returns {Promise<Combatant|null>}
      * @param {Actor} actor                A `spacecraft`
      * @param {CombatantGroup} group       The fleet it flies for
-     * @param {object} [options]
      * @param {boolean} [options.reserve]  Folio 117's reserve: a tanker, transport or auxiliary
-     * @returns {Promise<Combatant|null>}
      */
     async addShip(actor, group, { reserve = false } = {}) {
         if ( !this.#gate() ) return null;
@@ -194,16 +163,11 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * One wing. §9.95's `{actor, count}` and not §9.78's actorless Combatant — a squadron has a
-     * hull, a crew and a place in the compendium, and folio 114 treats it "much like an individual
-     * ship". §9.78's form stays right for the missile salvo folio 124 wants tracked beside them.
+     * One wing. @returns {Promise<Combatant|null>}
      * @param {Actor} actor                   The fighter class
-     * @param {CombatantGroup} group
-     * @param {object} [options]
      * @param {number} [options.count]        How many fighters
      * @param {string} [options.name]         Folio 114's squadron name
      * @param {number|null} [options.crewSkill]  Folio 114 lets a wing differ from its mothership
-     * @returns {Promise<Combatant|null>}
      */
     async addSquadron(actor, group, { count = 1, name, crewSkill = null } = {}) {
         if ( !this.#gate() ) return null;
@@ -217,21 +181,14 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * A flight of missiles or torpedoes, as §9.78 fixed its shape: a `Combatant` with **no Actor**,
-     * because a salvo has a position, a target and an age and has no hull, no crew and no business
-     * in the compendium. Folio 124 wants them "tracked and moved as if they were ships", which is
-     * that design arriving at the screen that needs it.
-     *
-     * Its position is not a band-map entry — the map is keyed by two FLEETS and §9.100 B3 warns off
-     * keying a contact into it — but folio 119's flight time from the band it was fired at.
+    /**
+     * A flight of missiles or torpedoes: a `Combatant` with **no Actor**, because a salvo has a
+     * in the compendium.
      * @param {CombatantGroup} group          The fleet that fired it
-     * @param {object} [options]
      * @param {string} [options.warhead]      A key of `MGT2.FleetWarheads`
      * @param {number} [options.count]        How many are in the air
-     * @param {Combatant} [options.target]
      * @param {Combatant} [options.from]      The hull or wing that fired it (folio 110's missile DM)
      * @param {string} [options.band]         The band it was fired at, which sets its flight time
-     * @param {string} [options.name]
      * @returns {Promise<Combatant|null>}
      */
     async addSalvo(group, { warhead = "missileStandard", count = 1, target, from, band, name } = {}) {
@@ -253,15 +210,9 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
 
     /**
      * Folio 122's hand-off between the two engines, and it is the chapter's own instruction: when a
-     * dispersal extracts "a very small group, perhaps 1-3 ships, and that group includes one or more
-     * of the Travellers, the Referee should consider using the normal space combat rules". So the
-     * hulls leave this battle and arrive in a `space` Combat, through `MGT2Combat#addShip`, which
-     * builds the ship group and its crew roster the way the shipped engine expects.
-     *
-     * Advisory rather than enforced: folio 122 says *consider*, and a referee sending five is warned
-     * and obeyed.
+     * dispersal extracts "a very small group, perhaps 1-3 ships, and that group includes one or
+     * more of the Travellers, the Referee should consider using the normal space combat rules".
      * @param {Combatant[]} combatants   `fleetShip` contacts of this battle
-     * @param {object} [options]
      * @param {string} [options.band]    Where the new fight opens
      * @returns {Promise<Combat|null>}
      */
@@ -286,13 +237,9 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * Folio 122's other half: the fleet divides into smaller fleets that stay in this battle. The
-     * new fleet inherits every band its parent held, because a fleet breaking formation is at the
-     * range its parent was — nothing else would place it.
+     * Folio 122's other half: the fleet divides into smaller fleets that stay in this battle.
      * @param {CombatantGroup} group     The fleet being split
      * @param {Combatant[]} combatants   Which of its contacts leave
-     * @param {object} [options]
-     * @param {string} [options.name]
      * @returns {Promise<CombatantGroup|null>}
      */
     async disperse(group, combatants, { name } = {}) {
@@ -323,7 +270,6 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
      * Folio 122's reassembly, once the same Leadership → Tactics (naval) chain has been made again:
      * the contacts return to one fleet and an emptied one leaves the battle with its bands.
      * @param {CombatantGroup} group   The fleet being folded away
-     * @param {CombatantGroup} into
      */
     async reassemble(group, into) {
         if ( (group?.type !== FLEET) || (into?.type !== FLEET) || (group.id === into.id) ) return null;
@@ -336,12 +282,7 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
         return group.delete();
     }
 
-    /**
-     * Take a fleet out of the battle. The band map is keyed by pairs, so a fleet leaving takes every
-     * pair it was half of with it — nothing else would ever clear those keys.
-     * @param {CombatantGroup} group
-     * @returns {Promise<CombatantGroup|null>}
-     */
+    /** Take a fleet out of the battle. @returns {Promise<CombatantGroup|null>} */
     async removeFleet(group) {
         if ( (group?.type !== FLEET) || (group.parent !== this.parent) ) return null;
         await this.clearGroup(group);
@@ -351,11 +292,7 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
         return group.delete();
     }
 
-    /**
-     * Folio 115's three steps in order, and the round turning over after the Actions Step. The step
-     * is the round's spine at fleet level — folio 115 moves whole fleets in the Manoeuvre Step and
-     * spends the pools in the Attack Step — so it is driven from here rather than from a screen.
-     */
+    /** Folio 115's three steps in order, and the round turning over after the Actions Step. */
     async advanceStep() {
         const index = STEPS.indexOf(this.step);
         if ( index < 0 ) return this.parent.update({ system: { step: STEPS[0] } });
@@ -365,23 +302,15 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
 
     /**
      * Folio 115: "once the Actions Step is complete, a fleet combat round ends and […] a new round
-     * begins with the Manoeuvre Step." Called by `MGT2Combat#_onEndRound`, which hands a sub-type it
-     * does not know how to end its own round.
-     *
-     * Four things turn over, and the order matters: folio 116 banks the Thrust each fleet put into
-     * movement and moves a pair that can afford the change, folio 122's Morale lasts "for that round"
-     * only, folios 113/119/121 restore every pool to its maximum, and the step returns to Manoeuvre.
+     * begins with the Manoeuvre Step." Called by `MGT2Combat#_onEndRound`, which hands a sub-type
+     * it does not know how to end its own round.
      */
     async endRound() {
-        // Every reading is taken BEFORE any fleet is written. Folio 116 adds two fleets' movement
-        // together, and a fleet cleared first would contribute nothing to the second's reading —
-        // the pair would move on one side's Thrust alone, and the second would settle against the
-        // cost of the band it had already been moved into.
+        // Every reading is taken BEFORE any fleet is written.
         const plans = this.fleets.map(fleet => ({ fleet, ...fleet.system.movementPlan }));
         const changed = new Set();
         for ( const plan of plans ) {
-            // One pair, one band change. Two fleets closing on each other both bank the pair's
-            // COMBINED progress, so both ledgers pay the same cost and the band moves once.
+            // One pair, one band change.
             const key = plan.opponent ? SpaceCombatData.pairKey(plan.fleet, plan.opponent) : null;
             if ( plan.moves && key && !changed.has(key) ) {
                 changed.add(key);
@@ -400,51 +329,30 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
     }
 }
 
-/* -------------------------------------------- */
-
-/**
- * A fleet: several ships moving as a unit (folio 115). Its name, image, ownership and Initiative are
- * `CombatantGroup`'s own schema and are not redeclared here — what a fleet adds is a flag ship, a
- * commander's Tactics Effect, the formation its ships hold and the Thrust score folio 115 uses and
- * never defines.
- *
- * The readings below are getters and not derived data, for `ShipGroupData`'s reason: a group's
- * members are filled in as the Combatants prepare, which happens after the group has.
- */
+/** A fleet: several ships moving as a unit (folio 115). */
 export class FleetGroupData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         return {
             // Folio 115: the flag ship needs a command bridge and is worth DM+1 on the Morale check
-            // while it remains in the battle. A Combatant id and not an Actor's — the same hull can
-            // fly in two encounters, and only one of them is this fleet.
+            // while it remains in the battle.
             flagship: new fields.DocumentIdField({
                 required: false, nullable: true, initial: null, readonly: false }),
             // Folio 115: one Tactics (naval) check by the fleet's commander, "the Effect of this
-            // check is added to the Initiative of the fleet". It belongs to no ship, which is why it
-            // is entered on the fleet rather than derived from anything below it — §9.26's shape one
-            // level up.
+            // check is added to the Initiative of the fleet".
             tacticsEffect: new fields.NumberField({
                 required: true, nullable: false, integer: true, initial: 0 }),
             // Folio 117's three operational ranges are the spacing INSIDE a fleet and not the range
-            // to the enemy: Adjacent-to-Close is Defensive DM+1 for every ship, Short is the plane of
-            // battle, Medium disperses. The band map answers the other question and cannot hold this
-            // one — it is keyed by two fleets.
+            // to the enemy: Adjacent-to-Close is Defensive DM+1 for every ship, Short is the plane
+            // of battle, Medium disperses.
             formation: new fields.StringField({
                 required: true, blank: false, initial: PLANE_OF_BATTLE, choices: MGT2.ShipRangeBands }),
             // Folio 115 uses "the fleet's Thrust score" once and never defines it, and the Fleet
-            // Sheet (folio 106) has no such field. Derived below and typed here — the ruling is the
-            // referee's and this is where they state a different one.
+            // Sheet (folio 106) has no such field.
             thrustOverride: new fields.NumberField({
                 required: false, nullable: true, initial: null, integer: true, min: 0 }),
 
             // Folio 116 reprints Core folio 166 word for word and the only change is that the mover
-            // is a fleet. `ShipGroupData.thrust` with the station list taken out: folio 115 says
-            // "there is no detailed combat manoeuvring", so a fleet's Thrust buys movement or
-            // nothing — which also keeps §9.101's `ArrayField._cast` trap off this schema.
-            //
-            // NOT named `thrust`: `DataModel#_initialize` defines every field as an own property,
-            // which would shadow the `thrust` getter below and silently replace the fleet's Thrust
-            // score with this object.
+            // is a fleet.
             movement: new fields.SchemaField({
                 thrust: spentField(),
                 // Folio 116: "a fleet can spend Thrust over multiple rounds to close or open a
@@ -459,9 +367,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
             }),
 
             // Folio 122: the Morale check "potentially result[s] in changes to the Crew Skill score
-            // of all of the ships in a fleet FOR THAT ROUND". Per-fleet and per-round, so it is read
-            // off the group at the point of use and cleared when the round turns over — writing it
-            // onto each ship would mean unwriting it next round (§9.100 B1).
+            // of all of the ships in a fleet FOR THAT ROUND".
             morale: new fields.NumberField({
                 required: true, nullable: false, integer: true, initial: 0 }),
 
@@ -470,20 +376,17 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
             breakingOff: new fields.BooleanField({ required: false, initial: false }),
 
             // Folio 124: a gas giant or rocky planet held with superior Thrust is worth Defensive
-            // DM+1 per point of superiority. The object is no document and the band to it cannot be
-            // measured, so this is the referee's declaration that the fleet holds one; the DM below
-            // derives from the Thrust comparison, which is the half that is arithmetic.
+            // DM+1 per point of superiority.
             terrain: new fields.BooleanField({ required: false, initial: false }),
 
             // Folio 117 gives one turn's grace outside the plane of battle: ships at Medium "can
             // maintain their position in the fleet provided they return to Short range in the
-            // following turn". Counted at the end of each round, surfaced, never enforced.
+            // following turn".
             scattered: new fields.NumberField({
                 required: true, nullable: false, integer: true, min: 0, initial: 0 }),
 
-            // Folio 122's Fleet Dispersal table, once the Leadership → Tactics (naval) chain has been
-            // rolled: how many rounds are left to run and what the fleet's DMs pay meanwhile. On a
-            // failure the same two fields are the penalty and its duration.
+            // Folio 122's Fleet Dispersal table, once the Leadership → Tactics (naval) chain has
+            // been rolled: how many rounds are left to run and what the fleet's DMs pay meanwhile.
             dispersal: new fields.SchemaField({
                 rounds: spentField(),
                 dm: new fields.NumberField({
@@ -493,12 +396,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
         };
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * The Combatants in this fleet. Read off `_source.group` rather than off `members`, so the
-     * answer does not depend on whether the group prepared before or after its members.
-     */
+    /** The Combatants in this fleet. */
     get combatants() {
         const id = this.parent.id;
         return this.parent.parent.combatants.filter(combatant => combatant._source.group === id);
@@ -521,8 +419,6 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
         return this.ships.filter(combatant => combatant.system.reserve);
     }
 
-    /* -------------------------------------------- */
-
     /** HG folio 105: "to command a fleet, a capital ship must have a command bridge". */
     static commands(actor) {
         return actor?.system?.bridge?.type === "command";
@@ -536,9 +432,9 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * Folio 115: "as long as the flag ship remains in the battle, its fleet receives DM+1 during the
-     * Morale check that is made each round." A wreck has left it — folio 111 wrecks a ship at zero
-     * adjusted Hull points. This DM is one row of `moraleRows` below, which is where it is spent.
+     * Folio 115: "as long as the flag ship remains in the battle, its fleet receives DM+1 during
+     * the Morale check that is made each round." A wreck has left it — folio 111 wrecks a ship at
+     * zero adjusted Hull points.
      */
     get flagShipDM() {
         const flag = this.flagShip;
@@ -546,11 +442,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
         return (flag.system.hull.remaining > 0) ? 1 : 0;
     }
 
-    /**
-     * Fly the flag, or strike it by passing nothing. Refused rather than warned about for a hull
-     * with no command bridge: folio 105 makes it a precondition on being the flag ship at all.
-     * @param {Combatant|null} combatant
-     */
+    /** Fly the flag, or strike it by passing nothing. */
     async setFlagShip(combatant) {
         if ( !combatant ) return this.parent.update({ system: { flagship: null } });
         if ( (combatant.type !== FLEET_SHIP) || (combatant._source.group !== this.parent.id) ) {
@@ -570,19 +462,13 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
             tacticsEffect: (effect === null) ? 0 : Math.trunc(Number(effect) || 0) } });
     }
 
-    /* -------------------------------------------- */
-
     /** The fleet on the other side, where there are exactly two — which is the ordinary battle. */
     get opposing() {
         const others = this.parent.parent.system.fleets.filter(one => one.id !== this.parent.id);
         return (others.length === 1) ? others[0] : null;
     }
 
-    /**
-     * How much of the fleet is gone. Ships and wings both, because folio 122 counts "the ships in a
-     * fleet" in a battle where folio 114 makes a squadron a contact treated much like one — and the
-     * reserve counts, because folio 117 keeps it part of the fleet.
-     */
+    /** How much of the fleet is gone. */
     get strength() {
         const all = this.combatants.filter(one => FLEET_COMBATANTS.includes(one.type));
         const lost = all.filter(one => one.system.eliminated).length;
@@ -592,8 +478,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
 
     /**
      * Folio 122's four Morale events plus folio 115's flag ship, read off the battle rather than
-     * typed. Every row is named even when it is worth nothing, which is what `Checks.modifiers`
-     * prints on the card — a referee has to see that a term was considered.
+     * typed.
      * @param {CombatantGroup} [against]   The opposing fleet; the other one when there are two
      * @returns {[string, number][]}
      */
@@ -617,14 +502,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
         ];
     }
 
-    /**
-     * Folio 122's Morale check, made each round. **The book prints its DMs and neither a target nor
-     * a consequence** — only that the check "potentially result[s] in changes to the Crew Skill
-     * score of all of the ships in a fleet for that round" — so the dice are rolled and the card is
-     * posted and nothing is written. `setMorale` is where the referee states what it cost, which is
-     * §9.35's discipline: display the state, let the referee spend it.
-     * @param {CombatantGroup} [against]
-     */
+    /** Folio 122's Morale check, made each round. */
     async moraleCheck(against = null) {
         const rows = this.moraleRows(against);
         const { parts, labels } = Checks.modifiers(rows);
@@ -644,13 +522,9 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
             morale: (delta === null) ? 0 : Math.trunc(Number(delta) || 0) } });
     }
 
-    /* -------------------------------------------- */
-
     /**
      * Folio 122's Fleet Dispersal table, read off the Effect of the Tactics (naval) check that ends
      * the chapter's own task chain — Average (8+) Leadership, then Difficult (10+) Tactics (naval).
-     * The chain is §9.25's and is rolled through it; what lands here is its Effect.
-     * @param {number} effect
      */
     async applyDispersal(effect) {
         const score = Math.trunc(Number(effect) || 0);
@@ -670,10 +544,8 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * Folio 124: Defensive DM+1 per point of Thrust superiority while the fleet holds a planet as an
-     * obstruction. The superiority is over the fleet being defended against; the proximity to the
-     * object is the referee's, which is what `terrain` states.
-     * @param {CombatantGroup} [against]
+     * Folio 124: Defensive DM+1 per point of Thrust superiority while the fleet holds a planet as
+     * an obstruction.
      */
     terrainDM(against = null) {
         if ( !this.terrain ) return 0;
@@ -686,17 +558,14 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
         return this.breakingOff ? -1 : 0;
     }
 
-    /* -------------------------------------------- */
-
     /** Folio 117: a fleet holding Adjacent-to-Close gives every one of its ships Defensive DM+1. */
     get formationDM() {
         return TIGHT.includes(this.formation) ? 1 : 0;
     }
 
     /**
-     * Folio 115: the ships "must move as a unit, staying within Short range of each other, otherwise
-     * they disperse", and folio 117 gives Medium one turn's grace. Surfaced, never enforced —
-     * dispersal is folio 122's task chain and the referee's call.
+     * Folio 115: the ships "must move as a unit, staying within Short range of each other,
+     * otherwise they disperse", and folio 117 gives Medium one turn's grace.
      */
     get dispersing() {
         return SpaceCombatData.bandIndex(this.formation)
@@ -705,9 +574,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
 
     /**
      * Folio 117's grace spent: "ships that stray to Medium range can maintain their position in the
-     * fleet provided they return to Short range in the following turn". `scattered` counts the
-     * rounds that have ended out of formation, so one is the allowance and two is a fleet that folio
-     * 117 says now forms separate fleets or squadrons.
+     * fleet provided they return to Short range in the following turn".
      */
     get mustDisperse() {
         return this.scattered > SCATTER_GRACE;
@@ -717,9 +584,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
      * **A referee-facing ruling, because folio 115 uses "the fleet's Thrust score" once and never
      * defines it and folio 106's Fleet Sheet has no field for it.** The slowest ship of the battle
      * line: folio 115 makes the ships of a fleet move as a unit, and a formation is as fast as its
-     * slowest member. The reserve is out of it — folio 117 exempts it from the formation — and so
-     * are squadrons, which folio 115 lets launch at their own Thrust. `thrustOverride` is where a
-     * referee who rules otherwise types theirs.
+     * slowest member.
      */
     get thrust() {
         return this.thrustOverride ?? this.thrustDerived;
@@ -732,8 +597,6 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
 
     /**
      * Folio 115's streamlined roll: "an average or approximation of the ships' Crew Skill scores".
-     * Over the whole fleet, reserve included — the book qualifies neither — while squadrons carry
-     * their own (folio 114) and are left out.
      */
     get crewSkill() {
         return Math.round(this.crewSkillMean);
@@ -743,22 +606,13 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
         return mean(this.ships.map(combatant => combatant.system.crewSkill));
     }
 
-    /**
-     * The other averaged term of the streamlined roll. **A reading**: folio 115 names only Crew
-     * Skill as averaged, and the formula it streamlines carries an Offensive DM that no single ship
-     * can answer for a whole fleet.
-     */
+    /** The other averaged term of the streamlined roll. */
     get offensiveDM() {
         return Math.round(mean(this.ships.map(combatant => combatant.system.offensive.standard)));
     }
 
-    /* -------------------------------------------- */
-
     /**
      * Which of folio 115's two Initiative procedures this fleet is running — and it needs no field.
-     * `Combatant#_prepareGroup` overwrites every member's Initiative with its group's, so a fleet
-     * that has been rolled IS the streamlined mode and one that has not leaves each ship its own
-     * (§9.100 B3).
      * @returns {"streamlined"|"detailed"}
      */
     get mode() {
@@ -776,8 +630,6 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
         }
         return parts.join(" ");
     }
-
-    /* -------------------------------------------- */
 
     /** The fleet this one is manoeuvring against, once it has named one (folio 116). */
     get opponent() {
@@ -808,9 +660,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
     /**
      * Folio 116, word for word from Core folio 166: "if two fleets are travelling towards one
      * another, then the proportion of their Thrusts devoted to movement are added together […] if
-     * one fleet is trying to escape another, then subtract the lower Thrust from the higher". Which
-     * of the two it is falls out of where each says it is going, and the two only interact when both
-     * have named the other.
+     * one fleet is trying to escape another, then subtract the lower Thrust from the higher".
      */
     get closingRate() {
         const other = this.opponent?.system;
@@ -836,9 +686,6 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
 
     /**
      * What this round's manoeuvre comes to, read while every fleet still holds what it allocated.
-     * Folio 116 lets Thrust accumulate across rounds to pay for a band change one round cannot
-     * afford, so what this round bought is added to the bank; once the bank covers the cost the pair
-     * moves one band and the remainder carries into the next change.
      */
     get movementPlan() {
         const rate = this.closingRate;
@@ -857,9 +704,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * End of round for one fleet. The plan is passed IN rather than read here, because the band it
-     * would move is a property of a PAIR: two fleets closing on each other both bank the combined
-     * rate, so the change is applied once by `FleetCombatData#endRound` and both ledgers pay it.
+     * End of round for one fleet.
      * @param {object} [plan]   `movementPlan`, taken before any fleet was written
      */
     async endRound(plan) {
@@ -887,11 +732,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
         return this.parent.update({ initiative: roll.total });
     }
 
-    /**
-     * Folio 115's detailed procedure: one roll per ship. The fleet's own number is cleared FIRST,
-     * because `_prepareGroup` overwrites every member with it — leaving it would store a roll per
-     * ship that nothing ever shows.
-     */
+    /** Folio 115's detailed procedure: one roll per ship. */
     async rollShips() {
         if ( this.parent.type !== FLEET ) return this.parent;
         if ( Number.isFinite(this.parent.initiative) ) {
@@ -904,39 +745,23 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
     }
 }
 
-/* -------------------------------------------- */
-
-/**
- * One hull in a fleet battle. Everything the dice read is READ THROUGH to the Actor's own Fleet Ship
- * Sheet (§9.102's `system.fleet`) and nothing is copied onto the Combatant: a rating or a mount
- * edited on the ship sheet mid-battle has to reach the dice, which is §9.98's audit.
- *
- * Getters rather than `prepareDerivedData`, because `Combatant#group` is only assigned in
- * `_prepareGroup`, which v14 runs after the system model has prepared.
- */
+/** One hull in a fleet battle. */
 export class FleetShipData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         return {
             // Folio 117: tankers, transports and auxiliaries stay at Very Long or Distant and are
-            // "considered part of the fleet in spite of their distance". A flag on the ship and not
-            // a fourth document (§9.100 B3), and it is what keeps a slow auxiliary out of the
-            // fleet's Thrust score.
+            // "considered part of the fleet in spite of their distance".
             reserve: new fields.BooleanField({ required: false, initial: false }),
 
             // Folio 121's Radiation Effects, counted per encounter and therefore on the Combatant:
             // an exposure is something that happened in THIS battle, and a `spacecraft` carries no
-            // radiation track at all (§9.26's split).
+            // radiation track at all.
             radiation: spentField(),
 
-            // What this round has already taken out of each pool. Folio 113 restores the salvo pool
-            // "to maximum in the following round", folio 119 replenishes the screens on the same
-            // terms, and folio 121 reverts Repair Points to zero at the end of each round — one
-            // shape for all five, cleared together by `FleetCombatData#endRound`.
+            // What this round has already taken out of each pool.
             spent: new fields.SchemaField(Object.fromEntries(POOLS.map(pool => [pool, spentField()])))
         };
     }
-
-    /* -------------------------------------------- */
 
     get ship() {
         return (this.parent.actor?.type === "spacecraft") ? this.parent.actor : null;
@@ -947,8 +772,9 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * Folios 110-111's Fleet Ship Sheet, derived on the Actor by §9.102. **Null while the rule is
-     * off**, which is what makes the switch gate the engine rather than hide a number somebody typed.
+     * Folios 110-111's Fleet Ship Sheet, derived on the Actor. **Null while the rule is
+     * off**, which is what makes the switch gate the engine rather than hide a number somebody
+     * typed.
      */
     get stats() {
         return this.ship?.system.fleet ?? null;
@@ -957,7 +783,7 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
     /**
      * Folio 110's Crew Skill with the two things the chapter moves it by: folio 122's Morale, which
      * changes it for "all of the ships in a fleet for that round", and folio 121's Radiation, which
-     * is this hull's own. Both are per-encounter, which is why neither is written onto the Actor.
+     * is this hull's own.
      */
     get crewSkill() {
         return Math.max(0, (this.stats?.crewSkill ?? 0)
@@ -987,8 +813,8 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
 
     /**
      * Folio 110's slashed pair, **recomposed from the Actor's parts rather than read whole**: the
-     * standard DM starts at half the Crew Skill and Morale and Radiation have already moved that, so
-     * `system.fleet.offensive` is the ship's standing figure and this is the round's.
+     * standard DM starts at half the Crew Skill and Morale and Radiation have already moved that,
+     * so `system.fleet.offensive` is the ship's standing figure and this is the round's.
      */
     get offensive() {
         const stats = this.stats;
@@ -1002,8 +828,8 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
 
     /**
      * Folio 111's Defensive DM, plus every fleet-level term the chapter adds to it: folio 117's
-     * formation bonus (the fleet's own spacing, NOT the range to the enemy, which is why it needs no
-     * target), folio 122's dispersal penalty and folio 122's DM-1 for breaking off.
+     * formation bonus (the fleet's own spacing, NOT the range to the enemy, which is why it needs
+     * no target), folio 122's dispersal penalty and folio 122's DM-1 for breaking off.
      */
     get defensive() {
         const stats = this.stats;
@@ -1070,25 +896,16 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
         return this.parent.isDefeated || (this.stats ? (this.hull.remaining <= 0) : false);
     }
 
-    /* -------------------------------------------- */
-
     /**
      * Folios 113 and 121's pools at this round's Crew Skill, with folio 121's radiation fraction
-     * already struck off the three terms that table names. One derivation, on the Actor, so the
-     * DEFENCES panel a referee reads before the battle and the pool the round spends are the same
-     * arithmetic and cannot drift apart.
+     * already struck off the three terms that table names.
      */
     get defences() {
         return this.ship?.system.fleetDefences?.(this.crewSkill,
             { radiation: this.radiationRow?.salvo ?? 0 }) ?? null;
     }
 
-    /**
-     * The five spendable pools, each as `{max, spent, left}`. Folio 113 restores the salvo pool
-     * every round, folio 119 the two screens, folio 121 the Repair Points; the sandcaster pool is
-     * the odd one out and is read through `sandcasterAgainst`, because folio 119 makes its size a
-     * function of who is shooting.
-     */
+    /** The five spendable pools, each as `{max, spent, left}`. */
     get pools() {
         const defences = this.defences;
         const pool = (key, max) => ({ key, max, spent: this.spent[key],
@@ -1121,11 +938,8 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * Take points out of a pool. Refused rather than clamped when the pool cannot cover it: a
-     * referee spending 400 points of salvo defence a ship does not have is making a mistake the
-     * round cannot undo, and folio 113 caps the pool at what the systems produce.
+     * Take points out of a pool.
      * @param {string} key       A member of `POOLS`
-     * @param {number} points
      * @param {Combatant} [against]   Only the sandcaster pool has one (folio 119)
      */
     async spend(key, points, against = null) {
@@ -1142,15 +956,8 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
 
     /**
      * Folio 121's Repair System: "Repair Points can be used to repair systems that have been
-     * affected by Critical Hits on a point-for-point basis" — one point per severity level. The
-     * severity lives on the Actor, which is where `applyCritical` put it, so this spends the round's
-     * pool and lowers the location.
-     *
-     * Folio 121's "destroyed cannot be repaired […] until the ship is taken to a base or shipyard"
-     * is NOT enforced: which cell a stored severity means is folio 120's grid, which the corpus
-     * carries column-scrambled, so the judgement stays the referee's.
+     * affected by Critical Hits on a point-for-point basis" — one point per severity level.
      * @param {string} location   A key of `MGT2.ShipCriticals`
-     * @param {number} levels
      */
     async repairCritical(location, levels = 1) {
         const ship = this.ship;
@@ -1160,19 +967,15 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
         const before = this.parent._source.system.spent.repair;
         await this.spend("repair", wanted);
         // `spend` refuses a pool it cannot cover, so the severity only moves once the points did.
-        // Read through the document: `Combatant#update` re-initialises `system` and leaves this
-        // instance behind, so `this.spent` here would still be the figure from before the spend.
         if ( this.parent._source.system.spent.repair === before ) return this.parent;
         await ship.update({ [`system.criticals.${location}`]: current - wanted });
         return this.parent;
     }
 
-    /* -------------------------------------------- */
-
     /**
      * Folio 115: `2D + the ship's Crew Skill + the fleet's Thrust score + Offensive DM`, plus the
-     * commander's Tactics (naval) Effect — folio 115 adds that to "the Initiative of the fleet", and
-     * in the detailed mode there is no fleet number to add it to, so every ship carries it.
+     * commander's Tactics (naval) Effect — folio 115 adds that to "the Initiative of the fleet",
+     * and in the detailed mode there is no fleet number to add it to, so every ship carries it.
      */
     get initiativeFormula() {
         const fleet = this.fleetGroup?.system;
@@ -1195,39 +998,27 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
     }
 }
 
-/* -------------------------------------------- */
-
 /**
  * One wing (folio 114): a fighter class, a number of them, and a Hull pool that loses a fighter per
- * fighter's-worth destroyed. §9.95's `{actor, count}`, which `carriedCraft` already answers with for
- * a clamp rack of ten light fighters — the same pair, placed on a battle map.
- *
- * **Folio 114's DMs are not folio 110's.** A squadron starts at its FULL Crew Skill where a ship
- * starts at half, so the DMs are recomposed here from the parts the Actor derives rather than read
- * off `system.fleet.offensive` whole.
+ * fighter's-worth destroyed.
  */
 export class SquadronData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         return {
             count: new fields.NumberField({
                 required: true, nullable: false, integer: true, min: 1, initial: 1 }),
-            // Folio 114's Hull pool. Per-encounter and on the Combatant because ten squadrons fly
-            // the same fighter Actor, so the Actor cannot hold one wing's losses.
+            // Folio 114's Hull pool.
             damage: new fields.NumberField({
                 required: true, nullable: false, integer: true, min: 0, initial: 0 }),
             // Folio 114: "usually the same as the squadron's mothership but may be different" — one
-            // level lower for a green wing, one or two higher for a crack one. Null reads the
-            // fighter class's own typed figure.
+            // level lower for a green wing, one or two higher for a crack one.
             crewSkillOverride: new fields.NumberField({
                 required: false, nullable: true, integer: true, min: 0, initial: null })
             // **No pools.** Folio 114's Fighter Squadron Sheet prints Crew Skill, weapons, the two
             // DMs, Thrust, Armour and Hull points and nothing else: a wing has no salvo defence, no
-            // screens, no sandcasters and no Repair Points. Declaring the five would be an
-            // accumulator with no source, which is §9.102's own lesson one entry back.
+            // screens, no sandcasters and no Repair Points.
         };
     }
-
-    /* -------------------------------------------- */
 
     get fighter() {
         return (this.parent.actor?.type === "spacecraft") ? this.parent.actor : null;
@@ -1244,27 +1035,22 @@ export class SquadronData extends foundry.abstract.TypeDataModel {
 
     /**
      * Folio 114's own figure, moved by folio 122's Morale like every other element of the fleet —
-     * "changes to the Crew Skill score of all of the ships in a fleet for that round", and folio 114
-     * makes a wing a contact treated much like a ship. Radiation is not read: folio 121's table is
-     * about a ship's crew and a wing has no hull to irradiate.
+     * "changes to the Crew Skill score of all of the ships in a fleet for that round", and folio
+     * 114 makes a wing a contact treated much like a ship.
      */
     get crewSkill() {
         const own = this.crewSkillOverride ?? (this.stats?.crewSkill ?? 0);
         return Math.max(0, own + (this.fleetGroup?.system.morale ?? 0));
     }
 
-    /**
-     * Folio 114: the squadron's own Crew Skill, the Fire Control rating and the TL step. The
-     * fire-control term is the Actor's max over the plain and Advanced packages, which is HG folio
-     * 73's "does not stack" — folio 114 names only "Fire Control software".
-     */
+    /** Folio 114: the squadron's own Crew Skill, the Fire Control rating and the TL step. */
     get offensive() {
         const stats = this.stats;
         if ( !stats ) return { standard: 0, missile: 0 };
         return {
             standard: this.crewSkill + stats.fireControl + stats.tl,
             // Folio 114 prints no missile DM for a squadron and folio 107's sample squadron carries
-            // missile racks. Folio 110's form, over the squadron's own figures.
+            // missile racks.
             missile: stats.launchSolution + stats.tl
         };
     }
@@ -1282,10 +1068,7 @@ export class SquadronData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * Folio 114: "add DM+1 against opposing ships at Close or Adjacent Range". **This +1 is the
-     * range to the enemy** — unlike folio 117's identically-worded one for a ship, which is the
-     * fleet's own spacing — so it is the band map's first reader. Folio 124's celestial terrain
-     * rides on top of it, a planetoid serving a wing the way a planet serves a fleet.
+     * Folio 114: "add DM+1 against opposing ships at Close or Adjacent Range".
      * @param {CombatantGroup} other   The attacking fleet
      */
     defensiveAgainst(other) {
@@ -1309,12 +1092,6 @@ export class SquadronData extends foundry.abstract.TypeDataModel {
     /**
      * Folio 114: one fighter's Hull points times the count, losing a fighter every time a fighter's
      * worth is eliminated.
-     *
-     * **The per-fighter figure is the fleet-adjusted one, and that is a referee-facing ruling.**
-     * Folio 114 says only "obtain the Hull points from the fighter's description" and does not
-     * repeat folio 111's ÷ 3.5 — although it does repeat it for Armour two lines above. Read as an
-     * omission rather than a rule: every other quantity in the chapter is in ÷ 3.5 space, and an
-     * undivided wing would have 3.5 times the hull of the same tonnage flown as ships.
      */
     get hull() {
         const perFighter = Math.max(1, this.stats?.hull ?? 0);
@@ -1328,8 +1105,6 @@ export class SquadronData extends foundry.abstract.TypeDataModel {
     get eliminated() {
         return this.parent.isDefeated || (this.stats ? (this.hull.strength <= 0) : false);
     }
-
-    /* -------------------------------------------- */
 
     /**
      * Folio 115's formula with the squadron's OWN Thrust rather than its fleet's: the same page
@@ -1352,38 +1127,25 @@ export class SquadronData extends foundry.abstract.TypeDataModel {
     }
 }
 
-/* -------------------------------------------- */
-
 /**
- * A flight of missiles or torpedoes on its way to a target — §9.78's design, arriving at the screen
- * that needs it. **No Actor**: a salvo has a position, a target and an age, and it has no hull, no
- * crew and no business in the compendium. Folio 124 asks for exactly this — "salvoes can be tracked
- * and moved as if they were ships".
- *
- * Its position is folio 119's flight time from the band it was fired at and **not** an entry in the
- * band map, which is keyed by two FLEETS; §9.100 B3 records that a Combatant id would validate into
- * that map and read back as null.
+ * A flight of missiles or torpedoes on its way to a target, arriving at the screen that needs it.
  */
 export class SalvoData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         return {
-            // Folio 112: "the number of missiles or torpedoes that make it through a ship's defences
-            // becomes the multiple", so the count IS the salvo's weight and not a detail of it.
+            // Folio 112: "the number of missiles or torpedoes that make it through a ship's
+            // defences becomes the multiple", so the count IS the salvo's weight and not a detail
+            // of it.
             count: new fields.NumberField({
                 required: true, nullable: false, integer: true, min: 0, initial: 1 }),
-            // What point defence has taken out. Stored beside the count rather than subtracted from
-            // it, so a round can be undone and a card can say what the pool bought.
+            // What point defence has taken out.
             removed: spentField(),
             warhead: new fields.StringField({
                 required: true, blank: false, initial: "missileStandard", choices: MGT2.FleetWarheads }),
-            // The contact it is flying at. A Combatant id, because a salvo outlives the ship that
-            // fired it and is aimed at one hull rather than at a fleet.
+            // The contact it is flying at.
             target: new fields.DocumentIdField({
                 required: false, nullable: true, initial: null, readonly: false }),
-            // And who fired it. Folio 110 derives a MISSILE Offensive DM on the ship, and a salvo
-            // resolving itself has none — so without this the only reader of that DM answers 0.
-            // Nullable because a salvo outlives its shooter, which is the whole reason §9.78 made it
-            // a contact rather than a property of one.
+            // And who fired it.
             firedBy: new fields.DocumentIdField({
                 required: false, nullable: true, initial: null, readonly: false }),
             // Folio 119's Missile Flight table is read from where it was FIRED and not from where
@@ -1392,8 +1154,6 @@ export class SalvoData extends foundry.abstract.TypeDataModel {
                 required: true, blank: false, initial: PLANE_OF_BATTLE, choices: MGT2.ShipRangeBands })
         };
     }
-
-    /* -------------------------------------------- */
 
     get head() {
         return MGT2.FleetWarheads[this.warhead] ?? MGT2.FleetWarheads.missileStandard;
@@ -1424,10 +1184,7 @@ export class SalvoData extends foundry.abstract.TypeDataModel {
         return this.head.torpedo === true;
     }
 
-    /**
-     * Folio 113: "against torpedoes, double the amount taken from the pool. For example, 100 taken
-     * from the pool only eliminates 50 torpedoes." So a torpedo costs two points and a missile one.
-     */
+    /** Folio 113: "against torpedoes, double the amount taken from the pool. */
     get cost() {
         return this.torpedo ? 2 : 1;
     }
@@ -1451,17 +1208,12 @@ export class SalvoData extends foundry.abstract.TypeDataModel {
         return this.remaining <= 0;
     }
 
-    /* -------------------------------------------- */
-
     /** Folio 119's Missile Flight table, read from the band the salvo was fired at. */
     get flightRounds() {
         return MGT2.MissileFlight[this.launchBand] ?? 0;
     }
 
-    /**
-     * The round it lands on. `roundJoined` is core's own field and is the salvo's age for free,
-     * which is the half of §9.78 that needed no schema.
-     */
+    /** The round it lands on. */
     get impactRound() {
         return (this.parent.roundJoined ?? this.parent.parent?.round ?? 0) + this.flightRounds;
     }
@@ -1474,15 +1226,9 @@ export class SalvoData extends foundry.abstract.TypeDataModel {
         return this.roundsLeft <= 0;
     }
 
-    /* -------------------------------------------- */
-
     /**
      * Folio 113's salvo defence, spent: "each point removes one missile from incoming salvoes", and
-     * a torpedo costs two. The points come out of the defender's own pool, which is what makes this
-     * the pool's sink rather than a subtraction somebody does on paper.
-     *
-     * Folio 119's multi-warhead rider shrinks the POOL rather than the exchange rate — a defender's
-     * Salvo Defence is 20% smaller against one, which is fewer points to spend.
+     * a torpedo costs two.
      * @param {Combatant} defender   The `fleetShip` being shot at
      * @param {number} points        Points of Salvo Defence to spend
      */
@@ -1506,8 +1252,6 @@ export class SalvoData extends foundry.abstract.TypeDataModel {
         return this.parent.update({
             system: { removed: Math.min(this.count, this.removed + wanted) } });
     }
-
-    /* -------------------------------------------- */
 
     /**
      * A salvo has no Initiative of its own — it moves on folio 119's flight table and not on the

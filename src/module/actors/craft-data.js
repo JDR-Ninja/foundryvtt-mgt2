@@ -10,21 +10,14 @@ const OVERFLOW_DAMAGE = "6d6";
 
 /**
  * What a vehicle and a spacecraft share: a hull that takes damage behind armour, a Tech Level, a
- * registry entry, and a critical track keyed by location. Everything else differs in **unit** — a
- * vehicle's crew is a count where a ship's is a roster of stations — so only the shape lives here.
- *
- * Abstract: never registered in `CONFIG.Actor.dataModels`.
- *
+ * registry entry, and a critical track keyed by location.
  * @extends {ActorBaseData}
  */
 export class CraftData extends ActorBaseData {
 
     static DEFAULT_DAMAGE_ORDER = ["hull"];
 
-    /**
-     * The critical table this craft rolls on — `MGT2.VehicleCriticals` or `MGT2.ShipCriticals`. Its
-     * keys are the locations `criticals` declares, so the subclass chooses both at once.
-     */
+    /** The critical table this craft rolls on — `MGT2.VehicleCriticals` or `MGT2.ShipCriticals`. */
     static CRITICALS = {};
 
     /** Core p.140, p.169: the ladder fires each time the wound passes another tenth of the hull. */
@@ -39,9 +32,7 @@ export class CraftData extends ActorBaseData {
             required: false, nullable: false, integer: true, min: 0, max: MAX_SEVERITY, initial: 0 });
 
         Object.assign(schema, {
-            // One pool for both craft. A vehicle's Hull is transcribed off the printed statblock and
-            // is a genuine `base`; a ship's is computed from tonnage and lands in `auto` instead
-            // (§4.2). Same field, two writers.
+            // One pool for both craft.
             characteristics: new fields.SchemaField({
                 hull: createCharacteristicField(true)
             }),
@@ -50,7 +41,7 @@ export class CraftData extends ActorBaseData {
                 required: false, nullable: false, integer: true, min: 0, initial: 12 }),
 
             // Severity per location, stored; what a severity *does* is a lookup in `CRITICALS`
-            // (§1.11), which keeps the books' prose out of the document.
+            //, which keeps the books' prose out of the document.
             criticals: new fields.SchemaField(Object.fromEntries(
                 Object.keys(this.CRITICALS).map(location => [location, severity()]))),
             // Its own track rather than a tenth location: eight of the vehicle's cells and sixteen
@@ -64,27 +55,13 @@ export class CraftData extends ActorBaseData {
         return schema;
     }
 
-    /* -------------------------------------------- */
-    /*  Accessors                                   */
-    /* -------------------------------------------- */
-
-    /**
-     * Core p.140, p.168: a hull at zero is wrecked and there is no state under it. The inherited
-     * pair still derives — a single-link chain can never be `unconscious` — because the shared
-     * header renders them.
-     * @inheritDoc
-     */
+    /** Core p.140, p.168: a hull at zero is wrecked and there is no state under it. @inheritDoc */
     damageStatesFor(characteristics) {
         const hull = characteristics.hull;
         return { ...super.damageStatesFor(characteristics), wrecked: (hull.max > 0) && (hull.damage >= hull.max) };
     }
 
-    /**
-     * One word, and it is the craft's own. The inherited pair still derives for the shared header,
-     * but a hull emptying is not a death — on a single-link chain `dead` and `wrecked` fire on the
-     * same point and only one of them is what the books call it.
-     * @inheritDoc
-     */
+    /** One word, and it is the craft's own. @inheritDoc */
     get damageStateLabels() {
         return { wrecked: this.constructor.WRECKED_LABEL };
     }
@@ -94,11 +71,7 @@ export class CraftData extends ActorBaseData {
         return Math.min(MAX_SEVERITY, Math.max(0, (Math.trunc(effect) || 0) - 5));
     }
 
-    /**
-     * How many sustained-damage thresholds a wound moving from `before` to `after` crossed. Core
-     * p.140 asks for a Severity 1 critical at every tenth of starting Hull, and with the wound
-     * stored that is a subtraction rather than a counter to keep in step (§1.2).
-     */
+    /** How many sustained-damage thresholds a wound moving from `before` to `after` crossed. */
     sustainedCrossings(before, after) {
         const step = this.constructor.SUSTAINED_FRACTION * this.characteristics.hull.max;
         if (!(step > 0)) return 0;
@@ -129,10 +102,6 @@ export class CraftData extends ActorBaseData {
             .map(([location]) => location);
     }
 
-    /* -------------------------------------------- */
-    /*  Data Preparation                            */
-    /* -------------------------------------------- */
-
     /** @inheritDoc */
     prepareDerivedData() {
         super.prepareDerivedData();
@@ -144,15 +113,7 @@ export class CraftData extends ActorBaseData {
         this.prepareEncumbrance();
     }
 
-    /* -------------------------------------------- */
-    /*  Rules                                       */
-    /* -------------------------------------------- */
-
-    /**
-     * The wound, plus how many sustained-damage thresholds it crossed. The count is reported rather
-     * than acted on: the location is a 2D roll the referee makes.
-     * @inheritDoc
-     */
+    /** The wound, plus how many sustained-damage thresholds it crossed. @inheritDoc */
     async applyDamage(amount, options = {}) {
         const before = this.characteristics.hull.damage;
         const result = await super.applyDamage(amount, options);

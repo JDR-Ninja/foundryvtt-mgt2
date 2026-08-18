@@ -11,7 +11,6 @@ export class ChatHelper {
 
     /**
      * Wire up the interactive buttons of a rendered chat card.
-     * Called from the "renderChatMessageHTML" hook, so `html` is a plain HTMLElement.
      * @param {ChatMessage} message   The message being rendered
      * @param {HTMLElement} html      The rendered message element
      */
@@ -26,8 +25,7 @@ export class ChatHelper {
             return setupRequestCard(message, html);
         }
         // The third door onto the Docket, and — on a check that answered one — the strip naming the
-        // request it came from. Both injected rather than added to `roll.html`, which §8 keeps
-        // unchanged; the strip's link is picked up by the `chainSource` binding further down.
+        // request it came from.
         injectAskTheSame(message, html);
         injectAskedStrip(message, html);
 
@@ -75,9 +73,7 @@ export class ChatHelper {
             });
         }
 
-        // The offering side of the chain: this check is held for whatever is rolled next. Several
-        // cards may be armed at once, which is Core p.63's working together — each contributor
-        // offers from their own card and the final check receives them all.
+        // The offering side of the chain: this check is held for whatever is rolled next.
         const chainInto = html.querySelector('button[data-action="chainInto"]');
         if (chainInto) {
             chainInto.addEventListener("click", event => {
@@ -100,8 +96,8 @@ export class ChatHelper {
             });
         }
 
-        // Indexed buttons are meaningless without the flag that describes them, and a
-        // third-party module may well render its own button[data-index].
+        // Indexed buttons are meaningless without the flag that describes them, and a third-party
+        // module may well render its own button[data-index].
         if (message.flags?.mgt2?.buttons?.length) {
             for (const button of html.querySelectorAll("button[data-index]")) {
                 button.addEventListener("click", async event => {
@@ -131,13 +127,7 @@ export class ChatHelper {
         });
     }
 
-    /**
-     * Roll the attack's three readings into one message. Reduced Damage substitutes into the damage
-     * expression (`4D` → `4D3`) rather than scaling a total, so it cannot be computed after the
-     * fact and has to be rolled here; Minimum is one point per die and is deterministic. Which one
-     * applies is decided by the *defender's* traits, which the system does not read — so all three
-     * are offered and the defender picks.
-     */
+    /** Roll the attack's three readings into one message. */
     static async _processRollDamageButtonEvent(message, event) {
         event.preventDefault();
         event.stopPropagation();
@@ -145,11 +135,7 @@ export class ChatHelper {
         if (!damage?.formula) return;
 
         // Core p.77: damage is rolled with the attack's Effect added to the total, and a melee
-        // attack adds the attacker's STR DM on top. Both were captured with the attack roll, and
-        // both sit outside the transform: Companion p.93 scopes "any plus or minus" to the weapon's
-        // printed damage, and neither of these is one.
-        // Core folio 79: a burst adds the Auto score, and it sits outside the transform for the same
-        // reason — it is the fire mode's addition, not part of the weapon's printed damage.
+        // attack adds the attacker's STR DM on top.
         const attackBonus = [];
         if (damage.effect) attackBonus.push(MGT2Helper.getFormulaDM(damage.effect));
         if (damage.strengthDM) attackBonus.push(MGT2Helper.getFormulaDM(damage.strengthDM));
@@ -167,8 +153,7 @@ export class ChatHelper {
         }
 
         // Core p.78: a Destructive weapon multiplies the total rolled by 10 — written either as the
-        // doubled D of `3DD` or as the trait. Core p.167 puts the scale ratio *after* it, so it
-        // belongs to the damage total and not to the pipeline the target runs.
+        // doubled D of `3DD` or as the trait.
         const boost = (MGT2Helper.isDestructive(damage.formula) || damage.destructive) ? 10 : 1;
 
         const full = await new Roll(formula + bonus, {}).roll();
@@ -194,10 +179,9 @@ export class ChatHelper {
             // Core folio 79: a Radiation weapon also delivers a dose, which needs the target and so
             // rides to the apply path with the rest of the pipeline's inputs.
             radiation: damage.radiation === true,
-            // RH folio 106: an ion hit meets no armour and shuts a robot's brain down. Only the
-            // target knows whether either happens, so it travels the same way.
+            // RH folio 106: an ion hit meets no armour and shuts a robot's brain down.
             ion: damage.ion === true,
-            // §9.4: the Poison or Diseased trait stays on the attacker; what the defender gets is a
+            // The Poison or Diseased trait stays on the attacker; what the defender gets is a
             // `disease` Item built from its parameters, named after whatever carried it.
             hazards: damage.hazards ?? [],
             sourceName: damage.rollObjectName ?? ""
@@ -243,10 +227,7 @@ export class ChatHelper {
         });
     }
 
-    /**
-     * The three readings, in the order the card offers them; the first is the one preselected. Each
-     * detail states the dice alone, so `raw` is what was rolled before Destructive's multiple.
-     */
+    /** The three readings, in the order the card offers them; the first is the one preselected. */
     static #transformOptions(formula, raw, boost, flat, added) {
         const detail = (expression, dice) => [`${expression} = ${dice}`, ...added].join(" · ");
         return [
@@ -266,8 +247,7 @@ export class ChatHelper {
 
     /**
      * Mark the reading the selected target's traits select, and move the pick onto it while the
-     * viewer has not made one of their own. **Their pick always wins** — the traits answer a
-     * question, they do not take the choice away.
+     * viewer has not made one of their own.
      */
     static #markTransform(message, html) {
         const pick = html.querySelector(".dmgpick");
@@ -275,7 +255,7 @@ export class ChatHelper {
 
         const types = message.flags.mgt2.apply.damageType ?? [];
         // The canvas may answer "who am I applying this to"; it may never answer "what is the
-        // answer" (REDESIGN-PLAN.md §1). A referee's own selection is the first question.
+        // answer".
         const found = new Set((canvas.tokens?.controlled ?? [])
             .filter(token => token.actor?.isOwner)
             .map(token => token.actor.system.damageTransform?.(types))
@@ -346,9 +326,10 @@ export class ChatHelper {
                 ui.notifications.info(game.i18n.format("MGT2.Actor.StunIncapacitated",
                     { name: token.actor.name, rounds: result.rounds }));
             }
-            // RH folio 106: an ion hit shuts a robot's brain down for as many rounds as it inflicted
-            // and a hardened one shrugs it off — the same kind of fact as the Stun rounds above, and
-            // reported the same way, because neither is a wound anything on the sheet can hold.
+            // RH folio 106: an ion hit shuts a robot's brain down for as many rounds as it
+            // inflicted and a hardened one shrugs it off — the same kind of fact as the Stun rounds
+            // above, and reported the same way, because neither is a wound anything on the sheet
+            // can hold.
             if (result?.shutdown > 0) {
                 ui.notifications.info(game.i18n.format("MGT2.Actor.robot.IonShutdown",
                     { name: token.actor.name, rounds: result.shutdown }));
@@ -363,17 +344,7 @@ export class ChatHelper {
         }
     }
 
-    /* -------------------------------------------- */
-    /*  Grappling (Core folio 78)                   */
-    /* -------------------------------------------- */
-
-    /**
-     * The winner's menu. Six of the eight outcomes are things the referee does to the fiction and the
-     * system writes none of them — it names the outcome and prints the figure the folio gives it.
-     * The two that produce a wound post it as an ordinary damage offer, so the defender applies it
-     * the way they apply every other one; the grapple's own damage carries `ignoreArmour`, and the
-     * throw's 1D does not, because the folio exempts only the first.
-     */
+    /** The winner's menu. */
     static async _resolveGrapple(message, event) {
         event.preventDefault();
         event.stopPropagation();
@@ -440,15 +411,9 @@ export class ChatHelper {
         return getDocumentClass("ChatMessage").create(chatData);
     }
 
-    /* -------------------------------------------- */
-    /*  Radiation (Core folio 81)                   */
-    /* -------------------------------------------- */
-
     /**
-     * Core folio 79: "the target will receive 2D x 20 rads, multiplied by three for Spacecraft scale
-     * weapons". Rolled per target, because the folio gives each one their own dose. The Destructive
-     * clause, which doses everything within ten metres, is the referee's radius and is already how a
-     * card applied to several tokens behaves.
+     * Core folio 79: "the target will receive 2D x 20 rads, multiplied by three for Spacecraft
+     * scale weapons".
      */
     static async #applyRadiation(actor, scale) {
         const source = MGT2.RadiationSources.weapon;
@@ -458,12 +423,7 @@ export class ChatHelper {
 
     /**
      * One exposure, read the way folio 81 reads it: the immediate column against this dose, the
-     * permanent one against the running total. Folio 100's armour Rad score comes off first, which
-     * is why the damage that follows is applied raw — the Protection was already paid at the rads.
-     *
-     * Both entry points end here — the health panel's own control and a Radiation weapon's damage
-     * card — so the table is read in one place.
-     * @param {Actor} actor
+     * permanent one against the running total.
      * @param {object} exposure   `{dose, roll}` — the dose before the armour deduction
      */
     static async resolveExposure(actor, { dose, roll = null }) {
@@ -502,10 +462,6 @@ export class ChatHelper {
         return ChatHelper.postRecovery(actor, "MGT2.Radiation.Exposure", message, roll, "MGT2.Actor.Rads");
     }
 
-    /* -------------------------------------------- */
-    /*  Recovery (Core p.82-83)                     */
-    /* -------------------------------------------- */
-
     /** The card knows the Effect; who was treated is the referee's pick, as it is for damage. */
     static async _applyChatCardFirstAid(message, event) {
         event.preventDefault();
@@ -515,10 +471,7 @@ export class ChatHelper {
         for (const token of ChatHelper.#targets()) await ChatHelper.applyFirstAid(token.actor, points);
     }
 
-    /**
-     * Core p.82: the Effect of a Medic check, minimum one point, once only. The two conditions it
-     * also names are facts no sheet holds, so the dialog has the referee confirm them.
-     */
+    /** Core p.82: the Effect of a Medic check, minimum one point, once only. */
     static applyFirstAid(actor, points) {
         if (actor.system.states?.firstAidUsed) {
             return ui.notifications.warn(game.i18n.format("MGT2.Recovery.AlreadyApplied", { name: actor.name }));
@@ -534,11 +487,7 @@ export class ChatHelper {
         });
     }
 
-    /**
-     * Hand the referee a pool and let them place it. Both procedures that divide "as desired" end
-     * here, from the sheet and from a chat card alike — neither caller may decide where the points
-     * land, so neither of them owns this.
-     */
+    /** Hand the referee a pool and let them place it. */
     static async applyRestore(actor, { procedure, points, conditions = [], spendFirstAid = false }) {
         const system = actor.system;
         const rows = system.damagedLinks.map(key => ({
@@ -554,8 +503,8 @@ export class ChatHelper {
         });
         if (!distribution) return;
 
-        // The procedure was carried out the moment it was confirmed, whatever the referee then chose
-        // to place — so that is what spends the one attempt the rule allows.
+        // The procedure was carried out the moment it was confirmed, whatever the referee then
+        // chose to place — so that is what spends the one attempt the rule allows.
         const extra = spendFirstAid ? { states: { firstAidUsed: true } } : {};
         const healed = await system.applyHeal(distribution, extra);
         return ChatHelper.postRecovery(actor, procedure, ChatHelper.restoredMessage(healed, distribution));

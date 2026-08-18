@@ -1,10 +1,7 @@
 const { DialogV2 } = foundry.applications.api;
 
 /**
- * The world's empty compendium packs (DOCTYPE-SCHEMAS §36): the shape of a library and none of its
- * content. One pack per document type × visibility and no finer — the only reason left to open a
- * second pack of the same type is that someone must not see it. Tables and Notes start unticked, so
- * a referee who wants neither never has to delete them.
+ * The world's empty compendium packs: the shape of a library and none of its content.
  */
 const PACKS = [
     { key: "library", type: "Item",         gmOnly: false, initial: true },
@@ -15,27 +12,21 @@ const PACKS = [
 ];
 
 /**
- * A pack created and left alone is readable by every player — the ownership default is
- * `{PLAYER: "OBSERVER", ASSISTANT: "OWNER"}` (`common/packages/base-package.mjs:115-123`) — so the
- * GM-only rows are configured by the operation that creates them. A referee who fills the NPC pack
- * first and configures it second has already published it.
+ * A pack created and left alone is readable by every player — the ownership default is `{PLAYER:
+ * "OBSERVER", ASSISTANT: "OWNER"}` (`common/packages/base-package.mjs:115-123`) — so the GM-only
+ * rows are configured by the operation that creates them.
  */
 const GM_ONLY = { GAMEMASTER: "OWNER", ASSISTANT: "OWNER", TRUSTED: "NONE", PLAYER: "NONE" };
 
 /** The world setting recording what the button has created: the folder, and one collection id per row. */
 export const PACKS_SETTING = "worldPacks";
 
-/* -------------------------------------------- */
-
 function readRecord() {
     const stored = game.settings.get("mgt2", PACKS_SETTING) ?? {};
     return { folder: stored.folder ?? null, packs: { ...stored.packs } };
 }
 
-/**
- * The row's pack, or null. Idempotency keys on the recorded collection id, never on the label, which
- * is the referee's to change; a recorded id whose pack has since been deleted counts as missing.
- */
+/** The row's pack, or null. */
 function findPack(record, key) {
     const id = record.packs[key];
     return id ? (game.packs.get(id) ?? null) : null;
@@ -53,8 +44,8 @@ async function getPackFolder(record) {
 
 /**
  * Three calls, not one: `createCompendium` takes only `{label, type}` — that is all the core dialog
- * sends (`client/applications/sidebar/tabs/compendium-directory.mjs:464-485`) — the folder is assigned
- * afterwards, and ownership is pack configuration rather than metadata.
+ * sends (`client/applications/sidebar/tabs/compendium-directory.mjs:464-485`) — the folder is
+ * assigned afterwards, and ownership is pack configuration rather than metadata.
  */
 async function createPack(row, folder) {
     const pack = await foundry.documents.collections.CompendiumCollection.createCompendium({
@@ -68,7 +59,7 @@ async function createPack(row, folder) {
 }
 
 /**
- * Create the named packs that do not already exist. Touches nothing that exists, and never deletes.
+ * Create the named packs that do not already exist.
  * @param {string[]} keys   Row keys from PACKS
  * @returns {Promise<number>}   How many packs were created
  */
@@ -103,14 +94,7 @@ export async function createWorldPacks(keys) {
     return created;
 }
 
-/* -------------------------------------------- */
-
-/**
- * The checkbox list. Built here rather than passed in because `new menu.type()` takes no arguments
- * (`client/applications/settings/config.mjs:212`), and returned as a bare `<div>` because DialogV2
- * runs `cleanHTML` over string content, which would strip the attributes off these controls.
- * @returns {HTMLDivElement}
- */
+/** The checkbox list. @returns {HTMLDivElement} */
 function buildContent() {
     const record = readRecord();
 
@@ -151,8 +135,8 @@ async function onCreate(button) {
 }
 
 /**
- * `registerMenu` takes an ApplicationV2 or a v1 FormApplication subclass and throws on anything else
- * (`client/helpers/client-settings.mjs:185-193`); a DialogV2 subclass qualifies.
+ * `registerMenu` takes an ApplicationV2 or a v1 FormApplication subclass and throws on anything
+ * else (`client/helpers/client-settings.mjs:185-193`); a DialogV2 subclass qualifies.
  * @extends {DialogV2}
  */
 export class WorldPacksMenu extends DialogV2 {

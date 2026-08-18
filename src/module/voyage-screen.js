@@ -17,16 +17,7 @@ const MISJUMP = `${PARTS_PATH}/misjump.html`;
 const WORLD_TYPE = "Actor.world";
 const CREW_TYPES = "Actor.character Actor.npc";
 
-/**
- * Core p.157's two checks, as `role.actions[]` records. The parts that never move are frozen here;
- * everything reading the leg is added at call time, because a `dm` taken off the parsec count
- * cannot live in an `Object.freeze` (§9.33.4).
- *
- * `skill: "engineer"` is not an abbreviation. `MGT2Helper.matchesSkill` matches on equality or on a
- * prefix followed by a non-alphanumeric, so `engineer` finds both `Engineer` and
- * `Engineer (J-Drive)` while `engineer (j-drive)` finds only the second — and an Item named
- * `Engineer` would take the untrained DM−3 with no warning at all.
- */
+/** Core p.157's two checks, as `role.actions[]` records. */
 const JUMP_STEPS = Object.freeze({
     plot: Object.freeze({ kind: "skill", skill: "astrogation", characteristic: "education",
         difficulty: "Easy", label: "MGT2.Voyage.Plot", role: "astrogator" }),
@@ -36,16 +27,7 @@ const JUMP_STEPS = Object.freeze({
 
 /**
  * The voyage screen: one leg, the stop it lands on, and the two checks that fly it.
- *
- * Standalone rather than a second sheet on the hull, and the Foundry source settles it rather than
- * taste (§9.33.4): `registerSheet` **throws** on anything that is not an appv1 `Application` or a
- * `DocumentSheetV2`, and `makeDefault: false` is a persisted `flags.core.sheetClass` swap that
- * closes every other application on the document. It also reads three documents where a sheet
- * serves one. No `SheetModeMixin` either — nothing here has a design/play split, so permission is
- * the only gate.
- *
  * @extends {ApplicationV2}
- * @mixes HandlebarsApplication
  */
 export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
@@ -87,8 +69,6 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     };
 
-    /* -------------------------------------------- */
-
     /** @type {Actor} */
     #ship;
 
@@ -97,8 +77,8 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * A `spacecraft` Actor carries ownership, so the manual `canEdit` the combat screen needs
-     * (a `Combat` has no ownership field) is three words here (§4.11).
+     * A `spacecraft` Actor carries ownership, so the manual `canEdit` the combat screen needs (a
+     * `Combat` has no ownership field) is three words here.
      */
     get canEdit() {
         return this.#ship.canUserModify(game.user, "update");
@@ -108,12 +88,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return game.i18n.format("MGT2.Voyage.Title", { ship: this.#ship.name });
     }
 
-    /**
-     * One screen per hull, addressed by the ship's own id. `options.id` is a TEMPLATE string the
-     * constructor resolves against `uniqueId`, and the base `_initializeApplicationOptions` assigns
-     * a fresh monotonic one after the `DEFAULT_OPTIONS` merge — so without the override below the
-     * lookup never hits and every click opens another window.
-     */
+    /** One screen per hull, addressed by the ship's own id. */
     static open(ship) {
         if ( ship?.type !== "spacecraft" ) return null;
         const existing = foundry.applications.instances.get(`mgt2-voyage-${ship.id}`);
@@ -127,18 +102,8 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return applied;
     }
 
-    /* -------------------------------------------- */
-
     /**
-     * The two Effects the jump was flown on, and the reading they produced. None of it is stored:
-     * a jump is resolved once and what survives it is the card and whatever the referee writes down
-     * — the same reason `StopTrafficDialog` persists nothing (§9.68).
-     *
-     * Captured from the two roll buttons and editable, because a table that rolled on paper types
-     * the numbers in instead. **Editing one discards the reading** rather than re-reading the dice
-     * it was rolled with: those dice answered different numbers, and the stop-traffic device of
-     * fixed slots is the opposite case — seven rows sharing one roll, where a corrected modifier
-     * must not reshuffle its neighbours.
+     * The two Effects the jump was flown on, and the reading they produced.
      * @type {{plot: number|null, jump: number|null}}
      */
     #effects = { plot: null, jump: null };
@@ -152,13 +117,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     /** Every document this screen has written into `apps`, which is not the same as the current leg. */
     #registered = new Set();
 
-    /**
-     * `document.apps` is the only re-render mechanism there is. Deregistration cannot key off the
-     * CURRENT `here`/`next` — the leg moves, so a world that has just left it would be looked up in
-     * the wrong place and leak its entry — hence the set. Registering also pins a packed world in
-     * the compendium cache: `CompendiumCollection#clear` refuses to evict a document a rendered app
-     * is registered on, which is what keeps the 300 s flush from degrading the next read.
-     */
+    /** `document.apps` is the only re-render mechanism there is. */
     #syncRegistrations(documents) {
         const wanted = new Set(documents.filter(document => document));
         for ( const document of this.#registered ) {
@@ -170,8 +129,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * `_tearDown` and not `_onClose`: it runs synchronously before the state flips to CLOSED, while
-     * `_onClose` is dispatched unawaited. It is also what fires when a `world` is deleted out from
-     * under the screen, which force-closes every app registered on it.
+     * `_onClose` is dispatched unawaited.
      * @inheritDoc
      */
     _tearDown(options) {
@@ -179,10 +137,6 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         for ( const document of this.#registered ) delete document.apps[this.id];
         this.#registered = new Set();
     }
-
-    /* -------------------------------------------- */
-    /*  Context                                     */
-    /* -------------------------------------------- */
 
     /** @inheritDoc */
     async _prepareContext(options) {
@@ -193,11 +147,10 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
         const here = await VoyageScreen.#stop(voyage.here);
         const next = await VoyageScreen.#stop(voyage.next);
-        // The two ends and no queue entry: §9.33.4 registers in three `apps`, and a stop still to
-        // come changes nothing this screen prints.
+        // The two ends and no queue entry: three `apps` are registered, and a stop still to come
+        // changes nothing this screen prints.
         this.#syncRegistrations([this.#ship, here.document, next.document]);
-        // The Actor was carried this far only so `apps` could be written. What the template gets is
-        // the reading of it.
+        // The Actor was carried this far only so `apps` could be written.
         delete here.document;
         delete next.document;
 
@@ -221,14 +174,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return context;
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * One end of the leg. It must read with a typed name and no `world` document at all — `crew[]`'s
-     * degradation pattern, because no content ships and the Actor may not exist yet. The read is
-     * AWAITED: `fromUuidSync` answers for a packed Actor with an index entry, which looks like a
-     * document and carries no UWP (§9.33.4).
-     */
+    /** One end of the leg. */
     static async #stop(stop) {
         const document = stop.world ? await fromUuid(stop.world) : null;
         const world = (document?.type === "world") ? document : null;
@@ -249,11 +195,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         };
     }
 
-    /**
-     * What the pair is worth, and every figure of it is a reading of the three stored numbers.
-     * Core p.157: DM−1 per parsec on the Astrogation check, 148+6D hours in jumpspace whatever the
-     * distance, and Jump Control software rated for the distance to be flown.
-     */
+    /** What the pair is worth, and every figure of it is a reading of the three stored numbers. */
     static #leg(system, parsecs, next) {
         return {
             burn: MGT2Helper.roundWeight(system.jumpFuel(parsecs)),
@@ -269,10 +211,9 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * The tank as one budget panel: the cap is `fuel.tons`, design tonnage that never moves, and the
-     * one row is `ops.fuel`, the real level — Poor Maintenance leaks a percentage of CAPACITY, so
-     * both are needed (Core p.155). Nothing derives off `ops.fuel` on the model; §9.33.3 keeps
-     * "can I make THIS jump" a screen comparison, and `enough` is it.
+     * The tank as one budget panel: the cap is `fuel.tons`, design tonnage that never moves, and
+     * the one row is `ops.fuel`, the real level — Poor Maintenance leaks a percentage of CAPACITY,
+     * so both are needed (Core p.155).
      */
     #fuel(parsecs) {
         const system = this.#ship.system;
@@ -302,8 +243,8 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         const jump = [];
         if ( !system.fuel.refined ) jump.push({ label: chip("UnrefinedChip"), negative: true });
         // Core p.157 prints two more and neither is applied: the 100-diameter limit is a position
-        // nothing on this screen tracks, and DM−1 per month behind maintenance reads the counter
-        // §9.33.10 Q4 declined outright. Both are named so their absence is a decision.
+        // nothing on this screen tracks, and DM−1 per month behind maintenance reads a counter the
+        // design declined.
         jump.push({ label: chip("MaintenanceChip"), inert: true },
             { label: chip("DiameterChip"), inert: true });
         return {
@@ -314,12 +255,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         };
     }
 
-    /**
-     * The misjump block. It reads the ruleset the hull declares and nothing else decides its shape:
-     * Core takes one Effect and answers from a ladder, the Companion takes two and rolls three more
-     * tables (§9.89). Both are a READOUT — no field of the ship moves, and the after-effects of a
-     * bad jump are stated for the referee to apply rather than rolled for everyone aboard (§9.35).
-     */
+    /** The misjump block. */
     #misjump(ruleset) {
         const core = ruleset === "core";
         return {
@@ -336,14 +272,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         };
     }
 
-    /**
-     * A table row as one sentence: the printed outcome with the dice it asked for filled in.
-     *
-     * A clause whose figure was never rolled is DROPPED rather than printed with a hole in it —
-     * Core folio 158's perceived time is the one that can be missing, and `perceivedTime` off means
-     * the row's `{perceived}` has no answer. Matched on the placeholder and not on the words around
-     * it, because that is the only handle a translated string offers.
-     */
+    /** A table row as one sentence: the printed outcome with the dice it asked for filled in. */
     static #outcome(entry) {
         const values = entry.values ?? {};
         const answered = clause => !clause.match(/{\w+}/g)
@@ -416,11 +345,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         };
     }
 
-    /**
-     * Companion folio 151-152's consequences, as sentences. Everyone aboard makes two checks, which
-     * is precisely why this rolls nothing: the crew are Actors this screen does not own, and a
-     * per-passenger roll is the referee's to make.
-     */
+    /** Companion folio 151-152's consequences, as sentences. */
     static #badJumpLines() {
         const rules = MGT2.Misjumps.companion.badJump;
         const [routine, difficult] = rules.difficulties;
@@ -447,8 +372,6 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         };
     }
 
-    /* -------------------------------------------- */
-
     static #shipStats(system) {
         return {
             tons: system.hull.tons,
@@ -465,8 +388,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * The roster, which belongs to the SHIP: this screen reads three of its rows and writes one
-     * field on one of them, from a drop. Two rows carry a button, because Core p.157's chain is an
-     * astrogator's check and then an engineer's — and both need a sheet to read the level off.
+     * field on one of them, from a drop.
      */
     async #crew() {
         const rows = [];
@@ -489,10 +411,6 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         return rows;
     }
-
-    /* -------------------------------------------- */
-    /*  Listeners                                   */
-    /* -------------------------------------------- */
 
     /** The frame outlives every re-render, so this binds once. @inheritDoc */
     _attachFrameListeners() {
@@ -543,15 +461,9 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     }
 
-    /* -------------------------------------------- */
-    /*  Drag and Drop                               */
-    /* -------------------------------------------- */
-
     /**
      * A plain `ApplicationV2` inherits no drag-drop plumbing at all — the wiring first appears on
-     * `ActorSheetV2` — so the whole controller is supplied here (§9.33.8 #5). What IS free is the
-     * refusal at the pointer: `MGT2Helper.watchDrags` is a document-level capture listener, and
-     * core has no `dataTransfer` access during `dragover` at all.
+     * `ActorSheetV2` — so the whole controller is supplied here.
      * @type {DragDrop}
      */
     get dragDrop() {
@@ -573,8 +485,6 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * A zone declares what it takes in `data-accept` and refuses everything else AT THE POINTER.
-     * The permission gate above ran once at bind time rather than per event, so a permission change
-     * needs a re-render to take effect — which is why the write paths test `canEdit` again.
      */
     #onDragOver(event) {
         const zone = event.target.closest("[data-accept]");
@@ -599,7 +509,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
      * Three zones, three different documents: a `world` on either end of the leg sets that end, a
      * `world` on the queue is filed as a name to come back to, and a person on the roster writes
      * `spacecraft.system.crew[]` — the roster is the ship's and this screen only reads it, the same
-     * split §9.26 drew for space combat.
+     * split space combat draws.
      */
     async #onDrop(event) {
         const zone = event.target.closest("[data-accept]");
@@ -617,8 +527,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * The uuid AND the name are written, because the leg has to keep reading when the document is
-     * gone. A world promoted onto the leg leaves the queue in the same write, or it would be both
-     * the next stop and a stop still to come.
+     * gone.
      */
     async #dropStop(actor, stop) {
         const queue = this.#ship.system.voyage.queue
@@ -636,11 +545,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.#ship.update({ "system.voyage.queue": queue });
     }
 
-    /**
-     * A ship has a crew when no jump is running, so the row is written on the hull (§9.26). Dropped
-     * on the table and nowhere in particular they are a new station with nobody's name on it, which
-     * is the roster's own vacant state.
-     */
+    /** A ship has a crew when no jump is running, so the row is written on the hull. */
     async #dropCrew(actor, rowIndex) {
         const index = Number(rowIndex ?? -1);
         const crew = this.#ship.system.crew.map(station => ({ ...station }));
@@ -649,14 +554,9 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.#ship.update({ "system.crew": crew });
     }
 
-    /* -------------------------------------------- */
-    /*  Actions                                     */
-    /* -------------------------------------------- */
-
     /**
-     * The referee's clock, and the single writer of the leg (§9.35): nothing subscribes to
+     * The referee's clock, and the single writer of the leg: nothing subscribes to
      * `updateWorldTime`, no roll moves the stop, and the fuel was debited by the Jump button.
-     * @this {VoyageScreen}
      */
     static async #onAdvance() {
         if ( !this.canEdit ) {
@@ -667,10 +567,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * Core p.157's chain: an Easy (4+) Astrogation check at DM−1 per parsec, then an Easy (4+)
-     * Engineer (j-drive) check carrying its Effect. The chain costs nothing — the prompt's chain row
-     * sweeps every visible message rather than one actor's, so the astrogator→engineer hand-off
-     * works between two different characters, which is the printed case.
-     * @this {VoyageScreen}
+     * Engineer (j-drive) check carrying its Effect.
      */
     static async #onJumpStep(event, target) {
         const step = target.dataset.step;
@@ -678,14 +575,13 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         const parsecs = Math.max(1, ship.system.voyage.next.parsecs);
         const burn = ship.system.jumpFuel(parsecs);
 
-        // Core p.157 leaves no room here: without the fuel the drive does not fire. Refused BEFORE
-        // the prompt opens, so nobody rolls a jump the tank cannot pay for.
+        // Core p.157 leaves no room here: without the fuel the drive does not fire.
         if ( (step === "jump") && (ship.system.ops.fuel < burn) ) {
             return ui.notifications.warn(game.i18n.format("MGT2.Voyage.NoFuel",
                 { need: MGT2Helper.roundWeight(burn), have: MGT2Helper.roundWeight(ship.system.ops.fuel) }));
         }
 
-        // §9.33.4's reservation, answered before the roll rather than after it: a `skill` action
+        // Answered before the roll rather than after it: a `skill` action
         // needs a linked crew Actor, so `crew[].actor` has to be filled or neither button does
         // anything — and the warning names the station rather than the mechanism.
         const crew = await this.#stationActor(step);
@@ -701,12 +597,12 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             { crew, extraModifiers: VoyageScreen.#stepModifiers(step, ship.system, parsecs) });
         // Not a truthiness test: `rollStationAction` hands back a notification id on every refusal
         // path and `undefined` on a dismissed prompt, so the debit keys off the message the roll
-        // actually posted. A jump that did not roll costs nothing.
+        // actually posted.
         if ( !(message instanceof ChatMessage) ) return message;
 
         // The Effect the misjump block reads, taken off the message's own validated data rather
         // than from `resolve` — the same source a chain reads, so the block and the card can never
-        // disagree about what was rolled (§9.29).
+        // disagree about what was rolled.
         const effect = checkOf(message)?.effect;
         if ( Number.isInteger(effect) ) {
             this.#effects[step] = effect;
@@ -715,19 +611,13 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         if ( step !== "jump" ) return message;
 
-        // §9.33.7(f): the debit is one transaction with the roll, or `ops.fuel` is wrong at the
-        // first forgotten jump. The prompt was open across other people's writes, so the level is
-        // re-read off the document rather than taken from the copy made before it — and the clamp
-        // is the schema's `min: 0`, not caution.
+        // The debit is one transaction with the roll, or `ops.fuel` is wrong at the first
+        // forgotten jump.
         return ship.update({
             "system.ops.fuel": Math.max(0, ship.system.ops.fuel - burn) });
     }
 
-    /**
-     * Read the jump. Rolls, which is why the reading is made here and kept rather than derived in
-     * `_prepareContext`: a render must not roll dice, and a re-render must not roll them again.
-     * @this {VoyageScreen}
-     */
+    /** Read the jump. */
     static async #onMisjumpRoll() {
         const { plot, jump } = this.#effects;
         if ( !Number.isInteger(jump) ) return;
@@ -739,11 +629,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.render({ parts: ["panel"] });
     }
 
-    /**
-     * The reading, on the log. Nothing is written to the ship — a misjump is a referee's outcome and
-     * §9.35's rule holds here as everywhere: the system reports and the table applies.
-     * @this {VoyageScreen}
-     */
+    /** The reading, on the log. */
     static async #onMisjumpPost() {
         if ( !this.#reading ) return;
         const context = { misjump: this.#misjump(this.#ship.system.voyage.ruleset), card: true };
@@ -754,8 +640,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             author: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor: this.#ship }),
             // The dice the reading was produced from, so the card is a roll and not a report of one
-            // (§9.117). v14 appends no display of its own once `content` is set — the body below
-            // already prints every figure — so this buys Dice So Nice and an auditable record.
+            //.
             rolls: this.#reading.rolls ?? [],
             content: `<div class="mgt2 theme-light card misjump">
                 <div class="chd"><div class="what"><h4>${title}</h4>
@@ -763,29 +648,20 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         });
     }
 
-    /**
-     * The DMs the two checks carry, as waivable modifiers rather than as `action.dm`. `action.dm`
-     * would enter the prompt under the generic `StationDM` label; a source with `params` reads
-     * "DM−1 per parsec ×3" instead, which `MGT2Helper.modifierLabel` has always supported
-     * (§9.33.4). Both are un-tickable in the same list, which is what a referee waiving one wants.
-     */
+    /** The DMs the two checks carry, as waivable modifiers rather than as `action.dm`. */
     static #stepModifiers(step, system, parsecs) {
         if ( step === "plot" ) {
             return [{ key: "parsecs", label: "MGT2.Voyage.ParsecDM",
                 params: { parsecs }, dm: -parsecs }];
         }
         // Core p.157. The other two printed modifiers are the referee's: the 100-diameter limit is
-        // a position nothing here tracks, and DM−1 per month behind maintenance reads a counter
-        // §9.33.10 Q4 declined outright. Both are stated on the screen and neither is applied.
+        // a position nothing here tracks, and DM−1 per month behind maintenance reads a counter the
+        // design declined.
         return system.fuel.refined ? []
             : [{ key: "unrefined", label: "MGT2.Voyage.UnrefinedDM", dm: -2 }];
     }
 
-    /**
-     * Whoever is at the station the step belongs to. `rollStationAction` requires a linked crew
-     * Actor for a `skill` action — there is no sheet to read the level off otherwise — so
-     * `crew[].actor` has to be filled before either button does anything.
-     */
+    /** Whoever is at the station the step belongs to. */
     async #stationActor(step) {
         const wanted = JUMP_STEPS[step].role;
         for ( const station of this.#ship.system.crew ) {
@@ -811,9 +687,8 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * The queue carries names and no numbers, so removing one cannot falsify its neighbour — which
-     * is the failure `#onRowDelete` has on every other array on the ship, and the reason §9.33.2
-     * refused an index here.
-     * @this {VoyageScreen}
+     * is the failure `#onRowDelete` has on every other array on the ship, and the reason an index
+     * is refused here.
      */
     static async #onQueueRemove(event, target) {
         if ( !this.canEdit ) return;
@@ -838,18 +713,14 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 }
 
-/* -------------------------------------------- */
-
 /**
  * Two entry points: the ship's own sheet, where a crew is already looking, and the Actor directory,
- * where a referee is. Neither imports the sheet class — the header-control hook fires for every
- * application and the type test is enough — so no import cycle closes with `spacecraft-sheet.js`.
+ * where a referee is.
  */
 export function registerVoyageScreen() {
     // NOT `getHeaderControls`, which never fires: `ApplicationV2#_doEvent` defaults
     // `parentClassHooks` to true and appends `{}` to a name that has none, so the hook is called
-    // once per class in the inheritance chain and never under the bare name. `getActorContextOptions`
-    // below is the opposite case — `DocumentDirectory` passes `parentClassHooks: false` explicitly.
+    // once per class in the inheritance chain and never under the bare name.
     Hooks.on("getHeaderControlsActorSheetV2", (application, controls) => {
         if ( application.document?.type !== "spacecraft" ) return;
         controls.push({

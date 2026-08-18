@@ -23,11 +23,6 @@ const LIGHT_WEAPON_DICE = 4;
 /**
  * Schema and behaviour of the `vehicle` Actor sub-type — the eleven printed statblock lines, the
  * six-line systems block, five armour facings and a critical track.
- *
- * **Printed value wins, derived value warns** (§9.20). Hull, Cargo and Shipping are transcribed off
- * the page and the `spaces`-derived figures beside them exist only to flag a mismatch; nothing here
- * ever writes a computed number over a typed one.
- *
  * @extends {CraftData}
  */
 export class VehicleData extends CraftData {
@@ -42,7 +37,7 @@ export class VehicleData extends CraftData {
     static defineSchema() {
         const schema = super.defineSchema();
         // The registry's `vehicle` family is five flag traits and that is complete: the six lines
-        // that look missing are the systems block below, not traits (§1.4).
+        // that look missing are the systems block below, not traits.
         schema.traits = createTraitsField("vehicle");
 
         const facing = () => new fields.NumberField({
@@ -52,8 +47,8 @@ export class VehicleData extends CraftData {
 
         Object.assign(schema, {
             // The chassis sets skill and speciality (VH p.14-33), and an array because a multi-mode
-            // vehicle has more than one: the Peswab Marsh Hopper prints
-            // `Flyer (grav), Seafarer (submarine)` (Aliens 3 p.266).
+            // vehicle has more than one: the Peswab Marsh Hopper prints `Flyer (grav), Seafarer
+            // (submarine)` (Aliens 3 p.266).
             skill: new fields.ArrayField(new fields.SchemaField({
                 skill: new fields.StringField({
                     required: false, blank: true, initial: "", choices: MGT2.VehicleSkills }),
@@ -62,8 +57,8 @@ export class VehicleData extends CraftData {
             }), { initial: [] }),
 
             // Never printed, and four runtime rules read it: the detection DM per 25 Spaces, the
-            // towing cost per 25 % towed, and the per-Space price of armour, camouflage and stealth.
-            // It cannot be recovered from Hull — Hull-per-Space runs from 1-per-5 to 4-per-1.
+            // towing cost per 25 % towed, and the per-Space price of armour, camouflage and
+            // stealth.
             spaces: new fields.NumberField({
                 required: false, nullable: false, integer: true, min: 0, initial: 0 }),
 
@@ -75,10 +70,9 @@ export class VehicleData extends CraftData {
             // Orthogonal to the mode: a vehicle tows *while* it is on the ground (VH p.3).
             towing: new fields.BooleanField({ required: false, initial: false }),
 
-            // Band numbers, not names: collision damage is 1D per band, Weave picks a negative DM up
-            // to the current band, and an attack takes DM-1 per band of difference (Core p.136-142).
-            // Cruise is stored rather than derived from "maximum minus one" — VH p.144 prints two
-            // bands down and p.147 prints a cruise *above* maximum, and deriving would correct them.
+            // Band numbers, not names: collision damage is 1D per band, Weave picks a negative DM
+            // up to the current band, and an attack takes DM-1 per band of difference (Core
+            // p.136-142).
             speed: new fields.SchemaField({ max: band(), cruise: band() }),
 
             range: new fields.SchemaField({
@@ -99,9 +93,7 @@ export class VehicleData extends CraftData {
 
             armour: new fields.SchemaField({
                 front: facing(), rear: facing(), sides: facing(),
-                // Nullable and null by default. Writing a default here would destroy the condition
-                // both books rest on — "unless otherwise stated" cannot be told from a stated value
-                // once it is stored — and no published vehicle prints either facing (§9.5).
+                // Nullable and null by default.
                 top: new fields.NumberField({
                     required: false, nullable: true, integer: true, min: 0, initial: null }),
                 bottom: new fields.NumberField({
@@ -111,8 +103,7 @@ export class VehicleData extends CraftData {
                 reactive: new fields.SchemaField({ front: facing(), rear: facing(), sides: facing() })
             }),
 
-            // Six lines, six kinds of number (VH p.12). `null` and not 0: `-` on the page means
-            // absent, and Sensors genuinely prints `+0` on five published vehicles.
+            // Six lines, six kinds of number (VH p.12).
             systems: new fields.SchemaField({
                 autopilot: new fields.NumberField({ integer: true, min: 0, max: 3, nullable: true, initial: null }),
                 comms: new fields.NumberField({ min: 0, nullable: true, initial: null }),
@@ -125,8 +116,7 @@ export class VehicleData extends CraftData {
             }),
 
             // The mount belongs to the vehicle: it supplies the fire arc and the fire control, and
-            // one mount can hold several weapons (VH p.37-38). Ids of the vehicle's own embedded
-            // weapons, the same shape `PhysicalItemData.container.id` already uses.
+            // one mount can hold several weapons (VH p.37-38).
             mounts: new fields.ArrayField(new fields.SchemaField({
                 type: new fields.StringField({
                     required: false, blank: false, initial: "fixed", choices: MGT2.VehicleMounts }),
@@ -144,9 +134,7 @@ export class VehicleData extends CraftData {
             driver: new fields.DocumentUUIDField({
                 type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
 
-            // What Core folio 138's two vehicular actions leave standing. Stored and not derived:
-            // "for this round" and "until the driver's next action" are facts no sheet can watch,
-            // which is the same reason a Reaction's DM lives on the Combatant (§1 C).
+            // What Core folio 138's two vehicular actions leave standing.
             combat: new fields.SchemaField({
                 // "The winner of a dogfight gains DM+2 to all their attack rolls for this round
                 // while the loser suffers DM-2." Signed, and zero is "no dogfight standing".
@@ -158,13 +146,13 @@ export class VehicleData extends CraftData {
                     required: false, nullable: false, integer: true, min: 0, initial: 0 }),
                 // The Effect of the evasive check, kept as the Effect: the rule turns it into a
                 // negative DM, and a failed check's Effect is negative and applies as it stands —
-                // the same call §1 C made for Tactics, and for the same reason (no book caps it).
+                // the same call Tactics makes, and for the same reason (no book caps it).
                 evasive: new fields.NumberField({
                     required: false, nullable: false, integer: true, initial: 0 })
             }),
 
             // Submersibles, airships and drones are one type with two nullable sub-objects, not
-            // sub-types: no behaviour differs at the type level (§9.8). Null is "not one of these".
+            // sub-types: no behaviour differs at the type level.
             submersible: new fields.SchemaField({
                 safeDepth: new fields.NumberField({ required: false, nullable: false, min: 0, initial: 0 }),
                 // "The depth to which they can go before being automatically destroyed" (VH p.23).
@@ -175,8 +163,8 @@ export class VehicleData extends CraftData {
             remote: new fields.SchemaField({
                 interface: new fields.StringField({
                     required: false, blank: false, initial: "basic", choices: MGT2.RemoteInterfaces }),
-                // Two ranges, not one: "it is perfectly possible for the drone to be within range of
-                // control but be out of range to send any information back" (VH p.67).
+                // Two ranges, not one: "it is perfectly possible for the drone to be within range
+                // of control but be out of range to send any information back" (VH p.67).
                 commsRange: new fields.NumberField({ required: false, nullable: false, min: 0, initial: 0 }),
                 telemetryRange: new fields.NumberField({ required: false, nullable: false, min: 0, initial: 0 })
             }, { required: false, nullable: true, initial: null })
@@ -184,13 +172,8 @@ export class VehicleData extends CraftData {
         return schema;
     }
 
-    /* -------------------------------------------- */
-    /*  Accessors                                   */
-    /* -------------------------------------------- */
-
     /**
-     * The media this chassis is built for, read off its skills rather than stored twice. A vehicle
-     * with no skill yet is assumed to be a ground vehicle, which is the field's own initial.
+     * The media this chassis is built for, read off its skills rather than stored twice.
      * @type {Set<string>}
      */
     get nativeModes() {
@@ -203,8 +186,7 @@ export class VehicleData extends CraftData {
     }
 
     /**
-     * Every penalty standing between the printed Agility and the one in play. Rails is never a
-     * native medium and always costs 2; towing costs 2 wherever the vehicle is (VH p.3, p.47-48).
+     * Every penalty standing between the printed Agility and the one in play.
      * @type {Array<{label: string, dm: number}>}
      */
     get agilityPenalties() {
@@ -233,10 +215,7 @@ export class VehicleData extends CraftData {
     }
 
     /**
-     * Stored beside computed, for the three lines the design system also produces (§3.1, §9.20).
-     * Shipping is Spaces × 0.25 t; Cargo cannot exceed that same figure, since it is 0.25 t per
-     * *unused* Space; and Hull divided by Spaces is the chassis's implied Hull-per-Space, which the
-     * Vehicle Handbook's chassis tables run from 0.2 to 4. **Advisory only** — every row reports.
+     * Stored beside computed, for the three lines the design system also produces.
      * @type {Array<{key: string, printed: number, derived: number, agrees: boolean}>}
      */
     get crossCheck() {
@@ -253,11 +232,7 @@ export class VehicleData extends CraftData {
         ];
     }
 
-    /**
-     * Whoever is at the controls, or null. Core folio 138 makes both vehicular actions the driver's
-     * own check, so this is who rolls them; the vehicle only supplies the Agility.
-     * @type {Actor|null}
-     */
+    /** Whoever is at the controls, or null. @type {Actor|null} */
     get driverActor() {
         if (!this.driver) return null;
         // fromUuidSync only answers for documents already loaded; a compendium driver degrades to
@@ -271,22 +246,17 @@ export class VehicleData extends CraftData {
             ? this.spaces * ENVELOPE_FRACTION : null;
     }
 
-    /* -------------------------------------------- */
-    /*  Data Preparation                            */
-    /* -------------------------------------------- */
-
     /** @inheritDoc */
     prepareDerivedData() {
         super.prepareDerivedData();
 
         // Core p.140: the roof takes half the sides and the floor half the rear, and the two
-        // fallbacks are asymmetric on purpose. A stored override is how VH p.35's design-time
-        // reallocation is expressed; null is how the other two rules apply.
+        // fallbacks are asymmetric on purpose.
         const armour = this.armour;
         armour.effectiveRoof = armour.top ?? Math.floor(armour.sides / 2);
         armour.effectiveFloor = armour.bottom ?? Math.floor(armour.rear / 2);
         // Core folio 140: against a weapon under 4D or with Stun, every facing gains the vehicle's
-        // TL. Printed here for the sheet; `protectionAgainst` is where it meets an actual attack.
+        // TL.
         armour.vsLight = this.tl;
 
         this.agilityEffective = this.agilityPenalties
@@ -306,23 +276,7 @@ export class VehicleData extends CraftData {
 
     /**
      * The standing DMs that belong to an **attack made from this vehicle**, each a named source so
-     * the prompt lists it and the referee can waive it. `auto` is assigned from the finished list
-     * rather than added to, which keeps `auto === sum(sources)`: a DM in the total and absent from
-     * the list is one nobody can see, print or waive (§9.77).
-     *
-     * **This list is the mounted weapon's**, and that is why it holds only these two. The sheet
-     * extends `TravellerActorSheet`, so a mounted weapon rolls through a Traveller's own path and
-     * `checkModifiers` reads exactly this array. Core folio 138 scopes both to that roll: the
-     * dogfight's "DM+2 to all their attack rolls", and evasive action's "negative DM to any attacks
-     * made from the vehicle too". What either costs an attacker shooting **at** the vehicle is
-     * stated on the chat card and never applied, because applying it would mean the attack roll
-     * reading its target (Appendix B, and §1 C's Reactions, which are the same shape).
-     *
-     * **A critical's Control and Systems DMs are deliberately NOT here.** Folio 141 scopes them to
-     * control checks and to comms, sensors and computer checks — neither is an attack, so putting
-     * them in this array would stand them on every shot the vehicle fires. They travel on
-     * `criticalEffects` instead: the action roll takes the control half (`vehicle-sheet.js`), a
-     * station's own check is made on the crewman's sheet, and the panel prints both.
+     * the prompt lists it and the referee can waive it.
      */
     #prepareCheckModifiers() {
         const sources = [];
@@ -338,11 +292,7 @@ export class VehicleData extends CraftData {
         this.modifiers.check.sources = sources;
     }
 
-    /**
-     * The standing criticals as four numbers. Only the cells that name an integer are folded: a
-     * `D3` or `1D` Speed Band loss is a roll the referee makes when the critical lands, and this is
-     * the continuing state rather than the moment of the hit.
-     */
+    /** The standing criticals as four numbers. */
     #foldCriticals() {
         const totals = { controlDM: 0, systemsDM: 0, speedBands: 0, speedZero: false };
         for (const location of this.criticalLocations) {
@@ -355,10 +305,6 @@ export class VehicleData extends CraftData {
         }
         return totals;
     }
-
-    /* -------------------------------------------- */
-    /*  Rules                                       */
-    /* -------------------------------------------- */
 
     /** The five facings as one lookup, the two derived ones included. */
     armourAt(facing) {
@@ -384,8 +330,7 @@ export class VehicleData extends CraftData {
 
     /**
      * Core folio 140: the wound is taken behind the armour of the facing the attack came from, and
-     * with no facing named the front is the one that answers. The anti-light-weapon bonus joins it
-     * here rather than in the stored figure — it is a property of the attack, not of the vehicle.
+     * with no facing named the front is the one that answers.
      * @inheritDoc
      */
     protectionAgainst(options = {}) {
@@ -397,8 +342,8 @@ export class VehicleData extends CraftData {
     /**
      * Core folio 140: "against any weapon that has less than Damage 4D or has the Stun trait, a
      * vehicle will have an extra amount of armour equal to its TL on each facing." The dice are
-     * counted off the attack's own expression, so a wound typed by hand or dragged onto a token
-     * bar — which names no weapon and states no dice — earns nothing.
+     * counted off the attack's own expression, so a wound typed by hand or dragged onto a token bar
+     * — which names no weapon and states no dice — earns nothing.
      * @param {object} options   `applyDamage`'s options: `formula` and `stun`
      */
     lightWeaponArmour({ formula, stun } = {}) {
@@ -406,10 +351,6 @@ export class VehicleData extends CraftData {
         const dice = MGT2Helper.damageDice(formula);
         return ((dice > 0) && (dice < LIGHT_WEAPON_DICE)) ? this.armour.vsLight : 0;
     }
-
-    /* -------------------------------------------- */
-    /*  Document Lifecycle                          */
-    /* -------------------------------------------- */
 
     /**
      * A vehicle is a thing on the map, not a person: several of the same model are dropped at once

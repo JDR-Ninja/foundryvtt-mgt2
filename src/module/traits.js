@@ -1,17 +1,9 @@
-/**
- * The trait registry, and the one field shape it types.
- *
- * **No rules text ships.** An entry carries a name, a family, an ordered parameter shape and
- * nothing else — a trait's definition is Mongoose's. The page citations and the species that carry
- * each trait stay in `docs/traits-registry.json`, which generates the block below; a two-column
- * `name → what it does` table is a UI for storing prose and is exactly what this replaces. The
- * `note` on a *stored* trait is the owner's own text.
- */
+/** The trait registry, and the one field shape it types. */
 
 const fields = foundry.data.fields;
 
-// >>> generated from docs/traits-registry.json
-// 137 entries over 122 names, 44 parameterised, across 7 families.
+// >>> generated from docs/traits-registry.json 137 entries over 122 names, 44 parameterised, across
+// 7 families.
 const REGISTRY = {
     animal: {
         "alarm": {label: "Alarm"},
@@ -168,14 +160,9 @@ const REGISTRY = {
 // <<< generated
 
 /**
- * Which vocabulary a stored trait speaks — part of its identity, not decoration: Radiation is
- * `2D × 20` rads at personal scale (Core p.79) and a Hull-proportional DM at ship scale (HG p.31),
- * and Armour takes three slots on a creature and one on a species. Ion is the same shape: RH folio
- * 107's Pulse Carbine carries it at personal scale, HG folio 31's ion cannon at ship scale, and the
- * two rules are different — so the slug is declared in both families rather than in either alone.
- * `custom` is the eighth key and
- * has no registry entries: it is what a site whose accessory list the books never typed declares,
- * rather than claiming a family whose autocomplete would be wrong for it.
+ * Which vocabulary a stored trait speaks — part of its identity, not decoration: Radiation is `2D ×
+ * 20` rads at personal scale (Core p.79) and a Hull-proportional DM at ship scale (HG p.31), and
+ * Armour takes three slots on a creature and one on a species.
  */
 export const TRAIT_FAMILIES = Object.freeze({
     animal: "MGT2.TraitFamily.animal",
@@ -199,15 +186,7 @@ const DICE = /^\d*[dD]\d*\s*(?:[+-]\s*\d+)?$/;
 const INTERVAL = /^\d*[dD]\d*\s*(?:[+-]\s*\d+)?\s+\S+/;
 const LEADING_NUMBER = /^([+-]?\d+(?:[.,]\d+)?)\s*(.*)$/;
 
-/**
- * Typographic stand-ins for `-`: true minus, en dash, hyphen, non-breaking hyphen. The corpus is
- * ASCII throughout, but `DOCTYPE-SCHEMAS.md` §2.1 writes `Small (−6)` and anything pasted out of a
- * PDF carries them, where a non-numeric `num` fails silently instead of loudly.
- *
- * **Every replacement is one character for one character**, so an offset into the folded text is
- * the same offset into the raw token — which is what lets a match be computed on the folded form
- * and then sliced out of the printed one. `value` must round-trip the book verbatim.
- */
+/** Typographic stand-ins for `-`: true minus, en dash, hyphen, non-breaking hyphen. */
 const SIGNS = /[−–‐‑]/g;
 
 /** Folded for matching only: signs regularised, case dropped, length untouched. */
@@ -231,25 +210,18 @@ for (const [family, entries] of Object.entries(REGISTRY)) {
 
 /**
  * The registry, indexed for the two lookups that happen: `TRAITS[family][slug]` resolves a stored
- * trait's behaviour, `TRAITS[family]` is the family's whole vocabulary. Neither is a scan.
+ * trait's behaviour, `TRAITS[family]` is the family's whole vocabulary.
  */
 export const TRAITS = deepFreeze(REGISTRY);
 
 /**
  * Spellings the books print for a trait the registry names otherwise, canonical slug to alternates.
- *
- * An alias is an *input* spelling and nothing more: it resolves to the canonical slug, adds no
- * registry entry, no label and no i18n key, and it can only match inside a family that already
- * carries that slug — so `Camouflage` on a vehicle, where it is a systems-block line rather than a
- * trait (`DOCTYPE-SCHEMAS.md` §3.3), still resolves to nothing. Both earn their place from the
- * corpus: `Camouflage` outnumbers `Camouflaged` about twenty to one in print and 55 to 5 in
- * statblock trait lists, and `Armoured (+5)` carries a score that falling back to `custom` drops.
  */
 const ALIASES = Object.freeze({
     camouflaged: ["Camouflage"],
     armour: ["Armoured"],
     // `One Shot` on the thrown weapons (Dart, Javelin — CSC p.154) is `One Use` said differently:
-    // the weapon is expended after a single use. Five printings against the registry's 48.
+    // the weapon is expended after a single use.
     "one-use": ["One Shot"]
 });
 
@@ -259,8 +231,7 @@ const FAMILY_LIST = Object.freeze(Object.fromEntries(Object.entries(TRAITS).map(
 
 /**
  * Every spelling a family answers to, paired with the entry it names and longest first so that
- * `Very Bulky` is tried before `Bulky`. Aliases join the same list, which is what gives them the
- * bare `Armoured +5` form as well as the parenthesised one.
+ * `Very Bulky` is tried before `Bulky`.
  */
 const FAMILY_LABELS = Object.freeze(Object.fromEntries(Object.entries(TRAITS).map(([family, entries]) => {
     const spellings = [];
@@ -297,20 +268,10 @@ export function traitNumber(entry) {
     return 0;
 }
 
-/**
- * How each weapon trait meets an attack roll — Core p.79, CSC p.131 and FC p.6-8 between them.
- * `applied` is already in the total, `offered` is a toggle the player confirms, and everything
- * absent from this table is `reminded`: a line with no number. A `control` names the row the prompt
- * gives a trait whose rule is a choice rather than a number — Auto's three fire modes cannot be a
- * checkbox, so the chip states the score and the strip is where it is spent. Surfacing beats applying
- * (`REDESIGN-PLAN.md` §1), so a rule turning on what no sheet holds is never applied — and AP,
- * Lo-Pen, Smart and Blast are reminders here *permanently*, each needing a target the attack roll
- * must not read. AP and Lo-Pen do resolve later, on the damage card, against whoever it is applied
- * to; Smart and Blast have no such moment.
- */
+/** How each weapon trait meets an attack roll — Core p.79, CSC p.131 and FC p.6-8 between them. */
 export const WEAPON_ROLL = Object.freeze({
     // Core p.79: "a negative DM equal to the difference between their STR DM and +1" — +2 for Very
-    // Bulky. The attacker's STR is on the sheet, so these are the traits that can compute at all.
+    // Bulky.
     "bulky": { tone: "applied", strength: 1 },
     "very-bulky": { tone: "applied", strength: 2 },
     // FC p.7: "The DM is applied to attack rolls and the results of weapon malfunctions."
@@ -332,15 +293,14 @@ export const WEAPON_ROLL = Object.freeze({
     // Core folio 79: "the target will receive 2D x 20 rads" — a dose delivered to whoever was hit,
     // so it is resolved on the apply path like AP and Lo-Pen.
     "radiation": { tone: "reminded", target: true },
-    // RH folio 106: an ion hit shuts a robot's brain down and its armour does not protect. Whether
-    // any of that happens depends on what was hit, so it resolves on the apply path too.
+    // RH folio 106: an ion hit shuts a robot's brain down and its armour does not protect.
     "ion": { tone: "reminded", target: true },
     "smart": { tone: "reminded", target: true },
     "blast": { tone: "reminded", target: true }
 });
 
-// Companion p.93-94: five creature traits substitute into the damage expression rather than
-// scaling its total, and each names the damage types that get through untouched.
+// Companion p.93-94: five creature traits substitute into the damage expression rather than scaling
+// its total, and each names the damage types that get through untouched.
 export const DAMAGE_RESPONSE = Object.freeze({
     "dispersed": { transform: "reduced", exceptions: ["blades", "fire"] },
     "tough": { transform: "reduced", exceptions: [] },
@@ -353,11 +313,7 @@ export const DAMAGE_RESPONSE = Object.freeze({
 const TRANSFORMS = ["full", "reduced", "minimum", "immune"];
 
 /**
- * Which transform a defender's traits select, and what bypasses it. **The books give no rule for
- * carrying two of them at once**, so this takes the strongest and intersects the exceptions: an
- * exception is stated against its own trait, so a damage type escapes only when every trait present
- * lets it. Dispersed and Particulate together therefore minimise a blade — Particulate says so and
- * Dispersed does not overrule it — while fire, which both except, still lands in full.
+ * Which transform a defender's traits select, and what bypasses it.
  * @param {(key: string) => boolean} has   Whether the defender carries a trait
  */
 export function resolveDamageResponse(has) {
@@ -374,22 +330,14 @@ export function resolveDamageResponse(has) {
     return { transform, exceptions: exceptions ?? [] };
 }
 
-/* -------------------------------------------- */
-/*  Hazards (Core folio 80)                     */
-/* -------------------------------------------- */
-
 /**
  * The two traits that leave something behind on whoever was hit, and the `disease` sub-type each
- * one becomes. The trait belongs to the attacker — a creature's venom sac — and the Item to the
- * thing now suffering it, so applying one **constructs** the victim's Item from the slots rather
- * than linking a document the creature would have to own (§9.4).
+ * one becomes.
  */
 export const HAZARD_TRAITS = Object.freeze({ poison: "poison", diseased: "disease" });
 
 /**
- * `Very Difficult (12+)` → `VeryDifficult`. The registry's `difficulty` slot round-trips the book
- * verbatim and the books sometimes print the target beside the name, while `DiseaseData.difficulty`
- * is the bare key `MGT2.DifficultyTargets` then supplies the number for.
+ * `Very Difficult (12+)` → `VeryDifficult`.
  * @returns {string|null}   Null for anything the ladder does not name
  */
 function difficultyKey(value) {
@@ -399,11 +347,7 @@ function difficultyKey(value) {
 }
 
 /**
- * The `disease` Item a Poison or Diseased trait inflicts, as creation data. The four slots map one
- * for one, `DiseaseData.effect` being the field §9.4 added for the third of them — and **nothing
- * about what the hazard does is written here**: the name is the trait's own and the description is
- * whatever note its owner typed. The Item is what already knows how to roll the resist check and
- * apply the interval damage, so no rule is re-implemented on this side.
+ * The `disease` Item a Poison or Diseased trait inflicts, as creation data.
  * @param {object} entry          A stored trait
  * @param {string} [sourceName]   What carried it — the weapon, or the creature that bit
  * @returns {object|null}         Null for any trait that is not a hazard
@@ -442,17 +386,8 @@ export function hazardTraits(entries) {
     return Object.values(entries ?? []).filter(entry => Boolean(HAZARD_TRAITS[entry?.key]));
 }
 
-/* -------------------------------------------- */
-
 /**
  * The one field that replaces six identical `{name, description}` arrays.
- *
- * `params` is an ordered list rather than a scalar because the corpus forces it:
- * `Armour (+7, +10 vs. lasers)` is a score plus a conditional score, `Poison (Difficult, 1D+3,
- * blindness, 1D minutes)` takes four slots, and `Explosive (1D, 3m)` and `Toxic (0m, 1D)` print the
- * same two concepts in opposite orders — so no universal slot order exists and a parser has to be
- * keyed on the trait name whatever the storage. `value` round-trips the book verbatim; `num` is the
- * only half a rule reads.
  * @param {string} family   The vocabulary this site speaks, and the family a new entry starts in
  */
 export function createTraitsField(family) {
@@ -477,13 +412,9 @@ export function buildTraitMap(entries) {
     return map;
 }
 
-/* -------------------------------------------- */
-/*  Reading and writing the printed form        */
-/* -------------------------------------------- */
-
 /**
  * The localised name of a stored trait — its `note` for a custom one, which is the owner's own
- * text. Keyed once per name and not once per entry: Radiation is Radiation in either family.
+ * text.
  */
 export function traitLabel(entry) {
     if (!entry) return "";
@@ -549,12 +480,6 @@ function slotNumber(type, token) {
 
 /**
  * Fill an entry's slots from the printed tokens, left to right.
- *
- * Two rules do the work an ordinary zip cannot. An optional slot is skipped when taking it would
- * starve a required slot further along — that is how `Diseased (Average (8+), D3, 1D days)` puts
- * `1D days` in `interval` rather than in `effect` — and a numeric slot whose token carries trailing
- * words hands them on when the next slot is free text, which is what makes `+10 vs. lasers` two
- * slots rather than one.
  * @returns {object[]|null}   Null when a required slot could not be filled
  */
 function fillSlots(slots, tokens) {
@@ -587,9 +512,7 @@ function fillSlots(slots, tokens) {
 }
 
 /**
- * Read a printed trait — `Armour (+12)`, `AP 5`, `Zero-G` — into the stored shape. Both the
- * parenthesised form the books use and the bare `NAME value` form worlds typed by hand are
- * accepted; the name is matched against the family's spellings, longest first.
+ * Read a printed trait — `Armour (+12)`, `AP 5`, `Zero-G` — into the stored shape.
  * @returns {{family: string, key: string, params: object[]}|null}   Null when nothing matched
  */
 export function parseTraitText(text, family) {
@@ -610,8 +533,7 @@ export function parseTraitText(text, family) {
             if (params) return { family, key: entry.slug, params };
         }
         // `AP 5`, `Armour +12`, and `AP3` — which the books print 27 times with no separator at
-        // all. Anything but a letter ends the name; a letter would make `Large` swallow `Larger`,
-        // and a remainder the slot's type rejects falls through to the next spelling regardless.
+        // all.
         else if (!bracketed && (folded.length > spelling.length) && folded.startsWith(spelling)
             && /[^a-z]/.test(folded.charAt(spelling.length))) {
             const params = fillSlots(entry.params, splitTokens(name.slice(label.length).trim()));
@@ -621,16 +543,7 @@ export function parseTraitText(text, family) {
     return null;
 }
 
-/**
- * Convert one legacy `{name, description}` entry in place, or leave it alone.
- *
- * Both halves of "in place" matter. The shim runs on every read because nothing persists it, so it
- * has to be idempotent — a `key` already present means converted. And it runs over partial update
- * payloads too (`client/data/client-backend.mjs:231` cleans every update with `{migrate: true,
- * partial: true}`), so a half-formed entry with no `name` string is left untouched. The legacy keys
- * are not deleted: on a partial clean a missing key does not get its `initial`, and the array
- * element's own clean drops them anyway.
- */
+/** Convert one legacy `{name, description}` entry in place, or leave it alone. */
 function migrateTraitEntry(entry, family) {
     if (!entry || (typeof entry !== "object")) return;
     if (entry.key !== undefined) return;
@@ -639,7 +552,7 @@ function migrateTraitEntry(entry, family) {
     const parsed = parseTraitText(entry.name, family);
     Object.assign(entry, parsed ?? { family, key: CUSTOM_KEY, params: [] });
     // A world that typed its traits by the book keeps their meaning; one that did not keeps its
-    // text. The description is the owner's note either way, and joins a name that matched nothing.
+    // text.
     const description = (typeof entry.description === "string") ? entry.description.trim() : "";
     entry.note = parsed
         ? description
@@ -652,13 +565,8 @@ export function migrateTraitArray(entries, family) {
     for (const entry of entries) migrateTraitEntry(entry, family);
 }
 
-/* -------------------------------------------- */
-/*  Sheets                                      */
-/* -------------------------------------------- */
-
 /**
- * Re-derive every `num` from the `value` beside it. The chip row lets the owner retype a printed
- * token, and `num` is the half no form control writes.
+ * Re-derive every `num` from the `value` beside it.
  * @param {object|object[]} entries   The submitted list, still indexed by position
  */
 export function refreshTraitNumbers(entries) {
@@ -672,8 +580,7 @@ export function refreshTraitNumbers(entries) {
 }
 
 /**
- * Append what the autocomplete input was given. Whatever the family's vocabulary does not
- * recognise is kept whole as a custom entry, so nothing a referee types is ever dropped.
+ * Append what the autocomplete input was given.
  * @returns {object[]|null}   The new list, or null when there was nothing to add
  */
 export function appendTraitText(entries, text, family) {
@@ -684,13 +591,7 @@ export function appendTraitText(entries, text, family) {
         parsed ? { ...parsed, note: "" } : { family, key: CUSTOM_KEY, params: [], note: printed }];
 }
 
-/**
- * The chip row's autocomplete: one input that commits on Enter or on leaving the field. It is not
- * a form control — v14's `<string-tags>` holds a `Set<string>` and a trait is four fields — so it
- * carries no `name` and the callback writes through a document update instead.
- * @param {HTMLElement} root
- * @param {(property: string, text: string) => unknown} add
- */
+/** The chip row's autocomplete: one input that commits on Enter or on leaving the field. */
 export function bindTraitInput(root, add) {
     for (const input of root.querySelectorAll(".codes .addtag input")) {
         const property = input.closest("[data-property]")?.dataset.property;
@@ -709,8 +610,7 @@ export function bindTraitInput(root, add) {
 }
 
 /**
- * One chip row's whole render context. Shared because the same component serves the item sheets'
- * Traits block and the character sheet's own list.
+ * One chip row's whole render context.
  * @param {object[]} entries   The stored list
  * @param {string} property    Its path under `system`, which names the form controls
  * @param {string} family      The vocabulary this site speaks

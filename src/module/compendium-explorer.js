@@ -4,24 +4,10 @@ import { MGT2Helper } from "./helper.js";
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { SearchFilter } = foundry.applications.ux;
 
-/**
- * The three fields this system adds to every Actor and Item compendium index (§85, §88).
- *
- * Adding any field at all flips `get indexed()` to false — it is a subset test,
- * `this.indexFields.isSubsetOf(this.#indexedFields)` — so the cost is not "these three fields" but
- * "one server round-trip per Actor or Item pack in the world", paid whether a filter uses them or
- * not. The list stays short by one rule: **a field earns the index by being one a referee *narrows*
- * on, not one they read.** Price and weight are read once a row is found; traits are an array of
- * objects rather than a scalar. `scale` is here because 543 weapons split 331 / 149 / 63 across it
- * (§88), and nobody fitting a turret wants to page through pistols.
- */
+/** The three fields this system adds to every Actor and Item compendium index. */
 export const INDEX_FIELDS = Object.freeze(["system.tl", "system.subType", "system.scale"]);
 
-/**
- * Rows built per render. Four thousand rows of markup is a second of layout on every keystroke, and
- * nobody reads past the first screen — but a list that stops without saying so reads as an answer,
- * so the count strip prints both numbers whenever it truncates.
- */
+/** Rows built per render. */
 const PAGE = 200;
 
 /** The sub-type vocabulary each document type owns. A type absent here has no table and prints raw. */
@@ -43,8 +29,6 @@ const SOURCES = Object.freeze({
 /** The three text fields. They re-draw the results alone, so the caret survives mid-word editing. */
 const TEXT_FILTERS = Object.freeze(["q", "tlMin", "tlMax"]);
 
-/* -------------------------------------------- */
-
 /** Blank is "no bound", which is a different statement from zero. */
 function bound(value) {
     const text = String(value ?? "").trim();
@@ -60,25 +44,10 @@ function bump(facets, value, documentName, type) {
     facets.set(value, row);
 }
 
-/* -------------------------------------------- */
-
 /**
- * One browsing surface over every compendium the user may see (§37): search, narrow, drag onto a
- * sheet. The packs of §36 are storage; this is the access surface, and it is what makes their coarse
- * split correct — with an explorer there is nothing to navigate.
- *
- * Its shape is dictated by one Foundry fact rather than by taste. **A filter may only read a field
- * the index carries**, the index loaded at world start carries the pack's metadata fields only, and
- * anything added through `CONFIG.Item.compendiumIndexFields` exists only after an explicit
- * `await pack.getIndex()`. So this is async on open, caches what it fetches, reads nothing
- * synchronously — and says on screen which packs have not landed yet, because a screen that shows
- * only the settled list is hiding its own cost.
- *
- * It replaces nothing: the compendium sidebar tab answers *what may this pack do* — ownership, lock,
- * import, delete — and this answers *where is the thing* (§85).
- *
+ * One browsing surface over every compendium the user may see: search, narrow, drag onto a
+ * sheet.
  * @extends {ApplicationV2}
- * @mixes HandlebarsApplication
  */
 export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2) {
 
@@ -102,8 +71,6 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
         rail: { template: "systems/mgt2/templates/explorer-rail.html", scrollable: [""] },
         results: { template: "systems/mgt2/templates/explorer-results.html", scrollable: [".rows"] }
     };
-
-    /* -------------------------------------------- */
 
     /** Nothing here is persisted: what a referee is looking for is a question, not a preference. */
     #filters = { q: "", cls: "", type: "", subType: "", scale: "", tlMin: "", tlMax: "" };
@@ -129,29 +96,12 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
         return (existing ?? new CompendiumExplorer()).render({ force: true });
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * Every pack this user may see. `visible` is `getUserLevel() >= OBSERVER`, and it is the only
-     * gate: what a referee may *write* is a different question, and its answer rides the row rather
-     * than removing it (§85).
-     * @type {CompendiumCollection[]}
-     */
+    /** Every pack this user may see. @type {CompendiumCollection[]} */
     get packs() {
         return game.packs.filter(pack => pack.visible);
     }
 
-    /* -------------------------------------------- */
-    /*  Indexes                                     */
-    /* -------------------------------------------- */
-
-    /**
-     * One `getIndex()` per pack that needs one, fired together and drawn as each lands.
-     *
-     * A pack whose document class declares no extra field is **already** indexed, so `getIndex`
-     * returns the cached collection without reaching the server: only the Actor and Item packs pay
-     * for `INDEX_FIELDS`, and a pack of Scenes or Journals costs nothing to include.
-     */
+    /** One `getIndex()` per pack that needs one, fired together and drawn as each lands. */
     #loadIndexes() {
         for ( const pack of this.packs ) {
             const id = pack.collection;
@@ -182,10 +132,6 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
         return this.#loading.has(id) ? "loading" : "waiting";
     }
 
-    /* -------------------------------------------- */
-    /*  Reading the index                           */
-    /* -------------------------------------------- */
-
     /** The printed Tech Level, through `MGT2.TL` where the stored value is one of its keys. */
     static tlLabel(value) {
         if ( (value === undefined) || (value === null) || (value === "") ) return null;
@@ -213,14 +159,7 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
         return key ? game.i18n.localize(key) : (type ?? null);
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * One pass over every index record of every shown pack: the rows, and the two facet lists.
-     *
-     * A facet is counted against every filter **but its own**, so choosing a type does not empty the
-     * sub-type list it was chosen from.
-     */
+    /** One pass over every index record of every shown pack: the rows, and the two facet lists. */
     #scan() {
         const filters = this.#filters;
         const query = filters.q ? SearchFilter.cleanQuery(filters.q).toLowerCase() : "";
@@ -246,7 +185,8 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
             for ( const entry of pack.index ) {
                 if ( query && !SearchFilter.cleanQuery(entry.name ?? "").toLowerCase().includes(query) ) continue;
                 // A declared field cannot be read before its pack is back, so the row is withheld
-                // rather than shown unjudged: showing it would be a lie about what the screen knows.
+                // rather than shown unjudged: showing it would be a lie about what the screen
+                // knows.
                 if ( declared && !ready ) {
                     withheld++;
                     continue;
@@ -282,7 +222,7 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
                     pending: !ready,
                     pack: pack.title,
                     // A module pack is read-only and can be uninstalled, taking its documents with
-                    // it. Both are facts about the row and not discoveries to make later (§85).
+                    // it.
                     sourceIcon: SOURCES[pack.metadata.packageType]?.icon,
                     locked: pack.locked
                 });
@@ -316,10 +256,6 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
             return (compared || a.name.localeCompare(b.name)) * dir;
         });
     }
-
-    /* -------------------------------------------- */
-    /*  Context                                     */
-    /* -------------------------------------------- */
 
     /** @inheritDoc */
     async _prepareContext(options) {
@@ -410,13 +346,8 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
         }));
     }
 
-    /* -------------------------------------------- */
-    /*  Events                                      */
-    /* -------------------------------------------- */
-
     /**
      * Two delegated listeners on the application root, so both survive either part being replaced.
-     * The indexes are fired here and not awaited: the un-landed state is the one worth showing.
      * @inheritDoc
      */
     async _onFirstRender(context, options) {
@@ -447,8 +378,7 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
     /**
      * `{uuid, type}` with the *document name* as the type, which is what core's own compendium rows
      * write (`compendium-directory.mjs`, `_onDragDocumentStart`) and what every sheet's `_onDrop`
-     * expects. A locked pack changes nothing here: locked governs writing into the pack, not taking
-     * a copy out of it, and the native tab drags from a module pack too.
+     * expects.
      */
     static #onDragStart(event) {
         const row = event.target.closest("[data-uuid]");
@@ -456,8 +386,6 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
         event.dataTransfer.setData("text/plain",
             JSON.stringify({ type: row.dataset.doc, uuid: row.dataset.uuid }));
     }
-
-    /* -------------------------------------------- */
 
     static #onSort(event, target) {
         const key = target.dataset.key;
@@ -488,15 +416,7 @@ export class CompendiumExplorer extends HandlebarsApplicationMixin(ApplicationV2
     }
 }
 
-/* -------------------------------------------- */
-
-/**
- * The index fields, and the control that opens the window.
- *
- * The button goes in the compendium sidebar's own header — the tab is where a referee looks for
- * "browse the compendiums", and §85 keeps the tab itself untouched, so this adds a control and
- * removes none. The hook fires on every render of that tab, hence the guard.
- */
+/** The index fields, and the control that opens the window. */
 export function registerCompendiumExplorer() {
     CONFIG.Actor.compendiumIndexFields.push(...INDEX_FIELDS);
     CONFIG.Item.compendiumIndexFields.push(...INDEX_FIELDS);

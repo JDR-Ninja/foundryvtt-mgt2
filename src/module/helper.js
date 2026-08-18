@@ -1,8 +1,7 @@
 import { MGT2 } from "./config.js";
 import { traitLabel, traitNumber, WEAPON_ROLL } from "./traits.js";
 
-// What the block says about a row. Never what the trait does — the registry ships no definitions,
-// so a status line states how the system treated it and nothing more.
+// What the block says about a row.
 const TRAIT_STATUS = {
     applied: "MGT2.RollPrompt.TraitApplied",
     offered: "MGT2.RollPrompt.TraitOffered",
@@ -36,17 +35,13 @@ export class MGT2Helper {
         return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     }
 
-    /**
-     * Render a modifier with an explicit sign.
-     * @param {number} value
-     * @param {string} [zero]   What to render for 0 — the roll formula needs "+0", labels want "0".
-     */
     /** Traveller's pseudo-hex: 0-9, then A for 10 and on through the alphabet, clamped at Z. */
     static uppDigit(value) {
         const n = Math.min(35, Math.max(0, value));
         return n < 10 ? String(n) : String.fromCharCode(55 + n);
     }
 
+    /** @param {string} [zero]   What to render for 0 — a roll formula needs "+0", a label wants "0". */
     static signed(value, zero = "0") {
         if (value === 0) return zero;
         return value > 0 ? `+${value}` : `${value}`;
@@ -56,14 +51,7 @@ export class MGT2Helper {
         return ` (${this.signed(dm)})`;
     }
 
-    /**
-     * A credit figure with its thousands grouped. The `Cr` marker is the caller's — every sheet
-     * prints it as its own `<i>`, which is styled — so this returns the number alone.
-     *
-     * Grouped in the reader's own language, because a ship's purchase price is eight digits and
-     * `Cr48000000` is not a number anyone reads. A value that is not finite returns empty rather
-     * than `NaN`: the templates already guard the zero case with their own `{{#if}}`.
-     */
+    /** A credit figure with its thousands grouped. */
     static credits(value) {
         const number = Number(value);
         if (!Number.isFinite(number)) return "";
@@ -75,11 +63,7 @@ export class MGT2Helper {
     }
 
     /**
-     * One signed term of a roll formula, optionally naming itself. `signed` is for display and
-     * produces `-3`, which `Roll` reads as a term rather than as a subtraction; this produces
-     * `- 3`. The flavour rides in brackets (`RollTerm.FLAVOR_REGEXP`) so a formula carrying several
-     * DMs says which is which in its own tooltip instead of totalling them into one number.
-     * @param {number} value
+     * One signed term of a roll formula, optionally naming itself.
      * @param {string} [flavor]   Already localised — it is read by whoever opens the roll
      */
     static term(value, flavor = "") {
@@ -89,9 +73,7 @@ export class MGT2Helper {
 
     /**
      * The books print damage as `3D`, a Destructive weapon as `3DD` (Core p.78) and a D3 weapon as
-     * `3D3`; Foundry's parser reads none of the three. Normalising here is what lets a weapon be
-     * transcribed exactly as its page prints it. A formula that already names its faces — `3d10` —
-     * is left alone, which is why the faces group refuses to match in front of another digit.
+     * `3D3`; Foundry's parser reads none of the three.
      */
     static damageFormula(formula) {
         return String(formula ?? "")
@@ -105,8 +87,7 @@ export class MGT2Helper {
 
     /**
      * Companion p.93, Reduced Damage — a weapon's damage dice drop to D3 and keep any plus or
-     * minus, so `3d6-3` becomes `3D3-3`. A different roll, not a scaled total, which is why the
-     * attack rolls it alongside the full one. Falls back when the substitution would not parse.
+     * minus, so `3d6-3` becomes `3D3-3`.
      */
     static reduceDamageFormula(formula) {
         const reduced = String(formula ?? "").replace(/(\d*)[dD](?:3|6)?(?![0-9dD])/g, (_m, n) => `${n}D3`);
@@ -122,19 +103,13 @@ export class MGT2Helper {
         return dice;
     }
 
-    /**
-     * How many dice a damage score rolls, whichever way it is written. Normalised first, because the
-     * doubled D of `3DD` reads as one die otherwise — and the rules that count dice mean the printed
-     * score (Core folio 140's "less than Damage 4D"), which the doubling does not change.
-     */
+    /** How many dice a damage score rolls, whichever way it is written. */
     static damageDice(formula) {
         return this.minimumDamage(this.damageFormula(formula));
     }
 
     /**
-     * The score on a parameterised weapon trait — `AP 5`, `Lo-Pen 3` (Core p.79). The registry
-     * already typed it, so the first numeric slot is the answer; a `custom` entry that the
-     * registry did not recognise still reads through its note.
+     * The score on a parameterised weapon trait — `AP 5`, `Lo-Pen 3` (Core p.79).
      * @param {object[]} traits   Stored traits, or a derived traitMap's values
      * @param {string} key        A registry slug
      */
@@ -151,26 +126,21 @@ export class MGT2Helper {
 
     /**
      * A free-text Item name against a registry list: lowercased, prefix-insensitive, blank never
-     * matching. Both callers below name something the books identify and the data cannot (§9.47).
+     * matching.
      */
     static #namedAs(name, registry) {
         const text = String(name ?? "").trim().toLowerCase();
         return (text !== "") && registry.some(entry => text.startsWith(entry));
     }
 
-    /**
-     * Whether a rolled skill is the Medic skill Core p.82 drives first aid off. A skill is a
-     * free-text Item with no registry behind it, so this is a name match and nothing more — a world
-     * that renames the skill loses the card button and uses the sheet's own control instead.
-     */
+    /** Whether a rolled skill is the Medic skill Core p.82 drives first aid off. */
     static isFirstAidSkill(name) {
         return MGT2Helper.#namedAs(name, MGT2.FirstAidSkills);
     }
 
     /**
      * CSC p.66's exception to the Processing 0 count: Interface "will run in conjunction with one
-     * other Bandwidth 0 program". The same name match, and the same failure mode — a world that
-     * renames it loses one advisory flag and nothing else (§9.130).
+     * other Bandwidth 0 program".
      */
     static isInterfaceSoftware(name) {
         return MGT2Helper.#namedAs(name, MGT2.InterfaceSoftware);
@@ -178,8 +148,6 @@ export class MGT2Helper {
 
     /**
      * The Weapon traits block: one row per stored trait, each in the tone its own rule earns.
-     * Both the prompt and the roll path read this — the prompt to render and the roll to total —
-     * the way the range band is computed twice from the same rule.
      * @param {Item} weapon        The weapon being attacked with
      * @param {number} strengthDM  The attacker's STR DM, which Bulky and Very Bulky read
      * @returns {object[]}
@@ -187,7 +155,7 @@ export class MGT2Helper {
     static weaponTraitRows(weapon, strengthDM = 0) {
         const range = this.getNumberFromInput(weapon?.system.range?.value);
         // The traits the loaded round leaves the weapon with: a shotgun firing pellets follows
-        // rules its own line never carried, and a few rounds replace the list outright (§9.90).
+        // rules its own line never carried, and a few rounds replace the list outright.
         const traits = weapon?.system.effective?.traits ?? weapon?.system.traits;
         return (traits ?? []).map(trait => {
             const rule = WEAPON_ROLL[trait.key] ?? {};
@@ -233,10 +201,7 @@ export class MGT2Helper {
         return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(key);
     }
 
-    /**
-     * Whether a skill Item answers a requirement written as a bare skill name. A speciality answers
-     * the skill it belongs to, so "Gun Combat (slug)" satisfies a requirement for "Gun Combat".
-     */
+    /** Whether a skill Item answers a requirement written as a bare skill name. */
     static matchesSkill(name, required) {
         const skill = String(name ?? "").trim().toLowerCase();
         const wanted = String(required ?? "").trim().toLowerCase();
@@ -245,14 +210,7 @@ export class MGT2Helper {
             || (skill.startsWith(wanted) && /[^a-z0-9]/.test(skill.charAt(wanted.length)));
     }
 
-    /**
-     * One number out of the three shapes a Tech Level is stored in. A personal item holds an
-     * `MGT2.TL` **key** — `TL09` — while a ship, a vehicle, a robot and a `component` hold a bare
-     * number; and `NA`, `Unknow` and `NotIdentified` are not Tech Levels at all, so they must read
-     * as absent rather than as zero.
-     * @param {string|number} value
-     * @returns {number|null}
-     */
+    /** One number out of the three shapes a Tech Level is stored in. @returns {number|null} */
     static tlNumber(value) {
         if (typeof value === "number") return Number.isFinite(value) ? value : null;
         const digits = /(\d+)/.exec(value ?? "");
@@ -261,12 +219,7 @@ export class MGT2Helper {
 
     /**
      * Whether software can run on this thing — a `computer` Item always, and a **fitted augment
-     * carrying a Processing figure** too (§9.84). Core p.107's wafer jack *is* a computer, and
-     * Core p.110 gives `Computer/N` and a computer's Processing the one scale, so the only thing
-     * separating them was which Item type they were authored as.
-     *
-     * Takes a source-shaped object rather than a document, because the inventory reasons over plain
-     * views and the delete path over `_source` data.
+     * carrying a Processing figure** too.
      */
     static runsSoftware(item) {
         if (item?.type === "computer") return true;
@@ -281,11 +234,7 @@ export class MGT2Helper {
             ? item.system?.processing : item?.system?.augment?.processing) ?? 0;
     }
 
-    /**
-     * Whether a skill Item's name already ends in its own speciality. The packs name a speciality
-     * Item "Animals (Handling)" — the form `matchesSkill` resolves, and the one that keeps the five
-     * Items called "Art" apart — so a label that appends the speciality would state it twice.
-     */
+    /** Whether a skill Item's name already ends in its own speciality. */
     static nameStatesSpeciality(name, speciality) {
         const label = String(name ?? "").trim().toLowerCase();
         const tail = String(speciality ?? "").trim().toLowerCase();
@@ -302,8 +251,7 @@ export class MGT2Helper {
     /**
      * Core folio 77: the band a shot falls in, measured against the weapon's own Range score — a
      * quarter of it is Short, up to it is normal, twice is Long, four times is Extreme and beyond
-     * that is out of range. Past `threshold` metres every attack is Extreme; the caller passes 0
-     * where the Scope trait has voided the rule, which the prompt reads off the trait's own chip.
+     * that is out of range.
      * @returns {{key: string, dm: number, min: number, max: number|null, forced: boolean}|null}
      */
     static rangeBand(distance, range, threshold = 0) {
@@ -335,8 +283,7 @@ export class MGT2Helper {
     /**
      * The space combat band a distance falls in (Core p.165), and what that band is worth: the
      * attack DM (p.167), the Thrust a change of band costs (p.166), and whether the exchange
-     * resolves as a dogfight. Adjacent and Close carry a null DM because the books print none for
-     * them — which is not the same as a zero, and the caller must not read it as one.
+     * resolves as a dogfight.
      * @param {number|string} distance   Kilometres
      * @returns {{key: string, dm: number|null, thrust: number, dogfight: boolean, max: number|null}|null}
      */
@@ -357,11 +304,7 @@ export class MGT2Helper {
         return MGT2.DifficultyTargets[difficulty] ?? 0;
     }
 
-    /**
-     * The number a check is measured against. Core p.61: "if no difficulty is listed for a check,
-     * you can always assume it is Average (8+)", so every check yields an Effect.
-     * @returns {{value: number, assumed: boolean}}
-     */
+    /** The number a check is measured against. @returns {{value: number, assumed: boolean}} */
     static getEffectTarget(difficulty) {
         const value = this.getDifficultyValue(difficulty);
         if (value > 0) return { value, assumed: false };
@@ -389,8 +332,8 @@ export class MGT2Helper {
     }
 
     static getDifficultyDisplay(difficulty) {
-        // The localised label already carries the target ("Average (8)"), because the same
-        // strings feed the difficulty dropdowns. Appending it again read "Average (8) (8+)".
+        // The localised label already carries the target ("Average (8)"), because the same strings
+        // feed the difficulty dropdowns.
         if (MGT2.DifficultyTargets[difficulty] === undefined) return null;
         return game.i18n.localize(MGT2.Difficulty[difficulty]);
     }
@@ -449,31 +392,12 @@ export class MGT2Helper {
         }
     }
 
-    /**
-     * The drag in flight, cached from `dragstart`. `DataTransfer` puts its store in protected mode
-     * for the whole of `dragover`, so `getData` there returns "" — and a zone that cannot read the
-     * payload cannot refuse it at the pointer, only after the drop.
-     *
-     * **No listener on `document` can do it, and that was this watcher's bug until 2026-08-15.** A
-     * source writes its payload from its own `dragstart` handler, so a **capture** listener runs
-     * before every one of them and reads an empty store — and a **bubble** listener never runs at
-     * all, because `DragDrop#_handleDragStart` is
-     * `this.callback(event, "dragstart"); if ( event.dataTransfer.items.length ) event.stopPropagation();`
-     * (`ux/drag-drop.mjs`). Every drag Foundry itself starts is `DragDrop`-bound, so the payload was
-     * written and then sealed off one element below `document`, and `#dragged` was null for the
-     * lifetime of the feature.
-     *
-     * So the read happens **inside** `DragDrop`, through `CONFIG.ux.DragDrop` — the seam core
-     * provides and uses itself, every construction going through `DragDrop.implementation`. The
-     * bubble listener stays for the sources that are not `DragDrop`-bound (a delegated handler of
-     * ours), and the capture pass voids the previous drag, because a source that stops propagation
-     * before writing anything would otherwise leave a stale payload readable.
-     */
+    /** The drag in flight, cached from `dragstart`. */
     static watchDrags() {
         if ( MGT2Helper.#watchingDrags ) return;
         MGT2Helper.#watchingDrags = true;
         // Subclass whatever is installed rather than the base class, so a module that has also
-        // overridden it still composes. `implementation` refuses anything that is not a subclass.
+        // overridden it still composes.
         const Base = CONFIG.ux.DragDrop;
         CONFIG.ux.DragDrop = class MGT2DragDrop extends Base {
             /** @inheritDoc */
@@ -503,15 +427,9 @@ export class MGT2Helper {
     static #dragged = null;
 
     /**
-     * Does a zone take what is being dragged? A zone declares `Actor.<type>` rather than a bare
-     * document name because the type is only known once the uuid resolves, which is what this does.
-     *
-     * The payload defaults to the cached one, which is the only one `dragover` can see — but a drop
-     * handler must pass its own: the watcher above clears the cache on the CAPTURE phase, so it has
-     * already fired by the time a bubbling drop listener runs.
+     * Does a zone take what is being dragged? @returns {boolean}
      * @param {HTMLElement} zone   Carrying `data-accept`, a space-separated list
      * @param {object} [data]      A drop payload, `{type, uuid}`
-     * @returns {boolean}
      */
     static dropAccepted(zone, data) {
         const accept = zone?.dataset.accept;
@@ -544,7 +462,6 @@ export class MGT2Helper {
     /**
      * A dropped document as a creation payload: `getItemDataFromDropData` hands back a clone that
      * still carries the source's id, and creating with it would collide with the original.
-     * @param {Item|object} source
      * @returns {object}
      */
     static stripIds(source) {

@@ -1,7 +1,4 @@
-/**
- * Toggle the sheet between play and edit mode, saving what is in the form first.
- * @this {DocumentSheetV2}
- */
+/** Toggle the sheet between play and edit mode, saving what is in the form first. */
 async function onToggleSheetMode() {
   const { MODES } = this.constructor;
   this._mode = this.isEditMode ? MODES.PLAY : MODES.EDIT;
@@ -11,12 +8,6 @@ async function onToggleSheetMode() {
 
 /**
  * Play / edit mode, shared by the actor and item sheets — which have no common base of their own.
- * The mode belongs to the instance and is never persisted: every open starts in play.
- *
- * Only `context.editable` follows the mode. `isEditable` itself must not: `DocumentSheetV2` gates
- * form submission on it, so a play-mode sheet would silently discard what the user typed.
- *
- * @param {typeof DocumentSheetV2} Base
  * @returns {typeof DocumentSheetV2}
  */
 export const SheetModeMixin = Base => class extends Base {
@@ -58,8 +49,8 @@ export const SheetModeMixin = Base => class extends Base {
   }
 
   /**
-   * A closed sheet keeps its instance — the document caches it — so the mode has to be cleared
-   * here for the next open to start in play.
+   * A closed sheet keeps its instance — the document caches it — so the mode has to be cleared here
+   * for the next open to start in play.
    * @inheritDoc
    */
   _onClose(options) {

@@ -6,30 +6,16 @@ import { RollPromptHelper } from "./roll-prompt.js";
 import { TravellerActorSheet } from "./actors/character-sheet.js";
 
 /**
- * The nudge, namespaced because core reserves bare query names
- * (`client/config.mjs`, "System and modules must prefix the names of the queries they register").
+ * The nudge, namespaced because core reserves bare query names (`client/config.mjs`, "System and
+ * modules must prefix the names of the queries they register").
  */
 export const NUDGE_QUERY = "mgt2.nudge";
 
 /** How long the flash sits on the card, matching `jumpToMessage`'s own mark. */
 const FLASH_MS = 1600;
 
-/* -------------------------------------------- */
-/*  Answering one line                          */
-/* -------------------------------------------- */
-
 /**
- * Answer one line of a roll request (`ROLL-REQUEST.md` §10 item 7). The demand reaches `terms()`
- * intact or it does not reach it at all: every imposed value is a static readout with a hidden
- * mirror, the imposed DM travels in the documented `extra` slot, and the imposed stance is resolved
- * against the footer button per Core p.61.
- *
- * **What the demand left open decides the friction** (§5.1): one characteristic named and the skill
- * resolved is one click; anything else opens the seeded prompt, and shift-click always does.
- *
- * @param {ChatMessage} message
- * @param {string} lineId
- * @param {object} [options]
+ * Answer one line of a roll request.
  * @param {boolean} [options.prompt]   Force the prompt open — the shift-click path
  */
 export async function answerRequest(message, lineId, { prompt = false } = {}) {
@@ -38,8 +24,7 @@ export async function answerRequest(message, lineId, { prompt = false } = {}) {
     const read = request.reading.find(line => line.id === lineId);
     if ( !read ) return null;
 
-    // §5.1: the chit is the addressee's and the referee's, who owns everything. Guarded here as
-    // well as in the render, because a card is a document and its DOM is not a permission.
+    // The chit is the addressee's and the referee's, who owns everything.
     if ( !game.user.isGM && (read.user !== game.user.id) ) {
         return void ui.notifications.warn(game.i18n.localize("MGT2.Errors.RequestNotYours"));
     }
@@ -55,13 +40,11 @@ export async function answerRequest(message, lineId, { prompt = false } = {}) {
     const imposed = imposedOf(request, read);
     const rollOptions = seedOptions(request, read, actor, imposed);
     // Core p.63-64: on a `together` tally the resolver's prompt opens with the contributors'
-    // answers already armed, summed and named. The arming is the REQUEST's, not a click on this
-    // client, which is what `armChain`'s per-client set could never carry (item 8).
+    // answers already armed, summed and named.
     const chain = read.resolver ? contributorAnswers(request, read) : [];
     rollOptions.armed = chain;
 
-    // One click, no dialog. The demand fixed the characteristic and the skill resolved, so there is
-    // nothing left to ask — and a dialog whose every control is a readout is a dialog for nothing.
+    // One click, no dialog.
     const direct = !prompt && (request.chars.length === 1)
         && (request.skillMode !== "open") && (read.skillItem !== UNRESOLVED);
     const data = direct
@@ -70,7 +53,7 @@ export async function answerRequest(message, lineId, { prompt = false } = {}) {
     if ( !data ) return null;
 
     // Core p.64's imposed DM through the documented `extra` slot, which is where `#onRoll` already
-    // puts its own terms. No new term slot, and no second place a DM can enter a formula.
+    // puts its own terms.
     const extra = request.dm.value ? [[request.dm.label, request.dm.value]] : [];
     const { formula, modifiers, chainSources, stance } =
         RollPromptHelper.terms(data, actor, rollOptions.checkModifiers, extra);
@@ -84,8 +67,7 @@ export async function answerRequest(message, lineId, { prompt = false } = {}) {
     return Checks.post(outcome, {
         actor,
         label,
-        // The correlation, and the only thing tying an answer to a request. It rides the ANSWER
-        // because a player cannot update a ChatMessage (§8).
+        // The correlation, and the only thing tying an answer to a request.
         flags: { mgt2: { request: { message: message.id, line: read.id } } },
         mode: data.rollMode,
         // Companion p.7: a row the referee took is whispered, with the dice out of `rolls` and in
@@ -97,23 +79,19 @@ export async function answerRequest(message, lineId, { prompt = false } = {}) {
         modifiers,
         chainSources,
         // Core p.61 verbatim: "a Boon and a Bane cancel each other out and the check is rolled
-        // normally". Named on the card, because a 2d6 with a Bane on the demand needs explaining.
+        // normally".
         lines: [request.flavor, stance.cancelled
             ? game.i18n.localize("MGT2.Request.Prompt.Cancelled") : null]
     });
 }
 
-/* -------------------------------------------- */
-
-/** The `imposed` block §8 names, read off the demand and this line's own frozen resolution. */
+/** The `imposed` block, read off the demand and this line's own frozen resolution. */
 function imposedOf(request, read) {
     return {
         difficulty: request.difficulty,
         chars: [...request.chars],
         // Meaningless on a demand that names no skill, and `null` there would read as the referee
-        // choosing untrained — so `skillMode` is read FIRST, which is the card's rule too. An
-        // `unresolved` line imposes no skill either: it posts as open-skill for that line alone,
-        // which is what keeps a mixed-language table off a silent Core p.59 DM-3.
+        // choosing untrained — so `skillMode` is read FIRST, which is the card's rule too.
         skillItem: ((request.skillMode === "named") && (read.skillItem !== UNRESOLVED))
             ? read.skillItem : undefined,
         stance: request.stance,
@@ -123,12 +101,7 @@ function imposedOf(request, read) {
     };
 }
 
-/**
- * What the seeded prompt opens on. The characteristic list is narrowed to what the referee offered
- * (Core p.59's `INT or EDU`), the skill list stays the actor's own, and the blocks are the ones a
- * request can fill — an attack's range, traits and psionic reach belong to the answering sheet and
- * are §9's deferred cases.
- */
+/** What the seeded prompt opens on. */
 function seedOptions(request, read, actor, imposed) {
     const characteristics = RollPromptHelper.actorCharacteristics(actor);
     const offered = request.chars.filter(key => characteristics.some(entry => entry._id === key));
@@ -155,7 +128,7 @@ function seedOptions(request, read, actor, imposed) {
 /**
  * The prompt's own `skill` sentinel for this line: an Item id where the referee's client resolved
  * one, `NP` where the referee chose untrained, and nothing at all where the demand named no skill
- * or this line could not resolve it — that line picks from its own vocabulary (§8's third state).
+ * or this line could not resolve it — that line picks from its own vocabulary.
  */
 function skillKey(request, read) {
     if ( request.skillMode !== "named" ) return "";
@@ -188,8 +161,6 @@ function answerLabel(request, read, actor) {
 
 /**
  * The one-click answer: the form the prompt would have come back with, built from the demand alone.
- * It goes through the same `terms()` as the dialog does, so the two paths cannot produce different
- * numbers — which is the whole of §11's first risk.
  */
 function directAnswer(request, read, actor, rollOptions, chain) {
     const characteristic = rollOptions.characteristic;
@@ -213,17 +184,9 @@ function directAnswer(request, read, actor, rollOptions, chain) {
     return data;
 }
 
-/* -------------------------------------------- */
-/*  Core p.63-64 — working together             */
-/* -------------------------------------------- */
-
 /**
  * The answers the resolver's check chains from: every other line that has landed one, in the order
- * they landed. Item 8 — `tally = together` **broadcasts** the arming, where `armChain` is one
- * player clicking *Chain into…* on their own card and hoping.
- *
- * A source this client cannot see is left out rather than named: `#priorChecks` withholds an
- * invisible message anyway, and a chain term the roller cannot click back to is not auditable.
+ * they landed.
  * @returns {string[]}   ChatMessage ids
  */
 function contributorAnswers(request, read) {
@@ -234,21 +197,7 @@ function contributorAnswers(request, read) {
         .filter(id => game.messages.get(id)?.visible);
 }
 
-/* -------------------------------------------- */
-/*  The nudge                                   */
-/* -------------------------------------------- */
-
-/**
- * Tell the addressees a request landed (§5). Fire-and-forget, and **degradable by design**: if the
- * query fails, the user left, or their setting is `off`, nothing is lost — the card is already in
- * their log. That is why this is a nudge and not a transport.
- *
- * `User.queryMany` settles per user internally (`documents/user.mjs`,
- * "const queryResults = await Promise.allSettled(queryPromises)"), which is what catches
- * `User#query`'s own `User [id] is not active` throw for a player who left between compose and
- * post. **No timeout is set**: a request must not expire while the referee is still talking.
- * @param {ChatMessage} message
- */
+/** Tell the addressees a request landed. */
 export async function nudgeRequest(message) {
     if ( message?.type !== REQUEST ) return null;
     const wanted = new Set();
@@ -262,11 +211,7 @@ export async function nudgeRequest(message) {
     return getDocumentClass("User").queryMany(users, NUDGE_QUERY, { message: message.id });
 }
 
-/**
- * The receiving half. `flash` pulses the card and the chat tab and **does not scroll**; `open`
- * scrolls and opens the roll. Client-scope, which is the direct correction of a world-scoped alert
- * with no opt-out.
- */
+/** The receiving half. */
 async function onNudge({ message: id } = {}) {
     const mode = game.settings.get("mgt2", "request.nudge");
     if ( (mode === "off") || !id ) return false;
@@ -283,8 +228,6 @@ async function onNudge({ message: id } = {}) {
     flash(document.querySelector('#sidebar-tabs [data-tab="chat"]'), false);
     // Not awaited, and never rolled for them: the query answers now, so the referee's own client is
     // not left holding a socket callback open for as long as the prompt sits on somebody's screen.
-    // `open` opens the PROMPT even where the demand would otherwise be one click — a nudge that
-    // rolled on its own would be the system answering for the player.
     if ( mode === "open" ) answerRequest(message, line.id, { prompt: true });
     return true;
 }
@@ -296,8 +239,6 @@ function flash(node, scroll) {
     node.classList.add("mgt2-jumped");
     setTimeout(() => node.classList.remove("mgt2-jumped"), FLASH_MS);
 }
-
-/* -------------------------------------------- */
 
 /**
  * The answering half of the feature: the seam `request.js` calls for the chit, the nudge query, and
@@ -315,11 +256,9 @@ export function registerRequestAnswer() {
 }
 
 /**
- * §2 S4's `ASKED` strip, in the existing `.from` vocabulary and injected into the rendered card
- * rather than added to `roll.html` — §8 keeps that template unchanged, and the strip's own link is
- * picked up by the `chainSource` listener that runs after this.
- * @param {ChatMessage} message
- * @param {HTMLElement} html
+ * The `ASKED` strip, in the existing `.from` vocabulary and injected into the rendered card rather
+ * than added to `roll.html`, which keeps that template unchanged. The strip's own link is picked up
+ * by the `chainSource` listener that runs after this.
  */
 export function injectAskedStrip(message, html) {
     const flag = message?.flags?.mgt2?.request;

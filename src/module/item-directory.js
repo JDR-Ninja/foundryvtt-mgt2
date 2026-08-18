@@ -1,12 +1,4 @@
-/**
- * The Items sidebar, taught what storage means.
- *
- * A stored world item stays listed here: it is a world item like any other, and hiding it would
- * take it out of the folders and out of the search. What the directory adds is the way back out —
- * dropping a stored item into the list is how it leaves the container it is in.
- *
- * @extends {ItemDirectory}
- */
+/** The Items sidebar, taught what storage means. @extends {ItemDirectory} */
 export class MGT2ItemDirectory extends foundry.applications.sidebar.tabs.ItemDirectory {
 
   /** @inheritDoc */

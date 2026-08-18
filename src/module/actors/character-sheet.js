@@ -18,25 +18,12 @@ const { DragDrop } = foundry.applications.ux;
 
 const PARTS_PATH = "systems/mgt2/templates/actors";
 
-/**
- * The Traveller character sheet.
- *
- * The layout is a grid on the window content and every section is its own part, so a change can
- * be rendered where it happened instead of rebuilding the whole sheet — which matters with
- * `submitOnChange` and two ProseMirror editors.
- *
- * @extends {ActorSheetV2}
- * @mixes HandlebarsApplication
- */
+/** The Traveller character sheet. @extends {ActorSheetV2} */
 export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(ActorSheetV2)) {
 
   /**
    * The Item types this sheet accepts on a drop, declared so a subclass can say what it takes
-   * instead of the inventory's list being the system's (§9.135).
-   *
-   * This one is the **inventory**: everything a Traveller can be carrying. A ship's parts are not
-   * on it, which is why `SpacecraftActorSheet` declares its own — and why `component`, `cargo`,
-   * `passage` and `role` had never been droppable anywhere.
+   * instead of the inventory's list being the system's.
    * @type {Set<string>}
    */
   static DROP_ITEM_TYPES = new Set(["armor", "weapon", "ammunition", "computer", "container", "item",
@@ -172,16 +159,10 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     ["img", ["header"]]
   ];
 
-  /* -------------------------------------------- */
-  /*  Drag and Drop                               */
-  /* -------------------------------------------- */
-
   /**
-   * The sheet marks its draggable rows with `.drag-item-list` rather than the core `.draggable`,
-   * so the inherited DragDrop instance is replaced wholesale (the parent's backing field is private).
+   * The sheet marks its draggable rows with `.drag-item-list` rather than the core `.draggable`, so
+   * the inherited DragDrop instance is replaced wholesale (the parent's backing field is private).
    * @type {DragDrop}
-   * @protected
-   * @override
    */
   get _dragDrop() {
     return this.#dragDrop ??= new DragDrop.implementation({
@@ -201,14 +182,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   /** @type {DragDrop|null} */
   #dragDrop = null;
 
-  /* -------------------------------------------- */
-  /*  View State                                  */
-  /* -------------------------------------------- */
-
   /**
    * Which container the Storage tab filters on, and which one items are dropped into.
-   * This is one viewer's preference, so it belongs to the User: on the actor it was a world write
-   * that two players looking at the same sheet would fight over.
    * @type {{view: string, dropIn: string}}
    */
   get viewState() {
@@ -255,15 +230,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return result;
   }
 
-  /* -------------------------------------------- */
-  /*  Rendering                                   */
-  /* -------------------------------------------- */
-
-  /**
-   * Re-render only the parts a change can reach. Everything else keeps its DOM — which is what
-   * stops the two ProseMirror editors from being rebuilt on every keystroke elsewhere.
-   * @inheritDoc
-   */
+  /** Re-render only the parts a change can reach. @inheritDoc */
   _configureRenderOptions(options) {
     super._configureRenderOptions(options);
     if ( options.isFirstRender || !options.renderContext ) return;
@@ -277,7 +244,6 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
    */
   static #affectedParts(options) {
     // Any item change can move a weight, the armour total or one of the lists.
-    // The context names the embedded collection, so it reads "updateitems", not "updateItem".
     if ( /^(create|update|delete)items$/.test(options.renderContext) ) {
       return new Set(["header", "characteristics", "health", "skills", "inventory", "relations", "footer"]);
     }
@@ -293,8 +259,6 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return parts;
   }
 
-  /* -------------------------------------------- */
-
   /** @inheritDoc */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
@@ -308,13 +272,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return Object.assign(context, this.#prepareViewModel());
   }
 
-  /* -------------------------------------------- */
-
   /**
    * One presentation object per item, referencing the live prepared document rather than a copy of
-   * it. The sheet therefore neither deep-copies the actor on every render nor loses what
-   * prepareDerivedData assigns outside the schema.
-   * @param {Item} item
+   * it.
    * @returns {object}
    */
   #itemView(item) {
@@ -325,13 +285,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return view;
   }
 
-  /* -------------------------------------------- */
-
   /**
    * The characteristics as an ordered list — the roster's order, which is the one the rulebook
-   * prints and players read everywhere else. `base` is the only bound field; `max`, `value` and
-   * `dm` are readouts, and `modifier` is what `base` and `max` differ by — the derivation the row
-   * spells out.
+   * prints and players read everywhere else.
    * @returns {object[]}
    */
   #prepareCharacteristics() {
@@ -346,8 +302,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         fields: schema[key].fields,
         base: c.base, damage: c.damage, value: c.value, max: c.max, dm: c.dm,
         // Both halves: the actor's own flag, and whether the world has adopted the rule that makes
-        // this characteristic exist. Every collection below filters on it, so the two switches reach
-        // the damage track, the chain readout and the static line from one place.
+        // this characteristic exist.
         show: this.actor.system.isCharacteristicShown(key),
         modifier: c.auto + c.effect,
         percent: c.max > 0 ? Math.round((c.value / c.max) * 100) : 0,
@@ -358,8 +313,6 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       };
     });
   }
-
-  /* -------------------------------------------- */
 
   /**
    * Sort the actor's items into the collections consumed by the sheet template.
@@ -391,13 +344,14 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       initiative: actor.system.initiative,
       characteristics,
       // Rows stay in the roster's order — players read the six in one fixed sequence, and a chain
-      // edit must not move them. The chain survives as `chainOrder`, stated once on the header.
+      // edit must not move them.
       damageTrack: characteristics.filter(c => c.show && chain.includes(c.key)),
       chainOrder: chain.map(key => byKey.get(key)).filter(c => c?.show),
       psionic: psionic?.show ? psionic : null,
       statics: characteristics.filter(c => c.show && (c.key !== "psionic") && !chain.includes(c.key)),
-      // The talent list is the per-actor flag under the world's rule: with psionics not adopted, the
-      // section is not drawn and the flag that would draw it is not offered (`actor-config-sheet`).
+      // The talent list is the per-actor flag under the world's rule: with psionics not adopted,
+      // the section is not drawn and the flag that would draw it is not offered
+      // (`actor-config-sheet`).
       showPsionicTalents: Rules.on("psionics") && (actor.system.config.psionic === true)
     };
 
@@ -407,8 +361,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     for (const item of actor.items) views.set(item.id, this.#itemView(item));
 
     // `hosts` is every view software can be loaded onto; `computers` is the subset that renders as
-    // its own row group. A wafer jack is both a computer and an implant, so it hosts software while
-    // staying in Augments where a reader expects it (§9.84).
+    // its own row group.
     const weapons = [], armors = [], augments = [], computers = [], hosts = [], softwares = [];
     const items = [], equipments = [], containerItems = [], careers = [];
     const skills = [], psionics = [], diseases = [], wounds = [], contacts = [];
@@ -433,8 +386,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
     actorContainers.sort(MGT2Helper.compareByName);
 
-    // The picker reads `display`, so the "every container" entry had neither a label nor a language:
-    // it rendered as a blank option. `MGT2.Items.SelectAll` was written for it and never wired up.
+    // The picker reads `display`, so the "every container" entry had neither a label nor a
+    // language: it rendered as a blank option.
     const everyContainer = game.i18n.localize("MGT2.Items.SelectAll");
     const containers = [{ name: everyContainer, display: everyContainer, _id: "" }].concat(actorContainers);
     const containerIndex = new Map();
@@ -455,10 +408,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const currentContainerView = containerIndex.get(viewId);
     model.containerView = currentContainerView;
     model.containerShowAll = viewId === "";
-    // With every container shown there is none to ask for the total, and asking nothing read 0 under
-    // a list of rows. The sum is over the containers that are not inside another: a container's
-    // weight is already its contents recursively, so the top level counts everything exactly once.
-    // A locked one is left out of the sum for the same viewer whose rows it withholds (§9.143).
+    // With every container shown there is none to ask for the total, and asking nothing read 0
+    // under a list of rows.
     model.containerWeight = model.containerShowAll
       ? MGT2Helper.roundWeight(actorContainers.reduce((sum, c) =>
         (c.system.container?.id || (c.system.locked && !game.user.isGM)) ? sum : sum + c.system.weight, 0))
@@ -470,8 +421,6 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       const sys = v.system;
 
       // `in`, not `hasOwn`: a container's weight is a getter, and it lives on the prototype.
-      // Rounded because the product is a float: 0.1 kg × 3 prints 0.30000000000000004 raw, and one
-      // decimal is what the aggregates and the item sheets already show (§9.143).
       if (("weight" in sys) && sys.weight > 0) {
         const total = isNaN(sys.quantity) ? sys.weight : sys.weight * sys.quantity;
         v.weight = `${MGT2Helper.roundWeight(total)} ${settings.weightUnit}`;
@@ -529,7 +478,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
           } else {
             // The PRINTED figure, alone among the readouts, and deliberately: this parenthesis is
             // the package's name — Core folio 111's own column, the thing that makes it Intrusion/3
-            // — while `runAt` is a property of running, and a package bound to no host runs nowhere.
+            // — while `runAt` is a property of running, and a package bound to no host runs
+            // nowhere.
             v.display = sys.software.bandwidth > 0 ? `${v.name} (${sys.software.bandwidth})` : v.name;
             softwares.push(v);
           }
@@ -544,8 +494,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
           break;
 
         // Both are `PhysicalItemData` and both are in `DROP_ITEM_TYPES`, so with no case here a
-        // dropped one landed on the actor and drew nowhere. The blocks they earn are
-        // `DOCUMENT-TYPES.md` §12-§13's work; until then the generic list is where they belong.
+        // dropped one landed on the actor and drew nowhere.
         case "drug":
         case "ammunition": items.push(v); break;
 
@@ -583,7 +532,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     } : null;
 
     // What each recovery control needs to say before it is pressed: the conditions the rules put on
-    // it, and the rate it will use. Every one of them is derived.
+    // it, and the rate it will use.
     const states = actor.system.states;
     const augment = actor.system.augmentTL;
     model.recovery = {
@@ -611,8 +560,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       protection: actor.system.radiationProtection
     } : null;
 
-    // The budget block's bar is a CSS variable, and the numbers behind it are already derived —
-    // so the percentage is computed here rather than walked out of the DOM the way the kit does.
+    // The budget block's bar is a CSS variable, and the numbers behind it are already derived — so
+    // the percentage is computed here rather than walked out of the DOM the way the kit does.
     const inventory = actor.system.inventory;
     model.encumbranceNormal = inventory.encumbrance.normal;
     model.encumbranceOver = actor.system.states.encumbrance;
@@ -653,21 +602,14 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return model;
   }
 
-  /* -------------------------------------------- */
-
   /** @inheritDoc */
   async _onRender(context, options) {
     await super._onRender(context, options);
     bindTraitInput(this.element, (property, text) => this.#addTrait(text));
   }
 
-  /* -------------------------------------------- */
-  /*  Event Listeners and Handlers                */
-  /* -------------------------------------------- */
-
   /**
    * Resolve the embedded item id carried by the closest row of a clicked control.
-   * @param {HTMLElement} target
    * @returns {string|undefined}
    */
   static #itemId(target) {
@@ -756,20 +698,12 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return this.actor.update(data);
   }
 
-  /* -------------------------------------------- */
-
   /** A chain link's label: a characteristic on a person, a pool on everything else. */
   static #linkLabel(key) {
     return MGT2.Characteristics[key] ?? MGT2.DamageTracks[key] ?? key;
   }
 
-  /**
-   * Spend or recover on one characteristic's own track, by the amount sitting in the control. Its
-   * one caller is the psionic reserve, which is not in the damage chain: spending writes its own
-   * wound and never reaches `life` (Core folio 229 sends only the overrun there, through
-   * `spendPsi`). Everything that walks the chain goes through the dialog below.
-   * @this {TravellerActorSheet}
-   */
+  /** Spend or recover on one characteristic's own track, by the amount sitting in the control. */
   static async #onApplyDamage(event, target) {
     const control = target.closest(".dmgctl");
     const key = control?.dataset.characteristic;
@@ -792,12 +726,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     spacecraft: "MGT2.Actor.spacecraft.Repair"
   };
 
-  /**
-   * The pool, the wound track and the tail icon are one door. What it types is a wound and not an
-   * attack, so it skips the pipeline entirely — and folio 77's question is asked in the preview,
-   * before anything is written, rather than from a block that opens after half of it already is.
-   * @this {TravellerActorSheet}
-   */
+  /** The pool, the wound track and the tail icon are one door. */
   static async #onOpenDamage() {
     const result = await CharacterPrompts.openDamage({
       system: this.actor.system,
@@ -818,10 +747,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
   /**
    * The stun sub-track is stored and bounded and Rest 1 h puts it back, so its own number is the
-   * control that changes it. One transient field, removed on Enter, Escape or blur — and it carries
-   * no `name`, because `submitOnChange` serialises the form by name and a named control here would
-   * submit on every keystroke.
-   * @this {TravellerActorSheet}
+   * control that changes it.
    */
   static #onEditStun(event, target) {
     if ( target.hidden ) return;
@@ -845,9 +771,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       target.hidden = false;
       if ( commit ) return this.#setStun(value);
     };
-    // `submitOnChange` listens for `change` on the form. Nothing of a nameless control is
-    // serialised, but the submit still re-renders the header — and it fires BEFORE blur, so the
-    // field would be torn out from under the commit below.
+    // `submitOnChange` listens for `change` on the form.
     field.addEventListener("change", changeEvent => changeEvent.stopPropagation());
     field.addEventListener("keydown", keyEvent => {
       if ( keyEvent.key === "Enter" ) { keyEvent.preventDefault(); close(true); }
@@ -856,12 +780,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     field.addEventListener("blur", () => close(true));
   }
 
-  /**
-   * Set the sub-track outright. Upwards it is Stun damage: capped at the stun link and the excess
-   * reported as rounds of incapacitation rather than written (Core p.79). Downwards it is what
-   * Rest 1 h does to the whole track done to part of it — straight off the stun link, never through
-   * the heal path, which walks the chain backwards and would hand back a lethal wound taken since.
-   */
+  /** Set the sub-track outright. */
   async #setStun(value) {
     const system = this.actor.system;
     const delta = value - system.stun;
@@ -890,10 +809,6 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   static async #onRestHour() {
     return this.actor.system.restHour();
   }
-
-  /* -------------------------------------------- */
-  /*  Recovery (Core p.82-83)                     */
-  /* -------------------------------------------- */
 
   /** No card here and so no Effect: the pool opens at Core p.82's minimum of one and is editable. */
   static async #onFirstAid() {
@@ -964,11 +879,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       game.i18n.format("MGT2.Recovery.Restored", { points: keys.length, detail }));
   }
 
-  /**
-   * Core p.83: an END check per minute, each failure adding a cumulative DM+1 to the next. The
-   * count is stored on the actor because the minute between attempts outlives any sheet, and the
-   * check states no difficulty, so it scores against the assumed Average.
-   */
+  /** Core p.83: an END check per minute, each failure adding a cumulative DM+1 to the next. */
   static async #onRevive() {
     const system = this.actor.system;
     const failures = system.states.reviveFailures;
@@ -983,17 +894,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       game.i18n.localize(awake ? "MGT2.Recovery.Awake" : "MGT2.Recovery.StillOut"), roll);
   }
 
-  /* -------------------------------------------- */
-  /*  Radiation (Core folio 81)                   */
-  /* -------------------------------------------- */
-
-  /**
-   * Take a dose. The exposure is either one of the printed sources, rolled, or a number the referee
-   * types; folio 100's armour Rad score comes off it either way, and what is left does two separate
-   * things — the immediate column is rolled as damage now, and the running total moves a permanent
-   * END penalty that derives itself from the count.
-   * @this {TravellerActorSheet}
-   */
+  /** Take a dose. */
   static async #onRadiation() {
     const system = this.actor.system;
     const result = await CharacterPrompts.openRadiation(
@@ -1006,14 +907,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       { dose: roll ? roll.total : MGT2Helper.getIntegerFromInput(result.rads), roll });
   }
 
-  /* -------------------------------------------- */
-
-  /**
-   * One row of the permanent-change log (§9.39, §9.91). Signed, so this one control is ageing, a
-   * creation injury, an event, medical care and a referee's ruling alike — and none of them ever
-   * writes `base`. Nothing is scheduled: a Traveller ages when the table says so (§9.35).
-   * @this {TravellerActorSheet}
-   */
+  /** One row of the permanent-change log. */
   static async #onLossAdd() {
     const system = this.actor.system;
     const result = await CharacterPrompts.openCharacteristicLoss({
@@ -1021,10 +915,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       rows: system.rollableCharacteristics.map(key => ({
         key,
         label: game.i18n.localize(MGT2.Characteristics[key]),
-        // What the Traveller has NOW, which is what the reader is watching move — `max` is
-        // `base + auto + effect` floored at 0, so it already carries every earlier row. `base` goes
-        // with it because folio 49's crisis care restores what was REDUCED to 0, and a
-        // characteristic that was never rolled is not a casualty.
+        // What the Traveller has NOW, which is what the reader is watching move — `max` is `base +
+        // auto + effect` floored at 0, so it already carries every earlier row.
         now: system.characteristics[key].max,
         base: system.characteristics[key].base
       }))
@@ -1057,8 +949,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     });
 
     const update = { "system.characteristicLog": log };
-    // Folio 52: what the Traveller cannot pay becomes debt carried into play. Only on request —
-    // a referee recording history is not making a transaction.
+    // Folio 52: what the Traveller cannot pay becomes debt carried into play.
     if (result.billed && (cost > 0)) {
       const paid = Math.min(system.finance.credits, cost);
       update["system.finance.credits"] = system.finance.credits - paid;
@@ -1070,8 +961,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   /**
    * A row deleted by index, which is safe here and is not on the ship's arrays: a log entry carries
    * no reference to its neighbours, so removing one cannot falsify another — the sum simply loses
-   * that row, and the score it derives moves with it (§9.39).
-   * @this {TravellerActorSheet}
+   * that row, and the score it derives moves with it.
    */
   static async #onLossDelete(event, target) {
     const index = Number(target.closest("[data-loss-index]")?.dataset.lossIndex ?? -1);
@@ -1083,12 +973,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
   /**
    * The log as the sheet reads it: each row with its changes already named and signed, the running
-   * score beside the characteristics that moved, and what the whole log has cost. Every figure is a
-   * reading of the stored rows — nothing here is a second copy of the derivation.
-   *
-   * **Null on anything that is not a `character`.** This runs from the shared view model, which the
-   * craft sheets inherit, and only `CharacterData` declares the log — §9.39 put it there because a
-   * ship does not age. The Health tab's block is guarded on the same value.
+   * score beside the characteristics that moved, and what the whole log has cost.
    */
   #prepareLoss() {
     const system = this.actor.system;
@@ -1113,8 +998,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         }))
     }));
 
-    // The score each moved characteristic now stands at, against the one it was rolled with. Read
-    // off `base` and `max` rather than re-summed: the sum is the model's and this is its readout.
+    // The score each moved characteristic now stands at, against the one it was rolled with.
     for (const entry of log) {
       for (const key of Object.keys(entry.changes ?? {})) {
         if (key in system.characteristics) running[key] = true;
@@ -1122,10 +1006,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     }
     return {
       rows,
-      // Two different facts, and the log distinguishes them where a single flag cannot. `crisis` is
-      // permanent — folio 49 makes a Traveller who has suffered one fail every later qualification
-      // roll, and buying care does not undo that — while `zeroed` is whether one is standing at 0
-      // right now, which is the half a doctor can still change.
+      // Two different facts, and the log distinguishes them where a single flag cannot.
       crisis: system.states.ageingCrisis,
       zeroed: Object.keys(running).some(key =>
         (system.characteristics[key].max <= 0) && (system.characteristics[key].base > 0)),
@@ -1139,16 +1020,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     };
   }
 
-  /* -------------------------------------------- */
-
   /**
    * The training strip: one row per live programme, and the edit-only hatch onto the stored fields
-   * of the row at the top. Every figure a row prints is read off `system.training` and none of it is
-   * recomputed (§9.133) — the one exception is the count of periods failed since the last grant,
-   * which nothing else needs and which the struck pips are.
-   *
-   * **Null on anything that is not a `character`.** This runs from the shared view model, which the
-   * craft sheets inherit, and only `CharacterData` declares the subtree: an NPC does not study.
+   * of the row at the top.
    */
   #prepareProgrammes() {
     const training = this.actor.system.training;
@@ -1186,8 +1060,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
           ...Array.fromRange(programme.periodsLeft).map(() => ""),
           ...Array.fromRange(failed).map(() => "fail")],
         barred: programme.barred ? TravellerActorSheet.#barredReason(programme.target) : null,
-        // What is actually waiting on the player: it sorts to the top and takes the accent rail. A
-        // barred programme is waiting on nobody — nothing it banks can ever be spent.
+        // What is actually waiting on the player: it sorts to the top and takes the accent rail.
         waiting: !programme.barred && (programme.ready || programme.checkDue),
         verb: TravellerActorSheet.#trainingVerb(programme),
         targetLabel: MGT2.TrainingTargets[programme.target.kind],
@@ -1203,8 +1076,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       rows,
       // The stored fields stay repairable, but they are not the interface: edit mode only, beneath
       // the strip and never inside it, and for one programme — more than that is what the window is
-      // for. `characteristic` is the override Core p.55's Athletics exception needs; the resolved
-      // `checkCharacteristic` beside it is derived and must never be bound to a control.
+      // for.
       hatch: first ? {
         fields: this.actor.system.schema.fields.training.fields.programmes.element.fields,
         label: first.targetLabel,
@@ -1221,9 +1093,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   }
 
   /**
-   * Why neither book lets this programme reach anything: Core p.55 bars Jack-of-all-Trades outright,
-   * and Compagnon p.40's table names five characteristics — SOC by name, PSI because psionic
-   * strength has training rules of its own.
+   * Why neither book lets this programme reach anything: Core p.55 bars Jack-of-all-Trades
+   * outright, and Compagnon p.40's table names five characteristics — SOC by name, PSI because
+   * psionic strength has training rules of its own.
    */
   static #barredReason(target) {
     if ( target.kind !== "characteristic" ) return "MGT2.Training.Barred.jackOfAllTrades";
@@ -1232,12 +1104,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   }
 
   /**
-   * The one verb a row offers, and never two. Under Core the player drives — log a week, then roll
-   * the period's own check. Under the Companion the award is the referee's (p.39), so a row grows a
-   * verb only where the book gives the player a move: the teaching check where a comrade is linked,
-   * and the purchase once the balance covers the level. Both the grant and the purchase open the
-   * window rather than firing, because each creates or raises a document and consults
-   * `skillCapBreach` (§9.133).
+   * The one verb a row offers, and never two.
    * @returns {{action: string, label: string, hot: boolean}|null}
    */
   static #trainingVerb(programme) {
@@ -1265,11 +1132,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return target.closest("[data-programme-id]")?.dataset.programmeId;
   }
 
-  /**
-   * Core p.55: one more week of the open Study Period. Written at its own key rather than over the
-   * map, so two clients logging a week on two different programmes cannot overwrite one another.
-   * @this {TravellerActorSheet}
-   */
+  /** Core p.55: one more week of the open Study Period. */
   static async #onTrainingWeek(event, target) {
     const id = TravellerActorSheet.#programmeId(target);
     const training = this.actor.system.training;
@@ -1281,18 +1144,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return this.actor.update({ [`system.training.programmes.${id}.weeks`]: weeks });
   }
 
-  /**
-   * The check that settles what is open, and the only thing either engine rolls from the strip.
-   * Core p.55 closes a full Study Period on an Average (8+) EDU check — or on Athletics' own
-   * physical characteristic — and the eight weeks are spent whichever way it goes. Compagnon p.39
-   * has a taught Traveller roll Average (8+) INT at DM−the level being learned for one Dedicated
-   * point.
-   *
-   * The voyage screen's pattern exactly (§9.33.7): the system's own prompt is awaited so boons,
-   * banes and situational DMs all apply, the outcome is read off the returned message rather than
-   * from the roll, and **a prompt that came back as anything but a `ChatMessage` writes nothing**.
-   * @this {TravellerActorSheet}
-   */
+  /** The check that settles what is open, and the only thing either engine rolls from the strip. */
   static async #onTrainingCheck(event, target) {
     const id = TravellerActorSheet.#programmeId(target);
     const programme = this.actor.system.training?.programmes[id];
@@ -1300,7 +1152,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
     const companion = programme.engine === "companion";
     // Compagnon p.39: the teacher's own level caps what can be learned, and the check is taken at
-    // DM−the level being reached. Waivable, like every other source the prompt lists.
+    // DM−the level being reached.
     const modifiers = companion
       ? [{ key: "training", label: "MGT2.Training.TeachingDM", dm: -programme.next }] : [];
     const message = await TravellerActorSheet.roll(this.actor, {
@@ -1337,12 +1189,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return this.actor.update(update);
   }
 
-  /**
-   * The training window, on the programme the clicked row names. Reached through `game.mgt2` rather
-   * than by import: the screen is a standalone `ApplicationV2` registered in `core.js`, the way the
-   * creation grid and the docket are.
-   * @this {TravellerActorSheet}
-   */
+  /** The training window, on the programme the clicked row names. */
   static #onTrainingOpen(event, target) {
     const open = game.mgt2?.trainingScreen;
     if ( typeof open !== "function" ) {
@@ -1352,15 +1199,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return open(this.actor, { programme: TravellerActorSheet.#programmeId(target) });
   }
 
-  /* -------------------------------------------- */
-
   /**
-   * Everything standing against `modifiers.check`, each entry still named. The three provenances
-   * are offered separately because they are waived separately: a referee's own entry and an Active
-   * Effect are one standing figure, while fatigue or armour is a state the player can argue out of.
-   *
-   * Public and actor-first for the same reason `roll` is: a roll request answered with one click
-   * has no sheet and no prompt, and it must still carry what the answering Traveller is standing in.
+   * Everything standing against `modifiers.check`, each entry still named.
    * @returns {{key: string, label: string, dm: number, params?: object}[]}
    */
   static checkModifiers(actor, token = null) {
@@ -1368,9 +1208,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const sources = [...(check.sources ?? [])];
     const standing = check.custom + check.effect;
     if (standing !== 0) sources.push({ key: "actor", label: "MGT2.RollPrompt.ActorDM", dm: standing });
-    // Core p.76: every Reaction taken costs DM-1 on the next set of actions. It is per-encounter
-    // state, so it lives on the Combatant — and it arrives here as one more waivable source, which
-    // is what lets a referee say the round has moved on.
+    // Core p.76: every Reaction taken costs DM-1 on the next set of actions.
     const reactions = MGT2Combatant.reactionDM(actor, token);
     if (reactions !== 0) {
       sources.push({ key: "reactions", label: "MGT2.RollPrompt.ReactionDM", dm: reactions });
@@ -1381,13 +1219,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   /**
    * The distance to the one targeted token, measured with Foundry's own `measurePath` so the figure
    * agrees with what the ruler draws — centre to centre, elevation included, and on the diagonal
-   * rule the manifest declares (`grid.diagonals`, Euclidean, Companion p.173). A snapshot taken as
-   * the prompt opens and never again: it fills the field the player would otherwise have typed, and
-   * no rule downstream reads a target (`REDESIGN-PLAN.md` §1).
-   *
-   * Null wherever the answer would be a guess rather than a measurement — no target or several of
-   * them, no token to measure from, or a scene whose units are not the ones the weapon's own Range
-   * score is written in. The fallback is the field the player types, so nothing is ever wrong.
+   * rule the manifest declares (`grid.diagonals`, Euclidean, Companion p.173).
    * @param {TokenDocument|null} token   The sheet's own token, where the sheet has one
    * @returns {{distance: number, target: string}|null}
    */
@@ -1402,7 +1234,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     if (!scale || (scale !== weapon?.system.range?.unit)) return null;
 
     // The sheet's own token first: an unlinked NPC opened from its token is *that* token, not a
-    // sibling. Failing that, only a token there can be no argument about.
+    // sibling.
     const placed = token ? null : actor.getActiveTokens();
     const from = token ?? ((placed?.length === 1) ? placed[0] : null);
     const start = (from?.document ?? from)?.getCenterPoint();
@@ -1412,12 +1244,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return { distance: Math.round(measured * 10) / 10, target: targets[0].document.name };
   }
 
-  /**
-   * Core p.74's Common Modifiers, read off the prompt. Aiming is capped at the six consecutive
-   * Minor Actions p.75 allows, a laser sight is worth nothing without it, and a fast-moving target
-   * costs a DM per full ten metres rather than per metre.
-   * @returns {[string, number][]}
-   */
+  /** Core p.74's Common Modifiers, read off the prompt. @returns {[string, number][]} */
   static #attackModifiers(data, weapon) {
     const terms = [];
     const named = key => game.i18n.localize(MGT2.AttackModifiers[key].label);
@@ -1453,8 +1280,6 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     if (data.prone === true) terms.push([named("prone"), MGT2.AttackModifiers.prone.dm]);
 
     // Core folio 167: the to-hit column of the Damage Scale table, whose row the attacker declares.
-    // The damage column is not read here — `reduceDamage` resolves the ratio against whoever the
-    // card is applied to, which is where the target is actually known.
     const cross = MGT2.CrossScaleAttack[
       (weapon?.system.scale === "spacecraft") ? "spacecraft" : "ground"];
     if (data.crossScale === true) terms.push([game.i18n.localize(cross.label), cross.dm]);
@@ -1489,11 +1314,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
   /**
    * Every check a Traveller makes, from the four things a control can name: the kind of roll, a
-   * characteristic key, a skill Item id and any other Item id. Public and actor-first because a
-   * hotbar macro has no sheet — `#onRoll` is one of its callers, not its owner.
-   *
-   * @param {Actor} actor
-   * @param {object} what
+   * characteristic key, a skill Item id and any other Item id.
    * @param {string} [what.roll]            `initiative` | `characteristic` | `skill` | `psionic`
    * @param {string} [what.characteristic]  A characteristic key, for `roll: "characteristic"`
    * @param {string} [what.skill]           A `talent` Item id, for `roll: "skill"`
@@ -1513,12 +1334,12 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       skills: RollPromptHelper.actorSkills(actor),
       skill: "",
       // A caller's own sources join the actor's BEFORE the prompt is built, which is what leaves
-      // them un-tickable beside it rather than pushed in past the checkbox filter (§9.33.4).
+      // them un-tickable beside it rather than pushed in past the checkbox filter.
       checkModifiers: [...TravellerActorSheet.checkModifiers(actor, token), ...modifiers],
       difficulty,
       damageFormula: null,
-      // The prompt renders its blocks from what is being rolled, so a bare characteristic check
-      // is shorter than a weapon attack.
+      // The prompt renders its blocks from what is being rolled, so a bare characteristic check is
+      // shorter than a weapon attack.
       blocks: { skill: true, range: false, traits: false, psionic: false, attack: false,
         extended: false },
       // RH folio 115's brain ceiling, which only a robot answers with anything.
@@ -1535,9 +1356,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       rollOptions.rollTypeName = game.i18n.localize("MGT2.RollPrompt.InitiativeRoll");
       rollOptions.characteristic = actor.system.config.initiative.characteristic;
       // Core p.85: a creature has no DEX and Fast Metabolism hands it the DM directly, so with no
-      // characteristic named the whole figure is offered as a waivable modifier instead. With one
-      // named the prompt reads that characteristic's own DM, so the standing accumulator is all
-      // that is left to carry — offering `system.initiative` there would count the DM twice (§9.94).
+      // characteristic named the whole figure is offered as a waivable modifier instead.
       const standing = rollOptions.characteristic
         ? actor.system.modifiers.initiative.dm : actor.system.initiative;
       if (standing !== 0) {
@@ -1576,9 +1395,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
       if (itemObj && roll === "psionic") {
         // Core folio 229: "A Traveller with no PSI points cannot attempt to activate a power." The
-        // refusal is what makes the folio's next clause reachable at all — the excess a spend pushes
-        // past zero can only exist when there was a reserve to start from. Enforced only where the
-        // sheet shows PSI: hiding the reserve is how a table opts out of tracking it.
+        // refusal is what makes the folio's next clause reachable at all — the excess a spend
+        // pushes past zero can only exist when there was a reserve to start from.
         const reserve = actor.system.characteristics.psionic;
         const tracked = actor.system.isCharacteristicShown("psionic");
         if (tracked && (reserve.value <= 0)) {
@@ -1593,8 +1411,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         rollOptions.blocks.psionic = tracked;
         // Core p.229: activating a power is "a skill check using the appropriate skill, adding
         // their PSI DM" — the talent IS that skill, so it joins the list the prompt offers and is
-        // preselected. It sits behind "Not proficient" rather than at the end, which would read as
-        // an accident in an otherwise sorted list.
+        // preselected.
         rollOptions.skills.splice(1, 0, {
           _id: itemObj.id, name: itemObj.getRollDisplay(false), term: itemObj.name,
           dm: itemObj.system.level
@@ -1615,7 +1432,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       if (itemObj && Object.hasOwn(itemObj.system, "damage")) {
         // A weapon answers with the round in it, which may replace its damage outright — a 40mm
         // grenade in an Advanced Combat Rifle does the grenade's damage and not the rifle's 3D
-        // (Core p.127, §9.90). Every other type has no round and answers with its own.
+        // (Core p.127).
         rollOptions.damageFormula = itemObj.system.effective?.damage ?? itemObj.system.damage;
         if (itemObj.type === "disease") {
           if (itemObj.system.subType === "disease") {
@@ -1640,8 +1457,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         }
       }
 
-      // Core p.229: the PSI DM is added to every power, so a talent that names no characteristic
-      // of its own still gets one — but only where the sheet shows PSI at all.
+      // Core p.229: the PSI DM is added to every power, so a talent that names no characteristic of
+      // its own still gets one — but only where the sheet shows PSI at all.
       if ((roll === "psionic") && (rollOptions.characteristic === "")
         && actor.system.isCharacteristicShown("psionic")) {
         rollOptions.characteristic = "psionic";
@@ -1654,10 +1471,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
           rollOptions.difficulty = itemObj.system.difficulty;
         }
         // Core folio 80: "The Traveller must make a series of END checks to resist the effects of
-        // the disease", and "poisons operate in the same way". The characteristic is the rule and
-        // not a choice, so the prompt opens on it — for the two sub-types the folio names, and only
-        // where the actor has an END to roll. A `wound` is the system's own third sub-type and the
-        // folio says nothing about it, so it is left to the referee.
+        // the disease", and "poisons operate in the same way".
         if (MGT2.EnduranceResisted.includes(itemObj.system.subType)
           && actor.system.rollableCharacteristics.includes("endurance")) {
           rollOptions.characteristic = "endurance";
@@ -1677,8 +1491,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         // block: a melee attack is offered the second weapon as readily as a pistol is.
         rollOptions.blocks.attack = true;
         // Core folio 77: the magazine is how many shots can be fired "before reloading is
-        // necessary", so an empty one is refused here rather than allowed to drift negative. Which
-        // mode is short of rounds cannot be known until the prompt has been answered.
+        // necessary", so an empty one is refused here rather than allowed to drift negative.
         if (TravellerActorSheet.#magazine(itemObj)?.ammo === 0) {
           return ui.notifications.warn(
             game.i18n.format("MGT2.Errors.WeaponEmpty", { name: itemObj.name }));
@@ -1686,10 +1499,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       }
 
       // Core folio 58 makes characteristic checks and skill checks two different kinds of task
-      // check, and only the second has a skill that can be missing. Two cases therefore open on
-      // folio 59's DM-3 instead of on the blank option, whose DM+0 is skill 0 and reads as trained:
-      // a binding naming a skill this actor does not carry, and a weapon, which folio 59 makes a
-      // skill check by name. Both are defaults — the select still offers every skill beside them.
+      // check, and only the second has a skill that can be missing.
       if (rollOptions.skill && !rollOptions.skills.some(entry => entry._id === rollOptions.skill)) {
         rollOptions.skill = "NP";
       }
@@ -1707,8 +1517,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     // Core p.74's attack modifiers and the weapon traits are this path's own terms; everything else
     // the prompt came back with is assembled the same way for any caller.
     const extra = [];
-    // Core folio 78: DM-2 to the attack rolls of both weapons. Outside `#attackModifiers`, which is
-    // folio 74's ranged table and never runs for a melee pair.
+    // Core folio 78: DM-2 to the attack rolls of both weapons.
     if (rollOptions.blocks.attack && (userRollData.dualWeapons === true)) {
       extra.push([game.i18n.localize(MGT2.AttackModifiers.dualWeapons.label),
         MGT2.AttackModifiers.dualWeapons.dm]);
@@ -1736,9 +1545,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       return;
     }
 
-    // Core folio 79: the fire mode decides what Auto does beyond forfeiting the aim. A burst adds
-    // the score to damage; full auto makes that many attacks, and each is rolled and carded on its
-    // own — which is what lets them be applied to the separate targets the folio allows.
+    // Core folio 79: the fire mode decides what Auto does beyond forfeiting the aim.
     const auto = MGT2Helper.traitScore(rollOptions.weapon?.system.traits, "auto");
     const fireMode = (auto > 0) ? (MGT2.FireModes[userRollData.fireMode] ?? {}) : {};
     const attacks = fireMode.attacks ? auto : 1;
@@ -1746,9 +1553,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const rounds = fireMode.rounds ? fireMode.rounds * auto : 0;
 
     // Core folio 77 counts shots against the magazine, so an ordinary attack spends one round and
-    // folio 79's two Auto modes spend what they are priced at — once for the whole salvo, since full
-    // auto is one pull of the trigger however many attacks it makes. A mode the magazine cannot pay
-    // for is refused: the books print no partial burst, and a spare magazine reloads in full.
+    // folio 79's two Auto modes spend what they are priced at — once for the whole salvo, since
+    // full auto is one pull of the trigger however many attacks it makes.
     const magazine = TravellerActorSheet.#magazine(rollOptions.weapon);
     const spend = magazine ? Math.max(1, rounds) : 0;
     if (magazine && (spend > magazine.ammo)) {
@@ -1773,13 +1579,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       const { effect, opposed } = scored;
       const carriesEffect = itemObj?.type === "weapon";
 
-      // Core p.73: the Effect of the DEX or INT check IS the Initiative, not the total — and *every*
-      // Traveller rolls their own. The check lists no difficulty, so it scores against the assumed
-      // Average 8 like any other.
-      // ActorSheetV2#token is null when the sheet is the base actor's, and every unlinked token shares
-      // its actorId — so getCombatantsByActor would answer for each mook as well. Only the linked
-      // token's combatant belongs to this sheet; a mook is rolled from its own token sheet, where
-      // `token` is set and getCombatantsByActor already routes through the synthetic actor.
+      // Core p.73: the Effect of the DEX or INT check IS the Initiative, not the total — and
+      // *every* Traveller rolls their own.
       if (isInitiative) {
         const combatants = game.combat?.getCombatantsByActor(actor) ?? [];
         const own = token ? combatants : combatants.filter(c => c.token?.actorLink === true);
@@ -1787,29 +1588,26 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       }
 
       // Core folio 75: the Effect is the verdict on the work — any failure costs the round, the
-      // ruin rung costs the task. A sentence and never a write: nothing here holds task progress.
+      // ruin rung costs the task.
       const sustained = MGT2Helper.getIntegerFromInput(userRollData.damageSustained);
       const extendedLine = (sustained > 0)
         ? game.i18n.localize(MGT2.ExtendedAction.outcomes[(effect >= 0) ? "kept"
           : ((effect <= MGT2.ExtendedAction.ruin) ? "ruined" : "lost")])
         : null;
 
-      // Core p.82: first aid restores the Effect of a Medic check, minimum one point. The skill that
-      // was actually rolled is the one the prompt came back with, not the one the row started from.
+      // Core p.82: first aid restores the Effect of a Medic check, minimum one point.
       const rolledSkill = (userRollData.skill && (userRollData.skill !== "NP"))
         ? actor.getEmbeddedDocument("Item", userRollData.skill) : null;
       const firstAidPoints = MGT2Helper.isFirstAidSkill(rolledSkill?.name) ? Math.max(1, effect) : 0;
 
       // Core folio 78: to grapple IS to make an opposed Melee check, so nothing on the prompt
-      // declares one — the skill rolled and the Opposed row together are the declaration. A draw is
-      // a standstill and has no winner (Core p.62), so it offers no menu.
+      // declares one — the skill rolled and the Opposed row together are the declaration.
       const grapple = (opposed && (opposed.outcome !== "tie")
         && MGT2.Grapple.skills.some(name => MGT2Helper.matchesSkill(rolledSkill?.name, name)))
         ? TravellerActorSheet.#grappleWinner(actor, opposed, effect) : null;
 
       // Core folio 229: the power is paid for now, out of the reserve, and the card states what it
-      // cost. The write happens before the card is built so a spend that reached the damage chain
-      // has already been taken when the message lands.
+      // cost.
       const psiLine = rollOptions.blocks.psionic
         ? await TravellerActorSheet.#spendPsi(actor, rollOptions.talent, userRollData, effect)
         : null;
@@ -1825,28 +1623,25 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
           rollObjectName: rollOptions.rollObjectName,
           rollTypeName: rollOptions.rollTypeName,
           // Core p.77: damage is rolled with the attack's Effect added, and a melee attack adds the
-          // attacker's STR DM on top. Both are captured now — the roll happens on another card.
+          // attacker's STR DM on top.
           effect: carriesEffect ? effect : 0,
           strengthDM: (carriesEffect && itemObj.system.range?.isMelee)
             ? actor.system.meleeDamageDM : 0,
           // Core folio 79: a burst adds the Auto score to the damage this attack deals.
           burst,
           // The rest of the pipeline's inputs, carried so that stages 2 to 6 can run later on
-          // whichever actor was hit. Nothing here names a target.
-          // Core p.167: the scale that multiplies is the WEAPON's — a ship's turret is Spacecraft
-          // scale whoever pulls the trigger. Only an item that has no scale falls back to the firer.
+          // whichever actor was hit.
           scale: itemObj?.system.scale ?? actor.system.scale,
           ap: MGT2Helper.traitScore(traits, "ap"),
           loPen: MGT2Helper.traitScore(traits, "lo-pen"),
           stun: MGT2Helper.hasTrait(traits, "stun"),
           // Core folio 79: a Radiation weapon doses whoever it hits, which only the apply path knows.
           radiation: MGT2Helper.hasTrait(traits, "radiation"),
-          // RH folio 106: an ion weapon meets no armour and shuts a robot's brain down. Whether any
-          // of that applies is the target's answer, so the trait travels and resolves there.
+          // RH folio 106: an ion weapon meets no armour and shuts a robot's brain down.
           ion: MGT2Helper.hasTrait(traits, "ion"),
           // Core p.78: most Destructive weapons say so in the score itself, which the card reads.
           destructive: MGT2Helper.hasTrait(traits, "destructive"),
-          // Poison and Diseased become an Item the DEFENDER owns (§9.4), so the parameters travel
+          // Poison and Diseased become an Item the DEFENDER owns, so the parameters travel
           // with the rest of the pipeline's inputs and are built on the apply path.
           hazards: hazardTraits(traits),
           damageType: carriesEffect ? Array.from(itemObj.system.damageType ?? []) : []
@@ -1884,12 +1679,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return posted;
   }
 
-  /**
-   * Who won the grapple and by how much. The comparison lives on this roll's card whichever way it
-   * went, so the winner is either this speaker or the check it was opposed by — and the winner's
-   * Effect is by definition the higher of the two, which is the number folio 78's damage reads.
-   * @returns {{winner: string, effect: number}}
-   */
+  /** Who won the grapple and by how much. @returns {{winner: string, effect: number}} */
   static #grappleWinner(actor, opposed, effect) {
     const winner = (opposed.outcome === "won") ? actor.name
       : (game.messages.get(opposed.message)?.speaker?.alias || opposed.label);
@@ -1897,10 +1687,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   }
 
   /**
-   * What one attack with this weapon is counted against, or null where it counts nothing. Core
-   * folio 77's magazine is a personal weapon's, so a **spacecraft** weapon is excluded: folio 167
-   * holds a turret's twelve missiles and refills all twelve at once, which is a mount-level count
-   * the ship sheet keeps beside the mount rather than on the weapon.
+   * What one attack with this weapon is counted against, or null where it counts nothing.
    * @returns {{ammo: number, magazine: number}|null}
    */
   static #magazine(weapon) {
@@ -1909,17 +1696,13 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     if (!Rules.on("magazines")) return null;
     const system = weapon?.system;
     // The loaded round's magazine, where there is one: a grenade takes a 40-round rifle to 1, so
-    // the capacity the shot is counted against is the round's and not the weapon's (§9.90).
+    // the capacity the shot is counted against is the round's and not the weapon's.
     const magazine = system?.effective?.magazine ?? system?.magazine;
     if (!system || (system.scale === "spacecraft") || !(magazine > 0)) return null;
     return { ammo: system.ammo, magazine };
   }
 
-  /**
-   * What the card says about the fire mode (Core folio 79). The rounds a salvo spends are its
-   * whole cost, so they are stated once and the attacks after the first only number themselves.
-   * @returns {string|null}
-   */
+  /** What the card says about the fire mode (Core folio 79). @returns {string|null} */
   static #fireModeLine({ burst, rounds, attack, attacks }) {
     if (burst > 0) {
       return game.i18n.format("MGT2.Chat.Roll.FireModeBurst",
@@ -1935,13 +1718,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
   /**
    * Core folio 229: "They must also spend the listed number of PSI points if they succeed or one
-   * point if they fail. If this cost brings them below zero PSI, then any excess points are applied
-   * as damage."
-   *
-   * Two readings the folio settles rather than leaves open. **A failure costs one point flat**: the
-   * reach multiplies "the PSI Cost", and one point is not it. And **success is the check's own
-   * Effect**, which is scored against the difficulty or, where the power states none, the assumed
-   * Average every other check in the system falls back to (Core p.61).
+   * point if they fail.
    * @returns {Promise<string|null>}   What the card says about the spend
    */
   static async #spendPsi(actor, talent, data, effect) {
@@ -1953,8 +1730,6 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       spent.damage > 0 ? "MGT2.Chat.Roll.PsiSpentDamage" : "MGT2.Chat.Roll.PsiSpent", spent);
   }
 
-  /* -------------------------------------------- */
-
   /** @this {TravellerActorSheet} */
   static async #onItemCreate(event, target) {
     const data = {
@@ -1965,15 +1740,16 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     if (target.dataset.subtype) {
       data.system = { subType: target.dataset.subtype };
     }
-    // A `component` discriminates on `category` where every other type uses `subType`, and the ship's
-    // Computer block creates one of those (§9.131).
+    // A `component` discriminates on `category` where every other type uses `subType`, and the
+    // ship's Computer block creates one of those.
     if (target.dataset.category) {
       data.system = { ...data.system, category: target.dataset.category };
     }
 
     const item = await getDocumentClass("Item").create(data, { parent: this.actor });
     // A play-mode row offers the eye and not the pencil, so a blank Item created there would be a
-    // dead end: the create carries the whole of the authoring and opens the sheet to take it (§9.143).
+    // dead end: the create carries the whole of the authoring and opens the sheet to take it
+    //.
     if (item && !this.isEditMode) {
       await item.sheet.render({ force: true, mode: this.constructor.MODES.EDIT });
     }
@@ -2076,10 +1852,6 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     return this.setViewState(view);
   }
 
-  /* -------------------------------------------- */
-  /*  Drag and Drop                               */
-  /* -------------------------------------------- */
-
   /** @inheritDoc */
   async _onDrop(event) {
     const dropData = MGT2Helper.getDataFromDropEvent(event);
@@ -2105,13 +1877,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       update.system.traits = Object.values(this.actor.system.traits ?? [])
         .concat(Object.values(sourceItemData.system.traits ?? []));
 
-      // The characteristic modifiers are NOT written. They are derived from the embedded Item in
-      // `CharacterData#prepareCharacteristicAuto`, which is what makes trying a species on and
-      // taking it off again correct by construction: the old write was `base + value` — additive,
-      // non-idempotent, and it survived deleting the species (§9.18).
-      //
-      // One species at a time, so an existing one is replaced rather than stacked: it is a fact of
-      // character generation, not something a Traveller accumulates.
+      // The characteristic modifiers are NOT written.
       const previous = this.actor.items.filter(item => item.type === "species").map(item => item.id);
       if (previous.length) await this.actor.deleteEmbeddedDocuments("Item", previous);
 
@@ -2175,8 +1941,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         }
       }
     } else {
-      // Copy from another collection. A container arrives with what it holds, so the reference
-      // between the copies has to be rewritten as they are made.
+      // Copy from another collection.
       let stored = "";
       if (targetItem !== null) {
         if (targetItem.type === "container") {
@@ -2201,18 +1966,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   }
 }
 
-/* -------------------------------------------- */
-
 /**
  * The NPC sheet — one class for both presets, because `subType` is a preset and not a branch.
- *
- * It extends the Traveller sheet rather than forking it: every action, the roll path, the damage
- * controls and the characteristics column are inherited unchanged, and what differs is which parts
- * render and the statblock the header prints.
- *
- * ApplicationV2 concatenates `classes` up the inheritance chain, so the root also carries
- * `character` and every rule written against that selector applies here as well.
- *
  * @extends {TravellerActorSheet}
  */
 export class NpcActorSheet extends TravellerActorSheet {
@@ -2248,10 +2003,6 @@ export class NpcActorSheet extends TravellerActorSheet {
   /**
    * A creature has no characteristics column at all: its whole pool is Hits and the header prints
    * it, so the part is dropped rather than rendered empty and the grid drops the column with it.
-   *
-   * The parent maps document paths onto the *character* sheet's parts, and this sheet has three of
-   * its own — an unlucky mapping would filter the list down to nothing — so a document-driven
-   * render redraws all of them instead.
    * @inheritDoc
    */
   _configureRenderOptions(options) {
@@ -2308,11 +2059,7 @@ export class NpcActorSheet extends TravellerActorSheet {
     };
   }
 
-  /**
-   * The stored size DM beside the row the Animal Size table would have suggested. The ladder is
-   * advisory — the table says so and the published blocks break it constantly — so this reports
-   * agreement and never writes.
-   */
+  /** The stored size DM beside the row the Animal Size table would have suggested. */
   static #size(system) {
     const band = system.sizeBand;
     const dm = system.sizeDM;
@@ -2336,11 +2083,7 @@ export class NpcActorSheet extends TravellerActorSheet {
     return Object.values(MGT2.SpeedBands)[band] ?? null;
   }
 
-  /**
-   * The pool drawn on the stored wound. The scale is **twice** the maximum, because `damage` can
-   * exceed `max` and that overrun is the Destroyed state (Core p.85) — the four printed thresholds
-   * are then four marks on one bar that only ever fills.
-   */
+  /** The pool drawn on the stored wound. */
   static #track(system) {
     const hits = system.characteristics.hits;
     if ( !(hits.max > 0) || !system.damageChain.includes("hits") ) return null;
@@ -2373,12 +2116,7 @@ export class NpcActorSheet extends TravellerActorSheet {
     }
   }
 
-  /**
-   * Core p.90: 2D against the pattern's own thresholds. The card states what was rolled and which
-   * of the two it reached; a gate is printed beside it and left to the referee, because surprise is
-   * a scene fact the system deliberately does not track.
-   * @this {NpcActorSheet}
-   */
+  /** Core p.90: 2D against the pattern's own thresholds. */
   static async #onReactionRoll() {
     const reaction = this.actor.system.reaction;
     if ( !reaction ) return;

@@ -7,18 +7,12 @@ const fields = foundry.data.fields;
 
 /**
  * Schema and behaviour of the `npc` Actor sub-type — a person and a creature at once.
- *
- * `subType` is a **preset, not a branch**: it sets defaults on create and decides which sheet
- * blocks render. `applyDamage`, `getModifier`, the roll path and the chat card are identical for
- * both, which is the whole argument for one type instead of two.
- *
  * @extends {ActorBaseData}
  */
 export class NpcData extends ActorBaseData {
 
     // Core folio 77: "Damage is initially applied to a target's END", and only the excess reaches
-    // STR or DEX. `initial` only — an existing actor keeps the chain it stored, so `migration.js`
-    // rewrites the ones created while this constant printed the UPP order instead.
+    // STR or DEX.
     static DEFAULT_DAMAGE_ORDER = ["endurance", "strength", "dexterity"];
 
     static DEFAULT_INITIATIVE = "dexterity";
@@ -27,19 +21,13 @@ export class NpcData extends ActorBaseData {
 
     static MENTAL_LINKS = ["intellect", "education"];
 
-    // `MGT2.Actor.npc.FIELDS` fills in `field.label` and `.hint`. A prefix with no `FIELDS`
-    // subtree is a silent no-op — `Object.assign(rules, undefined)` — so the two must move
-    // together. Only `{{formGroup}}` renders those, and no template calls it yet.
+    // `MGT2.Actor.npc.FIELDS` fills in `field.label` and `.hint`.
     static LOCALIZATION_PREFIXES = ["MGT2.Actor.npc"];
 
     /** The six the core rulebook defines, in the order the UPP prints them. */
     static UPP_ORDER = ["strength", "dexterity", "endurance", "intellect", "education", "social"];
 
-    /**
-     * What each preset is. Everything else about the two is the same.
-     * `actorLink` is the other half: a Traveller-shaped NPC is one person and wants its token
-     * linked, a creature is meant to be dropped on a map five at a time.
-     */
+    /** What each preset is. Everything else about the two is the same. */
     static PRESETS = Object.freeze({
         person: {
             show: ["strength", "dexterity", "endurance", "intellect", "education", "social"],
@@ -82,14 +70,13 @@ export class NpcData extends ActorBaseData {
                 psionic: createCharacteristicField(false),
                 other: createCharacteristicField(false),
                 // Core p.85 calls this "the Hits characteristic" in its own words, which is why it
-                // sits in the record rather than beside it: `damageOrder`, `life`, the token bar and
-                // the chain editor then need no special case.
+                // sits in the record rather than beside it: `damageOrder`, `life`, the token bar
+                // and the chain editor then need no special case.
                 hits: createCharacteristicField(false)
             }),
 
             // Core p.84: how far the animal moves with one Minor Action. 6 m is a human's Movement
-            // (p.75). `fly` is a Speed Band and not metres — `Flyer (X)` names "a maximum Speed
-            // Band" (p.85) — and `note` carries the print that quantifies nothing at all.
+            // (p.75).
             speed: new fields.SchemaField({
                 ground: new fields.NumberField({ required: false, nullable: false, min: 0, initial: 6 }),
                 swim: new fields.NumberField({ required: false, nullable: true, min: 0, initial: null }),
@@ -116,9 +103,7 @@ export class NpcData extends ActorBaseData {
                 required: false, blank: true, initial: "", choices: MGT2.ExperienceLevels }),
             combatant: new fields.BooleanField({ required: false, initial: false }),
 
-            // No statblock prints a number appearing. This exists because three rules need a count
-            // and nothing else supplies one: Alarm (p.84), Chaser (p.90) and Ornery (Companion
-            // p.94). A pair rather than a scalar so a herd token's bar can read "7 of 12".
+            // No statblock prints a number appearing.
             group: new fields.SchemaField({
                 count: new fields.SchemaField({
                     value: new fields.NumberField({ required: false, nullable: false, integer: true, min: 0, initial: 1 }),
@@ -131,17 +116,13 @@ export class NpcData extends ActorBaseData {
             })
         });
 
-        // §9.19 keeps the printed identity code here and derives it on `character`: a referee
-        // transcribing an NPC has the code and may never type the six characteristics.
+        // The printed identity code is kept here and derived on `character`: a referee transcribing
+        // an NPC has the code and may never type the six characteristics.
         schema.personal.extendFields({
             ucp: new fields.StringField({ required: false, blank: true, trim: true })
         });
         return schema;
     }
-
-    /* -------------------------------------------- */
-    /*  Accessors                                   */
-    /* -------------------------------------------- */
 
     /** @inheritDoc */
     get traitFamily() {
@@ -150,12 +131,6 @@ export class NpcData extends ActorBaseData {
 
     /**
      * Core p.85, restated p.84: four states off one number, because the wound is what is stored.
-     * A person-preset NPC drains END, STR and DEX and takes the Traveller rule instead — the test
-     * is the chain rather than `subType`, so a referee who moves one onto Hits gets the rule that
-     * goes with the pool.
-     *
-     * Every comparison is behind `max > 0`: a fresh actor has every score at 0, and `damage >= max`
-     * would otherwise read `0 >= 0` and call it dead on creation.
      * @inheritDoc
      */
     damageStatesFor(characteristics) {
@@ -170,12 +145,7 @@ export class NpcData extends ActorBaseData {
         };
     }
 
-    /**
-     * The creature ladder names four rungs and the dialog states all of them. A person-preset NPC
-     * falls through to the two Traveller states, and so does a creature with no Hits — the roster is
-     * intersected with what the rule actually produced.
-     * @inheritDoc
-     */
+    /** The creature ladder names four rungs and the dialog states all of them. @inheritDoc */
     get damageStateLabels() {
         return (this.subType === "creature")
             ? {
@@ -207,18 +177,14 @@ export class NpcData extends ActorBaseData {
 
     /**
      * The size DM the creature carries, attacker-side: "all ranged attacks made against the animal
-     * gain a DM equal to the score" (Core p.85). Not a defence, and it does not touch melee.
+     * gain a DM equal to the score" (Core p.85).
      */
     get sizeDM() {
         return MGT2Helper.traitScore(this.traits, "large")
             - Math.abs(MGT2Helper.traitScore(this.traits, "small"));
     }
 
-    /**
-     * The Animal Size row the stored Hits fall in (Core p.89). **Advisory only** — the table itself
-     * says "a referee need not be bound by the suggestions here", and the published blocks break it
-     * constantly. Offered beside the stored size trait; never computed with.
-     */
+    /** The Animal Size row the stored Hits fall in (Core p.89). */
     get sizeBand() {
         const hits = this.characteristics.hits.max;
         if (!(hits > 0)) return null;
@@ -233,23 +199,16 @@ export class NpcData extends ActorBaseData {
         return MGT2.Experience[key] ?? null;
     }
 
-    /* -------------------------------------------- */
-    /*  Data Preparation                            */
-    /* -------------------------------------------- */
-
     /** @inheritDoc */
     prepareDerivedData() {
         super.prepareDerivedData();
 
         // Core p.85: Fast Metabolism (+X) "gains a DM to Initiative rolls equal to the figure
-        // shown", and its mirror the other way. Provisional, as `Armour (+X)` is: phase 7 turns
-        // both into `final`-phase Active Effects.
+        // shown", and its mirror the other way.
         this.initiative += MGT2Helper.traitScore(this.traits, "fast-metabolism")
             - Math.abs(MGT2Helper.traitScore(this.traits, "slow-metabolism"));
 
-        // Fight or Flight (Core p.90), keyed on the pattern alone. A `gate` is a scene fact the
-        // referee resolves — surprise is deliberately not tracked — and `altAttack` is the
-        // threshold once it holds.
+        // Fight or Flight (Core p.90), keyed on the pattern alone.
         this.reaction = MGT2.Reactions[this.behaviour.pattern] ?? null;
 
         this.inventory = { armor: 0, weight: 0, encumbrance: { normal: 0, heavy: 0 } };
@@ -260,21 +219,13 @@ export class NpcData extends ActorBaseData {
 
         this.states.incapacitated = this.stunIncapacitated;
 
-        // Stored on this type and derived on `character` (§9.19): a referee transcribing an NPC has
-        // a printed code and may never type the six characteristics. The derivation is the fallback,
-        // not the authority.
+        // Stored on this type and derived on `character`: a referee transcribing an NPC has
+        // a printed code and may never type the six characteristics.
         this.upp = this.personal.ucp?.trim()
             || NpcData.UPP_ORDER.map(key => MGT2Helper.uppDigit(this.characteristics[key].max)).join("");
     }
 
-    /* -------------------------------------------- */
-    /*  Document Lifecycle                          */
-    /* -------------------------------------------- */
-
-    /**
-     * The preset's own fields, as an update payload. Applied on create and again whenever the
-     * preset itself is changed, which is the only way a referee reaches the other one.
-     */
+    /** The preset's own fields, as an update payload. */
     presetSource(subType) {
         const preset = NpcData.PRESETS[subType] ?? NpcData.PRESETS.person;
         const characteristics = {};
@@ -298,11 +249,7 @@ export class NpcData extends ActorBaseData {
         });
     }
 
-    /**
-     * Switching the preset re-applies it in the same update. Without this the dropdown would change
-     * a label and nothing else, since `_preCreate` is the only other place the defaults are written.
-     * @inheritDoc
-     */
+    /** Switching the preset re-applies it in the same update. @inheritDoc */
     async _preUpdate(changes, options, user) {
         const subType = changes.system?.subType;
         if (!subType || (subType === this.subType)) return;

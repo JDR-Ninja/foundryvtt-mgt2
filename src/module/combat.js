@@ -5,44 +5,28 @@ import { MGT2Helper } from "./helper.js";
 const fields = foundry.data.fields;
 
 // A sub-type a SYSTEM declares is not namespaced: `Document.TYPES` reports ["base", "space"], so
-// these are the strings `system.json` and `CONFIG.<Doc>.dataModels` both key on. Keying them
-// namespaced attaches no model and fails silently — right type, empty `system`, no error.
+// these are the strings `system.json` and `CONFIG.<Doc>.dataModels` both key on.
 export const SPACE = "space";
 export const SHIP = "ship";
 
 /** The seven bands closest first, which is the order Core folio 165 prints and a step walks. */
 const BANDS = Object.freeze(Object.keys(MGT2.ShipRangeBands));
 
-/**
- * The three steps a round is actually resolved in (Core folio 164). `MGT2.CombatSteps` carries a
- * fourth key, `reaction`, so a station action can say it IS one — the Core resolves reactions when
- * they are provoked and HG folio 95 calls them an informal fourth phase. Nothing that walks the
- * round may walk that key, which is why it is filtered out here rather than at every reader.
- */
+/** The three steps a round is actually resolved in (Core folio 164). */
 export const STEPS = Object.freeze(Object.keys(MGT2.CombatSteps).filter(key => key !== "reaction"));
 
 const ID = /^[a-zA-Z0-9]{16}$/;
 
 /**
- * A range band belongs to a PAIR of ships, and the map is keyed by the two CombatantGroup ids sorted
- * ascending and joined with a pipe. That ordering is the whole guarantee: `TypedObjectField` drops
- * any key this refuses, so "b|a" can never be written beside "a|b".
+ * A range band belongs to a PAIR of ships, and the map is keyed by the two CombatantGroup ids
+ * sorted ascending and joined with a pipe.
  */
 export function validPairKey(key) {
     const [a, b] = String(key).split("|");
     return ID.test(a ?? "") && ID.test(b ?? "") && (a < b);
 }
 
-/* -------------------------------------------- */
-
-/**
- * A space combat encounter. Core folio 164 resolves a round in three named steps rather than in
- * initiative-order turns, and every ship takes a step before any ship takes the next — which is why
- * `step` is a property of the Combat and not of a turn.
- *
- * `round` is deliberately NOT declared: `Combat#round` is already core's and the tracker drives it,
- * so a second counter here would only drift away from it.
- */
+/** A space combat encounter. */
 export class SpaceCombatData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         return {
@@ -51,15 +35,12 @@ export class SpaceCombatData extends foundry.abstract.TypeDataModel {
             step: new fields.StringField({
                 required: true, blank: false, initial: "manoeuvre", choices: STEPS }),
             // The band is a property of a pair, which no Actor and no Item can hold — the argument
-            // for the sub-type. The band is STORED and the kilometres derive from it, never the
-            // other way round: MGT2 resolves on bands throughout (Core folio 165).
+            // for the sub-type.
             bands: new fields.TypedObjectField(new fields.StringField({
                 required: true, blank: false, choices: MGT2.ShipRangeBands
             }), { validateKey: validPairKey })
         };
     }
-
-    /* -------------------------------------------- */
 
     /** The canonical key for a pair, whichever order the caller names the two groups in. */
     static pairKey(a, b) {
@@ -94,8 +75,6 @@ export class SpaceCombatData extends foundry.abstract.TypeDataModel {
         return BANDS[here + Math.sign(there - here)];
     }
 
-    /* -------------------------------------------- */
-
     /** Every ship in the fight. A ship is a group, because several people act at its initiative. */
     get shipGroups() {
         return this.parent.groups.filter(group => group.type === SHIP);
@@ -120,11 +99,7 @@ export class SpaceCombatData extends foundry.abstract.TypeDataModel {
         return this.parent.update({ system: { bands: { [key]: value } } });
     }
 
-    /**
-     * Drop every pair a group was half of — what a ship leaving the fight takes with it. The map is
-     * read back off the DOCUMENT rather than off `this`: a caller holding a model from before a
-     * `setBand` would sweep the keys as they were then and leave the new ones orphaned.
-     */
+    /** Drop every pair a group was half of — what a ship leaving the fight takes with it. */
     async clearGroup(group) {
         const id = group?.id ?? group;
         const bands = {};
@@ -136,17 +111,7 @@ export class SpaceCombatData extends foundry.abstract.TypeDataModel {
     }
 }
 
-/* -------------------------------------------- */
-
-/**
- * One ship in the fight: "one ship, several crew acting at its initiative". v14 already gives that
- * behaviour away — `Combatant#_prepareGroup` overwrites a member's initiative with the group's — so
- * the ship's number is rolled here and every crew member reads it back.
- *
- * The readings below are getters and not derived data on purpose: `CombatantGroup#members` is filled
- * by the Combatants as they prepare, which happens after the group has, so anything computed in
- * `prepareDerivedData` would be computed against an empty set.
- */
+/** One ship in the fight: "one ship, several crew acting at its initiative". */
 export class ShipGroupData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         return {
@@ -162,11 +127,11 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
                     movement: new fields.BooleanField({ required: false, initial: false })
                 }), { initial: [] }),
                 // Core folio 166: "A ship can spend Thrust over multiple rounds to close or open a
-                // category", so this is a running total carried between rounds and not an allocation.
+                // category", so this is a running total carried between rounds and not an
+                // allocation.
                 banked: new fields.NumberField({
                     required: true, nullable: false, integer: true, min: 0, initial: 0 }),
-                // What the bank is being spent on. The cost of a change is the Thrust of the band
-                // being LEFT, which is a property of the pair — hence the other group, not just a band.
+                // What the bank is being spent on.
                 target: new fields.SchemaField({
                     group: new fields.DocumentIdField({
                         required: false, nullable: true, initial: null, readonly: false }),
@@ -179,19 +144,13 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
             resolved: new fields.SetField(new fields.StringField({
                 required: true, blank: false, choices: STEPS }), { required: false, initial: [] }),
             // Core folio 165: one Tactics (naval) check by the commander of a ship or of a whole
-            // fleet, its Effect added to Initiative. It belongs to no ship, so it is entered here
-            // rather than derived from anything below it.
+            // fleet, its Effect added to Initiative.
             tacticsEffect: new fields.NumberField({
                 required: true, nullable: false, integer: true, initial: 0 })
         };
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * The Combatants in this group. Read off `_source.group` rather than off `members`, so the
-     * answer does not depend on whether the group prepared before or after its members.
-     */
+    /** The Combatants in this group. */
     get combatants() {
         const id = this.parent.id;
         return this.parent.parent.combatants.filter(combatant => combatant._source.group === id);
@@ -202,13 +161,9 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
         return this.combatants.find(combatant => combatant.actor?.type === "spacecraft")?.actor ?? null;
     }
 
-    /**
-     * The crew, in the ship's own roster order. `Combat#combatants` is ordered by nothing in
-     * particular, so the order is imposed here rather than left to whoever reads it.
-     */
+    /** The crew, in the ship's own roster order. */
     get crew() {
-        // `station` IS the roster index, so it is the order. It used to be looked up by `role` Item
-        // id, which put two gunners sharing one Gunner role at the same position (§9.98).
+        // `station` IS the roster index, so it is the order.
         const at = combatant => combatant.system.station ?? Number.MAX_SAFE_INTEGER;
         return this.combatants.filter(combatant => combatant.type === CREW)
             .sort((a, b) => at(a) - at(b));
@@ -221,7 +176,7 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
 
     /**
      * Core folio 164 closes pilot and captain to one holder each and binds the two gunner duties to
-     * a named mount. Warned, never blocked — a roster half filled in is as common as a mistake.
+     * a named mount.
      */
     get dutyIssues() {
         const held = new Set();
@@ -240,13 +195,7 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
         return { duplicated, unmounted, any: (duplicated.length > 0) || (unmounted.length > 0) };
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * Core folio 165: 2D + the PILOT's Pilot skill + the ship's Thrust score. Whoever is on pilot
-     * duty this encounter is the pilot, so their own level wins over the ship's standing pilot
-     * station; the ship's figure is what answers when nobody has taken the duty yet.
-     */
+    /** Core folio 165: 2D + the PILOT's Pilot skill + the ship's Thrust score. */
     get pilotSkill() {
         const pilot = this.crewOn("pilot")?.actor;
         if ( !pilot ) return this.ship?.system.pilotSkill ?? 0;
@@ -255,28 +204,17 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
         return skill?.system.level ?? 0;
     }
 
-    /**
-     * Core folio 165, plus the commander's Tactics (naval) Effect. The two numbers are baked into
-     * the formula rather than left as `@initiative`: the roll may be made from a crew member's own
-     * Combatant, and their roll data would answer with a Traveller's Initiative instead.
-     *
-     * The Effect is scoped to the ship because folio 165 scopes it there — "the Effect of this check
-     * is added to the Initiative of the spacecraft (or fleet)". Folio 73's personal check reaches
-     * "everyone on the same side" instead, so the personal half stores it against a `side` rather
-     * than against a group (§9.30). One rule, two scopes, and both fold in as a named term.
-     */
+    /** Core folio 165, plus the commander's Tactics (naval) Effect. */
     get initiativeFormula() {
         const thrust = this.ship?.system.drives.effectiveThrust ?? 0;
         const parts = ["2d6"];
         // `SpacecraftData#initiative` is not read here — this pilot is whoever took the duty, not
-        // the ship's standing one — so the standing DM is summed in rather than inherited (§9.94).
+        // the ship's standing one — so the standing DM is summed in rather than inherited.
         const base = this.pilotSkill + thrust + (this.ship?.system.modifiers.initiative.dm ?? 0);
         if ( base ) parts.push(MGT2Helper.term(base));
         if ( this.tacticsEffect ) parts.push(MGT2Helper.term(this.tacticsEffect));
         return parts.join(" ");
     }
-
-    /* -------------------------------------------- */
 
     /** Thrust the drive can put out this round, criticals folded in (Core folio 165). */
     get available() {
@@ -319,9 +257,7 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
 
     /**
      * Core folio 166: two ships closing on each other add the Thrust each puts into movement; one
-     * running from the other subtracts the lower from the higher. Which of the two it is falls out
-     * of where each says it is going, and the two only interact when both have named the other —
-     * a ship that has not declared it is manoeuvring against this one contributes nothing.
+     * running from the other subtracts the lower from the higher.
      */
     get closingRate() {
         const other = this.opponent?.system;
@@ -334,12 +270,7 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
         return together ? (this.movement + other.movement) : (this.movement - other.movement);
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * Roll the ship's Initiative. Written on the GROUP, which is what makes it the whole crew's:
-     * every member reads it back through `Combatant#_prepareGroup`.
-     */
+    /** Roll the ship's Initiative. */
     async rollInitiative() {
         if ( this.parent.type !== SHIP ) return this.parent;
         const roll = await foundry.dice.Roll.create(this.initiativeFormula).evaluate();
@@ -348,9 +279,6 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
 
     /**
      * What this round's manoeuvre comes to, read while every ship still holds what it allocated.
-     * Core folio 166 lets Thrust accumulate across rounds to pay for a band change one round cannot
-     * afford, so what this round bought is added to the bank; once the bank covers the cost the pair
-     * moves one band and the remainder carries into the next change.
      */
     get movementPlan() {
         const rate = this.closingRate;
@@ -369,10 +297,7 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
     }
 
     /**
-     * End of round for one ship. The plan is passed IN rather than read here, because both halves of
-     * folio 166's closing arithmetic are properties of a PAIR: `closingRate` reads the other ship's
-     * allocation and this method clears its own, so a ship settled first contributed nothing to the
-     * second's rate. Measured before the fix: two ships closing at 4 Thrust each banked 8 and 4.
+     * End of round for one ship.
      * @param {object} [plan]   `movementPlan`, taken before any ship was written
      */
     async endRound(plan) {
@@ -397,11 +322,7 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
     }
 }
 
-/* -------------------------------------------- */
-
-/**
- * @extends {CombatantGroup}
- */
+/** @extends {CombatantGroup} */
 export class MGT2CombatantGroup extends CombatantGroup {
 
     async rollInitiative() {
@@ -409,23 +330,14 @@ export class MGT2CombatantGroup extends CombatantGroup {
     }
 }
 
-/* -------------------------------------------- */
-
-/**
- * @extends {Combat}
- */
+/** @extends {Combat} */
 export class MGT2Combat extends Combat {
 
     /**
      * Put a ship in the fight: one CombatantGroup for the ship, one plain Combatant carrying the
      * spacecraft Actor — which is what lets the group read the ship's Thrust and pilot — and one
-     * `crew` Combatant per row of `spacecraft.system.crew[]`. The roster is referenced, never moved.
-     *
-     * `band` places the contact, because a contact has to arrive somewhere and the band IS the
-     * state. With no `relativeTo` it arrives at that band from every ship already in the fight,
-     * which is the only reading one number supports.
+     * `crew` Combatant per row of `spacecraft.system.crew[]`.
      * @param {Actor} actor                        A `spacecraft`
-     * @param {object} [options]
      * @param {string} [options.band]              A key of `MGT2.ShipRangeBands`
      * @param {CombatantGroup} [options.relativeTo]  The contact the band is measured against
      * @returns {Promise<CombatantGroup|null>}
@@ -445,10 +357,6 @@ export class MGT2Combat extends Combat {
             // Core folio 164 calls anyone aboard without a duty a Passenger, which is the schema's
             // initial value — the book has the referee assign duties as the battle begins, so
             // guessing one off the station's name would be inventing an answer.
-            //
-            // `dutyTarget` is deliberately NOT seeded from the roster: blank means "whatever mount
-            // the station is at", which keeps reading the ship sheet, and a value means the gunner
-            // moved this encounter. Seeding it made every join a snapshot (§9.98).
             combatants.push({
                 type: CREW,
                 group: group.id,
@@ -467,12 +375,7 @@ export class MGT2Combat extends Combat {
         return group;
     }
 
-    /**
-     * Take a ship out of the fight. The band map is keyed by pairs, so a group leaving takes every
-     * pair it was half of with it — nothing else would ever clear those keys.
-     * @param {CombatantGroup} group
-     * @returns {Promise<Combat|null>}
-     */
+    /** Take a ship out of the fight. @returns {Promise<Combat|null>} */
     async removeShip(group) {
         if ( (group?.type !== SHIP) || (group.parent !== this) ) return null;
         await this.system.clearGroup(group);
@@ -483,14 +386,15 @@ export class MGT2Combat extends Combat {
 
     /**
      * Core folio 164: the round ends with the Actions Step and the next one opens on the Manoeuvre
-     * Step, so the step resets and everything a round caps is released — one action per crew member,
-     * the reactions each has used, and the Thrust the pilot allocated, which banks on its way out.
+     * Step, so the step resets and everything a round caps is released — one action per crew
+     * member, the reactions each has used, and the Thrust the pilot allocated, which banks on its
+     * way out.
      * @inheritDoc
      */
     async _onEndRound(context) {
         await super._onEndRound(context);
         // A second engine on the same document family ends its own round: HG folio 115's fleet
-        // sub-type carries `endRound` on its Combat model, and `space` on each ship group (§9.100 C).
+        // sub-type carries `endRound` on its Combat model, and `space` on each ship group.
         if ( this.type !== SPACE ) return this.system?.endRound?.();
         // Every reading is taken BEFORE any ship is written, and one pair changes band once: folio
         // 166 adds two closing ships' movement together, so both ledgers have to pay the same cost

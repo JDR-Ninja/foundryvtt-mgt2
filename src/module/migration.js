@@ -2,26 +2,8 @@ import { MGT2Helper } from "./helper.js";
 import { seedRules } from "./rules.js";
 
 /**
- * World migrations.
- *
- * Shape changes inside `system` are handled by `DataModel.migrateData`, which runs on every read
- * and writes nothing — old worlds simply load correctly. This module exists for the second half:
- * persisting those shims so they can eventually be dropped, and carrying the changes migrateData
- * cannot express (a document's `type`, or anything outside `system`).
- *
- * Each entry runs once, in order, for worlds coming from a version older than its own — so an entry's
- * version must be one `system.json` actually reaches, or `migrateWorld` re-runs it on every load.
- *
- * **0.2.0 is unreleased, so its entry is still open and gains work rather than getting a successor.**
- * The cost is that a local world already stamped `0.2.0` does not see what was added afterwards: to
- * replay it, clear the setting — `game.settings.set("mgt2", "migrationVersion", "")` — and reload.
- * That is safe here because every step below re-runs to a no-op on a world it has already touched.
- */
-
-/**
  * The `npc` person preset shipped the damage chain in UPP order; Core folio 77 applies damage to
- * END first. Both are spelled out here rather than read off `NpcData`: a migration records what it
- * did on one release and must not follow a constant a later one changes again.
+ * END first.
  */
 const NPC_CHAIN_STALE = ["strength", "dexterity", "endurance"];
 const NPC_CHAIN_FIXED = ["endurance", "strength", "dexterity"];
@@ -59,17 +41,9 @@ const MIGRATIONS = [
   }
 ];
 
-/* -------------------------------------------- */
-
 /**
- * How many actors come out of this with a different `life.max` (§9.1) — the number the completion
+ * How many actors come out of this with a different `life.max` — the number the completion
  * notice reports, because `life` is `primaryTokenAttribute` and every one of those tokens rescales.
- *
- * The comparison is possible at all because the two definitions live in two places: 0.1.x wrote
- * STR+DEX+END into the document on every update, and nothing writes `system.life` any more, so the
- * stored number is still the old reading while `actor.system.life` is the new sum over
- * `damageOrder`. A stored zero is an actor that write never ran for — it has no previous reading to
- * have moved — and `world` and `stash` carry no chain at all.
  * @returns {number}
  */
 function countRescaledLife() {
@@ -82,17 +56,8 @@ function countRescaledLife() {
   return count;
 }
 
-/* -------------------------------------------- */
-
 /**
- * Take the species bonus back out of `base` and put the species Item on the actor instead (§9.18).
- *
- * **Every subtraction is logged, and that is not caution — it is the only check there can be.** The
- * write being unwound was `base + value`: additive, non-idempotent, and nothing in the data
- * distinguishes one drop from two, so a Traveller who took the same species twice comes out of this
- * still carrying one copy of the bonus and no code can tell. A world whose species Item is gone gets
- * a line naming the actor and is left alone, because guessing is worse than not moving.
- * @param {Actor} actor
+ * Take the species bonus back out of `base` and put the species Item on the actor instead.
  */
 async function unwindSpecies(actor) {
   const name = actor._source.system?.personal?.species?.trim();
@@ -125,16 +90,7 @@ async function unwindSpecies(actor) {
   await actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(species)]);
 }
 
-/* -------------------------------------------- */
-
-/**
- * Drop the fields the 0.2.0 schema no longer declares. `migrateData` has already produced the new
- * shape in memory, so writing the document back is enough to persist it; the `ForcedDeletion`
- * operators remove what would otherwise linger in the source forever. That operator is v14's
- * replacement for the `-=key: null` syntax, which warns since 14 and is removed in 16.
- * @param {Actor} actor
- * @returns {object|null}
- */
+/** Drop the fields the 0.2.0 schema no longer declares. @returns {object|null} */
 function collectActorUpdate(actor) {
   const source = actor._source.system;
   if ( !source ) return null;
@@ -147,8 +103,7 @@ function collectActorUpdate(actor) {
     dirty = true;
   }
   // Only the exact stale triple, order included: nothing records who wrote a chain, so a reordered,
-  // shortened or `hits`-based one is a decision and is left alone. The one case this cannot tell
-  // apart — a referee who chose the buggy order — loses only the order, no wound and no link.
+  // shortened or `hits`-based one is a decision and is left alone.
   if ( (actor.type === "npc") && isChain(source.config?.damageOrder, NPC_CHAIN_STALE) ) {
     update["system.config.damageOrder"] = [...NPC_CHAIN_FIXED];
     dirty = true;
@@ -163,16 +118,13 @@ function collectActorUpdate(actor) {
     update["system.states.encumbrance"] = new foundry.data.operators.ForcedDeletion();
     dirty = true;
   }
-  // `crew[].duty` moved onto the `crew` Combatant, where it clears with the encounter (§9.26). It
-  // carries nothing: there is no combat to carry it into, and the field never shipped outside 0.2.0.
-  // Writing the prepared array back is the removal — an ArrayField update replaces, never merges.
+  // `crew[].duty` moved onto the `crew` Combatant, where it clears with the encounter.
   if ( (actor.type === "spacecraft") && source.crew?.some(row => "duty" in row) ) {
     update["system.crew"] = actor.system.crew.map(row => ({ ...row }));
     dirty = true;
   }
   // The UPP is the six canonical maxima and derives; a typed one beside them was a second source of
-  // truth for one fact (§9.19). Logged rather than dropped silently: a world may have typed a
-  // species profile the six characteristics do not reproduce.
+  // truth for one fact.
   if ( source.personal && ("ucp" in source.personal) && (actor.type === "character") ) {
     if ( source.personal.ucp ) {
       // eslint-disable-next-line no-console
@@ -182,18 +134,14 @@ function collectActorUpdate(actor) {
     update["system.personal.ucp"] = new foundry.data.operators.ForcedDeletion();
     dirty = true;
   }
-  // `study.{skill, total, completed}` became one keyed `training` programme (§9.133). `CharacterData`
-  // has already produced it in `_source`, so persisting is a write of what the shim built — and once
-  // `study` is gone the test fails and the step is a no-op.
+  // `study.{skill, total, completed}` became one keyed `training` programme.
   if ( (actor.type === "character") && source.study ) {
     update["system.training"] = foundry.utils.deepClone(source.training ?? { programmes: {} });
     update["system.study"] = new foundry.data.operators.ForcedDeletion();
     dirty = true;
   }
   // A world imported from the `mgt2-data` module carried its geometry in that module's flag
-  // namespace, where the system could not read it; §9.142 put the two typed halves in the schema.
-  // The flags are LEFT IN PLACE — the module's Scene generator still places its pins off them — so
-  // this lifts rather than moves, and it never overwrites a sector or hex somebody typed.
+  // namespace, where the system could not read it; the two typed halves are in the schema now.
   if ( actor.type === "world" ) {
     const flags = actor._source.flags?.["mgt2-data"] ?? {};
     for ( const key of ["sector", "hex"] ) {
@@ -220,12 +168,7 @@ function isChain(stored, chain) {
   return Array.isArray(stored) && (stored.length === chain.length) && stored.every((key, i) => key === chain[i]);
 }
 
-/* -------------------------------------------- */
-
-/**
- * @param {Item} item
- * @returns {object|null}
- */
+/** @returns {object|null} */
 function collectItemUpdate(item) {
   const source = item._source.system;
   if ( !source ) return null;
@@ -246,8 +189,7 @@ function collectItemUpdate(item) {
     dirty = true;
   }
   // A station's construction position used to be read off the Item's NAME, which is user text in
-  // whatever language the world runs in. Stamping the derived key makes it explicit, so renaming
-  // the station later cannot silently cost a ship its pilot's Pilot skill.
+  // whatever language the world runs in.
   if ( (item.type === "role") && !source.crewRole && item.system.crewRoleKey ) {
     update["system.crewRole"] = item.system.crewRoleKey;
     dirty = true;
@@ -257,15 +199,16 @@ function collectItemUpdate(item) {
     update["system.overload"] = new foundry.data.operators.ForcedDeletion();
     dirty = true;
   }
-  // `MGT2.Durations` had a French key name in the English dictionary, and `durationUnit` stores that
-  // key rather than a label — so the typo was persisted on every psionic talent that names hours.
+  // `MGT2.Durations` had a French key name in the English dictionary, and `durationUnit` stores
+  // that key rather than a label — so the typo was persisted on every psionic talent that names
+  // hours.
   if ( source.psionic?.durationUnit === "Heures" ) {
     update["system.psionic.durationUnit"] = "Hours";
     dirty = true;
   }
   // `damage` and `interval` were `DiseaseData`'s, copied onto `CareerData` and never given a career
-  // meaning: no control wrote them, no code read them, and every career Item carried the pair blank.
-  // `difficulty` stays — it is the qualification target and is not the same field as the disease's.
+  // meaning: no control wrote them, no code read them, and every career Item carried the pair
+  // blank.
   if ( item.type === "career" ) {
     for ( const key of ["damage", "interval"] ) {
       if ( key in source ) {
@@ -278,12 +221,7 @@ function collectItemUpdate(item) {
   return dirty ? update : null;
 }
 
-/* -------------------------------------------- */
-
-/**
- * Run any migration the world has not seen yet. GM only — everyone else would race for the same
- * writes. Safe to call on every load: it is a no-op once the recorded version is current.
- */
+/** Run any migration the world has not seen yet. */
 export async function migrateWorld() {
   if ( !game.user.isGM ) return;
 
@@ -307,7 +245,6 @@ export async function migrateWorld() {
     let count = 0;
     for ( const migration of pending ) {
       // Worth a log line: this rewrites documents once, and a GM chasing a problem needs the trace.
-      // eslint-disable-next-line no-console
       console.log(`mgt2 | migrating world to ${migration.version}: ${migration.label}`);
       count += (await migration.migrate()) ?? 0;
     }

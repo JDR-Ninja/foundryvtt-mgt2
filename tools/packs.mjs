@@ -6,12 +6,16 @@
  *
  *   node tools/packs.mjs compile  [name...] [--out DIR]  _source JSON  ->  LevelDB
  *   node tools/packs.mjs extract  [name...]              LevelDB       ->  _source JSON
- *   node tools/packs.mjs validate [name...]              every source document through its data model
  *   node tools/packs.mjs list     [name...]              what each compiled pack holds
  *   node tools/packs.mjs clean    [name...]              delete the compiled databases
  *
  * `compile` is what a bare clone, the CI and the release run: it needs nothing but this repository.
  * `packs/_source/` is committed and the compiled databases beside it are not — see `.gitignore`.
+ *
+ * **Nothing here validates a document against its data model, and that is deliberate** (§9.145).
+ * Doing so needs Foundry's `common/` on disk, which is outside every repository, so it belongs to
+ * whatever writes `packs/_source/` rather than to what reads it back: a document that fails its
+ * schema should never reach a committed, reviewable source file in the first place.
  *
  * A source file may hold one document or an array of them, and every `.json` under a pack's source
  * directory is read, so a generator can split its content however suits it.
@@ -30,7 +34,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE_DIR = path.join(ROOT, "packs", "_source");
 
 const argv = process.argv.slice(2);
-const flags = { force: argv.includes("--force"), out: readOption("--out") };
+const flags = { out: readOption("--out") };
 const names = argv.filter(argument => !argument.startsWith("--") && argument !== flags.out);
 const command = names.shift() ?? "";
 const packsDir = flags.out ? path.resolve(flags.out) : path.join(ROOT, "packs");
@@ -41,21 +45,15 @@ const selected = names.length ? names.map(name => {
 }) : PACKS;
 
 switch ( command ) {
-    case "compile": {
+    case "compile":
         checkManifest();
-        const failures = await validateAll();
-        if ( failures && !flags.force ) {
-            fail(`${failures} invalid documents — nothing compiled.`, "Re-run with --force to ignore.");
-        }
         await compileAll();
         break;
-    }
     case "extract": await extractAll(); break;
-    case "validate": process.exit((await validateAll()) ? 1 : 0); break;
     case "list": checkManifest(); await list(); break;
     case "clean": clean(); break;
     default:
-        console.error("Usage: node tools/packs.mjs compile|extract|validate|list|clean [pack...] [--out DIR]");
+        console.error("Usage: node tools/packs.mjs compile|extract|list|clean [pack...] [--out DIR]");
         process.exit(1);
 }
 
@@ -86,68 +84,6 @@ function checkManifest() {
 
     if ( problems.length ) {
         fail("system.json and tools/packs.config.mjs disagree:", ...problems.map(problem => `  ${problem}`));
-    }
-}
-
-/* -------------------------------------------- */
-/*  Validating                                  */
-/* -------------------------------------------- */
-
-/**
- * Run every source document's `system` object through the system's real data model. Foundry reports a
- * bad one only as a console line at load, so the check happens here where it can name the file.
- *
- * It needs Foundry's `common/` on disk and is therefore a workspace convenience, not a build step: a
- * bare clone says so and carries on, exactly as the CI does.
- * @returns {Promise<number>}   How many documents failed.
- */
-async function validateAll() {
-    const packs = selected.filter(pack => ["Actor", "Item"].includes(pack.type));
-    if ( !packs.length ) {
-        console.log("  nothing to validate — no Actor or Item pack in the roster");
-        return 0;
-    }
-
-    let validate;
-    try {
-        ({ validate } = await import("./lib/system.mjs"));
-    } catch ( error ) {
-        console.warn(`  validation skipped — the data models could not be loaded: ${error.message}`);
-        return 0;
-    }
-
-    let failures = 0;
-    for ( const pack of packs ) {
-        const dir = path.join(SOURCE_DIR, pack.name);
-        if ( !fs.existsSync(dir) ) continue;
-
-        const reported = new Set();
-        let checked = 0;
-        for ( const file of walk(dir) ) {
-            for ( const document of readFile(file) ) {
-                if ( document._documentName === "Folder" ) continue;
-                for ( const [name, documentName, type, source] of documentsOf(pack, document) ) {
-                    checked++;
-                    const result = validate(documentName, type, source);
-                    if ( result.ok ) continue;
-                    failures++;
-                    const line = `${type}: ${result.error.split("\n").slice(0, 3).join(" | ")}`;
-                    if ( reported.has(line) ) continue;
-                    reported.add(line);
-                    console.error(`  ✗ ${pack.name}/${path.basename(file)} — ${name}\n      ${line}`);
-                }
-            }
-        }
-        if ( checked ) console.log(`  ${pack.name.padEnd(14)} — ${checked} documents checked`);
-    }
-    return failures;
-}
-
-/** A document and each embedded Item it carries, as `[name, documentName, type, system]`. */
-function* documentsOf(pack, document) {
-    yield [document.name, pack.type, document.type, document.system ?? {}];
-    for ( const embedded of document.items ?? [] ) {
-        yield [`${document.name} › ${embedded.name}`, "Item", embedded.type, embedded.system ?? {}];
     }
 }
 

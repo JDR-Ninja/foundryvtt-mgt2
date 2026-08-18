@@ -9,62 +9,42 @@ const fields = foundry.data.fields;
 /** The body this message renders. `content` is only the fallback a world that lost the sub-type sees. */
 const CARD = "systems/mgt2/templates/chat/request.html";
 
-/**
- * The second ChatMessage sub-type, beside `check` in `chat-message.js` (`ROLL-REQUEST.md` §8). Same
- * registration rule and the same trap: a system's sub-types are NOT namespaced, so `ChatMessage.TYPES`
- * reports `["base", "check", "request"]` and this literal is what `CONFIG.ChatMessage.dataModels` is
- * keyed by. Key it wrong and the document is created with the right type and an empty `system`,
- * silently.
- */
+/** The second ChatMessage sub-type, beside `check` in `chat-message.js`. */
 export const REQUEST = "request";
 
-/**
- * How the demand names a skill. `none` is Core p.58's characteristic-only check and renders as
- * "No skill — characteristic check", never as a blank; `open` leaves the skill to the answering
- * client. Not a CONFIG table: §8 declares exactly two, and these three are a shape the referee
- * chooses between rather than a vocabulary a world may extend.
- */
+/** How the demand names a skill. */
 export const SKILL_MODES = Object.freeze(["named", "none", "open"]);
 
-/** §7's state machine. `closed` is the referee ticking Conclude; nothing ever concludes on its own. */
+/** The state machine. `closed` is the referee ticking Conclude; nothing concludes on its own. */
 export const REQUEST_STATES = Object.freeze(["open", "closed", "withdrawn"]);
 
-/**
- * What a line can say. The first three are stored; the last three are §7's computed-never-stored
- * readings — a line with no addressee, an actor carrying none of the demanded characteristics, and a
- * second answer on a line that already has one. They are choices here because Conclude freezes the
- * reading into the cache, and a frozen reading is exactly those six words.
- */
+/** What a line can say. */
 export const LINE_STATES = Object.freeze([
     "waiting", "answered", "declined", "unclaimed", "unable", "superseded"
 ]);
 
 /**
  * `skillItem`'s third state: this client could not match the typed name against that actor's own
- * Items. The line then posts as open-skill so the answering client picks from its own vocabulary,
- * which is the only thing standing between a mixed-language table and a silent Core p.59 DM-3.
+ * Items.
  */
 export const UNRESOLVED = "unresolved";
 
 /**
- * What Conclude froze, and the vocabulary §8 left to this phase because it belongs to the control
- * that writes it. Two, because the tally is two: `tally` is the count that came in and `chain` is
- * Core p.63-64's summed rungs with the resolver's name. Nothing here aggregates Effects — Traveller
- * prints no such rule.
+ * What Conclude froze, in a vocabulary of its own because it belongs to the control that writes it.
  */
 export const OUTCOME_KINDS = Object.freeze(["tally", "chain"]);
 
 /**
  * The two SEND modes, and only two: `ChatMessage#visible` hides a whispered message *without rolls*
  * from non-recipients, and a request card has no rolls — so `gm`/`blind`/`self` would post a demand
- * nobody could see or answer (§0).
+ * nobody could see or answer.
  */
 export const VISIBILITY_MODES = Object.freeze({
     public: "MGT2.Request.Visibility.public",
     addressed: "MGT2.Request.Visibility.addressed"
 });
 
-/** What arriving does on the addressee's screen. `flash` never scrolls; `open` does (§5). */
+/** What arriving does on the addressee's screen. `flash` never scrolls; `open` does. */
 export const NUDGE_MODES = Object.freeze({
     flash: "MGT2.Request.Nudge.flash",
     open: "MGT2.Request.Nudge.open",
@@ -73,13 +53,7 @@ export const NUDGE_MODES = Object.freeze({
 
 /**
  * One demand the referee composed and sent: the skill, the characteristic(s), the rung, the stance,
- * the timeframe, the one named DM, and the roster it was sent to (`ROLL-REQUEST.md` §8).
- *
- * **The answers are not stored here.** They are ordinary `check` messages carrying
- * `flags.mgt2.request`, read back off `game.messages` at render time — so N players answering costs
- * N messages and zero updates, and a refresh, a late join, two GMs or a sleeping GM are all correct
- * with no reconciliation code. `lines` is the record of *who was asked*; its result cache is written
- * exactly once, at Conclude, by `game.users.activeGM`.
+ * the timeframe, the one named DM, and the roster it was sent to.
  */
 export class RequestMessageData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
@@ -87,16 +61,13 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
             skillMode: new fields.StringField({
                 required: true, blank: false, initial: "named", choices: SKILL_MODES }),
             // The name the referee typed, and there is no key it could be instead: a skill is a
-            // free-text embedded Item with no registry behind it. The resolution of it is frozen
-            // per line, in `lines[].skillItem`, which is where the three states live.
+            // free-text embedded Item with no registry behind it.
             skill: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             // `system.flavor` — not the core `flavor`, which ChatMessage declares as an HTMLField
-            // (`common/documents/chat-message.mjs`, "flavor: new fields.HTMLField()"). This is the
-            // referee's reason for asking, printed under the demand line on both card views.
+            // (`common/documents/chat-message.mjs`, "flavor: new fields.HTMLField()").
             flavor: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-            // Cardinality IS the meaning (Core p.59): 0 = the player picks, 1 = fixed, 2+ = offered.
-            // Constrained to the characteristic keys because a demand that stored a localised label
-            // would arrive at a French client as a characteristic nobody has.
+            // Cardinality IS the meaning (Core p.59): 0 = the player picks, 1 = fixed, 2+ =
+            // offered.
             chars: new fields.ArrayField(new fields.StringField({
                 required: true, blank: false, choices: MGT2.Characteristics }), { initial: [] }),
             // Blank is a real answer: Core p.61 permits a check with no stated difficulty, and the
@@ -109,12 +80,12 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
                 required: true, blank: false, initial: "none", choices: MGT2.Stance }),
             timeframe: new fields.StringField({
                 required: true, blank: false, initial: "Normal", choices: MGT2.Timeframes }),
-            // Core p.64 constrains a DM's provenance, not who applies it — so the label is the whole
-            // point of the row, and the Docket refuses to post a value carrying none.
+            // Core p.64 constrains a DM's provenance, not who applies it — so the label is the
+            // whole point of the row, and the Docket refuses to post a value carrying none.
             dm: new fields.SchemaField({
                 label: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-                // No bounds: §1.12 asks a min/max to state a rule, and the -6..+6 of the control is
-                // a control's range. Integer because a DM is countable.
+                // No bounds: a min/max would state a rule, and the -6..+6 of the control is only a
+                // control's range.
                 value: new fields.NumberField({
                     required: true, nullable: false, integer: true, initial: 0 })
             }),
@@ -124,8 +95,7 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
             // rung is simply not emitted for a non-GM.
             showTarget: new fields.BooleanField({ required: false, initial: true }),
             // Core p.73's OPPOSING FORCES collapse: one roll on the highest score in the chosen
-            // characteristic. The Docket offers it only when `skillMode === "none"`, which is the
-            // case p.73 prints — whose skill level a collapsed skilled roll would use is unprinted.
+            // characteristic.
             sideRoll: new fields.BooleanField({ required: false, initial: false }),
             state: new fields.StringField({
                 required: true, blank: false, initial: "open", choices: REQUEST_STATES }),
@@ -138,16 +108,11 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
                 // this and never throws — the roster contract.
                 name: new fields.StringField({ required: false, blank: true, trim: true }),
                 // Frozen at Post so two owners cannot both be told "yours" and the card does not
-                // re-read differently on every client. Null is `unclaimed`. `readonly` defaults to
-                // true on a DocumentIdField, which would refuse Conclude's write.
+                // re-read differently on every client.
                 user: new fields.DocumentIdField({
                     required: false, nullable: true, initial: null, readonly: false }),
                 // THREE states, not two: an Item id is a frozen resolution, `null` is the referee
                 // choosing untrained, and `"unresolved"` is this client failing to match the name.
-                // Collapsing the third into the second hands that line a silent DM-3 that looks
-                // exactly like Core p.59 working. A DocumentIdField cannot carry it — its
-                // `_validateType` throws "must be a valid 16-character alphanumeric ID" — so this is
-                // a StringField that accepts either.
                 skillItem: new fields.StringField({
                     required: true, blank: false, nullable: true, initial: null,
                     validate: value => (value === UNRESOLVED)
@@ -162,7 +127,7 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
                 status: new fields.StringField({
                     required: true, blank: false, initial: "waiting", choices: LINE_STATES }),
                 // Null, not zero: a line that has not answered has no Effect at all, and zero is a
-                // real Effect — an exact success (Core p.61). The `CheckMessageData` convention.
+                // real Effect — an exact success (Core p.61).
                 effect: new fields.NumberField({
                     required: true, integer: true, nullable: true, initial: null }),
                 message: new fields.DocumentIdField({
@@ -179,26 +144,13 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
         };
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * What every line says right now. **Derived, never trusted from the cache** while the request is
-     * open: the answers are ordinary `check` messages and Foundry already replicates and orders
-     * them, so a refresh, a late join, two GMs or a player answering first are all correct with no
-     * reconciliation code (§8). Once Conclude has frozen the reading, this returns the cache — and
-     * still says so when an answer landed afterwards, because concluding freezes the roll-up and not
-     * the world (§7).
-     * @type {object[]}
-     */
+    /** What every line says right now. @type {object[]} */
     get reading() {
         const answers = answersOf(this.parent.id);
         return this.lines.map(line => readLine(this, line, answers.get(line.id) ?? []));
     }
 
-    /**
-     * The one write this document takes after it is posted. Everything else about a request is a
-     * reading, which is why N players answering costs N messages and zero updates.
-     */
+    /** The one write this document takes after it is posted. */
     async conclude() {
         if ( this.state !== "open" ) return null;
         const reading = this.reading;
@@ -214,15 +166,7 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
         return this.parent.update({ system: { state: "closed", lines, outcome } });
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * @inheritdoc
-     * The WHOLE `li` is ours the moment this method exists — core hands back what it returns
-     * untouched (`client/documents/chat-message.mjs`, "const html = await this.system.renderHTML")
-     * — so the head, the delete control and `data-message-id` are rendered from core's own template
-     * rather than re-invented here and left to rot at the next patch.
-     */
+    /** @inheritdoc */
     async renderHTML({ canDelete, canClose = false, ...rest } = {}) {
         const message = this.parent;
         const content = await foundry.applications.handlebars.renderTemplate(CARD, cardContext(this));
@@ -244,13 +188,9 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
     }
 }
 
-/* -------------------------------------------- */
-/*  The reading                                 */
-/* -------------------------------------------- */
-
 /**
  * Every answer posted against one request, bucketed by the line it answers and earliest first —
- * Core p.63's chain and §7's `superseded` both need the order, and neither may depend on the
+ * Core p.63's chain and `superseded` both need the order, and neither may depend on the
  * collection's own.
  * @param {string} id   The request message's id
  * @returns {Map<string, ChatMessage[]>}
@@ -267,12 +207,7 @@ function answersOf(id) {
     return byLine;
 }
 
-/**
- * One line, read against the log. The three computed states of §7 are decided here and stored
- * nowhere: `unclaimed` is a line no user was frozen onto, `unable` is an actor carrying none of the
- * demanded characteristics, and a second answer supersedes nothing — the reading takes the earliest
- * and counts the rest.
- */
+/** One line, read against the log. */
 function readLine(request, line, answers) {
     const first = answers[0] ?? null;
 
@@ -297,7 +232,7 @@ function readLine(request, line, answers) {
 
     // A line whose actor this client cannot see is NOT `unable` — it is unknown here, and saying
     // "cannot answer" about somebody else's Traveller would be a falsehood rather than a permission
-    // boundary. §7 folds the two together; this splits them.
+    // boundary.
     const actor = line.actor ? foundry.utils.fromUuidSync(line.actor, { strict: false }) : null;
     const rollable = actor?.system?.rollableCharacteristics ?? null;
     const unable = !!rollable && (request.chars.length > 0)
@@ -319,19 +254,10 @@ function chainTotal(reading) {
         .reduce((sum, read) => sum + MGT2Helper.taskChainDM(read.effect), 0);
 }
 
-/* -------------------------------------------- */
-
 /**
  * The correlation an answer carries, and the only thing that ties one to a request:
  * `flags.mgt2.request = {message, line, declined?}` — the request card's id, the `lines[].id` it
  * answers, and `declined: true` on a decline.
- *
- * It rides the ANSWER rather than the request because a player cannot update a ChatMessage:
- * ChatMessage declares only `create`/`delete` permissions, `update` falls back to OWNER, and
- * ChatMessage has no ownership field — so writing the result onto the line would have been a
- * permission error on a button the design calls "not an error" (§5). Zero new permission surface.
- *
- * @param {ChatMessage} message
  * @returns {{message: string, line: string, declined?: boolean}|null}
  */
 export function requestFlagOf(message) {
@@ -339,12 +265,7 @@ export function requestFlagOf(message) {
     return (flag?.message && flag?.line) ? flag : null;
 }
 
-/* -------------------------------------------- */
-
-/**
- * Three settings, and each scope is an argument (§8). Called from `registerSettings`, as
- * `registerRules` is.
- */
+/** Three settings, and each scope is an argument. */
 export function registerRequestSettings() {
 
     game.settings.register("mgt2", "request.visibility", {
@@ -358,9 +279,7 @@ export function registerRequestSettings() {
         requiresReload: false
     });
 
-    // Not user-facing: the last demands, held as their own PAYLOAD rather than as message ids. Chat
-    // logs get flushed, and a dead chip fired from the chat control's context menu has no window in
-    // which to explain itself. Deduped on a hash of the payload, and debounced.
+    // Not user-facing: the last demands, held as their own PAYLOAD rather than as message ids.
     game.settings.register("mgt2", "request.recent", {
         scope: "world",
         config: false,
@@ -368,9 +287,8 @@ export function registerRequestSettings() {
         default: []
     });
 
-    // Client scope, and that is the direct correction of the module this design was read against:
-    // a world-scoped alert with no opt-out. If the nudge never arrives — offline, query refused —
-    // nothing is lost, because the card is already in their log.
+    // Client scope, and that is the direct correction of the module this design was read against: a
+    // world-scoped alert with no opt-out.
     game.settings.register("mgt2", "request.nudge", {
         name: "MGT2.Request.Settings.nudge.name",
         hint: "MGT2.Request.Settings.nudge.hint",
@@ -383,10 +301,6 @@ export function registerRequestSettings() {
     });
 }
 
-/* -------------------------------------------- */
-/*  What the card prints                        */
-/* -------------------------------------------- */
-
 /** The ladder cell a given Effect falls in, as a key into `MGT2.EffectBands`. */
 function bandKeyOf(effect) {
     const band = MGT2Helper.getEffectBand(effect);
@@ -395,8 +309,7 @@ function bandKeyOf(effect) {
 
 /**
  * `≤−6` · `−5…−2` · `−1` · `0` · `+1…+5` · `≥+6` — how one band of `MGT2.EffectBands` names itself
- * on a `.spread`. Exported because `.spread` is one class over two grounds and the Docket foot
- * prints the same six labels; a second copy of this is how the two would drift.
+ * on a `.spread`.
  */
 export function bandRange({ min, max }) {
     const sign = value => MGT2Helper.signed(value, "0");
@@ -423,8 +336,7 @@ function untrainedLabel(actor) {
 
 /**
  * What one line cost this Traveller, in the words the rules use: the skill at its level, the
- * characteristic(s) offered, and the dice it landed on. A line whose actor is not loaded degrades
- * to what was stored at compose time and never throws — the roster contract.
+ * characteristic(s) offered, and the dice it landed on.
  */
 function lineDetail(request, read, actor, showTarget) {
     const parts = [];
@@ -452,11 +364,7 @@ function lineDetail(request, read, actor, showTarget) {
     return parts.filter(part => part).join(" · ");
 }
 
-/**
- * The DM this line would roll at, through the one reducer both totalling paths already use. Only
- * what the demand FIXES is counted: the characteristic joins in when exactly one was named, and
- * when it was not, the detail cell says so rather than the chit inventing a pick.
- */
+/** The DM this line would roll at, through the one reducer both totalling paths already use. */
 function lineChit(request, read, actor, chain) {
     const rows = [];
     if ( (request.skillMode === "named") && (read.skillItem !== UNRESOLVED) ) {
@@ -483,11 +391,7 @@ function lineChit(request, read, actor, chain) {
     return MGT2Helper.signed(Checks.modifiers(rows).total, "+0");
 }
 
-/**
- * Everything `templates/chat/request.html` prints, built per client from the live reading. Two
- * clients holding different tallies of one request is not a bug — it is `combat-screen.js`'s own
- * rule, *a screen shows what its user has permission to see*, reaching chat (§5).
- */
+/** Everything `templates/chat/request.html` prints, built per client from the live reading. */
 function cardContext(request) {
     const gm = game.user.isGM;
     // Off does not hide the rung with CSS: the card is rendered per client, so it is not emitted.
@@ -538,16 +442,14 @@ function cardContext(request) {
         context.terms.push({ label: game.i18n.localize("MGT2.Request.SideRoll") });
     }
 
-    // §5, *rows you may not see, you do not see*: a referee's own row is absent from a player's
+    // *rows you may not see, you do not see*: a referee's own row is absent from a player's
     // copy entirely — not shown as permanently unanswered — because its answer is a `check`
-    // whispered to GMs and a row that can never resolve reads as somebody forgetting to roll. Two
-    // clients therefore hold different tallies of one request, which is the design and not a bug.
+    // whispered to GMs and a row that can never resolve reads as somebody forgetting to roll.
     const reading = gm ? request.reading : request.reading.filter(read => !read.self);
     const chain = chainTotal(reading);
     const answered = reading.filter(read => read.status === "answered");
 
-    // One marker per answer, on the band its Effect landed in. The referee's own is hollow, and it
-    // is on the referee's copy only.
+    // One marker per answer, on the band its Effect landed in.
     const markers = {};
     for ( const read of answered ) {
         if ( !Number.isInteger(read.effect) ) continue;
@@ -563,9 +465,7 @@ function cardContext(request) {
     for ( const read of reading ) {
         const actor = read.actor ? foundry.utils.fromUuidSync(read.actor, { strict: false }) : null;
         const mine = (read.user === game.user.id) || (gm && read.self);
-        // §5: the chit is enabled for the addressee and for the referee, who owns everything. A
-        // line nobody was frozen onto is the referee's by definition, and `unable` is offered to
-        // nobody — the actor carries none of the characteristics the demand named.
+        // The chit is enabled for the addressee and for the referee, who owns everything.
         const offered = (request.state === "open") && !!read.actor
             && (((read.status === "waiting") && (mine || gm))
                 || ((read.status === "unclaimed") && gm));
@@ -575,8 +475,8 @@ function cardContext(request) {
             detail: lineDetail(request, read, actor, showTarget),
             mine,
             resolver: read.resolver && (request.tally === "together"),
-            // Core p.63-64 needs ONE Traveller to make the final check, and no book says which:
-            // it is the referee's call, and this is the only surface that knows who has landed.
+            // Core p.63-64 needs ONE Traveller to make the final check, and no book says which: it
+            // is the referee's call, and this is the only surface that knows who has landed.
             pick: gm && (request.tally === "together") && (request.state === "open"),
             message: read.message,
             late: read.late
@@ -599,7 +499,6 @@ function cardContext(request) {
             total: Math.max(0, reading.length - 1),
             resolver: reading.find(read => read.resolver)?.name ?? "" })
         // Parallel-independent is the commonest shape and Traveller prints no aggregation for it.
-        // Printing one would be a rule the book does not have.
         : game.i18n.format("MGT2.Request.Chat.FootSolo", {
             asked: reading.length,
             answered: answered.length,
@@ -607,7 +506,7 @@ function cardContext(request) {
 
     if ( gm ) {
         // Nothing auto-concludes: -1 and 0 are referee decisions (p.61), so the last die is where
-        // the referee's job starts. `.hot` only says that every line is in.
+        // the referee's job starts.
         if ( request.state === "open" ) {
             context.buttons.push({ action: "requestConclude",
                 label: game.i18n.localize("MGT2.Request.Chat.Conclude"),
@@ -629,25 +528,11 @@ function cardContext(request) {
     return context;
 }
 
-/* -------------------------------------------- */
-/*  Re-rendering, which nothing in core does    */
-/* -------------------------------------------- */
-
 /** One render at a time per card: two answers landing together must not race to replace the node. */
 const rendering = new Map();
 
 /**
- * Re-render a request card **because a different message arrived**. Core has no path for this: a
- * message re-renders when it is itself updated, and the whole value of this card is that it is a
- * live reading of the log.
- *
- * **The not-in-DOM branch is the trap, and it is guarded here.** Past `CONFIG.ChatMessage.batchSize`
- * the card was never rendered, and `ChatLog#updateMessage` does not skip it — its else-branch POSTS
- * it (`chat.mjs`, `await this.#postOne(message, {before: nextMessage?.id, notify: false})`), and
- * `#postOne` appends to the bottom of the log when the `before` message is not rendered either. The
- * result is a stale copy of an old card at the foot of the chat. So: no node, no work. The body is
- * derived, so the card is correct the moment it next enters the DOM.
- *
+ * Re-render a request card **because a different message arrived**.
  * @param {string} id   The request message's id
  */
 export function rerenderRequest(id) {
@@ -668,8 +553,8 @@ async function renderInPlace(id) {
         const notification = !!li.closest("#chat-notifications");
         const html = await message.renderHTML(
             notification ? { canDelete: false, canClose: true } : {});
-        // Core hangs its auto-dismiss clock on the notification ELEMENT, so a replacement that
-        // does not carry it over restarts the countdown and re-pins a card the reader dismissed.
+        // Core hangs its auto-dismiss clock on the notification ELEMENT, so a replacement that does
+        // not carry it over restarts the countdown and re-pins a card the reader dismissed.
         if ( "_lifeSpan" in li ) {
             html._lifeSpan = li._lifeSpan;
             const hover = event => html.classList.toggle("hovered", event.type === "pointerenter");
@@ -680,10 +565,7 @@ async function renderInPlace(id) {
     }
 }
 
-/**
- * The two hooks that make the card live. An answer is an ordinary `check` message carrying
- * `flags.mgt2.request`, so both its arrival and its deletion change what the request card reads.
- */
+/** The two hooks that make the card live. */
 export function registerRequestHooks() {
     for ( const hook of ["createChatMessage", "deleteChatMessage"] ) {
         Hooks.on(hook, message => {
@@ -693,16 +575,7 @@ export function registerRequestHooks() {
     }
 }
 
-/* -------------------------------------------- */
-/*  What the card's controls do                 */
-/* -------------------------------------------- */
-
-/**
- * Wire one rendered request card. Called from `ChatHelper.setupCardListeners` behind a type guard,
- * per the established pattern (§8).
- * @param {ChatMessage} message
- * @param {HTMLElement} html
- */
+/** Wire one rendered request card. */
 export function setupRequestCard(message, html) {
     for ( const control of html.querySelectorAll('[data-action^="request"]') ) {
         control.addEventListener("click", event => {
@@ -729,8 +602,7 @@ function onRequestAction(message, dataset, event) {
 
 /**
  * Core p.61 prints no reroll, so *Ask again* is the retry and it is the honest record: a second
- * card, at the same roster, leaving the first one's answers in the log as the checks they are. Line
- * ids are kept — an answer is correlated by message id first, so nothing can cross over.
+ * card, at the same roster, leaving the first one's answers in the log as the checks they are.
  */
 async function askAgain(message) {
     const system = message.system.toObject();
@@ -744,8 +616,7 @@ async function askAgain(message) {
 /**
  * Core p.63-64: working together is several contributors checking to add task chain modifiers into
  * **one** Traveller's final check, and no book says which one — it is the referee's call, taken on
- * the surface that knows who has already landed. One line at a time; clicking the resolver again
- * clears it. The write is the referee's own, on a message only a GM may update.
+ * the surface that knows who has already landed.
  */
 async function setResolver(message, lineId) {
     if ( !game.user.isGM ) return null;
@@ -755,9 +626,9 @@ async function setResolver(message, lineId) {
 }
 
 /**
- * §5.5: declining posts a message rather than writing the line, because a player cannot update a
+ * Declining posts a message rather than writing the line, because a player cannot update a
  * ChatMessage — it declares only `create`/`delete`, `update` falls back to OWNER and ChatMessage
- * has no ownership field. Zero new permission surface, and the derived reading already scans for it.
+ * has no ownership field.
  */
 async function decline(message) {
     const line = message.system.reading.find(
@@ -775,13 +646,7 @@ async function decline(message) {
     });
 }
 
-/**
- * Roll one line's answer. The routing — one click when the demand fixed everything, the seeded
- * prompt when it did not — is item 7's, and it registers itself on `game.mgt2.request.answer`.
- * @param {ChatMessage} message
- * @param {string} lineId
- * @param {object} [options]
- */
+/** Roll one line's answer. */
 export function answerRequest(message, lineId, options = {}) {
     const answer = game.mgt2?.request?.answer;
     if ( typeof answer !== "function" ) {
@@ -789,10 +654,6 @@ export function answerRequest(message, lineId, options = {}) {
     }
     return answer(message, lineId, options);
 }
-
-/* -------------------------------------------- */
-/*  Posting, and the doors onto it              */
-/* -------------------------------------------- */
 
 /** The last ten demands the referee sent, and the one list three of the four doors read. */
 const RECENT_LIMIT = 10;
@@ -810,12 +671,7 @@ export function demandOf(payload) {
     return demand;
 }
 
-/**
- * FNV-1a over the demand's canonical form. Keys are sorted and `chars` with them, so `INT or EDU`
- * and `EDU or INT` are one demand — which is what a referee means by "the same one again".
- * @param {object} demand
- * @returns {string}
- */
+/** FNV-1a over the demand's canonical form. @returns {string} */
 export function requestHash(demand) {
     const canonical = JSON.stringify(demand, (key, value) => {
         if ( Array.isArray(value) ) return [...value].sort();
@@ -837,8 +693,7 @@ export function recentRequests() {
 }
 
 // The list is built synchronously so two posts in one second cannot lose the first, and only the
-// WRITE is debounced. Message ids were refused for this: chat logs get flushed, and a dead chip
-// fired from a context menu has no window in which to explain itself (§8).
+// WRITE is debounced.
 let pendingRecent = null;
 const flushRecent = foundry.utils.debounce(() => {
     const entries = pendingRecent;
@@ -869,18 +724,10 @@ export function recentLabel(demand) {
 }
 
 /**
- * Create the card. The one create path, so the recents list cannot drift from what was actually
- * sent, and `content` carries the static demand line a world that lost the sub-type would fall
- * back to (§4).
- * There is deliberately **no `speaker`**: `ChatMessage.getSpeaker()` answers with the controlled
- * token, and the referee's roster is seeded from exactly those tokens — so a demand aimed at Cassia
- * would have been posted *as* Cassia. The card is the referee's, and `alias` falls back to the author.
- *
+ * Create the card. @returns {Promise<ChatMessage>}
  * @param {object} system            A `RequestMessageData` payload
- * @param {object} [options]
  * @param {string[]} [options.whisper]   `Addressed` = the frozen users plus the GMs; `Public` = none
  * @param {string} [options.content]     The fallback body, when the caller prints a richer one
- * @returns {Promise<ChatMessage>}
  */
 export async function postRequest(system, { whisper = [], content } = {}) {
     const message = await getDocumentClass("ChatMessage").create({
@@ -896,8 +743,7 @@ export async function postRequest(system, { whisper = [], content } = {}) {
 }
 
 /**
- * The seam every door goes through. The Docket is item 2's; this is what opens it, and what says so
- * plainly when a world has lost it rather than leaving a control that does nothing.
+ * The seam every door goes through.
  * @param {object} [seed]   A partial demand to pre-fill, plus `from` naming the roster source
  */
 export function openDocket(seed = {}) {
@@ -911,12 +757,7 @@ export function openDocket(seed = {}) {
     return open(seed);
 }
 
-/* -------------------------------------------- */
-
-/**
- * Three doors, and the fourth is *Ask again* on the card itself. All GM-only: the Docket never
- * renders for anyone else.
- */
+/** Three doors, and the fourth is *Ask again* on the card itself. */
 export function registerRequestControls() {
     // `#chat-controls` is one persistent element that core moves between the sidebar form and the
     // notifications pane, so the injection is idempotent and hangs off every event that moves it.
@@ -925,8 +766,7 @@ export function registerRequestControls() {
     Hooks.on("changeSidebarTab",
         app => injectDocketControl(app?.element?.querySelector?.("#chat-controls")));
 
-    // Core p.73: everyone rolls DEX or INT and the Effect IS the initiative. No difficulty, no
-    // skill, each on their own — the one "everybody rolls the same check" the rules print.
+    // Core p.73: everyone rolls DEX or INT and the Effect IS the initiative.
     Hooks.on("getCombatTrackerContextOptions", (application, options) => {
         options.push({
             label: "MGT2.Request.Chat.AskInitiative",
@@ -961,8 +801,8 @@ function injectDocketControl(root) {
         jQuery: false,
         fixed: true,
         onOpen: () => {
-            // `label`/`onClick`, never `name`/`callback`: both are deprecated in v14 and removed
-            // in v16, and the old pair still logs a compatibility warning when it works.
+            // `label`/`onClick`, never `name`/`callback`: both are deprecated in v14 and removed in
+            // v16, and the old pair still logs a compatibility warning when it works.
             menu.menuItems = recentRequests().map(entry => ({
                 label: recentLabel(entry.payload),
                 icon: '<i class="fa-regular fa-clock-rotate-left"></i>',
@@ -973,10 +813,8 @@ function injectDocketControl(root) {
 }
 
 /**
- * *Ask the same*, injected into a rendered `check` card rather than into `roll.html` — §8 keeps
- * that template unchanged, and a check posted before this feature existed still gets the button.
- * @param {ChatMessage} message
- * @param {HTMLElement} html
+ * *Ask the same*, injected into a rendered `check` card rather than into `roll.html`, which keeps
+ * that template unchanged, so a check posted before this feature existed still gets the button.
  */
 export function injectAskTheSame(message, html) {
     const check = checkOf(message);

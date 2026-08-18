@@ -15,22 +15,12 @@ const PICKER = `${PARTS_PATH}/picker.html`;
 /** A comrade who teaches is another Traveller (Companion p.41), so only a person may be dropped. */
 const TEACHER_TYPES = "Actor.character Actor.npc";
 
-/**
- * The three log kinds the REFEREE writes. `teaching` is not among them — that one is a check the
- * player rolls — and `period` and `grant` are written by the loop rather than by a button.
- */
+/** The three log kinds the REFEREE writes. */
 const AWARDS = Object.freeze(["study", "fullTime", "adventure"]);
 
 /**
  * The training window: every programme a Traveller has open, and the loop that moves them.
- *
- * Standalone rather than a second sheet, on the voyage screen's argument (§9.33.4): `registerSheet`
- * refuses anything that is not a `DocumentSheetV2`, and swapping the sheet class would close every
- * other window on the Actor. It is also the only place that WRITES a skill Item — a document
- * creation that follows a die roll is confirmed in a window, never behind a chat card (§9.133).
- *
  * @extends {ApplicationV2}
- * @mixes HandlebarsApplication
  */
 export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
@@ -65,17 +55,14 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         panel: { template: `${PARTS_PATH}/panel.html`, scrollable: [""] }
     };
 
-    /* -------------------------------------------- */
-
     /** @type {Actor} */
     #actor;
 
-    /** Which programme the panel is showing. A key into the map, never an index (§9.133). */
+    /** Which programme the panel is showing. A key into the map, never an index. */
     #selected = "";
 
     /**
-     * What the last check read, kept beside the programme it was rolled on. Nothing of it is stored:
-     * the log row carries the outcome, and this is only the sentence under the ledger.
+     * What the last check read, kept beside the programme it was rolled on.
      * @type {{id: string, ok: boolean, total: number}|null}
      */
     #last = null;
@@ -93,16 +80,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * One window per Traveller, addressed by the Actor's own id. `options.id` is a TEMPLATE the
-     * constructor resolves against `uniqueId`, and the base `_initializeApplicationOptions` assigns
-     * a fresh monotonic one after the `DEFAULT_OPTIONS` merge — so without the override below the
-     * lookup never hits and every click opens another window.
-     *
-     * Because the window is reused, `programme` has to be applied BEFORE the render: the sheet
-     * strip's name, its ellipsis and its Grant button each promise to open on their own row, and an
-     * already-open window would otherwise come to the front still showing the rail's last choice.
-     * @param {Actor} actor
-     * @param {object} [options]
+     * One window per Traveller, addressed by the Actor's own id.
      * @param {string} [options.programme]   A key into `system.training.programmes`
      */
     static open(actor, { programme = "" } = {}) {
@@ -110,7 +88,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         const existing = foundry.applications.instances.get(`mgt2-training-${actor.id}`);
         const screen = existing ?? new TrainingScreen({ actor });
         // An id that is absent, or that belongs to another Traveller, falls back to the rail's own
-        // default rather than blanking the panel. `hasOwn` and not `in`: the map is a plain object.
+        // default rather than blanking the panel.
         if ( Object.hasOwn(actor.system.training.programmes, programme) ) screen.select(programme);
         return screen.render({ force: true });
     }
@@ -144,19 +122,15 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         delete this.#actor.apps[this.id];
     }
 
-    /* -------------------------------------------- */
-    /*  Context                                     */
-    /* -------------------------------------------- */
-
     /** @inheritDoc */
     async _prepareContext(options) {
         const context = await super._prepareContext(options);
         const training = this.#actor.system.training;
         const entries = Object.entries(training.programmes);
 
-        // A programme closes wherever it happens to sit in the map, so the two lists are partitioned
-        // rather than flagged mid-loop — a header emitted on the first closed row would drag every
-        // later live one under it.
+        // A programme closes wherever it happens to sit in the map, so the two lists are
+        // partitioned rather than flagged mid-loop — a header emitted on the first closed row would
+        // drag every later live one under it.
         const live = entries.filter(([, programme]) => !programme.closed);
         const closed = entries.filter(([, programme]) => programme.closed);
         if ( !training.programmes[this.#selected] ) this.#selected = live[0]?.[0] ?? closed[0]?.[0] ?? "";
@@ -180,8 +154,6 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             ? await this.#panel(this.#selected, training.programmes[this.#selected]) : null;
         return context;
     }
-
-    /* -------------------------------------------- */
 
     /** The printed skill name, or the characteristic's own label. */
     static #targetName(target) {
@@ -232,12 +204,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         };
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * The panel, which is one programme read every way the two books ask for. Every figure below is
-     * a derived field of the model — nothing here recomputes a cost, a period count or a balance.
-     */
+    /** The panel, which is one programme read every way the two books ask for. */
     async #panel(id, programme) {
         const core = programme.engine === "core";
         const characteristic = programme.target.kind === "characteristic";
@@ -273,9 +240,8 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             last: (this.#last?.id === id) ? this.#last : null
         };
 
-        // Core p.55 excepts Athletics from EDU and lets ANY physical characteristic buy Athletics 0,
-        // so the choice is the player's. The control binds `characteristic`, the STORED override —
-        // binding `checkCharacteristic` would persist a derived value on the next write.
+        // Core p.55 excepts Athletics from EDU and lets ANY physical characteristic buy Athletics
+        // 0, so the choice is the player's.
         panel.athletics = core && MGT2.AthleticsTraining.skills.some(skill =>
             MGT2Helper.matchesSkill(programme.target.key, skill));
         panel.physical = MGT2.TrainingCosts.physical.map(key => ({
@@ -320,10 +286,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         ];
     }
 
-    /**
-     * The ladder. Periods are the outer loop and they STACK rather than fill: a failed one is spent
-     * time that bought nothing, which the rule is explicit about, so it is drawn as an extra pip.
-     */
+    /** The ladder. */
     static #pips(programme, failed) {
         const pips = Array.from({ length: programme.periodsNeeded }, (_pip, index) =>
             ({ pass: index < programme.periodsPassed, fail: false }));
@@ -346,10 +309,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         }));
     }
 
-    /**
-     * Companion p.41's comrade. The level is read HERE and never copied onto the programme: a number
-     * taken off another sheet and stored is stale the moment that sheet changes.
-     */
+    /** Companion p.41's comrade. */
     async #teacher(programme) {
         if ( programme.engine === "core" ) return null;
         const actor = programme.teacher ? await fromUuid(programme.teacher) : null;
@@ -366,8 +326,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * What the success will WRITE, said before it happens — the one thing the shipped block never
-     * did. `ready` is the model's; the skill cap is read here because it is a fact about the ACTOR
-     * and not about the programme, and with `skillCapBreach` off it does not bind at all.
+     * did.
      */
     #will(programme, name) {
         const core = programme.engine === "core";
@@ -419,10 +378,6 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             : game.i18n.format("MGT2.Training.Ordinal.n", { n });
     }
 
-    /* -------------------------------------------- */
-    /*  Listeners                                   */
-    /* -------------------------------------------- */
-
     /** The frame outlives every re-render, so this binds once. @inheritDoc */
     _attachFrameListeners() {
         super._attachFrameListeners();
@@ -435,10 +390,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         this.dragDrop.bind(this.element);
     }
 
-    /**
-     * Two controls write, and both are named after a STORED field. `characteristic` in particular is
-     * the player's Athletics override; `checkCharacteristic` beside it is derived and binds nothing.
-     */
+    /** Two controls write, and both are named after a STORED field. */
     async #onChangeInput(event) {
         const input = event.target;
         const programme = this.#programme();
@@ -451,12 +403,8 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     }
 
-    /* -------------------------------------------- */
-
     /**
-     * A `character` Actor takes one drop and it is the comrade teaching (Companion p.41). A plain
-     * `ApplicationV2` inherits no drag-drop plumbing — it first appears on `ActorSheetV2` — so the
-     * controller is supplied here.
+     * A `character` Actor takes one drop and it is the comrade teaching (Companion p.41).
      * @type {DragDrop}
      */
     get dragDrop() {
@@ -499,16 +447,12 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.#write({ teacher: actor.uuid });
     }
 
-    /* -------------------------------------------- */
-    /*  Writes                                      */
-    /* -------------------------------------------- */
-
     /** The programme the panel is showing, re-read off the document every time it is asked for. */
     #programme(id = this.#selected) {
         return this.#actor.system.training.programmes[id] ?? null;
     }
 
-    /** Per key, never per collection: two clients moving two programmes must not collide (§9.133). */
+    /** Per key, never per collection: two clients moving two programmes must not collide. */
     async #write(changes, id = this.#selected) {
         const update = {};
         for ( const [key, value] of Object.entries(changes) ) {
@@ -517,10 +461,6 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.#actor.update(update);
     }
 
-    /* -------------------------------------------- */
-    /*  Actions                                     */
-    /* -------------------------------------------- */
-
     /** @this {TrainingScreen} */
     static async #onSelect(event, target) {
         this.#selected = target.closest("[data-programme]").dataset.programme;
@@ -528,11 +468,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.render({ parts: ["rail", "panel"] });
     }
 
-    /**
-     * Ticking the box a week happened in. Clicking a ticked box is the only undo there is — which is
-     * also why the period is eight boxes and not a bar: Core p.55's weeks need not be consecutive.
-     * @this {TrainingScreen}
-     */
+    /** Ticking the box a week happened in. */
     static async #onLogWeek(event, target) {
         const programme = this.#programme();
         if ( !this.canEdit || !programme || programme.closed ) return;
@@ -543,10 +479,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * Core p.55's Average (8+) check on the programme's own characteristic, or Companion p.41's
-     * teaching check at DM−the level being learned. Raised through the system's own prompt, so Boon,
-     * Bane, the timeframe and the chain all come with it — and the outcome is read off the posted
-     * message rather than from the local score, so the card and the log can never disagree (§9.29).
-     * @this {TrainingScreen}
+     * teaching check at DM−the level being learned.
      */
     static async #onCheck() {
         const id = this.#selected;
@@ -559,7 +492,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         const note = this.element.querySelector('[name="note"]')?.value ?? before.note;
         const teacher = core ? null : await this.#teacher(before);
         // Companion p.42: the teacher's own level caps what can be learned, and the check is taken
-        // at DM−the level being reached. Waivable, like every other source the prompt lists.
+        // at DM−the level being reached.
         const modifiers = core ? []
             : [{ key: "training", label: "MGT2.Training.TeachingDM", dm: -before.next }];
 
@@ -571,8 +504,8 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             difficulty: "Average",
             modifiers
         });
-        // Not a truthiness test: a dismissed prompt and an unparsable formula both come back without
-        // a message, and a check that did not roll writes nothing at all.
+        // Not a truthiness test: a dismissed prompt and an unparsable formula both come back
+        // without a message, and a check that did not roll writes nothing at all.
         if ( !(message instanceof ChatMessage) ) return message;
         const check = checkOf(message);
         if ( !Number.isInteger(check?.effect) ) return message;
@@ -595,11 +528,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.#write({ log }, id);
     }
 
-    /**
-     * The referee's award (Companion p.41). A General point arrives already allocated — there is no
-     * pool it could sit in, which is the one field the schema must refuse to have.
-     * @this {TrainingScreen}
-     */
+    /** The referee's award (Companion p.41). */
     static async #onAward(event, target) {
         const id = this.#selected;
         const programme = this.#programme(id);
@@ -612,13 +541,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.#write({ log }, id);
     }
 
-    /**
-     * The grant asks; it does not fire. A characteristic goes through `characteristicLog` as a signed
-     * +1 rather than touching `characteristics.<k>.base`, which §9.39 reserves for what was first
-     * rolled. **The programme does not close** — it carries on toward the next level, and the `grant`
-     * row is the reset Core counts periods from.
-     * @this {TrainingScreen}
-     */
+    /** The grant asks; it does not fire. */
     static async #onGrant() {
         const id = this.#selected;
         const programme = this.#programme(id);
@@ -652,11 +575,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.#write({ log: [...after.log.map(entry => ({ ...entry })), row] }, id);
     }
 
-    /**
-     * Create the Item or raise it. The HIGHEST match is the one raised, because `skillLevel` — which
-     * is where `held` and therefore the level being bought came from — reads the best of them:
-     * a target of `Gun Combat` on a Traveller carrying two specialities must not raise the lower one.
-     */
+    /** Create the Item or raise it. */
     async #grantSkill(name, level) {
         const existing = Grants.skills(this.#actor)
             .filter(item => MGT2Helper.matchesSkill(item.name, name))
@@ -666,8 +585,6 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             name, type: "talent", system: { subType: "skill", level }
         }]);
     }
-
-    /* -------------------------------------------- */
 
     /** @this {TrainingScreen} */
     static async #onAdd() {
@@ -710,13 +627,9 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return document?.sheet?.render(true);
     }
 
-    /* -------------------------------------------- */
-    /*  The picker                                  */
-    /* -------------------------------------------- */
-
     /**
-     * What each book refuses, drawn as refusals rather than hidden: a Traveller who goes looking for
-     * Jack-of-all-Trades has a question, and an empty list answers it with silence.
+     * What each book refuses, drawn as refusals rather than hidden: a Traveller who goes looking
+     * for Jack-of-all-Trades has a question, and an empty list answers it with silence.
      * @returns {Promise<{engine: string, kind: string, key: string}|null>}
      */
     async #pick() {
@@ -730,8 +643,8 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             position: { width: 520 },
             content,
             ok: { label: "MGT2.Training.Start", icon: "fa-solid fa-graduation-cap" },
-            // A click inside a form control does not run its label's activation behaviour, so typing
-            // a name would otherwise leave the row it belongs to unchosen.
+            // A click inside a form control does not run its label's activation behaviour, so
+            // typing a name would otherwise leave the row it belongs to unchosen.
             render: (event, dialog) => dialog.element.querySelectorAll(".opt.new input.f")
                 .forEach(input => input.addEventListener("input", () => {
                     input.closest(".opt").querySelector("input[type=radio]").checked = true;
@@ -742,7 +655,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
         const [engine, kind, ...rest] = String(chosen.choice).split(":");
         // A blank key is the typed row: the Item this programme is about may not exist yet, and
-        // creating it is what the programme is for (§9.133).
+        // creating it is what the programme is for.
         const key = rest.join(":") || String(chosen[`new-${engine}`] ?? "").trim();
         return key ? { engine, kind, key } : null;
     }
@@ -804,8 +717,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             }
         }
 
-        // The typed row, one per engine offered. A new skill costs one period and arrives at level 0
-        // — the one branch of Core p.55 that is not "as many periods as the level".
+        // The typed row, one per engine offered.
         const typed = engines.map(engine => ({
             engine, value: `${engine}:skill:`, badge: `MGT2.Training.Badge.${engine}`,
             why: (engine === "core")
@@ -828,17 +740,14 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 }
 
-/* -------------------------------------------- */
-
 /**
  * Two doors: the Traveller's own sheet, where a player is already looking, and the Actor directory,
  * where a referee is.
  */
 export function registerTrainingScreen() {
-    // NOT `getHeaderControls`, which never fires: `ApplicationV2#_doEvent` defaults `parentClassHooks`
-    // to true and appends `{}` to a name that has none, so the hook is called once per class in the
-    // inheritance chain and never under the bare name. `getActorContextOptions` is the opposite case
-    // — `DocumentDirectory` passes `parentClassHooks: false` explicitly.
+    // NOT `getHeaderControls`, which never fires: `ApplicationV2#_doEvent` defaults
+    // `parentClassHooks` to true and appends `{}` to a name that has none, so the hook is called
+    // once per class in the inheritance chain and never under the bare name.
     Hooks.on("getHeaderControlsActorSheetV2", (application, controls) => {
         if ( application.document?.type !== "character" ) return;
         controls.push({

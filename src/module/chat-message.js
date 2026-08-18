@@ -2,22 +2,10 @@ import { MGT2Helper } from "./helper.js";
 
 const fields = foundry.data.fields;
 
-/**
- * The ChatMessage sub-type a check posts. Declared in `system.json` under `documentTypes` and
- * registered on `CONFIG.ChatMessage.dataModels` — the lookup is `dataModels[message.type]` with the
- * literal type string, so this constant is the one both ends use. A system's sub-types are NOT
- * namespaced: `ChatMessage.TYPES` reports `["base", "check"]`.
- */
+/** The ChatMessage sub-type a check posts. */
 export const CHECK = "check";
 
-/**
- * What a check leaves behind for the next roll to read (`DOCUMENT-TYPES.md` #16).
- *
- * Before this existed the Effect of an ordinary check lived only in the card's rendered HTML, so
- * nothing could chain from it, oppose it, or audit it after the fact. `DOCTYPE-SCHEMAS.md` §9.25
- * shipped that payload as `flags.mgt2.check` while the sub-type was still unbuilt; this is the same
- * six fields, validated, and the flag form is still read so a session in progress keeps working.
- */
+/** What a check leaves behind for the next roll to read. */
 export class CheckMessageData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         return {
@@ -50,12 +38,7 @@ export class CheckMessageData extends foundry.abstract.TypeDataModel {
     }
 }
 
-/**
- * The check a message carries, whichever form it is in. A typed message answers from its data
- * model; one posted before the sub-type existed still answers from its flag.
- * @param {ChatMessage} message
- * @returns {CheckMessageData|object|null}
- */
+/** The check a message carries, whichever form it is in. @returns {CheckMessageData|object|null} */
 export function checkOf(message) {
     if (message?.type === CHECK) return message.system;
     return message?.flags?.mgt2?.check ?? null;
@@ -63,8 +46,7 @@ export function checkOf(message) {
 
 /**
  * Scroll the chat log to a message and mark it, which is what makes a chain auditable after the
- * fact without storing the chain anywhere (`sketch-task-chain.html`). The log may be popped out,
- * so both roots are searched.
+ * fact without storing the chain anywhere.
  * @param {string} id   A ChatMessage id
  */
 export function jumpToMessage(id) {

@@ -5,24 +5,13 @@ import { TravellerActorSheet } from "./character-sheet.js";
 
 const PARTS_PATH = "systems/mgt2/templates/actors";
 
-/** The six canonical characteristics, in the order the UPP prints them (§5.8). */
+/** The six canonical characteristics, in the order the UPP prints them. */
 const TRAVELLER_KEYS = ["strength", "dexterity", "endurance", "intellect", "education", "social"];
 
 /** The three repeatable arrays one pair of handlers serves. */
 const ROW_ARRAYS = new Set(["options", "locomotion", "manipulators"]);
 
-/**
- * The robot sheet. Nine of the thirteen printed statblock rows are computed from a handful of
- * stored choices, which no other Actor type does — so this is the one sheet that has to be able to
- * show a *formula* rather than only its result, and the derivation chains in the panel are the
- * single component the shared kit did not already carry.
- *
- * Everything else is the kit unchanged: the statline, two budget panels in the soft over-state, the
- * damage track, the code row, and — under `traveller.enabled` — the character sheet's own
- * characteristic partial.
- *
- * @extends {TravellerActorSheet}
- */
+/** The robot sheet. @extends {TravellerActorSheet} */
 export class RobotActorSheet extends TravellerActorSheet {
 
     /** @inheritDoc */
@@ -58,8 +47,8 @@ export class RobotActorSheet extends TravellerActorSheet {
     static TABS = {};
 
     /**
-     * The parent maps document paths onto the *character* sheet's parts, and this sheet has three of
-     * its own, so a document-driven render redraws all of them instead.
+     * The parent maps document paths onto the *character* sheet's parts, and this sheet has three
+     * of its own, so a document-driven render redraws all of them instead.
      * @inheritDoc
      */
     _configureRenderOptions(options) {
@@ -108,15 +97,8 @@ export class RobotActorSheet extends TravellerActorSheet {
         return context;
     }
 
-    /* -------------------------------------------- */
-    /*  Blocks                                      */
-    /* -------------------------------------------- */
-
     /**
-     * One budget panel. The total, the bar and the over-state are computed here and never authored,
-     * which is the block's own contract.
-     * @param {number} cap
-     * @param {Array<{key: string, value: number}>} rows
+     * One budget panel.
      * @param {string} over   `soft` for a design-time warning, `hard` for a real game state
      */
     static #budget(cap, rows, over = "soft") {
@@ -160,8 +142,7 @@ export class RobotActorSheet extends TravellerActorSheet {
     /**
      * The slot budget, in the **soft** over-state: the Robot Handbook states no penalty for
      * exceeding Slots, so this is a design-time warning with no rule behind it and must not borrow
-     * the danger colour. The zero-slot overrun is a row of its own, because that is where a real
-     * Slot is spent on an option that costs none (RH p.31).
+     * the danger colour.
      */
     static #slots(system) {
         const rows = system.options.filter(option => !option.zeroSlot).map(option => ({
@@ -187,17 +168,14 @@ export class RobotActorSheet extends TravellerActorSheet {
         return RobotActorSheet.#budget(system.zeroSlot.budget, rows);
     }
 
-    /**
-     * The `computer` pattern a third time. Unlike the two above this one **is** a hard state: a
-     * brain asked for more Bandwidth than it has is overloaded, which the rules do define.
-     */
+    /** The `computer` pattern a third time. */
     static #bandwidth(system) {
         const brain = system.brain;
         const rows = brain.packages.map(entry => ({
             key: entry._id, label: entry.name, value: entry.bandwidth
         }));
-        // RH p.73's surcharge is a cost like any other and rides `used`, so it gets a row of its own
-        // — folded into the INT figure below it would read as an upgrade nobody bought.
+        // RH p.73's surcharge is a cost like any other and rides `used`, so it gets a row of its
+        // own — folded into the INT figure below it would read as an upgrade nobody bought.
         if (brain.bandwidth.surcharged > 0) {
             rows.push({
                 key: "surcharge",
@@ -227,11 +205,7 @@ export class RobotActorSheet extends TravellerActorSheet {
         return budget;
     }
 
-    /**
-     * The three chains the sheet writes out rather than only answering. Nine of thirteen rows are
-     * computed and several multiplicatively, so a bare result cannot be audited: the user could not
-     * tell a wrong efficiency flag from a wrong TL band.
-     */
+    /** The three chains the sheet writes out rather than only answering. */
     static #chains(system) {
         const loco = MGT2.RobotLocomotion[system.primaryLocomotionKey];
         const term = (value, label, extra = {}) => ({ value, label, ...extra });
@@ -344,15 +318,7 @@ export class RobotActorSheet extends TravellerActorSheet {
         };
     }
 
-    /* -------------------------------------------- */
-    /*  Event Listeners and Handlers                */
-    /* -------------------------------------------- */
-
-    /**
-     * One handler for the three repeatable arrays. The form is submitted first, because a create
-     * rewrites the whole array and would otherwise discard what is typed in the other rows.
-     * @this {RobotActorSheet}
-     */
+    /** One handler for the three repeatable arrays. */
     static async #onRowCreate(event, target) {
         const key = target.dataset.rows;
         if (!ROW_ARRAYS.has(key)) return;
@@ -374,7 +340,6 @@ export class RobotActorSheet extends TravellerActorSheet {
     /**
      * Exactly one mode is primary, and it is the one Agility, the base endurance and the chassis
      * cost multiplier all read (RH p.16, p.23).
-     * @this {RobotActorSheet}
      */
     static async #onLocomotionPrimary(event, target) {
         await this.submit();

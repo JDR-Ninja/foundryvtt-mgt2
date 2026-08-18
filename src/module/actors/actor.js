@@ -1,10 +1,4 @@
-/**
- * The system Actor document.
- *
- * It holds no rules of its own: everything is delegated to the sub-type's data model, which is the
- * only thing that knows what a `character` (or, later, an `npc`) can do. The optional calls below
- * are what makes a sub-type without that behaviour a no-op rather than a branch.
- */
+/** The system Actor document. */
 export class TravellerActor extends Actor {
 
   /** @inheritDoc */
@@ -15,8 +9,7 @@ export class TravellerActor extends Actor {
 
   /**
    * `life` is summed over the damage chain, so the bar cannot be written to directly: a drag is
-   * translated into damage, or into healing when it goes the other way. Every sub-type keeps its
-   * pool at `system.life`, which is what makes this one line of dispatch enough for all of them.
+   * translated into damage, or into healing when it goes the other way.
    * @inheritDoc
    */
   async modifyTokenAttribute(attribute, value, isDelta = false, isBar = true) {
@@ -27,7 +20,6 @@ export class TravellerActor extends Actor {
     }
 
     // A characteristic's current value is `max - damage`, so its bar has to write the wound too.
-    // The roster comes off the schema — a spacecraft bar will be `characteristics.hull`.
     const [, key] = attribute.match(/^characteristics\.([^.]+)(?:\.value)?$/) ?? [];
     if ( !this.system.characteristicKeys?.includes(key) ) {
       return super.modifyTokenAttribute(attribute, value, isDelta, isBar);

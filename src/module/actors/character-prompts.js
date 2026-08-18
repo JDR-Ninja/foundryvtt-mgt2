@@ -17,12 +17,7 @@ export async function buildContent(path, data) {
     return content;
 }
 
-/**
- * The same wrapper for markup this module builds itself. The healing prompts have no template of
- * their own: their rows are one per damaged characteristic and are known only at call time.
- * @param {string} html
- * @returns {HTMLDivElement}
- */
+/** The same wrapper for markup this module builds itself. @returns {HTMLDivElement} */
 function buildElement(html) {
     const content = document.createElement("div");
     content.innerHTML = html;
@@ -34,15 +29,7 @@ function esc(text) {
     return foundry.utils.escapeHTML(String(text ?? ""));
 }
 
-/* -------------------------------------------- */
-
-/**
- * A read-only pop-out showing the full species description.
- * This is a viewer rather than a form, so it is a small ApplicationV2 instead of a DialogV2
- * (which requires at least one button).
- * @extends {ApplicationV2}
- * @mixes HandlebarsApplication
- */
+/** A read-only pop-out showing the full species description. @extends {ApplicationV2} */
 class EditorFullView extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /** @inheritDoc */
@@ -69,14 +56,11 @@ class EditorFullView extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 }
 
-/* -------------------------------------------- */
-
 export class CharacterPrompts {
 
     /**
-     * Configure initiative and the damage order.
+     * Configure initiative and the damage order. @returns {Promise<object|null>}
      * @param {object} system   The actor's system data
-     * @returns {Promise<object|null>}
      */
     static async openConfig(system) {
         const content = await buildContent("systems/mgt2/templates/actors/actor-config-sheet.html", {
@@ -124,14 +108,7 @@ export class CharacterPrompts {
 
     /**
      * Core folio 228: PSI comes back at one point an hour, beginning three hours after the last
-     * talent. This is the only procedure that reaches the reserve — it sits in no damage chain and
-     * Core p.83 names it the exception to the mental track — so a psion who had spent their points
-     * could otherwise only get them back by retyping the wound.
-     *
-     * The hours are typed and nothing is scheduled (§9.35), and the row writes into the dialog's own
-     * `damage` field rather than the document: what the rule proposes is still the referee's to
-     * overrule before saving. Built here rather than in the template because it belongs to one
-     * characteristic out of twelve.
+     * talent.
      */
     static #wirePsiRest(root, context) {
         if ( context.key !== "psionic" ) return;
@@ -165,8 +142,7 @@ export class CharacterPrompts {
 
     /**
      * A characteristic with no score has no pool to drain, so it cannot take a rank in the damage
-     * chain. The control follows the base field as it is typed, and a disabled control submits
-     * nothing — which is what leaves an existing chain untouched.
+     * chain.
      */
     static #gateChainRank(root) {
         const base = root.querySelector('input[name="base"]');
@@ -183,33 +159,19 @@ export class CharacterPrompts {
         sync();
     }
 
-    /**
-     * Show the full species description.
-     * @param {string} title
-     * @param {string} html
-     */
+    /** Show the full species description. */
     static async openEditorFullView(title, html) {
         return new EditorFullView({ window: { title: title || "" }, rawHtml: html }).render({ force: true });
     }
 
-    /* -------------------------------------------- */
-    /*  Damage (Core folio 77)                      */
-    /* -------------------------------------------- */
-
     /**
-     * Type a wound or take one back. Strictly raw: a number typed by hand names no weapon, so no
-     * scale, no Protection, no Effect floor and no damage-type transform apply — an attack carrying
-     * all four goes through the chat card instead.
-     *
-     * The map is a preview and writes nothing, so folio 77's question is answered and the two states
-     * it trips are stated before anything reaches the document.
+     * Type a wound or take one back.
      * @param {object} context   `{system, name, healLabel}`
      * @returns {Promise<{amount: number, direction: string, overflow: string}|null>}
      */
     static async openDamage(context) {
         const system = context.system;
         // The widest reading of folio 77's question — which links could take the overflow at all.
-        // Whether it is actually asked is decided per amount, live, by the same method.
         const asks = system.overflowChoice(Number.MAX_SAFE_INTEGER);
 
         // The roster the type names, intersected with what its rule actually produces: a creature
@@ -249,10 +211,7 @@ export class CharacterPrompts {
     }
 
     /**
-     * Lay `amount` on the chain without writing anything. Mirrors what `applyDamage` will do: damage
-     * fills each link to its own maximum and the last one takes the remainder uncapped, with the
-     * target's choice moved forward one place (Core folio 77); healing walks the chain backwards, so
-     * the link injured last is repaired first.
+     * Lay `amount` on the chain without writing anything.
      * @returns {{rows: object[], states: Record<string, boolean>}}
      */
     static #planDamage(system, amount, heal, overflow) {
@@ -288,10 +247,9 @@ export class CharacterPrompts {
         }
         for ( const row of rows ) row.now = Math.max(0, row.max - row.damage);
 
-        // The states are read off the MODEL against this projection, never restated here: a creature
-        // is driven off at half its Hits and a craft is wrecked rather than dead, and only the
-        // sub-type knows that. Links outside the chain pass through — a robot's `inoperable` reads
-        // INT, which no wound on the chain moves.
+        // The states are read off the MODEL against this projection, never restated here: a
+        // creature is driven off at half its Hits and a craft is wrecked rather than dead, and only
+        // the sub-type knows that.
         const projected = { ...system.characteristics };
         for ( const row of rows ) {
             projected[row.key] = { ...system.characteristics[row.key], damage: row.damage, value: row.now };
@@ -347,15 +305,10 @@ export class CharacterPrompts {
         sync();
     }
 
-    /* -------------------------------------------- */
-    /*  Grappling (Core folio 78)                   */
-    /* -------------------------------------------- */
-
     /**
      * Core folio 78: "The winner of this check may choose to do one of the following." Eight rows,
      * each a name and the figure the folio attaches to it — never what the outcome does, which is
-     * the same rule the trait registry follows. Nothing here is live: the Effect is settled by the
-     * time the card offers the menu, so every figure is known when the dialog is built.
+     * the same rule the trait registry follows.
      * @param {object} context   `{winner, effect}`, off the check card's own flag
      * @returns {Promise<{outcome: string}|null>}
      */
@@ -394,15 +347,10 @@ export class CharacterPrompts {
         return "—";
     }
 
-    /* -------------------------------------------- */
-    /*  Healing (Core p.82-83)                      */
-    /* -------------------------------------------- */
-
     /**
-     * Core p.82 divides both first aid and surgery "as desired", so this one dialog ends both. The
-     * pool is editable: the Effect a card carries is an offer, not a fact the referee must accept.
+     * Core p.82 divides both first aid and surgery "as desired", so this one dialog ends both.
      * @param {object} context   `{title, points, opening, rows, conditions, note}`, `rows` being
-     *                           `[{key, label, damage}]` and `conditions` labels that gate submit
+     *     `[{key, label, damage}]` and `conditions` labels that gate submit
      * @returns {Promise<Record<string, number>|null>}
      */
     static async openDistribution(context) {
@@ -517,14 +465,7 @@ export class CharacterPrompts {
 
     /**
      * Core p.82: surgery restores like first aid — the Effect, minimum one — and a failed check
-     * instead costs 3 + the Effect. That sum shrinks as the check gets worse and goes negative below
-     * Effect -3, so it is floored: an operation that went wrong cannot heal.
-     *
-     * The literal reading is what ships, and the cost is therefore *surfaced* rather than imposed
-     * (§9.22): `typed` is the number the dialog's own field carried, and it wins over the formula
-     * whenever it carries one — which is how a table reading `3 + |Effect|` gets to type 9 for an
-     * Effect of -6. The direction is not negotiable, because a failed check cannot heal.
-     * @param {number} effect
+     * instead costs 3 + the Effect.
      * @param {number|string|null} [typed]   The dialog's editable number, if it was submitted
      * @returns {{success: boolean, points: number, derived: number}}
      */
@@ -578,17 +519,9 @@ export class CharacterPrompts {
         });
     }
 
-    /* -------------------------------------------- */
-    /*  Radiation (Core folio 81)                   */
-    /* -------------------------------------------- */
-
     /**
-     * One dose. Core folio 81's Radiation Exposure table is offered as it is printed — pick a source
-     * and its figure is rolled — and the field beside it is the exposure the table does not cover,
-     * which is most of them. Folio 100's armour Rad score is stated rather than typed: it is already
-     * on the sheet, and it comes off whichever route the dose arrived by.
+     * One dose. @returns {Promise<{source: string, rads: string}|null>}
      * @param {object} context   `{rads, protection}`
-     * @returns {Promise<{source: string, rads: string}|null>}
      */
     static async openRadiation(context) {
         const sources = Object.entries(CONFIG.MGT2.RadiationSources).map(([key, source]) =>
@@ -645,8 +578,6 @@ export class CharacterPrompts {
         sync();
     }
 
-    /* -------------------------------------------- */
-
     /**
      * Core p.83's augment interference, offered and never applied: the system cannot know which
      * implant is "relevant", and the facility's Tech Level is not on any sheet — so the referee
@@ -702,21 +633,9 @@ export class CharacterPrompts {
         button.disabled = unconfirmed || overspent;
     }
 
-    /* -------------------------------------------- */
-    /*  Permanent characteristic change (folio 48-49)                                             */
-    /* -------------------------------------------- */
-
     /**
-     * One row of the permanent-change log (§9.39, §9.91). **Signed**: ageing and creation injuries
-     * take, medical care gives back, and both are entries in the same list — so this one dialog is
-     * every route into it and nothing here ever writes a characteristic's `base`.
-     *
-     * The deltas are typed because the rules make them a choice: ageing "repeats every term from the
-     * fourth onwards and the PLAYER chooses which characteristics take the loss", and after the fact
-     * there is no way to infer what a roll took. Record the choice; derive the total.
-     *
+     * One row of the permanent-change log. @returns {Promise<object|null>}
      * @param {object} context   `{rows, sources, cash, terms}` — see `#prepareLossPrompt`
-     * @returns {Promise<object|null>}
      */
     static async openCharacteristicLoss(context) {
         const sources = Object.entries(CONFIG.MGT2.CharacteristicLossSources).map(([key, label]) =>
@@ -782,15 +701,7 @@ export class CharacterPrompts {
         });
     }
 
-    /**
-     * The two care sources have arithmetic of their own and the other four have none (§9.39).
-     *
-     * `medicalCare` prices what is typed — Cr5000 a point — so the cost follows the deltas.
-     * `ageingCrisisCare` is the opposite: it prices ONE rolled sum and it decides the deltas itself,
-     * so the delta fields go dark carrying the restoration and the cost field goes dark too, rolled
-     * on apply. That is `#wireRadiation`'s device and the reason is the same — a figure the dialog
-     * would have to invent is better rolled by the handler that applies it.
-     */
+    /** The two care sources have arithmetic of their own and the other four have none. */
     static #wireLoss(root, context) {
         const care = CONFIG.MGT2.CharacteristicCare;
         const source = root.querySelector("select.source");
@@ -808,8 +719,6 @@ export class CharacterPrompts {
             // The crisis restoration is not a choice: every characteristic the log REDUCED to 0
             // comes back to 1. Folio 49 says *reduced*, so one that was never rolled — a Traveller
             // with no PSI — is not a casualty and is not restored.
-            // **`readOnly` and not `disabled`** — a disabled input submits nothing, so the whole
-            // restoration would be previewed here and then lost on the way out.
             for ( const field of deltas ) {
                 const now = Number(field.dataset.now);
                 const reduced = (now <= 0) && (Number(field.dataset.base) > 0);

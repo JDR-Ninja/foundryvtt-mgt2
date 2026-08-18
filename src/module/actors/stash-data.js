@@ -5,15 +5,6 @@ const fields = foundry.data.fields;
 /**
  * Schema and behaviour of the `stash` Actor sub-type: a container nobody carries — a loot pile on
  * the floor, a shop's stock, a cache buried on a moon.
- *
- * The thinnest Actor in the system, and what earns it a type is ownership and only ownership
- * (§9.34). An Item's ownership is its parent's, so showing players the party's loot means showing
- * them whoever holds it; an Actor carries its own. Inventory and weight are *not* reasons — the
- * `container` Item already aggregates both, and this reuses that logic at Actor level.
- *
- * No encumbrance line, ever: `container` needs `onHand` and `weightless` precisely to keep party
- * loot off whoever happens to hold it, and a stash has no carrier to protect.
- *
  * @extends {foundry.abstract.TypeDataModel}
  */
 export class StashData extends foundry.abstract.TypeDataModel {
@@ -23,12 +14,11 @@ export class StashData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         return {
             // What kind of stash this is, in the referee's own words — "shop stock · Regina
-            // downport", "buried · left by Ilai Vosk, deceased". A subtitle, never a discriminator.
+            // downport", "buried · left by Ilai Vosk, deceased".
             kind: new fields.StringField({ required: false, blank: true, trim: true }),
 
             // The first document in the system where a lock has a job: a player can see a stash
-            // without being able to open it. Enforced HERE and only here — retrofitting enforcement
-            // onto every `container` would lock inventories referees have been treating as open.
+            // without being able to open it.
             locked: new fields.BooleanField({ required: false, initial: false }),
             lockedDescription: new fields.StringField({
                 required: false, blank: true, trim: true, nullable: true }),
@@ -41,16 +31,7 @@ export class StashData extends foundry.abstract.TypeDataModel {
         };
     }
 
-    /* -------------------------------------------- */
-    /*  Accessors                                   */
-    /* -------------------------------------------- */
-
-    /**
-     * What is in it. Read at each access rather than derived once, for the reason `ItemContainerData`
-     * gives: the contents are sibling documents and a nested container is built before the items
-     * pointing at it exist.
-     * @type {Item[]}
-     */
+    /** What is in it. @type {Item[]} */
     get contents() {
         return this.parent.items.filter(item => !item.system.container?.id);
     }
@@ -68,10 +49,7 @@ export class StashData extends foundry.abstract.TypeDataModel {
 
     /**
      * What each top-level row is worth, keyed by item id — a bag reports what is inside it, exactly
-     * as its weight does. One pass and no second recursion: everything in a stash is a sibling of
-     * everything else, so a nested bag's contents are already in this list, and `containerChain`
-     * files each one under the row it ends up in. A `container` adds no price of its own, the way it
-     * adds no mass of its own (`datamodels.js:580`).
+     * as its weight does.
      * @type {Map<string, number>}
      */
     get valueByRow() {
@@ -86,41 +64,23 @@ export class StashData extends foundry.abstract.TypeDataModel {
         return rows;
     }
 
-    /**
-     * What the lot is worth. A readout and never a till: a sum of stored costs, with nothing on the
-     * stash sheet that buys, sells or prices anything (§9.34).
-     * @type {number}
-     */
+    /** What the lot is worth. @type {number} */
     get value() {
         return [...this.valueByRow.values()].reduce((sum, cost) => sum + cost, 0);
     }
 
-    /**
-     * One item's price, stack included. Gated on `container` and not on `cost`, because the field
-     * name is not the unit: a `component` prices in MCr and a talent's `cost` is PSI points, and
-     * neither is a thing a stash can hold — the drop path refuses both by the same test.
-     */
+    /** One item's price, stack included. */
     static #cost(item) {
         if ( !("container" in item.system) || !("cost" in item.system) ) return 0;
         const qty = item.system.quantity;
         return (!isNaN(qty) && qty > 0) ? item.system.cost * qty : 0;
     }
 
-    /**
-     * Whether a user may see past the lid. A locked stash keeps its sheet open and withholds every
-     * row — that is the whole point of the flag, and it is what makes "readable but not takeable"
-     * expressible at all.
-     * @param {User} [user]
-     * @returns {boolean}
-     */
+    /** Whether a user may see past the lid. @returns {boolean} */
     canOpen(user = game.user) {
         if ( !this.locked ) return true;
         return this.parent.testUserPermission(user, "OWNER");
     }
-
-    /* -------------------------------------------- */
-    /*  Document Lifecycle                          */
-    /* -------------------------------------------- */
 
     /**
      * A stash is one place with one record behind it — a cache is not dropped twice — so its token

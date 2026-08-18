@@ -6,12 +6,9 @@ export const MAX_CONTAINER_DEPTH = 5;
 /**
  * Creation data for an item and everything it holds, re-keyed so the references between them
  * survive the move to another collection — `keepId: true` on creation is what makes the new ids
- * stick. What the copy sheds is every tie to where it came from: the machine software was loaded
- * in, and whether armour was being worn.
- *
+ * stick.
  * @param {TravellerItem} item        The document being copied
  * @param {string} [containerId]      The container it lands in, blank for loose
- * @param {number} [depth]
  * @returns {Promise<object[]>}       The head of the list is the item itself
  */
 export async function copyItemWithContents(item, containerId = "", depth = 0) {
@@ -37,11 +34,6 @@ export async function copyItemWithContents(item, containerId = "", depth = 0) {
 /**
  * The two rules a singular item obeys whatever wrote it, returned as an update rather than applied:
  * a create writes through `updateSource` and an update through the `changed` object it was handed.
- *
- * *Qty max 1* names only `computer` and software. A `container` is singular too and used to be
- * listed here, but `ItemContainerData` descends from `ItemBaseData` and has no `quantity` at all —
- * the schema is what makes it one, and a second rule saying so could only ever disagree (§9.127).
- *
  * @param {string} type            The Item type
  * @param {object} system          The system data the write would leave behind
  * @returns {object|null}          Flat update paths, or null when nothing is out of bounds
@@ -62,7 +54,7 @@ export class TravellerItem extends Item {
 
   /**
    * The item rules hold on a create as much as on an update: nothing on the sheet builds a stack of
-   * computers, but a pack, a macro or a drop from another collection can (§9.127).
+   * computers, but a pack, a macro or a drop from another collection can.
    * @inheritDoc
    */
   async _preCreate(data, options, user) {
@@ -86,8 +78,7 @@ export class TravellerItem extends Item {
       options.mgt2FormerContainer = this.system.container?.id || null;
     }
 
-    // A bag cannot end up inside itself, at any remove. Guarded here rather than at each control:
-    // the storage select, a drop and a macro all arrive as the same write.
+    // A bag cannot end up inside itself, at any remove.
     const containerId = foundry.utils.getProperty(changed, "system.container.id");
     if (containerId && (this.type === "container")) {
       const target = this.siblings?.get(containerId);
@@ -98,17 +89,7 @@ export class TravellerItem extends Item {
     }
   }
 
-  /* -------------------------------------------- */
-  /*  Containment                                 */
-  /* -------------------------------------------- */
-
-  /**
-   * The collection this item's siblings live in. Storage is a reference between siblings — "in the
-   * bag" means "in the same collection, pointing at the bag" — so an owned container holds the
-   * actor's items and a loose one holds the world's. A compendium resolves to nothing here: every
-   * caller on the derived-data path is synchronous and a pack read is not. See {@link getContents}.
-   * @type {Collection<TravellerItem>|null}
-   */
+  /** The collection this item's siblings live in. @type {Collection<TravellerItem>|null} */
   get siblings() {
     if (this.pack) return null;
     return this.isEmbedded ? (this.actor?.items ?? null) : game.items;
@@ -127,11 +108,7 @@ export class TravellerItem extends Item {
     return documents.filter(item => item.system.container?.id === this.id);
   }
 
-  /**
-   * Every container this item sits inside, innermost first. Capped rather than cycle-checked: the
-   * cap is also what stops a corrupt chain from walking forever.
-   * @type {TravellerItem[]}
-   */
+  /** Every container this item sits inside, innermost first. @type {TravellerItem[]} */
   get containerChain() {
     const chain = [];
     let current = this.siblings?.get(this.system.container?.id);
@@ -144,8 +121,6 @@ export class TravellerItem extends Item {
 
   /**
    * Mass of this item, quantity included.
-   * Worn armour counts a quarter of its mass; powered armour carries itself, and a container
-   * weighs what it holds.
    * @param {Set<string>} [seen]   Containers already summed, so a cycle cannot recurse forever.
    */
   getTotalWeight(seen) {
@@ -170,8 +145,6 @@ export class TravellerItem extends Item {
       (sum, item) => sum + MGT2Helper.roundWeight(item.getTotalWeight(seen)), 0));
   }
 
-  /* -------------------------------------------- */
-
   /** @inheritDoc */
   _onCreate(data, options, userId) {
     super._onCreate(data, options, userId);
@@ -191,9 +164,8 @@ export class TravellerItem extends Item {
     super._onDelete(options, userId);
     this.#renderContainers(this.system.container?.id);
 
-    // A loose container is deleted from a list its contents also live in, and the user can see
-    // them there: taking them with it would silently remove items off the screen. They are cut
-    // loose instead. An owned container still takes its contents with it — the actor cascades.
+    // A loose container is deleted from a list its contents also live in, and the user can see them
+    // there: taking them with it would silently remove items off the screen.
     if ((game.user.id !== userId) || (this.type !== "container") || this.isEmbedded || this.pack) return;
     const loose = this.contents.map(item => ({ _id: item.id, "system.container.id": "" }));
     if (loose.length) this.constructor.updateDocuments(loose);
@@ -201,7 +173,7 @@ export class TravellerItem extends Item {
 
   /**
    * An item moving in or out is not a change to the container document, so nothing else would
-   * redraw the sheet listing it. An owned item's actor sheet re-renders on its own.
+   * redraw the sheet listing it.
    */
   #renderContainers(...ids) {
     for (const id of new Set(ids.filter(Boolean))) {
@@ -212,12 +184,12 @@ export class TravellerItem extends Item {
 
   /**
    * The skill as a roll names it: the name, its speciality, and the level it contributes.
-   * @param {boolean} [level]   Drop the level for a caller that prints the DM in a cell of its own —
-   *                            it would otherwise state the same number twice on one line.
+   * @param {boolean} [level]   Drop the level for a caller that prints the DM in a cell of its own
+   *     — it would otherwise state the same number twice on one line.
    */
   getRollDisplay(level = true) {
     // Core p.229: a psionic talent is a skill — "Luka gains Telepathy 0" — so it states its level
-    // the same way. Only a skill talent carries a speciality, and a psionic one leaves it blank.
+    // the same way.
     if (this.type === "talent") {
       const speciality = this.system.skill.speciality;
       let label = (speciality && !MGT2Helper.nameStatesSpeciality(this.name, speciality))

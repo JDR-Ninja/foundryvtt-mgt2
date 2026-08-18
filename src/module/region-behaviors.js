@@ -9,38 +9,12 @@ const EVENTS = CONST.REGION_EVENTS;
 /**
  * Environmental hazards as `RegionBehavior` sub-types — six Companion chapters of "while you are
  * *here*, this happens to you", which is what a Region is for.
- *
- * **Four handlers and no clock, and the emptiness between them is §9.35's decision rather than an
- * omission.** All seventeen `REGION_EVENTS` fire on movement or on a combat round and not one fires
- * because time passed, while MGT2 runs hazards per round, per minute, per 90 or 120 seconds and per
- * hour. Rather than invent a clock the system declined one outright: **it computes what a rule is
- * worth and never decides when it applies.** So a region states its band, its damage and its
- * interval; only the per-round interval is applied, because a `Combat` is already being advanced by
- * hand, and the referee applies the rest — a wrong automatic number is worse than an absent one,
- * because nobody checks it.
- *
- * What is built, and only this: `gravity`'s standing effect on `TOKEN_ENTER`, where `TOKEN_EXIT`
- * must **not** remove it (high gravity is DM−1 until acclimatised, 1D weeks, Core p.80) — Foundry's
- * own `applyActiveEffect` deletes on exit and is therefore not merely insufficient here but wrong;
- * `radiation`'s one-shot dose on `TOKEN_ENTER`; and the per-round rows of `temperature` and `vacuum`
- * on `TOKEN_ROUND_START`. Two traps wait there, both silent: every handler opens with
- * `if ( !event.user.isSelf ) return;` or it fires once per connected client
- * (`region.mjs:2528-2537` emits to everyone), and anything that awaits must call
- * `token.pauseMovement()` first, because a token can walk clear of the region before the `await`
- * resolves.
- */
-
-/* -------------------------------------------- */
-
-/**
- * A hazard row, rolled and taken through the pipeline. Raw, because Protection is what an *attack*
- * meets and a hot plain is not attacking anyone — Core p.82 puts temperature damage on the chain
- * from END, which is where the chain already starts.
- * @param {Actor} actor
  * @param {string} formula   The damage expression the referee typed
  * @param {string} label     An i18n key naming the row on the card
  * @param {string} [note]    An already-localised fragment placed before the damage
  */
+
+/** A hazard row, rolled and taken through the pipeline. */
 async function applyHazard(actor, formula, label, note = "") {
     const expression = MGT2Helper.damageFormula(formula);
     if ( !expression ) return;
@@ -59,8 +33,6 @@ function canBeHurt(actor) {
     return (actor?.isOwner === true) && (typeof actor.system.applyDamage === "function");
 }
 
-/* -------------------------------------------- */
-
 /** Companion p.59-64. A standing modifier, and the one hazard that outlives leaving the region. */
 export class GravityBehaviorData extends RegionBehaviorType {
 
@@ -73,7 +45,7 @@ export class GravityBehaviorData extends RegionBehaviorType {
             // Where a world is unusually dense the printed figure wins over the band's nominal one.
             gees: new fields.NumberField({ required: false, nullable: true, initial: null, min: 0 }),
             // Core p.81: in zero G, an Average (8+) Athletics (dexterity) check or the recoil spins
-            // the shooter. A property of the region, not of the weapon.
+            // the shooter.
             recoil: new fields.BooleanField({ required: false, initial: false })
         };
     }
@@ -83,15 +55,13 @@ export class GravityBehaviorData extends RegionBehaviorType {
         this.dm = band.dm;
         this.physicalOnly = band.physicalOnly;
         this.effectiveGees = this.gees ?? band.gees;
-        // Core p.80-81: 1D weeks, or 1D days with the matching Athletics. Never scheduled — it is why
-        // the effect must survive TOKEN_EXIT rather than being removed with it.
+        // Core p.80-81: 1D weeks, or 1D days with the matching Athletics.
         this.acclimatises = band.dm !== 0;
     }
 
     /**
      * Core p.80-81: DM−1 to every skill check on a high-gravity world, to the physical ones on a
-     * low-gravity one. The effect is matched by its `origin` and by nothing else, which is what
-     * keeps a second entry from stacking a second copy.
+     * low-gravity one.
      */
     #effectData() {
         const scope = this.physicalOnly ? "PhysicalChecks" : "AllChecks";
@@ -110,21 +80,18 @@ export class GravityBehaviorData extends RegionBehaviorType {
                 }]
             },
             // The low-gravity bands reach physical checks only, and no accumulator is narrower than
-            // `modifiers.check`. Recorded so the scope is not lost while the DM is the whole answer.
+            // `modifiers.check`.
             flags: { mgt2: { region: { band: this.band, physicalOnly: this.physicalOnly } } }
         };
     }
 
-    /**
-     * @param {RegionTokenEnterEvent} event
-     * @this {GravityBehaviorData}
-     */
     static async #onTokenEnter(event) {
         if ( !event.user.isSelf ) return;
         const { token, movement } = event.data;
         const actor = token.actor;
-        // Standard gravity is the absence of the rule rather than a modifier of zero, and a sub-type
-        // with no check accumulator — `world`, `stash` — has nothing for the change to land on.
+        // Standard gravity is the absence of the rule rather than a modifier of zero, and a
+        // sub-type with no check accumulator — `world`, `stash` — has nothing for the change to
+        // land on.
         if ( !actor?.isOwner || (this.dm === 0) || !actor.system.modifiers?.check ) return;
         if ( actor.effects.some(effect => effect.origin === this.behavior.uuid) ) return;
 
@@ -140,8 +107,6 @@ export class GravityBehaviorData extends RegionBehaviorType {
     };
 }
 
-/* -------------------------------------------- */
-
 /** Companion p.83-84. Two intervals, and only one of them has an event behind it. */
 export class TemperatureBehaviorData extends RegionBehaviorType {
 
@@ -153,8 +118,7 @@ export class TemperatureBehaviorData extends RegionBehaviorType {
             damage: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             interval: new fields.StringField({
                 required: false, blank: false, initial: "hour", choices: MGT2.HazardClocks }),
-            // Gear that negates it outright — a vacc suit on a hot plain. Free text, because no book
-            // prints a closed list and the referee names what their table is carrying.
+            // Gear that negates it outright — a vacc suit on a hot plain.
             protectedBy: new fields.SetField(
                 new fields.StringField({ required: true, blank: false, trim: true }),
                 { required: false, initial: [] })
@@ -174,14 +138,10 @@ export class TemperatureBehaviorData extends RegionBehaviorType {
             named.has(item.name.trim().toLowerCase()) && (item.system.equipped !== false));
     }
 
-    /**
-     * @param {RegionTokenRoundStartEvent} event
-     * @this {TemperatureBehaviorData}
-     */
     static async #onTokenRoundStart(event) {
         if ( !event.user.isSelf ) return;
-        // §9.35 in one line: 50°C is 1D per *hour* and no event says an hour passed, so the row is a
-        // readout and the referee applies it. Only `interval: round` may fire on its own.
+        // 50°C is 1D per *hour* and no event says an hour passed, so the row is a readout the
+        // referee applies.
         if ( !this.scheduled || event.data.skipped || !this.damage ) return;
 
         const actor = event.data.token.actor;
@@ -194,8 +154,6 @@ export class TemperatureBehaviorData extends RegionBehaviorType {
         [EVENTS.TOKEN_ROUND_START]: this.#onTokenRoundStart
     };
 }
-
-/* -------------------------------------------- */
 
 /** Companion p.65-71. Hard vacuum escalates a die per round; the thinner two do not. */
 export class VacuumBehaviorData extends RegionBehaviorType {
@@ -223,10 +181,7 @@ export class VacuumBehaviorData extends RegionBehaviorType {
         return `vacuum-${this.behavior.id}`;
     }
 
-    /**
-     * Which round of this exposure the token is in. The round it started is stored rather than a
-     * running count, so one write covers an exposure of any length.
-     */
+    /** Which round of this exposure the token is in. */
     async #exposureRound(token, round) {
         const first = token.getFlag("mgt2", this.#counter);
         if ( first === undefined ) {
@@ -236,10 +191,6 @@ export class VacuumBehaviorData extends RegionBehaviorType {
         return Math.max(1, round - first + 1);
     }
 
-    /**
-     * @param {RegionTokenRoundStartEvent} event
-     * @this {VacuumBehaviorData}
-     */
     static async #onTokenRoundStart(event) {
         if ( !event.user.isSelf ) return;
         // A skipped round is one the referee jumped over; the escalation still reads off the round
@@ -249,8 +200,7 @@ export class VacuumBehaviorData extends RegionBehaviorType {
         const { token, round } = event.data;
         if ( !canBeHurt(token.actor) ) return;
         const exposure = await this.#exposureRound(token, round);
-        // Core p.82: "a cumulative 1D damage every round" — 1D, then 2D, then 3D. The die *count*
-        // grows, so multiplying the rolled total would be a different and smaller number.
+        // Core p.82: "a cumulative 1D damage every round" — 1D, then 2D, then 3D.
         const formula = this.cumulative ? VacuumBehaviorData.#escalate(this.damage, exposure) : this.damage;
         return applyHazard(token.actor, formula,
             MGT2.VacuumPressures[this.pressure]?.label ?? "MGT2.Region.Hazard",
@@ -281,8 +231,6 @@ export class VacuumBehaviorData extends RegionBehaviorType {
     };
 }
 
-/* -------------------------------------------- */
-
 /** Core p.82. One shot on entry, and the only kind that fits Foundry's model unchanged. */
 export class RadiationBehaviorData extends RegionBehaviorType {
 
@@ -298,10 +246,6 @@ export class RadiationBehaviorData extends RegionBehaviorType {
         };
     }
 
-    /**
-     * @param {RegionTokenEnterEvent} event
-     * @this {RadiationBehaviorData}
-     */
     static async #onTokenEnter(event) {
         if ( !event.user.isSelf ) return;
         const { token, movement } = event.data;
@@ -311,8 +255,8 @@ export class RadiationBehaviorData extends RegionBehaviorType {
 
         const resumeMovement = movement ? token.pauseMovement() : undefined;
         const roll = await new Roll(RadiationBehaviorData.#doseFormula(this.rads)).roll();
-        // The region absorbs first; folio 100's armour Rad score comes off inside `resolveExposure`,
-        // which is also where the two columns of folio 81 are read.
+        // The region absorbs first; folio 100's armour Rad score comes off inside
+        // `resolveExposure`, which is also where the two columns of folio 81 are read.
         const dose = roll.total - this.shielded;
         if ( dose > 0 ) await ChatHelper.resolveExposure(actor, { dose, roll });
         else {

@@ -8,7 +8,7 @@ const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applicat
 
 const PARTS_PATH = "systems/mgt2/templates/combat";
 
-/** §9.26's drop table names these two and no others; the band cell takes the ship instead. */
+/** Only these two may be dropped on a station; the band cell takes the ship instead. */
 const CREW_TYPES = "Actor.character Actor.npc";
 
 /** The seven bands closest first — the order Core folio 165 prints, which is also the strip. */
@@ -16,15 +16,7 @@ const BANDS = Object.freeze(Object.keys(MGT2.ShipRangeBands));
 
 /**
  * The space combat screen: the range strip, the order and the stations.
- *
- * Not a `DocumentSheetV2`, and the reason is a rule rather than a preference. A `Combat` carries no
- * ownership field, so `testUserPermission` answers OWNER for the referee and NONE for everyone else
- * — and `DocumentSheetV2#render` throws below LIMITED. The screen has to open for a player whose
- * ship is in the fight, so it is a plain application that registers itself in `combat.apps` the way
- * a document sheet would, and gates every write on the document being written.
- *
  * @extends {ApplicationV2}
- * @mixes HandlebarsApplication
  */
 export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
@@ -67,8 +59,6 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         }
     };
 
-    /* -------------------------------------------- */
-
     /** @type {Combat} */
     #combat;
 
@@ -82,20 +72,10 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
     /** Which other contact the kilometre readout edits. */
     #measuredId = null;
 
-    /**
-     * The distance the referee last typed. Deliberately not stored: the BAND is the state and the
-     * kilometres are a reading of it (§9.26), so a persisted distance would be a second, softer
-     * answer to a question the band has already settled.
-     * @type {number|null}
-     */
+    /** The distance the referee last typed. @type {number|null} */
     #km = null;
 
-    /**
-     * The whole encounter is the referee's. `Combat` has no ownership field and core lets a player
-     * write only `round`, `turn` and `combatants` on it, so naming `system` in the test is what makes
-     * the question the real one: may I write the step and the band map? A player still reads the
-     * screen and still rolls their own crew's station checks, which go through their own actor.
-     */
+    /** The whole encounter is the referee's. */
     get canEdit() {
         return this.#combat.canUserModify(game.user, "update", { system: {} });
     }
@@ -135,10 +115,6 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         delete this.#combat.apps[this.id];
     }
 
-    /* -------------------------------------------- */
-    /*  Context                                     */
-    /* -------------------------------------------- */
-
     /** Every ship in the fight, highest Initiative first — an order that is not sorted is a list. */
     get ships() {
         return this.#combat.system.shipGroups
@@ -177,14 +153,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return context;
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * The strip, read from one ship outwards. Position in Traveller is one band per PAIR, so the
-     * seven cells are the same seven for everybody and only the pins move. The kilometres under
-     * each label are the band's own printed range and derive from it, never the reverse — `minKm`
-     * is transcription and display only (§9.32).
-     */
+    /** The strip, read from one ship outwards. */
     #strip(selected) {
         const system = this.#combat.system;
         const others = this.ships.filter(group => group.id !== selected?.id);
@@ -197,8 +166,8 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
             return {
                 key, label: band.label,
                 km: SpaceCombatScreen.bandKm(band),
-                // Adjacent and Close carry null rather than zero: the book prints no DM for them
-                // at all, and a dash is not a zero.
+                // Adjacent and Close carry null rather than zero: the book prints no DM for them at
+                // all, and a dash is not a zero.
                 noDM: band.attackDM === null,
                 negative: band.attackDM < 0,
                 dm: MGT2Helper.signed(band.attackDM ?? 0),
@@ -245,7 +214,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return reach;
     }
 
-    /** Public because the fleet strip prints the same seven bands from the same table (§9.100 A). */
+    /** Public because the fleet strip prints the same seven bands from the same table. */
     static bandKm(band) {
         const say = (key, data) => game.i18n.format(`MGT2.SpaceCombat.${key}`, data);
         const number = value => value.toLocaleString(game.i18n.lang);
@@ -260,19 +229,13 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return (band.maxKm === null) ? band.minKm * 2 : Math.round((band.minKm + band.maxKm) / 2);
     }
 
-    /**
-     * What the kilometre field shows. The typed figure stands while it still falls inside the stored
-     * band; anything else — a band someone else moved, a band clicked on the strip — falls back to
-     * the middle of it. The band is the state, so the readout can never contradict it.
-     */
+    /** What the kilometre field shows. */
     static #reading(band, typed) {
         if ( !band ) return 0;
         const inside = (typed !== null) && (typed >= band.minKm)
             && ((band.maxKm === null) || (typed <= band.maxKm));
         return inside ? typed : SpaceCombatScreen.#midpoint(band);
     }
-
-    /* -------------------------------------------- */
 
     #orderRow(group, selected) {
         const ship = group.system.ship;
@@ -291,12 +254,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         };
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * One ship's panel. State, Thrust, Closing and Stations are the ship's own running state, so
-     * they render only for a ship the viewer owns — an enemy roster is the referee's business.
-     */
+    /** One ship's panel. */
     #panel(group) {
         if ( !group ) return null;
         const ship = group.system.ship;
@@ -334,8 +292,8 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
 
     /**
      * Core folio 165: the pilot splits Thrust between movement and combat manoeuvring, and the book
-     * prints no closed list of manoeuvres — so a row is whatever the pilot called it plus the points
-     * behind it, and only the rows flagged `movement` buy range.
+     * prints no closed list of manoeuvres — so a row is whatever the pilot called it plus the
+     * points behind it, and only the rows flagged `movement` buy range.
      */
     static #thrustBudget(group) {
         const cap = group.system.available;
@@ -351,12 +309,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         };
     }
 
-    /**
-     * The bank. Core folio 166 lets Thrust accumulate over rounds to pay for a band change one round
-     * cannot afford, so the cap is what LEAVING the current band costs and the total is what has
-     * been put by. Being under it is the problem, which is why the reading is `N short` and not
-     * `N free` — `REDESIGN-PLAN.md` defect 15, fixed here in the port.
-     */
+    /** The bank. */
     #closing(group) {
         const cost = group.system.cost;
         const banked = group.system.thrust.banked;
@@ -382,10 +335,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         };
     }
 
-    /**
-     * The roster, filtered by the step. Which actions a crew member has is decided by their DUTY —
-     * through the `role` Item their station is — and when they may take them by the step (§9.27).
-     */
+    /** The roster, filtered by the step. */
     #crew(group) {
         const step = this.#combat.system.step;
         return group.system.crew.map(combatant => {
@@ -423,12 +373,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         });
     }
 
-    /**
-     * Reactions are not a step. The Core prints three and resolves reactions when they are provoked
-     * (folio 171); HG folio 95 calls them an informal fourth phase. So they are a list beside the
-     * strip, each carrying the cap the rules put on that one — once per round for Point Defence
-     * (folio 171), once per salvo for Electronic Warfare (folio 173).
-     */
+    /** Reactions are not a step. */
     #reactions(group) {
         const rows = [];
         for ( const combatant of group.system.crew ) {
@@ -450,10 +395,6 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         }
         return rows;
     }
-
-    /* -------------------------------------------- */
-    /*  Listeners                                   */
-    /* -------------------------------------------- */
 
     /** The frame outlives every re-render, so these bind once. @inheritDoc */
     _attachFrameListeners() {
@@ -521,14 +462,9 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return id ? this.#combat.groups.get(id) : null;
     }
 
-    /* -------------------------------------------- */
-    /*  Drag and Drop                               */
-    /* -------------------------------------------- */
-
     /**
      * A zone declares what it takes in `data-accept` and refuses everything else AT THE POINTER,
-     * which is the only place a refusal is any use. The type is only known once the uuid resolves,
-     * so the zone names `Actor.<type>` rather than a bare document name.
+     * which is the only place a refusal is any use.
      */
     #onDragOver(event) {
         const zone = event.target.closest("[data-accept]");
@@ -555,7 +491,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
     /**
      * Two drops, because they write two different documents: a ship dropped on a BAND joins the
      * fight at that range and writes the Combat, a person dropped on the ROSTER takes a station and
-     * writes the ship's own crew row (§9.26).
+     * writes the ship's own crew row.
      */
     async #onDrop(event) {
         const zone = event.target.closest("[data-accept]");
@@ -571,8 +507,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
 
     /**
      * Dropping a ship sets its range in the same gesture: a contact has to arrive somewhere and the
-     * band IS the state, so the cell answers it. The band is measured against the ship the strip is
-     * read from — the only pair the cell can be speaking about.
+     * band IS the state, so the cell answers it.
      */
     async #dropShip(actor, band) {
         if ( !this.canEdit ) {
@@ -598,10 +533,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
 
     /**
      * A person dropped on a station writes `crew[i].actor` on the SPACECRAFT, because that is where
-     * a crew roster belongs — a ship has a crew when no combat is running. The Combatant is
-     * re-pointed at the same actor so the station's checks have a sheet to read. Dropped on the
-     * roster and nowhere in particular they are a Passenger, Core folio 164's own word for anyone
-     * aboard who has not been given a duty.
+     * a crew roster belongs — a ship has a crew when no combat is running.
      */
     async #dropCrew(actor, row) {
         const group = this.selected;
@@ -611,8 +543,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         }
         const combatant = row ? this.#combat.combatants.get(row.dataset.combatantId) : null;
         const crew = ship.system.crew.map(station => ({ ...station }));
-        // The row the Combatant already names. Matching on the `role` Item id instead wrote the
-        // second gunner's actor onto the first gunner's row, both sharing one Gunner role (§9.98).
+        // The row the Combatant already names.
         const index = combatant?.system.station ?? -1;
 
         if ( crew[index] ) crew[index].actor = actor.uuid;
@@ -629,10 +560,6 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
             system: { station: crew.length - 1 }
         }]);
     }
-
-    /* -------------------------------------------- */
-    /*  Actions                                     */
-    /* -------------------------------------------- */
 
     /** @this {SpaceCombatScreen} */
     static #onSelectShip(event, target) {
@@ -739,13 +666,10 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
     }
 }
 
-/* -------------------------------------------- */
-
 /**
- * Two surfaces, because the tracker's two context menus have different audiences: the encounter menu
- * is built only for the GM, and a player whose ship is in the fight still has to be able to open the
- * screen. The combatant menu is the one `combatant.js` already uses, and its hook name comes from
- * `ApplicationV2#_createContextMenu` reading the CLASS name.
+ * Two surfaces, because the tracker's two context menus have different audiences: the encounter
+ * menu is built only for the GM, and a player whose ship is in the fight still has to be able to
+ * open the screen.
  */
 export function registerSpaceCombatScreen() {
     Hooks.on("getCombatContextOptions", (application, options) => {

@@ -13,13 +13,9 @@ const PARTS_PATH = "systems/mgt2/templates/actors";
 const DM_KEYS = ["sensorDM", "controlDM", "jumpDM"];
 
 /**
- * The spacecraft sheet — the type `DOCUMENT-TYPES.md` calls the hard one, because it is the single
+ * The spacecraft sheet, and the hard one: it is the single
  * screen that needs all four layout blocks at once: a statline header, three budgets with live
  * totals, two rosters of linked actors, and a code row.
- *
- * Every block comes from `_blocks.sass` unchanged. What this file adds is the mount table and the
- * finance panel, and nothing else.
- *
  * @extends {TravellerActorSheet}
  */
 export class SpacecraftActorSheet extends TravellerActorSheet {
@@ -47,9 +43,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     };
 
     /**
-     * What a hull takes on a drop: the four types `SpacecraftData` reads off its own Items. A weapon
-     * is here because a mount links embedded `weapon` Items (§9.114); the Traveller's inventory types
-     * are not, a ship having no pockets.
+     * What a hull takes on a drop: the four types `SpacecraftData` reads off its own Items.
      * @inheritDoc
      */
     static DROP_ITEM_TYPES = new Set(["component", "cargo", "passage", "role", "weapon"]);
@@ -77,8 +71,8 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     static TABS = {};
 
     /**
-     * The parent maps document paths onto the *character* sheet's parts, and this sheet has three of
-     * its own, so a document-driven render redraws all of them instead.
+     * The parent maps document paths onto the *character* sheet's parts, and this sheet has three
+     * of its own, so a document-driven render redraws all of them instead.
      * @inheritDoc
      */
     _configureRenderOptions(options) {
@@ -117,36 +111,28 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             mounts: SpacecraftActorSheet.#mounts(system, context.weapons),
             crew: this.#crew(system),
             bays: this.#bays(system),
-            // Craft and bays are two counts now: a clamp rack of ten fighters is one row (§9.95).
+            // Craft and bays are two counts now: a clamp rack of ten fighters is one row.
             craftCount: system.smallCraftCount,
             criticals: this.#criticals(system),
             manifest: this.#manifest(),
             manoeuvre: system.manoeuvre,
             finance: SpacecraftActorSheet.#finance(system),
             design: SpacecraftActorSheet.#design(system),
-            // Which of §4.1's six the book is answering for. The panel marks each beside its own
-            // readout; the two budget blocks carry theirs on the row and the header.
+            // Which of the six headline figures the book is answering for.
             printed: system.printedFigures,
             derived: SpacecraftActorSheet.#derived(system),
-            // Null where the table does not play fleet battles: the rule is off and no statblock was
-            // computed. The stored Crew Skill it reads is drawn with the roster either way (§9.100).
+            // Null where the table does not play fleet battles: the rule is off and no statblock
+            // was computed.
             fleet: system.fleet
         };
         return context;
     }
 
-    /* -------------------------------------------- */
-    /*  Blocks                                      */
-    /* -------------------------------------------- */
-
     /**
      * One budget panel: the total, the bar and the over-state are computed here and never authored,
      * which is the block's own contract.
-     * @param {number} cap
-     * @param {Array<{key: string, value: number, why?: string, powered?: boolean}>} rows
-     * @param {number} [stated]   A printed total displacing the sum of the rows (§4.1). The rows
-     *                            then no longer add up to the header, which is exactly what the
-     *                            block's `why` gloss is there to say
+     * @param {number} [stated]   A printed total displacing the sum of the rows, which then no
+     *     longer add up to the header — what the block's `why` gloss says
      */
     static #budget(cap, rows, stated) {
         const total = stated
@@ -164,14 +150,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         };
     }
 
-    /**
-     * The parts list and the design check beside it (§9.92). Every figure is `system.components`
-     * and `system.design` read back — the arithmetic is the model's, and this names it.
-     *
-     * A check that does not APPLY is drawn and greyed rather than dropped: an empty ledger says
-     * nothing, and a ledger of four lines with two of them silent says exactly which two rules this
-     * parts list is complete enough to answer.
-     */
+    /** The parts list and the design check beside it. */
     static #design(system) {
         const design = system.design;
         return {
@@ -213,9 +192,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     }
 
     /**
-     * The formula's own answer for each of §4.1's six, whether or not an override is displacing it.
-     * The edit form prompts with these, so an empty box already says what "derive" will give — which
-     * is the cheapest way to make a nullable field's two states legible.
+     * The formula's own answer for each of the six, whether or not an override is displacing it.
      */
     static #derived(system) {
         const round = value => Math.round(value * 100) / 100;
@@ -238,8 +215,8 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     }
 
     /**
-     * The one budget with a state: a consumer taken offline is an Engineer's action and it frees its
-     * draw (Core p.171), which is why power is a panel rather than a number.
+     * The one budget with a state: a consumer taken offline is an Engineer's action and it frees
+     * its draw (Core p.171), which is why power is a panel rather than a number.
      */
     static #power(system) {
         const budget = SpacecraftActorSheet.#budget(system.power.available,
@@ -266,7 +243,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return budget;
     }
 
-    /** A package the ship cannot run spends nothing, so its row reads 0 and says why (§9.128). */
+    /** A package the ship cannot run spends nothing, so its row reads 0 and says why. */
     static #computer(system) {
         const budget = SpacecraftActorSheet.#budget(system.computer.processing,
             system.computer.software.map(row => ({
@@ -280,13 +257,13 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         budget.overCrowded = system.computer.overCrowded;
         budget.blockedSoftware = system.computer.blockedSoftware;
         // What is aboard, beside what is running: the hint under the budget is the only place the
-        // design figure appears, and it is the one HG p.73 is about (§9.132).
+        // design figure appears, and it is the one HG p.73 is about.
         budget.installed = system.computer.installed;
         budget.carried = system.computer.carried;
         return budget;
     }
 
-    /** Hull options are options, not traits: the registry has no ship family (§1.4). */
+    /** Hull options are options, not traits: the registry has no ship family. */
     static #hullOptions(system) {
         return Object.entries(MGT2.HullOptions).map(([key, option]) => ({
             key, label: option.label, on: system.hull.options.has(key)
@@ -310,8 +287,6 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return rows;
     }
 
-    /* -------------------------------------------- */
-
     /** Each mount with the weapons it holds, its damage multiple, and the ones no mount claimed. */
     static #mounts(system, weapons) {
         const byId = new Map(weapons.map(weapon => [weapon._id, weapon]));
@@ -332,19 +307,17 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             const missile = held.some(weapon => MGT2Helper.hasTrait(weapon.system.traits, "smart")
                 || /missile|torpedo/i.test(weapon.name));
             // Core p.168: two or more weapons OF THE SAME TYPE in one mount fire together on a
-            // single attack roll, each extra one adding +1 per damage die. Missiles are excluded.
+            // single attack roll, each extra one adding +1 per damage die.
             const linked = held.length
                 ? held.filter(weapon => weapon.name === held[0].name).length : 0;
             const band = held[0]?.system.range?.band || "";
             return {
                 index, type: mount.type, label: mount.label, popup: mount.popup,
                 typeLabel: type.label,
-                // Names a weapon and resolves none: correct for the defensive counts, which read the
-                // class off the label, and silently zero for anything offensive (§9.106).
+                // Names a weapon and resolves none: correct for the defensive counts, which read
+                // the class off the label, and silently zero for anything offensive.
                 inert: inert[index],
-                // Core p.165-167: the furthest band the mounted weapon reaches. What the band is
-                // worth to an attack belongs to the range the exchange happens at, not to the
-                // weapon, so only the reach is carried here.
+                // Core p.165-167: the furthest band the mounted weapon reaches.
                 band, bandLabel: MGT2.ShipRangeBands[band]?.label ?? "",
                 linked: missile ? 1 : linked,
                 linkedBonus: missile ? 0
@@ -372,10 +345,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         };
     }
 
-    /**
-     * The roster. A station action of kind `skill` needs a sheet to read the level off, so it is
-     * disabled on a vacant or unstatted slot; a `special` action is the referee's and is not.
-     */
+    /** The roster. */
     #crew(system) {
         const required = new Map(system.crewRequired.map(row => [row.key, row.count]));
         const rows = system.crew.map((station, index) => {
@@ -394,9 +364,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 vacant: !statted && !station.name,
                 station: role?.name ?? "",
                 department: role ? MGT2.Departments[role.system.department] : "",
-                // The mount this station sits at. The combat DUTY is not the ship's any more: it is
-                // per-encounter and lives on the `crew` Combatant (§9.26), so this roster names the
-                // turret and the encounter names who is at it.
+                // The mount this station sits at.
                 dutyTarget: station.dutyTarget,
                 actions: (role?.system.actions ?? []).map((action, i) => ({
                     index: i, label: action.label, kind: action.kind, skill: action.skill,
@@ -421,8 +389,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             totals: system.crewTotals,
             military: system.role === "military",
             hasRoles: this.actor.items.some(item => item.type === "role"),
-            // The typed Crew Skill and the average the roster can see. Not the same claim: the
-            // roster holds stations, so the observed figure is over `bodies` and not over the crew.
+            // The typed Crew Skill and the average the roster can see.
             skill: system.crewSkill,
             observed: system.crewSkillObserved
         };
@@ -444,7 +411,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 transfer: kind.transfer ?? null,
                 name: actor?.name ?? null,
                 img: actor?.img ?? null,
-                // `capacity` is per craft (§9.95), so the row's own tonnage is the product — and it
+                // `capacity` is per craft, so the row's own tonnage is the product — and it
                 // is the figure the tonnage budget sums, which is why the sheet prints it and not
                 // the stored number.
                 tons: Math.round(count * bay.capacity * 100) / 100,
@@ -458,10 +425,6 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     /**
      * What the hull is actually carrying, as the two things a referee acts on at the far end of a
      * route: freight to hand over and passengers to put ashore.
-     *
-     * A speculative lot is listed and never deliverable — it was bought outright (Core p.243) and is
-     * sold at a counter, not settled against a consignment note — which is the same split
-     * `trade.html`'s hold column draws from the other side.
      */
     #manifest() {
         const day = game.settings.get("mgt2", "campaignDay");
@@ -474,8 +437,8 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                     _id: item.id, freight: !lot.speculative, name: item.name, tons: lot.tons,
                     where: SpacecraftActorSheet.#destinationOf(lot.destination),
                     dueDay: lot.dueDay,
-                    // Core p.241 measures lateness at the moment of delivery: the day is read now, and
-                    // no timer ever moves it (§9.35).
+                    // Core p.241 measures lateness at the moment of delivery: the day is read now,
+                    // and no timer ever moves it.
                     late: (lot.dueDay !== null) && (day > lot.dueDay),
                     fare: lot.fare ? MGT2Helper.credits(lot.fare) : null,
                     can: settle && !lot.speculative && (lot.fare > 0)
@@ -488,8 +451,9 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                     _id: item.id, passage: true, name: item.name, count: booking.count,
                     grade: grade.label, lowBerth: booking.lowBerth,
                     where: SpacecraftActorSheet.#destinationOf(booking.destination),
-                    // The fare was collected when the berth was taken (Core p.239), so arrival moves
-                    // no money at all — what it owes is Core p.158's revival check on a low passage.
+                    // The fare was collected when the berth was taken (Core p.239), so arrival
+                    // moves no money at all — what it owes is Core p.158's revival check on a low
+                    // passage.
                     fare: booking.fare ? MGT2Helper.credits(booking.fare) : null,
                     can: settle
                 });
@@ -505,10 +469,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return world?.name || destination.name || null;
     }
 
-    /**
-     * The gate on both acts at the manifest. The same one the two trade screens take: `CreditSplit`
-     * refuses a non-GM outright, and the act writes to the hull either way.
-     */
+    /** The gate on both acts at the manifest. */
     get #canSettle() {
         return game.user.isGM && this.actor.canUserModify(game.user, "update");
     }
@@ -527,11 +488,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return { locations, hullSeverity: system.hullSeverity, standing: system.criticalEffects };
     }
 
-    /**
-     * One critical cell as localised fragments. The config table carries numbers and system names
-     * only, so a cell that is nothing but the books' flavour has nothing to print and the sheet
-     * hands it back to the referee.
-     */
+    /** One critical cell as localised fragments. */
     static #effectText(cell) {
         if (!cell) return null;
         const parts = [];
@@ -583,8 +540,8 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
 
     /**
      * The running costs, and the one row that disagrees with the printed page on purpose: Core
-     * p.183 subtracts carried craft from the maintenance base and the catalogue's cost ÷ 12 000 does
-     * not, so the catalogue bills a carried boat twice (§9.20).
+     * p.183 subtracts carried craft from the maintenance base and the catalogue's cost ÷ 12 000
+     * does not, so the catalogue bills a carried boat twice.
      */
     static #finance(system) {
         const finance = system.finance;
@@ -595,9 +552,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             purchase: money(finance.purchase),
             mortgage: money(finance.mortgage),
             mortgageOverridden: finance.mortgageOverride !== null,
-            // Core p.149's term, and the total it was never multiplied out to. `multiple` is what
-            // makes the overcost legible — at the book's twelve periods a year it reads x2.00, which
-            // is to say the crew buys the hull twice (§9.115).
+            // Core p.149's term, and the total it was never multiplied out to.
             periods: finance.mortgagePeriods,
             periodsPerYear: finance.periodsPerYear,
             total: money(finance.mortgageTotal),
@@ -619,31 +574,17 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             lifeSupport: money(finance.lifeSupport),
             salaries: money(finance.salaries),
             // Outside the five periodic rows above, and rendered apart from them: fuel is a unit
-            // price the crew pays when they buy some (§9.33.7 c).
+            // price the crew pays when they buy some.
             fuelPerTon: money(finance.fuelPerTon),
             tankFill: money(finance.tankFill),
             refined: system.fuel.refined
         };
     }
 
-    /* -------------------------------------------- */
-    /*  The far end of a route                      */
-    /* -------------------------------------------- */
-
     /** One settlement at a time: a second split window beside the first would pay the fare twice. */
     #settling = false;
 
-    /**
-     * A consignment handed over. Core p.241: "Cargo is paid for upon delivery, assuming it is
-     * delivered on time. Failing to deliver cargo on time reduces the amount paid by 1D+4 x 10%" —
-     * so the penalty is rolled here, against the campaign day as it stands at this moment, and never
-     * off a clock the system does not run.
-     *
-     * **Money first and the lot second**, which is the counter's own order: cancelling the split has
-     * to cost nothing, and a cargo deleted before the payment landed would be a consignment nobody
-     * can be paid for.
-     * @this {SpacecraftActorSheet}
-     */
+    /** A consignment handed over. */
     static async #onDeliverLot(event, target) {
         if (this.#settling) return;
         const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
@@ -689,15 +630,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         }
     }
 
-    /**
-     * Passengers ashore. No money moves: the fare was collected when the berth was taken (Core p.239
-     * prints the table and no condition on it, while the delivery clause on p.241 is the cargo's).
-     *
-     * A low passage still owes Core p.158's Routine (6+) Medic check on opening the capsule, once per
-     * passenger — **and it is not rolled here**. §9.35 has the system report and the referee apply,
-     * and this is a check that kills people.
-     * @this {SpacecraftActorSheet}
-     */
+    /** Passengers ashore. */
     static async #onArrivePassage(event, target) {
         const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
         if ((item?.type !== "passage") || !this.#canSettle) return;
@@ -732,16 +665,12 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-            // v14 appends no display of its own once `content` is set, so this costs the card nothing
-            // and buys Dice So Nice and an auditable record (§9.117).
+            // v14 appends no display of its own once `content` is set, so this costs the card
+            // nothing and buys Dice So Nice and an auditable record.
             rolls: roll ? [roll] : [],
             content
         });
     }
-
-    /* -------------------------------------------- */
-    /*  Event Listeners and Handlers                */
-    /* -------------------------------------------- */
 
     /** @this {SpacecraftActorSheet} */
     static async #onCriticalSet(event, target) {
@@ -759,9 +688,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
 
     /**
      * Core p.169: severity is Effect − 5, a repeat takes `max(new, old + 1)` and caps at 6, and a
-     * further hit on a 6 deals 6D that ignores armour. The location is the referee's own 2D roll,
-     * typed here rather than rolled: the system does not resolve an attack for them.
-     * @this {SpacecraftActorSheet}
+     * further hit on a 6 deals 6D that ignores armour.
      */
     static async #onCriticalRoll(event, target) {
         const panel = target.closest(".critctl");
@@ -802,7 +729,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
 
     /**
      * HG p.73: a package is started when it is wanted and stopped when it is not, and only what is
-     * running spends Processing (§9.132). The set is the inverse of power's — what is IN service.
+     * running spends Processing.
      */
     static async #onSoftwareToggle(event, target) {
         return this.#toggleMember("system.computer.running", this.actor.system.computer.running,
@@ -817,23 +744,14 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return this.actor.update({ [path]: Array.from(members) });
     }
 
-    /**
-     * Core p.149's two elections after a career Benefit. Continuing keeps the calculated payment, so
-     * it CLEARS the override rather than writing the same number back — that null is what tells the
-     * two elections apart afterwards.
-     * @this {SpacecraftActorSheet}
-     */
+    /** Core p.149's two elections after a career Benefit. */
     static async #onElectMortgage(event, target) {
         const payment = target.dataset.election === "remortgage"
             ? Math.round(this.actor.system.finance.elections.remortgage.payment) : null;
         return this.actor.update({ "system.finance.mortgageOverride": payment });
     }
 
-    /**
-     * Core p.153's check, for this hull. Its own window rather than a block on the panel: it is
-     * asked once per system arrived at, and half its ladder is per-check rather than per-ship.
-     * @this {SpacecraftActorSheet}
-     */
+    /** Core p.153's check, for this hull. */
     static async #onSkipDebts(event, target) {
         return SkipDebtsDialog.open(this.actor);
     }
@@ -847,11 +765,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return this.actor.update({ "system.hull.options": Array.from(options) });
     }
 
-    /**
-     * One handler for the four repeatable arrays. The form is submitted first, because a create
-     * rewrites the whole array and would otherwise discard what is typed in the other rows.
-     * @this {SpacecraftActorSheet}
-     */
+    /** One handler for the four repeatable arrays. */
     static async #onRowCreate(event, target) {
         await this.submit();
         const key = target.dataset.rows;
@@ -869,10 +783,8 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     }
 
     /**
-     * A station's action, rolled on the crew member the slot links to — the one place the ship reads
-     * a linked actor at all. A `skill` action is refused on a vacant or unstatted slot because there
-     * is no sheet to read the level off; a `special` one is a referee's call and always offered.
-     * @this {SpacecraftActorSheet}
+     * A station's action, rolled on the crew member the slot links to — the one place the ship
+     * reads a linked actor at all.
      */
     static async #onStationAction(event, target) {
         const row = target.closest("[data-row-index]");
@@ -889,14 +801,9 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     }
 
     /**
-     * The same roll from two screens: the ship's own roster and the space combat screen. The
-     * encounter's answer for the mount wins where there is one — Core folio 164 has a gunner choose
-     * a turret at the start of the combat, and the roster's own is the standing one (§9.26).
-     * @param {Actor} ship
+     * The same roll from two screens: the ship's own roster and the space combat screen.
      * @param {object} action              A `role.actions[]` record
-     * @param {object} [options]
      * @param {Actor|null} [options.crew]  Whoever is at the station, or null
-     * @param {string} [options.dutyTarget]
      * @param {object[]} [options.extraModifiers]  The caller's own waivable modifiers
      */
     static async rollStationAction(ship, action,
@@ -918,22 +825,20 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             return ui.notifications.warn(game.i18n.localize("MGT2.Actor.spacecraft.NoMount"));
         }
 
-        // Core p.59: an unskilled check is DM−3, and a skill the crewman does not have is unskilled.
-        // The prompt states that as its own "Not proficient" option rather than as a term.
+        // Core p.59: an unskilled check is DM−3, and a skill the crewman does not have is
+        // unskilled.
         const skill = actor.items.find(item => (item.type === "talent")
             && (item.system.subType === "skill") && MGT2Helper.matchesSkill(item.name, action.skill));
 
         // The ship's own contributions ride the prompt as waivable modifiers, which is what they
         // are: a referee who rules that a critical has knocked the fire control out says so by
-        // unticking it rather than by editing the ship. A caller's own join them HERE, before the
-        // prompt is built: `RollPromptHelper.terms`' fourth argument pushes its entries in AFTER
-        // the checkbox filter, so a term passed there could never be unticked (§9.33.4).
+        // unticking it rather than by editing the ship.
         const shipModifiers = [...extraModifiers];
         if (action.dm) {
             shipModifiers.push({ key: "station", label: "MGT2.Actor.spacecraft.StationDM", dm: action.dm });
         }
         // The mount's own accuracy grade, which stands in for a scope on a vehicle or ship weapon
-        // (VH p.45). It is stored per weapon and was displayed and never rolled.
+        // (VH p.45).
         const weapon = mount?.weapon ?? null;
         if (weapon?.system.fireControl) {
             shipModifiers.push({ key: "fireControl", label: "MGT2.Items.FireControl",
@@ -950,8 +855,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         }
 
         // The same prompt every other check opens, seeded from the crew member's sheet: Boon and
-        // Bane, the timeframe, the difficulty ladder and the chain row all come with it. The
-        // characteristics and skills are the CREWMAN's — the ship has neither.
+        // Bane, the timeframe, the difficulty ladder and the chain row all come with it.
         const rollOptions = {
             rollTypeName: ship.name,
             rollObjectName: action.label,
@@ -977,8 +881,8 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             rollOptions.difficulty = userRollData.difficulty;
         }
 
-        // A station action scores an Effect like any other check, so it can feed a chain too —
-        // Core p.166's Aid Gunners is exactly that shape.
+        // A station action scores an Effect like any other check, so it can feed a chain too — Core
+        // p.166's Aid Gunners is exactly that shape.
         const scored = await Checks.resolve({
             formula, rollData: actor.getRollData(),
             difficulty: rollOptions.difficulty, prompt: userRollData
@@ -988,8 +892,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         const flags = { mgt2: {} };
 
         // A fired mount carries the whole damage payload, so the card the defender resolves knows
-        // what the mount is worth. HG p.29's multiple and Core p.168's linked weapons both live
-        // here because both are properties of the MOUNT, not of the weapon.
+        // what the mount is worth.
         if (weapon?.system.damage) {
             const traits = weapon.system.traits;
             flags.mgt2.damage = {
@@ -1009,10 +912,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             };
         }
 
-        // The same card every other check posts. A one-line flavour cost this path three things: the
-        // Effect band, the terms that produced the roll, and — because the Roll damage button lives
-        // on that card and nowhere else — any way at all to roll the damage payload above. A gunner
-        // could fire and never resolve the hit.
+        // The same card every other check posts.
         return Checks.post(scored, {
             actor,
             label: action.label,
@@ -1033,8 +933,6 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
 
     /**
      * The mount a gunner's `dutyTarget` names — an index, or a label, matched case-insensitively.
-     * Returns the prepared row rather than the stored record, so the caller gets the multiple and
-     * the linked-weapon bonus already computed.
      */
     static #dutyMount(ship, dutyTarget) {
         const rows = SpacecraftActorSheet.#mounts(ship.system, ship.items.filter(i => i.type === "weapon"));
@@ -1062,25 +960,15 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return document?.sheet?.render(true);
     }
 
-    /* -------------------------------------------- */
-    /*  Drag and Drop                               */
-    /* -------------------------------------------- */
-
-    /**
-     * A person dropped on a station row takes it. The roster stored a UUID from the first day and
-     * the only way to put one there was to paste it into a text field, which §10 called the most
-     * visible UX hole in the system. Dropped on the table and nowhere in particular they are a new
-     * station with nobody's name on it, which is the roster's own vacant state.
-     * @inheritDoc
-     */
+    /** A person dropped on a station row takes it. @inheritDoc */
     async _onDrop(event) {
         const data = MGT2Helper.getDataFromDropEvent(event);
         if (data?.type !== "Actor") return this.#onDropItem(event, data);
         if (!this.isEditable) return false;
 
         const actor = await fromUuid(data.uuid);
-        // §9.26's drop table names these two: a ship's crew is people, and a `spacecraft` dropped
-        // here would be asking for a carried craft, which is the bay's question and not this one.
+        // Only these two may be dropped here: a ship's crew is people, and a `spacecraft` would be
+        // asking for a carried craft, which is the bay's question and not this one.
         if (!["character", "npc"].includes(actor?.type)) {
             ui.notifications.warn(game.i18n.localize("MGT2.Actor.spacecraft.NotCrew"));
             return false;
@@ -1095,10 +983,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     }
 
     /**
-     * A ship takes parts, not luggage. The inherited handler is the Traveller's inventory — containers,
-     * loading software into a machine, stacking — and none of it applies to a hull, so the four types
-     * a ship actually reads are embedded plainly and everything else is refused (§9.135).
-     * @param {DragEvent} event
+     * A ship takes parts, not luggage.
      * @param {object} data   The drop payload, already parsed
      */
     async #onDropItem(event, data) {

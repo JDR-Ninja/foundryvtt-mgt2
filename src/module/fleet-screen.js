@@ -24,18 +24,7 @@ const MITIGATORS = Object.freeze(["sand", "meson", "damper"]);
 
 /**
  * The fleet battle screen (HG folios 105-124): the referee's surface for the second engine.
- *
- * Not a `DocumentSheetV2`, for §9.26's reason one level up — a `Combat` carries no ownership field,
- * so `testUserPermission` answers NONE for a player and `DocumentSheetV2#render` throws below
- * LIMITED. A player commanding one fleet has to be able to open it, so this is a plain application
- * that registers itself in `combat.apps` and gates every write on the document being written.
- *
- * Everything it prints is derived by `fleet.js`, `fleet-attack.js` or §9.102's `system.fleet`.
- * Nothing here recomputes a rule: a figure that differs between the screen and the engine is a bug
- * in whichever of the two invented it, and there is only ever meant to be one.
- *
  * @extends {ApplicationV2}
- * @mixes HandlebarsApplication
  */
 export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
@@ -98,8 +87,6 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         }
     };
 
-    /* -------------------------------------------- */
-
     /** @type {Combat} */
     #combat;
 
@@ -122,25 +109,17 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
     /** How many of each battery the referee has declared this round (folio 117). */
     #firing = new Map();
 
-    /**
-     * Folio 118's three riders that name a weapon by the words on its page. §9.75 forbids matching a
-     * name against a table that does not list both languages, so all three are the referee's tick
-     * and never a guess — see `FleetAttack.damage`.
-     */
+    /** Folio 118's three riders that name a weapon by the words on its page. */
     #options = { ignoresArmour: false, armourPiercing: false, customised: false, effectiveness: false };
 
     /**
-     * The attack last resolved on this client, held so `apply` can be a separate gesture. Folio 117
-     * has the attacker declare every battery before any of them fire, so the damage is reported and
-     * the referee applies it — which is also where folio 119's screens and sandcasters get spent.
+     * The attack last resolved on this client, held so `apply` can be a separate gesture.
      * @type {object|null}
      */
     #attack = null;
 
     /** @type {{pool: string, points: number}} */
     #mitigate = { pool: "", points: 0 };
-
-    /* -------------------------------------------- */
 
     get canEdit() {
         return this.#combat.canUserModify(game.user, "update", { system: {} });
@@ -178,10 +157,6 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         delete this.#combat.apps[this.id];
     }
 
-    /* -------------------------------------------- */
-    /*  Selection                                   */
-    /* -------------------------------------------- */
-
     /** Every fleet, highest Initiative first — folio 115 resolves all three steps in that order. */
     get fleets() {
         return this.#combat.system.fleets
@@ -217,10 +192,6 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return targets.find(one => one.id === this.#targetId) ?? targets[0] ?? null;
     }
 
-    /* -------------------------------------------- */
-    /*  Context                                     */
-    /* -------------------------------------------- */
-
     /** @inheritDoc */
     async _prepareContext(options) {
         const context = await super._prepareContext(options);
@@ -247,13 +218,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return context;
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * The strip, read from one fleet outwards. Folio 115 measures range between FLEETS, so the pins
-     * are fleets and the seven cells are the same seven for everybody — the band is a property of a
-     * pair and the kilometres under each label derive from it, never the reverse.
-     */
+    /** The strip, read from one fleet outwards. */
     #strip(fleet) {
         const system = this.#combat.system;
         const others = this.fleets.filter(group => group.id !== fleet?.id);
@@ -291,14 +256,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         };
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * One fleet: the command block folio 106's Fleet Sheet prints, plus its roster. Everything the
-     * chapter lets a commander decide is here — the flag ship (folio 105), the Tactics Effect
-     * (folio 115), the formation (folio 117), Morale (folio 122) and the Thrust it allocates
-     * (folio 116).
-     */
+    /** One fleet: the command block folio 106's Fleet Sheet prints, plus its roster. */
     #fleetRow(group, selected) {
         const system = group.system;
         const strength = system.strength;
@@ -338,9 +296,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
             strength,
             lostPercent: Math.round(strength.fraction * 100),
             opposing: opposing ? { id: opposing.id, name: opposing.name } : null,
-            // Folio 116's bank, which is the pair's progress and not this fleet's allocation. The
-            // cap is what LEAVING the current band costs, so being UNDER it is the problem — the
-            // budget block's `short` reading, the same opt-in the space screen makes.
+            // Folio 116's bank, which is the pair's progress and not this fleet's allocation.
             movement: system.movement,
             closingRate: system.closingRate,
             cost: system.cost,
@@ -397,11 +353,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return row;
     }
 
-    /**
-     * Folio 122's Morale check, read off the battle rather than typed. Every row is named even when
-     * it is worth nothing, which is what `Checks.modifiers` prints — a referee has to see that a
-     * term was considered.
-     */
+    /** Folio 122's Morale check, read off the battle rather than typed. */
     #morale(fleet) {
         if ( !fleet ) return null;
         const rows = fleet.system.moraleRows();
@@ -411,8 +363,6 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
             morale: fleet.system.morale
         };
     }
-
-    /* -------------------------------------------- */
 
     /** The panel: whichever contact is selected, in the shape folios 107-114 print for its kind. */
     #panel(combatant) {
@@ -431,7 +381,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return { ...base, kind: "ship", ...this.#shipPanel(combatant) };
     }
 
-    /** Folios 107-113's Fleet Ship Sheet, every figure of it derived on the Actor by §9.102. */
+    /** Folios 107-113's Fleet Ship Sheet, every figure of it derived on the Actor. */
     #shipPanel(combatant) {
         const system = combatant.system;
         const stats = system.stats;
@@ -469,8 +419,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
             pools: FLAT_POOLS.map(key => ({ ...system.pools[key],
                 label: `MGT2.Fleet.Pool.${key}` })),
             // Folio 119 makes the sandcaster pool a function of who is SHOOTING, and the panel is a
-            // ship's own. The opposing ship it is sized against is therefore the contact the WEAPONS
-            // block is aimed at — a reading, and the gloss names it rather than leaving it implied.
+            // ship's own.
             sand: { ...sand, label: "MGT2.Fleet.Pool.sand", against: target?.name ?? null },
             criticals: Object.entries(ship?.system.criticals ?? {})
                 .filter(([, severity]) => severity > 0)
@@ -510,7 +459,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         };
     }
 
-    /** §9.78's actorless flight, on folio 119's clock. */
+    /** An Actorless flight, on folio 119's clock. */
     #salvoPanel(combatant) {
         const system = combatant.system;
         return {
@@ -536,10 +485,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         };
     }
 
-    /**
-     * Folio 107's WEAPONS panel: `100 x Turrets (beam lasers)` on one line. The count firing is the
-     * referee's declaration (folio 117) and defaults to the whole battery.
-     */
+    /** Folio 107's WEAPONS panel: `100 x Turrets (beam lasers)` on one line. */
     #batteries(actor) {
         return fleetBatteries(actor).map(row => {
             const key = `${row.mount}|${row.id}|${row.name}`;
@@ -564,8 +510,8 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
                 id: one.id, name: one.name, selected: one.id === target?.id,
                 fleet: one.system.fleetGroup?.name ?? "" })),
             target: target ? { id: target.id, name: target.name } : null,
-            // A wing has no screens and no sandcasters — folio 114's sheet prints none (§9.102's
-            // "an accumulator with no source" applied to a document rather than to a field).
+            // A wing has no screens and no sandcasters — folio 114's sheet prints none, which is an
+            // accumulator with no source applied to a document rather than to a field.
             pools: (target?.type === FLEET_SHIP)
                 ? MITIGATORS.map(key => ({ key, label: `MGT2.Fleet.Pool.${key}`,
                     left: (key === "sand")
@@ -576,10 +522,6 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         if ( !this.#attack ) return context;
         return { ...context, last: this.#attack };
     }
-
-    /* -------------------------------------------- */
-    /*  Listeners                                   */
-    /* -------------------------------------------- */
 
     /** The frame outlives every re-render, so these bind once. @inheritDoc */
     _attachFrameListeners() {
@@ -662,10 +604,6 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return id ? this.#combat.combatants.get(id) : null;
     }
 
-    /* -------------------------------------------- */
-    /*  Drag and Drop                               */
-    /* -------------------------------------------- */
-
     #onDragOver(event) {
         const zone = event.target.closest("[data-accept]");
         this.#clearDropState(zone);
@@ -689,9 +627,9 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
     }
 
     /**
-     * One document, two zones: a hull dropped on the LINE joins as a `fleetShip`, and one dropped on
-     * the WINGS joins as a `squadron` of one — folio 114's count is edited in the panel, because a
-     * drag cannot carry a number.
+     * One document, two zones: a hull dropped on the LINE joins as a `fleetShip`, and one dropped
+     * on the WINGS joins as a `squadron` of one — folio 114's count is edited in the panel, because
+     * a drag cannot carry a number.
      */
     async #onDrop(event) {
         const zone = event.target.closest("[data-accept]");
@@ -714,10 +652,6 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         this.#contactId = combatant.id;
         return this.render();
     }
-
-    /* -------------------------------------------- */
-    /*  Actions — selection and the round           */
-    /* -------------------------------------------- */
 
     /** @this {FleetCombatScreen} */
     static #onSelectFleet(event, target) {
@@ -772,10 +706,6 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         if ( !this.canEdit ) return;
         return this.#combat.nextRound();
     }
-
-    /* -------------------------------------------- */
-    /*  Actions — the fleets                        */
-    /* -------------------------------------------- */
 
     /** @this {FleetCombatScreen} */
     static async #onAddFleet() {
@@ -834,10 +764,6 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return contact.system.expose(target.dataset.step === "down" ? -1 : 1);
     }
 
-    /* -------------------------------------------- */
-    /*  Actions — the pools                         */
-    /* -------------------------------------------- */
-
     /** Folio 113: the pools are spent per round and restored when it turns over. */
     static async #onSpend(event, target) {
         const contact = this.#contactOf(target);
@@ -854,15 +780,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return contact?.system.repairCritical(target.dataset.location, 1);
     }
 
-    /* -------------------------------------------- */
-    /*  Actions — the attack                        */
-    /* -------------------------------------------- */
-
-    /**
-     * Folio 118's three weapon types, one door each. The resolution is `fleet-attack.js`'s and
-     * nothing about the arithmetic is repeated here — the screen chooses which of the three the
-     * battery is and hands over the referee's own declarations.
-     */
+    /** Folio 118's three weapon types, one door each. */
     static async #onFire(event, target) {
         const attacker = this.selectedContact;
         const victim = this.target;
@@ -914,9 +832,8 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
 
     /**
      * Folio 119's missile step, and this is the seam the two halves of the chapter meet at: the
-     * flight is §9.78's Combatant and the damage is `FleetAttack.resolveMissiles`, which takes the
-     * number of warheads that survived as its input. That number is `remaining` — what the salvo
-     * launched, less what point defence took out of it.
+     * flight is a Combatant and the damage is `FleetAttack.resolveMissiles`, which takes the
+     * number of warheads that survived as its input.
      */
     static async #onImpact(event, target) {
         const salvo = this.#contactOf(target);
@@ -924,9 +841,10 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         if ( (salvo?.type !== SALVO) || !victim ) {
             return ui.notifications.warn(game.i18n.localize("MGT2.Fleet.Screen.NoSalvoTarget"));
         }
-        // The SHOOTER, where it is still in the battle: folio 110 derives the missile Offensive DM on
-        // the hull, and a salvo answering for itself carries none — a flight that outlives its ship
-        // falls back to itself and scores 0, which is the same answer the printed three steps give.
+        // The SHOOTER, where it is still in the battle: folio 110 derives the missile Offensive DM
+        // on the hull, and a salvo answering for itself carries none — a flight that outlives its
+        // ship falls back to itself and scores 0, which is the same answer the printed three steps
+        // give.
         const shooter = salvo.system.shooter ?? salvo;
         const result = await FleetAttack.resolveMissiles({
             attacker: shooter, target: victim, warhead: salvo.system.warhead,
@@ -984,15 +902,15 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
     /**
      * Folio 118 reports and the referee applies, which is also the moment folio 119's screens and
      * sandcasters are spent: the points come out of the DEFENDER's own ledger and reduce the figure
-     * before it reaches the hull. Refused rather than clamped when the pool cannot cover it, which
-     * is `spend`'s own rule.
+     * before it reaches the hull.
      */
     static async #onApplyDamage() {
         const attack = this.#attack;
         const victim = attack ? this.#combat.combatants.get(attack.target.id) : null;
         if ( !victim ) return;
-        // Whoever fired, not whoever is selected now: folio 119's superiority test is the ATTACKER's
-        // Offensive DM against this target, and the referee may have clicked elsewhere meanwhile.
+        // Whoever fired, not whoever is selected now: folio 119's superiority test is the
+        // ATTACKER's Offensive DM against this target, and the referee may have clicked elsewhere
+        // meanwhile.
         const attacker = this.#combat.combatants.get(attack.attacker) ?? null;
         const { pool, points } = this.#mitigate;
         let reduction = 0;
@@ -1019,12 +937,9 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return this.render();
     }
 
-    /* -------------------------------------------- */
-
     /**
      * Folio 122's hand-off: "a very small group, perhaps 1-3 ships […] the Referee should consider
-     * using the normal space combat rules". `detach` builds the `space` Combat and its roster; what
-     * belongs here is what the space screen's own create door does — activate it and open it.
+     * using the normal space combat rules".
      */
     static async #onDetach(event, target) {
         const contact = this.#contactOf(target);
@@ -1044,12 +959,9 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
     }
 }
 
-/* -------------------------------------------- */
-
 /**
  * Two surfaces, the same pair the space screen registers — and the create entry carries the switch,
- * which is what closes §9.100 C's "the sub-type is not offered when the switch is off". The refusal
- * inside `FleetCombatData` is the backstop, not the gate.
+ * so the sub-type is not offered when the switch is off.
  */
 export function registerFleetCombatScreen() {
     Hooks.on("getCombatContextOptions", (application, options) => {

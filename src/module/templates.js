@@ -1,8 +1,4 @@
-/**
- * Preload the templates rendered through `renderTemplate` rather than by an Application.
- * Templates referenced from a PARTS entry are loaded by ApplicationV2 itself.
- * @return {Promise}
- */
+/** Preload the templates rendered through `renderTemplate` rather than by an Application. */
 export const preloadHandlebarsTemplates = async function() {
 
   const templatePaths = [

@@ -13,10 +13,6 @@ const DM_KEYS = ["controlDM", "systemsDM", "sensorDM"];
 /**
  * The vehicle sheet: the eleven printed statblock lines in the books' own order, the five armour
  * facings, the six-line systems block and a critical track of nine locations.
- *
- * It inherits the character sheet's item, roll and damage plumbing wholesale — a mounted weapon
- * rolls through exactly the path a Traveller's does — and adds only what this type owns.
- *
  * @extends {TravellerActorSheet}
  */
 export class VehicleActorSheet extends TravellerActorSheet {
@@ -56,8 +52,8 @@ export class VehicleActorSheet extends TravellerActorSheet {
     static TABS = {};
 
     /**
-     * The parent maps document paths onto the *character* sheet's parts, and this sheet has three of
-     * its own — an unlucky mapping would filter the list down to nothing — so a document-driven
+     * The parent maps document paths onto the *character* sheet's parts, and this sheet has three
+     * of its own — an unlucky mapping would filter the list down to nothing — so a document-driven
      * render redraws all of them instead.
      * @inheritDoc
      */
@@ -111,12 +107,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
         };
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * The pool, drawn on the stored wound. A hull only ever fills — there is no state under wrecked
-     * — so the bar runs to the maximum and the sustained-damage ladder marks the tenths.
-     */
+    /** The pool, drawn on the stored wound. */
     static #hull(system) {
         const hull = system.characteristics.hull;
         const pct = points => (hull.max > 0) ? Math.min(100, Math.round((points / hull.max) * 100)) : 0;
@@ -203,7 +194,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
         return rows;
     }
 
-    /** Printed beside computed. Never a correction — the row only ever reports (§9.20). */
+    /** Printed beside computed. Never a correction — the row only ever reports. */
     static #crossCheck(system) {
         const rows = system.crossCheck.map(row => ({
             ...row,
@@ -228,11 +219,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
         return { locations, hullSeverity: system.hullSeverity, standing: system.criticalEffects };
     }
 
-    /**
-     * One critical cell as localised fragments. The config table carries numbers and system names
-     * only, so a cell that is nothing but the books' flavour has nothing to print and the sheet
-     * hands it back to the referee.
-     */
+    /** One critical cell as localised fragments. */
     static #effectText(cell) {
         if (!cell) return null;
         const parts = [];
@@ -296,14 +283,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
         return { rows: mounts, unmounted: weapons.filter(weapon => !claimed.has(weapon._id)) };
     }
 
-    /* -------------------------------------------- */
-    /*  Event Listeners and Handlers                */
-    /* -------------------------------------------- */
-
-    /**
-     * The pip the referee clicked, or one step back when it is already the standing severity.
-     * @this {VehicleActorSheet}
-     */
+    /** The pip the referee clicked, or one step back when it is already the standing severity. */
     static async #onCriticalSet(event, target) {
         const location = target.closest("[data-location]").dataset.location;
         const step = Number(target.dataset.step);
@@ -319,9 +299,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
 
     /**
      * Core p.140: severity is Effect − 5, a repeat takes `max(new, old + 1)` and caps at 6, and a
-     * further hit on a 6 deals 6D that ignores armour. The location is the referee's 2D roll, typed
-     * here rather than rolled: the system does not read the canvas or resolve an attack for them.
-     * @this {VehicleActorSheet}
+     * further hit on a 6 deals 6D that ignores armour.
      */
     static async #onCriticalRoll(event, target) {
         const panel = target.closest(".critctl");
@@ -370,32 +348,14 @@ export class VehicleActorSheet extends TravellerActorSheet {
         return this.actor.update({ "system.skill": skill });
     }
 
-    /**
-     * The two nullable sub-objects. Absent is a state and not a block of zeroes, so switching one
-     * off writes `null` rather than emptying its fields.
-     * @this {VehicleActorSheet}
-     */
+    /** The two nullable sub-objects. */
     static async #onBlockToggle(event, target) {
         await this.submit();
         const key = target.dataset.block;
         return this.actor.update({ [`system.${key}`]: this.actor.system[key] ? null : {} });
     }
 
-    /* -------------------------------------------- */
-    /*  Vehicular actions (Core folio 138)          */
-    /* -------------------------------------------- */
-
-    /**
-     * Core folio 138's two actions that leave a DM behind. Both are the **driver's** own skill check
-     * — "the drivers of both vehicles make opposed skill checks using the skill appropriate to their
-     * vehicle (Drive, Flyer, or Seafarer), modified by their vehicle's Agility as normal" — so the
-     * prompt is seeded from the person at the controls and the vehicle supplies one waivable DM.
-     *
-     * The dogfight resolves through the prompt's own **Opposed** row rather than a second
-     * comparison: Core folio 62's machinery already reads two Effects off two cards (§1 C), and all
-     * this adds is which side of it takes the DM+2.
-     * @this {VehicleActorSheet}
-     */
+    /** Core folio 138's two actions that leave a DM behind. */
     static async #onVehicleAction(event, target) {
         const action = MGT2.VehicleActions[target.dataset.vehicleAction];
         if (!action) return;
@@ -404,17 +364,15 @@ export class VehicleActorSheet extends TravellerActorSheet {
         if (!driver) return ui.notifications.warn(game.i18n.localize("MGT2.Actor.vehicle.NoDriver"));
 
         // Folio 141: a critical's Control DM stands on control checks, and both actions here are
-        // control checks — they roll the chassis skill. Read off `criticalEffects` and not off
-        // `modifiers.check.sources`, which is the mounted weapon's list: the Systems half belongs to
-        // neither roll, and a dogfight is not an attack.
+        // control checks — they roll the chassis skill.
         const modifiers = [];
         if (system.criticalEffects.controlDM !== 0) {
             modifiers.push({ key: "criticalControl", label: "MGT2.Actor.vehicle.ControlDM",
                 dm: system.criticalEffects.controlDM });
         }
 
-        // "All skill checks used in these actions use the Agility of the vehicle as a DM" — as a row
-        // the referee can untick, which is the treatment a ship's own station DM already gets.
+        // "All skill checks used in these actions use the Agility of the vehicle as a DM" — as a
+        // row the referee can untick, which is the treatment a ship's own station DM already gets.
         if (system.agilityEffective !== 0) {
             modifiers.push({ key: "agility", label: "MGT2.Actor.vehicle.Agility",
                 dm: system.agilityEffective });
@@ -464,10 +422,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
     }
 
     /**
-     * What the check leaves standing on the vehicle. A dogfight needs the other driver's check to
-     * have a winner at all, so with no Opposed source picked nothing is written and the card says
-     * so — clearing a standing dogfight because the row was left empty would be a silent wrong
-     * number. Evasive action stores the Effect as it stands, negative included (§1 C, Tactics).
+     * What the check leaves standing on the vehicle.
      * @returns {Promise<string>}   The i18n key of the sentence the card states
      */
     async #resolveAction(action, effect, opposed) {
@@ -489,9 +444,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
 
     /**
      * Core folio 138 names "the skill appropriate to their vehicle (Drive, Flyer, or Seafarer)",
-     * which the chassis already stores — so the driver's own matching skill opens preselected. A
-     * preselection only: the dropdown still offers every skill they carry, and "Not proficient"
-     * stands when they carry none.
+     * which the chassis already stores — so the driver's own matching skill opens preselected.
      */
     static #chassisSkill(system, skills) {
         for (const pair of system.skill) {
@@ -506,10 +459,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
 
     /**
      * The same card every other check posts, so the action can be chained from and opposed like any
-     * other. Its one addition is the sentence naming what the outcome costs — including the half
-     * that lands on **the other side**, which is stated and never applied: an attack roll may not
-     * read its target (Appendix B), so a dogfight's DM-2 and evasive action's negative DM reach the
-     * attacker as a line a referee reads out.
+     * other.
      */
     static async #postAction(vehicle, driver, scored, context) {
         const { action, outcome } = context;
@@ -542,14 +492,9 @@ export class VehicleActorSheet extends TravellerActorSheet {
         return this.actor.system.driverActor?.sheet?.render(true);
     }
 
-    /* -------------------------------------------- */
-    /*  Drag and Drop                               */
-    /* -------------------------------------------- */
-
     /**
      * A person dropped on the sheet takes the controls — the same drop the ship's crew roster
-     * accepts, at one seat instead of a table. Core folio 138's two actions are the driver's own
-     * check, so the seat is what makes either rollable at all.
+     * accepts, at one seat instead of a table.
      * @inheritDoc
      */
     async _onDrop(event) {

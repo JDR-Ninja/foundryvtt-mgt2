@@ -9,26 +9,15 @@ const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applicat
 
 const PARTS_PATH = "systems/mgt2/templates/chargen";
 
-/**
- * The pool the table chose, world-scoped and not user-facing. **The one piece of group state in the
- * whole feature that is not a document**, and it is deliberate: everything a Traveller *decides* is
- * written to that Traveller (§9.38), but the package is the menu rather than a decision, one campaign
- * plays one of them, and §9.46 already settles that what the whole table plays by is a world setting.
- * What has been taken out of it is per-Traveller and lives on the flag, so the draft itself needs no
- * shared write and a player drains their own turn.
- */
+/** The pool the table chose, world-scoped and not user-facing. */
 export const PACKAGE_SETTING = "chargenPackage";
 
-/** Stamped on every skill the package grants, so a sheet can tell one from a career table's (§9.38). */
+/** Stamped on every skill the package grants, so a sheet can tell one from a career table's. */
 const PACKAGE_TABLE = "package";
 
 /**
  * Folio 50's shared skills package: *"as a group, all Travellers select one of the following skill
- * packages … each Traveller takes it in turns to select an item from the package. Keep going until all
- * skills have been selected."*
- *
- * **No package ships** (§9.36) — the four printed ones are the publisher's expression — so the table
- * types the one they chose and this drains it.
+ * packages … each Traveller takes it in turns to select an item from the package.
  */
 export const Package = {
 
@@ -42,11 +31,7 @@ export const Package = {
         return game.settings.set("mgt2", PACKAGE_SETTING, { name, skills });
     },
 
-    /**
-     * One typed entry read as a grant. The books print the package as *"Deception 1, Electronics 1,
-     * Gun Combat 1"*, so a trailing number is the level and its absence is folio 50's own default.
-     * @returns {{label: string, name: string, level: number}}
-     */
+    /** One typed entry read as a grant. @returns {{label: string, name: string, level: number}} */
     entry(text) {
         const label = String(text ?? "").trim();
         const match = label.match(/^(.*?)\s+(\d+)$/);
@@ -62,20 +47,6 @@ export const Package = {
     /**
      * What is left of the pool — a **multiset** difference and not a set one, because one printed
      * package lists the same skill twice and taking it once must leave the other.
-     *
-     * **Two sources, because a pick outlives the ledger that recorded it.** While a Traveller is in
-     * creation the picks are on their flag, which is where the draft is played. `Chargen.finish` takes
-     * that flag off — so a table that finishes one Traveller before the pool is empty would see their
-     * picks come back and the rest of the group could take the same skill twice. A Traveller who has
-     * left is therefore counted through the skills the package granted them, matched on the package's
-     * own name so a previous campaign's draft cannot leak into this one.
-     *
-     * Draining a stored pool instead would be simpler and is closed off: **a player cannot write a
-     * world setting** — measured, *"User ZZ Player lacks permission to update Setting"* — so the pool
-     * has to be derived or the draft becomes the referee's alone, which is what "the owner rolls"
-     * forbids (§9.38).
-     *
-     * @param {Actor[]} roster
      * @returns {string[]}
      */
     remaining(roster) {
@@ -100,10 +71,7 @@ export const Package = {
     },
 
     /**
-     * Whose turn it is: fewest picks taken, the roster's own order breaking the tie. *"Takes it in
-     * turns"* is a rotation and the count is what states where the rotation has got to — which is why
-     * nothing stores a cursor and an interrupted draft resumes by reading.
-     * @param {Actor[]} roster
+     * Whose turn it is: fewest picks taken, the roster's own order breaking the tie.
      * @returns {Actor|null}
      */
     turn(roster) {
@@ -112,13 +80,7 @@ export const Package = {
         return roster.find(actor => this.picks(actor).length === fewest) ?? null;
     },
 
-    /**
-     * Take one entry out of the pool. Two writes, both to the picker's own Traveller: the pick, which
-     * is what empties the pool, and the skill, which is what survives creation.
-     *
-     * `atLeast` and not `raise`: a package never lowers a skill already held, and a Traveller who
-     * spends their pick on something they already have has wasted it rather than lost it.
-     */
+    /** Take one entry out of the pool. */
     async take(actor, text) {
         const entry = this.entry(text);
         if ( !actor || !entry.name ) return null;
@@ -134,12 +96,9 @@ export const Package = {
     }
 };
 
-/* -------------------------------------------- */
-
 /**
  * Folio 48's ship debate: *"only one Traveller may start the campaign owning a ship … each of the
- * others gains Cr25000 per year, per ship rolled"*. A ship given up is a **field on the entitlement
- * row** and not a note, because the pension arithmetic counts these rows every time it recomputes.
+ * others gains Cr25000 per year, per ship rolled"*.
  */
 const Ships = {
 
@@ -159,10 +118,7 @@ const Ships = {
     },
 
     /**
-     * Settle it for the whole table at once. **Permission is tested on every Traveller before any of
-     * them is written**, because a half-applied election leaves two owners or none — the same reason
-     * `Grants.connect` refuses rather than pays one side.
-     * @param {Actor[]} roster
+     * Settle it for the whole table at once.
      * @param {string} keeper   The actor id that starts the campaign owning a ship
      */
     async elect(roster, keeper) {
@@ -182,24 +138,10 @@ const Ships = {
     }
 };
 
-/* -------------------------------------------- */
-
 /**
- * §9.40's closing screen — the two steps that are group-level by construction, and the transition out
+ * The closing screen — the two steps that are group-level by construction, and the transition out
  * of creation.
- *
- * **Why a second window rather than a block on the grid.** §9.40 puts these on §9.38's screen and not
- * on a sheet, and that is the load-bearing half: what they must not be is per-Traveller. The creation
- * grid's height is already budgeted to the last pixel — the term grid is its only scroller precisely so
- * the strip and the tray stay visible — and a ship debate has nothing to say while the table is still
- * playing terms. So this is the same roster read a second way, opened from the grid's masthead.
- *
- * **What it does that no sheet could.** One Traveller keeps the ship and the others are paid for it; a
- * pool of skills is drained around the table in turn; and the roster is torn down together. Every one
- * of those reads more than one actor.
- *
  * @extends {ApplicationV2}
- * @mixes HandlebarsApplication
  */
 export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
 
@@ -234,16 +176,14 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
         return screen.render({ force: true });
     }
 
-    /* -------------------------------------------- */
-
     /** Every actor this screen has written into `apps`, which is not the same as the current roster. */
     #registered = new Set();
 
     /**
-     * The same two registrations the creation grid needs, and the same array hazard: `game.actors.apps`
-     * is an ARRAY where a document's `apps` is a Record, so a window reopened during its own closing
-     * animation leaves an orphan in it that re-renders for the rest of the session. Pruned by class
-     * rather than tracked, which also makes this idempotent.
+     * The same two registrations the creation grid needs, and the same array hazard:
+     * `game.actors.apps` is an ARRAY where a document's `apps` is a Record, so a window reopened
+     * during its own closing animation leaves an orphan in it that re-renders for the rest of the
+     * session.
      */
     #syncRegistrations(actors) {
         const wanted = new Set(actors.filter(actor => actor));
@@ -268,25 +208,22 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
         if ( index >= 0 ) game.actors.apps.splice(index, 1);
     }
 
-    /* -------------------------------------------- */
-    /*  Context                                     */
-    /* -------------------------------------------- */
-
     /** @inheritDoc */
     async _prepareContext(options) {
         const context = await super._prepareContext(options);
         const roster = Chargen.roster().sort((a, b) => a.name.localeCompare(b.name));
         this.#syncRegistrations(roster);
 
-        // §9.46's solo generation removes the Connections Rule and **both** of these steps, degenerating
-        // the grid to one column. The option that contradicts the thesis earns its row by saying so.
+        // Solo generation removes the Connections Rule and **both** of these steps, degenerating
+        // the grid to one column.
         const solo = CreationOptions.solo();
         context.solo = solo;
         context.empty = !roster.length;
         context.columns = roster.map(actor => ChargenClose.#row(actor));
-        // Tearing the table down is a GROUP action, so it is offered only to a user who may write every
-        // column: a player who may write one gets a half-applied roster — measured, one Traveller torn
-        // down and one refused — which is the state `Ships.elect` already refuses whole for.
+        // Tearing the table down is a GROUP action, so it is offered only to a user who may write
+        // every column: a player who may write one gets a half-applied roster — measured, one
+        // Traveller torn down and one refused — which is the state `Ships.elect` already refuses
+        // whole for.
         context.canFinishAll = !context.empty && context.columns.every(column => column.canEdit);
         context.serving = context.columns.filter(column => column.serving).length;
         context.owed = context.columns.reduce((sum, column) => sum + column.rolls, 0);
@@ -294,8 +231,6 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
         context.package = solo ? null : ChargenClose.#package(roster);
         return context;
     }
-
-    /* -------------------------------------------- */
 
     /** One Traveller's whole account, read off the actor and the ledger. Nothing here is stored. */
     static #row(actor) {
@@ -307,8 +242,9 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
             age: summary.age,
             serving: Chargen.isServing(actor),
             terms: Chargen.termsServed(actor),
-            // What the ledger still owes, plus the rank bonus that is DERIVED and never written into
-            // it — writing a derivation into a ledger double-counts it on the next recompute (§9.40).
+            // What the ledger still owes, plus the rank bonus that is DERIVED and never written
+            // into it — writing a derivation into a ledger double-counts it on the next recompute
+            //.
             rolls: summary.rolls,
             careers: summary.careers.map(career => ({
                 id: career.id, name: career.name, terms: career.terms, rank: career.rank,
@@ -341,16 +277,11 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
             || game.i18n.localize(MGT2.BenefitKinds[row.kind] ?? row.kind);
     }
 
-    /**
-     * The ship election. It is offered only where more than one Traveller rolled one, because with a
-     * single owner there is nothing to debate and folio 48 asks for no election.
-     */
+    /** The ship election. */
     static #ship(columns) {
         const holders = columns.filter(column => column.ships.held);
         const kept = holders.filter(column => column.ships.kept);
-        // **Settled is not "somebody still holds one"** — before the debate every holder does. It is
-        // exactly one holder keeping and every other having given theirs up, which is also true with
-        // a single holder and nothing to debate. Measured: reading `kept` alone announced two owners.
+        // **Settled is not "somebody still holds one"** — before the debate every holder does.
         const settled = (kept.length === 1)
             && holders.every(column => column.ships.kept || column.ships.givenUp);
         return {
@@ -380,21 +311,11 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
         };
     }
 
-    /* -------------------------------------------- */
-    /*  Actions                                     */
-    /* -------------------------------------------- */
-
     static #actorOf(target) {
         return game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId);
     }
 
-    /**
-     * One Benefit roll, end to end in one action. **Rolling and recording are one gesture on purpose**:
-     * `Muster.roll` posts a public card and spends the tray's one-shot DM, and `Muster.take` is what
-     * writes the entitlement row and spends the roll off the ledger — so a control that offered only
-     * the first would leave the dice in the log and the accounts untouched.
-     * @this {ChargenClose}
-     */
+    /** One Benefit roll, end to end in one action. */
     static async #onBenefit(event, target) {
         const actor = ChargenClose.#actorOf(target);
         if ( !actor ) return;
@@ -442,11 +363,7 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
         });
     }
 
-    /**
-     * What the row the dice landed on actually said. **The system ships no benefit table** (§9.36), so
-     * this is transcription rather than lookup — which is also why the voucher's two ceilings are typed
-     * rather than derived.
-     */
+    /** What the row the dice landed on actually said. */
     static async #askOutcome(actor, asked, total) {
         const kinds = Object.entries(MGT2.BenefitKinds).map(([key, label]) =>
             `<option value="${key}"${(key === ((asked.column === "cash") ? "cash" : "voucher")) ? " selected" : ""}>`
@@ -495,8 +412,7 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * The election, and it writes every holder rather than one: electing an owner is also declaring
-     * the rest paid off, so the two halves cannot be separate gestures (§9.40).
-     * @this {ChargenClose}
+     * the rest paid off, so the two halves cannot be separate gestures.
      */
     static async #onKeepShip(event, target) {
         const actor = ChargenClose.#actorOf(target);
@@ -513,11 +429,7 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.render();
     }
 
-    /**
-     * The table declares the package, once. It is typed rather than chosen from a list because none
-     * ships and none ever will (§9.36) — and the referee pastes the line their book prints.
-     * @this {ChargenClose}
-     */
+    /** The table declares the package, once. */
     static async #onEditPackage() {
         const current = Package.read();
         const typed = await DialogV2.prompt({
@@ -541,12 +453,7 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.render();
     }
 
-    /**
-     * The transition out, one Traveller at a time. **The pension is banked here and nowhere earlier**,
-     * because it is the first moment the ship debate has an answer — and then the flag comes off, which
-     * is what makes them an ordinary Traveller (§9.38, §9.50).
-     * @this {ChargenClose}
-     */
+    /** The transition out, one Traveller at a time. */
     static async #onFinish(event, target) {
         const actor = ChargenClose.#actorOf(target);
         if ( !actor ) return;
@@ -560,8 +467,8 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
     static async #onFinishAll() {
         const roster = Chargen.roster();
         if ( !roster.length ) return;
-        // Whole or not at all, as the ship election is: a roster half torn down is worse than one not
-        // torn down, and the confirmation must never name a Traveller this user cannot write.
+        // Whole or not at all, as the ship election is: a roster half torn down is worse than one
+        // not torn down, and the confirmation must never name a Traveller this user cannot write.
         for ( const actor of roster ) {
             if ( actor.canUserModify(game.user, "update") ) continue;
             ui.notifications.warn(game.i18n.format("MGT2.Chargen.Screen.NoPermission", { name: actor.name }));
@@ -574,9 +481,9 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * Finishing is irreversible in one direction only — the flag goes and the decided history stays —
-     * so what is confirmed is the state that is being thrown away: rolls not taken, a career still
-     * open, a package not drained.
+     * Finishing is irreversible in one direction only — the flag goes and the decided history stays
+     * — so what is confirmed is the state that is being thrown away: rolls not taken, a career
+     * still open, a package not drained.
      */
     static async #confirmFinish(actors) {
         const warnings = [];
@@ -600,13 +507,7 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
         });
     }
 
-    /**
-     * Bank the pension and take the flag off, in that order. The ships given up are **read off the
-     * entitlement rows** rather than passed in: the election has already written them, which is what
-     * turns §9.40's *"nothing on one actor knows how the table settled it"* into something one actor
-     * does know.
-     * @param {Actor} actor
-     */
+    /** Bank the pension and take the flag off, in that order. */
     static async finish(actor) {
         if ( !actor.canUserModify(game.user, "update") ) {
             ui.notifications.warn(game.i18n.format("MGT2.Chargen.Screen.NoPermission", { name: actor.name }));
@@ -622,12 +523,10 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 }
 
-/* -------------------------------------------- */
-
 /**
- * The package is world-scoped and never shown in the settings pane: it is the table's own list, edited
- * from the closing screen where it is used, on the precedent of `migrationVersion` and the world-packs
- * ids (§9.97 is for rules, and a package is not one).
+ * The package is world-scoped and never shown in the settings pane: it is the table's own list,
+ * edited from the closing screen where it is used, on the precedent of `migrationVersion` and the
+ * world-packs ids.
  */
 export function registerChargenSettings() {
     game.settings.register("mgt2", PACKAGE_SETTING, {

@@ -18,11 +18,7 @@ const BLOCKS = ["roll", "hazard", "specs", "carried", "traits", "rules", "relati
 
 const blockPath = id => `systems/mgt2/templates/items/blocks/${id}.html`;
 
-/**
- * Which tab holds each block. `masthead` is not a tab: the roll binding is lifted above the strip so
- * it stays on screen from every one of them. The map is TOTAL over `BLOCKS` — a block with no slot
- * would silently stop rendering on every type, so the omission is caught at load instead.
- */
+/** Which tab holds each block. */
 const SLOT = {
   roll: "masthead", hazard: "masthead",
   specs: "details", relationship: "details", station: "details", career: "details",
@@ -41,9 +37,7 @@ for ( const id of BLOCKS ) {
 
 /**
  * `CareerData` is two schemas in one Item and `isTemplate` is which — the Item having no Actor
- * parent, read and never stored. Drawing both halves at once would offer a referee writing a career
- * the fields recording what one Traveller did with it, and offer a Traveller's own record the tables
- * they are not allowed to edit. So each half draws only where it means something.
+ * parent, read and never stored.
  */
 const TEMPLATE_ONLY = new Set(["career", "careertables"]);
 const RECORD_ONLY = new Set(["events"]);
@@ -53,10 +47,8 @@ const EPONYMOUS = new Set(["effects", "description", "contents"]);
 
 /**
  * Every array of NON-BLANK strings a sheet draws, and the reason they are listed together: the
- * element is `blank: false`, so an appended empty string cleans away, the diff comes out empty and no
- * update fires — adding a track rung silently did nothing (§9.110). So none of these takes an add
- * control at all. **A trailing input is how one is added and emptying a row is how it is deleted**,
- * which is the convention `rules[]` has always used, and the blanks are dropped here on the way in.
+ * element is `blank: false`, so an appended empty string cleans away, the diff comes out empty and
+ * no update fires — adding a track rung silently did nothing.
  */
 const STRING_LISTS = ["rules", "qualificationOverride.exceptCareers", "backgroundSkills.mandatory",
   "backgroundSkills.choices"];
@@ -64,16 +56,15 @@ const STRING_LISTS = ["rules", "qualificationOverride.exceptCareers", "backgroun
 /** The same convention one level down, where the list is a track's rungs inside an indexed track. */
 const TRACK_LISTS = ["tracks", "frame.tracks"];
 
-/** And again, where it is the skills a standing modifier reads its DM off (§9.121). */
+/** And again, where it is the skills a standing modifier reads its DM off. */
 const STANDING_LISTS = ["standingModifiers", "frame.standingModifiers"];
 
 /** A submitted list arrives keyed by index, so it is an object here and an array afterwards. */
 const compact = list => Object.values(list ?? {}).filter(entry => entry?.trim());
 
 /**
- * A declared step's check as the book prints it — `Patriarchy 4+`, `Caste 2+`, `Patriarchy, by SOC` —
- * or nothing at all where the frame declares no check (§9.120). Composed here rather than in the
- * template because a summary is three optional parts and Handlebars cannot join them.
+ * A declared step's check as the book prints it — `Patriarchy 4+`, `Caste 2+`, `Patriarchy, by SOC`
+ * — or nothing at all where the frame declares no check.
  * @returns {string}
  */
 function stepCheckSummary(check) {
@@ -95,15 +86,7 @@ const SUBTYPES = {
   disease: MGT2.DiseaseSubType
 };
 
-/**
- * The Traveller item sheet, shared by all item sub-types.
- *
- * One root template for every type: the types differ by which blocks they carry, not by which
- * layout they need, so the per-type work is a list of block names and nothing else.
- *
- * @extends {ItemSheetV2}
- * @mixes HandlebarsApplication
- */
+/** The Traveller item sheet, shared by all item sub-types. @extends {ItemSheetV2} */
 export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixin(ItemSheetV2)) {
 
   /** @inheritDoc */
@@ -137,20 +120,13 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     }
   };
 
-  /**
-   * One root part, unwrapped into `.window-content`. That is what makes `.window-content` the form
-   * element, which is what lets the masthead carry `weight` — a bare input outside the schema, see
-   * `_processFormData`. Promoting the masthead to a part of its own breaks that round trip silently.
-   * @inheritDoc
-   */
+  /** One root part, unwrapped into `.window-content`. @inheritDoc */
   static PARTS = {
     sheet: {
       root: true,
       template: "systems/mgt2/templates/items/item-sheet.html",
       templates: BLOCKS.map(blockPath).concat("systems/mgt2/templates/actors/parts/tabs-nav.html",
-        // A printed cell is the same editor in six places on a career template (§9.48). The three
-        // below are the same editor on a career template and on a species frame, because the schema
-        // builds both from one factory (§9.54).
+        // A printed cell is the same editor in six places on a career template.
         "systems/mgt2/templates/items/parts/career-cell.html",
         "systems/mgt2/templates/items/parts/string-list.html",
         "systems/mgt2/templates/items/parts/track-definition.html",
@@ -162,15 +138,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     }
   };
 
-  /**
-   * The five tabs, in nav order. Which of them render varies per document: a slot no block fills
-   * gets neither a nav entry nor a body, so no `initial` is declared here — the first surviving tab
-   * is it. `effects` and `description` are on every type's list, so there is always one.
-   *
-   * Effects sits last on every sheet in the system, the character sheet included: it is the one tab
-   * that is about what is being done *to* the document rather than what the document is.
-   * @inheritDoc
-   */
+  /** The five tabs, in nav order. @inheritDoc */
   static TABS = {
     item: {
       tabs: [
@@ -183,14 +151,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     }
   };
 
-  /**
-   * Which blocks each type carries, in render order. Keyed by type, or by `type:subType` where the
-   * sub-type changes the answer. A type absent from the map uses `_default`.
-   *
-   * `effects` is on every list, empty or not: any Item can carry an ActiveEffect and any of them
-   * transfers to the owner, so a type that never shows the block is a type whose effects are
-   * invisible.
-   */
+  /** Which blocks each type carries, in render order. */
   static #BLOCKS_BY_TYPE = {
     _default: ["specs", "carried", "effects", "description"],
     weapon: ["roll", "specs", "carried", "traits", "effects", "description"],
@@ -200,35 +161,26 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     disease: ["hazard", "effects", "description"],
     computer: ["specs", "carried", "traits", "effects", "description", "software"],
     // A wafer jack is a computer as much as an implant, so it lists what it runs; `#composition`
-    // drops the block again on an augment that hosts nothing (§9.84).
+    // drops the block again on an augment that hosts nothing.
     "equipment:augment": ["specs", "carried", "effects", "description", "software"],
     container: ["carried", "effects", "description", "contents"],
-    // Both halves are listed and `#composition` drops the one this Item is not (§9.48, §9.103).
+    // Both halves are listed and `#composition` drops the one this Item is not.
     career: ["specs", "career", "effects", "description", "careertables", "events"],
     contact: ["relationship", "effects", "description", "notes"],
     // The split is where the schema already splits: `frame.*` is the term this species runs and
-    // everything beside it is what a Traveller of it rolls. Neither half is gated — unlike a career,
-    // a species is one schema in one Item and the EMBEDDED copy is the one the loop reads (§9.54).
+    // everything beside it is what a Traveller of it rolls.
     species: ["specs", "species", "traits", "speciesframe", "effects", "description", "detail"],
     role: ["station", "actions", "effects", "description"],
-    // The three ship-owned types are not carried by anyone, so none of them takes `carried` and none
-    // shows a supply cell. `drug` is deliberately absent: a dose is carried, priced and counted, so
-    // the default list is already the right one for it.
+    // The three ship-owned types are not carried by anyone, so none of them takes `carried` and
+    // none shows a supply cell.
     cargo: ["specs", "trade", "effects", "description"],
     passage: ["specs", "effects", "description"],
     component: ["specs", "effects", "description"],
     ammunition: ["specs", "carried", "traits", "rules", "effects", "description"]
   };
 
-  /* -------------------------------------------- */
-
   /**
    * The blocks this document carries, grouped into the tab each one belongs in.
-   *
-   * `carried` is the block that dissolved: its inventory line is the masthead's supply cell and its
-   * TL, legality and weightless join Specs, so what the partial still draws is a container's own
-   * storage properties — nothing at all on anything else.
-   *
    * @param {object[]} [traits]   The prepared code rows, when the blocks are being rendered
    * @returns {{supply: boolean, slots: Record<string, object[]>}}
    */
@@ -246,7 +198,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         supply = true;
         if ( item.type !== "container" ) continue;
       }
-      // An augment is a host only while it is fitted and states Processing (§9.84); one that is
+      // An augment is a host only while it is fitted and states Processing; one that is
       // neither has no software to list, and a `computer` always passes.
       if ( (id === "software") && !MGT2Helper.runsSoftware(item) ) continue;
       // A weapon declares both trait arrays and the sheet had one code row to spend, so the block
@@ -261,13 +213,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     return { supply, slots };
   }
 
-  /* -------------------------------------------- */
-
   /**
    * The tab set varies per document, so the declared list is filtered down to the slots this item's
-   * blocks fill and `initial` follows it. v14 reads both from here: `_prepareTabs`
-   * (`client/applications/api/application.mjs`) destructures `{tabs, labelPrefix, initial}` off this
-   * method, which is also where FilePicker varies its own source tabs.
+   * blocks fill and `initial` follows it.
    * @inheritDoc
    */
   _getTabsConfig(group) {
@@ -279,11 +227,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   }
 
   /**
-   * `_prepareTabs` fills `tabGroups[group]` with `??=`, so a stored id outlives the tab that carried
-   * it: turn a talent from psionic to skill and Details is gone while the group still points at it,
-   * leaving a blank body under a strip with nothing active. Reset only when the id is genuinely
-   * absent — a blanket reset would bounce the user off the tab they are typing in, on every
-   * `submitOnChange` re-render.
+   * `_prepareTabs` fills `tabGroups[group]` with `??=`, so a stored id outlives the tab that
+   * carried it: turn a talent from psionic to skill and Details is gone while the group still
+   * points at it, leaving a blank body under a strip with nothing active.
    * @inheritDoc
    */
   _prepareTabs(group) {
@@ -293,8 +239,6 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     }
     return super._prepareTabs(group);
   }
-
-  /* -------------------------------------------- */
 
   /** @inheritDoc */
   async _prepareContext(options) {
@@ -329,12 +273,12 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         .filter(c => (c.id !== item.id) && !c.containerChain.some(p => p.id === item.id))) : null,
       computers: actor ? [{ name: "", _id: "" }].concat(actor.getComputers()) : null,
       // Every round the owner carries, whatever it says it fits: `weaponType` is free text because
-      // no book prints a closed list, so it is a hint on the row and never a filter (§9.90).
+      // no book prints a closed list, so it is a hint on the row and never a filter.
       rounds: (actor && (item.type === "weapon"))
         ? [{ name: game.i18n.localize("MGT2.Items.WeaponsOwn"), _id: "" }]
           .concat(actor.items.filter(entry => entry.type === "ammunition")) : null,
       // The counter lives on the Traveller, not on the drug, so that it survives the last dose
-      // being swallowed — which is precisely when it matters most (§9.90).
+      // being swallowed — which is precisely when it matters most.
       doses: (item.type === "drug") ? Doses.countOf(actor, item.name) : null,
       weight: "weight" in item.system ? item.system.weight : null,
       unitlabels: { weight: MGT2Helper.getWeightLabel() },
@@ -361,8 +305,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
 
   /**
    * What a species frame reads as rather than what it stores: the term sequence derived against the
-   * Core one (§9.54), and the Set of characteristics it does without — a Set being neither an array
-   * nor a plain object, so Handlebars cannot walk it and `.join` on it throws (§9.111).
+   * Core one, and the Set of characteristics it does without — a Set being neither an array
+   * nor a plain object, so Handlebars cannot walk it and `.join` on it throws.
    */
   #speciesFrame() {
     if ( this.item.type !== "species" ) return null;
@@ -372,8 +316,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       own: [...own],
       cut: [...cut],
       declared: this.item.system.frame.steps.length > 0,
-      // The step's own label and the one-line reading of its check, composed here because a play-time
-      // row prints what the book prints — `Patriarchy 4+` — and Handlebars cannot assemble that.
+      // The step's own label and the one-line reading of its check, composed here because a
+      // play-time row prints what the book prints — `Patriarchy 4+` — and Handlebars cannot
+      // assemble that.
       steps: this.item.system.frame.steps.map((step, index) => ({
         index,
         key: step.key,
@@ -387,9 +332,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   }
 
   /**
-   * The four skill tables as a list the template can walk, because `tables` is a SchemaField and not
-   * an array — a career has these four slots or fewer, never a fifth, and `present` is what says
-   * which exist rather than the key being absent (§9.48).
+   * The four skill tables as a list the template can walk, because `tables` is a SchemaField and
+   * not an array — a career has these four slots or fewer, never a fifth, and `present` is what
+   * says which exist rather than the key being absent.
    */
   #careerTables() {
     if ( (this.item.type !== "career") || !this.item.system.isTemplate ) return null;
@@ -400,10 +345,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   }
 
   /**
-   * The reference ledger, on the `system.design` model (§9.92): one line per name this template
-   * points at, and the names that resolve to nothing spelled out beside it. A check with nothing to
-   * read is drawn and silent rather than green — a career declaring no ladders answers no question
-   * about ladders, and saying so is the point.
+   * The reference ledger, on the `system.design` model: one line per name this template
+   * points at, and the names that resolve to nothing spelled out beside it.
    */
   #careerIssues() {
     if ( (this.item.type !== "career") || !this.item.system.isTemplate ) return null;
@@ -511,15 +454,12 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   }
 
   /**
-   * Core folio 79: what Auto X buys this weapon, one line per mode. **There is no fire-mode field
-   * and there will not be one** — the folio makes the mode a choice per pull of the trigger, so it
-   * is the prompt's control and the sheet's job is to state what each mode costs in rounds against
-   * the magazine printed beside it.
+   * Core folio 79: what Auto X buys this weapon, one line per mode.
    * @returns {string[]|null}   Null on anything that is not an Auto weapon
    */
   #fireModes() {
     // The loaded round's list: a grenade replaces the rifle's traits outright, so Auto goes with
-    // them and the weapon offers no burst while that round is in it (§9.90).
+    // them and the weapon offers no burst while that round is in it.
     const auto = (this.item.type === "weapon")
       ? MGT2Helper.traitScore(this.item.system.effective.traits, "auto") : 0;
     if ( auto <= 0 ) return null;
@@ -536,22 +476,17 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   }
 
   /**
-   * What is in the magazine, and what putting a full one in costs in actions. Core folio 77 makes a
-   * spare magazine "fully reload the weapon", so there is one reload and no partial one; Core folio
-   * 75 prices it at a Minor Action, and FC folio 7-8's Slow Loader X replaces that with X of them.
-   * The cost is **stated and never spent** — nothing in this system keeps a ground-combat action
-   * budget, which is the same treatment the prompt's aiming ladder already gets.
+   * What is in the magazine, and what putting a full one in costs in actions.
    * @returns {{value: number, magazine: number, full: boolean, actions: number}|null}
    */
   #ammo() {
     const { type, system } = this.item;
     // The loaded round's magazine, where one is loaded: a 40mm grenade takes the rifle from 40 to 1
-    // and every number on the weapon's own line is wrong while it is in there (§9.90).
+    // and every number on the weapon's own line is wrong while it is in there.
     const magazine = system.effective?.magazine ?? system.magazine;
     if ( (type !== "weapon") || !(magazine > 0) ) return null;
     // One null closes the whole count: the loaded readout, the Reload button and the round selector
-    // all render off this. The weapon's printed magazine stays on its spec line — that is the
-    // catalogue figure, not a tally.
+    // all render off this.
     if ( !Rules.on("magazines") ) return null;
     return {
       value: system.ammo,
@@ -562,12 +497,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     };
   }
 
-  /**
-   * Where a lot or a booking is bound for, as one name. §6.3 stores the pair degraded — a uuid where
-   * the world exists as an Actor, a bare name where it does not — so the readout takes whichever
-   * half is filled, and a speculative lot has neither (Core p.242).
-   * @returns {string|null}
-   */
+  /** Where a lot or a booking is bound for, as one name. @returns {string|null} */
   #destination() {
     const destination = this.item.system.destination;
     if ( !destination ) return null;
@@ -575,20 +505,14 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     return world?.name || destination.name || null;
   }
 
-  /**
-   * The printed reference as one line, from the two strings §6.1 stores. Either half may stand
-   * alone — a book with no page is still a citation — and neither is prefixed here: `page` holds
-   * whatever the book prints, which is `p.150-152` on one entry and `inside back cover` on another.
-   * @returns {string|null}
-   */
+  /** The printed reference as one line, from the two strings stored. @returns {string|null} */
   #citation() {
     const source = this.item.system.source;
     return [source?.book, source?.page].filter(half => half?.trim()).join(", ") || null;
   }
 
   /**
-   * §6.2's tonnage triple resolved against the hull this row is fitted to. A component off a ship
-   * has no hull to take a percentage of, and that is the normal state of one in a compendium.
+   * The tonnage triple resolved against the hull this row is fitted to.
    * @returns {number|null}
    */
   #componentTons() {
@@ -600,8 +524,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
 
   /**
    * Core p.244 keeps a purchase column and a sale column and applies the **largest applicable** DM
-   * rather than their sum, which is why each is a list of (trade code, DM) pairs. One block per
-   * column, the way the trait rows do it.
+   * rather than their sum, which is why each is a list of (trade code, DM) pairs.
    * @returns {object[]|null}
    */
   #tradeColumns() {
@@ -614,10 +537,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   }
 
   /**
-   * The trait arrays as shared code rows, one per array the schema declares. A weapon's traits and a
-   * species' come from the registry; the accessory lists the other types call options have no
-   * printed vocabulary, so they declare the `custom` family and their autocomplete is empty by
-   * design. A weapon declares both, and with one row per sheet its accessories were unreachable.
+   * The trait arrays as shared code rows, one per array the schema declares.
    * @returns {object[]}
    */
   #prepareTraits() {
@@ -632,16 +552,10 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     return rows;
   }
 
-  /**
-   * What this item holds: software loaded into a computer, or items stored in a container. Both
-   * read in play mode, so the list is not gated on the sheet being editable.
-   *
-   * Software is loaded into a machine an actor owns, so it still needs one. A container does not:
-   * its contents are whatever sits beside it, in the world as much as on a character.
-   */
+  /** What this item holds: software loaded into a computer, or items stored in a container. */
   #prepareNested(actor) {
     const item = this.item;
-    // A fitted augment with Processing hosts software exactly as a computer does (§9.84).
+    // A fitted augment with Processing hosts software exactly as a computer does.
     const isHost = MGT2Helper.runsSoftware(item);
     if ( !isHost && (item.type !== "container") ) return [];
 
@@ -683,8 +597,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
 
   /**
    * Fire control and power draw exist only above ground scale, and the scale also decides which
-   * unit the range field speaks. Applied on change so the grid answers before the round trip.
-   * @param {string} key
+   * unit the range field speaks.
    */
   #applyScale(key) {
     const scale = MGT2.WeaponScales[key];
@@ -701,15 +614,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     }
   }
 
-  /* -------------------------------------------- */
-  /*  Form Submission                             */
-  /* -------------------------------------------- */
-
-  /**
-   * Replaces `_getSubmitData` of the V1 sheet.
-   * Note it must return an *expanded* object: the result is handed to Document#validate.
-   * @inheritDoc
-   */
+  /** Replaces `_getSubmitData` of the V1 sheet. @inheritDoc */
   _processFormData(event, form, formData) {
     const submitData = super._processFormData(event, form, formData);
     const system = submitData.system;
@@ -752,8 +657,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         if ( track?.values ) track.values = compact(track.values);
       }
     }
-    // The same convention one level down again: the skills a declared step's check names (§9.120),
-    // and the ones a standing modifier reads its DM off (§9.121).
+    // The same convention one level down again: the skills a declared step's check names,
+    // and the ones a standing modifier reads its DM off.
     for ( const step of Object.values(system?.frame?.steps ?? {}) ) {
       if ( step?.check?.skills ) step.check.skills = compact(step.check.skills);
     }
@@ -769,15 +674,10 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     return submitData;
   }
 
-  /* -------------------------------------------- */
-  /*  Event Listeners and Handlers                */
-  /* -------------------------------------------- */
-
   /**
    * Append an entry to an indexed collection stored on the item, saving pending form edits first.
    * @param {string} property   The system property holding the collection
    * @param {object} blank      The entry to append
-   * @this {TravellerItemSheet}
    */
   static async #appendEntry(property, blank) {
     await this.submit();
@@ -790,7 +690,6 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
    * Remove one entry from an indexed collection stored on the item.
    * @param {string} property   The system property holding the collection
    * @param {number} index      The index to drop
-   * @this {TravellerItemSheet}
    */
   static async #removeEntry(property, index) {
     await this.submit();
@@ -801,19 +700,11 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   }
 
   /**
-   * Write a collection back, addressed at the **outermost array on its path** and carrying that array
-   * whole.
-   *
-   * `ArrayField._cast` rebuilds an array from only the submitted keys (`common/data/fields.mjs`,
-   * `if ( Number.isInteger(i) && (i >= 0) ) arr[i] = v;`), so an update sent as
-   * `system.rankLadders.0.rows` arrives as `{0: {rows}}` and leaves **one** ladder, stripped of its own
-   * id and name — §9.101's hazard reached through the update rather than through the form. Four of a
-   * career template's collections nest inside an indexed one, so the path is re-rooted here rather than
-   * written as given.
+   * Write a collection back, addressed at the **outermost array on its path** and carrying that
+   * array whole.
    * @param {object} source     The item's system source, mutated and then written
    * @param {string} property   The dotted path of the collection
    * @param {Array} next        What it becomes
-   * @this {TravellerItemSheet}
    */
   static async #writeCollection(source, property, next) {
     foundry.utils.setProperty(source, property, next);
@@ -822,8 +713,6 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     const root = (indexed < 0) ? property : parts.slice(0, indexed).join(".");
     return this.item.update({ [`system.${root}`]: foundry.utils.getProperty(source, root) });
   }
-
-  /* -------------------------------------------- */
 
   /** @this {TravellerItemSheet} */
   static #onTraitDelete(event, target) {
@@ -844,14 +733,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   }
 
   /**
-   * Add a row to any indexed collection, the path coming from the DOM rather than from a handler per
-   * array — a career template has eighteen of them and four are nested two deep (§9.48). `closest`
-   * walking up from the control is what makes the nesting work: the innermost `[data-property]`
-   * above the button is always the collection that button belongs to.
-   *
-   * A blank of `{}` cleans to every sub-field's own `initial`, so only an array of scalars needs
-   * `data-blank` — `benefits.cash` is the one.
-   * @this {TravellerItemSheet}
+   * Add a row to any indexed collection, the path coming from the DOM rather than from a handler
+   * per array — a career template has eighteen of them and four are nested two deep.
    */
   static #onEntryCreate(event, target) {
     const property = target.closest("[data-property]")?.dataset.property;
@@ -871,9 +754,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
 
   /**
    * Seed the frame's step list with the Core sequence so a referee editing one term step does not
-   * retype the other nine. **Empty stays the default** — this is offered, never required — and what
-   * a frame cuts is still derived rather than authored (§9.54).
-   * @this {TravellerItemSheet}
+   * retype the other nine.
    */
   static async #onStepsDeclare() {
     await this.submit();
@@ -901,7 +782,6 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   /**
    * Purchase and sale are two columns of the same table (Core p.244), so the row goes to whichever
    * one asked for it rather than to a handler each.
-   * @this {TravellerItemSheet}
    */
   static #onTradeDMCreate(event, target) {
     const property = target.closest("[data-property]").dataset.property;
@@ -932,13 +812,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     return TravellerItemSheet.#removeEntry.call(this, "modifiers", Number(element.dataset.modifiersPart));
   }
 
-  /* -------------------------------------------- */
-
   /**
    * The roll belongs to the character sheet: it owns the characteristics, the skill list and the
-   * Effect card. Its handler reads nothing but the clicked element's dataset, so this hands it the
-   * item sheet's own button and borrows the sheet as `this` rather than growing a second roll path.
-   * @this {TravellerItemSheet}
+   * Effect card.
    */
   static #onItemRoll(event, target) {
     const sheet = this.item.actor?.sheet;
@@ -950,11 +826,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
 
   /**
    * Core folio 77: a spare magazine "will fully reload the weapon", so the whole capacity goes back
-   * in and there is nothing to count. Whose action it is, is settled by folio 75 — the firer's Minor
-   * Action — and the button says so rather than spending one.
-   * @this {TravellerItemSheet}
+   * in and there is nothing to count.
    */
-  /** A dose is taken, not equipped — everything that follows from that is in `doses.js` (§9.90). */
+  /** A dose is taken, not equipped — everything that follows from that is in `doses.js`. */
   static #onDoseTake() {
     return Doses.take(this.item);
   }
@@ -963,13 +837,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     return this.item.update({ "system.loaded": this.item.system.effective.magazine });
   }
 
-  /* -------------------------------------------- */
-  /*  Drag and Drop                               */
-  /* -------------------------------------------- */
-
   /**
    * A contents row stands for a sibling document, not for anything embedded in this item, so what
-   * leaves the sheet is that sibling's own drag data. Anything else is an effect.
+   * leaves the sheet is that sibling's own drag data.
    * @inheritDoc
    */
   async _onDragStart(event) {
@@ -978,12 +848,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     event.dataTransfer.setData("text/plain", JSON.stringify(nested.toDragData()));
   }
 
-  /**
-   * Storing something is a drop on the container's own sheet. All it writes is a reference, so an
-   * item already in this collection only changes hands; one from a compendium, another actor or
-   * the world is copied in with everything it holds.
-   * @inheritDoc
-   */
+  /** Storing something is a drop on the container's own sheet. @inheritDoc */
   async _onDrop(event) {
     const data = MGT2Helper.getDataFromDropEvent(event);
     const container = this.item;
@@ -1020,8 +885,6 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     return this.render();
   }
 
-  /* -------------------------------------------- */
-
   /** The sibling document a nested row stands for. @this {TravellerItemSheet} */
   static #nestedItem(target) {
     const id = target.closest("[data-item-id]")?.dataset.itemId;
@@ -1033,10 +896,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     return TravellerItemSheet.#nestedItem.call(this, target)?.sheet.render({ force: true });
   }
 
-  /**
-   * A sibling changing is not a change to this item, so nothing re-renders the list on its own.
-   * @this {TravellerItemSheet}
-   */
+  /** A sibling changing is not a change to this item, so nothing re-renders the list on its own. */
   static async #onNestedRemove(event, target) {
     const field = MGT2Helper.runsSoftware(this.item)
       ? "system.software.computerId" : "system.container.id";

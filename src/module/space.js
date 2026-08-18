@@ -1,28 +1,6 @@
 import { MGT2 } from "./config.js";
 
-/**
- * Where a world sits in Charted Space, and how far one is from another.
- *
- * A sector is 32 columns of 40 hexes, sixteen subsectors of 8 by 10 lettered A to P in reading order,
- * and a world's printed location is its column and row **within its own sector** — Craw's `1939` is
- * column 19, row 39 of the Spinward Marches. The pair means nothing without the sector beside it,
- * which is why 122 hexes of Behind the Claw are printed twice: the book covers two sectors and each
- * has its own grid. `worldSpace` folds the sector's own position in and produces the one frame in
- * which every world in Charted Space has an unambiguous pair of numbers.
- *
- * **Even-numbered columns are drawn half a hex lower**, so a step sideways changes the row for one
- * parity and not the other, and the two readings disagree. This one was checked against the only two
- * distances the books state outright: Craw 1939 → Glisten 2036 is 3 parsecs (Behind the Claw p.131)
- * and Arcanum 2126 → Deneb 1925 is 2 (p.165). The other parity gives 4 and 2.
- *
- * Distance is computed in cube coordinates rather than on the offset grid: the offset form needs a
- * parity correction at every step, the cube form is half the sum of three differences.
- *
- * This is a **second implementation on purpose** — `mgt2-data/tools/lib/space.mjs` is the same
- * geometry for the Node generators, which run without a browser and read `tools/data/sectors.json`
- * off disk. Neither runtime can import the other's module. The two must agree, and the module's
- * build checks that they do.
- */
+/** Where a world sits in Charted Space, and how far one is from another. */
 
 /** The grid every sector is drawn on. */
 export const SECTOR = Object.freeze({
@@ -32,12 +10,7 @@ export const SECTOR = Object.freeze({
 /** Folded sector names, so a hand-typed `spinward marches` still resolves. `MGT2.Sectors` is frozen. */
 let folded = null;
 
-/**
- * `"1939"` → `{col: 19, row: 39}`. Anything else is not a location on a sector map: a book listing a
- * star system orbit by orbit files `orbit 5` in the same column.
- * @param {string} printed
- * @returns {{col: number, row: number}|null}
- */
+/** `"1939"` → `{col: 19, row: 39}`. @returns {{col: number, row: number}|null} */
 export function parseHex(printed) {
     const match = /^(\d{2})(\d{2})$/.exec(String(printed ?? "").trim());
     if ( !match ) return null;
@@ -56,8 +29,6 @@ export function subsectorLetter({ col, row }) {
 
 /**
  * A sector-local hex in the world space of the whole map, so worlds of different sectors compare.
- * @param {{x: number, y: number}} sector   The sector's own position, from `MGT2.Sectors`.
- * @param {{col: number, row: number}} cell
  */
 export function worldSpace(sector, { col, row }) {
     return {
@@ -72,12 +43,7 @@ function cube({ x, y }) {
     return { x, y: -x - z, z };
 }
 
-/**
- * Jump distance in parsecs between two world-space points.
- * @param {{x: number, y: number}} from
- * @param {{x: number, y: number}} to
- * @returns {number}
- */
+/** Jump distance in parsecs between two world-space points. @returns {number} */
 export function distance(from, to) {
     const a = cube(from);
     const b = cube(to);
@@ -94,11 +60,7 @@ export function findSector(name) {
 }
 
 /**
- * Everything the typed pair means. **Nothing here throws and nothing here is required**: a world with
- * no location, or one in a sector the registry never heard of, is a legitimate state and simply has
- * no `coords` — a homebrew sector has no origin to fold in, and a referee is not obliged to place a
- * world before using its profile. The sector-local halves still resolve without the registry, because
- * the subsector a hex falls in is a property of the grid and not of the sector.
+ * Everything the typed pair means.
  * @param {string} sector   The sector's printed name.
  * @param {string} hex      The hex **within that sector**, as the books print it.
  * @returns {{cell: {col: number, row: number}|null, subsector: string|null, subsectorName: string|null,

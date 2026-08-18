@@ -9,30 +9,12 @@ const { DragDrop } = foundry.applications.ux;
 
 const PARTS_PATH = "systems/mgt2/templates/chargen";
 
-/**
- * Creation produces a Traveller, so a Traveller is what the roster takes. An `npc` statline is
- * written rather than served, and dropping one here would start a term loop over a creature.
- */
+/** Creation produces a Traveller, so a Traveller is what the roster takes. */
 const ROSTER_TYPES = "Actor.character";
 
 /**
- * The creation screen: a grid of Travellers × terms, and no session document behind it (§9.38).
- *
- * **The roster is the flag.** The set of actors carrying `flags.mgt2.chargen` *is* the table, which is
- * why interrupting the evening costs nothing — every decided outcome is already on its actor and
- * reopening this window reads them back. Nothing here is stored: the grid, the step strip and the tray
- * are three readings of the same documents, and selecting a column changes the second and third and
- * nothing else.
- *
- * **The step strip is §9.54's whole argument made visible**: it is read off the selected Traveller's
- * FRAME — the species Item — so a frame that deletes four steps renders four fewer, from declared
- * data. No line in this file compares a step, a career or a species name (§9.47).
- *
- * Standalone rather than a sheet, for `voyage-screen.js`'s reason and one more of its own: it reads
- * every actor at the table, and `registerSheet` binds one document.
- *
+ * The creation screen: a grid of Travellers × terms, and no session document behind it.
  * @extends {ApplicationV2}
- * @mixes HandlebarsApplication
  */
 export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
@@ -41,8 +23,7 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         id: "mgt2-chargen",
         classes: ["mgt2", "chargen", "nopad"],
         // 1160 is the sketch's own frame, and it is not decoration: four columns at 4 rem of term
-        // gutter plus a 12-line cell is what fits before a fifth Traveller falls off the edge. The
-        // height is the budget below — masthead 44, strip 78, tray 128, leaving the ledger ~380.
+        // gutter plus a 12-line cell is what fits before a fifth Traveller falls off the edge.
         position: { width: 1160, height: 700 },
         window: { resizable: true, icon: "fa-solid fa-user-plus", title: "MGT2.Chargen.Screen.Title" },
         actions: {
@@ -54,12 +35,7 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     };
 
-    /**
-     * Four parts, and they are the sketch's four blocks. The ledger is the only scroller: a table that
-     * grows a row per term must not push the strip and the tray off the bottom, because those two are
-     * what say *what happens next* for the column the referee just clicked.
-     * @inheritDoc
-     */
+    /** Four parts, and they are the sketch's four blocks. @inheritDoc */
     static PARTS = {
         masthead: { template: `${PARTS_PATH}/masthead.html` },
         ledger: { template: `${PARTS_PATH}/ledger.html`, scrollable: [""] },
@@ -69,7 +45,6 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * One window. A second would show the same roster twice and select two different columns in it.
-     * @param {object} [options]
      * @param {Actor} [options.add]   A Traveller to put on the roster before the window opens
      */
     static async open({ add } = {}) {
@@ -78,11 +53,7 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return screen.render({ force: true });
     }
 
-    /**
-     * Put a Traveller on the roster — which is writing the flag and nothing else (§9.38). The actor
-     * needs no preparation: a half-built Traveller is a valid document, and so is an empty one.
-     * @param {Actor} actor
-     */
+    /** Put a Traveller on the roster — which is writing the flag and nothing else. */
     async add(actor) {
         if ( actor?.type !== "character" ) return null;
         if ( !actor.canUserModify(game.user, "update") ) {
@@ -97,35 +68,13 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return Chargen.start(actor);
     }
 
-    /* -------------------------------------------- */
-
     /** Which column the strip and the tray are read from. Per-client, and never persisted. */
     #selectedId = null;
 
     /** Every actor this screen has written into `apps`, which is not the same as the current roster. */
     #registered = new Set();
 
-    /**
-     * Two registrations, two different shapes, and both are needed.
-     *
-     * `document.apps` is a Record keyed by application id and catches an EMBEDDED write — a `career`
-     * record gaining a term, the species Item being swapped — because `_onUpdateDescendantDocuments`
-     * re-renders the parent. `game.actors.apps` catches the roster itself moving: `_onModifyContents`
-     * fires for a top-level update only when `!operation.parent` (`document-collection.mjs`,
-     * *"if ( operation.render && !operation.parent && documents.length )"*), which is exactly the
-     * shape of the flag write that puts a Traveller on the table from another client. Register one
-     * and the other half never arrives.
-     *
-     * **The collection's `apps` is an ARRAY and the document's is a Record, and that difference leaks.**
-     * `close()` removes a window from `foundry.applications.instances` before its teardown runs, so a
-     * reopen during the closing animation builds a SECOND instance under the same id. On a document
-     * that is harmless — the second simply overwrites `apps[id]`, which is why the voyage and combat
-     * screens never had to think about it — but an array keeps both, and the displaced one is never
-     * torn down and re-renders on every actor write for the rest of the session. Measured: three
-     * close-and-reopen cycles left the array holding a closed window still reporting `rendered: true`.
-     * So the array is pruned by identity here rather than tracked with a flag, which also makes the
-     * registration idempotent.
-     */
+    /** Two registrations, two different shapes, and both are needed. */
     #syncRegistrations(actors) {
         const wanted = new Set(actors.filter(actor => actor));
         for ( const actor of this.#registered ) {
@@ -142,8 +91,8 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * `_tearDown` and not `_onClose`: it runs synchronously before the state flips to CLOSED, while
-     * `_onClose` is dispatched unawaited — and a stale entry in a collection's `apps` array renders a
-     * closed window on every actor update for the rest of the session.
+     * `_onClose` is dispatched unawaited — and a stale entry in a collection's `apps` array renders
+     * a closed window on every actor update for the rest of the session.
      * @inheritDoc
      */
     _tearDown(options) {
@@ -153,10 +102,6 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         const index = game.actors.apps.indexOf(this);
         if ( index >= 0 ) game.actors.apps.splice(index, 1);
     }
-
-    /* -------------------------------------------- */
-    /*  Context                                     */
-    /* -------------------------------------------- */
 
     /** @inheritDoc */
     async _prepareContext(options) {
@@ -176,18 +121,15 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         context.empty = !columns.length;
         context.serving = columns.filter(column => !column.done).length;
         // Who has business on the closing screen: a Traveller whose last career is closed is owed
-        // mustering out, and until that runs the flag stays on and the column stays ragged (§9.50).
+        // mustering out, and until that runs the flag stays on and the column stays ragged.
         context.done = columns.length - context.serving;
-        // The table's clock, DERIVED and not stored: the furthest cursor on the roster. There is no
-        // session document to hold a shared term, and the columns going ragged is the point (§9.38).
+        // The table's clock, DERIVED and not stored: the furthest cursor on the roster.
         context.term = columns.reduce((furthest, column) => Math.max(furthest, column.cursor), 0);
         context.rows = ChargenScreen.#rows(columns);
         context.strip = selected ? this.#strip(selected) : null;
         context.tray = selected ? ChargenScreen.#tray(selected) : null;
         return context;
     }
-
-    /* -------------------------------------------- */
 
     /** One Traveller, read whole. Nothing here is stored — every field is a reading of the actor. */
     #column(actor) {
@@ -199,35 +141,31 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             id: actor.id, name: actor.name, actor,
             isOwner: actor.isOwner,
             canEdit: actor.canUserModify(game.user, "update"),
-            // The species Item's own name, because §9.42 is per VARIANT: two statlines can exist under
-            // one species name, so the frame that is actually loaded is what the header prints.
+            // The species Item's own name, because a frame is per VARIANT: two statlines can exist
+            // under one species name, so the frame actually loaded is what the header prints.
             species: species?.name ?? "",
             age: Chargen.age(actor),
             cursor: Chargen.read(actor).term,
             lastTerm: timeline.at(-1)?.index ?? 0,
             done,
-            // The manner of leaving, which four separate rules read rather than the fact (§9.53).
+            // The manner of leaving, which four separate rules read rather than the fact.
             exitMode: done ? ChargenScreen.#label(MGT2.CareerExitModes, timeline.at(-1)?.career.system.exitMode) : "",
             cells: new Map(timeline.map(row => [row.index, ChargenScreen.#cell(row, frame)])),
             selected: false
         };
     }
 
-    /**
-     * One cell: the career, the assignment and the term's own typed facts. `survived` is three-valued
-     * and the third is not a failure — a frame that deletes the survival step produces a term with no
-     * check at all, which must not read as one that was passed.
-     */
+    /** One cell: the career, the assignment and the term's own typed facts. */
     static #cell(row, frame) {
         const lines = [];
         const say = (tone, mark, key) => lines.push({ tone, mark, text: game.i18n.localize(key) });
         if ( row.survived === true ) say("good", "✓", "MGT2.Chargen.Screen.Survived");
         if ( row.survived === false ) say("bad", "✗", "MGT2.Chargen.Screen.SurvivalFailed");
-        // Ejection is a FIELD and never a phrase (§9.49): a note reading "not ejected" would fool any
-        // text match, which is why the row carries the boolean and this reads it.
+        // Ejection is a FIELD and never a phrase: a note reading "not ejected" would fool
+        // any text match, which is why the row carries the boolean and this reads it.
         if ( row.ejected ) say("bad", "✗", "MGT2.Chargen.Screen.Ejected");
-        // The term KIND is the frame's own vocabulary (§9.54) — the frame declares what a term yields
-        // and names it, so the label comes off the frame and never off a list in this file.
+        // The term KIND is the frame's own vocabulary — the frame declares what a term
+        // yields and names it, so the label comes off the frame and never off a list in this file.
         const kind = frame?.termKinds?.find(entry => entry.key === row.kind);
         if ( row.kind ) lines.push({ tone: "", mark: "·", text: kind?.label || row.kind });
         if ( row.note ) lines.push({ tone: "", mark: "·", text: row.note });
@@ -244,10 +182,8 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * The grid, and the one rule that makes the tail ragged: **a vacated cell is not an empty one**.
-     * A Traveller who has stopped — every career record closed, and the teardown still to come, since
-     * mustering out consumes the ledger (§9.50) — has no cell where the others still have one. A term
-     * simply not yet played is blank instead, because those two are different facts.
+     * The grid, and the one rule that makes the tail ragged: **a vacated cell is not an empty
+     * one**.
      */
     static #rows(columns) {
         const last = columns.reduce((furthest, column) =>
@@ -264,21 +200,12 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         }));
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * §9.54's whole argument, on screen. The sequence, what this frame ADDS to the Core one and what
-     * it DELETES from it all come out of `Chargen.steps`, which derives both against
-     * `MGT2.CoreTermSequence` — so a frame that drops ranks drops the commission step with them
-     * without anyone having to list it, and this method never names a step.
-     */
+    /** The frame's whole argument, on screen. */
     #strip(column) {
         const { sequence, own, cut } = Chargen.steps(column.actor);
         const species = Chargen.frame(column.actor);
         const frame = species?.system.frame;
-        // The step the loop is on. A chip is a control only for a column the viewer may write to,
-        // which is what "the owner rolls" means on a shared screen (§9.38) — a player sees every
-        // column's strip and can drive only their own.
+        // The step the loop is on.
         const cursor = ChargenTerm.current(column.actor);
         return {
             id: column.id,
@@ -290,15 +217,14 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             })),
             cut: [...cut].map(key => ({ key, label: ChargenScreen.#label(MGT2.CreationSteps, key) })),
             why: frame?.why ?? "",
-            // No species Item is no frame, and the Core sequence is what a Traveller without one runs.
-            // Said out loud, because `personal.species` is a display string and reading it for this is
-            // the mistake the sentence exists to prevent (§9.54, §9.99).
+            // No species Item is no frame, and the Core sequence is what a Traveller without one
+            // runs.
             frameName: species?.name ?? game.i18n.localize("MGT2.Chargen.Screen.DefaultFrame"),
             source: ChargenScreen.#source(species?.system.source)
         };
     }
 
-    /** §9.96's pair degrades: a book with no page is still a citation, and prints without a bare "p." */
+    /** The pair degrades: a book with no page is still a citation, and prints without a bare "p." */
     static #source(source) {
         if ( !source?.book ) return "";
         return source.page
@@ -307,17 +233,15 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * §9.51's seven fields, and an entry is never a bare value: a printed penalty runs for a whole
-     * career, is spent on a check the holder chooses, and expires on HOW that career ended.
+     * A tray entry is never a bare value: a printed penalty runs for a whole career, is spent on a
+     * check the holder chooses, and expires on HOW that career ended.
      */
     static #tray(column) {
         const state = Chargen.read(column.actor);
         return {
             name: column.name,
-            // §9.50's two counters, which are LEDGERS and not derivations — thirty printed rows wipe,
-            // grant, remove or retain Benefit rolls, and two let a player wager them mid-term. They
-            // live in the tray because that is where they are stored, and they are the two numbers a
-            // table has to see before mustering out.
+            // The two counters are LEDGERS and not derivations — thirty printed rows wipe, grant,
+            // remove or retain Benefit rolls, and two let a player wager them mid-term.
             benefitRolls: Chargen.benefitRolls(column.actor),
             skillRolls: Chargen.skillRolls(column.actor),
             entries: state.tray.map(entry => ({
@@ -345,21 +269,15 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * A scoped tray entry names a career, and the field takes two different things by design: the id
-     * of a record on this Traveller, or **a template id the referee typed** — which is what keeps
-     * §9.47's invariant intact where a career name would otherwise be needed. So it resolves against
-     * the actor's own records and prints the stored string untouched when it is the second kind. What
-     * it must never do is print a raw document id at the table.
+     * A scoped tray entry names a career, and the field takes two different things by design: the
+     * id of a record on this Traveller, or **a template id the referee typed** — which is what
+     * keeps no career name in the code where one would otherwise be needed.
      */
     static #careerName(actor, career) {
         if ( !career ) return "";
         const record = actor.items.get(career);
         return (record?.type === "career") ? record.name : career;
     }
-
-    /* -------------------------------------------- */
-    /*  Actions                                     */
-    /* -------------------------------------------- */
 
     /** @this {ChargenScreen} */
     static #onSelectColumn(event, target) {
@@ -371,9 +289,8 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * Taking a Traveller off the roster, which is unsetting the flag and nothing else — **the actor
-     * keeps everything decided so far** (§9.38), because everything decided was written to the actor
-     * as it was decided. The confirmation says so, since "leave" reads like a deletion and is not one.
-     * @this {ChargenScreen}
+     * keeps everything decided so far**, because everything decided was written to the
+     * actor as it was decided.
      */
     static async #onLeave(event, target) {
         const actor = game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId);
@@ -396,49 +313,32 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId)?.sheet?.render({ force: true });
     }
 
-    /**
-     * The hand-off. Mustering out CONSUMES the ledger this grid draws and the teardown follows it
-     * (§9.50), so the closing screen is a second reading of the same roster rather than a step of the
-     * term — which is also why the ragged tail is what points at it: a column that has stopped is the
-     * one with business there.
-     */
+    /** The hand-off. */
     static #onOpenClose() {
         return ChargenClose.open();
     }
 
-    /**
-     * Run one step of the term on the selected Traveller. **The chip clicked is the step run**, not
-     * the cursor: a referee skips steps and a table plays them out of order, and the frame's sequence
-     * is what the cursor walks afterwards. Permission is re-tested inside `ChargenTerm.run`, because a
-     * disabled button is a courtesy and not a gate.
-     * @this {ChargenScreen}
-     */
+    /** Run one step of the term on the selected Traveller. */
     static async #onRunStep(event, target) {
         const actor = game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId);
         if ( !actor ) return;
         await ChargenTerm.run(actor, target.dataset.step);
-        // The document writes redraw every client through `apps`; this catches the case where the step
-        // wrote only the cursor, which lives on a flag the screen reads but no document update names.
+        // The document writes redraw every client through `apps`; this catches the case where the
+        // step wrote only the cursor, which lives on a flag the screen reads but no document update
+        // names.
         return this.render();
     }
-
-    /* -------------------------------------------- */
-    /*  Drag and drop                               */
-    /* -------------------------------------------- */
 
     /** @inheritDoc */
     async _onRender(context, options) {
         await super._onRender(context, options);
         // Re-bound on every render because the ledger part carries the zone and is replaced.
-        // `DragDrop#bind` ASSIGNS `element.ondragover` rather than adding a listener, so it never
-        // stacks.
         this.dragDrop.bind(this.element);
     }
 
     /**
      * A plain `ApplicationV2` inherits no drag-drop plumbing, so the controller is supplied here as
-     * the Docket's and the voyage screen's are. The permission is per-actor and tested at the drop:
-     * a player puts their own Traveller on the table, which is the whole point of the owner rolling.
+     * the Docket's and the voyage screen's are.
      * @type {DragDrop}
      */
     get dragDrop() {
@@ -480,15 +380,14 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 }
 
-/* -------------------------------------------- */
-
 /**
  * Three doors, and none of them imports a sheet class: the character sheet's header, the Actor
- * directory's context menu, and the directory's own footer for the case where nobody is selected yet.
+ * directory's context menu, and the directory's own footer for the case where nobody is selected
+ * yet.
  */
 export function registerChargenScreen() {
-    // NOT `getHeaderControls`, which never fires: `ApplicationV2#_doEvent` appends the class name, so
-    // the hook is called once per class in the chain and never under the bare name.
+    // NOT `getHeaderControls`, which never fires: `ApplicationV2#_doEvent` appends the class name,
+    // so the hook is called once per class in the chain and never under the bare name.
     Hooks.on("getHeaderControlsActorSheetV2", (application, controls) => {
         if ( application.document?.type !== "character" ) return;
         controls.push({
@@ -511,7 +410,7 @@ export function registerChargenScreen() {
     });
 
     // The window has to be reachable with nobody selected — resuming a session three hours in is
-    // opening it, and the roster is already there (§9.38).
+    // opening it, and the roster is already there.
     Hooks.on("renderActorDirectory", (application, element) => {
         const header = element.querySelector(".header-actions");
         if ( !header || header.querySelector(".mgt2-chargen") ) return;

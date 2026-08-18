@@ -3,18 +3,7 @@ import { MGT2Helper } from "./helper.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-/**
- * Core folio 153, *Skipping on Debts* — the consequence half of the mortgage (§9.115).
- *
- * One 2D per new system against a fixed 8+, and a ladder of six terms that is unlike every other
- * modifier list in this system: two of its terms are **rates** (per parsec, per MCr10 of hull), one
- * is a referee's judgement over a printed span, one is a four-way band, and one is a characteristic
- * of the world offset by a constant. Nothing here is a task check — there is no characteristic, no
- * skill and no Effect — so it rolls plain dice rather than going through `Checks`.
- *
- * Pure: every method takes numbers and returns a reading. The dialog below is the only caller that
- * touches a document, and it writes exactly the two fields the folio says persist.
- */
+/** Core folio 153, *Skipping on Debts* — the consequence half of the mortgage. */
 export class SkipDebts {
 
     /** One printed line: what it is called, what it is worth, and which way it leans. */
@@ -23,11 +12,7 @@ export class SkipDebts {
     }
 
     /**
-     * The ladder, in the order folio 153 prints it. **Every term is drawn, including the ones worth
-     * nothing**: a referee checking the sheet against the page needs to see that the line was read
-     * and came to zero, which is not the same as a line the system forgot.
-     *
-     * @param {object} input
+     * The ladder, in the order folio 153 prints it.
      * @param {number} input.parsecs    Distance run since the crew was last discovered
      * @param {number} input.disguise   0-6, positive — the ladder applies the minus
      * @param {number} input.purchase   The hull's price, for the MCr10 rate
@@ -54,10 +39,7 @@ export class SkipDebts {
         return terms.reduce((sum, term) => sum + term.dm, 0);
     }
 
-    /**
-     * The check itself. 8+ and the crew is hunted — the folio names no other outcome and reads no
-     * Effect, so the reading is a boolean and the margin is left on the card for the referee.
-     */
+    /** The check itself. */
     static async check(dm) {
         const roll = await new Roll(`2d6 ${MGT2Helper.getFormulaDM(dm)}`).roll();
         return {
@@ -69,25 +51,7 @@ export class SkipDebts {
     }
 }
 
-/* -------------------------------------------- */
-
-/**
- * The skip check for one hull.
- *
- * GM-only, and opened from the ship's finance panel: it reads the purchase price, which is a
- * `gmOnlyFields` figure, and it answers a question about the crew rather than for them.
- *
- * **It writes two fields and no more.** Folio 153 makes the distance run and the ship's disguise
- * persist — the distance explicitly, "reset every time the Travellers are discovered" — so retyping
- * them at every system would be the tedium that stops the rule being used. Both are saved when the
- * referee rolls, which is one deliberate action, and neither ever advances on its own (§9.35).
- *
- * The form part renders once and the results part re-renders on every keystroke, which is what keeps
- * a caret in the field being typed into — the frame is `StopTrafficDialog`'s, unchanged.
- *
- * @extends {ApplicationV2}
- * @mixes HandlebarsApplication
- */
+/** The skip check for one hull. @extends {ApplicationV2} */
 export class SkipDebtsDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /** @inheritDoc */
@@ -119,9 +83,9 @@ export class SkipDebtsDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         super({ ...options, id: `mgt2-skip-debts-${ship.id}` });
         this.#ship = ship;
         const finance = ship.system.finance;
-        // Seeded from the hull for the two the folio persists, and from the world the ship is at for
-        // the Law Level — the voyage leg already resolves it, and a referee who has a `world` Actor
-        // should not retype a digit that is on it.
+        // Seeded from the hull for the two the folio persists, and from the world the ship is at
+        // for the Law Level — the voyage leg already resolves it, and a referee who has a `world`
+        // Actor should not retype a digit that is on it.
         this.#input = {
             parsecs: finance.skipParsecs,
             disguise: finance.skipDisguise,
@@ -148,8 +112,6 @@ export class SkipDebtsDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         if ( world?.type !== "world" ) return;
         this.#input.lawLevel = world.system.uwp.lawLevel ?? 0;
     }
-
-    /* -------------------------------------------- */
 
     /** The typed values, coerced once so nothing below has to. */
     get reading() {
@@ -185,11 +147,9 @@ export class SkipDebtsDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         return context;
     }
 
-    /* -------------------------------------------- */
-
     /**
-     * One delegated listener on the application root, so it survives the results part being replaced
-     * on every keystroke. `data-field` rather than `name`: nothing here is submitted anywhere.
+     * One delegated listener on the application root, so it survives the results part being
+     * replaced on every keystroke.
      * @inheritDoc
      */
     async _onFirstRender(context, options) {
@@ -201,20 +161,13 @@ export class SkipDebtsDialog extends HandlebarsApplicationMixin(ApplicationV2) {
                 ? event.target.checked : event.target.value;
             // The reading a roll produced belongs to the ladder it was rolled against, so a changed
             // term discards it rather than leaving old dice beside a new DM — `VoyageScreen` keeps
-            // its misjump the same way. Re-rolling is the referee's, not the form's.
+            // its misjump the same way.
             this.#reading = null;
             this.render({ parts: ["results"] });
         });
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * Roll, and save the two the folio persists. The write is here rather than on every keystroke
-     * because a referee reaching the die has settled what the distance and the disguise are; typing
-     * a number and closing the window changes nothing.
-     * @this {SkipDebtsDialog}
-     */
+    /** Roll, and save the two the folio persists. */
     static async #onRollSkip(event, target) {
         const input = this.reading;
         const terms = SkipDebts.terms(input);
@@ -227,12 +180,7 @@ export class SkipDebtsDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         this.render({ parts: ["results"] });
     }
 
-    /**
-     * The reading, on the log. Nothing else is written — folio 153 hands the consequence to the
-     * referee ("ship tracers… or naval vessels"), and §9.35's rule holds: the system reports and the
-     * table applies.
-     * @this {SkipDebtsDialog}
-     */
+    /** The reading, on the log. */
     static async #onPost(event, target) {
         if ( !this.#reading ) return;
         const context = await this._prepareContext({});
@@ -245,7 +193,7 @@ export class SkipDebtsDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             author: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor: this.#ship }),
             // The 2D the verdict was read from, so the card is a roll and not a report of one
-            // (§9.117). v14 appends no display of its own once `content` is set.
+            //.
             rolls: [this.#reading.roll],
             content: `<div class="mgt2 theme-light card skipdebts">
                 <div class="chd"><div class="what"><h4>${title}</h4>

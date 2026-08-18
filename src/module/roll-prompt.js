@@ -13,12 +13,7 @@ const AVERAGE_2D = 7;
 /** The strip spans this many bands either side of zero; anything beyond clamps onto the end. */
 const LADDER_REACH = 6;
 
-/**
- * Checks a card has offered to the next roll — `sketch-task-chain.html`'s "Chain into…". A set,
- * because Core p.63's working together is several contributors offering into one final check, and
- * each of them clicks their own card. Per-client and never persisted: this is the state of an open
- * window, the same boundary the rail and the sheet's play/edit mode sit behind.
- */
+/** Checks a card has offered to the next roll — `sketch-task-chain.html`'s "Chain into…". */
 const armedHere = new Set();
 
 /** Offer a check to whatever is rolled next. @param {string} id   A ChatMessage id */
@@ -42,8 +37,7 @@ function chosenStance(diceModifier) {
 
 /**
  * Core p.61: "if a Traveller has both a Boon and a Bane on the same check, they cancel each other
- * out and the check is rolled normally". Tri-state and non-stacking, so the sum's sign is the whole
- * rule — two of a kind stay that kind, one of each cancels, and either alone stands.
+ * out and the check is rolled normally".
  * @param {string} imposed        What the referee asked for
  * @param {string} diceModifier   What the footer button chose
  */
@@ -58,9 +52,7 @@ export function resolveStance(imposed, diceModifier) {
     };
 }
 
-/**
- * The dice-roll configuration prompt.
- */
+/** The dice-roll configuration prompt. */
 export class RollPromptHelper {
 
     /**
@@ -69,8 +61,8 @@ export class RollPromptHelper {
      * @returns {Promise<object|null>}   The submitted form data, or null if the dialog was dismissed
      */
     static async roll(options) {
-        // A bare <div> with no attributes bypasses DialogV2's cleanHTML pass, which would
-        // otherwise strip attributes from the rendered form controls.
+        // A bare <div> with no attributes bypasses DialogV2's cleanHTML pass, which would otherwise
+        // strip attributes from the rendered form controls.
         const content = document.createElement("div");
         content.innerHTML = await foundry.applications.handlebars.renderTemplate(
             "systems/mgt2/templates/roll-prompt.html", {
@@ -80,8 +72,7 @@ export class RollPromptHelper {
                 characteristic: options.characteristic,
                 skills: options.skills,
                 skill: options.skill,
-                // Built here so the timeframe DM has one home, shared with the roll path. A strip
-                // implies an order, so they run from rushed to unhurried rather than in key order.
+                // Built here so the timeframe DM has one home, shared with the roll path.
                 timeframes: Object.entries(CONFIG.MGT2.Timeframes).map(([key, label]) => ({
                     key,
                     label: game.i18n.localize(label),
@@ -97,7 +88,7 @@ export class RollPromptHelper {
                     display: MGT2Helper.signed(source.dm),
                     // A source whose rule names the checks it reaches follows the select that
                     // decides them instead of standing on every roll: the characteristic for Core
-                    // folio 98's encumbrance, the skill for folio 107's augment (§9.84).
+                    // folio 98's encumbrance, the skill for folio 107's augment.
                     scope: source.characteristics?.join(" ") ?? "",
                     skillScope: source.skills?.join(" ") ?? ""
                 })),
@@ -108,10 +99,7 @@ export class RollPromptHelper {
                     target,
                     label: game.i18n.localize(CONFIG.MGT2.Difficulty[key])
                 })),
-                // What the referee fixed, stated and not offered. Never a control: `.voided` leaves
-                // radios keyboard-reachable, `disabled` is skipped outright by `FormDataExtended`
-                // (`ux/form-data-extended.mjs`, "if ( !name || disabled ) continue"), and a hidden
-                // mirror sharing a name yields an array. So: a static readout plus one hidden input.
+                // What the referee fixed, stated and not offered.
                 imposed: this.#imposedContext(options),
                 traits: MGT2Helper.weaponTraitRows(options.weapon, options.strengthDM),
                 // Core folio 78 and folio 75, both folded into the Modifiers row rather than given
@@ -133,11 +121,7 @@ export class RollPromptHelper {
                 ...this.#rangeContext(options.blocks?.range ? options.weapon : null, options.measured)
             });
 
-        /**
-         * Read the dialog form, optionally tagging the roll with a boon/bane die modifier.
-         * @param {HTMLButtonElement} button
-         * @param {string} [diceModifier]
-         */
+        /** Read the dialog form, optionally tagging the roll with a boon/bane die modifier. */
         const read = (button, diceModifier) => {
             const data = new FormDataExtended(button.form).object;
             if ( diceModifier ) data.diceModifier = diceModifier;
@@ -179,26 +163,14 @@ export class RollPromptHelper {
             rejectClose: false
         });
 
-        // An offer is consumed by the roll it was made into, not by a window opening. A prompt
-        // opened and dismissed leaves every contributor's card still armed, which matters when
-        // three people have offered into one check and the fourth mis-clicks.
+        // An offer is consumed by the roll it was made into, not by a window opening.
         if ( result ) armedHere.clear();
         return result;
     }
 
-    /* -------------------------------------------- */
-
     /**
      * What a roll request fixed, resolved against the roller's own numbers so the readout and the
-     * formula read the same source (`ROLL-REQUEST.md` §6). Each entry that carries a DM is drawn as
-     * an `[data-applied-dm]` node — the shape `#readout` already has for a term with no control of
-     * its own — and each entry the form must send back carries one `<input type="hidden">`.
-     *
-     * **The imposed DM is the one exception and carries no hidden input**: it reaches the formula
-     * through `terms()`'s documented `extra` slot, so nothing reads it off the form.
-     *
-     * Cardinality is Core p.59's meaning: one characteristic is fixed and becomes a readout, two or
-     * more is the referee narrowing a choice the player still makes, so the pill goes on the select.
+     * formula read the same source.
      */
     static #imposedContext(options) {
         const imposed = options.imposed;
@@ -215,9 +187,8 @@ export class RollPromptHelper {
         }
         else context.narrowChars = chars.length > 1;
 
-        // `null` is the referee choosing untrained, which is the prompt's own `NP` sentinel; an id is
-        // a resolution frozen on the referee's client. An open or unresolved skill sends no
-        // `skillItem` at all, so the select stays live and that line picks from its own vocabulary.
+        // `null` is the referee choosing untrained, which is the prompt's own `NP` sentinel; an id
+        // is a resolution frozen on the referee's client.
         if ( imposed.skillItem !== undefined ) {
             const key = (imposed.skillItem === null) ? "NP" : imposed.skillItem;
             const skill = options.skills?.find(entry => entry._id === key);
@@ -265,14 +236,9 @@ export class RollPromptHelper {
         return context;
     }
 
-    /* -------------------------------------------- */
-
     /**
      * The characteristic options a given actor offers, with the blank first entry that means "no
-     * characteristic". Each is named with its current score. **The roster is the actor's own**
-     * (`rollableCharacteristics`) and not the shown keys: a damage pool is displayed and never
-     * rolled, and a robot's INT is rolled whether or not the Traveller flag reveals it.
-     * @param {Actor} actor
+     * characteristic".
      */
     static actorCharacteristics(actor) {
         const options = [{ _id: "", name: "", dm: 0 }];
@@ -284,12 +250,7 @@ export class RollPromptHelper {
         return options;
     }
 
-    /**
-     * The skills a given actor offers, "Not proficient" first. Core p.59 puts an untrained check at
-     * DM−3, and the entry has to be choosable rather than assumed — the blank option means a check
-     * no skill applies to at all.
-     * @param {Actor} actor
-     */
+    /** The skills a given actor offers, "Not proficient" first. */
     static actorSkills(actor) {
         const skills = actor.items
             .filter(item => (item.type === "talent") && (item.system.subType === "skill"))
@@ -304,10 +265,7 @@ export class RollPromptHelper {
 
     /**
      * Core folio 59's DM−3 for an unskilled check, as folio 69's Jack-of-All-Trades leaves it: one
-     * point of the penalty per level, no benefit past level 3, and never a bonus. The label names
-     * the skill that softened it — the row read "Not proficient · −3" whatever the level was, which
-     * is what made the rule invisible in play.
-     * @param {Actor} actor
+     * point of the penalty per level, no benefit past level 3, and never a bonus.
      * @returns {{dm: number, level: number, label: string}}
      */
     static untrained(actor) {
@@ -334,23 +292,16 @@ export class RollPromptHelper {
      * Everything the prompt's answer contributes to one check: the dice, the characteristic, the
      * skill, the timeframe, the modifiers that were not waived, the chain, and the free DM — in
      * that order, because the card lists them in the order the formula reads them.
-     *
-     * `extra` slots in where a caller's own terms belong: after the waivable modifiers and before
-     * the chain. That is where `#onRoll` puts Core p.74's attack modifiers and the weapon traits.
-     *
      * @param {object} data              What `RollPromptHelper.roll` came back with
      * @param {Actor} actor              Whose characteristics and skills the prompt offered
      * @param {object[]} checkModifiers  The sources the prompt listed, with their `key`
-     * @param {[string, number][]} extra
      * @returns {{formula: string, modifiers: string[], chainSources: object[], stance: object}}
      */
     static terms(data, actor, checkModifiers = [], extra = []) {
         const modifiers = [];
         const parts = [];
         // Core p.61's tri-state, resolved once: the referee's own Boon or Bane rides the form as
-        // `imposedStance`, the player's rides the footer button, and one of each cancels. Without
-        // this an imposed Bane was discarded the moment ROLL was pressed, because the stance only
-        // ever entered through the button callback.
+        // `imposedStance`, the player's rides the footer button, and one of each cancels.
         const stance = resolveStance(data.imposedStance, data.diceModifier);
         if ( stance.dice ) {
             parts.push("3d6");
@@ -388,10 +339,7 @@ export class RollPromptHelper {
             parts.push(MGT2Helper.getFormulaDM(timeframeDM));
         }
 
-        // The accumulator's own numbers, minus whatever the player waived in the prompt. Each keeps
-        // its name so the card explains the total the same way the readout did.
-        // FormDataExtended does not expand a dotted field name, so the prompt names each checkbox
-        // `check-<key>` and it comes back flat.
+        // The accumulator's own numbers, minus whatever the player waived in the prompt.
         const rows = checkModifiers.filter(source => data[`check-${source.key}`] === true)
             .map(source => [MGT2Helper.modifierLabel(source), source.dm]);
         rows.push(...extra);
@@ -405,8 +353,7 @@ export class RollPromptHelper {
         }
 
         // Core p.63: the Effect of a previous check is a DM on this one, and the working together
-        // rule on the same page is that table read once per contributor. The sources are kept
-        // whole, not just their ids: the card's strip names each one and links back to it.
+        // rule on the same page is that table read once per contributor.
         const chainSources = [];
         for ( const id of [data.chain ?? []].flat().filter(value => value) ) {
             const message = game.messages.get(id);
@@ -432,21 +379,7 @@ export class RollPromptHelper {
         return { formula: parts.join(""), modifiers, chainSources, stance };
     }
 
-    /**
-     * Checks this one can be measured against: chained from (Core p.63) or opposed (Core p.62).
-     * One list, because both rows read the same thing — an Effect a second roll can see, which is
-     * the whole of what the `check` message sub-type exists for. Newest first and capped, because a
-     * list long enough to scroll is one nobody reads.
-     *
-     * An **armed** source is exempt from the cap and comes first, already selected: the card asked
-     * for it by name, and a source that had scrolled past the window would otherwise be unreachable
-     * from here at all.
-     *
-     * `extra` is arming that did not come from a click on this client — Core p.63-64's working
-     * together, where the contributors' answers are armed onto the resolver's prompt by the request
-     * itself. `armChain`'s set is per-client and could never carry that.
-     * @param {string[]} [extra]
-     */
+    /** Checks this one can be measured against: chained from (Core p.63) or opposed (Core p.62). */
     static #priorChecks(limit = 6, extra = []) {
         const messages = game.messages?.contents ?? [];
         const armed = new Set([...armedHere, ...(extra ?? [])]);
@@ -463,8 +396,8 @@ export class RollPromptHelper {
                 label: `${name} · ${MGT2Helper.signed(check.effect, "+0")}`
                     + (consumed.has(message.id) ? ` · ${game.i18n.localize("MGT2.RollPrompt.ChainUsed")}` : ""),
                 term: game.i18n.format("MGT2.RollPrompt.ChainTerm", { source: check.label || name }),
-                // The chain reads the rung; the opposed row reads the Effect itself, because
-                // Core p.62 compares the two numbers and modifies neither.
+                // The chain reads the rung; the opposed row reads the Effect itself, because Core
+                // p.62 compares the two numbers and modifies neither.
                 dm: MGT2Helper.taskChainDM(check.effect), effect: check.effect
             };
         };
@@ -478,14 +411,7 @@ export class RollPromptHelper {
         return rows;
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * RH folio 115's task ceiling as two sentences the readout picks between. The caption states a
-     * standing fact about the roller, so both are built here and `#ceiling` decides which one the
-     * check in the form is: the rule reaches INT, EDU and SOC alone, and taking longer lowers the
-     * difficulty by one level, which can bring a task back inside.
-     */
+    /** RH folio 115's task ceiling as two sentences the readout picks between. */
     static #ceilingContext(ceiling) {
         if (!ceiling?.target || !Rules.on("taskCeiling")) return {};
         const params = {
@@ -500,17 +426,10 @@ export class RollPromptHelper {
         } };
     }
 
-    /* -------------------------------------------- */
-
     /**
      * Core folio 229's Reach row: the band the power is printed at, and the two a psion can push it
      * to — "increased by one Range Band if twice the PSI Cost is paid and increased by two Range
-     * Bands if the PSI Cost is multiplied by four". Each cell names the band it buys and the points
-     * it costs, so the choice is made against the reserve rather than against a multiplier.
-     *
-     * The printed reach is the first cell and the default. A power that states none has no row at
-     * all — there is nothing to extend — and a band the table has no room past is not offered,
-     * because the folio's ladder ends at Planetary.
+     * Bands if the PSI Cost is multiplied by four".
      */
     static #reachContext(talent) {
         const psionic = talent?.system.psionic;
@@ -530,19 +449,9 @@ export class RollPromptHelper {
             })) };
     }
 
-    /* -------------------------------------------- */
-
     /**
      * What the Range block needs: the weapon's own Range score, the aiming ladder, the two
-     * thresholds Core folio 77 names and — for a weapon with Auto — the fire mode. **Which cell
-     * starts checked is the world's `extremeRange` rule**: folio 77's 100 m, the 300 m it grants a
-     * no-stress environment, or the empty cell where the referee waives it. The strip itself stays —
-     * the threshold is a fact about this shot, and the rule only supplies its default — and Scope
-     * voids the whole row from its own chip.
-     *
-     * `measured` is the caller's own snapshot of the canvas and is the only thing here that ever
-     * came off it: this prompt takes no actor and no token, and seeding a text field is not
-     * resolving a rule. Absent, the distance is typed exactly as it always was.
+     * thresholds Core folio 77 names and — for a weapon with Auto — the fire mode.
      */
     static #rangeContext(weapon, measured = null) {
         if (!weapon) return {};
@@ -551,8 +460,7 @@ export class RollPromptHelper {
         const unit = range.unit ? game.i18n.localize(MGT2.MetricRange[range.unit]).toLowerCase() : "";
         const aimTerm = game.i18n.localize(MGT2.AttackModifiers.aiming.label);
         const auto = MGT2Helper.traitScore(weapon.system.effective.traits, "auto");
-        // Core folio 167: the to-hit half of the Damage Scale table. The weapon states one side of
-        // the pair, so the cell offers the other one and nothing is read off a defender.
+        // Core folio 167: the to-hit half of the Damage Scale table.
         const crossScale = MGT2.CrossScaleAttack[
             (weapon.system.scale === "spacecraft") ? "spacecraft" : "ground"];
 
@@ -562,7 +470,6 @@ export class RollPromptHelper {
                 unit,
                 distance: measured?.distance ?? "",
                 // Under the gutter word, so the band can be read against the score it came from.
-                // A weapon with no Range score names no bands, and "0 m" would read like one.
                 rangeLabel: range.value ? MGT2Helper.getRangeDisplay(range) : "",
                 // Core folio 77 states the rule in metres, so a weapon ranged in kilometres is not offered it.
                 thresholds: (range.unit === "kilometer") ? null
@@ -604,19 +511,13 @@ export class RollPromptHelper {
         };
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * Wire the live readout and hang the dice each button rolls under its label. DialogV2 renders
-     * a button label as text, so the sub-label has to be appended after the fact.
-     */
+    /** Wire the live readout and hang the dice each button rolls under its label. */
     static #activate(root) {
         const form = root.querySelector("form");
         if ( !form ) return;
 
         // Each button says what IT rolls, which on a request is the referee's stance resolved
-        // against that button's own (Core p.61). A BOON button reading "3D drop low" beside an
-        // imposed Bane would be a lie on the most-used surface in the system.
+        // against that button's own (Core p.61).
         const imposed = form.elements.imposedStance?.value ?? "";
         const dice = { bane: "dh", submit: "", boon: "dl" };
         for ( const [action, chosen] of Object.entries(dice) ) {
@@ -629,8 +530,7 @@ export class RollPromptHelper {
         }
 
         // An offered trait tracks its own rule until the player touches it, and then stops: a box
-        // that keeps re-deciding after being clicked is not an offer. Setting `checked` from code
-        // fires no change event, so anything arriving here is the player's.
+        // that keeps re-deciding after being clicked is not an offer.
         for ( const box of form.querySelectorAll('input[data-auto="true"]') ) {
             box.addEventListener("change", () => { box.dataset.auto = "false"; });
         }
@@ -663,8 +563,6 @@ export class RollPromptHelper {
         update();
     }
 
-    /* -------------------------------------------- */
-
     /** The dice one stance pairing actually rolls, as an i18n key. */
     static #diceLabel(imposed, diceModifier) {
         const { value } = resolveStance(imposed, diceModifier);
@@ -673,13 +571,9 @@ export class RollPromptHelper {
         return "MGT2.RollPrompt.RollDice";
     }
 
-    /* -------------------------------------------- */
-
     /**
      * The Weapon traits block's live half: the conditions an offered trait watches, and the rows
-     * one voids. Core p.79 rules Auto out of the same action as Scope or an aiming action, so an
-     * unconditional suppressor is read first and a trait that depends on a row is judged against
-     * what is left of it.
+     * one voids.
      * @returns {Set<string>}   The form controls whose contribution is void
      */
     static #traits(form) {
@@ -713,22 +607,7 @@ export class RollPromptHelper {
         return suppressed;
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * A modifier whose rule reaches only some checks follows the select that decides them. Two
-     * scopes, and each names the control it watches rather than a rule of its own:
-     *
-     * - `scope` — the **characteristic**. Core folio 98 puts the encumbered DM-2 on "physical
-     *   actions" and folio 9 heads STR, DEX and END the physical characteristics; no skill in this
-     *   system carries such a flag and no book prints one, so the characteristic is the answer.
-     * - `skillScope` — the **skill**, carrying Item ids because that is what the select's options
-     *   are keyed by. Core folio 107's skill augmentation is DM+1 "when using that specific skill",
-     *   and it is the only rule so far that scopes this way (§9.84).
-     *
-     * Either stops deciding the moment the player touches the box, the same offer semantics an
-     * offered trait has: a referee who calls a check physical says so by ticking it back.
-     */
+    /** A modifier whose rule reaches only some checks follows the select that decides them. */
     static #scoped(form) {
         const chosen = {
             scope: form.elements.characteristic?.value ?? "",
@@ -742,11 +621,7 @@ export class RollPromptHelper {
         }
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * Recompute the formula, the target and the Effect ladder from the form as it stands.
-     */
+    /** Recompute the formula, the target and the Effect ladder from the form as it stands. */
     static #readout(form) {
         const out = key => form.querySelector(`[data-readout="${key}"]`);
         // Every number in the readout is a modifier, so zero reads "+0" rather than "0".
@@ -762,9 +637,7 @@ export class RollPromptHelper {
         this.#scoped(form);
 
         // A DM source is either a select or a segmented radio group; both name a chosen node that
-        // carries the DM, so the only difference is how the choice is read off. A select that
-        // allows several contributes all of them — Core p.63's working together is the task chain
-        // rules read once per contributor, not a second rule.
+        // carries the DM, so the only difference is how the choice is read off.
         for ( const control of form.querySelectorAll(".dm-source") ) {
             const isSelect = control.matches("select");
             const chosen = isSelect
@@ -809,15 +682,14 @@ export class RollPromptHelper {
             box.disabled = !live;
             box.closest("label")?.classList.toggle("disabled", !live);
             // A box the player cannot reach is not an offer, and "your call" on a greyed control
-            // says the opposite of what it is doing. Name what is missing instead.
+            // says the opposite of what it is doing.
             const status = requires && form.querySelector(`[data-status="${box.name}"]`);
             if ( status ) {
                 status.title = live ? game.i18n.localize("MGT2.RollPrompt.TraitOffered")
                     : game.i18n.format("MGT2.RollPrompt.TraitUnmet",
                         { requirement: game.i18n.localize(MGT2.AttackModifiers[requires]?.label ?? requires) });
             }
-            // A chip is solid while it is in the roll and struck through while it is not. The chip
-            // IS the control now, so it is the box's own label.
+            // A chip is solid while it is in the roll and struck through while it is not.
             const chip = box.closest(".code");
             chip?.classList.toggle("hot", box.checked && live);
             chip?.classList.toggle("off", !(box.checked && live));
@@ -834,8 +706,8 @@ export class RollPromptHelper {
         // and the number rolled cannot drift apart.
         const { total } = Checks.modifiers(terms);
 
-        // The dice the formula reads are the ones ROLL would roll, so an imposed Bane shows as
-        // 3D drop high before a button is touched rather than only after one is.
+        // The dice the formula reads are the ones ROLL would roll, so an imposed Bane shows as 3D
+        // drop high before a button is touched rather than only after one is.
         const diceName = game.i18n.localize(
             this.#diceLabel(form.elements.imposedStance?.value ?? "", ""));
         out("formula").textContent = (total === 0) ? diceName : `${diceName} ${sign(total)}`;
@@ -876,18 +748,7 @@ export class RollPromptHelper {
         out("effectBand").textContent = game.i18n.localize(MGT2Helper.getEffectBand(effect).label);
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * RH folio 115's ceiling against the check as it stands. Two things narrow it, and both are in
-     * the form already: the rule reaches INT-, EDU- and SOC-based checks alone, and "performing a
-     * task more slowly can lower difficulty by one level" — the eight rungs are two points apart, so
-     * one level is exactly the DM+2 the slower timeframe already grants.
-     *
-     * **Stated, never enforced.** The same folio allows external modifiers to bring a task "to an
-     * equivalent complexity within the capability of the robot's brain", which is a judgement no
-     * dictionary here can make for the referee.
-     */
+    /** RH folio 115's ceiling against the check as it stands. */
     static #ceiling(form, target) {
         const node = form.querySelector('[data-readout="ceiling"]');
         if ( !node ) return;
@@ -899,11 +760,8 @@ export class RollPromptHelper {
         node.classList.toggle("over", over);
     }
 
-    /* -------------------------------------------- */
-
     /**
-     * Paint the range band the typed distance falls in and hand its DM back to the readout. The
-     * distance is typed: nothing here reads the canvas, a target or a measurement.
+     * Paint the range band the typed distance falls in and hand its DM back to the readout.
      * @returns {{dm: number, term: string}|null}
      */
     static #band(form, suppressed = new Set()) {

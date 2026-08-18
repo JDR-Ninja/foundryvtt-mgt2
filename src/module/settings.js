@@ -41,8 +41,8 @@ export const registerSettings = function () {
         onChange: applyTheme
     });
 
-    // The three display settings below are read into the render context and nowhere else, so without
-    // an onChange a flipped one did nothing until every sheet was reopened.
+    // The three display settings below are read into the render context and nowhere else, so
+    // without an onChange a flipped one did nothing until every sheet was reopened.
     game.settings.register('mgt2', 'usePronouns', {
         name: "MGT2.Settings.usePronouns.name",
         hint: "MGT2.Settings.usePronouns.hint",
@@ -65,10 +65,10 @@ export const registerSettings = function () {
         onChange: refreshRuleUI
     });
 
-    // The campaign's *now*, in days, and nothing schedules it (§9.35): speculative trade needs a day
-    // to compare against — "cannot deal with that supplier again for at least a month" (Core p.243) —
-    // and `game.time.worldTime` stays at 0 without a calendar module, which would read as permanently
-    // closed. Days rather than an Imperial date: every printed timer does arithmetic on days.
+    // The campaign's *now*, in days, and nothing schedules it: speculative trade needs a
+    // day to compare against — "cannot deal with that supplier again for at least a month" (Core
+    // p.243) — and `game.time.worldTime` stays at 0 without a calendar module, which would read as
+    // permanently closed.
     game.settings.register('mgt2', 'campaignDay', {
         name: "MGT2.Settings.campaignDay.name",
         hint: "MGT2.Settings.campaignDay.hint",
@@ -92,8 +92,8 @@ export const registerSettings = function () {
 
     registerRules();
     registerRequestSettings();
-    // Folio 50's shared skills package: the pool the table chose, edited from the closing screen and
-    // never shown in the settings pane, because it is data the referee typed and not a rule.
+    // Folio 50's shared skills package: the pool the table chose, edited from the closing screen
+    // and never shown in the settings pane, because it is data the referee typed and not a rule.
     registerChargenSettings();
 
     // Not user-facing: the folder and the collection ids the compendium button has created.

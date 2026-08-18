@@ -2,15 +2,7 @@ import { MENU_ID, RULE_GROUPS, RULES, Rules, ruleSetting } from "./rules.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-/**
- * Where a rule is printed, in the three states a registry row can be in.
- *
- * **An absent book renders as the words "house rule" and never as a blank** (§9.99). The sixteen of
- * the creation group have no folio by definition — they exist because the books are silent rather
- * than ambiguous — and a blank source line reads as a transcription somebody forgot rather than as a
- * rule no book contains. `unofficial` is the third state: a designer's answer outside any book,
- * printed with its year, which is the only external standing two of the sixteen have.
- */
+/** Where a rule is printed, in the three states a registry row can be in. */
 function sourceLine(rule) {
     if ( rule.book ) return rule.page
         ? game.i18n.format("MGT2.Rules.Source",
@@ -22,20 +14,6 @@ function sourceLine(rule) {
 
 /**
  * The switchboard — a file of its own, and that is load-bearing rather than tidy.
- *
- * `rules.js` is reached from `actor-base-data.js`, which the pack-validation tooling imports in
- * **Node** to clean generated documents against the system's own schemas. Destructuring
- * `foundry.applications.api` at module scope there broke that tooling outright: the stub global has
- * `data`, `abstract`, `utils` and `CONST` and no `applications`. The registry is data and stays
- * Node-safe; the window is interface and lives here, imported only by `settings.js`.
- *
- * One section per group, one row per rule, and the book and page under each — a referee choosing
- * whether a rule is in force is choosing whether to open a book.
- *
- * `registerMenu` takes an ApplicationV2 or a v1 FormApplication subclass and throws on anything else
- * (`client/helpers/client-settings.mjs`, *"Menu type must be a FormApplication or ApplicationV2"*),
- * and `new menu.type()` takes no arguments.
- *
  * @extends {ApplicationV2}
  */
 export class OptionalRulesMenu extends HandlebarsApplicationMixin(ApplicationV2) {
@@ -47,8 +25,9 @@ export class OptionalRulesMenu extends HandlebarsApplicationMixin(ApplicationV2)
         classes: ["mgt2", "mgt2-rules"],
         position: { width: 560, height: "auto" },
         window: { title: "MGT2.Rules.Title", icon: "fa-solid fa-sliders", resizable: true },
-        // Each control writes as it is clicked: a switch that has to be saved afterwards is a switch
-        // whose effect nobody sees, and the window stays open because these are read together.
+        // Each control writes as it is clicked: a switch that has to be saved afterwards is a
+        // switch whose effect nobody sees, and the window stays open because these are read
+        // together.
         form: { handler: OptionalRulesMenu.#onSubmit, submitOnChange: true, closeOnSubmit: false }
     };
 
@@ -97,10 +76,6 @@ export class OptionalRulesMenu extends HandlebarsApplicationMixin(ApplicationV2)
      * Read through the DOM rather than off the submitted object: a picker's cells submit a string
      * when one is ticked, an array when several are, and nothing at all when none is — three shapes
      * for one control, where the checkboxes themselves have only two states.
-     *
-     * Only what changed is written. `submitOnChange` fires this on every click, and a `set` is a
-     * document update broadcast to every client whether or not the value moved.
-     * @this {OptionalRulesMenu}
      */
     static async #onSubmit(event, form) {
         for ( const [key, rule] of Object.entries(RULES) ) {

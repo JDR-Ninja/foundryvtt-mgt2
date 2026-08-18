@@ -19,20 +19,7 @@ const UWP_TABLES = Object.freeze({
     government: MGT2.Governments
 });
 
-/**
- * The world sheet: one line typed, everything else a reading of it.
- *
- * `world` extends `TypeDataModel` rather than `ActorBaseData` — no characteristics, no damage chain,
- * no token bar — so this is the one Actor sheet in the system that is **not** a subclass of the
- * character sheet. It takes the mode mixin and the shared blocks and nothing else.
- *
- * Two fields are writes rather than derivations, and they are why a world is an Actor at all
- * (§9.33.5): the berthing rate, rolled once per starport and recorded (Core p.258), and the supplier
- * lockout a crew earns by walking away (Core p.243).
- *
- * @extends {ActorSheetV2}
- * @mixes HandlebarsApplication
- */
+/** The world sheet: one line typed, everything else a reading of it. @extends {ActorSheetV2} */
 export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(ActorSheetV2)) {
 
     /** @inheritDoc */
@@ -92,14 +79,7 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
         return context;
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * The eight cells of the strip. The glyph comes off `profile` rather than out of a second eHex
-     * encoder, so one function still produces the printed line. The gloss only says what the glyph
-     * cannot: the decimal behind a letter above 9, and what the digit means on the four cells that
-     * have a table. Localised here rather than in the template because the two halves join.
-     */
+    /** The eight cells of the strip. */
     static #cells(system) {
         const line = system.profile;
         const glyphs = [...line.slice(0, 7), line.slice(8)];
@@ -119,12 +99,7 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
         });
     }
 
-    /**
-     * Where the world is, as one line. The sector and the hex are what was typed; the subsector is a
-     * reading of the hex alone and survives an unknown sector, so it prints its name where the
-     * registry has one and its letter otherwise. The absolute coordinate is the only figure here
-     * nobody types and no table prints, so it rides the tooltip rather than the line.
-     */
+    /** Where the world is, as one line. */
     static #location(system) {
         const at = system.location;
         const parts = [system.sector, system.hex, at.subsectorName ?? at.subsector].filter(Boolean);
@@ -144,9 +119,8 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
     }
 
     /**
-     * Three states, and a naive `0` collapses two of them: `null` is NOT YET ROLLED, class E is a port
-     * that charges nothing, class X is no port at all (Core p.258). Only the third case is rollable,
-     * which is why the button reads the band rather than the stored value.
+     * Three states, and a naive `0` collapses two of them: `null` is NOT YET ROLLED, class E is a
+     * port that charges nothing, class X is no port at all (Core p.258).
      */
     static #berthing(system) {
         const perDie = system.starport.berthingPerDie;
@@ -161,11 +135,7 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
         };
     }
 
-    /**
-     * The eighteen codes with the condition that produced each one. `derived` and `published` are
-     * printed side by side and never merged (§9.20): an override with no visible condition beside it
-     * cannot be told from a typo, and neither set can be trusted once they are one column.
-     */
+    /** The eighteen codes with the condition that produced each one. */
     static #ledger(system) {
         const rows = MGT2.TradeCodes.map(row => {
             const override = system.codeOverrides[row.code];
@@ -192,9 +162,8 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
     }
 
     /**
-     * The two halves this world can answer for on its own: the Starport DM (Core p.239, p.240) and the
-     * travel zone, which both tables read with opposite signs. The population and Tech Level terms
-     * belong to the roll, and the roll needs the other end of a leg — so the sheet never makes one.
+     * The two halves this world can answer for on its own: the Starport DM (Core p.239, p.240) and
+     * the travel zone, which both tables read with opposite signs.
      */
     static #traffic(system) {
         const zone = MGT2.TravelZones[system.zone] ?? MGT2.TravelZones.green;
@@ -222,10 +191,6 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
         };
     }
 
-    /* -------------------------------------------- */
-    /*  Event Listeners and Handlers                */
-    /* -------------------------------------------- */
-
     /** @inheritDoc */
     async _onRender(context, options) {
         await super._onRender(context, options);
@@ -234,10 +199,8 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
     }
 
     /**
-     * A subsector is 8x10 hexes and day one is several hundred typed digits, so the printed line is an
-     * input and the eight cells are the parse (§9.33.5). The field carries no `name` and stops the
-     * change from reaching the form: it is a reading of the cells, never a value of its own, and
-     * letting `submitOnChange` fire would write the stale cells back over the parse.
+     * A subsector is 8x10 hexes and day one is several hundred typed digits, so the printed line is
+     * an input and the eight cells are the parse.
      */
     async #onPasteUwp(event) {
         event.stopPropagation();
@@ -262,10 +225,7 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
     }
 
     /**
-     * "Roll once per starport and record it — prices are stable at any given port" (Core p.258). One
-     * die against the class band; class E and class X have no band to roll against and the control is
-     * disabled for both, so neither can be written a number that would read as a price.
-     * @this {WorldActorSheet}
+     * "Roll once per starport and record it — prices are stable at any given port" (Core p.258).
      */
     static async #onBerthingRoll() {
         const perDie = this.actor.system.starport.berthingPerDie;
@@ -284,11 +244,7 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
         return this.actor.update({ "system.berthing": null });
     }
 
-    /**
-     * Derive, force on, force off. Clearing an override deletes the key rather than storing a third
-     * value: `-=key` warns since v14, so the operator is what removes it (`combat.js:119`).
-     * @this {WorldActorSheet}
-     */
+    /** Derive, force on, force off. */
     static async #onCodeOverride(event, target) {
         const code = target.closest("[data-code]").dataset.code;
         const state = target.dataset.state;
@@ -300,7 +256,6 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
     /**
      * The four supplier writes are the model's, because the speculative trade screen makes two of
      * them too and a second implementation would double-stamp.
-     * @this {WorldActorSheet}
      */
     static async #onSearchRecord() {
         return this.actor.system.recordSearch(game.settings.get("mgt2", "campaignDay"));
@@ -324,7 +279,6 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
     /**
      * The market, opened on this world rather than on a retyped profile — a mistyped digit silently
      * changes every DM on that page, and the two write-backs need the document anyway.
-     * @this {WorldActorSheet}
      */
     static #onTradeScreen() {
         return SpecTradeDialog.open({ world: this.actor });

@@ -1,32 +1,13 @@
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 
-/** What a dose leaves on the effect it creates, so the row can offer to end it (§9.90). */
+/** What a dose leaves on the effect it creates, so the row can offer to end it. */
 export const DOSE_FLAG = "dose";
 
-/**
- * A dose of a drug, which is a *consumption* and not a possession (§9.90).
- *
- * This is the whole of what `DOCUMENT-TYPES.md` §12 meant by "a drug is a timed effect": the drug
- * Item carries its Active Effects and they reach nobody while it is in a pocket — taking one copies
- * them onto the Traveller, with the printed duration read into a duration Foundry counts down. An
- * equipped/unequipped toggle would be the wrong shape, and it is the single most-repeated complaint
- * against `mgt2e`'s inventory.
- *
- * **Three moments and Foundry has one.** `sketch-consumables.html` is right that an Active Effect
- * models the middle band alone, so the other two are held here: an **onset** creates the effect
- * disabled and says so on the row, and an **after-effect** is a control, because Core p.115's
- * Metabolic Accelerator ends in 2D damage and "the effect expired" cannot run a damage pipeline by
- * itself. Nothing is scheduled either way (§9.35).
- */
+/** A dose of a drug, which is a *consumption* and not a possession. */
 export class Doses {
 
-    /**
-     * Take one dose of a drug. Everything it does is one of four writes and none of them is
-     * reversible by re-running it, which is why the guards are refusals rather than clamps.
-     * @param {Item} drug
-     * @returns {Promise<ActiveEffect[]|null>}
-     */
+    /** Take one dose of a drug. @returns {Promise<ActiveEffect[]|null>} */
     static async take(drug) {
         const actor = drug?.actor;
         if ( (drug?.type !== "drug") || !actor ) return null;
@@ -44,11 +25,7 @@ export class Doses {
         return effects;
     }
 
-    /**
-     * End a dose and run whatever the drug leaves behind. The effect is deleted either way: a dose
-     * that has run out is not a dose that is suspended, and `disabled` already means the onset.
-     * @param {ActiveEffect} effect
-     */
+    /** End a dose and run whatever the drug leaves behind. */
     static async end(effect) {
         const dose = effect?.getFlag("mgt2", DOSE_FLAG);
         if ( !dose ) return null;
@@ -76,17 +53,8 @@ export class Doses {
         return actor.system.drugCounters.find(row => row.drug === name)?.doses ?? null;
     }
 
-    /* -------------------------------------------- */
-
     /**
-     * A printed interval as a Foundry duration. The books write `10 minutes`, `three rounds` and
-     * `1D hours`; the first and third parse, the second does not and is left as prose — a duration
-     * nobody can count is better than a duration invented from a word.
-     *
-     * A dice expression is ROLLED HERE, once, when the dose is taken: `1D hours` is a length the
-     * drug has on this occasion, not a length it always has.
-     *
-     * @param {string} text
+     * A printed interval as a Foundry duration.
      * @returns {Promise<{value: number, units: string}|null>}   v14's `{value, units}` pair
      */
     static async interval(text) {
@@ -103,22 +71,13 @@ export class Doses {
         return { value: count * unit.per, units: unit.unit };
     }
 
-    /**
-     * The unit a word names. Accents are stripped before the lookup so `journée` finds `journee`,
-     * which is the only reason the table can list a French word in ASCII.
-     */
+    /** The unit a word names. */
     static #unit(word) {
         const key = word.toLocaleLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
         return Object.values(MGT2.DoseUnits).find(unit => unit.words.includes(key)) ?? null;
     }
 
-    /* -------------------------------------------- */
-
-    /**
-     * The drug's own effects, copied onto the Traveller. A drug carrying none still produces one
-     * marker: the dose is a fact of the session even when the referee applies its numbers by hand,
-     * and without it there would be nothing to end and nothing to count down.
-     */
+    /** The drug's own effects, copied onto the Traveller. */
     static async #apply(drug, onset, duration) {
         const dose = {
             drug: drug.name, item: drug.id,
@@ -129,14 +88,10 @@ export class Doses {
         const data = sources.map(effect => {
             const base = effect ? effect.toObject() : { name: drug.name, img: drug.img };
             delete base._id;
-            // ASSIGNED, never merged. `ActiveEffect#toObject()` hands back a `duration` whose
-            // `seconds` is a getter with no setter, so `mergeObject` recurses into it and throws
-            // "Cannot set property seconds" — a v14 trap that fires only on a drug that carries an
-            // effect of its own, which is the common case and not the edge one.
+            // ASSIGNED, never merged.
             base.transfer = false;                     // the copy belongs to the Traveller
             base.origin = drug.uuid;
-            // Core p.115's Combat Drugs do nothing for three rounds. Disabled is the only state
-            // Foundry has for "real but not yet", and the row says which of the two it is.
+            // Core p.115's Combat Drugs do nothing for three rounds.
             base.disabled = Boolean(onset);
             // A printed duration nobody can read leaves whatever the effect's author set.
             if ( duration ) base.duration = { ...duration };
@@ -147,10 +102,9 @@ export class Doses {
     }
 
     /**
-     * The counter this drug feeds, and the reason it lives on the Traveller: stims escalate per dose
-     * taken without sleep between and anti-rad counts doses that day (Core p.115), so the count has
-     * to survive the last dose being swallowed. Matched on the drug's NAME rather than on its id —
-     * two boxes of the same drug are the same drug.
+     * The counter this drug feeds, and the reason it lives on the Traveller: stims escalate per
+     * dose taken without sleep between and anti-rad counts doses that day (Core p.115), so the
+     * count has to survive the last dose being swallowed.
      */
     static async #count(actor, drug) {
         if ( !Array.isArray(actor.system.drugCounters) ) return null;
@@ -161,8 +115,6 @@ export class Doses {
         await actor.update({ "system.drugCounters": counters });
         return row?.doses ?? 1;
     }
-
-    /* -------------------------------------------- */
 
     /** What a dose is, on the log: the three moments, and how many have been taken. */
     static async #card(drug, { onset, duration, doses }) {

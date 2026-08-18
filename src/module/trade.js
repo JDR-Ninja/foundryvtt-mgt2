@@ -13,8 +13,7 @@ const SHIP_TYPE = "Actor.spacecraft";
 
 /**
  * The `mgt2-data` module ships the same thirty-six rows as `cargo` Items, keyed by their D66 and
- * carrying an icon and the printed blurb. Consulted and never required: with the module absent a lot
- * is built from `MGT2.TradeGoods` alone and differs only in its artwork.
+ * carrying an icon and the printed blurb.
  */
 const GOODS_PACK = "mgt2-data.items";
 const GOODS_KEY = "flags.mgt2-data.d66";
@@ -27,23 +26,14 @@ const DICE_PER_ROW = 2;
 
 /**
  * Attempts drawn per random row, so that a legal supplier's 61-65 can be skipped rather than
- * re-rolled one await at a time. Four is enough that exhausting them is a 1 in 2700 event.
+ * re-rolled one await at a time.
  */
 const STOCK_TRIES = 4;
 
-/**
- * Speculative trade: the shelf a supplier has, and what one lot costs or fetches.
- *
- * Pure, on the shape `StopTraffic` established — every method takes the referee's typed values and
- * the dice already rolled and returns a reading. Nothing here touches a document.
- */
+/** Speculative trade: the shelf a supplier has, and what one lot costs or fetches. */
 export class SpecTrade {
 
-    /**
-     * Every key a Purchase or Sale DM column can name. The eighteen trade codes derive from the
-     * profile, and the travel zone joins them: Core p.244 prices Advanced Weapons by Amber and Red,
-     * which are not facts about the world's economy and are on the same column regardless.
-     */
+    /** Every key a Purchase or Sale DM column can name. */
     static codesOf(uwp, zone) {
         const codes = MGT2.TradeCodes.filter(row => row.test(uwp)).map(row => row.code);
         return ((zone === "amber") || (zone === "red")) ? [...codes, zone] : codes;
@@ -57,8 +47,7 @@ export class SpecTrade {
 
     /**
      * Core p.242: a supplier stocks every Common good, plus every good one of the world's codes
-     * matches. Rows 61-65 are a black market's alone, which is the only thing the toggle changes
-     * about the shelf.
+     * matches.
      */
     static stock(codes, blackMarket) {
         return Object.values(MGT2.TradeGoods).filter(row => !row.exotic
@@ -66,11 +55,7 @@ export class SpecTrade {
             && ((row.availability === null) || row.availability.some(code => codes.includes(code))));
     }
 
-    /**
-     * The winning row of one DM column. Core p.243 takes the LARGEST applicable and never the sum —
-     * a rule with exactly one implementation, `CargoData.bestDM`; this adds only the name of the row
-     * that won it, because a DM whose source is not printed cannot be argued with at the table.
-     */
+    /** The winning row of one DM column. */
     static best(rows, codes) {
         const dm = CargoData.bestDM(rows, codes);
         const row = rows.find(entry => codes.includes(entry.code) && (entry.dm === dm));
@@ -79,11 +64,6 @@ export class SpecTrade {
 
     /**
      * Both DM columns of one good against one world, with the smuggler's overlay on the sale side.
-     *
-     * Core p.243 gives a locally banned good a Sale DM of the world's Law Level minus the Level it is
-     * banned at, and takes the HIGHER where a good is banned everywhere as well. Below the ban the
-     * difference is negative and the good is simply legal there, so the local term floors at zero —
-     * a ruling, since the printed sentence subtracts without saying what a negative means.
      */
     static columns(goods, codes, { lawLevel, bannedAt }) {
         const purchase = SpecTrade.best(goods.purchase, codes);
@@ -95,12 +75,7 @@ export class SpecTrade {
         };
     }
 
-    /**
-     * One transaction. Core p.243: 3D, plus the trader's Broker, minus the other side's, plus the
-     * largest DM in this side's own column and minus the largest in the other's. That sign flip is
-     * the whole mechanism — the world which is cheapest to buy a cargo on is the world which pays
-     * worst for it, and no world is good for both.
-     */
+    /** One transaction. */
     static reading(side, goods, columns, input, roll) {
         const own = (side === "purchase") ? columns.purchase : columns.sale;
         const other = (side === "purchase") ? columns.sale : columns.purchase;
@@ -129,10 +104,7 @@ export class SpecTrade {
 
     /**
      * Core p.242's local broker charges "a flat fee of 10% of the gross proceeds of a transaction",
-     * and a fixer handling illegal goods charges 20%. It is levied on the GROSS and not on the
-     * margin, so the same rate is paid on top of a purchase and out of a sale — which is why a
-     * brokered deal that only breaks even loses money twice.
-     *
+     * and a fixer handling illegal goods charges 20%.
      * @param {number} gross     What the goods themselves change hands at
      * @param {object} input     The screen's reading — `localBroker` decides whether any fee is due
      * @param {boolean} illegal  Whether this transaction is the fixer's rather than the broker's
@@ -152,11 +124,7 @@ export class SpecTrade {
             : game.i18n.localize(SpecTrade.codeLabel(column.code));
     }
 
-    /**
-     * The Tons column, rolled. Core p.242 bands the size of the market onto the ROLL and not onto the
-     * total — "this can result in a number of zero or less", which is no availability at all, and a
-     * multiplier applied afterwards could never produce it.
-     */
+    /** The Tons column, rolled. */
     static tons(goods, population, dice) {
         const dm = MGT2.readTable(MGT2.SpeculativeTrade.population, population).dm;
         const parts = dice.slice(0, goods.dice);
@@ -164,14 +132,7 @@ export class SpecTrade {
         return { parts, dm, raw, tons: Math.max(0, raw) * goods.multiplier };
     }
 
-    /**
-     * Finding the supplier at all. The starport's size helps (Core p.242) and every search already
-     * made here this month costs a further DM−1 (Core p.241) — the count `world.system.trade.attempts`
-     * keeps, which a dropped world supplies and which is typed where there is no document at all.
-     *
-     * `attempts` is a parameter and not a reading of *now* because a roll already made must survive
-     * its own stamp: the count the dice answered is one lower than the count the next search reads.
-     */
+    /** Finding the supplier at all. */
     static search(uwp, attempts, roll = null) {
         const port = MGT2.Starports[uwp.starport] ?? MGT2.Starports.X;
         const terms = [StopTraffic.term(
@@ -188,28 +149,9 @@ export class SpecTrade {
     }
 }
 
-/* -------------------------------------------- */
-
 /**
- * The speculative block — the shelf, the tonnage and both prices of one stop (§33.9 step 7).
- *
- * ONE world, not two. Traffic is a route and needs both ends; a speculative trade is a market, and
- * the crew sells the hold and buys the next cargo at the same counter. Both readings are drawn
- * because the same trade codes feed them with opposite signs, which is the fact a referee reads off
- * the printed table wrong.
- *
- * It owns no document: the shelf is never persisted, and a stop is answered once (§9.35). The
- * per-planet, per-month state that Core p.241 and p.243 describe lives on the `world` Actor and
- * nowhere else — so a world may be DROPPED here, which fills the same typed fields and buys the two
- * write-backs the books make persistent. Without one the count is typed and nothing is written, so a
- * table with no documents at all still gets every DM.
- *
- * The counter at the bottom is the exception, and it is deliberate: a settled price BUYS a lot into
- * the hold and a lot in the hold SELLS back, each in one press. Both go through `CreditSplit`, money
- * first and cargo second — cancelling the split is the common case, and it has to cost nothing.
- *
+ * The speculative block — the shelf, the tonnage and both prices of one stop.
  * @extends {ApplicationV2}
- * @mixes HandlebarsApplication
  */
 export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
@@ -240,9 +182,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         results: { template: "systems/mgt2/templates/trade-results.html", scrollable: [""] }
     };
 
-    /* -------------------------------------------- */
-
-    /** The typed values. None of it is persisted: a stop is answered once (§9.35). */
+    /** The typed values. None of it is persisted: a stop is answered once. */
     #input = {
         world: "", zone: "green", goods: "11",
         broker: 0, otherBroker: MGT2.SpeculativeTrade.otherBroker,
@@ -250,52 +190,40 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     };
 
     /**
-     * The shelf's dice, rolled once and kept. Each of the thirty-six rows owns a fixed slot of the
-     * quantity pool, so correcting the Population code re-reads the dice already on the table instead
-     * of quietly producing a different shelf.
+     * The shelf's dice, rolled once and kept.
      * @type {{quantity: number[], stock: string[]}|null}
      */
     #dice = null;
 
     /**
-     * The two 3D, kept apart from the shelf's: they are different acts a stop apart, and folding them
-     * into one store would make a rolled shelf read as a price of zero.
+     * The two 3D, kept apart from the shelf's: they are different acts a stop apart, and folding
+     * them into one store would make a rolled shelf read as a price of zero.
      * @type {{purchase: number, sale: number}|null}
      */
     #price = null;
 
-    /** The `Roll` behind `#price`, kept so the posted card can carry it (§9.117). */
+    /** The `Roll` behind `#price`, kept so the posted card can carry it. */
     #priceRoll = null;
 
     /**
-     * The supplier search, kept as the 2D AND the attempt count it was rolled at. Stamping the world
-     * moves that count, so a reading re-derived from *now* would silently worsen a roll already made.
+     * The supplier search, kept as the 2D AND the attempt count it was rolled at.
      * @type {{attempts: number, roll: number}|null}
      */
     #search = null;
 
-    /** The `Roll` behind `#search`, on the card for the same reason as the price's (§9.117). */
+    /** The `Roll` behind `#search`, on the card for the same reason as the price's. */
     #searchRoll = null;
 
-    /**
-     * The market, when one was dropped. It FILLS the typed fields and does not replace them — every
-     * reading below still comes off the line in the box. What the handle buys is the write-back: the
-     * search stamp (Core p.241) and the refusal (Core p.243), which are the only two facts of a stop
-     * the books make outlive it.
-     * @type {Actor|null}
-     */
+    /** The market, when one was dropped. @type {Actor|null} */
     #world = null;
 
-    /**
-     * The hull that takes delivery. Written only by the two acts at the bottom of the screen: a lot
-     * bought becomes a `cargo` Item on it, and a lot sold is deleted off it.
-     * @type {Actor|null}
-     */
+    /** The hull that takes delivery. @type {Actor|null} */
     #ship = null;
 
     /**
      * What this supplier has already sold, by D66. Core p.242 rolls the tonnage as the stock the
-     * supplier HAS, so a lot bought is a lot gone — a second press would buy cargo that is not there.
+     * supplier HAS, so a lot bought is a lot gone — a second press would buy cargo that is not
+     * there.
      * @type {Set<string>}
      */
     #bought = new Set();
@@ -315,7 +243,6 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * One window: a second would answer the same market twice with different dice.
-     * @param {object} [options]
      * @param {Actor} [options.world]   A `world` to put in the slot before the window opens
      */
     static open({ world } = {}) {
@@ -325,10 +252,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * Put a world in the slot, which fills the typed fields from it and keeps the handle. A DIFFERENT
-     * world drops the dice with the market they were rolled for: `#dice` is kept so that a corrected
-     * digit re-reads the same shelf, and another planet is not a correction.
-     * @param {Actor} actor
+     * Put a world in the slot, which fills the typed fields from it and keeps the handle.
      * @returns {Actor|null}
      */
     seed(actor) {
@@ -355,8 +279,6 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         this.#searchRoll = null;
         this.#bought.clear();
     }
-
-    /* -------------------------------------------- */
 
     /** Every document this screen has written into `apps`, which is not the same as the two slots. */
     #registered = new Set();
@@ -386,36 +308,23 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         this.#registered = new Set();
     }
 
-    /* -------------------------------------------- */
-
     /** What the dropped world says about its suppliers, against the campaign's own *now*. */
     get standing() {
         return this.#world ? this.#world.system.tradeStanding(campaignDay()) : null;
     }
 
     /**
-     * The gate the world sheet's own four buttons take, said out loud: `DocumentSheetV2` disables the
-     * whole form below OWNER, and a `world` hands the players OBSERVER (§9.33.5). So the screen is
-     * everyone's — Core p.238 gives the chapter to the Travellers — and the two stamps are the
-     * referee's.
+     * The gate the world sheet's own four buttons take, said out loud: `DocumentSheetV2` disables
+     * the whole form below OWNER, and a `world` hands the players OBSERVER.
      */
     get canWrite() {
         return Boolean(this.#world?.canUserModify(game.user, "update"));
     }
 
-    /**
-     * The gate on the two acts that move money. `CreditSplit` refuses a non-GM outright — it writes
-     * other people's purses — and the lot itself is written onto the hull, so both halves of the
-     * counter take the referee. The screen stays everyone's (Core p.238): the buttons grey, and
-     * nothing else on the page changes.
-     */
+    /** The gate on the two acts that move money. */
     get canTrade() {
         return game.user.isGM && Boolean(this.#ship?.canUserModify(game.user, "update"));
     }
-
-    /* -------------------------------------------- */
-    /*  Context                                     */
-    /* -------------------------------------------- */
 
     /** The profile parsed and the numbers coerced once, so nothing below has to. */
     get reading() {
@@ -428,8 +337,8 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             goods: this.#input.goods,
             broker: Math.trunc(Number(this.#input.broker) || 0),
             otherBroker: Math.trunc(Number(this.#input.otherBroker) || 0),
-            // A dropped world OWNS the count: Core p.241 keys it to the planet and the month, and two
-            // independent counters for one rule is what stamps a single search twice.
+            // A dropped world OWNS the count: Core p.241 keys it to the planet and the month, and
+            // two independent counters for one rule is what stamps a single search twice.
             attempts: standing ? standing.attemptsThisMonth
                 : Math.max(0, Math.trunc(Number(this.#input.attempts) || 0)),
             blackMarket: this.#input.blackMarket === true,
@@ -471,8 +380,8 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
         context.codes = codes.map(code => ({ code, label: SpecTrade.codeLabel(code),
             zone: !MGT2.TradeCodes.some(row => row.code === code) }));
-        // Two readings of the same rule: what the NEXT search costs, and the one already rolled read
-        // against the count it was rolled at.
+        // Two readings of the same rule: what the NEXT search costs, and the one already rolled
+        // read against the count it was rolled at.
         context.search = SpecTrade.search(input.uwp, input.attempts);
         context.searched = this.#search
             ? SpecTrade.search(input.uwp, this.#search.attempts, this.#search.roll) : null;
@@ -497,11 +406,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * The lot on the table: the rolled tonnage of the selected good, and what the settled purchase
-     * percentage makes it cost. `total` is `CargoData#prepareDerivedData`'s own expression for `paid`
-     * — the same three figures in the same order — so the sum debited and the sum the sheet prints
-     * afterwards cannot disagree.
-     *
-     * Priced without a hull, gated on one: a crew reading what a lot costs has not decided to buy it.
+     * percentage makes it cost.
      */
     #offer(goods, input, purchase) {
         if ( !this.#dice || !this.#price || (goods.exotic === true) ) return null;
@@ -509,12 +414,11 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         const { tons } = SpecTrade.tons(goods, input.uwp.population,
             this.#dice.quantity.slice(slot, slot + DICE_PER_ROW));
         const total = Math.round(tons * goods.basePrice * purchase.percent / 100);
-        // Core p.242: the broker's cut rides on top of a purchase, so what the crew is debited is not
-        // what the goods cost. A black market counter or an illegal row makes it the fixer's 20%.
+        // Core p.242: the broker's cut rides on top of a purchase, so what the crew is debited is
+        // not what the goods cost.
         const fee = SpecTrade.brokerFee(total, input, input.blackMarket || (goods.illegal === true));
         const hold = this.#ship ? this.#ship.system.cargo : null;
-        // What stops the purchase, in the order a referee would fix it. A greyed button that does not
-        // say why is a button pressed twice.
+        // What stops the purchase, in the order a referee would fix it.
         const blocked = !hold ? "MGT2.Trade.NeedAShip"
             : (total <= 0) ? "MGT2.Trade.NoneInStock"
                 : this.#bought.has(goods.d66) ? "MGT2.Trade.LotTaken"
@@ -524,23 +428,15 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             rate: fee.rate, fee: fee.fee, due: fee.due,
             feeCredits: MGT2Helper.credits(fee.fee), dueCredits: MGT2Helper.credits(fee.due),
             capacity: hold?.capacity ?? 0, free: hold?.free ?? 0,
-            // Core p.241: a lot cannot be broken up, so a hold with room for part of it has room for
-            // none of it. Both readings warn and neither refuses — an oversized lot is a legal
-            // purchase and a problem the crew has to solve.
+            // Core p.241: a lot cannot be broken up, so a hold with room for part of it has room
+            // for none of it.
             overFree: Boolean(hold) && (tons > hold.free),
             overHold: Boolean(hold) && (tons > hold.capacity),
             ready: !blocked && !this.#busy
         };
     }
 
-    /**
-     * What the hold is carrying, each lot priced against THIS market. The percentage is re-derived
-     * from the lot's OWN stored Sale DM column and not from the row selected above: the crew sells
-     * what is aboard, and that is exactly why `CargoData` stores the two columns at all.
-     *
-     * A freight consignment is listed and never offered — it is carried for a fare (Core p.239) and
-     * is not the crew's to sell — so the hold reads whole while only speculation is on the block.
-     */
+    /** What the hold is carrying, each lot priced against THIS market. */
     #lots(input, codes) {
         if ( !this.#ship ) return [];
         const capacity = this.#ship.system.cargo.capacity;
@@ -555,9 +451,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
                 this.#price ? this.#price.sale : null);
             const priced = lot.speculative && read.percent;
             const total = priced ? Math.round(lot.tons * lot.basePrice * read.percent / 100) : 0;
-            // The fee comes OUT of a sale (Core p.242). A lot the Imperium bans outright is the
-            // fixer's business rather than the broker's, as is any black-market counter — and that
-            // is `illegal` and not `legality`, which is the level a WORLD bans it at (§9.141).
+            // The fee comes OUT of a sale (Core p.242).
             const fee = SpecTrade.brokerFee(total, input,
                 input.blackMarket || (lot.illegal === true) || (lot.legality !== null));
             return {
@@ -571,11 +465,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         });
     }
 
-    /**
-     * The market slot: which document is in it, and the two facts this screen can write to it. The
-     * standing is printed here rather than only on the world sheet so that a stamp is visibly landing
-     * — the referee has no second button to remember, and no reason to press one.
-     */
+    /** The market slot: which document is in it, and the two facts this screen can write to it. */
     #slot() {
         const standing = this.standing;
         if ( !standing ) return { linked: false };
@@ -594,8 +484,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * The hull slot: the designed `cargo.capacity` against the tonnage the ship's own manifest sums
-     * out of its `cargo` Items. It is what a purchase has to fit into and what a sale empties, and a
-     * lot cannot be broken up (Core p.241) — so the free figure is a warning and never a refusal.
+     * out of its `cargo` Items.
      */
     static #hold(ship) {
         if ( !ship ) return { linked: false };
@@ -632,13 +521,9 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         return { dm, tone: (dm > 0) ? "pos" : ((dm < 0) ? "neg" : "nil") };
     }
 
-    /* -------------------------------------------- */
-    /*  Events                                      */
-    /* -------------------------------------------- */
-
     /**
-     * One delegated listener on the application root, so it survives the results part being replaced
-     * on every keystroke. `data-field` rather than `name`: nothing here is submitted anywhere.
+     * One delegated listener on the application root, so it survives the results part being
+     * replaced on every keystroke.
      * @inheritDoc
      */
     async _onFirstRender(context, options) {
@@ -656,8 +541,6 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     async _onRender(context, options) {
         await super._onRender(context, options);
         // Re-bound on every render because the form part carries the slots and is replaced.
-        // `DragDrop#bind` ASSIGNS `element.ondragover` rather than adding a listener, so it never
-        // stacks.
         this.dragDrop.bind(this.element);
     }
 
@@ -676,8 +559,6 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     }
 
-    /* -------------------------------------------- */
-
     /** Clicking a shelf line selects it; the select in the header is the same control by another name. */
     static #onPick(event, target) {
         this.#input.goods = target.dataset.d66;
@@ -687,31 +568,23 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * Finding a supplier at all: an Average (8+) check at the Starport DM (Core p.242), less one per
-     * search already made here this month (Core p.241). That second term is a fact about the PLANET,
-     * so the roll and the stamp are one press — the referee never has to remember the world sheet's
-     * own button, which is what made a single search count twice.
-     *
-     * The count is read before the write, because the penalty counts PREVIOUS attempts; and it is
-     * stored beside the dice, so the stamp that follows does not re-price the roll that earned it.
-     * @this {SpecTradeDialog}
+     * Finding a supplier at all: an Average (8+) check at the Starport DM (Core p.242), less one
+     * per search already made here this month (Core p.241).
      */
     static async #onRollSearch() {
         const input = this.reading;
         if ( !input.uwp ) return;
         this.#searchRoll = await new Roll("2d6").roll();
         this.#search = { attempts: input.attempts, roll: this.#searchRoll.total };
-        // The stamp redraws every client through `apps`; with no world there is nothing to write and
-        // the typed count keeps driving the DM.
+        // The stamp redraws every client through `apps`; with no world there is nothing to write
+        // and the typed count keeps driving the DM.
         if ( this.canWrite ) await this.#world.system.recordSearch(campaignDay());
         else this.render({ parts: ["results"] });
     }
 
     /**
-     * Core p.243: a crew unwilling to pay may walk away, and cannot deal with that supplier again for
-     * at least a month. The second of the two facts the books make persistent, and the reason the
-     * screen keeps a handle on the document at all.
-     * @this {SpecTradeDialog}
+     * Core p.243: a crew unwilling to pay may walk away, and cannot deal with that supplier again
+     * for at least a month.
      */
     static async #onWalkAway() {
         if ( !this.canWrite ) return;
@@ -732,11 +605,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         return document?.sheet?.render({ force: true });
     }
 
-    /**
-     * The shelf. Thirty-six tonnages in one pool, plus the random rows a supplier turns up beyond
-     * their codes — Core p.242 gives as many of those as the Population code, and 61-65 never appear
-     * unless the supplier is a black market, which instead rolls 1D under a leading 6.
-     */
+    /** The shelf. */
     static async #onRollStock(event, target) {
         const input = this.reading;
         if ( !input.uwp ) return;
@@ -769,29 +638,12 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         const faces = roll.dice[0].results.map(result => result.result);
         const sum = from => faces.slice(from, from + dice).reduce((total, die) => total + die, 0);
         this.#price = { purchase: sum(0), sale: sum(dice) };
-        // The two 3D the card is actually about (§9.117). The shelf's pools are left out for the
-        // same reason as the traffic dialog's: they are sliced per row and mostly never read.
+        // The two 3D the card is actually about.
         this.#priceRoll = roll;
         this.render({ parts: ["results"] });
     }
 
-    /* -------------------------------------------- */
-    /*  The counter                                 */
-    /* -------------------------------------------- */
-
-    /**
-     * The purchase. ONE press: the crew is debited through `CreditSplit`, and the lot lands in the
-     * hold.
-     *
-     * **Money first and cargo second**, which is the whole order. The split screen is one the referee
-     * closes unbought more often than not, so a cancel has to cost nothing at all — no Item, no stamp,
-     * no card. A failure after the debit leaves a paid crew with no cargo, which is visible on the log
-     * and fixable by hand; the reverse would be a hold nobody paid for.
-     *
-     * This is not a supplier search and stamps nothing on the world: Core p.241's count is the search's
-     * and is written where the dice are rolled.
-     * @this {SpecTradeDialog}
-     */
+    /** The purchase. */
     static async #onBuyLot() {
         if ( this.#busy ) return;
         const context = await this._prepareContext({});
@@ -811,8 +663,8 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
                     world: this.#marketName(), percent: offer.percent })
             });
             if ( !split ) return;
-            // Marked before the Item exists: the money is gone either way, so the supplier's stock of
-            // that good is spent whatever happens next.
+            // Marked before the Item exists: the money is gone either way, so the supplier's stock
+            // of that good is spent whatever happens next.
             this.#bought.add(goods.d66);
             const item = await this.#createLot(goods, offer).catch(error => {
                 console.error(error);
@@ -830,13 +682,8 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * The mirror, and the reason the screen draws a sale reading at all: the crew sells the hold and
-     * buys the next cargo at the same counter (Core p.241). A whole lot at a time, because a lot
-     * cannot be broken up.
-     *
-     * Same order as the purchase — the credit lands first and the lot leaves the hold second, so a
-     * cancelled split cannot destroy cargo the crew still owns.
-     * @this {SpecTradeDialog}
+     * The mirror, and the reason the screen draws a sale reading at all: the crew sells the hold
+     * and buys the next cargo at the same counter (Core p.241).
      */
     static async #onSellLot(event, target) {
         if ( this.#busy ) return;
@@ -871,11 +718,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     }
 
-    /**
-     * The lot, on the ship. Every number and the name come from the system's own row, so the Item
-     * reads in the client's language and carries exactly the two DM columns Core p.243 scores it on
-     * later; the compendium document is consulted for its icon and its blurb and for nothing else.
-     */
+    /** The lot, on the ship. */
     async #createLot(goods, offer) {
         const packed = await SpecTradeDialog.#goodsDocument(goods.d66);
         const data = {
@@ -884,20 +727,20 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             system: {
                 tons: offer.tons,
                 basePrice: goods.basePrice,
-                // What was actually paid, as a percentage: the margin at the next port is unreadable
-                // without it (Core p.243).
+                // What was actually paid, as a percentage: the margin at the next port is
+                // unreadable without it (Core p.243).
                 purchasePct: offer.percent,
                 purchaseDM: goods.purchase.map(row => ({ ...row })),
                 saleDM: goods.sale.map(row => ({ ...row })),
-                // The Trade Goods table prints no Law Level. A stored 0 would read on the sheet as
-                // Law Level 0 and manufacture a smuggler's Sale DM the book never prints.
+                // The Trade Goods table prints no Law Level.
                 legality: null,
                 // Core p.243's "illegal throughout the Imperium", which `legality` cannot state.
                 illegal: goods.illegal === true
             }
         };
-        // `destination`, `dueDay` and `farePerTon` are left at their defaults: having no destination
-        // at all IS being speculative, which is what `CargoData` derives `speculative` from.
+        // `destination`, `dueDay` and `farePerTon` are left at their defaults: having no
+        // destination at all IS being speculative, which is what `CargoData` derives `speculative`
+        // from.
         if ( packed ) {
             data.img = packed.img;
             data.system.description = packed.system.description;
@@ -908,9 +751,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * The same row as an Item, where the module is installed. Its flags carry the D66 and flags sit
-     * outside the default compendium index, so the one field is requested explicitly rather than
-     * loading thirty-six documents to read one key off each.
+     * The same row as an Item, where the module is installed.
      * @returns {Promise<object|null>}   The Item's source data, or null wherever the lookup fails
      */
     static async #goodsDocument(d66) {
@@ -929,14 +770,9 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     }
 
-    /* -------------------------------------------- */
-    /*  Drag and drop                               */
-    /* -------------------------------------------- */
-
     /**
      * A plain `ApplicationV2` inherits no drag-drop plumbing, so the controller is supplied here as
-     * the chargen and voyage screens' are. No permission gate on the drop: reading a world is not
-     * writing to one, and `canWrite` is what the two stamps test.
+     * the chargen and voyage screens' are.
      * @type {DragDrop}
      */
     get dragDrop() {
@@ -985,21 +821,12 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.render();
     }
 
-    /* -------------------------------------------- */
-    /*  Chat                                        */
-    /* -------------------------------------------- */
-
     /** A dropped world is named; a typed one is only ever its own profile line. */
     #marketName() {
         return this.#world?.name || this.#input.world;
     }
 
-    /**
-     * ONE card, and it is about the CARGO. `CreditSplit` posted the transfer a moment earlier and
-     * named every share, so nothing here repeats one: what this adds is the lot — the tonnage, the
-     * percentage of base it went at, and the hold it arrived in or left, which is where a lot too big
-     * for the hull becomes visible to the whole table rather than only to whoever pressed the button.
-     */
+    /** ONE card, and it is about the CARGO. */
     async #postLot({ goods, tons, percent, base, total, fee, rate, settled, sold }) {
         const hold = this.#ship.system.cargo;
         const content = await foundry.applications.handlebars.renderTemplate(
@@ -1038,7 +865,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             author: game.user.id,
             speaker: ChatMessage.getSpeaker(),
             // v14 appends no display of its own once `content` is set, so this costs the card
-            // nothing and buys Dice So Nice and an auditable record (§9.117).
+            // nothing and buys Dice So Nice and an auditable record.
             rolls: [this.#searchRoll, this.#priceRoll].filter(roll => roll),
             content: `<div class="mgt2 theme-light card spectrade">
                 <div class="chd"><div class="what"><h4>${
@@ -1048,9 +875,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 }
 
-/* -------------------------------------------- */
-
-/** The campaign's own *now*, in days, and the only clock the system has (§9.35). */
+/** The campaign's own *now*, in days, and the only clock the system has. */
 function campaignDay() {
     return game.settings.get("mgt2", "campaignDay");
 }
@@ -1062,11 +887,9 @@ function marketGloss(parsed) {
         port: parsed.uwp.starport, pop: parsed.uwp.population, law: parsed.uwp.lawLevel });
 }
 
-/* -------------------------------------------- */
-
 /**
- * Beside the traffic control and on the same grounds: Core p.238 hands the chapter to the Travellers,
- * so this is not GM-only either.
+ * Beside the traffic control and on the same grounds: Core p.238 hands the chapter to the
+ * Travellers, so this is not GM-only either.
  */
 export function registerSpecTrade() {
     Hooks.on("getSceneControlButtons", controls => {

@@ -5,20 +5,13 @@ const { DragDrop } = foundry.applications.ux;
 
 const TEMPLATES = "systems/mgt2/templates";
 
-/**
- * What the roster takes, tested AFTER the uuid resolves. A `spacecraft` is a crew SOURCE and never a
- * payer: no hull holds money — its `finance` is purchase, mortgage and periods paid, with no balance
- * — and neither does a `stash`. `character.system.finance.credits` is the only purse in the system.
- */
+/** What the roster takes, tested AFTER the uuid resolves. */
 const ROSTER_TYPES = "Actor.character Actor.spacecraft";
 
 /** The two ways money moves. Not a CONFIG list: nothing outside this screen reads it. */
 const DIRECTIONS = ["debit", "credit"];
 
-/**
- * These controls live in no `<form>`: the screen submits nowhere and reads its own state. Radios with
- * no form owner group by name across the whole document, so every name here is prefixed.
- */
+/** These controls live in no `<form>`: the screen submits nowhere and reads its own state. */
 const FIELD = "cs";
 
 /**
@@ -45,27 +38,7 @@ const FIELD = "cs";
 /**
  * The referee's transfer screen: a sum, a direction, a roster of Travellers and the split between
  * them, applied on one explicit validation.
- *
- * **The first thing in this system that writes money on demand**, so the whole design is about
- * making that write visible before and after it happens. §9.35's doctrine — *the referee types it and
- * NOTHING here writes it* — is bent deliberately, and the chat card is what makes the bend honest:
- * the direction, the sum, every participant's share and every shortfall that became debt are on the
- * log, whether the transfer was typed here or handed in by another screen.
- *
- * Three mechanics carry it, and they are the feature:
- *
- * 1. **Weights, never raw percentages.** Dragging one row rescales the *unlocked* others in
- *    proportion; a lock pin fixes a share against every later move. N sliders that must be made to
- *    total 100 % by hand is the shape this avoids.
- * 2. **Every row is typable in credits or in percent**, each following the other, because the table
- *    case is "Alice puts in Cr50000, split the rest" and the alternative is arithmetic in the head.
- * 3. **The rounding remainder is named.** Whole credits do not divide three ways, and `allocate`
- *    says out loud who took the odd one.
- *
- * GM-only, screen and entry points alike: it moves other people's purses.
- *
  * @extends {ApplicationV2}
- * @mixes HandlebarsApplication
  */
 export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
 
@@ -91,9 +64,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * Three parts, and the split is the Docket's for the Docket's reason: the typed values render
-     * ONCE so a caret survives a keystroke, while the roster and the foot are a reading of them. The
-     * roster goes further still — it is patched in place rather than re-rendered, because a gauge
-     * replaced mid-drag loses the pointer.
+     * ONCE so a caret survives a keystroke, while the roster and the foot are a reading of them.
      * @inheritDoc
      */
     static PARTS = {
@@ -104,20 +75,13 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * Open the screen and wait for what it applies.
-     *
-     * **One window per transfer, and not one window for the system.** A caller's seeded sum is its own
-     * transaction, and two screens open at once are safe: every purse is read at the moment the
-     * transfer is validated, never at the moment the window opened.
-     *
-     * @param {object} [seed]
      * @param {number} [seed.total]        The sum, in credits
      * @param {string} [seed.direction]    `debit` (default) or `credit`
      * @param {string[]} [seed.actors]     Actor uuids to seed the roster with; non-characters drop out
      * @param {string} [seed.spacecraft]   A spacecraft uuid — its crew roster seeds the roster, and
-     *                                     the CREW button stays live against that hull afterwards
+     *     the CREW button stays live against that hull afterwards
      * @param {string} [seed.reason]       A line carried onto the chat card
      * @returns {Promise<CreditSplitResult|null>}  What was applied, or `null` where the referee closed
-     *                                             the window without validating and for a non-GM
      */
     static async open(seed = {}) {
         if ( !game.user.isGM ) {
@@ -145,8 +109,6 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         return super._canRender(options);
     }
 
-    /* -------------------------------------------- */
-
     /** The sum to move, in whole credits. */
     #total = 0;
 
@@ -160,8 +122,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
     #ship = null;
 
     /**
-     * The roster, per-client and never persisted. `share` is a fraction of the whole and the rows sum
-     * to 1 by construction; `locked` pins one against every later move.
+     * The roster, per-client and never persisted.
      * @type {{id: string, uuid: string, name: string, share: number, locked: boolean}[]}
      */
     #rows = [];
@@ -175,15 +136,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
     /** @type {((result: CreditSplitResult|null) => void)|null} */
     #settle = null;
 
-    /* -------------------------------------------- */
-    /*  Seeding                                     */
-    /* -------------------------------------------- */
-
-    /**
-     * What the window opens on. A caller that names a source gets exactly that source; a referee who
-     * opens it by hand gets the epic-rolls heuristic the Docket uses — whoever is selected, and
-     * otherwise the active table.
-     */
+    /** What the window opens on. */
     async #seedRoster(seed) {
         const actors = [];
         for ( const uuid of seed.actors ?? [] ) {
@@ -209,11 +162,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
             .map(user => user.character);
     }
 
-    /**
-     * A hull's crew as payers. `spacecraft.system.crew[]` is a list of STATIONS carrying an optional
-     * Actor uuid, so a station nobody mans contributes nothing and one Traveller at two stations is
-     * one row — `#add` deduplicates on the uuid.
-     */
+    /** A hull's crew as payers. */
     static async #crewOf(uuid) {
         const ship = await CreditSplit.#resolve(uuid);
         if ( ship?.type !== "spacecraft" ) return [];
@@ -231,8 +180,6 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * Appended, never replaced, and deduplicated on the uuid: adding the party twice adds nobody.
-     * Anything that is not a `character` drops out here rather than sitting on the roster as a row
-     * with no purse behind it.
      */
     #add(actors) {
         const held = new Set(this.#rows.map(row => row.uuid));
@@ -247,15 +194,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         if ( added ) this.#even();
     }
 
-    /* -------------------------------------------- */
-    /*  The split                                   */
-    /* -------------------------------------------- */
-
-    /**
-     * Equal shares over the unlocked rows, of whatever the locks leave. **Every structural change goes
-     * through it** — adding or removing a Traveller re-splits — so the rule is one sentence a referee
-     * can hold, and a share that has to survive that is what the lock pin is for.
-     */
+    /** Equal shares over the unlocked rows, of whatever the locks leave. */
     #even() {
         const free = this.#rows.filter(row => !row.locked);
         if ( !free.length ) return;
@@ -268,14 +207,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
             (row.locked && (row !== except)) ? sum + row.share : sum, 0);
     }
 
-    /**
-     * One row moved, and the whole mechanism. The unlocked others rescale IN PROPORTION to absorb the
-     * difference — never re-evened, which would flatten a split the referee had already shaped.
-     *
-     * The row is clamped by what the locks leave. Where every other row is locked there is nowhere for
-     * the difference to go, so it stays unassigned and the foot says so — better than a drag that
-     * silently refuses to move.
-     */
+    /** One row moved, and the whole mechanism. */
     #setShare(id, share) {
         const row = this.#rows.find(entry => entry.id === id);
         if ( !row ) return;
@@ -292,16 +224,8 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * `total` credits divided by `shares`, in whole credits, and the answer to "who gets the odd one".
-     *
-     * Largest remainder: every row takes the whole credits its share is worth, and the credits the
-     * division leaves over go one each to the largest fractions dropped — ties to the largest share,
-     * then to the first row on the list. Cr1000 three ways is therefore 334/333/333 and never
-     * 333/333/333, and `orphans` names the rows that took one.
-     *
-     * The pool is what the shares CLAIM rather than the whole sum, so a roster whose shares no longer
-     * reach 100 % leaves the difference unassigned instead of having it dumped on the first rows.
-     *
+     * `total` credits divided by `shares`, in whole credits, and the answer to "who gets the odd
+     * one".
      * @param {number[]} shares  Fractions of the whole, summing to 1 or less
      * @param {number} total     Whole credits
      * @returns {{amounts: number[], orphans: number[]}}
@@ -325,15 +249,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * What a payer cannot pay, moved onto the payers who can. Two proportional splits of the same
-     * figure — taken off the short rows in proportion to how short they are, handed to the others in
-     * proportion to the cash they have spare — so the transfer stays exactly the sum it was.
-     *
-     * **A locked row is never moved, in either direction.** The pin is what the referee set by hand,
-     * and a share that cannot survive this button is not a pin — so a locked payer who is short keeps
-     * their shortfall, and the foot goes on naming the debt it will become.
-     *
-     * @param {{amount: number, cash: number, locked: boolean}[]} rows
+     * What a payer cannot pay, moved onto the payers who can.
      * @returns {number[]}   The amounts after the move, in the same order
      */
     static cover(rows) {
@@ -348,25 +264,14 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         return amounts.map((amount, index) => amount - taken[index] + given[index]);
     }
 
-    /**
-     * `total` credits over integer weights. No row can receive more than its own weight — the largest
-     * remainder never rounds a row past its weight while `total` is no larger than their sum, which is
-     * what keeps a payer from being handed more slack than they have.
-     */
+    /** `total` credits over integer weights. */
     static #byWeight(weights, total) {
         const sum = weights.reduce((value, weight) => value + weight, 0);
         if ( !sum || !total ) return weights.map(() => 0);
         return CreditSplit.allocate(weights.map(weight => weight / sum), total).amounts;
     }
 
-    /* -------------------------------------------- */
-    /*  The reading                                 */
-    /* -------------------------------------------- */
-
-    /**
-     * The transfer resolved against every row, once. The roster draws it, the foot counts it, the
-     * validation gates on it and the write spends it, so the four cannot disagree.
-     */
+    /** The transfer resolved against every row, once. */
     #reading() {
         const total = this.#total;
         const debit = this.#direction === "debit";
@@ -423,10 +328,6 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         return (actor?.type === "character") && actor.system?.finance ? actor : null;
     }
 
-    /* -------------------------------------------- */
-    /*  Context                                     */
-    /* -------------------------------------------- */
-
     /** @inheritDoc */
     async _prepareContext(options) {
         const context = await super._prepareContext(options);
@@ -448,10 +349,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         return context;
     }
 
-    /**
-     * The four sentences the foot prints. Built here rather than in the template because `#sync`
-     * patches the same four in place, and two sources for one sentence is two sentences.
-     */
+    /** The four sentences the foot prints. */
     #lines(reading) {
         const money = value => MGT2Helper.credits(value);
         return {
@@ -473,15 +371,10 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         };
     }
 
-    /* -------------------------------------------- */
-    /*  Listeners                                   */
-    /* -------------------------------------------- */
-
     /** The frame outlives every re-render, so this binds once. @inheritDoc */
     _attachFrameListeners() {
         super._attachFrameListeners();
-        // `input` alone. Every control here fires it, a radio included, and adding `change` would
-        // renormalise the whole roster twice per drag.
+        // `input` alone.
         this.element.addEventListener("input", this.#onField.bind(this));
     }
 
@@ -489,25 +382,20 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
     async _onRender(context, options) {
         await super._onRender(context, options);
         // Re-bound on every render because the roster part carries the zones and is replaced.
-        // `DragDrop#bind` ASSIGNS `element.ondragover` rather than adding a listener, so it never
-        // stacks.
         this.dragDrop.bind(this.element);
         this.#sync();
     }
 
-    /**
-     * One delegated reader for the whole window. A gauge, a percent and a credit figure are three
-     * spellings of one number, so all three land on `#setShare` — which is what makes "Alice puts in
-     * Cr50000, split the rest" one keystroke rather than a division.
-     */
+    /** One delegated reader for the whole window. */
     #onField(event) {
         const input = event.target;
         const gauge = input.dataset.gauge;
         if ( gauge ) {
             const id = input.dataset.row;
             if ( gauge === "credits" ) {
-                // No sum typed yet, so credits name no fraction of anything: the field is left where
-                // it is rather than resolving to a share of zero and flattening the whole split.
+                // No sum typed yet, so credits name no fraction of anything: the field is left
+                // where it is rather than resolving to a share of zero and flattening the whole
+                // split.
                 if ( !this.#total ) return;
                 this.#setShare(id, Math.max(0, MGT2Helper.getIntegerFromInput(input.value)) / this.#total);
             }
@@ -536,8 +424,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * The window patched in place rather than re-rendered, and it has to be: a range input replaced
-     * mid-drag loses the pointer and a field replaced mid-word loses the caret. Everything below reads
-     * the same `#reading()` the roster part renders from, so the two cannot drift.
+     * mid-drag loses the pointer and a field replaced mid-word loses the caret.
      * @param {HTMLElement} [skip]   The control the referee is in — never written back over them
      */
     #sync(skip) {
@@ -584,8 +471,6 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         if ( node ) node.disabled = !on;
     }
 
-    /* -------------------------------------------- */
-
     static #onSeedControlled() {
         this.#add(CreditSplit.#controlledActors());
         this.render({ parts: ["roster", "foot"] });
@@ -614,7 +499,6 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * The pin. What it promises is narrow and exact: no OTHER row's move ever changes this share.
-     * The row itself stays live, because re-pinning it is the same act as pinning it.
      */
     static #onToggleLock(event, target) {
         const row = this.#row(target);
@@ -661,14 +545,9 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         this.render({ parts: ["roster", "foot"] });
     }
 
-    /* -------------------------------------------- */
-    /*  Drag and drop                               */
-    /* -------------------------------------------- */
-
     /**
      * A plain `ApplicationV2` inherits no drag-drop plumbing, so the controller is supplied here as
-     * the Docket's is. The refusal at the pointer is free: `MGT2Helper.watchDrags` reads the payload
-     * inside `DragDrop`, which is the only place it is readable during `dragover`.
+     * the Docket's is.
      * @type {DragDrop}
      */
     get dragDrop() {
@@ -715,7 +594,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         const actor = data.uuid ? await fromUuid(data.uuid) : null;
         if ( !actor ) return;
         // A hull is the crew source, and dropping one is the ship picker this window deliberately
-        // does not build. It holds no purse, so it never becomes a row of its own.
+        // does not build.
         if ( actor.type === "spacecraft" ) {
             this.#ship = actor.uuid;
             this.#add(await CreditSplit.#crewOf(actor.uuid));
@@ -724,15 +603,9 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.render({ parts: ["roster", "foot"] });
     }
 
-    /* -------------------------------------------- */
-    /*  The write                                   */
-    /* -------------------------------------------- */
-
     /**
-     * The one write this window makes, on one explicit press and never as a side effect of a render.
-     * Validating twice cannot debit twice: the guard is set before the first await, the button greys
-     * with it, and the window closes on the way out.
-     * @this {CreditSplit}
+     * The one write this window makes, on one explicit press and never as a side effect of a
+     * render.
      */
     static async #onApply() {
         if ( this.#applying ) return;
@@ -755,10 +628,8 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
             const after = debit ? (before - paid) : (before + row.amount);
             if ( row.actor && row.amount ) {
                 const update = { "system.finance.credits": after };
-                // Folio 52's shape, verbatim: pay what you have and the remainder is carried as debt.
-                // `credits` is `min: 0`, so a naive subtraction would clamp at zero with no error at
-                // all and report a payment nobody made. A credit repays no debt — no book prints
-                // that, so the figure is shown and left alone.
+                // Folio 52's shape, verbatim: pay what you have and the remainder is carried as
+                // debt.
                 if ( debt ) update["system.finance.debt"] = finance.debt + debt;
                 await row.actor.update(update);
             }
@@ -779,12 +650,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         return "MGT2.CreditSplit.Errors.Unassigned";
     }
 
-    /**
-     * The card, and it is what makes the write honest. §9.35's doctrine is that the referee types it
-     * and nothing here writes it; this screen bends that deliberately, so the direction, the sum,
-     * every participant's share and every shortfall that became debt go on the log where the table
-     * can argue with them.
-     */
+    /** The card, and it is what makes the write honest. */
     async #post(entries) {
         const money = value => MGT2Helper.credits(value);
         const debt = entries.reduce((sum, entry) => sum + entry.debt, 0);
@@ -815,8 +681,6 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
         this.#settle = null;
     }
 }
-
-/* -------------------------------------------- */
 
 /**
  * The referee's door onto it, beside the trade tools and unlike them GATED: those hand a chapter to
