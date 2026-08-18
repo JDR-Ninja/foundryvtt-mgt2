@@ -1,0 +1,24 @@
+{{! Berths and passengers. Four numbers with three consumers each — tonnage, life support and the
+    steward requirement — which is why they are ratings on the ship rather than Items. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.spacecraft.Accommodation'}}</h3>
+		<span class="count">{{localize 'MGT2.Actor.spacecraft.AccommodationCount'}}</span>
+	</div>
+	<dl class="statline grid play-only" data-derived="system.staterooms">
+		{{#each ship.accommodation as |row|}}
+		<div class="stat{{#unless row.value}} none{{/unless}}">
+			<dt>{{localize row.label}}</dt>
+			<dd>{{#if row.value}}{{row.value}}{{else}}&mdash;{{/if}}</dd>
+		</div>
+		{{/each}}
+	</dl>
+	<div class="grid edit-only">
+		{{#each ship.accommodation as |row|}}
+		<label>
+			<span class="lbl">{{localize row.label}}</span>
+			<input class="f num" type="number" min="0" step="1" name="system.{{row.path}}" value="{{row.value}}" data-dtype="Number" />
+		</label>
+		{{/each}}
+	</div>
+</div>

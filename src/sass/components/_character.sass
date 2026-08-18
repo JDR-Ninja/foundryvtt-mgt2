@@ -814,9 +814,46 @@
 //  Spacecraft — the two things the kit genuinely does not carry
 // --------------------------------------------
 
+// The shell holds the nav and the six bodies; each body is the `.mgt2-panel` that scrolls and
+// carries the column inset, so the shell itself takes neither padding nor a scrollbar.
 .mgt2 .mgt2-spacecraft-panel
 	display: flex
 	flex-direction: column
+	min-height: 0
+	overflow: hidden
+
+.mgt2 .tab[data-group="spacecraft"].active
+	display: flex
+	flex-direction: column
+	flex: 1 1 auto
+
+// The tab holds two editors and nothing else, so they stand side by side where the width is there
+// and the pair is capped: a `prose-mirror` grows with its text and nothing else bounded it.
+.mgt2 .tab[data-tab="description"] > .block
+	flex: 1 1 auto
+	min-height: 0
+
+.mgt2 .tab[data-tab="description"] prose-mirror
+	flex: 1 1 auto
+	min-height: 7rem
+	max-height: 22rem
+
+@container sheet (min-width: 980px)
+	.mgt2 .tab[data-tab="description"].active
+		flex-direction: row
+		align-items: stretch
+		> .block
+			flex: 1 1 0
+			min-width: 0
+
+// The magazine reads as one figure: what is loaded, over what the mount holds.
+.mgt2 td.ammo
+	display: flex
+	align-items: baseline
+	justify-content: center
+	gap: 5px
+	.f.num
+		width: 3.4rem
 
 // The manifest is where a route ENDS: the act sits beside the consignment that travelled, and a lot
 // past its due day is marked because Core p.241 prices the delay off the day of arrival.

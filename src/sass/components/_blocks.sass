@@ -849,6 +849,40 @@ li.chat-message:has(> .message-content > .mgt2.card)
 .mgt2 .trackwrap
 	padding-top: 13px
 
+// A design verdict, a budget breakdown or a list of untouched locations folds behind one line, so
+// the block costs its heading and nothing else until it is asked for.
+.mgt2 details.fold
+	> summary
+		display: flex
+		align-items: baseline
+		gap: 8px
+		cursor: var(--cursor-pointer)
+		font-family: var(--cond)
+		font-size: 11px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--mute)
+		list-style: none
+		&::-webkit-details-marker
+			display: none
+		&::before
+			content: "\25B8"
+			font-size: 9px
+			color: var(--faint)
+		&:hover
+			color: var(--mgt2-color-primary-active)
+		&.bad
+			color: var(--danger)
+		b
+			font-family: var(--mono)
+			font-weight: 400
+			font-variant-numeric: tabular-nums
+	&[open] > summary::before
+		content: "\25BE"
+	> :not(summary)
+		margin-top: 7px
+
 // --------------------------------------------
 //  CRITICALS — location × severity 1–6, plus a separate Hull Severity.
 // --------------------------------------------

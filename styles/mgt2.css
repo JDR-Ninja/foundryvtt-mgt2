@@ -3473,6 +3473,45 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   padding-top: 13px;
 }
 
+.mgt2 details.fold > summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  cursor: var(--cursor-pointer);
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+  list-style: none;
+}
+.mgt2 details.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.mgt2 details.fold > summary::before {
+  content: "▸";
+  font-size: 9px;
+  color: var(--faint);
+}
+.mgt2 details.fold > summary:hover {
+  color: var(--mgt2-color-primary-active);
+}
+.mgt2 details.fold > summary.bad {
+  color: var(--danger);
+}
+.mgt2 details.fold > summary b {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 details.fold[open] > summary::before {
+  content: "▾";
+}
+.mgt2 details.fold > :not(summary) {
+  margin-top: 7px;
+}
+
 .mgt2 .crits {
   display: grid;
   grid-template-columns: 8.5rem 1fr;
@@ -4719,6 +4758,45 @@ li.chat-message:has(> .message-content > .mgt2.card) {
 .mgt2 .mgt2-spacecraft-panel {
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mgt2 .tab[data-group=spacecraft].active {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+.mgt2 .tab[data-tab=description] > .block {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.mgt2 .tab[data-tab=description] prose-mirror {
+  flex: 1 1 auto;
+  min-height: 7rem;
+  max-height: 22rem;
+}
+
+@container sheet (min-width: 980px) {
+  .mgt2 .tab[data-tab=description].active {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .mgt2 .tab[data-tab=description].active > .block {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+.mgt2 td.ammo {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+}
+.mgt2 td.ammo .f.num {
+  width: 3.4rem;
 }
 
 .mgt2 table.manifest td .btn {

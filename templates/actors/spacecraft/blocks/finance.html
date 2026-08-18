@@ -1,0 +1,136 @@
+{{! The READOUT is the crew's: Core p.155 bills the debt to "the crew". Only the four stored
+    numbers are gated, and the gate that matters is `gmOnlyFields` in the manifest — server-side. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.spacecraft.Finance'}}</h3>
+		{{#if isGM}}<span class="count">{{localize 'MGT2.Actor.spacecraft.GMOnly'}}</span>{{/if}}
+	</div>
+	{{#if isGM}}
+	<div class="grid edit-only">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Purchase'}}</span>
+			{{formInput systemFields.finance.fields.purchase name="system.finance.purchase" value=system.finance.purchase classes="f num"}}
+		</label>
+		{{! Nullable: a ship bought outright, bought with Ship Shares, or taken as a career
+		    Benefit have three different legitimate mortgages. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.MortgageOverride'}}</span>
+			<input class="f num" type="number" min="0" step="1" placeholder="&mdash;"
+				name="system.finance.mortgageOverride" value="{{system.finance.mortgageOverride}}" data-dtype="Number" />
+		</label>
+		{{! Typed, not `formInput`: a bounded integer gets a `<range-picker>` from the field, and a
+		    slider beside three number boxes in a two-column grid is not what this row is. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.BenefitQuarters'}}</span>
+			<input class="f num" type="number" min="0" max="4" step="1"
+				name="system.finance.benefitQuarters" value="{{system.finance.benefitQuarters}}" data-dtype="Number" />
+		</label>
+		{{! The referee advances it; nothing in the system does. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.PeriodsPaid'}}</span>
+			{{formInput systemFields.finance.fields.periodsPaid name="system.finance.periodsPaid" value=system.finance.periodsPaid classes="f num"}}
+		</label>
+	</div>
+	{{/if}}
+	<div class="finance" data-derived="system.finance">
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Purchase'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.PurchaseWhy'}}</span><span class="v"><i>Cr</i>{{credits ship.finance.purchase}}</span></div>
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Mortgage'}}</span><span class="why">{{#if ship.finance.mortgageOverridden}}{{localize 'MGT2.Actor.spacecraft.MortgageOverridden'}}{{else}}{{localize 'MGT2.Actor.spacecraft.MortgageWhy'}}{{/if}}</span><span class="v"><i>Cr</i>{{credits ship.finance.mortgage}}</span></div>
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Maintenance'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.MaintenanceWhy'}}</span><span class="v">{{ship.finance.maintenance}}</span></div>
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.LifeSupport'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.LifeSupportWhy'}}</span><span class="v">{{ship.finance.lifeSupport}}</span></div>
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.Salaries'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.SalariesWhy'}}</span><span class="v">{{ship.finance.salaries}}</span></div>
+	</div>
+
+	{{! Folio 149 prints the payment and a 40-year term and never multiplies them out; folio 154's
+	    maintenance rule divides the year by 12, which is where the count comes from. }}
+	{{#if ship.finance.mortgage}}
+	{{#if ship.finance.periods}}
+	<div class="finance" data-derived="system.finance">
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.MortgageTerm'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.MortgageTermWhy' n=ship.finance.periodsPerYear}}</span><span class="v">{{ship.finance.periods}}</span></div>
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.MortgageTotal'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.MortgageTotalWhy' n=ship.finance.periods}}</span><span class="v"><i>Cr</i>{{credits ship.finance.total}}</span></div>
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.MortgageOvercost'}}</span>{{#if ship.finance.multiple}}<span class="why">{{localize 'MGT2.Actor.spacecraft.MortgageOvercostWhy' n=ship.finance.multiple}}</span>{{/if}}<span class="v warn"><i>Cr</i>{{credits ship.finance.overcost}}</span></div>
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.MortgageBalance'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.MortgageBalanceWhy' n=ship.finance.remaining}}</span><span class="v"><i>Cr</i>{{credits ship.finance.balance}}</span></div>
+	</div>
+
+	<section class="budget compact" data-over="soft" data-derived="system.finance">
+		<span class="lbl">{{localize 'MGT2.Actor.spacecraft.MortgagePaid'}}</span>
+		<div class="gauge"><i style="--g: {{ship.finance.percent}}%"></i></div>
+		<span class="tot"><b>{{ship.finance.paid}}</b><span class="of">/ {{ship.finance.periods}}</span></span>
+	</section>
+	{{else}}
+	<p class="hint">{{localize 'MGT2.Actor.spacecraft.MortgageOwned'}}</p>
+	{{/if}}
+	{{/if}}
+
+	{{! Its own group, and deliberately not a sixth row above: Core p.155 prints fuel as a unit
+	    price, so a full tank per period is a quantity no rule states. }}
+	<div class="finance" data-derived="system.finance">
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.FuelCost'}}</span><span class="why">{{#if ship.finance.refined}}{{localize 'MGT2.Actor.spacecraft.Refined'}}{{else}}{{localize 'MGT2.Actor.spacecraft.Unrefined'}}{{/if}}</span><span class="v">{{ship.finance.tankFill}}</span></div>
+	</div>
+
+	{{#if isGM}}
+	<details class="fold" data-fold="finance">
+		<summary>{{localize 'MGT2.Actor.spacecraft.Analyses'}}</summary>
+
+	{{! Core p.149's two elections after a career Benefit, priced side by side. Both are suggestions:
+	    applying one writes the override. They total the same money — the choice is which figure moves. }}
+	{{#if ship.finance.elections}}
+	<section class="budget check" data-over="soft">
+		<header>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Elections'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.ElectionsHint'}}"></i>
+			<span class="rem">{{localize 'MGT2.Actor.spacecraft.ElectionsRem' n=ship.finance.quarters}}</span>
+		</header>
+		<table class="rows brows">
+			<tbody>
+				<tr>
+					<td>{{localize 'MGT2.Actor.spacecraft.ElectKeep'}}<span class="why">{{localize 'MGT2.Actor.spacecraft.ElectPeriodsWhy' n=ship.finance.elections.keep.periods}}</span></td>
+					<td class="num">{{credits ship.finance.elections.keep.payment}}</td>
+					<td class="d">{{#if ship.finance.mortgageOverridden}}<a class="flag" data-action="electMortgage" data-election="keep">{{localize 'MGT2.Actor.spacecraft.ElectApply'}}</a>{{else}}{{localize 'MGT2.Actor.spacecraft.ElectInForce'}}{{/if}}</td>
+				</tr>
+				<tr>
+					<td>{{localize 'MGT2.Actor.spacecraft.ElectRemortgage'}}<span class="why">{{localize 'MGT2.Actor.spacecraft.ElectPeriodsWhy' n=ship.finance.elections.remortgage.periods}}</span></td>
+					<td class="num">{{credits ship.finance.elections.remortgage.payment}}</td>
+					<td class="d">{{#if ship.finance.mortgageOverridden}}{{localize 'MGT2.Actor.spacecraft.ElectInForce'}}{{else}}<a class="flag" data-action="electMortgage" data-election="remortgage">{{localize 'MGT2.Actor.spacecraft.ElectApply'}}</a>{{/if}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</section>
+	{{/if}}
+
+	{{! Core p.153's consequence, in its own window: it is asked once per system arrived at, and
+	    half its ladder is per-check rather than per-ship. The parsec count printed here is the
+	    one the folio says persists until the crew is discovered. }}
+	{{#if ship.finance.mortgage}}
+	<section class="budget check" data-over="soft">
+		<header>
+			<span class="lbl">{{localize 'MGT2.SkipDebts.Title'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.SkipDebts.PanelHint'}}"></i>
+			<span class="rem">{{localize 'MGT2.SkipDebts.Run' n=system.finance.skipParsecs}}</span>
+			<a class="flag" data-action="skipDebts">{{localize 'MGT2.SkipDebts.Open'}}</a>
+		</header>
+	</section>
+	{{/if}}
+
+	{{! Authoritative and takes no override: the catalogue's plain cost ÷ 12 000 bills a carried
+	    craft twice, once here and once on its own sheet. The delta is shown rather than hidden. }}
+	{{#if ship.finance.carried}}
+	<section class="budget check" data-over="soft">
+		<header>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.CrossCheck'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.MaintenanceHint'}}"></i>
+			<span class="rem">{{localize 'MGT2.Actor.spacecraft.PrintedVsDerived'}}</span>
+		</header>
+		<table class="rows brows">
+			<tbody>
+				<tr class="mismatch">
+					<td>{{localize 'MGT2.Actor.spacecraft.Maintenance'}}<span class="why">{{localize 'MGT2.Actor.spacecraft.CatalogueWhy' n=ship.finance.catalogue}}</span></td>
+					<td class="num">{{ship.finance.maintenance}}</td>
+					<td class="d">&minus; {{ship.finance.delta}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</section>
+	{{/if}}
+	</details>
+	{{/if}}
+</div>

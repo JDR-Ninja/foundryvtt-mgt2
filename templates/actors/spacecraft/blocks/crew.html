@@ -1,0 +1,134 @@
+{{! BLOCK 3 — the crew. A station action of kind `skill` needs a sheet to read the level off, so
+    it is disabled on a vacant or unstatted slot; a `special` action is not. The link is a
+    stored UUID and nothing here reads the canvas. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.spacecraft.Crew'}}</h3>
+		<span class="count">{{localize 'MGT2.Actor.spacecraft.CrewCount' stations=ship.crew.totals.stations aboard=ship.crew.totals.aboard}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.CrewHint'}}"></i>
+		<a class="add edit-only" data-action="rowCreate" data-rows="crew" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddStation'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+
+	{{! HG p.110: Crew Skill is TYPED and never averaged. The roster below holds stations rather
+	    than people — the Pantheress is crewed in the thousands and printed at Crew Skill 1 — so
+	    the stored figure is authoritative and the observed average is a hint beside it, which is
+	    the shape the crew requirement already uses. Deliberately OUTSIDE the fleet-battles gate:
+	    the field is stored whatever the switch says. }}
+	<dl class="statline" data-derived="system.crewSkillObserved">
+		<div class="stat">
+			<dt>{{localize 'MGT2.Actor.spacecraft.CrewSkill'}}</dt>
+			<dd>
+				<span class="play-only">{{ship.crew.skill}}</span>
+				<span class="edit-only">{{formInput systemFields.crewSkill name="system.crewSkill" value=system.crewSkill classes="f num"}}</span>
+			</dd>
+		</div>
+		<div class="stat{{#unless ship.crew.observed.bodies}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.spacecraft.CrewSkillObserved'}}</dt>
+			<dd>{{#if ship.crew.observed.bodies}}{{ship.crew.observed.level}}<i>{{localize 'MGT2.Actor.spacecraft.CrewSkillRead' bodies=ship.crew.observed.bodies unread=ship.crew.observed.unread}}</i>{{else}}&mdash;<i>{{localize 'MGT2.Actor.spacecraft.CrewSkillUnread'}}</i>{{/if}}</dd>
+		</div>
+	</dl>
+
+	{{#if ship.crew.rows.length}}
+	<table class="roster">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Actor.spacecraft.Station'}}</th>
+				<th>{{localize 'MGT2.Actor.spacecraft.Who'}}</th>
+				<th>{{localize 'MGT2.Actor.spacecraft.Mount'}}</th>
+				<th>{{localize 'MGT2.Actor.spacecraft.Actions'}}</th>
+				<th class="r">{{localize 'MGT2.Actor.spacecraft.Req'}}</th>
+			</tr>
+		</thead>
+		{{! Drop a person on a row and they take that station; drop them on the table and nowhere in
+		    particular and they are a new one. The zone names `Actor.<type>` because the type is
+		    only known once the uuid resolves, and it refuses at the pointer. }}
+		<tbody data-accept="Actor.character Actor.npc">
+			{{#each ship.crew.rows as |row|}}
+			<tr data-row-index="{{row.index}}" data-accept="Actor.character Actor.npc"{{#if row.vacant}} class="vacant"{{/if}}>
+				<td class="station">
+					<span class="play-only">
+						<b>{{#if row.station}}{{row.station}}{{else}}&mdash;{{/if}}{{#if (gt row.count 1)}} &times;{{row.count}}{{/if}}</b>
+						{{#if row.department}}<span class="dept">{{localize row.department}}</span>{{/if}}
+					</span>
+					<span class="edit-only">
+						<select class="f" name="system.crew.{{row.index}}.role">
+							<option value="">&mdash;</option>
+							{{#each row.roles as |choice|}}
+							<option value="{{choice._id}}"{{#if choice.selected}} selected{{/if}}>{{choice.name}}</option>
+							{{/each}}
+						</select>
+						<input class="f num" type="number" min="1" step="1" name="system.crew.{{row.index}}.count" value="{{row.count}}" data-dtype="Number" />
+					</span>
+				</td>
+				<td class="who{{#if row.statted}} linked{{else}}{{#if row.name}} plain{{/if}}{{/if}}">
+					<span class="play-only">
+						{{#if row.statted}}
+						<span class="av"></span><a data-action="openCraft" data-uuid="{{row.actor}}">{{row.name}}</a>
+						<i class="src">{{localize 'MGT2.Actor.spacecraft.LinkedActor'}}</i>
+						{{else if row.name}}
+						<em>{{row.name}}</em><i class="src">{{localize 'MGT2.Actor.spacecraft.NameOnly'}}</i>
+						{{else}}
+						{{localize 'MGT2.Actor.spacecraft.Vacant'}}
+						{{/if}}
+					</span>
+					<span class="edit-only">
+						<input class="f" type="text" name="system.crew.{{row.index}}.name" value="{{row.name}}" placeholder="{{localize 'MGT2.Actor.spacecraft.CrewName'}}" />
+						<input class="f" type="text" name="system.crew.{{row.index}}.actor" value="{{row.actor}}" placeholder="{{localize 'MGT2.Actor.spacecraft.ActorUuid'}}" />
+					</span>
+				</td>
+				{{! The station's standing mount. The combat DUTY is not here: it starts and stops
+				    with the encounter, so it lives on the `crew` Combatant. }}
+				<td class="duty">
+					<span class="ro play-only">{{#if row.dutyTarget}}{{row.dutyTarget}}{{else}}&mdash;{{/if}}</span>
+					<input class="f edit-only" type="text" name="system.crew.{{row.index}}.dutyTarget" value="{{row.dutyTarget}}" placeholder="{{localize 'MGT2.Actor.spacecraft.DutyTarget'}}" />
+				</td>
+				<td>
+					<div class="todo">
+						{{#each row.actions as |action|}}
+						<button type="button" class="btn" data-action="stationAction" data-action-index="{{action.index}}"{{#if action.disabled}} disabled data-tooltip="{{localize 'MGT2.Actor.spacecraft.NoCrewSheet'}}"{{/if}}>
+							{{action.label}}<i>{{#if action.skill}}{{action.skill}}{{/if}}{{#if action.target}} {{action.target}}+{{else}}{{#unless action.skill}}&mdash;{{/unless}}{{/if}}{{#if action.stepLabel}} &middot; {{localize action.stepLabel}}{{/if}}{{#if action.capLabel}} &middot; {{localize action.capLabel}}{{/if}}</i>
+						</button>
+						{{/each}}
+					</div>
+				</td>
+				<td class="r">
+					{{#if row.required}}
+					<span class="need{{#if (lt row.count row.required)}} short{{/if}}">{{row.count}} / <b>{{row.required}}</b></span>
+					{{else}}
+					<span class="need">{{row.count}} / <b>&mdash;</b></span>
+					{{/if}}
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+
+	{{! Advisory, and it stays advisory: the Core Rulebook's own Patrol Corvette does not satisfy
+	    its own table, and under-crewing is a legitimate campaign state. }}
+	<details class="fold" data-fold="crewreq"{{#if ship.crew.short}} open{{/if}}>
+		<summary class="{{#if ship.crew.short}}bad{{/if}}">{{localize 'MGT2.Actor.spacecraft.CrewRequired'}} <b>{{ship.crew.totals.stations}} / {{ship.crew.totals.required}}</b></summary>
+		<section class="budget check" data-over="soft">
+			<header>
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.CrewRequired'}}</span>
+				<span class="rem">{{localize (lookup choices.service system.role)}}</span>
+			</header>
+			<table class="rows brows" data-derived="system.crewRequired">
+				<tbody>
+					{{#each ship.crew.required as |row|}}
+					<tr>
+						<td>{{localize row.label}}</td>
+						<td class="num">{{row.count}}</td>
+						<td class="d"><i>Cr</i>{{credits row.salary}}</td>
+					</tr>
+					{{/each}}
+					<tr>
+						<td>{{localize 'MGT2.Actor.spacecraft.CrewTotal'}}</td>
+						<td class="num">{{ship.crew.totals.required}}</td>
+						<td class="d"><i>Cr</i>{{credits ship.crew.totals.salaries}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+	</details>
+</div>

@@ -27,6 +27,7 @@
 	    the third is easy to miss because no catalogue entry prints it. }}
 	{{> systems/mgt2/templates/actors/spacecraft/budget.html
 		b=ship.tonnage
+		fold="tonnage"
 		title=(localize 'MGT2.Actor.spacecraft.Tonnage')
 		flag=(localize 'MGT2.Actor.spacecraft.OverHull')
 		unit=(localize 'MGT2.Actor.spacecraft.Tons')
@@ -51,6 +52,7 @@
 
 	{{> systems/mgt2/templates/actors/spacecraft/budget.html
 		b=ship.hardpoints
+		fold="hardpoints"
 		title=(localize 'MGT2.Actor.spacecraft.Hardpoints')
 		flag=(localize 'MGT2.Actor.spacecraft.NoHardpoint')
 		derived="system.hardpoints"}}

@@ -1,0 +1,60 @@
+{{! The parts list feeds NOTHING above: the statblock is stored on the Actor and a ship with no
+    components is complete. Every check is advisory — published ships fail these. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Design.Title'}}</h3>
+		<span class="count">{{#if ship.design.fitted}}{{localize 'MGT2.Design.Count' n=ship.design.count tons=ship.design.tons}}{{else}}{{localize 'MGT2.Design.Optional'}}{{/if}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Design.Advisory'}}"></i>
+		<a class="add edit-only" data-action="itemCreate" data-type-item="component" data-create-name="{{localize 'MGT2.Design.NewComponent'}}" data-tooltip="{{localize 'MGT2.Design.AddComponent'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+
+	{{#if ship.design.fitted}}
+	<table class="rows">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Items.Name'}}</th>
+				<th>{{localize 'MGT2.Design.Category'}}</th>
+				<th class="c">{{localize 'MGT2.Actor.spacecraft.Tons'}}</th>
+				<th class="c">{{localize 'MGT2.Design.MCr'}}</th>
+				<th class="c">{{localize 'MGT2.Actor.spacecraft.Power'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each ship.design.rows as |row|}}
+			<tr data-item-id="{{row._id}}"{{#if row.dm}} class="hit"{{/if}}>
+				<td>
+					{{row.name}}{{#if (gt row.quantity 1)}} <span class="sub">&times;{{row.quantity}}</span>{{/if}}
+					{{#if row.rating}}<span class="sub">{{localize 'MGT2.Design.Rating' n=row.rating}}</span>{{/if}}
+				</td>
+				<td class="word">{{localize row.categoryLabel}}</td>
+				<td class="c num">{{row.tons}}</td>
+				<td class="c num">{{#if row.cost}}{{row.cost}}{{else}}&mdash;{{/if}}</td>
+				{{! One column, two readings: a plant states what it makes and every other row
+				    what it takes, which is the `power` / `rating` split. }}
+				<td class="c num{{#if (gt row.power 0)}} good{{/if}}">{{#if row.power}}{{#if (gt row.power 0)}}+{{/if}}{{row.power}}{{else}}&mdash;{{/if}}</td>
+				{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Design.EditComponent" del="MGT2.Design.DeleteComponent"}}
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+
+	{{! The ledger, and only where the world checks its designs. A check with nothing to read is
+	    drawn and silent rather than green: a parts list is a transcription and may be partial, so
+	    a ship with no fuel row typed is not a ship short of fuel. }}
+	{{#if (rule 'designValidation')}}
+	<details class="fold" data-fold="design">
+		<summary class="{{#if ship.design.failed}}bad{{/if}}">{{#if ship.design.failed}}{{localize 'MGT2.Design.Failed' n=ship.design.failed}}{{else if ship.design.checked}}{{localize 'MGT2.Design.Passed' n=ship.design.checked}}{{else}}{{localize 'MGT2.Design.NothingToRead'}}{{/if}}</summary>
+		<div class="valid" data-derived="system.design">
+			{{#each ship.design.checks as |check|}}
+			<div class="v {{#unless check.applies}}na{{else}}{{#if check.ok}}ok{{else}}no{{/if}}{{/unless}}">
+				<span class="mk">{{#unless check.applies}}&middot;{{else}}{{#if check.ok}}&check;{{else}}&times;{{/if}}{{/unless}}</span>
+				<span class="nm">{{localize check.label}}<span class="g">{{#if check.applies}}{{localize check.why}}{{else}}{{localize 'MGT2.Design.NothingToRead'}}{{/if}}</span></span>
+				<span class="num">{{#if check.applies}}{{check.used}}{{#if check.match}} = {{else}}/{{/if}}{{check.cap}}{{else}}&mdash;{{/if}}</span>
+			</div>
+			{{/each}}
+		</div>
+	</details>
+	{{/if}}
+</div>

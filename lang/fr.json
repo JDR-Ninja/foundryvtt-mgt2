@@ -1503,6 +1503,15 @@
         "AddMount": "Ajouter une monture",
         "DeleteMount": "Retirer cette monture",
         "Ammo": "Munitions",
+        "Tabs": {
+          "Station": "Poste de combat",
+          "Hold": "Soute & passagers"
+        },
+        "Analyses": "Analyses",
+        "JumpsAboard": "{n} sauts en réservoir",
+        "PilotN": "Pilote {n}",
+        "IntactLocations": "{n} localisations intactes",
+        "FoldRows": "{n} lignes",
         "Popup": "escamotable",
         "NoMultiple": "×1 · ne s'applique jamais à un missile",
         "AfterArmour": "après blindage",
@@ -3378,6 +3387,7 @@
     },
     "Design": {
       "Title": "Conception",
+      "Passed": "{n} vérifications lues, aucune ligne rouge.",
       "Optional": "optionnelle — le vaisseau ci-dessus est complet sans elle",
       "Count": "{n} composants · {tons} t comptabilisées",
       "Category": "Catégorie",

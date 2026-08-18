@@ -3,6 +3,7 @@ import { MGT2 } from "../config.js";
 import { CreditSplit } from "../credit-split.js";
 import { MGT2Helper } from "../helper.js";
 import { RollPromptHelper } from "../roll-prompt.js";
+import { Rules } from "../rules.js";
 import { SkipDebtsDialog } from "../skip-debts.js";
 import { CraftData } from "./craft-data.js";
 import { TravellerActorSheet } from "./character-sheet.js";
@@ -11,6 +12,26 @@ const PARTS_PATH = "systems/mgt2/templates/actors";
 
 /** Cell keys that phrase themselves as a signed DM and nothing else. */
 const DM_KEYS = ["sensorDM", "controlDM", "jumpDM"];
+
+/** Every block the panel composes from; each one is a partial of the same name. */
+const BLOCKS = ["hull", "accommodation", "manifest", "mounts", "crew", "bays", "criticals",
+    "design", "computer", "fleet", "finance", "description", "notes"];
+
+const blockPath = id => `${PARTS_PATH}/spacecraft/blocks/${id}.html`;
+
+/** Which tab holds each block. */
+const SLOT = {
+    mounts: "station", criticals: "station", computer: "station", crew: "station",
+    manifest: "hold", accommodation: "hold", bays: "hold",
+    finance: "finance",
+    hull: "design", design: "design",
+    fleet: "fleet",
+    description: "description", notes: "description"
+};
+
+for ( const id of BLOCKS ) {
+    if ( !(id in SLOT) ) throw new Error(`MGT2 | the spacecraft sheet block "${id}" has no tab slot.`);
+}
 
 /**
  * The spacecraft sheet, and the hard one: it is the single
@@ -59,19 +80,79 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         header: { template: `${PARTS_PATH}/spacecraft/header.html` },
         rail: {
             template: `${PARTS_PATH}/spacecraft/rail.html`,
-            templates: [`${PARTS_PATH}/spacecraft/budget.html`],
+            templates: [`${PARTS_PATH}/spacecraft/budget.html`,
+                `${PARTS_PATH}/spacecraft/budget-rows.html`],
             scrollable: [""]
         },
         panel: {
             template: `${PARTS_PATH}/spacecraft/panel.html`,
-            templates: [`${PARTS_PATH}/parts/row-controls.html`,
-                `${PARTS_PATH}/spacecraft/budget.html`],
-            scrollable: [""]
+            templates: BLOCKS.map(blockPath).concat(`${PARTS_PATH}/parts/row-controls.html`,
+                `${PARTS_PATH}/parts/tabs-nav.html`,
+                `${PARTS_PATH}/spacecraft/budget.html`,
+                `${PARTS_PATH}/spacecraft/budget-rows.html`),
+            scrollable: ['.tab[data-group="spacecraft"].active']
         }
     };
 
-    /** One rail and one panel, no tab strip. */
-    static TABS = {};
+    /** The five tabs, in nav order; Fleet is a sixth only where the rule is on. @inheritDoc */
+    static TABS = {
+        spacecraft: {
+            tabs: [
+                { id: "station", cssClass: "item tab-select", icon: "fa-solid fa-crosshairs", label: "MGT2.Actor.spacecraft.Tabs.Station" },
+                { id: "hold", cssClass: "item tab-select", icon: "fa-solid fa-pallet-boxes", label: "MGT2.Actor.spacecraft.Tabs.Hold" },
+                { id: "finance", cssClass: "item tab-select", icon: "fa-solid fa-credit-card", label: "MGT2.Actor.spacecraft.Finance" },
+                { id: "design", cssClass: "item tab-select", icon: "fa-solid fa-drafting-compass", label: "MGT2.Design.Title" },
+                { id: "fleet", cssClass: "item tab-select", icon: "fa-solid fa-chess-rook", label: "MGT2.Actor.spacecraft.Fleet.Title" },
+                { id: "description", cssClass: "item tab-select", icon: "fa-solid fa-book", label: "MGT2.Actor.spacecraft.Description" }
+            ]
+        }
+    };
+
+    /** The blocks this hull carries, grouped into the tab each one belongs in. */
+    #composition() {
+        const slots = {};
+        for ( const id of BLOCKS ) {
+            if ( (id === "fleet") && !Rules.on("fleetBattles") ) continue;
+            (slots[SLOT[id]] ??= []).push({ id, template: blockPath(id) });
+        }
+        return slots;
+    }
+
+    /** The Fleet tab is drawn only where the rule is on. @inheritDoc */
+    _getTabsConfig(group) {
+        const config = super._getTabsConfig(group);
+        if ( (group !== "spacecraft") || !config ) return config;
+        const slots = this.#composition();
+        const tabs = config.tabs.filter(tab => tab.id in slots);
+        return { ...config, tabs, initial: tabs[0]?.id ?? null };
+    }
+
+    /**
+     * `_prepareTabs` fills `tabGroups[group]` with `??=`, so a stored id outlives the tab that
+     * carried it: turn fleet battles off while Fleet is open and the strip has nothing active.
+     * @inheritDoc
+     */
+    _prepareTabs(group) {
+        if ( group === "spacecraft" ) {
+            const { tabs } = this._getTabsConfig(group);
+            if ( !tabs.some(tab => tab.id === this.tabGroups[group]) ) this.tabGroups[group] = null;
+        }
+        return super._prepareTabs(group);
+    }
+
+    /** Folds the reader opened by hand; one with no entry keeps what the template asked for.
+     * @type {Map<string, boolean>} */
+    #folds = new Map();
+
+    /** @inheritDoc */
+    _onRender(context, options) {
+        super._onRender(context, options);
+        for ( const fold of this.element.querySelectorAll("details.fold[data-fold]") ) {
+            const key = fold.dataset.fold;
+            if ( this.#folds.has(key) ) fold.open = this.#folds.get(key);
+            fold.addEventListener("toggle", () => this.#folds.set(key, fold.open));
+        }
+    }
 
     /**
      * The parent maps document paths onto the *character* sheet's parts, and this sheet has three
@@ -89,6 +170,11 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     async _prepareContext(options) {
         const context = await super._prepareContext(options);
         const system = this.actor.system;
+
+        // The parent overwrites `context.tabs` with the character sheet's two groups.
+        context.tabs = this._prepareTabs("spacecraft");
+        const slots = this.#composition();
+        for ( const tab of Object.values(context.tabs) ) tab.blocks = slots[tab.id];
 
         context.choices = {
             configurations: MGT2.HullConfigurations,
@@ -119,6 +205,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             criticals: this.#criticals(system),
             manifest: this.#manifest(),
             manoeuvre: system.manoeuvre,
+            fuel: SpacecraftActorSheet.#fuel(system),
             drives: SpacecraftActorSheet.#drives(system),
             finance: SpacecraftActorSheet.#finance(system),
             design: SpacecraftActorSheet.#design(system),
@@ -160,6 +247,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return {
             ...system.components,
             failed: design.failed,
+            checked: design.checks.filter(check => check.applies).length,
             checks: design.checks.map(check => ({
                 ...check,
                 label: `MGT2.Design.Checks.${check.key}`,
@@ -213,8 +301,9 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     static #tonnage(system) {
         const printed = system.printedFigures;
         const why = { armour: printed.armourTons, bridge: printed.bridgeTons };
+        // A row at zero is a fitting the hull does not carry.
         return SpacecraftActorSheet.#budget(system.hull.tons,
-            system.budget.rows.map(row => ({ key: row.key, value: row.tons,
+            system.budget.rows.filter(row => row.tons).map(row => ({ key: row.key, value: row.tons,
                 why: SpacecraftActorSheet.#printedWhy(why[row.key]) })));
     }
 
@@ -223,8 +312,10 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
      * its draw (Core p.171), which is why power is a panel rather than a number.
      */
     static #power(system) {
+        // `other` is never incremented at all; one already shed stays listed, to be brought back.
         const budget = SpacecraftActorSheet.#budget(system.power.available,
-            system.power.rows.map(row => ({ key: row.key, value: row.draw, powered: row.powered })),
+            system.power.rows.filter(row => row.draw || !row.powered)
+                .map(row => ({ key: row.key, value: row.draw, powered: row.powered })),
             system.power.requirements.total);
         budget.surplus = system.power.surplus;
         budget.plant = system.power.plant;
@@ -234,6 +325,17 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         budget.ionDrain = system.power.ionDrain;
         budget.why = SpacecraftActorSheet.#printedWhy(system.printedFigures.powerDraw);
         return budget;
+    }
+
+    /** The level in the tank against the tonnage that holds it: `ops.fuel`, not `fuel.tons`. */
+    static #fuel(system) {
+        const jumpTons = system.fuel.jumpTons;
+        return {
+            aboard: Math.round(system.ops.fuel * 100) / 100,
+            capacity: system.fuel.tons,
+            jumps: jumpTons > 0 ? Math.floor(system.ops.fuel / jumpTons) : 0,
+            rated: system.drives.jump
+        };
     }
 
     /** The second drive and the G-force it costs the crew, resolved to what the hint prints. */
@@ -426,6 +528,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 ...row, label: MGT2.CrewRoles[row.key]?.label ?? row.key
             })),
             totals: system.crewTotals,
+            short: system.crewTotals.stations < system.crewTotals.required,
             military: system.role === "military",
             hasRoles: this.actor.items.some(item => item.type === "role"),
             // The typed Crew Skill and the average the roster can see.
@@ -524,7 +627,12 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 effect: SpacecraftActorSheet.#effectText(system.criticalEffect(key))
             };
         });
-        return { locations, hullSeverity: system.hullSeverity, standing: system.criticalEffects };
+        return {
+            locations,
+            hit: locations.filter(location => location.severity),
+            intact: locations.filter(location => !location.severity),
+            hullSeverity: system.hullSeverity, standing: system.criticalEffects
+        };
     }
 
     /** One critical cell as localised fragments. */

@@ -1,0 +1,76 @@
+{{! Severity is stored and the effect is a lookup. Sixteen of the sixty-six cells do not damage
+    their own location at all — they raise the separate Hull Severity track. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.spacecraft.Criticals'}}</h3>
+		<span class="count">{{localize 'MGT2.Actor.spacecraft.CriticalsCount'}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.CriticalHint'}}"></i>
+		<a class="rm edit-only" data-action="criticalClear" data-tooltip="{{localize 'MGT2.Actor.spacecraft.ClearCriticals'}}"><i class="fa-solid fa-eraser"></i></a>
+	</div>
+	{{#if ship.criticals.hit.length}}
+	<div class="crits">
+		{{#each ship.criticals.hit as |location|}}
+		<span class="loc hit">{{localize location.label}}<i>{{location.roll}}</i></span>
+		<div class="pips" data-location="{{location.key}}">
+			{{#each location.pips as |pip|}}
+			<i class="{{#if pip.on}}on{{/if}}" data-action="criticalSet" data-step="{{pip.step}}"></i>
+			{{/each}}
+		</div>
+		{{#if location.effect}}
+		<span class="eff">{{localize 'MGT2.Actor.spacecraft.Severity'}} {{location.severity}} — <b>{{location.effect}}</b></span>
+		{{/if}}
+		{{/each}}
+	</div>
+	{{/if}}
+	{{#if ship.criticals.intact.length}}
+	<details class="fold" data-fold="criticals">
+		<summary>{{localize 'MGT2.Actor.spacecraft.IntactLocations' n=ship.criticals.intact.length}}</summary>
+		<div class="crits">
+			{{#each ship.criticals.intact as |location|}}
+			<span class="loc">{{localize location.label}}<i>{{location.roll}}</i></span>
+			<div class="pips" data-location="{{location.key}}">
+				{{#each location.pips as |pip|}}
+				<i data-action="criticalSet" data-step="{{pip.step}}"></i>
+				{{/each}}
+			</div>
+			{{/each}}
+		</div>
+	</details>
+	{{/if}}
+	{{! Both are typed at the round they happen: Core p.170's armour cells strip points that no
+	    critical writes, and sixteen cells raise Hull Severity instead of their own location. }}
+	<div class="grid">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.ArmourDamage'}}</span>
+			{{formInput systemFields.armour.fields.damage name="system.armour.damage" value=system.armour.damage classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.HullSeverity'}}</span>
+			{{! A number, not the <range-picker> a min-and-max NumberField would otherwise render. }}
+			<input class="f num" type="number" min="0" max="6" step="1"
+				name="system.hullSeverity" value="{{system.hullSeverity}}" data-dtype="Number" />
+		</label>
+	</div>
+	<dl class="statline" data-derived="system.criticalEffects">
+		<div class="stat{{#unless ship.criticals.standing.controlDM}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.spacecraft.ControlDM'}}</dt><dd>{{showDM ship.criticals.standing.controlDM}}</dd>
+		</div>
+		<div class="stat{{#unless ship.criticals.standing.sensorDM}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.spacecraft.SensorDM'}}</dt><dd>{{showDM ship.criticals.standing.sensorDM}}</dd>
+		</div>
+		<div class="stat{{#unless ship.criticals.standing.jumpDM}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.spacecraft.JumpDM'}}</dt><dd>{{showDM ship.criticals.standing.jumpDM}}</dd>
+		</div>
+	</dl>
+	{{! No `name` on either control: they belong to the referee's action, not to the document,
+	    and `submitOnChange` submits every named control on the sheet. }}
+	<div class="critctl">
+		<select class="f" data-crit="location" aria-label="{{localize 'MGT2.Actor.spacecraft.Location'}}">
+			{{#each ship.criticals.locations as |location|}}
+			<option value="{{location.key}}">{{location.roll}} &middot; {{localize location.label}}</option>
+			{{/each}}
+		</select>
+		<input class="f num" type="number" data-crit="effect" min="0" step="1" value="6" aria-label="{{localize 'MGT2.Actor.spacecraft.Effect'}}" />
+		<button type="button" class="btn b-dmg" data-action="criticalRoll">{{localize 'MGT2.Actor.spacecraft.ApplyCritical'}}</button>
+	</div>
+</div>

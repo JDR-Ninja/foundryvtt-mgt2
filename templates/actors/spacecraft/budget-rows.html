@@ -1,0 +1,25 @@
+{{! The switched variant's rows hold a STORED control beside a derived number, so the derived
+    marker stays on the total: nothing under `data-derived` may contain a form control. }}
+<table class="rows brows"{{#unless switched}} data-derived="{{derived}}"{{/unless}}>
+	<tbody>
+		{{#each b.rows as |row|}}
+		<tr{{#if (eq row.powered false)}} class="off"{{/if}}{{#if row.item}} data-item-id="{{row.key}}"{{/if}}>
+			{{#if ../switched}}
+			<td class="sw">
+				<input type="checkbox" data-action="{{../switched}}" data-consumer="{{row.key}}" {{checked row.powered}} />
+			</td>
+			{{/if}}
+			<td>
+				{{#if row.label}}{{row.label}}{{else}}{{localize (concat ../prefix row.key)}}{{/if}}
+				{{#if row.why}}<span class="why">{{localize row.why}}</span>{{/if}}
+			</td>
+			<td class="num">{{row.value}}</td>
+			{{! A row that IS a document opens and deletes like any inventory row; a power consumer
+			    is a fixed key with nothing behind it. }}
+			{{#if row.item}}
+			{{> systems/mgt2/templates/actors/parts/row-controls.html edit=../edit del=../del}}
+			{{/if}}
+		</tr>
+		{{/each}}
+	</tbody>
+</table>

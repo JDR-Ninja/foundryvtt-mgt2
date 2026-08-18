@@ -1,0 +1,70 @@
+{{! BLOCK 3 again, different columns. A carried craft is a full independent ship record, so it
+    is a reference and not an embedded document — and the parent has to know which craft it
+    carries in order to exclude them from its own maintenance (Core p.183). }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.spacecraft.CarriedCraft'}}</h3>
+		<span class="count">{{localize 'MGT2.Actor.spacecraft.BayCount' bays=ship.bays.length craft=ship.craftCount}}</span>
+		<a class="add edit-only" data-action="rowCreate" data-rows="bays" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddBay'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	{{#if ship.bays.length}}
+	<table class="roster">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Actor.spacecraft.Bay'}}</th>
+				<th>{{localize 'MGT2.Actor.spacecraft.Craft'}}</th>
+				<th>{{localize 'MGT2.Actor.spacecraft.State'}}</th>
+				<th class="r">{{localize 'MGT2.Actor.spacecraft.Tons'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each ship.bays as |bay|}}
+			<tr data-row-index="{{bay.index}}"{{#if bay.vacant}} class="vacant"{{/if}}>
+				<td class="station">
+					<span class="play-only">
+						<b>{{localize bay.kindLabel}}</b>
+						<span class="dept">{{#if bay.external}}{{localize 'MGT2.Actor.spacecraft.External'}}{{else}}{{localize 'MGT2.Actor.spacecraft.Internal'}}{{/if}}</span>
+					</span>
+					<select class="f edit-only" name="system.bays.{{bay.index}}.kind">
+						{{#each ../choices.bays as |entry key|}}
+						<option value="{{key}}"{{#if (eq key bay.kind)}} selected{{/if}}>{{localize entry.label}}</option>
+						{{/each}}
+					</select>
+				</td>
+				<td class="who{{#if bay.name}} linked{{/if}}">
+					{{! Ten fighters on ten clamps are ONE Actor carried ten times, so the count
+					    sits beside the name rather than making ten identical rows. }}
+					<span class="play-only">
+						{{#if bay.name}}
+						<span class="av"></span>{{#if bay.many}}<b class="times">{{bay.count}}&times;</b> {{/if}}<a data-action="openCraft" data-uuid="{{bay.craft}}">{{bay.name}}</a>
+						<i class="src">{{localize 'MGT2.Actor.spacecraft.LinkedActor'}}</i>
+						{{else}}{{localize 'MGT2.Actor.spacecraft.Empty'}}{{/if}}
+					</span>
+					<input class="f edit-only" type="text" name="system.bays.{{bay.index}}.craft" value="{{bay.craft}}" placeholder="{{localize 'MGT2.Actor.spacecraft.ActorUuid'}}" />
+				</td>
+				<td class="duty">
+					<span class="ro">{{#if bay.name}}{{localize 'MGT2.Actor.spacecraft.Docked'}}{{else}}&mdash;{{/if}}</span>
+					{{#if bay.transfer}}<span class="at">{{bay.transfer}}</span>{{/if}}
+				</td>
+				{{! The READOUT is the row's own tonnage — `count × capacity`, which is what the
+				    budget sums — and the two inputs beside it are the stored halves: how many,
+				    and what one of them costs the hull. }}
+				<td class="r">
+					<span class="need play-only">{{bay.tons}} t{{#if bay.many}}<i class="each">{{bay.capacity}} t {{localize 'MGT2.Actor.spacecraft.Each'}}</i>{{/if}}</span>
+					<span class="baytons edit-only">
+						<input class="f num" type="number" min="1" step="1" name="system.bays.{{bay.index}}.count" value="{{bay.count}}" data-dtype="Number" aria-label="{{localize 'MGT2.Actor.spacecraft.HowMany'}}" />
+						<input class="f num" type="number" min="0" step="0.1" name="system.bays.{{bay.index}}.capacity" value="{{bay.capacity}}" data-dtype="Number" aria-label="{{localize 'MGT2.Actor.spacecraft.TonsEach'}}" />
+					</span>
+				</td>
+				<td class="r">
+					<div class="acts edit-only">
+						<a data-action="rowDelete" data-rows="bays" data-tooltip="{{localize 'MGT2.Actor.spacecraft.DeleteBay'}}"><i class="fas fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</div>

@@ -1,0 +1,54 @@
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.spacecraft.Fleet.Title'}}</h3>
+		<span class="count">{{localize 'MGT2.Actor.spacecraft.Fleet.Count'}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.Fleet.Hint'}}"></i>
+	</div>
+	<dl class="statline grid" data-derived="system.fleet">
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.CrewSkill'}}</dt><dd>{{ship.fleet.crewSkill}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.Typed'}}</i></dd></div>
+		{{! p.110 prints the pair slashed, and the two are not the same shape: the missile DM has
+		    no Crew Skill term at all. }}
+		<div class="stat" data-tooltip="{{localize 'MGT2.Actor.spacecraft.Fleet.OffensiveWhy' half=ship.fleet.half fire=ship.fleet.fireControl launch=ship.fleet.launchSolution tl=ship.fleet.tl}}"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.OffensiveDM'}}</dt><dd>{{showDM ship.fleet.offensive.standard}} / {{showDM ship.fleet.offensive.missile}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.OffensivePair'}}</i></dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.DefensiveDM'}}</dt><dd>{{showDM ship.fleet.defensive}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.DefensiveWhy' half=ship.fleet.half evade=ship.fleet.evade tl=ship.fleet.tl}}</i></dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.Armour'}}</dt><dd>{{ship.fleet.armour}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.Divided' n=system.protection}}</i></dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.HullPoints'}}</dt><dd>{{ship.fleet.hull}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.Divided' n=ship.hull.max}}</i></dd></div>
+		<div class="stat{{#unless ship.fleet.damage}} none{{/unless}}"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.Remaining'}}</dt><dd>{{ship.fleet.remaining}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.Thrust'}}</dt><dd>{{system.drives.effectiveThrust}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.Jump'}}</dt><dd>{{system.drives.jump}}</dd></div>
+		<div class="stat{{#unless ship.fleet.autoRepair}} none{{/unless}}"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.AutoRepair'}}</dt><dd>{{#if ship.fleet.autoRepair}}{{ship.fleet.autoRepair}}{{else}}&mdash;{{/if}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.TLStep'}}</dt><dd>{{showDM ship.fleet.tl}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.TLWhy' tl=system.tl}}</i></dd></div>
+	</dl>
+
+	{{! The rated packages actually fitted. A ship stores its programs as `component` Items and
+	    the rating is the component's own — `Evade/2` is rating 2, no second field. }}
+	{{#if ship.fleet.software.length}}
+	<ul class="codes" data-derived="system.fleet.software">
+		{{#each ship.fleet.software as |row|}}
+		<li class="code"><b>{{localize row.label}}</b><span class="ps"><span class="p">{{localize 'MGT2.Design.Rating' n=row.rating}}</span></span></li>
+		{{/each}}
+	</ul>
+	{{else}}
+	<p class="hint">{{localize 'MGT2.Actor.spacecraft.Fleet.NoSoftware'}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.Fleet.NoSoftwareWhy'}}"></i></p>
+	{{/if}}
+
+	{{! p.111's own column: a critical after each tenth of the adjusted pool is gone. Core p.169's
+	    Sustained Damage over a different pool, so it is the same ladder the rail already prints
+	    and not a second one. }}
+	<section class="budget check" data-over="soft">
+		<header>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Fleet.Thresholds'}}</span>
+			<span class="rem">{{localize 'MGT2.Actor.spacecraft.Fleet.ThresholdsRem'}}</span>
+		</header>
+		<table class="rows brows" data-derived="system.fleet.thresholds">
+			<tbody>
+				{{#each ship.fleet.thresholds as |row|}}
+				<tr{{#if row.passed}} class="mismatch"{{/if}}>
+					<td>{{row.percent}}%</td>
+					<td class="num">{{row.points}}</td>
+					<td class="d">{{#if row.passed}}{{localize 'MGT2.Actor.spacecraft.Fleet.Passed'}}{{else}}&mdash;{{/if}}</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</section>
+</div>

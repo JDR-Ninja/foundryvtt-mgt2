@@ -1,0 +1,134 @@
+{{! The mount is not packaging: it carries the fire arc, the magazine and a damage multiple that
+    spans three orders of magnitude, and it is the ship that owns the hardpoint (HG p.29). }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.spacecraft.Mounts'}}</h3>
+		<span class="count">{{ship.mounts.rows.length}}</span>
+		<a class="add edit-only" data-action="rowCreate" data-rows="mounts" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddMount'}}"><i class="fa-solid fa-plus"></i></a>
+		<a class="add edit-only" data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-crosshairs"></i></a>
+	</div>
+	{{#if ship.mounts.rows.length}}
+	<table class="rows mounts">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Actor.spacecraft.Mount'}}</th>
+				<th>{{localize 'MGT2.Items.Weapons'}}</th>
+				<th>{{localize 'MGT2.Actor.spacecraft.Band'}}</th>
+				<th class="c">{{localize 'MGT2.Actor.spacecraft.Ammo'}}</th>
+				<th class="r">{{localize 'MGT2.Items.Damage'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each ship.mounts.rows as |mount|}}
+			<tr data-row-index="{{mount.index}}">
+				<td class="mt">
+					<span class="play-only">
+						<b>{{localize mount.typeLabel}}</b>
+						<span class="arc">{{#if mount.label}}{{mount.label}}{{/if}}{{#if mount.popup}} &middot; {{localize 'MGT2.Actor.spacecraft.Popup'}}{{/if}}</span>
+					</span>
+					<span class="edit-only">
+						{{! `mount` is a block param and stays lexically in scope inside the nested
+						    each; `../mount` would look the key up on the parent CONTEXT and select
+						    the first option every time. }}
+						<select class="f" name="system.mounts.{{mount.index}}.type">
+							{{#each ../choices.mountTypes as |entry key|}}
+							<option value="{{key}}"{{#if (eq key mount.type)}} selected{{/if}}>{{localize entry.label}}</option>
+							{{/each}}
+						</select>
+						<input class="f" type="text" name="system.mounts.{{mount.index}}.label" value="{{mount.label}}" placeholder="{{localize 'MGT2.Actor.spacecraft.MountLabel'}}" />
+						<label class="check">
+							<input type="checkbox" name="system.mounts.{{mount.index}}.popup" {{checked mount.popup}} />
+							<span>{{localize 'MGT2.Actor.spacecraft.Popup'}}</span>
+						</label>
+					</span>
+				</td>
+				<td>
+					{{#each mount.weapons as |weapon|}}
+					<div class="mw">
+						<button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button>
+					</div>
+					{{/each}}
+					<select class="f edit-only" name="system.mounts.{{mount.index}}.weapons" multiple size="2">
+						{{#each mount.choices as |choice|}}
+						<option value="{{choice._id}}"{{#if choice.selected}} selected{{/if}}>{{choice.name}}</option>
+						{{/each}}
+					</select>
+				</td>
+				{{! Core p.165-167: a spacecraft weapon is printed with the furthest band it
+				    reaches. What the band is worth to an attack is a property of the RANGE the
+				    exchange happens at, not of the weapon, so only the reach is stated here. }}
+				<td class="mt">
+					{{#if mount.bandLabel}}
+					<b>{{localize mount.bandLabel}}</b>
+					<span class="arc">{{localize 'MGT2.Actor.spacecraft.BandReach'}}</span>
+					{{else}}<span class="arc">&mdash;</span>{{/if}}
+				</td>
+				{{! Live in both modes: reloading is a round's action (Core p.168), not construction. }}
+				<td class="c ammo">
+					<input class="f num" type="number" min="0" step="1" name="system.mounts.{{mount.index}}.ammo" value="{{mount.ammo}}" data-dtype="Number" aria-label="{{localize 'MGT2.Actor.spacecraft.Ammo'}}" />
+					<span class="mag{{#unless mount.ammo}} empty{{/unless}}">/ {{mount.ammoMax}}</span>
+				</td>
+				<td class="dmg{{#if mount.big}} big{{/if}}">
+					{{! A label names a CLASS and never a quantity, so this mount still counts
+					    toward the ship's screens and sandcasters and contributes no attack at all. }}
+					{{#if mount.inert}}
+					<b class="noarm" data-tooltip="{{localize 'MGT2.Actor.spacecraft.InertMountHint'}}">{{localize 'MGT2.Actor.spacecraft.InertMount'}}</b>
+					{{/if}}
+					{{#each mount.weapons as |weapon|}}<b>{{weapon.system.damage}}</b>{{/each}}
+					<span class="mult">
+						{{#if mount.missile}}{{localize 'MGT2.Actor.spacecraft.NoMultiple'}}
+						{{else}}&times;{{mount.multiple}} &middot; {{localize 'MGT2.Actor.spacecraft.AfterArmour'}}{{/if}}
+					</span>
+					{{! Core p.168: same-type weapons in one mount fire on ONE roll, each extra
+					    one adding +1 per damage die. }}
+					{{#if mount.linkedBonus}}
+					<span class="mult">{{localize 'MGT2.Actor.spacecraft.Linked' count=mount.linked bonus=mount.linkedBonus}}</span>
+					{{/if}}
+				</td>
+				<td class="r">
+					<div class="acts edit-only">
+						<a data-action="rowDelete" data-rows="mounts" data-tooltip="{{localize 'MGT2.Actor.spacecraft.DeleteMount'}}"><i class="fas fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+	{{#if ship.mounts.unmounted.length}}
+	<table class="rows">
+		<tbody>
+			{{#each ship.mounts.unmounted as |weapon|}}
+			<tr data-item-id="{{weapon._id}}">
+				<td><button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button><span class="sub">{{localize 'MGT2.Actor.spacecraft.Unmounted'}}</span></td>
+				<td class="c num">{{weapon.system.damage}}</td>
+				{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+	{{! The whole affordance for the gap: the count says how many mounts are half-armed and the
+	    control beside it makes the weapon that would arm them. }}
+	{{#if ship.mounts.inertCount}}
+	<p class="noarmnote">{{localize 'MGT2.Actor.spacecraft.InertMountNote'}} <b>{{ship.mounts.inertCount}}</b></p>
+	{{/if}}
+	{{! The price of the multiple, and the attacker-side rules the system deliberately will not
+	    resolve: nothing here reads the canvas or a selected target. }}
+	<ul class="codes" data-family="shipWeapon">
+		<li class="code inert">
+			<b>{{localize 'MGT2.Actor.spacecraft.AttackerTonnage'}}</b>
+			<span class="ps"><span class="p">{{ship.mounts.tons}} t</span></span>
+		</li>
+		{{#if ship.mounts.spinal}}
+		<li class="code inert">
+			<b>{{localize 'MGT2.Actor.spacecraft.SpinalVsSmall'}}</b>
+			<span class="ps"><span class="p">&le;10 000 t &minus;4</span><span class="p">&le;5 000 t &minus;8</span><span class="p">&lt;2 000 t {{localize 'MGT2.Actor.spacecraft.NoAttack'}}</span></span>
+		</li>
+		{{/if}}
+		{{#if ship.mounts.scansUnarmed}}
+		<li class="code"><b>{{localize 'MGT2.Actor.spacecraft.ScansUnarmed'}}</b></li>
+		{{/if}}
+	</ul>
+</div>

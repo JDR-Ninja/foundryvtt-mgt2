@@ -12,31 +12,16 @@
 		<span class="rem">{{#if b.over}}{{localize 'MGT2.Actor.spacecraft.Over' n=b.remaining}}{{else}}{{#if under}}{{localize 'MGT2.Actor.spacecraft.ShortN' n=b.remaining}}{{else}}{{localize 'MGT2.Actor.spacecraft.FreeN' n=b.remaining}}{{/if}}{{/if}}</span>
 	</header>
 	<div class="gauge"><i style="--g: {{b.fill}}%"></i><u style="--m: {{b.mark}}%"></u></div>
-	{{! The switched variant's rows hold a STORED control beside a derived number, so the derived
-	    marker stays on the total: nothing under `data-derived` may contain a form control. }}
+	{{! `fold` names a budget whose rows are a design verdict rather than a state, so the header and
+	    the gauge stay and the breakdown collapses behind them. }}
 	{{#if b.rows.length}}
-	<table class="rows brows"{{#unless switched}} data-derived="{{derived}}"{{/unless}}>
-		<tbody>
-			{{#each b.rows as |row|}}
-			<tr{{#if (eq row.powered false)}} class="off"{{/if}}{{#if row.item}} data-item-id="{{row.key}}"{{/if}}>
-				{{#if ../switched}}
-				<td class="sw">
-					<input type="checkbox" data-action="{{../switched}}" data-consumer="{{row.key}}" {{checked row.powered}} />
-				</td>
-				{{/if}}
-				<td>
-					{{#if row.label}}{{row.label}}{{else}}{{localize (concat ../prefix row.key)}}{{/if}}
-					{{#if row.why}}<span class="why">{{localize row.why}}</span>{{/if}}
-				</td>
-				<td class="num">{{row.value}}</td>
-				{{! A row that IS a document opens and deletes like any inventory row; a power consumer
-				    is a fixed key with nothing behind it. }}
-				{{#if row.item}}
-				{{> systems/mgt2/templates/actors/parts/row-controls.html edit=../edit del=../del}}
-				{{/if}}
-			</tr>
-			{{/each}}
-		</tbody>
-	</table>
+	{{#if fold}}
+	<details class="fold" data-fold="{{fold}}"{{#if b.over}} open{{/if}}>
+		<summary>{{localize 'MGT2.Actor.spacecraft.FoldRows' n=b.rows.length}}</summary>
+		{{> systems/mgt2/templates/actors/spacecraft/budget-rows.html}}
+	</details>
+	{{else}}
+	{{> systems/mgt2/templates/actors/spacecraft/budget-rows.html}}
+	{{/if}}
 	{{/if}}
 </section>

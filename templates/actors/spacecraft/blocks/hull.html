@@ -1,0 +1,150 @@
+{{! The stored ratings the whole sheet reads. Three of the four headline numbers are formulas over
+    `hull.tons`, `thrust` and `jump`, not sums over a parts list: a ship with no Items is complete. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.spacecraft.HullDrives'}}</h3>
+		<span class="count">{{localize 'MGT2.Actor.spacecraft.DesignInputs'}}</span>
+	</div>
+	<dl class="statline grid play-only" data-derived="system.hull">
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Tonnage'}}</dt><dd>{{system.hull.tons}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i></dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Configuration'}}</dt><dd class="word">{{localize (lookup (lookup choices.configurations system.hull.configuration) 'label')}}</dd></div>
+		{{! A formula is a default and a printed statblock is data: where the book answered, the
+		    figure says so in the same gloss the mortgage override uses. }}
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.HullPoints'}}</dt><dd>{{ship.hull.max}}{{#if ship.printed.hullPoints}}<span class="why">{{localize 'MGT2.Actor.spacecraft.Printed'}}</span>{{/if}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.ArmourFit'}}</dt><dd class="word">{{localize (lookup (lookup choices.materials system.armour.material) 'label')}} {{showDM system.armour.current}}</dd></div>
+		<div class="stat{{#if (gt system.armour.points system.armour.max)}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.Actor.spacecraft.ArmourMax'}}</dt><dd>{{system.armour.max}}</dd>
+		</div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.PowerPlant'}}</dt><dd>{{system.power.plant}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.FuelJump'}}</dt><dd>{{system.fuel.jumpTons}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i>{{#if ship.printed.jumpTons}}<span class="why">{{localize 'MGT2.Actor.spacecraft.Printed'}}</span>{{/if}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.JumpsInTank'}}</dt><dd>{{system.fuel.jumpCapacity}}</dd></div>
+		{{! Holographic controls are an option on any bridge, not a type — Core p.186 / HG p.52 —
+		    so they read as a qualifier on the type's own line, with the DM they buy. }}
+		<div class="stat{{#if system.bridge.holographicUnderTL}} hurt{{/if}}"{{#if system.bridge.holographicUnderTL}} data-tooltip="{{localize 'MGT2.Actor.spacecraft.HolographicTLHint'}}"{{/if}}><dt>{{localize 'MGT2.Actor.spacecraft.Bridge'}}</dt><dd class="word">{{localize (lookup (lookup choices.bridges system.bridge.type) 'label')}}{{#if system.bridge.dm}} {{showDM system.bridge.dm}}{{/if}}{{#if system.bridge.holographic}} <span class="why">{{localize 'MGT2.Actor.spacecraft.Holographic'}}</span>{{/if}}</dd></div>
+		{{! The bridge's tonnage rides the tonnage budget, but its COST is derived here and printed
+		    by the books, and no override can be marked on a figure the sheet never shows. }}
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.BridgeCost'}}</dt><dd><i>Cr</i>{{credits system.bridge.cost}}{{#if ship.printed.bridgeCost}}<span class="why">{{localize 'MGT2.Actor.spacecraft.Printed'}}</span>{{/if}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Sensors'}}</dt><dd class="word">{{localize (lookup (lookup choices.sensors system.sensors.grade) 'label')}} {{showDM system.sensors.dm}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.Scale'}}</dt><dd class="word">{{localize (lookup (lookup choices.scales system.scale) 'label')}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.TL'}}</dt><dd>{{system.tl}}</dd></div>
+	</dl>
+
+	<div class="grid edit-only">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.HullTons'}}</span>
+			{{formInput systemFields.hull.fields.tons name="system.hull.tons" value=system.hull.tons classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Configuration'}}</span>
+			{{formInput systemFields.hull.fields.configuration name="system.hull.configuration" value=system.hull.configuration localize=true classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.ArmourMaterial'}}</span>
+			{{formInput systemFields.armour.fields.material name="system.armour.material" value=system.armour.material localize=true classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.ArmourPoints'}}</span>
+			{{formInput systemFields.armour.fields.points name="system.armour.points" value=system.armour.points classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Thrust'}}</span>
+			{{formInput systemFields.drives.fields.thrust name="system.drives.thrust" value=system.drives.thrust classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Jump'}}</span>
+			{{formInput systemFields.drives.fields.jump name="system.drives.jump" value=system.drives.jump classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.PowerPlant'}}</span>
+			{{formInput systemFields.power.fields.plant name="system.power.plant" value=system.power.plant classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Bridge'}}</span>
+			{{formInput systemFields.bridge.fields.type name="system.bridge.type" value=system.bridge.type localize=true classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Holographic'}}</span>
+			{{formInput systemFields.bridge.fields.holographic name="system.bridge.holographic" value=system.bridge.holographic classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Sensors'}}</span>
+			{{formInput systemFields.sensors.fields.grade name="system.sensors.grade" value=system.sensors.grade localize=true classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.TL'}}</span>
+			{{formInput systemFields.tl name="system.tl" value=system.tl classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.FuelTons'}}</span>
+			{{formInput systemFields.fuel.fields.tons name="system.fuel.tons" value=system.fuel.tons classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.CargoCapacity'}}</span>
+			{{formInput systemFields.cargo.fields.capacity name="system.cargo.capacity" value=system.cargo.capacity classes="f num"}}
+		</label>
+		<label data-tooltip="{{localize 'MGT2.Actor.spacecraft.ReactionThrustWhy'}}">
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.ReactionThrust'}}</span>
+			{{formInput systemFields.drives.fields.reactionThrust name="system.drives.reactionThrust" value=system.drives.reactionThrust classes="f num"}}
+		</label>
+		<label class="check">
+			{{formInput systemFields.drives.fields.reaction name="system.drives.reaction" value=system.drives.reaction}}
+			<span>{{localize 'MGT2.Actor.spacecraft.ReactionDrive'}}</span>
+		</label>
+		<label class="check">
+			{{formInput systemFields.fuel.fields.refined name="system.fuel.refined" value=system.fuel.refined}}
+			<span>{{localize 'MGT2.Actor.spacecraft.Refined'}}</span>
+		</label>
+	</div>
+
+	{{!-- Transcription overrides: empty derives, a number is what the page says. Every field is
+	    `{{formInput}}` — a NumberField with no `integer` renders `step="any"`, and a hand-typed
+	    `step="1"` would refuse a 16.5-ton drive. `{{! }}` ends at the FIRST `}}`, hence the long form. --}}
+	<div class="sect edit-only">
+		<h3>{{localize 'MGT2.Actor.spacecraft.PrintedFigures'}}</h3>
+		<span class="count">{{localize 'MGT2.Actor.spacecraft.PrintedCount'}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.PrintedHint'}}"></i>
+	</div>
+	<div class="grid edit-only">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.HullPoints'}}</span>
+			{{formInput systemFields.hull.fields.pointsOverride name="system.hull.pointsOverride" value=system.hull.pointsOverride placeholder=ship.derived.hullPoints classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.ArmourTons'}}</span>
+			{{formInput systemFields.armour.fields.tonsOverride name="system.armour.tonsOverride" value=system.armour.tonsOverride placeholder=ship.derived.armourTons classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.BridgeTons'}}</span>
+			{{formInput systemFields.bridge.fields.tonsOverride name="system.bridge.tonsOverride" value=system.bridge.tonsOverride placeholder=ship.derived.bridgeTons classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.BridgeCost'}}</span>
+			{{formInput systemFields.bridge.fields.costOverride name="system.bridge.costOverride" value=system.bridge.costOverride placeholder=ship.derived.bridgeCost classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.FuelJump'}}</span>
+			{{formInput systemFields.fuel.fields.jumpTonsOverride name="system.fuel.jumpTonsOverride" value=system.fuel.jumpTonsOverride placeholder=ship.derived.jumpTons classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.PowerDraw'}}</span>
+			{{formInput systemFields.power.fields.drawOverride name="system.power.drawOverride" value=system.power.drawOverride placeholder=ship.derived.powerDraw classes="f num"}}
+		</label>
+	</div>
+
+	{{! BLOCK 4. Hull options are options, not traits: the registry has no ship family, so a
+	    spacecraft carries no traits[] at all and this block replaces it. }}
+	{{#if ship.options.on.length}}
+	<ul class="codes play-only" data-family="hull" data-tooltip="{{localize 'MGT2.Actor.spacecraft.Options'}}">
+		{{#each ship.options.on as |option|}}
+		<li class="code"><b>{{localize option.label}}</b></li>
+		{{/each}}
+	</ul>
+	{{/if}}
+	<ul class="codes edit-only" data-family="hull" data-tooltip="{{localize 'MGT2.Actor.spacecraft.OptionsHint'}}">
+		{{#each ship.options.rows as |option|}}
+		<li class="code{{#unless option.on}} off{{/unless}}" data-action="hullOptionToggle" data-option="{{option.key}}">
+			<b>{{localize option.label}}</b>
+		</li>
+		{{/each}}
+	</ul>
+</div>

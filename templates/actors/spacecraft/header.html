@@ -79,16 +79,34 @@
 			<dt>{{localize 'MGT2.Actor.spacecraft.Power'}}</dt>
 			<dd>{{system.power.surplus}}<i>{{localize 'MGT2.Actor.spacecraft.Free'}}</i></dd>
 		</div>
-		<div class="stat{{#unless system.fuel.tons}} none{{/unless}}">
+		{{! The level in the tank against the tonnage that holds it, and the jumps that buys at the
+		    rated range — the figure asked for most often and the one the panel never showed. }}
+		<div class="stat{{#unless ship.fuel.capacity}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.spacecraft.Fuel'}}</dt>
-			<dd>{{#if system.fuel.tons}}{{system.fuel.tons}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i>{{else}}&mdash;{{/if}}</dd>
+			<dd>{{#if ship.fuel.capacity}}{{ship.fuel.aboard}}<span class="of">/{{ship.fuel.capacity}}</span>{{#if ship.fuel.rated}}<i>{{localize 'MGT2.Actor.spacecraft.JumpsAboard' n=ship.fuel.jumps}}</i>{{/if}}{{else}}&mdash;{{/if}}</dd>
 		</div>
 		<div class="stat{{#unless system.cargo.capacity}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.spacecraft.Cargo'}}</dt>
 			<dd>{{#if system.cargo.capacity}}{{system.cargo.capacity}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i>{{else}}&mdash;{{/if}}</dd>
 		</div>
+		{{! A reaction exists only where someone holds the station, so the count is read every round. }}
+		<div class="stat{{#if ship.crew.short}} hurt{{/if}}">
+			<dt>{{localize 'MGT2.Actor.spacecraft.Crew'}}</dt>
+			<dd>{{ship.crew.totals.stations}}<span class="of">/{{ship.crew.totals.required}}</span><i>{{localize 'MGT2.Actor.spacecraft.PilotN' n=system.pilotSkill}}</i></dd>
+		</div>
 		{{! 2D + the pilot's Pilot skill + CURRENT Thrust, so an M-Drive critical feeds it. }}
 		<div class="stat"><dt>{{localize 'MGT2.Actor.Initiative'}}</dt><dd>{{showDM system.initiative}}</dd></div>
+		{{! Standing criticals apply to checks made from anywhere on the sheet, so they are read here
+		    rather than in the block that records them. }}
+		{{#if ship.criticals.standing.controlDM}}
+		<div class="stat hurt"><dt>{{localize 'MGT2.Actor.spacecraft.ControlDM'}}</dt><dd>{{showDM ship.criticals.standing.controlDM}}</dd></div>
+		{{/if}}
+		{{#if ship.criticals.standing.sensorDM}}
+		<div class="stat hurt"><dt>{{localize 'MGT2.Actor.spacecraft.SensorDM'}}</dt><dd>{{showDM ship.criticals.standing.sensorDM}}</dd></div>
+		{{/if}}
+		{{#if ship.criticals.standing.jumpDM}}
+		<div class="stat hurt"><dt>{{localize 'MGT2.Actor.spacecraft.JumpDM'}}</dt><dd>{{showDM ship.criticals.standing.jumpDM}}</dd></div>
+		{{/if}}
 		{{! The wound is the one number nothing else on the sheet can move, and its track is drawn in
 		    the rail — so the door is rendered here whatever the Hull entry shows. }}
 		<div class="ends">

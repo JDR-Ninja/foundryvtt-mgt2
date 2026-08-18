@@ -1,0 +1,70 @@
+{{! Ship software spends Processing exactly as personal software spends bandwidth (HG p.20), and
+    the gate reads the HULL's Tech Level, never the computer's. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.spacecraft.Computer'}}</h3>
+		<span class="count">{{localize 'MGT2.Actor.spacecraft.ComputerCount'}}</span>
+		<a class="add edit-only" data-action="itemCreate" data-type-item="component" data-category="software" data-create-name="{{localize 'MGT2.Actor.spacecraft.NewSoftware'}}" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddSoftware'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	<div class="grid edit-only">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Processing'}}</span>
+			{{formInput systemFields.computer.fields.processing name="system.computer.processing" value=system.computer.processing classes="f num"}}
+		</label>
+		<label data-tooltip="{{localize 'MGT2.Actor.spacecraft.BackupWhy'}}">
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.BackupProcessing'}}</span>
+			{{formInput systemFields.computer.fields.backup name="system.computer.backup" value=system.computer.backup classes="f num"}}
+		</label>
+		<label class="check" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BisWhy'}}">
+			{{formInput systemFields.computer.fields.bis name="system.computer.bis" value=system.computer.bis}}
+			<span>{{localize 'MGT2.Actor.spacecraft.Bis'}}</span>
+		</label>
+		<label class="check" data-tooltip="{{localize 'MGT2.Actor.spacecraft.FibWhy'}}">
+			{{formInput systemFields.computer.fields.fib name="system.computer.fib" value=system.computer.fib}}
+			<span>{{localize 'MGT2.Actor.spacecraft.Fib'}}</span>
+		</label>
+		{{#if ship.computer.hasBackup}}
+		<label class="check" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BisWhy'}}">
+			{{formInput systemFields.computer.fields.backupBis name="system.computer.backupBis" value=system.computer.backupBis}}
+			<span>{{localize 'MGT2.Actor.spacecraft.BackupBis'}}</span>
+		</label>
+		<label class="check" data-tooltip="{{localize 'MGT2.Actor.spacecraft.FibWhy'}}">
+			{{formInput systemFields.computer.fields.backupFib name="system.computer.backupFib" value=system.computer.backupFib}}
+			<span>{{localize 'MGT2.Actor.spacecraft.BackupFib'}}</span>
+		</label>
+		{{/if}}
+	</div>
+	{{> systems/mgt2/templates/actors/spacecraft/budget.html
+		b=ship.computer
+		switched="softwareToggle"
+		edit="MGT2.Actor.EditSoftware"
+		del="MGT2.Actor.DeleteSoftware"
+		title=(localize 'MGT2.Actor.spacecraft.Processing')
+		flag=(localize 'MGT2.Actor.spacecraft.Overload')
+		derived="system.computer"}}
+	{{#if ship.computer.hasBackup}}
+	<ul class="codes" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BackupWhy'}}">
+		<li class="code{{#unless ship.computer.onBackup}} off{{/unless}}" data-action="backupToggle">
+			<b>{{localize 'MGT2.Actor.spacecraft.OnBackup' n=ship.computer.backup}}</b>
+		</li>
+	</ul>
+	{{/if}}
+	{{#if ship.computer.liveFib}}
+	<p class="hint">{{localize 'MGT2.Actor.spacecraft.FibHint'}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.FibWhy'}}"></i></p>
+	{{/if}}
+	{{#if ship.computer.ionDrain}}
+	<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.IonBandwidth' n=ship.computer.ionDrain rated=ship.computer.rated available=ship.computer.available}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.IonWhy'}}"></i><a class="rm" data-action="ionClear" data-track="computer" data-tooltip="{{localize 'MGT2.Actor.spacecraft.IonClear'}}"><i class="fa-solid fa-eraser"></i></a></p>
+	{{/if}}
+	{{#if ship.computer.jumpBonus}}
+	<p class="hint">{{localize 'MGT2.Actor.spacecraft.BisHint' n=ship.computer.jumpBonus base=ship.computer.available}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BisWhy'}}"></i></p>
+	{{/if}}
+	{{#if ship.computer.carried}}
+	<p class="hint">{{localize 'MGT2.Actor.spacecraft.CarriedHint' installed=ship.computer.installed cap=ship.computer.cap}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.CarriedWhy'}}"></i></p>
+	{{/if}}
+	{{#if ship.computer.blockedSoftware}}
+	<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.BlockedHint' count=ship.computer.blockedSoftware tl=system.tl}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BlockedWhy'}}"></i></p>
+	{{/if}}
+	{{#if ship.computer.overCrowded}}
+	<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.OverCrowdedHint'}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.OverCrowdedWhy'}}"></i></p>
+	{{/if}}
+</div>

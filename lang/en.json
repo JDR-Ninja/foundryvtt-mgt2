@@ -1503,6 +1503,15 @@
         "AddMount": "Add a mount",
         "DeleteMount": "Remove this mount",
         "Ammo": "Ammo",
+        "Tabs": {
+          "Station": "Combat station",
+          "Hold": "Hold & passengers"
+        },
+        "Analyses": "Analyses",
+        "JumpsAboard": "{n} jumps in tank",
+        "PilotN": "Pilot {n}",
+        "IntactLocations": "{n} locations intact",
+        "FoldRows": "{n} rows",
         "Popup": "pop-up",
         "NoMultiple": "×1 · never applies to a missile",
         "AfterArmour": "after armour",
@@ -4484,6 +4493,7 @@
     },
     "Design": {
       "Title": "Design",
+      "Passed": "{n} checks read, no red line.",
       "Optional": "optional — the ship above is complete without it",
       "Count": "{n} components · {tons} t accounted",
       "Category": "Category",

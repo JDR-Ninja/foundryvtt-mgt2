@@ -166,7 +166,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     container: ["carried", "effects", "description", "contents"],
     // Both halves are listed and `#composition` drops the one this Item is not.
     career: ["specs", "career", "effects", "description", "careertables", "events"],
-    contact: ["relationship", "effects", "description", "notes"],
+    // A contact is someone the Traveller KNOWS, and knowing someone moves no number on the sheet:
+    // the relationship is the whole record, so there is nothing for a change to carry.
+    contact: ["relationship", "description", "notes"],
     // The split is where the schema already splits: `frame.*` is the term this species runs and
     // everything beside it is what a Traveller of it rolls.
     species: ["specs", "species", "traits", "speciesframe", "effects", "description", "detail"],
