@@ -30,6 +30,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             criticalClear: SpacecraftActorSheet.#onCriticalClear,
             powerToggle: SpacecraftActorSheet.#onPowerToggle,
             softwareToggle: SpacecraftActorSheet.#onSoftwareToggle,
+            backupToggle: SpacecraftActorSheet.#onBackupToggle,
             hullOptionToggle: SpacecraftActorSheet.#onHullOptionToggle,
             rowCreate: SpacecraftActorSheet.#onRowCreate,
             rowDelete: SpacecraftActorSheet.#onRowDelete,
@@ -245,7 +246,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
 
     /** A package the ship cannot run spends nothing, so its row reads 0 and says why. */
     static #computer(system) {
-        const budget = SpacecraftActorSheet.#budget(system.computer.processing,
+        const budget = SpacecraftActorSheet.#budget(system.computer.cap,
             system.computer.software.map(row => ({
                 // `item` is what tells the budget partial this row is a document and not a fixed
                 // consumer key, so it draws the open and delete controls.
@@ -260,6 +261,13 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         // design figure appears, and it is the one HG p.73 is about.
         budget.installed = system.computer.installed;
         budget.carried = system.computer.carried;
+        // Why the cap is not the Processing typed above it: the operating computer's own score, and
+        // what Jump Control claimed of the /bis pool.
+        budget.available = system.computer.available;
+        budget.jumpBonus = system.computer.jumpBonus;
+        budget.backup = system.computer.backup;
+        budget.hasBackup = system.computer.backup !== null;
+        budget.onBackup = system.computer.onBackup;
         return budget;
     }
 
@@ -734,6 +742,14 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     static async #onSoftwareToggle(event, target) {
         return this.#toggleMember("system.computer.running", this.actor.system.computer.running,
             target.dataset.consumer);
+    }
+
+    /**
+     * HG p.20: the primary and the backup "cannot be operated simultaneously", and no book gives
+     * the fallback a trigger — so it is set here and never derived.
+     */
+    static async #onBackupToggle(event, target) {
+        return this.actor.update({ "system.computer.onBackup": !this.actor.system.computer.onBackup });
     }
 
     /** @this {SpacecraftActorSheet} */

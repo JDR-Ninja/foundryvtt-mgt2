@@ -83,6 +83,10 @@
 				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Processing'}}</span>
 				{{formInput systemFields.computer.fields.processing name="system.computer.processing" value=system.computer.processing classes="f num"}}
 			</label>
+			<label data-tooltip="{{localize 'MGT2.Actor.spacecraft.BackupWhy'}}">
+				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.BackupProcessing'}}</span>
+				{{formInput systemFields.computer.fields.backup name="system.computer.backup" value=system.computer.backup classes="f num"}}
+			</label>
 			<label>
 				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.TL'}}</span>
 				{{formInput systemFields.tl name="system.tl" value=system.tl classes="f num"}}
@@ -102,6 +106,10 @@
 			<label class="check">
 				{{formInput systemFields.fuel.fields.refined name="system.fuel.refined" value=system.fuel.refined}}
 				<span>{{localize 'MGT2.Actor.spacecraft.Refined'}}</span>
+			</label>
+			<label class="check" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BisWhy'}}">
+				{{formInput systemFields.computer.fields.bis name="system.computer.bis" value=system.computer.bis}}
+				<span>{{localize 'MGT2.Actor.spacecraft.Bis'}}</span>
 			</label>
 		</div>
 
@@ -715,6 +723,16 @@
 			title=(localize 'MGT2.Actor.spacecraft.Processing')
 			flag=(localize 'MGT2.Actor.spacecraft.Overload')
 			derived="system.computer"}}
+		{{#if ship.computer.hasBackup}}
+		<ul class="codes" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BackupWhy'}}">
+			<li class="code{{#unless ship.computer.onBackup}} off{{/unless}}" data-action="backupToggle">
+				<b>{{localize 'MGT2.Actor.spacecraft.OnBackup' n=ship.computer.backup}}</b>
+			</li>
+		</ul>
+		{{/if}}
+		{{#if ship.computer.jumpBonus}}
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.BisHint' n=ship.computer.jumpBonus base=ship.computer.available}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BisWhy'}}"></i></p>
+		{{/if}}
 		{{#if ship.computer.carried}}
 		<p class="hint">{{localize 'MGT2.Actor.spacecraft.CarriedHint' installed=ship.computer.installed cap=ship.computer.cap}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.CarriedWhy'}}"></i></p>
 		{{/if}}

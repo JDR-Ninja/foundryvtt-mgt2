@@ -1126,6 +1126,10 @@ MGT2.ShipSoftware = Object.freeze({
         names: ["point defence", "point defense", "defense a bout portant"]}
 });
 
+// HG p.20 scopes the /bis option to "Jump Control programs only". A name, and kept out of
+// `ShipSoftware` above because that list is the fleet block's and Jump Control is no fleet DM.
+MGT2.JumpControlSoftware = Object.freeze(["jump control", "controle de saut"]);
+
 // HG p.113's four salvo-defence categories.
 MGT2.FleetDefences = Object.freeze({
     // HG p.40's Type I/II/III batteries, laser and gauss alike.

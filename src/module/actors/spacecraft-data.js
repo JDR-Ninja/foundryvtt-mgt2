@@ -23,6 +23,9 @@ const WEEKS_PER_PERIOD = 4;
 /** The power consumers the panel can switch off, in the order the catalogue prints them. */
 const POWER_CONSUMERS = ["basic", "mDrive", "jDrive", "sensors", "weapons", "screens", "other"];
 
+/** HG p.20 and Core p.181 both print the /bis option's bonus as +5, and only for Jump Control. */
+const BIS_PROCESSING = 5;
+
 /** HG p.111 divides Armour and Hull points by this and never says why: it is the mean of 1D. */
 const FLEET_DIVISOR = 3.5;
 
@@ -151,7 +154,18 @@ export class SpacecraftData extends CraftData {
                 // CARRIES and what it is RUNNING are two figures, and the budget is against the
                 // second.
                 running: new fields.SetField(new fields.StringField({ required: true, blank: false }),
-                    { required: false, initial: [] })
+                    { required: false, initial: [] }),
+                // HG p.20: "A computer's Processing score is increased by +5 for the purposes of
+                // running Jump Control programs only."
+                bis: new fields.BooleanField({ required: false, initial: false }),
+                // HG p.20: "A ship may have a maximum of two computers (a primary and a backup) but
+                // the second must have a lower Processing score than the primary." Null is a hull
+                // with no backup fitted.
+                backup: new fields.NumberField({
+                    required: false, nullable: true, integer: true, min: 0, initial: null }),
+                // "The primary and backup computers cannot be operated simultaneously" — which one
+                // is live is a state the referee sets, since no book gives the fallback a trigger.
+                onBackup: new fields.BooleanField({ required: false, initial: false })
             }),
 
             sensors: new fields.SchemaField({
@@ -998,7 +1012,11 @@ export class SpacecraftData extends CraftData {
                 ok: round(mappedTons) === round(budgetTons),
                 used: round(mappedTons), cap: round(budgetTons) },
             { key: "statedPower", applies: generates > 0, ok: round(generates) === round(this.power.plant),
-                used: round(generates), cap: round(this.power.plant) }
+                used: round(generates), cap: round(this.power.plant) },
+            // HG p.20: "the second must have a lower Processing score than the primary".
+            { key: "backupComputer", applies: this.computer.backup !== null,
+                ok: this.computer.backup < this.computer.processing,
+                used: this.computer.backup ?? 0, cap: this.computer.processing }
         ];
 
         this.components = {
@@ -1067,7 +1085,7 @@ export class SpacecraftData extends CraftData {
         // computer" — which is why `computer` carries a Processing score and no TL of its own.
         const hullTL = MGT2Helper.tlNumber(this.tl);
         const started = this.computer.running;
-        let used = 0, installed = 0, running = 0, blocked = 0;
+        let used = 0, installed = 0, running = 0, blocked = 0, jump = 0;
         const software = [];
         for (const item of this.parent.items) {
             const program = SpacecraftData.#programOf(item);
@@ -1081,6 +1099,7 @@ export class SpacecraftData extends CraftData {
             else installed += program.bandwidthRun;
             if (inService) {
                 used += program.bandwidthRun;
+                if (SpacecraftData.#isJumpControl(item.name)) jump += program.bandwidthRun;
                 // CSC folio 66's exception, which reaches a ship for the same reason folio 110 does
                 //: Interface runs beside one other Bandwidth 0 program.
                 if (!MGT2Helper.isInterfaceSoftware(item.name)) running += 1;
@@ -1092,18 +1111,35 @@ export class SpacecraftData extends CraftData {
                 downgraded: program.downgraded, tlBlocked: program.tlBlocked
             });
         }
+        // Only one of the two computers is ever operating (HG p.20), so only one Processing score
+        // is ever the budget's.
+        const available = (this.computer.onBackup && (this.computer.backup !== null))
+            ? this.computer.backup : this.computer.processing;
+        // HG p.20's /bis is a ring-fenced pool rather than a bigger one: the +5 is spendable by
+        // Jump Control and by nothing else, so only what Jump Control claims of it raises the cap.
+        const bonus = this.computer.bis ? Math.min(BIS_PROCESSING, jump) : 0;
+
         this.computer.used = used;
         this.computer.installed = installed;
         this.computer.software = software;
-        this.computer.overload = used > this.computer.processing;
+        this.computer.available = available;
+        this.computer.jumpBonus = bonus;
+        this.computer.cap = available + bonus;
+        this.computer.overload = used > this.computer.cap;
         // Whether the hint under the budget applies, and it covers the two states that need saying:
         // more aboard than the computer can run at once — which HG p.73 designs to and is not a
         // defect — and anything aboard that is not started, which is every hull until someone does.
-        this.computer.carried = (installed > this.computer.processing) || (installed > used);
+        this.computer.carried = (installed > this.computer.cap) || (installed > used);
         this.computer.blockedSoftware = blocked;
         // HG's smallest model is a Computer/5, so this only ever fires on a hand-typed 0 — a ship
         // with no working computer, which is the state the clause describes.
-        this.computer.overCrowded = (this.computer.processing === 0) && (running > 1);
+        this.computer.overCrowded = (available === 0) && (running > 1);
+    }
+
+    /** HG p.20 scopes /bis to "Jump Control programs only", and a program is a free-text name. */
+    static #isJumpControl(name) {
+        const plain = SpacecraftData.#plainName(name);
+        return MGT2.JumpControlSoftware.some(match => plain.includes(match));
     }
 
     /**

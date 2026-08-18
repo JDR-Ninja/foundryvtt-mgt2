@@ -1462,6 +1462,10 @@
         "Sensors": "Sensors",
         "Scale": "Scale",
         "Processing": "Processing",
+        "BackupProcessing": "Backup",
+        "BackupWhy": "High Guard p.20: a ship may have at most two computers, a primary and a backup with a lower Processing score, and the two cannot be operated simultaneously. Leave this empty for a ship with no backup.",
+        "Bis": "Jump Control (/bis)",
+        "BisWhy": "High Guard p.20: a /bis computer's Processing score is increased by +5 for the purposes of running Jump Control programs only, for +50% of its cost. Core p.161 names the Type-S scout's Computer/5bis as the example.",
         "Configuration": "Configuration",
         "HullTons": "Hull tons",
         "HullDrives": "Hull & drives",
@@ -1616,6 +1620,8 @@
         "OverCrowdedWhy": "Core p.110: a Processing 0 computer runs one Bandwidth 0 package at a time. High Guard's smallest model is a Computer/5, so a ship reaching this has no working computer.",
         "CarriedHint": "{installed} Bandwidth aboard against Processing {cap}. Start what is in service; the rest spends nothing.",
         "CarriedWhy": "High Guard p.73: not all of a ship's software has to run at once, so a hull may carry more Bandwidth than its Processing runs.",
+        "BisHint": "Jump Control is drawing {n} of the +5 this computer holds only for it, over its own {base}.",
+        "OnBackup": "Backup in service — Processing {n}",
         "Finance": "Finance",
         "GMOnly": "GM only",
         "Purchase": "Purchase",
@@ -4466,7 +4472,8 @@
         "hardpoints": "Hardpoints",
         "jumpFuel": "Jump fuel",
         "statedTons": "Against the stated tonnage",
-        "statedPower": "Against the stated plant"
+        "statedPower": "Against the stated plant",
+        "backupComputer": "Backup computer"
       },
       "Why": {
         "power": "drawn against generated",
@@ -4474,7 +4481,8 @@
         "hardpoints": "one per full 100 tons",
         "jumpFuel": "10% of hull per parsec at the drive's rating",
         "statedTons": "the parts against the budget rows they map to",
-        "statedPower": "the plants against the ship's own output"
+        "statedPower": "the plants against the ship's own output",
+        "backupComputer": "lower Processing than the primary"
       }
     },
     "ComponentCategories": {

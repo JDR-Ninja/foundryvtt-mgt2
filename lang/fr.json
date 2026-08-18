@@ -143,7 +143,7 @@
     "Books": {
       "core": "Livre de base",
       "companion": "Traveller Companion",
-      "highGuard": "High Guard",
+      "highGuard": "Garde Haute",
       "robot": "Robot Handbook",
       "vehicle": "Vehicle Handbook",
       "csc": "Central Supply Catalogue",
@@ -1462,6 +1462,10 @@
         "Sensors": "Capteurs",
         "Scale": "Échelle",
         "Processing": "Processeur",
+        "BackupProcessing": "Secours",
+        "BackupWhy": "Garde Haute p. 20 : un vaisseau ne peut porter que deux ordinateurs, un principal et un de secours au Processeur inférieur, et les deux ne peuvent fonctionner simultanément. Laissez vide pour un vaisseau sans ordinateur de secours.",
+        "Bis": "Contrôle de saut (/bis)",
+        "BisWhy": "Garde Haute p. 20 : le Processeur d'un ordinateur /bis est augmenté de +5 pour l'exécution des programmes de Contrôle de saut uniquement, pour +50 % de son prix. Le Livre de base p. 161 cite l'Ordinateur/5bis de l'éclaireur Type-S en exemple.",
         "Configuration": "Configuration",
         "HullTons": "Tonnage de coque",
         "HullDrives": "Coque & propulseurs",
@@ -1616,6 +1620,8 @@
         "OverCrowdedWhy": "Livre de base p. 106 : un ordinateur de Processeur 0 n'exécute qu'un seul logiciel de Bande passante 0 à la fois. Le plus petit modèle de Garde Haute est un Ordinateur/5 : un vaisseau qui atteint ce cas n'a plus d'ordinateur en état.",
         "CarriedHint": "{installed} de Bande passante à bord pour un Processeur de {cap}. Lancez ce qui est en service ; le reste ne dépense rien.",
         "CarriedWhy": "Garde Haute p. 73 : les logiciels de bord n'ont pas tous à tourner en même temps, un vaisseau peut donc embarquer plus de Bande passante que son Processeur n'en exécute.",
+        "BisHint": "Le Contrôle de saut puise {n} des +5 que cet ordinateur ne réserve qu'à lui, en plus de ses {base}.",
+        "OnBackup": "Secours en service — Processeur {n}",
         "Finance": "Finance",
         "GMOnly": "MJ seulement",
         "Purchase": "Achat",
@@ -3361,7 +3367,8 @@
         "hardpoints": "Points d'ancrage",
         "jumpFuel": "Carburant de saut",
         "statedTons": "Face au tonnage déclaré",
-        "statedPower": "Face au générateur déclaré"
+        "statedPower": "Face au générateur déclaré",
+        "backupComputer": "Ordinateur de secours"
       },
       "Why": {
         "power": "consommée face à produite",
@@ -3369,7 +3376,8 @@
         "hardpoints": "un par tranche de 100 tonnes",
         "jumpFuel": "10 % de la coque par parsec à l'indice du propulseur",
         "statedTons": "les pièces face aux lignes de budget qu'elles recouvrent",
-        "statedPower": "les générateurs face à la production du vaisseau"
+        "statedPower": "les générateurs face à la production du vaisseau",
+        "backupComputer": "Processeur inférieur à celui du principal"
       }
     },
     "ComponentCategories": {
