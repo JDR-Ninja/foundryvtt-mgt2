@@ -12,7 +12,7 @@
  * `compile` is what a bare clone, the CI and the release run: it needs nothing but this repository.
  * `packs/_source/` is committed and the compiled databases beside it are not — see `.gitignore`.
  *
- * **Nothing here validates a document against its data model, and that is deliberate** (§9.145).
+ * **Nothing here validates a document against its data model, and that is deliberate.**
  * Doing so needs Foundry's `common/` on disk, which is outside every repository, so it belongs to
  * whatever writes `packs/_source/` rather than to what reads it back: a document that fails its
  * schema should never reach a committed, reviewable source file in the first place.
@@ -29,6 +29,7 @@ import { fileURLToPath } from "node:url";
 import { ClassicLevel } from "classic-level";
 import { PACKS, PACK_BY_NAME } from "./packs.config.mjs";
 import { flattenDocument, nestDocuments, COLLECTIONS } from "./lib/collections.mjs";
+import { readSource } from "./lib/source.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCE_DIR = path.join(ROOT, "packs", "_source");
@@ -155,6 +156,14 @@ async function extractAll() {
             console.log(`  ${pack.name.padEnd(14)} — generated from ${pack.generated}, not extracted`);
             continue;
         }
+        // The whole loop runs one way: a person edits the source, and Foundry
+        // verifies rather than writes. An extract over an authored pack would be the other
+        // direction and would take the pack with it — one `rmSync`, one flattened file, and every
+        // `flags.mgt2.demo` written by hand is gone. Refused for its own reason, not `generated`'s.
+        if ( pack.authored ) {
+            console.log(`  ${pack.name.padEnd(14)} — authored by hand, not extracted`);
+            continue;
+        }
         const documents = await read(pack);
         if ( !documents ) continue;
         const dir = path.join(SOURCE_DIR, pack.name);
@@ -220,26 +229,6 @@ function where(location) {
 /* -------------------------------------------- */
 /*  Reading                                     */
 /* -------------------------------------------- */
-
-/** Every `.json` under a pack's source directory, in a stable order, objects or arrays alike. */
-function readSource(dir) {
-    return walk(dir).flatMap(readFile);
-}
-
-function readFile(file) {
-    const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
-    return Array.isArray(parsed) ? parsed : [parsed];
-}
-
-function walk(dir) {
-    const files = [];
-    for ( const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name)) ) {
-        const full = path.join(dir, entry.name);
-        if ( entry.isDirectory() ) files.push(...walk(full));
-        else if ( entry.name.endsWith(".json") ) files.push(full);
-    }
-    return files;
-}
 
 function readOption(name) {
     const index = process.argv.indexOf(name);

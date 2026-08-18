@@ -1,0 +1,9 @@
+{
+  "_id": "demorobotbroken1",
+  "name": "Demo — Deckhand Drone",
+  "type": "robot",
+  "img": "icons/svg/mystery-man.svg",
+  "prototypeToken": { "actorLink": false },
+  "flags": { "mgt2": { "demo": { "order": 6, "cliff": "manipulators", "teaches": ["A packed robot carries its own manipulators."], "trap": "manipulators is written by _preCreate, which never runs here." } } },
+  "system": { "tl": 11, "manipulators": [], "characteristics": { "strength": { "show": true } } }
+}

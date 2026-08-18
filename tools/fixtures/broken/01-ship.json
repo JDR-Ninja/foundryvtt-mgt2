@@ -1,0 +1,23 @@
+{
+  "_id": "demoshipbroken01",
+  "name": "Kestrel Courier",
+  "type": "spacecraft",
+  "img": "systems/mgt2/assets/ship.webp",
+  "system": {
+    "tl": 12,
+    "characteristics": { "hull": { "base": 3 } },
+    "fuel": { "tons": 22 },
+    "crew": [ { "role": "nosuchroleid0001", "count": 1 } ],
+    "mounts": [ { "type": "singleTurret", "label": "Dorsal", "weapons": ["nosuchweapon0001"] } ],
+    "notes": "Repairs restore 1D hull points."
+  },
+  "items": [
+    {
+      "_id": "demosoftware0001",
+      "name": "Fire Control",
+      "type": "item",
+      "img": "icons/svg/item-bag.svg",
+      "system": { "tl": 12, "subType": "software", "software": { "bandwidth": 3, "computerId": "" } }
+    }
+  ]
+}

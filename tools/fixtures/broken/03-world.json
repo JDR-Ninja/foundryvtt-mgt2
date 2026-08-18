@@ -1,0 +1,9 @@
+{
+  "_id": "demoworldbroken1",
+  "name": "Demo — Bellweather",
+  "type": "world",
+  "img": "icons/svg/city.svg",
+  "prototypeToken": { "actorLink": true },
+  "flags": { "mgt2": { "demo": { "order": 7, "cliff": "uwp", "teaches": ["The seven cells are integers."], "trap": "A bad codeOverrides key is dropped with no message." } } },
+  "system": { "uwp": { "starport": "B", "size": "7", "atmosphere": 5, "hydrographics": 4, "population": 8, "government": 2, "lawLevel": 3, "techLevel": 10 }, "codeOverrides": { "Ni": true, "ZZ": true } }
+}

@@ -1,0 +1,21 @@
+[
+  {
+    "_id": "democharbroken01",
+    "name": "Demo — Traveller",
+    "type": "character",
+    "img": "icons/svg/mystery-man.svg",
+    "prototypeToken": { "actorLink": true },
+    "flags": { "mgt2": { "demo": { "order": 2, "cliff": "skills", "teaches": ["A skill is an embedded talent Item."], "trap": "There is no system.skills." } } },
+    "system": { "skills": { "gunCombat": 1 } },
+    "items": []
+  },
+  {
+    "_id": "demovehiclesilnt",
+    "name": "Demo — Silent Skimmer",
+    "type": "vehicle",
+    "img": "icons/svg/hazard.svg",
+    "prototypeToken": { "actorLink": false },
+    "flags": { "mgt2": { "demo": { "order": 5, "cliff": "armour", "teaches": ["Armour is per facing."], "trap": "The sides carry the printed figure." } } },
+    "system": { "tl": 9, "armour": { "sides": 6, "top": null, "bottom": null }, "systems": { "camouflage": null, "stealth": null }, "submersible": null, "remote": null }
+  }
+]

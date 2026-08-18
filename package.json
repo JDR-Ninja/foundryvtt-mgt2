@@ -12,6 +12,8 @@
     "package": "npm run styles && npm run compile && node tools/package.mjs",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
+    "lint:packs": "node tools/lint-packs.mjs",
+    "lint:packs:selftest": "node tools/lint-packs.mjs --selftest",
     "packs": "node tools/packs.mjs list",
     "packs:extract": "node tools/packs.mjs extract"
   },

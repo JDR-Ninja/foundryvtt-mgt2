@@ -1,0 +1,9 @@
+{
+  "_id": "demoworldrefused",
+  "name": "Demo — Refused",
+  "type": "world",
+  "img": "icons/svg/city.svg",
+  "prototypeToken": { "actorLink": true },
+  "flags": { "mgt2": { "demo": { "order": 12, "cliff": "uwp", "teaches": ["A starport outside the vocabulary is refused."], "trap": "Starport is a choices field." } } },
+  "system": { "uwp": { "starport": "Z", "size": 7, "atmosphere": 5, "hydrographics": 4, "population": 8, "government": 2, "lawLevel": 3, "techLevel": 10 } }
+}

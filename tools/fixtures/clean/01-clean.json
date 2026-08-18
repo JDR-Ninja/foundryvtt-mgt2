@@ -1,0 +1,58 @@
+[
+  {
+    "_id": "demorolepilot001",
+    "name": "Demo — Pilot",
+    "type": "role",
+    "img": "icons/svg/wing.svg",
+    "flags": {
+      "mgt2": {
+        "demo": {
+          "order": 1,
+          "cliff": "roster",
+          "teaches": [
+            "A crew row resolves through a role Item's id."
+          ],
+          "trap": "The code finds a station by system.crewRoleKey, never by name."
+        }
+      }
+    },
+    "system": {
+      "crewRole": "pilot"
+    }
+  },
+  {
+    "_id": "demovehicleclean",
+    "name": "Demo — Marsh Skimmer",
+    "type": "vehicle",
+    "img": "icons/svg/hazard.svg",
+    "prototypeToken": {
+      "actorLink": false
+    },
+    "flags": {
+      "mgt2": {
+        "demo": {
+          "order": 5,
+          "cliff": "null is not 0",
+          "teaches": [
+            "An empty field can carry a rule."
+          ],
+          "trap": "armour top and bottom are null, which is half the sides and rear; camouflage and stealth are null because a positive value clamps to 0; submersible and remote are null, where an empty object would mean yes at depth 0."
+        }
+      }
+    },
+    "system": {
+      "tl": 9,
+      "armour": {
+        "sides": 6,
+        "top": null,
+        "bottom": null
+      },
+      "systems": {
+        "camouflage": null,
+        "stealth": null
+      },
+      "submersible": null,
+      "remote": null
+    }
+  }
+]

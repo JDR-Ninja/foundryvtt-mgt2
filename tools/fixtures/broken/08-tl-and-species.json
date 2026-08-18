@@ -1,0 +1,25 @@
+[
+  {
+    "_id": "demoarmourtlbad1",
+    "name": "Demo — Deck Vest",
+    "type": "armor",
+    "img": "icons/svg/shield.svg",
+    "flags": { "mgt2": { "demo": { "order": 3, "cliff": "tl", "teaches": ["Tech level is a vocabulary key."], "trap": "Nothing enforces the TL vocabulary." } } },
+    "system": { "tl": "12", "subType": "armour", "protection": 4 }
+  },
+  {
+    "_id": "democharspecies1",
+    "name": "Demo — Traveller",
+    "type": "character",
+    "img": "icons/svg/mystery-man.svg",
+    "prototypeToken": { "actorLink": true },
+    "flags": { "mgt2": { "demo": { "order": 2, "cliff": "species", "teaches": ["A species feeds auto."], "trap": "The Actor stores the species Item's id and copies nothing." } } },
+    "system": { "characteristics": { "strength": { "base": 7, "auto": 2 } } },
+    "items": [
+      { "_id": "demospeciesgood1", "name": "Demo — Sophont", "type": "species", "img": "icons/svg/mystery-man.svg",
+        "system": { "characteristicRolls": [ { "characteristic": "strength", "formula": "2D6", "replaces": "" } ] } },
+      { "_id": "demoskillgunslug", "name": "Demo — Gun Combat (slug)", "type": "talent", "img": "icons/svg/target.svg",
+        "system": { "subType": "skill", "value": 1 } }
+    ]
+  }
+]

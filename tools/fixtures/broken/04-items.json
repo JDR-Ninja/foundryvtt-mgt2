@@ -1,0 +1,37 @@
+[
+  {
+    "_id": "demospeciesbrok1",
+    "name": "Demo — Sophont",
+    "type": "species",
+    "img": "icons/svg/mystery-man.svg",
+    "flags": { "mgt2": { "demo": { "order": 8, "cliff": "species", "teaches": ["A species feeds auto."], "trap": "Writing base is additive and non-idempotent." } } },
+    "system": { "characteristics": { "strength": { "base": 2 } } }
+  },
+  {
+    "_id": "democareerbroke1",
+    "name": "Demo — Harbour Patrol",
+    "type": "career",
+    "img": "icons/svg/combat.svg",
+    "flags": { "mgt2": { "demo": { "order": 9, "cliff": "career", "teaches": ["Chargen needs one career."], "trap": "Thirty-one stored keys." } } },
+    "system": { "kind": "career", "assignments": [], "rankLadders": [], "tables": [], "benefits": [], "eventTable": [] }
+  },
+  {
+    "_id": "demoweaponbroke1",
+    "name": "Demo — Sidearm",
+    "type": "weapon",
+    "img": "icons/svg/sword.svg",
+    "flags": { "mgt2": { "demo": { "order": 10, "cliff": "traits", "teaches": ["A trait carries its number twice."], "trap": "params[].num is not recomputed at load." } } },
+    "system": { "tl": 8, "subType": "", "damage": "3D6",
+      "traits": [ { "family": "weapon", "key": "ap", "params": [ { "slot": "", "value": "5", "num": null } ], "note": "" } ],
+      "effects": [] },
+    "effects": [ { "name": "Steady", "changes": [ { "key": "system.characteristics.dexterity.mod", "mode": 2, "value": "1" } ] } ]
+  },
+  {
+    "_id": "demoloosesoftw01",
+    "name": "Demo — Fire Control Suite",
+    "type": "item",
+    "img": "icons/svg/item-bag.svg",
+    "flags": { "mgt2": { "demo": { "order": 11, "cliff": "software", "teaches": ["Software points at a computer."], "trap": "computerId is an id, never a name." } } },
+    "system": { "tl": 12, "subType": "software", "software": { "bandwidth": 3, "computerId": "democomputer0001" } }
+  }
+]

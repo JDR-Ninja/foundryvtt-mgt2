@@ -9,9 +9,17 @@
  * tools print. A document's own name is stored data that no `game.i18n` reaches — which is why the
  * `docs` pack ships one journal per language rather than one journal translated at load.
  *
- * `generated` names the workspace document a pack is built from. Such a pack is written by its own
- * generator, and `extract` refuses it: the source files are the generator's to lay out, and an
- * extract would flatten its per-language files into one.
+ * A pack declares **who writes its source**, and `extract` refuses both for their own reason —
+ * an extract destroys the source directory and writes one flat file in its place, so a pack whose
+ * layout means something cannot survive one:
+ *
+ * - `generated` names the workspace document a pack is built from. The source files are the
+ *   generator's to lay out, and an extract would flatten its per-language files into one.
+ * - `authored` marks a pack written by hand, one JSON file per document. An
+ *   extract would take every `flags.mgt2.demo` with it. Such a pack also answers to the linter,
+ *   `tools/lint-packs.mjs`, which is what replaces the sheet that never filled it in.
+ *
+ * A pack with neither is nobody's, and nothing but `compile` will touch it.
  */
 
 export const PACKS = [

@@ -20,6 +20,15 @@ jobs:
 
       - run: npm run lint
 
+      # The hand-authored packs' gate: plain Node over packs/_source and system.json, so it needs
+      # nothing this checkout does not already have. The schema half of the same check runs where the
+      # packs are authored, because it loads Foundry's common/ from an installed build.
+      - run: npm run lint:packs
+
+      # The rules against their own fixtures: every cliff fires on the broken ones, the correct ones
+      # draw nothing. It is what keeps the gate honest while the roster still has no authored pack.
+      - run: npm run lint:packs:selftest
+
       - name: Build stylesheet
         run: npm run styles
 
