@@ -1,18 +1,23 @@
-# MGT2 - Mongoose Traveller (Unofficial)
+# MGT2 — Mongoose Traveller (Unofficial)
 
-*English version below*
+An unofficial game system for [Foundry Virtual Tabletop](http://foundryvtt.com), built for Mongoose
+Publishing's Traveller — and specially for the French edition translated by
+[Modül](https://www.gameontabletop.com/cf3161/traveller-vf.html).
 
-Ce système de jeu pour [Foundry Virtual Tabletop](http://foundryvtt.com) qui fournit une feuille de personnage et un système de jeu
-pour Mongoose Publishing Traveller.
+**Requires Foundry VTT v14** (14.366 minimum).
 
-Spécialement développé pour la version française traduite par [Modül](https://www.gameontabletop.com/cf3161/traveller-vf.html)
+| | | |
+|---|---|---|
+| 🇫🇷 | **Français** | [README.fr.md](https://github.com/JDR-Ninja/foundryvtt-mgt2/blob/main/README.fr.md) |
+| 🇬🇧 | **English** | [README.en.md](https://github.com/JDR-Ninja/foundryvtt-mgt2/blob/main/README.en.md) |
+| 🇪🇸 | **Español** | [README.es.md](https://github.com/JDR-Ninja/foundryvtt-mgt2/blob/main/README.es.md) |
+| 🇧🇷 | **Português (Brasil)** | [README.pt-BR.md](https://github.com/JDR-Ninja/foundryvtt-mgt2/blob/main/README.pt-BR.md) |
 
-#### Screenshots
-![Alt text](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/master/web/foundryvtt/inventory.jpg "Screenshot") 
+**Changelog** —
+[Français](https://github.com/JDR-Ninja/foundryvtt-mgt2/blob/main/CHANGELOG.fr.md) ·
+[English](https://github.com/JDR-Ninja/foundryvtt-mgt2/blob/main/CHANGELOG.en.md) ·
+[Español](https://github.com/JDR-Ninja/foundryvtt-mgt2/blob/main/CHANGELOG.es.md) ·
+[Português](https://github.com/JDR-Ninja/foundryvtt-mgt2/blob/main/CHANGELOG.pt-BR.md)
 
-## English
-This game system for [Foundry Virtual Tabletop](http://foundryvtt.com) provides character sheet and game system 
-support for Mongoose Publishing Traveller.
-
-Specially developed for the French version translated by [Modül](https://www.gameontabletop.com/cf3161/traveller-vf.html)
-
+<!-- Absolute URLs on purpose: system.json points Foundry at the RAW file, where a relative link is
+     dead. GitHub resolves these too, so one form works in both places. -->

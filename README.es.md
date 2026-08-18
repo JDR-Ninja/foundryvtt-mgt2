@@ -1,0 +1,49 @@
+# MGT2 — Mongoose Traveller (no oficial)
+
+[Français](README.fr.md) · [English](README.en.md) · [Português (Brasil)](README.pt-BR.md)
+
+Un sistema de juego no oficial para [Foundry Virtual Tabletop](http://foundryvtt.com), para Traveller
+de Mongoose Publishing — desarrollado especialmente para la edición francesa traducida por
+[Modül](https://www.gameontabletop.com/cf3161/traveller-vf.html).
+
+> **Requiere Foundry VTT v14** (14.366 como mínimo).
+>
+> La interfaz en español cubre los elementos genéricos; el vocabulario Traveller sigue en inglés,
+> clave por clave, tal y como Foundry lo resuelve.
+
+## Qué hace el sistema
+
+* **Siete tipos de Actor** — Viajero, PNJ, Vehículo, Astronave, Robot, Mundo, Reserva.
+* **Diecisiete tipos de Objeto** — del arma y la armadura al lote de carga, el pasaje, el componente
+  de nave y el puesto de tripulación.
+* **Creación de Viajeros en grupo**, en una cuadrícula de Viajeros × periodos, interrumpible sin
+  perder nada. Las carreras y las especies son plantillas que escribe el árbitro.
+* **Combate espacial** y **batallas entre flotas**, con una banda de alcance por cada par de naves.
+* **Comercio** — Perfil Universal de Mundo analizado, códigos comerciales derivados, comercio
+  especulativo, tráfico de escala, manifiesto de bodega.
+* **Viajes y salto**, con el combustible real, la hipoteca de la nave y las finanzas de la
+  tripulación.
+* **La cadena de daño completa**, resuelta del lado del defensor, con primeros auxilios, cirugía y
+  recuperación.
+* **Treinta y seis reglas opcionales y variantes**, todas desactivadas por defecto.
+* **Cuatro idiomas** — francés, inglés, español y portugués (Brasil).
+
+El detalle versión por versión está en el [changelog](CHANGELOG.es.md).
+
+## Lo que el sistema no hace, a propósito
+
+* **Nunca programa el tiempo.** Una región enuncia su intervalo y su coste; el árbitro mueve el reloj.
+  El asalto de combate es la única excepción, porque Foundry ya lo cuenta.
+* **No incluye contenido sacado de los libros** — ninguna tabla de carrera, ningún catálogo de equipo,
+  ningún texto de reglas. Incluye la estructura y los registros que los hacen funcionar.
+
+## Capturas
+
+<!-- Las capturas en español van en web/screenshots/es/ — ver web/screenshots/README.md -->
+
+![Inventario](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/master/web/foundryvtt/inventory.jpg)
+
+## Licencia y estado
+
+No oficial, y sin vínculo con Mongoose Publishing ni con Modül. Traveller es una marca de Mongoose
+Publishing. Véase [LICENSE](LICENSE) y [CREDITS.md](CREDITS.md).
