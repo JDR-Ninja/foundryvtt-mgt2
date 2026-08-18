@@ -113,6 +113,8 @@
 		{{#if offer}}
 		<p class="hint{{#if offer.overFree}} bad{{/if}}">
 			{{localize 'MGT2.Trade.BuyLine' tons=offer.tons percent=offer.percent credits=offer.credits}}
+			{{! The broker's cut rides on TOP of a purchase, so the sum debited is not the price. }}
+			{{#if offer.rate}}{{localize 'MGT2.Trade.FeeAdded' rate=offer.rate fee=offer.feeCredits credits=offer.dueCredits}}{{/if}}
 			{{#if offer.blocked}}{{localize offer.blocked}}{{/if}}
 			{{#if offer.overHold}}{{localize 'MGT2.Trade.HoldTooSmall' tons=offer.tons capacity=offer.capacity}}
 			{{else if offer.overFree}}{{localize 'MGT2.Trade.HoldTight' tons=offer.tons free=offer.free}}{{/if}}
@@ -157,6 +159,9 @@
 			</div>
 			{{/each}}
 		</div>
+		{{! The fee comes OUT of a sale, so the column already reads net — said out loud, because a
+		    figure silently 10% under the percentage above it is a figure a table will argue with. }}
+		{{#if brokered}}<p class="hint">{{localize 'MGT2.Trade.FeeTaken'}}</p>{{/if}}
 		{{#unless card}}{{#unless canTrade}}<p class="hint">{{localize 'MGT2.Trade.RefereeTrades'}}</p>{{/unless}}{{/unless}}
 		{{else}}
 		<p class="hint">{{localize 'MGT2.Trade.HoldEmpty'}}</p>

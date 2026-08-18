@@ -29,7 +29,7 @@ const NPC_CHAIN_FIXED = ["endurance", "strength", "dexterity"];
 const MIGRATIONS = [
   {
     version: "0.2.0",
-    label: "damageOrder, protection, view state, crew duty, NPC damage chain, species unwind, ucp, durationUnit, career damage/interval",
+    label: "damageOrder, protection, view state, crew duty, NPC damage chain, species unwind, ucp, durationUnit, career damage/interval, world geometry",
     async migrate() {
       // Before the sweep: it rewrites `characteristics.<k>.base`, which the sweep then persists.
       for ( const actor of game.actors ) await unwindSpecies(actor);
@@ -181,6 +181,19 @@ function collectActorUpdate(actor) {
     }
     update["system.personal.ucp"] = new foundry.data.operators.ForcedDeletion();
     dirty = true;
+  }
+  // A world imported from the `mgt2-data` module carried its geometry in that module's flag
+  // namespace, where the system could not read it; §9.142 put the two typed halves in the schema.
+  // The flags are LEFT IN PLACE — the module's Scene generator still places its pins off them — so
+  // this lifts rather than moves, and it never overwrites a sector or hex somebody typed.
+  if ( actor.type === "world" ) {
+    const flags = actor._source.flags?.["mgt2-data"] ?? {};
+    for ( const key of ["sector", "hex"] ) {
+      if ( flags[key] && !source[key] ) {
+        update[`system.${key}`] = flags[key];
+        dirty = true;
+      }
+    }
   }
   for ( const [key, characteristic] of Object.entries(source.characteristics ?? {}) ) {
     for ( const dropped of ["dm", "showMax"] ) {

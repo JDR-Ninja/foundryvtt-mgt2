@@ -1,4 +1,5 @@
 import { MGT2 } from "../config.js";
+import { locate } from "../space.js";
 
 const fields = foundry.data.fields;
 
@@ -21,8 +22,8 @@ const UWP_ORDER = ["size", "atmosphere", "hydrographics", "population", "governm
  * embedded document, and a packed page cannot be read at all where a packed Actor degrades to its
  * index entry (§9.33.5).
  *
- * Ten stored fields and everything else derives. It carries no characteristics, no damage chain and
- * no token bar, so it extends `TypeDataModel` directly rather than `ActorBaseData`.
+ * Twelve stored fields and everything else derives. It carries no characteristics, no damage chain
+ * and no token bar, so it extends `TypeDataModel` directly rather than `ActorBaseData`.
  *
  * @extends {foundry.abstract.TypeDataModel}
  */
@@ -49,6 +50,16 @@ export class WorldData extends foundry.abstract.TypeDataModel {
                 lawLevel: count(),
                 techLevel: count()
             }),
+
+            // WHAT THE BOOKS PRINT, and only that: the sector by name and the hex INSIDE that sector,
+            // so `0605` is column 6 row 5 of its own grid — the pair a referee reads off a subsector
+            // map and can type for a world of their own. Everything the pair means derives in
+            // `location` below, through `MGT2.Sectors` (§9.142).
+            //
+            // Free strings and NOT a `choices` list on the sector: a sector the registry never heard
+            // of is a homebrew map, which is a legitimate state and not a validation failure.
+            sector: new fields.StringField({ required: false, blank: true, trim: true }),
+            hex: new fields.StringField({ required: false, blank: true, trim: true }),
 
             // Read by BOTH traffic tables with opposite signs — passengers Amber +1 / Red −4
             // (Core p.239), freight Amber −2 / Red −6 (Core p.240) — and a Red Zone is forbidden.
@@ -126,6 +137,11 @@ export class WorldData extends foundry.abstract.TypeDataModel {
             berthingPerDie: port.berthingPerDie,
             trafficDM: port.trafficDM
         };
+
+        // The typed pair read out: the hex parsed, the subsector it falls in, and the absolute
+        // world-space coordinate a route is measured in. Null-safe throughout — a world nobody placed
+        // and a world in a homebrew sector both land here without a coordinate and without a throw.
+        this.location = locate(this.sector, this.hex);
 
         const zone = MGT2.TravelZones[this.zone] ?? MGT2.TravelZones.green;
         this.travel = {

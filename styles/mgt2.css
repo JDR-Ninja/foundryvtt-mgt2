@@ -1439,6 +1439,14 @@ body {
 .mgt2.card.skipdebts .slots .slot.vacant b {
   color: var(--faint);
 }
+.mgt2.stoptraffic .slots.three,
+.mgt2.card.stoptraffic .slots.three,
+.mgt2.spectrade .slots.three,
+.mgt2.card.spectrade .slots.three,
+.mgt2.skipdebts .slots.three,
+.mgt2.card.skipdebts .slots.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 .mgt2.stoptraffic .inputs,
 .mgt2.card.stoptraffic .inputs,
 .mgt2.spectrade .inputs,
@@ -1588,15 +1596,29 @@ body {
   color: var(--mute);
 }
 .mgt2.stoptraffic .inputs .row4,
+.mgt2.stoptraffic .inputs .row5,
 .mgt2.card.stoptraffic .inputs .row4,
+.mgt2.card.stoptraffic .inputs .row5,
 .mgt2.spectrade .inputs .row4,
+.mgt2.spectrade .inputs .row5,
 .mgt2.card.spectrade .inputs .row4,
+.mgt2.card.spectrade .inputs .row5,
 .mgt2.skipdebts .inputs .row4,
-.mgt2.card.skipdebts .inputs .row4 {
+.mgt2.skipdebts .inputs .row5,
+.mgt2.card.skipdebts .inputs .row4,
+.mgt2.card.skipdebts .inputs .row5 {
   grid-column: 1/-1;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 9px 14px;
+}
+.mgt2.stoptraffic .inputs .row5,
+.mgt2.card.stoptraffic .inputs .row5,
+.mgt2.spectrade .inputs .row5,
+.mgt2.card.spectrade .inputs .row5,
+.mgt2.skipdebts .inputs .row5,
+.mgt2.card.skipdebts .inputs .row5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 .mgt2.stoptraffic .panel,
 .mgt2.card.stoptraffic .panel,
@@ -2328,6 +2350,73 @@ body {
 .mgt2.card.skipdebts .shelf.hold .r.frt .cr {
   color: var(--faint);
 }
+.mgt2.stoptraffic .shelf.book .r,
+.mgt2.card.stoptraffic .shelf.book .r,
+.mgt2.spectrade .shelf.book .r,
+.mgt2.card.spectrade .shelf.book .r,
+.mgt2.skipdebts .shelf.book .r,
+.mgt2.card.skipdebts .shelf.book .r {
+  grid-template-columns: minmax(0, 1fr) 4.4rem 6rem 4.6rem 5rem;
+  cursor: default;
+}
+.mgt2.stoptraffic .shelf.book .tk,
+.mgt2.card.stoptraffic .shelf.book .tk,
+.mgt2.spectrade .shelf.book .tk,
+.mgt2.card.spectrade .shelf.book .tk,
+.mgt2.skipdebts .shelf.book .tk,
+.mgt2.card.skipdebts .shelf.book .tk {
+  text-align: right;
+}
+.mgt2.stoptraffic .shelf.book .tk input.f,
+.mgt2.card.stoptraffic .shelf.book .tk input.f,
+.mgt2.spectrade .shelf.book .tk input.f,
+.mgt2.card.spectrade .shelf.book .tk input.f,
+.mgt2.skipdebts .shelf.book .tk input.f,
+.mgt2.card.skipdebts .shelf.book .tk input.f {
+  width: 100%;
+  padding: 0 4px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  text-align: right;
+}
+.mgt2.stoptraffic .shelf.book .act,
+.mgt2.card.stoptraffic .shelf.book .act,
+.mgt2.spectrade .shelf.book .act,
+.mgt2.card.spectrade .shelf.book .act,
+.mgt2.skipdebts .shelf.book .act,
+.mgt2.card.skipdebts .shelf.book .act {
+  text-align: right;
+}
+.mgt2.stoptraffic .shelf.book .btn,
+.mgt2.card.stoptraffic .shelf.book .btn,
+.mgt2.spectrade .shelf.book .btn,
+.mgt2.card.spectrade .shelf.book .btn,
+.mgt2.skipdebts .shelf.book .btn,
+.mgt2.card.skipdebts .shelf.book .btn {
+  padding: 1px 8px;
+  font-size: 10px;
+}
+.mgt2.stoptraffic .shelf.book .r.done .nm,
+.mgt2.stoptraffic .shelf.book .r.done .sz,
+.mgt2.stoptraffic .shelf.book .r.done .cr,
+.mgt2.card.stoptraffic .shelf.book .r.done .nm,
+.mgt2.card.stoptraffic .shelf.book .r.done .sz,
+.mgt2.card.stoptraffic .shelf.book .r.done .cr,
+.mgt2.spectrade .shelf.book .r.done .nm,
+.mgt2.spectrade .shelf.book .r.done .sz,
+.mgt2.spectrade .shelf.book .r.done .cr,
+.mgt2.card.spectrade .shelf.book .r.done .nm,
+.mgt2.card.spectrade .shelf.book .r.done .sz,
+.mgt2.card.spectrade .shelf.book .r.done .cr,
+.mgt2.skipdebts .shelf.book .r.done .nm,
+.mgt2.skipdebts .shelf.book .r.done .sz,
+.mgt2.skipdebts .shelf.book .r.done .cr,
+.mgt2.card.skipdebts .shelf.book .r.done .nm,
+.mgt2.card.skipdebts .shelf.book .r.done .sz,
+.mgt2.card.skipdebts .shelf.book .r.done .cr {
+  color: var(--faint);
+  text-decoration: line-through;
+}
 .mgt2.stoptraffic .sect.sub,
 .mgt2.card.stoptraffic .sect.sub,
 .mgt2.spectrade .sect.sub,
@@ -2416,25 +2505,37 @@ body {
 }
 @container (max-width: 700px) {
   .mgt2.stoptraffic .slots,
+  .mgt2.stoptraffic .slots.three,
   .mgt2.stoptraffic .inputs,
   .mgt2.card.stoptraffic .slots,
+  .mgt2.card.stoptraffic .slots.three,
   .mgt2.card.stoptraffic .inputs,
   .mgt2.spectrade .slots,
+  .mgt2.spectrade .slots.three,
   .mgt2.spectrade .inputs,
   .mgt2.card.spectrade .slots,
+  .mgt2.card.spectrade .slots.three,
   .mgt2.card.spectrade .inputs,
   .mgt2.skipdebts .slots,
+  .mgt2.skipdebts .slots.three,
   .mgt2.skipdebts .inputs,
   .mgt2.card.skipdebts .slots,
+  .mgt2.card.skipdebts .slots.three,
   .mgt2.card.skipdebts .inputs {
     grid-template-columns: minmax(0, 1fr);
   }
   .mgt2.stoptraffic .inputs .row4,
+  .mgt2.stoptraffic .inputs .row5,
   .mgt2.card.stoptraffic .inputs .row4,
+  .mgt2.card.stoptraffic .inputs .row5,
   .mgt2.spectrade .inputs .row4,
+  .mgt2.spectrade .inputs .row5,
   .mgt2.card.spectrade .inputs .row4,
+  .mgt2.card.spectrade .inputs .row5,
   .mgt2.skipdebts .inputs .row4,
-  .mgt2.card.skipdebts .inputs .row4 {
+  .mgt2.skipdebts .inputs .row5,
+  .mgt2.card.skipdebts .inputs .row4,
+  .mgt2.card.skipdebts .inputs .row5 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .mgt2.stoptraffic .cols,
@@ -2492,6 +2593,22 @@ body {
   .mgt2.card.spectrade .shelf.hold .cr,
   .mgt2.skipdebts .shelf.hold .cr,
   .mgt2.card.skipdebts .shelf.hold .cr {
+    display: block;
+  }
+  .mgt2.stoptraffic .shelf.book .r,
+  .mgt2.card.stoptraffic .shelf.book .r,
+  .mgt2.spectrade .shelf.book .r,
+  .mgt2.card.spectrade .shelf.book .r,
+  .mgt2.skipdebts .shelf.book .r,
+  .mgt2.card.skipdebts .shelf.book .r {
+    grid-template-columns: minmax(0, 1fr) 3.4rem 5rem 3.6rem 4.4rem;
+  }
+  .mgt2.stoptraffic .shelf.book .cr,
+  .mgt2.card.stoptraffic .shelf.book .cr,
+  .mgt2.spectrade .shelf.book .cr,
+  .mgt2.card.spectrade .shelf.book .cr,
+  .mgt2.skipdebts .shelf.book .cr,
+  .mgt2.card.skipdebts .shelf.book .cr {
     display: block;
   }
 }
@@ -4383,6 +4500,15 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   flex-direction: column;
 }
 
+.mgt2 table.manifest td .btn {
+  padding: 1px 9px;
+  font-size: 11px;
+}
+.mgt2 table.manifest td.word .sub {
+  display: inline;
+  margin: 0;
+}
+
 .mgt2 table.mounts td.mt {
   width: 10.5rem;
 }
@@ -4809,6 +4935,15 @@ ul.softwares li:hover a {
 .mgt2 .mgt2-header .portrait.world {
   width: 84px;
   height: 84px;
+}
+
+.mgt2 .mgt2-header .meta.edit-only > label.wide {
+  grid-column: span 2;
+}
+
+.mgt2 .mgt2-header input.f.hex {
+  font-family: var(--mono);
+  letter-spacing: 0.06em;
 }
 
 .mgt2 .uwp {

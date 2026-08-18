@@ -1,5 +1,6 @@
 import { Checks } from "../checks.js";
 import { MGT2 } from "../config.js";
+import { CreditSplit } from "../credit-split.js";
 import { MGT2Helper } from "../helper.js";
 import { RollPromptHelper } from "../roll-prompt.js";
 import { SkipDebtsDialog } from "../skip-debts.js";
@@ -39,7 +40,9 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             stationAction: SpacecraftActorSheet.#onStationAction,
             openCraft: SpacecraftActorSheet.#onOpenCraft,
             electMortgage: SpacecraftActorSheet.#onElectMortgage,
-            skipDebts: SpacecraftActorSheet.#onSkipDebts
+            skipDebts: SpacecraftActorSheet.#onSkipDebts,
+            deliverLot: SpacecraftActorSheet.#onDeliverLot,
+            arrivePassage: SpacecraftActorSheet.#onArrivePassage
         }
     };
 
@@ -117,6 +120,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             // Craft and bays are two counts now: a clamp rack of ten fighters is one row (§9.95).
             craftCount: system.smallCraftCount,
             criticals: this.#criticals(system),
+            manifest: this.#manifest(),
             manoeuvre: system.manoeuvre,
             finance: SpacecraftActorSheet.#finance(system),
             design: SpacecraftActorSheet.#design(system),
@@ -451,6 +455,64 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         });
     }
 
+    /**
+     * What the hull is actually carrying, as the two things a referee acts on at the far end of a
+     * route: freight to hand over and passengers to put ashore.
+     *
+     * A speculative lot is listed and never deliverable — it was bought outright (Core p.243) and is
+     * sold at a counter, not settled against a consignment note — which is the same split
+     * `trade.html`'s hold column draws from the other side.
+     */
+    #manifest() {
+        const day = game.settings.get("mgt2", "campaignDay");
+        const settle = this.#canSettle;
+        const rows = [];
+        for (const item of this.actor.items) {
+            if (item.type === "cargo") {
+                const lot = item.system;
+                rows.push({
+                    _id: item.id, freight: !lot.speculative, name: item.name, tons: lot.tons,
+                    where: SpacecraftActorSheet.#destinationOf(lot.destination),
+                    dueDay: lot.dueDay,
+                    // Core p.241 measures lateness at the moment of delivery: the day is read now, and
+                    // no timer ever moves it (§9.35).
+                    late: (lot.dueDay !== null) && (day > lot.dueDay),
+                    fare: lot.fare ? MGT2Helper.credits(lot.fare) : null,
+                    can: settle && !lot.speculative && (lot.fare > 0)
+                });
+            }
+            else if (item.type === "passage") {
+                const booking = item.system;
+                const grade = MGT2.PassageClasses[booking.grade] ?? MGT2.PassageClasses.middle;
+                rows.push({
+                    _id: item.id, passage: true, name: item.name, count: booking.count,
+                    grade: grade.label, lowBerth: booking.lowBerth,
+                    where: SpacecraftActorSheet.#destinationOf(booking.destination),
+                    // The fare was collected when the berth was taken (Core p.239), so arrival moves
+                    // no money at all — what it owes is Core p.158's revival check on a low passage.
+                    fare: booking.fare ? MGT2Helper.credits(booking.fare) : null,
+                    can: settle
+                });
+            }
+        }
+        return { rows, day, count: rows.length, canSettle: settle };
+    }
+
+    /** A destination degrades to its stored name where the world is not an Actor, or was deleted. */
+    static #destinationOf(destination) {
+        if (!destination) return null;
+        const world = destination.world ? foundry.utils.fromUuidSync(destination.world) : null;
+        return world?.name || destination.name || null;
+    }
+
+    /**
+     * The gate on both acts at the manifest. The same one the two trade screens take: `CreditSplit`
+     * refuses a non-GM outright, and the act writes to the hull either way.
+     */
+    get #canSettle() {
+        return game.user.isGM && this.actor.canUserModify(game.user, "update");
+    }
+
     /** Eleven locations × six pips, with the standing severity spelled out beside it. */
     #criticals(system) {
         const locations = Object.entries(MGT2.ShipCriticals).map(([key, location]) => {
@@ -562,6 +624,119 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             tankFill: money(finance.tankFill),
             refined: system.fuel.refined
         };
+    }
+
+    /* -------------------------------------------- */
+    /*  The far end of a route                      */
+    /* -------------------------------------------- */
+
+    /** One settlement at a time: a second split window beside the first would pay the fare twice. */
+    #settling = false;
+
+    /**
+     * A consignment handed over. Core p.241: "Cargo is paid for upon delivery, assuming it is
+     * delivered on time. Failing to deliver cargo on time reduces the amount paid by 1D+4 x 10%" —
+     * so the penalty is rolled here, against the campaign day as it stands at this moment, and never
+     * off a clock the system does not run.
+     *
+     * **Money first and the lot second**, which is the counter's own order: cancelling the split has
+     * to cost nothing, and a cargo deleted before the payment landed would be a consignment nobody
+     * can be paid for.
+     * @this {SpacecraftActorSheet}
+     */
+    static async #onDeliverLot(event, target) {
+        if (this.#settling) return;
+        const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
+        const lot = item?.system;
+        if ((item?.type !== "cargo") || lot.speculative || !(lot.fare > 0) || !this.#canSettle) return;
+
+        const day = game.settings.get("mgt2", "campaignDay");
+        const late = (lot.dueDay !== null) && (day > lot.dueDay);
+        let roll = null, docked = 0;
+        if (late) {
+            roll = await new Roll(MGT2.FreightDelivery.latePenalty).roll();
+            docked = Math.round(lot.fare * roll.total * MGT2.FreightDelivery.penaltyPerPoint / 100);
+        }
+        const due = Math.max(0, lot.fare - docked);
+        const where = SpacecraftActorSheet.#destinationOf(lot.destination)
+            ?? game.i18n.localize("MGT2.Actor.spacecraft.NoDestination");
+
+        this.#settling = true;
+        try {
+            const split = await CreditSplit.open({
+                total: due,
+                direction: "credit",
+                spacecraft: this.actor.uuid,
+                reason: game.i18n.format("MGT2.Trade.DeliveryReason",
+                    { tons: lot.tons, lot: item.name, world: where })
+            });
+            if (!split) return;
+            const name = item.name;
+            const tons = lot.tons;
+            await item.delete();
+            await this.#postSettlement({
+                title: "MGT2.Trade.Card.Delivered", where, roll,
+                line: game.i18n.format("MGT2.Trade.Card.Consignment",
+                    { lot: name, tons, credits: MGT2Helper.credits(due) }),
+                late, days: late ? (day - lot.dueDay) : 0,
+                percent: roll ? (roll.total * MGT2.FreightDelivery.penaltyPerPoint) : 0,
+                docked: MGT2Helper.credits(docked),
+                credits: MGT2Helper.credits(lot.fare)
+            });
+        }
+        finally {
+            this.#settling = false;
+        }
+    }
+
+    /**
+     * Passengers ashore. No money moves: the fare was collected when the berth was taken (Core p.239
+     * prints the table and no condition on it, while the delivery clause on p.241 is the cargo's).
+     *
+     * A low passage still owes Core p.158's Routine (6+) Medic check on opening the capsule, once per
+     * passenger — **and it is not rolled here**. §9.35 has the system report and the referee apply,
+     * and this is a check that kills people.
+     * @this {SpacecraftActorSheet}
+     */
+    static async #onArrivePassage(event, target) {
+        const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
+        if ((item?.type !== "passage") || !this.#canSettle) return;
+        const booking = item.system;
+        const where = SpacecraftActorSheet.#destinationOf(booking.destination)
+            ?? game.i18n.localize("MGT2.Actor.spacecraft.NoDestination");
+        const grade = game.i18n.localize(
+            (MGT2.PassageClasses[booking.grade] ?? MGT2.PassageClasses.middle).label);
+
+        await this.#postSettlement({
+            title: "MGT2.Trade.Card.Ashore", where,
+            line: game.i18n.format("MGT2.Trade.Card.Disembark",
+                { n: booking.count, grade }),
+            revival: booking.lowBerth, count: booking.count
+        });
+        return item.delete();
+    }
+
+    /** The far end, on the log — the settlement, and whatever the referee still owes it. */
+    async #postSettlement({ title, where, line, roll, late, days, percent, docked, credits,
+        revival, count }) {
+        const hold = this.actor.system.cargo;
+        const content = await foundry.applications.handlebars.renderTemplate(
+            "systems/mgt2/templates/chat/traffic-delivery.html", {
+                title, line, late, days, docked, credits, revival, count,
+                where: game.i18n.format("MGT2.Trade.Arriving", { world: where }),
+                percent,
+                roll: roll?.total ?? 0,
+                ship: this.actor.name,
+                used: hold.used, capacity: hold.capacity
+            });
+        return getDocumentClass("ChatMessage").create({
+            author: game.user.id,
+            speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+            // v14 appends no display of its own once `content` is set, so this costs the card nothing
+            // and buys Dice So Nice and an auditable record (§9.117).
+            rolls: roll ? [roll] : [],
+            content
+        });
     }
 
     /* -------------------------------------------- */

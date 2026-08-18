@@ -11,6 +11,9 @@
 		</div>
 	</div>
 	<p class="bare">{{localize 'MGT2.Trade.Card.Lot' tons=tons goods=goods percent=percent base=base credits=credits}}</p>
+	{{! Core p.242's broker cut, which the split screen's card cannot explain: it posted the sum that
+	    moved, and this is why that sum is not the price above. }}
+	{{#if fee}}<p class="bare">{{#if sold}}{{localize 'MGT2.Trade.Card.FeeTaken' rate=rate fee=fee credits=settled}}{{else}}{{localize 'MGT2.Trade.Card.FeeAdded' rate=rate fee=fee credits=settled}}{{/if}}</p>{{/if}}
 	{{! Core p.241: a lot cannot be broken up, so an overfull hold is a fact the table has to solve
 	    rather than something the purchase could have refused. }}
 	<div class="pipe">

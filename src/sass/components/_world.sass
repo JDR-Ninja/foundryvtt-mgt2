@@ -39,6 +39,16 @@
 	width: 84px
 	height: 84px
 
+// The sector is a name where the other three header fields are a code, a letter or a count, so it
+// takes two of the auto-fit columns instead of being ellipsised at the track's 7.5rem minimum.
+.mgt2 .mgt2-header .meta.edit-only > label.wide
+	grid-column: span 2
+
+// `0605` is a coordinate read off a map, not a quantity: it lines up column with column.
+.mgt2 .mgt2-header input.f.hex
+	font-family: var(--mono)
+	letter-spacing: 0.06em
+
 // --------------------------------------------
 //  THE UWP STRIP
 // --------------------------------------------

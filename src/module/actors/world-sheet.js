@@ -79,6 +79,7 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
         context.world = {
             profile: system.profile,
             cells: WorldActorSheet.#cells(system),
+            location: WorldActorSheet.#location(system),
             bases: WorldActorSheet.#bases(system),
             berthing: WorldActorSheet.#berthing(system),
             ledger: WorldActorSheet.#ledger(system),
@@ -116,6 +117,22 @@ export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(A
                     label ? game.i18n.localize(label) : ""].filter(Boolean).join(" · ")
             };
         });
+    }
+
+    /**
+     * Where the world is, as one line. The sector and the hex are what was typed; the subsector is a
+     * reading of the hex alone and survives an unknown sector, so it prints its name where the
+     * registry has one and its letter otherwise. The absolute coordinate is the only figure here
+     * nobody types and no table prints, so it rides the tooltip rather than the line.
+     */
+    static #location(system) {
+        const at = system.location;
+        const parts = [system.sector, system.hex, at.subsectorName ?? at.subsector].filter(Boolean);
+        const hint = at.coords
+            ? game.i18n.format("MGT2.Actor.world.WorldSpace", { x: at.coords.x, y: at.coords.y })
+            : at.cell ? game.i18n.localize("MGT2.Actor.world.SectorUnknown")
+                : system.hex ? game.i18n.localize("MGT2.Actor.world.NotOnAMap") : "";
+        return { line: parts.join(" · "), hint };
     }
 
     /** Every base the config knows, on or off — the row is a picker as well as a readout. */

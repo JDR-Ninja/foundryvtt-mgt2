@@ -84,5 +84,12 @@
 			<input type="checkbox" data-field="blackMarket" {{checked input.blackMarket}} />
 			<span>{{localize 'MGT2.Trade.BlackMarket'}}</span>
 		</label>
+
+		{{! Core p.242: a HIRED local broker is a different state from the crew's own Broker skill —
+		    DM+2 on the negotiation, against a flat cut of the gross that the price roll never sees. }}
+		<label class="fld ck">
+			<input type="checkbox" data-field="localBroker" {{checked input.localBroker}} />
+			<span>{{localize 'MGT2.Trade.LocalBroker'}}</span>
+		</label>
 	</div>
 </div>

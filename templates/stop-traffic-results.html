@@ -93,7 +93,7 @@
 		<div class="mail">
 			{{#if rolled}}
 			<span class="v {{#if offer.mail.offered}}yes{{else}}no{{/if}}">{{#if offer.mail.offered}}{{localize 'MGT2.Trade.MailContainers' n=offer.mail.containers}}{{else}}{{localize 'MGT2.Trade.MailNone'}}{{/if}}</span>
-			<span class="cr">{{#if offer.mail.offered}}{{localize 'MGT2.Trade.MailPay' tons=offer.mail.tons credits=offer.mail.credits}}{{else}}{{localize 'MGT2.Trade.MailMissed' target=offer.mail.target roll=offer.mail.roll dm=(showDM offer.mail.dm) total=offer.mail.total}}{{/if}}</span>
+			<span class="cr">{{#if offer.mail.offered}}{{localize 'MGT2.Trade.MailPay' tons=offer.mail.tons credits=offer.mail.creditsDisplay}}{{else}}{{localize 'MGT2.Trade.MailMissed' target=offer.mail.target roll=offer.mail.roll dm=(showDM offer.mail.dm) total=offer.mail.total}}{{/if}}</span>
 			{{else}}
 			<span class="v no">&mdash;</span>
 			<span class="cr">{{localize 'MGT2.Trade.MailNeeds' target=offer.mail.target dm=(showDM offer.mail.dm)}}</span>
@@ -101,6 +101,79 @@
 			<span class="terms">{{#each offer.mail.terms as |term|}}<span class="dm {{term.tone}}">{{term.label}} {{showDM term.dm}}</span>{{/each}}</span>
 		</div>
 	</div>
+
+	{{! THE COUNTER, and the only part of this screen that writes anything. Drawn in the dialog alone:
+	    the card above is the offer, and an offer with buttons on it is a card that can be pressed
+	    twice. Money moves in one direction only here — Core p.239 sells a berth when it is taken and
+	    Core p.241 pays for cargo on delivery, which happens at the far end and on the ship's sheet. }}
+	{{#unless card}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Trade.Booking'}}</h3>
+			{{! A blank due day is no deadline agreed, not day zero — a lot with one can never be late. }}
+			<span class="count">{{#if booking.dueDay}}{{localize 'MGT2.Trade.BookingCount' world=booking.destination.name day=booking.dueDay}}{{else}}{{localize 'MGT2.Trade.BookingCountOpen' world=booking.destination.name}}{{/if}}</span>
+		</div>
+
+		<div class="shelf book">
+			<div class="r hdr">
+				<span class="nm">{{localize 'MGT2.Trade.Consignment'}}</span>
+				<span class="sz">{{localize 'MGT2.Trade.Offered'}}</span>
+				<span class="cr">{{localize 'MGT2.Trade.Rate'}}</span>
+				<span class="tk">{{localize 'MGT2.Trade.Take'}}</span>
+				<span class="act"></span>
+			</div>
+
+			{{! Passengers: the fare is per head and the count is the crew's, bounded by the offer. }}
+			{{#each booking.passengers as |row|}}
+			<div class="r{{#if row.taken}} done{{/if}}"{{#if row.blocked}} data-tooltip="{{localize row.blocked}}"{{/if}}>
+				<span class="nm">{{localize row.label}}</span>
+				<span class="sz">{{row.available}}</span>
+				<span class="cr">{{localize 'MGT2.Trade.PerHead' credits=row.fare}}</span>
+				<span class="tk"><input class="f n" type="number" step="1" min="0" max="{{row.available}}"
+				       data-take="{{row.grade}}" value="{{row.available}}"
+				       aria-label="{{localize 'MGT2.Trade.Take'}}" {{disabled (not row.ready)}} /></span>
+				<span class="act"><button type="button" class="btn" data-action="bookPassage"
+				        data-grade="{{row.grade}}" {{disabled (not row.ready)}}>{{localize 'MGT2.Trade.Book'}}</button></span>
+			</div>
+			{{/each}}
+
+			{{! One line per LOT and never per row: the tonnages a row rolled are separate consignments
+			    and a lot cannot be broken up (Core p.241), so each is taken or left whole. }}
+			{{#each booking.freights as |lot|}}
+			<div class="r{{#if lot.taken}} done{{/if}}{{#if lot.overFree}} bad{{/if}}"
+			     data-tooltip="{{#if lot.blocked}}{{localize lot.blocked}}{{else if lot.overHold}}{{localize 'MGT2.Trade.HoldTooSmall' tons=lot.tons capacity=../hull.capacity}}{{else if lot.overFree}}{{localize 'MGT2.Trade.HoldTight' tons=lot.tons free=../booking.free}}{{else}}{{localize 'MGT2.Trade.FreightOnDelivery'}}{{/if}}">
+				<span class="nm">{{localize lot.label}}</span>
+				<span class="sz">{{lot.tons}} t</span>
+				<span class="cr">{{localize 'MGT2.Trade.Credits' credits=lot.fare}}</span>
+				<span class="tk">&mdash;</span>
+				<span class="act"><button type="button" class="btn" data-action="bookFreight"
+				        data-row="{{lot.row}}" data-lot="{{lot.index}}" {{disabled (not lot.ready)}}>{{localize 'MGT2.Trade.TakeLot'}}</button></span>
+			</div>
+			{{/each}}
+
+			{{#if booking.mail}}
+			<div class="r{{#if booking.mail.taken}} done{{/if}}{{#if booking.mail.overFree}} bad{{/if}}"
+			     data-tooltip="{{#if booking.mail.blocked}}{{localize booking.mail.blocked}}{{else}}{{localize 'MGT2.Trade.MailAllOrNone'}}{{/if}}">
+				<span class="nm">{{localize 'MGT2.Trade.Mail'}}</span>
+				<span class="sz">{{booking.mail.tons}} t</span>
+				<span class="cr">{{localize 'MGT2.Trade.Credits' credits=booking.mail.fare}}</span>
+				<span class="tk">&mdash;</span>
+				<span class="act"><button type="button" class="btn" data-action="bookMail"
+				        {{disabled (not booking.mail.ready)}}>{{localize 'MGT2.Trade.TakeLot'}}</button></span>
+			</div>
+			{{/if}}
+		</div>
+
+		{{! Warnings and never refusals: a lot cannot be broken up and a stateroom shortage is the
+		    crew's problem to solve, not this screen's to forbid. }}
+		{{#if booking.berths}}
+		<p class="hint{{#if (or booking.berths.over booking.berths.overLow)}} bad{{/if}}">
+			{{localize 'MGT2.Trade.BerthLine' used=booking.berths.used rooms=booking.berths.staterooms low=booking.berths.low berths=booking.berths.berths}}
+		</p>
+		{{/if}}
+		{{#unless booking.canTrade}}<p class="hint">{{localize 'MGT2.Trade.RefereeBooks'}}</p>{{/unless}}
+	</div>
+	{{/unless}}
 	{{/unless}}
 
 	{{! Absent on the chat card, which is this same readout with nothing left to press. }}
@@ -108,7 +181,9 @@
 	<div class="foot">
 		<button type="button" class="btn hot" data-action="rollTraffic">{{localize 'MGT2.Trade.RollAll'}}</button>
 		<button type="button" class="btn" data-action="post" {{#unless canPost}}disabled{{/unless}}>{{localize 'MGT2.Trade.Post'}}</button>
-		<span class="why">{{localize 'MGT2.Trade.NoDocument'}}</span>
+		<span class="why">
+			{{~#if booking.canTrade}}{{localize 'MGT2.Trade.BooksOnto' ship=hull.name}}{{else}}{{localize 'MGT2.Trade.NoDocument'}}{{/if~}}
+		</span>
 	</div>
 	{{/unless}}
 </div>

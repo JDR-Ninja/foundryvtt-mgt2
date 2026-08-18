@@ -1860,6 +1860,40 @@ MGT2.Traffic = Object.freeze({
     })
 });
 
+// Core p.239's Passage and Freight table, indexed by the parsecs jumped. A fare is for a SINGLE jump
+// and six parsecs is the longest one there is, so the table has no open end at either extreme. A
+// working passage is paid in labour and has no column: `MGT2.PassageClasses.working` carries `unpaid`
+// and `PassageData` derives its fare as zero.
+MGT2.PassageFares = Object.freeze([
+    Object.freeze({high: 9000, middle: 6500, basic: 2000, low: 700, freight: 1000}),
+    Object.freeze({high: 14000, middle: 10000, basic: 3000, low: 1300, freight: 1600}),
+    Object.freeze({high: 21000, middle: 14000, basic: 5000, low: 2200, freight: 2600}),
+    Object.freeze({high: 34000, middle: 23000, basic: 8000, low: 3900, freight: 4400}),
+    Object.freeze({high: 60000, middle: 40000, basic: 14000, low: 7200, freight: 8500}),
+    Object.freeze({high: 210000, middle: 130000, basic: 55000, low: 27000, freight: 32000})
+]);
+
+/**
+ * One row of the Passage and Freight table, clamped to the six the book prints.
+ * @param {number} parsecs
+ * @returns {object}
+ */
+MGT2.readFares = parsecs => MGT2.PassageFares[
+    Math.min(MGT2.PassageFares.length, Math.max(1, Math.trunc(Number(parsecs)) || 1)) - 1];
+
+// Core p.241: "Cargo is paid for upon delivery, assuming it is delivered on time. Failing to deliver
+// cargo on time reduces the amount paid by 1D+4 x 10%" — five to ten tenths, so the worst late lot
+// pays nothing at all. Mail is "a special form of freight" and inherits the clause.
+//
+// The chapter prints NO deadline, so this table holds none: a due day is a term the referee and the
+// shipper agree, and the field is left blank until one does. A blank one is a consignment with no
+// deadline recorded, which the delivery act reads as never late — the honest reading of a rule the
+// books state only as "on time". Nothing here schedules anything either (§9.35).
+MGT2.FreightDelivery = Object.freeze({
+    latePenalty: "1d6 + 4",
+    penaltyPerPoint: 10
+});
+
 // Core p.241. Mail is pass or fail on 12+ rather than a quantity, and its DM is the FREIGHT world
 // total banded — the one place in the chapter where one table's output is another table's input.
 // The payment is flat, so a container beats freight out to four parsecs and loses at five or six.
@@ -2032,6 +2066,12 @@ MGT2.SpeculativeTrade = Object.freeze({
     attemptDM: -1,
     // Core p.242: a legal supplier never stocks 61-65, and a black market rolls 1D under a leading 6.
     illegalTens: 6,
+    // Core p.242's hired local broker: DM+2 on the negotiation, against a flat fee of 10% of the
+    // gross proceeds — 20% where the fixer is handling illegal goods. The fee is charged on the
+    // transaction and not on the profit, so it is added to a purchase and taken off a sale.
+    localBrokerDM: 2,
+    brokerFee: 10,
+    fixerFee: 20,
     population: Object.freeze([{max: 3, dm: -3}, {max: 8, dm: 0}, {max: null, dm: 3}])
 });
 
@@ -2611,4 +2651,42 @@ MGT2.SuitBreaches = Object.freeze({
     none: "MGT2.SuitBreaches.none",
     minor: "MGT2.SuitBreaches.minor",
     major: "MGT2.SuitBreaches.major"
+});
+
+/* -------------------------------------------- */
+
+// WHERE A SECTOR SITS, and what its subsectors are called. A world types the sector by name and the
+// hex inside it (§9.142); this table is what turns that pair into one frame for all of Charted
+// Space, `space.js` folding the origin in. The origin is in SECTORS, not in hexes — a sector is 32
+// columns of 40 — and it is the only figure here a calculation reads.
+//
+// Geometry and proper names only. A subsector Traveller Map has never named is simply absent, so an
+// unnamed one reads back as its letter rather than as a placeholder pretending to be a name; and a
+// sector that is not here is not an error — a homebrew sector derives no coordinate and keeps
+// everything the grid alone can tell it.
+MGT2.Sectors = Object.freeze({
+    "Spinward Marches": {x: -4, y: -1, subsectors: Object.freeze({
+        A: "Cronor", B: "Jewell", C: "Regina", D: "Aramis", E: "Querion", F: "Vilis",
+        G: "Lanth", H: "Rhylanor", I: "Darrian", J: "Sword Worlds", K: "Lunion", L: "Mora",
+        M: "Five Sisters", N: "District 268", O: "Glisten", P: "Trin's Veil"
+    })},
+    "Deneb": {x: -3, y: -1, subsectors: Object.freeze({
+        A: "Pretoria", B: "Lamas", C: "Antra", D: "Million", E: "Sabine", F: "Inar",
+        G: "Dunmag", H: "Atsah", I: "Star Lane", J: "Vincennes", K: "Usani", L: "Geniishir",
+        M: "Gulf", N: "Zeng", O: "Kamlar", P: "Vast Heavens"
+    })},
+    "Foreven": {x: -5, y: -1, subsectors: Object.freeze({
+        D: "Massina", H: "Fessor", L: "Reidain", P: "Urnian"
+    })},
+    "Kruse": {x: 0, y: 9, subsectors: Object.freeze({
+        A: "Adams", B: "Barratt", C: "Chase", D: "Drower", E: "Eberhardt", F: "French",
+        G: "Gower", H: "Hagan", I: "Ivy", J: "Jain", K: "Kane", L: "Luomala", M: "Mullings",
+        N: "Neyzi", O: "Osthoff", P: "Pletneva"
+    })},
+    "Lubbock": {x: -1, y: 7, subsectors: Object.freeze({
+        H: "Horden"
+    })},
+    "Xuanzang": {x: -2, y: 15, subsectors: Object.freeze({
+        M: "Moksadeva"
+    })}
 });

@@ -155,6 +155,9 @@
 		{{! Core p.242: a speculative lot is bought with no destination and no deadline at all, so
 		    both rows go quiet rather than absent — the lot is still a lot. }}
 		<li{{#unless destination}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Destination'}}</span><b class="word">{{#if destination}}{{destination}}{{else}}&mdash;{{/if}}</b></li>
+		{{#if system.illegal}}
+		<li><span class="lbl">{{localize 'MGT2.Items.IllegalEverywhere'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
+		{{/if}}
 		<li{{#unless system.dueDay}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.DueDay'}}</span><b>{{#if system.dueDay}}{{system.dueDay}}{{else}}&mdash;{{/if}}</b></li>
 		<li{{#unless system.farePerTon}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.FarePerTon'}}</span><b>{{system.farePerTon}}<span class="u">Cr</span></b></li>
 		<li{{#unless system.basePrice}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.BasePrice'}}</span><b>{{system.basePrice}}<span class="u">Cr</span></b></li>
@@ -450,6 +453,12 @@
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.PurchasePct'}}</span>
 			{{formInput systemFields.purchasePct name="system.purchasePct" value=source.purchasePct classes="f num"}}
+		</label>
+		{{! Two different bans, and the pair has to stay legible: a Law Level is what a WORLD forbids,
+		    the flag is Core p.243's "illegal throughout the Imperium", which prints no level at all. }}
+		<label class="check">
+			{{formInput systemFields.illegal name="system.illegal" value=system.illegal}}
+			<span>{{localize 'MGT2.Items.IllegalEverywhere'}}</span>
 		</label>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.BannedAt'}}</span>

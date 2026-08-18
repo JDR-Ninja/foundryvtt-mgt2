@@ -1,8 +1,14 @@
 import { MGT2 } from "./config.js";
+import { CreditSplit } from "./credit-split.js";
 import { MGT2Helper } from "./helper.js";
 import { WorldData } from "./actors/world-data.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+const { DragDrop } = foundry.applications.ux;
+
+/** Two ends and one hull: a route needs both counters, unlike the market a speculative stop is at. */
+const WORLD_TYPE = "Actor.world";
+const SHIP_TYPE = "Actor.spacecraft";
 
 /**
  * A sector table prints the travel zone in a column of its own (Core p.248), so the field accepts it
@@ -195,11 +201,20 @@ export class StopTraffic {
 /* -------------------------------------------- */
 
 /**
- * Traffic at the stop — the passenger, freight and mail rolls of one commercial call.
+ * Traffic at the stop — the passenger, freight and mail of one commercial call, from the roll to the
+ * booking.
  *
- * It owns no document and creates none (§33.9 step 1). Two profiles are typed rather than read off a
- * `world` Actor on purpose: the dialog exists so that a referee does not need one, and step 2 is to
- * measure how often the profiles get retyped before deciding the Actor is worth the entry.
+ * **THREE SLOTS, because traffic is a route.** A speculative trade is one counter and takes one
+ * world; this needs both ends, and the hull that carries what is booked. A dropped world FILLS the
+ * profile and the zone and does not replace them: typing keeps working, because a table with no
+ * documents at all must still get every DM. What the far end's handle buys is `destination` — a uuid
+ * where the world is an Actor, the bare profile line where the referee only typed one.
+ *
+ * **It creates documents now.** The rolls produce an offer, and a booking taken off that offer is a
+ * `passage` or a `cargo` Item on the hull — with the destination, the deadline and the rate that
+ * `CargoData` has always declared and nothing has ever written. Who is paid when is Core p.238-241's
+ * own split: a passage fare is collected when the berth is taken and freight is paid on delivery, at
+ * the other end of the route and on the ship's own sheet.
  *
  * The form part renders once and the results part re-renders on every keystroke, which is what keeps
  * a caret in the field being typed into.
@@ -213,12 +228,17 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
     static DEFAULT_OPTIONS = {
         id: "mgt2-stop-traffic",
         classes: ["mgt2", "stoptraffic"],
-        position: { width: 760, height: 760 },
+        position: { width: 760, height: 860 },
         window: { resizable: true, icon: "fa-solid fa-cart-flatbed-suitcase",
             title: "MGT2.Trade.StopTraffic" },
         actions: {
             rollCheck: StopTrafficDialog.#onRollCheck,
             rollTraffic: StopTrafficDialog.#onRollTraffic,
+            bookPassage: StopTrafficDialog.#onBookPassage,
+            bookFreight: StopTrafficDialog.#onBookFreight,
+            bookMail: StopTrafficDialog.#onBookMail,
+            slotClear: StopTrafficDialog.#onSlotClear,
+            openDocument: StopTrafficDialog.#onOpenDocument,
             post: StopTrafficDialog.#onPost
         }
     };
@@ -232,14 +252,37 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
     /* -------------------------------------------- */
 
     /**
-     * The seven typed values and the leading check. The only state the dialog has, and none of it is
-     * persisted: a stop is answered once and the answer is the referee's to write down.
+     * The typed values, the leading check and the one booking parameter the chapter does not print.
+     * None of it is persisted: a stop is answered once, and what outlives it is the Items a booking
+     * writes onto the hull.
      */
     #input = {
         here: "", next: "", hereZone: "green", nextZone: "green", parsecs: 1,
         steward: 0, checkSkill: "broker", checkDM: 0, effect: 0,
-        armed: false, rank: 0, socialDM: 0
+        armed: false, rank: 0, socialDM: 0, dueIn: null
     };
+
+    /**
+     * The two ends, where a `world` Actor was dropped for one. They fill the typed profile and zone
+     * and are read back for exactly one thing the typed line cannot give: `destination`, as a uuid
+     * rather than a name.
+     * @type {{here: Actor|null, next: Actor|null}}
+     */
+    #worlds = { here: null, next: null };
+
+    /** The hull a booking is written onto. Read for its hold and its berths, written only on a book. */
+    #ship = null;
+
+    /**
+     * What this offer has already handed over, keyed `passage:<grade>`, `<size>:<index>` and `mail`.
+     * A traffic table is what is available at this stop, so a lot booked is a lot gone — pressing
+     * twice would carry the same consignment twice. Cleared when the dice are rolled again.
+     * @type {Set<string>}
+     */
+    #taken = new Set();
+
+    /** One booking at a time: a second split window open beside the first would credit twice. */
+    #busy = false;
 
     /**
      * Every die of the current offer, rolled once and kept. Each row owns a fixed slot of ten, so a
@@ -252,10 +295,70 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
     /** The `Roll` objects behind `#dice`, kept so the posted card can carry them (§9.117). */
     #rolls = [];
 
-    /** One window: a second one would answer the same stop twice with different dice. */
-    static open() {
-        const existing = foundry.applications.instances.get("mgt2-stop-traffic");
-        return (existing ?? new StopTrafficDialog()).render({ force: true });
+    /**
+     * One window: a second one would answer the same stop twice with different dice.
+     * @param {object} [options]
+     * @param {Actor} [options.world]   A `world` to put in the near slot before the window opens
+     */
+    static open({ world } = {}) {
+        const screen = foundry.applications.instances.get("mgt2-stop-traffic")
+            ?? new StopTrafficDialog();
+        if ( world ) screen.seed(world, "here");
+        return screen.render({ force: true });
+    }
+
+    /**
+     * Put a world in one of the two end slots, which fills that end's typed profile and zone. The
+     * dice are NOT dropped: the pool is re-read against corrected modifiers on purpose, and a dropped
+     * profile is the same correction a typed one is.
+     * @param {Actor} actor
+     * @param {"here"|"next"} end
+     * @returns {Actor|null}
+     */
+    seed(actor, end) {
+        if ( (actor?.type !== "world") || !(end in this.#worlds) ) return null;
+        this.#worlds[end] = actor;
+        this.#input[end] = actor.system.profile;
+        this.#input[`${end}Zone`] = actor.system.zone;
+        return actor;
+    }
+
+    /**
+     * Back to hand mode for one end. The typed line already holds what the world filled in, so no DM
+     * moves; what is lost is the uuid a booking would have stored as its destination.
+     */
+    #unseed(end) {
+        if ( end in this.#worlds ) this.#worlds[end] = null;
+    }
+
+    /* -------------------------------------------- */
+
+    /** Every document this screen has written into `apps`, which is not the same as the three slots. */
+    #registered = new Set();
+
+    /**
+     * `document.apps` is the only re-render mechanism there is, and here it keeps the hold honest: a
+     * lot delivered on the ship's own sheet redraws this screen's free tonnage, so the figure a
+     * booking is warned against is never a stale copy of the hull's.
+     */
+    #syncRegistrations(documents) {
+        const wanted = new Set(documents.filter(document => document));
+        for ( const document of this.#registered ) {
+            if ( !wanted.has(document) ) delete document.apps[this.id];
+        }
+        for ( const document of wanted ) document.apps[this.id] = this;
+        this.#registered = wanted;
+    }
+
+    /**
+     * `_tearDown` and not `_onClose`: it runs synchronously before the state flips to CLOSED, while
+     * `_onClose` is dispatched unawaited.
+     * @inheritDoc
+     */
+    _tearDown(options) {
+        super._tearDown(options);
+        for ( const document of this.#registered ) delete document.apps[this.id];
+        this.#registered = new Set();
     }
 
     /* -------------------------------------------- */
@@ -276,14 +379,28 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
             effect: Math.trunc(Number(this.#input.effect) || 0),
             armed: this.#input.armed === true,
             rank: Math.trunc(Number(this.#input.rank) || 0),
-            socialDM: Math.trunc(Number(this.#input.socialDM) || 0)
+            socialDM: Math.trunc(Number(this.#input.socialDM) || 0),
+            // Blank is a consignment with no deadline agreed, and that is NOT zero days: `|| 0`
+            // here would make every lot late the moment it was booked.
+            dueIn: StopTrafficDialog.#days(this.#input.dueIn)
         };
+    }
+
+    /**
+     * The gate on every act that writes to the hull. `CreditSplit` refuses a non-GM outright — it
+     * writes other people's purses — and a booking is an Item created on the ship, so the whole
+     * counter takes the referee. The screen stays everyone's (Core p.238): the buttons grey and
+     * nothing else on the page changes.
+     */
+    get canTrade() {
+        return game.user.isGM && Boolean(this.#ship?.canUserModify(game.user, "update"));
     }
 
     /** @inheritDoc */
     async _prepareContext(options) {
         const context = await super._prepareContext(options);
         const input = this.reading;
+        this.#syncRegistrations([this.#worlds.here, this.#worlds.next, this.#ship]);
         Object.assign(context, {
             config: MGT2,
             input: this.#input,
@@ -296,6 +413,15 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
             next: input.next,
             glossHere: StopTrafficDialog.glossOf(input.here),
             glossNext: StopTrafficDialog.glossOf(input.next),
+            worldType: WORLD_TYPE,
+            shipType: SHIP_TYPE,
+            ends: [
+                { end: "here", label: "MGT2.Trade.Here",
+                    ...StopTrafficDialog.#worldSlot(this.#worlds.here) },
+                { end: "next", label: "MGT2.Trade.Destination",
+                    ...StopTrafficDialog.#worldSlot(this.#worlds.next) }
+            ],
+            hull: StopTrafficDialog.#shipSlot(this.#ship),
             ready: Boolean(input.here.uwp && input.next.uwp),
             rolled: this.#dice !== null
         });
@@ -303,9 +429,137 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
         if ( context.ready ) {
             context.offer = StopTraffic.offer(input, this.#dice);
             const mail = context.offer.mail;
-            if ( mail.offered ) mail.credits = MGT2Helper.credits(mail.credits);
+            if ( mail.offered ) mail.creditsDisplay = MGT2Helper.credits(mail.credits);
+            context.booking = this.#booking(input, context.offer);
         }
         return context;
+    }
+
+    /* -------------------------------------------- */
+    /*  Booking                                     */
+    /* -------------------------------------------- */
+
+    /**
+     * What of this offer can actually be taken aboard, and at what rate.
+     *
+     * The fares are Core p.239's Passage and Freight table read at the route's own length, so nothing
+     * here is typed twice. `blocked` names what stops each line in the order a referee would fix it —
+     * a greyed button that does not say why is a button pressed twice.
+     */
+    #booking(input, offer) {
+        const fares = MGT2.readFares(input.parsecs);
+        const destination = this.#destination();
+        const day = campaignDay();
+        const hold = this.#ship ? this.#ship.system.cargo : null;
+        const stop = () => !this.#ship ? "MGT2.Trade.NeedAShipHere"
+            : !destination.name && !destination.world ? "MGT2.Trade.NeedADestination"
+                : !this.canTrade ? "MGT2.Trade.RefereeBooks" : null;
+
+        // A lot cannot be broken up (Core p.241), so a hold with room for part of it has room for
+        // none of it. Both readings warn and neither refuses.
+        const fit = tons => ({
+            overFree: Boolean(hold) && (tons > hold.free),
+            overHold: Boolean(hold) && (tons > hold.capacity)
+        });
+        const line = (key, blocked) => {
+            const taken = this.#taken.has(key);
+            const why = blocked ?? (taken ? "MGT2.Trade.AlreadyBooked" : stop());
+            return { key, taken, blocked: why, ready: !why && !this.#busy };
+        };
+
+        const passengers = (offer.passengers ?? []).map(row => {
+            const available = row.quantity ?? 0;
+            const farePerHead = fares[row.key] ?? 0;
+            return { ...line(`passage:${row.key}`, available ? null : "MGT2.Trade.NoneOffered"),
+                grade: row.key, label: row.label, available, farePerHead,
+                fare: MGT2Helper.credits(farePerHead),
+                total: MGT2Helper.credits(available * farePerHead) };
+        });
+
+        // One button per LOT and never per row: the tonnages a row rolled are separate consignments,
+        // and each is taken or left whole.
+        const freights = [];
+        for ( const row of offer.freights ?? [] ) {
+            (row.parts ?? []).forEach((tons, index) => {
+                freights.push({ ...line(`${row.key}:${index}`, tons ? null : "MGT2.Trade.NoneOffered"),
+                    row: row.key, index, label: row.label, tons, ...fit(tons),
+                    fare: MGT2Helper.credits(tons * fares.freight) });
+            });
+        }
+
+        // Core p.241 calls mail "a special form of freight", so it becomes one `cargo` lot like any
+        // other — all the containers at once, because the Travellers "must take them all or none at
+        // all", and at a flat rate per ton that reproduces Cr25000 a container without scaling.
+        const mail = offer.mail.offered
+            ? { ...line("mail", null), containers: offer.mail.containers, tons: offer.mail.tons,
+                ...fit(offer.mail.tons), fare: MGT2Helper.credits(offer.mail.credits) }
+            : null;
+
+        return { fares, destination, day, passengers, freights, mail,
+            dueDay: (input.dueIn === null) ? null : (day + input.dueIn),
+            berths: StopTrafficDialog.#berths(this.#ship),
+            free: hold?.free ?? 0,
+            canTrade: this.canTrade };
+    }
+
+    /**
+     * The far end as a `CargoData.destination`. It degrades the way the crew roster does: the uuid
+     * where the world is an Actor, the bare profile line where the referee only typed one — and the
+     * name is stored beside the uuid so a deleted Actor leaves a readable manifest rather than a
+     * blank one.
+     * @returns {{world: string|null, name: string}}
+     */
+    #destination() {
+        const world = this.#worlds.next;
+        if ( world ) return { world: world.uuid, name: world.name };
+        return { world: null, name: StopTraffic.parseLine(this.#input.next).profile };
+    }
+
+    /**
+     * The agreed delivery window in days, or null where none was agreed. Blank has to survive as
+     * blank: the chapter prints no deadline, so a lot with none is a lot that cannot be late, and
+     * coercing an empty field to 0 would book every consignment already overdue.
+     */
+    static #days(value) {
+        const text = String(value ?? "").trim();
+        if ( !text ) return null;
+        const days = Math.trunc(Number(text));
+        return Number.isFinite(days) ? Math.max(0, days) : null;
+    }
+
+    /**
+     * What the hull can actually sleep. Core p.158: a high or middle passenger takes a stateroom
+     * each, two basic share one, and a low passenger takes a berth — an emergency low berth holding
+     * four of them. Advisory and nothing more: the counts are what is ALREADY booked, and the screen
+     * warns rather than refusing.
+     */
+    static #berths(ship) {
+        if ( !ship ) return null;
+        const rooms = ship.system.staterooms;
+        const staterooms = rooms.standard + rooms.high + rooms.luxury;
+        const berths = Object.entries(ship.system.lowBerths).reduce((sum, [key, count]) =>
+            sum + (count * (MGT2.LowBerths[key]?.holds ?? 1)), 0);
+        const booked = ship.system.manifest.passengers;
+        const used = booked.high + booked.middle + Math.ceil(booked.basic / 2);
+        return { staterooms, berths, used, low: booked.low,
+            over: used > staterooms, overLow: booked.low > berths };
+    }
+
+    /** One end's slot: the document in it, and the two lines it fills below. */
+    static #worldSlot(world) {
+        if ( !world ) return { linked: false };
+        return { linked: true, uuid: world.uuid, name: world.name,
+            profile: world.system.profile, codes: world.system.codes.join(" ") };
+    }
+
+    /** The hull slot: the hold a lot has to fit and the berths a booking has to sleep in. */
+    static #shipSlot(ship) {
+        if ( !ship ) return { linked: false };
+        const cargo = ship.system.cargo;
+        const berths = StopTrafficDialog.#berths(ship);
+        return { linked: true, uuid: ship.uuid, name: ship.name,
+            capacity: cargo.capacity, used: cargo.used, free: cargo.free, over: cargo.over === true,
+            staterooms: berths.staterooms, berths: berths.berths };
     }
 
     /* -------------------------------------------- */
@@ -327,6 +581,15 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
             this.#syncGlosses();
             this.render({ parts: ["results"] });
         });
+    }
+
+    /** @inheritDoc */
+    async _onRender(context, options) {
+        await super._onRender(context, options);
+        // Re-bound on every render because the form part carries the slots and is replaced.
+        // `DragDrop#bind` ASSIGNS `element.ondragover` rather than adding a listener, so it never
+        // stacks.
+        this.dragDrop.bind(this.element);
     }
 
     /**
@@ -399,12 +662,265 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
             mail: twos[ROWS],
             containers: containers.total
         };
+        // A re-rolled offer is a different stop, so what an earlier one booked is on offer again.
+        this.#taken.clear();
         this.render({ parts: ["results"] });
+    }
+
+    /** Back to hand mode for that slot; nothing is written and nothing rolled is discarded. */
+    static #onSlotClear(event, target) {
+        if ( target.dataset.slot === "ship" ) this.#ship = null;
+        else this.#unseed(target.dataset.slot);
+        return this.render();
+    }
+
+    /** @this {StopTrafficDialog} */
+    static async #onOpenDocument(event, target) {
+        const uuid = target.closest("[data-uuid]")?.dataset.uuid;
+        const document = uuid ? await fromUuid(uuid) : null;
+        return document?.sheet?.render({ force: true });
+    }
+
+    /* -------------------------------------------- */
+    /*  The counter                                 */
+    /* -------------------------------------------- */
+
+    /**
+     * Passengers aboard. **The fare is collected here**: Core p.239 prints the Passage and Freight
+     * table and no condition on it, while Core p.241 says of cargo alone that it "is paid for upon
+     * delivery" — so the clause that makes payment wait is the freight clause, and a berth is sold
+     * when it is taken.
+     *
+     * Money first and the booking second, which is the order the counter already uses: the split
+     * screen is one a referee closes unbought more often than not, so a cancel costs nothing at all.
+     * @this {StopTrafficDialog}
+     */
+    static async #onBookPassage(event, target) {
+        if ( this.#busy ) return;
+        const grade = target.dataset.grade;
+        const context = await this._prepareContext({});
+        const row = context.booking?.passengers.find(line => line.grade === grade);
+        if ( !row?.ready ) return;
+        // The crew takes as many as it wants of what is offered — the berths are a warning and not a
+        // cap, so the count is the referee's and only the offer bounds it.
+        const field = this.element.querySelector(`[data-take="${grade}"]`);
+        const count = Math.min(row.available,
+            Math.max(0, MGT2Helper.getIntegerFromInput(field?.value)));
+        if ( !count ) return;
+
+        const name = game.i18n.localize(row.label);
+        const total = count * row.farePerHead;
+        await this.#write(`passage:${grade}`, async () => {
+            const split = await CreditSplit.open({
+                total,
+                direction: "credit",
+                spacecraft: this.#ship.uuid,
+                reason: game.i18n.format("MGT2.Trade.PassageReason", { n: count, grade: name,
+                    world: this.#endName("next") })
+            });
+            if ( !split ) return false;
+            await this.#ship.createEmbeddedDocuments("Item", [{
+                name: game.i18n.format("MGT2.Trade.PassageName", { n: count, grade: name }),
+                type: "passage",
+                system: { grade, count, destination: context.booking.destination,
+                    farePerHead: row.farePerHead }
+            }]);
+            await this.#postBooking({ title: "MGT2.Trade.Card.Booked",
+                line: game.i18n.format("MGT2.Trade.Card.Passengers", { n: count, grade: name,
+                    credits: MGT2Helper.credits(total) }),
+                note: game.i18n.localize("MGT2.Trade.Card.FarePaid") });
+            return true;
+        });
+    }
+
+    /**
+     * One freight lot. **No money moves here**: Core p.241 pays for cargo on delivery, which happens
+     * at the far end and on the ship's own sheet — so what the booking writes is the consignment, and
+     * the three fields that make it one rather than a speculative purchase.
+     * @this {StopTrafficDialog}
+     */
+    static async #onBookFreight(event, target) {
+        if ( this.#busy ) return;
+        const row = target.dataset.row;
+        const index = Number(target.dataset.lot);
+        const context = await this._prepareContext({});
+        const lot = context.booking?.freights.find(line => (line.row === row) && (line.index === index));
+        if ( !lot?.ready ) return;
+        const label = game.i18n.localize(lot.label);
+        return this.#write(lot.key, () => this.#consign({
+            name: game.i18n.format("MGT2.Trade.FreightName", { size: label,
+                world: this.#endName("next") }),
+            tons: lot.tons,
+            farePerTon: context.booking.fares.freight,
+            booking: context.booking,
+            title: "MGT2.Trade.Card.Consigned",
+            line: game.i18n.format("MGT2.Trade.Card.Freight", { size: label, tons: lot.tons,
+                credits: lot.fare })
+        }));
+    }
+
+    /**
+     * Mail, as **one freight lot like any other**. Core p.241 calls it "a special form of freight",
+     * the Travellers "must take them all or none at all", and the payment is a flat Cr25000 per
+     * five-ton container that does not scale with distance — which a `farePerTon` of Cr5000 states
+     * exactly, with no second kind of Item and no field that only mail would use.
+     * @this {StopTrafficDialog}
+     */
+    static async #onBookMail() {
+        if ( this.#busy ) return;
+        const context = await this._prepareContext({});
+        const mail = context.booking?.mail;
+        if ( !mail?.ready ) return;
+        return this.#write("mail", () => this.#consign({
+            name: game.i18n.format("MGT2.Trade.MailName", { n: mail.containers,
+                world: this.#endName("next") }),
+            tons: mail.tons,
+            farePerTon: MGT2.MailTraffic.creditsPerContainer / MGT2.MailTraffic.tonsPerContainer,
+            booking: context.booking,
+            title: "MGT2.Trade.Card.Consigned",
+            line: game.i18n.format("MGT2.Trade.Card.Mail", { n: mail.containers, tons: mail.tons,
+                credits: mail.fare })
+        }));
+    }
+
+    /**
+     * A `cargo` lot carried for a fare. The three fields nothing in the system had ever written:
+     * `destination` makes it freight rather than speculation — `CargoData` derives `speculative` from
+     * having none — `dueDay` records Core p.241's deadline in campaign days, and `farePerTon` is the
+     * rate the delivery is settled at.
+     */
+    async #consign({ name, tons, farePerTon, booking, title, line }) {
+        await this.#ship.createEmbeddedDocuments("Item", [{
+            name,
+            type: "cargo",
+            system: { tons, farePerTon, destination: booking.destination, dueDay: booking.dueDay }
+        }]);
+        await this.#postBooking({ title, line,
+            note: game.i18n.format("MGT2.Trade.Card.DueDay", { day: booking.dueDay }) });
+        return true;
+    }
+
+    /**
+     * The guard every act at this counter shares. `key` is marked BEFORE the write, so a double press
+     * cannot book twice, and released again where the act came to nothing — a cancelled split or a
+     * creation that threw leaves the offer exactly as it was.
+     * @param {string} key
+     * @param {() => Promise<boolean>} act   False where nothing was written
+     */
+    async #write(key, act) {
+        this.#busy = true;
+        this.#taken.add(key);
+        this.render({ parts: ["results"] });
+        try {
+            if ( !await act() ) this.#taken.delete(key);
+        }
+        catch ( error ) {
+            console.error(error);
+            this.#taken.delete(key);
+            ui.notifications.error(game.i18n.localize("MGT2.Trade.Errors.BookingFailed"));
+        }
+        finally {
+            this.#busy = false;
+            this.render();
+        }
+    }
+
+    /* -------------------------------------------- */
+    /*  Drag and drop                               */
+    /* -------------------------------------------- */
+
+    /**
+     * A plain `ApplicationV2` inherits no drag-drop plumbing, so the controller is supplied here as
+     * the speculative and chargen screens' are. No permission gate on the drop: reading a world is
+     * not writing to one, and `canTrade` is what the booking buttons test.
+     * @type {DragDrop}
+     */
+    get dragDrop() {
+        return this.#dragDrop ??= new DragDrop.implementation({
+            dropSelector: "[data-accept]",
+            callbacks: {
+                dragover: this.#onDragOver.bind(this),
+                dragleave: this.#onDragLeave.bind(this),
+                drop: this.#onDrop.bind(this)
+            }
+        });
+    }
+
+    /** @type {DragDrop|null} */
+    #dragDrop = null;
+
+    /** A zone refuses at the pointer or not at all — after the drop is too late to be feedback. */
+    #onDragOver(event) {
+        const zone = event.target.closest("[data-accept]");
+        for ( const node of this.element.querySelectorAll(".over, .deny") ) {
+            if ( node !== zone ) node.classList.remove("over", "deny");
+        }
+        if ( !zone ) return;
+        zone.classList.add(MGT2Helper.dropAccepted(zone) ? "over" : "deny");
+    }
+
+    #onDragLeave(event) {
+        const zone = event.target.closest("[data-accept]");
+        if ( zone && !zone.contains(event.relatedTarget) ) zone.classList.remove("over", "deny");
+    }
+
+    /** Three zones: the two ends of the route, and the hull that carries what is booked on it. */
+    async #onDrop(event) {
+        const zone = event.target.closest("[data-accept]");
+        const data = MGT2Helper.getDataFromDropEvent(event);
+        zone?.classList.remove("over", "deny");
+        if ( !zone || !MGT2Helper.dropAccepted(zone, data) ) return;
+        // Awaited end to end: a packed Actor answers `fromUuidSync` with an index entry.
+        const actor = data.uuid ? await fromUuid(data.uuid) : null;
+        if ( !actor ) return;
+        if ( zone.dataset.slot === "ship" ) {
+            if ( actor.type !== "spacecraft" ) return;
+            this.#ship = actor;
+        }
+        else if ( !this.seed(actor, zone.dataset.slot) ) return;
+        return this.render();
     }
 
     /* -------------------------------------------- */
     /*  Chat                                        */
     /* -------------------------------------------- */
+
+    /** A dropped world is named; a typed one is only ever its own profile line. */
+    #endName(end) {
+        return this.#worlds[end]?.name || StopTraffic.parseLine(this.#input[end]).profile;
+    }
+
+    /**
+     * ONE card, and it is about the BOOKING. Where a fare changed hands, `CreditSplit` posted the
+     * transfer a moment earlier and named every share, so nothing here repeats one: what this adds is
+     * the consignment — what was taken aboard, at what rate, for where, and by when.
+     */
+    async #postBooking({ title, line, note }) {
+        const hold = this.#ship.system.cargo;
+        // Swallowed on purpose: the consignment is already aboard, and a card that failed to render
+        // must not report the booking as one that never happened.
+        try {
+            const content = await foundry.applications.handlebars.renderTemplate(
+                "systems/mgt2/templates/chat/traffic-booking.html", {
+                    title,
+                    where: game.i18n.format("MGT2.Trade.Route", { here: this.#endName("here"),
+                        next: this.#endName("next"), parsecs: this.reading.parsecs }),
+                    line,
+                    note,
+                    ship: this.#ship.name,
+                    used: hold.used, capacity: hold.capacity, over: hold.over === true
+                });
+            return await getDocumentClass("ChatMessage").create({
+                author: game.user.id,
+                speaker: ChatMessage.getSpeaker(),
+                content
+            });
+        }
+        catch ( error ) {
+            console.error(error);
+            return null;
+        }
+    }
 
     /**
      * The offer, on the log. Nothing is written to any document — §9.35 has the system report and the
@@ -431,6 +947,16 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
                 }</h4><span class="tgt">${route}</span></div></div>${body}</div>`
         });
     }
+}
+
+/* -------------------------------------------- */
+
+/**
+ * The campaign's own *now*, in days, and the only clock the system has (§9.35). A deadline is
+ * measured against it once, at the moment it is written, and nothing counts it down.
+ */
+function campaignDay() {
+    return game.settings.get("mgt2", "campaignDay");
 }
 
 /* -------------------------------------------- */

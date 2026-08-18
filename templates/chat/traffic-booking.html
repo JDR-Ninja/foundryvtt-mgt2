@@ -1,0 +1,21 @@
+{{! Pinned light like every other card: Foundry hard-codes `themed theme-light` on ol.chat-log.
+
+    The transfer is NOT here. Where a fare changed hands `credit-split.html` posted it a moment
+    earlier and named every share; this card carries the consignment — what was taken aboard, for
+    where, by when, and the hold it went into or came out of. }}
+<div class="mgt2 theme-light card stoptraffic">
+	<div class="chd">
+		<div class="what">
+			<h4>{{localize title}}</h4>
+			<span class="tgt">{{where}}</span>
+		</div>
+	</div>
+	<p class="bare">{{line}}</p>
+	{{#if note}}<p class="bare">{{note}}</p>{{/if}}
+	{{! Core p.241: a lot cannot be broken up, so an overfull hold is a fact the table has to solve
+	    rather than something the booking could have refused. }}
+	<div class="pipe">
+		<span>{{localize 'MGT2.Trade.Card.Hold' ship=ship used=used capacity=capacity}}</span>
+		{{#if over}}<span class="hot">{{localize 'MGT2.Trade.Card.Over'}}</span>{{/if}}
+	</div>
+</div>

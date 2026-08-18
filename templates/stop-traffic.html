@@ -1,9 +1,43 @@
 <div class="hd">
 	<h2>{{localize 'MGT2.Trade.OnOffer'}}</h2>
 
-	{{! The seven typed values, in the order a referee has them to hand: the two ends first, because
-	    every DM below is read off them twice. No field carries a `name` — the dialog owns no document
-	    and submits nowhere, which is the property that lets it ship before any of §33 is built. }}
+	{{! THREE SLOTS, because traffic is a ROUTE: a market is one counter and a route has two ends,
+	    plus the hull that carries what is booked. A dropped world FILLS the profile and zone below
+	    rather than replacing them — a table with no documents at all still gets every DM — and what
+	    the far end's handle buys is a destination stored as a uuid instead of a name. }}
+	<div class="slots three">
+		{{#each ends as |slot|}}
+		<div class="slot{{#unless slot.linked}} vacant{{/unless}}" data-accept="{{../worldType}}" data-slot="{{slot.end}}">
+			<span class="role">{{localize slot.label}}</span>
+			{{#if slot.linked}}
+			<b data-uuid="{{slot.uuid}}" data-action="openDocument">{{slot.name}}</b>
+			<span class="uwp">{{slot.profile}}{{#if slot.codes}} &middot; {{slot.codes}}{{/if}}</span>
+			<a class="rm" data-action="slotClear" data-slot="{{slot.end}}" data-tooltip="{{localize 'MGT2.Trade.ClearSlot'}}"><i class="fa-solid fa-xmark"></i></a>
+			{{else}}
+			<b>{{localize 'MGT2.Trade.DropWorld'}}</b>
+			<span class="uwp">{{localize 'MGT2.Trade.TypedInstead'}}</span>
+			{{/if}}
+		</div>
+		{{/each}}
+
+		<div class="slot{{#unless hull.linked}} vacant{{/unless}}" data-accept="{{shipType}}" data-slot="ship">
+			<span class="role">{{localize 'MGT2.Trade.ShipSlot'}}</span>
+			{{#if hull.linked}}
+			<b data-uuid="{{hull.uuid}}" data-action="openDocument">{{hull.name}}</b>
+			<span class="uwp">{{localize 'MGT2.Trade.Hold' used=hull.used capacity=hull.capacity}}</span>
+			<span class="uwp">{{localize 'MGT2.Trade.Berths' rooms=hull.staterooms berths=hull.berths}}</span>
+			<span class="st{{#if hull.over}} shut{{/if}}">{{localize 'MGT2.Trade.HoldFree' tons=hull.free}}</span>
+			<a class="rm" data-action="slotClear" data-slot="ship" data-tooltip="{{localize 'MGT2.Trade.ClearSlot'}}"><i class="fa-solid fa-xmark"></i></a>
+			{{else}}
+			<b>{{localize 'MGT2.Trade.DropShip'}}</b>
+			<span class="uwp">{{localize 'MGT2.Trade.BookingHint'}}</span>
+			{{/if}}
+		</div>
+	</div>
+
+	{{! The typed values, in the order a referee has them to hand: the two ends first, because every DM
+	    below is read off them twice. No field carries a `name` — the dialog submits nowhere, and what
+	    it writes it writes onto the hull in the slot above. }}
 	<div class="inputs">
 		<div class="end">
 			<label class="fld here">
@@ -29,7 +63,7 @@
 			</label>
 		</div>
 
-		<div class="row4">
+		<div class="row5">
 			<label class="fld">
 				<span>{{localize 'MGT2.Trade.Parsecs'}}</span>
 				<input class="f n" type="number" step="1" min="1" data-field="parsecs" value="{{input.parsecs}}" />
@@ -45,6 +79,14 @@
 			<label class="fld">
 				<span>{{localize 'MGT2.Trade.SocialDM'}}</span>
 				<input class="f n" type="number" step="1" data-field="socialDM" value="{{input.socialDM}}" />
+			</label>
+			{{! The chapter prints no deadline at all, so this is the referee's number: it is stamped
+			    onto a freight lot as a campaign day and nothing ever counts it down. Blank is the
+			    default and means no deadline was agreed — such a lot can never be late. }}
+			<label class="fld" data-tooltip="{{localize 'MGT2.Trade.DueInHint'}}">
+				<span>{{localize 'MGT2.Trade.DueIn'}}</span>
+				<input class="f n" type="number" step="1" min="0" data-field="dueIn" value="{{input.dueIn}}"
+				       placeholder="{{localize 'MGT2.Trade.NoDeadline'}}" />
 			</label>
 		</div>
 

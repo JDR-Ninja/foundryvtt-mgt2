@@ -335,9 +335,11 @@ export class SpacecraftData extends CraftData {
                     world: new fields.DocumentUUIDField({
                         type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
                     name: new fields.StringField({ required: false, blank: true, trim: true }),
-                    // A property of the PAIR, typed by hand: no stored coordinate can compute it, and
-                    // `hex` is deliberately not in the schema (§9.33.5). Core p.157 counts anything
-                    // under a parsec as jump-1 for both the Astrogation DM and the fuel.
+                    // A property of the PAIR, and still typed by hand — but no longer because nothing
+                    // could compute it: §9.142 put `sector` and `hex` on `world` and `space.js` reads
+                    // a distance off them. Whether a leg computes its own parsecs when both ends are
+                    // Actors is an open decision; either end may be a bare name, so the field stays.
+                    // Core p.157 counts anything under a parsec as jump-1 for the DM and the fuel.
                     parsecs: count(1)
                 }),
                 // Names and references, NOTHING else — no parsecs, no index, no note. The deletion
@@ -1231,7 +1233,7 @@ export class SpacecraftData extends CraftData {
     #prepareManifest() {
         const booked = {high: 0, middle: 0, basic: 0, low: 0};
         const lots = [];
-        let used = 0, freight = 0, speculation = 0, bookings = 0;
+        let used = 0, freight = 0, speculation = 0, bookings = 0, baggage = 0;
 
         for (const item of this.parent.items) {
             if (item.type === "cargo") {
@@ -1245,15 +1247,27 @@ export class SpacecraftData extends CraftData {
             else if (item.type === "passage") {
                 const grade = item.system.grade;
                 if (grade in booked) booked[grade] += item.system.count;
+                // Core p.238 charges a passage HOLD SPACE as well as a berth, and the page states the
+                // conversion itself: a high passage takes "one ton of cargo space" where a middle one
+                // takes "100kg of cargo". `PassageClasses.baggage` is that in kilograms throughout,
+                // with the ton stored as 1000 — so tonnes are kilograms over a thousand and no factor
+                // is invented here (§9.142).
+                baggage += item.system.baggage;
                 bookings++;
             }
         }
+
+        const baggageTons = baggage / 1000;
+        used += baggageTons;
 
         this.cargo.used = Math.round(used * 100) / 100;
         this.cargo.free = Math.round((this.cargo.capacity - used) * 100) / 100;
         this.cargo.over = used > this.cargo.capacity;
         this.cargo.lots = lots;
+        // Published beside the total so a hold that is not empty with no lots aboard says why.
+        this.cargo.baggage = Math.round(baggageTons * 100) / 100;
         this.manifest = {lots: lots.length, bookings, freight, speculation,
+            baggage: this.cargo.baggage,
             passengers: bookings ? booked : {...this.passengers}};
     }
 

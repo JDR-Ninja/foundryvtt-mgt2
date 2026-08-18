@@ -180,6 +180,60 @@
 		</div>
 	</div>
 
+	{{! THE MANIFEST, and the far end of a route. A booking is made at the stop, on the traffic screen;
+	    it ENDS here, because a delivery happens at the other end and this is the document that
+	    travelled. Core p.241 pays for cargo on delivery and docks a late lot 1D+4 × 10%; a passage was
+	    paid for when the berth was taken (Core p.239), so putting passengers ashore moves no money and
+	    a low berth leaves Core p.158's revival check with the referee. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.spacecraft.Manifest'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.spacecraft.ManifestCount' n=ship.manifest.count day=ship.manifest.day}}</span>
+			<a class="add edit-only" data-action="itemCreate" data-type-item="cargo" data-create-name="{{localize 'MGT2.Actor.spacecraft.NewLot'}}" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddLot'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if ship.manifest.count}}
+		<table class="rows manifest">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Name'}}</th>
+					<th>{{localize 'MGT2.Trade.Destination'}}</th>
+					<th class="c">{{localize 'MGT2.Actor.spacecraft.Tons'}}</th>
+					<th class="c">{{localize 'MGT2.Items.DueDay'}}</th>
+					<th class="r">{{localize 'MGT2.Trade.Fare'}}</th>
+					<th></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each ship.manifest.rows as |row|}}
+				<tr data-item-id="{{row._id}}"{{#if row.late}} class="hit"{{/if}}>
+					<td>
+						{{row.name}}
+						{{#if row.passage}}<span class="sub">{{localize row.grade}} &times;{{row.count}}{{#if row.lowBerth}} &middot; {{localize 'MGT2.Actor.spacecraft.LowBerth'}}{{/if}}</span>{{/if}}
+					</td>
+					<td class="word">{{#if row.where}}{{row.where}}{{else}}<span class="sub">{{localize 'MGT2.Trade.Speculation'}}</span>{{/if}}</td>
+					<td class="c num">{{#if row.passage}}&mdash;{{else}}{{row.tons}}{{/if}}</td>
+					<td class="c num">{{#if row.dueDay}}{{row.dueDay}}{{else}}&mdash;{{/if}}</td>
+					<td class="r num">{{#if row.fare}}<i>Cr</i>{{row.fare}}{{else}}&mdash;{{/if}}</td>
+					<td class="r">
+						{{#if row.passage}}
+						<button type="button" class="btn" data-action="arrivePassage" {{disabled (not row.can)}}>{{localize 'MGT2.Actor.spacecraft.Disembark'}}</button>
+						{{else if row.freight}}
+						<button type="button" class="btn" data-action="deliverLot" {{disabled (not row.can)}}
+						        data-tooltip="{{#if row.late}}{{localize 'MGT2.Actor.spacecraft.DeliverLate'}}{{else}}{{localize 'MGT2.Actor.spacecraft.DeliverHint'}}{{/if}}">{{localize 'MGT2.Actor.spacecraft.Deliver'}}</button>
+						{{/if}}
+					</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.spacecraft.EditLot" del="MGT2.Actor.spacecraft.DeleteLot"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{#unless ship.manifest.canSettle}}<p class="hint">{{localize 'MGT2.Actor.spacecraft.RefereeSettles'}}</p>{{/unless}}
+		{{else}}
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.ManifestEmpty'}}</p>
+		{{/if}}
+	</div>
+
 	{{! The mount is not packaging: it carries the fire arc, the magazine and a damage multiple that
 	    spans three orders of magnitude, and it is the ship that owns the hardpoint (HG p.29). }}
 	<div class="block">

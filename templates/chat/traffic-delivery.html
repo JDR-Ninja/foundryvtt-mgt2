@@ -1,0 +1,23 @@
+{{! Pinned light like every other card: Foundry hard-codes `themed theme-light` on ol.chat-log.
+
+    The far end of a route. `credit-split.html` posted the payment a moment earlier and named every
+    share, so what this adds is the settlement — the fare owed, what a late arrival cost, and the
+    check a low passenger still owes the referee. }}
+<div class="mgt2 theme-light card stoptraffic">
+	<div class="chd">
+		<div class="what">
+			<h4>{{localize title}}</h4>
+			<span class="tgt">{{where}}</span>
+		</div>
+	</div>
+	<p class="bare">{{line}}</p>
+	{{! Core p.241: "Failing to deliver cargo on time reduces the amount paid by 1D+4 x 10%" —
+	    measured against the campaign day at the moment of delivery, never counted down. }}
+	{{#if late}}<p class="bare hot">{{localize 'MGT2.Trade.Card.Late' days=days roll=roll percent=percent docked=docked credits=credits}}</p>{{/if}}
+	{{! Core p.158 puts every low passenger through a revival check on arrival. The system marks and
+	    never enforces (§9.35), so the check is named and the referee rolls it. }}
+	{{#if revival}}<p class="bare hot">{{localize 'MGT2.Trade.Card.Revival' n=count}}</p>{{/if}}
+	<div class="pipe">
+		<span>{{localize 'MGT2.Trade.Card.Hold' ship=ship used=used capacity=capacity}}</span>
+	</div>
+</div>

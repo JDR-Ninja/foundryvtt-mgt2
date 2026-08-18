@@ -1241,6 +1241,11 @@ export class CargoData extends ItemBaseData {
         // the `legality` every physical item carries, which defaults to 9 (§6.1).
         schema.legality = new fields.NumberField({
             required: false, nullable: true, initial: null, min: 0, integer: true });
+        // Core p.243's OTHER kind of illegal: rows 61-65 of the Trade Goods table are banned
+        // "throughout the Imperium" and print no Law Level at all, so `legality` cannot say it —
+        // a stored 0 would read on the sheet as Law Level 0, the most permissive there is, and
+        // would manufacture a smuggler's Sale DM the book never prints (§9.141).
+        schema.illegal = new fields.BooleanField({ required: false, initial: false });
 
         return schema;
     }

@@ -106,6 +106,12 @@ export class SpecTrade {
         const other = (side === "purchase") ? columns.sale : columns.purchase;
         const terms = [StopTraffic.term(game.i18n.localize("MGT2.Trade.Terms.Broker"), input.broker)];
 
+        // Core p.242: the hired local broker's own DM, printed as a term of its own so a table can
+        // see whether it has already been typed into the Broker box beside it.
+        if ( input.localBroker ) {
+            terms.push(StopTraffic.term(game.i18n.localize("MGT2.Trade.Terms.LocalBroker"),
+                MGT2.SpeculativeTrade.localBrokerDM));
+        }
         if ( own.code ) terms.push(StopTraffic.term(SpecTrade.termLabel(own), own.dm, true));
         if ( other.code ) terms.push(StopTraffic.term(SpecTrade.termLabel(other), -other.dm));
         terms.push(StopTraffic.term(game.i18n.localize("MGT2.Trade.Terms.OtherBroker"), -input.otherBroker));
@@ -119,6 +125,24 @@ export class SpecTrade {
         const perTon = Math.round(goods.basePrice * percent / 100);
         return { side, label, terms, dm, roll, total, percent,
             perTon: MGT2Helper.credits(perTon) };
+    }
+
+    /**
+     * Core p.242's local broker charges "a flat fee of 10% of the gross proceeds of a transaction",
+     * and a fixer handling illegal goods charges 20%. It is levied on the GROSS and not on the
+     * margin, so the same rate is paid on top of a purchase and out of a sale — which is why a
+     * brokered deal that only breaks even loses money twice.
+     *
+     * @param {number} gross     What the goods themselves change hands at
+     * @param {object} input     The screen's reading — `localBroker` decides whether any fee is due
+     * @param {boolean} illegal  Whether this transaction is the fixer's rather than the broker's
+     * @returns {{rate: number, fee: number, due: number, net: number}}
+     */
+    static brokerFee(gross, input, illegal) {
+        const rate = !input.localBroker ? 0
+            : (illegal ? MGT2.SpeculativeTrade.fixerFee : MGT2.SpeculativeTrade.brokerFee);
+        const fee = Math.round(gross * rate / 100);
+        return { rate, fee, due: gross + fee, net: gross - fee };
     }
 
     /** A DM row names its code, or the Law Level a smuggled cargo is banned at. */
@@ -222,7 +246,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     #input = {
         world: "", zone: "green", goods: "11",
         broker: 0, otherBroker: MGT2.SpeculativeTrade.otherBroker,
-        attempts: 0, blackMarket: false, bannedAt: ""
+        attempts: 0, blackMarket: false, bannedAt: "", localBroker: false
     };
 
     /**
@@ -409,6 +433,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             attempts: standing ? standing.attemptsThisMonth
                 : Math.max(0, Math.trunc(Number(this.#input.attempts) || 0)),
             blackMarket: this.#input.blackMarket === true,
+            localBroker: this.#input.localBroker === true,
             // Blank is "nobody bans this", which is a different statement from Law Level 0.
             bannedAt: banned === "" ? null : Math.max(0, Math.trunc(Number(banned) || 0))
         };
@@ -462,6 +487,9 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         context.lot = this.#shelfRow(goods, input, codes);
         context.offer = this.#offer(goods, input, readings.find(read => read.side === "purchase"));
         context.lots = this.#lots(input, codes);
+        // Every figure in the hold column already has the broker's cut out of it, which the column
+        // itself cannot say.
+        context.brokered = input.localBroker;
         context.canTrade = this.canTrade;
         context.canPost = context.rolled || context.priced || (context.searched !== null);
         return context;
@@ -481,6 +509,9 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         const { tons } = SpecTrade.tons(goods, input.uwp.population,
             this.#dice.quantity.slice(slot, slot + DICE_PER_ROW));
         const total = Math.round(tons * goods.basePrice * purchase.percent / 100);
+        // Core p.242: the broker's cut rides on top of a purchase, so what the crew is debited is not
+        // what the goods cost. A black market counter or an illegal row makes it the fixer's 20%.
+        const fee = SpecTrade.brokerFee(total, input, input.blackMarket || (goods.illegal === true));
         const hold = this.#ship ? this.#ship.system.cargo : null;
         // What stops the purchase, in the order a referee would fix it. A greyed button that does not
         // say why is a button pressed twice.
@@ -490,6 +521,8 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
                     : !this.canTrade ? "MGT2.Trade.RefereeTrades" : null;
         return {
             tons, total, percent: purchase.percent, credits: MGT2Helper.credits(total), blocked,
+            rate: fee.rate, fee: fee.fee, due: fee.due,
+            feeCredits: MGT2Helper.credits(fee.fee), dueCredits: MGT2Helper.credits(fee.due),
             capacity: hold?.capacity ?? 0, free: hold?.free ?? 0,
             // Core p.241: a lot cannot be broken up, so a hold with room for part of it has room for
             // none of it. Both readings warn and neither refuses — an oversized lot is a legal
@@ -522,10 +555,16 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
                 this.#price ? this.#price.sale : null);
             const priced = lot.speculative && read.percent;
             const total = priced ? Math.round(lot.tons * lot.basePrice * read.percent / 100) : 0;
+            // The fee comes OUT of a sale (Core p.242). A lot the Imperium bans outright is the
+            // fixer's business rather than the broker's, as is any black-market counter — and that
+            // is `illegal` and not `legality`, which is the level a WORLD bans it at (§9.141).
+            const fee = SpecTrade.brokerFee(total, input,
+                input.blackMarket || (lot.illegal === true) || (lot.legality !== null));
             return {
                 id: item.id, name: item.name, tons: lot.tons, speculative: lot.speculative,
                 sale: SpecTradeDialog.tone(read.dm), percent: priced ? read.percent : null,
-                total, credits: MGT2Helper.credits(total),
+                total, net: fee.net, fee: fee.fee, rate: fee.rate,
+                credits: MGT2Helper.credits(fee.net),
                 over: lot.tons > capacity,
                 sellable: (total > 0) && !this.#busy && this.canTrade
             };
@@ -765,7 +804,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         this.render({ parts: ["results"] });
         try {
             const split = await CreditSplit.open({
-                total: offer.total,
+                total: offer.due,
                 direction: "debit",
                 spacecraft: this.#ship.uuid,
                 reason: game.i18n.format("MGT2.Trade.BuyReason", { tons: offer.tons, goods: name,
@@ -781,7 +820,8 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
                 return null;
             });
             if ( item ) await this.#postLot({ goods: name, tons: offer.tons, percent: offer.percent,
-                base: goods.basePrice, total: offer.total, sold: false });
+                base: goods.basePrice, total: offer.total, fee: offer.fee, rate: offer.rate,
+                settled: offer.due, sold: false });
         }
         finally {
             this.#busy = false;
@@ -813,7 +853,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         this.render({ parts: ["results"] });
         try {
             const split = await CreditSplit.open({
-                total: row.total,
+                total: row.net,
                 direction: "credit",
                 spacecraft: this.#ship.uuid,
                 reason: game.i18n.format("MGT2.Trade.SellReason", { tons: row.tons, goods: name,
@@ -822,7 +862,8 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             if ( !split ) return;
             await item.delete();
             await this.#postLot({ goods: name, tons: row.tons, percent: row.percent,
-                base, total: row.total, sold: true });
+                base, total: row.total, fee: row.fee, rate: row.rate,
+                settled: row.net, sold: true });
         }
         finally {
             this.#busy = false;
@@ -850,7 +891,9 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
                 saleDM: goods.sale.map(row => ({ ...row })),
                 // The Trade Goods table prints no Law Level. A stored 0 would read on the sheet as
                 // Law Level 0 and manufacture a smuggler's Sale DM the book never prints.
-                legality: null
+                legality: null,
+                // Core p.243's "illegal throughout the Imperium", which `legality` cannot state.
+                illegal: goods.illegal === true
             }
         };
         // `destination`, `dueDay` and `farePerTon` are left at their defaults: having no destination
@@ -957,15 +1000,20 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
      * percentage of base it went at, and the hold it arrived in or left, which is where a lot too big
      * for the hull becomes visible to the whole table rather than only to whoever pressed the button.
      */
-    async #postLot({ goods, tons, percent, base, total, sold }) {
+    async #postLot({ goods, tons, percent, base, total, fee, rate, settled, sold }) {
         const hold = this.#ship.system.cargo;
         const content = await foundry.applications.handlebars.renderTemplate(
             "systems/mgt2/templates/chat/trade-lot.html", {
                 title: sold ? "MGT2.Trade.Card.Sold" : "MGT2.Trade.Card.Bought",
                 where: game.i18n.format("MGT2.Trade.At", { world: this.#marketName(), goods }),
-                goods, tons, percent,
+                goods, tons, percent, rate,
                 base: MGT2Helper.credits(base),
                 credits: MGT2Helper.credits(total),
+                // Named on the card because the split screen posted the sum that MOVED and this is
+                // the line that explains why it is not the price.
+                fee: fee ? MGT2Helper.credits(fee) : null,
+                settled: MGT2Helper.credits(settled),
+                sold,
                 ship: this.#ship.name,
                 used: hold.used, capacity: hold.capacity, over: hold.over === true
             });

@@ -8,12 +8,24 @@
 		</div>
 
 		<div class="meta play-only">
+			{{#if world.location.line}}<span data-tooltip-text="{{world.location.hint}}">{{world.location.line}}</span>{{/if}}
 			<span>{{localize system.starport.label}}</span>
 			{{#each world.bases.on as |base|}}<span>{{localize base.label}}</span>{{/each}}
 			{{#if system.gasGiants}}<span>{{localize 'MGT2.Actor.world.GasGiantsN' n=system.gasGiants}}</span>{{/if}}
 		</div>
 
+		{{! The sector by NAME and the hex INSIDE it — the pair the books print, and the pair a referee
+		    can type for a map of their own. A sector the registry does not carry costs the absolute
+		    coordinate and nothing else, so neither field is a picker. }}
 		<div class="meta edit-only">
+			<label class="wide">
+				<span class="lbl">{{systemFields.sector.label}}</span>
+				{{formInput systemFields.sector name="system.sector" value=system.sector classes="f" placeholder=(localize 'MGT2.Actor.world.SectorPlaceholder')}}
+			</label>
+			<label>
+				<span class="lbl">{{systemFields.hex.label}}</span>
+				{{formInput systemFields.hex name="system.hex" value=system.hex classes="f hex" placeholder="0605"}}
+			</label>
 			<label>
 				<span class="lbl">{{systemFields.zone.label}}</span>
 				{{formInput systemFields.zone name="system.zone" value=system.zone localize=true classes="f"}}
@@ -61,6 +73,12 @@
 	</div>
 
 	<dl class="statline" data-derived="system">
+		{{! The absolute coordinate is not printed: it is the frame, not the reading. It rides the
+		    tooltip, which is also where an unplaceable location says so. }}
+		<div class="stat{{#unless world.location.line}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.world.Location'}}</dt>
+			<dd class="word" data-tooltip-text="{{world.location.hint}}">{{#if world.location.line}}{{world.location.line}}{{else}}&mdash;{{/if}}</dd>
+		</div>
 		<div class="stat lead{{#unless world.ledger.publishedCount}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.world.TradeCodes'}}</dt>
 			<dd class="word">{{#if world.ledger.publishedCount}}{{world.ledger.publishedLine}}{{else}}&mdash;{{/if}}</dd>
