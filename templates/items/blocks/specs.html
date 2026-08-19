@@ -101,6 +101,10 @@
 		{{#if system.powered}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Powered'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
 		{{/if}}
+		{{! A null test and not a truthy one: Computer/0 is a rating and prints as one. }}
+		{{#unless (eq system.processing null)}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.processingUsed}}<span class="u">/ {{system.processing}}</span></b></li>
+		{{/unless}}
 		{{/if}}
 
 		{{#if (eq item.type "computer")}}
@@ -133,9 +137,10 @@
 		{{#if system.augment.protection}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Protection'}}</span><b>{{system.augment.protection}}</b></li>
 		{{/if}}
-		{{#if system.augment.processing}}
+		{{! A null test and not a truthy one: Computer/0 is a rating and prints as one. }}
+		{{#unless (eq system.augment.processing null)}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.augment.processing}}</b></li>
-		{{/if}}
+		{{/unless}}
 		{{/if}}
 
 		{{#if (eq system.subType "software")}}
@@ -328,6 +333,10 @@
 		<label class="check">
 			{{formInput systemFields.powered name="system.powered" value=system.powered}}
 			<span>{{localize 'MGT2.Items.Powered'}}</span>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Processing'}}</span>
+			{{formInput systemFields.processing name="system.processing" value=system.processing classes="f num"}}
 		</label>
 		{{/if}}
 

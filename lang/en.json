@@ -4675,14 +4675,16 @@
       "radiation": {
         "FIELDS": {
           "rads": {
-            "label": "Dose"
+            "label": "Dose",
+            "hint": "Rads per entry: a number, or dice such as 2D or 2D×20."
           },
           "shielded": {
             "label": "Absorbed by the region",
             "hint": "Rads stopped before the Traveller's own Rad score is deducted."
           }
         }
-      }
+      },
+      "BadDose": "“{dose}” is not a dose this region can roll — no radiation was applied."
     },
     "GravityBands": {
       "micro": "Micro-gravity",

@@ -369,7 +369,9 @@ export class RobotData extends ActorBaseData {
         const hits = characteristics.hits;
         const live = (hits.max > 0) && this.damageChain.includes("hits");
         return {
-            ...super.damageStatesFor(characteristics),
+            // Never unconscious and never dead; false rather than absent clears a stale icon.
+            unconscious: false,
+            dead: false,
             wrecked: live && (hits.damage >= hits.max),
             destroyed: live && (hits.damage >= (2 * hits.max)),
             // RH folio 106: "Robots reduced to INT 0 are inoperable" — reduced, so a grade that

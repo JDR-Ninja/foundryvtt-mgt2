@@ -1,6 +1,8 @@
 <td class="r">
 	<div class="acts">
-		{{#if equip}}<a class="{{#if toggle}}on{{/if}}" data-action="itemEquip" data-tooltip="{{localize 'MGT2.Actor.EquipUnequip'}}"><i class="fa-solid fa-shield-halved"></i></a>{{/if}}
+		{{! The row's own schema decides, not the caller: a type that declares no `equipped` would
+		    write a key `DataField#clean` prunes, so the shield never lights and never errors. }}
+		{{#if canEquip}}<a class="{{#if toggle}}on{{/if}}" data-action="itemEquip" data-tooltip="{{localize 'MGT2.Actor.EquipUnequip'}}"><i class="fa-solid fa-shield-halved"></i></a>{{/if}}
 		{{#if store}}<a data-action="itemStorageIn" data-tooltip="{{localize 'MGT2.Actor.StoreItem'}}"><i class="fa-solid fa-inbox-in"></i></a>{{/if}}
 		{{#if unstore}}<a data-action="itemStorageOut" data-tooltip="{{localize 'MGT2.Actor.UnstoreItem'}}"><i class="fa-solid fa-inbox-out"></i></a>{{/if}}
 		{{#if eject}}<a data-action="softwareEject" data-tooltip="{{localize 'MGT2.Actor.UnloadSoftware'}}"><i class="fa-solid fa-eject"></i></a>{{/if}}

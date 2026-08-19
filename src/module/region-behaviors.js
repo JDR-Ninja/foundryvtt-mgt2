@@ -17,7 +17,7 @@ const EVENTS = CONST.REGION_EVENTS;
 /** A hazard row, rolled and taken through the pipeline. */
 async function applyHazard(actor, formula, label, note = "") {
     const expression = MGT2Helper.damageFormula(formula);
-    if ( !expression ) return;
+    if ( !expression || !Roll.validate(expression) ) return;
     const roll = await new Roll(expression).roll();
     if ( roll.total <= 0 ) return;
 
@@ -133,9 +133,10 @@ export class TemperatureBehaviorData extends RegionBehaviorType {
     protects(actor) {
         if ( this.protectedBy.size === 0 ) return false;
         const named = new Set([...this.protectedBy].map(gear => gear.toLowerCase()));
-        // Only `armor` declares `equipped`; anything else counts as soon as it is on the sheet.
+        // Core p.82: a Traveller is protected by what they are wearing, never by what is in their
+        // pack. `=== true` is also the type test — the skill and the suit share a name.
         return actor.items.some(item =>
-            named.has(item.name.trim().toLowerCase()) && (item.system.equipped !== false));
+            named.has(item.name.trim().toLowerCase()) && (item.system.equipped === true));
     }
 
     static async #onTokenRoundStart(event) {
@@ -253,22 +254,34 @@ export class RadiationBehaviorData extends RegionBehaviorType {
         if ( !actor?.isOwner || !this.rads ) return;
         if ( typeof actor.system.applyRadiation !== "function" ) return;
 
-        const resumeMovement = movement ? token.pauseMovement() : undefined;
-        const roll = await new Roll(RadiationBehaviorData.#doseFormula(this.rads)).roll();
-        // The region absorbs first; folio 100's armour Rad score comes off inside
-        // `resolveExposure`, which is also where the two columns of folio 81 are read.
-        const dose = roll.total - this.shielded;
-        if ( dose > 0 ) await ChatHelper.resolveExposure(actor, { dose, roll });
-        else {
-            await ChatHelper.postRadiation(actor, game.i18n.format("MGT2.Region.Shielded",
-                { rads: roll.total, shielded: this.shielded }), roll);
+        // ⚠ Validated before the token is paused: `pauseMovement` holds the move until its resume
+        // runs, and a throw between the two leaves the token stopped until the page reloads.
+        const formula = RadiationBehaviorData.#doseFormula(this.rads);
+        if ( !Roll.validate(formula) ) {
+            return void ui.notifications.warn(
+                game.i18n.format("MGT2.Region.BadDose", { dose: this.rads }));
         }
-        await resumeMovement?.();
+
+        const resumeMovement = movement ? token.pauseMovement() : undefined;
+        try {
+            const roll = await new Roll(formula).roll();
+            // The region absorbs first; folio 100's armour Rad score comes off inside
+            // `resolveExposure`, which is also where the two columns of folio 81 are read.
+            const dose = roll.total - this.shielded;
+            if ( dose > 0 ) await ChatHelper.resolveExposure(actor, { dose, roll });
+            else {
+                await ChatHelper.postRadiation(actor, game.i18n.format("MGT2.Region.Shielded",
+                    { rads: roll.total, shielded: this.shielded }), roll);
+            }
+        }
+        finally {
+            await resumeMovement?.();
+        }
     }
 
     /** The books print a dose as `2D×20`, and Foundry's parser only knows the ASCII operator. */
     static #doseFormula(rads) {
-        return MGT2Helper.damageFormula(rads).replace(/[×x]/gi, "*");
+        return MGT2Helper.damageFormula(String(rads ?? "").replace(/(?<=[0-9Dd])\s*[×xX]\s*(?=\d)/g, "*"));
     }
 
     static events = {

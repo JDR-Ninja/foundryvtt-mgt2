@@ -101,7 +101,6 @@ export class CharacterData extends ActorBaseData {
                 // `credits` IS the cash on hand: what mustering out banks into, a medical bill is
                 // paid from and a creation event's cash grant raises.
                 credits: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
-                cashOnHand: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
                 debt: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
                 livingCost: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
                 // What THIS Traveller pays towards a hull the crew owns collectively (Core p.155).
@@ -448,8 +447,8 @@ export class CharacterData extends ActorBaseData {
      * host cannot run keeps its `computerId` and is marked rather than refused.
      */
     #prepareComputers() {
-        // A host is a `computer` Item or a fitted augment carrying Processing — Core p.107's wafer
-        // jack is both — and `computerId` is a bare Item id that never required one type.
+        // A host is a `computer` Item, worn armour rated Computer/N, or a fitted augment carrying
+        // Processing; `computerId` is a bare Item id that never required one type.
         const hosts = new Map();
         const running = new Map();
         for (const item of this.parent.items) {

@@ -3569,14 +3569,16 @@
       "radiation": {
         "FIELDS": {
           "rads": {
-            "label": "Dose"
+            "label": "Dose",
+            "hint": "Rads par entrée : un nombre, ou des dés comme 2D ou 2D×20."
           },
           "shielded": {
             "label": "Absorbé par la région",
             "hint": "Rads arrêtés avant la déduction du score de Rad du voyageur."
           }
         }
-      }
+      },
+      "BadDose": "« {dose} » n’est pas une dose que cette région peut lancer — aucune irradiation n’a été appliquée."
     },
     "GravityBands": {
       "micro": "Micro-gravité",

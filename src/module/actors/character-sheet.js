@@ -875,7 +875,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
     // Core p.82: a failed operation costs the patient points, and that is damage — so it goes
     // through the chain, where the unconscious threshold and death are waiting for it.
-    await system.applyDamage(outcome.points, { raw: true });
+    await this.actor.system.applyDamage(outcome.points, { raw: true });
     return ChatHelper.postRecovery(this.actor, "MGT2.Recovery.Surgery",
       game.i18n.format("MGT2.Recovery.Costs", { points: outcome.points }));
   }
@@ -887,8 +887,10 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       { enduranceDM: system.enduranceDM, augment: system.augmentTL });
     if ( !result ) return;
 
-    const distribution = system.spreadEvenly(system.medicalCarePoints(result.medic));
-    const healed = await system.applyHeal(distribution);
+    // Re-read after the dialog: an update replaces `actor.system` with a fresh instance.
+    const live = this.actor.system;
+    const distribution = live.spreadEvenly(live.medicalCarePoints(result.medic));
+    const healed = await live.applyHeal(distribution);
     return ChatHelper.postRecovery(this.actor, "MGT2.Recovery.MedicalCare",
       ChatHelper.restoredMessage(healed, distribution));
   }
@@ -900,13 +902,14 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const points = roll.total;
 
     let message;
+    const live = this.actor.system;
     if ( points < 0 ) {
-      await system.applyDamage(-points, { raw: true });
+      await live.applyDamage(-points, { raw: true });
       message = game.i18n.format("MGT2.Recovery.Costs", { points: -points });
     } else {
       // The rule divides nothing here, so this takes the chain's own backwards heal.
-      const healed = Math.min(points, system.life.damage);
-      await system.applyDamage(-points, { raw: true });
+      const healed = Math.min(points, live.life.damage);
+      await live.applyDamage(-points, { raw: true });
       message = ChatHelper.restoredMessage(healed, {});
     }
     return ChatHelper.postRecovery(this.actor, "MGT2.Recovery.NaturalHealing", message, roll);
@@ -928,7 +931,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const awake = roll.total >= MGT2Helper.getEffectTarget(null).value;
 
     await this.actor.update({ system: { states: awake
-      ? { reviveFailures: 0, consciousWound: system.life.damage }
+      ? { reviveFailures: 0, consciousWound: this.actor.system.life.damage }
       : { reviveFailures: failures + 1 } } });
 
     return ChatHelper.postRecovery(this.actor, "MGT2.Recovery.Revive",
@@ -980,7 +983,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     }
     if (!Object.keys(changes).length && !cost) return;
 
-    const log = system.characteristicLog.map(entry => ({ ...entry }));
+    const live = this.actor.system;
+    const log = live.characteristicLog.map(entry => ({ ...entry }));
     log.push({
       source: result.source,
       term: MGT2Helper.hasValue(result, "term") ? MGT2Helper.getIntegerFromInput(result.term) : null,
@@ -992,9 +996,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const update = { "system.characteristicLog": log };
     // Folio 52: what the Traveller cannot pay becomes debt carried into play.
     if (result.billed && (cost > 0)) {
-      const paid = Math.min(system.finance.credits, cost);
-      update["system.finance.credits"] = system.finance.credits - paid;
-      update["system.finance.debt"] = system.finance.debt + (cost - paid);
+      const paid = Math.min(live.finance.credits, cost);
+      update["system.finance.credits"] = live.finance.credits - paid;
+      update["system.finance.debt"] = live.finance.debt + (cost - paid);
     }
     return this.actor.update(update);
   }
@@ -1587,7 +1591,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     }
 
     // Core folio 79: the fire mode decides what Auto does beyond forfeiting the aim.
-    const auto = MGT2Helper.traitScore(rollOptions.weapon?.system.traits, "auto");
+    const auto = MGT2Helper.traitScore(
+      rollOptions.weapon?.system.effective?.traits ?? rollOptions.weapon?.system.traits, "auto");
     const fireMode = (auto > 0) ? (MGT2.FireModes[userRollData.fireMode] ?? {}) : {};
     const attacks = fireMode.attacks ? auto : 1;
     const burst = fireMode.damage ? auto : 0;
@@ -1658,7 +1663,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       const flags = { mgt2: {} };
 
       if (rollOptions.damageFormula !== null && rollOptions.damageFormula !== "") {
-        const traits = carriesEffect ? itemObj.system.traits : [];
+        // The round in it and not the weapon's own line, as the formula above already is.
+        const traits = carriesEffect
+          ? (itemObj.system.effective?.traits ?? itemObj.system.traits) : [];
         flags.mgt2.damage = {
           formula: rollOptions.damageFormula,
           rollObjectName: rollOptions.rollObjectName,
@@ -1914,6 +1921,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
 
     // Simple drop — a species included: `SpeciesData`'s own hooks own the link.
     if (this.constructor.DROP_ITEM_SIMPLE.has(sourceItemData.type)) {
+      // A move, not a copy: `stripIds` would leave the duplicate unrecognisable downstream.
+      if (this.actor.items.has(sourceItemData.id)) return false;
       await this.actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(sourceItemData)]);
       return true;
     }

@@ -521,7 +521,7 @@ export class ChatHelper {
         // The procedure was carried out the moment it was confirmed, whatever the referee then
         // chose to place — so that is what spends the one attempt the rule allows.
         const extra = spendFirstAid ? { states: { firstAidUsed: true } } : {};
-        const healed = await system.applyHeal(distribution, extra);
+        const healed = await actor.system.applyHeal(distribution, extra);
         return ChatHelper.postRecovery(actor, procedure, ChatHelper.restoredMessage(healed, distribution));
     }
 

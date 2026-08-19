@@ -179,9 +179,10 @@ export class EquipmentData extends PhysicalItemData {
             // Core p.107: subdermal armour "stacks with other protection" — additive over worn armour.
             protection: new fields.NumberField({ required: false, initial: 0, integer: true, min: 0 }),
             // Core p.110 glosses `Computer/N` as the Processing score, so this is the same scale as
-            // `ComputerData.processing` and is spent as one: a fitted augment stating a figure here
-            // is a host `MGT2Helper.runsSoftware` accepts.
-            processing: new fields.NumberField({ required: false, initial: 0, integer: true, min: 0 })
+            // `ComputerData.processing` and is spent as one. `null` is no computer, `0` is
+            // Computer/0 — Core p.106 prints a Neural Comm at that rating and it runs Interface.
+            processing: new fields.NumberField({
+                required: false, nullable: true, initial: null, integer: true, min: 0 })
         });
 
         schema.subType.initial = "equipment"; // augment, clothing, trinket, toolkit, equipment
@@ -930,6 +931,7 @@ export class ArmorData extends PhysicalItemData {
 
     prepareDerivedData() {
         this.traitMap = buildTraitMap(this.options);
+        this.processingUsed = 0;
     }
 
     static defineSchema() {
@@ -937,6 +939,10 @@ export class ArmorData extends PhysicalItemData {
         schema.equipped = new fields.BooleanField({ required: false, initial: false });
         schema.radiations = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
         schema.protection = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
+        // Core p.102's battle dress carries a Computer/2 and p.104's Computer Weave adds a
+        // Computer/0: `null` is no computer system, `0` is Computer/0, and the two are a rung apart.
+        schema.processing = new fields.NumberField({
+            required: false, nullable: true, initial: null, min: 0, integer: true });
 
         // DM-1 to every check per missing level of the required skill; not having the skill at all
         // inflicts the usual DM-3 unskilled penalty instead.

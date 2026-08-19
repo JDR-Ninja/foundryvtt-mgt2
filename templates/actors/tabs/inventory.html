@@ -29,7 +29,7 @@
 						<td class="c">{{weapon.range}}</td>
 						<td class="c num">{{weapon.system.damage}}</td>
 						<td class="r num">{{weapon.weight}}</td>
-						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=weapon.toggleClass store=true edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
+						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=weapon.canEquip toggle=weapon.toggleClass store=true edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
 					</tr>
 					{{/each}}
 				</tbody>
@@ -56,16 +56,19 @@
 					</tr>
 				</thead>
 				<tbody>
+					{{! Core p.102: battle dress carries an on-board computer, so worn armour rated
+					    Computer/N accepts a software drop and prints its load like any other host. }}
 					{{#each armors as |armor|}}
-					<tr class="drag-item-list" data-item-id="{{armor._id}}">
+					<tr class="drag-item-list{{#if armor.hostsSoftware}} drop-item-list{{/if}}" data-item-id="{{armor._id}}">
 						<td>
 							<button type="button" class="roll" data-action="roll" data-roll="item" data-item-id="{{armor._id}}">{{armor.name}}</button>
 							{{#if armor.subInfo}}<span class="sub">{{armor.subInfo}}</span>{{/if}}
+							{{#if armor.hostsSoftware}}<span class="sub {{armor.overloadClass}}">{{armor.system.processingUsed}}/{{armor.system.processing}}{{#if armor.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if armor.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if armor.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=armor.system.blockedSoftware}}"></i>{{/if}}</span>{{/if}}
 						</td>
 						{{#if (rule 'radiation')}}<td class="c num">{{armor.system.radiations}}</td>{{/if}}
 						<td class="c num">{{armor.system.protection}}</td>
 						<td class="r num">{{armor.weight}}</td>
-						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=armor.toggleClass store=true edit="MGT2.Actor.EditArmor" del="MGT2.Actor.DeleteArmor"}}
+						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=armor.canEquip toggle=armor.toggleClass store=true edit="MGT2.Actor.EditArmor" del="MGT2.Actor.DeleteArmor"}}
 					</tr>
 					{{/each}}
 				</tbody>
@@ -97,7 +100,7 @@
 						<td>{{augment.system.improvement}}
 							{{#if augment.hostsSoftware}}<span class="sub {{augment.overloadClass}}">{{augment.system.processingUsed}}/{{augment.system.augment.processing}}{{#if augment.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if augment.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if augment.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=augment.system.blockedSoftware}}"></i>{{/if}}</span>{{/if}}
 						</td>
-						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=augment.toggleClass store=true edit="MGT2.Actor.EditAugment" del="MGT2.Actor.DeleteAugment"}}
+						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=augment.canEquip toggle=augment.toggleClass store=true edit="MGT2.Actor.EditAugment" del="MGT2.Actor.DeleteAugment"}}
 					</tr>
 					{{#each augment.subItems as |subItem|}}
 					<tr class="drag-item-list" data-item-id="{{subItem._id}}">
@@ -137,7 +140,7 @@
 						</td>
 						<td class="c num {{computer.overloadClass}}">{{computer.system.processingUsed}}/{{computer.system.processing}}{{#if computer.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if computer.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if computer.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=computer.system.blockedSoftware}}"></i>{{/if}}</td>
 						<td class="r num">{{computer.weight}}</td>
-						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=computer.toggleClass store=true edit="MGT2.Actor.EditComputer" del="MGT2.Actor.DeleteComputer"}}
+						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=computer.canEquip toggle=computer.toggleClass store=true edit="MGT2.Actor.EditComputer" del="MGT2.Actor.DeleteComputer"}}
 					</tr>
 					{{#each computer.subItems as |subItem|}}
 					<tr class="drag-item-list" data-item-id="{{subItem._id}}">
@@ -192,7 +195,7 @@
 						<td>{{equipment.name}}</td>
 						<td class="c num">{{equipment.system.quantity}}</td>
 						<td class="r num">{{equipment.weight}}</td>
-						{{> systems/mgt2/templates/actors/parts/row-controls.html equip=true toggle=equipment.toggleClass store=true edit="MGT2.Actor.EditEquipment" del="MGT2.Actor.DeleteEquipment"}}
+						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=equipment.canEquip toggle=equipment.toggleClass store=true edit="MGT2.Actor.EditEquipment" del="MGT2.Actor.DeleteEquipment"}}
 					</tr>
 					{{/each}}
 				</tbody>

@@ -11,7 +11,7 @@ const NPC_CHAIN_FIXED = ["endurance", "strength", "dexterity"];
 const MIGRATIONS = [
   {
     version: "0.2.0",
-    label: "damageOrder, protection, view state, crew duty, NPC damage chain, species unwind, species link, ucp, durationUnit, career damage/interval, world geometry, training programmes",
+    label: "damageOrder, protection, view state, crew duty, NPC damage chain, species unwind, species link, ucp, durationUnit, career damage/interval, world geometry, training programmes, augment Computer/0",
     async migrate() {
       // Before the sweep: it rewrites `characteristics.<k>.base`, which the sweep then persists.
       for ( const actor of game.actors ) await unwindSpecies(actor);
@@ -235,6 +235,13 @@ function collectItemUpdate(item) {
   if ( (item.type === "computer") && (("processingUsed" in source) || ("overload" in source)) ) {
     update["system.processingUsed"] = new foundry.data.operators.ForcedDeletion();
     update["system.overload"] = new foundry.data.operators.ForcedDeletion();
+    dirty = true;
+  }
+  // `augment.processing` became nullable: `0` used to mean "not a computer" and now means
+  // Computer/0, so a stored zero would turn every fitted augment into a software host.
+  if ( (item.type === "equipment") && (source.subType === "augment")
+    && (source.augment?.processing === 0) ) {
+    update["system.augment.processing"] = null;
     dirty = true;
   }
   // `MGT2.Durations` had a French key name in the English dictionary, and `durationUnit` stores

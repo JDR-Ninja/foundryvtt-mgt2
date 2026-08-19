@@ -59,7 +59,10 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         header: { template: `${PARTS_PATH}/header.html` },
         rail: {
             template: `${PARTS_PATH}/rail.html`,
-            templates: ["systems/mgt2/templates/actors/spacecraft/budget.html"],
+            // ⚠ A partial a part includes must be listed here too: the mixin loads `template` and
+            // `templates` and does not walk nested `{{> …}}`, so an omission throws only on open.
+            templates: ["systems/mgt2/templates/actors/spacecraft/budget.html",
+                "systems/mgt2/templates/actors/spacecraft/budget-rows.html"],
             scrollable: [""]
         },
         panel: {

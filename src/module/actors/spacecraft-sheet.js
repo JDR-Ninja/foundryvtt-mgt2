@@ -1107,8 +1107,11 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         const wanted = String(dutyTarget ?? "").trim();
         if (!wanted) return null;
         const index = Number(wanted);
-        const row = Number.isInteger(index) ? rows.rows[index]
-            : rows.rows.find(entry => entry.label.trim().toLowerCase() === wanted.toLowerCase());
+        // The hardpoint budget prints `Mount 1` for the first mount, so a typed number is 1-based.
+        const named = entry => (entry.label
+            || game.i18n.format("MGT2.Actor.spacecraft.MountN", { n: entry.index + 1 })).trim().toLowerCase();
+        const row = Number.isInteger(index) ? rows.rows[index - 1]
+            : rows.rows.find(entry => named(entry) === wanted.toLowerCase());
         if (!row?.weapons.length) return null;
         return { ...row, weapon: row.weapons[0] };
     }

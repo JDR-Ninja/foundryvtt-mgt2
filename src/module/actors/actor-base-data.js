@@ -423,7 +423,13 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     }
 
     prepareEncumbrance() {
-        const normal = this.constructor.ENCUMBRANCE_LINKS
+        const links = this.constructor.ENCUMBRANCE_LINKS;
+        // No links is a sub-type the rule does not reach; false rather than absent clears the icon.
+        if (!links.length) {
+            this.states.encumbrance = false;
+            return;
+        }
+        const normal = links
             .reduce((sum, key) => sum + (this.characteristics[key]?.value ?? 0), this.encumbranceSkillBonus);
         this.inventory.encumbrance = { normal, heavy: normal * 2 };
         // Gating the flag is what keeps the DM-2 below, the header tick and the token icon together.

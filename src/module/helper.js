@@ -10,14 +10,6 @@ const TRAIT_STATUS = {
 
 export class MGT2Helper {
 
-    static decimalSeparator;
-    static badDecimalSeparator;
-
-    static {
-        this.decimalSeparator = Number(1.1).toLocaleString().charAt(1);
-        this.badDecimalSeparator = (this.decimalSeparator === "." ? "," : ".");
-    }
-
     /** Substitute `{0}`, `{1}`… placeholders. The indexed form is persisted in chat message flags. */
     static format(template, ...values) {
         return values.reduce((text, value, i) => text.replaceAll(`{${i}}`, String(value)), template);
@@ -76,8 +68,11 @@ export class MGT2Helper {
      * `3D3`; Foundry's parser reads none of the three.
      */
     static damageFormula(formula) {
+        // ⚠ Anchored against letters on both sides, or the `d` of a word is read as a die and prose
+        // becomes an expression: "200 rads" once normalised to "200 ra1d6s".
         return String(formula ?? "")
-            .replace(/(\d*)[dD]{1,2}(3|6)?(?!\d)/g, (_m, n, faces) => `${n === "" ? 1 : n}d${faces ?? 6}`);
+            .replace(/(?<![A-Za-z])(\d*)[dD]{1,2}(3|6)?(?![A-Za-z\d])/g,
+                (_m, n, faces) => `${n === "" ? 1 : n}d${faces ?? 6}`);
     }
 
     /** Core p.78: the doubled D of `3DD` is the Destructive trait, written into the damage score. */
@@ -223,15 +218,20 @@ export class MGT2Helper {
      */
     static runsSoftware(item) {
         if (item?.type === "computer") return true;
+        // Worn, not carried: a suit in the locker runs nothing, as it protects against nothing.
+        if (item?.type === "armor") {
+            return (item.system?.equipped === true) && (item.system?.processing !== null);
+        }
         return (item?.type === "equipment") && (item.system?.subType === "augment")
             && (item.system?.equipped === true)
-            && ((+item.system?.augment?.processing || 0) > 0);
+            && (item.system?.augment?.processing !== null);
     }
 
     /** The Processing a host offers, wherever its own type happens to store it. */
     static processing(item) {
-        return ((item?.type === "computer")
-            ? item.system?.processing : item?.system?.augment?.processing) ?? 0;
+        if (item?.type === "computer") return item.system?.processing ?? 0;
+        if (item?.type === "armor") return item.system?.processing ?? 0;
+        return item?.system?.augment?.processing ?? 0;
     }
 
     /** Whether a skill Item's name already ends in its own speciality. */
@@ -364,7 +364,9 @@ export class MGT2Helper {
         if (data === undefined || data === null) return 0;
 
         if (typeof data === "string") {
-            const converted = Number(data.replace(/\s+/g, '').replace(this.badDecimalSeparator, this.decimalSeparator).trim());
+            // Every string reaching here is a distance, a quantity or a percentage, none of which is
+            // written with grouping — so a comma is always the decimal point, whatever the locale.
+            const converted = Number(data.replace(/\s+/g, "").replace(/,/g, "."));
             if (isNaN(converted))
                 return 0;
 

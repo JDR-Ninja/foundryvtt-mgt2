@@ -26,6 +26,9 @@ export class CraftData extends ActorBaseData {
     /** What this craft is called once its hull is gone — the subclass owns the word. */
     static WRECKED_LABEL = "";
 
+    /** Core p.98 weighs a Traveller; a hull's load is a tonnage budget. @inheritDoc */
+    static ENCUMBRANCE_LINKS = [];
+
     static defineSchema() {
         const schema = super.defineSchema();
         const severity = () => new fields.NumberField({
@@ -58,7 +61,10 @@ export class CraftData extends ActorBaseData {
     /** Core p.140, p.168: a hull at zero is wrecked and there is no state under it. @inheritDoc */
     damageStatesFor(characteristics) {
         const hull = characteristics.hull;
-        return { ...super.damageStatesFor(characteristics), wrecked: (hull.max > 0) && (hull.damage >= hull.max) };
+        // The base's pair is a person's: over a one-link chain `dead` would mean `wrecked` and skull
+        // the token. False rather than absent clears a stale icon.
+        return { unconscious: false, dead: false,
+            wrecked: (hull.max > 0) && (hull.damage >= hull.max) };
     }
 
     /** One word, and it is the craft's own. @inheritDoc */

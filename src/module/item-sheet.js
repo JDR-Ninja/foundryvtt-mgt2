@@ -155,7 +155,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   static #BLOCKS_BY_TYPE = {
     _default: ["specs", "carried", "effects", "description"],
     weapon: ["roll", "specs", "carried", "traits", "effects", "description"],
-    armor: ["specs", "carried", "traits", "effects", "description"],
+    // Battle dress carries a computer; `#composition` drops the block on armour that hosts nothing.
+    armor: ["specs", "carried", "traits", "effects", "description", "software"],
     talent: ["roll", "effects", "description"],
     "talent:psionic": ["roll", "specs", "effects", "description"],
     disease: ["hazard", "effects", "description"],

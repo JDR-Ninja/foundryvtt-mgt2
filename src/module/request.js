@@ -102,8 +102,10 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
             lines: new fields.ArrayField(new fields.SchemaField({
                 // What an answer's `flags.mgt2.request.line` points back at, minted by the Docket.
                 id: new fields.StringField({ required: true, blank: false, trim: true }),
+                // ⚠ Not `embedded: false`: an unlinked token's Actor uuid carries a Token segment,
+                // and the field would refuse every roster built from the canvas.
                 actor: new fields.DocumentUUIDField({
-                    type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
+                    type: "Actor", required: false, nullable: true, initial: null }),
                 // The name as it read at compose time: a line whose actor is not loaded degrades to
                 // this and never throws — the roster contract.
                 name: new fields.StringField({ required: false, blank: true, trim: true }),

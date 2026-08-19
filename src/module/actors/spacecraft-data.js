@@ -400,9 +400,10 @@ export class SpacecraftData extends CraftData {
         const ladder = MGT2.BridgeSizes;
         const index = ladder.findIndex(entry => this.hull.tons <= entry.maxTons);
         // Past the printed ladder the bridge grows by 20 tons per additional 100 000 tons.
-        if (index < 0) return 60 + (Math.ceil((this.hull.tons - 100000) / 100000) * 20);
-        const step = Math.max(0, index + (type?.step ?? 0));
-        return ladder[step].tons + (type?.addTons ?? 0);
+        const base = (index < 0)
+            ? 60 + (Math.ceil((this.hull.tons - 100000) / 100000) * 20)
+            : ladder[Math.max(0, index + (type?.step ?? 0))].tons;
+        return base + (type?.addTons ?? 0);
     }
 
     /**

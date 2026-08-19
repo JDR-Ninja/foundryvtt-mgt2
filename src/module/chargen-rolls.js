@@ -88,7 +88,8 @@ export const CreationRoll = {
             [record, record?.system.standingModifiers]];
         for ( const [source, entries] of sources ) {
             for ( const entry of entries ?? [] ) {
-                if ( check && entry.appliesTo.size && !entry.appliesTo.has(check) ) continue;
+                // No `check &&`: a check this call cannot name is not one a scoped entry reaches.
+                if ( entry.appliesTo.size && !entry.appliesTo.has(check) ) continue;
                 if ( entry.career && career && (entry.career !== career) ) continue;
                 if ( !CreationRoll.gated(actor, entry.gate) ) continue;
                 const dm = entry.dm + (entry.per * CreationRoll.highestLevel(actor, entry.skills));
@@ -218,6 +219,6 @@ export const CreationOptions = {
     boon() {
         const picked = Rules.get("creationBoonDice");
         const count = { none: 0, two: 2, four: 4, all: Number.POSITIVE_INFINITY }[picked] ?? 0;
-        return { count, formula: "3dckh2" };
+        return { count, formula: "3d6kh2" };
     }
 };

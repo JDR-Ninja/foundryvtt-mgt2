@@ -83,7 +83,7 @@ export class ChargenTerm {
             const earns = (entry.survived !== false) && (kind ? kind.yieldsBenefit : true);
             if ( earns ) {
                 await credit(actor, "benefitRolls", { value: 1, career: record.id, term,
-                    note: game.i18n.localize("MGT2.Chargen.Term.BenefitTermServed") });
+                    note: game.i18n.localize("MGT2.Chargen.Term.BenefitTermServed") }, { once: true });
             }
             // `terms` is kept beside `termLog` and is what a record written before the log had
             //, so the loop keeps the two agreeing rather than leaving one stale.
@@ -790,7 +790,7 @@ async function skill(view) {
     // The term's own roll, credited here where no basic-training step claimed it.
     if ( !logEntry(record, term).outcomes.has("basicTraining") ) {
         await credit(actor, "skillRolls", { value: 1, career: record.id, term,
-            note: game.i18n.localize("MGT2.Chargen.Term.SkillTermRoll") });
+            note: game.i18n.localize("MGT2.Chargen.Term.SkillTermRoll") }, { once: true });
     }
     const available = Chargen.skillRolls(actor);
     if ( available <= 0 ) {
@@ -1408,10 +1408,14 @@ async function logTerm(record, term, patch) {
     return row;
 }
 
-/** One signed row of a counter ledger — a delta and never a total. */
-async function credit(actor, ledger, entry) {
+/**
+ * One signed row of a counter ledger — a delta and never a total.
+ * @param {boolean} [options.once]   Refuse a repeat row. Only the automatic once-per-term entries
+ *     want it: two skills bought in one term are two identical rows.
+ */
+async function credit(actor, ledger, entry, { once = false } = {}) {
     const rows = Chargen.read(actor)[ledger].map(row => ({ ...row }));
-    if ( rows.some(row => (row.career === entry.career) && (row.term === entry.term)
+    if ( once && rows.some(row => (row.career === entry.career) && (row.term === entry.term)
         && (row.note === entry.note) && (row.value === entry.value)) ) return actor;
     rows.push(entry);
     return Chargen.update(actor, { [ledger]: rows });
