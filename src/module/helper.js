@@ -229,21 +229,19 @@ export class MGT2Helper {
         if (item?.type === "armor") {
             return (item.system?.equipped === true) && (item.system?.processing !== null);
         }
-        return (item?.type === "equipment") && (item.system?.subType === "augment")
-            && (item.system?.equipped === true)
-            && (item.system?.augment?.processing !== null);
+        if (item?.type !== "equipment") return false;
+        // An augment in a med-kit is in nobody's skull; a comm is carried, the way a computer is.
+        return ((item.system?.processing ?? null) !== null)
+            && ((item.system.subType !== "augment") || (item.system.equipped === true));
     }
 
-    /** The Processing a host offers, wherever its own type happens to store it. */
+    /** The Processing a host offers. */
     static processing(item) {
-        if (item?.type === "computer") return item.system?.processing ?? 0;
-        if (item?.type === "armor") return item.system?.processing ?? 0;
-        return item?.system?.augment?.processing ?? 0;
+        return item?.system?.processing ?? 0;
     }
 
-    /** Core p.112's specialised rating, read off the same three hosts as the Processing score. */
+    /** Core p.112's specialised rating, read off the same hosts as the Processing score. */
     static specialised(item) {
-        if (item?.type === "equipment") return item.system?.augment?.specialised;
         return item?.system?.specialised;
     }
 

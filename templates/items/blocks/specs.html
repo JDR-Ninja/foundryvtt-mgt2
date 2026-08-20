@@ -147,10 +147,10 @@
 		<li><span class="lbl">{{localize 'MGT2.Items.Protection'}}</span><b>{{system.augment.protection}}</b></li>
 		{{/if}}
 		{{! A null test and not a truthy one: Computer/0 is a rating and prints as one. }}
-		{{#unless (eq system.augment.processing null)}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.augment.processing}}</b></li>
-		{{#if system.augment.specialised.bonus}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Specialised'}}</span><b class="word">{{system.augment.specialised.software}} {{showDM system.augment.specialised.bonus}}</b></li>
+		{{#unless (eq system.processing null)}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.processingUsed}}<span class="u">/ {{system.processingCap}}</span></b></li>
+		{{#if system.specialised.bonus}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Specialised'}}</span><b class="word">{{system.specialised.software}} {{showDM system.specialised.bonus}}</b></li>
 		{{/if}}
 		{{/unless}}
 		{{/if}}
@@ -411,6 +411,11 @@
 			<span class="lbl">{{localize 'MGT2.Items.Improvement'}}</span>
 			{{formInput systemFields.augment.fields.improvement name="system.augment.improvement" value=system.augment.improvement classes="f"}}
 		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Processing'}}</span>
+			{{formInput systemFields.processing name="system.processing" value=system.processing classes="f num"}}
+		</label>
+		{{> systems/mgt2/templates/items/parts/specialised.html f=systemFields.specialised v=system.specialised path="system.specialised"}}
 		{{/if}}
 
 		{{! Core p.106's IMPROVEMENTS cell in the three kinds the system can compute. The printed cell
@@ -428,11 +433,6 @@
 			<span class="lbl">{{localize 'MGT2.Items.Protection'}}</span>
 			{{formInput systemFields.augment.fields.protection name="system.augment.protection" value=system.augment.protection classes="f num"}}
 		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.Processing'}}</span>
-			{{formInput systemFields.augment.fields.processing name="system.augment.processing" value=system.augment.processing classes="f num"}}
-		</label>
-		{{> systems/mgt2/templates/items/parts/specialised.html f=systemFields.augment.fields.specialised v=system.augment.specialised path="system.augment.specialised"}}
 		{{/if}}
 
 		{{#if (eq system.subType "software")}}

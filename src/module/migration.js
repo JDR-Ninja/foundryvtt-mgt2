@@ -175,11 +175,12 @@ function collectItemUpdate(item) {
     update["system.crewRole"] = item.system.crewRoleKey;
     dirty = true;
   }
-  // `augment.processing` became nullable: `0` used to mean "not a computer" and now means
-  // Computer/0, so a stored zero would turn every fitted augment into a software host.
+  // `processing` became nullable: `0` used to mean "not a computer" and now means Computer/0, so a
+  // stored zero would turn every fitted augment into a software host. It reads the LIFTED path —
+  // `EquipmentData.migrateData` has already moved it off `augment`, which `cleanData` then prunes.
   if ( (item.type === "equipment") && (source.subType === "augment")
-    && (source.augment?.processing === 0) ) {
-    update["system.augment.processing"] = null;
+    && (source.processing === 0) ) {
+    update["system.processing"] = null;
     dirty = true;
   }
   // `MGT2.Durations` had a French key name in the English dictionary, and `durationUnit` stores

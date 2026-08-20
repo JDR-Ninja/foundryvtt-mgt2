@@ -165,9 +165,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     "talent:psionic": ["roll", "specs", "effects", "description"],
     disease: ["hazard", "effects", "description"],
     computer: ["specs", "carried", "traits", "effects", "description", "software"],
-    // A wafer jack is a computer as much as an implant, so it lists what it runs; `#composition`
-    // drops the block again on an augment that hosts nothing.
-    "equipment:augment": ["specs", "carried", "effects", "description", "software"],
+    // A wafer jack is a computer as much as an implant, and so is a transceiver from TL10 up, so
+    // equipment lists what it runs; `#composition` drops the block on one that hosts nothing.
+    equipment: ["specs", "carried", "effects", "description", "software"],
     container: ["carried", "effects", "description", "contents"],
     // Both halves are listed and `#composition` drops the one this Item is not.
     career: ["specs", "career", "effects", "description", "careertables", "events"],

@@ -105,7 +105,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     },
     inventory: {
       template: `${PARTS_PATH}/tabs/inventory.html`,
-      templates: [`${PARTS_PATH}/parts/tabs-nav.html`, `${PARTS_PATH}/parts/row-controls.html`],
+      templates: [`${PARTS_PATH}/parts/tabs-nav.html`, `${PARTS_PATH}/parts/row-controls.html`,
+        `${PARTS_PATH}/parts/host-badge.html`, `${PARTS_PATH}/parts/host-software.html`],
       scrollable: ['.tab[data-group="inventory"].active']
     },
     relations: {

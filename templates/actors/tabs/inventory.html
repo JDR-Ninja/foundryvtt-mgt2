@@ -63,13 +63,20 @@
 						<td>
 							<button type="button" class="roll" data-action="roll" data-roll="item" data-item-id="{{armor._id}}">{{armor.name}}</button>
 							{{#if armor.subInfo}}<span class="sub">{{armor.subInfo}}</span>{{/if}}
-							{{#if armor.hostsSoftware}}<span class="sub {{armor.overloadClass}}">{{armor.system.processingUsed}}/{{armor.system.processingCap}}{{#if armor.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if armor.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if armor.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=armor.system.blockedSoftware}}"></i>{{/if}}</span>{{/if}}
+							{{> systems/mgt2/templates/actors/parts/host-badge.html host=armor}}
 						</td>
 						{{#if (rule 'radiation')}}<td class="c num">{{armor.system.radiations}}</td>{{/if}}
 						<td class="c num">{{armor.system.protection}}</td>
 						<td class="r num">{{armor.weight}}</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=armor.canEquip toggle=armor.toggleClass store=true edit="MGT2.Actor.EditArmor" del="MGT2.Actor.DeleteArmor"}}
 					</tr>
+					{{#each armor.subItems as |subItem|}}
+					{{#if (rule 'radiation')}}
+					{{> systems/mgt2/templates/actors/parts/host-software.html sub=subItem cols=4}}
+					{{else}}
+					{{> systems/mgt2/templates/actors/parts/host-software.html sub=subItem cols=3}}
+					{{/if}}
+					{{/each}}
 					{{/each}}
 				</tbody>
 			</table>
@@ -97,17 +104,13 @@
 					{{#each augments as |augment|}}
 					<tr class="drag-item-list{{#if augment.hostsSoftware}} drop-item-list{{/if}}" data-item-id="{{augment._id}}">
 						<td>{{augment.name}}</td>
-						<td>{{augment.system.improvement}}
-							{{#if augment.hostsSoftware}}<span class="sub {{augment.overloadClass}}">{{augment.system.processingUsed}}/{{augment.system.processingCap}}{{#if augment.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if augment.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if augment.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=augment.system.blockedSoftware}}"></i>{{/if}}</span>{{/if}}
+						<td>{{augment.system.augment.improvement}}
+							{{> systems/mgt2/templates/actors/parts/host-badge.html host=augment}}
 						</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=augment.canEquip toggle=augment.toggleClass store=true edit="MGT2.Actor.EditAugment" del="MGT2.Actor.DeleteAugment"}}
 					</tr>
 					{{#each augment.subItems as |subItem|}}
-					<tr class="drag-item-list" data-item-id="{{subItem._id}}">
-						<td><i class="fa-brands fa-usb"></i> {{subItem.name}}</td>
-						<td class="num"{{#if subItem.system.software.downgraded}} data-tooltip="{{localize 'MGT2.Items.SoftwareDowngraded'}}"{{/if}}>{{#if subItem.system.software.downgraded}}{{subItem.system.software.bandwidthRun}}/{{/if}}{{subItem.system.software.bandwidth}}{{#if subItem.system.software.tlBlocked}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.SoftwareBlocked'}}"></i>{{/if}}</td>
-						{{> systems/mgt2/templates/actors/parts/row-controls.html eject=true edit="MGT2.Actor.EditSoftware"}}
-					</tr>
+					{{> systems/mgt2/templates/actors/parts/host-software.html sub=subItem cols=2}}
 					{{/each}}
 					{{/each}}
 				</tbody>
@@ -193,13 +196,20 @@
 					</tr>
 				</thead>
 				<tbody>
+					{{! CSC p.64 rates every transceiver from TL10 up, so carried gear takes a software
+					    drop and prints its load exactly as a computer or a suit does. }}
 					{{#each equipments as |equipment|}}
-					<tr class="drag-item-list" data-item-id="{{equipment._id}}">
-						<td>{{equipment.name}}</td>
+					<tr class="drag-item-list{{#if equipment.hostsSoftware}} drop-item-list{{/if}}" data-item-id="{{equipment._id}}">
+						<td>{{equipment.name}}
+							{{> systems/mgt2/templates/actors/parts/host-badge.html host=equipment}}
+						</td>
 						<td class="c num">{{equipment.system.quantity}}</td>
 						<td class="r num">{{equipment.weight}}</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=equipment.canEquip toggle=equipment.toggleClass store=true edit="MGT2.Actor.EditEquipment" del="MGT2.Actor.DeleteEquipment"}}
 					</tr>
+					{{#each equipment.subItems as |subItem|}}
+					{{> systems/mgt2/templates/actors/parts/host-software.html sub=subItem cols=3}}
+					{{/each}}
 					{{/each}}
 				</tbody>
 			</table>

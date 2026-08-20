@@ -158,13 +158,23 @@ export class ItemData extends PhysicalItemData {
 
 export class EquipmentData extends PhysicalItemData {
 
+    /** The rating left `augment` once gear that is not one turned out to carry it. @inheritDoc */
+    static migrateData(source, options) {
+        for ( const key of ["processing", "specialised"] ) {
+            if ( (source.augment?.[key] !== undefined) && (source[key] === undefined) ) {
+                source[key] = source.augment[key];
+            }
+        }
+        return super.migrateData(source, options);
+    }
+
     /**
      * Reset for every equipment and not only an augment: the owning actor derives them, so a loose
      * Item has to read sanely without one.
      */
     prepareBaseData() {
         this.processingUsed = 0;
-        this.processingCap = this.augment.processing ?? 0;
+        this.processingCap = this.processing ?? 0;
         this.overload = false;
         this.overCrowded = false;
         this.blockedSoftware = 0;
@@ -192,14 +202,15 @@ export class EquipmentData extends PhysicalItemData {
                 value: new fields.NumberField({ required: false, initial: 0, integer: true })
             }),
             // Core p.107: subdermal armour "stacks with other protection" — additive over worn armour.
-            protection: new fields.NumberField({ required: false, initial: 0, integer: true, min: 0 }),
-            // Core p.110 glosses `Computer/N` as the Processing score, so this is the same scale as
-            // `ComputerData.processing` and is spent as one. `null` is no computer, `0` is
-            // Computer/0 — Core p.106 prints a Neural Comm at that rating and it runs Interface.
-            processing: new fields.NumberField({
-                required: false, nullable: true, initial: null, integer: true, min: 0 }),
-            specialised: createSpecialisedField()
+            protection: new fields.NumberField({ required: false, initial: 0, integer: true, min: 0 })
         });
+
+        // Core p.110 glosses `Computer/N` as the Processing score, the same scale `ComputerData`
+        // and `ArmorData` store: `null` is no computer, `0` is Computer/0. Not an augment field —
+        // CSC p.64 rates every transceiver from TL10 up, and Core p.109 the mobile comms.
+        schema.processing = new fields.NumberField({
+            required: false, nullable: true, initial: null, integer: true, min: 0 });
+        schema.specialised = createSpecialisedField();
 
         schema.subType.initial = "equipment"; // augment, clothing, trinket, toolkit, equipment
 

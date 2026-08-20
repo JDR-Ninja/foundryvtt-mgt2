@@ -1,0 +1,9 @@
+{{! One package loaded into a host, for the tables that have no column its Bandwidth belongs in: it
+    spans them and carries the figure the way a host carries its own. The computers table keeps its
+    own row, its Processing column being the one place the number lines up. }}
+<tr class="drag-item-list" data-item-id="{{sub._id}}">
+	<td colspan="{{cols}}"><i class="fa-brands fa-usb"></i> {{sub.name}}
+		<span class="sub"{{#if sub.system.software.downgraded}} data-tooltip="{{localize 'MGT2.Items.SoftwareDowngraded'}}"{{/if}}>{{#if sub.system.software.downgraded}}{{sub.system.software.bandwidthRun}}/{{/if}}{{sub.system.software.bandwidth}}{{#if sub.system.software.tlBlocked}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.SoftwareBlocked'}}"></i>{{/if}}</span>
+	</td>
+	{{> systems/mgt2/templates/actors/parts/row-controls.html eject=true edit="MGT2.Actor.EditSoftware"}}
+</tr>
