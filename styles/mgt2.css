@@ -7300,6 +7300,123 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
   flex-direction: column;
 }
 
+.mgt2.application.fleet-chart {
+  container-type: inline-size;
+  container-name: sheet;
+}
+.mgt2.application.fleet-chart > .window-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  height: 100%;
+  overflow: hidden;
+}
+.mgt2.application.fleet-chart > .window-content > [data-application-part=chart] {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mgt2 .mgt2-chart {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 21rem;
+  height: 100%;
+}
+.mgt2 .mgt2-chart .face {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 11px 16px 13px;
+}
+.mgt2 .mgt2-chart .top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+.mgt2 .mgt2-chart .top h2 {
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.mgt2 .mgt2-chart .top .of {
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .mgt2-chart .side {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  min-width: 0;
+  padding: 11px 14px 13px;
+  overflow: auto;
+  border-left: 1px solid var(--rule);
+}
+.mgt2 .mgt2-chart .order.places li {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.mgt2 .mgt2-chart .code {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent-text);
+}
+
+.mgt2 .mgt2-chart .plot {
+  width: 100%;
+  max-width: 34rem;
+  height: auto;
+  margin: 0 auto;
+}
+.mgt2 .mgt2-chart .plot .cell {
+  fill: transparent;
+  stroke: var(--rule-soft);
+  stroke-width: 0.75;
+}
+.mgt2 .mgt2-chart .plot .cell[data-action] {
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .mgt2-chart .plot .cell:hover {
+  fill: var(--hover);
+}
+.mgt2 .mgt2-chart .plot .cell.on {
+  fill: var(--accent-soft);
+}
+.mgt2 .mgt2-chart .plot .cell.me {
+  stroke: var(--accent-text);
+  stroke-width: 1.5;
+}
+.mgt2 .mgt2-chart .plot .tok {
+  fill: var(--fill);
+  pointer-events: none;
+}
+.mgt2 .mgt2-chart .plot .tok.me {
+  fill: var(--accent-text);
+}
+.mgt2 .mgt2-chart .plot .hub {
+  fill: var(--rule);
+  stroke: var(--rule);
+  pointer-events: none;
+}
+
+@container sheet (max-width: 720px) {
+  .mgt2 .mgt2-chart {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .mgt2 .mgt2-chart .side {
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+  }
+}
 @container sheet (max-width: 940px) {
   .mgt2.application.fleet-combat > .window-content {
     grid-template-columns: minmax(0, 1fr);

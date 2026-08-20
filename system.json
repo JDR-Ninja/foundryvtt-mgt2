@@ -169,6 +169,7 @@
 		"Combatant": {
 			"person": {},
 			"crew": {},
+			"missileSalvo": {},
 			"fleetShip": {},
 			"squadron": {},
 			"salvo": {}

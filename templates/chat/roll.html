@@ -40,6 +40,10 @@
 	{{#if extendedLine}}
 	<div class="cmsg">{{extendedLine}}</div>
 	{{/if}}
+	{{! Companion folio 53: the row a double 1 that also failed landed on, which the referee applies. }}
+	{{#if mishapLine}}
+	<div class="cmsg">{{mishapLine}}</div>
+	{{/if}}
 	{{#if rollMessage}}
 	<div class="cmsg{{#if opposedMessage}} jump{{/if}}"{{#if opposedMessage}} data-action="chainSource" data-message-id="{{opposedMessage}}"{{/if}}>{{rollMessage}}</div>
 	{{/if}}

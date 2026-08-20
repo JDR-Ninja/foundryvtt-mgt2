@@ -63,7 +63,7 @@
 						<td>
 							<button type="button" class="roll" data-action="roll" data-roll="item" data-item-id="{{armor._id}}">{{armor.name}}</button>
 							{{#if armor.subInfo}}<span class="sub">{{armor.subInfo}}</span>{{/if}}
-							{{#if armor.hostsSoftware}}<span class="sub {{armor.overloadClass}}">{{armor.system.processingUsed}}/{{armor.system.processing}}{{#if armor.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if armor.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if armor.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=armor.system.blockedSoftware}}"></i>{{/if}}</span>{{/if}}
+							{{#if armor.hostsSoftware}}<span class="sub {{armor.overloadClass}}">{{armor.system.processingUsed}}/{{armor.system.processingCap}}{{#if armor.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if armor.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if armor.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=armor.system.blockedSoftware}}"></i>{{/if}}</span>{{/if}}
 						</td>
 						{{#if (rule 'radiation')}}<td class="c num">{{armor.system.radiations}}</td>{{/if}}
 						<td class="c num">{{armor.system.protection}}</td>
@@ -98,7 +98,7 @@
 					<tr class="drag-item-list{{#if augment.hostsSoftware}} drop-item-list{{/if}}" data-item-id="{{augment._id}}">
 						<td>{{augment.name}}</td>
 						<td>{{augment.system.improvement}}
-							{{#if augment.hostsSoftware}}<span class="sub {{augment.overloadClass}}">{{augment.system.processingUsed}}/{{augment.system.augment.processing}}{{#if augment.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if augment.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if augment.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=augment.system.blockedSoftware}}"></i>{{/if}}</span>{{/if}}
+							{{#if augment.hostsSoftware}}<span class="sub {{augment.overloadClass}}">{{augment.system.processingUsed}}/{{augment.system.processingCap}}{{#if augment.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if augment.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if augment.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=augment.system.blockedSoftware}}"></i>{{/if}}</span>{{/if}}
 						</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=augment.canEquip toggle=augment.toggleClass store=true edit="MGT2.Actor.EditAugment" del="MGT2.Actor.DeleteAugment"}}
 					</tr>
@@ -141,7 +141,7 @@
 							<button type="button" class="roll" data-action="roll" data-roll="item" data-item-id="{{computer._id}}">{{computer.name}}</button>
 							{{#if computer.subInfo}}<span class="sub">{{computer.subInfo}}</span>{{/if}}
 						</td>
-						<td class="c num {{computer.overloadClass}}">{{computer.system.processingUsed}}/{{computer.system.processing}}{{#if computer.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if computer.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if computer.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=computer.system.blockedSoftware}}"></i>{{/if}}</td>
+						<td class="c num {{computer.overloadClass}}">{{computer.system.processingUsed}}/{{computer.system.processingCap}}{{#if computer.system.overload}} <i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.Overload'}}"></i>{{/if}}{{#if computer.system.overCrowded}} <i class="fa-solid fa-layer-group" data-tooltip="{{localize 'MGT2.Items.OverCrowded'}}"></i>{{/if}}{{#if computer.system.blockedSoftware}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.BlockedSoftware' count=computer.system.blockedSoftware}}"></i>{{/if}}</td>
 						<td class="r num">{{computer.weight}}</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=computer.canEquip toggle=computer.toggleClass store=true edit="MGT2.Actor.EditComputer" del="MGT2.Actor.DeleteComputer"}}
 					</tr>
@@ -358,6 +358,15 @@
 					<span class="lbl">{{localize 'MGT2.Actor.MonthlyShipPayments'}}</span>
 					{{formInput systemFields.finance.fields.monthlyShipPayments name="system.finance.monthlyShipPayments" value=system.finance.monthlyShipPayments classes="f num"}}
 				</label>
+				{{! Companion folio 4: the ledger stays the truth and WLT is read off it, so this is a
+				    readout and never an input. The purchase check is the referee's to call. }}
+				{{#if (rule 'wealth')}}
+				<label class="wide">
+					<span class="lbl">{{localize 'MGT2.Actor.Wealth'}}</span>
+					<b class="word">{{system.wealth.score}} ({{showDM system.wealth.dm}})</b>
+					<span class="hint">{{localize 'MGT2.Actor.WealthHint' cash=system.wealth.cash}}</span>
+				</label>
+				{{/if}}
 				<label class="wide">
 					<span class="lbl">{{localize 'MGT2.Actor.Notes'}}</span>
 					<textarea class="f" name="system.finance.notes" rows="4">{{system.finance.notes}}</textarea>

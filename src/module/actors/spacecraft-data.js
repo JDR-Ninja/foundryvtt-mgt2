@@ -80,6 +80,13 @@ export class SpacecraftData extends CraftData {
                 options: new fields.SetField(
                     new fields.StringField({ required: true, blank: false, choices: MGT2.HullOptions }),
                     { required: false, initial: [] }),
+                // HG p.13-14's Install Hull Options, and the grade the one graded option carries.
+                installed: new fields.SetField(
+                    new fields.StringField({
+                        required: true, blank: false, choices: MGT2.HullInstallOptions }),
+                    { required: false, initial: [] }),
+                stealth: new fields.StringField({
+                    required: false, blank: true, initial: "", choices: MGT2.StealthTypes }),
                 shipClass: new fields.StringField({ required: false, blank: true, trim: true }),
                 // The one figure of the six a book prints as a countable pool rather than as a
                 // measured quantity, and `characteristics.hull.max` is summed from it — so a
@@ -749,6 +756,8 @@ export class SpacecraftData extends CraftData {
         // anything in `prepareDerivedData` reads one.
         this.modifiers.crewSkill.auto = this.criticalEffects.crewSkill;
         this.sumModifiers();
+        // Before the tonnage: Stealth's grid claims 2 % of the hull and the budget sums that row.
+        this.#prepareInstalledOptions();
         this.#prepareArmour();
         this.#prepareDrives();
         this.#prepareSystems();
@@ -799,6 +808,52 @@ export class SpacecraftData extends CraftData {
             if (cell.jump) totals.jump = cell.jump;
         }
         return totals;
+    }
+
+    /**
+     * HG p.13-14's Install Hull Options: each costs per ton of hull, Stealth alone costs tonnage
+     * and carries a sensor DM, and the folio's two refusals are drawn as design lines.
+     */
+    #prepareInstalledOptions() {
+        const fitted = this.hull.installed;
+        const grade = fitted.has("stealth") ? (MGT2.StealthTypes[this.hull.stealth] ?? null) : null;
+        const underTL = [];
+        const clashes = new Map();
+        let cost = 0;
+
+        for (const key of fitted) {
+            const option = MGT2.HullInstallOptions[key];
+            if (!option) continue;
+            const rate = (key === "stealth") ? (grade?.costPerTon ?? 0) : (option.costPerTon ?? 0);
+            cost += rate * this.hull.tons;
+            const tl = (key === "stealth") ? grade?.tl : option.tl;
+            if (tl && (this.tl < tl)) underTL.push({ key, tl });
+            for (const other of option.excludes ?? []) {
+                // One line per clashing pair: the folio states both refusals, and so does the table.
+                if (fitted.has(other)) clashes.set([key, other].sort().join("|"), [key, other].sort());
+            }
+        }
+
+        this.hullOptions = {
+            tons: Math.round((grade?.hullFraction ?? 0) * this.hull.tons * 100) / 100,
+            cost,
+            sensorDM: grade?.dm ?? 0,
+            // "decreases the amount of rads absorbed by all crew by 1,000 (rather than the normal
+            // 500) and treats the bridge as if it is Hardened" — the crew's own sheets apply it.
+            radsAbsorbed: fitted.has("radiationShielding")
+                ? MGT2.HullInstallOptions.radiationShielding.radsAbsorbed : 0,
+            underTL,
+            clashes: [...clashes.values()],
+            gradeMissing: fitted.has("stealth") && !grade
+        };
+    }
+
+    /** HG p.14: "Reflec coating on a hull increases the ship's Protection against lasers by +3." */
+    protectionAgainst(options = {}) {
+        const base = super.protectionAgainst(options);
+        const reflec = this.hull.installed.has("reflec")
+            && Array.from(options.damageType ?? []).includes("laser");
+        return reflec ? (base + MGT2.HullInstallOptions.reflec.laserProtection) : base;
     }
 
     #prepareArmour() {
@@ -971,6 +1026,7 @@ export class SpacecraftData extends CraftData {
             { key: "staterooms", tons: staterooms },
             { key: "lowBerths", tons: lowBerths },
             { key: "bays", tons: bays },
+            { key: "hullOptions", tons: this.hullOptions.tons },
             { key: "cargo", tons: this.cargo.capacity }
         ];
 
@@ -1283,6 +1339,16 @@ export class SpacecraftData extends CraftData {
             }
         }
 
+        // Companion p.178: a percentage off the normal requirement, and a role that needs one body
+        // still needs one — "a ship that needs one astrogator ... still needs an astrogator".
+        const automation = this.#automationRow();
+        if (automation?.crew) {
+            for (const [key, role] of Object.entries(MGT2.CrewRoles)) {
+                if (!role.reducible || !required[key]) continue;
+                required[key] = Math.max(1, Math.ceil(required[key] * (100 + automation.crew) / 100));
+            }
+        }
+
         const core = Object.values(required).reduce((sum, n) => sum + n, 0);
         const passengers = booked.high + booked.middle + booked.basic;
         required.medic = Math.ceil((core + (military ? 0 : passengers)) / 120);
@@ -1302,6 +1368,17 @@ export class SpacecraftData extends CraftData {
         // The one number read off a linked actor: the pilot's own Pilot skill.
         this.pilotSkill = this.#pilotSkill();
         this.crewSkillObserved = this.#observedCrewSkill();
+    }
+
+    /** The fitted automation part's printed row, or null. @returns {object|null} */
+    #automationRow() {
+        if (!Rules.on("shipAutomation")) return null;
+        for (const item of this.parent?.items ?? []) {
+            if ((item.type !== "component") || (item.system.category !== "automation")) continue;
+            const row = MGT2.ShipAutomation.find(entry => entry.rating === item.system.rating);
+            if (row) return row;
+        }
+        return null;
     }
 
     /**

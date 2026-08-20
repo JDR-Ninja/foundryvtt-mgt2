@@ -1,4 +1,5 @@
 import { MGT2 } from "./config.js";
+import { Checks } from "./checks.js";
 import { CREW } from "./combatant.js";
 import { MGT2Helper } from "./helper.js";
 
@@ -8,6 +9,16 @@ const fields = foundry.data.fields;
 // these are the strings `system.json` and `CONFIG.<Doc>.dataModels` both key on.
 export const SPACE = "space";
 export const SHIP = "ship";
+export const MISSILE_SALVO = "missileSalvo";
+
+/** Core folio 172: a missile that has not arrived within ten rounds runs out of fuel. */
+const MISSILE_FUEL_ROUNDS = 10;
+
+/** Core folio 173: a salvo launched at Distant range burns its fuel getting there. */
+const DISTANT_SALVO_DM = -2;
+
+/** Core folio 173's Smart bounds, which the referee reads against the target's Tech Level. */
+const SMART_BOUNDS = Object.freeze({ min: 1, max: 6 });
 
 /** The seven bands closest first, which is the order Core folio 165 prints and a step walks. */
 const BANDS = Object.freeze(Object.keys(MGT2.ShipRangeBands));
@@ -311,6 +322,199 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
     }
 }
 
+/**
+ * Core folios 172-173: a flight of missiles, tracked between the ship that launched it and the ship
+ * it is aimed at. A `Combatant` with no Actor, because a salvo is a contact and not a hull.
+ */
+export class MissileSalvoData extends foundry.abstract.TypeDataModel {
+    static defineSchema() {
+        return {
+            // Core folio 173: "Apply DM+1 to the attack roll for every missile in the salvo", so
+            // the count is the salvo's whole weight and not a detail of it.
+            count: new fields.NumberField({
+                required: true, nullable: false, integer: true, min: 0, initial: 1 }),
+            // What electronic warfare and point defence took out.
+            removed: new fields.NumberField({
+                required: true, nullable: false, integer: true, min: 0, initial: 0 }),
+            // The ship group it is flying at, and the one that fired it.
+            target: new fields.DocumentIdField({
+                required: false, nullable: true, initial: null, readonly: false }),
+            firedBy: new fields.DocumentIdField({
+                required: false, nullable: true, initial: null, readonly: false }),
+            // The missile Item on the firing ship, which carries the damage and the traits.
+            weapon: new fields.DocumentIdField({
+                required: false, nullable: true, initial: null, readonly: false }),
+            // Core folio 172's Missile Flight table is read from where the salvo was FIRED and not
+            // from where the ships are now.
+            launchBand: new fields.StringField({
+                required: true, blank: false, initial: "medium", choices: MGT2.ShipRangeBands }),
+            // Core folio 173: "a salvo may only be subjected to Electronic Warfare once per round,
+            // no matter how many sensor operators are available".
+            jammedRound: new fields.NumberField({
+                required: false, nullable: true, integer: true, min: 0, initial: null })
+        };
+    }
+
+    #group(id) {
+        const group = id ? this.parent.parent?.groups.get(id) : null;
+        return (group?.type === SHIP) ? group : null;
+    }
+
+    get targetGroup() {
+        return this.#group(this.target);
+    }
+
+    get shooterGroup() {
+        return this.#group(this.firedBy);
+    }
+
+    /** The missile itself, while the ship that fired it is still in the fight. */
+    get missile() {
+        return this.weapon ? (this.shooterGroup?.system.ship?.items.get(this.weapon) ?? null) : null;
+    }
+
+    get remaining() {
+        return Math.max(0, this.count - this.removed);
+    }
+
+    get eliminated() {
+        return this.remaining <= 0;
+    }
+
+    /** Core folio 172's Missile Flight table, read from the band the salvo was fired at. */
+    get flightRounds() {
+        return MGT2.MissileFlight[this.launchBand] ?? 0;
+    }
+
+    get impactRound() {
+        return (this.parent.roundJoined ?? this.parent.parent?.round ?? 0) + this.flightRounds;
+    }
+
+    get roundsLeft() {
+        return Math.max(0, this.impactRound - (this.parent.parent?.round ?? 0));
+    }
+
+    get arriving() {
+        return this.roundsLeft <= 0;
+    }
+
+    /** Core folio 172: ten rounds in flight and it is inert. Stated, never enforced. */
+    get inert() {
+        const flown = (this.parent.parent?.round ?? 0) - (this.parent.roundJoined ?? 0);
+        return flown >= MISSILE_FUEL_ROUNDS;
+    }
+
+    /**
+     * Core folio 172: "Missiles used against targets within Adjacent or Close ranges lose any Smart
+     * trait they possess."
+     */
+    get smart() {
+        return MGT2Helper.hasTrait(this.missile?.system.traits, "smart")
+            && !MGT2.ShipRangeBands[this.launchBand]?.dogfight;
+    }
+
+    /** Take rounds out of the flight. */
+    async remove(count) {
+        const wanted = Math.max(0, Math.trunc(Number(count) || 0));
+        if ( !wanted ) return this.parent;
+        return this.parent.update({
+            system: { removed: Math.min(this.count, this.removed + wanted) } });
+    }
+
+    /**
+     * Core folio 173: a Difficult (10+) Electronics (sensors) check removes its Effect in missiles,
+     * and the same salvo takes one attempt a round however many operators try.
+     * @param {number} effect   The Effect of the check the sensor operator already rolled
+     */
+    async jam(effect) {
+        const round = this.parent.parent?.round ?? 0;
+        if ( this.jammedRound === round ) {
+            ui.notifications.warn(game.i18n.format("MGT2.SpaceCombat.SalvoJammed",
+                { name: this.parent.name }));
+            return this.parent;
+        }
+        const taken = Math.max(0, Math.trunc(Number(effect) || 0));
+        return this.parent.update({ system: {
+            jammedRound: round, removed: Math.min(this.count, this.removed + taken) } });
+    }
+
+    /** Core folio 173's attack roll: the missiles left, and nothing the gunner or the range gives. */
+    get attackRows() {
+        const entries = [[game.i18n.localize("MGT2.SpaceCombat.SalvoMissiles"), this.remaining]];
+        if ( this.launchBand === "distant" ) {
+            entries.push([game.i18n.localize(MGT2.ShipRangeBands.distant.label), DISTANT_SALVO_DM]);
+        }
+        return Checks.modifiers(entries);
+    }
+
+    /**
+     * Core folio 173: the salvo attacks in the Attack Step, and on a hit its damage is rolled as
+     * for one missile and multiplied by the Effect.
+     */
+    async attack() {
+        const target = this.targetGroup;
+        if ( !target || this.eliminated ) {
+            ui.notifications.warn(game.i18n.format("MGT2.SpaceCombat.SalvoNoTarget",
+                { name: this.parent.name }));
+            return null;
+        }
+        const rows = this.attackRows;
+        const outcome = await Checks.resolve({
+            formula: ["2d6", ...rows.parts].join(" + "), difficulty: "Average" });
+        if ( !outcome ) return null;
+
+        const missile = this.missile;
+        const hit = outcome.effect >= 0;
+        // Folio 173: "the Effect cannot be higher than the number of remaining missiles". The floor
+        // of 1 is the damage pipeline's own, which multiplies after armour and never by zero.
+        const multiple = Math.max(1, Math.min(outcome.effect, this.remaining));
+        const lines = [];
+        if ( this.smart ) {
+            lines.push(game.i18n.format("MGT2.SpaceCombat.SalvoSmart", SMART_BOUNDS));
+        }
+        lines.push(game.i18n.format(hit ? "MGT2.SpaceCombat.SalvoHit" : "MGT2.SpaceCombat.SalvoMissed",
+            { name: target.name, multiple, missiles: this.remaining }));
+
+        const flags = { mgt2: {} };
+        if ( hit && missile?.system.damage ) {
+            flags.mgt2.damage = {
+                formula: missile.system.damage,
+                rollObjectName: missile.name,
+                rollTypeName: this.parent.name,
+                // The Effect is the multiplier here and never an addition to the dice, which is the
+                // whole of folio 173's Impact paragraph.
+                effect: 0,
+                strengthDM: 0,
+                scale: missile.system.scale ?? "spacecraft",
+                multiple,
+                ap: MGT2Helper.traitScore(missile.system.traits, "ap"),
+                loPen: MGT2Helper.traitScore(missile.system.traits, "lo-pen"),
+                damageType: Array.from(missile.system.damageType ?? [])
+            };
+        }
+
+        return Checks.post(outcome, {
+            actor: this.shooterGroup?.system.ship ?? null,
+            label: this.parent.name,
+            flags,
+            difficulty: "Average",
+            rollTypeName: this.parent.name,
+            rollObjectName: missile?.name ?? game.i18n.localize("MGT2.SpaceCombat.Salvo"),
+            modifiers: rows.labels,
+            lines,
+            showRollDamage: Boolean(flags.mgt2.damage)
+        });
+    }
+
+    /**
+     * A salvo has no Initiative of its own, so it acts with the ship that fired it — which is what
+     * Core folio 173 does by resolving it in that round's Attack Step.
+     */
+    get initiativeFormula() {
+        return this.shooterGroup?.system.initiativeFormula ?? "2d6";
+    }
+}
+
 /** @extends {CombatantGroup} */
 export class MGT2CombatantGroup extends CombatantGroup {
 
@@ -362,6 +566,39 @@ export class MGT2Combat extends Combat {
             for ( const other of others ) await this.system.setBand(group, other, band);
         }
         return group;
+    }
+
+    /**
+     * Core folio 172: "A salvo is all the missiles launched by a ship against a single target in
+     * the same combat round." One Combatant, no Actor, flying on the table's clock.
+     * @param {CombatantGroup} from      The ship group that fired
+     * @param {CombatantGroup} at        The ship group it is aimed at
+     * @param {string} [options.weapon]  The missile Item id on the firing ship
+     * @param {number} [options.count]   How many are in the air
+     * @param {string} [options.band]    The band it was fired at, which sets its flight time
+     * @returns {Promise<Combatant|null>}
+     */
+    async addSalvo(from, at, { weapon = null, count = 1, name } = {}) {
+        if ( (this.type !== SPACE) || (from?.type !== SHIP) || (at?.type !== SHIP) ) return null;
+        const band = this.system.bandBetween(from, at);
+        const missile = weapon ? from.system.ship?.items.get(weapon) : null;
+        const [combatant] = await this.createEmbeddedDocuments("Combatant", [{
+            type: MISSILE_SALVO, actorId: null,
+            name: name || game.i18n.format("MGT2.SpaceCombat.SalvoName",
+                { name: missile?.name ?? game.i18n.localize("MGT2.SpaceCombat.Salvo"), target: at.name }),
+            ...(missile?.img ? { img: missile.img } : {}),
+            system: {
+                count: Math.max(1, Math.trunc(count)),
+                target: at.id, firedBy: from.id, weapon: missile?.id ?? null,
+                launchBand: MGT2.ShipRangeBands[band] ? band : "medium"
+            }
+        }]);
+        return combatant ?? null;
+    }
+
+    /** Every missile salvo still in the air. Named apart from the fleet chapter's own. */
+    get missileSalvoes() {
+        return this.combatants.filter(combatant => combatant.type === MISSILE_SALVO);
     }
 
     /** Take a ship out of the fight. @returns {Promise<Combat|null>} */

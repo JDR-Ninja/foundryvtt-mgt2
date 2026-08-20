@@ -177,7 +177,11 @@ export class CharacterData extends ActorBaseData {
                 fatigue: new fields.BooleanField({ required: false, initial: false }),
                 // Core folio 81's 51-150 band.
                 nausea: new fields.BooleanField({ required: false, initial: false }),
+                // Companion folio 80's second stage, which the referee ticks: the intervals are days.
+                starving: new fields.BooleanField({ required: false, initial: false }),
                 unconscious: new fields.BooleanField({ required: false, initial: false }),
+                // Companion folio 50: written by the blow that emptied END, and inert once it refills.
+                knockedOut: new fields.BooleanField({ required: false, initial: false }),
                 // The referee's override, kept beside the derived condition below.
                 surgeryRequired: new fields.BooleanField({ required: false, initial: false }),
                 // Core p.82: first aid applies once, which no reading of the wound can tell you.
@@ -318,6 +322,10 @@ export class CharacterData extends ActorBaseData {
 
         this.#prepareTreatment();
         this.#prepareTraining();
+        this.#prepareWealth();
+        // Companion p.80: END days before starvation tells, then twice END more at DM-2.
+        const end = this.characteristics.endurance?.value ?? 0;
+        this.starvation = { before: end, impaired: end * 2 };
 
         this.inventory = { armor: 0, weight: 0, encumbrance: { normal: 0, heavy: 0 } };
         this.prepareArmor();
@@ -344,6 +352,20 @@ export class CharacterData extends ActorBaseData {
             }
         }
         this.states.ageingCrisis = crisis;
+    }
+
+    /**
+     * Companion p.4's Wealth, read off the cash the ledger already tracks: the highest rung whose
+     * printed month's cash the Traveller has. Below the first rung is WLT 0.
+     */
+    #prepareWealth() {
+        if ( !Rules.on("wealth") ) return void (this.wealth = null);
+        const credits = this.finance.credits;
+        const ladder = MGT2.Wealth.ladder;
+        let score = 0;
+        for ( const rung of ladder ) if ( credits >= rung.credits ) score = rung.score;
+        this.wealth = { score, dm: ActorBaseData.getModifier(score),
+            cash: ladder.find(rung => rung.score === score)?.credits ?? 0 };
     }
 
     /** Which of the two treatment procedures the patient qualifies for (Core p.82-83). */
@@ -454,12 +476,14 @@ export class CharacterData extends ActorBaseData {
         // Processing; `computerId` is a bare Item id that never required one type.
         const hosts = new Map();
         const running = new Map();
+        const reserved = new Map();
         for (const item of this.parent.items) {
             if (!MGT2Helper.runsSoftware(item)) continue;
             item.system.processingUsed = 0;
             item.system.blockedSoftware = 0;
             hosts.set(item.id, item);
             running.set(item.id, 0);
+            reserved.set(item.id, 0);
         }
 
         for (const item of this.parent.items) {
@@ -477,16 +501,27 @@ export class CharacterData extends ActorBaseData {
             }
 
             host.system.processingUsed += item.system.software.bandwidthRun;
+            // Core folio 112: the specialised rating is reserved for one named program, matched as
+            // a printed name the way HG folio 20's /bis matches Jump Control.
+            const named = MGT2Helper.specialised(host)?.software;
+            if (named && MGT2Helper.matchesSkill(item.name, named)) {
+                reserved.set(host.id, reserved.get(host.id) + item.system.software.bandwidthRun);
+            }
             // CSC folio 66's exception: Interface runs alongside one other Bandwidth 0 program.
             if (!MGT2Helper.isInterfaceSoftware(item.name)) running.set(host.id, running.get(host.id) + 1);
         }
 
         for (const host of hosts.values()) {
             const processing = MGT2Helper.processing(host);
-            host.system.overload = host.system.processingUsed > processing;
+            // A ring-fenced pool and not a bigger one: only what the named program claims of the
+            // bonus raises the cap.
+            const bonus = Math.min(MGT2Helper.specialised(host)?.bonus ?? 0, reserved.get(host.id));
+            host.system.processingCap = processing + bonus;
+            host.system.overload = host.system.processingUsed > host.system.processingCap;
             // "Processing 0 can only run one Bandwidth 0 package at a time" — a count, which the
-            // sum cannot reach: two Bandwidth-0 packages still sum to 0.
-            host.system.overCrowded = (processing === 0) && (running.get(host.id) > 1);
+            // sum cannot reach: two Bandwidth-0 packages still sum to 0. Read off the cap, because
+            // CSC folio 61's wafer jack is a Computer/2 for Expert programs and a 0 for the rest.
+            host.system.overCrowded = (host.system.processingCap === 0) && (running.get(host.id) > 1);
         }
     }
 

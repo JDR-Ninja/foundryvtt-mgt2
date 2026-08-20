@@ -6,11 +6,23 @@
 		<h3>{{localize 'MGT2.Chargen.Frame.Term'}}</h3>
 		<span class="count">{{speciesFrame.sequence.length}}</span>
 	</div>
+	{{! One published species starts its Travellers at two ages, by which of its three sexes they are. }}
+	<div class="stack" data-property="frame.startAge">
+		{{#each system.frame.startAge as |law s|}}
+		<div class="entry" data-entry-index="{{s}}">
+			{{> systems/mgt2/templates/items/parts/law-selectors.html law=law path=(concat "frame.startAge." s)}}
+			<div class="pfields">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Frame.StartAge'}}</span>
+					<input class="f num edit-only" type="number" step="1" min="0" name="system.frame.startAge.{{s}}.age" value="{{law.age}}" data-dtype="Number" />
+					<b class="play-only word">{{law.age}}</b>
+				</label>
+			</div>
+		</div>
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Frame.LawRow'}}</a>
+	</div>
 	<div class="pfields">
-		<label>
-			<span class="lbl">{{localize 'MGT2.Chargen.Frame.StartAge'}}</span>
-			{{formInput systemFields.frame.fields.startAge name="system.frame.startAge" value=system.frame.startAge classes="f num"}}
-		</label>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Frame.TermYears'}}</span>
 			{{formInput systemFields.frame.fields.termYears name="system.frame.termYears" value=system.frame.termYears classes="f num"}}
@@ -57,6 +69,12 @@
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Frame.CheckWhen'}}</span>
 					<select class="f" name="system.frame.steps.{{i}}.check.when">{{selectOptions @root.config.StepCheckTriggers selected=step.check.when localize=true}}</select>
+				</label>
+				{{! Two printed checks add their total to a table rather than beating a target, so they
+				    take neither arm below and the step names the table. }}
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Frame.CheckKind'}}</span>
+					<select class="f" name="system.frame.steps.{{i}}.check.kind">{{selectOptions @root.config.CreationCheckKinds selected=step.check.kind localize=true}}</select>
 				</label>
 				{{! The ladder's index, blank for a check that prints one target. }}
 				<label>

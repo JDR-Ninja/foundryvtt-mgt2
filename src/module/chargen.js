@@ -137,10 +137,20 @@ export const Chargen = {
             ?? { sequence: [...MGT2.CoreTermSequence], own: new Set(), cut: new Set() };
     },
 
+    /** The first law row that answers: sex is the Traveller's, role a rung on a declared track. */
+    law(actor, rows) {
+        if ( !rows?.length ) return null;
+        const sex = fold(actor?.system.personal?.gender);
+        const roles = rows.some(row => row.role)
+            ? Object.values(this.read(actor).tracks).map(track => fold(track.rung)) : [];
+        return rows.find(row => (!row.sex || (fold(row.sex) === sex))
+            && (!row.role || roles.includes(fold(row.role)))) ?? null;
+    },
+
     /** Age as a **sum over the term log**, and never `18 + 4 × terms`. @returns {number} */
     age(actor) {
         const frame = this.frame(actor)?.system.frame;
-        const startAge = frame?.startAge ?? MGT2.CreationDefaults.startAge;
+        const startAge = this.law(actor, frame?.startAge)?.age ?? MGT2.CreationDefaults.startAge;
         const termYears = frame?.termYears ?? MGT2.CreationDefaults.termYears;
         let years = 0;
         for ( const career of actor?.items ?? [] ) {
@@ -204,7 +214,7 @@ export const Chargen = {
     timeline(actor) {
         const frame = this.frame(actor)?.system.frame;
         const termYears = frame?.termYears ?? MGT2.CreationDefaults.termYears;
-        let age = frame?.startAge ?? MGT2.CreationDefaults.startAge;
+        let age = this.law(actor, frame?.startAge)?.age ?? MGT2.CreationDefaults.startAge;
         let index = 0;
         const rows = [];
         for ( const career of this.careers(actor) ) {
@@ -396,7 +406,7 @@ export const Chargen = {
      */
     ageingDue(actor) {
         const defaults = MGT2.CreationDefaults;
-        const ageing = this.frame(actor)?.system.ageing;
+        const ageing = this.law(actor, this.frame(actor)?.system.ageing);
         const byTerm = ageing ? ageing.fromTerm : defaults.ageingFromTerm;
         const byAge = ageing ? ageing.fromAge : defaults.ageingFromAge;
         const prefersTerms = Rules.get("ageingTriggerPrecedence") !== "age";
@@ -417,6 +427,8 @@ function bears(entry, check, career) {
     if ( entry.scope === "nextCareer" ) return !entry.career || (MGT2Helper.skillSlug(entry.career) !== key);
     return !entry.career || (MGT2Helper.skillSlug(entry.career) === key);
 }
+
+const fold = value => (value ?? "").trim().toLowerCase();
 
 /** A row of the flag read back as something the flag will take again. */
 function plain(entry) {

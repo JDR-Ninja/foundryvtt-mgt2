@@ -868,7 +868,7 @@ async function ageing(view) {
         return { advance: true };
     }
 
-    const law = Chargen.frame(actor)?.system.ageing;
+    const law = Chargen.law(actor, Chargen.frame(actor)?.system.ageing);
     const defaults = MGT2.CreationDefaults;
     const terms = Chargen.termsServed(actor);
     // The law is an EXPRESSION and not a switch: the published values run -1, -2, -1/2, +1 and ±1
@@ -1081,8 +1081,14 @@ async function declaredStep(view, key) {
 
     // The row's award is the printed table's own column and is NOT conditioned on the roll — what
     // the roll buys is the check's arm — so it applies either way and the two are read together.
-    const arms = [rolled.passed ? check.onPass : check.onFail, row?.award];
+    const indexes = check.kind === "index";
+    const arms = indexes ? [row?.award] : [rolled.passed ? check.onPass : check.onFail, row?.award];
     const lines = [];
+    if ( indexes ) {
+        const read = game.i18n.format("MGT2.Chargen.Term.ReadOnTable", { step: label, total: rolled.total });
+        ui.notifications.info(read);
+        lines.push(read);
+    }
     for ( const arm of arms ) lines.push(...await applyStepOutcome(view, arm, key));
     const note = [label, ...lines].filter(line => line).join(" · ");
     if ( view.record ) await logTerm(view.record, view.term, { note });
@@ -1091,8 +1097,9 @@ async function declaredStep(view, key) {
 
 /** Enough of a check to roll: a named term, and a target the ladder or the line supplies. */
 function checkRolls(check) {
-    return !!(check.characteristic || check.skills.length)
-        && ((check.target !== null) || (check.ladder.length > 0));
+    if ( !(check.characteristic || check.skills.length) ) return false;
+    // A check that indexes a table has a total to read and needs no target at all.
+    return (check.kind === "index") || (check.target !== null) || (check.ladder.length > 0);
 }
 
 /**

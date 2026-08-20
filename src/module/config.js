@@ -267,6 +267,18 @@ MGT2.FireModes = Object.freeze({
     fullAuto: {label: "MGT2.FireModes.fullAuto", attacks: true, rounds: 3, suppress: "aiming"}
 });
 
+// Companion p.53: a combat check that comes up double 1 AND fails, read against 2D + weapon skill,
+// so a higher skill lands a milder row.
+MGT2.CombatMishaps = Object.freeze([
+    { max: 2, label: "MGT2.CombatMishaps.self" },
+    { max: 4, label: "MGT2.CombatMishaps.lost" },
+    { max: 6, label: "MGT2.CombatMishaps.dropped" },
+    { max: 7, label: "MGT2.CombatMishaps.minor" },
+    { max: 9, label: "MGT2.CombatMishaps.serious" },
+    { max: 11, label: "MGT2.CombatMishaps.destroyed" },
+    { max: null, label: "MGT2.CombatMishaps.none" }
+]);
+
 // Companion p.93-94. Not a partition: the types overlap and an empty set is the normal case.
 MGT2.DamageTypes = Object.freeze({
     blades: "MGT2.DamageTypes.blades",
@@ -307,14 +319,26 @@ MGT2.DamageTransforms = Object.freeze({
 // Core p.82. The names a rolled free-text skill is matched against to offer the first-aid button.
 MGT2.FirstAidSkills = Object.freeze(["medic", "médecine"]);
 
-// HG p.19-21: the sensor grade, and a command bridge's DM+1 to Tactics (naval) made within it.
+// Core p.181, HG p.19-21: the sensor grade covers Electronics (comms) and (sensors); a command bridge, Tactics (naval) DM+1.
 MGT2.ShipCheckSkills = Object.freeze({
-    sensors: {skills: ["electronics", "électronique"], specialities: ["sensors", "capteurs"]},
+    sensors: {skills: ["electronics", "électronique"], specialities: ["sensors", "capteurs", "comms"]},
     navalTactics: {skills: ["tactics", "tactique"], specialities: ["naval", "navale"]}
 });
 
 // CSC folio 66's exception: Interface runs alongside one other Bandwidth 0 program. A name only.
 MGT2.InterfaceSoftware = Object.freeze(["interface"]);
+
+// Core p.172 launches these in salvos and HG p.29 exempts them from the mount's damage multiple.
+MGT2.MissileWeapons = Object.freeze(["missile", "torpedo", "torpille"]);
+
+// Core p.81: in zero gravity a close combat weapon, or a ranged one without Zero-G, owes an
+// Average (8+) Athletics (dexterity) check. Companion p.59 calls that band microgravity.
+MGT2.Microgravity = Object.freeze({band: "micro", difficulty: "Average", trait: "zero-g"});
+
+// Core p.158: opening a low berth is a Medic check at the passenger's END DM, DM+1 aboard a TL12
+// hull, DM-1 out of an emergency berth and DM-2 for a non-human.
+MGT2.LowBerthRevival = Object.freeze({
+    difficulty: "Routine", tl: 12, tlDM: 1, emergencyDM: -1, nonHumanDM: -2});
 
 // Core folio 81's Radiation Effects.
 MGT2.RadiationEffects = Object.freeze([
@@ -431,6 +455,19 @@ MGT2.PhysicalCharacteristics = Object.freeze(["strength", "dexterity", "enduranc
 MGT2.InitiativeCharacteristics = Object.freeze({
     dexterity: "MGT2.Characteristics.dexterity.name",
     intellect: "MGT2.Characteristics.intellect.name"
+});
+
+// Companion folio 4's Wealth table, read the way the ledger allows: the Credits on hand name the
+// WLT score they are the month's cash for. `spend` is the purchase check's DM-1 per Cr5000.
+MGT2.Wealth = Object.freeze({
+    spend: { credits: 5000, dm: -1 },
+    ladder: Object.freeze([
+        { score: 1, credits: 100 }, { score: 2, credits: 200 }, { score: 3, credits: 400 },
+        { score: 4, credits: 800 }, { score: 5, credits: 1200 }, { score: 6, credits: 1500 },
+        { score: 7, credits: 2000 }, { score: 8, credits: 3000 }, { score: 9, credits: 5000 },
+        { score: 10, credits: 7500 }, { score: 11, credits: 10000 }, { score: 12, credits: 12500 },
+        { score: 13, credits: 15000 }, { score: 14, credits: 17500 }, { score: 15, credits: 20000 }
+    ])
 });
 
 MGT2.TL = Object.freeze({
@@ -1038,6 +1075,29 @@ MGT2.HullOptions = Object.freeze({
     breakaway: {label: "MGT2.HullOptions.breakaway", hullPoints: 1, hullCost: 1}
 });
 
+// Stealth Types (HG p.14). Only the TL8 grid costs tonnage; the coatings above it are a finish.
+MGT2.StealthTypes = Object.freeze({
+    basic: {label: "MGT2.StealthTypes.basic", tl: 8, costPerTon: 40000, dm: -2, hullFraction: 0.02},
+    improved: {label: "MGT2.StealthTypes.improved", tl: 10, costPerTon: 100000, dm: -2, hullFraction: 0},
+    enhanced: {label: "MGT2.StealthTypes.enhanced", tl: 12, costPerTon: 500000, dm: -4, hullFraction: 0},
+    advanced: {label: "MGT2.StealthTypes.advanced", tl: 14, costPerTon: 1000000, dm: -6, hullFraction: 0}
+});
+
+// Install Hull Options (HG p.13-14). Each is priced per ton of hull and "can only be added once";
+// `excludes` is the folio's own refusal and is read both ways.
+MGT2.HullInstallOptions = Object.freeze({
+    heatShielding: {label: "MGT2.HullInstallOptions.heatShielding", tl: 6, costPerTon: 100000},
+    // "decreases the amount of rads absorbed by all crew by 1,000 (rather than the normal 500)".
+    radiationShielding: {label: "MGT2.HullInstallOptions.radiationShielding", tl: 7, costPerTon: 25000,
+        radsAbsorbed: 1000},
+    reflec: {label: "MGT2.HullInstallOptions.reflec", tl: 10, costPerTon: 100000,
+        laserProtection: 3, excludes: ["stealth"]},
+    // Priced with the solar arrays on HG p.44, which the parts list carries.
+    solarCoating: {label: "MGT2.HullInstallOptions.solarCoating",
+        excludes: ["heatShielding", "reflec", "stealth"]},
+    stealth: {label: "MGT2.HullInstallOptions.stealth", graded: true, excludes: ["reflec"]}
+});
+
 // Tons of hull per Hull point (HG p.10). Very large ships brace more heavily and take more.
 MGT2.HullPointRates = Object.freeze([
     {maxTons: 24999, tonsPerPoint: 2.5},
@@ -1283,6 +1343,22 @@ MGT2.FleetTraits = Object.freeze({
     hardened: {label: "MGT2.FleetTraits.hardened", names: ["hardened", "blindage em"]},
     // +10% of the FLEET Armour, which is the only figure a fleet attack subtracts.
     reflec: {label: "MGT2.FleetTraits.reflec", names: ["reflec"], armourBonus: 0.1}
+});
+
+// HG p.122-124's Fleet Manoeuvre Chart: four quadrants counter-clockwise, one ring per range band
+// with Distant drawn twice, ring N cut into N sectors per quadrant. `km` is the ring's outer edge.
+MGT2.FleetChart = Object.freeze({
+    quadrants: Object.freeze(["A", "C", "D", "B"]),
+    rings: Object.freeze([
+        {band: "adjacent", sectors: 1, km: 1},
+        {band: "close", sectors: 2, km: 10},
+        {band: "short", sectors: 3, km: 1250},
+        {band: "medium", sectors: 4, km: 10000},
+        {band: "long", sectors: 5, km: 25000},
+        {band: "veryLong", sectors: 6, km: 50000},
+        {band: "distant", sectors: 7, km: 175000},
+        {band: "distant", sectors: 8, km: 300000}
+    ])
 });
 
 // Which column of the Crew Requirements table a ship reads (HG p.23).
@@ -1770,8 +1846,27 @@ MGT2.ComponentCategories = Object.freeze({
     stateroom: "MGT2.ComponentCategories.stateroom",
     cargo: "MGT2.ComponentCategories.cargo",
     software: "MGT2.ComponentCategories.software",
+    automation: "MGT2.ComponentCategories.automation",
+    gravShield: "MGT2.ComponentCategories.gravShield",
     option: "MGT2.ComponentCategories.option"
 });
+
+// Which categories a rule the table has not adopted keeps off the component sheet.
+MGT2.OptionalComponentCategories = Object.freeze({
+    automation: "shipAutomation",
+    gravShield: "graviticShielding"
+});
+
+// Companion p.178: the six printed rows, read off an `automation` component's `rating`. `crew` is
+// the percentage the requirement moves by, and rating 0 fits a part that changes nothing.
+MGT2.ShipAutomation = Object.freeze([
+    { rating: 1, label: "MGT2.ShipAutomation.crewIntensive", crew: 100 },
+    { rating: 2, label: "MGT2.ShipAutomation.low", crew: 40 },
+    { rating: 3, label: "MGT2.ShipAutomation.standard", crew: 0 },
+    { rating: 4, label: "MGT2.ShipAutomation.enhanced", crew: -10 },
+    { rating: 5, label: "MGT2.ShipAutomation.advanced", crew: -25 },
+    { rating: 6, label: "MGT2.ShipAutomation.high", crew: -40 }
+]);
 
 // Where a permanent characteristic change came from.
 MGT2.CharacteristicLossSources = Object.freeze({
@@ -1809,7 +1904,15 @@ MGT2.CreationSteps = Object.freeze({
     status: "MGT2.Chargen.Steps.status",
     continuation: "MGT2.Chargen.Steps.continuation",
     // Dependants gained on a check. Distinct from `nest`, a transfer between groups that gains nobody.
-    household: "MGT2.Chargen.Steps.household"
+    household: "MGT2.Chargen.Steps.household",
+    // Life Events relocated out of the event step, which one printed frame puts at end of term.
+    lifeEvent: "MGT2.Chargen.Steps.lifeEvent"
+});
+
+// A check either beats a printed target or indexes a printed table with its total.
+MGT2.CreationCheckKinds = Object.freeze({
+    beat: "MGT2.Chargen.CreationCheckKinds.beat",
+    index: "MGT2.Chargen.CreationCheckKinds.index"
 });
 
 // What a declared step's printed ladder of targets is read against.

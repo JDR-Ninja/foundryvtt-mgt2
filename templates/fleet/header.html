@@ -6,6 +6,7 @@
 		<h2>{{#if strip.from}}{{localize 'MGT2.Fleet.Screen.RangeFrom'}} <i>{{strip.from.name}}</i>{{else}}{{localize 'MGT2.Fleet.Screen.NoFleets'}}{{/if}}</h2>
 		<span class="of">{{#if strip.to}}{{localize 'MGT2.Fleet.Screen.To' name=strip.to.name}}{{else}}{{localize 'MGT2.Fleet.Screen.AddFleetHint'}}{{/if}}</span>
 		{{#unless enabled}}<span class="of gm">{{localize 'MGT2.Fleet.RuleOff'}}</span>{{/unless}}
+		{{#if chart}}<a class="need" data-action="openChart"><i class="fa-solid fa-crosshairs"></i> {{localize 'MGT2.Fleet.Chart.Open'}}</a>{{/if}}
 	</div>
 
 	<div class="bands">

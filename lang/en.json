@@ -319,6 +319,38 @@
         "core": "Core Rulebook — Study Periods",
         "companion": "Traveller Companion — Experience Points",
         "both": "Both, chosen for each programme"
+      },
+      "fleetChart": {
+        "name": "Fleet manoeuvre chart",
+        "hint": "The optional map High Guard prints beside the fleet battle rules: eight rings of range around a fixed point, each cut into quadrants and sectors. Placing a fleet on it writes the range between fleets that the battle screen already reads, so switching it off leaves every range where it stands and returns the map to being typed by hand."
+      },
+      "wealth": {
+        "name": "Abstract Wealth (WLT)",
+        "hint": "Prints a WLT score and its DM beside the Traveller's cash, read off Credits through the Companion's own table. Credits stay tracked: the ladder reads them, it does not replace them."
+      },
+      "combatMishaps": {
+        "name": "Combat mishaps",
+        "hint": "A combat check that rolls double 1 and still fails reads a mishap on 2D plus the weapon skill, printed on the card."
+      },
+      "naturalResilience": {
+        "name": "Natural resilience",
+        "hint": "The target's END DM comes off the damage of every attack, and a negative DM is added instead."
+      },
+      "knockoutBlow": {
+        "name": "Knockout blow",
+        "hint": "An attack that takes END from its starting value to 0 knocks the Traveller out at once, with two physical characteristics still standing."
+      },
+      "starvation": {
+        "name": "Starvation and thirst",
+        "hint": "Adds a starving state the referee ticks: DM−2 on physical actions and no natural healing, with the END-derived day counts printed beside it."
+      },
+      "shipAutomation": {
+        "name": "Starship automation",
+        "hint": "Offers an automation part; the row it carries moves the crew requirement by its printed percentage, and a role that needs one body still needs one."
+      },
+      "graviticShielding": {
+        "name": "Gravitic shielding",
+        "hint": "Offers a gravitic shield part on the component sheet. TL16 and up."
       }
     },
     "Chargen": {
@@ -336,7 +368,8 @@
         "nest": "Nest transition",
         "status": "Status check",
         "continuation": "Continuation check",
-        "household": "Household development"
+        "household": "Household development",
+        "lifeEvent": "Life Event"
       },
       "CareerKinds": {
         "career": "Career",
@@ -412,7 +445,6 @@
         "TrayEntry": "Pending entry",
         "TrayNote": "note",
         "TrayCondition": "What earns this entry — a branch-bound entry is not applied unless its branch was taken",
-        "OverridesDraftLimit": "beats the once-per-lifetime draft",
         "Standing": "Standing modifiers",
         "StandingEntry": "Standing modifier",
         "StandingGate": "Only while",
@@ -529,7 +561,14 @@
         "DefaultCount": "EDU DM + 3",
         "Mandatory": "Always taken",
         "SkillChoices": "Chosen from",
-        "BackgroundHint": "An empty list is the honest state of a world that has typed none: the referee's whole library is open."
+        "BackgroundHint": "An empty list is the honest state of a world that has typed none: the referee's whole library is open.",
+        "RollLabel": "printed name",
+        "LawSex": "sex",
+        "LawRole": "role",
+        "LawRow": "Variant",
+        "LawDefault": "any Traveller",
+        "CheckKind": "The total",
+        "RollShort": "abbr."
       },
       "Qualification": {
         "target": "Roll against a target",
@@ -925,7 +964,8 @@
         "NoStepTarget": "{step}: the printed table gives no target for this Traveller.",
         "StepNotTriggered": "{step} does not fire this term.",
         "TrackAtCap": "{track} is already at its last rung.",
-        "TrackHeld": "{track} cannot be lost once attained."
+        "TrackHeld": "{track} cannot be lost once attained.",
+        "ReadOnTable": "{step}: read {total} on the table your book prints."
       },
       "StepCheckTriggers": {
         "everyTerm": "Every term",
@@ -934,6 +974,10 @@
       "StepCheckIndices": {
         "term": "Term number",
         "characteristic": "Characteristic band"
+      },
+      "CreationCheckKinds": {
+        "beat": "Beats a target",
+        "index": "Indexes a table"
       }
     },
     "Packs": {
@@ -1714,7 +1758,8 @@
           "staterooms": "Staterooms",
           "lowBerths": "Low berths",
           "bays": "Craft bays",
-          "cargo": "Cargo hold"
+          "cargo": "Cargo hold",
+          "hullOptions": "Hull options"
         },
         "DrawRows": {
           "basic": "Basic ship systems",
@@ -1724,7 +1769,19 @@
           "weapons": "Weapons",
           "screens": "Screens",
           "other": "Other"
-        }
+        },
+        "HullOptionMin": "{option} is for hulls of {min} t and over; this one is {tons} t",
+        "HullOptionMax": "{option} stops at {max} t; this hull is {tons} t",
+        "HullInstallTL": "{option} needs TL{tl}; the ship is TL{ship}",
+        "HullInstallExclusive": "{option} cannot be combined with {other}",
+        "HullInstallStealthGrade": "Stealth is fitted with no type chosen",
+        "InstallOptions": "Installed hull options",
+        "InstallOptionsHint": "High Guard p.13-14: each option is priced per ton of hull and can only be added once. Click one to switch it on or off.",
+        "InstallCost": "Options cost",
+        "StealthType": "Stealth type",
+        "StealthDM": "Detection DM",
+        "StealthTLWhy": "A further DM-1 for every Tech Level the ship is above the sensors looking for it.",
+        "RadsAbsorbed": "Rads absorbed"
       },
       "robot": {
         "TL": "TL",
@@ -2086,7 +2143,11 @@
           }
         }
       },
-      "AugmentDuplicate": "Core p.107 allows one skill augmentation. No DM from {names}."
+      "AugmentDuplicate": "Core p.107 allows one skill augmentation. No DM from {names}.",
+      "Wealth": "Wealth (WLT)",
+      "WealthHint": "Cr{cash} a month in hand; a purchase above it is a WLT check at DM−1 per Cr5000 spent.",
+      "Starving": "Starving",
+      "StarvingHint": "{before} days before starvation tells, then {impaired} more at DM−2 on physical actions with no natural healing."
     },
     "Training": {
       "Title": "Training: {name}",
@@ -2487,7 +2548,10 @@
         "fireMode": "the fire mode decides what this does"
       },
       "TraitsHint": "Surfacing beats applying.",
-      "TraitsBoundary": "A solid chip is already in this roll. A dashed one is a reminder the system deliberately does not resolve, because resolving it would mean reading the target."
+      "TraitsBoundary": "A solid chip is already in this roll. A dashed one is a reminder the system deliberately does not resolve, because resolving it would mean reading the target.",
+      "Microgravity": "Zero-G",
+      "MicrogravityCheck": "Athletics (dexterity) {target}+ or the attack misses automatically and the shooter spins out of control. Nobody rolls it here.",
+      "MicrogravityExempt": "Zero-G weapon: no check."
     },
     "Timeframes": {
       "Normal": "Normal",
@@ -2588,7 +2652,8 @@
       "NaturalHealingHint": "1D + END DM per day · END DM alone while surgery is required",
       "MentalHint": "INT and EDU, one point each per day · not PSI",
       "ReviveHint": "END check each minute · DM+1 per failed check",
-      "PsiRest": "PSI rest"
+      "PsiRest": "PSI rest",
+      "StarvingNoHealing": "A starving Traveller does not heal from injuries."
     },
     "Radiation": {
       "Exposure": "Radiation exposure",
@@ -2872,7 +2937,9 @@
       "Rules": "Rules",
       "AddRule": "add a rule",
       "DeleteRule": "Remove this rule",
-      "RulesHint": "What the round does that is neither damage nor a trait — pellets ignoring the target's Dodge, armour counting double. Clear a line to remove it."
+      "RulesHint": "What the round does that is neither damage nor a trait — pellets ignoring the target's Dodge, armour counting double. Clear a line to remove it.",
+      "Specialised": "Specialised for",
+      "SpecialisedBonus": "Specialised Processing"
     },
     "Durations": {
       "Seconds": "Seconds",
@@ -3437,7 +3504,36 @@
       "NoMount": "no mount",
       "NothingThisStep": "— nothing this step",
       "PassengerWhy": "aboard without a duty",
-      "NoDutyNoActions": "no duty, no actions"
+      "NoDutyNoActions": "no duty, no actions",
+      "Missiles": "Missiles",
+      "MissilesWhy": "salvoes in flight",
+      "Salvo": "Salvo",
+      "SalvoName": "{name} at {target}",
+      "SalvoFlight": "Flight",
+      "SalvoEffect": "Effect",
+      "SalvoFrom": "from {name}",
+      "SalvoAt": "at {name}",
+      "SalvoArriving": "arriving",
+      "SalvoRounds": "{n} rounds out",
+      "SalvoSmartChip": "Smart",
+      "SalvoInert": "out of fuel",
+      "SalvoJam": "Electronic warfare",
+      "SalvoPointDefence": "Point defence",
+      "SalvoImpact": "Impact",
+      "SalvoDelete": "Remove this salvo",
+      "SalvoLaunch": "Launch",
+      "SalvoWeapon": "Missile",
+      "SalvoTarget": "Target",
+      "SalvoCount": "Missiles",
+      "SalvoFire": "Fire",
+      "SalvoNoMissiles": "No missile is mounted on this ship.",
+      "SalvoNeedsTarget": "Name the ship the salvo is fired at.",
+      "SalvoJammed": "{name} has already been subjected to electronic warfare this round.",
+      "SalvoNoTarget": "{name} has no target left in the fight, or nothing left in the air.",
+      "SalvoMissiles": "Missiles in the salvo",
+      "SalvoSmart": "Smart: the referee adds the Tech Level difference, DM+{min} at least and DM+{max} at most.",
+      "SalvoHit": "{name} is hit: roll damage as for one missile, deduct armour, then multiply by {multiple} — the Effect, capped at the {missiles} missiles left.",
+      "SalvoMissed": "{name} is missed."
     },
     "Fleet": {
       "NewFleet": "New fleet",
@@ -3604,6 +3700,28 @@
         "Result": "{name} reduces Thrust by {n} or eliminates {n} weapon systems",
         "Rounds": "for {n} round(s)",
         "NoEffect": "No effect — the ion total is below one full hull."
+      },
+      "Chart": {
+        "Title": "Schéma des manœuvres de flotte",
+        "Open": "Schéma des manœuvres",
+        "RuleOff": "Le schéma des manœuvres est désactivé : rien ici n'écrit de position.",
+        "Hint": "Chaque anneau est une Zone de portée mesurée depuis le point fixe au centre — une planète, une station ou un convoi se déplaçant à une vitesse fixe. Placer une flotte écrit la portée entre elle et chaque autre flotte placée.",
+        "Placing": "Placement de {name}",
+        "NoSubject": "Rien à placer",
+        "Contacts": "Sur le schéma",
+        "Clear": "Retirer du schéma",
+        "Ranges": "Portées entre flottes",
+        "Pair": "{from} vers {to}",
+        "NoPairs": "Placez deux flottes pour lire la portée entre elles.",
+        "Code": {
+          "adjacent": "A",
+          "close": "C",
+          "short": "S",
+          "medium": "M",
+          "long": "L",
+          "veryLong": "VL",
+          "distant": "D"
+        }
       }
     },
     "FleetTraits": {
@@ -4338,7 +4456,9 @@
         "Late": "{days} days late — 1D+4 rolled {roll}, so {percent}% is docked: Cr{docked} off a Cr{credits} fare.",
         "Revival": "{n} low passengers: each needs a Routine (6+) Medic check as the capsule opens (Core p.158). Roll them.",
         "Hold": "{ship} · hold {used} / {capacity} t",
-        "Over": "over capacity — a lot cannot be broken up"
+        "Over": "over capacity — a lot cannot be broken up",
+        "RevivalCheck": "Revival check",
+        "RevivalNonHuman": "A non-human passenger takes DM{dm} on it."
       },
       "Errors": {
         "LotFailed": "{goods} could not be stowed aboard: the crew has already paid, so add the lot to the hold by hand.",
@@ -4382,7 +4502,10 @@
         "OtherBroker": "Their Broker",
         "Banned": "Banned at law {law}",
         "Attempts": "{n} earlier searches"
-      }
+      },
+      "RevivalTL": "TL12 ship",
+      "RevivalEmergency": "Emergency low berth",
+      "RevivalEndurance": "{name}'s END"
     },
     "WorldBases": {
       "naval": "Naval base",
@@ -4554,7 +4677,9 @@
       "stateroom": "Stateroom",
       "cargo": "Cargo",
       "software": "Software",
-      "option": "Option"
+      "option": "Option",
+      "automation": "Automation",
+      "gravShield": "Gravitic shield"
     },
     "DrugAfterKinds": {
       "none": "None",
@@ -4742,6 +4867,39 @@
         "weeks25": "25 weeks to a year",
         "overYear": "More than a year"
       }
+    },
+    "CombatMishaps": {
+      "Line": "Combat mishap ({total}): {result}",
+      "self": "Shoots or strikes themselves for the weapon's normal damage.",
+      "lost": "The weapon falls somewhere inaccessible — unrecoverable this fight, and lost for good if the party flees.",
+      "dropped": "The weapon falls but stays in sight — recoverable in a later round with a significant action.",
+      "minor": "A minor malfunction or lost grip. This round's attack is wasted; an Easy (6+) skill check as a significant action next round restores it, repeated each round until it works.",
+      "serious": "A serious malfunction puts the weapon out of action until it can be fixed in a workshop.",
+      "destroyed": "The weapon is destroyed by an ammunition explosion or similar critical damage.",
+      "none": "The attempt fails, and no mishap beyond that."
+    },
+    "ShipAutomation": {
+      "crewIntensive": "Crew-intensive",
+      "low": "Low automation",
+      "standard": "Standard automation",
+      "enhanced": "Enhanced automation",
+      "advanced": "Advanced automation",
+      "high": "High automation"
+    },
+    "HullInstallOptions": {
+      "heatShielding": "Heat shielding",
+      "radiationShielding": "Radiation shielding",
+      "reflec": "Reflec",
+      "solarCoating": "Solar coating",
+      "stealth": "Stealth"
+    },
+    "StealthTypes": {
+      "basic": "Basic",
+      "improved": "Improved",
+      "enhanced": "Enhanced",
+      "advanced": "Advanced"
     }
-  }
+  },
+  "TYPES.Combatant.missileSalvo": "Missile salvo",
+  "TYPES.HINTS.Combatant.missileSalvo": "Missiles in flight in a ship-scale battle, with a target, the band they were fired at and a number of rounds to impact."
 }

@@ -30,7 +30,7 @@ import { ChargenScreen, registerChargenScreen } from "./chargen-screen.js";
 import { ChargenTerm } from "./chargen-term.js";
 import { Checks } from "./checks.js";
 import { CrewCombatantData, MGT2Combatant, PersonCombatantData, registerCombatantContextOptions } from "./combatant.js";
-import { MGT2Combat, MGT2CombatantGroup, SHIP, ShipGroupData, SPACE, SpaceCombatData } from "./combat.js";
+import { MGT2Combat, MGT2CombatantGroup, MISSILE_SALVO, MissileSalvoData, SHIP, ShipGroupData, SPACE, SpaceCombatData } from "./combat.js";
 import { FLEET, FLEET_SHIP, FleetCombatData, FleetGroupData, FleetShipData, SALVO, SQUADRON, SalvoData, SquadronData } from "./fleet.js";
 import { FleetAttack, fleetBatteries, fleetWeaponRow, fleetWeaponRows } from "./fleet-attack.js";
 import { registerSpaceCombatScreen } from "./combat-screen.js";
@@ -148,8 +148,9 @@ Hooks.once("init", async function () {
   CONFIG.Combatant.documentClass = MGT2Combatant;
   CONFIG.Combatant.dataModels = {
     person: PersonCombatantData, crew: CrewCombatantData,
-    // `salvo` carries no Actor: a flight of missiles is a contact with a position, a target and an
-    // age, and has no hull and no business in the compendium (HG folio 124).
+    // Neither salvo carries an Actor: a flight of missiles is a contact with a target and an age,
+    // and has no hull and no business in the compendium (Core folio 172, HG folio 124).
+    [MISSILE_SALVO]: MissileSalvoData,
     [FLEET_SHIP]: FleetShipData, [SQUADRON]: SquadronData, [SALVO]: SalvoData
   };
   // A space combat is three documents, because a range band is a property of a PAIR of ships and no
@@ -459,6 +460,9 @@ Hooks.once("init", async function () {
 
   Hooks.on("renderChatMessageHTML", (message, html, messageData) => {
     ChatHelper.setupCardListeners(message, html, messageData);
+    // Core p.158's revival check is the ship's card, so the ship's sheet resolves it.
+    html.querySelector('button[data-action="revival"]')
+      ?.addEventListener("click", () => SpacecraftActorSheet.rollRevival(message));
   });
 
   // Preload template partials

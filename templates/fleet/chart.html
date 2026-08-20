@@ -1,0 +1,70 @@
+{{! HG p.122's Fleet Manoeuvre Chart. Eight rings around a fixed point, four quadrants counted
+    counter-clockwise from the top, and ring N holding N sectors per quadrant — so the sector next to
+    A1M across the vertical axis is B4M. Clicking a cell places the selected contact; a FLEET's
+    placement also writes the pair bands, which is the map the rest of the engine reads. }}
+<div class="mgt2-chart">
+
+	<section class="face">
+		<div class="top">
+			<h2>{{localize 'MGT2.Fleet.Chart.Title'}}</h2>
+			<span class="of">{{#if subject}}{{localize 'MGT2.Fleet.Chart.Placing' name=subject.name}}{{else}}{{localize 'MGT2.Fleet.Chart.NoSubject'}}{{/if}}</span>
+			{{#unless enabled}}<span class="of gm">{{localize 'MGT2.Fleet.Chart.RuleOff'}}</span>{{/unless}}
+		</div>
+
+		<svg class="plot" viewBox="0 0 {{view.size}} {{view.size}}" role="img"
+			aria-label="{{localize 'MGT2.Fleet.Chart.Title'}}">
+			{{#each cells as |cell|}}
+			<path class="cell{{#if cell.here}} on{{/if}}{{#if cell.here.mine}} me{{/if}}" d="{{cell.d}}"
+				data-quadrant="{{cell.quadrant}}" data-sector="{{cell.sector}}" data-band="{{cell.band}}"
+				{{#if ../canEdit}}data-action="place"{{/if}}><title>{{cell.code}}{{#if cell.here}} &mdash; {{cell.here.label}}{{/if}}</title></path>
+			{{/each}}
+			{{#each cells as |cell|}}
+			{{#if cell.here}}<circle class="tok{{#if cell.here.mine}} me{{/if}}" cx="{{cell.mark.x}}" cy="{{cell.mark.y}}" r="4.5" />{{/if}}
+			{{/each}}
+			<circle class="hub" cx="{{view.centre}}" cy="{{view.centre}}" r="{{view.hub}}" />
+		</svg>
+		<p class="hint">{{localize 'MGT2.Fleet.Chart.Hint'}}</p>
+	</section>
+
+	<aside class="side">
+		{{! Everything the chart places. A hull is not one of them: p.115 moves a fleet's ships as a
+		    unit, so the fleet carries the position and its hulls carry the formation. }}
+		<div class="block">
+			<div class="sect">
+				<h3>{{localize 'MGT2.Fleet.Chart.Contacts'}}</h3>
+			</div>
+			<ul class="order places">
+				{{#each subjects as |row|}}
+				<li class="{{#if row.selected}}on{{/if}}" data-subject-id="{{row.id}}">
+					<span class="who" data-action="selectSubject">
+						<span class="nm">{{row.name}}</span>
+						<span class="sub">{{localize row.kind}}{{#if row.fleet}} &middot; {{row.fleet}}{{/if}}</span>
+					</span>
+					<span class="st">{{#if row.code}}<b class="code">{{row.code}}</b>{{else}}&mdash;{{/if}}</span>
+				</li>
+				{{/each}}
+			</ul>
+			{{#unless subjects.length}}<p class="hint">{{localize 'MGT2.Fleet.Screen.NoFleets'}}</p>{{/unless}}
+			{{#if canEdit}}
+			<button type="button" class="btn" data-action="clearPlace">{{localize 'MGT2.Fleet.Chart.Clear'}}</button>
+			{{/if}}
+		</div>
+
+		{{! What the chart wrote. p.124 reads the range to a target off the two positions, and that is
+		    what lands in the band map the attack path already asks. }}
+		<div class="block">
+			<div class="sect">
+				<h3>{{localize 'MGT2.Fleet.Chart.Ranges'}}</h3>
+			</div>
+			<div class="fleet">
+				{{#each pairs as |pair|}}
+				<div class="row">
+					<span class="lbl">{{localize 'MGT2.Fleet.Chart.Pair' from=pair.from to=pair.to}}</span>
+					<span class="v">{{#if pair.label}}{{localize pair.label}}{{else}}&mdash;{{/if}}</span>
+				</div>
+				{{/each}}
+			</div>
+			{{#unless pairs.length}}<p class="hint">{{localize 'MGT2.Fleet.Chart.NoPairs'}}</p>{{/unless}}
+		</div>
+	</aside>
+</div>

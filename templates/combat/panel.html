@@ -228,6 +228,83 @@
 			</tbody>
 		</table>
 	</div>
+
+	{{! BLOCK 4 - Core p.172-173. A salvo is a contact with an age: it is fired at a band, that band
+	    fixes its flight time, and electronic warfare and point defence thin it on the way. The Effect
+	    beside a row is the check the sensor operator or the gunner has already rolled. }}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.SpaceCombat.Missiles'}}</h3>
+			<span class="count">{{localize 'MGT2.SpaceCombat.MissilesWhy'}}</span>
+		</div>
+		{{#if panel.salvoes.length}}
+		<table class="roster">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.SpaceCombat.Salvo'}}</th>
+					<th>{{localize 'MGT2.SpaceCombat.SalvoFlight'}}</th>
+					<th>{{localize 'MGT2.SpaceCombat.SalvoEffect'}}</th>
+					<th class="r">{{localize 'MGT2.SpaceCombat.Action'}}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each panel.salvoes as |salvo|}}
+				<tr data-salvo-id="{{salvo.id}}" class="{{#if salvo.eliminated}}spent{{/if}}">
+					<td class="station">
+						<b>{{salvo.name}}</b>
+						<span class="dept">{{#if salvo.incoming}}{{localize 'MGT2.SpaceCombat.SalvoFrom' name=salvo.other}}{{else}}{{localize 'MGT2.SpaceCombat.SalvoAt' name=salvo.other}}{{/if}}</span>
+					</td>
+					<td class="duty">
+						<span class="ro">{{salvo.remaining}} / {{salvo.count}}</span>
+						<span class="at">{{localize salvo.bandLabel}}</span>
+						<span class="at">{{#if salvo.arriving}}{{localize 'MGT2.SpaceCombat.SalvoArriving'}}{{else}}{{localize 'MGT2.SpaceCombat.SalvoRounds' n=salvo.roundsLeft}}{{/if}}</span>
+						{{#if salvo.smart}}<span class="at">{{localize 'MGT2.SpaceCombat.SalvoSmartChip'}}</span>{{/if}}
+						{{#if salvo.inert}}<span class="at"><b class="noarm">{{localize 'MGT2.SpaceCombat.SalvoInert'}}</b></span>{{/if}}
+					</td>
+					<td>
+						{{#if ../canEdit}}
+						<input class="f n" type="number" step="1" name="salvoEffect" value="0"
+							aria-label="{{localize 'MGT2.SpaceCombat.SalvoEffect'}}" />
+						{{/if}}
+					</td>
+					<td class="r act">
+						{{#if ../canEdit}}
+						<div class="todo">
+							<button type="button" class="btn" data-action="salvoJam"{{#if salvo.jammed}} disabled{{/if}}>{{localize 'MGT2.SpaceCombat.SalvoJam'}}</button>
+							<button type="button" class="btn" data-action="salvoDefend">{{localize 'MGT2.SpaceCombat.SalvoPointDefence'}}</button>
+							<button type="button" class="btn" data-action="salvoImpact"{{#unless salvo.arriving}} disabled{{/unless}}>{{localize 'MGT2.SpaceCombat.SalvoImpact'}}</button>
+							<a class="rm" data-action="salvoRemove" data-tooltip="{{localize 'MGT2.SpaceCombat.SalvoDelete'}}"><i class="fa-solid fa-trash"></i></a>
+						</div>
+						{{/if}}
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		{{#if canEdit}}
+		{{#if panel.launch.missiles.length}}
+		<div class="poolrow" data-salvo-form>
+			<span class="lbl">{{localize 'MGT2.SpaceCombat.SalvoLaunch'}}</span>
+			<select class="f" name="salvoWeapon" aria-label="{{localize 'MGT2.SpaceCombat.SalvoWeapon'}}">
+				{{#each panel.launch.missiles as |missile|}}
+				<option value="{{missile.id}}">{{missile.name}}</option>
+				{{/each}}
+			</select>
+			<select class="f" name="salvoTarget" aria-label="{{localize 'MGT2.SpaceCombat.SalvoTarget'}}">
+				{{#each panel.launch.targets as |target|}}
+				<option value="{{target.id}}">{{target.name}}</option>
+				{{/each}}
+			</select>
+			<input class="f n" type="number" min="1" step="1" name="salvoCount" value="1"
+				aria-label="{{localize 'MGT2.SpaceCombat.SalvoCount'}}" />
+			<button type="button" class="btn" data-action="launchSalvo">{{localize 'MGT2.SpaceCombat.SalvoFire'}}</button>
+		</div>
+		{{else}}
+		<p class="hint">{{localize 'MGT2.SpaceCombat.SalvoNoMissiles'}}</p>
+		{{/if}}
+		{{/if}}
+	</div>
 {{/if}}
 
 {{else}}

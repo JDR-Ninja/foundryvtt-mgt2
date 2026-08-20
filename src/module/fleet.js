@@ -19,6 +19,9 @@ export const FLEET_COMBATANTS = Object.freeze([FLEET_SHIP, SQUADRON]);
 /** Everything on the chart. Folio 124 tracks salvoes "as if they were ships". */
 export const FLEET_CONTACTS = Object.freeze([...FLEET_COMBATANTS, SALVO]);
 
+/** What the manoeuvre chart places: folio 115 moves a fleet's hulls as a unit, so a hull is not one. */
+const CHART_PLACED = Object.freeze([FLEET, SQUADRON, SALVO]);
+
 /** HG folio 117's tightest operational range, and folio 114's — both worth Defensive DM+1. */
 const TIGHT = Object.freeze(["adjacent", "close"]);
 
@@ -42,6 +45,70 @@ function mean(values) {
 /** A pool counter: spent this round, never negative, cleared when the round turns over. */
 function spentField() {
     return new fields.NumberField({ required: true, nullable: false, integer: true, min: 0, initial: 0 });
+}
+
+/** Folio 122's place on the manoeuvre chart, null throughout while a contact is unplaced. */
+function positionField() {
+    return new fields.SchemaField({
+        quadrant: new fields.StringField({ required: false, nullable: true, blank: false,
+            initial: null, choices: MGT2.FleetChart.quadrants }),
+        sector: new fields.NumberField({ required: false, nullable: true, integer: true,
+            min: 1, initial: null }),
+        band: new fields.StringField({ required: false, nullable: true, blank: false,
+            initial: null, choices: MGT2.ShipRangeBands })
+    });
+}
+
+/** How many sectors a quadrant holds in one band — 15 for Distant, which folio 123 draws twice. */
+export function chartSectors(band) {
+    return MGT2.FleetChart.rings.reduce((sum, ring) =>
+        sum + ((ring.band === band) ? ring.sectors : 0), 0);
+}
+
+/** Which ring of the chart a sector of a band falls in, and its place around that ring. */
+export function chartRing(band, sector) {
+    const rings = MGT2.FleetChart.rings;
+    let seen = 0;
+    for ( let index = 0; index < rings.length; index++ ) {
+        if ( rings[index].band !== band ) continue;
+        if ( sector <= (seen + rings[index].sectors) ) {
+            return { index, ring: rings[index], place: sector - seen - 1 };
+        }
+        seen += rings[index].sectors;
+    }
+    return null;
+}
+
+/** A cell's centre: kilometres from the fixed point, and radians counter-clockwise from the top. */
+function chartPoint(position) {
+    const quadrant = MGT2.FleetChart.quadrants.indexOf(position?.quadrant ?? "");
+    const found = chartRing(position?.band, position?.sector);
+    if ( (quadrant < 0) || !found ) return null;
+    const inner = found.index ? MGT2.FleetChart.rings[found.index - 1].km : 0;
+    return {
+        km: (inner + found.ring.km) / 2,
+        angle: (((quadrant * found.ring.sectors) + found.place + 0.5) * 2 * Math.PI)
+            / (4 * found.ring.sectors)
+    };
+}
+
+/** Folio 124: the range to a target is set by "the position of the attacking fleet relative to" it. */
+export function chartBand(a, b) {
+    const from = chartPoint(a);
+    const to = chartPoint(b);
+    if ( !from || !to ) return null;
+    // One ring covers exactly one band's span, so two contacts sharing a cell are at that band.
+    if ( (a.quadrant === b.quadrant) && (a.sector === b.sector) && (a.band === b.band) ) return a.band;
+    const km = Math.sqrt((from.km ** 2) + (to.km ** 2)
+        - (2 * from.km * to.km * Math.cos(from.angle - to.angle)));
+    return SpaceCombatData.bandForKm(km);
+}
+
+/** Folio 124: "C Quadrant, Sector 3, at Distant range (you could abbreviate this to C3D)". */
+export function chartCode(position) {
+    if ( !position?.quadrant || !position.sector || !position.band ) return null;
+    const band = game.i18n.localize(`MGT2.Fleet.Chart.Code.${position.band}`);
+    return `${position.quadrant}${position.sector}${band}`;
 }
 
 /** The fleet group a Combatant belongs to, read off `_source` so it answers before it prepares. */
@@ -111,6 +178,44 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
         const value = MGT2.ShipRangeBands[band]
             ? band : new foundry.data.operators.ForcedDeletion();
         return this.parent.update({ system: { bands: { [key]: value } } });
+    }
+
+    /** Folio 122 prints the chart as optional, so it is a second switch behind the engine's own. */
+    get chart() {
+        return this.enabled && Rules.on("fleetChart");
+    }
+
+    /** Put a fleet, a wing or a salvo on the chart, or lift it off by passing no position. */
+    async setPosition(target, position) {
+        if ( !this.chart ) {
+            ui.notifications.warn(game.i18n.localize("MGT2.Fleet.Chart.RuleOff"));
+            return null;
+        }
+        if ( !CHART_PLACED.includes(target?.type) || (target.parent !== this.parent) ) return null;
+        const quadrant = MGT2.FleetChart.quadrants.includes(position?.quadrant)
+            ? position.quadrant : null;
+        const band = MGT2.ShipRangeBands[position?.band] ? position.band : null;
+        const value = (quadrant && band)
+            ? { quadrant, band, sector: Math.min(chartSectors(band),
+                Math.max(1, Math.trunc(Number(position.sector) || 1))) }
+            : { quadrant: null, sector: null, band: null };
+        await target.update({ system: { position: value } });
+        if ( target.type === FLEET ) await this.writeChartBands();
+        return target;
+    }
+
+    /** Every placed pair of fleets, derived and stored: the band map stays the interface. */
+    async writeChartBands() {
+        const placed = this.fleets.filter(group => group.system.position.quadrant);
+        const bands = {};
+        for ( let i = 0; i < placed.length; i++ ) {
+            for ( let j = i + 1; j < placed.length; j++ ) {
+                const band = chartBand(placed[i].system.position, placed[j].system.position);
+                if ( band ) bands[SpaceCombatData.pairKey(placed[i], placed[j])] = band;
+            }
+        }
+        if ( !Object.keys(bands).length ) return this.parent;
+        return this.parent.update({ system: { bands } });
     }
 
     /** Drop every pair a fleet was half of — what a fleet leaving the battle takes with it. */
@@ -246,7 +351,8 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
 
         const [split] = await this.parent.createEmbeddedDocuments("CombatantGroup", [{
             type: FLEET, img: group.img,
-            name: name || game.i18n.format("MGT2.Fleet.SplitOf", { name: group.name })
+            name: name || game.i18n.format("MGT2.Fleet.SplitOf", { name: group.name }),
+            system: { position: { ...group.system.position } }
         }]);
         if ( !split ) return null;
         // Every band the parent held, and never a band to the parent itself: two halves of one
@@ -379,6 +485,8 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
             // following turn".
             scattered: new fields.NumberField({
                 required: true, nullable: false, integer: true, min: 0, initial: 0 }),
+
+            position: positionField(),
 
             // Folio 122's Fleet Dispersal table, once the Leadership → Tactics (naval) chain has
             // been rolled: how many rounds are left to run and what the fleet's DMs pay meanwhile.
@@ -1008,7 +1116,8 @@ export class SquadronData extends foundry.abstract.TypeDataModel {
             // Folio 114: "usually the same as the squadron's mothership but may be different" — one
             // level lower for a green wing, one or two higher for a crack one.
             crewSkillOverride: new fields.NumberField({
-                required: false, nullable: true, integer: true, min: 0, initial: null })
+                required: false, nullable: true, integer: true, min: 0, initial: null }),
+            position: positionField()
             // **No pools.** Folio 114's Fighter Squadron Sheet prints Crew Skill, weapons, the two
             // DMs, Thrust, Armour and Hull points and nothing else: a wing has no salvo defence, no
             // screens, no sandcasters and no Repair Points.
@@ -1146,7 +1255,9 @@ export class SalvoData extends foundry.abstract.TypeDataModel {
             // Folio 119's Missile Flight table is read from where it was FIRED and not from where
             // the fleets are now — the flight time was fixed when the trigger was pulled.
             launchBand: new fields.StringField({
-                required: true, blank: false, initial: PLANE_OF_BATTLE, choices: MGT2.ShipRangeBands })
+                required: true, blank: false, initial: PLANE_OF_BATTLE, choices: MGT2.ShipRangeBands }),
+            // Folio 124: salvoes "can be tracked and moved as if they were ships".
+            position: positionField()
         };
     }
 

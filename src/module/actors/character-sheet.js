@@ -297,13 +297,15 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
    */
   #prepareCharacteristics() {
     const schema = this.actor.system.schema.fields.characteristics.fields;
+    const named = this.actor.system.characteristicNames ?? {};
 
     return this.actor.system.characteristicKeys.map(key => {
       const c = this.actor.system.characteristics[key];
       return {
         key,
-        label: TravellerActorSheet.#linkLabel(key),
-        short: `MGT2.Characteristics.${key}.short`,
+        // A species name is a literal, and `localize` hands back what it cannot find.
+        label: named[key]?.label || TravellerActorSheet.#linkLabel(key),
+        short: named[key]?.short || `MGT2.Characteristics.${key}.short`,
         fields: schema[key].fields,
         base: c.base, damage: c.damage, value: c.value, max: c.max, dm: c.dm,
         // Both halves: the actor's own flag, and whether the world has adopted the rule that makes
@@ -907,6 +909,10 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   /** Core p.83's rate can come out negative while surgery is required, and then it is a wound. */
   static async #onNaturalHealing() {
     const system = this.actor.system;
+    // Companion p.80: a starving Traveller "does not heal from injuries".
+    if (Rules.on("starvation") && system.states.starving) {
+      return void ui.notifications.warn(game.i18n.localize("MGT2.Recovery.StarvingNoHealing"));
+    }
     const roll = await new Roll(system.naturalHealingFormula).roll();
     const points = roll.total;
 
@@ -1556,6 +1562,14 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         // Core folio 78's pair is one-handed weapons of either kind, so this outlives the range
         // block: a melee attack is offered the second weapon as readily as a pistol is.
         rollOptions.blocks.attack = true;
+        // Core folio 81: in zero gravity every close combat weapon and every ranged weapon without
+        // the Zero-G trait owes an Athletics (dexterity) check. Stated, and rolled by nobody.
+        if (actor.system.gravityBand === MGT2.Microgravity.band) {
+          const traits = itemObj.system.effective?.traits ?? itemObj.system.traits;
+          rollOptions.microgravity = {
+            exempt: MGT2Helper.hasTrait(traits, MGT2.Microgravity.trait)
+          };
+        }
         // Core folio 77: the magazine is how many shots can be fired "before reloading is
         // necessary", so an empty one is refused here rather than allowed to drift negative.
         if (TravellerActorSheet.#magazine(itemObj)?.ammo === 0) {
@@ -1667,6 +1681,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         ? actor.getEmbeddedDocument("Item", userRollData.skill) : null;
       const firstAidPoints = MGT2Helper.isFirstAidSkill(rolledSkill?.name) ? Math.max(1, effect) : 0;
 
+      const mishapLine = carriesEffect
+        ? await TravellerActorSheet.#combatMishap(scored, rolledSkill) : null;
+
       // Core folio 78: to grapple IS to make an opposed Melee check, so nothing on the prompt
       // declares one — the skill rolled and the Opposed row together are the declaration.
       const grapple = (opposed && (opposed.outcome !== "tie")
@@ -1738,6 +1755,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         ammoLine: (attack === 1) ? ammoLine : null,
         psiLine,
         extendedLine,
+        mishapLine,
         grapple,
         showRollDamage: rollOptions.damageFormula !== null && rollOptions.damageFormula !== "",
         damageCarriesEffect: carriesEffect,
@@ -1769,6 +1787,22 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const magazine = system?.effective?.magazine ?? system?.magazine;
     if (!system || (system.scale === "spacecraft") || !(magazine > 0)) return null;
     return { ammo: system.ammo, magazine };
+  }
+
+  /**
+   * Companion p.53: a double 1 that is also a failure, read on 2D + the weapon skill — so a higher
+   * skill lands a milder row. @returns {Promise<string|null>}
+   */
+  static async #combatMishap(scored, skill) {
+    if (!Rules.on("combatMishaps") || (scored.effect >= 0)) return null;
+    const dice = (scored.roll.dice[0]?.results ?? []).filter(result => result.active);
+    if ((dice.length !== 2) || dice.some(result => result.result !== 1)) return null;
+
+    const level = Math.max(0, skill?.system.level ?? 0);
+    const roll = await new Roll(`2d6${MGT2Helper.getFormulaDM(level)}`).roll();
+    const row = MGT2.CombatMishaps.find(entry => (entry.max === null) || (roll.total <= entry.max));
+    return game.i18n.format("MGT2.CombatMishaps.Line",
+      { total: roll.total, result: game.i18n.localize(row.label) });
   }
 
   /** What the card says about the fire mode (Core folio 79). @returns {string|null} */

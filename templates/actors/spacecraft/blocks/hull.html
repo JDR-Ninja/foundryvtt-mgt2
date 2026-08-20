@@ -147,4 +147,39 @@
 		</li>
 		{{/each}}
 	</ul>
+
+	{{! HG p.13-14's Install Hull Options. Each is priced per ton of hull and fitted at most once;
+	    Stealth alone claims tonnage and carries the sensor DM, and its grade is a select. }}
+	{{#if ship.options.fitted.length}}
+	<ul class="codes play-only" data-family="hull" data-tooltip="{{localize 'MGT2.Actor.spacecraft.InstallOptions'}}">
+		{{#each ship.options.fitted as |option|}}
+		<li class="code"><b>{{localize option.label}}</b></li>
+		{{/each}}
+	</ul>
+	{{/if}}
+	<ul class="codes edit-only" data-family="hull" data-tooltip="{{localize 'MGT2.Actor.spacecraft.InstallOptionsHint'}}">
+		{{#each ship.options.installed as |option|}}
+		<li class="code{{#unless option.on}} off{{/unless}}" data-action="hullOptionToggle" data-set="installed" data-option="{{option.key}}">
+			<b>{{localize option.label}}</b>
+		</li>
+		{{/each}}
+	</ul>
+	<div class="grid edit-only">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.StealthType'}}</span>
+			{{formInput systemFields.hull.fields.stealth name="system.hull.stealth" value=system.hull.stealth localize=true blank="" classes="f"}}
+		</label>
+	</div>
+	{{#if ship.options.fitted.length}}
+	<dl class="statline grid play-only" data-derived="system.hullOptions">
+		<div class="stat"><dt>{{localize 'MGT2.Actor.spacecraft.InstallCost'}}</dt><dd><i>Cr</i>{{credits ship.options.cost}}</dd></div>
+		<div class="stat{{#unless ship.options.stealthDM}} none{{/unless}}"><dt>{{localize 'MGT2.Actor.spacecraft.StealthDM'}}</dt><dd>{{#if ship.options.stealthDM}}{{showDM ship.options.stealthDM}}{{else}}&mdash;{{/if}}</dd></div>
+		<div class="stat{{#unless ship.options.rads}} none{{/unless}}"><dt>{{localize 'MGT2.Actor.spacecraft.RadsAbsorbed'}}</dt><dd>{{#if ship.options.rads}}{{ship.options.rads}}{{else}}&mdash;{{/if}}</dd></div>
+	</dl>
+	{{#if ship.options.stealthDM}}<span class="why">{{localize 'MGT2.Actor.spacecraft.StealthTLWhy'}}</span>{{/if}}
+	{{/if}}
+	{{! HG p.12's size limits and p.13's exclusions: a red line and never a refusal. }}
+	{{#each ship.options.checks as |line|}}
+	<span class="at"><b class="noarm">{{line}}</b></span>
+	{{/each}}
 </div>

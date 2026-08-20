@@ -19,7 +19,7 @@ export const Grants = {
      *            mandatory: string[]}}
      */
     backgroundSkills(actor) {
-        const block = Chargen.frame(actor)?.system.backgroundSkills;
+        const block = Chargen.law(actor, Chargen.frame(actor)?.system.backgroundSkills);
         const eduDM = actor?.system.characteristics?.education?.dm ?? 0;
         const declared = (block?.formula ?? "").trim();
         const fixed = declared ? Number(declared) : NaN;
@@ -228,13 +228,14 @@ export const Grants = {
         const boon = CreationOptions.boon();
         const entries = (declared.length
             ? declared.map(row => ({ characteristic: row.characteristic, formula: row.formula || "2D",
-                replaces: row.replaces }))
+                replaces: row.replaces, label: row.label }))
             : MGT2.RolledCharacteristics.filter(key => !without.has?.(key))
-                .map(characteristic => ({ characteristic, formula: "2D", replaces: "" })))
+                .map(characteristic => ({ characteristic, formula: "2D", replaces: "", label: "" })))
             .filter(entry => entry.characteristic);
         for ( const [index, entry] of entries.entries() ) {
             entry.boon = index < boon.count;
-            entry.label = game.i18n.localize(MGT2.Characteristics[entry.characteristic] ?? entry.characteristic);
+            entry.label = entry.label
+                || game.i18n.localize(MGT2.Characteristics[entry.characteristic] ?? entry.characteristic);
             entry.rolled = entry.boon ? boon.formula : MGT2Helper.damageFormula(entry.formula);
         }
         return { method: Rules.get("creationAssignment"), boon: boon.count, entries };

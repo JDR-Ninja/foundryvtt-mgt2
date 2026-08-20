@@ -4,7 +4,7 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{panel.name}}</h3>
-			<span class="count">{{panel.fleetName}}{{#if panel.shipClass}} &middot; {{panel.shipClass}}{{/if}}{{#if panel.tons}} &middot; {{localize 'MGT2.SpaceCombat.Tons' tons=panel.tons}}{{/if}}</span>
+			<span class="count">{{panel.fleetName}}{{#if panel.shipClass}} &middot; {{panel.shipClass}}{{/if}}{{#if panel.tons}} &middot; {{localize 'MGT2.SpaceCombat.Tons' tons=panel.tons}}{{/if}}{{#if panel.code}} &middot; {{panel.code}}{{/if}}</span>
 			{{#if panel.editable}}
 			<a class="rm" data-action="removeContact" data-tooltip="{{localize 'MGT2.Fleet.Screen.RemoveContact'}}"><i class="fa-solid fa-trash"></i></a>
 			{{/if}}

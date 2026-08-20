@@ -403,12 +403,47 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return budget;
     }
 
-    /** Hull options are options, not traits: the registry has no ship family. */
+    /**
+     * Hull options are options, not traits: the registry has no ship family. HG p.12's size limits
+     * are drawn as advisory lines beside them and refuse nothing.
+     */
     static #hullOptions(system) {
-        const rows = Object.entries(MGT2.HullOptions).map(([key, option]) => ({
-            key, label: option.label, on: system.hull.options.has(key)
+        const say = (key, data) => game.i18n.format(`MGT2.Actor.spacecraft.${key}`, data);
+        const checks = [];
+        const rows = Object.entries(MGT2.HullOptions).map(([key, option]) => {
+            const on = system.hull.options.has(key);
+            if (on && option.minTons && (system.hull.tons < option.minTons)) {
+                checks.push(say("HullOptionMin", { option: game.i18n.localize(option.label),
+                    tons: system.hull.tons, min: option.minTons }));
+            }
+            if (on && option.maxTons && (system.hull.tons > option.maxTons)) {
+                checks.push(say("HullOptionMax", { option: game.i18n.localize(option.label),
+                    tons: system.hull.tons, max: option.maxTons }));
+            }
+            return { key, label: option.label, on };
+        });
+        const installed = Object.entries(MGT2.HullInstallOptions).map(([key, option]) => ({
+            key, label: option.label, on: system.hull.installed.has(key)
         }));
-        return { rows, on: rows.filter(row => row.on) };
+
+        const fitted = system.hullOptions;
+        const named = key => game.i18n.localize(MGT2.HullInstallOptions[key].label);
+        for (const row of fitted.underTL) {
+            checks.push(say("HullInstallTL", { option: named(row.key), tl: row.tl, ship: system.tl }));
+        }
+        for (const [a, b] of fitted.clashes) {
+            checks.push(say("HullInstallExclusive", { option: named(a), other: named(b) }));
+        }
+        if (fitted.gradeMissing) {
+            checks.push(game.i18n.localize("MGT2.Actor.spacecraft.HullInstallStealthGrade"));
+        }
+
+        return {
+            rows, on: rows.filter(row => row.on),
+            installed, fitted: installed.filter(row => row.on),
+            checks,
+            stealthDM: fitted.sensorDM, cost: fitted.cost, rads: fitted.radsAbsorbed
+        };
     }
 
     /** Berths and passengers as one list: three consumers read them and none of them is a pool. */
@@ -445,8 +480,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 ammo += weapon.system.magazine ?? 0;
             }
             // HG p.29: the multiple applies after armour and never to missiles or torpedoes.
-            const missile = held.some(weapon => MGT2Helper.hasTrait(weapon.system.traits, "smart")
-                || /missile|torpedo/i.test(weapon.name));
+            const missile = held.some(weapon => MGT2Helper.isMissileWeapon(weapon));
             // Core p.168: two or more weapons OF THE SAME TYPE in one mount fire together on a
             // single attack roll, each extra one adding +1 per damage die.
             const linked = held.length
@@ -828,13 +862,28 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         });
     }
 
+    /** Core p.158's two ship-side modifiers to the revival check. */
+    #revivalModifiers() {
+        const rule = MGT2.LowBerthRevival;
+        const rows = [];
+        if ((MGT2Helper.tlNumber(this.actor.system.tl) ?? 0) >= rule.tl) {
+            rows.push({ key: "revivalTL", label: "MGT2.Trade.RevivalTL", dm: rule.tlDM });
+        }
+        if (this.actor.system.lowBerths.emergency > 0) {
+            rows.push({ key: "revivalEmergency", label: "MGT2.Trade.RevivalEmergency",
+                dm: rule.emergencyDM });
+        }
+        return rows;
+    }
+
     /** The far end, on the log — the settlement, and whatever the referee still owes it. */
     async #postSettlement({ title, where, line, roll, late, days, percent, docked, credits,
         revival, count }) {
         const hold = this.actor.system.cargo;
+        const nonHuman = MGT2Helper.signed(MGT2.LowBerthRevival.nonHumanDM);
         const content = await foundry.applications.handlebars.renderTemplate(
             "systems/mgt2/templates/chat/traffic-delivery.html", {
-                title, line, late, days, docked, credits, revival, count,
+                title, line, late, days, docked, credits, revival, count, nonHuman,
                 where: game.i18n.format("MGT2.Trade.Arriving", { world: where }),
                 percent,
                 roll: roll?.total ?? 0,
@@ -847,7 +896,65 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             // v14 appends no display of its own once `content` is set, so this costs the card
             // nothing and buys Dice So Nice and an auditable record.
             rolls: roll ? [roll] : [],
-            content
+            content,
+            flags: revival
+                ? { mgt2: { revival: { ship: this.actor.name, modifiers: this.#revivalModifiers() } } }
+                : {}
+        });
+    }
+
+    /**
+     * Core p.158: opening a low berth is a Routine (6+) Medic check with the PASSENGER's END DM,
+     * so a targeted passenger lends theirs and the selected token makes the check.
+     * @param {ChatMessage} message   The Ashore card, carrying what the ship contributed
+     */
+    static async rollRevival(message) {
+        const payload = message.flags?.mgt2?.revival;
+        if (!payload) return;
+        const actor = canvas.tokens?.controlled.find(token => token.actor?.isOwner)?.actor;
+        if (!actor) {
+            return ui.notifications.warn(game.i18n.localize("MGT2.Errors.NoOwnedTokenSelected"));
+        }
+
+        const modifiers = payload.modifiers.map(row => ({ ...row }));
+        const passenger = Array.from(game.user?.targets ?? [])[0]?.actor;
+        const endurance = passenger?.system.characteristics?.endurance?.dm;
+        if (Number.isFinite(endurance)) {
+            modifiers.push({ key: "revivalEndurance", label: "MGT2.Trade.RevivalEndurance",
+                params: { name: passenger.name }, dm: endurance });
+        }
+
+        const medic = actor.items.find(item => (item.type === "talent")
+            && (item.system.subType === "skill") && MGT2Helper.isFirstAidSkill(item.name));
+        const label = game.i18n.localize("MGT2.Trade.Card.RevivalCheck");
+        const rollOptions = {
+            rollTypeName: payload.ship,
+            rollObjectName: label,
+            characteristics: RollPromptHelper.actorCharacteristics(actor),
+            characteristic: "",
+            skills: RollPromptHelper.actorSkills(actor),
+            skill: medic?.id ?? "NP",
+            checkModifiers: modifiers,
+            difficulty: MGT2.LowBerthRevival.difficulty,
+            blocks: { skill: true, range: false, traits: false },
+            strengthDM: 0
+        };
+
+        const answered = await RollPromptHelper.roll(rollOptions);
+        if (!answered) return;
+        const { formula, modifiers: named, chainSources } =
+            RollPromptHelper.terms(answered, actor, modifiers);
+        if (MGT2Helper.hasValue(answered, "difficulty")) rollOptions.difficulty = answered.difficulty;
+
+        const scored = await Checks.resolve({
+            formula, rollData: actor.getRollData(),
+            difficulty: rollOptions.difficulty, prompt: answered });
+        if (!scored) return;
+        return Checks.post(scored, {
+            actor, label, mode: answered.rollMode,
+            rollTypeName: payload.ship, rollObjectName: label,
+            difficulty: rollOptions.difficulty,
+            modifiers: named, chainSources, showButtons: true
         });
     }
 
@@ -951,13 +1058,14 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return SkipDebtsDialog.open(this.actor);
     }
 
-    /** @this {SpacecraftActorSheet} */
+    /** Serves HG p.12's specialised hulls and p.13's installed options, one set each. */
     static async #onHullOptionToggle(event, target) {
         const key = target.dataset.option;
-        const options = new Set(this.actor.system.hull.options);
+        const path = target.dataset.set === "installed" ? "installed" : "options";
+        const options = new Set(this.actor.system.hull[path]);
         if (options.has(key)) options.delete(key);
         else options.add(key);
-        return this.actor.update({ "system.hull.options": Array.from(options) });
+        return this.actor.update({ [`system.hull.${path}`]: Array.from(options) });
     }
 
     /** One handler for the four repeatable arrays. */

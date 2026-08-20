@@ -259,7 +259,6 @@
 						{{selectOptions @root.config.CareerExitModes selected=pending.expiresWhen localize=true}}
 					</select>
 					<input class="f wide" type="text" name="system.{{et.key}}.{{r}}.tray.{{p}}.note" value="{{pending.note}}" placeholder="{{localize 'MGT2.Chargen.Template.TrayNote'}}" />
-					<label class="chk"><input type="checkbox" name="system.{{et.key}}.{{r}}.tray.{{p}}.overridesOncePerLifetime" {{checked pending.overridesOncePerLifetime}} /><span>{{localize 'MGT2.Chargen.Template.OverridesDraftLimit'}}</span></label>
 					<a class="del" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
 				</div>
 				{{/each}}

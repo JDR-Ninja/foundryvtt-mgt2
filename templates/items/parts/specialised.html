@@ -1,0 +1,11 @@
+{{! Core p.112: a computer built for one purpose runs THAT program at +1 or +2 Processing. The bonus
+    is ring-fenced, so only what the named program claims of it raises the host's cap. Callers pass
+    `f` (the SchemaField), `v` (its value) and `path`. }}
+<label>
+	<span class="lbl">{{localize 'MGT2.Items.Specialised'}}</span>
+	{{formInput f.fields.software name=(concat path ".software") value=v.software classes="f"}}
+</label>
+<label>
+	<span class="lbl">{{localize 'MGT2.Items.SpecialisedBonus'}}</span>
+	{{formInput f.fields.bonus name=(concat path ".bonus") value=v.bonus classes="f num"}}
+</label>

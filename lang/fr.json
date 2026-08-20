@@ -319,6 +319,38 @@
         "core": "Livre de base — périodes d'étude",
         "companion": "Compagnon — points d'Expérience",
         "both": "Les deux, au choix pour chaque programme"
+      },
+      "fleetChart": {
+        "name": "Schéma des manœuvres de flotte",
+        "hint": "La carte optionnelle que Garde Haute imprime à côté des règles de bataille entre flottes : huit anneaux de portée autour d'un point fixe, chacun divisé en quadrants et en secteurs. Y placer une flotte écrit la portée entre flottes que l'écran de bataille lit déjà ; la désactiver laisse chaque portée en place et rend la carte à la saisie manuelle."
+      },
+      "wealth": {
+        "name": "Richesse abstraite (RCH)",
+        "hint": "Affiche un score de RCH et son MD à côté du liquide du Voyageur, lu sur les Crédits via la table du Compagnon. Les Crédits restent suivis : l'échelle les lit, elle ne les remplace pas."
+      },
+      "combatMishaps": {
+        "name": "Aléas de combat",
+        "hint": "Un test de combat qui obtient un double 1 et échoue quand même lit un aléa sur 2D plus la compétence d'arme, imprimé sur la carte."
+      },
+      "naturalResilience": {
+        "name": "Résistance naturelle",
+        "hint": "Le MD d'END de la cible est déduit des dégâts de chaque attaque ; un MD négatif est au contraire ajouté."
+      },
+      "knockoutBlow": {
+        "name": "K.-O.",
+        "hint": "Une attaque qui réduit l'END de sa valeur de départ à 0 assomme le Voyageur sur le coup, alors qu'il lui reste deux caractéristiques physiques."
+      },
+      "starvation": {
+        "name": "Faim et soif",
+        "hint": "Ajoute un état de famine que l'Arbitre coche : MD-2 aux actions physiques et plus de guérison naturelle, avec le nombre de jours dérivé de l'END affiché à côté."
+      },
+      "shipAutomation": {
+        "name": "Automatisation des vaisseaux",
+        "hint": "Propose une pièce d'automatisation ; la ligne qu'elle porte modifie l'effectif requis du pourcentage imprimé, et un poste qui exige une personne en exige toujours une."
+      },
+      "graviticShielding": {
+        "name": "Blindage gravitique",
+        "hint": "Propose une pièce de blindage gravitique sur la fiche de composant. TL16 et plus."
       }
     },
     "Chargen": {
@@ -336,7 +368,8 @@
         "nest": "Changement de nid",
         "status": "Jet de statut",
         "continuation": "Jet de continuation",
-        "household": "Développement de la maisonnée"
+        "household": "Développement de la maisonnée",
+        "lifeEvent": "Événement de la vie"
       },
       "CareerKinds": {
         "career": "Carrière",
@@ -412,7 +445,6 @@
         "TrayEntry": "En attente",
         "TrayNote": "note",
         "TrayCondition": "Ce qui donne droit à cette entrée — une entrée liée à une branche ne s'applique pas si cette branche n'a pas été prise",
-        "OverridesDraftLimit": "passe outre la limite de Conscription",
         "Standing": "Modificateurs permanents",
         "StandingEntry": "Modificateur permanent",
         "StandingGate": "Seulement tant que",
@@ -529,7 +561,14 @@
         "DefaultCount": "MD ÉDU + 3",
         "Mandatory": "Toujours acquises",
         "SkillChoices": "Choisies parmi",
-        "BackgroundHint": "Une liste vide est l'état honnête d'un monde qui n'en a saisi aucune : toute la bibliothèque du référent est ouverte."
+        "BackgroundHint": "Une liste vide est l'état honnête d'un monde qui n'en a saisi aucune : toute la bibliothèque du référent est ouverte.",
+        "RollLabel": "nom imprimé",
+        "LawSex": "sexe",
+        "LawRole": "rôle",
+        "LawRow": "Variante",
+        "LawDefault": "tout Voyageur",
+        "CheckKind": "Le total",
+        "RollShort": "abrégé"
       },
       "Qualification": {
         "target": "Jet contre un seuil",
@@ -925,7 +964,8 @@
         "NoStepTarget": "{step} : la table imprimée ne donne aucun seuil pour ce Voyageur.",
         "StepNotTriggered": "{step} ne se déclenche pas cette période.",
         "TrackAtCap": "{track} est déjà à son dernier échelon.",
-        "TrackHeld": "{track} ne peut plus être perdu une fois obtenu."
+        "TrackHeld": "{track} ne peut plus être perdu une fois obtenu.",
+        "ReadOnTable": "{step} : lisez {total} sur la table imprimée dans votre livre."
       },
       "StepCheckTriggers": {
         "everyTerm": "À chaque période",
@@ -934,6 +974,10 @@
       "StepCheckIndices": {
         "term": "Numéro de période",
         "characteristic": "Palier de caractéristique"
+      },
+      "CreationCheckKinds": {
+        "beat": "Atteint une difficulté",
+        "index": "Indique une ligne de table"
       }
     },
     "Packs": {
@@ -1714,7 +1758,8 @@
           "staterooms": "Cabines",
           "lowBerths": "Cryocapsules",
           "bays": "Baies d'appareils",
-          "cargo": "Soute"
+          "cargo": "Soute",
+          "hullOptions": "Options de coque"
         },
         "DrawRows": {
           "basic": "Systèmes de base du vaisseau",
@@ -1724,7 +1769,19 @@
           "weapons": "Armes",
           "screens": "Écrans",
           "other": "Autre"
-        }
+        },
+        "HullOptionMin": "{option} est réservée aux coques de {min} t et plus ; celle-ci fait {tons} t",
+        "HullOptionMax": "{option} s'arrête à {max} t ; cette coque fait {tons} t",
+        "HullInstallTL": "{option} exige le NT{tl} ; le vaisseau est de NT{ship}",
+        "HullInstallExclusive": "{option} ne peut pas être combiné avec {other}",
+        "HullInstallStealthGrade": "Furtivité installée sans type choisi",
+        "InstallOptions": "Options de coque installées",
+        "InstallOptionsHint": "Garde Haute p.13-14 : chaque option coûte par tonne de coque et ne peut être ajoutée qu'une seule fois. Cliquez pour l'activer ou la désactiver.",
+        "InstallCost": "Coût des options",
+        "StealthType": "Type de furtivité",
+        "StealthDM": "MD de détection",
+        "StealthTLWhy": "Un MD-1 supplémentaire pour chaque Niveau technologique dont le vaisseau surpasse les capteurs qui tentent de le localiser.",
+        "RadsAbsorbed": "Rads absorbés"
       },
       "robot": {
         "TL": "NT",
@@ -2085,7 +2142,11 @@
           }
         }
       },
-      "AugmentDuplicate": "Le Livre de base p.103 n'autorise qu'une seule augmentation de compétence. Aucun MD pour {names}."
+      "AugmentDuplicate": "Le Livre de base p.103 n'autorise qu'une seule augmentation de compétence. Aucun MD pour {names}.",
+      "Wealth": "Richesse (RCH)",
+      "WealthHint": "Cr{cash} par mois en liquide ; un achat au-delà est un test de RCH à MD-1 par tranche de Cr5000 dépensée.",
+      "Starving": "Famine",
+      "StarvingHint": "{before} jours avant que la famine ne se fasse sentir, puis {impaired} de plus à MD-2 aux actions physiques et sans guérison naturelle."
     },
     "Training": {
       "Title": "Formation : {name}",
@@ -2486,7 +2547,10 @@
       "Visibility": "Visibilité",
       "EffectOnAverage": "Effet sur un jet moyen",
       "NoModifiers": "aucun modificateur",
-      "ActorDM": "Modificateur de l'acteur"
+      "ActorDM": "Modificateur de l'acteur",
+      "Microgravity": "Gravité zéro",
+      "MicrogravityCheck": "Test d'Athlétisme (dextérité) {target}+ ou l'attaque rate automatiquement et le tireur part en vrille sans aucun contrôle. Le système ne le lance pas.",
+      "MicrogravityExempt": "Arme Zéro-G : aucun test."
     },
     "CombatSteps": {
       "label": "Phase",
@@ -2595,7 +2659,36 @@
       "NoMount": "aucune monture",
       "NothingThisStep": "— rien à cette phase",
       "PassengerWhy": "à bord sans affectation",
-      "NoDutyNoActions": "aucune affectation, aucune action"
+      "NoDutyNoActions": "aucune affectation, aucune action",
+      "Missiles": "Missiles",
+      "MissilesWhy": "salves en vol",
+      "Salvo": "Salve",
+      "SalvoName": "{name} sur {target}",
+      "SalvoFlight": "Vol",
+      "SalvoEffect": "Effet",
+      "SalvoFrom": "de {name}",
+      "SalvoAt": "sur {name}",
+      "SalvoArriving": "à l'impact",
+      "SalvoRounds": "{n} rounds avant impact",
+      "SalvoSmartChip": "Intelligente",
+      "SalvoInert": "en panne de carburant",
+      "SalvoJam": "Guerre électronique",
+      "SalvoPointDefence": "Défense à bout portant",
+      "SalvoImpact": "Impact",
+      "SalvoDelete": "Retirer cette salve",
+      "SalvoLaunch": "Lancement",
+      "SalvoWeapon": "Missile",
+      "SalvoTarget": "Cible",
+      "SalvoCount": "Missiles",
+      "SalvoFire": "Lancer",
+      "SalvoNoMissiles": "Aucun missile n'est monté sur ce vaisseau.",
+      "SalvoNeedsTarget": "Désignez le vaisseau visé par la salve.",
+      "SalvoJammed": "{name} a déjà subi la guerre électronique ce round.",
+      "SalvoNoTarget": "{name} n'a plus de cible dans le combat, ou plus rien en vol.",
+      "SalvoMissiles": "Missiles dans la salve",
+      "SalvoSmart": "Intelligente : l'Arbitre ajoute la différence de NT, MD+{min} au minimum et MD+{max} au maximum.",
+      "SalvoHit": "{name} est touché : lancez les dégâts comme pour un missile unique, déduisez le blindage, puis multipliez par {multiple} — l'Effet, plafonné aux {missiles} missiles restants.",
+      "SalvoMissed": "{name} n'est pas touché."
     },
     "Fleet": {
       "NewFleet": "Nouvelle flotte",
@@ -2762,6 +2855,28 @@
         "Result": "{name} réduit sa Poussée de {n} ou élimine {n} systèmes d’armes",
         "Rounds": "pendant {n} round(s)",
         "NoEffect": "Aucun effet — le total ionique n’atteint pas une coque entière."
+      },
+      "Chart": {
+        "Title": "Schéma des manœuvres de flotte",
+        "Open": "Schéma des manœuvres",
+        "RuleOff": "Le schéma des manœuvres est désactivé : rien ici n'écrit de position.",
+        "Hint": "Chaque anneau est une Zone de portée mesurée depuis le point fixe au centre — une planète, une station ou un convoi se déplaçant à une vitesse fixe. Placer une flotte écrit la portée entre elle et chaque autre flotte placée.",
+        "Placing": "Placement de {name}",
+        "NoSubject": "Rien à placer",
+        "Contacts": "Sur le schéma",
+        "Clear": "Retirer du schéma",
+        "Ranges": "Portées entre flottes",
+        "Pair": "{from} vers {to}",
+        "NoPairs": "Placez deux flottes pour lire la portée entre elles.",
+        "Code": {
+          "adjacent": "A",
+          "close": "P",
+          "short": "C",
+          "medium": "M",
+          "long": "Lo",
+          "veryLong": "TL",
+          "distant": "L"
+        }
       }
     },
     "FleetTraits": {
@@ -3223,7 +3338,9 @@
         "Late": "{days} jours de retard — 1D+4 donne {roll}, soit {percent} % retenus : {docked} Cr sur un fret de {credits} Cr.",
         "Revival": "{n} passagers en caisson : chacun exige un jet de Médecine Routinier (6+) à l'ouverture (Core p.158). À vous de les lancer.",
         "Hold": "{ship} · soute {used} / {capacity} t",
-        "Over": "soute en surcharge — un lot ne peut pas être divisé"
+        "Over": "soute en surcharge — un lot ne peut pas être divisé",
+        "RevivalCheck": "Test de réanimation",
+        "RevivalNonHuman": "Un passager non humain subit un MD{dm}."
       },
       "Errors": {
         "LotFailed": "{goods} n'a pas pu être arrimé : l'équipage a déjà payé, ajoutez donc le lot en soute à la main.",
@@ -3267,7 +3384,10 @@
         "OtherBroker": "Courtier d'en face",
         "Banned": "Interdit au niveau de loi {law}",
         "Attempts": "{n} recherches antérieures"
-      }
+      },
+      "RevivalTL": "Vaisseau de NT12",
+      "RevivalEmergency": "Cryocapsule d'urgence",
+      "RevivalEndurance": "END de {name}"
     },
     "WorldBases": {
       "naval": "Base navale",
@@ -3439,7 +3559,9 @@
       "stateroom": "Cabine",
       "cargo": "Soute",
       "software": "Logiciel",
-      "option": "Option"
+      "option": "Option",
+      "automation": "Automatisation",
+      "gravShield": "Blindage gravitique"
     },
     "DrugAfterKinds": {
       "none": "Aucun",
@@ -4025,7 +4147,9 @@
       "Rules": "Règles",
       "AddRule": "ajouter une règle",
       "DeleteRule": "Retirer cette règle",
-      "RulesHint": "Ce que fait la munition et qui n'est ni des dégâts ni un trait — la chevrotine ignore l'Esquive de la cible, l'armure compte double. Videz une ligne pour la retirer."
+      "RulesHint": "Ce que fait la munition et qui n'est ni des dégâts ni un trait — la chevrotine ignore l'Esquive de la cible, l'armure compte double. Videz une ligne pour la retirer.",
+      "Specialised": "Spécialisé pour",
+      "SpecialisedBonus": "Processeur spécialisé"
     },
     "Durations": {
       "Seconds": "Secondes",
@@ -4562,7 +4686,8 @@
       "NaturalHealingHint": "1D + MD d'END par jour · MD d'END seul tant qu'une chirurgie est requise",
       "MentalHint": "INT et ÉDU, un point chacune par jour · pas le PSI",
       "ReviveHint": "Test d'END chaque minute · MD+1 par test raté",
-      "PsiRest": "Repos PSI"
+      "PsiRest": "Repos PSI",
+      "StarvingNoHealing": "Un Voyageur en état de famine ne guérit plus de ses blessures."
     },
     "RobotArmour": {
       "tl6": "NT 6-8",
@@ -4670,6 +4795,39 @@
         "weeks25": "25 semaines à un an",
         "overYear": "Plus d'un an"
       }
+    },
+    "CombatMishaps": {
+      "Line": "Aléa de combat ({total}) : {result}",
+      "self": "Se tire dessus ou se frappe lui-même, subissant les dégâts normaux de l'arme.",
+      "lost": "L'arme tombe dans un endroit inaccessible. Elle ne peut pas être récupérée pendant ce combat et si les Voyageurs sont contraints de fuir, elle sera définitivement perdue.",
+      "dropped": "L'arme tombe mais reste en vue. Elle peut être récupérée lors d'un round ultérieur en utilisant une action significative.",
+      "minor": "Un dysfonctionnement mineur de l'arme ou une mauvaise prise en main. Toute attaque effectuée ce round est perdue, mais l'arme peut être remise en état de marche en réussissant un test de la compétence associée Facile (6+) (1 action significative) au round suivant. En cas d'échec, la tentative doit être répétée à chaque round.",
+      "serious": "Un grave dysfonctionnement s'est produit, mettant l'arme hors d'usage jusqu'à ce qu'elle puisse être réparée dans un atelier.",
+      "destroyed": "L'arme est détruite suite à l'explosion de ses munitions ou à un autre incident grave lui causant des dégâts structurels critiques.",
+      "none": "Le test de compétence échoue, mais aucun aléa supplémentaire ne se produit."
+    },
+    "ShipAutomation": {
+      "crewIntensive": "Équipage nombreux",
+      "low": "Automatisation rudimentaire",
+      "standard": "Automatisation standard",
+      "enhanced": "Automatisation améliorée",
+      "advanced": "Automatisation avancée",
+      "high": "Haute automatisation"
+    },
+    "HullInstallOptions": {
+      "heatShielding": "Bouclier thermique",
+      "radiationShielding": "Bouclier anti-radiations",
+      "reflec": "Revêtement Réflec",
+      "solarCoating": "Revêtement solaire",
+      "stealth": "Furtivité"
+    },
+    "StealthTypes": {
+      "basic": "Basique",
+      "improved": "Amélioré",
+      "enhanced": "Augmenté",
+      "advanced": "Avancé"
     }
-  }
+  },
+  "TYPES.Combatant.missileSalvo": "Salve de missiles",
+  "TYPES.HINTS.Combatant.missileSalvo": "Missiles en vol dans un combat de vaisseaux, avec une cible, la portée de tir et un nombre de rounds avant impact."
 }

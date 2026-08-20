@@ -50,8 +50,7 @@ const EPONYMOUS = new Set(["effects", "description", "contents"]);
  * element is `blank: false`, so an appended empty string cleans away, the diff comes out empty and
  * no update fires — adding a track rung silently did nothing.
  */
-const STRING_LISTS = ["rules", "qualificationOverride.exceptCareers", "backgroundSkills.mandatory",
-  "backgroundSkills.choices"];
+const STRING_LISTS = ["rules", "qualificationOverride.exceptCareers"];
 
 /** The same convention one level down, where the list is a track's rungs inside an indexed track. */
 const TRACK_LISTS = ["tracks", "frame.tracks"];
@@ -71,10 +70,13 @@ function stepCheckSummary(check) {
   const named = check.skills.length ? check.skills.join(" / ")
     : (check.characteristic ? game.i18n.localize(MGT2.Characteristics[check.characteristic]) : "");
   if ( !named ) return "";
-  const target = check.index
-    ? game.i18n.format("MGT2.Chargen.Frame.CheckLadder",
-      { index: game.i18n.localize(MGT2.StepCheckIndices[check.index]) })
-    : ((check.target === null) ? "" : game.i18n.format("MGT2.Chargen.Term.Target", { n: check.target }));
+  let target = "";
+  if ( check.kind === "index" ) target = game.i18n.localize(MGT2.CreationCheckKinds.index);
+  else if ( check.index ) {
+    target = game.i18n.format("MGT2.Chargen.Frame.CheckLadder",
+      { index: game.i18n.localize(MGT2.StepCheckIndices[check.index]) });
+  }
+  else if ( check.target !== null ) target = game.i18n.format("MGT2.Chargen.Term.Target", { n: check.target });
   return [named, target].filter(part => part).join(" ");
 }
 
@@ -131,7 +133,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         "systems/mgt2/templates/items/parts/string-list.html",
         "systems/mgt2/templates/items/parts/track-definition.html",
         "systems/mgt2/templates/items/parts/standing-modifier.html",
-        "systems/mgt2/templates/items/parts/step-outcome.html"),
+        "systems/mgt2/templates/items/parts/step-outcome.html",
+        "systems/mgt2/templates/items/parts/law-selectors.html",
+        "systems/mgt2/templates/items/parts/specialised.html"),
       // The masthead never scrolls, so the open tab is the only scroller — and `submitOnChange`
       // re-renders the whole sheet on every keystroke.
       scrollable: ['.tab[data-group="item"].active']
@@ -297,6 +301,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       destination: this.#destination(),
       citation: this.#citation(),
       componentTons: this.#componentTons(),
+      componentCategories: TravellerItemSheet.#componentCategories(item.system.category),
       trade: this.#tradeColumns(),
       nested: this.#prepareNested(actor),
       careerTables: this.#careerTables(),
@@ -332,6 +337,16 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       without: Array.from(this.item.system.withoutCharacteristics,
         key => game.i18n.localize(MGT2.Characteristics[key]))
     };
+  }
+
+  /**
+   * The categories a part may be, minus the ones behind a rule this table has not adopted — the one
+   * already stored stays offered, so a switch turned off does not silently retype a fitted part.
+   */
+  static #componentCategories(current) {
+    const optional = MGT2.OptionalComponentCategories;
+    return Object.fromEntries(Object.entries(MGT2.ComponentCategories).filter(([key]) =>
+      (key === current) || !optional[key] || Rules.on(optional[key])));
   }
 
   /**
@@ -664,6 +679,10 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     // and the ones a standing modifier reads its DM off.
     for ( const step of Object.values(system?.frame?.steps ?? {}) ) {
       if ( step?.check?.skills ) step.check.skills = compact(step.check.skills);
+    }
+    for ( const law of Object.values(system?.backgroundSkills ?? {}) ) {
+      if ( law?.mandatory ) law.mandatory = compact(law.mandatory);
+      if ( law?.choices ) law.choices = compact(law.choices);
     }
     for ( const path of STANDING_LISTS ) {
       for ( const entry of Object.values(foundry.utils.getProperty(system ?? {}, path) ?? {}) ) {

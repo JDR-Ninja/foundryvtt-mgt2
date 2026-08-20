@@ -24,7 +24,11 @@
 					<option value="">&mdash;</option>
 					{{selectOptions @root.config.Characteristics selected=roll.replaces localize=true}}
 				</select>
-				<b class="play-only word">{{localize (lookup @root.config.Characteristics roll.characteristic)}} {{roll.formula}}{{#if roll.replaces}} &rarr; {{localize (lookup @root.config.Characteristics roll.replaces)}}{{/if}}</b>
+				{{! The book's own name for an alien characteristic in a spare slot: BOL, RES and FOL
+				    all read as Other or Charm without it. }}
+				<input class="f edit-only" type="text" name="system.characteristicRolls.{{i}}.label" value="{{roll.label}}" placeholder="{{localize 'MGT2.Chargen.Frame.RollLabel'}}" />
+				<input class="f n edit-only" type="text" name="system.characteristicRolls.{{i}}.short" value="{{roll.short}}" placeholder="{{localize 'MGT2.Chargen.Frame.RollShort'}}" />
+				<b class="play-only word">{{#if roll.label}}{{roll.label}}{{else}}{{localize (lookup @root.config.Characteristics roll.characteristic)}}{{/if}} {{roll.formula}}{{#if roll.replaces}} &rarr; {{localize (lookup @root.config.Characteristics roll.replaces)}}{{/if}}</b>
 				<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
 			</div>
 		</div>
@@ -65,18 +69,29 @@
 	    anywhere, which is the state of one whole published species. }}
 	<div class="sect">
 		<h3>{{localize 'MGT2.Chargen.Frame.Ageing'}}</h3>
+		<span class="count">{{system.ageing.length}}</span>
 	</div>
-	<div class="pfields">
-		<label>
-			<span class="lbl">{{localize 'MGT2.Chargen.Frame.AgeingFrom'}}</span>
-			{{formInput systemFields.ageing.fields.fromTerm name="system.ageing.fromTerm" value=source.ageing.fromTerm classes="f num" placeholder=(localize 'MGT2.Chargen.Frame.NotPrinted')}}
-			{{formInput systemFields.ageing.fields.fromAge name="system.ageing.fromAge" value=source.ageing.fromAge classes="f num" placeholder=(localize 'MGT2.Chargen.Frame.NotPrinted')}}
-		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Chargen.Frame.AgeingLaw'}}</span>
-			{{formInput systemFields.ageing.fields.perTerm name="system.ageing.perTerm" value=system.ageing.perTerm classes="f num"}}
-			{{formInput systemFields.ageing.fields.flat name="system.ageing.flat" value=system.ageing.flat classes="f num"}}
-		</label>
+	<div class="stack" data-property="ageing">
+		{{#each system.ageing as |law a|}}
+		<div class="entry" data-entry-index="{{a}}">
+			{{> systems/mgt2/templates/items/parts/law-selectors.html law=law path=(concat "ageing." a)}}
+			<div class="pfields">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Frame.AgeingFrom'}}</span>
+					<input class="f num edit-only" type="number" step="1" min="0" name="system.ageing.{{a}}.fromTerm" value="{{law.fromTerm}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Frame.NotPrinted'}}" />
+					<input class="f num edit-only" type="number" step="1" min="0" name="system.ageing.{{a}}.fromAge" value="{{law.fromAge}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Frame.NotPrinted'}}" />
+					<b class="play-only word">{{#if law.fromTerm}}{{law.fromTerm}}{{else}}&mdash;{{/if}} / {{#if law.fromAge}}{{law.fromAge}}{{else}}&mdash;{{/if}}</b>
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Frame.AgeingLaw'}}</span>
+					<input class="f num edit-only" type="number" step="0.5" name="system.ageing.{{a}}.perTerm" value="{{law.perTerm}}" data-dtype="Number" />
+					<input class="f num edit-only" type="number" step="1" name="system.ageing.{{a}}.flat" value="{{law.flat}}" data-dtype="Number" />
+					<b class="play-only word">{{law.perTerm}} / {{law.flat}}</b>
+				</label>
+			</div>
+		</div>
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Frame.LawRow'}}</a>
 	</div>
 	<p class="hint edit-only">{{localize 'MGT2.Chargen.Frame.AgeingHint'}}</p>
 
@@ -115,17 +130,26 @@
 	    referee's whole library is open, which is the honest state of a world that has typed no list. }}
 	<div class="sect">
 		<h3>{{localize 'MGT2.Chargen.Frame.BackgroundSkills'}}</h3>
+		<span class="count">{{system.backgroundSkills.length}}</span>
 	</div>
-	<div class="pfields">
-		<label>
-			<span class="lbl">{{localize 'MGT2.Chargen.Frame.SkillCount'}}</span>
-			<input class="f edit-only" type="text" name="system.backgroundSkills.formula" value="{{system.backgroundSkills.formula}}" placeholder="{{localize 'MGT2.Chargen.Frame.DefaultCount'}}" />
-			<b class="play-only word">{{#if system.backgroundSkills.formula}}{{system.backgroundSkills.formula}}{{else}}{{localize 'MGT2.Chargen.Frame.DefaultCount'}}{{/if}}</b>
-		</label>
+	<div class="stack" data-property="backgroundSkills">
+		{{#each system.backgroundSkills as |law b|}}
+		<div class="entry" data-entry-index="{{b}}">
+			{{> systems/mgt2/templates/items/parts/law-selectors.html law=law path=(concat "backgroundSkills." b)}}
+			<div class="pfields">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Frame.SkillCount'}}</span>
+					<input class="f edit-only" type="text" name="system.backgroundSkills.{{b}}.formula" value="{{law.formula}}" placeholder="{{localize 'MGT2.Chargen.Frame.DefaultCount'}}" />
+					<b class="play-only word">{{#if law.formula}}{{law.formula}}{{else}}{{localize 'MGT2.Chargen.Frame.DefaultCount'}}{{/if}}</b>
+				</label>
+			</div>
+			{{> systems/mgt2/templates/items/parts/string-list.html list=law.mandatory
+				path=(concat "backgroundSkills." b ".mandatory") label='MGT2.Chargen.Frame.Mandatory' add='MGT2.Items.Skill'}}
+			{{> systems/mgt2/templates/items/parts/string-list.html list=law.choices
+				path=(concat "backgroundSkills." b ".choices") label='MGT2.Chargen.Frame.SkillChoices' add='MGT2.Items.Skill'}}
+		</div>
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Frame.LawRow'}}</a>
 	</div>
-	{{> systems/mgt2/templates/items/parts/string-list.html list=system.backgroundSkills.mandatory
-		path="backgroundSkills.mandatory" label='MGT2.Chargen.Frame.Mandatory' add='MGT2.Items.Skill'}}
-	{{> systems/mgt2/templates/items/parts/string-list.html list=system.backgroundSkills.choices
-		path="backgroundSkills.choices" label='MGT2.Chargen.Frame.SkillChoices' add='MGT2.Items.Skill'}}
 	<p class="hint edit-only">{{localize 'MGT2.Chargen.Frame.BackgroundHint'}}</p>
 </div>

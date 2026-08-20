@@ -44,6 +44,12 @@ export const RULES = Object.freeze({
             both: "MGT2.Rules.advancementSystem.both" },
         default: "core"
     },
+    // The readout half only: Credits stay the ledger nine screens write, and WLT is read off them
+    // through folio 4's own table.
+    wealth: {
+        group: "travellers", book: "companion", page: "4",
+        default: false
+    },
 
     // "Instead of rolling" binds only the first-career sentence, and 1st edition allowed both.
     secondCareerBasicTraining: {
@@ -204,6 +210,19 @@ export const RULES = Object.freeze({
         group: "combat", book: "core", page: "77",
         default: true
     },
+    // A double 1 that is also a failure, on a check made with a weapon.
+    combatMishaps: {
+        group: "combat", book: "companion", page: "53",
+        default: false
+    },
+    naturalResilience: {
+        group: "combat", book: "companion", page: "50",
+        default: false
+    },
+    knockoutBlow: {
+        group: "combat", book: "companion", page: "50",
+        default: false
+    },
     // Which cell the prompt's threshold strip starts on.
     extremeRange: {
         group: "combat", book: "core", page: "77",
@@ -219,6 +238,11 @@ export const RULES = Object.freeze({
     encumbrance: {
         group: "health", book: "core", page: "98",
         default: true
+    },
+    // The referee ticks it; the day counts are printed beside it and never scheduled.
+    starvation: {
+        group: "health", book: "companion", page: "80-81",
+        default: false
     },
     // The default a NEW hull is created with.
     jumpRuleset: {
@@ -249,6 +273,20 @@ export const RULES = Object.freeze({
     // Core rules and p.122 sends a dispersed handful of ships back to them.
     fleetBattles: {
         group: "space", book: "highGuard", page: "105-124",
+        default: false
+    },
+    // "Optionally use the Fleet Manoeuvre Chart": a second writer for the same band map.
+    fleetChart: {
+        group: "space", book: "highGuard", page: "122-124",
+        default: false
+    },
+    // Two more parts a hull may carry, each with its own printed table.
+    shipAutomation: {
+        group: "space", book: "companion", page: "178",
+        default: false
+    },
+    graviticShielding: {
+        group: "space", book: "companion", page: "179",
         default: false
     },
 

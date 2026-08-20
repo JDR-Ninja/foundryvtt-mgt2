@@ -142,6 +142,24 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         return Rules.on("speciesModifiersStack") ? all : all.slice(0, 1);
     }
 
+    /**
+     * What a species calls the slots it fills, keyed by characteristic: Core p.52's aliens print
+     * their own name and abbreviation where the generic roster would read Other or Charm.
+     * @returns {Record<string, {label?: string, short?: string}>}
+     */
+    get characteristicNames() {
+        const names = {};
+        for ( const item of this.speciesItems ) {
+            for ( const row of item.system.characteristicRolls ?? [] ) {
+                if ( !row.characteristic || !(row.label || row.short) ) continue;
+                const named = names[row.characteristic] ??= {};
+                if ( row.label ) named.label = row.label;
+                if ( row.short ) named.short = row.short;
+            }
+        }
+        return names;
+    }
+
     /** The roster, off the schema — a config dictionary only ever describes one sub-type's. */
     get characteristicKeys() {
         return Object.keys(this.schema.fields.characteristics?.fields ?? {});
@@ -370,6 +388,12 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         this.damageResponse = resolveDamageResponse(key => MGT2Helper.hasTrait(this.traits, key));
 
         const states = this.damageStates;
+        // Companion p.50: the knockout outlives the blow that wrote it and expires when END refills,
+        // which is what keeps it out of the chain's own reading.
+        if (this.states?.knockedOut && Rules.on("knockoutBlow")
+            && (this.characteristics[this.stunLink]?.value <= 0)) {
+            states.unconscious = true;
+        }
         // Core p.83: an END check restores consciousness without healing, so the chain alone cannot
         // answer.
         if (states.unconscious && (life.damage <= (this.states?.consciousWound ?? -1))) {
@@ -451,6 +475,10 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         { state: "nausea", key: "nausea", label: "MGT2.Radiation.Nausea", dm: -1 },
         // Core folio 98 is narrower: "DM-2 on all physical actions".
         { state: "encumbrance", key: "encumbrance", label: "MGT2.Actor.Encumbrance", dm: -2,
+            characteristics: MGT2.PhysicalCharacteristics },
+        // Companion folio 80, the same narrowing: "sufficiently impaired to suffer DM-2 on any
+        // physical actions".
+        { state: "starving", key: "starving", label: "MGT2.Actor.Starving", dm: -2, rule: "starvation",
             characteristics: MGT2.PhysicalCharacteristics }
     ]);
 
@@ -475,7 +503,8 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     /** @protected */
     stateCheckModifiers() {
         const sources = [];
-        for (const { state, ...source } of this.constructor.CHECK_STATES) {
+        for (const { state, rule, ...source } of this.constructor.CHECK_STATES) {
+            if (rule && !Rules.on(rule)) continue;
             if (this.states?.[state] === true) sources.push({ ...source });
         }
         return sources;
@@ -546,6 +575,15 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         return { skillDuplicates, any: skillDuplicates.length > 0 };
     }
 
+    /** The gravity band this actor is standing in, from the region effect that put it there. */
+    get gravityBand() {
+        for (const effect of this.parent.allApplicableEffects()) {
+            const band = effect.active ? effect.flags?.mgt2?.region?.band : null;
+            if (band) return band;
+        }
+        return null;
+    }
+
     /** Core p.80-81: a low-gravity band is DM−1 to the PHYSICAL checks alone. */
     scopedEffectModifiers() {
         const sources = [];
@@ -610,7 +648,15 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         }
 
         const data = this.#wounded(wound, options.overflow);
-        if (!foundry.utils.isEmpty(data)) await this.parent.update({ system: { characteristics: data } });
+        if (foundry.utils.isEmpty(data)) return { wound, rounds: 0 };
+        // Companion p.50: END taken from its STARTING value to 0 by one attack, which is a fact
+        // about the blow and cannot be read back off the wound afterwards.
+        const link = this.characteristics[this.stunLink];
+        const knocked = ("knockedOut" in (this.states ?? {})) && Rules.on("knockoutBlow")
+            && link && !link.damage && (wound >= link.max);
+        const system = knocked
+            ? { characteristics: data, states: { knockedOut: true } } : { characteristics: data };
+        await this.parent.update({ system });
         return { wound, rounds: 0 };
     }
 
@@ -648,6 +694,8 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
 
         // Core p.77: Protection is subtracted; the AP trait ignores that much of it.
         wound -= Math.max(0, this.protectionAgainst(options) * loPen - pierced);
+        // Companion p.50: the END DM comes off every attack, and a negative one is added instead.
+        if (Rules.on("naturalResilience")) wound -= this.enduranceDM;
 
         // HG p.29: a bay, barbette or spinal mount multiplies AFTER the armour deduction, so it
         // cannot be folded into the attack's dice.

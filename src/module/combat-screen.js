@@ -44,6 +44,11 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
             stationAction: SpaceCombatScreen.#onStationAction,
             toggleSpent: SpaceCombatScreen.#onToggleSpent,
             toggleReaction: SpaceCombatScreen.#onToggleReaction,
+            launchSalvo: SpaceCombatScreen.#onLaunchSalvo,
+            salvoJam: SpaceCombatScreen.#onSalvoJam,
+            salvoDefend: SpaceCombatScreen.#onSalvoDefend,
+            salvoImpact: SpaceCombatScreen.#onSalvoImpact,
+            salvoRemove: SpaceCombatScreen.#onSalvoRemove,
             openActor: SpaceCombatScreen.#onOpenActor
         }
     };
@@ -287,7 +292,47 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         panel.crew = this.#crew(group);
         panel.reactions = this.#reactions(group);
         panel.issues = group.system.dutyIssues;
+        panel.salvoes = this.#salvoes(group);
+        panel.launch = this.#launch(group);
         return panel;
+    }
+
+    /**
+     * Core folios 172-173: every flight this ship fired or is under, with the two countermeasures
+     * that thin it and the impact that ends it.
+     */
+    #salvoes(group) {
+        const rows = [];
+        for ( const combatant of this.#combat.missileSalvoes ) {
+            const salvo = combatant.system;
+            const incoming = salvo.target === group.id;
+            if ( !incoming && (salvo.firedBy !== group.id) ) continue;
+            const other = incoming ? salvo.shooterGroup : salvo.targetGroup;
+            rows.push({
+                id: combatant.id, name: combatant.name, incoming,
+                other: other?.name ?? null,
+                count: salvo.count, remaining: salvo.remaining, eliminated: salvo.eliminated,
+                roundsLeft: salvo.roundsLeft, arriving: salvo.arriving, inert: salvo.inert,
+                bandLabel: MGT2.ShipRangeBands[salvo.launchBand]?.label ?? "",
+                jammed: salvo.jammedRound === this.#combat.round,
+                smart: salvo.smart
+            });
+        }
+        return rows;
+    }
+
+    /** What this ship can put in the air: its mounted missiles, and the contacts to aim them at. */
+    #launch(group) {
+        const ship = group.system.ship;
+        const mounted = new Set(ship.system.mounts.flatMap(mount => mount.weapons));
+        const missiles = [...mounted].map(id => ship.items.get(id))
+            .filter(weapon => MGT2Helper.isMissileWeapon(weapon))
+            .map(weapon => ({ id: weapon.id, name: weapon.name }));
+        return {
+            missiles,
+            targets: this.ships.filter(other => other.id !== group.id)
+                .map(other => ({ id: other.id, name: other.name }))
+        };
     }
 
     /**
@@ -658,6 +703,56 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         const taken = combatant.system.spent.reactions.filter(entry => entry !== key);
         if ( taken.length === combatant.system.spent.reactions.length ) taken.push(key);
         return combatant.update({ system: { spent: { reactions: taken } } });
+    }
+
+    /** Core folio 172: one salvo is everything one ship fires at one target in one round. */
+    static async #onLaunchSalvo(event, target) {
+        const group = this.selected;
+        const form = target.closest("[data-salvo-form]");
+        const at = this.#combat.groups.get(form.querySelector('[name="salvoTarget"]').value);
+        if ( !group || !at ) {
+            return ui.notifications.warn(game.i18n.localize("MGT2.SpaceCombat.SalvoNeedsTarget"));
+        }
+        const salvo = await this.#combat.addSalvo(group, at, {
+            weapon: form.querySelector('[name="salvoWeapon"]').value,
+            count: MGT2Helper.getIntegerFromInput(form.querySelector('[name="salvoCount"]').value)
+        });
+        return salvo ? this.render() : null;
+    }
+
+    #salvoOf(target) {
+        const row = target.closest("[data-salvo-id]");
+        return row ? this.#combat.combatants.get(row.dataset.salvoId) : null;
+    }
+
+    /** What the referee typed beside the row: the Effect of the check that was already rolled. */
+    static #salvoEffect(target) {
+        const row = target.closest("[data-salvo-id]");
+        return MGT2Helper.getIntegerFromInput(row?.querySelector('[name="salvoEffect"]')?.value);
+    }
+
+    /** @this {SpaceCombatScreen} */
+    static async #onSalvoJam(event, target) {
+        const salvo = this.#salvoOf(target);
+        return salvo?.system.jam(SpaceCombatScreen.#salvoEffect(target));
+    }
+
+    /** Core folio 171: the Effect of the gunner's check removes that many missiles. */
+    static async #onSalvoDefend(event, target) {
+        const salvo = this.#salvoOf(target);
+        return salvo?.system.remove(SpaceCombatScreen.#salvoEffect(target));
+    }
+
+    /** @this {SpaceCombatScreen} */
+    static async #onSalvoImpact(event, target) {
+        const salvo = this.#salvoOf(target);
+        return salvo?.system.attack();
+    }
+
+    /** @this {SpaceCombatScreen} */
+    static async #onSalvoRemove(event, target) {
+        const salvo = this.#salvoOf(target);
+        return salvo?.delete();
     }
 
     /** The link is a stored uuid and nothing here reads the canvas. @this {SpaceCombatScreen} */

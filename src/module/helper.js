@@ -141,6 +141,13 @@ export class MGT2Helper {
         return MGT2Helper.#namedAs(name, MGT2.InterfaceSoftware);
     }
 
+    /** Core p.172 fires these in salvos; HG p.29 keeps the mount's damage multiple off them. */
+    static isMissileWeapon(weapon) {
+        if (MGT2Helper.hasTrait(weapon?.system?.traits, "smart")) return true;
+        const name = String(weapon?.name ?? "").toLowerCase();
+        return MGT2.MissileWeapons.some(word => name.includes(word));
+    }
+
     /**
      * The Weapon traits block: one row per stored trait, each in the tone its own rule earns.
      * @param {Item} weapon        The weapon being attacked with
@@ -232,6 +239,12 @@ export class MGT2Helper {
         if (item?.type === "computer") return item.system?.processing ?? 0;
         if (item?.type === "armor") return item.system?.processing ?? 0;
         return item?.system?.augment?.processing ?? 0;
+    }
+
+    /** Core p.112's specialised rating, read off the same three hosts as the Processing score. */
+    static specialised(item) {
+        if (item?.type === "equipment") return item.system?.augment?.specialised;
+        return item?.system?.specialised;
     }
 
     /** Whether a skill Item's name already ends in its own speciality. */

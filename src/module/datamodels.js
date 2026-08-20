@@ -66,6 +66,20 @@ export class LocalDocumentField extends fields.DocumentIdField {
     }
 }
 
+/**
+ * Core p.112: a computer "designed for a specific purpose" runs one named program at a Processing
+ * score +1 or +2 higher. The same ring-fenced pool HG p.20 gives a ship's `/bis`, one scale down.
+ */
+function createSpecialisedField() {
+    return new fields.SchemaField({
+        // The printed program name the bonus is reserved for; blank is a general-purpose host.
+        software: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+        // No `max`: a `NumberField` CLEANS before it validates, so a typed 3 would silently read 2.
+        bonus: new fields.NumberField({
+            required: false, nullable: false, min: 0, integer: true, initial: 0 })
+    });
+}
+
 /** Where the entry is printed. */
 function createSourceField() {
     return new fields.SchemaField({
@@ -150,6 +164,7 @@ export class EquipmentData extends PhysicalItemData {
      */
     prepareBaseData() {
         this.processingUsed = 0;
+        this.processingCap = this.augment.processing ?? 0;
         this.overload = false;
         this.overCrowded = false;
         this.blockedSoftware = 0;
@@ -182,7 +197,8 @@ export class EquipmentData extends PhysicalItemData {
             // `ComputerData.processing` and is spent as one. `null` is no computer, `0` is
             // Computer/0 — Core p.106 prints a Neural Comm at that rating and it runs Interface.
             processing: new fields.NumberField({
-                required: false, nullable: true, initial: null, integer: true, min: 0 })
+                required: false, nullable: true, initial: null, integer: true, min: 0 }),
+            specialised: createSpecialisedField()
         });
 
         schema.subType.initial = "equipment"; // augment, clothing, trinket, toolkit, equipment
@@ -312,8 +328,6 @@ export function createTrayEntryField() {
         // modifier stops applying.
         condition: new fields.StringField({
             required: false, blank: false, initial: "always", choices: MGT2.TrayConditions }),
-        // The Companion's forced draft is exempt from the once-per-lifetime limit, as a general rule.
-        overridesOncePerLifetime: new fields.BooleanField({ required: false, initial: false }),
         note: new fields.StringField({ required: false, blank: true, trim: true })
     });
 }
@@ -414,6 +428,10 @@ function createStepField() {
             // A step is a position in the term and most checks are simply made there.
             when: new fields.StringField({
                 required: false, blank: false, initial: "everyTerm", choices: MGT2.StepCheckTriggers }),
+            // An `index` check adds its total to a printed table rather than beating a target, so it
+            // takes neither arm below and the step names the table.
+            kind: new fields.StringField({
+                required: false, blank: false, initial: "beat", choices: MGT2.CreationCheckKinds }),
             // The named term.
             characteristic: new fields.StringField({
                 required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
@@ -477,6 +495,24 @@ function migrateStepArray(steps) {
     for ( let i = 0; i < steps.length; i++ ) {
         if ( typeof steps[i] === "string" ) steps[i] = { key: steps[i] };
     }
+}
+
+/** A law that stated one block of values now states a list of them. */
+function liftLaw(source, key, leaves) {
+    // ⚠ An indexed update payload is cleaned through here and is a plain object too, so only a
+    // block carrying one of the law's own leaf keys is lifted.
+    const law = source?.[key];
+    if ( !law || Array.isArray(law) || !leaves.some(leaf => leaf in law) ) return;
+    source[key] = [law];
+}
+
+/** A law printed once per sex or per role: a row naming neither is the default, first match wins. */
+function createRoleAxisField(values) {
+    return new fields.ArrayField(new fields.SchemaField({
+        sex: new fields.StringField({ required: false, blank: true, trim: true }),
+        role: new fields.StringField({ required: false, blank: true, trim: true }),
+        ...values
+    }), { initial: [] });
 }
 
 /**
@@ -932,6 +968,7 @@ export class ArmorData extends PhysicalItemData {
     prepareDerivedData() {
         this.traitMap = buildTraitMap(this.options);
         this.processingUsed = 0;
+        this.processingCap = this.processing ?? 0;
     }
 
     static defineSchema() {
@@ -943,6 +980,7 @@ export class ArmorData extends PhysicalItemData {
         // Computer/0: `null` is no computer system, `0` is Computer/0, and the two are a rung apart.
         schema.processing = new fields.NumberField({
             required: false, nullable: true, initial: null, min: 0, integer: true });
+        schema.specialised = createSpecialisedField();
 
         // DM-1 to every check per missing level of the required skill; not having the skill at all
         // inflicts the usual DM-3 unskilled penalty instead.
@@ -970,6 +1008,7 @@ export class ComputerData extends PhysicalItemData {
     /** Derived by the owning actor; reset here so a loose computer still reads sanely. */
     prepareBaseData() {
         this.processingUsed = 0;
+        this.processingCap = this.processing;
         this.overload = false;
         this.overCrowded = false;
         this.blockedSoftware = 0;
@@ -983,6 +1022,7 @@ export class ComputerData extends PhysicalItemData {
         const schema = super.defineSchema();
 
         schema.processing = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
+        schema.specialised = createSpecialisedField();
         schema.options = createTraitsField("custom");
 
         return schema;
@@ -1234,6 +1274,9 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
     static migrateData(source, options) {
         migrateTraitArray(source.traits, "species");
         migrateStepArray(source.frame?.steps);
+        if ( typeof source.frame?.startAge === "number" ) source.frame.startAge = [{ age: source.frame.startAge }];
+        liftLaw(source, "ageing", ["fromTerm", "fromAge", "perTerm", "flat"]);
+        liftLaw(source, "backgroundSkills", ["formula", "mandatory", "choices"]);
         return super.migrateData(source, options);
     }
 
@@ -1312,7 +1355,9 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
             frame: new fields.SchemaField({
                 // Empty runs the Core sequence.
                 steps: new fields.ArrayField(createStepField(), { initial: [] }),
-                startAge: new fields.NumberField({ required: false, initial: 18, min: 0, integer: true }),
+                startAge: createRoleAxisField({
+                    age: new fields.NumberField({ required: false, initial: 18, min: 0, integer: true })
+                }),
                 termYears: new fields.NumberField({ required: false, initial: 4, min: 0, integer: true }),
                 // The frame's own justification: a frame that deletes three steps owes the table a why.
                 why: new fields.StringField({ required: false, blank: true, trim: true }),
@@ -1346,7 +1391,12 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
                     required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
                 formula: new FormulaField({ required: false, blank: true, initial: "2D" }),
                 replaces: new fields.StringField({
-                    required: false, blank: true, initial: "", choices: MGT2.Characteristics })
+                    required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
+                // The book's own name for a slot: BOL, RES and FOL read as Other or Charm without it.
+                // `label` is the full name and `short` the printed abbreviation; the sheet needs both,
+                // because the cell prints one and its tooltip the other.
+                label: new fields.StringField({ required: false, blank: true, trim: true }),
+                short: new fields.StringField({ required: false, blank: true, trim: true })
             }), { initial: [] }),
             // Characteristics this species does not have at all, which is not one it does not roll for.
             withoutCharacteristics: new fields.SetField(new fields.StringField({
@@ -1358,7 +1408,7 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
 
             // The ageing law is an EXPRESSION — `a × terms + b` — and not a switch: the published
             // values run −1, −2, −½, +1 and ±1 by sex.
-            ageing: new fields.SchemaField({
+            ageing: createRoleAxisField({
                 fromTerm: new fields.NumberField({ required: false, nullable: true, initial: 4, min: 0, integer: true }),
                 fromAge: new fields.NumberField({ required: false, nullable: true, initial: 34, min: 0, integer: true }),
                 perTerm: new fields.NumberField({ required: false, initial: -1 }),
@@ -1383,7 +1433,7 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
             }),
             // `EDU DM + 3` is a DEFAULT and not arithmetic: every published species prints its own
             // count and its own mandatory skills.
-            backgroundSkills: new fields.SchemaField({
+            backgroundSkills: createRoleAxisField({
                 formula: new FormulaField({ required: false, blank: true }),
                 mandatory: new fields.ArrayField(
                     new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] }),

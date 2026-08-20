@@ -223,6 +223,18 @@
 	</div>
 	{{/if}}
 
+	{{! Core p.81: in zero gravity every close combat weapon and every ranged weapon without the
+	    Zero-G trait owes an Athletics (dexterity) check or it misses and the shooter spins. Stated
+	    with its target number and rolled by nobody: the table plays it. }}
+	{{#if microgravity}}
+	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.Microgravity' }}">
+		<span class="pgut">{{ localize 'MGT2.RollPrompt.Microgravity' }}</span>
+		<div class="pfields">
+			<span class="hint">{{#if microgravity.exempt}}{{ localize 'MGT2.RollPrompt.MicrogravityExempt' }}{{else}}{{ localize 'MGT2.RollPrompt.MicrogravityCheck' target=microgravity.target }}{{/if}}</span>
+		</div>
+	</div>
+	{{/if}}
+
 	{{#if blocks.traits}}
 	{{! Three tones and no fourth: a solid chip is already in the total, a pressable one is the
 	    player's to confirm, a dashed chip contributes nothing. The chip is the shared codes

@@ -103,12 +103,18 @@
 		{{/if}}
 		{{! A null test and not a truthy one: Computer/0 is a rating and prints as one. }}
 		{{#unless (eq system.processing null)}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.processingUsed}}<span class="u">/ {{system.processing}}</span></b></li>
+		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.processingUsed}}<span class="u">/ {{system.processingCap}}</span></b></li>
+		{{#if system.specialised.bonus}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Specialised'}}</span><b class="word">{{system.specialised.software}} {{showDM system.specialised.bonus}}</b></li>
+		{{/if}}
 		{{/unless}}
 		{{/if}}
 
 		{{#if (eq item.type "computer")}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.processingUsed}}<span class="u">/ {{system.processing}}</span></b></li>
+		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.processingUsed}}<span class="u">/ {{system.processingCap}}</span></b></li>
+		{{#if system.specialised.bonus}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Specialised'}}</span><b class="word">{{system.specialised.software}} {{showDM system.specialised.bonus}}</b></li>
+		{{/if}}
 		{{/if}}
 
 		{{#if (eq item.type "career")}}
@@ -143,6 +149,9 @@
 		{{! A null test and not a truthy one: Computer/0 is a rating and prints as one. }}
 		{{#unless (eq system.augment.processing null)}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.augment.processing}}</b></li>
+		{{#if system.augment.specialised.bonus}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Specialised'}}</span><b class="word">{{system.augment.specialised.software}} {{showDM system.augment.specialised.bonus}}</b></li>
+		{{/if}}
 		{{/unless}}
 		{{/if}}
 
@@ -341,6 +350,7 @@
 			<span class="lbl">{{localize 'MGT2.Items.Processing'}}</span>
 			{{formInput systemFields.processing name="system.processing" value=system.processing classes="f num"}}
 		</label>
+		{{> systems/mgt2/templates/items/parts/specialised.html f=systemFields.specialised v=system.specialised path="system.specialised"}}
 		{{/if}}
 
 		{{#if (eq item.type "computer")}}
@@ -348,6 +358,7 @@
 			<span class="lbl">{{localize 'MGT2.Items.Processing'}}</span>
 			{{formInput systemFields.processing name="system.processing" value=system.processing classes="f num"}}
 		</label>
+		{{> systems/mgt2/templates/items/parts/specialised.html f=systemFields.specialised v=system.specialised path="system.specialised"}}
 		{{/if}}
 
 		{{#if (eq item.type "career")}}
@@ -421,6 +432,7 @@
 			<span class="lbl">{{localize 'MGT2.Items.Processing'}}</span>
 			{{formInput systemFields.augment.fields.processing name="system.augment.processing" value=system.augment.processing classes="f num"}}
 		</label>
+		{{> systems/mgt2/templates/items/parts/specialised.html f=systemFields.augment.fields.specialised v=system.augment.specialised path="system.augment.specialised"}}
 		{{/if}}
 
 		{{#if (eq system.subType "software")}}
@@ -513,7 +525,7 @@
 		<label class="wide">
 			<span class="lbl">{{localize 'MGT2.Items.Category'}}</span>
 			<select class="f" name="system.category">
-				{{selectOptions config.ComponentCategories selected=system.category localize=true}}
+				{{selectOptions componentCategories selected=system.category localize=true}}
 			</select>
 		</label>
 		{{! A ship's TL is a number, not the `TL12` string a personal item carries, so this type keeps

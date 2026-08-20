@@ -29,7 +29,7 @@
 	<div class="block fleetblock{{#if fleet.selected}} on{{/if}}" data-fleet-id="{{fleet.id}}">
 		<div class="sect">
 			<h3 data-action="selectFleet">{{fleet.name}}</h3>
-			<span class="count">{{localize 'MGT2.Fleet.Screen.Strength' left=fleet.strength.left of=fleet.strength.total}}</span>
+			<span class="count">{{localize 'MGT2.Fleet.Screen.Strength' left=fleet.strength.left of=fleet.strength.total}}{{#if fleet.code}} &middot; {{fleet.code}}{{/if}}</span>
 			{{#if ../canEdit}}
 			<a class="rm" data-action="removeFleet" data-tooltip="{{localize 'MGT2.Fleet.Screen.RemoveFleet'}}"><i class="fa-solid fa-trash"></i></a>
 			{{/if}}

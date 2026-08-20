@@ -113,6 +113,7 @@ export class RollPromptHelper {
                 } : null,
                 extended: options.blocks?.extended
                     ? { dm: MGT2.ExtendedAction.dm, per: MGT2.ExtendedAction.per } : null,
+                microgravity: this.#microgravityContext(options.microgravity),
                 priorChecks: this.#priorChecks(6, options.armed),
                 ...this.#ceilingContext(options.ceiling),
                 ...this.#reachContext(options.blocks?.psionic ? options.talent : null),
@@ -166,6 +167,13 @@ export class RollPromptHelper {
         // An offer is consumed by the roll it was made into, not by a window opening.
         if ( result ) armedHere.clear();
         return result;
+    }
+
+    /** Core p.81's zero-gravity requirement, stated with its target number. */
+    static #microgravityContext(microgravity) {
+        if ( !microgravity ) return null;
+        return { exempt: microgravity.exempt === true,
+            target: MGT2Helper.getDifficultyValue(MGT2.Microgravity.difficulty) };
     }
 
     /**

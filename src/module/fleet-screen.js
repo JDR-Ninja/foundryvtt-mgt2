@@ -1,6 +1,6 @@
 import { MGT2 } from "./config.js";
 import { STEPS } from "./combat.js";
-import { FLEET, FLEET_SHIP, SALVO, SQUADRON } from "./fleet.js";
+import { FLEET, FLEET_SHIP, SALVO, SQUADRON, chartBand, chartCode } from "./fleet.js";
 import { FleetAttack, fleetBatteries } from "./fleet-attack.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
@@ -21,6 +21,9 @@ const FLAT_POOLS = Object.freeze(["salvo", "meson", "damper", "repair"]);
 
 /** Folio 119's three defensive pools, which reduce damage rather than removing missiles. */
 const MITIGATORS = Object.freeze(["sand", "meson", "damper"]);
+
+/** The chart drawn as folio 123 draws it: a hub for the fixed point and eight rings of equal width. */
+const CHART_VIEW = Object.freeze({ centre: 210, hub: 16, edge: 200, size: 420 });
 
 /**
  * The fleet battle screen (HG folios 105-124): the referee's surface for the second engine.
@@ -66,6 +69,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
             applyDamage: FleetCombatScreen.#onApplyDamage,
             clearAttack: FleetCombatScreen.#onClearAttack,
             detach: FleetCombatScreen.#onDetach,
+            openChart: FleetCombatScreen.#onOpenChart,
             openActor: FleetCombatScreen.#onOpenActor
         }
     };
@@ -200,6 +204,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
 
         context.canEdit = this.canEdit;
         context.enabled = combat.system.enabled;
+        context.chart = combat.system.chart;
         context.round = combat.round;
         context.step = combat.system.step;
         context.stepLabel = MGT2.CombatSteps[combat.system.step];
@@ -263,6 +268,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         const opposing = system.opposing;
         return {
             id: group.id, name: group.name, img: group.img,
+            code: chartCode(system.position),
             selected: group.id === selected?.id,
             // `CombatantGroup` has its own ownership field, so a player commanding one fleet writes
             // its Tactics, its formation and its Morale without being able to touch the encounter.
@@ -374,6 +380,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
             // tests ownership against — so the block has to name it the way a rail block does.
             fleetId: fleet?.id ?? "",
             fleetName: fleet?.name ?? "",
+            code: chartCode(combatant.system.position),
             editable: this.canEdit || (fleet?.isOwner === true)
         };
         if ( combatant.type === SALVO ) return { ...base, kind: "salvo", ...this.#salvoPanel(combatant) };
@@ -956,10 +963,215 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return SpaceCombatScreen.open(combat);
     }
 
+    /** @this {FleetCombatScreen} */
+    static #onOpenChart() {
+        return FleetChartScreen.open(this.#combat);
+    }
+
     /** The link is a stored uuid and nothing here reads the canvas. @this {FleetCombatScreen} */
     static async #onOpenActor(event, target) {
         const linked = await fromUuid(target.closest("[data-uuid]")?.dataset.uuid ?? "");
         return linked?.sheet?.render(true);
+    }
+}
+
+/**
+ * Folios 122-124's Fleet Manoeuvre Chart: 144 cells around a fixed point, and the placement that
+ * writes the pair bands the rest of the engine already reads.
+ * @extends {ApplicationV2}
+ */
+export class FleetChartScreen extends HandlebarsApplicationMixin(ApplicationV2) {
+
+    constructor(options) {
+        super(options);
+        this.#combat = options.combat;
+    }
+
+    /** @inheritDoc */
+    static DEFAULT_OPTIONS = {
+        id: "mgt2-fleet-chart-{id}",
+        classes: ["mgt2", "fleet-chart", "nopad"],
+        position: { width: 780, height: 720 },
+        window: { resizable: true, icon: "fa-solid fa-crosshairs" },
+        actions: {
+            selectSubject: FleetChartScreen.#onSelectSubject,
+            place: FleetChartScreen.#onPlace,
+            clearPlace: FleetChartScreen.#onClearPlace
+        }
+    };
+
+    /** @inheritDoc */
+    static PARTS = { chart: { template: `${PARTS_PATH}/chart.html` } };
+
+    /** @type {Combat} */
+    #combat;
+
+    /** Which contact a click on a cell places. */
+    #subjectId = null;
+
+    get canEdit() {
+        return this.#combat.canUserModify(game.user, "update", { system: {} });
+    }
+
+    get title() {
+        const label = game.i18n.localize("MGT2.Fleet.Chart.Title");
+        return this.#combat.name ? `${label}: ${this.#combat.name}` : label;
+    }
+
+    /** One chart per encounter, beside the battle screen rather than inside it. */
+    static open(combat) {
+        if ( combat?.type !== FLEET ) return null;
+        const existing = foundry.applications.instances.get(`mgt2-fleet-chart-${combat.id}`);
+        return (existing ?? new FleetChartScreen({ combat })).render({ force: true });
+    }
+
+    /** @inheritDoc */
+    _initializeApplicationOptions(options) {
+        const applied = super._initializeApplicationOptions(options);
+        applied.uniqueId = options.combat.id;
+        return applied;
+    }
+
+    /** The same registration `DocumentSheetV2` makes, so a document write reaches this window. */
+    async _onFirstRender(context, options) {
+        await super._onFirstRender(context, options);
+        this.#combat.apps[this.id] = this;
+    }
+
+    /** @inheritDoc */
+    _onClose(options) {
+        super._onClose(options);
+        delete this.#combat.apps[this.id];
+    }
+
+    /** Everything the chart places: folio 115's fleets, folio 114's wings, folio 124's salvoes. */
+    get subjects() {
+        return [
+            ...this.#combat.system.fleets,
+            ...this.#combat.combatants.filter(one => [SQUADRON, SALVO].includes(one.type))
+        ];
+    }
+
+    get subject() {
+        const all = this.subjects;
+        return all.find(one => one.id === this.#subjectId) ?? all[0] ?? null;
+    }
+
+    /** @inheritDoc */
+    async _prepareContext(options) {
+        const context = await super._prepareContext(options);
+        const subject = this.subject;
+        context.canEdit = this.canEdit;
+        context.enabled = this.#combat.system.chart;
+        context.view = CHART_VIEW;
+        context.cells = this.#cells();
+        context.subjects = this.subjects.map(one => ({
+            id: one.id, name: one.name,
+            kind: (one.type === FLEET)
+                ? "TYPES.CombatantGroup.fleet" : `TYPES.Combatant.${one.type}`,
+            fleet: (one.type === FLEET) ? null : (one.system.fleetGroup?.name ?? ""),
+            code: chartCode(one.system.position),
+            selected: one.id === subject?.id
+        }));
+        context.subject = context.subjects.find(row => row.selected) ?? null;
+        context.pairs = this.#pairs();
+        return context;
+    }
+
+    /** The 144 cells, each one annulus sector of the ring its band is drawn in. */
+    #cells() {
+        const rings = MGT2.FleetChart.rings;
+        const width = (CHART_VIEW.edge - CHART_VIEW.hub) / rings.length;
+        const held = this.#held();
+        const cells = [];
+        rings.forEach((ring, index) => {
+            const inner = CHART_VIEW.hub + (index * width);
+            const step = (2 * Math.PI) / (4 * ring.sectors);
+            const before = rings.slice(0, index)
+                .reduce((sum, one) => sum + ((one.band === ring.band) ? one.sectors : 0), 0);
+            MGT2.FleetChart.quadrants.forEach((quadrant, side) => {
+                for ( let place = 0; place < ring.sectors; place++ ) {
+                    const from = ((side * ring.sectors) + place) * step;
+                    const sector = before + place + 1;
+                    const at = { quadrant, sector, band: ring.band };
+                    cells.push({ ...at,
+                        d: FleetChartScreen.#wedge(from, from + step, inner, inner + width),
+                        mark: FleetChartScreen.#at(from + (step / 2), inner + (width / 2)),
+                        code: chartCode(at),
+                        here: held.get(`${quadrant}|${sector}|${ring.band}`) ?? null
+                    });
+                }
+            });
+        });
+        return cells;
+    }
+
+    /** What sits in each cell, keyed as `#cells` keys them. */
+    #held() {
+        const map = new Map();
+        const subject = this.subject;
+        for ( const one of this.subjects ) {
+            const at = one.system.position;
+            if ( !at.quadrant ) continue;
+            const key = `${at.quadrant}|${at.sector}|${at.band}`;
+            const cell = map.get(key) ?? { names: [], mine: false };
+            cell.names.push(one.name);
+            cell.mine ||= (one.id === subject?.id);
+            cell.label = cell.names.join(", ");
+            map.set(key, cell);
+        }
+        return map;
+    }
+
+    /** A point `radius` from the centre, at `angle` radians counter-clockwise from the top. */
+    static #at(angle, radius) {
+        return {
+            x: (CHART_VIEW.centre - (radius * Math.sin(angle))).toFixed(2),
+            y: (CHART_VIEW.centre - (radius * Math.cos(angle))).toFixed(2)
+        };
+    }
+
+    /** One annulus sector. Counter-clockwise on screen is sweep 0, and the return arc is sweep 1. */
+    static #wedge(from, to, inner, outer) {
+        const a = FleetChartScreen.#at(from, outer);
+        const b = FleetChartScreen.#at(to, outer);
+        const c = FleetChartScreen.#at(to, inner);
+        const d = FleetChartScreen.#at(from, inner);
+        return `M${a.x} ${a.y}A${outer} ${outer} 0 0 0 ${b.x} ${b.y}`
+            + `L${c.x} ${c.y}A${inner} ${inner} 0 0 1 ${d.x} ${d.y}Z`;
+    }
+
+    /** What the chart writes: every placed pair of fleets and the band it derives for them. */
+    #pairs() {
+        const fleets = this.#combat.system.fleets.filter(group => group.system.position.quadrant);
+        const rows = [];
+        for ( let i = 0; i < fleets.length; i++ ) {
+            for ( let j = i + 1; j < fleets.length; j++ ) {
+                const band = chartBand(fleets[i].system.position, fleets[j].system.position);
+                rows.push({ from: fleets[i].name, to: fleets[j].name,
+                    label: MGT2.ShipRangeBands[band]?.label ?? null });
+            }
+        }
+        return rows;
+    }
+
+    /** @this {FleetChartScreen} */
+    static #onSelectSubject(event, target) {
+        this.#subjectId = target.closest("[data-subject-id]").dataset.subjectId;
+        return this.render();
+    }
+
+    /** Folio 124: a click is the placement, and a fleet's placement rewrites the pair bands. */
+    static async #onPlace(event, target) {
+        if ( !this.canEdit || !this.subject ) return;
+        const { quadrant, sector, band } = target.dataset;
+        return this.#combat.system.setPosition(this.subject, { quadrant, sector: Number(sector), band });
+    }
+
+    /** @this {FleetChartScreen} */
+    static async #onClearPlace() {
+        if ( !this.canEdit || !this.subject ) return;
+        return this.#combat.system.setPosition(this.subject, null);
     }
 }
 
@@ -992,6 +1204,11 @@ export function registerFleetCombatScreen() {
             icon: '<i class="fa-solid fa-table-columns"></i>',
             visible: () => application.viewed?.type === FLEET,
             onClick: () => FleetCombatScreen.open(application.viewed)
+        }, {
+            label: "MGT2.Fleet.Chart.Open",
+            icon: '<i class="fa-solid fa-crosshairs"></i>',
+            visible: () => (application.viewed?.type === FLEET) && Rules.on("fleetChart"),
+            onClick: () => FleetChartScreen.open(application.viewed)
         });
     });
 }
