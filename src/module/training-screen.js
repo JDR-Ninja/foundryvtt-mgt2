@@ -186,7 +186,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             const periods = programme.log.filter(row => row.kind === "period").length;
             state = core
                 ? `${periods} ${game.i18n.localize("MGT2.Training.Periods")} · ${programme.weeksSpent} ${weeks}`
-                : game.i18n.format("MGT2.Training.Entries", { n: programme.log.length });
+                : MGT2Helper.plural("MGT2.Training.Entries", programme.log.length);
         }
         else if ( core ) {
             state = programme.checkDue ? game.i18n.localize("MGT2.Training.CheckDue")
@@ -235,8 +235,8 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             cost: programme.cost,
             checkDue: programme.checkDue,
             log: TrainingScreen.#record(programme),
-            count: core ? game.i18n.format("MGT2.Training.WeeksSpent", { n: programme.weeksSpent })
-                : game.i18n.format("MGT2.Training.Entries", { n: programme.log.length }),
+            count: core ? MGT2Helper.plural("MGT2.Training.WeeksSpent", programme.weeksSpent)
+                : MGT2Helper.plural("MGT2.Training.Entries", programme.log.length),
             last: (this.#last?.id === id) ? this.#last : null
         };
 
@@ -254,7 +254,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         panel.formula = game.i18n.format("MGT2.Training.Formula", { dm: MGT2Helper.signed(dm, "+0") });
         panel.why = core
             ? (programme.checkDue ? game.i18n.localize("MGT2.Training.PeriodComplete")
-                : game.i18n.format("MGT2.Training.WeeksShort", { n: period - programme.weeks }))
+                : MGT2Helper.plural("MGT2.Training.WeeksShort", period - programme.weeks))
             : game.i18n.localize("MGT2.Training.TeachingDM");
 
         panel.awards = AWARDS.map(kind => ({
@@ -335,8 +335,8 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             : game.i18n.format("MGT2.Training.RisesTo", { name, n: programme.next });
 
         if ( programme.closed ) {
-            const parts = [game.i18n.format("MGT2.Training.Entries", { n: programme.log.length })];
-            if ( core ) parts.push(game.i18n.format("MGT2.Training.WeeksSpent", { n: programme.weeksSpent }));
+            const parts = [MGT2Helper.plural("MGT2.Training.Entries", programme.log.length)];
+            if ( core ) parts.push(MGT2Helper.plural("MGT2.Training.WeeksSpent", programme.weeksSpent));
             return { label: "MGT2.Training.Written", text: parts.join(" · ") };
         }
         if ( programme.barred ) {
@@ -360,7 +360,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             label: core
                 ? game.i18n.format("MGT2.Training.OnSuccess",
                     { ordinal: TrainingScreen.#ordinal(programme.periodsNeeded) })
-                : game.i18n.format("MGT2.Training.AtPoints", { n: programme.cost }),
+                : MGT2Helper.plural("MGT2.Training.AtPoints", programme.cost),
             text: `${consequence}. ${game.i18n.format("MGT2.Training.MoreToGo", { n: left })}`
         };
     }
@@ -711,8 +711,8 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
                     barred: CharacterData.trainingBarred(target) || training(key),
                     why: barred ? game.i18n.localize(barred)
                         : training(key) ? game.i18n.localize("MGT2.Training.Barred.alreadyTraining")
-                            : game.i18n.format(mental ? "MGT2.Training.CostMental" : "MGT2.Training.CostPhysical",
-                                { n: CharacterData.trainingCost(target, next) })
+                            : MGT2Helper.plural(mental ? "MGT2.Training.CostMental" : "MGT2.Training.CostPhysical",
+                                CharacterData.trainingCost(target, next))
                 });
             }
         }

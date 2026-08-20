@@ -14,7 +14,7 @@ const NPC_CHAIN_FIXED = ["endurance", "strength", "dexterity"];
 const MIGRATIONS = [
   {
     version: "0.2.0",
-    label: "damageOrder, protection, NPC damage chain, species unwind, species link, durationUnit, world geometry, training programmes, augment Computer/0",
+    label: "damageOrder, protection, NPC damage chain, species unwind, species link, durationUnit, world geometry, training programmes, augment Computer/0, term log closure",
     async migrate() {
       // Before the sweep: it rewrites `characteristics.<k>.base`, which the sweep then persists.
       for ( const actor of game.actors ) await unwindSpecies(actor);
@@ -163,7 +163,7 @@ function isChain(stored, chain) {
 }
 
 /** @returns {object|null} */
-function collectItemUpdate(item) {
+export function collectItemUpdate(item) {
   const source = item._source.system;
   if ( !source ) return null;
   const update = { _id: item.id };
@@ -188,6 +188,13 @@ function collectItemUpdate(item) {
   // hours.
   if ( source.psionic?.durationUnit === "Heures" ) {
     update["system.psionic.durationUnit"] = "Hours";
+    dirty = true;
+  }
+  // `terms` is the count `closeTerm` wrote, so the first that many rows are the closed ones.
+  if ( (item.type === "career") && source.termLog?.length
+    && (source.termLog.filter(entry => entry.closed).length < (source.terms ?? 0)) ) {
+    update["system.termLog"] = source.termLog.map((entry, index) =>
+      ({ ...entry, closed: index < (source.terms ?? 0) }));
     dirty = true;
   }
 
@@ -222,7 +229,7 @@ export async function migrateWorld() {
       count += (await migration.migrate()) ?? 0;
     }
     await game.settings.set("mgt2", "migrationVersion", game.system.version);
-    ui.notifications.info(game.i18n.format("MGT2.Migration.Complete", { count }));
+    ui.notifications.info(MGT2Helper.plural("MGT2.Migration.Complete", count, { count }));
   } catch(err) {
     // Leave migrationVersion untouched so the next load retries rather than skipping ahead.
     ui.notifications.error(game.i18n.localize("MGT2.Migration.Failed"), { permanent: true });

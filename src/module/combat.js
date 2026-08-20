@@ -472,8 +472,8 @@ export class MissileSalvoData extends foundry.abstract.TypeDataModel {
         if ( this.smart ) {
             lines.push(game.i18n.format("MGT2.SpaceCombat.SalvoSmart", SMART_BOUNDS));
         }
-        lines.push(game.i18n.format(hit ? "MGT2.SpaceCombat.SalvoHit" : "MGT2.SpaceCombat.SalvoMissed",
-            { name: target.name, multiple, missiles: this.remaining }));
+        lines.push(MGT2Helper.plural(hit ? "MGT2.SpaceCombat.SalvoHit" : "MGT2.SpaceCombat.SalvoMissed",
+            this.remaining, { name: target.name, multiple, missiles: this.remaining }));
 
         const flags = { mgt2: {} };
         if ( hit && missile?.system.damage ) {

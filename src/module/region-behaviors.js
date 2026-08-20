@@ -258,7 +258,7 @@ export class RadiationBehaviorData extends RegionBehaviorType {
             const dose = roll.total - this.shielded;
             if ( dose > 0 ) await ChatHelper.resolveExposure(actor, { dose, roll });
             else {
-                await ChatHelper.postRadiation(actor, game.i18n.format("MGT2.Region.Shielded",
+                await ChatHelper.postRadiation(actor, MGT2Helper.plural("MGT2.Region.Shielded", roll.total,
                     { rads: roll.total, shielded: this.shielded }), roll);
             }
         }

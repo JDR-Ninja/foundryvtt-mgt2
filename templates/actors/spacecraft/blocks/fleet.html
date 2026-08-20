@@ -51,4 +51,52 @@
 			</tbody>
 		</table>
 	</section>
+
+	{{! FOLIO 107's WEAPONS panel: one line per battery, `100 x Turrets (beam lasers)` and not a
+	    hundred lines. Folio 111 excludes ortillery from a fleet action, so those rows are absent
+	    rather than struck out. }}
+	<section class="budget check">
+		<header>
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Fleet.Weapons'}}</span>
+			<span class="rem">{{localize 'MGT2.Actor.spacecraft.Fleet.WeaponsRem'}}</span>
+		</header>
+		{{#if ship.fleet.batteries.length}}
+		<table class="rows brows" data-derived="system.mounts">
+			<tbody>
+				{{#each ship.fleet.batteries as |row|}}
+				<tr>
+					<td>
+						{{row.count}} &times; {{row.name}}
+						<span class="why">{{row.mountLabel}}{{#if row.bandLabel}} &middot; {{localize row.bandLabel}}{{/if}}</span>
+					</td>
+					{{! `0/N` on a mount whose label named a weapon is the one figure here that is
+					    wrong rather than absent: a class can be priced, a die count cannot. }}
+					<td class="num{{#if row.inert}} noarm{{/if}}"
+						{{#if row.inert}}data-tooltip="{{localize 'MGT2.Actor.spacecraft.InertMountHint'}}"
+						{{else if row.printed}}data-tooltip="{{localize 'MGT2.Actor.spacecraft.Fleet.PrintedCell'}}"{{/if}}>
+						{{#if row.salvo}}{{row.damage}}/&mdash;{{else}}{{row.damage}}/{{row.multiple}}{{/if}}
+						{{#if row.inert}} <i>{{localize 'MGT2.Actor.spacecraft.InertMount'}}</i>{{/if}}
+						{{#if row.salvo}} <i>{{localize 'MGT2.Actor.spacecraft.Fleet.AsSalvo'}}</i>{{/if}}
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{else}}
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.Fleet.NoBatteries'}}</p>
+		{{/if}}
+	</section>
+
+	{{! FOLIO 113's DEFENCES panel, at the ship's own Crew Skill. The fleet screen prints the same
+	    four figures as pools a round spends down; here they are the evaluation the sheet is for. }}
+	<dl class="statline grid" data-derived="system.fleet.defences">
+		<div class="stat"><dt>{{localize 'MGT2.FleetDefences.pointDefence'}}</dt><dd>{{ship.fleet.defences.pointDefence}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.FleetDefences.laser'}}</dt><dd>{{ship.fleet.defences.lasers}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.LasersWhy'}}</i></dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.FleetDefences.repulsor'}}</dt><dd>{{ship.fleet.defences.repulsors}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.ShipSoftware.electronicWarfare'}}</dt><dd>{{ship.fleet.defences.ew}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.EWWhy'}}</i></dd></div>
+		<div class="stat lead"><dt>{{localize 'MGT2.Actor.spacecraft.Fleet.SalvoDefence'}}</dt><dd>{{ship.fleet.defences.salvo}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.SalvoWhy'}}</i></dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.ShipScreens.mesonScreen'}}</dt><dd>{{ship.fleet.defences.mesonScreen}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.ScreenWhy' n=ship.fleet.crewSkill}}</i></dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.ShipScreens.nuclearDamper'}}</dt><dd>{{ship.fleet.defences.nuclearDamper}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.ScreenWhy' n=ship.fleet.crewSkill}}</i></dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.FleetDefences.sandcaster'}}</dt><dd>{{ship.fleet.defences.sandcasters}}<i>{{localize 'MGT2.Actor.spacecraft.Fleet.SandcastersWhy'}}</i></dd></div>
+	</dl>
 </div>

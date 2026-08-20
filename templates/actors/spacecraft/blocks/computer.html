@@ -62,7 +62,7 @@
 	<p class="hint">{{localize 'MGT2.Actor.spacecraft.CarriedHint' installed=ship.computer.installed cap=ship.computer.cap}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.CarriedWhy'}}"></i></p>
 	{{/if}}
 	{{#if ship.computer.blockedSoftware}}
-	<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.BlockedHint' count=ship.computer.blockedSoftware tl=system.tl}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BlockedWhy'}}"></i></p>
+	<p class="hint bad">{{plural 'MGT2.Actor.spacecraft.BlockedHint' ship.computer.blockedSoftware count=ship.computer.blockedSoftware tl=system.tl}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.BlockedWhy'}}"></i></p>
 	{{/if}}
 	{{#if ship.computer.overCrowded}}
 	<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.OverCrowdedHint'}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.OverCrowdedWhy'}}"></i></p>

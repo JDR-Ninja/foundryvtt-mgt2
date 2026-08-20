@@ -4,7 +4,7 @@
 	<h2>{{localize 'MGT2.Chargen.Close.Heading'}}</h2>
 	<span class="count">
 		{{#if empty}}{{localize 'MGT2.Chargen.Close.NobodyYet'}}
-		{{else}}{{localize 'MGT2.Chargen.Close.Standing' serving=serving total=columns.length owed=owed}}{{/if}}
+		{{else}}{{plural 'MGT2.Chargen.Close.Standing' owed serving=serving total=columns.length owed=owed}}{{/if}}
 	</span>
 	{{#if canFinishAll}}
 	<button type="button" class="finishall" data-action="finishAll">

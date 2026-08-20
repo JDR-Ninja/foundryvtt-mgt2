@@ -15,7 +15,7 @@
 	{{/if}}
 	{{#if package.declared}}
 		{{#if package.drained}}
-		<p class="settled">{{localize 'MGT2.Chargen.Close.PackageDone' n=package.declared}}</p>
+		<p class="settled">{{plural 'MGT2.Chargen.Close.PackageDone' package.declared}}</p>
 		{{else}}
 		<p class="why">{{localize 'MGT2.Chargen.Close.PackageTurn' name=package.turnName}}
 			<span class="tally">{{#each package.takenBy as |who|}}{{who.name}} {{who.n}}{{#unless @last}} · {{/unless}}{{/each}}</span>

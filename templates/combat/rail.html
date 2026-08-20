@@ -22,7 +22,7 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.SpaceCombat.Order'}}</h3>
-			<span class="count">{{localize 'MGT2.SpaceCombat.Contacts' n=order.length}}</span>
+			<span class="count">{{plural 'MGT2.SpaceCombat.Contacts' order.length}}</span>
 		</div>
 		<ul class="order">
 			{{#each order as |ship|}}

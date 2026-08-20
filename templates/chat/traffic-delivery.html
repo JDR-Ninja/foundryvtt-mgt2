@@ -13,12 +13,12 @@
 	<p class="bare">{{line}}</p>
 	{{! Core p.241: "Failing to deliver cargo on time reduces the amount paid by 1D+4 x 10%" —
 	    measured against the campaign day at the moment of delivery, never counted down. }}
-	{{#if late}}<p class="bare hot">{{localize 'MGT2.Trade.Card.Late' days=days roll=roll percent=percent docked=docked credits=credits}}</p>{{/if}}
+	{{#if late}}<p class="bare hot">{{plural 'MGT2.Trade.Card.Late' days days=days roll=roll percent=percent docked=docked credits=credits}}</p>{{/if}}
 	{{! Core p.158 puts every low passenger through a revival check on arrival. The button opens it
 	    for the selected token, at the END DM of whichever passenger is targeted; the non-human DM is
 	    named rather than applied, because no document says who is one. }}
 	{{#if revival}}
-	<p class="bare hot">{{localize 'MGT2.Trade.Card.Revival' n=count}}</p>
+	<p class="bare hot">{{plural 'MGT2.Trade.Card.Revival' count}}</p>
 	<p class="bare">{{localize 'MGT2.Trade.Card.RevivalNonHuman' dm=nonHuman}}</p>
 	<div class="cbtns"><button data-action="revival">{{localize 'MGT2.Trade.Card.RevivalCheck'}}</button></div>
 	{{/if}}

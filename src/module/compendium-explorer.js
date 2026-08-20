@@ -4,8 +4,9 @@ import { MGT2Helper } from "./helper.js";
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { SearchFilter } = foundry.applications.ux;
 
-/** The three fields this system adds to every Actor and Item compendium index. */
-export const INDEX_FIELDS = Object.freeze(["system.tl", "system.subType", "system.scale"]);
+/** The fields this system indexes; the last two are the ceilings a Benefit is redeemed against. */
+export const INDEX_FIELDS = Object.freeze(["system.tl", "system.subType", "system.scale",
+    "system.cost", "system.range.isMelee"]);
 
 /** Rows built per render. */
 const PAGE = 200;

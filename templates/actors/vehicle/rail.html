@@ -189,7 +189,7 @@
 			</tbody>
 		</table>
 		{{#if vehicle.crossCheck.envelope}}
-		<p class="hint">{{localize 'MGT2.Actor.vehicle.EnvelopeHint' spaces=vehicle.crossCheck.envelope}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.EnvelopeWhy' spaces=vehicle.crossCheck.envelope}}"></i></p>
+		<p class="hint">{{plural 'MGT2.Actor.vehicle.EnvelopeHint' vehicle.crossCheck.envelope spaces=vehicle.crossCheck.envelope}}<i class="fa-solid fa-circle-info note" data-tooltip="{{plural 'MGT2.Actor.vehicle.EnvelopeWhy' vehicle.crossCheck.envelope spaces=vehicle.crossCheck.envelope}}"></i></p>
 		{{/if}}
 	</section>
 	{{/if}}

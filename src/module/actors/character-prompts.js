@@ -546,7 +546,7 @@ export class CharacterPrompts {
                         <span class="dm outcome"></span>
                     </label>
                 </div>
-                <p class="hint">${esc(game.i18n.format("MGT2.Radiation.Standing", context))}</p>
+                <p class="hint">${esc(MGT2Helper.plural("MGT2.Radiation.Standing", context.rads, context))}</p>
             </div>`);
 
         return DialogV2.input({

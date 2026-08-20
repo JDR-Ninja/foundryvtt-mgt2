@@ -77,7 +77,7 @@
 				<td class="n">{{misjump.reading.distance.read}}</td>
 				<td class="n dim">{{misjump.reading.distance.printed}}</td>
 				<td class="n">
-					{{localize 'MGT2.Jump.Diameters' n=misjump.reading.distance.value}}
+					{{plural 'MGT2.Jump.Diameters' misjump.reading.distance.value}}
 					{{#if misjump.reading.distance.precipitated}}<span class="chip bad">{{localize 'MGT2.Jump.Precipitated' n=misjump.reading.distance.emergence}}</span>{{/if}}
 				</td>
 			</tr>
@@ -86,7 +86,7 @@
 				<td class="n">{{misjump.reading.time.read}}</td>
 				<td class="n dim">{{misjump.reading.time.printed}}</td>
 				<td class="n">
-					{{localize 'MGT2.Jump.Hours' n=misjump.reading.time.duration}}
+					{{plural 'MGT2.Jump.Hours' misjump.reading.time.duration}}
 					{{#if misjump.reading.time.value}}<span class="chip">{{#if misjump.reading.time.long}}{{localize 'MGT2.Jump.Long' n=misjump.reading.time.value}}{{else}}{{localize 'MGT2.Jump.Short' n=misjump.reading.time.value}}{{/if}}</span>{{/if}}
 				</td>
 			</tr>

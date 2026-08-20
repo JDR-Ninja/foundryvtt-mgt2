@@ -1,0 +1,60 @@
+{{! What the voucher entitles you to, then what the referee's own packs hold that fits inside it.
+    Block classes throughout: this screen owns no styling of its own. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{label}}</h3>
+		<span class="count">{{who}}</span>
+	</div>
+	<dl class="statline">
+		{{#if ceiling}}<div class="stat"><dt>{{localize 'MGT2.Chargen.Close.Credits'}}</dt><dd>{{ceiling}}</dd></div>{{/if}}
+		{{#if tl}}<div class="stat"><dt>{{localize 'MGT2.Chargen.Close.Tl'}}</dt><dd>{{tl}}</dd></div>{{/if}}
+		{{#if constraint}}<div class="stat"><dt>{{localize 'MGT2.Chargen.Benefits.Constraint.Label'}}</dt><dd>{{constraint}}</dd></div>{{/if}}
+		{{#if alternative}}<div class="stat"><dt>{{localize 'MGT2.Chargen.Benefits.Alternative'}}</dt><dd>{{alternative}}</dd></div>{{/if}}
+	</dl>
+
+	{{#if modes}}
+	<div class="vacts">
+		{{#each modes as |m|}}
+		<button type="button" class="btn{{#if m.on}} hot{{/if}}" data-action="setMode" data-mode="{{m.key}}">{{localize m.label}}</button>
+		{{/each}}
+	</div>
+	{{/if}}
+
+	{{#if names}}
+	<p class="hint">{{localize 'MGT2.Chargen.Benefits.NamesOnly'}}</p>
+	{{/if}}
+
+	{{#if unredeemable}}
+	<p class="hint">{{localize 'MGT2.Chargen.Benefits.NoLibrary'}}</p>
+	{{else if rows.length}}
+	<table class="rows">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Items.Name'}}</th>
+				<th class="r">{{localize 'MGT2.Items.Cost'}}</th>
+				<th class="c">{{localize 'MGT2.Items.TL'}}</th>
+				<th>{{localize 'MGT2.Explorer.Columns.pack'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each rows as |r|}}
+			<tr data-uuid="{{r.uuid}}">
+				<td>{{r.name}}</td>
+				<td class="r num">{{r.cost}}</td>
+				<td class="c num">{{r.tl}}</td>
+				<td><span class="sub">{{r.pack}}</span></td>
+				<td class="acts"><a data-action="choose" data-tooltip="{{localize 'MGT2.Chargen.Benefits.Take'}}"><i class="fa-solid fa-hand-holding-box"></i></a></td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{else}}
+	<p class="hint">{{localize 'MGT2.Chargen.Benefits.NothingFits'}}</p>
+	{{/if}}
+
+	<div class="vacts">
+		<span class="count">{{#if capped}}{{localize 'MGT2.Chargen.Benefits.Capped' shown=rows.length matched=matched}}{{else if rows.length}}{{matched}}{{/if}}</span>
+		<button type="button" class="btn" data-action="byHand">{{localize 'MGT2.Chargen.Benefits.ByHand'}}</button>
+	</div>
+</div>

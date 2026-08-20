@@ -83,7 +83,7 @@
 				<span class="ps">
 					<span class="p">{{localize 'MGT2.Actor.spacecraft.BandThrust' thrust=band.thrust}}</span>
 					{{! No rounds figure on a ship with no Thrust at all: banking nothing never arrives. }}
-					{{#unless band.affordable}}{{#if band.rounds}}<span class="p">{{localize 'MGT2.Actor.spacecraft.BandRounds' rounds=band.rounds}}</span>{{/if}}{{/unless}}
+					{{#unless band.affordable}}{{#if band.rounds}}<span class="p">{{plural 'MGT2.Actor.spacecraft.BandRounds' band.rounds rounds=band.rounds}}</span>{{/if}}{{/unless}}
 					<span class="p">{{#if band.dogfight}}{{localize 'MGT2.Actor.spacecraft.Dogfight'}}{{else}}{{showDM band.attackDM}}{{/if}}</span>
 				</span>
 			</li>

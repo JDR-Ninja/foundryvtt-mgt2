@@ -342,13 +342,13 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
             eliminated: system.eliminated === true
         };
         if ( combatant.type === SALVO ) {
-            row.sub = game.i18n.format("MGT2.Fleet.Screen.SalvoLine", {
+            row.sub = MGT2Helper.plural("MGT2.Fleet.Screen.SalvoLine", system.roundsLeft, {
                 n: system.remaining, rounds: system.roundsLeft });
             row.arriving = system.arriving;
             return row;
         }
         if ( combatant.type === SQUADRON ) {
-            row.sub = game.i18n.format("MGT2.Fleet.Screen.WingLine", {
+            row.sub = MGT2Helper.plural("MGT2.Fleet.Screen.WingLine", system.count, {
                 n: system.hull.strength, of: system.count });
             return row;
         }
@@ -732,8 +732,9 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         const confirmed = await DialogV2.confirm({
             window: { title: "MGT2.Fleet.Screen.RemoveFleet" },
             classes: ["mgt2"],
-            content: `<p>${game.i18n.format("MGT2.Fleet.Screen.RemoveFleetHint", {
-                name: fleet.name, count: fleet.system.combatants.length })}</p>`
+            content: `<p>${MGT2Helper.plural("MGT2.Fleet.Screen.RemoveFleetHint",
+                fleet.system.combatants.length,
+                { name: fleet.name, count: fleet.system.combatants.length })}</p>`
         });
         if ( !confirmed ) return;
         if ( fleet.id === this.#fleetId ) this.#fleetId = null;

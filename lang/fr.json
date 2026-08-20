@@ -88,7 +88,10 @@
       "TacticsDropped": "{name} a été surpris et ne détient plus le test de Tactique de ce camp.",
       "SurprisedHint": "Un Voyageur surpris ne peut faire aucun test de Tactique.",
       "TacticsTaken": "{name} commande {side} : Effet de Tactique {effect} sur l’Initiative de tout ce camp.",
-      "TacticsLate": "Le test de Tactique se fait au début du combat. {count} combattant(s) de ce camp ont déjà lancé l’Initiative et doivent la relancer — rien n’a été modifié pour eux.",
+      "TacticsLate": {
+        "one": "Le test de Tactique se fait au début du combat. {count} combattant de ce camp a déjà lancé l’Initiative et doit la relancer — rien n’a été modifié pour lui.",
+        "other": "Le test de Tactique se fait au début du combat. {count} combattants de ce camp ont déjà lancé l’Initiative et doivent la relancer — rien n’a été modifié pour eux."
+      },
       "SideHint": "Un seul test de Tactique par camp, son Effet sur l’Initiative de tous. Le camp est déduit de l’attitude du pion et vous pouvez le corriger."
     },
     "Edit": "Modifier",
@@ -690,7 +693,8 @@
         "skill": "Compétence",
         "ship": "Vaisseau",
         "shipShare": "Parts de vaisseau",
-        "membership": "Adhésion"
+        "membership": "Adhésion",
+        "contact": "Contact"
       },
       "BenefitRepeats": {
         "another": "Un autre",
@@ -700,6 +704,65 @@
         "stackMortgage": "Cumuler une part de l'hypothèque",
         "reroll": "Relancer",
         "convert": "Le convertir en autre chose"
+      },
+      "Benefits": {
+        "Title": "Avantages",
+        "Add": "Noter un Avantage",
+        "Delete": "Supprimer cet Avantage",
+        "None": "Aucun Avantage n'a été noté.",
+        "From": "Origine",
+        "Term": "période {n}",
+        "State": "État",
+        "States": {
+          "owed": "dû",
+          "redeemed": "échangé",
+          "surrendered": "abandonné"
+        },
+        "Redeem": "Échanger",
+        "Take": "Prendre celui-ci",
+        "Printed": "Avantage imprimé",
+        "Other": "autre chose",
+        "PickHint": "Choisissez l'Avantage imprimé dans la table, ou décrivez-en un que ce système ne définit pas.",
+        "NamesOnly": "Un vaisseau ou un véhicule est désigné et non créé : la ligne note lequel, et l'arbitre décide où vit l'Acteur.",
+        "NoLibrary": "Cet Avantage ne s'échange contre aucun document. Notez ce qui a été pris.",
+        "NothingFits": "Aucun compendium ne contient quoi que ce soit dans ces limites.",
+        "Capped": "{shown} sur {matched}",
+        "ByHand": "Le noter à la main",
+        "ByHandHint": "Rien dans la bibliothèque de l'arbitre ne convient, ou l'objet pris n'est dans aucun compendium. Notez ce qui a été pris.",
+        "ImprovedNote": "amélioré : {name}",
+        "Alternative": "Ou à la place",
+        "Mode": {
+          "base": "En prendre un autre",
+          "tradeIn": "Échanger l'original",
+          "improve": "Améliorer celui que l'on possède"
+        },
+        "Constraint": {
+          "Label": "Limité à",
+          "unarmed": "non armé",
+          "ranged": "arme à distance commune ou militaire",
+          "scoutService": "appartient toujours au Service des Éclaireurs",
+          "mortgage": "25 % du prêt remboursé · 1D jets sur les Particularités des vaisseaux"
+        },
+        "armour": "Armure",
+        "ally": "Allié",
+        "blade": "Lame",
+        "characteristic": "Augmentation des caractéristiques",
+        "combatImplant": "Implant de combat",
+        "contact": "Contact",
+        "cybernetic": "Implant cybernétique",
+        "freeTrader": "Franc-Marchand",
+        "farTrader": "Marchand au long cours",
+        "gun": "Pistolet",
+        "labShip": "Vaisseau-laboratoire",
+        "personalVehicle": "Véhicule personnel",
+        "safariShip": "Vaisseau safari",
+        "scientificEquipment": "Équipement scientifique",
+        "scoutShip": "Vaisseau Éclaireur",
+        "shipShares": "Parts de vaisseau",
+        "shipsBoat": "Vedette",
+        "tas": "Adhésion à la SAV",
+        "weapon": "Arme",
+        "yacht": "Yacht"
       },
       "TrackKinds": {
         "numeric": "Un nombre",
@@ -715,7 +778,10 @@
         "Title": "Force Psionique",
         "Training": "Formation psionique",
         "Attempts": "Tests déjà tentés",
-        "Result": "PSI {score}, après {terms} périodes de service.",
+        "Result": {
+          "one": "PSI {score}, après {terms} période de service.",
+          "other": "PSI {score}, après {terms} périodes de service."
+        },
         "None": "PSI {score} — aucun potentiel pour les talents psioniques."
       },
       "Connect": {
@@ -739,7 +805,10 @@
         "Title": "Fin de carrière",
         "Heading": "Fin de carrière",
         "Ready": "{name} a quitté sa dernière carrière et peut terminer sa carrière.",
-        "Standing": "{serving} sur {total} encore en service · {owed} jets d'Avantage dus",
+        "Standing": {
+          "one": "{serving} sur {total} encore en service · {owed} jet d'Avantage dû",
+          "other": "{serving} sur {total} encore en service · {owed} jets d'Avantage dus"
+        },
         "NobodyYet": "personne d'inscrit",
         "NobodyHint": "Personne n'est en création. Inscrivez d'abord un Voyageur depuis l'écran de création.",
         "Traveller": "Voyageur",
@@ -748,13 +817,22 @@
         "Cash": "Cash",
         "Pension": "Retraite",
         "Taken": "Obtenu",
-        "AgeTerms": "âge {age} · {terms} périodes",
+        "AgeTerms": {
+          "one": "âge {age} · {terms} période",
+          "other": "âge {age} · {terms} périodes"
+        },
         "StillServing": "encore en service",
-        "RankTerms": "rang {rank} · {terms} périodes",
+        "RankTerms": {
+          "one": "rang {rank} · {terms} période",
+          "other": "rang {rank} · {terms} périodes"
+        },
         "PensionOf": "retraite Cr{credits}/an",
         "CashOf": "{taken} / {limit}",
         "PerYear": "Cr{credits}/an",
-        "Shares": "{n} Parts de vaisseau",
+        "Shares": {
+          "one": "{n} Part de vaisseau",
+          "other": "{n} Parts de vaisseau"
+        },
         "NothingYet": "rien d'obtenu pour l'instant",
         "Redeem": "Échanger dans la bibliothèque de l'arbitre",
         "GivenUp": "abandonné",
@@ -763,8 +841,14 @@
         "FinishAll": "Terminer la création",
         "FinishHint": "La création s'achève pour {names}. Tout ce qui a été décidé reste sur le Voyageur ; le registre de création — les entrées en attente, les compteurs de jets, les choix du module — est abandonné.",
         "WarnServing": "Encore en service dans une carrière : {names}",
-        "WarnRolls": "{n} jets d'Avantage n'ont pas été pris",
-        "WarnPackage": "{n} compétences du module n'ont pas été prises",
+        "WarnRolls": {
+          "one": "{n} jet d'Avantage n'a pas été pris",
+          "other": "{n} jets d'Avantage n'ont pas été pris"
+        },
+        "WarnPackage": {
+          "one": "{n} compétence du module n'a pas été prise",
+          "other": "{n} compétences du module n'ont pas été prises"
+        },
         "NoCareers": "{name} n'a aucune carrière achevée dont sortir.",
         "RollsLeft": "{n} restants",
         "CashLeft": "Colonne Cash tirée {taken} fois sur {limit} dans la vie de ce Voyageur.",
@@ -791,7 +875,10 @@
         "SoloOff": "La génération en solo est active et supprime cette étape.",
         "PackageTitle": "Module de compétences partagé",
         "PackageTurn": "C'est au tour de {name} — prenez une compétence.",
-        "PackageDone": "Les {n} compétences ont toutes été prises.",
+        "PackageDone": {
+          "one": "La seule compétence a été prise.",
+          "other": "Les {n} compétences ont toutes été prises."
+        },
         "PackageNone": "Aucun module n'a encore été choisi.",
         "PackageEdit": "choisir le module",
         "PackageHint": "Le groupe choisit un module ensemble, puis chacun prend à tour de rôle une compétence jusqu'à épuisement de la liste. Aucun module n'est fourni avec ce système — saisissez celui que votre livre imprime, séparé par des virgules. Un nombre final indique le niveau.",
@@ -918,7 +1005,10 @@
         "NoAdvancementTarget": "Cette affectation n'indique aucun seuil d'avancement.",
         "Advanced": "Avancement au rang {rank}, et un jet de compétence supplémentaire.",
         "Demoted": "Rétrogradation au rang {rank}. Le bonus déjà versé par l'échelon perdu est conservé, ainsi que le rang le plus élevé atteint.",
-        "ForcedOut": "Le jet est inférieur ou égal aux {n} périodes servies : la carrière ne peut pas continuer après cette période.",
+        "ForcedOut": {
+          "one": "Le jet est inférieur ou égal à {n} période servie : la carrière ne peut pas continuer après cette période.",
+          "other": "Le jet est inférieur ou égal aux {n} périodes servies : la carrière ne peut pas continuer après cette période."
+        },
         "MustContinue": "12 naturel — trop précieux pour être perdu, la carrière continue.",
         "Released": "{track} dépassée : la carrière prend fin.",
         "Held": "{track} non dépassée : la carrière continue.",
@@ -931,7 +1021,10 @@
         "PickTable": "Choisissez une table de compétences ({n} restants)",
         "PickSkillRow": "Choisissez une ligne de la table",
         "IronMan": "{name} n'a pas survécu. Rien n'a été supprimé — tout l'historique est sur le Voyageur, et le sort de ce document appartient à l'arbitre.",
-        "MaximumTerms": "Le maximum de {n} périodes fixé par la table est atteint : cette carrière ne peut pas être poursuivie.",
+        "MaximumTerms": {
+          "one": "Le maximum de {n} période fixé par la table est atteint : cette carrière ne peut pas être poursuivie.",
+          "other": "Le maximum de {n} périodes fixé par la table est atteint : cette carrière ne peut pas être poursuivie."
+        },
         "SkillGained": "Jet de compétence : {skills}",
         "PickGrant": "Choisissez",
         "PickAward": "Qu'accorde cette ligne ?",
@@ -951,7 +1044,11 @@
         "AnagathicsTaken": "Anagathiques commencés.",
         "AnagathicsRefused": "Le jet d'anagathiques a échoué.",
         "AnagathicsForced": "Un 2 exact : allez directement dans une carrière à entrée forcée cette période.",
-        "DecideHint": "{career}, {n} périodes servies. Continuer, changer d'affectation, ou partir ?",
+        "DecideHint": {
+          "one": "{career}, {n} période servie. Continuer, changer d'affectation, ou partir ?",
+          "other": "{career}, {n} périodes servies. Continuer, changer d'affectation, ou partir ?"
+        },
+        "DecideSkipped": "Cette période n'a jamais été résolue : {steps}. La clôturer maintenant coûte quand même quatre ans et rapporte quand même son jet d'Avantage.",
         "Continue": "Continuer",
         "LeaveCareer": "Quitter la carrière",
         "ChangeAssignment": "Changer d'affectation ({rule})",
@@ -989,7 +1086,10 @@
       "visible": "visible par les joueurs",
       "gmOnly": "arbitre seulement",
       "exists": "déjà créé",
-      "created": "{count} compendium(s) créé(s) dans le dossier {folder}.",
+      "created": {
+        "one": "{count} compendium créé dans le dossier {folder}.",
+        "other": "{count} compendiums créés dans le dossier {folder}."
+      },
       "nothing": "Rien à créer — tous les compendiums cochés existent déjà.",
       "failed": "Impossible de créer le compendium {label}.",
       "labels": {
@@ -1022,8 +1122,14 @@
       "ReadOnly": "Lecture seule — ce compendium appartient à un module ou au système",
       "Count": "{matched} sur {total}",
       "Capped": "les {shown} premiers sur {matched} — affinez la recherche pour voir la suite",
-      "Loading": "{n} index de compendium en cours de chargement",
-      "Withheld": "{n} ligne(s) retenue(s) tant que leur index n'est pas arrivé",
+      "Loading": {
+        "one": "{n} index de compendium en cours de chargement",
+        "other": "{n} index de compendium en cours de chargement"
+      },
+      "Withheld": {
+        "one": "{n} ligne retenue tant que son index n'est pas arrivé",
+        "other": "{n} lignes retenues tant que leur index n'est pas arrivé"
+      },
       "Arriving": "Les index arrivent encore — un NT ou un sous-type ne peut pas encore être lu.",
       "Empty": "Aucun résultat.",
       "Columns": {
@@ -1175,7 +1281,10 @@
       "StoreItem": "Entreposer Objet",
       "Stun": "Incapacitation",
       "StunHint": "L'END seule l'encaisse ; ce qui dépasse l'END devient des rounds d'incapacité.",
-      "StunIncapacitated": "{name} est incapacité pendant {rounds} round(s).",
+      "StunIncapacitated": {
+        "one": "{name} est incapacité pendant {rounds} round.",
+        "other": "{name} est incapacité pendant {rounds} rounds."
+      },
       "SurgeryRequired": "Chirurgie requise",
       "SurgeryRequiredHint": "Ne récupère que le MD d'END (peut empirer).",
       "TabCore": "P",
@@ -1366,9 +1475,15 @@
           "cargo": "Cargaison",
           "hullPerSpace": "Coque par Espace"
         },
-        "CrossCheckHint": "Le nombre imprimé l'emporte toujours. Chaque Espace donne 0,25 t de capacité, et Coque ÷ Espaces est le chiffre de châssis que les tables de conception font aller de 0,2 à 4 — une ligne en désaccord le signale et ne réécrit jamais rien.",
-        "EnvelopeHint": "Enveloppe de gaz : {spaces} Espaces au plus.",
-        "EnvelopeWhy": "Dirigeable : l'enveloppe de gaz ne peut pas dépasser {spaces} Espaces.",
+        "CrossCheckHint": "Le nombre imprimé l'emporte toujours. Le Transport suit le tonnage par Espace du milieu du châssis — une demi-tonne au sol, jusqu'à deux dans les airs, moitié moins sur un châssis ouvert —, la Cargaison compte 0,25 t par Espace, et Coque ÷ Espaces est le chiffre de châssis que les tables de conception font aller de 0,2 à 4. Une ligne en désaccord le signale et ne réécrit jamais rien.",
+        "EnvelopeHint": {
+          "one": "Enveloppe de gaz : {spaces} Espace au plus.",
+          "other": "Enveloppe de gaz : {spaces} Espaces au plus."
+        },
+        "EnvelopeWhy": {
+          "one": "Dirigeable : l'enveloppe de gaz ne peut pas dépasser {spaces} Espace.",
+          "other": "Dirigeable : l'enveloppe de gaz ne peut pas dépasser {spaces} Espaces."
+        },
         "Armour": "Blindage",
         "ArmourCount": "3 imprimées · 2 surcharges annulables",
         "Facing": {
@@ -1545,10 +1660,19 @@
           "Hold": "Soute & passagers"
         },
         "Analyses": "Analyses",
-        "JumpsAboard": "{n} sauts en réservoir",
+        "JumpsAboard": {
+          "one": "{n} saut en réservoir",
+          "other": "{n} sauts en réservoir"
+        },
         "PilotN": "Pilote {n}",
-        "IntactLocations": "{n} localisations intactes",
-        "FoldRows": "{n} lignes",
+        "IntactLocations": {
+          "one": "{n} localisation intacte",
+          "other": "{n} localisations intactes"
+        },
+        "FoldRows": {
+          "one": "{n} ligne",
+          "other": "{n} lignes"
+        },
         "Popup": "escamotable",
         "NoMultiple": "×1 · ne s'applique jamais à un missile",
         "AfterArmour": "après blindage",
@@ -1563,7 +1687,10 @@
         "SpinalVsSmall": "Monture spinale contre petit vaisseau",
         "NoAttack": "ne peut pas attaquer",
         "Crew": "Équipage",
-        "CrewCount": "{stations} postes · {aboard} à bord",
+        "CrewCount": {
+          "one": "{stations} poste · {aboard} à bord",
+          "other": "{stations} postes · {aboard} à bord"
+        },
         "AddStation": "Ajouter un poste",
         "Station": "Poste",
         "Who": "Qui",
@@ -1607,7 +1734,18 @@
           "Thresholds": "Seuils de coup critique",
           "ThresholdsRem": "un critique par dixième",
           "Passed": "franchi",
-          "Hint": "Chaque valeur ici est la valeur ordinaire divisée par 3,5 — la moyenne de 1D — parce que le combat de flottes est le combat spatial normal dont on a retiré les dés. La compétence d'équipage se saisit à côté de la liste et ne s'en déduit jamais."
+          "Hint": "Chaque valeur ici est la valeur ordinaire divisée par 3,5 — la moyenne de 1D — parce que le combat de flottes est le combat spatial normal dont on a retiré les dés. La compétence d'équipage se saisit à côté de la liste et ne s'en déduit jamais.",
+          "Weapons": "Armes",
+          "WeaponsRem": "une ligne par batterie",
+          "NoBatteries": "Aucune batterie à bord — rien sur cette coque ne tire dans une bataille de flottes.",
+          "PrintedCell": "Le folio 112 imprime cette case : en bataille de flottes, un faisceau de particules en tourelle inflige 4 de dégâts là où le folio 28 imprime 3D. La table que désigne le chapitre des flottes fait foi.",
+          "AsSalvo": "en salve",
+          "SalvoDefence": "Défense de salve",
+          "SalvoWhy": "somme des quatre · un point retire un missile, une torpille en coûte deux",
+          "LasersWhy": "par tourelle, et non par arme",
+          "EWWhy": "opérateurs de détection ÷ 3 × (compétence d'équipage + guerre électronique)",
+          "ScreenWhy": "({n} + 3,5) × 10, par écran",
+          "SandcastersWhy": "chaque lance-sable en tourelle · dimensionné face au tireur en jeu"
         },
         "NoCrewSheet": "Cette action lit une compétence sur une fiche, et ce poste n'a aucun membre d'équipage lié.",
         "RefereeAction": "{action} — au choix de l'arbitre.",
@@ -1620,7 +1758,10 @@
         "Manoeuvre": "Manœuvre",
         "ManoeuvreCount": "Poussée {thrust} · coût pour changer de zone",
         "BandThrust": "P {thrust}",
-        "BandRounds": "{rounds} rounds",
+        "BandRounds": {
+          "one": "{rounds} round",
+          "other": "{rounds} rounds"
+        },
         "Dogfight": "combat rapproché",
         "Burning": "Propulseur à réaction allumé — Poussée +{n}, {total} en tout",
         "BurnWhy": "Garde Haute p. 16 : les deux propulseurs s'additionnent. La p. 45 fait du second une accélération temporaire qui consomme du carburant : il reste allumé aussi longtemps que le pilote le dit, et rien ici ne le programme.",
@@ -1647,12 +1788,18 @@
         "Internal": "intérieur, fermé",
         "Empty": "— vide —",
         "Docked": "Amarré",
-        "CraftPerRound": "{n} appareils par round",
+        "CraftPerRound": {
+          "one": "{n} appareil par round",
+          "other": "{n} appareils par round"
+        },
         "Repairs": "réparations à bord",
         "ClampTons": "la pince fait {tons} t, pas {capacity}",
         "ClampCraft": "appareil de {tons} t, pince pour {band} t",
         "BaySize": "{need} t exigées pour un appareil de {tons} t",
-        "MountCapacity": "{held} armes, la monture en porte {cap}",
+        "MountCapacity": {
+          "one": "{held} arme, la monture en porte {cap}",
+          "other": "{held} armes, la monture en porte {cap}"
+        },
         "Criticals": "Critiques",
         "CriticalsCount": "sévérité = Effet − 5 · plafond 6",
         "ClearCriticals": "Effacer tous les critiques",
@@ -1686,7 +1833,10 @@
         "RefereeSettles": "La livraison et le débarquement reviennent au MJ : ils déplacent les bourses de l'équipage et écrivent sur le vaisseau.",
         "SoftwareDowngraded": "exécuté plus bas",
         "SoftwareBlocked": "au-dessus du NT du vaisseau",
-        "BlockedHint": "{count} logiciel(s) au-dessus du NT{tl} ne s'exécutent pas et ne dépensent aucun Processeur.",
+        "BlockedHint": {
+          "one": "{count} logiciel au-dessus du NT{tl} ne s'exécute pas et ne dépense aucun Processeur.",
+          "other": "{count} logiciels au-dessus du NT{tl} ne s'exécutent pas et ne dépensent aucun Processeur."
+        },
         "BlockedWhy": "Garde Haute p. 20 : le NT opérationnel est celui du vaisseau et non celui de l'ordinateur ; un logiciel au-dessus ne s'exécute pas et ne dépense aucun Processeur.",
         "OverCrowdedHint": "Cet ordinateur n'exécute qu'un seul logiciel de Bande passante 0 à la fois.",
         "OverCrowdedWhy": "Livre de règles de Traveller p. 106 : un ordinateur de Processeur 0 n'exécute qu'un seul logiciel de Bande passante 0 à la fois. Le plus petit modèle de Garde Haute est un Ordinateur/5 : un vaisseau qui atteint ce cas n'a plus d'ordinateur en état.",
@@ -1712,22 +1862,37 @@
         "MortgageOverride": "Hypothèque forcée",
         "MortgageOverridden": "montant choisi",
         "MortgageTerm": "Durée",
-        "MortgageTermWhy": "{n} périodes par an · 40 ans",
+        "MortgageTermWhy": {
+          "one": "{n} période par an · 40 ans",
+          "other": "{n} périodes par an · 40 ans"
+        },
         "MortgageTotal": "Total remboursé",
-        "MortgageTotalWhy": "{n} versements",
+        "MortgageTotalWhy": {
+          "one": "{n} versement",
+          "other": "{n} versements"
+        },
         "MortgageOvercost": "Au-delà de l'achat",
         "MortgageOvercostWhy": "×{n} le prix",
         "MortgageBalance": "Reste à payer",
-        "MortgageBalanceWhy": "{n} périodes à courir",
+        "MortgageBalanceWhy": {
+          "one": "{n} période à courir",
+          "other": "{n} périodes à courir"
+        },
         "MortgagePaid": "Remboursé",
         "MortgageOwned": "Propriété pleine et entière — aucune hypothèque ne court sur cette coque.",
         "BenefitQuarters": "Quarts payés (bénéfice)",
         "PeriodsPaid": "Périodes payées",
         "Elections": "Choix de bénéfice",
-        "ElectionsRem": "{n} quart(s) remboursé(s)",
+        "ElectionsRem": {
+          "one": "{n} quart remboursé",
+          "other": "{n} quarts remboursés"
+        },
         "ElectKeep": "Continuer à payer",
         "ElectRemortgage": "Refinancer",
-        "ElectPeriodsWhy": "{n} périodes",
+        "ElectPeriodsWhy": {
+          "one": "{n} période",
+          "other": "{n} périodes"
+        },
         "ElectApply": "Appliquer",
         "ElectInForce": "en vigueur",
         "ElectionsHint": "Un bénéfice de carrière portant sur ce vaisseau rembourse un quart de l'hypothèque à chaque fois qu'il est obtenu. Le Voyageur choisit soit de continuer à payer le montant calculé et de finir dix ans plus tôt, soit de refinancer — un quart de moins sur le prix par bénéfice, recalculé sur les quarante ans. Les deux remboursent la même somme ; le choix porte sur ce qui bouge, le versement ou la durée. Appliquer un choix écrit l'hypothèque forcée, ou l'efface.",
@@ -1875,17 +2040,32 @@
         "Rads": "Rads reçus par le cerveau",
         "RadiationHint": "Les radiations ont coûté à ce cerveau INT -{n} et Bande passante -{n}, définitivement.",
         "BrainDamageDM": "Cerveau endommagé",
-        "IonShutdown": "{name} — impact ionique : le cerveau est éteint pendant {rounds} rounds.",
+        "IonShutdown": {
+          "one": "{name} — impact ionique : le cerveau est éteint pendant {rounds} round.",
+          "other": "{name} — impact ionique : le cerveau est éteint pendant {rounds} rounds."
+        },
         "IonImmune": "{name} est durci : l'impact ionique ne fait rien.",
         "NewBrain": "Cerveau",
         "AddBrain": "Ajouter le cerveau comme Item ordinateur",
         "BrainItem": "{name} est le cerveau : son Processeur de {n} est la Bande passante totale, un module de stockage l'augmente donc en augmentant l'Item.",
         "NoBrainItem": "Aucun Item cerveau : l'Ordinateur/{n} inhérent au grade est donc le total. Ajoutez un Item ordinateur pour modéliser les modules de stockage et les améliorations de Bande passante.",
-        "Oversized": "{count} module(s) de compétences plus gros que la Bande passante inhérente de {n} du cerveau.",
+        "Oversized": {
+          "one": "{count} module de compétences plus gros que la Bande passante inhérente de {n} du cerveau.",
+          "other": "{count} modules de compétences plus gros que la Bande passante inhérente de {n} du cerveau."
+        },
         "OversizedWhy": "Un module de compétences plus gros que la Bande passante inhérente de {n} ne peut pas être porté, quel que soit le total auquel le stockage l'a portée.",
-        "DowngradeIgnored": "{count} module(s) réglé(s) pour tourner plus bas coûtent quand même leur Bande passante imprimée.",
-        "DowngradeIgnoredWhy": "Robot Handbook p. 67, p. 73 : un cerveau ne peut pas traiter un module plus gros que sa Bande passante inhérente et n'a aucun moyen d'en exécuter un plus bas ; {count} module(s) réglé(s) pour tourner sous leur Bande passante imprimée lui coûtent donc leur plein tarif.",
-        "Surcharged": "{count} compétence(s) de niveau 0 au-delà de l'allocation gratuite, à 1 point de Bande passante chacune.",
+        "DowngradeIgnored": {
+          "one": "{count} module réglé pour tourner plus bas coûte quand même sa Bande passante imprimée.",
+          "other": "{count} modules réglés pour tourner plus bas coûtent quand même leur Bande passante imprimée."
+        },
+        "DowngradeIgnoredWhy": {
+          "one": "Robot Handbook p. 67, p. 73 : un cerveau ne peut pas traiter un module plus gros que sa Bande passante inhérente et n'a aucun moyen d'en exécuter un plus bas ; {count} module réglé pour tourner sous sa Bande passante imprimée lui coûte donc son plein tarif.",
+          "other": "Robot Handbook p. 67, p. 73 : un cerveau ne peut pas traiter un module plus gros que sa Bande passante inhérente et n'a aucun moyen d'en exécuter un plus bas ; {count} modules réglés pour tourner sous leur Bande passante imprimée lui coûtent donc leur plein tarif."
+        },
+        "Surcharged": {
+          "one": "{count} compétence de niveau 0 au-delà de l'allocation gratuite, à 1 point de Bande passante.",
+          "other": "{count} compétences de niveau 0 au-delà de l'allocation gratuite, à 1 point de Bande passante chacune."
+        },
         "SurchargedWhy": "Robot Handbook p. 73 : un cerveau retient autant de compétences de niveau 0 en Bande passante 0 que son score de Bande passante de base ; {count} au-delà coûtent 1 point chacune.",
         "SurchargeRow": "Compétences Bande passante 0 hors quota ({count})",
         "SurchargeWhy": "au-delà de l'allocation gratuite",
@@ -1914,8 +2094,14 @@
         },
         "Tactical": "Vitesse tactique",
         "VehicleBand": "Déplacement à vitesse de véhicule",
-        "VehicleSpeedHint": "Le Déplacement à vitesse de véhicule remplace entièrement le chiffre en mètres par un Palier de vitesse et divise par quatre l'endurance tant qu'il est utilisé — {hours} heures au lieu du chiffre ci-dessus.",
-        "VehicleSpeedOn": "Déplacement à vitesse de véhicule en cours — {hours} heures d'endurance, en Paliers de vitesse.",
+        "VehicleSpeedHint": {
+          "one": "Le Déplacement à vitesse de véhicule remplace entièrement le chiffre en mètres par un Palier de vitesse et divise par quatre l'endurance tant qu'il est utilisé — {hours} heure au lieu du chiffre ci-dessus.",
+          "other": "Le Déplacement à vitesse de véhicule remplace entièrement le chiffre en mètres par un Palier de vitesse et divise par quatre l'endurance tant qu'il est utilisé — {hours} heures au lieu du chiffre ci-dessus."
+        },
+        "VehicleSpeedOn": {
+          "one": "Déplacement à vitesse de véhicule en cours — {hours} heure d'endurance, en Paliers de vitesse.",
+          "other": "Déplacement à vitesse de véhicule en cours — {hours} heures d'endurance, en Paliers de vitesse."
+        },
         "AgilityEnhancement": "Amélioration d'agilité",
         "Power": "Source d'énergie",
         "PowerPacks": "Blocs d'énergie",
@@ -2147,7 +2333,10 @@
       "Wealth": "Richesse (RCH)",
       "WealthHint": "Cr{cash} par mois en liquide ; un achat au-delà est un test de RCH à MD-1 par tranche de Cr5000 dépensée.",
       "Starving": "Famine",
-      "StarvingHint": "{before} jours avant que la famine ne se fasse sentir, puis {impaired} de plus à MD-2 aux actions physiques et sans guérison naturelle."
+      "StarvingHint": {
+        "one": "{before} jour avant que la famine ne se fasse sentir, puis {impaired} de plus à MD-2 aux actions physiques et sans guérison naturelle.",
+        "other": "{before} jours avant que la famine ne se fasse sentir, puis {impaired} de plus à MD-2 aux actions physiques et sans guérison naturelle."
+      }
     },
     "Training": {
       "Title": "Formation : {name}",
@@ -2166,8 +2355,14 @@
       "Weeks": "semaines",
       "WeeksAbbr": "sem.",
       "Periods": "périodes",
-      "WeeksSpent": "{n} semaines passées",
-      "Entries": "{n} entrées",
+      "WeeksSpent": {
+        "one": "{n} semaine passée",
+        "other": "{n} semaines passées"
+      },
+      "Entries": {
+        "one": "{n} entrée",
+        "other": "{n} entrées"
+      },
       "FailedCount": "{n} échouées",
       "EngineIs": "ouvrage : {engine}",
       "Engine": {
@@ -2198,7 +2393,10 @@
       "Check": "Moyenne (8+) {characteristic}",
       "CheckDue": "test à faire",
       "PeriodComplete": "Période achevée",
-      "WeeksShort": "encore {n} semaines",
+      "WeeksShort": {
+        "one": "encore {n} semaine",
+        "other": "encore {n} semaines"
+      },
       "Formula": "2D {dm} contre 8+",
       "TeachingDM": "le MD vaut −le niveau appris",
       "Passed": "Réussi",
@@ -2210,7 +2408,10 @@
       "Grant": "Accorder le niveau {n}",
       "Buy": "Acheter le niveau {n}",
       "OnSuccess": "À la {ordinal} réussite",
-      "AtPoints": "À {n} points",
+      "AtPoints": {
+        "one": "À {n} point",
+        "other": "À {n} points"
+      },
       "Ready": "Prêt",
       "Written": "Inscrit",
       "AddedAtZero": "Ajout de {name} à la fiche au niveau 0",
@@ -2243,14 +2444,23 @@
         "charCost": "Une caractéristique physique coûte sa nouvelle valeur, une mentale le double."
       },
       "Cost": "{periods} périodes · {weeks} semaines",
-      "CostPhysical": "{n} points — la nouvelle valeur",
-      "CostMental": "{n} points — une mentale coûte le double",
+      "CostPhysical": {
+        "one": "{n} point — la nouvelle valeur",
+        "other": "{n} points — la nouvelle valeur"
+      },
+      "CostMental": {
+        "one": "{n} point — une mentale coûte le double",
+        "other": "{n} points — une mentale coûte le double"
+      },
       "RailCore": "{count} base · {weeks} semaines notées",
       "RailCompanion": "{count} compagnon · {points} points dédiés",
       "RailWeekRule": "une semaine appartient à un seul programme (Livre de règles de Traveller p.54)",
       "NoteLabel": "Où sont passées les semaines",
       "NotePlaceholder": "Saut vers Regina, bibliothèque du bord…",
-      "MigratedWeeks": "{weeks} semaines au-delà de la période ont été abandonnées lors de la migration.",
+      "MigratedWeeks": {
+        "one": "{weeks} semaine au-delà de la période a été abandonnée lors de la migration.",
+        "other": "{weeks} semaines au-delà de la période ont été abandonnées lors de la migration."
+      },
       "NewSkill": "nouvelle compétence",
       "LevelRange": "niveau {from} → {to}",
       "ValueRange": "valeur {from} → {to}",
@@ -2511,7 +2721,10 @@
       "TraitsBoundary": "Une puce pleine est déjà dans ce jet. Une puce en pointillés est un rappel que le système ne résout délibérément pas, parce que le résoudre supposerait de lire la cible.",
       "FireMode": "Mode de tir",
       "FireModeAttacks": "×{count}",
-      "FireModeRounds": "{rounds} balles",
+      "FireModeRounds": {
+        "one": "{rounds} balle",
+        "other": "{rounds} balles"
+      },
       "ReachHint": "Portée — payée en points de PSI",
       "ReachCost": "{points} points de PSI",
       "PhysicalOnly": "La règle applique ceci aux actions physiques — le modificateur suit la caractéristique jetée, jusqu'à ce que vous en décidiez autrement.",
@@ -2618,7 +2831,10 @@
       "Round": "Round",
       "EndRound": "Fin du round",
       "Order": "Ordre",
-      "Contacts": "{n} contacts",
+      "Contacts": {
+        "one": "{n} contact",
+        "other": "{n} contacts"
+      },
       "RollInitiative": "Lancer l’Initiative du vaisseau",
       "ShipLine": "{tons} t · P{thrust}",
       "Fleet": "Flotte",
@@ -2670,7 +2886,10 @@
       "SalvoFrom": "de {name}",
       "SalvoAt": "sur {name}",
       "SalvoArriving": "à l'impact",
-      "SalvoRounds": "{n} rounds avant impact",
+      "SalvoRounds": {
+        "one": "{n} round avant impact",
+        "other": "{n} rounds avant impact"
+      },
       "SalvoSmartChip": "Intelligente",
       "SalvoInert": "en panne de carburant",
       "SalvoJam": "Guerre électronique",
@@ -2688,7 +2907,10 @@
       "SalvoNoTarget": "{name} n'a plus de cible dans le combat, ou plus rien en vol.",
       "SalvoMissiles": "Missiles dans la salve",
       "SalvoSmart": "Intelligente : l'Arbitre ajoute la différence de NT, MD+{min} au minimum et MD+{max} au maximum.",
-      "SalvoHit": "{name} est touché : lancez les dégâts comme pour un missile unique, déduisez le blindage, puis multipliez par {multiple} — l'Effet, plafonné aux {missiles} missiles restants.",
+      "SalvoHit": {
+        "one": "{name} est touché : lancez les dégâts comme pour un missile unique, déduisez le blindage, puis multipliez par {multiple} — l'Effet, plafonné au {missiles} missile restant.",
+        "other": "{name} est touché : lancez les dégâts comme pour un missile unique, déduisez le blindage, puis multipliez par {multiple} — l'Effet, plafonné aux {missiles} missiles restants."
+      },
       "SalvoMissed": "{name} n'est pas touché."
     },
     "Fleet": {
@@ -2722,7 +2944,10 @@
         "AdvanceStep": "Étape suivante",
         "AddFleet": "Ajouter une flotte",
         "RemoveFleet": "Retirer la flotte",
-        "RemoveFleetHint": "Retirer {name} de la bataille, avec ses {count} contacts et toutes ses portées ?",
+        "RemoveFleetHint": {
+          "one": "Retirer {name} de la bataille, avec son {count} contact et toutes ses portées ?",
+          "other": "Retirer {name} de la bataille, avec ses {count} contacts et toutes ses portées ?"
+        },
         "RemoveContact": "Retirer de la bataille",
         "Strength": "{left} sur {of} restants",
         "RollFleet": "Lancer l’Initiative de la flotte",
@@ -2733,8 +2958,14 @@
         "DropShipHint": "Déposez un vaisseau spatial ici pour l’ajouter à la ligne",
         "DropWingHint": "Déposez une classe de chasseur ici pour ajouter un escadron",
         "ShipLine": "coque {hull} · blindage {armour}",
-        "WingLine": "{n} chasseurs sur {of}",
-        "SalvoLine": "{n} en vol · impact dans {rounds} round(s)",
+        "WingLine": {
+          "one": "{n} sur {of} chasseur",
+          "other": "{n} sur {of} chasseurs"
+        },
+        "SalvoLine": {
+          "one": "{n} en vol · impact dans {rounds} round",
+          "other": "{n} en vol · impact dans {rounds} rounds"
+        },
         "SalvoName": "{ship} — {head}",
         "NoContact": "Sélectionnez un vaisseau, un escadron ou une salve",
         "Command": "Commandement",
@@ -2749,7 +2980,10 @@
         "OpenSheet": "Ouvrir la fiche",
         "Formation": "Formation",
         "FormationWhy": "espacement interne de la flotte — MD défensif +{dm}",
-        "Dispersing": "hors du plan de bataille depuis {n} round(s)",
+        "Dispersing": {
+          "one": "hors du plan de bataille depuis {n} round",
+          "other": "hors du plan de bataille depuis {n} rounds"
+        },
         "MustDisperse": "le round de grâce est écoulé",
         "ThrustDerived": "le plus lent de la ligne : {n}",
         "ThrustOverride": "Poussée (saisie)",
@@ -2761,7 +2995,10 @@
         "BreakingOffWhy": "MD défensif -1, pas de monture spinale",
         "Dispersal": "Dispersion",
         "EffectPlaceholder": "effet",
-        "DispersalState": "{rounds} round(s) restants, MD {dm}",
+        "DispersalState": {
+          "one": "{rounds} round restant, MD {dm}",
+          "other": "{rounds} rounds restants, MD {dm}"
+        },
         "Allocate": "Au déplacement",
         "Held": "{n} en réserve",
         "EachRound": "testé à chaque round",
@@ -2791,7 +3028,10 @@
         "SandWhy": "efficacité des lance-sables {score} — multiplicateur {multiplier}",
         "SandAgainst": "calculée contre {name}",
         "Radiation": "Expositions aux radiations",
-        "RadiationWhy": "Compétence d’équipage {skill}, {weapons} système(s) d’armes éliminé(s)",
+        "RadiationWhy": {
+          "one": "Compétence d’équipage {skill}, {weapons} système d’armes éliminé",
+          "other": "Compétence d’équipage {skill}, {weapons} systèmes d’armes éliminés"
+        },
         "RepairWhy": "un point de réparation par niveau de sévérité",
         "Repair": "Réparer",
         "Weapons": "Armes",
@@ -2840,7 +3080,10 @@
         "Subtotal": "Sous-total des dégâts {subtotal}",
         "Final": "{damage} à {target}",
         "Missiles": "Salve",
-        "Salvo": "{hits} ogives au but, {damage} chacune"
+        "Salvo": {
+          "one": "{hits} ogive au but, {damage}",
+          "other": "{hits} ogives au but, {damage} chacune"
+        }
       },
       "Spinal": {
         "Gunner": "Compétence d’équipage (artilleur)",
@@ -2853,8 +3096,14 @@
         "Title": "Armes à ions",
         "Immune": "{name} a le Blindage EM et ignore les armes à ions.",
         "Total": "Effet ionique {effect} contre {hull} points de coque ajustés",
-        "Result": "{name} réduit sa Poussée de {n} ou élimine {n} systèmes d’armes",
-        "Rounds": "pendant {n} round(s)",
+        "Result": {
+          "one": "{name} réduit sa Poussée de {n} ou élimine {n} système d’armes",
+          "other": "{name} réduit sa Poussée de {n} ou élimine {n} systèmes d’armes"
+        },
+        "Rounds": {
+          "one": "pendant {n} round",
+          "other": "pendant {n} rounds"
+        },
         "NoEffect": "Aucun effet — le total ionique n’atteint pas une coque entière."
       },
       "Chart": {
@@ -3065,7 +3314,10 @@
       "UnrefinedChip": "Carburant non raffiné −2",
       "MaintenanceChip": "entretien — non suivi",
       "DiameterChip": "limite des 100 diamètres — à l'arbitre",
-      "ParsecDM": "Distance de saut · {parsecs} parsecs",
+      "ParsecDM": {
+        "one": "Distance de saut · {parsecs} parsec",
+        "other": "Distance de saut · {parsecs} parsecs"
+      },
       "UnrefinedDM": "Carburant non raffiné",
       "DebitWhy": "Le saut débite le réservoir au moment du jet. Rien d'autre ne touche au carburant, et aucun jet ne fait avancer l'étape.",
       "NoFuel": "Ce saut consomme {need} t et le réservoir en contient {have}. Sans le carburant, le propulseur ne s'allume pas.",
@@ -3113,8 +3365,14 @@
       "TimeVariance": "Variance de durée",
       "MisjumpTable": "Saut manqué",
       "VeryBadTable": "Très mauvais saut",
-      "Diameters": "{n} diamètres",
-      "Hours": "{n} heures",
+      "Diameters": {
+        "one": "{n} diamètre",
+        "other": "{n} diamètres"
+      },
+      "Hours": {
+        "one": "{n} heure",
+        "other": "{n} heures"
+      },
       "Long": "plus long de {n}",
       "Short": "plus court de {n}",
       "Precipitated": "précipité à {n}",
@@ -3129,19 +3387,37 @@
         "Clean": "Le jet d'Ingénieur (propulseur de saut) a réussi : il n'y a pas de saut manqué à lire.",
         "Late": "Le vaisseau arrive dans le système visé avec {days} jours de retard. Au choix de l'arbitre, l'équipage perçoit {perceived} jours supplémentaires dans l'espace de saut.",
         "Displaced": "Le vaisseau arrive dans le système visé à {diameters} × 100 diamètres du monde visé.",
-        "Adrift": "Le saut manqué le plus survivable : le vaisseau se retrouve à {parsecs} parsecs dans une direction aléatoire, éventuellement en plein espace vide."
+        "Adrift": {
+          "one": "Le saut manqué le plus survivable : le vaisseau se retrouve à {parsecs} parsec dans une direction aléatoire, éventuellement en plein espace vide.",
+          "other": "Le saut manqué le plus survivable : le vaisseau se retrouve à {parsecs} parsecs dans une direction aléatoire, éventuellement en plein espace vide."
+        }
       },
       "Misjump": {
         "Lost": "Le vaisseau est perdu dans l'espace de saut, ou en ressort en fragments et en particules subatomiques.",
-        "Wrecked": "Le vaisseau saute de {parsecs} parsecs dans une direction aléatoire. Son propulseur de saut est entièrement détruit à la sortie, et l'équipage comme les passagers risquent des séquelles psychologiques durables.",
-        "Severe": "Le vaisseau saute de {parsecs} parsecs dans une direction aléatoire. Son propulseur de saut est gravement endommagé à la sortie.",
-        "Scattered": "Le vaisseau saute de {parsecs} parsecs dans une direction aléatoire.",
+        "Wrecked": {
+          "one": "Le vaisseau saute de {parsecs} parsec dans une direction aléatoire. Son propulseur de saut est entièrement détruit à la sortie, et l'équipage comme les passagers risquent des séquelles psychologiques durables.",
+          "other": "Le vaisseau saute de {parsecs} parsecs dans une direction aléatoire. Son propulseur de saut est entièrement détruit à la sortie, et l'équipage comme les passagers risquent des séquelles psychologiques durables."
+        },
+        "Severe": {
+          "one": "Le vaisseau saute de {parsecs} parsec dans une direction aléatoire. Son propulseur de saut est gravement endommagé à la sortie.",
+          "other": "Le vaisseau saute de {parsecs} parsecs dans une direction aléatoire. Son propulseur de saut est gravement endommagé à la sortie."
+        },
+        "Scattered": {
+          "one": "Le vaisseau saute de {parsecs} parsec dans une direction aléatoire.",
+          "other": "Le vaisseau saute de {parsecs} parsecs dans une direction aléatoire."
+        },
         "Recalibrate": "Durée allongée ou raccourcie de {days} jours. Le propulseur de saut exige un recalibrage complet — {work} jours de travail — mais aucune réparation.",
-        "Rough": "Saut très chaotique : la sortie se fait à {diameters} diamètres du monde visé."
+        "Rough": {
+          "one": "Saut très chaotique : la sortie se fait à {diameters} diamètre du monde visé.",
+          "other": "Saut très chaotique : la sortie se fait à {diameters} diamètres du monde visé."
+        }
       },
       "VeryBad": {
         "None": "Aucun effet supplémentaire.",
-        "Recalibration": "Le propulseur de saut exige un long recalibrage après la sortie — {days} jours.",
+        "Recalibration": {
+          "one": "Le propulseur de saut exige un long recalibrage après la sortie — {days} jour.",
+          "other": "Le propulseur de saut exige un long recalibrage après la sortie — {days} jours."
+        },
         "MinorRepairs": "Le propulseur de saut exige des réparations mineures après la sortie.",
         "MajorRepairs": "Le propulseur de saut exige des réparations majeures après la sortie.",
         "Intrusions": "Des intrusions d'espace de saut se produisent et le propulseur de saut est détruit à la sortie. Le vaisseau perd {hullPerDay} % de sa coque par jour.",
@@ -3163,7 +3439,10 @@
         "Checks": "Toute personne à bord fait un jet de {first} et un jet de {second}, l'un en {routine} et l'autre en {difficult}. Chaque voyageur choisit lequel se fait à quel niveau.",
         "VeryBadDM": "Un très mauvais saut impose un MD{dm} aux deux.",
         "Physical": "{first} échoué : un MD égal à l'Effet de l'échec sur tous les jets pendant {hours} heures après l'entrée, puis de nouveau après la sortie. À {at} ou pire, le voyageur est incapacité pendant {out} minutes, puis subit un MD{then} pendant {thenHours} heures.",
-        "Mental": "{second} échoué : MD{dm} sur les jets mentaux et sociaux pendant tout le saut et {days} jours après. À {at} ou pire, les effets sont graves."
+        "Mental": {
+          "one": "{second} échoué : MD{dm} sur les jets mentaux et sociaux pendant tout le saut et {days} jour après. À {at} ou pire, les effets sont graves.",
+          "other": "{second} échoué : MD{dm} sur les jets mentaux et sociaux pendant tout le saut et {days} jours après. À {at} ou pire, les effets sont graves."
+        }
       }
     },
     "Starports": {
@@ -3202,14 +3481,26 @@
       "PopCap": "plafonné par la population",
       "Freight": "Cargaison",
       "FreightCount": "trois jets · un lot ne peut pas être divisé",
-      "TonsPerLot": "{size} tonnes par lot",
-      "Lots": " t · {lots} lots · plus gros {biggest}",
+      "TonsPerLot": {
+        "one": "{size} tonne par lot",
+        "other": "{size} tonnes par lot"
+      },
+      "Lots": {
+        "one": " t · {lots} lot · plus gros {biggest}",
+        "other": " t · {lots} lots · plus gros {biggest}"
+      },
       "CarouseSplit": "Un test de Mondanités ne trouve que des passagers : la cargaison demande Courtier ou Sens de la rue.",
       "Mail": "Courrier",
       "MailSource": "réussite ou échec sur 12+",
-      "MailContainers": "{n} conteneurs",
+      "MailContainers": {
+        "one": "{n} conteneur",
+        "other": "{n} conteneurs"
+      },
       "MailNone": "Aucun courrier proposé",
-      "MailPay": "{tons} tonnes · {credits} Cr forfaitaires, tout ou rien",
+      "MailPay": {
+        "one": "{tons} tonne · {credits} Cr forfaitaires, tout ou rien",
+        "other": "{tons} tonnes · {credits} Cr forfaitaires, tout ou rien"
+      },
       "MailMissed": "il fallait {target}+, obtenu {roll} {dm} = {total}",
       "MailNeeds": "2D {dm} contre {target}+",
       "RollAll": "Lancer les huit",
@@ -3231,9 +3522,15 @@
       "NoCodes": "aucun code — marchandises communes seulement",
       "SearchLine": "trouver un fournisseur : {dm} contre {target}+",
       "Shelf": "En rayon",
-      "ShelfCount": "{n} types · marchandises communes, plus tout code correspondant",
+      "ShelfCount": {
+        "one": "{n} type · marchandises communes, plus tout code correspondant",
+        "other": "{n} types · marchandises communes, plus tout code correspondant"
+      },
       "Drawn": "Également en stock",
-      "DrawnCount": "{n} lignes aléatoires · une par point de population",
+      "DrawnCount": {
+        "one": "{n} ligne aléatoire · une par point de population",
+        "other": "{n} lignes aléatoires · une par point de population"
+      },
       "D66": "D66",
       "Tons": "Tonnes",
       "BasePrice": "Base Cr",
@@ -3243,7 +3540,10 @@
       "ExoticsHint": "Les exotiques sortent de ces règles : ni prix, ni tonnage, ni MD.",
       "PerTon": "{credits} Cr la tonne",
       "NotRolled": "non lancé",
-      "LotLine": "Un lot fait {size} tonnes, sur une base de {base} Cr la tonne.",
+      "LotLine": {
+        "one": "Un lot fait {size} tonne, sur une base de {base} Cr la tonne.",
+        "other": "Un lot fait {size} tonnes, sur une base de {base} Cr la tonne."
+      },
       "RollShelf": "Lancer le rayon",
       "RollPrice": "Lancer les deux prix",
       "At": "{world} · {goods}",
@@ -3255,7 +3555,10 @@
       "TypedInstead": "ou saisissez le profil ci-dessous",
       "ShipHint": "pour la soute où devra tenir un lot",
       "ClearSlot": "Retirer de l'emplacement",
-      "SearchedHere": "{n} recherches ce mois-ci · {dm}",
+      "SearchedHere": {
+        "one": "{n} recherche ce mois-ci · {dm}",
+        "other": "{n} recherches ce mois-ci · {dm}"
+      },
       "Hold": "soute {used} / {capacity} t",
       "HoldFree": "{tons} t libres",
       "AttemptsFromWorld": "Le compte est celui de {world} — chaque recherche faite ici ce mois-ci, inscrite sur le document.",
@@ -3275,7 +3578,10 @@
       "HoldTight": "{tons} t pour {free} t libres — la soute passe en surcharge, et un lot ne peut pas être divisé.",
       "HoldTooSmall": "{tons} t pour une soute de {capacity} t — ce lot ne tiendra jamais dans cette coque, et un lot ne peut pas être divisé.",
       "InTheHold": "En soute",
-      "HoldCount": "{n} lots · {used} / {capacity} t",
+      "HoldCount": {
+        "one": "{n} lot · {used} / {capacity} t",
+        "other": "{n} lots · {used} / {capacity} t"
+      },
       "HoldEmpty": "La soute est vide — rien à vendre à ce comptoir.",
       "LotColumn": "Lot",
       "Fetches": "Rapporte",
@@ -3316,7 +3622,10 @@
       "PassageName": "{grade} × {n}",
       "PassageReason": "{n} × {grade} vers {world}, prix encaissé à la réservation.",
       "FreightName": "{size} pour {world}",
-      "MailName": "Courrier · {n} conteneurs pour {world}",
+      "MailName": {
+        "one": "Courrier · {n} conteneur pour {world}",
+        "other": "Courrier · {n} conteneurs pour {world}"
+      },
       "DeliveryReason": "{tons} t de {lot} livrées à {world}.",
       "Arriving": "Arrivée à {world}",
       "Card": {
@@ -3331,13 +3640,22 @@
         "FeeTaken": "Les {rate} % du courtier local prélèvent {fee} Cr — {credits} Cr perçus.",
         "Passengers": "{n} × {grade} — {credits} Cr encaissés.",
         "Freight": "{size} : {tons} t, {credits} Cr à la livraison.",
-        "Mail": "{n} conteneurs, {tons} t, {credits} Cr forfaitaires à la livraison.",
+        "Mail": {
+          "one": "{n} conteneur, {tons} t, {credits} Cr forfaitaires à la livraison.",
+          "other": "{n} conteneurs, {tons} t, {credits} Cr forfaitaires à la livraison."
+        },
         "Consignment": "{lot} : {tons} t, {credits} Cr payés.",
         "Disembark": "{n} × {grade} débarqués.",
         "FarePaid": "Le prix a été encaissé au moment de la réservation (Livre de règles de Traveller p.239).",
         "DueDay": "Échéance au jour de campagne {day}, payé à la livraison (Livre de règles de Traveller p.241).",
-        "Late": "{days} jours de retard — 1D+4 donne {roll}, soit {percent} % retenus : {docked} Cr sur un fret de {credits} Cr.",
-        "Revival": "{n} passagers en cryocapsule : chacun exige un jet de Médecine Routinier (6+) à l'ouverture (Livre de règles de Traveller p.158). À vous de les lancer.",
+        "Late": {
+          "one": "{days} jour de retard — 1D+4 donne {roll}, soit {percent} % retenus : {docked} Cr sur un fret de {credits} Cr.",
+          "other": "{days} jours de retard — 1D+4 donne {roll}, soit {percent} % retenus : {docked} Cr sur un fret de {credits} Cr."
+        },
+        "Revival": {
+          "one": "{n} passager en cryocapsule : il exige un jet de Médecine Routinier (6+) à l'ouverture (Livre de règles de Traveller p.158). À vous de le lancer.",
+          "other": "{n} passagers en cryocapsule : chacun exige un jet de Médecine Routinier (6+) à l'ouverture (Livre de règles de Traveller p.158). À vous de les lancer."
+        },
         "Hold": "{ship} · soute {used} / {capacity} t",
         "Over": "soute en surcharge — un lot ne peut pas être divisé",
         "RevivalCheck": "Test de réanimation",
@@ -3371,7 +3689,10 @@
         "Population": "Population {n}",
         "Starport": "Astroport {port}",
         "TechLevel": "Niveau technologique {n}",
-        "Parsecs": "{n} parsecs",
+        "Parsecs": {
+          "one": "{n} parsec",
+          "other": "{n} parsecs"
+        },
         "WorldTotal": "Total des mondes",
         "Steward": "Chef Intendant",
         "Check": "Effet ({skill})",
@@ -3384,7 +3705,10 @@
         "LocalBroker": "Courtier local",
         "OtherBroker": "Courtier d'en face",
         "Banned": "Interdit au niveau de loi {law}",
-        "Attempts": "{n} recherches antérieures"
+        "Attempts": {
+          "one": "{n} recherche antérieure",
+          "other": "{n} recherches antérieures"
+        }
       },
       "RevivalTL": "Vaisseau de NT12",
       "RevivalEmergency": "Cryocapsule d'urgence",
@@ -3510,9 +3834,15 @@
     },
     "Design": {
       "Title": "Conception",
-      "Passed": "{n} vérifications lues, aucune ligne rouge.",
+      "Passed": {
+        "one": "{n} vérification lue, aucune ligne rouge.",
+        "other": "{n} vérifications lues, aucune ligne rouge."
+      },
       "Optional": "optionnelle — le vaisseau ci-dessus est complet sans elle",
-      "Count": "{n} composants · {tons} t comptabilisées",
+      "Count": {
+        "one": "{n} composant · {tons} t comptabilisées",
+        "other": "{n} composants · {tons} t comptabilisées"
+      },
       "Category": "Catégorie",
       "MCr": "MCr",
       "Rating": "indice {n}",
@@ -3522,7 +3852,10 @@
       "DeleteComponent": "Retirer ce composant",
       "NothingToRead": "rien de saisi pour confronter cette règle",
       "Advisory": "Chaque ligne est indicative. Des vaisseaux publiés échouent à ces contrôles — le catalogue contredit assez souvent le chapitre de construction pour qu'un refus d'enregistrer rende toute transcription impossible.",
-      "Failed": "{n} lignes rouges.",
+      "Failed": {
+        "one": "{n} ligne rouge.",
+        "other": "{n} lignes rouges."
+      },
       "Checks": {
         "power": "Énergie",
         "tonnage": "Tonnage",
@@ -3642,7 +3975,10 @@
       "Damage": "{points} dégâts",
       "Ambient": "{celsius} °C",
       "Exposure": "round {round} d'exposition",
-      "Shielded": "{rads} rads, entièrement absorbés par les {shielded} de la région",
+      "Shielded": {
+        "one": "{rads} rad, entièrement absorbé par les {shielded} de la région",
+        "other": "{rads} rads, entièrement absorbés par les {shielded} de la région"
+      },
       "gravity": {
         "AllChecks": "MD {dm} à tous les tests de compétence jusqu'à l'acclimatation — 1D semaines, ou 1D jours avec Athlétisme (force). Quitter la région n'y met pas fin.",
         "PhysicalChecks": "MD {dm} à tous les tests de compétence physique jusqu'à l'acclimatation — 1D semaines, ou 1D jours avec Athlétisme (dextérité). Quitter la région n'y met pas fin.",
@@ -3872,13 +4208,25 @@
       "ExposeHint": "Une dose · l'armure en est déduite · les effets immédiats s'appliquent tout de suite · le cumul coûte de l'END définitivement",
       "Source": "Source",
       "Typed": "— une dose saisie",
-      "Standing": "{rads} rads accumulés · l'armure en arrête {protection}",
+      "Standing": {
+        "one": "{rads} rad accumulé · l'armure en arrête {protection}",
+        "other": "{rads} rads accumulés · l'armure en arrête {protection}"
+      },
       "Reaching": "{rads} reçus",
-      "Absorbed": "{dose} rads, entièrement arrêtés par {protection} d'armure",
-      "Dose": "{dose} rads · {total} au total",
+      "Absorbed": {
+        "one": "{dose} rad, entièrement arrêté par {protection} d'armure",
+        "other": "{dose} rads, entièrement arrêtés par {protection} d'armure"
+      },
+      "Dose": {
+        "one": "{dose} rad · {total} au total",
+        "other": "{dose} rads · {total} au total"
+      },
       "Immediate": "immédiat {formula}, {points} dégâts",
       "Permanent": "END {endurance} définitivement",
-      "Hardened": "durci — {reaching} rads réduits de moitié à {dose}",
+      "Hardened": {
+        "one": "durci — {reaching} rad réduit de moitié à {dose}",
+        "other": "durci — {reaching} rads réduits de moitié à {dose}"
+      },
       "Brain": "le cerveau perd INT -{points} et Bande passante -{points}, définitivement",
       "Cumulative": "Cumul",
       "Nausea": "Nausée",
@@ -3898,8 +4246,14 @@
         "ChainInto": "Enchaîner vers…",
         "ChainedFrom": "Enchaîné depuis",
         "Ammo": "Chargeur {left}/{magazine} · balles dépensées {spent}",
-        "FireModeBurst": "Rafale — {score} aux dégâts · {rounds} balles",
-        "FireModeFullAuto": "Auto complet — attaque {attack} sur {attacks} · {rounds} balles",
+        "FireModeBurst": {
+          "one": "Rafale — {score} aux dégâts · {rounds} balle",
+          "other": "Rafale — {score} aux dégâts · {rounds} balles"
+        },
+        "FireModeFullAuto": {
+          "one": "Auto complet — attaque {attack} sur {attacks} · {rounds} balle",
+          "other": "Auto complet — attaque {attack} sur {attacks} · {rounds} balles"
+        },
         "FireModeFullAutoNext": "Auto complet — attaque {attack} sur {attacks}",
         "NoDifficulty": "aucune difficulté fixée",
         "PsiSpent": "PSI dépensés {points} · {left} restants",
@@ -4026,7 +4380,10 @@
       "Reload": "Recharger",
       "ReloadHint": "Insère un chargeur plein. Actions Mineures nécessaires : {actions}.",
       "FireModes": "Modes de tir",
-      "FireModeCost": "{mode} {gain}, {rounds} balles",
+      "FireModeCost": {
+        "one": "{mode} {gain}, {rounds} balle",
+        "other": "{mode} {gain}, {rounds} balles"
+      },
       "Modifier": "Modificateur",
       "Modifiers": "Modificateurs",
       "Name": "Nom",
@@ -4411,11 +4768,17 @@
       "NoOwnedTokenSelected": "Aucun jeton vous appartenant n'est sélectionné.",
       "NoPsiPoints": "{name} n'a plus de points de PSI : aucun pouvoir ne peut être tenté.",
       "WeaponEmpty": "{name} est vide et doit être rechargé avant de tirer à nouveau.",
-      "WeaponShort": "{name} a {ammo} balles chargées et ce mode de tir en dépense {rounds}."
+      "WeaponShort": {
+        "one": "{name} a {ammo} balle chargée et ce mode de tir en dépense {rounds}.",
+        "other": "{name} a {ammo} balles chargées et ce mode de tir en dépense {rounds}."
+      }
     },
     "Migration": {
       "Begin": "MGT2 : migration des données du monde, ne fermez pas la partie.",
-      "Complete": "MGT2 : migration du monde terminée. {count} acteur(s) ont changé de maximum de vie.",
+      "Complete": {
+        "one": "MGT2 : migration du monde terminée. {count} acteur a changé de maximum de vie.",
+        "other": "MGT2 : migration du monde terminée. {count} acteurs ont changé de maximum de vie."
+      },
       "Failed": "MGT2 : échec de la migration du monde. Consultez la console ; elle sera retentée au prochain chargement."
     },
     "Notifications": {
@@ -4486,7 +4849,10 @@
       "Weapon": "{n} arme : {state}",
       "WeaponDM": "{n} arme : {state} {dm}",
       "Cargo": "{amount} de cargaison détruits",
-      "Occupants": "{n} occupants subissent {dice}",
+      "Occupants": {
+        "one": "{n} occupant subit {dice}",
+        "other": "{n} occupants subissent {dice}"
+      },
       "SystemLoss": "1D — comms, capteurs ou ordinateur perdus",
       "HullSeverity": "Sévérité de la coque +{value}",
       "Some": "Au hasard",
@@ -4496,7 +4862,10 @@
       "ThrustZero": "Poussée réduite à zéro",
       "SensorRange": "Capteurs inopérants au-delà de {band}",
       "SensorsDisabled": "Capteurs désactivés",
-      "FuelLeak": "Fuite de carburant — {amount} tonnes par {per}",
+      "FuelLeak": {
+        "one": "Fuite de carburant — {amount} tonne par {per}",
+        "other": "Fuite de carburant — {amount} tonnes par {per}"
+      },
       "Jump": "Propulseur-S : {state}",
       "JumpDM": "Tests de saut {dm}",
       "LifeSupport": "Défaillance du support de vie en {time}",
@@ -4712,7 +5081,10 @@
       "RestoredPlain": "{points} restaurés",
       "Awake": "Reprend connaissance",
       "StillOut": "Toujours inconscient",
-      "ApplyFirstAid": "Appliquer les premiers soins — {points} points",
+      "ApplyFirstAid": {
+        "one": "Appliquer les premiers soins — {points} point",
+        "other": "Appliquer les premiers soins — {points} points"
+      },
       "AlreadyApplied": "{name} a déjà reçu les premiers soins.",
       "Undamaged": "{name} n'a aucune caractéristique endommagée à restaurer.",
       "FirstAidHint": "Effet de Médecine (ÉDU), minimum 1 · à volonté · une seule fois",
@@ -4862,7 +5234,10 @@
     "SkipDebts": {
       "Title": "Fuite devant les dettes",
       "Open": "Test de fuite",
-      "Run": "{n} parsec(s) parcouru(s)",
+      "Run": {
+        "one": "{n} parsec parcouru",
+        "other": "{n} parsecs parcourus"
+      },
       "PanelHint": "Un 2D à chaque nouveau système où l'équipage arrive. Sur 8+, il est traqué — par les pisteurs de vaisseaux employés par la banque, ou comme criminel dans la base impériale. La distance parcourue et les modifications du vaisseau sont conservées d'un test à l'autre ; remettez la distance à zéro dès que l'équipage est repéré.",
       "Parsecs": "Parsecs parcourus",
       "Disguise": "Vaisseau modifié",
@@ -4883,7 +5258,10 @@
       "Roll": "Lancer le test",
       "Post": "Publier",
       "Terms": {
-        "Parsecs": "{n} parsecs parcourus",
+        "Parsecs": {
+          "one": "{n} parsec parcouru",
+          "other": "{n} parsecs parcourus"
+        },
         "Disguise": "Vaisseau modifié",
         "Value": "Valeur volée · {n} × MCr10",
         "Revisited": "Vu ici dans les trois derniers mois",

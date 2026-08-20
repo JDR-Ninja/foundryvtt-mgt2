@@ -5,8 +5,11 @@ import { createTraitsField } from "../traits.js";
 
 const fields = foundry.data.fields;
 
-/** VH p.6, p.10: one Space is 250 kg of capacity, which is what Shipping counts in tons. */
-const TONS_PER_SPACE = 0.25;
+/** VH p.6: a Space given over to cargo carries 250 kg. Shipping is a different rate entirely. */
+const CARGO_TONS_PER_SPACE = 0.25;
+
+/** How far a printed Shipping may sit outside its band before the row reports, for rounding. */
+const SHIPPING_SLACK = 0.05;
 
 /** VH p.3: a vehicle costs half a per cent of its purchase price to keep running each month. */
 const MAINTENANCE_RATE = 0.005;
@@ -214,22 +217,45 @@ export class VehicleData extends CraftData {
         return this.mounts.reduce((total, mount) => total + mount.weapons.length, 0);
     }
 
+    /** Shipping per Space, widest span of its media, or null where no edition prints a rate. */
+    get shippingBand() {
+        // `hasOwn`, not `??`: the airship's entry IS null, which a nullish fallback would replace.
+        const rates = this.skill.map(pair => Object.hasOwn(MGT2.VehicleShipping, pair.speciality)
+            ? MGT2.VehicleShipping[pair.speciality] : MGT2.VehicleShipping.default);
+        if (!rates.length) rates.push(MGT2.VehicleShipping.default);
+        if (rates.includes(null)) return null;
+        // Open Frame halves what the type ships at, and Open Vehicle is what records it (VH 2026 p.40).
+        const open = MGT2Helper.hasTrait(this.traits, "open-vehicle") ? 0.5 : 1;
+        return {
+            nominal: Math.max(...rates.map(rate => rate.nominal)) * open,
+            min: Math.min(...rates.map(rate => rate.min)) * open,
+            max: Math.max(...rates.map(rate => rate.max))
+        };
+    }
+
     /**
-     * Stored beside computed, for the three lines the design system also produces.
+     * Stored beside computed, for the lines the design system also produces.
      * @type {Array<{key: string, printed: number, derived: number, agrees: boolean}>}
      */
     get crossCheck() {
         if (!(this.spaces > 0)) return [];
-        const capacity = this.spaces * TONS_PER_SPACE;
+        const capacity = this.spaces * CARGO_TONS_PER_SPACE;
         const perSpace = this.characteristics.hull.max / this.spaces;
-        return [
-            { key: "shipping", printed: this.shipping, derived: capacity,
-                agrees: Math.abs(this.shipping - capacity) < 0.5 },
+        const band = this.shippingBand;
+        const rows = [];
+        // A rate per medium, and the two editions differ: the band decides, `derived` only shows.
+        if (band) {
+            rows.push({ key: "shipping", printed: this.shipping,
+                derived: this.spaces * band.nominal,
+                agrees: (this.shipping >= this.spaces * band.min * (1 - SHIPPING_SLACK))
+                    && (this.shipping <= this.spaces * band.max * (1 + SHIPPING_SLACK)) });
+        }
+        rows.push(
             { key: "cargo", printed: this.cargo, derived: capacity, agrees: this.cargo <= capacity },
             { key: "hullPerSpace", printed: this.characteristics.hull.max,
                 derived: Math.round(perSpace * 100) / 100,
-                agrees: (perSpace >= 0.2) && (perSpace <= 4) }
-        ];
+                agrees: (perSpace >= 0.2) && (perSpace <= 4) });
+        return rows;
     }
 
     /** Whoever is at the controls, or null. @type {Actor|null} */

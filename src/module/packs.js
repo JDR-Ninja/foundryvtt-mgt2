@@ -1,3 +1,5 @@
+import { MGT2Helper } from "./helper.js";
+
 const { DialogV2 } = foundry.applications.api;
 
 /**
@@ -128,7 +130,7 @@ async function onCreate(button) {
     const boxes = button.form.querySelectorAll('input[name="pack"]:checked:not(:disabled)');
     const created = await createWorldPacks(Array.from(boxes).map(box => box.value));
     if ( !created ) return ui.notifications.info(game.i18n.localize("MGT2.Packs.nothing"));
-    ui.notifications.info(game.i18n.format("MGT2.Packs.created", {
+    ui.notifications.info(MGT2Helper.plural("MGT2.Packs.created", created, {
         count: created,
         folder: game.i18n.localize("MGT2.Packs.folder")
     }));

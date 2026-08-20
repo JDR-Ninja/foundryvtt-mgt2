@@ -49,8 +49,8 @@ export const Psionics = {
                 roll,
                 rollTypeName: game.i18n.localize("MGT2.Chargen.Psi.Title"),
                 rollObjectName: game.i18n.localize("MGT2.Characteristics.psionic.name"),
-                lines: [game.i18n.format(score > 0 ? "MGT2.Chargen.Psi.Result" : "MGT2.Chargen.Psi.None",
-                    { score, terms: test.terms })]
+                lines: [MGT2Helper.plural(score > 0 ? "MGT2.Chargen.Psi.Result" : "MGT2.Chargen.Psi.None",
+                    test.terms, { score, terms: test.terms })]
             })
         });
         return { roll, score, ...test };

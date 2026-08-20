@@ -138,7 +138,7 @@ export class SpecTrade {
         const terms = [StopTraffic.term(
             game.i18n.format("MGT2.Trade.Terms.Starport", { port: uwp.starport }), port.searchDM)];
         if ( attempts ) {
-            terms.push(StopTraffic.term(game.i18n.format("MGT2.Trade.Terms.Attempts", { n: attempts }),
+            terms.push(StopTraffic.term(MGT2Helper.plural("MGT2.Trade.Terms.Attempts", attempts),
                 attempts * MGT2.SpeculativeTrade.attemptDM));
         }
         const dm = terms.reduce((sum, term) => sum + term.dm, 0);

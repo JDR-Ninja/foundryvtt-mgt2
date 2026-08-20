@@ -92,6 +92,9 @@ function registerHandlebarsHelpers() {
   // A printed table's rows are numbered from 1 and stored from 0, and a career template draws six
   // of them.
   Handlebars.registerHelper('inc', index => Number(index) + 1);
+  // `{{plural 'KEY' count hash=...}}` — the count is positional and also fills `{n}`.
+  Handlebars.registerHelper('plural', (key, count, options) =>
+    MGT2Helper.plural(key, Number(count), options.hash));
 }
 
 /** The Item types a sheet offers a roll for. */

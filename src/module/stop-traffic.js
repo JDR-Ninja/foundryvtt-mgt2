@@ -83,7 +83,7 @@ export class StopTraffic {
         const far = MGT2.Traffic.perParsec * Math.max(0, parsecs - 1);
         if ( far ) {
             groups.push({ terms: [
-                StopTraffic.term(game.i18n.format("MGT2.Trade.Terms.Parsecs", { n: parsecs }), far)] });
+                StopTraffic.term(MGT2Helper.plural("MGT2.Trade.Terms.Parsecs", parsecs), far)] });
         }
         const total = groups.reduce((sum, group) =>
             sum + group.terms.reduce((run, term) => run + term.dm, 0), 0);
@@ -645,14 +645,14 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
         const mail = context.booking?.mail;
         if ( !mail?.ready ) return;
         return this.#write("mail", () => this.#consign({
-            name: game.i18n.format("MGT2.Trade.MailName", { n: mail.containers,
-                world: this.#endName("next") }),
+            name: MGT2Helper.plural("MGT2.Trade.MailName", mail.containers,
+                { world: this.#endName("next") }),
             tons: mail.tons,
             farePerTon: MGT2.MailTraffic.creditsPerContainer / MGT2.MailTraffic.tonsPerContainer,
             booking: context.booking,
             title: "MGT2.Trade.Card.Consigned",
-            line: game.i18n.format("MGT2.Trade.Card.Mail", { n: mail.containers, tons: mail.tons,
-                credits: mail.fare })
+            line: MGT2Helper.plural("MGT2.Trade.Card.Mail", mail.containers,
+                { tons: mail.tons, credits: mail.fare })
         }));
     }
 

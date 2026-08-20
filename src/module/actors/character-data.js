@@ -136,6 +136,8 @@ export class CharacterData extends ActorBaseData {
             entitlements: new fields.ArrayField(new fields.SchemaField({
                 kind: new fields.StringField({
                     required: false, blank: false, initial: "voucher", choices: MGT2.BenefitKinds }),
+                // Which `MGT2.Benefits` definition this row came from; blank is the referee's own.
+                ref: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 // What the row entitles you to, as the book prints it.
                 category: new fields.StringField({ required: false, blank: true, trim: true }),
                 // Null where the row prints no ceiling; an improved cybernetic implant exceeds both.
@@ -151,6 +153,8 @@ export class CharacterData extends ActorBaseData {
                 count: new fields.NumberField({ required: false, initial: 1, min: 0, integer: true }),
                 // Redeemed rather than deleted: a referee auditing a sheet needs the row that paid.
                 redeemed: new fields.BooleanField({ required: false, initial: false }),
+                item: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+                uuid: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 // Given up rather than taken, for one printed rule: only one Traveller may start
                 // owning a ship, and each of the others takes Cr25000 a year instead (folio 48).
                 surrendered: new fields.BooleanField({ required: false, initial: false }),
@@ -227,7 +231,7 @@ export class CharacterData extends ActorBaseData {
                 target: { kind: "skill", key: source.study.skill },
                 log: Array.from({ length: passed }, () => ({ kind: "period", ok: true, amount: period })),
                 weeks: Math.min(total, period),
-                note: dropped ? game.i18n.format("MGT2.Training.MigratedWeeks", { weeks: dropped }) : ""
+                note: dropped ? MGT2Helper.plural("MGT2.Training.MigratedWeeks", dropped, { weeks: dropped }) : ""
             } } };
         }
 

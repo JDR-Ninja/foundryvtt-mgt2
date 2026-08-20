@@ -29,7 +29,7 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Trade.Shelf'}}</h3>
-			<span class="count">{{localize 'MGT2.Trade.ShelfCount' n=shelf.length}}</span>
+			<span class="count">{{plural 'MGT2.Trade.ShelfCount' shelf.length}}</span>
 		</div>
 		<div class="shelf">
 			<div class="r hdr">
@@ -54,7 +54,7 @@
 		</div>
 		{{#if drawn.length}}
 		<div class="sect sub"><h3>{{localize 'MGT2.Trade.Drawn'}}</h3>
-			<span class="count">{{localize 'MGT2.Trade.DrawnCount' n=drawn.length}}</span></div>
+			<span class="count">{{plural 'MGT2.Trade.DrawnCount' drawn.length}}</span></div>
 		<div class="shelf">
 			{{#each drawn as |row|}}
 			<div class="r{{#if row.selected}} on{{/if}}{{#if row.illegal}} bad{{/if}}"
@@ -105,7 +105,7 @@
 			</div>
 			{{/each}}
 		</div>
-		<p class="hint">{{localize 'MGT2.Trade.LotLine' size=lot.size base=lot.basePrice}}</p>
+		<p class="hint">{{plural 'MGT2.Trade.LotLine' lot.size size=lot.size base=lot.basePrice}}</p>
 		{{! What the lot actually costs, once both the tonnage and the percentage are on the table.
 		    The capacity clause WARNS and never refuses: a lot cannot be broken up (Core p.241), so a
 		    hold with room for part of it has room for none of it — which is a legal purchase and a
@@ -132,7 +132,7 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Trade.InTheHold'}}</h3>
-			<span class="count">{{localize 'MGT2.Trade.HoldCount' n=lots.length used=hold.used capacity=hold.capacity}}</span>
+			<span class="count">{{plural 'MGT2.Trade.HoldCount' lots.length used=hold.used capacity=hold.capacity}}</span>
 		</div>
 		{{#if lots.length}}
 		<div class="shelf hold">

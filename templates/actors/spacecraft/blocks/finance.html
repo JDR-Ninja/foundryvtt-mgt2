@@ -45,10 +45,10 @@
 	{{#if ship.finance.mortgage}}
 	{{#if ship.finance.periods}}
 	<div class="finance" data-derived="system.finance">
-		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.MortgageTerm'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.MortgageTermWhy' n=ship.finance.periodsPerYear}}</span><span class="v">{{ship.finance.periods}}</span></div>
-		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.MortgageTotal'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.MortgageTotalWhy' n=ship.finance.periods}}</span><span class="v"><i>Cr</i>{{credits ship.finance.total}}</span></div>
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.MortgageTerm'}}</span><span class="why">{{plural 'MGT2.Actor.spacecraft.MortgageTermWhy' ship.finance.periodsPerYear}}</span><span class="v">{{ship.finance.periods}}</span></div>
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.MortgageTotal'}}</span><span class="why">{{plural 'MGT2.Actor.spacecraft.MortgageTotalWhy' ship.finance.periods}}</span><span class="v"><i>Cr</i>{{credits ship.finance.total}}</span></div>
 		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.MortgageOvercost'}}</span>{{#if ship.finance.multiple}}<span class="why">{{localize 'MGT2.Actor.spacecraft.MortgageOvercostWhy' n=ship.finance.multiple}}</span>{{/if}}<span class="v warn"><i>Cr</i>{{credits ship.finance.overcost}}</span></div>
-		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.MortgageBalance'}}</span><span class="why">{{localize 'MGT2.Actor.spacecraft.MortgageBalanceWhy' n=ship.finance.remaining}}</span><span class="v"><i>Cr</i>{{credits ship.finance.balance}}</span></div>
+		<div class="row"><span>{{localize 'MGT2.Actor.spacecraft.MortgageBalance'}}</span><span class="why">{{plural 'MGT2.Actor.spacecraft.MortgageBalanceWhy' ship.finance.remaining}}</span><span class="v"><i>Cr</i>{{credits ship.finance.balance}}</span></div>
 	</div>
 
 	<section class="budget compact" data-over="soft" data-derived="system.finance">
@@ -78,17 +78,17 @@
 		<header>
 			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Elections'}}</span>
 			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.ElectionsHint'}}"></i>
-			<span class="rem">{{localize 'MGT2.Actor.spacecraft.ElectionsRem' n=ship.finance.quarters}}</span>
+			<span class="rem">{{plural 'MGT2.Actor.spacecraft.ElectionsRem' ship.finance.quarters}}</span>
 		</header>
 		<table class="rows brows">
 			<tbody>
 				<tr>
-					<td>{{localize 'MGT2.Actor.spacecraft.ElectKeep'}}<span class="why">{{localize 'MGT2.Actor.spacecraft.ElectPeriodsWhy' n=ship.finance.elections.keep.periods}}</span></td>
+					<td>{{localize 'MGT2.Actor.spacecraft.ElectKeep'}}<span class="why">{{plural 'MGT2.Actor.spacecraft.ElectPeriodsWhy' ship.finance.elections.keep.periods}}</span></td>
 					<td class="num">{{credits ship.finance.elections.keep.payment}}</td>
 					<td class="d">{{#if ship.finance.mortgageOverridden}}<a class="flag" data-action="electMortgage" data-election="keep">{{localize 'MGT2.Actor.spacecraft.ElectApply'}}</a>{{else}}{{localize 'MGT2.Actor.spacecraft.ElectInForce'}}{{/if}}</td>
 				</tr>
 				<tr>
-					<td>{{localize 'MGT2.Actor.spacecraft.ElectRemortgage'}}<span class="why">{{localize 'MGT2.Actor.spacecraft.ElectPeriodsWhy' n=ship.finance.elections.remortgage.periods}}</span></td>
+					<td>{{localize 'MGT2.Actor.spacecraft.ElectRemortgage'}}<span class="why">{{plural 'MGT2.Actor.spacecraft.ElectPeriodsWhy' ship.finance.elections.remortgage.periods}}</span></td>
 					<td class="num">{{credits ship.finance.elections.remortgage.payment}}</td>
 					<td class="d">{{#if ship.finance.mortgageOverridden}}{{localize 'MGT2.Actor.spacecraft.ElectInForce'}}{{else}}<a class="flag" data-action="electMortgage" data-election="remortgage">{{localize 'MGT2.Actor.spacecraft.ElectApply'}}</a>{{/if}}</td>
 				</tr>
@@ -105,7 +105,7 @@
 		<header>
 			<span class="lbl">{{localize 'MGT2.SkipDebts.Title'}}</span>
 			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.SkipDebts.PanelHint'}}"></i>
-			<span class="rem">{{localize 'MGT2.SkipDebts.Run' n=system.finance.skipParsecs}}</span>
+			<span class="rem">{{plural 'MGT2.SkipDebts.Run' system.finance.skipParsecs}}</span>
 			<a class="flag" data-action="skipDebts">{{localize 'MGT2.SkipDebts.Open'}}</a>
 		</header>
 	</section>

@@ -88,7 +88,10 @@
       "TacticsDropped": "{name} was surprised and no longer holds this side's Tactics check.",
       "SurprisedHint": "A surprised Traveller may make no Tactics check.",
       "TacticsTaken": "{name} commands {side}: Tactics Effect {effect} on the Initiative of everyone on that side.",
-      "TacticsLate": "The Tactics check comes at the start of a combat. {count} combatant(s) on this side have already rolled Initiative and must re-roll — nothing was changed for them.",
+      "TacticsLate": {
+        "one": "The Tactics check comes at the start of a combat. {count} combatant on this side has already rolled Initiative and must re-roll — nothing was changed for them.",
+        "other": "The Tactics check comes at the start of a combat. {count} combatants on this side have already rolled Initiative and must re-roll — nothing was changed for them."
+      },
       "SideHint": "One Tactics check a side, its Effect on everyone's Initiative. The side is guessed from the token's disposition and is yours to correct."
     },
     "Edit": "Edit",
@@ -690,7 +693,8 @@
         "skill": "Skill",
         "ship": "Ship",
         "shipShare": "Ship Shares",
-        "membership": "Membership"
+        "membership": "Membership",
+        "contact": "Contact"
       },
       "BenefitRepeats": {
         "another": "Another one",
@@ -700,6 +704,65 @@
         "stackMortgage": "Stack a share of the mortgage",
         "reroll": "Roll again",
         "convert": "Convert it to something else"
+      },
+      "Benefits": {
+        "Title": "Benefits",
+        "Add": "Record a Benefit",
+        "Delete": "Delete this Benefit",
+        "None": "No Benefit has been recorded.",
+        "From": "From",
+        "Term": "term {n}",
+        "State": "State",
+        "States": {
+          "owed": "owed",
+          "redeemed": "redeemed",
+          "surrendered": "given up"
+        },
+        "Redeem": "Redeem",
+        "Take": "Take this one",
+        "Printed": "Printed Benefit",
+        "Other": "something else",
+        "PickHint": "Choose the Benefit the table printed, or describe one this system does not define.",
+        "NamesOnly": "A ship or a vehicle is named rather than created: the row records which one, and the referee decides where the Actor lives.",
+        "NoLibrary": "This Benefit is redeemed against no document. Record what was taken.",
+        "NothingFits": "No compendium holds anything within these limits.",
+        "Capped": "{shown} of {matched}",
+        "ByHand": "Record it by hand",
+        "ByHandHint": "Nothing in the referee's library fits, or the thing taken is not in a compendium. Write down what was taken.",
+        "ImprovedNote": "improved: {name}",
+        "Alternative": "Or instead",
+        "Mode": {
+          "base": "Take another",
+          "tradeIn": "Trade the original in",
+          "improve": "Improve the one fitted"
+        },
+        "Constraint": {
+          "Label": "Limited to",
+          "unarmed": "unarmed",
+          "ranged": "common or military ranged",
+          "scoutService": "still belongs to the Scout Service",
+          "mortgage": "25% of the mortgage paid off · roll 1D on Spacecraft Quirks"
+        },
+        "armour": "Armour",
+        "ally": "Ally",
+        "blade": "Blade",
+        "characteristic": "Characteristic Increases",
+        "combatImplant": "Combat Implant",
+        "contact": "Contact",
+        "cybernetic": "Cybernetic Implant",
+        "freeTrader": "Free Trader",
+        "farTrader": "Far Trader",
+        "gun": "Gun",
+        "labShip": "Lab Ship",
+        "personalVehicle": "Personal Vehicle",
+        "safariShip": "Safari Ship",
+        "scientificEquipment": "Scientific Equipment",
+        "scoutShip": "Scout Ship",
+        "shipShares": "Ship Shares",
+        "shipsBoat": "Ship's Boat",
+        "tas": "TAS Membership",
+        "weapon": "Weapon",
+        "yacht": "Yacht"
       },
       "TrackKinds": {
         "numeric": "A number",
@@ -715,7 +778,10 @@
         "Title": "Psionic Strength",
         "Training": "Psionic training",
         "Attempts": "Checks already attempted",
-        "Result": "PSI {score}, after {terms} terms served.",
+        "Result": {
+          "one": "PSI {score}, after {terms} term served.",
+          "other": "PSI {score}, after {terms} terms served."
+        },
         "None": "PSI {score} — no potential for psionic talents at all."
       },
       "Connect": {
@@ -739,7 +805,10 @@
         "Title": "Mustering out",
         "Heading": "Mustering out",
         "Ready": "{name} has left their last career and is ready to muster out.",
-        "Standing": "{serving} of {total} still serving · {owed} Benefit rolls owed",
+        "Standing": {
+          "one": "{serving} of {total} still serving · {owed} Benefit roll owed",
+          "other": "{serving} of {total} still serving · {owed} Benefit rolls owed"
+        },
         "NobodyYet": "nobody on the roster",
         "NobodyHint": "Nobody is in creation. Put a Traveller on the roster from the creation screen first.",
         "Traveller": "Traveller",
@@ -748,13 +817,22 @@
         "Cash": "Cash",
         "Pension": "Pension",
         "Taken": "Taken",
-        "AgeTerms": "age {age} · {terms} terms",
+        "AgeTerms": {
+          "one": "age {age} · {terms} term",
+          "other": "age {age} · {terms} terms"
+        },
         "StillServing": "still serving",
-        "RankTerms": "rank {rank} · {terms} terms",
+        "RankTerms": {
+          "one": "rank {rank} · {terms} term",
+          "other": "rank {rank} · {terms} terms"
+        },
         "PensionOf": "pension Cr{credits}/yr",
         "CashOf": "{taken} / {limit}",
         "PerYear": "Cr{credits}/yr",
-        "Shares": "{n} Ship Shares",
+        "Shares": {
+          "one": "{n} Ship Share",
+          "other": "{n} Ship Shares"
+        },
         "NothingYet": "nothing taken yet",
         "Redeem": "Redeem against the referee's library",
         "GivenUp": "given up",
@@ -763,8 +841,14 @@
         "FinishAll": "Finish creation",
         "FinishHint": "Creation ends for {names}. Everything decided stays on the Traveller; the creation ledger — the pending tray, the roll counters, the package picks — is discarded.",
         "WarnServing": "Still serving a career: {names}",
-        "WarnRolls": "{n} Benefit rolls have not been taken",
-        "WarnPackage": "{n} package skills have not been taken",
+        "WarnRolls": {
+          "one": "{n} Benefit roll has not been taken",
+          "other": "{n} Benefit rolls have not been taken"
+        },
+        "WarnPackage": {
+          "one": "{n} package skill has not been taken",
+          "other": "{n} package skills have not been taken"
+        },
         "NoCareers": "{name} has no closed career to muster out of.",
         "RollsLeft": "{n} left",
         "CashLeft": "Cash rolled {taken} of {limit} times in this Traveller's life.",
@@ -791,7 +875,10 @@
         "SoloOff": "Solo generation is on, and it removes this step.",
         "PackageTitle": "Shared skills package",
         "PackageTurn": "{name} is up — take one skill.",
-        "PackageDone": "All {n} skills have been taken.",
+        "PackageDone": {
+          "one": "The one skill has been taken.",
+          "other": "All {n} skills have been taken."
+        },
         "PackageNone": "No package has been chosen yet.",
         "PackageEdit": "choose the package",
         "PackageHint": "The group chooses one package together, then takes it in turns to pick one skill each until the list is empty. No package ships with this system — type the one your book prints, separated by commas. A trailing number is the level.",
@@ -918,7 +1005,10 @@
         "NoAdvancementTarget": "This assignment states no advancement number.",
         "Advanced": "Advanced to rank {rank}, and one extra skill roll.",
         "Demoted": "Demoted to rank {rank}. The bonus the lost rung paid is kept, and so is the highest rank reached.",
-        "ForcedOut": "The roll came out at or under the {n} terms served: the career cannot continue after this term.",
+        "ForcedOut": {
+          "one": "The roll came out at or under the {n} term served: the career cannot continue after this term.",
+          "other": "The roll came out at or under the {n} terms served: the career cannot continue after this term."
+        },
         "MustContinue": "Natural 12 — too valuable to lose, so the career continues.",
         "Released": "{track} passed: the career ends.",
         "Held": "{track} not passed: the career continues.",
@@ -931,7 +1021,10 @@
         "PickTable": "Pick a skill table ({n} left)",
         "PickSkillRow": "Pick a row from the table",
         "IronMan": "{name} did not survive. Nothing has been deleted — the whole history is on the Traveller, and what happens to that document is the referee's decision.",
-        "MaximumTerms": "The table's maximum of {n} terms has been reached, so this career cannot be continued.",
+        "MaximumTerms": {
+          "one": "The table's maximum of {n} term has been reached, so this career cannot be continued.",
+          "other": "The table's maximum of {n} terms has been reached, so this career cannot be continued."
+        },
         "SkillGained": "Skill roll: {skills}",
         "PickGrant": "Pick one",
         "PickAward": "Which does this row award?",
@@ -951,7 +1044,11 @@
         "AnagathicsTaken": "Anagathics started.",
         "AnagathicsRefused": "The anagathics roll failed.",
         "AnagathicsForced": "An exact 2: go straight to a forced-entry career this term.",
-        "DecideHint": "{career}, {n} terms served. Continue, change assignment, or leave?",
+        "DecideHint": {
+          "one": "{career}, {n} term served. Continue, change assignment, or leave?",
+          "other": "{career}, {n} terms served. Continue, change assignment, or leave?"
+        },
+        "DecideSkipped": "This term never resolved: {steps}. Closing it now still costs four years and still earns its Benefit roll.",
         "Continue": "Continue",
         "LeaveCareer": "Leave the career",
         "ChangeAssignment": "Change assignment ({rule})",
@@ -989,7 +1086,10 @@
       "visible": "visible to players",
       "gmOnly": "referee only",
       "exists": "already created",
-      "created": "{count} compendium pack(s) created in the {folder} folder.",
+      "created": {
+        "one": "{count} compendium pack created in the {folder} folder.",
+        "other": "{count} compendium packs created in the {folder} folder."
+      },
       "nothing": "Nothing to create — every pack you ticked already exists.",
       "failed": "Could not create the compendium pack {label}.",
       "labels": {
@@ -1022,8 +1122,14 @@
       "ReadOnly": "Read-only — this pack belongs to a module or to the system",
       "Count": "{matched} of {total}",
       "Capped": "first {shown} of {matched} — narrow the search to see the rest",
-      "Loading": "{n} pack index(es) still arriving",
-      "Withheld": "{n} row(s) withheld until their index lands",
+      "Loading": {
+        "one": "{n} pack index still arriving",
+        "other": "{n} pack indexes still arriving"
+      },
+      "Withheld": {
+        "one": "{n} row withheld until its index lands",
+        "other": "{n} rows withheld until their index lands"
+      },
       "Arriving": "The indexes are still arriving — a Tech Level or a sub-type cannot be read yet.",
       "Empty": "Nothing matches.",
       "Columns": {
@@ -1175,7 +1281,10 @@
       "StoreItem": "Store Item",
       "Stun": "Stun",
       "StunHint": "END alone takes it; what exceeds END is rounds of incapacitation.",
-      "StunIncapacitated": "{name} is incapacitated for {rounds} round(s).",
+      "StunIncapacitated": {
+        "one": "{name} is incapacitated for {rounds} round.",
+        "other": "{name} is incapacitated for {rounds} rounds."
+      },
       "SurgeryRequired": "Surgery Required",
       "SurgeryRequiredHint": "Recover only the END DM (can get worse).",
       "TabCore": "CORE",
@@ -1366,9 +1475,15 @@
           "cargo": "Cargo",
           "hullPerSpace": "Hull per Space"
         },
-        "CrossCheckHint": "The printed number always wins. Spaces gives 0.25 t of capacity each, and Hull ÷ Spaces is the chassis figure the design tables run from 0.2 to 4 — a disagreeing row reports and never rewrites.",
-        "EnvelopeHint": "Gas envelope: {spaces} Spaces at most.",
-        "EnvelopeWhy": "Airship: the gas envelope may not exceed {spaces} Spaces.",
+        "CrossCheckHint": "The printed number always wins. Shipping is the tonnage per Space the chassis's medium ships at — half a ton on the ground, up to two in the air, halved again on an open frame — Cargo counts 0.25 t a Space, and Hull ÷ Spaces is the chassis figure the design tables run from 0.2 to 4. A disagreeing row reports and never rewrites.",
+        "EnvelopeHint": {
+          "one": "Gas envelope: {spaces} Space at most.",
+          "other": "Gas envelope: {spaces} Spaces at most."
+        },
+        "EnvelopeWhy": {
+          "one": "Airship: the gas envelope may not exceed {spaces} Space.",
+          "other": "Airship: the gas envelope may not exceed {spaces} Spaces."
+        },
         "Armour": "Armour",
         "ArmourCount": "3 printed · 2 nullable overrides",
         "Facing": {
@@ -1545,10 +1660,19 @@
           "Hold": "Hold & passengers"
         },
         "Analyses": "Analyses",
-        "JumpsAboard": "{n} jumps in tank",
+        "JumpsAboard": {
+          "one": "{n} jump in tank",
+          "other": "{n} jumps in tank"
+        },
         "PilotN": "Pilot {n}",
-        "IntactLocations": "{n} locations intact",
-        "FoldRows": "{n} rows",
+        "IntactLocations": {
+          "one": "{n} location intact",
+          "other": "{n} locations intact"
+        },
+        "FoldRows": {
+          "one": "{n} row",
+          "other": "{n} rows"
+        },
         "Popup": "pop-up",
         "NoMultiple": "×1 · never applies to a missile",
         "AfterArmour": "after armour",
@@ -1563,7 +1687,10 @@
         "SpinalVsSmall": "Spinal vs. small",
         "NoAttack": "cannot attack",
         "Crew": "Crew",
-        "CrewCount": "{stations} stations · {aboard} aboard",
+        "CrewCount": {
+          "one": "{stations} station · {aboard} aboard",
+          "other": "{stations} stations · {aboard} aboard"
+        },
         "AddStation": "Add a station",
         "Station": "Station",
         "Who": "Who",
@@ -1607,7 +1734,18 @@
           "Thresholds": "Critical hit thresholds",
           "ThresholdsRem": "one critical each tenth",
           "Passed": "passed",
-          "Hint": "Every figure here is the ordinary one divided by 3.5 — the average of 1D — because fleet combat is the standard space combat with the dice taken out. Crew skill is typed beside the roster and is never derived from it."
+          "Hint": "Every figure here is the ordinary one divided by 3.5 — the average of 1D — because fleet combat is the standard space combat with the dice taken out. Crew skill is typed beside the roster and is never derived from it.",
+          "Weapons": "Weapons",
+          "WeaponsRem": "one line per battery",
+          "NoBatteries": "No battery aboard — nothing on this hull fires in a fleet action.",
+          "PrintedCell": "Folio 112 prints this cell: a turret particle beam is Damage 4 in a fleet action, where folio 28 prints 3D. The table the fleet chapter names is the one in force.",
+          "AsSalvo": "as a salvo",
+          "SalvoDefence": "Salvo defence",
+          "SalvoWhy": "the four added · one point removes one missile, a torpedo costs two",
+          "LasersWhy": "per turret, not per barrel",
+          "EWWhy": "sensor operators ÷ 3 × (crew skill + electronic warfare)",
+          "ScreenWhy": "({n} + 3.5) × 10, per screen",
+          "SandcastersWhy": "every sandcaster in a turret · sized against the shooter in play"
         },
         "NoCrewSheet": "That action reads a skill off a sheet, and this station has no linked crew member.",
         "RefereeAction": "{action} — referee's call.",
@@ -1620,7 +1758,10 @@
         "Manoeuvre": "Manoeuvre",
         "ManoeuvreCount": "Thrust {thrust} · cost to change band",
         "BandThrust": "T {thrust}",
-        "BandRounds": "{rounds} rounds",
+        "BandRounds": {
+          "one": "{rounds} round",
+          "other": "{rounds} rounds"
+        },
         "Dogfight": "dogfight",
         "Burning": "Reaction drive lit — Thrust +{n}, {total} in all",
         "BurnWhy": "High Guard p.16: the two drives add. p.45 calls the second one a temporary speed boost that burns fuel, so it is lit for as long as the pilot says and nothing here schedules it.",
@@ -1647,12 +1788,18 @@
         "Internal": "interior, sealed",
         "Empty": "— empty —",
         "Docked": "Docked",
-        "CraftPerRound": "{n} craft per round",
+        "CraftPerRound": {
+          "one": "{n} craft per round",
+          "other": "{n} craft per round"
+        },
         "Repairs": "repairs aboard",
         "ClampTons": "clamp is {tons} t, not {capacity}",
         "ClampCraft": "{tons} t craft, clamp takes {band} t",
         "BaySize": "{need} t needed for a {tons} t craft",
-        "MountCapacity": "{held} weapons, mount holds {cap}",
+        "MountCapacity": {
+          "one": "{held} weapon, mount holds {cap}",
+          "other": "{held} weapons, mount holds {cap}"
+        },
         "Criticals": "Criticals",
         "CriticalsCount": "severity = Effect − 5 · cap 6",
         "ClearCriticals": "Clear every critical",
@@ -1686,7 +1833,10 @@
         "RefereeSettles": "Delivering and disembarking are the referee's: they move the crew's purses and write to the ship.",
         "SoftwareDowngraded": "run lower",
         "SoftwareBlocked": "above the ship's TL",
-        "BlockedHint": "{count} package(s) above TL{tl} do not run and spend no Processing.",
+        "BlockedHint": {
+          "one": "{count} package above TL{tl} does not run and spends no Processing.",
+          "other": "{count} packages above TL{tl} do not run and spend no Processing."
+        },
         "BlockedWhy": "High Guard p.20: the operating Tech Level is the ship's, not the computer's, so a package above it does not run and spends no Processing.",
         "OverCrowdedHint": "This computer runs one Bandwidth 0 package at a time.",
         "OverCrowdedWhy": "Core p.110: a Processing 0 computer runs one Bandwidth 0 package at a time. High Guard's smallest model is a Computer/5, so a ship reaching this has no working computer.",
@@ -1712,22 +1862,37 @@
         "MortgageOverride": "Mortgage override",
         "MortgageOverridden": "elected figure",
         "MortgageTerm": "Term",
-        "MortgageTermWhy": "{n} periods a year · 40 years",
+        "MortgageTermWhy": {
+          "one": "{n} period a year · 40 years",
+          "other": "{n} periods a year · 40 years"
+        },
         "MortgageTotal": "Total repaid",
-        "MortgageTotalWhy": "{n} payments",
+        "MortgageTotalWhy": {
+          "one": "{n} payment",
+          "other": "{n} payments"
+        },
         "MortgageOvercost": "Over purchase",
         "MortgageOvercostWhy": "×{n} the price",
         "MortgageBalance": "Left to pay",
-        "MortgageBalanceWhy": "{n} periods to run",
+        "MortgageBalanceWhy": {
+          "one": "{n} period to run",
+          "other": "{n} periods to run"
+        },
         "MortgagePaid": "Paid off",
         "MortgageOwned": "Owned outright — no mortgage runs on this hull.",
         "BenefitQuarters": "Benefit quarters",
         "PeriodsPaid": "Periods paid",
         "Elections": "Benefit elections",
-        "ElectionsRem": "{n} quarter(s) paid off",
+        "ElectionsRem": {
+          "one": "{n} quarter paid off",
+          "other": "{n} quarters paid off"
+        },
         "ElectKeep": "Keep paying",
         "ElectRemortgage": "Re-mortgage",
-        "ElectPeriodsWhy": "{n} periods",
+        "ElectPeriodsWhy": {
+          "one": "{n} period",
+          "other": "{n} periods"
+        },
         "ElectApply": "Apply",
         "ElectInForce": "in force",
         "ElectionsHint": "A career Benefit of this ship pays off a quarter of the mortgage each time it is rolled. The Traveller elects either to keep paying the calculated figure and finish ten years earlier, or to re-mortgage — a quarter off the price per Benefit, recalculated over the full forty years. Both repay the same money; the choice is which of the payment and the term moves. Applying one writes the mortgage override, or clears it.",
@@ -1876,17 +2041,32 @@
         "Rads": "Rads to the brain",
         "RadiationHint": "Radiation has cost this brain INT -{n} and Bandwidth -{n}, permanently.",
         "BrainDamageDM": "Brain damage",
-        "IonShutdown": "{name} — ion hit: the brain is shut down for {rounds} rounds.",
+        "IonShutdown": {
+          "one": "{name} — ion hit: the brain is shut down for {rounds} round.",
+          "other": "{name} — ion hit: the brain is shut down for {rounds} rounds."
+        },
         "IonImmune": "{name} is hardened: the ion hit does nothing.",
         "NewBrain": "Brain",
         "AddBrain": "Add the brain as a computer Item",
         "BrainItem": "{name} is the brain: its Processing of {n} is the total Bandwidth, so a storage module raises it by raising the Item.",
         "NoBrainItem": "No brain Item, so the grade's own inherent Computer/{n} is the total. Add a computer Item to model storage modules and Bandwidth upgrades.",
-        "Oversized": "{count} skill package(s) larger than the brain's inherent Bandwidth of {n}.",
+        "Oversized": {
+          "one": "{count} skill package larger than the brain's inherent Bandwidth of {n}.",
+          "other": "{count} skill packages larger than the brain's inherent Bandwidth of {n}."
+        },
         "OversizedWhy": "A skill package larger than the inherent Bandwidth of {n} cannot be carried, whatever storage has raised the total to.",
-        "DowngradeIgnored": "{count} package(s) set to run lower still cost their printed Bandwidth.",
-        "DowngradeIgnoredWhy": "Robot Handbook p.67, p.73: a brain cannot process a package larger than its inherent Bandwidth and has no way to run one lower, so {count} package(s) set to run below their printed Bandwidth still cost it in full.",
-        "Surcharged": "{count} level 0 skill(s) past the free allowance, at Bandwidth 1 each.",
+        "DowngradeIgnored": {
+          "one": "{count} package set to run lower still costs its printed Bandwidth.",
+          "other": "{count} packages set to run lower still cost their printed Bandwidth."
+        },
+        "DowngradeIgnoredWhy": {
+          "one": "Robot Handbook p.67, p.73: a brain cannot process a package larger than its inherent Bandwidth and has no way to run one lower, so {count} package set to run below its printed Bandwidth still costs it in full.",
+          "other": "Robot Handbook p.67, p.73: a brain cannot process a package larger than its inherent Bandwidth and has no way to run one lower, so {count} packages set to run below their printed Bandwidth still cost it in full."
+        },
+        "Surcharged": {
+          "one": "{count} level 0 skill past the free allowance, at Bandwidth 1.",
+          "other": "{count} level 0 skills past the free allowance, at Bandwidth 1 each."
+        },
         "SurchargedWhy": "Robot Handbook p.73: a brain holds as many Bandwidth 0 level 0 skills as its base Bandwidth score, and {count} beyond that cost Bandwidth 1 each.",
         "SurchargeRow": "Bandwidth 0 skills over the allowance ({count})",
         "SurchargeWhy": "past the free allowance",
@@ -1915,8 +2095,14 @@
         },
         "Tactical": "Tactical speed",
         "VehicleBand": "Vehicle Speed Movement",
-        "VehicleSpeedHint": "Vehicle Speed Movement replaces the metre figure with a Speed Band entirely and quarters the endurance while it is in use — {hours} hours rather than the figure above.",
-        "VehicleSpeedOn": "Vehicle Speed Movement is in use — {hours} hours of endurance, in Speed Bands.",
+        "VehicleSpeedHint": {
+          "one": "Vehicle Speed Movement replaces the metre figure with a Speed Band entirely and quarters the endurance while it is in use — {hours} hour rather than the figure above.",
+          "other": "Vehicle Speed Movement replaces the metre figure with a Speed Band entirely and quarters the endurance while it is in use — {hours} hours rather than the figure above."
+        },
+        "VehicleSpeedOn": {
+          "one": "Vehicle Speed Movement is in use — {hours} hour of endurance, in Speed Bands.",
+          "other": "Vehicle Speed Movement is in use — {hours} hours of endurance, in Speed Bands."
+        },
         "AgilityEnhancement": "Agility enhancement",
         "Power": "Power source",
         "PowerPacks": "Power packs",
@@ -2147,7 +2333,10 @@
       "Wealth": "Wealth (WLT)",
       "WealthHint": "Cr{cash} a month in hand; a purchase above it is a WLT check at DM−1 per Cr5000 spent.",
       "Starving": "Starving",
-      "StarvingHint": "{before} days before starvation tells, then {impaired} more at DM−2 on physical actions with no natural healing."
+      "StarvingHint": {
+        "one": "{before} day before starvation tells, then {impaired} more at DM−2 on physical actions with no natural healing.",
+        "other": "{before} days before starvation tells, then {impaired} more at DM−2 on physical actions with no natural healing."
+      }
     },
     "Training": {
       "Title": "Training: {name}",
@@ -2166,8 +2355,14 @@
       "Weeks": "weeks",
       "WeeksAbbr": "wk",
       "Periods": "periods",
-      "WeeksSpent": "{n} weeks spent",
-      "Entries": "{n} entries",
+      "WeeksSpent": {
+        "one": "{n} week spent",
+        "other": "{n} weeks spent"
+      },
+      "Entries": {
+        "one": "{n} entry",
+        "other": "{n} entries"
+      },
       "FailedCount": "{n} failed",
       "EngineIs": "engine: {engine}",
       "Engine": {
@@ -2198,7 +2393,10 @@
       "Check": "Average (8+) {characteristic}",
       "CheckDue": "check due",
       "PeriodComplete": "Period complete",
-      "WeeksShort": "{n} weeks short",
+      "WeeksShort": {
+        "one": "{n} week short",
+        "other": "{n} weeks short"
+      },
       "Formula": "2D {dm} vs 8+",
       "TeachingDM": "DM is −the level learned",
       "Passed": "Passed",
@@ -2210,7 +2408,10 @@
       "Grant": "Grant level {n}",
       "Buy": "Buy level {n}",
       "OnSuccess": "On the {ordinal} success",
-      "AtPoints": "At {n} points",
+      "AtPoints": {
+        "one": "At {n} point",
+        "other": "At {n} points"
+      },
       "Ready": "Ready",
       "Written": "Written",
       "AddedAtZero": "{name} is added to the sheet at level 0",
@@ -2243,14 +2444,23 @@
         "charCost": "A physical characteristic costs its new value, a mental one twice it."
       },
       "Cost": "{periods} periods · {weeks} weeks",
-      "CostPhysical": "{n} points — the new value",
-      "CostMental": "{n} points — a mental one costs double",
+      "CostPhysical": {
+        "one": "{n} point — the new value",
+        "other": "{n} points — the new value"
+      },
+      "CostMental": {
+        "one": "{n} point — a mental one costs double",
+        "other": "{n} points — a mental one costs double"
+      },
       "RailCore": "{count} core · {weeks} weeks logged",
       "RailCompanion": "{count} companion · {points} points dedicated",
       "RailWeekRule": "a week belongs to one programme (Core p.55)",
       "NoteLabel": "Where the weeks went",
       "NotePlaceholder": "Jump to Regina, ship's library…",
-      "MigratedWeeks": "{weeks} weeks beyond the period were dropped when this was migrated.",
+      "MigratedWeeks": {
+        "one": "{weeks} week beyond the period was dropped when this was migrated.",
+        "other": "{weeks} weeks beyond the period were dropped when this was migrated."
+      },
       "NewSkill": "new skill",
       "LevelRange": "level {from} → {to}",
       "ValueRange": "value {from} → {to}",
@@ -2521,7 +2731,10 @@
       "ThresholdNoStress": "Beyond {metres} m — no stress",
       "FireMode": "Fire mode",
       "FireModeAttacks": "×{count}",
-      "FireModeRounds": "{rounds} rounds",
+      "FireModeRounds": {
+        "one": "{rounds} round",
+        "other": "{rounds} rounds"
+      },
       "ReachHint": "Reach — paid for in PSI points",
       "ReachCost": "{points} PSI points",
       "PhysicalOnly": "The rule puts this on physical actions — it follows the characteristic being rolled, until you say otherwise.",
@@ -2639,7 +2852,10 @@
       "RestoredPlain": "Restored {points}",
       "Awake": "Regains consciousness",
       "StillOut": "Still unconscious",
-      "ApplyFirstAid": "Apply first aid — {points} points",
+      "ApplyFirstAid": {
+        "one": "Apply first aid — {points} point",
+        "other": "Apply first aid — {points} points"
+      },
       "AlreadyApplied": "{name} has already had first aid.",
       "Undamaged": "{name} has no damaged characteristic to restore.",
       "FirstAidHint": "Medic (EDU) Effect, minimum 1 · as desired · once only",
@@ -2661,13 +2877,25 @@
       "ExposeHint": "One dose · armour comes off it · the immediate effects land now · the running total costs END for good",
       "Source": "Source",
       "Typed": "— a typed dose",
-      "Standing": "{rads} rads accumulated · armour stops {protection}",
+      "Standing": {
+        "one": "{rads} rad accumulated · armour stops {protection}",
+        "other": "{rads} rads accumulated · armour stops {protection}"
+      },
       "Reaching": "{rads} reaching",
-      "Absorbed": "{dose} rads, all of it stopped by {protection} of armour",
-      "Dose": "{dose} rads · {total} in total",
+      "Absorbed": {
+        "one": "{dose} rad, all of it stopped by {protection} of armour",
+        "other": "{dose} rads, all of it stopped by {protection} of armour"
+      },
+      "Dose": {
+        "one": "{dose} rad · {total} in total",
+        "other": "{dose} rads · {total} in total"
+      },
       "Immediate": "immediate {formula}, {points} damage",
       "Permanent": "END {endurance} permanently",
-      "Hardened": "hardened — {reaching} rads halved to {dose}",
+      "Hardened": {
+        "one": "hardened — {reaching} rad halved to {dose}",
+        "other": "hardened — {reaching} rads halved to {dose}"
+      },
       "Brain": "the brain loses INT -{points} and Bandwidth -{points}, permanently",
       "Cumulative": "Cumulative",
       "Nausea": "Nausea",
@@ -2691,8 +2919,14 @@
         "Effect": "Effect",
         "EffectVs": "Effect vs {target}",
         "Ammo": "Magazine {left}/{magazine} · rounds spent {spent}",
-        "FireModeBurst": "Burst — {score} to damage · {rounds} rounds",
-        "FireModeFullAuto": "Full auto — attack {attack} of {attacks} · {rounds} rounds",
+        "FireModeBurst": {
+          "one": "Burst — {score} to damage · {rounds} round",
+          "other": "Burst — {score} to damage · {rounds} rounds"
+        },
+        "FireModeFullAuto": {
+          "one": "Full auto — attack {attack} of {attacks} · {rounds} round",
+          "other": "Full auto — attack {attack} of {attacks} · {rounds} rounds"
+        },
         "FireModeFullAutoNext": "Full auto — attack {attack} of {attacks}",
         "NoDifficulty": "no difficulty set",
         "PsiSpent": "PSI spent {points} · {left} left",
@@ -2804,7 +3038,10 @@
       "Reload": "Reload",
       "ReloadHint": "Puts a full magazine in. Minor Actions needed: {actions}.",
       "FireModes": "Fire Modes",
-      "FireModeCost": "{mode} {gain}, {rounds} rounds",
+      "FireModeCost": {
+        "one": "{mode} {gain}, {rounds} round",
+        "other": "{mode} {gain}, {rounds} rounds"
+      },
       "Modifier": "Modifier",
       "Modifiers": "Modifiers",
       "Name": "Name",
@@ -3200,11 +3437,17 @@
       "NoOwnedTokenSelected": "No token you own is selected.",
       "NoPsiPoints": "{name} has no PSI points left, so no power can be attempted.",
       "WeaponEmpty": "{name} is empty and must be reloaded before it fires again.",
-      "WeaponShort": "{name} has {ammo} rounds loaded and this fire mode spends {rounds}."
+      "WeaponShort": {
+        "one": "{name} has {ammo} round loaded and this fire mode spends {rounds}.",
+        "other": "{name} has {ammo} rounds loaded and this fire mode spends {rounds}."
+      }
     },
     "Migration": {
       "Begin": "MGT2: migrating world data, please do not close the game.",
-      "Complete": "MGT2: world migration complete. {count} actor(s) changed life maximum.",
+      "Complete": {
+        "one": "MGT2: world migration complete. {count} actor changed life maximum.",
+        "other": "MGT2: world migration complete. {count} actors changed life maximum."
+      },
       "Failed": "MGT2: world migration failed. Check the console; it will be retried on the next load."
     },
     "Notifications": {
@@ -3275,7 +3518,10 @@
       "Weapon": "{n} weapon: {state}",
       "WeaponDM": "{n} weapon: {state} {dm}",
       "Cargo": "{amount} of cargo destroyed",
-      "Occupants": "{n} occupants take {dice}",
+      "Occupants": {
+        "one": "{n} occupant takes {dice}",
+        "other": "{n} occupants take {dice}"
+      },
       "SystemLoss": "1D — comms, sensors or computer lost",
       "HullSeverity": "Hull Severity +{value}",
       "Some": "Random",
@@ -3285,7 +3531,10 @@
       "ThrustZero": "Thrust reduced to zero",
       "SensorRange": "Sensors inoperative beyond {band}",
       "SensorsDisabled": "Sensors disabled",
-      "FuelLeak": "Fuel leak — {amount} tons per {per}",
+      "FuelLeak": {
+        "one": "Fuel leak — {amount} ton per {per}",
+        "other": "Fuel leak — {amount} tons per {per}"
+      },
       "Jump": "Jump drive: {state}",
       "JumpDM": "Jump checks {dm}",
       "LifeSupport": "Life support fails within {time}",
@@ -3490,7 +3739,10 @@
       "Round": "Round",
       "EndRound": "End round",
       "Order": "Order",
-      "Contacts": "{n} contacts",
+      "Contacts": {
+        "one": "{n} contact",
+        "other": "{n} contacts"
+      },
       "RollInitiative": "Roll this ship’s Initiative",
       "ShipLine": "{tons} t · T{thrust}",
       "Fleet": "Fleet",
@@ -3542,7 +3794,10 @@
       "SalvoFrom": "from {name}",
       "SalvoAt": "at {name}",
       "SalvoArriving": "arriving",
-      "SalvoRounds": "{n} rounds out",
+      "SalvoRounds": {
+        "one": "{n} round out",
+        "other": "{n} rounds out"
+      },
       "SalvoSmartChip": "Smart",
       "SalvoInert": "out of fuel",
       "SalvoJam": "Electronic warfare",
@@ -3560,7 +3815,10 @@
       "SalvoNoTarget": "{name} has no target left in the fight, or nothing left in the air.",
       "SalvoMissiles": "Missiles in the salvo",
       "SalvoSmart": "Smart: the referee adds the Tech Level difference, DM+{min} at least and DM+{max} at most.",
-      "SalvoHit": "{name} is hit: roll damage as for one missile, deduct armour, then multiply by {multiple} — the Effect, capped at the {missiles} missiles left.",
+      "SalvoHit": {
+        "one": "{name} is hit: roll damage as for one missile, deduct armour, then multiply by {multiple} — the Effect, capped at the {missiles} missile left.",
+        "other": "{name} is hit: roll damage as for one missile, deduct armour, then multiply by {multiple} — the Effect, capped at the {missiles} missiles left."
+      },
       "SalvoMissed": "{name} is missed."
     },
     "Fleet": {
@@ -3594,7 +3852,10 @@
         "AdvanceStep": "Next step",
         "AddFleet": "Add a fleet",
         "RemoveFleet": "Remove the fleet",
-        "RemoveFleetHint": "Remove {name} from the battle, with its {count} contacts and every range it held?",
+        "RemoveFleetHint": {
+          "one": "Remove {name} from the battle, with its {count} contact and every range it held?",
+          "other": "Remove {name} from the battle, with its {count} contacts and every range it held?"
+        },
         "RemoveContact": "Remove from the battle",
         "Strength": "{left} of {of} left",
         "RollFleet": "Roll the fleet’s initiative",
@@ -3605,8 +3866,14 @@
         "DropShipHint": "Drop a spacecraft here to add it to the line",
         "DropWingHint": "Drop a fighter class here to add a squadron",
         "ShipLine": "hull {hull} · armour {armour}",
-        "WingLine": "{n} of {of} fighters",
-        "SalvoLine": "{n} in flight · {rounds} round(s) out",
+        "WingLine": {
+          "one": "{n} of {of} fighter",
+          "other": "{n} of {of} fighters"
+        },
+        "SalvoLine": {
+          "one": "{n} in flight · {rounds} round out",
+          "other": "{n} in flight · {rounds} rounds out"
+        },
         "SalvoName": "{ship} — {head}",
         "NoContact": "Select a ship, a squadron or a salvo",
         "Command": "Command",
@@ -3621,7 +3888,10 @@
         "OpenSheet": "Open the sheet",
         "Formation": "Formation",
         "FormationWhy": "the fleet’s own spacing — defensive DM+{dm}",
-        "Dispersing": "outside the plane of battle for {n} round(s)",
+        "Dispersing": {
+          "one": "outside the plane of battle for {n} round",
+          "other": "outside the plane of battle for {n} rounds"
+        },
         "MustDisperse": "the grace round is spent",
         "ThrustDerived": "slowest of the line: {n}",
         "ThrustOverride": "Thrust (typed)",
@@ -3633,7 +3903,10 @@
         "BreakingOffWhy": "defensive DM-1, no spinal mounts",
         "Dispersal": "Dispersal",
         "EffectPlaceholder": "effect",
-        "DispersalState": "{rounds} round(s) left, DM {dm}",
+        "DispersalState": {
+          "one": "{rounds} round left, DM {dm}",
+          "other": "{rounds} rounds left, DM {dm}"
+        },
         "Allocate": "To movement",
         "Held": "{n} held",
         "EachRound": "checked every round",
@@ -3663,7 +3936,10 @@
         "SandWhy": "sandcaster effectiveness {score} — multiplier {multiplier}",
         "SandAgainst": "sized against {name}",
         "Radiation": "Radiation exposures",
-        "RadiationWhy": "crew skill {skill}, {weapons} weapon system(s) eliminated",
+        "RadiationWhy": {
+          "one": "crew skill {skill}, {weapons} weapon system eliminated",
+          "other": "crew skill {skill}, {weapons} weapon systems eliminated"
+        },
         "RepairWhy": "one repair point per severity",
         "Repair": "Repair",
         "Weapons": "Weapons",
@@ -3712,7 +3988,10 @@
         "Subtotal": "Damage subtotal {subtotal}",
         "Final": "{damage} to {target}",
         "Missiles": "Salvo",
-        "Salvo": "{hits} warheads on target at {damage} each"
+        "Salvo": {
+          "one": "{hits} warhead on target at {damage}",
+          "other": "{hits} warheads on target at {damage} each"
+        }
       },
       "Spinal": {
         "Gunner": "Crew skill (gunner)",
@@ -3725,8 +4004,14 @@
         "Title": "Ion weapons",
         "Immune": "{name} is Hardened and ignores ion weapons.",
         "Total": "Ion effect {effect} against {hull} adjusted hull points",
-        "Result": "{name} reduces Thrust by {n} or eliminates {n} weapon systems",
-        "Rounds": "for {n} round(s)",
+        "Result": {
+          "one": "{name} reduces Thrust by {n} or eliminates {n} weapon system",
+          "other": "{name} reduces Thrust by {n} or eliminates {n} weapon systems"
+        },
+        "Rounds": {
+          "one": "for {n} round",
+          "other": "for {n} rounds"
+        },
         "NoEffect": "No effect — the ion total is below one full hull."
       },
       "Chart": {
@@ -4210,7 +4495,10 @@
       "UnrefinedChip": "Unrefined fuel −2",
       "MaintenanceChip": "maintenance — not tracked",
       "DiameterChip": "100-diameter limit — the referee's",
-      "ParsecDM": "Jump distance · {parsecs} parsecs",
+      "ParsecDM": {
+        "one": "Jump distance · {parsecs} parsec",
+        "other": "Jump distance · {parsecs} parsecs"
+      },
       "UnrefinedDM": "Unrefined fuel",
       "DebitWhy": "The jump debits the tank as it rolls. Nothing else moves the fuel, and no roll moves the leg.",
       "NoFuel": "This jump burns {need} t and the tank holds {have}. Without the fuel the drive does not fire.",
@@ -4258,8 +4546,14 @@
       "TimeVariance": "Time variance",
       "MisjumpTable": "Misjump",
       "VeryBadTable": "Very bad jump",
-      "Diameters": "{n} diameters",
-      "Hours": "{n} hours",
+      "Diameters": {
+        "one": "{n} diameter",
+        "other": "{n} diameters"
+      },
+      "Hours": {
+        "one": "{n} hour",
+        "other": "{n} hours"
+      },
       "Long": "long by {n}",
       "Short": "short by {n}",
       "Precipitated": "precipitated out at {n}",
@@ -4274,19 +4568,37 @@
         "Clean": "The Engineer (j-drive) check held, so there is no misjump to read.",
         "Late": "The ship arrives in the target system {days} days later than normal. At the referee's option the crew perceive {perceived} extra days in jumpspace.",
         "Displaced": "The ship arrives in the target system {diameters} × 100 diameters from the intended world.",
-        "Adrift": "The most survivable misjump: the ship ends up {parsecs} parsecs in a random direction, potentially in deep and empty space."
+        "Adrift": {
+          "one": "The most survivable misjump: the ship ends up {parsecs} parsec in a random direction, potentially in deep and empty space.",
+          "other": "The most survivable misjump: the ship ends up {parsecs} parsecs in a random direction, potentially in deep and empty space."
+        }
       },
       "Misjump": {
         "Lost": "The ship is lost in jumpspace, or emerges as fragments and subatomic particles.",
-        "Wrecked": "The ship misjumps {parsecs} parsecs in a random direction. Its jump drive is completely wrecked on emergence, and the crew and passengers risk lasting psychological effects.",
-        "Severe": "The ship misjumps {parsecs} parsecs in a random direction. Its jump drive is severely damaged on emergence.",
-        "Scattered": "The ship misjumps {parsecs} parsecs in a random direction.",
+        "Wrecked": {
+          "one": "The ship misjumps {parsecs} parsec in a random direction. Its jump drive is completely wrecked on emergence, and the crew and passengers risk lasting psychological effects.",
+          "other": "The ship misjumps {parsecs} parsecs in a random direction. Its jump drive is completely wrecked on emergence, and the crew and passengers risk lasting psychological effects."
+        },
+        "Severe": {
+          "one": "The ship misjumps {parsecs} parsec in a random direction. Its jump drive is severely damaged on emergence.",
+          "other": "The ship misjumps {parsecs} parsecs in a random direction. Its jump drive is severely damaged on emergence."
+        },
+        "Scattered": {
+          "one": "The ship misjumps {parsecs} parsec in a random direction.",
+          "other": "The ship misjumps {parsecs} parsecs in a random direction."
+        },
         "Recalibrate": "Duration increased or decreased by {days} days. The jump drive needs extensive recalibration — {work} days of work — but no repairs.",
-        "Rough": "A very rough jump: emergence is {diameters} diameters from the target world."
+        "Rough": {
+          "one": "A very rough jump: emergence is {diameters} diameter from the target world.",
+          "other": "A very rough jump: emergence is {diameters} diameters from the target world."
+        }
       },
       "VeryBad": {
         "None": "No additional effects.",
-        "Recalibration": "The jump drive needs lengthy recalibration after emergence — {days} days.",
+        "Recalibration": {
+          "one": "The jump drive needs lengthy recalibration after emergence — {days} day.",
+          "other": "The jump drive needs lengthy recalibration after emergence — {days} days."
+        },
         "MinorRepairs": "The jump drive needs minor repairs after emergence.",
         "MajorRepairs": "The jump drive needs major repairs after emergence.",
         "Intrusions": "Jumpspace intrusions occur and the jump drive is destroyed on emergence. The ship loses {hullPerDay}% of its Hull per day.",
@@ -4308,7 +4620,10 @@
         "Checks": "Everyone aboard makes a {first} check and an {second} check, one at {routine} and the other at {difficult}. Each Traveller chooses which is taken at which level.",
         "VeryBadDM": "A very bad jump puts DM{dm} on both.",
         "Physical": "{first} failed: a DM equal to the Effect of the failure on every check for {hours} hours after entry, and again after emergence. At {at} or worse the Traveller is incapacitated for {out} minutes, then DM{then} for {thenHours} hours.",
-        "Mental": "{second} failed: DM{dm} on mental and interpersonal checks for the whole jump and {days} days after it. At {at} or worse the effects are serious."
+        "Mental": {
+          "one": "{second} failed: DM{dm} on mental and interpersonal checks for the whole jump and {days} day after it. At {at} or worse the effects are serious.",
+          "other": "{second} failed: DM{dm} on mental and interpersonal checks for the whole jump and {days} days after it. At {at} or worse the effects are serious."
+        }
       }
     },
     "Starports": {
@@ -4347,14 +4662,26 @@
       "PopCap": "capped by population",
       "Freight": "Freight",
       "FreightCount": "three rolls · a lot cannot be broken up",
-      "TonsPerLot": "{size} tons per lot",
-      "Lots": " t · {lots} lots · biggest {biggest}",
+      "TonsPerLot": {
+        "one": "{size} ton per lot",
+        "other": "{size} tons per lot"
+      },
+      "Lots": {
+        "one": " t · {lots} lot · biggest {biggest}",
+        "other": " t · {lots} lots · biggest {biggest}"
+      },
       "CarouseSplit": "A Carouse check finds passengers only: freight takes Broker or Streetwise.",
       "Mail": "Mail",
       "MailSource": "pass or fail on 12+",
-      "MailContainers": "{n} containers",
+      "MailContainers": {
+        "one": "{n} container",
+        "other": "{n} containers"
+      },
       "MailNone": "None offered",
-      "MailPay": "{tons} tons · Cr{credits} flat, all or none",
+      "MailPay": {
+        "one": "{tons} ton · Cr{credits} flat, all or none",
+        "other": "{tons} tons · Cr{credits} flat, all or none"
+      },
       "MailMissed": "needed {target}+, rolled {roll} {dm} = {total}",
       "MailNeeds": "2D {dm} against {target}+",
       "RollAll": "Roll all eight",
@@ -4376,9 +4703,15 @@
       "NoCodes": "no codes — common goods only",
       "SearchLine": "finding a supplier: {dm} against {target}+",
       "Shelf": "On the shelf",
-      "ShelfCount": "{n} types · common goods, plus every matching code",
+      "ShelfCount": {
+        "one": "{n} type · common goods, plus every matching code",
+        "other": "{n} types · common goods, plus every matching code"
+      },
       "Drawn": "Also in stock",
-      "DrawnCount": "{n} random rows · one per point of population",
+      "DrawnCount": {
+        "one": "{n} random row · one per point of population",
+        "other": "{n} random rows · one per point of population"
+      },
       "D66": "D66",
       "Tons": "Tons",
       "BasePrice": "Base Cr",
@@ -4388,7 +4721,10 @@
       "ExoticsHint": "Exotics are outside these rules: no price, no tonnage, no DM.",
       "PerTon": "Cr{credits} per ton",
       "NotRolled": "not rolled",
-      "LotLine": "One lot is {size} tons at a base of Cr{base} per ton.",
+      "LotLine": {
+        "one": "One lot is {size} ton at a base of Cr{base} per ton.",
+        "other": "One lot is {size} tons at a base of Cr{base} per ton."
+      },
       "RollShelf": "Roll the shelf",
       "RollPrice": "Roll both prices",
       "At": "{world} · {goods}",
@@ -4400,7 +4736,10 @@
       "TypedInstead": "or type the profile below",
       "ShipHint": "for the hold a lot has to fit",
       "ClearSlot": "Take it out of the slot",
-      "SearchedHere": "{n} searches this month · {dm}",
+      "SearchedHere": {
+        "one": "{n} search this month · {dm}",
+        "other": "{n} searches this month · {dm}"
+      },
       "Hold": "hold {used} / {capacity} t",
       "HoldFree": "{tons} t free",
       "AttemptsFromWorld": "The count is {world}'s own — every search made here this month, stamped on the document.",
@@ -4420,7 +4759,10 @@
       "HoldTight": "{tons} t into {free} t free — the hold goes over capacity, and a lot cannot be broken up.",
       "HoldTooSmall": "{tons} t into a {capacity} t hold — this lot will never fit this hull, and a lot cannot be broken up.",
       "InTheHold": "In the hold",
-      "HoldCount": "{n} lots · {used} / {capacity} t",
+      "HoldCount": {
+        "one": "{n} lot · {used} / {capacity} t",
+        "other": "{n} lots · {used} / {capacity} t"
+      },
       "HoldEmpty": "The hold is empty — nothing to sell at this counter.",
       "LotColumn": "Lot",
       "Fetches": "Fetches",
@@ -4461,7 +4803,10 @@
       "PassageName": "{grade} × {n}",
       "PassageReason": "{n} × {grade} to {world}, fare collected at booking.",
       "FreightName": "{size} for {world}",
-      "MailName": "Mail · {n} containers for {world}",
+      "MailName": {
+        "one": "Mail · {n} container for {world}",
+        "other": "Mail · {n} containers for {world}"
+      },
       "DeliveryReason": "{tons} t of {lot} delivered to {world}.",
       "Arriving": "Arriving at {world}",
       "Card": {
@@ -4476,13 +4821,22 @@
         "FeeTaken": "A local broker's {rate}% took Cr{fee} — Cr{credits} received.",
         "Passengers": "{n} × {grade} — Cr{credits} collected.",
         "Freight": "{size}: {tons} t, Cr{credits} on delivery.",
-        "Mail": "{n} containers, {tons} t, Cr{credits} flat on delivery.",
+        "Mail": {
+          "one": "{n} container, {tons} t, Cr{credits} flat on delivery.",
+          "other": "{n} containers, {tons} t, Cr{credits} flat on delivery."
+        },
         "Consignment": "{lot}: {tons} t, Cr{credits} paid.",
         "Disembark": "{n} × {grade} put ashore.",
         "FarePaid": "The fare was collected when the berth was taken (Core p.239).",
         "DueDay": "Due on campaign day {day}, and paid on delivery (Core p.241).",
-        "Late": "{days} days late — 1D+4 rolled {roll}, so {percent}% is docked: Cr{docked} off a Cr{credits} fare.",
-        "Revival": "{n} low passengers: each needs a Routine (6+) Medic check as the capsule opens (Core p.158). Roll them.",
+        "Late": {
+          "one": "{days} day late — 1D+4 rolled {roll}, so {percent}% is docked: Cr{docked} off a Cr{credits} fare.",
+          "other": "{days} days late — 1D+4 rolled {roll}, so {percent}% is docked: Cr{docked} off a Cr{credits} fare."
+        },
+        "Revival": {
+          "one": "{n} low passenger: it needs a Routine (6+) Medic check as the capsule opens (Core p.158). Roll it.",
+          "other": "{n} low passengers: each needs a Routine (6+) Medic check as the capsule opens (Core p.158). Roll them."
+        },
         "Hold": "{ship} · hold {used} / {capacity} t",
         "Over": "over capacity — a lot cannot be broken up",
         "RevivalCheck": "Revival check",
@@ -4516,7 +4870,10 @@
         "Population": "Population {n}",
         "Starport": "Starport {port}",
         "TechLevel": "Tech level {n}",
-        "Parsecs": "{n} parsecs",
+        "Parsecs": {
+          "one": "{n} parsec",
+          "other": "{n} parsecs"
+        },
         "WorldTotal": "World total",
         "Steward": "Chief Steward",
         "Check": "{skill} Effect",
@@ -4529,7 +4886,10 @@
         "LocalBroker": "Local broker",
         "OtherBroker": "Their Broker",
         "Banned": "Banned at law {law}",
-        "Attempts": "{n} earlier searches"
+        "Attempts": {
+          "one": "{n} earlier search",
+          "other": "{n} earlier searches"
+        }
       },
       "RevivalTL": "TL12 ship",
       "RevivalEmergency": "Emergency low berth",
@@ -4655,9 +5015,15 @@
     },
     "Design": {
       "Title": "Design",
-      "Passed": "{n} checks read, no red line.",
+      "Passed": {
+        "one": "{n} check read, no red line.",
+        "other": "{n} checks read, no red line."
+      },
       "Optional": "optional — the ship above is complete without it",
-      "Count": "{n} components · {tons} t accounted",
+      "Count": {
+        "one": "{n} component · {tons} t accounted",
+        "other": "{n} components · {tons} t accounted"
+      },
       "Category": "Category",
       "MCr": "MCr",
       "Rating": "rating {n}",
@@ -4667,7 +5033,10 @@
       "DeleteComponent": "Remove this component",
       "NothingToRead": "nothing transcribed to read this against",
       "Advisory": "Every line is advisory. Published ships fail these — the catalogue disagrees with the construction chapter often enough that refusing to store a failing design would make transcription impossible.",
-      "Failed": "{n} red lines.",
+      "Failed": {
+        "one": "{n} red line.",
+        "other": "{n} red lines."
+      },
       "Checks": {
         "power": "Power",
         "tonnage": "Tonnage",
@@ -4787,7 +5156,10 @@
       "Damage": "{points} damage",
       "Ambient": "{celsius} °C",
       "Exposure": "round {round} of exposure",
-      "Shielded": "{rads} rads, all of it absorbed by the region's {shielded}",
+      "Shielded": {
+        "one": "{rads} rad, all of it absorbed by the region's {shielded}",
+        "other": "{rads} rads, all of it absorbed by the region's {shielded}"
+      },
       "gravity": {
         "AllChecks": "DM {dm} to all skill checks until acclimatised — 1D weeks, or 1D days with Athletics (strength). Leaving the region does not end it.",
         "PhysicalChecks": "DM {dm} to all physical skill checks until acclimatised — 1D weeks, or 1D days with Athletics (dexterity). Leaving the region does not end it.",
@@ -4862,7 +5234,10 @@
     "SkipDebts": {
       "Title": "Skipping on debts",
       "Open": "Skip check",
-      "Run": "{n} parsec(s) run",
+      "Run": {
+        "one": "{n} parsec run",
+        "other": "{n} parsecs run"
+      },
       "PanelHint": "One 2D for each new system the crew arrives in. On 8+ they are hunted — by ship tracers the bank employs, or as criminals in the Imperial database. The distance run and the ship's disguise are kept between checks; reset the distance to zero the moment the crew is discovered.",
       "Parsecs": "Parsecs run",
       "Disguise": "Ship altered",
@@ -4883,7 +5258,10 @@
       "Roll": "Roll the check",
       "Post": "Post to chat",
       "Terms": {
-        "Parsecs": "{n} parsecs run",
+        "Parsecs": {
+          "one": "{n} parsec run",
+          "other": "{n} parsecs run"
+        },
         "Disguise": "Ship altered",
         "Value": "Value stolen · {n} × MCr10",
         "Revisited": "Seen here in the past three months",

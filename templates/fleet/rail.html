@@ -104,7 +104,7 @@
 					{{else}}{{localize fleet.formationLabel}}{{/if}}
 				</span>
 			</div>
-			<span class="why">{{localize 'MGT2.Fleet.Screen.FormationWhy' dm=fleet.formationDM}}{{#if fleet.dispersing}} &middot; {{localize 'MGT2.Fleet.Screen.Dispersing' n=fleet.scattered}}{{/if}}{{#if fleet.mustDisperse}} &middot; {{localize 'MGT2.Fleet.Screen.MustDisperse'}}{{/if}}</span>
+			<span class="why">{{localize 'MGT2.Fleet.Screen.FormationWhy' dm=fleet.formationDM}}{{#if fleet.dispersing}} &middot; {{plural 'MGT2.Fleet.Screen.Dispersing' fleet.scattered}}{{/if}}{{#if fleet.mustDisperse}} &middot; {{localize 'MGT2.Fleet.Screen.MustDisperse'}}{{/if}}</span>
 			<div class="row">
 				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Thrust'}}</span>
 				<span class="v">{{fleet.thrust}}<i> {{localize 'MGT2.Fleet.Screen.ThrustDerived' n=fleet.thrustDerived}}</i></span>
@@ -146,7 +146,7 @@
 						placeholder="{{localize 'MGT2.Fleet.Screen.EffectPlaceholder'}}"
 						aria-label="{{localize 'MGT2.Fleet.Screen.Dispersal'}}" />
 					{{/if}}
-					<i> {{localize 'MGT2.Fleet.Screen.DispersalState' rounds=fleet.dispersal.rounds dm=fleet.dispersalDM}}</i>
+					<i> {{plural 'MGT2.Fleet.Screen.DispersalState' fleet.dispersal.rounds rounds=fleet.dispersal.rounds dm=fleet.dispersalDM}}</i>
 				</span>
 			</div>
 		</div>

@@ -257,7 +257,7 @@
 					<td class="duty">
 						<span class="ro">{{salvo.remaining}} / {{salvo.count}}</span>
 						<span class="at">{{localize salvo.bandLabel}}</span>
-						<span class="at">{{#if salvo.arriving}}{{localize 'MGT2.SpaceCombat.SalvoArriving'}}{{else}}{{localize 'MGT2.SpaceCombat.SalvoRounds' n=salvo.roundsLeft}}{{/if}}</span>
+						<span class="at">{{#if salvo.arriving}}{{localize 'MGT2.SpaceCombat.SalvoArriving'}}{{else}}{{plural 'MGT2.SpaceCombat.SalvoRounds' salvo.roundsLeft}}{{/if}}</span>
 						{{#if salvo.smart}}<span class="at">{{localize 'MGT2.SpaceCombat.SalvoSmartChip'}}</span>{{/if}}
 						{{#if salvo.inert}}<span class="at"><b class="noarm">{{localize 'MGT2.SpaceCombat.SalvoInert'}}</b></span>{{/if}}
 					</td>

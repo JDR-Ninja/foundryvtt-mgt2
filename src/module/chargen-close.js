@@ -1,7 +1,9 @@
+import { BenefitPicker } from "./benefit-picker.js";
 import { Chargen } from "./chargen.js";
 import { Grants } from "./chargen-grants.js";
 import { Muster } from "./chargen-muster.js";
 import { CreationOptions } from "./chargen-rolls.js";
+import { applyCell } from "./chargen-term.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 
@@ -260,21 +262,11 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
             benefits: (actor.system.entitlements ?? []).map((row, index) => ({
                 index,
                 kind: game.i18n.localize(MGT2.BenefitKinds[row.kind] ?? row.kind),
-                label: ChargenClose.#benefitLabel(row),
+                label: Muster.label(row),
                 redeemed: row.redeemed, surrendered: row.surrendered,
                 open: !row.redeemed && !row.surrendered
             }))
         };
-    }
-
-    /** A voucher is a right with limits, so the ceilings are the label and the category is the thing. */
-    static #benefitLabel(row) {
-        const parts = [row.category, row.constraint];
-        if ( row.credits !== null ) parts.push(MGT2Helper.credits(row.credits));
-        if ( row.tl !== null ) parts.push(`TL${row.tl}`);
-        if ( (row.count ?? 1) > 1 ) parts.push(`x${row.count}`);
-        return parts.filter(part => part).join(" · ")
-            || game.i18n.localize(MGT2.BenefitKinds[row.kind] ?? row.kind);
     }
 
     /** The ship election. */
@@ -323,7 +315,23 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
         if ( !asked ) return;
         const rolled = await Muster.roll(actor, asked);
         if ( !rolled ) return;
-        const benefit = await ChargenClose.#askOutcome(actor, asked, rolled.roll.total);
+        const provenance = { career: asked.career, table: "muster",
+            note: game.i18n.localize(`MGT2.Chargen.Muster.Column.${asked.column}`) };
+        const printed = Muster.rowFor(actor.items.get(asked.career), asked.column, rolled.roll.total);
+
+        if ( asked.column === "cash" ) {
+            await Muster.take(actor, { kind: "cash", credits: printed.cash, provenance,
+                category: game.i18n.localize("MGT2.Chargen.Muster.Column.cash") });
+            return this.render();
+        }
+        // The career template carries its own printed column, so the row the dice landed on IS the
+        // outcome; asking is what a career whose template holds no table falls back to.
+        if ( printed.cell ) {
+            await applyCell(actor, printed.cell, { provenance });
+            await Muster.spendRoll(actor, provenance, printed.cell.text);
+            return this.render();
+        }
+        const benefit = await Muster.promptRow(actor, { total: rolled.roll.total, provenance });
         if ( !benefit ) {
             return ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Close.RollDiscarded"));
         }
@@ -363,51 +371,11 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
         });
     }
 
-    /** What the row the dice landed on actually said. */
-    static async #askOutcome(actor, asked, total) {
-        const kinds = Object.entries(MGT2.BenefitKinds).map(([key, label]) =>
-            `<option value="${key}"${(key === ((asked.column === "cash") ? "cash" : "voucher")) ? " selected" : ""}>`
-            + `${game.i18n.localize(label)}</option>`).join("");
-        return DialogV2.prompt({
-            window: { title: "MGT2.Chargen.Close.Record" },
-            classes: ["mgt2"],
-            content: `<p>${game.i18n.format("MGT2.Chargen.Close.Rolled", { n: total })}</p>
-                <div class="form-group"><label>${game.i18n.localize("MGT2.Chargen.Close.Kind")}</label>
-                <select name="kind">${kinds}</select></div>
-                <div class="form-group"><label>${game.i18n.localize("MGT2.Chargen.Close.What")}</label>
-                <input type="text" name="category" value=""></div>
-                <div class="form-group"><label>${game.i18n.localize("MGT2.Chargen.Close.Credits")}</label>
-                <input type="number" name="credits" value=""></div>
-                <div class="form-group"><label>${game.i18n.localize("MGT2.Chargen.Close.Tl")}</label>
-                <input type="number" name="tl" value=""></div>
-                <div class="form-group"><label>${game.i18n.localize("MGT2.Chargen.Close.Count")}</label>
-                <input type="number" name="count" value="1" min="1"></div>
-                <div class="form-group"><label>${game.i18n.localize("MGT2.Chargen.Close.Note")}</label>
-                <input type="text" name="note" value=""></div>`,
-            ok: { label: "MGT2.Chargen.Close.Take",
-                callback: (event, button) => {
-                    const form = button.form.elements;
-                    const number = name => (form[name].value === "") ? null : Number(form[name].value);
-                    return {
-                        kind: form.kind.value,
-                        category: form.category.value.trim(),
-                        credits: number("credits"), tl: number("tl"),
-                        count: Math.max(1, number("count") ?? 1),
-                        note: form.note.value.trim(),
-                        provenance: { career: asked.career, table: "muster",
-                            note: game.i18n.localize(`MGT2.Chargen.Muster.Column.${asked.column}`) }
-                    };
-                } },
-            rejectClose: false
-        });
-    }
-
     /** @this {ChargenClose} */
     static async #onRedeem(event, target) {
         const actor = ChargenClose.#actorOf(target);
         if ( !actor ) return;
-        await Muster.redeem(actor, Number(target.dataset.index));
-        return this.render();
+        return BenefitPicker.open(actor, Number(target.dataset.index));
     }
 
     /**
@@ -493,9 +461,9 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
             warnings.push(game.i18n.format("MGT2.Chargen.Close.WarnServing",
                 { names: serving.map(actor => actor.name).join(", ") }));
         }
-        if ( owed > 0 ) warnings.push(game.i18n.format("MGT2.Chargen.Close.WarnRolls", { n: owed }));
+        if ( owed > 0 ) warnings.push(MGT2Helper.plural("MGT2.Chargen.Close.WarnRolls", owed));
         const left = CreationOptions.solo() ? 0 : Package.remaining(Chargen.roster()).length;
-        if ( left ) warnings.push(game.i18n.format("MGT2.Chargen.Close.WarnPackage", { n: left }));
+        if ( left ) warnings.push(MGT2Helper.plural("MGT2.Chargen.Close.WarnPackage", left));
         const list = warnings.map(text => `<li>${foundry.utils.escapeHTML(text)}</li>`).join("");
         return DialogV2.confirm({
             window: { title: "MGT2.Chargen.Close.Finish" },

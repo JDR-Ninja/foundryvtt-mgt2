@@ -37,7 +37,7 @@
 		</div>
 
 		{{#if robot.chains.vehicle}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.VehicleSpeedOn' hours=robot.chains.vehicle}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.VehicleSpeedHint' hours=robot.chains.vehicle}}"></i></p>
+		<p class="hint">{{plural 'MGT2.Actor.robot.VehicleSpeedOn' robot.chains.vehicle hours=robot.chains.vehicle}}<i class="fa-solid fa-circle-info note" data-tooltip="{{plural 'MGT2.Actor.robot.VehicleSpeedHint' robot.chains.vehicle hours=robot.chains.vehicle}}"></i></p>
 		{{/if}}
 
 		<div class="grid edit-only">
@@ -297,16 +297,16 @@
 		<p class="hint">{{localize 'MGT2.Actor.robot.NoBrainItem' n=robot.bandwidth.inherent}}</p>
 		{{/if}}
 		{{#if robot.bandwidth.oversized.length}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.Oversized' count=robot.bandwidth.oversized.length n=robot.bandwidth.inherent}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.OversizedWhy' n=robot.bandwidth.inherent}}"></i></p>
+		<p class="hint">{{plural 'MGT2.Actor.robot.Oversized' robot.bandwidth.oversized.length count=robot.bandwidth.oversized.length n=robot.bandwidth.inherent}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.OversizedWhy' n=robot.bandwidth.inherent}}"></i></p>
 		{{/if}}
 		{{! Core folio 110's downgrade is a Traveller's choice and a brain does not get it, so a
 		    package carrying one still costs its printed Bandwidth here — said out loud, because the
 		    Item's own sheet shows the figure the brain is ignoring. }}
 		{{#if robot.bandwidth.downgradesIgnored}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.DowngradeIgnored' count=robot.bandwidth.downgradesIgnored}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.DowngradeIgnoredWhy' count=robot.bandwidth.downgradesIgnored}}"></i></p>
+		<p class="hint">{{plural 'MGT2.Actor.robot.DowngradeIgnored' robot.bandwidth.downgradesIgnored count=robot.bandwidth.downgradesIgnored}}<i class="fa-solid fa-circle-info note" data-tooltip="{{plural 'MGT2.Actor.robot.DowngradeIgnoredWhy' robot.bandwidth.downgradesIgnored count=robot.bandwidth.downgradesIgnored}}"></i></p>
 		{{/if}}
 		{{#if robot.bandwidth.surcharged}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.Surcharged' count=robot.bandwidth.surcharged}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.SurchargedWhy' count=robot.bandwidth.surcharged}}"></i></p>
+		<p class="hint">{{plural 'MGT2.Actor.robot.Surcharged' robot.bandwidth.surcharged count=robot.bandwidth.surcharged}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.SurchargedWhy' count=robot.bandwidth.surcharged}}"></i></p>
 		{{/if}}
 		<div class="grid cols2 edit-only">
 			<label class="check">

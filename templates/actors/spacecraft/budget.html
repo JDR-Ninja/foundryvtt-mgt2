@@ -17,7 +17,7 @@
 	{{#if b.rows.length}}
 	{{#if fold}}
 	<details class="fold" data-fold="{{fold}}"{{#if b.over}} open{{/if}}>
-		<summary>{{localize 'MGT2.Actor.spacecraft.FoldRows' n=b.rows.length}}</summary>
+		<summary>{{plural 'MGT2.Actor.spacecraft.FoldRows' b.rows.length}}</summary>
 		{{> systems/mgt2/templates/actors/spacecraft/budget-rows.html}}
 	</details>
 	{{else}}

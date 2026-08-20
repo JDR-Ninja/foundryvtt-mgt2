@@ -115,7 +115,7 @@ MGT2.Misjumps = Object.freeze({
     // Core folio 158 reads the failed Engineer (j-drive) Effect alone: no second roll, no table.
     core: Object.freeze({
         outcomes: Object.freeze([
-            { max: -3, label: "MGT2.Jump.Core.Adrift", parsecs: "1D*1D", merciful: true },
+            { max: -3, label: "MGT2.Jump.Core.Adrift", parsecs: "1D*1D", plural: "parsecs", merciful: true },
             { max: -2, label: "MGT2.Jump.Core.Displaced", diameters: "1D" },
             // The extra 1D is the crew's PERCEIVED time, which the folio also makes optional.
             { max: -1, label: "MGT2.Jump.Core.Late", days: "1D", perceived: "1D" },
@@ -166,18 +166,18 @@ MGT2.Misjumps = Object.freeze({
         // Folio 153, 2D with the combined Effect as a DM; the trigger caps the sum at 0.
         table: Object.freeze([
             { max: 2, label: "MGT2.Jump.Misjump.Lost" },
-            { max: 4, label: "MGT2.Jump.Misjump.Wrecked", parsecs: "1D*1D" },
-            { max: 6, label: "MGT2.Jump.Misjump.Severe", parsecs: "2D" },
-            { max: 8, label: "MGT2.Jump.Misjump.Scattered", parsecs: "1D" },
+            { max: 4, label: "MGT2.Jump.Misjump.Wrecked", parsecs: "1D*1D", plural: "parsecs" },
+            { max: 6, label: "MGT2.Jump.Misjump.Severe", parsecs: "2D", plural: "parsecs" },
+            { max: 8, label: "MGT2.Jump.Misjump.Scattered", parsecs: "1D", plural: "parsecs" },
             { max: 10, label: "MGT2.Jump.Misjump.Recalibrate", days: "1D", work: "1D3" },
-            { max: null, label: "MGT2.Jump.Misjump.Rough", diameters: "100*2D" }
+            { max: null, label: "MGT2.Jump.Misjump.Rough", diameters: "100*2D", plural: "diameters" }
         ]),
 
         // Folio 152. ⚠ The printed table overlaps: 6-8 and 7-9 both name 7 and 8. Read top down as
         // a referee reads the page — the first band containing the roll wins.
         veryBad: Object.freeze([
             { max: 2, label: "MGT2.Jump.VeryBad.None" },
-            { max: 5, label: "MGT2.Jump.VeryBad.Recalibration", days: "2D" },
+            { max: 5, label: "MGT2.Jump.VeryBad.Recalibration", days: "2D", plural: "days" },
             { max: 8, label: "MGT2.Jump.VeryBad.MinorRepairs" },
             { max: 9, label: "MGT2.Jump.VeryBad.MajorRepairs" },
             { max: 12, label: "MGT2.Jump.VeryBad.Intrusions", hullPerDay: "2D-2" },
@@ -796,6 +796,18 @@ MGT2.VehicleNativeModes = Object.freeze({
     seafarer: "afloat"
 });
 
+// Shipping tonnage per Space by chassis speciality; `min`-`max` spans what the two editions print,
+// and the Open Vehicle trait halves it again at read time (VH p.15-34; VH 2026 p.29-35, p.40).
+MGT2.VehicleShipping = Object.freeze({
+    default: {nominal: 0.5, min: 0.5, max: 0.5},
+    wing: {nominal: 1, min: 0.5, max: 2},
+    rotor: {nominal: 1, min: 0.5, max: 1},
+    ornithopter: {nominal: 1, min: 0.5, max: 1},
+    sail: {nominal: 0.5, min: 0.25, max: 0.5},       // an unpowered boat ships at a quarter-ton
+    personal: {nominal: 0.5, min: 0.25, max: 0.5},
+    airship: null   // its Spaces leave the gas envelope out, so nothing checks (VH 2026 p.30)
+});
+
 // Five of the 78 print a service life instead of a distance: a fission or fusion plant (VH p.49).
 MGT2.RangeUnits = Object.freeze({
     km: "MGT2.RangeUnits.km",
@@ -1249,6 +1261,15 @@ MGT2.FleetDefences = Object.freeze({
         perWeapon: true, turretsOnly: true
     }
 });
+
+// HG p.112 and p.107 both read a TURRET particle beam as 4 where p.28 prints 3D.
+MGT2.FleetPrintedDamage = Object.freeze([
+    {
+        names: ["particle beam", "faisceau de particules"],
+        mounts: ["singleTurret", "doubleTurret", "tripleTurret", "fixed"],
+        damage: 4
+    }
+]);
 
 // HG p.119. The defender's Crew Skill plus its Defensive DM, less the attacker's Offensive DM.
 MGT2.SandcasterEffect = Object.freeze([
@@ -2172,6 +2193,7 @@ MGT2.BenefitKinds = Object.freeze({
     characteristic: "MGT2.Chargen.BenefitKinds.characteristic",
     cash: "MGT2.Chargen.BenefitKinds.cash",
     skill: "MGT2.Chargen.BenefitKinds.skill",
+    contact: "MGT2.Chargen.BenefitKinds.contact",
     ship: "MGT2.Chargen.BenefitKinds.ship",
     shipShare: "MGT2.Chargen.BenefitKinds.shipShare",
     membership: "MGT2.Chargen.BenefitKinds.membership"
@@ -2243,6 +2265,48 @@ MGT2.MusterOut = Object.freeze({
     shipShareValue: 1000000,
     // "They may purchase personal equipment worth up to Cr10000 before they start adventuring."
     preplayEquipment: 10000
+});
+
+// Folio 47's Other Benefits, defined once for the whole chapter and pointed at by every career's
+// column. A ceiling is a limit and never an item, so this table names no equipment.
+// `names` carries the printed spellings a `ref` may arrive as; the key itself always matches.
+// `pick` is what a redemption filters on, and its absence means the row is redeemed against nothing.
+MGT2.Benefits = Object.freeze({
+    armour: { kind: "voucher", credits: 10000, tl: 12, onRepeat: "upgradeCeiling",
+        repeatCredits: 25000, names: ["armor"], pick: { doc: "Item", types: ["armor"] } },
+    ally: { kind: "contact", relation: "Allie", onRepeat: "another" },
+    blade: { kind: "voucher", credits: 1000, tl: 12, onRepeat: "skillLevel",
+        pick: { doc: "Item", types: ["weapon"], melee: true } },
+    characteristic: { kind: "characteristic", onRepeat: "another",
+        names: ["characteristicincrease", "characteristicincreases"] },
+    // No ceiling is printed for it in any of the four careers that grant it.
+    combatImplant: { kind: "voucher", onRepeat: "another",
+        pick: { doc: "Item", types: ["equipment"], subTypes: ["augment"] } },
+    contact: { kind: "contact", relation: "Contact", onRepeat: "another" },
+    cybernetic: { kind: "voucher", credits: 75000, tl: 12, onRepeat: "improveExisting",
+        names: ["cyberneticimplant"],
+        pick: { doc: "Item", types: ["equipment"], subTypes: ["augment"] } },
+    freeTrader: { kind: "ship", onRepeat: "stackMortgage", constraint: "mortgage",
+        alternative: "farTrader", pick: { doc: "Actor", types: ["spacecraft"] } },
+    gun: { kind: "voucher", credits: 3000, tl: 12, onRepeat: "skillLevel", constraint: "ranged",
+        pick: { doc: "Item", types: ["weapon"], melee: false } },
+    labShip: { kind: "ship", onRepeat: "stackMortgage", constraint: "mortgage",
+        pick: { doc: "Actor", types: ["spacecraft"] } },
+    personalVehicle: { kind: "voucher", credits: 300000, tl: 10, onRepeat: "skillLevel",
+        constraint: "unarmed", pick: { doc: "Actor", types: ["vehicle"] } },
+    scientificEquipment: { kind: "voucher", credits: 2000, tl: 12, onRepeat: "skillLevel",
+        pick: { doc: "Item", types: ["equipment"] } },
+    scoutShip: { kind: "ship", onRepeat: "reroll", constraint: "scoutService",
+        pick: { doc: "Actor", types: ["spacecraft"] } },
+    shipShares: { kind: "shipShare", onRepeat: "another", names: ["shipshare"] },
+    shipsBoat: { kind: "ship", credits: 10000000, tl: 12, onRepeat: "skillLevel",
+        pick: { doc: "Actor", types: ["spacecraft"] } },
+    tas: { kind: "membership", onRepeat: "convert", names: ["tasmembership"],
+        convert: { ref: "shipShares", kind: "shipShare", count: 2 } },
+    weapon: { kind: "voucher", credits: 3000, tl: 12, onRepeat: "skillLevel",
+        pick: { doc: "Item", types: ["weapon"] } },
+    yacht: { kind: "ship", onRepeat: "stackMortgage", constraint: "mortgage",
+        alternative: "safariShip", pick: { doc: "Actor", types: ["spacecraft"] } }
 });
 
 // Folio 228's Psionic Training table.

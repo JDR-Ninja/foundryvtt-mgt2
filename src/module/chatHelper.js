@@ -353,7 +353,7 @@ export class ChatHelper {
             });
             // Core p.79: what a Stun weapon deals past END is rounds of incapacitation, not injury.
             if (result?.rounds > 0) {
-                ui.notifications.info(game.i18n.format("MGT2.Actor.StunIncapacitated",
+                ui.notifications.info(MGT2Helper.plural("MGT2.Actor.StunIncapacitated", result.rounds,
                     { name: token.actor.name, rounds: result.rounds }));
             }
             // RH folio 106: an ion hit shuts a robot's brain down for as many rounds as it
@@ -361,7 +361,7 @@ export class ChatHelper {
             // above, and reported the same way, because neither is a wound anything on the sheet
             // can hold.
             if (result?.shutdown > 0) {
-                ui.notifications.info(game.i18n.format("MGT2.Actor.robot.IonShutdown",
+                ui.notifications.info(MGT2Helper.plural("MGT2.Actor.robot.IonShutdown", result.shutdown,
                     { name: token.actor.name, rounds: result.shutdown }));
             } else if (result?.immune) {
                 ui.notifications.info(game.i18n.format("MGT2.Actor.robot.IonImmune",
@@ -477,10 +477,10 @@ export class ChatHelper {
         const applied = await actor.system.applyRadiation(dose - protection);
         if (!applied) {
             return ChatHelper.postRadiation(actor,
-                game.i18n.format("MGT2.Radiation.Absorbed", { dose, protection }), roll);
+                MGT2Helper.plural("MGT2.Radiation.Absorbed", dose, { dose, protection }), roll);
         }
 
-        const parts = [game.i18n.format("MGT2.Radiation.Dose", applied)];
+        const parts = [MGT2Helper.plural("MGT2.Radiation.Dose", applied.dose, applied)];
         if (applied.immediate?.damage) {
             const damage = await new Roll(MGT2Helper.damageFormula(applied.immediate.damage)).roll();
             // Read off the actor, never off a model held across the write above: an update replaces

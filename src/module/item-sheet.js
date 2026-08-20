@@ -484,7 +484,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     return Object.values(MGT2.FireModes).map(mode => {
       const label = game.i18n.localize(mode.label);
       if ( !mode.rounds ) return label;
-      return game.i18n.format("MGT2.Items.FireModeCost", {
+      return MGT2Helper.plural("MGT2.Items.FireModeCost", mode.rounds * auto, {
         mode: label,
         gain: mode.damage ? MGT2Helper.signed(auto)
           : game.i18n.format("MGT2.RollPrompt.FireModeAttacks", { count: auto }),

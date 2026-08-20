@@ -383,5 +383,44 @@
 				</label>
 			</div>
 		</div>
+
+		{{! Core p.47: a Benefit is a right with limits — "any armour up to Cr10000 and TL12" — so a
+		    row records the right and the player redeems it against the referee's own library. }}
+		<div class="block">
+			<div class="sect">
+				<h3>{{localize 'MGT2.Chargen.Benefits.Title'}}</h3>
+				<span class="count">{{entitlements.length}}</span>
+				<a class="add" data-action="benefitAdd" data-tooltip="{{localize 'MGT2.Chargen.Benefits.Add'}}"><i class="fa-solid fa-plus"></i></a>
+			</div>
+			{{#if entitlements.length}}
+			<table class="rows">
+				<thead>
+					<tr>
+						<th>{{localize 'MGT2.Chargen.Close.What'}}</th>
+						<th class="c">{{localize 'MGT2.Chargen.Close.Kind'}}</th>
+						<th>{{localize 'MGT2.Chargen.Benefits.From'}}</th>
+						<th class="c">{{localize 'MGT2.Chargen.Benefits.State'}}</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each entitlements as |b|}}
+					<tr data-index="{{b.index}}"{{#if b.itemId}} data-item-id="{{b.itemId}}"{{/if}}>
+						<td>{{b.label}}{{#if b.note}}<span class="sub">{{b.note}}</span>{{/if}}</td>
+						<td class="c">{{b.kind}}</td>
+						<td>{{b.from}}</td>
+						<td class="c">{{localize (concat "MGT2.Chargen.Benefits.States." b.state)}}</td>
+						<td class="acts">
+							{{#if b.open}}<a data-action="benefitRedeem" data-tooltip="{{localize 'MGT2.Chargen.Close.Redeem'}}"><i class="fa-solid fa-hand-holding-box"></i></a>{{/if}}
+							<a class="edit-only" data-action="benefitDelete" data-tooltip="{{localize 'MGT2.Chargen.Benefits.Delete'}}"><i class="fa-solid fa-trash"></i></a>
+						</td>
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+			{{else}}
+			<p class="hint">{{localize 'MGT2.Chargen.Benefits.None'}}</p>
+			{{/if}}
+		</div>
 	</div>
 </section>

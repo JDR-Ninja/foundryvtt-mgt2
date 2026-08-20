@@ -208,7 +208,7 @@
 			{{/if}}
 		</div>
 		{{#if panel.radiationRow}}
-		<span class="why">{{localize 'MGT2.Fleet.Screen.RadiationWhy' skill=panel.radiationRow.crewSkill weapons=panel.radiationRow.weapons}}</span>
+		<span class="why">{{plural 'MGT2.Fleet.Screen.RadiationWhy' panel.radiationRow.weapons skill=panel.radiationRow.crewSkill weapons=panel.radiationRow.weapons}}</span>
 		{{/if}}
 	</div>
 

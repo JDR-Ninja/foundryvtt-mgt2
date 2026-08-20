@@ -45,7 +45,8 @@ function localize(key, data) {
 /**
  * Folio 112's Fleet Combat Weapons table, derived: its Damage column is the number of dice the
  * ordinary weapon rolls and its Multiple column is `ShipMounts[…].damageMultiple`, so a `4D` fusion
- * gun in a small bay reads 6/10 without a row being transcribed anywhere.
+ * gun in a small bay reads 6/10 without a row being transcribed. That is 26 of the folio's 27
+ * cells, and p.111 sends both columns there; the twenty-seventh is `MGT2.FleetPrintedDamage`.
  */
 export function fleetDamage(formula) {
     const match = DICE.exec(String(formula ?? ""));
@@ -66,6 +67,7 @@ export function fleetWeaponRow(actor, mountIndex, weaponId = "") {
     const weapon = id ? actor.items.get(id) : null;
     const mountClass = MGT2.ShipMounts[mount.type] ?? MGT2.ShipMounts.fixed;
     const traits = weapon?.system.traitMap ?? {};
+    const printed = weapon ? (actor.system.fleetPrintedDamage?.(weapon.name, mount.type) ?? null) : null;
     return {
         id: weapon?.id ?? "",
         name: weapon?.name || mount.label || game.i18n.localize(mountClass.label),
@@ -74,7 +76,8 @@ export function fleetWeaponRow(actor, mountIndex, weaponId = "") {
         index: mountIndex,
         turret: TURRETS.includes(mount.type),
         spinal: mount.type === "spinal",
-        damage: fleetDamage(weapon?.system.damage),
+        damage: printed ?? fleetDamage(weapon?.system.damage),
+        printed: printed !== null,
         multiple: mountClass.damageMultiple ?? 1,
         // A mount that names a weapon in its label and resolves no Item reads `0/N` and is the one
         // row on this sheet that is wrong rather than empty — the ship's DEFENCES came out of that
@@ -321,7 +324,7 @@ export class FleetAttack {
             rollTypeName: attacker.name,
             rollObjectName: localize(entry?.label ?? "MGT2.Fleet.Attack.Missiles"),
             modifiers: factor?.rows.labels ?? [],
-            lines: [localize("MGT2.Fleet.Attack.Salvo", { hits, damage: adjusted }),
+            lines: [MGT2Helper.plural("MGT2.Fleet.Attack.Salvo", hits, { hits, damage: adjusted }),
                 localize("MGT2.Fleet.Attack.Final", { damage: total, target: target.name })]
         });
         return { base, adjusted, hits, total, factor, halved, band: at };
@@ -353,8 +356,8 @@ export class FleetAttack {
             rollObjectName: localize("MGT2.Fleet.Ion.Title"),
             lines: result > 0
                 ? [localize("MGT2.Fleet.Ion.Total", { effect, hull }),
-                    localize("MGT2.Fleet.Ion.Result", { n: result, name: target.name }),
-                    localize("MGT2.Fleet.Ion.Rounds", { n: rounds })]
+                    MGT2Helper.plural("MGT2.Fleet.Ion.Result", result, { name: target.name }),
+                    MGT2Helper.plural("MGT2.Fleet.Ion.Rounds", rounds)]
                 : [localize("MGT2.Fleet.Ion.Total", { effect, hull }),
                     localize("MGT2.Fleet.Ion.NoEffect")]
         });

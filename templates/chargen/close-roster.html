@@ -22,7 +22,7 @@
 			<tr data-actor-id="{{column.id}}">
 				<td class="who">
 					<b><a data-action="openActor">{{column.name}}</a></b>
-					<span class="ag">{{localize 'MGT2.Chargen.Close.AgeTerms' age=column.age terms=column.terms}}</span>
+					<span class="ag">{{plural 'MGT2.Chargen.Close.AgeTerms' column.terms age=column.age terms=column.terms}}</span>
 					{{#if column.serving}}<span class="warn">{{localize 'MGT2.Chargen.Close.StillServing'}}</span>{{/if}}
 				</td>
 				<td>
@@ -30,7 +30,7 @@
 						{{#each column.careers as |career|}}
 						<li>
 							<b>{{career.name}}</b>
-							<span>{{localize 'MGT2.Chargen.Close.RankTerms' rank=career.rank terms=career.terms}}</span>
+							<span>{{plural 'MGT2.Chargen.Close.RankTerms' career.terms rank=career.rank terms=career.terms}}</span>
 							{{#if career.pension}}<span class="pen">{{localize 'MGT2.Chargen.Close.PensionOf' credits=career.pension}}</span>{{/if}}
 						</li>
 						{{/each}}
@@ -40,7 +40,7 @@
 				<td class="n">{{localize 'MGT2.Chargen.Close.CashOf' taken=column.cash.taken limit=column.cash.limit}}</td>
 				<td class="n">
 					{{localize 'MGT2.Chargen.Close.PerYear' credits=column.pensionText}}
-					{{#if column.shipShares}}<span class="sh">{{localize 'MGT2.Chargen.Close.Shares' n=column.shipShares}}</span>{{/if}}
+					{{#if column.shipShares}}<span class="sh">{{plural 'MGT2.Chargen.Close.Shares' column.shipShares}}</span>{{/if}}
 				</td>
 				<td>
 					{{#if column.benefits.length}}

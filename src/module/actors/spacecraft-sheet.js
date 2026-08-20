@@ -1,6 +1,7 @@
 import { Checks } from "../checks.js";
 import { MGT2 } from "../config.js";
 import { CreditSplit } from "../credit-split.js";
+import { fleetBatteries } from "../fleet-attack.js";
 import { MGT2Helper } from "../helper.js";
 import { RollPromptHelper } from "../roll-prompt.js";
 import { Rules } from "../rules.js";
@@ -214,9 +215,25 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             derived: SpacecraftActorSheet.#derived(system),
             // Null where the table does not play fleet battles: the rule is off and no statblock
             // was computed.
-            fleet: system.fleet
+            fleet: this.#fleet(system)
         };
         return context;
+    }
+
+    /** HG p.107's WEAPONS and DEFENCES panels, off the readers the fleet screen uses. */
+    #fleet(system) {
+        if ( !system.fleet ) return null;
+        return {
+            ...system.fleet,
+            defences: system.fleetDefences(system.fleet.crewSkill),
+            batteries: fleetBatteries(this.actor).map(row => ({
+                ...row,
+                mountLabel: game.i18n.localize(row.mountLabel),
+                bandLabel: row.band ? MGT2.ShipRangeBands[row.band]?.label : null,
+                // HG p.112: what gets through is a salvo's multiple, so the mount's is not one.
+                salvo: MGT2Helper.isMissileWeapon(this.actor.items.get(row.id))
+            }))
+        };
     }
 
     /**
@@ -507,7 +524,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 weapons: held,
                 // Core p.183: a fixed mount or a turret holds one, two or three weapons by type.
                 overCapacity: (held.length > type.weapons)
-                    ? game.i18n.format("MGT2.Actor.spacecraft.MountCapacity",
+                    ? MGT2Helper.plural("MGT2.Actor.spacecraft.MountCapacity", held.length,
                         { held: held.length, cap: type.weapons }) : null,
                 choices: weapons.map(weapon => ({
                     _id: weapon._id, name: weapon.name, selected: mount.weapons.includes(weapon._id)

@@ -316,7 +316,8 @@ export class MGT2Combatant extends Combatant {
         const rolled = this.parent.combatants.filter(combatant => (combatant.type === PERSON)
             && (combatant.system.side === side) && (combatant.initiative !== null));
         if ( rolled.length ) {
-            ui.notifications.warn(game.i18n.format("MGT2.Combatant.TacticsLate", { count: rolled.length }));
+            ui.notifications.warn(MGT2Helper.plural("MGT2.Combatant.TacticsLate", rolled.length,
+            { count: rolled.length }));
         }
 
         return ChatMessage.create({

@@ -264,7 +264,10 @@ function createCellField(options = {}) {
             // The per-row floor of `SOC 10 or SOC +1, whichever is higher`. Null is the ordinary case.
             floor: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
             // Which shared Other Benefits definition a `benefit` grant points at, typed by the referee.
-            ref: new fields.StringField({ required: false, blank: true, trim: true })
+            ref: new fields.StringField({ required: false, blank: true, trim: true }),
+            // Which relationship a `contact` grant makes: an Ally is a benefit row of its own.
+            relation: new fields.StringField({
+                required: false, blank: true, trim: true, initial: "", choices: MGT2.ContactRelations })
         }), { initial: [] })
     }, options);
 }
@@ -715,12 +718,16 @@ export class CareerData extends ItemBaseData {
             // Null is a term with no survival check at all, which is not the same fact as a failed one.
             survived: new fields.BooleanField({ required: false, nullable: true, initial: null }),
             ejected: new fields.BooleanField({ required: false, initial: false }),
+            // Core folio 48 puts 34 "at the end of" the fourth term: a term is served once it closes.
+            closed: new fields.BooleanField({ required: false, initial: false }),
             // What the frame said this term yields, so a term that grants nothing stays legible.
             kind: new fields.StringField({ required: false, blank: true, trim: true }),
             // What the term PRODUCED, as facts a later step reads rather than as prose: a
             // commission and an advancement in the same term are two members here.
             outcomes: new fields.SetField(new fields.StringField({
                 required: true, blank: false, choices: MGT2.TermOutcomes }), { initial: [] }),
+            steps: new fields.SetField(new fields.StringField({
+                required: true, blank: false, choices: MGT2.CreationSteps }), { initial: [] }),
             note: new fields.StringField({ required: false, blank: true, trim: true })
         }), { initial: [] });
 

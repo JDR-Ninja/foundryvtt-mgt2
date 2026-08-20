@@ -48,7 +48,7 @@
 				<td class="duty">
 					<span class="ro">{{#if bay.name}}{{localize 'MGT2.Actor.spacecraft.Docked'}}{{else}}&mdash;{{/if}}</span>
 					{{#if bay.transfer}}<span class="at">{{localize bay.transfer}}</span>{{/if}}
-					{{#if bay.craftPerRound}}<span class="at">{{localize 'MGT2.Actor.spacecraft.CraftPerRound' n=bay.craftPerRound}}</span>{{/if}}
+					{{#if bay.craftPerRound}}<span class="at">{{plural 'MGT2.Actor.spacecraft.CraftPerRound' bay.craftPerRound}}</span>{{/if}}
 					{{#if bay.repairs}}<span class="at">{{localize 'MGT2.Actor.spacecraft.Repairs'}}</span>{{/if}}
 					{{#each bay.checks as |line|}}<span class="at"><b class="noarm">{{line}}</b></span>{{/each}}
 				</td>

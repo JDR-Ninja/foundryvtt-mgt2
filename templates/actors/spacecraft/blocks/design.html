@@ -3,7 +3,7 @@
 <div class="block">
 	<div class="sect">
 		<h3>{{localize 'MGT2.Design.Title'}}</h3>
-		<span class="count">{{#if ship.design.fitted}}{{localize 'MGT2.Design.Count' n=ship.design.count tons=ship.design.tons}}{{else}}{{localize 'MGT2.Design.Optional'}}{{/if}}</span>
+		<span class="count">{{#if ship.design.fitted}}{{plural 'MGT2.Design.Count' ship.design.count tons=ship.design.tons}}{{else}}{{localize 'MGT2.Design.Optional'}}{{/if}}</span>
 		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Design.Advisory'}}"></i>
 		<a class="add edit-only" data-action="itemCreate" data-type-item="component" data-create-name="{{localize 'MGT2.Design.NewComponent'}}" data-tooltip="{{localize 'MGT2.Design.AddComponent'}}"><i class="fa-solid fa-plus"></i></a>
 	</div>
@@ -45,7 +45,7 @@
 	    a ship with no fuel row typed is not a ship short of fuel. }}
 	{{#if (rule 'designValidation')}}
 	<details class="fold" data-fold="design">
-		<summary class="{{#if ship.design.failed}}bad{{/if}}">{{#if ship.design.failed}}{{localize 'MGT2.Design.Failed' n=ship.design.failed}}{{else if ship.design.checked}}{{localize 'MGT2.Design.Passed' n=ship.design.checked}}{{else}}{{localize 'MGT2.Design.NothingToRead'}}{{/if}}</summary>
+		<summary class="{{#if ship.design.failed}}bad{{/if}}">{{#if ship.design.failed}}{{plural 'MGT2.Design.Failed' ship.design.failed}}{{else if ship.design.checked}}{{plural 'MGT2.Design.Passed' ship.design.checked}}{{else}}{{localize 'MGT2.Design.NothingToRead'}}{{/if}}</summary>
 		<div class="valid" data-derived="system.design">
 			{{#each ship.design.checks as |check|}}
 			<div class="v {{#unless check.applies}}na{{else}}{{#if check.ok}}ok{{else}}no{{/if}}{{/unless}}">

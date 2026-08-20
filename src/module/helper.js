@@ -15,6 +15,16 @@ export class MGT2Helper {
         return values.reduce((text, value, i) => text.replaceAll(`{${i}}`, String(value)), template);
     }
 
+    /** A count-dependent string: the key holds one member per CLDR category the language uses. */
+    static plural(key, n, data = {}) {
+        const has = id => game.i18n.has(id, false);
+        const rule = Number.isFinite(n) ? game.i18n.pluralRules.select(n) : "other";
+        // The active language first, so one still holding the key as a plain string keeps its text;
+        // then `other`, because French selects `many` at a million and defines none.
+        const id = [`${key}.${rule}`, key, `${key}.other`].find(has) ?? `${key}.other`;
+        return game.i18n.format(id, { n, ...data });
+    }
+
     static hasValue(object, property) {
         return object != null && Object.hasOwn(object, property)
             && object[property] !== null && object[property] !== undefined && object[property] !== "";
@@ -254,9 +264,10 @@ export class MGT2Helper {
 
     /** A named modifier contribution reads either straight or through its substitutions. */
     static modifierLabel(source) {
-        return source.params
-            ? game.i18n.format(source.label, source.params)
-            : game.i18n.localize(source.label);
+        if ( !source.params ) return game.i18n.localize(source.label);
+        return source.plural
+            ? this.plural(source.label, Number(source.params[source.plural]), source.params)
+            : game.i18n.format(source.label, source.params);
     }
 
     /**

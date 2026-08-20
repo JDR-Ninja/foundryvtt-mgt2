@@ -630,7 +630,7 @@ export class RobotData extends ActorBaseData {
         const total = this.brain.rads + dose;
         const lost = Math.floor(total / RADS_PER_BRAIN_POINT) - this.radiationLoss;
         const lines = [];
-        if (dose < reaching) lines.push(game.i18n.format("MGT2.Radiation.Hardened", { reaching, dose }));
+        if (dose < reaching) lines.push(MGT2Helper.plural("MGT2.Radiation.Hardened", reaching, { reaching, dose }));
         if (lost > 0) lines.push(game.i18n.format("MGT2.Radiation.Brain", { points: lost }));
 
         await this.parent.update({ "system.brain.rads": total });

@@ -3,6 +3,7 @@ import { Grants } from "./chargen-grants.js";
 import { CreationOptions, CreationRoll } from "./chargen-rolls.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
+import { Muster } from "./chargen-muster.js";
 import { Rules } from "./rules.js";
 
 const { DialogV2 } = foundry.applications.api;
@@ -45,8 +46,14 @@ export class ChargenTerm {
         // A step the frame declares and this build has no procedure of its own for — the nest
         // transition, the status check, the continuation check.
         const handler = STEPS[key] ?? declaredStep;
-        const result = await handler(reading(actor), key) ?? {};
+        // Taken before the handler runs: closing a term moves the clock and may end the career, so
+        // afterwards neither the term number nor the serving record is the one this step belongs to.
+        const view = reading(actor);
+        const result = await handler(view, key) ?? {};
         if ( result.advance === false ) return result;
+        if ( view.record ) {
+            await logTerm(view.record, view.term, { steps: [key, ...(result.skip ?? [])] });
+        }
         await this.#advance(actor, key, result.skip ?? []);
         return result;
     }
@@ -75,7 +82,8 @@ export class ChargenTerm {
             await logTerm(record, term, {
                 years: kind?.years ?? null,
                 ages: kind ? kind.ages : true,
-                kind: kind?.key ?? ""
+                kind: kind?.key ?? "",
+                closed: true
             });
             // Folio 18: a term whose Survival failed loses that term's Benefit roll — unless the
             // mishap row said to keep it, which is `benefit: keep` and is credited back where the
@@ -135,11 +143,12 @@ async function elect(view) {
  * with one or more characteristics, an unconditional automatic, a score threshold that bypasses the
  * roll, a forced-only entry, and the referee's permission.
  */
-async function qualify(view) {
+async function qualify(view, key) {
     const { actor, record, system, term } = view;
     if ( !record ) return needCareer();
-    // Continuing is not re-qualifying: the roll exists to ENTER a career (folio 18).
-    if ( system.termLog.length ) {
+    // Continuing is not re-qualifying: the roll exists to ENTER a career (folio 18), and a career
+    // has been entered once one of its terms has closed.
+    if ( system.termLog.some(entry => entry.closed) || logEntry(record, term).steps.has(key) ) {
         ui.notifications.info(game.i18n.format("MGT2.Chargen.Term.Continuing", { career: record.name }));
         return { advance: true };
     }
@@ -717,7 +726,7 @@ async function advance(view) {
     else {
         if ( rolled.total <= served ) {
             outcomes.push("forcedOut");
-            lines.push(game.i18n.format("MGT2.Chargen.Term.ForcedOut", { n: served }));
+            lines.push(MGT2Helper.plural("MGT2.Chargen.Term.ForcedOut", served));
         }
         if ( rolled.natural === 12 ) {
             outcomes.push("mustContinue");
@@ -870,7 +879,7 @@ async function ageing(view) {
 
     const law = Chargen.law(actor, Chargen.frame(actor)?.system.ageing);
     const defaults = MGT2.CreationDefaults;
-    const terms = Chargen.termsServed(actor);
+    const terms = Chargen.termsServed(actor, { open: true });
     // The law is an EXPRESSION and not a switch: the published values run -1, -2, -1/2, +1 and ±1
     // by sex.
     const dm = Math.trunc(((law ? law.perTerm : defaults.ageingPerTerm) * terms)
@@ -959,7 +968,7 @@ function describeChanges(changes) {
 }
 
 /** Continue or leave — the step that closes the term and the only one that moves the clock. */
-async function decide(view) {
+async function decide(view, key) {
     const { actor, record, system, term } = view;
     if ( !record ) {
         await ChargenTerm.closeTerm(actor);
@@ -982,8 +991,8 @@ async function decide(view) {
     // term: it takes the offer of another term away without making the ending a forced one, so the
     // exit mode below stays voluntary.
     const cap = CreationOptions.maximumTerms();
-    const capped = (cap > 0) && (Chargen.termsServed(actor) >= cap);
-    if ( capped ) ui.notifications.info(game.i18n.format("MGT2.Chargen.Term.MaximumTerms", { n: cap }));
+    const capped = (cap > 0) && (Chargen.termsServed(actor, { open: true }) >= cap);
+    if ( capped ) ui.notifications.info(MGT2Helper.plural("MGT2.Chargen.Term.MaximumTerms", cap));
     const done = forced || capped;
     // The book's own two groups leave one career in neither, hence the fourth value.
     const changeRule = system.assignmentChange || Rules.get("undeclaredAssignmentChange");
@@ -996,11 +1005,21 @@ async function decide(view) {
     }
     buttons.push({ action: "leave", label: "MGT2.Chargen.Term.LeaveCareer", default: done });
 
+    // The strip runs any step at any moment, so a term can arrive here with steps unresolved. Say
+    // which, because closing the term buys its four years and its Benefit roll either way.
+    const sequence = ChargenTerm.sequence(actor);
+    const missed = sequence.slice(0, sequence.indexOf(key))
+        .filter(step => !entry.steps.has(step))
+        .map(step => game.i18n.localize(MGT2.CreationSteps[step] ?? step));
+    const warning = missed.length
+        ? `<p class="skipped">${game.i18n.format("MGT2.Chargen.Term.DecideSkipped",
+            { steps: missed.join(", ") })}</p>` : "";
+
     const choice = await DialogV2.wait({
         window: { title: "MGT2.Chargen.Steps.decide" },
         classes: ["mgt2"],
-        content: `<p>${game.i18n.format("MGT2.Chargen.Term.DecideHint",
-            { career: record.name, n: system.termLog.length })}</p>`,
+        content: `<p>${MGT2Helper.plural("MGT2.Chargen.Term.DecideHint",
+            system.termLog.length, { career: record.name })}</p>${warning}`,
         buttons, rejectClose: false
     });
     if ( !choice ) return { advance: false };
@@ -1251,7 +1270,7 @@ async function roll(view, { check = "", step, target = null, characteristic = ""
  * One printed cell applied, which is a small EXPRESSION and not a scalar.
  * @returns {Promise<string[]>}   What was granted, already localised, for the term log
  */
-async function applyCell(actor, cell, { level = null, provenance = {} } = {}) {
+export async function applyCell(actor, cell, { level = null, provenance = {} } = {}) {
     if ( !cell ) return [];
     let grants = cell.grants ?? [];
     if ( !grants.length ) return cell.text ? [cell.text] : [];
@@ -1291,11 +1310,15 @@ async function applyGrant(actor, grant, { level, provenance }) {
     if ( grant.kind === "contact" ) {
         const count = grant.formula
             ? (await new Roll(MGT2Helper.damageFormula(grant.formula)).roll()).total : grant.value;
-        for ( let i = 0; i < count; i++ ) await Grants.contact(actor, { provenance });
-        return `${game.i18n.localize(MGT2.CreationGrantKinds.contact)} ×${count}`;
+        const relation = grant.relation || "Contact";
+        for ( let i = 0; i < count; i++ ) await Grants.contact(actor, { relation, provenance });
+        return `${game.i18n.localize(MGT2.ContactRelations[relation])} ×${count}`;
     }
-    // A voucher and a bare note are the referee's to resolve: the system has no catalogue and never
-    // will.
+    if ( grant.kind === "benefit" ) {
+        const row = await Muster.take(actor, Muster.fromRef(grant.ref, { provenance }), { spend: false });
+        return Muster.label(row);
+    }
+    // A bare note is the referee's to resolve: the system has no catalogue and never will.
     return grantLabel(grant);
 }
 
@@ -1362,6 +1385,8 @@ function grantLabel(grant) {
         return `${game.i18n.localize(MGT2.Characteristics[grant.characteristic] ?? grant.characteristic)} `
             + MGT2Helper.signed(grant.value);
     }
+    if ( grant.kind === "benefit" ) return Muster.label(Muster.fromRef(grant.ref));
+    if ( grant.relation ) return game.i18n.localize(MGT2.ContactRelations[grant.relation]);
     return grant.ref || game.i18n.localize(MGT2.CreationGrantKinds[grant.kind] ?? grant.kind);
 }
 
@@ -1393,8 +1418,8 @@ function termKind(view) {
 /** The term log row for one term, present or not — the reader, never the writer. */
 function logEntry(record, term) {
     return record?.system.termLog.find(entry => entry.term === term)
-        ?? { term, years: null, ages: true, survived: null, ejected: false, kind: "",
-            outcomes: new Set(), note: "" };
+        ?? { term, years: null, ages: true, survived: null, ejected: false, closed: false, kind: "",
+            outcomes: new Set(), steps: new Set(), note: "" };
 }
 
 /**
@@ -1402,16 +1427,18 @@ function logEntry(record, term) {
  * decided.
  */
 async function logTerm(record, term, patch) {
-    const log = record.system.termLog.map(entry => ({ ...entry, outcomes: [...entry.outcomes] }));
+    const log = record.system.termLog.map(entry =>
+        ({ ...entry, outcomes: [...entry.outcomes], steps: [...entry.steps] }));
     let row = log.find(entry => entry.term === term);
     if ( !row ) {
-        row = { term, years: null, ages: true, survived: null, ejected: false, kind: "",
-            outcomes: [], note: "" };
+        row = { term, years: null, ages: true, survived: null, ejected: false, closed: false,
+            kind: "", outcomes: [], steps: [], note: "" };
         log.push(row);
     }
     const outcomes = new Set([...row.outcomes, ...(patch.outcomes ?? [])]);
+    const steps = new Set([...row.steps, ...(patch.steps ?? [])]);
     const note = patch.note ? [row.note, patch.note].filter(text => text).join(" · ") : row.note;
-    Object.assign(row, patch, { outcomes: [...outcomes], note });
+    Object.assign(row, patch, { outcomes: [...outcomes], steps: [...steps], note });
     await record.update({ "system.termLog": log });
     return row;
 }

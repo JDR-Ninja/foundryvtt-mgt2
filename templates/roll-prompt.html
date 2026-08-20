@@ -167,7 +167,7 @@
 				<span class="seg" data-name="fireMode" role="radiogroup"
 					aria-label="{{ localize 'MGT2.RollPrompt.FireMode' }}">
 					{{#each fireModes as |m|}}
-					<label{{#if m.rounds}} title="{{ localize 'MGT2.RollPrompt.FireModeRounds' rounds=m.rounds }}"{{/if}}><input
+					<label{{#if m.rounds}} title="{{plural 'MGT2.RollPrompt.FireModeRounds' m.rounds rounds=m.rounds}}"{{/if}}><input
 						type="radio" name="fireMode" value="{{m.key}}" data-suppress="{{m.suppress}}"{{#if @first}} checked{{/if}} /><span>{{m.label}}</span>{{#if m.display}}<span class="v">{{m.display}}</span>{{/if}}</label>
 					{{/each}}
 				</span>

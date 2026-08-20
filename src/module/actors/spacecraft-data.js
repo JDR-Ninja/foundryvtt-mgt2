@@ -685,6 +685,14 @@ export class SpacecraftData extends CraftData {
         };
     }
 
+    /** HG p.112's table where it is not the weapon's own dice; null for its other 26 rows. */
+    fleetPrintedDamage(name, mountType) {
+        const plain = SpacecraftData.#plainName(name);
+        const row = MGT2.FleetPrintedDamage.find(entry => entry.mounts.includes(mountType)
+            && entry.names.some(match => plain.includes(match)));
+        return row?.damage ?? null;
+    }
+
     /** HG p.119's Sandcaster Effectiveness — the only pool an opposing ship is a term of. */
     sandcasterPool(crewSkill, defensive, against = 0) {
         const total = this.fleet?.counts.sandcasters ?? 0;

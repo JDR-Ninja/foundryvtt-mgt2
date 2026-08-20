@@ -83,7 +83,7 @@
 		    rated range — the figure asked for most often and the one the panel never showed. }}
 		<div class="stat{{#unless ship.fuel.capacity}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.spacecraft.Fuel'}}</dt>
-			<dd>{{#if ship.fuel.capacity}}{{ship.fuel.aboard}}<span class="of">/{{ship.fuel.capacity}}</span>{{#if ship.fuel.rated}}<i>{{localize 'MGT2.Actor.spacecraft.JumpsAboard' n=ship.fuel.jumps}}</i>{{/if}}{{else}}&mdash;{{/if}}</dd>
+			<dd>{{#if ship.fuel.capacity}}{{ship.fuel.aboard}}<span class="of">/{{ship.fuel.capacity}}</span>{{#if ship.fuel.rated}}<i>{{plural 'MGT2.Actor.spacecraft.JumpsAboard' ship.fuel.jumps}}</i>{{/if}}{{else}}&mdash;{{/if}}</dd>
 		</div>
 		<div class="stat{{#unless system.cargo.capacity}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.spacecraft.Cargo'}}</dt>

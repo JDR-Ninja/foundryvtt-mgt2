@@ -57,7 +57,7 @@
 			{{! Companion folio 80: the second stage of starvation, whose intervals are days — so the
 			    referee ticks it and the tooltip carries the END-derived counts. }}
 			{{#if (rule 'starvation')}}
-			<label data-tooltip="{{localize 'MGT2.Actor.StarvingHint' before=system.starvation.before impaired=system.starvation.impaired}}">
+			<label data-tooltip="{{plural 'MGT2.Actor.StarvingHint' system.starvation.before before=system.starvation.before impaired=system.starvation.impaired}}">
 				{{formInput systemFields.states.fields.starving name="system.states.starving" value=system.states.starving}}{{localize 'MGT2.Actor.Starving'}}
 			</label>
 			{{/if}}

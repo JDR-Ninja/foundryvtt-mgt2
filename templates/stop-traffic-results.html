@@ -71,13 +71,13 @@
 		<div class="results">
 			{{#each offer.freights as |row|}}
 			<div class="r{{#if ../rolled}}{{#unless row.count}} none{{/unless}}{{/if}}">
-				<span class="nm">{{localize row.label}}<span class="g">{{localize 'MGT2.Trade.TonsPerLot' size=row.lotSize}}</span></span>
+				<span class="nm">{{localize row.label}}<span class="g">{{plural 'MGT2.Trade.TonsPerLot' row.lotSize size=row.lotSize}}</span></span>
 				<span class="dm">2D {{showDM row.dm}}</span>
 				{{! Every lot rolls its own tonnage, so the row prints them all: one die for N lots
 				    under-reports the hold a crew needs by a factor of N, and the biggest single lot
 				    is what decides whether any of it fits, because a lot cannot be broken up. }}
 				<span class="at">{{#if ../rolled}}{{row.roll}} &rarr; {{row.total}}{{#if row.count}} &rarr; {{#each row.parts}}{{#unless @first}}+{{/unless}}{{this}}{{/each}}{{/if}}{{/if}}</span>
-				<span class="out">{{#if ../rolled}}{{#if row.count}}{{row.quantity}}<span class="u">{{localize 'MGT2.Trade.Lots' lots=row.count biggest=row.biggest}}</span>{{else}}&mdash;{{/if}}{{else}}&mdash;{{/if}}</span>
+				<span class="out">{{#if ../rolled}}{{#if row.count}}{{row.quantity}}<span class="u">{{plural 'MGT2.Trade.Lots' row.count lots=row.count biggest=row.biggest}}</span>{{else}}&mdash;{{/if}}{{else}}&mdash;{{/if}}</span>
 			</div>
 			{{/each}}
 		</div>
@@ -92,8 +92,8 @@
 		</div>
 		<div class="mail">
 			{{#if rolled}}
-			<span class="v {{#if offer.mail.offered}}yes{{else}}no{{/if}}">{{#if offer.mail.offered}}{{localize 'MGT2.Trade.MailContainers' n=offer.mail.containers}}{{else}}{{localize 'MGT2.Trade.MailNone'}}{{/if}}</span>
-			<span class="cr">{{#if offer.mail.offered}}{{localize 'MGT2.Trade.MailPay' tons=offer.mail.tons credits=offer.mail.creditsDisplay}}{{else}}{{localize 'MGT2.Trade.MailMissed' target=offer.mail.target roll=offer.mail.roll dm=(showDM offer.mail.dm) total=offer.mail.total}}{{/if}}</span>
+			<span class="v {{#if offer.mail.offered}}yes{{else}}no{{/if}}">{{#if offer.mail.offered}}{{plural 'MGT2.Trade.MailContainers' offer.mail.containers}}{{else}}{{localize 'MGT2.Trade.MailNone'}}{{/if}}</span>
+			<span class="cr">{{#if offer.mail.offered}}{{plural 'MGT2.Trade.MailPay' offer.mail.tons tons=offer.mail.tons credits=offer.mail.creditsDisplay}}{{else}}{{localize 'MGT2.Trade.MailMissed' target=offer.mail.target roll=offer.mail.roll dm=(showDM offer.mail.dm) total=offer.mail.total}}{{/if}}</span>
 			{{else}}
 			<span class="v no">&mdash;</span>
 			<span class="cr">{{localize 'MGT2.Trade.MailNeeds' target=offer.mail.target dm=(showDM offer.mail.dm)}}</span>

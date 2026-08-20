@@ -12,7 +12,7 @@
 			<b data-uuid="{{slot.uuid}}" data-action="openDocument">{{slot.name}}</b>
 			<span class="uwp">{{slot.profile}}{{#if slot.codes}} &middot; {{slot.codes}}{{/if}}</span>
 			<span class="st{{#if slot.closedUntil}} shut{{/if}}">
-				{{~#if slot.closedUntil}}{{localize 'MGT2.Actor.world.ShutUntil' day=slot.closedUntil}}{{else}}{{localize 'MGT2.Trade.SearchedHere' n=slot.attempts dm=(showDM slot.searchDM)}}{{/if~}}
+				{{~#if slot.closedUntil}}{{localize 'MGT2.Actor.world.ShutUntil' day=slot.closedUntil}}{{else}}{{plural 'MGT2.Trade.SearchedHere' slot.attempts dm=(showDM slot.searchDM)}}{{/if~}}
 			</span>
 			<a class="rm" data-action="slotClear" data-slot="world" data-tooltip="{{localize 'MGT2.Trade.ClearSlot'}}"><i class="fa-solid fa-xmark"></i></a>
 			{{else}}

@@ -289,7 +289,10 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         const values = entry.values ?? {};
         const answered = clause => !clause.match(/{\w+}/g)
             ?.some(token => values[token.slice(1, -1)] === undefined);
-        return game.i18n.localize(entry.row.label)
+        const label = entry.row.plural
+            ? MGT2Helper.plural(entry.row.label, Number(values[entry.row.plural]))
+            : game.i18n.localize(entry.row.label);
+        return label
             .split(/(?<=\.)\s+/).filter(answered).join(" ")
             .replace(/{(\w+)}/g, (token, key) => values[key]);
     }
@@ -378,7 +381,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
                 out: rules.physical.outFor.replace("*", "×"),
                 then: MGT2Helper.signed(rules.physical.thenDM), thenHours: rules.physical.thenHours
             }),
-            mental: game.i18n.format("MGT2.Jump.BadJump.Mental", {
+            mental: MGT2Helper.plural("MGT2.Jump.BadJump.Mental", rules.mental.afterDays, {
                 second, dm: MGT2Helper.signed(rules.mental.dm), at: rules.mental.seriousAt,
                 days: rules.mental.afterDays })
         };
@@ -663,7 +666,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     static #stepModifiers(step, system, parsecs) {
         if ( step === "plot" ) {
             return [{ key: "parsecs", label: "MGT2.Voyage.ParsecDM",
-                params: { parsecs }, dm: -parsecs }];
+                params: { parsecs }, plural: "parsecs", dm: -parsecs }];
         }
         // Core p.157. The other two printed modifiers are the referee's: the 100-diameter limit is
         // a position nothing here tracks, and DM−1 per month behind maintenance reads a counter the

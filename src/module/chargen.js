@@ -148,31 +148,28 @@ export const Chargen = {
     },
 
     /** Age as a **sum over the term log**, and never `18 + 4 × terms`. @returns {number} */
-    age(actor) {
+    age(actor, { open = false } = {}) {
         const frame = this.frame(actor)?.system.frame;
         const startAge = this.law(actor, frame?.startAge)?.age ?? MGT2.CreationDefaults.startAge;
         const termYears = frame?.termYears ?? MGT2.CreationDefaults.termYears;
         let years = 0;
-        for ( const career of actor?.items ?? [] ) {
-            if ( career.type !== "career" ) continue;
-            const log = career.system.termLog ?? [];
-            if ( !log.length ) {
-                years += (career.system.terms ?? 0) * termYears;
-                continue;
+        for ( const career of this.careers(actor) ) {
+            for ( const term of servedRows(career.system, open) ) {
+                if ( term.ages ) years += term.years ?? termYears;
             }
-            for ( const term of log ) if ( term.ages ) years += term.years ?? termYears;
         }
         return startAge + years;
     },
 
+    /** The terms one record counts as served. @returns {number} */
+    termsIn(record, { open = false } = {}) {
+        return record ? servedRows(record.system, open).length : 0;
+    },
+
     /** Every term served, across every career record — the DM the ageing roll and PSI both read. */
-    termsServed(actor) {
-        let count = 0;
-        for ( const career of actor?.items ?? [] ) {
-            if ( career.type !== "career" ) continue;
-            count += career.system.termLog?.length || (career.system.terms ?? 0);
-        }
-        return count;
+    termsServed(actor, { open = false } = {}) {
+        return this.careers(actor).reduce((count, career) =>
+            count + this.termsIn(career, { open }), 0);
     },
 
     /**
@@ -410,8 +407,11 @@ export const Chargen = {
         const byTerm = ageing ? ageing.fromTerm : defaults.ageingFromTerm;
         const byAge = ageing ? ageing.fromAge : defaults.ageingFromAge;
         const prefersTerms = Rules.get("ageingTriggerPrecedence") !== "age";
-        if ( (byTerm !== null) && (prefersTerms || (byAge === null)) ) return this.termsServed(actor) >= byTerm;
-        if ( byAge !== null ) return this.age(actor) >= byAge;
+        // Folio 48 asks at the END of a term, so the one being played counts: 34 lands inside it.
+        if ( (byTerm !== null) && (prefersTerms || (byAge === null)) ) {
+            return this.termsServed(actor, { open: true }) >= byTerm;
+        }
+        if ( byAge !== null ) return this.age(actor, { open: true }) >= byAge;
         return false;
     }
 };
@@ -475,7 +475,14 @@ function sumLedger(entries, career) {
 /** A record written before `termLog` existed carries only a count. @returns {object[]} */
 function countOnlyTerms(terms) {
     return Array.fromRange(terms ?? 0, 1).map(term =>
-        ({ term, years: null, ages: true, survived: null, ejected: false, kind: "", note: "" }));
+        ({ term, years: null, ages: true, survived: null, ejected: false, closed: true, kind: "",
+            note: "" }));
+}
+
+/** The rows of one record that count as served: closed ones, and the open one only when asked. */
+function servedRows(system, open) {
+    const log = system?.termLog?.length ? system.termLog : countOnlyTerms(system?.terms);
+    return open ? log : log.filter(entry => entry.closed);
 }
 
 /** @returns {{key: string, value: number, cap: number|null}|null} */

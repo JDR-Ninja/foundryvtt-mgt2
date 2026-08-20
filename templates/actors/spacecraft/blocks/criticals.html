@@ -24,7 +24,7 @@
 	{{/if}}
 	{{#if ship.criticals.intact.length}}
 	<details class="fold" data-fold="criticals">
-		<summary>{{localize 'MGT2.Actor.spacecraft.IntactLocations' n=ship.criticals.intact.length}}</summary>
+		<summary>{{plural 'MGT2.Actor.spacecraft.IntactLocations' ship.criticals.intact.length}}</summary>
 		<div class="crits">
 			{{#each ship.criticals.intact as |location|}}
 			<span class="loc">{{localize location.label}}<i>{{location.roll}}</i></span>

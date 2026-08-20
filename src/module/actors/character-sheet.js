@@ -1,7 +1,9 @@
 import { ChatHelper } from "../chatHelper.js";
 import { checkOf } from "../chat-message.js";
 import { Checks, renderRollCard } from "../checks.js";
+import { BenefitPicker } from "../benefit-picker.js";
 import { CompendiumExplorer } from "../compendium-explorer.js";
+import { Muster } from "../chargen-muster.js";
 import { MGT2 } from "../config.js";
 import { CreditSplit } from "../credit-split.js";
 import { EFFECT_ACTIONS, prepareEffects } from "../effects.js";
@@ -75,6 +77,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       traitDelete: TravellerActorSheet.#onTraitDelete,
       openEditor: TravellerActorSheet.#onOpenEditor,
       speciesFind: TravellerActorSheet.#onSpeciesFind,
+      benefitAdd: TravellerActorSheet.#onBenefitAdd,
+      benefitRedeem: TravellerActorSheet.#onBenefitRedeem,
+      benefitDelete: TravellerActorSheet.#onBenefitDelete,
       creditTransfer: TravellerActorSheet.#onCreditTransfer,
       ...EFFECT_ACTIONS
     }
@@ -153,6 +158,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     // block reads the wound.
     ["system.characteristics", ["characteristics", "header", "footer", "health"]],
     ["system.biography", ["biography"]],
+    ["system.entitlements", ["inventory"]],
     ["system.finance", ["inventory"]],
     ["system.personal", ["header", "skills"]],
     ["system.health", ["health", "header", "characteristics", "footer"]],
@@ -616,8 +622,33 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     model.effects = prepareEffects(actor);
     model.loss = this.#prepareLoss();
     model.training = this.#prepareProgrammes();
+    model.entitlements = this.#prepareEntitlements();
 
     return model;
+  }
+
+  /**
+   * The Benefit ledger: what a career owed, what it has been spent on, and what was given up.
+   * @returns {object[]}
+   */
+  #prepareEntitlements() {
+    const actor = this.actor;
+    return (actor.system.entitlements ?? []).map((row, index) => {
+      const item = row.item ? actor.items.get(row.item) : null;
+      return {
+        index,
+        label: Muster.label(row),
+        kind: game.i18n.localize(MGT2.BenefitKinds[row.kind] ?? row.kind),
+        from: [actor.items.get(row.provenance?.career)?.name,
+          row.provenance?.term ? game.i18n.format("MGT2.Chargen.Benefits.Term",
+            { n: row.provenance.term }) : ""].filter(part => part).join(" · "),
+        // Kept on the row, so a redeemed line still reads after its Item has been deleted.
+        note: item?.name || row.note,
+        itemId: item?.id ?? "",
+        state: row.surrendered ? "surrendered" : (row.redeemed ? "redeemed" : "owed"),
+        open: !row.redeemed && !row.surrendered
+      };
+    });
   }
 
   /** @returns {object|null}   Null where no Item is linked, which is the panel's empty state. */
@@ -674,6 +705,26 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
    */
   static #onCreditTransfer() {
     return CreditSplit.open({ source: this.actor.uuid, actors: [] });
+  }
+
+  /** @this {TravellerActorSheet} */
+  static async #onBenefitAdd() {
+    const row = await Muster.promptRow(this.actor, { provenance: { table: "muster" } });
+    if ( !row ) return;
+    // Never spends a Benefit roll: this door is for a Traveller who finished on paper.
+    return Muster.take(this.actor, row, { spend: false });
+  }
+
+  /** @this {TravellerActorSheet} */
+  static #onBenefitRedeem(event, target) {
+    return BenefitPicker.open(this.actor, Number(target.closest("[data-index]").dataset.index));
+  }
+
+  /** @this {TravellerActorSheet} */
+  static async #onBenefitDelete(event, target) {
+    const index = Number(target.closest("[data-index]").dataset.index);
+    const rows = (this.actor.system.entitlements ?? []).map(row => ({ ...row }));
+    return this.actor.update({ "system.entitlements": rows.filter((_row, at) => at !== index) });
   }
 
   /** @this {TravellerActorSheet} */
@@ -842,8 +893,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     if ( delta > 0 ) {
       const result = await system.applyDamage(delta, { raw: true, stun: true });
       if ( result?.rounds > 0 ) {
-        ui.notifications.info(game.i18n.format("MGT2.Actor.StunIncapacitated",
-          { name: this.actor.name, rounds: result.rounds }));
+        ui.notifications.info(MGT2Helper.plural("MGT2.Actor.StunIncapacitated",
+          result.rounds, { name: this.actor.name, rounds: result.rounds }));
       }
       return;
     }
@@ -1643,7 +1694,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const magazine = TravellerActorSheet.#magazine(rollOptions.weapon);
     const spend = magazine ? Math.max(1, rounds) : 0;
     if (magazine && (spend > magazine.ammo)) {
-      return ui.notifications.warn(game.i18n.format("MGT2.Errors.WeaponShort",
+      return ui.notifications.warn(MGT2Helper.plural("MGT2.Errors.WeaponShort", magazine.ammo,
         { name: rollOptions.weapon.name, rounds: spend, ammo: magazine.ammo }));
     }
     let ammoLine = null;
@@ -1812,13 +1863,13 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   /** What the card says about the fire mode (Core folio 79). @returns {string|null} */
   static #fireModeLine({ burst, rounds, attack, attacks }) {
     if (burst > 0) {
-      return game.i18n.format("MGT2.Chat.Roll.FireModeBurst",
+      return MGT2Helper.plural("MGT2.Chat.Roll.FireModeBurst", rounds,
         { score: MGT2Helper.signed(burst), rounds });
     }
     if (attacks > 1) {
-      return game.i18n.format(
+      return MGT2Helper.plural(
         (attack === 1) ? "MGT2.Chat.Roll.FireModeFullAuto" : "MGT2.Chat.Roll.FireModeFullAutoNext",
-        { attack, attacks, rounds });
+        rounds, { attack, attacks, rounds });
     }
     return null;
   }

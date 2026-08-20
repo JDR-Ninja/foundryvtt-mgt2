@@ -79,7 +79,7 @@
 		{{! Core p.82 turns the Effect of a Medic check into the points first aid restores; who is
 		    treated is picked the way the damage card picks a target. }}
 		{{#if firstAidPoints}}
-		<button data-action="firstAid"><i class="fa-regular fa-heart-circle-plus"></i>{{localize 'MGT2.Recovery.ApplyFirstAid' points=firstAidPoints}}</button>
+		<button data-action="firstAid"><i class="fa-regular fa-heart-circle-plus"></i>{{plural 'MGT2.Recovery.ApplyFirstAid' firstAidPoints points=firstAidPoints}}</button>
 		{{/if}}
 		{{#if showRollDamage}}
 		<button data-action="rollDamage">{{#if damageCarriesEffect}}{{localize 'MGT2.Chat.Roll.DamagesWithEffect' effect=effectDisplay}}{{else}}{{ localize 'MGT2.Chat.Roll.Damages' }}{{/if}}</button>
