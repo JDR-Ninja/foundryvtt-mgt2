@@ -183,6 +183,11 @@
 			text-decoration: underline dotted
 		.ch
 			color: var(--faint)
+		// Printed only where the row's own rung differs from the one the TARGET strip states.
+		.rung
+			margin-left: 8px
+			white-space: nowrap
+			color: var(--accent-text)
 
 	td.dm,
 	th.dm
@@ -200,15 +205,63 @@
 
 	td.act,
 	th.act
-		width: 1.5rem
-		.x
-			font-size: 14px
+		width: 3.4rem
+		white-space: nowrap
+		text-align: right
+		a
+			margin-left: 3px
+			font-size: 13px
+			line-height: 1
+			color: var(--faint)
+			text-decoration: none
+			cursor: var(--cursor-pointer)
+		// The row disagrees with the demand, and the marker says so with the editor shut.
+		.ov.on
+			color: var(--accent-text)
+		.ov:hover,
+		.dup:hover
+			color: var(--accent-hot)
+		.x:hover
+			color: var(--danger)
+
+	// The editor for ONE row, and it lives in the scroller — so a row that disagrees with the
+	// demand costs the window no height at all, which is what the 640 px budget needed.
+	tr.ovr td
+		padding: 0 6px 4px
+	.ofields
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 4px 6px
+		padding: 4px 6px
+		border-left: 2px solid var(--accent-line)
+		background: var(--accent-soft)
+		.brk
+			flex-basis: 100%
+			height: 0
+		input.f.osk
+			flex: 1 1 7rem
+			min-width: 0
+		select.f.opp
+			flex: 0 1 8rem
+			min-width: 0
+		// The row's OWN characteristics, so three visible rows covers most sheets whole.
+		select.f.ochars
+			flex: 0 1 8rem
+			height: auto
+			min-width: 0
+			padding: 2px 4px
+			font-size: 12px
+		.oclr
+			font-size: 13px
 			line-height: 1
 			color: var(--faint)
 			text-decoration: none
 			cursor: var(--cursor-pointer)
 			&:hover
-				color: var(--danger)
+				color: var(--accent-hot)
+		.seg
+			flex: 1 1 100%
 
 	// The drop row carries p.73's collapse, because both are about the roster as a whole.
 	tr.drop td

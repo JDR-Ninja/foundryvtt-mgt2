@@ -1697,7 +1697,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       // Core folio 229: the power is paid for now, out of the reserve, and the card states what it
       // cost.
       const psiLine = rollOptions.blocks.psionic
-        ? await TravellerActorSheet.#spendPsi(actor, rollOptions.talent, userRollData, effect)
+        ? await TravellerActorSheet.spendPsi(actor, rollOptions.talent, userRollData, effect)
         : null;
 
       // The damage payload stays a flag: it is the WEAPON's offer to a future defender, resolved on
@@ -1828,7 +1828,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
    * point if they fail.
    * @returns {Promise<string|null>}   What the card says about the spend
    */
-  static async #spendPsi(actor, talent, data, effect) {
+  static async spendPsi(actor, talent, data, effect) {
     const listed = Math.max(0, talent?.system.psionic?.cost ?? 0);
     const points = (effect >= 0) ? listed * (MGT2Helper.getIntegerFromInput(data.psiBoost) || 1) : 1;
     const spent = await actor.system.spendPsi(points);

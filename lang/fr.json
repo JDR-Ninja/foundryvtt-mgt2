@@ -4225,7 +4225,9 @@
         "unable": "{n} ne peuvent pas répondre",
         "untrained": "{n} incompétents",
         "unresolved": "{n} non résolues ici",
-        "self": "{n} à vous"
+        "self": "{n} à vous",
+        "overridden": "{n} avec une demande propre",
+        "paired": "{n} appariées"
       },
       "Stance": {
         "bane": "Coup du sort",
@@ -4257,7 +4259,13 @@
         "unclaimed": "sans destinataire",
         "unable": "ne peut pas répondre",
         "OpenSkill": "{skill} — à vous de choisir",
-        "Superseded": "+{count} remplacé(s)"
+        "Superseded": "+{count} remplacé(s)",
+        "Opposed": {
+          "pair": "contre {name}",
+          "won": "l'emporte sur {name}",
+          "lost": "perd contre {name}",
+          "tie": "égalité avec {name}"
+        }
       },
       "Chat": {
         "AnySkill": "Toute compétence applicable",
@@ -4274,7 +4282,8 @@
         "DeclinedBy": "{name} ne fait pas ce test.",
         "AskTheSame": "Demander le même",
         "AskInitiative": "Demander l'Initiative",
-        "ResolverHint": "Travailler ensemble (Livre de base p.63) : l'Effet de tous les autres est chaîné dans le test de ce Voyageur. Cliquez pour le déplacer, cliquez encore pour l'enlever."
+        "ResolverHint": "Travailler ensemble (Livre de base p.63) : l'Effet de tous les autres est chaîné dans le test de ce Voyageur. Cliquez pour le déplacer, cliquez encore pour l'enlever.",
+        "FootOpposed": "Opposés · {settled} tranchés · {standstill} à égalité"
       },
       "Prompt": {
         "Asked": "Demandé par l'Arbitre",
@@ -4294,7 +4303,12 @@
           "name": "Demandes de jet : me signaler leur arrivée",
           "hint": "Ce qui se passe sur votre écran quand l'Arbitre vous demande un test. Le clignotement ne fait pas défiler le journal. Réglage personnel, et rien n'est perdu s'il ne vous parvient jamais — la demande est déjà dans votre discussion."
         }
-      }
+      },
+      "OverrideHint": "Cette ligne peut diverger de la demande : sa propre compétence, ses propres caractéristiques, son propre niveau de difficulté et la ligne à laquelle elle est opposée. Sans rien de défini, c'est la demande qui tranche.",
+      "DupeHint": "Solliciter deux fois ce Voyageur. Le Compagnon p.151 fait passer à chaque personne à bord deux tests, un Routine et un Difficile, en choisissant lequel est lequel.",
+      "OverrideSame": "comme demandé",
+      "OverrideClear": "Remettre cette ligne sur la demande",
+      "NoPsi": "aucun point PSI — aucun pouvoir possible"
     },
     "CreditSplit": {
       "Title": "Transfert de crédits",

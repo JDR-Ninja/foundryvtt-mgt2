@@ -44,6 +44,9 @@
 					{{else}}
 					{{#if row.skillDisplay}}<span class="sk{{#if row.untrained}} untrained{{/if}}{{#if (eq row.skillItem 'unresolved')}} unresolved{{/if}}">{{row.skillDisplay}}</span>{{/if}}
 					<span class="ch">{{row.charShort}} {{row.charDM}}</span>
+					{{! Only where the row disagrees: the TARGET strip states the demand's rung and
+					    printing it again on every row would say nothing. }}
+					{{#if row.rungLabel}}<span class="rung">{{row.rungLabel}}</span>{{/if}}
 					{{/if}}
 				</td>
 				<td class="dm">
@@ -52,9 +55,62 @@
 					{{/unless}}
 				</td>
 				<td class="act">
+					<a data-action="toggleOverride" class="ov{{#if row.overridden}} on{{/if}}"
+						data-tooltip="{{localize 'MGT2.Request.OverrideHint'}}">&plusmn;</a>
+					{{! Companion p.151 has everyone aboard make two checks and choose which is
+					    which, so one Traveller takes two lines. Seeding still dedupes. }}
+					<a data-action="dupeRow" class="dup" data-tooltip="{{localize 'MGT2.Request.DupeHint'}}">&#9634;</a>
 					<a data-action="dropRow" class="x" data-tooltip="{{localize 'MGT2.Request.Remove'}}">&times;</a>
 				</td>
 			</tr>
+			{{! The editor lives inside the roster, which is the only scroller — so a row that
+			    disagrees with the demand costs the window no height at all. }}
+			{{#if row.open}}
+			<tr class="ovr" data-row-id="{{row.id}}">
+				<td colspan="6">
+					<div class="ofields">
+						{{#if row.canSkill}}
+						<input class="f osk" type="text" name="{{../field}}RowSkill~{{row.id}}"
+							list="mgt2-docket-skills" value="{{row.skill}}"
+							placeholder="{{localize 'MGT2.Request.OverrideSame'}}"
+							aria-label="{{localize 'MGT2.Request.SkillName'}}" />
+						{{/if}}
+						{{! Core p.62 measures two checks against each other and this window holds
+						    both, so the pair is picked off the roster. Mutual: setting one end
+						    sets the other. }}
+						<select class="f opp" name="{{../field}}RowOpposes~{{row.id}}"
+							aria-label="{{localize 'MGT2.RollPrompt.Opposed'}}">
+							<option value="">{{localize 'MGT2.RollPrompt.OpposedNone'}}</option>
+							{{#each row.pairs as |p|}}
+							<option value="{{p.id}}"{{#if p.active}} selected{{/if}}>{{p.name}}</option>
+							{{/each}}
+						</select>
+						{{! Nothing selected is not an empty set: it is "as asked", because at
+						    demand level an empty set already means the player picks (Core p.59). }}
+						<select class="f ochars" multiple size="3" name="{{../field}}RowChars~{{row.id}}"
+							aria-label="{{localize 'MGT2.Request.Characteristics'}}">
+							{{#each row.chars as |c|}}
+							<option value="{{c.key}}"{{#if c.selected}} selected{{/if}}>{{c.label}}</option>
+							{{/each}}
+						</select>
+						<a data-action="clearOverride" class="oclr"
+							data-tooltip="{{localize 'MGT2.Request.OverrideClear'}}">&#8635;</a>
+						<span class="brk"></span>
+						<span class="seg num" data-name="{{../field}}RowDifficulty~{{row.id}}"
+							role="radiogroup" aria-label="{{localize 'MGT2.RollPrompt.Difficulty'}}">
+							<label title="{{localize 'MGT2.Request.OverrideSame'}}"><input type="radio"
+								name="{{../field}}RowDifficulty~{{row.id}}" value="same"{{#if row.sameRung}} checked{{/if}} /><span>=</span></label>
+							<label class="off" title="{{localize 'MGT2.Difficulty.NA'}}"><input type="radio"
+								name="{{../field}}RowDifficulty~{{row.id}}" value="="{{#if row.noRung}} checked{{/if}} /><span>&mdash;</span></label>
+							{{#each row.rungs as |d|}}
+							<label title="{{d.label}}"><input type="radio"
+								name="{{../../field}}RowDifficulty~{{row.id}}" value="={{d.key}}"{{#if d.active}} checked{{/if}} /><span>{{d.target}}+</span></label>
+							{{/each}}
+						</span>
+					</div>
+				</td>
+			</tr>
+			{{/if}}
 			{{/each}}
 			{{! One cell across the whole width. Split over the columns above, the chip lands in a
 			    cell sized to a `×` and wraps to three lines. }}

@@ -99,7 +99,7 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
             // Core p.73's ambush is one rule with two signs, and the sign is the line's own — which
             // is why the shared DM row above cannot carry it.
             ambush: new fields.StringField({
-                required: true, blank: false, initial: "none", choices: MGT2.Ambush }),
+                required: true, blank: false, initial: "none", choices: MGT2.RequestAmbush }),
             // Off does not hide the rung with CSS — the card is rendered per client, so a hidden
             // rung is simply not emitted for a non-GM.
             showTarget: new fields.BooleanField({ required: false, initial: true }),
@@ -130,6 +130,21 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
                         || foundry.data.validators.isValidId(value),
                     validationError: `must be a Document ID or "${UNRESOLVED}"`
                 }),
+                // The four a line may disagree with the demand about. `null` is not a value — it is
+                // "the demand decides", which is why an empty `chars` cannot mean it: at demand
+                // level `[]` already means the player picks (Core p.59).
+                skill: new fields.StringField({
+                    required: false, blank: true, trim: true, nullable: true, initial: null }),
+                difficulty: new fields.StringField({
+                    required: false, blank: true, nullable: true, initial: null,
+                    choices: MGT2.DifficultyChoices }),
+                chars: new fields.ArrayField(new fields.StringField({
+                    required: true, blank: false, choices: MGT2.Characteristics }),
+                { required: false, nullable: true, initial: null }),
+                // Core p.84: which OTHER line of this same request answers against this one. Mutual
+                // by construction, so a pair carries one verdict and not two.
+                opposes: new fields.StringField({
+                    required: false, blank: false, trim: true, nullable: true, initial: null }),
                 // Core p.63-64: who the contributors' rungs are summed into, on a `together` tally.
                 resolver: new fields.BooleanField({ required: false, initial: false }),
                 // The referee rolls this one, whispered to GMs — a self row, or Companion p.7's
@@ -168,6 +183,8 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
         const lines = reading.map(read => ({
             id: read.id, actor: read.actor, name: read.name, user: read.user,
             skillItem: read.skillItem, resolver: read.resolver, self: read.self,
+            skill: read.skill, difficulty: read.difficulty, chars: read.chars,
+            opposes: read.opposes,
             status: read.status, effect: read.effect, message: read.message
         }));
         return this.parent.update({
@@ -215,6 +232,38 @@ function answersOf(id) {
     return byLine;
 }
 
+/**
+ * What ONE line is being asked, which is the demand unless that line disagrees with it. `null` on a
+ * line field is "the demand decides"; every other value, blank included, is the line's own.
+ * @returns {{skillMode: string, skill: string, chars: string[], difficulty: string,
+ *     overridden: boolean}}
+ */
+export function lineDemand(request, line) {
+    return {
+        // Not overridable: a line that named a skill on a characteristic-only demand would be a
+        // second demand, and the roster is one demand resolved against several sheets.
+        skillMode: request.skillMode,
+        skill: line?.skill ?? request.skill,
+        chars: line?.chars ?? request.chars,
+        difficulty: line?.difficulty ?? request.difficulty,
+        overridden: [line?.skill, line?.chars, line?.difficulty]
+            .some(value => (value ?? null) !== null)
+    };
+}
+
+/** Core p.62: the line this one answers against, where the referee paired them. */
+function opposedLine(request, line) {
+    return line?.opposes ? (request.lines.find(other => other.id === line.opposes) ?? null) : null;
+}
+
+/** The pairing before either side has rolled, which is what the referee set and nothing more. */
+function pairingOf(request, reading, read) {
+    const other = opposedLine(request, read);
+    // A pairing across the visibility boundary is not shown as a name the reader cannot see.
+    if ( !other || !reading.some(entry => entry.id === other.id) ) return null;
+    return { outcome: "", name: other.name };
+}
+
 /** One line, read against the log. */
 function readLine(request, line, answers) {
     const first = answers[0] ?? null;
@@ -243,8 +292,8 @@ function readLine(request, line, answers) {
     // boundary.
     const actor = line.actor ? foundry.utils.fromUuidSync(line.actor, { strict: false }) : null;
     const rollable = actor?.system?.rollableCharacteristics ?? null;
-    const unable = !!rollable && (request.chars.length > 0)
-        && !request.chars.some(key => rollable.includes(key));
+    const chars = lineDemand(request, line).chars;
+    const unable = !!rollable && (chars.length > 0) && !chars.some(key => rollable.includes(key));
     const status = unable ? "unable" : ((!line.user && !line.self) ? "unclaimed" : "waiting");
     return { ...line, status, effect: null, message: null, total: null, superseded: 0, late: false };
 }
@@ -334,13 +383,14 @@ function untrainedLabel(actor) {
  * What one line cost this Traveller, in the words the rules use: the skill at its level, the
  * characteristic(s) offered, and the dice it landed on.
  */
-function lineDetail(request, read, actor, showTarget) {
+function lineDetail(request, read, actor, showTarget, opposed = null) {
     const parts = [];
-    if ( request.skillMode === "named" ) {
+    const asked = lineDemand(request, read);
+    if ( asked.skillMode === "named" ) {
         // This client could not match the typed name against that actor's own Items, so the line is
         // open-skill for this line only — which is the whole reason the third state exists.
         if ( read.skillItem === UNRESOLVED ) {
-            parts.push(game.i18n.format("MGT2.Request.Line.OpenSkill", { skill: request.skill }));
+            parts.push(game.i18n.format("MGT2.Request.Line.OpenSkill", { skill: asked.skill }));
         }
         else if ( read.skillItem === null ) parts.push(untrainedLabel(actor));
         else {
@@ -348,12 +398,24 @@ function lineDetail(request, read, actor, showTarget) {
             // `getRollDisplay()` prints nothing at all for a level of zero — which is the one
             // distinction Core p.58-59 makes and the one this card exists to keep legible.
             const item = actor?.items?.get(read.skillItem);
-            parts.push(item ? `${item.getRollDisplay(false)} ${item.system.level ?? 0}` : request.skill);
+            parts.push(item ? `${item.getRollDisplay(false)} ${item.system.level ?? 0}` : asked.skill);
         }
     }
-    parts.push(charsLabel(request.chars));
+    parts.push(charsLabel(asked.chars));
+    // A rung of the line's own is printed on the line, because the head states the demand's and one
+    // of the two would otherwise be a lie about this Traveller (Companion p.151).
+    if ( showTarget && ((read.difficulty ?? null) !== null) ) {
+        parts.push(MGT2Helper.getDifficultyDisplay(read.difficulty)
+            ?? game.i18n.localize("MGT2.Difficulty.NA"));
+    }
     // Hiding the rung hides the totals with it: total minus Effect is the target.
     if ( showTarget && Number.isInteger(read.total) ) parts.push(String(read.total));
+    // Core p.62: before the dice this says who the pair is, and after them which way it went.
+    if ( opposed ) {
+        parts.push(game.i18n.format(opposed.outcome
+            ? `MGT2.Request.Line.Opposed.${opposed.outcome}` : "MGT2.Request.Line.Opposed.pair",
+        { name: opposed.name }));
+    }
     if ( read.superseded > 0 ) {
         parts.push(game.i18n.format("MGT2.Request.Line.Superseded", { count: read.superseded }));
     }
@@ -363,9 +425,10 @@ function lineDetail(request, read, actor, showTarget) {
 /** Every term `answerRequest` would apply to this line, through the reducer both totals use. */
 function lineChit(request, read, actor, chain) {
     const rows = [];
-    const skill = ((request.skillMode === "named") && (read.skillItem !== UNRESOLVED))
+    const asked = lineDemand(request, read);
+    const skill = ((asked.skillMode === "named") && (read.skillItem !== UNRESOLVED))
         ? ((read.skillItem === null) ? "NP" : read.skillItem) : "";
-    const key = (request.chars.length === 1) ? request.chars[0] : "";
+    const key = (asked.chars.length === 1) ? asked.chars[0] : "";
 
     if ( skill === "NP" ) {
         rows.push([game.i18n.localize("MGT2.Items.NotProficient"),
@@ -391,6 +454,69 @@ function lineChit(request, read, actor, chain) {
         if ( scoped ) rows.push([MGT2Helper.modifierLabel(source), source.dm]);
     }
     return MGT2Helper.signed(Checks.modifiers(rows).total, "+0");
+}
+
+/**
+ * Core p.62's comparison as the ANSWERS already carry it, named by the line it was measured against
+ * where that line is in this same request.
+ * @returns {Map<string, {outcome: string, effect: number, name: string}>}   Keyed by line id
+ */
+function opposedReading(reading) {
+    const named = new Map();
+    for ( const read of reading ) if ( read.message ) named.set(read.message, read.name);
+    const verdicts = new Map();
+    for ( const read of reading ) {
+        const carried = read.message
+            ? (checkOf(game.messages.get(read.message))?.opposed ?? null) : null;
+        if ( carried ) {
+            verdicts.set(read.id, { outcome: carried.outcome, effect: carried.effect,
+                message: carried.message,
+                name: named.get(carried.message) || carried.label || "" });
+            continue;
+        }
+        // A referee's own row is whispered with `rolls: []`, so an addressee's answer cannot carry a
+        // comparison against it — the card measures the pair itself on any client that sees both.
+        const other = read.opposes ? reading.find(entry => entry.id === read.opposes) : null;
+        if ( !Number.isInteger(read.effect) || !Number.isInteger(other?.effect) ) continue;
+        verdicts.set(read.id, { effect: other.effect, message: other.message, name: other.name,
+            outcome: (read.effect > other.effect) ? "won"
+                : ((read.effect < other.effect) ? "lost" : "tie") });
+    }
+    return verdicts;
+}
+
+/**
+ * Core p.62: the answer the paired line has already posted, where this client can read it — a
+ * whispered referee roll is not one, and the card measures that pair instead.
+ * @returns {string|null}   A ChatMessage id
+ */
+export function opposingAnswer(request, read) {
+    const other = read?.opposes
+        ? request.reading.find(line => line.id === read.opposes) : null;
+    const message = other?.message ? game.messages.get(other.message) : null;
+    return message?.visible ? message.id : null;
+}
+
+/**
+ * Both halves of a pair record the same contest, so the aggregate counts unordered pairs — and a
+ * verdict pointing outside this request counts once, on the only end that is here.
+ * @returns {{settled: number, standstill: number}}
+ */
+function opposedTally(reading, verdicts) {
+    const seen = new Set();
+    let settled = 0;
+    let standstill = 0;
+    for ( const read of reading ) {
+        const verdict = verdicts.get(read.id);
+        if ( !verdict ) continue;
+        const other = reading.find(entry => entry.message === verdict.message);
+        const key = other ? [read.id, other.id].sort().join("~") : read.id;
+        if ( seen.has(key) ) continue;
+        seen.add(key);
+        if ( verdict.outcome === "tie" ) standstill++;
+        else settled++;
+    }
+    return { settled, standstill };
 }
 
 /** The foot, by tally — and the sum is over the reading THIS client may see. */
@@ -496,6 +622,7 @@ function cardContext(request) {
         markers: markers[key] ?? []
     }));
 
+    const verdicts = opposedReading(reading);
     for ( const read of reading ) {
         const actor = read.actor ? foundry.utils.fromUuidSync(read.actor, { strict: false }) : null;
         const mine = (read.user === game.user.id) || (gm && read.self);
@@ -506,7 +633,8 @@ function cardContext(request) {
         const line = {
             id: read.id,
             name: read.name,
-            detail: lineDetail(request, read, actor, showTarget),
+            detail: lineDetail(request, read, actor, showTarget,
+                verdicts.get(read.id) ?? pairingOf(request, reading, read)),
             mine,
             resolver: read.resolver && (request.tally === "together"),
             // Core p.63-64 needs ONE Traveller to make the final check, and no book says which: it
@@ -527,6 +655,13 @@ function cardContext(request) {
     context.lines.sort((a, b) => Number(a.resolver) - Number(b.resolver));
 
     context.foot = footOf(request, reading, answered, chain);
+    // Core p.62 is resolved per answer and always has been; what the card adds is the count, and
+    // only once an answer has actually carried one — there is no control and no mode.
+    if ( verdicts.size ) {
+        const { settled, standstill } = opposedTally(reading, verdicts);
+        context.opposedFoot = game.i18n.format("MGT2.Request.Chat.FootOpposed",
+            { settled, standstill });
+    }
 
     if ( gm ) {
         // Nothing auto-concludes: -1 and 0 are referee decisions (p.61), so the last die is where

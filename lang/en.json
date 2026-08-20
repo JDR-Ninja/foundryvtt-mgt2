@@ -3015,7 +3015,9 @@
         "unable": "{n} cannot answer",
         "untrained": "{n} untrained",
         "unresolved": "{n} unresolved here",
-        "self": "{n} yours"
+        "self": "{n} yours",
+        "overridden": "{n} asked something else",
+        "paired": "{n} paired"
       },
       "Stance": {
         "bane": "Bane",
@@ -3047,7 +3049,13 @@
         "unclaimed": "unclaimed",
         "unable": "cannot answer",
         "OpenSkill": "{skill} — pick your own",
-        "Superseded": "+{count} superseded"
+        "Superseded": "+{count} superseded",
+        "Opposed": {
+          "pair": "vs {name}",
+          "won": "beat {name}",
+          "lost": "lost to {name}",
+          "tie": "standstill with {name}"
+        }
       },
       "Chat": {
         "AnySkill": "Any applicable skill",
@@ -3064,7 +3072,8 @@
         "DeclinedBy": "{name} is not making this check.",
         "AskTheSame": "Ask the same",
         "AskInitiative": "Ask for Initiative",
-        "ResolverHint": "Working together (Core p.63): everyone else's Effect is chained into this Traveller's check. Click to move it, click again to clear it."
+        "ResolverHint": "Working together (Core p.63): everyone else's Effect is chained into this Traveller's check. Click to move it, click again to clear it.",
+        "FootOpposed": "Opposed · {settled} settled · {standstill} standstill"
       },
       "Prompt": {
         "Asked": "Asked by the referee",
@@ -3084,7 +3093,12 @@
           "name": "Roll requests: tell me one arrived",
           "hint": "What happens on your screen when the referee asks you for a check. Flashing does not scroll the log. Yours alone, and nothing is lost if it never reaches you — the request is already in your chat."
         }
-      }
+      },
+      "OverrideHint": "This line may disagree with the demand: its own skill, its own characteristics, its own rung, and the line it is measured against. Nothing set means the demand decides.",
+      "DupeHint": "Ask this Traveller twice. Companion p.151 has everyone aboard make two checks, one Routine and one Difficult, and choose which is which.",
+      "OverrideSame": "as asked",
+      "OverrideClear": "Put this line back on the demand",
+      "NoPsi": "no PSI points — cannot attempt a power"
     },
     "CreditSplit": {
       "Title": "Credit transfer",

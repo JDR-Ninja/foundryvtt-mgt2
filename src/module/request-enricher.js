@@ -84,7 +84,7 @@ export function parseRequest(config) {
             case "why": case "reason": demand.flavor = value; break;
             case "dm": demand.dm = dmOf(value); break;
             case "tally": if ( value in MGT2.RequestTally ) demand.tally = value; break;
-            case "ambush": if ( value in MGT2.Ambush ) demand.ambush = value; break;
+            case "ambush": if ( value in MGT2.RequestAmbush ) demand.ambush = value; break;
             case "": {
                 const flag = FLAGS[value.toLowerCase()];
                 if ( flag ) flag(demand);

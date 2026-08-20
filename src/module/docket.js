@@ -3,6 +3,7 @@ import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { ambushDM, postRequest, SKILL_MODES, UNRESOLVED } from "./request.js";
 import { RollPromptHelper } from "./roll-prompt.js";
+import { TravellerActorSheet } from "./actors/character-sheet.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { DragDrop } = foundry.applications.ux;
@@ -42,7 +43,10 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
             seedCombatants: Docket.#onSeedCombatants,
             clearRoster: Docket.#onClearRoster,
             dropRow: Docket.#onDropRow,
+            dupeRow: Docket.#onDupeRow,
             toggleSelf: Docket.#onToggleSelf,
+            toggleOverride: Docket.#onToggleOverride,
+            clearOverride: Docket.#onClearOverride,
             openDocument: Docket.#onOpenDocument
         }
     };
@@ -122,10 +126,15 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
     #last = null;
 
     /**
-     * The roster, per-client and never persisted.
-     * @type {{id: string, uuid: string, name: string, self: boolean}[]}
+     * The roster, per-client and never persisted. `over` is the four things a row may disagree with
+     * the demand about, `null` for each meaning it does not; `open` is whether its editor is shown.
+     * @type {{id: string, uuid: string, name: string, self: boolean, open: boolean,
+     *     over: {skill: ?string, difficulty: ?string, chars: ?string[], opposes: ?string}}[]}
      */
     #rows = [];
+
+    /** What had the caret when a part was replaced, since ApplicationV2 restores no focus at all. */
+    #focus = null;
 
     /** Set before the first await of the post: pressing twice must not send two cards. */
     #posting = false;
@@ -158,9 +167,15 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
                 name: actor.name,
                 // A creature nobody but the referee owns answers on the referee's client; a
                 // Traveller whose player is simply offline is `unclaimed` and waits for them.
-                self: !Docket.addresseeFor(actor) && !Docket.#hasPlayerStake(actor)
+                self: !Docket.addresseeFor(actor) && !Docket.#hasPlayerStake(actor),
+                open: false,
+                over: { skill: null, difficulty: null, chars: null, opposes: null }
             });
         }
+    }
+
+    #row(id) {
+        return this.#rows.find(row => row.id === id) ?? null;
     }
 
     /** Does any non-GM hold any level on this actor at all? A `stash` shared with the table does. */
@@ -188,18 +203,11 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         return null;
     }
 
-    /** The demand resolved against every row, once. */
+    /** The demand resolved against every row, once — and a row may disagree with the demand. */
     #reading() {
-        const demand = this.#demand;
-        const target = MGT2Helper.getEffectTarget(demand.difficulty);
-        const named = (demand.skillMode === "named") && Boolean(demand.skill.trim());
+        const target = MGT2Helper.getEffectTarget(this.#demand.difficulty);
         const actors = this.#rows.map(row => Docket.#actorOf(row.uuid));
-        // The only discriminator the roster has evidence for: a name not one docketed Traveller has
-        // ever heard of is a name this client cannot resolve, and the line posts as open-skill.
-        const known = named && Docket.#knownSkill(demand.skill, actors);
-
-        const rows = this.#rows.map((row, index) =>
-            this.#resolve(row, actors[index], { target: target.value, named, known }));
+        const rows = this.#rows.map((row, index) => this.#resolve(row, actors[index], actors));
 
         return {
             target,
@@ -210,8 +218,20 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
                 unable: rows.filter(row => row.status === "unable").length,
                 untrained: rows.filter(row => row.untrained).length,
                 unresolved: rows.filter(row => row.skillItem === UNRESOLVED).length,
-                self: rows.filter(row => row.self).length
+                self: rows.filter(row => row.self).length,
+                overridden: rows.filter(row => row.overridden).length,
+                paired: rows.filter(row => row.paired).length
             }
+        };
+    }
+
+    /** What one row is being asked, which is the demand unless that row disagrees with it. */
+    #asked(row) {
+        const demand = this.#demand;
+        return {
+            skill: row.over.skill ?? demand.skill,
+            chars: row.over.chars ?? demand.chars,
+            difficulty: row.over.difficulty ?? demand.difficulty
         };
     }
 
@@ -223,18 +243,36 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         return actor?.system?.characteristics ? actor : null;
     }
 
-    /** Does the typed name match any skill Item on the roster, or a chassis skill the books fix? */
+    /**
+     * Does the typed name match anything on the roster, or a chassis skill the books fix?
+     * @returns {""|"skill"|"psionic"}   A skill anywhere on the roster beats a power anywhere on it
+     */
     static #knownSkill(typed, actors) {
         const name = typed.trim();
+        let kind = "";
         for ( const actor of actors ) {
-            if ( actor?.items?.some(item => Docket.#isSkill(item)
-                && MGT2Helper.matchesSkill(item.name, name)) ) return true;
+            for ( const item of actor?.items ?? [] ) {
+                if ( !Docket.#rollable(item) || !MGT2Helper.matchesSkill(item.name, name) ) continue;
+                if ( Docket.#isSkill(item) ) return "skill";
+                kind = "psionic";
+            }
         }
-        return Docket.#vehicleSkillLabels().some(label => MGT2Helper.matchesSkill(label, name));
+        if ( kind ) return kind;
+        return Docket.#vehicleSkillLabels().some(label => MGT2Helper.matchesSkill(label, name))
+            ? "skill" : "";
     }
 
     static #isSkill(item) {
-        return (item.type === "talent") && (item.system.subType === "skill");
+        return (item?.type === "talent") && (item?.system?.subType === "skill");
+    }
+
+    /** Core p.229 makes a power a skill check on the power itself, so a demand may name one. */
+    static #isPower(item) {
+        return (item?.type === "talent") && (item?.system?.subType === "psionic");
+    }
+
+    static #rollable(item) {
+        return Docket.#isSkill(item) || Docket.#isPower(item);
     }
 
     /** Core p.66, p.68, p.71's chassis skills, which no Traveller need carry for the name to be real. */
@@ -249,9 +287,14 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
      * One roster row: who answers it, what the skill resolves to on THEIR sheet, which
      * characteristic they would roll, and what the whole thing is worth.
      */
-    #resolve(row, actor, { target, named, known }) {
+    #resolve(row, actor, actors) {
         const demand = this.#demand;
+        const asked = this.#asked(row);
         const user = actor ? Docket.addresseeFor(actor) : null;
+        // Being paired is not disagreeing with the demand — Core p.62 is about what the check is
+        // measured against, not about what was asked — so the two are counted apart.
+        const overridden = [row.over.skill, row.over.difficulty, row.over.chars]
+            .some(value => value !== null);
         const base = {
             ...row,
             name: actor?.name || row.name,
@@ -259,7 +302,10 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
             user,
             userName: user ? game.users.get(user)?.name ?? "" : "",
             skillItem: null,
-            untrained: false
+            untrained: false,
+            overridden,
+            paired: row.over.opposes !== null,
+            asked
         };
 
         // No sheet loaded is its own answer and not a failure of the demand.
@@ -268,16 +314,26 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
                 terms: [], total: 0, effect: null };
         }
 
-        const characteristic = Docket.#characteristicFor(actor, demand.chars);
+        const characteristic = Docket.#characteristicFor(actor, asked.chars);
         if ( !characteristic ) {
-            const wanted = demand.chars.length ? demand.chars : actor.system.rollableCharacteristics;
+            const wanted = asked.chars.length ? asked.chars : actor.system.rollableCharacteristics;
             return { ...base, status: "unable", terms: [], total: 0, effect: null,
                 why: game.i18n.format("MGT2.Request.CannotAnswer", {
                     chars: wanted.map(key => Docket.#shortName(key)).join("/") })
             };
         }
 
-        const skill = Docket.#skillFor(actor, demand.skill, { named, known });
+        // The only discriminator the roster has evidence for: a name not one docketed Traveller has
+        // ever heard of is a name this client cannot resolve, and the line posts as open-skill.
+        const named = (demand.skillMode === "named") && Boolean(asked.skill.trim());
+        const skill = Docket.#skillFor(actor, asked.skill,
+            { named, known: named ? Docket.#knownSkill(asked.skill, actors) : "" });
+        // Core p.229: "A Traveller with no PSI points cannot attempt to activate a power." The
+        // roster is where a refusal at the moment of the click becomes a refusal before the ask.
+        if ( skill.psionic && (Docket.#psiReserve(actor) <= 0) ) {
+            return { ...base, status: "unable", terms: [], total: 0, effect: null,
+                skillItem: skill.item, why: game.i18n.localize("MGT2.Request.NoPsi") };
+        }
         const terms = [[characteristic.label, characteristic.dm]];
         if ( skill.label ) terms.push([skill.label, skill.dm]);
         const timeframe = MGT2Helper.getTimeframeDM(demand.timeframe);
@@ -309,8 +365,14 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
             negative: total < 0,
             // Where this row lands on an average roll, which is the only reading that means
             // anything before the dice — and the caption on the strip states the 7 out loud.
-            effect: AVERAGE_2D + total - target
+            effect: AVERAGE_2D + total - MGT2Helper.getEffectTarget(asked.difficulty).value
         };
+    }
+
+    /** Core p.229's reserve, where the sheet keeps one at all. */
+    static #psiReserve(actor) {
+        if ( !actor.system.isCharacteristicShown?.("psionic") ) return Infinity;
+        return actor.system.characteristics.psionic?.value ?? 0;
     }
 
     /** Which characteristic the row will be rolled on. */
@@ -338,14 +400,16 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         // right.
         if ( !named ) return { item: null, label: "", dm: 0 };
 
-        const match = actor.items.find(item => Docket.#isSkill(item)
+        const match = actor.items.find(item => Docket.#rollable(item)
             && MGT2Helper.matchesSkill(item.name, typed));
         if ( match ) {
             return { item: match.id, label: match.getRollDisplay(false), dm: match.system.level,
-                display: match.getRollDisplay() };
+                display: match.getRollDisplay(), psionic: Docket.#isPower(match) };
         }
-        // Nobody on the roster has heard of the name.
-        if ( !known ) {
+        // Nobody on the roster has heard of the name — and Core p.229's powers are known or not
+        // known, so a Traveller without the power gets the same third state rather than folio 59's
+        // DM-3, which is the rule for a skill.
+        if ( !known || (known === "psionic") ) {
             return { item: UNRESOLVED, label: "", dm: 0,
                 display: game.i18n.localize("MGT2.Request.Unresolved") };
         }
@@ -369,7 +433,7 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
             demand: this.#demand,
             send: this.#send,
             rosterTypes: ROSTER_TYPES,
-            rows: reading.rows,
+            rows: this.#overrideContext(reading.rows),
             counts: reading.counts,
             spread: Docket.#spread(reading.rows),
             summary: this.#summary(reading),
@@ -401,7 +465,7 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
                 key, label: game.i18n.localize(`MGT2.Request.Visibility.${key}`),
                 active: key === this.#send.visibility
             })),
-            ambushes: Object.entries(MGT2.Ambush).map(([key, label]) => ({
+            ambushes: Object.entries(MGT2.RequestAmbush).map(([key, label]) => ({
                 key, label: game.i18n.localize(label), active: key === this.#demand.ambush
             })),
             // Core p.73 prints the collapse and the ambush for a characteristic-only check, which
@@ -411,15 +475,49 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         return context;
     }
 
-    /** The datalist: every skill on the roster, plus the chassis skills the books fix. */
+    /** The datalist: every skill and power on the roster, plus the chassis skills the books fix. */
     #vocabulary(rows) {
         const names = new Set(Docket.#vehicleSkillLabels());
         for ( const row of rows ) {
             for ( const item of row.actor?.items ?? [] ) {
-                if ( Docket.#isSkill(item) ) names.add(item.name);
+                if ( Docket.#rollable(item) ) names.add(item.name);
             }
         }
         return [...names].sort((a, b) => a.localeCompare(b));
+    }
+
+    /**
+     * Companion p.151 wants END and INT at two rungs and lets the Traveller allocate them, so the
+     * override is per row rather than per demand — and the same Traveller answers twice.
+     */
+    #overrideContext(rows) {
+        const demand = this.#demand;
+        const rungs = Object.entries(MGT2.DifficultyTargets).map(([key, target]) => ({ key, target,
+            label: game.i18n.localize(MGT2.Difficulty[key]) }));
+        return rows.map(row => {
+            const over = row.over;
+            return {
+                ...row,
+                rungs: rungs.map(rung => ({ ...rung, active: over.difficulty === rung.key })),
+                sameRung: over.difficulty === null,
+                noRung: over.difficulty === "",
+                rungLabel: (over.difficulty === null) ? ""
+                    : (MGT2Helper.getDifficultyDisplay(over.difficulty)
+                        ?? game.i18n.localize("MGT2.Difficulty.NA")),
+                // One Traveller's own characteristics, never the roster's union.
+                chars: (row.actor?.system.rollableCharacteristics ?? []).map(key => ({
+                    key, label: game.i18n.localize(MGT2.Characteristics[key] ?? key),
+                    selected: (over.chars ?? []).includes(key) })),
+                sameChars: over.chars === null,
+                skill: over.skill ?? "",
+                sameSkill: over.skill === null,
+                // Core p.62 needs two checks and this window holds both, so the pair is picked off
+                // the roster rather than off the chat log.
+                pairs: rows.filter(other => other.id !== row.id).map(other => ({
+                    id: other.id, name: other.name, active: over.opposes === other.id })),
+                canSkill: demand.skillMode === "named"
+            };
+        });
     }
 
     /**
@@ -477,7 +575,7 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         if ( demand.ambush !== "none" ) {
             parts.push(`${game.i18n.localize("MGT2.Request.Ambush")} ${
-                game.i18n.localize(MGT2.Ambush[demand.ambush])}`);
+                game.i18n.localize(MGT2.RequestAmbush[demand.ambush])}`);
         }
 
         // Only what is true: a roster with nobody untrained does not print a zero.
@@ -489,6 +587,8 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         add("MGT2.Request.Counts.untrained", counts.untrained);
         add("MGT2.Request.Counts.unresolved", counts.unresolved);
         add("MGT2.Request.Counts.self", counts.self);
+        add("MGT2.Request.Counts.overridden", counts.overridden);
+        add("MGT2.Request.Counts.paired", counts.paired);
         return { demand: parts.filter(part => part).join(" · "), tally: tallies.join(" · ") };
     }
 
@@ -528,6 +628,7 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         // The ladder's narration is the form part's, and that part renders once.
         if ( options.parts?.includes("form") ) this.#wireLadder();
         this.#syncForm();
+        this.#restoreFocus();
     }
 
     /**
@@ -600,8 +701,17 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         const input = event.target;
         const name = input.name;
         if ( !name?.startsWith(FIELD) ) return;
-        const key = name.slice(FIELD.length);
+        // A per-row control carries its row in its own name, because a radio group shared across
+        // rows is one group: every row's ladder would move together.
+        const [key, rowId] = name.slice(FIELD.length).split("~");
         const demand = this.#demand;
+
+        if ( rowId ) {
+            this.#onOverride(key, rowId, input);
+            this.#keepFocus();
+            this.render({ parts: ["roster", "foot"] });
+            return;
+        }
 
         switch ( key ) {
             case "SkillMode":
@@ -636,6 +746,66 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         // The two live parts.
         this.render({ parts: ["roster", "foot"] });
         this.#syncForm();
+    }
+
+    /** One row disagreeing with the demand. An empty value is `null` — "the demand decides". */
+    #onOverride(key, rowId, input) {
+        const row = this.#row(rowId);
+        if ( !row ) return;
+        switch ( key ) {
+            case "RowSkill":
+                row.over.skill = input.value.trim() ? input.value : null;
+                break;
+            case "RowDifficulty":
+                // Three answers and not two: `same` follows the demand, `—` is this line stating no
+                // rung at all (Core p.61), and a key is this line's own.
+                row.over.difficulty = (input.value === "same") ? null : input.value.slice(1);
+                break;
+            case "RowChars": {
+                const chosen = [...input.selectedOptions].map(option => option.value);
+                row.over.chars = chosen.length ? chosen : null;
+                break;
+            }
+            case "RowOpposes": this.#pair(row, input.value); break;
+            default: break;
+        }
+    }
+
+    /**
+     * Core p.62 measures two checks against each other, so the pairing is mutual: setting one end
+     * sets the other and clears whatever either end was pointing at.
+     */
+    #pair(row, otherId) {
+        const other = otherId ? this.#row(otherId) : null;
+        // Every old pointer at either end lets go BEFORE the new pair is made: clearing afterwards
+        // clears the pointer just written.
+        for ( const entry of this.#rows ) {
+            if ( (entry.over.opposes === row.id) || (entry.over.opposes === other?.id) ) {
+                entry.over.opposes = null;
+            }
+        }
+        row.over.opposes = other?.id ?? null;
+        if ( other ) other.over.opposes = row.id;
+    }
+
+    /** ApplicationV2 restores no focus, and the roster part now carries a typed field. */
+    #keepFocus() {
+        const node = document.activeElement;
+        if ( !node?.name || !this.element.contains(node) ) return;
+        this.#focus = { name: node.name, start: node.selectionStart ?? null,
+            end: node.selectionEnd ?? null };
+    }
+
+    #restoreFocus() {
+        const wanted = this.#focus;
+        this.#focus = null;
+        if ( !wanted ) return;
+        const node = this.element.querySelector(`[name="${CSS.escape(wanted.name)}"]`);
+        if ( !node ) return;
+        node.focus();
+        // A radio and a select both throw on `setSelectionRange`, and neither has a caret to keep.
+        if ( (wanted.start === null) || (node.type !== "text") ) return;
+        node.setSelectionRange(wanted.start, wanted.end);
     }
 
     /**
@@ -686,7 +856,38 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
 
     static #onDropRow(event, target) {
         const id = target.closest("[data-row-id]")?.dataset.rowId;
+        for ( const row of this.#rows ) if ( row.over.opposes === id ) row.over.opposes = null;
         this.#rows = this.#rows.filter(row => row.id !== id);
+        this.render({ parts: ["roster", "foot"] });
+    }
+
+    /**
+     * Companion p.151: everyone aboard makes TWO checks, one Routine and one Difficult, and chooses
+     * which is which — so one Traveller occupies two lines. Seeding still dedupes on the uuid; this
+     * is the referee saying so deliberately.
+     */
+    static #onDupeRow(event, target) {
+        const id = target.closest("[data-row-id]")?.dataset.rowId;
+        const at = this.#rows.findIndex(row => row.id === id);
+        if ( at < 0 ) return;
+        const row = this.#rows[at];
+        this.#rows.splice(at + 1, 0, { ...row, id: foundry.utils.randomID(), open: true,
+            over: { ...row.over, opposes: null } });
+        this.render({ parts: ["roster", "foot"] });
+    }
+
+    static #onToggleOverride(event, target) {
+        const row = this.#row(target.closest("[data-row-id]")?.dataset.rowId);
+        if ( !row ) return;
+        row.open = !row.open;
+        this.render({ parts: ["roster", "foot"] });
+    }
+
+    static #onClearOverride(event, target) {
+        const row = this.#row(target.closest("[data-row-id]")?.dataset.rowId);
+        if ( !row ) return;
+        this.#pair(row, "");
+        row.over = { skill: null, difficulty: null, chars: null, opposes: null };
         this.render({ parts: ["roster", "foot"] });
     }
 
@@ -785,6 +986,12 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
             name: row.name,
             user: row.self ? null : row.user,
             skillItem: row.skillItem,
+            // `null` on any of the four is "the demand decides", so a roster nobody overrode posts
+            // exactly the lines it posted before this existed.
+            skill: row.over.skill,
+            difficulty: row.over.difficulty,
+            chars: row.over.chars,
+            opposes: row.over.opposes,
             // Core p.63-64: on a `together` tally the contributors' rungs are summed into one
             // Traveller's check.
             resolver: false,
@@ -864,7 +1071,13 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         if ( this.#demand.sideRoll && (this.#demand.skillMode === "none") ) {
             rows = [rows.reduce((best, row) => Docket.#score(row) > Docket.#score(best) ? row : best)];
         }
-        for ( const row of rows ) await this.#rollFor(message, row);
+        // Core p.62 measures one check against another, so a pair both ends of which the referee
+        // answers is settled by whichever of the two rolls second.
+        const posted = new Map();
+        for ( const row of rows ) {
+            const answer = await this.#rollFor(message, row, posted.get(row.over.opposes));
+            if ( answer ) posted.set(row.id, answer.id);
+        }
     }
 
     /** The SCORE and not the DM: p.73 collapses onto the highest characteristic, which is the value. */
@@ -872,7 +1085,7 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         return row.actor?.system.characteristics?.[row.characteristic]?.value ?? 0;
     }
 
-    async #rollFor(message, row) {
+    async #rollFor(message, row, against = null) {
         const demand = this.#demand;
         // Core p.61's tri-state as the prompt's own footer builds it: three dice, one dropped.
         const dice = (demand.stance === "bane") ? "3d6dh"
@@ -880,11 +1093,17 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         // The terms the roster already reduced, spent as the formula.
         const formula = [dice, ...row.parts].join("");
         // What the card is called.
-        const label = ((demand.skillMode === "named") && demand.skill.trim())
+        const label = ((demand.skillMode === "named") && row.asked.skill.trim())
             || game.i18n.localize(MGT2.Characteristics[row.characteristic] ?? "MGT2.Request.Card");
 
-        const outcome = await Checks.resolve({ formula, difficulty: demand.difficulty });
+        const outcome = await Checks.resolve({ formula, difficulty: row.asked.difficulty,
+            prompt: against ? { opposed: against } : null });
         if ( !outcome ) return null;
+        // Core p.229: the power is paid for out of the reserve, on the referee's rows as on anyone
+        // else's, and there is no boost strip on a roll with no prompt.
+        const talent = row.actor?.items?.get(row.skillItem);
+        const psiLine = Docket.#isPower(talent)
+            ? await TravellerActorSheet.spendPsi(row.actor, talent, {}, outcome.effect) : null;
         return Checks.post(outcome, {
             actor: row.actor,
             label,
@@ -892,8 +1111,9 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
             flags: { mgt2: { request: { message: message.id, line: row.id } } },
             rollTypeName: label,
             rollObjectName: row.name,
-            difficulty: demand.difficulty,
+            difficulty: row.asked.difficulty,
             modifiers: row.terms,
+            psiLine,
             lines: [demand.flavor.trim()]
         });
     }

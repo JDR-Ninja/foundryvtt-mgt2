@@ -1,7 +1,7 @@
 import { Checks } from "./checks.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
-import { ambushDM, REQUEST, UNRESOLVED } from "./request.js";
+import { ambushDM, lineDemand, opposingAnswer, REQUEST, UNRESOLVED } from "./request.js";
 import { RollPromptHelper } from "./roll-prompt.js";
 import { TravellerActorSheet } from "./actors/character-sheet.js";
 
@@ -37,20 +37,34 @@ export async function answerRequest(message, lineId, { prompt = false } = {}) {
         return void ui.notifications.warn(game.i18n.localize("MGT2.Errors.RequestNoActor"));
     }
 
-    const imposed = imposedOf(request, read);
-    const rollOptions = seedOptions(request, read, actor, imposed);
+    const asked = lineDemand(request, read);
+    const talent = powerOf(request, read, actor);
+    // Core p.229: "A Traveller with no PSI points cannot attempt to activate a power."
+    if ( talent && actor.system.isCharacteristicShown("psionic")
+        && (actor.system.characteristics.psionic.value <= 0) ) {
+        return void ui.notifications.warn(
+            game.i18n.format("MGT2.Errors.NoPsiPoints", { name: actor.name }));
+    }
+
+    const imposed = imposedOf(request, read, asked);
+    const rollOptions = seedOptions(request, read, actor, imposed, asked, talent);
     // Core p.63-64: on a `together` tally the resolver's prompt opens with the contributors'
     // answers already armed, summed and named.
     const chain = read.resolver ? contributorAnswers(request, read) : [];
     rollOptions.armed = chain;
+    // Core p.62: the referee paired this line with another, and the pair is settled by whichever of
+    // the two answers second.
+    const against = opposingAnswer(request, read);
 
-    // One click, no dialog.
-    const direct = !prompt && (request.chars.length === 1)
-        && (request.skillMode !== "open") && (read.skillItem !== UNRESOLVED);
+    // One click, no dialog. A power keeps its dialog: folio 229's reach is a spend, not a DM, and
+    // there is no other surface on which to decline it.
+    const direct = !prompt && (asked.chars.length === 1) && !talent
+        && (asked.skillMode !== "open") && (read.skillItem !== UNRESOLVED);
     const data = direct
-        ? directAnswer(request, read, actor, rollOptions, chain)
+        ? directAnswer(request, read, actor, rollOptions, chain, asked)
         : await RollPromptHelper.roll(rollOptions);
     if ( !data ) return null;
+    if ( against && !MGT2Helper.hasValue(data, "opposed") ) data.opposed = against;
 
     // Core p.64's imposed DM through the documented `extra` slot, which is where `#onRoll` already
     // puts its own terms. Core p.73's ambush is a second one, and its sign is this line's own.
@@ -61,17 +75,27 @@ export async function answerRequest(message, lineId, { prompt = false } = {}) {
     const { formula, modifiers, chainSources, stance } =
         RollPromptHelper.terms(data, actor, rollOptions.checkModifiers, extra);
 
-    const difficulty = Object.hasOwn(data, "difficulty") ? data.difficulty : request.difficulty;
+    const difficulty = Object.hasOwn(data, "difficulty") ? data.difficulty : asked.difficulty;
     const outcome = await Checks.resolve({
         formula, rollData: actor.getRollData(), difficulty, prompt: data });
     if ( !outcome ) return null;
 
-    const label = answerLabel(request, read, actor);
+    // Core folio 229: the power is paid for now, out of the reserve, and the card states what it
+    // cost — the same call the sheet's own psionic roll makes.
+    const psiLine = (talent && rollOptions.blocks.psionic)
+        ? await TravellerActorSheet.spendPsi(actor, talent, data, outcome.effect) : null;
+    const label = answerLabel(actor, asked);
+    // The correlation is the only thing tying an answer to a request; a power's own duration rides
+    // beside it in the flag the card's buttons already read.
+    const flags = { mgt2: { request: { message: message.id, line: read.id } } };
+    const cardButtons = rollOptions.cardButtons ?? [];
+    if ( cardButtons.length ) flags.mgt2.buttons = cardButtons;
     return Checks.post(outcome, {
         actor,
         label,
-        // The correlation, and the only thing tying an answer to a request.
-        flags: { mgt2: { request: { message: message.id, line: read.id } } },
+        psiLine,
+        cardButtons,
+        flags,
         mode: data.rollMode,
         // Companion p.7: a row the referee took is whispered, with the dice out of `rolls` and in
         // the body — a whispered message that CARRIES rolls announces itself to the table as `???`.
@@ -88,14 +112,14 @@ export async function answerRequest(message, lineId, { prompt = false } = {}) {
     });
 }
 
-/** The `imposed` block, read off the demand and this line's own frozen resolution. */
-function imposedOf(request, read) {
+/** The `imposed` block, read off what THIS line was asked and its own frozen resolution. */
+function imposedOf(request, read, asked) {
     return {
-        difficulty: request.difficulty,
-        chars: [...request.chars],
+        difficulty: asked.difficulty,
+        chars: [...asked.chars],
         // Meaningless on a demand that names no skill, and `null` there would read as the referee
         // choosing untrained — so `skillMode` is read FIRST, which is the card's rule too.
-        skillItem: ((request.skillMode === "named") && (read.skillItem !== UNRESOLVED))
+        skillItem: ((asked.skillMode === "named") && (read.skillItem !== UNRESOLVED))
             ? read.skillItem : undefined,
         stance: request.stance,
         timeframe: request.timeframe,
@@ -106,28 +130,58 @@ function imposedOf(request, read) {
     };
 }
 
+/** Core p.229's power, where the line's frozen resolution named one. @returns {Item|null} */
+function powerOf(request, read, actor) {
+    if ( (request.skillMode !== "named") || !read.skillItem || (read.skillItem === UNRESOLVED) ) {
+        return null;
+    }
+    const item = actor.items.get(read.skillItem);
+    return ((item?.type === "talent") && (item.system.subType === "psionic")) ? item : null;
+}
+
 /** What the seeded prompt opens on. */
-function seedOptions(request, read, actor, imposed) {
+function seedOptions(request, read, actor, imposed, asked, talent) {
     const characteristics = RollPromptHelper.actorCharacteristics(actor);
-    const offered = request.chars.filter(key => characteristics.some(entry => entry._id === key));
-    return {
+    const offered = asked.chars.filter(key => characteristics.some(entry => entry._id === key));
+    // Core p.229: activating a power is a skill check "adding their PSI DM", so a demand that named
+    // no characteristic gets one — but only where the sheet shows PSI at all.
+    const tracked = Boolean(talent) && actor.system.isCharacteristicShown("psionic");
+    const options = {
         rollTypeName: game.i18n.localize("MGT2.Request.Prompt.Asked"),
-        rollObjectName: answerLabel(request, read, actor),
+        rollObjectName: answerLabel(actor, asked),
         // Two or more offered is the referee narrowing a choice the player still makes, so the
         // blank "no characteristic" entry goes with them: the demand named characteristics.
         characteristics: offered.length
             ? characteristics.filter(entry => offered.includes(entry._id)) : characteristics,
         characteristic: (offered.length > 1) ? bestCharacteristic(actor, offered) : (offered[0] ?? ""),
         skills: RollPromptHelper.actorSkills(actor),
-        skill: skillKey(request, read),
+        skill: skillKey(asked, read),
         checkModifiers: TravellerActorSheet.checkModifiers(actor),
-        difficulty: request.difficulty,
-        blocks: { skill: request.skillMode !== "none", range: false, traits: false,
-            psionic: false, attack: false, extended: false },
+        difficulty: asked.difficulty,
+        blocks: { skill: asked.skillMode !== "none", range: false, traits: false,
+            psionic: tracked, attack: false, extended: false },
         ceiling: actor.system.taskCeiling,
         strengthDM: actor.system.characteristics.strength?.dm ?? 0,
+        cardButtons: [],
         imposed
     };
+    if ( !talent ) return options;
+
+    options.talent = talent;
+    // The power IS the skill being checked and the roster froze its id, so the prompt's own list
+    // has to carry it: `actorSkills` lists skills alone.
+    options.skills.splice(1, 0, { _id: talent.id, name: talent.getRollDisplay(false),
+        term: talent.name, dm: talent.system.level });
+    if ( tracked && !options.characteristic && !offered.length ) options.characteristic = "psionic";
+    if ( MGT2Helper.hasValue(talent.system.psionic, "duration") ) {
+        options.cardButtons.push({
+            label: game.i18n.localize("MGT2.Items.Duration"),
+            formula: talent.system.psionic.duration,
+            message: { objectName: talent.name, flavor: "{0} ".concat(
+                game.i18n.localize(`MGT2.Durations.${talent.system.psionic.durationUnit}`)) }
+        });
+    }
+    return options;
 }
 
 /**
@@ -135,8 +189,8 @@ function seedOptions(request, read, actor, imposed) {
  * one, `NP` where the referee chose untrained, and nothing at all where the demand named no skill
  * or this line could not resolve it — that line picks from its own vocabulary.
  */
-function skillKey(request, read) {
-    if ( request.skillMode !== "named" ) return "";
+function skillKey(asked, read) {
+    if ( asked.skillMode !== "named" ) return "";
     if ( read.skillItem === UNRESOLVED ) return "";
     return (read.skillItem === null) ? "NP" : read.skillItem;
 }
@@ -156,10 +210,10 @@ function bestCharacteristic(actor, offered) {
 }
 
 /** What the answer card is called: the skill asked for, or the characteristic that stood in for it. */
-function answerLabel(request, read, actor) {
-    if ( (request.skillMode === "named") && request.skill ) return request.skill;
-    const key = (request.chars.length === 1) ? request.chars[0]
-        : bestCharacteristic(actor, request.chars);
+function answerLabel(actor, asked) {
+    if ( (asked.skillMode === "named") && asked.skill ) return asked.skill;
+    const key = (asked.chars.length === 1) ? asked.chars[0]
+        : bestCharacteristic(actor, asked.chars);
     return key ? game.i18n.localize(MGT2.Characteristics[key] ?? key)
         : game.i18n.localize("MGT2.Request.Card");
 }
@@ -167,14 +221,14 @@ function answerLabel(request, read, actor) {
 /**
  * The one-click answer: the form the prompt would have come back with, built from the demand alone.
  */
-function directAnswer(request, read, actor, rollOptions, chain) {
+function directAnswer(request, read, actor, rollOptions, chain, asked) {
     const characteristic = rollOptions.characteristic;
     const skill = rollOptions.skill;
     const data = {
         characteristic,
         timeframes: request.timeframe,
         imposedStance: request.stance,
-        difficulty: request.difficulty,
+        difficulty: asked.difficulty,
         chain
     };
     if ( rollOptions.blocks.skill ) data.skill = skill;

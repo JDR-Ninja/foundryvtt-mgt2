@@ -48,8 +48,10 @@
 		{{/if}}
 	</div>
 	{{/each}}
+	{{! The tally the referee chose, then Core p.62's own count — which is not a tally and has no
+	    control: it appears when an answer carried a comparison and never otherwise. }}
 	{{#if foot}}
-	<div class="cmods"><span>{{foot}}</span></div>
+	<div class="cmods"><span>{{foot}}</span>{{#if opposedFoot}}<span>{{opposedFoot}}</span>{{/if}}</div>
 	{{/if}}
 	{{#if buttons.length}}
 	<div class="cbtns">

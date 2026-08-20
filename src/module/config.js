@@ -513,9 +513,9 @@ MGT2.RequestTally = Object.freeze({
     sum: "MGT2.Request.Tally.sum"
 });
 
-// Core p.73: the side aware that combat is about to begin gains DM+6 to its Initiative check and the
-// side that is not aware suffers DM-6, for the first round only. `self` is the rows the referee owns.
-MGT2.Ambush = Object.freeze({
+// Core p.73's DM±6 as a request composes it, and a distinct table from `MGT2.Ambush` above: that one
+// is the combatant's own side and carries the DM, this one names which side the referee's rows are.
+MGT2.RequestAmbush = Object.freeze({
     none: "MGT2.Request.AmbushMode.none",
     self: "MGT2.Request.AmbushMode.self",
     others: "MGT2.Request.AmbushMode.others"
