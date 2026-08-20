@@ -43,9 +43,14 @@
 					</span>
 					<input class="f edit-only" type="text" name="system.bays.{{bay.index}}.craft" value="{{bay.craft}}" placeholder="{{localize 'MGT2.Actor.spacecraft.ActorUuid'}}" />
 				</td>
+				{{! What the book gives the bay, and a red line where the design disagrees with
+				    HG p.57's clamp bands or p.61's multiples. Advisory: nothing is refused. }}
 				<td class="duty">
 					<span class="ro">{{#if bay.name}}{{localize 'MGT2.Actor.spacecraft.Docked'}}{{else}}&mdash;{{/if}}</span>
-					{{#if bay.transfer}}<span class="at">{{bay.transfer}}</span>{{/if}}
+					{{#if bay.transfer}}<span class="at">{{localize bay.transfer}}</span>{{/if}}
+					{{#if bay.craftPerRound}}<span class="at">{{localize 'MGT2.Actor.spacecraft.CraftPerRound' n=bay.craftPerRound}}</span>{{/if}}
+					{{#if bay.repairs}}<span class="at">{{localize 'MGT2.Actor.spacecraft.Repairs'}}</span>{{/if}}
+					{{#each bay.checks as |line|}}<span class="at"><b class="noarm">{{line}}</b></span>{{/each}}
 				</td>
 				{{! The READOUT is the row's own tonnage — `count × capacity`, which is what the
 				    budget sums — and the two inputs beside it are the stored halves: how many,

@@ -274,16 +274,19 @@ export class CharacterData extends ActorBaseData {
     prepareCharacteristicAuto() {
         // Replace, not stack: no volume states which, and the corpus says "ADDITIONAL modifiers" on
         // the one occasion it means to add.
+        const species = {};
         for ( const item of this.speciesItems ) {
             for ( const modifier of item.system.modifiers ?? [] ) {
-                const c = this.characteristics[modifier.characteristic];
-                if ( !c || !Number.isFinite(modifier.value) ) continue;
-                // Folio 52: species modifiers may take a characteristic above 15 but never below 1,
-                // so the ceiling does not bind and the floor is a second clamp the shared `max`
-                // never had.
-                const floor = (c.base > 0) ? 1 - c.base : c.auto + modifier.value;
-                c.auto = Math.max(floor, c.auto + modifier.value);
+                if ( !this.characteristics[modifier.characteristic] ) continue;
+                if ( !Number.isFinite(modifier.value) ) continue;
+                species[modifier.characteristic] = (species[modifier.characteristic] ?? 0) + modifier.value;
             }
+        }
+        for ( const [key, delta] of Object.entries(species) ) {
+            const c = this.characteristics[key];
+            // Folio 52: the modifier may pass 15 but cannot take the score under 1, and it is applied
+            // as the score is rolled — so the floor binds the species delta, not the radiation loss.
+            c.auto += (c.base > 0) ? Math.max(1 - c.base, delta) : delta;
         }
         for ( const item of this.parent.items ) {
             // Core p.106: an augment is a fact of the body only once fitted — a bag improves nothing.
@@ -325,22 +328,22 @@ export class CharacterData extends ActorBaseData {
     }
 
     /**
-     * Folio 49: a characteristic reduced to 0 by ageing is death unless 1D × Cr10000 buys care, and
-     * a Traveller who suffered such a crisis automatically fails every later qualification roll.
+     * Folio 49: a characteristic reduced to 0 by ageing — or by a creation injury, where the rule is
+     * on — is death unless 1D × Cr10000 buys care, and a crisis fails every later qualification roll.
      */
     #prepareLossLog() {
         const running = {};
+        const sources = Rules.on("creationInjuryToZero") ? ["ageing", "injury"] : ["ageing"];
         let crisis = false;
         for ( const entry of this.characteristicLog ) {
             for ( const [key, delta] of Object.entries(entry.changes ?? {}) ) {
                 const c = this.characteristics[key];
                 if ( !c ) continue;
                 running[key] = (running[key] ?? c.base) + delta;
-                if ( (entry.source === "ageing") && (running[key] <= 0) ) crisis = true;
+                if ( sources.includes(entry.source) && (running[key] <= 0) ) crisis = true;
             }
         }
         this.states.ageingCrisis = crisis;
-        this.characteristicLoss = { crisis, entries: this.characteristicLog.length };
     }
 
     /** Which of the two treatment procedures the patient qualifies for (Core p.82-83). */

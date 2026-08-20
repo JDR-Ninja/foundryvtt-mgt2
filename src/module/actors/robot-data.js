@@ -11,9 +11,11 @@ const ZERO_SLOT_BASE = 5;
 /** RH p.16: locomotion `None` adds a quarter to the available Slots without raising Base Slots. */
 const NO_LOCOMOTION_BONUS = 0.25;
 
-/** RH p.16, p.22: 5 m per Minor Action, modified by Agility, and never more than 12. */
+/** RH p.16, p.22, p.55: 5 m per Minor Action by Agility, capped at 12, halved on sole power. */
 const SPEED_BASE = 5;
 const SPEED_CAP = 12;
+const SOLE_SOURCE_DIVISOR = 2;
+const SOLE_SOURCE_AGILITY = -2;
 
 /** RH p.23: Vehicle Speed Movement quarters the endurance while it is in use. */
 const VEHICLE_SPEED_DIVISOR = 4;
@@ -151,10 +153,10 @@ export class RobotData extends ActorBaseData {
             }),
 
             endurance: new fields.SchemaField({
-                // RTG and solar replace the multiplicative chain outright and print a half-life in
-                // years with the hourly figure beside it (RH p.20, p.76).
+                // RTG and solar replace the chain and print a half-life in years (RH p.20, p.76).
                 source: new fields.StringField({
                     required: false, blank: false, initial: "internal", choices: MGT2.RobotPower }),
+                redundant: new fields.BooleanField({ required: false, initial: false }),
                 halfLife: new fields.NumberField({
                     required: false, nullable: true, min: 0, initial: null }),
                 efficiency: new fields.BooleanField({ required: false, initial: false }),
@@ -217,7 +219,7 @@ export class RobotData extends ActorBaseData {
 
     /** RH p.16: Agility comes from the locomotion type. `None` has none rather than zero. */
     get agility() {
-        return this.primaryLocomotion?.agility ?? 0;
+        return this.primaryLocomotion?.agility ?? null;
     }
 
     /**
@@ -283,10 +285,18 @@ export class RobotData extends ActorBaseData {
         return this.manipulators.reduce((total, limb) => total + limb.count, 0);
     }
 
-    /** RH p.16, p.22: 5 m, modified by Agility and by whatever tactical speed was bought. */
+    /** RH p.55: RTG or solar alone degrades the robot; a second such unit clears it. */
+    get soleSourcePower() {
+        return (this.endurance.source !== "internal") && !this.endurance.redundant;
+    }
+
+    /** RH p.16, p.22, p.55: 5 m by Agility and tactical, halved and -2 on sole power. */
     get speedMetres() {
-        if (this.speed.vehicleBand !== null) return null;
-        return Math.max(0, Math.min(SPEED_CAP, SPEED_BASE + this.agility + this.speed.tactical));
+        if ((this.speed.vehicleBand !== null) || (this.agility === null)) return null;
+        const metres = SPEED_BASE + this.agility + this.speed.tactical;
+        const rate = this.soleSourcePower
+            ? Math.floor(metres / SOLE_SOURCE_DIVISOR) + SOLE_SOURCE_AGILITY : metres;
+        return Math.max(0, Math.min(SPEED_CAP, rate));
     }
 
     /**
@@ -345,20 +355,6 @@ export class RobotData extends ActorBaseData {
             over: used > total,
             zero: { budget: zeroBudget, used: zeroUsed, over: zeroUsed > zeroBudget }
         };
-    }
-
-    /** RH p.19, p.20, p.25: a "% of Slots" option rounds up and never costs less than one Slot. */
-    slotsForPercent(percent, points = 1) {
-        return Math.max(1, Math.ceil((percent / 100) * this.sizeRow.slots * points));
-    }
-
-    /** What a given number of added Protection points costs in Slots (RH p.19). */
-    armourSlots(points) {
-        const band = this.armourBand;
-        if (!band || !(points > 0)) return 0;
-        return Math.max(1,
-            Math.ceil((band.slotsPerPoint / 100) * this.sizeRow.slots * points),
-            Math.ceil(points / band.maxPerSlot));
     }
 
     /**
@@ -450,7 +446,9 @@ export class RobotData extends ActorBaseData {
         // RH p.13, p.20: the Size table's Hits, plus or minus whatever resiliency was bought.
         c.hits.auto = Math.max(0, this.sizeRow.hits + this.resiliency);
 
-        c.strength.auto = this.strongestManipulator?.strength ?? 0;
+        const strength = this.strongestManipulator?.strength ?? 0;
+        c.strength.auto = this.soleSourcePower
+            ? Math.floor(strength / SOLE_SOURCE_DIVISOR) : strength;
         c.dexterity.auto = (this.mostDexterousManipulator?.dexterity ?? 0) + this.agilityEnhancement;
         c.endurance.auto = this.travellerEndurance;
         // RH folio 106's brain damage lands in the same sink and is never written: the folio prices
@@ -586,14 +584,7 @@ export class RobotData extends ActorBaseData {
         const band = this.armourBand;
         const printed = MGT2Helper.hasTrait(this.traits, "armour");
         if (!printed) this.inventory.armor += band?.protection ?? 0;
-        this.armour = {
-            band: band?.label ?? "",
-            base: band?.protection ?? 0,
-            maxAdded: band?.maxAdded ?? 0,
-            slotsPerPoint: band?.slotsPerPoint ?? 0,
-            costPerSlot: band?.costPerSlot ?? 0,
-            printed
-        };
+        this.armour = { base: band?.protection ?? 0, printed };
     }
 
     /** Two robot-only readings of the Protection a wound meets. @inheritDoc */

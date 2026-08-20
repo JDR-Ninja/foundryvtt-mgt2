@@ -155,4 +155,12 @@ export class CraftData extends ActorBaseData {
         await this.parent.update({ [`system.criticals.${location}`]: next });
         return { location, severity: next, overflow: null };
     }
+
+    /** Core p.140, p.169: a cell reading `+1` or `+1D`, capped like every other severity. */
+    async raiseHullSeverity(amount) {
+        const roll = Number.isInteger(amount)
+            ? amount : (await new Roll(String(amount).replace(/D$/i, "d6")).roll()).total;
+        const next = Math.min(MAX_SEVERITY, this.parent.system.hullSeverity + roll);
+        return this.parent.update({ "system.hullSeverity": next });
+    }
 }

@@ -32,10 +32,6 @@ export class TravellerActor extends Actor {
     return this;
   }
 
-  getInitiative() {
-    return this.system.initiative;
-  }
-
   applyDamage(amount, options = {}) {
     return this.system.applyDamage?.(amount, options);
   }

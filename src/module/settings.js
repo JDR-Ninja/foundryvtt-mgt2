@@ -93,7 +93,8 @@ export const registerSettings = function () {
         scope: "world",
         type: new fields.NumberField({ required: true, integer: true, initial: 0 }),
         config: true,
-        requiresReload: false
+        requiresReload: false,
+        onChange: refreshRuleUI
     });
 
     game.settings.register("mgt2", "showLife", {

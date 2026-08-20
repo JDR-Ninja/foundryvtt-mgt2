@@ -6431,6 +6431,45 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
   font-size: 9.5px;
   color: var(--faint);
 }
+.mgt2.card .dmgface {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.card .dmgface[hidden] {
+  display: none;
+}
+.mgt2.card .dmgface .k {
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2.card .dmgface .f {
+  padding: 2px 7px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--rule-soft);
+  border-radius: 3px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2.card .dmgface .f:hover {
+  background: var(--hover);
+}
+.mgt2.card .dmgface .f.on {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
 .mgt2.card .dmgvoid {
   display: none;
 }
@@ -7458,6 +7497,15 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--faint);
+}
+.mgt2 .leg .hop .charted {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+  border-top: 1px dashed var(--rule-soft);
+  padding-top: 2px;
+  cursor: help;
 }
 
 .mgt2 .queue {

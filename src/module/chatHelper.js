@@ -7,6 +7,19 @@ import { injectAskTheSame, REQUEST, setupRequestCard } from "./request.js";
 import { injectAskedStrip } from "./request-answer.js";
 import { armChain } from "./roll-prompt.js";
 
+/** Core folio 140: the facings a vehicle answers an attack with; `left` and `right` are synonyms. */
+const FACINGS = ["front", "rear", "sides", "top", "bottom"];
+
+/** The lineage links: a chain strip's sources, an opposed line's one source, an answered request line. */
+export function wireChainSources(html) {
+    for (const link of html.querySelectorAll('[data-action="chainSource"]')) {
+        link.addEventListener("click", event => {
+            event.preventDefault();
+            jumpToMessage(link.dataset.messageId);
+        });
+    }
+}
+
 export class ChatHelper {
 
     /**
@@ -55,13 +68,20 @@ export class ChatHelper {
         for (const option of html.querySelectorAll(".dmgpick > [data-transform]")) {
             option.addEventListener("click", () => this._pickTransform(message, option, true));
         }
+        for (const option of html.querySelectorAll(".dmgface > [data-facing]")) {
+            option.addEventListener("click", () => this.#pickFacing(option));
+        }
 
         // The defender's traits answer which reading is right, and the defender is whichever token
         // the referee has selected — a question asked here and never at attack time, so the mark is
         // recomputed as the card is approached rather than baked into the message.
         if (html.querySelector(".dmgpick")) {
-            html.addEventListener("pointerenter", () => this.#markTransform(message, html));
-            this.#markTransform(message, html);
+            const mark = () => {
+                this.#markTransform(message, html);
+                this.#markFacing(html);
+            };
+            html.addEventListener("pointerenter", mark);
+            mark();
         }
 
         // Core folio 78: the winner of the opposed check picks what the grapple did, so the menu
@@ -88,13 +108,7 @@ export class ChatHelper {
             });
         }
 
-        // The lineage links: the chain strip's sources and the opposed line's one source.
-        for (const link of html.querySelectorAll('[data-action="chainSource"]')) {
-            link.addEventListener("click", event => {
-                event.preventDefault();
-                jumpToMessage(link.dataset.messageId);
-            });
-        }
+        wireChainSources(html);
 
         // Indexed buttons are meaningless without the flag that describes them, and a third-party
         // module may well render its own button[data-index].
@@ -211,6 +225,7 @@ export class ChatHelper {
             scaleLabel: (MGT2.Scales[payload.scale] ?? MGT2.WeaponScales[payload.scale])?.label ?? payload.scale,
             typeLabels: payload.damageType.map(type => MGT2.DamageTypes[type] ?? type),
             floor: payload.effect >= 6,
+            facings: FACINGS,
             options: ChatHelper.#transformOptions(formula,
                 { full: full.total, reduced: reduced.total, minimum }, boost, flat, added)
         }, payload);
@@ -273,6 +288,20 @@ export class ChatHelper {
         if (chosen && (pick.dataset.picked !== "true")) ChatHelper._pickTransform(message, chosen);
     }
 
+    /** Only a vehicle has more than one facing, so the strip appears only while one is selected. */
+    static #markFacing(html) {
+        const strip = html.querySelector(".dmgface");
+        if (!strip) return;
+        strip.hidden = !(canvas.tokens?.controlled ?? [])
+            .some(token => token.actor?.isOwner && (token.actor.type === "vehicle"));
+    }
+
+    static #pickFacing(option) {
+        for (const other of option.parentElement.querySelectorAll("[data-facing]")) {
+            other.classList.toggle("on", other === option);
+        }
+    }
+
     static _pickTransform(message, option, byHand = false) {
         const pick = option.parentElement;
         if (byHand) pick.dataset.picked = "true";
@@ -310,16 +339,17 @@ export class ChatHelper {
 
         // A card that offers no reading — the grapple's own damage — is applied at face value, so
         // the two it does not carry must not be dereferenced.
-        const picked = event.currentTarget.closest(".card")
-            ?.querySelector(".dmgpick > [data-transform].on")?.dataset.transform ?? "full";
+        const card = event.currentTarget.closest(".card");
+        const picked = card?.querySelector(".dmgpick > [data-transform].on")?.dataset.transform ?? "full";
         const amount = { full: payload.total, reduced: payload.reduced?.total, minimum: payload.minimum }[picked];
+        const facing = card?.querySelector(".dmgface > [data-facing].on")?.dataset.facing ?? "front";
 
         for (const token of targets) {
             const result = await token.actor.applyDamage(amount, {
                 scale: payload.scale, ap: payload.ap, loPen: payload.loPen,
                 effect: payload.effect, stun: payload.stun, formula: payload.formula,
                 multiple: payload.multiple, damageType: payload.damageType, ion: payload.ion,
-                ignoreArmour: payload.ignoreArmour
+                ignoreArmour: payload.ignoreArmour, facing
             });
             // Core p.79: what a Stun weapon deals past END is rounds of incapacitation, not injury.
             if (result?.rounds > 0) {

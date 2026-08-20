@@ -425,7 +425,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
                 .filter(([, severity]) => severity > 0)
                 .map(([location, severity]) => ({
                     location, severity, label: MGT2.ShipCriticals[location]?.label ?? location })),
-            batteries: this.#batteries(ship),
+            batteries: this.#batteries(ship, combatant.id),
             warheads: Object.entries(MGT2.FleetWarheads).map(([key, entry]) => ({
                 key, label: entry.label, torpedo: entry.torpedo === true }))
         };
@@ -451,7 +451,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
             armour: system.armour,
             thrust: system.thrust,
             hull: system.hull,
-            batteries: this.#batteries(system.fighter),
+            batteries: this.#batteries(system.fighter, combatant.id),
             // Folio 107's sample squadron carries missile racks, so a wing launches salvoes like a
             // hull — what folio 114 denies it is the DEFENCES half, not the weapons.
             warheads: Object.entries(MGT2.FleetWarheads).map(([key, entry]) => ({
@@ -486,9 +486,9 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
     }
 
     /** Folio 107's WEAPONS panel: `100 x Turrets (beam lasers)` on one line. */
-    #batteries(actor) {
+    #batteries(actor, contactId) {
         return fleetBatteries(actor).map(row => {
-            const key = `${row.mount}|${row.id}|${row.name}`;
+            const key = `${contactId}|${row.mount}|${row.id}|${row.name}`;
             return {
                 ...row, key,
                 mountLabel: game.i18n.localize(row.mountLabel),
@@ -504,19 +504,22 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
      */
     #attackContext() {
         const target = this.target;
+        // The pair the attack was resolved between, not the dropdown's current value: this is the
+        // ledger `applyDamage` charges. Folio 114 gives a wing no pools, and a salvo has none.
+        const victim = this.#attack ? this.#combat.combatants.get(this.#attack.target.id) : target;
+        const shooter = this.#attack
+            ? this.#combat.combatants.get(this.#attack.attacker) : this.selectedContact;
         const context = {
             options: this.#options,
             targets: this.targets.map(one => ({
                 id: one.id, name: one.name, selected: one.id === target?.id,
                 fleet: one.system.fleetGroup?.name ?? "" })),
             target: target ? { id: target.id, name: target.name } : null,
-            // A wing has no screens and no sandcasters — folio 114's sheet prints none, which is an
-            // accumulator with no source applied to a document rather than to a field.
-            pools: (target?.type === FLEET_SHIP)
+            pools: (victim?.type === FLEET_SHIP)
                 ? MITIGATORS.map(key => ({ key, label: `MGT2.Fleet.Pool.${key}`,
                     left: (key === "sand")
-                        ? target.system.sandcasterAgainst(this.selectedContact).left
-                        : target.system.pools[key].left })) : [],
+                        ? victim.system.sandcasterAgainst(shooter ?? null).left
+                        : victim.system.pools[key].left })) : [],
             mitigate: this.#mitigate
         };
         if ( !this.#attack ) return context;
@@ -828,7 +831,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
 
     #batteryOf(combatant, key) {
         const actor = (combatant.type === SQUADRON) ? combatant.system.fighter : combatant.system.ship;
-        return this.#batteries(actor).find(row => row.key === key) ?? null;
+        return this.#batteries(actor, combatant.id).find(row => row.key === key) ?? null;
     }
 
     /**
@@ -915,7 +918,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         const attacker = this.#combat.combatants.get(attack.attacker) ?? null;
         const { pool, points } = this.#mitigate;
         let reduction = 0;
-        if ( pool && points ) {
+        if ( pool && points && (typeof victim.system.spend === "function") ) {
             const before = victim._source.system.spent?.[pool] ?? 0;
             await victim.system.spend(pool, points, (pool === "sand") ? attacker : null);
             if ( (victim._source.system.spent?.[pool] ?? 0) === before ) return;

@@ -61,6 +61,9 @@
 			<button type="button" class="btn{{#if recovery.canMedicalCare}} hot{{/if}}" data-action="medicalCare" data-tooltip="{{localize 'MGT2.Recovery.MedicalCareHint'}}">{{localize 'MGT2.Recovery.MedicalCare'}}</button>
 			<button type="button" class="btn" data-action="naturalHealing" data-tooltip="{{localize 'MGT2.Recovery.NaturalHealingHint'}}">{{localize 'MGT2.Recovery.NaturalHealing'}}<i>{{recovery.naturalFormula}}</i></button>
 			<button type="button" class="btn" data-action="mentalHealing" {{#unless recovery.mental}}disabled{{/unless}} data-tooltip="{{localize 'MGT2.Recovery.MentalHint'}}">{{localize 'MGT2.Recovery.Mental'}}</button>
+			{{#if recovery.psi}}
+			<button type="button" class="btn" data-action="psiRest" {{#unless recovery.psi.spent}}disabled{{/unless}} data-tooltip="{{localize 'MGT2.Recovery.PsiRestHint'}}">{{localize 'MGT2.Recovery.PsiRest'}}<i>{{recovery.psi.spent}}</i></button>
+			{{/if}}
 			<button type="button" class="btn{{#if recovery.unconscious}} hot{{/if}}" data-action="revive" {{#unless recovery.unconscious}}disabled{{/unless}} data-tooltip="{{localize 'MGT2.Recovery.ReviveHint'}}">{{localize 'MGT2.Recovery.Revive'}}<i>{{showDM recovery.reviveDM}}</i></button>
 			{{#if recovery.firstAidUsed}}
 			<a class="reset" data-action="firstAidReset" data-tooltip="{{localize 'MGT2.Recovery.FirstAidResetHint'}}"><i class="fa-solid fa-rotate-left"></i></a>

@@ -127,6 +127,9 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
      */
     #rows = [];
 
+    /** Set before the first await of the post: pressing twice must not send two cards. */
+    #posting = false;
+
     /** Whoever the referee has selected. Naming documents is the permitted side of the canvas line. */
     static #controlledActors() {
         return (canvas?.tokens?.controlled ?? []).map(token => token.actor).filter(actor => actor);
@@ -498,11 +501,10 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         super._attachFrameListeners();
         // `input` alone.
         this.element.addEventListener("input", this.#onField.bind(this));
-        // Enter anywhere in the window posts, which is the footer button's own shortcut — but
-        // not on a control Enter already activates, or `+ PARTY` would post the docket instead of
-        // seeding it, and the close button would post on its way out.
+        // Enter posts, but never on a control Enter already activates: `+ PARTY` would post the
+        // docket instead of seeding it, and the close button would post on its way out.
         this.element.addEventListener("keydown", event => {
-            if ( event.key !== "Enter" ) return;
+            if ( (event.key !== "Enter") || event.repeat ) return;
             if ( event.target.closest("button, a, textarea, [data-action]") ) return;
             event.preventDefault();
             Docket.#onPost.call(this, event, null);
@@ -750,6 +752,7 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
      * before the card exists.
      */
     static async #onPost(event, target) {
+        if ( this.#posting ) return;
         const reading = this.#reading();
         const refusal = this.#refuse(reading);
         if ( refusal ) return void ui.notifications.error(game.i18n.localize(refusal));
@@ -773,30 +776,36 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         // Through `postRequest` and not `ChatMessage.create`, because the recents list the chat
         // control's context menu reads is written there — composing in this window was the one path
         // that never reached it, so the menu it fires from was permanently empty.
-        const message = await postRequest({
-            skillMode: demand.skillMode,
-            skill: (demand.skillMode === "named") ? demand.skill.trim() : "",
-            flavor: demand.flavor.trim(),
-            chars: demand.chars,
-            difficulty: demand.difficulty,
-            stance: demand.stance,
-            timeframe: demand.timeframe,
-            dm: { label: demand.dm.label.trim(), value: demand.dm.value },
-            tally: demand.tally,
-            showTarget: demand.showTarget,
-            sideRoll: demand.sideRoll,
-            state: "open",
-            lines
-        }, {
-            ...this.#whisper(lines),
-            // The body is rendered per client from a live reading of the log, and `content` is
-            // only what a world that has lost the sub-type would be left with.
-            content: this.#fallback(reading)
-        });
-        if ( !message ) return;
+        this.#posting = true;
+        try {
+            const message = await postRequest({
+                skillMode: demand.skillMode,
+                skill: (demand.skillMode === "named") ? demand.skill.trim() : "",
+                flavor: demand.flavor.trim(),
+                chars: demand.chars,
+                difficulty: demand.difficulty,
+                stance: demand.stance,
+                timeframe: demand.timeframe,
+                dm: { label: demand.dm.label.trim(), value: demand.dm.value },
+                tally: demand.tally,
+                showTarget: demand.showTarget,
+                sideRoll: demand.sideRoll,
+                state: "open",
+                lines
+            }, {
+                ...this.#whisper(lines),
+                // The body is rendered per client from a live reading of the log, and `content` is
+                // only what a world that has lost the sub-type would be left with.
+                content: this.#fallback(reading)
+            });
+            if ( !message ) return;
 
-        if ( this.#send.roll ) await this.#rollSide(message, reading);
-        this.close();
+            if ( this.#send.roll ) await this.#rollSide(message, reading);
+            this.close();
+        }
+        finally {
+            this.#posting = false;
+        }
     }
 
     /** `Addressed` whispers to the lines' own users and to the GMs; `Public` whispers to nobody. */

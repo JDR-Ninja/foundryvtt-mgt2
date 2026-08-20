@@ -115,6 +115,9 @@
 		<li><span class="lbl">{{localize 'MGT2.Items.Assignment'}}</span><b class="word">{{#if system.assignment}}{{system.assignment}}{{else}}—{{/if}}</b></li>
 		<li><span class="lbl">{{localize 'MGT2.Items.Terms'}}</span><b>{{system.terms}}</b></li>
 		<li><span class="lbl">{{localize 'MGT2.Items.Rank'}}</span><b>{{system.rank}}</b></li>
+		{{#unless system.isTemplate}}
+		<li><span class="lbl">{{localize 'MGT2.Items.EntryMode'}}</span><b class="word">{{localize (lookup config.CareerEntryModes system.entryMode)}}</b></li>
+		{{/unless}}
 		{{/if}}
 
 		{{#if (eq item.type "talent")}}
@@ -360,6 +363,13 @@
 			<span class="lbl">{{localize 'MGT2.Items.Rank'}}</span>
 			{{formInput systemFields.rank name="system.rank" value=system.rank classes="f num"}}
 		</label>
+		{{! Core p.18: a drafted entry beats "you may not return to the career you just left". }}
+		{{#unless system.isTemplate}}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.EntryMode'}}</span>
+			{{formInput systemFields.entryMode name="system.entryMode" value=system.entryMode localize=true classes="f"}}
+		</label>
+		{{/unless}}
 		{{/if}}
 
 		{{#if (eq item.type "talent")}}

@@ -2,6 +2,7 @@ import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { Jump } from "./jump.js";
 import { Rules } from "./rules.js";
+import { distance } from "./space.js";
 import { checkOf } from "./chat-message.js";
 import { SpacecraftActorSheet } from "./actors/spacecraft-sheet.js";
 
@@ -153,6 +154,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         // The two ends and no queue entry: three `apps` are registered, and a stop still to come
         // changes nothing this screen prints.
         this.#syncRegistrations([this.#ship, here.document, next.document]);
+        const charted = VoyageScreen.#charted(here.document, next.document);
         // The Actor was carried this far only so `apps` could be written.
         delete here.document;
         delete next.document;
@@ -161,7 +163,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         context.worldType = WORLD_TYPE;
         context.crewTypes = CREW_TYPES;
         context.route = {
-            here, next, parsecs,
+            here, next, parsecs, charted,
             queue: await Promise.all(voyage.queue.map((stop, index) =>
                 VoyageScreen.#stop(stop).then(({ document, ...entry }) => ({ ...entry, index }))))
         };
@@ -196,6 +198,13 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             zoneLabel: (system.zone === "green") ? null : MGT2.TravelZones[system.zone]?.label,
             forbidden: system.travel.forbidden
         };
+    }
+
+    /** The map's figure; null when an end is a bare name, an unknown sector or an unplaced hex. */
+    static #charted(here, next) {
+        const from = here?.system.location?.coords;
+        const to = next?.system.location?.coords;
+        return (from && to) ? distance(from, to) : null;
     }
 
     /** What the pair is worth, and every figure of it is a reading of the three stored numbers. */
@@ -530,14 +539,14 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * The uuid AND the name are written, because the leg has to keep reading when the document is
-     * gone.
+     * gone. Only `next` takes a distance back to the printed minimum; `here` has no parsecs.
      */
     async #dropStop(actor, stop) {
         const queue = this.#ship.system.voyage.queue
             .filter(entry => entry.world !== actor.uuid).map(entry => ({ ...entry }));
-        return this.#ship.update({ system: { voyage: {
-            [stop]: { world: actor.uuid, name: actor.name }, queue
-        } } });
+        const end = { world: actor.uuid, name: actor.name };
+        if ( stop === "next" ) end.parsecs = 1;
+        return this.#ship.update({ system: { voyage: { [stop]: end, queue } } });
     }
 
     async #dropQueued(actor) {
@@ -642,8 +651,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor: this.#ship }),
-            // The dice the reading was produced from, so the card is a roll and not a report of one
-            //.
+            // The dice the reading was produced from, so the card is a roll and not a report of it.
             rolls: this.#reading.rolls ?? [],
             content: `<div class="mgt2 theme-light card misjump">
                 <div class="chd"><div class="what"><h4>${title}</h4>
@@ -684,7 +692,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         const [stop] = queue.splice(index, 1);
         if ( !stop ) return;
         return this.#ship.update({ system: { voyage: {
-            next: { world: stop.world, name: stop.name }, queue
+            next: { world: stop.world, name: stop.name, parsecs: 1 }, queue
         } } });
     }
 

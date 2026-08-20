@@ -471,6 +471,10 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 tons: type.tons,
                 ammo: mount.ammo, ammoMax: ammo,
                 weapons: held,
+                // Core p.183: a fixed mount or a turret holds one, two or three weapons by type.
+                overCapacity: (held.length > type.weapons)
+                    ? game.i18n.format("MGT2.Actor.spacecraft.MountCapacity",
+                        { held: held.length, cap: type.weapons }) : null,
                 choices: weapons.map(weapon => ({
                     _id: weapon._id, name: weapon.name, selected: mount.weapons.includes(weapon._id)
                 }))
@@ -551,17 +555,37 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 index, kind: bay.kind, capacity: bay.capacity, craft: bay.craft, count,
                 kindLabel: kind.label ?? "", external: kind.external === true,
                 transfer: kind.transfer ?? null,
+                craftPerRound: kind.craftPerRound ?? null,
+                repairs: kind.repairs === true,
+                checks: SpacecraftActorSheet.#bayChecks(kind, bay.capacity,
+                    actor?.system?.hull?.tons ?? 0),
                 name: actor?.name ?? null,
                 img: actor?.img ?? null,
-                // `capacity` is per craft, so the row's own tonnage is the product — and it
-                // is the figure the tonnage budget sums, which is why the sheet prints it and not
-                // the stored number.
                 tons: Math.round(count * bay.capacity * 100) / 100,
                 many: count > 1,
                 purchase: actor?.system?.finance?.purchase ?? 0,
                 vacant: !bay.craft
             };
         });
+    }
+
+    /** HG p.57's clamp bands and p.61's multiples against the craft aboard, as localised lines. */
+    static #bayChecks(kind, capacity, craftTons) {
+        if (!craftTons) return [];
+        const say = (key, data) => game.i18n.format(`MGT2.Actor.spacecraft.${key}`, data);
+        const lines = [];
+        if (kind.tons && (capacity !== kind.tons)) {
+            lines.push(say("ClampTons", { tons: kind.tons, capacity }));
+        }
+        if (kind.minCraftTons && ((craftTons < kind.minCraftTons)
+            || (kind.maxCraftTons && (craftTons > kind.maxCraftTons)))) {
+            lines.push(say("ClampCraft", { tons: craftTons, band: kind.maxCraftTons
+                ? `${kind.minCraftTons}-${kind.maxCraftTons}` : `${kind.minCraftTons}+` }));
+        }
+        // HG p.61 rounds the multiple up, and 40 t x 1.1 floats to 44.000000000000006.
+        const need = kind.tonsMultiple ? Math.ceil((craftTons * kind.tonsMultiple) - 1e-9) : 0;
+        if (need > capacity) lines.push(say("BaySize", { need, tons: craftTons }));
+        return lines;
     }
 
     /**
@@ -777,7 +801,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         }
     }
 
-    /** Passengers ashore. */
+    /** Passengers ashore — the booking is deleted before the card reads the hold. */
     static async #onArrivePassage(event, target) {
         const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
         if ((item?.type !== "passage") || !this.#canSettle) return;
@@ -787,13 +811,13 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         const grade = game.i18n.localize(
             (MGT2.PassageClasses[booking.grade] ?? MGT2.PassageClasses.middle).label);
 
-        await this.#postSettlement({
+        const { count, lowBerth } = booking;
+        await item.delete();
+        return this.#postSettlement({
             title: "MGT2.Trade.Card.Ashore", where,
-            line: game.i18n.format("MGT2.Trade.Card.Disembark",
-                { n: booking.count, grade }),
-            revival: booking.lowBerth, count: booking.count
+            line: game.i18n.format("MGT2.Trade.Card.Disembark", { n: count, grade }),
+            revival: lowBerth, count
         });
-        return item.delete();
     }
 
     /** The far end, on the log — the settlement, and whatever the referee still owes it. */
@@ -852,20 +876,15 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         // The sixteen cells that raise Hull Severity instead of damaging their own location are
         // applied here rather than folded, because two of them are a 1D roll.
         const cell = this.actor.system.criticalEffect(location);
-        if (cell?.hullSeverity && !result.overflow) await this.#raiseHullSeverity(cell.hullSeverity);
+        if (cell?.hullSeverity && !result.overflow) {
+            await this.actor.system.raiseHullSeverity(cell.hullSeverity);
+        }
 
         return ui.notifications.info(result.overflow
             ? game.i18n.format("MGT2.Actor.spacecraft.CriticalOverflow",
                 { location: label, damage: result.overflow.total })
             : game.i18n.format("MGT2.Actor.spacecraft.CriticalApplied",
                 { location: label, severity: result.severity }));
-    }
-
-    /** `+1` or `+1D`, capped at 6 like every other severity. */
-    async #raiseHullSeverity(amount) {
-        const roll = Number.isInteger(amount) ? amount : (await new Roll(String(amount).replace(/D$/i, "d6")).roll()).total;
-        const next = Math.min(6, this.actor.system.hullSeverity + roll);
-        return this.actor.update({ "system.hullSeverity": next });
     }
 
     /** Core p.171: cutting power to a system is an Engineer's action, and it is reversible. */
@@ -1012,14 +1031,14 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             shipModifiers.push({ key: "fireControl", label: "MGT2.Items.FireControl",
                 dm: weapon.system.fireControl });
         }
-        // The sensor suite's grade modifies a sensors check made from this ship, and a Sensors
-        // critical is already folded into the same number (`sensors.dm`).
-        const sensorRole = MGT2.CrewRoles.sensorOperator;
-        const sensorCheck = MGT2Helper.matchesSkill(action.skill, sensorRole.skill)
-            && String(action.skill).toLowerCase().includes(sensorRole.speciality);
-        if (sensorCheck && system.sensors.dm) {
+        // A Sensors critical is already folded into `sensors.dm`.
+        if (SpacecraftActorSheet.#shipCheck(action.skill, "sensors") && system.sensors.dm) {
             shipModifiers.push({ key: "sensors", label: "MGT2.Actor.spacecraft.SensorDM",
                 dm: system.sensors.dm });
+        }
+        if (SpacecraftActorSheet.#shipCheck(action.skill, "navalTactics") && system.bridge.tacticsDM) {
+            shipModifiers.push({ key: "tactics", label: "MGT2.Actor.spacecraft.TacticsDM",
+                dm: system.bridge.tacticsDM });
         }
 
         // The same prompt every other check opens, seeded from the crew member's sheet: Boon and
@@ -1097,6 +1116,14 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             showRollDamage: Boolean(flags.mgt2.damage),
             damageCarriesEffect: true
         });
+    }
+
+    /** Whether a station action's free-text skill is any name an `MGT2.ShipCheckSkills` row prints. */
+    static #shipCheck(name, key) {
+        const row = MGT2.ShipCheckSkills[key];
+        const text = String(name ?? "").toLowerCase();
+        return row.skills.some(entry => MGT2Helper.matchesSkill(name, entry))
+            && row.specialities.some(entry => text.includes(entry));
     }
 
     /**

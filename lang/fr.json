@@ -43,7 +43,7 @@
   "TYPES.RegionBehavior.temperature": "Température",
   "TYPES.HINTS.RegionBehavior.temperature": "Indique la température ambiante, les dégâts et l'intervalle. Seules les lignes par round pourraient se déclencher seules.",
   "TYPES.RegionBehavior.vacuum": "Vide",
-  "TYPES.HINTS.RegionBehavior.vacuum": "Indique la pression, les dégâts et si l'effet s'aggrave. Une brèche dans la combinaison décale toute la table.",
+  "TYPES.HINTS.RegionBehavior.vacuum": "Indique la pression, les dégâts et si l'effet s'aggrave.",
   "TYPES.RegionBehavior.radiation": "Radiations",
   "TYPES.HINTS.RegionBehavior.radiation": "Indique la dose et ce que la région absorbe elle-même, avant l'armure du Voyageur.",
   "TYPES.Actor.character": "Voyageur",
@@ -113,14 +113,6 @@
       "campaignDay": {
         "name": "Jour de campagne",
         "hint": "Jours écoulés depuis le jour que vous avez appelé zéro. Rien ne l'avance : c'est vous. Le commerce spéculatif le lit — un fournisseur que l'on quitte reste fermé un mois, et un mois vaut 28 jours."
-      },
-      "useWeightMetric": {
-        "name": "Utiliser le Système Métrique pour le Poids",
-        "hint": "kilogramme (kg) au lieu de la livre (lbs)"
-      },
-      "useDistanceMetric": {
-        "name": "Utiliser le Système Métrique pour la Distance",
-        "hint": "kilomètre (km) au lieu du mile (mi)"
       },
       "usePronouns": {
         "name": "Utiliser le Pronom",
@@ -234,7 +226,7 @@
         "name": "Perdre un échelon sur un statut d'espèce",
         "hint": "La page d'une espèce dit qu'un statut est acquis à vie, et dit une ligne plus loin qu'il peut être perdu puis regagné, peut-être plusieurs fois.",
         "canFall": "Il peut toujours être perdu",
-        "heldThenPermanent": "Il peut être perdu, sauf s'il est conservé une période de plus",
+        "heldThenPermanent": "Il peut être perdu, mais c'est le plus haut échelon jamais obtenu qui compte",
         "permanent": "Une fois obtenu, il est acquis à vie"
       },
       "creationCostsBecomeDebt": {
@@ -932,7 +924,8 @@
         "RefereeStep": "{step} est une étape propre à ce cadre : c'est au référent de la résoudre.",
         "NoStepTarget": "{step} : la table imprimée ne donne aucun seuil pour ce Voyageur.",
         "StepNotTriggered": "{step} ne se déclenche pas cette période.",
-        "TrackAtCap": "{track} est déjà à son dernier échelon."
+        "TrackAtCap": "{track} est déjà à son dernier échelon.",
+        "TrackHeld": "{track} ne peut plus être perdu une fois obtenu."
       },
       "StepCheckTriggers": {
         "everyTerm": "À chaque période",
@@ -1576,6 +1569,7 @@
         "RefereeAction": "{action} — au choix de l'arbitre.",
         "StationDM": "Poste",
         "SensorDM": "MD de capteurs",
+        "TacticsDM": "MD de tactique navale",
         "DutyDuplicated": "déjà tenue",
         "DutyUnmounted": "aucune monture nommée",
         "NoMount": "Cet artilleur n'est assis à aucune monture. Nommez-en une dans le champ monture du poste.",
@@ -1609,6 +1603,12 @@
         "Internal": "intérieur, fermé",
         "Empty": "— vide —",
         "Docked": "Amarré",
+        "CraftPerRound": "{n} appareils par round",
+        "Repairs": "réparations à bord",
+        "ClampTons": "la pince fait {tons} t, pas {capacity}",
+        "ClampCraft": "appareil de {tons} t, pince pour {band} t",
+        "BaySize": "{need} t exigées pour un appareil de {tons} t",
+        "MountCapacity": "{held} armes, la monture en porte {cap}",
         "Criticals": "Critiques",
         "CriticalsCount": "sévérité = Effet − 5 · plafond 6",
         "ClearCriticals": "Effacer tous les critiques",
@@ -1864,6 +1864,8 @@
         "PowerPacks": "Blocs d'énergie",
         "Efficiency": "Efficacité",
         "HalfLife": "Demi-vie",
+        "Redundant": "Seconde source d'énergie",
+        "RedundantHint": "Un robot fonctionnant uniquement sur RTG ou énergie solaire voit sa vitesse de déplacement et sa FOR réduites de moitié et subit Agilité −2. Une seconde unité RTG ou solaire, quelle qu'en soit la combinaison, supprime ces dégradations tant que les deux fonctionnent à pleine capacité.",
         "Resiliency": "Résilience",
         "Endurance": "Endurance",
         "Speed": "Vitesse",
@@ -2082,7 +2084,8 @@
             "label": "Notes"
           }
         }
-      }
+      },
+      "AugmentDuplicate": "Le Livre de base p.103 n'autorise qu'une seule augmentation de compétence. Aucun MD pour {names}."
     },
     "Training": {
       "Title": "Formation : {name}",
@@ -2313,10 +2316,6 @@
     "MetricRange": {
       "meter": "M",
       "kilometer": "KM"
-    },
-    "MetricWeight": {
-      "kilogram": "KG",
-      "ton": "TON"
     },
     "EquipmentSubType": {
       "augment": "Augmentation",
@@ -2780,7 +2779,9 @@
     },
     "CraftBays": {
       "dockingSpace": "Espace d'amarrage",
+      "dockingSpaceTransfer": "1D minutes",
       "hangar": "Hangar complet",
+      "hangarTransfer": "2D minutes",
       "dockingClampI": "Pince d'amarrage, type I",
       "dockingClampII": "Pince d'amarrage, type II",
       "dockingClampIII": "Pince d'amarrage, type III",
@@ -2912,6 +2913,7 @@
       "TypeAName": "Nommez l'escale",
       "ClearStop": "Vider cette extrémité",
       "Parsecs": "parsecs",
+      "Charted": "Distance lue sur la carte",
       "Then": "Puis",
       "Promote": "En faire la prochaine escale",
       "Forget": "Oublier cette escale",
@@ -3524,14 +3526,6 @@
         "FIELDS": {
           "band": {
             "label": "Bande"
-          },
-          "gees": {
-            "label": "Gravité (g)",
-            "hint": "La valeur imprimée, pour un monde plus dense que sa bande. Laissé vide, la valeur nominale de la bande s'applique."
-          },
-          "recoil": {
-            "label": "Le recul fait tournoyer le tireur",
-            "hint": "En gravité zéro, tirer sans un test d'Athlétisme (dextérité) Moyen (8+) met le tireur en rotation."
           }
         }
       },
@@ -3560,9 +3554,6 @@
           },
           "damage": {
             "label": "Dégâts"
-          },
-          "breach": {
-            "label": "Brèche de combinaison"
           }
         }
       },
@@ -3599,11 +3590,6 @@
       "hard": "Vide absolu",
       "partial": "Vide partiel",
       "minimal": "Atmosphère ténue"
-    },
-    "SuitBreaches": {
-      "none": "Intacte",
-      "minor": "Brèche mineure",
-      "major": "Brèche majeure"
     },
     "CrewRoles": {
       "captain": "Capitaine",
@@ -3820,6 +3806,7 @@
       "Damage": {
         "AP": "AP {score}",
         "Apply": "Appliquer {amount} — {transform}",
+        "Facing": "Face touchée",
         "ApplyToWhoever": "appliquer à qui a été touché",
         "Destructive": "Destructive ×10",
         "Floor": "Plancher 1 point",
@@ -3883,6 +3870,7 @@
       "Disease": "Maladie",
       "Diseases": "Maladies",
       "Duration": "Durée",
+      "EntryMode": "Entrée",
       "Equipped": "Équipé",
       "Equipment": "Équipement",
       "Equipments": "Équipements",
@@ -4136,7 +4124,6 @@
         "declined": "refusé",
         "unclaimed": "sans destinataire",
         "unable": "ne peut pas répondre",
-        "superseded": "remplacé",
         "OpenSkill": "{skill} — à vous de choisir",
         "Superseded": "+{count} remplacé(s)"
       },
@@ -4216,7 +4203,8 @@
       },
       "What": {
         "debit": "Débiter Cr{credits} à {n}",
-        "credit": "Créditer Cr{credits} à {n}"
+        "credit": "Créditer Cr{credits} à {n}",
+        "gift": "Donner Cr{credits} à {n}"
       },
       "Card": {
         "Debt": "Cr{credits} en dette",
@@ -4567,7 +4555,8 @@
       "MedicalCareHint": "3 + MD d'END + Médecine par jour · réparti également · une ou deux caractéristiques endommagées après les premiers soins",
       "NaturalHealingHint": "1D + MD d'END par jour · MD d'END seul tant qu'une chirurgie est requise",
       "MentalHint": "INT et ÉDU, un point chacune par jour · pas le PSI",
-      "ReviveHint": "Test d'END chaque minute · MD+1 par test raté"
+      "ReviveHint": "Test d'END chaque minute · MD+1 par test raté",
+      "PsiRest": "Repos PSI"
     },
     "RobotArmour": {
       "tl6": "NT 6-8",

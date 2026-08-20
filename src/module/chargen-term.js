@@ -91,7 +91,7 @@ export class ChargenTerm {
                 ...(exitMode ? { "system.exitMode": exitMode } : {}) });
         }
         await Chargen.update(actor, { term: term + 1, step: "" });
-        await Chargen.expirePending(actor, record?.id, exitMode);
+        await Chargen.expirePending(actor, record?.name, exitMode);
         // The hand-off, and it is a sentence rather than a screen: mustering out CONSUMES this
         // ledger and the teardown follows it, so a Traveller whose last career has closed
         // is not finished — they are owed the closing screen, and nothing else in the loop would
@@ -225,11 +225,10 @@ function automaticEntry({ actor, system }) {
  * not carry a career they were refused, and it holds no term to lose.
  */
 async function failQualification({ actor, record }, reason) {
-    const state = Chargen.read(actor);
-    // Two budgets and not one: the draft is once per lifetime "unless otherwise stated", and the
-    // errata prints the otherwise as a general statement.
-    const spent = Rules.on("eventDraftBudget")
-        ? state.draft.applied : (state.draft.applied + state.draft.byEvent);
+    // Core p.19: the draft is once per lifetime "unless otherwise stated"; Core p.17 prints the
+    // otherwise as a general statement, so an event draft is budgeted apart.
+    const drafts = Chargen.draftsTaken(actor);
+    const spent = Rules.on("eventDraftBudget") ? drafts.drafted : (drafts.drafted + drafts.byEvent);
     const key = spent ? "MGT2.Chargen.Term.QualifyFailedNoDraft" : "MGT2.Chargen.Term.QualifyFailedDraft";
     ui.notifications.warn(`${reason} ${game.i18n.localize(key)}`);
     await record.delete();
@@ -477,7 +476,7 @@ async function applyRow(view, row, { mishap }) {
     for ( const pending of row.tray ) {
         if ( !await earned(pending, row, subPassed) ) continue;
         await Chargen.pushPending(actor, { ...pending, appliesTo: [...pending.appliesTo],
-            career: pending.career || (SELF_SCOPES.has(pending.scope) ? record.id : "") });
+            career: pending.career || (SELF_SCOPES.has(pending.scope) ? record.name : "") });
         lines.push(game.i18n.format("MGT2.Chargen.Term.Pending",
             { what: game.i18n.localize(MGT2.TrayKinds[pending.kind] ?? pending.kind) }));
     }
@@ -1154,7 +1153,10 @@ async function applyStepOutcome(view, arm, key) {
             lines.push(game.i18n.format("MGT2.Chargen.Term.TrackAdjusted", { track: moved.label,
                 dm: MGT2Helper.signed(delta), value: moved.rung || moved.value }));
         }
-        else if ( moved ) lines.push(game.i18n.format("MGT2.Chargen.Term.TrackAtCap", { track: moved.label }));
+        else if ( moved ) {
+            lines.push(game.i18n.format(moved.held
+                ? "MGT2.Chargen.Term.TrackHeld" : "MGT2.Chargen.Term.TrackAtCap", { track: moved.label }));
+        }
     }
     const granted = await applyCell(actor, arm.grant,
         { provenance: { term, career: record?.id ?? "", table: key } });
@@ -1218,7 +1220,7 @@ async function roll(view, { check = "", step, target = null, characteristic = ""
     rows = [], formula = "" } = {}) {
     const { actor, record } = view;
     const composed = CreationRoll.compose(actor, {
-        characteristic, skill: named, check, career: record?.id, target, rows });
+        characteristic, skill: named, check, career: record?.name, target, rows });
     // A table roll indexes rather than passes: 1D on a Mishap table, 2D on an Events table.
     if ( formula ) composed.formula = [formula, ...composed.parts].join("");
 
@@ -1228,7 +1230,7 @@ async function roll(view, { check = "", step, target = null, characteristic = ""
     if ( !posted ) return null;
 
     const total = posted.outcome.roll.total;
-    if ( target !== null ) await Chargen.spendPending(actor, check, record?.id);
+    if ( target !== null ) await Chargen.spendPending(actor, check, record?.name);
     return {
         total,
         // Three rules read the DICE and not the total: a natural 2 always fails Survival, a natural
@@ -1374,12 +1376,11 @@ function reading(actor) {
     };
 }
 
-/** What the frame says this kind of term yields — benefit rolls, advancement, skills, years. */
+/** What a term yields, selected by TERM NUMBER; a row with neither bound set is the catch-all. */
 function termKind(view) {
-    const key = logEntry(view.record, view.term).kind;
-    if ( !key ) return null;
-    return (Chargen.frame(view.actor)?.system.frame.termKinds ?? [])
-        .find(entry => entry.key === key) ?? null;
+    return (Chargen.frame(view.actor)?.system.frame.termKinds ?? []).find(entry =>
+        (!entry.fromTerm || (view.term >= entry.fromTerm))
+        && (!entry.toTerm || (view.term <= entry.toTerm))) ?? null;
 }
 
 /** The term log row for one term, present or not — the reader, never the writer. */

@@ -1,8 +1,10 @@
+import { wireChainSources } from "./chatHelper.js";
 import { checkOf } from "./chat-message.js";
 import { Checks, renderRollCard } from "./checks.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { RollPromptHelper } from "./roll-prompt.js";
+import { TravellerActorSheet } from "./actors/character-sheet.js";
 
 const fields = foundry.data.fields;
 
@@ -18,9 +20,9 @@ export const SKILL_MODES = Object.freeze(["named", "none", "open"]);
 /** The state machine. `closed` is the referee ticking Conclude; nothing concludes on its own. */
 export const REQUEST_STATES = Object.freeze(["open", "closed", "withdrawn"]);
 
-/** What a line can say. */
+/** What a line can say. Superseding is a count on the reading, never a status. */
 export const LINE_STATES = Object.freeze([
-    "waiting", "answered", "declined", "unclaimed", "unable", "superseded"
+    "waiting", "answered", "declined", "unclaimed", "unable"
 ]);
 
 /**
@@ -330,30 +332,34 @@ function lineDetail(request, read, actor, showTarget) {
     return parts.filter(part => part).join(" · ");
 }
 
-/** The DM this line would roll at, through the one reducer both totalling paths already use. */
+/** Every term `answerRequest` would apply to this line, through the reducer both totals use. */
 function lineChit(request, read, actor, chain) {
     const rows = [];
-    if ( (request.skillMode === "named") && (read.skillItem !== UNRESOLVED) ) {
-        if ( read.skillItem === null ) {
-            rows.push([game.i18n.localize("MGT2.Items.NotProficient"),
-                actor ? RollPromptHelper.untrained(actor).dm : MGT2.Untrained.dm]);
-        }
-        else {
-            const item = actor?.items?.get(read.skillItem);
-            if ( item ) rows.push([item.name, item.system.level ?? 0]);
-        }
+    const skill = ((request.skillMode === "named") && (read.skillItem !== UNRESOLVED))
+        ? ((read.skillItem === null) ? "NP" : read.skillItem) : "";
+    const key = (request.chars.length === 1) ? request.chars[0] : "";
+
+    if ( skill === "NP" ) {
+        rows.push([game.i18n.localize("MGT2.Items.NotProficient"),
+            actor ? RollPromptHelper.untrained(actor).dm : MGT2.Untrained.dm]);
     }
-    if ( request.chars.length === 1 ) {
-        const characteristic = actor?.system?.characteristics?.[request.chars[0]];
-        if ( characteristic ) {
-            rows.push([game.i18n.localize(MGT2.Characteristics[request.chars[0]]), characteristic.dm]);
-        }
+    else if ( skill ) {
+        const item = actor?.items?.get(skill);
+        if ( item ) rows.push([item.name, item.system.level ?? 0]);
     }
+    const characteristic = key ? actor?.system?.characteristics?.[key] : null;
+    if ( characteristic ) rows.push([game.i18n.localize(MGT2.Characteristics[key]), characteristic.dm]);
     if ( request.dm.value ) rows.push([request.dm.label, request.dm.value]);
     const timeframe = MGT2Helper.getTimeframeDM(request.timeframe);
     if ( timeframe ) rows.push([game.i18n.localize(MGT2.Timeframes[request.timeframe]), timeframe]);
     // Core p.63-64: the resolver's chit grows as each contributor lands.
     if ( read.resolver && chain ) rows.push([game.i18n.localize("MGT2.RollPrompt.Chain"), chain]);
+    const standing = actor?.system?.characteristics ? TravellerActorSheet.checkModifiers(actor) : [];
+    for ( const source of standing ) {
+        const scoped = source.characteristics ? source.characteristics.includes(key)
+            : (source.skills ? source.skills.includes(skill) : true);
+        if ( scoped ) rows.push([MGT2Helper.modifierLabel(source), source.dm]);
+    }
     return MGT2Helper.signed(Checks.modifiers(rows).total, "+0");
 }
 
@@ -550,6 +556,7 @@ export function setupRequestCard(message, html) {
             return onRequestAction(message, control.dataset, event);
         });
     }
+    wireChainSources(html);
 }
 
 function onRequestAction(message, dataset, event) {

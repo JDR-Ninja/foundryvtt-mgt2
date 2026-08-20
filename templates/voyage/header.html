@@ -38,6 +38,10 @@
 				aria-label="{{localize 'MGT2.Voyage.Parsecs'}}" />
 			{{else}}<span class="v">{{route.parsecs}}</span>{{/if}}
 			<span class="u">{{localize 'MGT2.Voyage.Parsecs'}}</span>
+			{{! A reading of 0 is two ends in one hex, so this tests against null and never truthiness. }}
+			{{#if (ne route.charted null)}}
+			<span class="charted" data-tooltip="{{localize 'MGT2.Voyage.Charted'}}">{{route.charted}}</span>
+			{{/if}}
 		</div>
 
 		<div class="end to{{#unless route.next.named}} vacant{{/unless}}"

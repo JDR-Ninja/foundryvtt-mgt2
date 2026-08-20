@@ -863,7 +863,6 @@ export class SpacecraftData extends CraftData {
         this.bridge.holographicUnderTL = this.bridge.holographic && (this.tl < HOLOGRAPHIC_TL);
 
         this.fuel.jumpTons = this.fuel.jumpTonsOverride ?? this.fuelPerMaxJump;
-        this.fuel.parsecTons = this.fuelPerParsec;
         this.fuel.plantTons = this.fuelPerPeriod;
         // Jumps at the RATED range, which is the only ratio the design tonnage answers, and it
         // divides by the tonnage IN FORCE — a printed jump tank that the ratio ignored would put a

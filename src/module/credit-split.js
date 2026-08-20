@@ -390,6 +390,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
     /** The four sentences the foot prints. */
     #lines(reading) {
         const money = value => MGT2Helper.credits(value);
+        const what = reading.gift ? "gift" : this.#direction;
         return {
             assignedLine: game.i18n.format("MGT2.CreditSplit.OfTotal",
                 { assigned: money(reading.assigned), total: money(reading.total) }),
@@ -404,7 +405,7 @@ export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
                 ? game.i18n.format("MGT2.CreditSplit.DebtLine",
                     { credits: money(reading.debt), n: reading.payers })
                 : "",
-            whatLine: game.i18n.format(`MGT2.CreditSplit.What.${this.#direction}`,
+            whatLine: game.i18n.format(`MGT2.CreditSplit.What.${what}`,
                 { credits: money(reading.assigned), n: reading.rows.length })
         };
     }

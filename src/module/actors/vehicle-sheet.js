@@ -313,6 +313,12 @@ export class VehicleActorSheet extends TravellerActorSheet {
         const result = await this.actor.system.applyCritical(location, severity);
         if (!result) return;
         const label = game.i18n.localize(MGT2.VehicleCriticals[location].label);
+        // The fourteen cells raising Hull Severity are applied here, two of them being a 1D roll.
+        const cell = this.actor.system.criticalEffect(location);
+        if (cell?.hullSeverity && !result.overflow) {
+            await this.actor.system.raiseHullSeverity(cell.hullSeverity);
+        }
+
         return ui.notifications.info(result.overflow
             ? game.i18n.format("MGT2.Actor.vehicle.CriticalOverflow",
                 { location: label, damage: result.overflow.total })

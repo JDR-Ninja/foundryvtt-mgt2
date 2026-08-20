@@ -18,6 +18,7 @@
 			{{/each}}
 		</div>
 
+		{{#if robot.chains.speed.length}}
 		<span class="lbl">{{localize 'MGT2.Actor.robot.ChainSpeed'}}</span>
 		<div class="chain" data-derived="system.speed.metres">
 			{{#each robot.chains.speed}}
@@ -25,6 +26,7 @@
 			<span class="t{{#if off}} off{{/if}}{{#if result}} result{{/if}}"><b>{{value}}</b><span>{{localize label}}</span></span>
 			{{/each}}
 		</div>
+		{{/if}}
 
 		<span class="lbl">{{localize 'MGT2.Actor.robot.ChainCost'}}</span>
 		<div class="chain" data-derived="system.baseCost">
@@ -61,6 +63,10 @@
 			<label>
 				<span class="lbl">{{localize 'MGT2.Actor.robot.Power'}}</span>
 				{{formInput systemFields.endurance.fields.source name="system.endurance.source" value=system.endurance.source localize=true classes="f"}}
+			</label>
+			<label class="check" data-tooltip="{{localize 'MGT2.Actor.robot.RedundantHint'}}">
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Redundant'}}</span>
+				{{formInput systemFields.endurance.fields.redundant name="system.endurance.redundant" value=system.endurance.redundant}}
 			</label>
 			<label>
 				<span class="lbl">{{localize 'MGT2.Actor.robot.PowerPacks'}}</span>

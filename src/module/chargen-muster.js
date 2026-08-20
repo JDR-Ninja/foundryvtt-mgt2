@@ -94,7 +94,7 @@ export const Muster = {
             if ( bonus.dm ) rows.push([record.name, bonus.dm]);
         }
         // Life Event 10's `DM+2 to any one Benefit roll` and everything shaped like it.
-        for ( const entry of Chargen.pending(actor, "benefit", career) ) {
+        for ( const entry of Chargen.pending(actor, "benefit", record?.name ?? "") ) {
             if ( (entry.kind === "dm") && entry.dm ) {
                 rows.push([entry.note || game.i18n.localize("MGT2.Chargen.Roll.Pending"), entry.dm]);
             }
@@ -122,16 +122,13 @@ export const Muster = {
                 modifiers: composed.labels
             })
         });
-        // Life Event 10's `DM+2 to any one Benefit roll` is a one-shot tray entry that `compose`
-        // above reads — so this is the roll that consumes it.
-        await Chargen.spendPending(actor, "benefit", career);
         return { roll, composed };
     },
 
     /**
      * Record one benefit roll's outcome and spend the roll.
      * @param {object} benefit    A `system.entitlements` row: kind, category, credits, tl, …
-     * @param {boolean} [options.spend]   Whether this consumes a Benefit roll from the ledger
+     * @param {boolean} [options.spend]   Whether this consumes a Benefit roll and its tray one-shots
      */
     async take(actor, benefit, { spend = true } = {}) {
         const row = {
@@ -153,6 +150,9 @@ export const Muster = {
         await actor.update(update);
 
         if ( spend ) {
+            // Folio 46, Life Event 10: the `DM+2 to any one Benefit roll` goes with the outcome kept.
+            await Chargen.spendPending(actor, "benefit",
+                actor.items.get(row.provenance.career)?.name ?? "");
             await Chargen.update(actor, {
                 benefitRolls: [...Chargen.read(actor).benefitRolls.map(entry => entry.toObject?.() ?? entry),
                     { value: -1, career: row.provenance.career ?? "", term: row.provenance.term,

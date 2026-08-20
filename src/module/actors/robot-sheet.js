@@ -217,11 +217,14 @@ export class RobotActorSheet extends TravellerActorSheet {
         endurance.push(term(system.endurance.hours, "MGT2.Actor.robot.Chain.hours", { result: true }));
 
         const agility = system.agility;
-        const speed = [
+        const speed = (system.speed.metres === null) ? [] : [
             term(5, "MGT2.Actor.robot.Chain.speedBase"),
             term(Math.abs(agility), loco?.label ?? "", { op: agility < 0 ? "−" : "+" }),
             term(Math.abs(system.speed.tactical), "MGT2.Actor.robot.Chain.tactical",
                 { op: system.speed.tactical < 0 ? "−" : "+", off: !system.speed.tactical }),
+            ...(system.soleSourcePower
+                ? [term(2, "MGT2.Actor.robot.Power", { op: "÷" }),
+                    term(2, "MGT2.Actor.robot.Agility", { op: "−" })] : []),
             term(system.speed.metres, "MGT2.Actor.robot.Chain.metres", { result: true })
         ];
 

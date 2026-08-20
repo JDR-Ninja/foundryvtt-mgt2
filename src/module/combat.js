@@ -56,12 +56,6 @@ export class SpaceCombatData extends foundry.abstract.TypeDataModel {
         }) ?? BANDS.at(-1);
     }
 
-    /** One band's full reading: its kilometres, its attack DM and what leaving it costs. */
-    static bandInfo(key) {
-        const band = MGT2.ShipRangeBands[key];
-        return band ? { key, ...band } : null;
-    }
-
     /** The band index, so "one step closer" is arithmetic rather than a table. */
     static bandIndex(key) {
         return BANDS.indexOf(key);
@@ -83,11 +77,6 @@ export class SpaceCombatData extends foundry.abstract.TypeDataModel {
     /** The band between two ship groups, or null while they have never been placed. */
     bandBetween(a, b) {
         return this.bands[SpaceCombatData.pairKey(a, b)] ?? null;
-    }
-
-    /** What that band is worth: the kilometres it spans, its attack DM and what leaving it costs. */
-    rangeBetween(a, b) {
-        return SpaceCombatData.bandInfo(this.bandBetween(a, b));
     }
 
     /** Set the band between two ship groups, or clear it by passing a falsy band. */

@@ -43,7 +43,7 @@
   "TYPES.RegionBehavior.temperature": "Temperature",
   "TYPES.HINTS.RegionBehavior.temperature": "States the ambient, the damage and the interval. Only the per-round rows could ever fire on their own.",
   "TYPES.RegionBehavior.vacuum": "Vacuum",
-  "TYPES.HINTS.RegionBehavior.vacuum": "States the pressure, the damage and whether it escalates. The suit's breach shifts the whole table.",
+  "TYPES.HINTS.RegionBehavior.vacuum": "States the pressure, the damage and whether it escalates.",
   "TYPES.RegionBehavior.radiation": "Radiation",
   "TYPES.HINTS.RegionBehavior.radiation": "States the dose and what the region itself absorbs, before the Traveller's own armour.",
   "TYPES.Actor.character": "Traveller",
@@ -113,14 +113,6 @@
       "campaignDay": {
         "name": "Campaign day",
         "hint": "Days since whatever day you called zero. Nothing advances it — you do. Speculative trade reads it: a supplier you walk away from is shut for a month, and a month is 28 days."
-      },
-      "useWeightMetric": {
-        "name": "Use Metric system for WEIGHT",
-        "hint": "kilogram (kg) instead of pounds (lbs)"
-      },
-      "useDistanceMetric": {
-        "name": "Use Metric system for DISTANCE",
-        "hint": "kilometer (km) instead of mile (mi)"
       },
       "usePronouns": {
         "name": "Use Pronouns",
@@ -234,7 +226,7 @@
         "name": "Losing a rung on a species status track",
         "hint": "One species' page says a status is for life once attained, and says one line later that it can be lost and regained, perhaps several times.",
         "canFall": "It can always be lost",
-        "heldThenPermanent": "It can be lost, unless held through a further term",
+        "heldThenPermanent": "It can be lost, but the highest rung ever attained is the one that answers",
         "permanent": "Once attained it is for life"
       },
       "creationCostsBecomeDebt": {
@@ -932,7 +924,8 @@
         "RefereeStep": "{step} is this frame's own step: the referee resolves it.",
         "NoStepTarget": "{step}: the printed table gives no target for this Traveller.",
         "StepNotTriggered": "{step} does not fire this term.",
-        "TrackAtCap": "{track} is already at its last rung."
+        "TrackAtCap": "{track} is already at its last rung.",
+        "TrackHeld": "{track} cannot be lost once attained."
       },
       "StepCheckTriggers": {
         "everyTerm": "Every term",
@@ -1576,6 +1569,7 @@
         "RefereeAction": "{action} — referee's call.",
         "StationDM": "Station",
         "SensorDM": "Sensor DM",
+        "TacticsDM": "Tactics DM",
         "DutyDuplicated": "already held",
         "DutyUnmounted": "no mount named",
         "NoMount": "That gunner is not sitting at a mount. Name one in the station's mount field.",
@@ -1609,6 +1603,12 @@
         "Internal": "interior, sealed",
         "Empty": "— empty —",
         "Docked": "Docked",
+        "CraftPerRound": "{n} craft per round",
+        "Repairs": "repairs aboard",
+        "ClampTons": "clamp is {tons} t, not {capacity}",
+        "ClampCraft": "{tons} t craft, clamp takes {band} t",
+        "BaySize": "{need} t needed for a {tons} t craft",
+        "MountCapacity": "{held} weapons, mount holds {cap}",
         "Criticals": "Criticals",
         "CriticalsCount": "severity = Effect − 5 · cap 6",
         "ClearCriticals": "Clear every critical",
@@ -1865,6 +1865,8 @@
         "PowerPacks": "Power packs",
         "Efficiency": "Efficiency",
         "HalfLife": "Half-life",
+        "Redundant": "Second power source",
+        "RedundantHint": "A robot running on RTG or solar alone has its movement rate and STR halved and suffers Agility −2. A second RTG or solar unit, in any combination, removes those degradations while both run at full capability.",
         "Resiliency": "Resiliency",
         "Endurance": "Endurance",
         "Speed": "Speed",
@@ -2083,7 +2085,8 @@
             "label": "Notes"
           }
         }
-      }
+      },
+      "AugmentDuplicate": "Core p.107 allows one skill augmentation. No DM from {names}."
     },
     "Training": {
       "Title": "Training: {name}",
@@ -2314,10 +2317,6 @@
     "MetricRange": {
       "meter": "M",
       "kilometer": "KM"
-    },
-    "MetricWeight": {
-      "kilogram": "KG",
-      "ton": "TON"
     },
     "EquipmentSubType": {
       "augment": "Augment",
@@ -2588,7 +2587,8 @@
       "MedicalCareHint": "3 + END DM + Medic per day · evenly · one or two damaged after first aid",
       "NaturalHealingHint": "1D + END DM per day · END DM alone while surgery is required",
       "MentalHint": "INT and EDU, one point each per day · not PSI",
-      "ReviveHint": "END check each minute · DM+1 per failed check"
+      "ReviveHint": "END check each minute · DM+1 per failed check",
+      "PsiRest": "PSI rest"
     },
     "Radiation": {
       "Exposure": "Radiation exposure",
@@ -2653,6 +2653,7 @@
       "Damage": {
         "AP": "AP {score}",
         "Apply": "Apply {amount} — {transform}",
+        "Facing": "Struck facing",
         "ApplyToWhoever": "apply to whoever was hit",
         "Destructive": "Destructive ×10",
         "Floor": "Floor 1 point",
@@ -2705,6 +2706,7 @@
       "Diseases": "Diseases",
       "Difficulty": "Difficulty",
       "Duration": "Duration",
+      "EntryMode": "Entry",
       "Equipped": "Equipped",
       "Equipment": "Equipment",
       "Equipments": "Equipments",
@@ -2969,7 +2971,6 @@
         "declined": "declined",
         "unclaimed": "unclaimed",
         "unable": "cannot answer",
-        "superseded": "superseded",
         "OpenSkill": "{skill} — pick your own",
         "Superseded": "+{count} superseded"
       },
@@ -3049,7 +3050,8 @@
       },
       "What": {
         "debit": "Debit Cr{credits} from {n}",
-        "credit": "Credit Cr{credits} to {n}"
+        "credit": "Credit Cr{credits} to {n}",
+        "gift": "Give Cr{credits} to {n}"
       },
       "Card": {
         "Debt": "Cr{credits} to debt",
@@ -3613,7 +3615,9 @@
     },
     "CraftBays": {
       "dockingSpace": "Docking Space",
+      "dockingSpaceTransfer": "1D minutes",
       "hangar": "Full Hangar",
+      "hangarTransfer": "2D minutes",
       "dockingClampI": "Docking Clamp, Type I",
       "dockingClampII": "Docking Clamp, Type II",
       "dockingClampIII": "Docking Clamp, Type III",
@@ -4018,6 +4022,7 @@
       "TypeAName": "Name the stop",
       "ClearStop": "Clear this end",
       "Parsecs": "parsecs",
+      "Charted": "Distance read off the map",
       "Then": "Then",
       "Promote": "Make this the next stop",
       "Forget": "Forget this stop",
@@ -4630,14 +4635,6 @@
         "FIELDS": {
           "band": {
             "label": "Band"
-          },
-          "gees": {
-            "label": "Gravity (g)",
-            "hint": "The printed figure, for a world denser than its band. Left blank, the band's nominal value applies."
-          },
-          "recoil": {
-            "label": "Recoil spins the shooter",
-            "hint": "In zero G, firing without an Average (8+) Athletics (dexterity) check sets the shooter spinning."
           }
         }
       },
@@ -4666,9 +4663,6 @@
           },
           "damage": {
             "label": "Damage"
-          },
-          "breach": {
-            "label": "Suit breach"
           }
         }
       },
@@ -4705,11 +4699,6 @@
       "hard": "Hard vacuum",
       "partial": "Partial vacuum",
       "minimal": "Thin atmosphere"
-    },
-    "SuitBreaches": {
-      "none": "Intact",
-      "minor": "Minor breach",
-      "major": "Major breach"
     },
     "SkipDebts": {
       "Title": "Skipping on debts",

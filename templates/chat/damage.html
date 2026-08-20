@@ -20,6 +20,14 @@
 		</div>
 		{{/each}}
 	</div>
+	{{! Core folio 140: the armour a vehicle meets an attack with is the facing the attack was made
+	    from, and nothing on the canvas can be read for it. Shown while a vehicle is selected. }}
+	<div class="dmgface" hidden>
+		<span class="k">{{localize 'MGT2.Chat.Damage.Facing'}}</span>
+		{{#each facings}}
+		<span class="f{{#if @first}} on{{/if}}" data-facing="{{this}}">{{localize (concat 'MGT2.Actor.vehicle.Facing.' this)}}</span>
+		{{/each}}
+	</div>
 	{{! Filled in against whichever token the referee has selected, and only then — nothing on this
 	    card resolved against a target when the attack was rolled. }}
 	<div class="dmgvoid">{{localize 'MGT2.Chat.Damage.Immune'}}</div>

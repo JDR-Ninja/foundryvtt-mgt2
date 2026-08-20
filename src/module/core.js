@@ -238,7 +238,8 @@ Hooks.once("init", async function () {
     // play beside the hull, and both are plain numbers rather than a pool.
     spacecraft: {
       bar: ["life", "characteristics.hull"],
-      value: ["hullSeverity", "characteristics.hull.value", "power.surplus", "fuel.tons"]
+      value: ["ops.fuel", "hullSeverity", "characteristics.hull.value", "power.surplus",
+        "fuel.tons"]
     },
     // The six canonical characteristics are declared on every robot and only revealed by
     // `traveller.enabled`, so they are offered as bars here whether or not the flag is set: the

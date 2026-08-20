@@ -61,6 +61,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       medicalCare: TravellerActorSheet.#onMedicalCare,
       naturalHealing: TravellerActorSheet.#onNaturalHealing,
       mentalHealing: TravellerActorSheet.#onMentalHealing,
+      psiRest: TravellerActorSheet.#onPsiRest,
       revive: TravellerActorSheet.#onRevive,
       radiation: TravellerActorSheet.#onRadiation,
       lossAdd: TravellerActorSheet.#onLossAdd,
@@ -144,7 +145,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     }
   };
 
-  /** Which parts a change to these paths can affect. Longest prefix wins. */
+  /** Which parts a change to these paths can affect. First match wins, so a longer prefix is listed above the one it extends. */
   static #PARTS_BY_PATH = [
     ["system.traits", ["skills"]],
     // The encumbrance cap in the footer is STR + END, so a score reaches it too, and the recovery
@@ -153,8 +154,8 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     ["system.biography", ["biography"]],
     ["system.finance", ["inventory"]],
     ["system.personal", ["header", "skills"]],
-    ["system.health", ["health", "header"]],
-    ["system.config", ["characteristics", "skills", "header"]],
+    ["system.health", ["health", "header", "characteristics", "footer"]],
+    ["system.config", ["characteristics", "skills", "header", "health"]],
     ["system.states", ["header", "health"]],
     ["system.stun", ["header"]],
     ["system.training", ["skills"]],
@@ -551,6 +552,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       reviveDM: actor.system.enduranceDM + states.reviveFailures,
       naturalFormula: actor.system.naturalHealingFormula,
       mental: actor.system.constructor.MENTAL_LINKS.some(k => actor.system.characteristics[k].damage > 0),
+      // The reserve is outside the damage chain, so no other procedure on this block reaches it.
+      psi: (Rules.on("psionics") && (actor.system.config.psionic === true))
+        ? { spent: actor.system.characteristics.psionic.damage } : null,
       augment: augment ? game.i18n.format("MGT2.Recovery.AugmentAt", augment) : null
     };
 
@@ -575,6 +579,11 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       : 0;
     // The cap tick sits where the fill stops, so an overrun reads as an overrun.
     model.encumbranceTick = model.encumbranceOver ? 100 : model.encumbrancePercent;
+
+    // Core p.107 allows one skill augmentation. Advisory: the extras stay fitted and stay listed.
+    const duplicates = actor.system.augmentIssues.skillDuplicates;
+    model.augmentDuplicates = duplicates.length
+      ? duplicates.map(id => actor.items.get(id)?.name).filter(Boolean).join(" · ") : null;
 
     const byName = MGT2Helper.compareByName;
     Object.assign(model, {
@@ -921,6 +930,18 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     const detail = keys.map(key => game.i18n.localize(MGT2.Characteristics[key])).join(" · ");
     return ChatHelper.postRecovery(this.actor, "MGT2.Recovery.Mental",
       game.i18n.format("MGT2.Recovery.Restored", { points: keys.length, detail }));
+  }
+
+  /** Core p.228: one point an hour from the fourth hour, and the only procedure reaching PSI. */
+  static async #onPsiRest() {
+    const spent = this.actor.system.characteristics.psionic.damage;
+    const result = await CharacterPrompts.openPsiRest({ spent });
+    if ( !result ) return;
+
+    const rest = await this.actor.system.restPsi(result.hours);
+    if ( !rest ) return;
+    return ChatHelper.postRecovery(this.actor, "MGT2.Recovery.PsiRest",
+      game.i18n.format("MGT2.Recovery.RestoredPlain", { points: rest.recovered }));
   }
 
   /** Core p.83: an END check per minute, each failure adding a cumulative DM+1 to the next. */

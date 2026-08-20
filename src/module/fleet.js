@@ -104,11 +104,6 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
         return this.bands[SpaceCombatData.pairKey(a, b)] ?? null;
     }
 
-    /** What that band is worth: the kilometres it spans, its attack DM and what leaving it costs. */
-    rangeBetween(a, b) {
-        return SpaceCombatData.bandInfo(this.bandBetween(a, b));
-    }
-
     /** Set the band between two fleets, or clear it by passing a falsy band. */
     async setBand(a, b, band) {
         const key = SpaceCombatData.pairKey(a, b);

@@ -1,3 +1,6 @@
+// `DataField#clean` prunes a key the schema no longer declares, on construction and on update
+// alike, so `_source` never carries one. Residue from a removed field stays in the database row
+// unread, and no condition here can see it: a step written to delete one fires on NOTHING.
 import { MGT2Helper } from "./helper.js";
 import { seedRules } from "./rules.js";
 
@@ -11,7 +14,7 @@ const NPC_CHAIN_FIXED = ["endurance", "strength", "dexterity"];
 const MIGRATIONS = [
   {
     version: "0.2.0",
-    label: "damageOrder, protection, view state, crew duty, NPC damage chain, species unwind, species link, ucp, durationUnit, career damage/interval, world geometry, training programmes, augment Computer/0",
+    label: "damageOrder, protection, NPC damage chain, species unwind, species link, durationUnit, world geometry, training programmes, augment Computer/0",
     async migrate() {
       // Before the sweep: it rewrites `characteristics.<k>.base`, which the sweep then persists.
       for ( const actor of game.actors ) await unwindSpecies(actor);
@@ -111,41 +114,19 @@ function traitKey(entry) {
   return `${entry?.family ?? ""}/${entry?.key ?? ""}/${params}/${entry?.note ?? ""}`;
 }
 
-/** Drop the fields the 0.2.0 schema no longer declares. @returns {object|null} */
+/** @returns {object|null} */
 function collectActorUpdate(actor) {
   const source = actor._source.system;
   if ( !source ) return null;
   const update = { _id: actor.id };
   let dirty = false;
 
-  if ( source.config?.damages ) {
-    update["system.config.damageOrder"] = actor.system.config.damageOrder;
-    update["system.config.damages"] = new foundry.data.operators.ForcedDeletion();
-    dirty = true;
-  }
   // Only the exact stale triple, order included: nothing records who wrote a chain, so a reordered,
   // shortened or `hits`-based one is a decision and is left alone.
   if ( (actor.type === "npc") && isChain(source.config?.damageOrder, NPC_CHAIN_STALE) ) {
     update["system.config.damageOrder"] = [...NPC_CHAIN_FIXED];
     dirty = true;
   }
-  for ( const key of ["name", "containerView", "containerDropIn", "inventory"] ) {
-    if ( key in source ) {
-      update[`system.${key}`] = new foundry.data.operators.ForcedDeletion();
-      dirty = true;
-    }
-  }
-  if ( source.states && ("encumbrance" in source.states) ) {
-    update["system.states.encumbrance"] = new foundry.data.operators.ForcedDeletion();
-    dirty = true;
-  }
-  // `crew[].duty` moved onto the `crew` Combatant, where it clears with the encounter.
-  if ( (actor.type === "spacecraft") && source.crew?.some(row => "duty" in row) ) {
-    update["system.crew"] = actor.system.crew.map(row => ({ ...row }));
-    dirty = true;
-  }
-  // `personal.speciesText` is NOT deleted: `DataField#clean` prunes an undeclared key, so
-  // no condition here can see one to fire on — the same reason the deletions above never fire.
   const species = actor.items.find(item => item.type === "species");
   if ( species ) {
     if ( source.personal?.species !== species.id ) {
@@ -161,23 +142,6 @@ function collectActorUpdate(actor) {
       dirty = true;
     }
   }
-  // The UPP is the six canonical maxima and derives; a typed one beside them was a second source of
-  // truth for one fact.
-  if ( source.personal && ("ucp" in source.personal) && (actor.type === "character") ) {
-    if ( source.personal.ucp ) {
-      // eslint-disable-next-line no-console
-      console.log(`mgt2 | "${actor.name}": discarding the typed UPP "${source.personal.ucp}" — `
-        + `it now derives as "${actor.system.upp}"`);
-    }
-    update["system.personal.ucp"] = new foundry.data.operators.ForcedDeletion();
-    dirty = true;
-  }
-  // `study.{skill, total, completed}` became one keyed `training` programme.
-  if ( (actor.type === "character") && source.study ) {
-    update["system.training"] = foundry.utils.deepClone(source.training ?? { programmes: {} });
-    update["system.study"] = new foundry.data.operators.ForcedDeletion();
-    dirty = true;
-  }
   // A world imported from the `mgt2-data` module carried its geometry in that module's flag
   // namespace, where the system could not read it; the two typed halves are in the schema now.
   if ( actor.type === "world" ) {
@@ -185,14 +149,6 @@ function collectActorUpdate(actor) {
     for ( const key of ["sector", "hex"] ) {
       if ( flags[key] && !source[key] ) {
         update[`system.${key}`] = flags[key];
-        dirty = true;
-      }
-    }
-  }
-  for ( const [key, characteristic] of Object.entries(source.characteristics ?? {}) ) {
-    for ( const dropped of ["dm", "showMax"] ) {
-      if ( dropped in characteristic ) {
-        update[`system.characteristics.${key}.${dropped}`] = new foundry.data.operators.ForcedDeletion();
         dirty = true;
       }
     }
@@ -213,28 +169,10 @@ function collectItemUpdate(item) {
   const update = { _id: item.id };
   let dirty = false;
 
-  if ( typeof source.protection === "string" ) {
-    update["system.protection"] = item.system.protection;
-    dirty = true;
-  }
-  if ( "trash" in source ) {
-    update["system.trash"] = new foundry.data.operators.ForcedDeletion();
-    dirty = true;
-  }
-  if ( (item.type === "container") && (("weight" in source) || ("count" in source)) ) {
-    update["system.weight"] = new foundry.data.operators.ForcedDeletion();
-    update["system.count"] = new foundry.data.operators.ForcedDeletion();
-    dirty = true;
-  }
   // A station's construction position used to be read off the Item's NAME, which is user text in
   // whatever language the world runs in.
   if ( (item.type === "role") && !source.crewRole && item.system.crewRoleKey ) {
     update["system.crewRole"] = item.system.crewRoleKey;
-    dirty = true;
-  }
-  if ( (item.type === "computer") && (("processingUsed" in source) || ("overload" in source)) ) {
-    update["system.processingUsed"] = new foundry.data.operators.ForcedDeletion();
-    update["system.overload"] = new foundry.data.operators.ForcedDeletion();
     dirty = true;
   }
   // `augment.processing` became nullable: `0` used to mean "not a computer" and now means
@@ -250,17 +188,6 @@ function collectItemUpdate(item) {
   if ( source.psionic?.durationUnit === "Heures" ) {
     update["system.psionic.durationUnit"] = "Hours";
     dirty = true;
-  }
-  // `damage` and `interval` were `DiseaseData`'s, copied onto `CareerData` and never given a career
-  // meaning: no control wrote them, no code read them, and every career Item carried the pair
-  // blank.
-  if ( item.type === "career" ) {
-    for ( const key of ["damage", "interval"] ) {
-      if ( key in source ) {
-        update[`system.${key}`] = new foundry.data.operators.ForcedDeletion();
-        dirty = true;
-      }
-    }
   }
 
   return dirty ? update : null;

@@ -49,13 +49,7 @@ export class ChargenState extends foundry.abstract.DataModel {
             // Folio 50's shared skills package, and only the half that is spent: what a Traveller
             // has already taken out of the pool the table chose.
             packagePicks: new fields.ArrayField(
-                new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] }),
-
-            // Two budgets and not one.
-            draft: new fields.SchemaField({
-                applied: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true }),
-                byEvent: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true })
-            })
+                new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] })
         };
     }
 }
@@ -180,6 +174,17 @@ export const Chargen = {
         return (actor?.items ?? []).filter(item => item.type === "career");
     },
 
+    /** The drafts the records show, event drafts apart. @returns {{drafted: number, byEvent: number}} */
+    draftsTaken(actor) {
+        let drafted = 0;
+        let byEvent = 0;
+        for ( const career of this.careers(actor) ) {
+            if ( career.system.entryMode === "drafted" ) drafted++;
+            else if ( career.system.entryMode === "draftedByEvent" ) byEvent++;
+        }
+        return { drafted, byEvent };
+    },
+
     /** Is any career still open? */
     isServing(actor) {
         return this.careers(actor).some(career => career.system.exitMode === "stillServing");
@@ -261,17 +266,24 @@ export const Chargen = {
     },
 
     /**
-     * One Traveller-scoped track as it stands.
+     * One Traveller-scoped track, and the rung that answers for it — the highest ever held where a
+     * rung once attained is kept.
      * @returns {{value: number, rung: string, high: number|null}}
      */
     track(actor, key) {
         const held = this.read(actor).tracks[key];
-        return { value: held?.value ?? 0, rung: held?.rung ?? "", high: held?.high ?? null };
+        const value = held?.value ?? 0;
+        const high = held?.high ?? null;
+        if ( (Rules.get("trackRungPermanence") !== "heldThenPermanent") || !(high > value) ) {
+            return { value, rung: held?.rung ?? "", high };
+        }
+        const definition = this.frame(actor)?.system.frame.tracks.find(entry => entry.key === key);
+        const rung = (definition?.kind === "enumerated") ? definition.values[high] : held.rung;
+        return { value: high, rung: rung ?? held.rung ?? "", high };
     },
 
     /**
-     * Move a frame-declared track, by rungs on an enumerated one and by points on a numeric one —
-     * the single reading that lets a caste degree and a parole threshold share one field.
+     * Move a frame-declared track, by rungs on an enumerated one and by points on a numeric one.
      * @returns {Promise<{value: number, rung: string, label: string, moved: boolean}|null>}   Null
      */
     async moveTrack(actor, key, delta) {
@@ -279,14 +291,16 @@ export const Chargen = {
         if ( !definition ) return null;
         const next = foundry.utils.deepClone(await this.ensureTracks(actor));
         const held = next[key];
-        const value = clampToTrack((held.value ?? 0) + delta, definition);
+        const floor = (Rules.get("trackRungPermanence") === "permanent") ? (held.value ?? 0) : -Infinity;
+        const value = Math.max(clampToTrack((held.value ?? 0) + delta, definition), floor);
         next[key] = {
             value,
             rung: (definition.kind === "enumerated") ? (definition.values[value] ?? held.rung) : held.rung,
             high: Math.max(held.high ?? value, value)
         };
         await this.update(actor, { tracks: next });
-        return { ...next[key], label: definition.label || key, moved: value !== held.value };
+        return { ...next[key], label: definition.label || key, moved: value !== held.value,
+            held: (delta < 0) && (floor !== -Infinity) && (value === (held.value ?? 0)) };
     },
 
     /**
@@ -336,9 +350,11 @@ export const Chargen = {
     async expirePending(actor, career, exitMode) {
         if ( !exitMode ) return actor;
         const state = this.read(actor);
+        const key = MGT2Helper.skillSlug(career);
         const tray = state.tray.filter(entry => {
             if ( entry.expiresWhen === exitMode ) return false;
-            return !((entry.duration === "thisCareer") && (!entry.career || (entry.career === career)));
+            return !((entry.duration === "thisCareer")
+                && (!entry.career || (MGT2Helper.skillSlug(entry.career) === key)));
         }).map(plain);
         return (tray.length === state.tray.length) ? actor : this.update(actor, { tray });
     },
@@ -395,10 +411,11 @@ export const Chargen = {
 function bears(entry, check, career) {
     if ( check && entry.appliesTo.size && !entry.appliesTo.has(check) ) return false;
     if ( !career || (entry.scope === "anyCareer") ) return true;
+    const key = MGT2Helper.skillSlug(career);
     // "The qualification roll for your NEXT career": every career but the one that granted it,
     // which is the whole difference from `anyCareer` and the reason the value exists.
-    if ( entry.scope === "nextCareer" ) return !entry.career || (entry.career !== career);
-    return !entry.career || (entry.career === career);
+    if ( entry.scope === "nextCareer" ) return !entry.career || (MGT2Helper.skillSlug(entry.career) !== key);
+    return !entry.career || (MGT2Helper.skillSlug(entry.career) === key);
 }
 
 /** A row of the flag read back as something the flag will take again. */

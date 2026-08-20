@@ -16,7 +16,7 @@ export const CreationRoll = {
      * @param {string} [options.skill]           A skill name, for the rows that are skill checks
      * @param {string} [options.check]           A `MGT2.TrayChecks` key, which is what a tray entry
      *     and a standing modifier are filtered by
-     * @param {string} [options.career]          The career record or template id being played
+     * @param {string} [options.career]          The name of the career being played
      * @param {number|null} [options.target]     The printed target number
      * @param {[string, number][]} [options.rows]  Rows the printed line grants and nothing derives
      *     — `−1 per previous career`, an age DM, a species DM
@@ -82,7 +82,9 @@ export const CreationRoll = {
      */
     standing(actor, check, career) {
         const frame = Chargen.frame(actor);
-        const record = career ? actor?.items.get(career) : null;
+        const key = MGT2Helper.skillSlug(career);
+        const record = key
+            ? Chargen.careers(actor).find(item => MGT2Helper.skillSlug(item.name) === key) : null;
         const rows = [];
         const sources = [[frame, frame?.system.frame.standingModifiers],
             [record, record?.system.standingModifiers]];
@@ -90,7 +92,7 @@ export const CreationRoll = {
             for ( const entry of entries ?? [] ) {
                 // No `check &&`: a check this call cannot name is not one a scoped entry reaches.
                 if ( entry.appliesTo.size && !entry.appliesTo.has(check) ) continue;
-                if ( entry.career && career && (entry.career !== career) ) continue;
+                if ( entry.career && key && (MGT2Helper.skillSlug(entry.career) !== key) ) continue;
                 if ( !CreationRoll.gated(actor, entry.gate) ) continue;
                 const dm = entry.dm + (entry.per * CreationRoll.highestLevel(actor, entry.skills));
                 if ( !dm ) continue;

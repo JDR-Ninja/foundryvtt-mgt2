@@ -148,7 +148,12 @@
 					"notes"
 				]
 			},
-			"container": {},
+			"container": {
+				"gmOnlyFields": [
+					"locked",
+					"lockedDescription"
+				]
+			},
 			"disease": {},
 			"role": {},
 			"equipment": {},

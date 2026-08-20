@@ -49,6 +49,8 @@
 						<button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button>
 					</div>
 					{{/each}}
+					{{! Core p.183: a mount holds one, two or three weapons by type. Advisory. }}
+					{{#if mount.overCapacity}}<b class="noarm">{{mount.overCapacity}}</b>{{/if}}
 					<select class="f edit-only" name="system.mounts.{{mount.index}}.weapons" multiple size="2">
 						{{#each mount.choices as |choice|}}
 						<option value="{{choice._id}}"{{#if choice.selected}} selected{{/if}}>{{choice.name}}</option>

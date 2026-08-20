@@ -109,7 +109,7 @@
 		{{! Metres OR a Speed Band, never both: Vehicle Speed Movement replaces the figure (RH p.23). }}
 		<div class="stat">
 			<dt>{{localize 'MGT2.Actor.robot.Speed'}}</dt>
-			<dd>{{#if robot.statblock.band}}<span class="word">{{localize robot.statblock.band}}</span>{{else}}{{robot.statblock.speed}}<i>{{localize 'MGT2.Actor.robot.Metres'}}</i>{{/if}}</dd>
+			<dd>{{#if robot.statblock.band}}<span class="word">{{localize robot.statblock.band}}</span>{{else if (eq robot.statblock.speed null)}}&mdash;{{else}}{{robot.statblock.speed}}<i>{{localize 'MGT2.Actor.robot.Metres'}}</i>{{/if}}</dd>
 		</div>
 		<div class="stat"><dt>{{localize 'MGT2.Actor.robot.TL'}}</dt><dd>{{system.tl}}</dd></div>
 		<div class="stat">

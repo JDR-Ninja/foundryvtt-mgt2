@@ -308,6 +308,41 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 			font-size: 9.5px
 			color: var(--faint)
 
+	// The struck facing, offered only while a vehicle is selected and never stored.
+	.dmgface
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 5px
+		padding: 6px 11px
+		border-top: 1px solid var(--rule-soft)
+		&[hidden]
+			display: none
+		.k
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 600
+			letter-spacing: 0.16em
+			text-transform: uppercase
+			color: var(--mute)
+		.f
+			padding: 2px 7px
+			font-family: var(--cond)
+			font-size: 10.5px
+			font-weight: 600
+			letter-spacing: 0.08em
+			text-transform: uppercase
+			color: var(--faint)
+			border: 1px solid var(--rule-soft)
+			border-radius: 3px
+			cursor: var(--cursor-pointer)
+			&:hover
+				background: var(--hover)
+			&.on
+				color: var(--accent-text)
+				background: var(--accent-soft)
+				border-color: var(--accent-line)
+
 	// An immune defender takes none of the three, and not even the Effect-6 floor gets through.
 	.dmgvoid
 		display: none

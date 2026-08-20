@@ -27,14 +27,6 @@
         "name": "Día de campaña",
         "hint": "Días desde el que hayas llamado cero. Nada lo hace avanzar: lo escribes tú."
       },
-      "useWeightMetric": {
-        "name": "Usar el sistema métrico para el PESO",
-        "hint": "Kilogramos (kg) en lugar de libras (lbs)."
-      },
-      "useDistanceMetric": {
-        "name": "Usar el sistema métrico para la DISTANCIA",
-        "hint": "Kilómetros (km) en lugar de millas (mi)."
-      },
       "usePronouns": {
         "name": "Usar pronombres",
         "hint": "Muestra los campos para introducir pronombres."
@@ -87,10 +79,6 @@
     "MetricRange": {
       "meter": "M",
       "kilometer": "KM"
-    },
-    "MetricWeight": {
-      "kilogram": "KG",
-      "ton": "TON"
     },
     "MetricSystem": {
       "Weight": {

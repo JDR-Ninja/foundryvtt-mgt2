@@ -1,4 +1,5 @@
 import { MGT2Helper } from "../helper.js";
+import { Rules } from "../rules.js";
 import { ActorBaseData } from "./actor-base-data.js";
 import { activateDamageOrder, prepareDamageOrder } from "./damage-order.js";
 
@@ -98,46 +99,48 @@ export class CharacterPrompts {
             position: { width: 420 },
             content,
             ok: { label: "MGT2.Save", icon: "fa-solid fa-floppy-disk" },
-            render: (event, dialog) => {
-                this.#gateChainRank(dialog.element);
-                this.#wirePsiRest(dialog.element, context);
-            },
+            render: (event, dialog) => this.#gateChainRank(dialog.element),
             rejectClose: false
         });
     }
 
     /**
-     * Core folio 228: PSI comes back at one point an hour, beginning three hours after the last
-     * talent.
+     * How long since the last talent. @returns {Promise<{hours: string}|null>}
+     * @param {object} context   `{spent}` — the PSI already spent, which caps the recovery
      */
-    static #wirePsiRest(root, context) {
-        if ( context.key !== "psionic" ) return;
-        const damage = root.querySelector('input[name="damage"]');
-        const grid = root.querySelector(".grid");
-        if ( !damage || !grid ) return;
-
-        // No `name`, so the hours never reach the update: only the wound they moved does.
-        const block = buildElement(`
-            <div class="dblock">
-                <label class="drow">
-                    <span class="lbl">${esc(game.i18n.localize("MGT2.Recovery.PsiHours"))}</span>
-                    <input class="f n hours" type="number" step="1" min="0" value="0" />
-                    <span class="dm"></span>
-                </label>
+    static async openPsiRest(context) {
+        const content = buildElement(`
+            <div class="dlg">
+                <div class="dblock">
+                    <label class="drow">
+                        <span class="lbl">${esc(game.i18n.localize("MGT2.Recovery.PsiHours"))}</span>
+                        <input class="f n hours" type="number" name="hours" step="1" min="0" value="0" />
+                        <span class="dm total"></span>
+                    </label>
+                </div>
                 <p class="hint">${esc(game.i18n.localize("MGT2.Recovery.PsiRestHint"))}</p>
-            </div>`).firstElementChild;
-        grid.after(block);
+            </div>`);
 
-        const spent = context.characteristic.damage;
-        const hours = block.querySelector("input.hours");
-        const readout = block.querySelector(".dm");
-        const sync = () => {
-            const recovered = Math.min(spent, ActorBaseData.psiRecovered(hours.value));
-            damage.value = String(spent - recovered);
-            readout.textContent = recovered > 0 ? `+${recovered}` : "—";
-            readout.classList.toggle("zero", recovered === 0);
-        };
-        hours.addEventListener("input", sync);
+        return DialogV2.input({
+            window: { title: game.i18n.localize("MGT2.Recovery.PsiRest") },
+            classes: ["mgt2"],
+            position: { width: 380 },
+            content,
+            ok: { label: "MGT2.Recovery.Apply", icon: "fa-solid fa-brain" },
+            render: (event, dialog) => {
+                const root = dialog.element;
+                const hours = root.querySelector("input.hours");
+                const total = root.querySelector(".dm.total");
+                const sync = () => {
+                    const recovered = Math.min(context.spent, ActorBaseData.psiRecovered(hours.value));
+                    total.textContent = game.i18n.format("MGT2.Recovery.Restores", { points: recovered });
+                    total.classList.toggle("zero", recovered === 0);
+                };
+                hours.addEventListener("input", sync);
+                sync();
+            },
+            rejectClose: false
+        });
     }
 
     /**
@@ -764,7 +767,8 @@ export class CharacterPrompts {
             });
             // What the chosen source means is a rule, so it hangs off the control as a tooltip; the
             // line below it stays for the one thing that is a state — a score about to reach 0.
-            const crisis0 = zeroed && (kind === "ageing");
+            const crisis0 = zeroed && ((kind === "ageing")
+                || ((kind === "injury") && Rules.on("creationInjuryToZero")));
             source.dataset.tooltip = game.i18n.localize(`MGT2.CharacteristicLossHints.${kind}`);
             why.replaceChildren();
             if ( crisis0 ) {

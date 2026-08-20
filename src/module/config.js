@@ -11,11 +11,6 @@ MGT2.MetricRange = Object.freeze({
     kilometer: "MGT2.MetricRange.kilometer"
 });
 
-MGT2.MetricWeight = Object.freeze({
-    kilogram: "MGT2.MetricWeight.kilogram",
-    ton: "MGT2.MetricWeight.ton"
-});
-
 MGT2.Difficulty = Object.freeze({
     NA: "MGT2.Difficulty.NA",
     Simple: "MGT2.Difficulty.Simple",
@@ -309,6 +304,12 @@ MGT2.DamageTransforms = Object.freeze({
 
 // Core p.82. The names a rolled free-text skill is matched against to offer the first-aid button.
 MGT2.FirstAidSkills = Object.freeze(["medic", "médecine"]);
+
+// HG p.19-21: the sensor grade, and a command bridge's DM+1 to Tactics (naval) made within it.
+MGT2.ShipCheckSkills = Object.freeze({
+    sensors: {skills: ["electronics", "électronique"], specialities: ["sensors", "capteurs"]},
+    navalTactics: {skills: ["tactics", "tactique"], specialities: ["naval", "navale"]}
+});
 
 // CSC folio 66's exception: Interface runs alongside one other Bandwidth 0 program. A name only.
 MGT2.InterfaceSoftware = Object.freeze(["interface"]);
@@ -884,7 +885,9 @@ MGT2.ShipCriticals = Object.freeze({
 
 // Spacecraft weapon mounts (HG p.26, p.29, p.34-35).
 MGT2.ShipMounts = Object.freeze({
-    fixed: {label: "MGT2.ShipMounts.fixed", tons: 0, weapons: 1, hardpoints: 1, damageMultiple: 1},
+    // Core p.183: a fixed mount takes up to three weapons. The one-weapon limit is the Firmpoint's,
+    // which a hull under 100 tons carries instead of a hardpoint (HG p.26).
+    fixed: {label: "MGT2.ShipMounts.fixed", tons: 0, weapons: 3, hardpoints: 1, damageMultiple: 1},
     // HG p.113 counts sandcasters and salvo-defence lasers by the mount, not by the weapon in it.
     singleTurret: {label: "MGT2.ShipMounts.singleTurret", tons: 1, weapons: 1, hardpoints: 1, damageMultiple: 1, turret: true},
     doubleTurret: {label: "MGT2.ShipMounts.doubleTurret", tons: 1, weapons: 2, hardpoints: 1, damageMultiple: 1, turret: true},
@@ -931,8 +934,8 @@ MGT2.ArmourMaterials = Object.freeze({
 
 // Carried craft (HG p.57, p.61-63). `tonsMultiple` applies to the carried craft's tonnage.
 MGT2.CraftBays = Object.freeze({
-    dockingSpace: {label: "MGT2.CraftBays.dockingSpace", tonsMultiple: 1.1, transfer: "1D minutes", external: false},
-    hangar: {label: "MGT2.CraftBays.hangar", tonsMultiple: 2, transfer: "2D minutes", external: false, repairs: true},
+    dockingSpace: {label: "MGT2.CraftBays.dockingSpace", tonsMultiple: 1.1, transfer: "MGT2.CraftBays.dockingSpaceTransfer", external: false},
+    hangar: {label: "MGT2.CraftBays.hangar", tonsMultiple: 2, transfer: "MGT2.CraftBays.hangarTransfer", external: false, repairs: true},
     dockingClampI: {label: "MGT2.CraftBays.dockingClampI", tons: 1, minCraftTons: 1, maxCraftTons: 30, external: true},
     dockingClampII: {label: "MGT2.CraftBays.dockingClampII", tons: 5, minCraftTons: 31, maxCraftTons: 99, external: true},
     dockingClampIII: {label: "MGT2.CraftBays.dockingClampIII", tons: 10, minCraftTons: 100, maxCraftTons: 300, external: true},
@@ -1521,9 +1524,6 @@ MGT2.TradeCodes = Object.freeze([
 
 /** Read a printed lookup table by a modified total. */
 MGT2.readTable = (rows, total) => rows.find(row => (row.max === null) || (total <= row.max)) ?? rows.at(-1);
-
-/** Read a D66 index. */
-MGT2.readD66 = (table, tens, units) => table[`${tens}${units}`] ?? null;
 
 /** Passenger and freight traffic. */
 MGT2.Traffic = Object.freeze({
@@ -2229,13 +2229,13 @@ MGT2.DoseUnits = Object.freeze({
 // Companion p.59-64. `physicalOnly` separates the two directions: low gravity costs physical checks
 // alone, high gravity costs every check.
 MGT2.GravityBands = Object.freeze({
-    micro: {label: "MGT2.GravityBands.micro", gees: 0.01, dm: -1, physicalOnly: true},
-    minimal: {label: "MGT2.GravityBands.minimal", gees: 0.1, dm: -1, physicalOnly: true},
-    veryLow: {label: "MGT2.GravityBands.veryLow", gees: 0.4, dm: -1, physicalOnly: true},
-    low: {label: "MGT2.GravityBands.low", gees: 0.7, dm: -1, physicalOnly: true},
-    standard: {label: "MGT2.GravityBands.standard", gees: 1, dm: 0, physicalOnly: false},
-    high: {label: "MGT2.GravityBands.high", gees: 1.4, dm: -1, physicalOnly: false},
-    extreme: {label: "MGT2.GravityBands.extreme", gees: 2.5, dm: -2, physicalOnly: false}
+    micro: {label: "MGT2.GravityBands.micro", dm: -1, physicalOnly: true},
+    minimal: {label: "MGT2.GravityBands.minimal", dm: -1, physicalOnly: true},
+    veryLow: {label: "MGT2.GravityBands.veryLow", dm: -1, physicalOnly: true},
+    low: {label: "MGT2.GravityBands.low", dm: -1, physicalOnly: true},
+    standard: {label: "MGT2.GravityBands.standard", dm: 0, physicalOnly: false},
+    high: {label: "MGT2.GravityBands.high", dm: -1, physicalOnly: false},
+    extreme: {label: "MGT2.GravityBands.extreme", dm: -2, physicalOnly: false}
 });
 
 // How often a hazard bites — and only `round` has an event behind it.
@@ -2251,13 +2251,6 @@ MGT2.VacuumPressures = Object.freeze({
     hard: {label: "MGT2.VacuumPressures.hard", cumulative: true},
     partial: {label: "MGT2.VacuumPressures.partial", cumulative: false},
     minimal: {label: "MGT2.VacuumPressures.minimal", cumulative: false}
-});
-
-// The suit's state rather than the region's: a breach shifts the whole table instead of adding to it.
-MGT2.SuitBreaches = Object.freeze({
-    none: "MGT2.SuitBreaches.none",
-    minor: "MGT2.SuitBreaches.minor",
-    major: "MGT2.SuitBreaches.major"
 });
 
 // WHERE A SECTOR SITS, and what its subsectors are called.

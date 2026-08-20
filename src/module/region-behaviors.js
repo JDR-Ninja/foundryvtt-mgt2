@@ -41,12 +41,7 @@ export class GravityBehaviorData extends RegionBehaviorType {
     static defineSchema() {
         return {
             band: new fields.StringField({
-                required: false, blank: false, initial: "standard", choices: MGT2.GravityBands }),
-            // Where a world is unusually dense the printed figure wins over the band's nominal one.
-            gees: new fields.NumberField({ required: false, nullable: true, initial: null, min: 0 }),
-            // Core p.81: in zero G, an Average (8+) Athletics (dexterity) check or the recoil spins
-            // the shooter.
-            recoil: new fields.BooleanField({ required: false, initial: false })
+                required: false, blank: false, initial: "standard", choices: MGT2.GravityBands })
         };
     }
 
@@ -54,9 +49,6 @@ export class GravityBehaviorData extends RegionBehaviorType {
         const band = MGT2.GravityBands[this.band] ?? MGT2.GravityBands.standard;
         this.dm = band.dm;
         this.physicalOnly = band.physicalOnly;
-        this.effectiveGees = this.gees ?? band.gees;
-        // Core p.80-81: 1D weeks, or 1D days with the matching Athletics.
-        this.acclimatises = band.dm !== 0;
     }
 
     /**
@@ -165,11 +157,7 @@ export class VacuumBehaviorData extends RegionBehaviorType {
         return {
             pressure: new fields.StringField({
                 required: false, blank: false, initial: "hard", choices: MGT2.VacuumPressures }),
-            damage: new fields.StringField({ required: false, blank: true, trim: true, initial: "1D" }),
-            // The suit's state and not the region's: a breach shifts the whole table rather than
-            // adding a row to it, so it is declared here where the table is read.
-            breach: new fields.StringField({
-                required: false, blank: false, initial: "none", choices: MGT2.SuitBreaches })
+            damage: new fields.StringField({ required: false, blank: true, trim: true, initial: "1D" })
         };
     }
 

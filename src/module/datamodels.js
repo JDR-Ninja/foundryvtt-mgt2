@@ -271,7 +271,7 @@ function createStandingModifierField() {
         // The tray's seven plus the frame-owned steps, which no tray entry can ever be spent on.
         appliesTo: new fields.SetField(new fields.StringField({
             required: true, blank: false, choices: MGT2.CreationChecks }), { initial: [] }),
-        // A template id the referee typed; blank is every career.
+        // A career NAME the referee typed, matched case- and space-insensitively; blank is every career.
         career: new fields.StringField({ required: false, blank: true, trim: true }),
         // Blank is ungated, which is what every frame entry written before this field meant.
         gate: new fields.SchemaField({
@@ -290,7 +290,7 @@ export function createTrayEntryField() {
             required: false, blank: false, initial: "dm", choices: MGT2.TrayKinds }),
         // The number a `dm` carries. Every other kind reads `value` instead.
         dm: new fields.NumberField({ required: false, initial: 0, integer: true }),
-        // What an `unlock`, `careerOffer`, `careerBlock` or `grant` names — a career id or a skill.
+        // What an `unlock`, `careerOffer`, `careerBlock` or `grant` names — a career name or a skill.
         value: new fields.StringField({ required: false, blank: true, trim: true }),
         // A SET: "event bonuses to advancement rolls may be applied to commission rolls instead".
         appliesTo: new fields.SetField(new fields.StringField({
@@ -330,7 +330,7 @@ function createEventRowField({ ejects = "stays", ...options } = {}) {
         benefitCount: new fields.NumberField({ required: false, initial: 1, integer: true }),
         // One printed row awards `D3 Benefit rolls`, so the count is rolled rather than counted.
         benefitFormula: new FormulaField({ required: false, blank: true, initial: "" }),
-        // A template id the referee typed: a row may send a Traveller to another career, offer one
+        // A career NAME the referee typed: a row may send a Traveller to another career, offer one
         // with qualification waived, or borrow another career's tables for a single roll.
         career: new fields.StringField({ required: false, blank: true, trim: true }),
         // WHICH of the three senses the reference above carries.
