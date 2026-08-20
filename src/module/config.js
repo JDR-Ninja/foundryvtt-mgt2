@@ -50,13 +50,15 @@ MGT2.TaskChain = Object.freeze([
 ]);
 
 // Core p.76. `dm` is what the REACTOR imposes on the attacker; announced, never applied.
+// `skills` holds the printed name in English and in Modül's French, as `MGT2.FirstAidSkills` does:
+// the level is read off a skill Item the referee named, and one literal only ever matches one table.
 MGT2.CombatReactions = Object.freeze({
     dodge: {label: "MGT2.CombatReactions.dodge", icon: "fa-solid fa-person-running",
-        characteristic: "dexterity", skill: "Athletics (dexterity)"},
+        characteristic: "dexterity", skills: ["athletics (dexterity)", "athlétisme (dextérité)"]},
     dive: {label: "MGT2.CombatReactions.dive", icon: "fa-solid fa-person-falling",
         dm: -2, noCover: -1, forgoes: true},
     parry: {label: "MGT2.CombatReactions.parry", icon: "fa-solid fa-shield-halved",
-        skill: "Melee"}
+        skills: ["melee", "mêlée"]}
 });
 
 // Core p.73. DM±6 on Initiative for the first round only — and Initiative is rolled once.
@@ -574,10 +576,10 @@ MGT2.VehicleCriticals = Object.freeze({
     fuel: {
         label: "MGT2.VehicleCriticals.fuel", roll: [2, 3],
         severities: [
-            {fuel: {dryIn: "2D hours"}},
-            {fuel: {dryIn: "1D hours"}},
-            {fuel: {dryIn: "1D minutes"}},
-            {fuel: {dryIn: "1D rounds"}},
+            {fuel: {dryIn: {dice: "2D", unit: "hours"}}},
+            {fuel: {dryIn: {dice: "1D", unit: "hours"}}},
+            {fuel: {dryIn: {dice: "1D", unit: "minutes"}}},
+            {fuel: {dryIn: {dice: "1D", unit: "rounds"}}},
             {fuel: {state: "explodes"}, hullSeverity: 1},
             {fuel: {state: "explodes"}, hullSeverity: "1D"}
         ]
@@ -863,11 +865,11 @@ MGT2.ShipCriticals = Object.freeze({
         label: "MGT2.ShipCriticals.crew", roll: [11, 11],
         severities: [
             {occupants: {n: 1, damage: "1D"}},
-            {lifeSupport: "1D hours"},
+            {lifeSupport: {dice: "1D", unit: "hours"}},
             {occupants: {n: "1D", damage: "2D"}},
-            {lifeSupport: "1D rounds"},
+            {lifeSupport: {dice: "1D", unit: "rounds"}},
             {occupants: {n: "all", damage: "3D"}},
-            {lifeSupport: "immediate"}
+            {lifeSupport: {}}
         ]
     },
     bridge: {

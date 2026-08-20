@@ -665,6 +665,10 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         const parts = [];
         const say = (key, data) => parts.push(game.i18n.format(`MGT2.Criticals.${key}`, data));
         const state = key => game.i18n.localize(`MGT2.Criticals.States.${key}`);
+        const unit = key => game.i18n.localize(`MGT2.Criticals.Units.${key}`);
+        // The interval is dice plus a unit, and the unit is a key: it reaches an already-translated
+        // sentence, so a literal here prints half in one language and half in the other.
+        const interval = ({ dice, unit: key }) => (dice ? `${dice} ` : "") + unit(key);
 
         if (cell.damage) say("Damage", { dice: cell.damage });
         if (cell.power === 0) say("PowerZero");
@@ -685,7 +689,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             say("Weapon", { n: cell.weapons.n ?? game.i18n.localize("MGT2.Criticals.Some"),
                 state: state(cell.weapons.state) });
         }
-        if (cell.fuel?.leak) say("FuelLeak", { amount: cell.fuel.leak, per: cell.fuel.per ?? "" });
+        if (cell.fuel?.leak) say("FuelLeak", { amount: cell.fuel.leak, per: unit(cell.fuel.per) });
         if (cell.fuel?.state) say("FuelState", { state: state(cell.fuel.state) });
         if (cell.cargo) {
             say("Cargo", {
@@ -699,7 +703,11 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 dice: cell.occupants.damage
             });
         }
-        if (cell.lifeSupport) say("LifeSupport", { time: cell.lifeSupport });
+        if (cell.lifeSupport) {
+            // Core p.164 prints the sixth cell as "Life support fails" with no interval.
+            if (cell.lifeSupport.unit) say("LifeSupport", { time: interval(cell.lifeSupport) });
+            else say("LifeSupportNow");
+        }
         if (cell.computer) say("Computer", { state: state(cell.computer) });
         if (cell.bridge) {
             say("Bridge", { state: state(cell.bridge.station) });

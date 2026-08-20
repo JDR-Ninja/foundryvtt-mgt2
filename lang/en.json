@@ -3161,9 +3161,7 @@
         "destroyed": "Destroyed",
         "explodes": "Explodes",
         "reboot": "Rebooting",
-        "bandwidth-50": "Bandwidth halved",
-        "hour": "hour",
-        "round": "round"
+        "bandwidth-50": "Bandwidth halved"
       },
       "Systems": {
         "comms": "Comms",
@@ -3196,8 +3194,16 @@
       "Jump": "Jump drive: {state}",
       "JumpDM": "Jump checks {dm}",
       "LifeSupport": "Life support fails within {time}",
+      "LifeSupportNow": "Life support fails",
       "Computer": "Computer: {state}",
-      "Bridge": "Random bridge station: {state}"
+      "Bridge": "Random bridge station: {state}",
+      "Units": {
+        "hours": "hours",
+        "minutes": "minutes",
+        "rounds": "rounds",
+        "hour": "hour",
+        "round": "round"
+      }
     },
     "AnimalSize": {
       "small4": "1-2",

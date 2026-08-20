@@ -3331,19 +3331,19 @@
     },
     "TradeCodes": {
       "Ag": "Agricole",
-      "As": "Astéroïde",
-      "Ba": "Stérile",
-      "De": "Désertique",
+      "As": "Astéroïdes",
+      "Ba": "Vierge",
+      "De": "Désert",
       "Fl": "Océans fluides",
       "Ga": "Jardin",
-      "Hi": "Forte population",
-      "Ht": "Haute technologie",
-      "Ic": "Calottes glaciaires",
+      "Hi": "Population élevée",
+      "Ht": "Haute Tech",
+      "Ic": "Gelé",
       "In": "Industriel",
-      "Lo": "Faible population",
-      "Lt": "Basse technologie",
-      "Na": "Non agricole",
-      "Ni": "Non industriel",
+      "Lo": "Population faible",
+      "Lt": "Basse tech",
+      "Na": "Non-Agricole",
+      "Ni": "Non-Industriel",
       "Po": "Pauvre",
       "Ri": "Riche",
       "Va": "Vide",
@@ -4314,9 +4314,7 @@
         "destroyed": "Détruit",
         "explodes": "Explose",
         "reboot": "Redémarrage",
-        "bandwidth-50": "Bande passante réduite de 50 %",
-        "hour": "heure",
-        "round": "round"
+        "bandwidth-50": "Bande passante réduite de 50 %"
       },
       "Systems": {
         "comms": "Comms",
@@ -4349,8 +4347,16 @@
       "Jump": "Propulseur-S : {state}",
       "JumpDM": "Tests de saut {dm}",
       "LifeSupport": "Défaillance du support de vie en {time}",
+      "LifeSupportNow": "Défaillance du support de vie",
       "Computer": "Ordinateur : {state}",
-      "Bridge": "Poste de la passerelle (au hasard) : {state}"
+      "Bridge": "Poste de la passerelle (au hasard) : {state}",
+      "Units": {
+        "hours": "heures",
+        "minutes": "minutes",
+        "rounds": "rounds",
+        "hour": "heure",
+        "round": "round"
+      }
     },
     "AnimalSize": {
       "large6": "125 ou plus"

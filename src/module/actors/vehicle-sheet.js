@@ -226,7 +226,10 @@ export class VehicleActorSheet extends TravellerActorSheet {
         const say = (key, data) => parts.push(game.i18n.format(`MGT2.Criticals.${key}`, data));
 
         if (cell.damage) say("Damage", { dice: cell.damage });
-        if (cell.fuel?.dryIn) say("FuelDry", { time: cell.fuel.dryIn });
+        if (cell.fuel?.dryIn) {
+            say("FuelDry", { time: `${cell.fuel.dryIn.dice} `
+                + game.i18n.localize(`MGT2.Criticals.Units.${cell.fuel.dryIn.unit}`) });
+        }
         if (cell.fuel?.state) say("FuelState", { state: game.i18n.localize(`MGT2.Criticals.States.${cell.fuel.state}`) });
         if (cell.speedBands === 0) say("SpeedZero");
         else if (cell.speedBands) say("SpeedBands", { bands: String(cell.speedBands).replace("-", "") });
