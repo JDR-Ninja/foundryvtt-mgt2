@@ -112,7 +112,7 @@ class PhysicalItemData extends ItemBaseData {
         // The Law Level at which the item becomes restricted (Core p.255, CSC p.4).
         schema.legality = new fields.NumberField({ required: false, initial: 9, min: 0, integer: true });
         schema.container = new fields.SchemaField({
-            id: new fields.StringField({ required: false, blank: true })
+            id: new fields.StringField({ required: false, blank: true, initial: "" })
         });
 
         schema.roll = new fields.SchemaField({
@@ -1470,7 +1470,7 @@ export class ItemContainerData extends ItemBaseData {
         schema.weightless = new fields.BooleanField({ required: false, initial: false });
         // A container is stored like anything else: a bag inside a bag is the same reference.
         schema.container = new fields.SchemaField({
-            id: new fields.StringField({ required: false, blank: true })
+            id: new fields.StringField({ required: false, blank: true, initial: "" })
         });
 
         schema.locked = new fields.BooleanField({ required: false, initial: false }); // GM only

@@ -302,12 +302,12 @@ export class SpacecraftData extends CraftData {
                 here: new fields.SchemaField({
                     world: new fields.DocumentUUIDField({
                         type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
-                    name: new fields.StringField({ required: false, blank: true, trim: true })
+                    name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
                 }),
                 next: new fields.SchemaField({
                     world: new fields.DocumentUUIDField({
                         type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
-                    name: new fields.StringField({ required: false, blank: true, trim: true }),
+                    name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                     // A property of the PAIR, and still typed by hand — but no longer because
                     // nothing could compute it: `sector` and `hex` are on `world`, and `space.js`
                     // reads a distance off them.

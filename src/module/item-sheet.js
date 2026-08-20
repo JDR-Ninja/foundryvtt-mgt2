@@ -646,7 +646,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         if ( system.equipped === true ) system.container = { id: "" };
       }
       else if ( containerChange ) {
-        const wasLoose = this.item.system.container.id === "" || this.item.system.container.id === null;
+        const wasLoose = this.item.system.container.id === "";
         if ( system.container.id !== "" && wasLoose ) system.equipped = false;
       }
     }
