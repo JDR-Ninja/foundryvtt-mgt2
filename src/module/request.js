@@ -34,7 +34,10 @@ export const UNRESOLVED = "unresolved";
 /**
  * What Conclude froze, in a vocabulary of its own because it belongs to the control that writes it.
  */
-export const OUTCOME_KINDS = Object.freeze(["tally", "chain"]);
+export const OUTCOME_KINDS = Object.freeze(["tally", "chain", "sum"]);
+
+/** Core p.73: DM+6 to the side that is aware, DM-6 to the side that is not, first round only. */
+export const AMBUSH_DM = 6;
 
 /**
  * The two SEND modes, and only two: `ChatMessage#visible` hides a whispered message *without rolls*
@@ -93,6 +96,10 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
             }),
             tally: new fields.StringField({
                 required: true, blank: false, initial: "solo", choices: MGT2.RequestTally }),
+            // Core p.73's ambush is one rule with two signs, and the sign is the line's own — which
+            // is why the shared DM row above cannot carry it.
+            ambush: new fields.StringField({
+                required: true, blank: false, initial: "none", choices: MGT2.Ambush }),
             // Off does not hide the rung with CSS — the card is rendered per client, so a hidden
             // rung is simply not emitted for a non-GM.
             showTarget: new fields.BooleanField({ required: false, initial: true }),
@@ -163,11 +170,8 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
             skillItem: read.skillItem, resolver: read.resolver, self: read.self,
             status: read.status, effect: read.effect, message: read.message
         }));
-        const resolver = reading.find(read => read.resolver);
-        const outcome = (this.tally === "together")
-            ? { kind: "chain", value: chainTotal(reading), label: resolver?.name ?? "" }
-            : { kind: "tally", value: reading.filter(read => read.status === "answered").length, label: "" };
-        return this.parent.update({ system: { state: "closed", lines, outcome } });
+        return this.parent.update({
+            system: { state: "closed", lines, outcome: outcomeOf(this.tally, reading) } });
     }
 
     /** @inheritdoc */
@@ -256,6 +260,30 @@ function chainTotal(reading) {
     return reading
         .filter(read => !read.resolver && (read.status === "answered") && Number.isInteger(read.effect))
         .reduce((sum, read) => sum + MGT2Helper.taskChainDM(read.effect), 0);
+}
+
+/** Mercenary Book 1 p.47 adds the Effects themselves, not the task chain rungs `together` reads. */
+function effectTotal(reading) {
+    return reading
+        .filter(read => (read.status === "answered") && Number.isInteger(read.effect))
+        .reduce((sum, read) => sum + read.effect, 0);
+}
+
+/** What Conclude freezes: the chain it fed, the Effects it added, or the answers it counted. */
+function outcomeOf(tally, reading) {
+    if ( tally === "together" ) {
+        return { kind: "chain", value: chainTotal(reading),
+            label: reading.find(read => read.resolver)?.name ?? "" };
+    }
+    if ( tally === "sum" ) return { kind: "sum", value: effectTotal(reading), label: "" };
+    return { kind: "tally",
+        value: reading.filter(read => read.status === "answered").length, label: "" };
+}
+
+/** Which end of Core p.73's DM+-6 one line sits at. @param {boolean} self  The referee's own row */
+export function ambushDM(ambush, self) {
+    if ( !ambush || (ambush === "none") ) return 0;
+    return ((ambush === "self") === (self === true)) ? AMBUSH_DM : -AMBUSH_DM;
 }
 
 /**
@@ -350,6 +378,8 @@ function lineChit(request, read, actor, chain) {
     const characteristic = key ? actor?.system?.characteristics?.[key] : null;
     if ( characteristic ) rows.push([game.i18n.localize(MGT2.Characteristics[key]), characteristic.dm]);
     if ( request.dm.value ) rows.push([request.dm.label, request.dm.value]);
+    const ambush = ambushDM(request.ambush, read.self);
+    if ( ambush ) rows.push([game.i18n.localize("MGT2.Request.Ambush"), ambush]);
     const timeframe = MGT2Helper.getTimeframeDM(request.timeframe);
     if ( timeframe ) rows.push([game.i18n.localize(MGT2.Timeframes[request.timeframe]), timeframe]);
     // Core p.63-64: the resolver's chit grows as each contributor lands.
@@ -361,6 +391,28 @@ function lineChit(request, read, actor, chain) {
         if ( scoped ) rows.push([MGT2Helper.modifierLabel(source), source.dm]);
     }
     return MGT2Helper.signed(Checks.modifiers(rows).total, "+0");
+}
+
+/** The foot, by tally — and the sum is over the reading THIS client may see. */
+function footOf(request, reading, answered, chain) {
+    if ( request.tally === "together" ) {
+        return game.i18n.format("MGT2.Request.Chat.FootChain", {
+            dm: MGT2Helper.signed(chain, "+0"),
+            answered: answered.filter(read => !read.resolver).length,
+            total: Math.max(0, reading.length - 1),
+            resolver: reading.find(read => read.resolver)?.name ?? "" });
+    }
+    if ( request.tally === "sum" ) {
+        return game.i18n.format("MGT2.Request.Chat.FootSum", {
+            sum: MGT2Helper.signed(effectTotal(reading), "+0"),
+            answered: answered.length,
+            asked: reading.length });
+    }
+    // Parallel-independent is the commonest shape and Traveller prints no aggregation for it.
+    return game.i18n.format("MGT2.Request.Chat.FootSolo", {
+        asked: reading.length,
+        answered: answered.length,
+        declined: reading.filter(read => read.status === "declined").length });
 }
 
 /** Everything `templates/chat/request.html` prints, built per client from the live reading. */
@@ -413,6 +465,16 @@ function cardContext(request) {
     if ( request.sideRoll ) {
         context.terms.push({ label: game.i18n.localize("MGT2.Request.SideRoll") });
     }
+    // A player sees only their own side, so the term states the one sign that reaches them; a
+    // referee sees both and gets the rule as the book prints it.
+    if ( request.ambush !== "none" ) {
+        const signs = new Set(request.lines.filter(line => gm || !line.self)
+            .map(line => ambushDM(request.ambush, line.self)));
+        const one = (signs.size === 1) ? [...signs][0] : null;
+        context.terms.push({ negative: one < 0, label: `${
+            game.i18n.localize("MGT2.Request.Ambush")} ${
+            one === null ? `±${AMBUSH_DM}` : MGT2Helper.signed(one)}` });
+    }
 
     // *rows you may not see, you do not see*: a referee's own row is absent from a player's
     // copy entirely — not shown as permanently unanswered — because its answer is a `check`
@@ -464,17 +526,7 @@ function cardContext(request) {
     // Core p.63-64 puts the resolver last, after everyone who fed it.
     context.lines.sort((a, b) => Number(a.resolver) - Number(b.resolver));
 
-    context.foot = (request.tally === "together")
-        ? game.i18n.format("MGT2.Request.Chat.FootChain", {
-            dm: MGT2Helper.signed(chain, "+0"),
-            answered: answered.filter(read => !read.resolver).length,
-            total: Math.max(0, reading.length - 1),
-            resolver: reading.find(read => read.resolver)?.name ?? "" })
-        // Parallel-independent is the commonest shape and Traveller prints no aggregation for it.
-        : game.i18n.format("MGT2.Request.Chat.FootSolo", {
-            asked: reading.length,
-            answered: answered.length,
-            declined: reading.filter(read => read.status === "declined").length });
+    context.foot = footOf(request, reading, answered, chain);
 
     if ( gm ) {
         // Nothing auto-concludes: -1 and 0 are referee decisions (p.61), so the last die is where
@@ -633,7 +685,7 @@ const RECENT_LIMIT = 10;
 
 /** The compose fields, and nothing the roster or the log put there. */
 const DEMAND_FIELDS = Object.freeze(["skillMode", "skill", "flavor", "chars", "difficulty", "stance",
-    "timeframe", "dm", "tally", "showTarget", "sideRoll"]);
+    "timeframe", "dm", "tally", "showTarget", "sideRoll", "ambush"]);
 
 /** The demand alone, which is what a recent entry is and what its hash is taken over. */
 export function demandOf(payload) {

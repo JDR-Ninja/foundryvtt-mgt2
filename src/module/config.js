@@ -505,10 +505,20 @@ MGT2.Stance = Object.freeze({
     boon: "MGT2.Request.Stance.boon"
 });
 
-// `solo` is N rollers with N consequences; `together` is Core p.63-64's one resolver taking a chain.
+// `solo` is N rollers with N consequences; `together` is Core p.63-64's one resolver taking a chain;
+// `sum` is Mercenary Book 1 p.47, where the Effects of four debriefing checks are added into the TSI.
 MGT2.RequestTally = Object.freeze({
     solo: "MGT2.Request.Tally.solo",
-    together: "MGT2.Request.Tally.together"
+    together: "MGT2.Request.Tally.together",
+    sum: "MGT2.Request.Tally.sum"
+});
+
+// Core p.73: the side aware that combat is about to begin gains DM+6 to its Initiative check and the
+// side that is not aware suffers DM-6, for the first round only. `self` is the rows the referee owns.
+MGT2.Ambush = Object.freeze({
+    none: "MGT2.Request.AmbushMode.none",
+    self: "MGT2.Request.AmbushMode.self",
+    others: "MGT2.Request.AmbushMode.others"
 });
 
 // Core p.136. Eleven bands, 0-10; the number itself is what the rules do arithmetic on.

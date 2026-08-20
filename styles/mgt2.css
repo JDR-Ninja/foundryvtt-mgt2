@@ -9100,6 +9100,18 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
     justify-content: flex-start;
   }
 }
+.mgt2-request-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.mgt2-request-link a.mgt2-request-ask {
+  padding-right: 1px;
+}
+.mgt2-request-link a.mgt2-request-ask > i {
+  margin-right: 0;
+}
+
 .mgt2.application.creditsplit {
   container-type: inline-size;
   container-name: creditsplit;

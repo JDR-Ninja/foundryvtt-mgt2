@@ -11,6 +11,12 @@
 			<span class="imp{{#if imposed.dm.negative}} neg{{/if}}" data-term="{{imposed.dm.term}}"
 				data-applied-dm="{{imposed.dm.dm}}"><span>{{imposed.dm.label}}</span><span class="gm">{{ localize 'MGT2.Request.Prompt.GM' }}</span></span>
 			{{/if}}
+			{{! Core p.73's +-6 is a second row and not a bigger one: the DM above is the referee's
+			    named circumstance, this is which side saw the other first. }}
+			{{#if imposed.ambush}}
+			<span class="imp{{#if imposed.ambush.negative}} neg{{/if}}" data-term="{{imposed.ambush.term}}"
+				data-applied-dm="{{imposed.ambush.dm}}"><span>{{imposed.ambush.label}}</span><span class="gm">{{ localize 'MGT2.Request.Prompt.GM' }}</span></span>
+			{{/if}}
 			{{! Core p.61: the stance rides the FORM, because the footer button callback is the only
 			    other place a stance has ever entered and an imposed one would be discarded there. }}
 			{{#if imposed.dice}}

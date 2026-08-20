@@ -49,6 +49,7 @@ import {
   RequestMessageData
 } from "./request.js";
 import { answerRequest, registerRequestAnswer } from "./request-answer.js";
+import { parseRequest, registerRequestEnricher } from "./request-enricher.js";
 import { Docket } from "./docket.js";
 import { registerActiveEffects } from "./effects.js";
 import { registerSpaceCanvas } from "./space-canvas.js";
@@ -308,8 +309,8 @@ Hooks.once("init", async function () {
     // tracker's *Ask for Initiative* preset and *Ask the same* on any check card.
     docket: Docket.open,
     // The request card's own two sides: what posts a demand, and what answers one line of it
-    // through the seeded prompt.
-    request: { post: postRequest, answer: answerRequest },
+    // through the seeded prompt. `parse` reads `@Request[…]` into the payload `docket` takes.
+    request: { post: postRequest, answer: answerRequest, parse: parseRequest },
     // The training window, and the door the sheet strip uses: it takes the programme the clicked
     // row names, so a Grant button pressed on one row cannot open the window on another.
     trainingScreen: TrainingScreen.open,
@@ -378,6 +379,9 @@ Hooks.once("init", async function () {
   // arrives — which nothing in core does.
   registerRequestHooks();
   registerRequestControls();
+  // The fourth door, and the only one that is not a control: `@Request[…]` inside an adventure's
+  // text, as a link the reader may roll and a bubble a referee sends.
+  registerRequestEnricher();
   // The answering half: the seeded prompt behind every DM chit, and the `mgt2.nudge` query — the
   // only wire traffic this feature has, and one nothing depends on.
   registerRequestAnswer();

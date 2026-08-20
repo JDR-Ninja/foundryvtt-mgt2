@@ -1,7 +1,7 @@
 import { Checks } from "./checks.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
-import { REQUEST, UNRESOLVED } from "./request.js";
+import { ambushDM, REQUEST, UNRESOLVED } from "./request.js";
 import { RollPromptHelper } from "./roll-prompt.js";
 import { TravellerActorSheet } from "./actors/character-sheet.js";
 
@@ -53,8 +53,11 @@ export async function answerRequest(message, lineId, { prompt = false } = {}) {
     if ( !data ) return null;
 
     // Core p.64's imposed DM through the documented `extra` slot, which is where `#onRoll` already
-    // puts its own terms.
+    // puts its own terms. Core p.73's ambush is a second one, and its sign is this line's own.
     const extra = request.dm.value ? [[request.dm.label, request.dm.value]] : [];
+    if ( imposed.ambush ) {
+        extra.push([game.i18n.localize("MGT2.Request.Ambush"), imposed.ambush]);
+    }
     const { formula, modifiers, chainSources, stance } =
         RollPromptHelper.terms(data, actor, rollOptions.checkModifiers, extra);
 
@@ -97,6 +100,8 @@ function imposedOf(request, read) {
         stance: request.stance,
         timeframe: request.timeframe,
         dm: { label: request.dm.label, value: request.dm.value },
+        // Core p.73's DM+-6, resolved to the one sign this line sits at.
+        ambush: ambushDM(request.ambush, read.self),
         flavor: request.flavor
     };
 }

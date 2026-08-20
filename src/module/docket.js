@@ -1,7 +1,7 @@
 import { Checks } from "./checks.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
-import { postRequest, SKILL_MODES, UNRESOLVED } from "./request.js";
+import { ambushDM, postRequest, SKILL_MODES, UNRESOLVED } from "./request.js";
 import { RollPromptHelper } from "./roll-prompt.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -108,7 +108,7 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
     #demand = {
         skillMode: "named", skill: "", flavor: "", chars: [], difficulty: "",
         stance: "none", timeframe: "Normal", dm: { label: "", value: 0 },
-        tally: "solo", showTarget: true, sideRoll: false
+        tally: "solo", showTarget: true, sideRoll: false, ambush: "none"
     };
 
     /** SEND, which is about the posting rather than about the demand. */
@@ -288,6 +288,8 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
             terms.push([demand.dm.label.trim()
                 || game.i18n.localize("MGT2.Request.UnnamedDM"), demand.dm.value]);
         }
+        const ambush = ambushDM(demand.ambush, base.self);
+        if ( ambush ) terms.push([game.i18n.localize("MGT2.Request.Ambush"), ambush]);
 
         const { total, labels, parts } = Checks.modifiers(terms);
         return {
@@ -399,8 +401,11 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
                 key, label: game.i18n.localize(`MGT2.Request.Visibility.${key}`),
                 active: key === this.#send.visibility
             })),
-            // Core p.73 prints the collapse for a characteristic-only check, which is the case it
-            // could decide: whose skill level a collapsed skilled roll uses, no book states.
+            ambushes: Object.entries(MGT2.Ambush).map(([key, label]) => ({
+                key, label: game.i18n.localize(label), active: key === this.#demand.ambush
+            })),
+            // Core p.73 prints the collapse and the ambush for a characteristic-only check, which
+            // is the case it could decide: whose skill level a collapsed roll uses, no book states.
             canSideRoll: this.#demand.skillMode === "none"
         });
         return context;
@@ -469,6 +474,10 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         if ( demand.dm.value ) {
             parts.push(`${demand.dm.label.trim() || game.i18n.localize("MGT2.Request.UnnamedDM")} ${
                 MGT2Helper.signed(demand.dm.value)}`);
+        }
+        if ( demand.ambush !== "none" ) {
+            parts.push(`${game.i18n.localize("MGT2.Request.Ambush")} ${
+                game.i18n.localize(MGT2.Ambush[demand.ambush])}`);
         }
 
         // Only what is true: a roster with nobody untrained does not print a zero.
@@ -597,9 +606,13 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         switch ( key ) {
             case "SkillMode":
                 demand.skillMode = input.value;
-                // Core p.73's collapse is offered only on a characteristic-only demand, so leaving
-                // that mode puts it back down rather than leaving a tick nothing honours.
-                if ( demand.skillMode !== "none" ) demand.sideRoll = false;
+                // Core p.73's collapse and its ambush are offered only on a characteristic-only
+                // demand, so leaving that mode puts both back down rather than leaving a control set
+                // to something nothing honours.
+                if ( demand.skillMode !== "none" ) {
+                    demand.sideRoll = false;
+                    demand.ambush = "none";
+                }
                 break;
             case "Skill": demand.skill = input.value; break;
             case "Flavor": demand.flavor = input.value; break;
@@ -611,6 +624,7 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
             case "Timeframe": demand.timeframe = input.value; break;
             case "DMLabel": demand.dm.label = input.value; break;
             case "DMValue": demand.dm.value = MGT2Helper.getIntegerFromInput(input.value); break;
+            case "Ambush": demand.ambush = input.value; break;
             case "Tally": demand.tally = input.value; break;
             case "ShowTarget": demand.showTarget = input.checked; break;
             case "SideRoll": demand.sideRoll = input.checked; break;
@@ -625,8 +639,8 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * The two things the form part shows about a mode it renders once: the skill field is inert on
-     * a demand that names no skill, and the collapse is offered only on p.73's own case.
+     * The three things the form part shows about a mode it renders once: the skill field is inert on
+     * a demand that names no skill, and p.73's collapse and its ambush belong to that case alone.
      */
     #syncSkillMode() {
         const none = this.#demand.skillMode === "none";
@@ -641,6 +655,13 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
             if ( !none ) side.checked = false;
             side.closest(".tog")?.classList.toggle("disabled", !none);
         }
+        // Voided rather than hidden: a strip that vanishes moves the DM row's other two controls.
+        const ambush = this.element.querySelectorAll(`[name="${FIELD}Ambush"]`);
+        for ( const radio of ambush ) {
+            radio.disabled = !none;
+            if ( !none ) radio.checked = radio.value === "none";
+        }
+        ambush[0]?.closest(".seggrp")?.classList.toggle("voided", !none);
     }
 
     static #onSeedControlled() {
@@ -790,6 +811,7 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
                 tally: demand.tally,
                 showTarget: demand.showTarget,
                 sideRoll: demand.sideRoll,
+                ambush: demand.ambush,
                 state: "open",
                 lines
             }, {

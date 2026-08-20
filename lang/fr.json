@@ -4186,6 +4186,13 @@
       "DMPlaceholder": "Faible gravité, non acclimaté",
       "DMValue": "Valeur du MD",
       "UnnamedDM": "MD sans nom",
+      "Ambush": "Embuscade",
+      "AmbushHint": "Livre de base p.73 : le camp qui sait que le combat va commencer gagne MD+6 à son test d'Initiative pour le premier round seulement, et le camp qui ne sait pas qu'il est sur le point d'être attaqué subit un MD−6. Votre camp, ce sont les lignes auxquelles vous répondez vous-même. Proposé uniquement sur une demande de caractéristique seule, qui est le test d'Initiative auquel la p.73 le rattache.",
+      "AmbushMode": {
+        "none": "Aucune",
+        "self": "Votre camp",
+        "others": "Leur camp"
+      },
       "AddCombatants": "+ Combattants",
       "AddControlled": "+ Jetons",
       "AddParty": "+ Équipe",
@@ -4227,7 +4234,8 @@
       },
       "Tally": {
         "solo": "Chacun pour soi",
-        "together": "Travailler ensemble"
+        "together": "Travailler ensemble",
+        "sum": "Σ Effet"
       },
       "Visibility": {
         "public": "Publique",
@@ -4257,6 +4265,7 @@
         "Late": "tardif",
         "FootSolo": "{asked} sollicités · {answered} rendus · {declined} refusés",
         "FootChain": "Chaîne {dm} · {answered} sur {total} rendus → {resolver}",
+        "FootSum": "Σ Effet {sum} · {answered} sur {asked} rendus",
         "Conclude": "Clôturer",
         "AskAgain": "Redemander",
         "Withdraw": "Retirer",
@@ -4271,6 +4280,10 @@
         "Asked": "Demandé par l'Arbitre",
         "GM": "ARB",
         "Cancelled": "Coup de pouce et coup du sort s'annulent — 2D."
+      },
+      "Enricher": {
+        "RollHint": "Faites ce test vous-même, sur le Voyageur que vous avez sélectionné ou qui vous est attribué. Rien n'est imposé ici : un texte n'est pas un Arbitre, et la compétence est cherchée sur votre propre fiche — si elle n'y correspond à rien, c'est vous qui choisissez.",
+        "AskHint": "Ouvrir le dossier sur cette demande et la soumettre à un groupe."
       },
       "Settings": {
         "visibility": {
@@ -4370,6 +4383,7 @@
       "RequestNotYours": "Cette ligne de la demande a été adressée à quelqu'un d'autre.",
       "RequestClosed": "Cette demande n'est plus ouverte.",
       "RequestNoActor": "La fiche de ce Voyageur est inaccessible d'ici, le test ne peut donc pas être fait.",
+      "RequestNoRoller": "Sélectionnez un jeton, ou faites-vous attribuer un Voyageur, et le test aura quelqu'un pour le faire.",
       "UnlabelledDM": "Un MD doit dire d'où il vient. Nommez-le, ou remettez-le à zéro.",
       "InvalidRollFormula": "Formule de jet invalide — vérifiez le modificateur saisi.",
       "InvalidDamageFormula": "Formule de dégâts invalide : {formula}.",

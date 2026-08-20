@@ -109,6 +109,20 @@
 				<input class="f n" type="text" name="{{field}}DMValue" maxlength="4"
 					value="{{demand.dm.value}}" aria-label="{{localize 'MGT2.Request.DMValue'}}" />
 			</span>
+			{{! Core p.73: one rule with two signs, and the sign is the row's own — the aware side
+			    gains DM+6 and the unaware suffers DM-6, first round only. Yours is the rows you
+			    answer. It sits in the DM row because that is what it is, and it is greyed on a
+			    demand that names a skill: p.73 attaches it to the Initiative check. }}
+			<span class="seggrp" data-tooltip="{{localize 'MGT2.Request.AmbushHint'}}">
+				<span class="seglbl">{{localize 'MGT2.Request.Ambush'}}</span>
+				<span class="seg" data-name="{{field}}Ambush" role="radiogroup"
+					aria-label="{{localize 'MGT2.Request.Ambush'}}">
+					{{#each ambushes as |a|}}
+					<label title="{{a.label}}"><input type="radio" name="{{../field}}Ambush"
+						value="{{a.key}}"{{#if a.active}} checked{{/if}} /><span>{{a.label}}</span></label>
+					{{/each}}
+				</span>
+			</span>
 		</div>
 	</div>
 

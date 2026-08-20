@@ -2976,6 +2976,13 @@
       "DMPlaceholder": "Low gravity, unacclimatised",
       "DMValue": "DM value",
       "UnnamedDM": "unnamed DM",
+      "Ambush": "Ambush",
+      "AmbushHint": "Core p.73: the side that is aware combat is about to begin gains DM+6 to its Initiative check and the side that is not aware suffers DM−6, for the first round only. Your side is the rows you answer yourself. Offered only on a characteristic-only demand, which is the Initiative check p.73 attaches it to.",
+      "AmbushMode": {
+        "none": "Neither",
+        "self": "Your side",
+        "others": "Their side"
+      },
       "AddCombatants": "+ Combatants",
       "AddControlled": "+ Tokens",
       "AddParty": "+ Party",
@@ -3017,7 +3024,8 @@
       },
       "Tally": {
         "solo": "Each on their own",
-        "together": "Working together"
+        "together": "Working together",
+        "sum": "Σ Effect"
       },
       "Visibility": {
         "public": "Public",
@@ -3047,6 +3055,7 @@
         "Late": "late",
         "FootSolo": "{asked} asked · {answered} in · {declined} declined",
         "FootChain": "Chain {dm} · {answered} of {total} in → {resolver}",
+        "FootSum": "Σ Effect {sum} · {answered} of {asked} in",
         "Conclude": "Conclude",
         "AskAgain": "Ask again",
         "Withdraw": "Withdraw",
@@ -3061,6 +3070,10 @@
         "Asked": "Asked by the referee",
         "GM": "GM",
         "Cancelled": "Boon and Bane cancel — 2D."
+      },
+      "Enricher": {
+        "RollHint": "Make this check yourself, on the Traveller you have selected or are assigned. Nothing here is imposed: text is not a referee, and the skill is matched against your own sheet — if it matches nothing, you pick.",
+        "AskHint": "Open the docket on this demand and ask a roster for it."
       },
       "Settings": {
         "visibility": {
@@ -3160,6 +3173,7 @@
       "RequestNotYours": "That line of the request was asked of somebody else.",
       "RequestClosed": "That request is no longer open.",
       "RequestNoActor": "That Traveller's sheet cannot be reached from here, so the check cannot be made.",
+      "RequestNoRoller": "Select a token, or have a Traveller assigned to you, and the check has somebody to be made by.",
       "UnlabelledDM": "A DM has to say where it comes from. Name it, or set it to zero.",
       "InvalidRollFormula": "Invalid roll formula — check the modifier you typed.",
       "InvalidDamageFormula": "Invalid damage formula: {formula}.",

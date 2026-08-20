@@ -234,13 +234,21 @@ export class RollPromptHelper {
             };
         }
 
+        // Core p.73's ambush: a second imposed DM, because its sign belongs to the side rather than
+        // to the demand and one row cannot hold both signs.
+        if ( imposed.ambush ) {
+            const term = game.i18n.localize("MGT2.Request.Ambush");
+            context.ambush = { term, label: `${term} ${MGT2Helper.signed(imposed.ambush)}`,
+                dm: imposed.ambush, negative: imposed.ambush < 0 };
+        }
+
         // What pressing ROLL rolls, which is what the readout has to say — the stance is imposed by
         // the form and the footer only ever adds to it.
         if ( context.stance !== "none" ) {
             context.dice = game.i18n.localize((context.stance === "bane")
                 ? "MGT2.RollPrompt.BaneDice" : "MGT2.RollPrompt.BoonDice");
         }
-        context.asked = Boolean(context.flavor || context.dm || context.dice);
+        context.asked = Boolean(context.flavor || context.dm || context.ambush || context.dice);
         return context;
     }
 

@@ -1587,6 +1587,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       else if (!rollOptions.skill && (itemObj?.type === "weapon")) rollOptions.skill = "NP";
     }
 
+    // Fills a gap and never closes one: every branch above has already had its say.
+    if (characteristic && !rollOptions.characteristic) rollOptions.characteristic = characteristic;
+
     // Core folio 75 reaches any skill check running longer than a combat round, which is a fact
     // about the fiction and not about the Item — so only the two that cannot be one are withheld.
     rollOptions.blocks.extended = rollOptions.blocks.skill && !isInitiative
