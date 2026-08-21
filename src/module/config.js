@@ -761,8 +761,8 @@ MGT2.VehicleCriticals2026 = Object.freeze({
         severities: [
             {range: "-2D%"},
             {range: "-1Dx10%"},
-            {range: "-50%", rangeDecay: {rate: "-10%", unit: "minutes"}},
-            {range: "-50%", rangeDecay: {rate: "-10%", unit: "rounds"}},
+            {range: "-50%", rangeDecay: {rate: "-10%", unit: "minute"}},
+            {range: "-50%", rangeDecay: {rate: "-10%", unit: "round"}},
             {fuel: {state: "explodes"}, cascade: 1},
             {fuel: {state: "explodes"}, cascade: "1D"}
         ]

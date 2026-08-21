@@ -4991,13 +4991,13 @@
       "LifeSupportNow": "Défaillance du support de vie",
       "Computer": "Ordinateur : {state}",
       "Bridge": "Poste de la passerelle (au hasard) : {state}",
-      "Agility": "Manœuvrabilité −{value}",
+      "Agility": "Maniabilité −{value}",
       "Steering": "Direction hors service",
       "Range": "Autonomie −{value}",
       "RangeDecay": "puis −{rate} par {unit}",
       "PowerLoss": "Énergie −{value}",
       "PowerPlant": "Générateur : {state}",
-      "HullBreach": "Coque percée : {breach}",
+      "HullBreach": "Coque {breach}",
       "HullLostIn": "Véhicule entier compromis en {time}",
       "Equipment": "{n} × équipement : {state}",
       "EquipmentAll": "Tout l'équipement : {state}",
@@ -5009,15 +5009,16 @@
       "CargoDamaged": "{amount} de la cargaison endommagée",
       "CargoDamagedAll": "Toute la cargaison endommagée",
       "Breach": {
-        "exposed": "compartiment exposé",
-        "compromised": "compartiment compromis",
-        "shattered": "coque brisée"
+        "exposed": "percée : compartiment exposé",
+        "compromised": "percée : compartiment compromis",
+        "shattered": "brisée"
       },
       "Units": {
         "hours": "heures",
         "minutes": "minutes",
         "rounds": "rounds",
         "hour": "heure",
+        "minute": "minute",
         "round": "round"
       }
     },
@@ -5075,7 +5076,7 @@
     },
     "VehicleCriticals": {
       "speed": "Vitesse",
-      "agility": "Manœuvrabilité",
+      "agility": "Maniabilité",
       "power": "Énergie",
       "equipment": "Équipement",
       "operator": "Pilote",
