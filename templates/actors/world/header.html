@@ -11,7 +11,7 @@
 			{{#if world.location.line}}<span data-tooltip-text="{{world.location.hint}}">{{world.location.line}}</span>{{/if}}
 			<span>{{localize system.starport.label}}</span>
 			{{#each world.bases.on as |base|}}<span>{{localize base.label}}</span>{{/each}}
-			{{#if system.gasGiants}}<span>{{localize 'MGT2.Actor.world.GasGiantsN' n=system.gasGiants}}</span>{{/if}}
+			{{#if system.gasGiants}}<span>{{plural 'MGT2.Actor.world.GasGiantsN' system.gasGiants}}</span>{{/if}}
 		</div>
 
 		{{! The sector by NAME and the hex INSIDE it — the pair the books print, and the pair a referee

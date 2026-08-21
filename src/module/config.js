@@ -118,7 +118,9 @@ MGT2.Misjumps = Object.freeze({
             { max: -3, label: "MGT2.Jump.Core.Adrift", parsecs: "1D*1D", plural: "parsecs", merciful: true },
             { max: -2, label: "MGT2.Jump.Core.Displaced", diameters: "1D" },
             // The extra 1D is the crew's PERCEIVED time, which the folio also makes optional.
-            { max: -1, label: "MGT2.Jump.Core.Late", days: "1D", perceived: "1D" },
+            { max: -1, label: "MGT2.Jump.Core.Late", days: "1D", perceived: "1D",
+                plurals: { days: "MGT2.Jump.Core.LateDays",
+                    perceived: "MGT2.Jump.Core.LatePerceived" } },
             { max: null, label: "MGT2.Jump.Core.Clean", clean: true }
         ])
     }),
@@ -169,7 +171,9 @@ MGT2.Misjumps = Object.freeze({
             { max: 4, label: "MGT2.Jump.Misjump.Wrecked", parsecs: "1D*1D", plural: "parsecs" },
             { max: 6, label: "MGT2.Jump.Misjump.Severe", parsecs: "2D", plural: "parsecs" },
             { max: 8, label: "MGT2.Jump.Misjump.Scattered", parsecs: "1D", plural: "parsecs" },
-            { max: 10, label: "MGT2.Jump.Misjump.Recalibrate", days: "1D", work: "1D3" },
+            { max: 10, label: "MGT2.Jump.Misjump.Recalibrate", days: "1D", work: "1D3",
+                plurals: { days: "MGT2.Jump.Misjump.RecalibrateDays",
+                    work: "MGT2.Jump.Misjump.RecalibrateWork" } },
             { max: null, label: "MGT2.Jump.Misjump.Rough", diameters: "100*2D", plural: "diameters" }
         ]),
 

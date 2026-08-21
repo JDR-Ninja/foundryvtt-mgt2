@@ -1050,8 +1050,10 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
         const wanted = Math.max(0, Math.trunc(Number(points) || 0));
         const pool = (key === "sand") ? this.sandcasterAgainst(against) : this.pools[key];
         if ( wanted > pool.left ) {
-            ui.notifications.warn(game.i18n.format("MGT2.Fleet.PoolEmpty",
-                { name: this.parent.name, left: pool.left, wanted }));
+            ui.notifications.warn(game.i18n.format("MGT2.Fleet.PoolEmpty", {
+                name: this.parent.name,
+                left: MGT2Helper.plural("MGT2.Fleet.PoolLeft", pool.left),
+                wanted: MGT2Helper.plural("MGT2.Fleet.PoolSpent", wanted) }));
             return this.parent;
         }
         return this.parent.update({ system: { spent: { [key]: this.spent[key] + wanted } } });
@@ -1343,8 +1345,10 @@ export class SalvoData extends foundry.abstract.TypeDataModel {
         const wanted = Math.max(0, Math.trunc(Number(points) || 0));
         const available = Math.floor(defender.system.pools.salvo.left * (1 - this.salvoPenalty));
         if ( wanted > available ) {
-            ui.notifications.warn(game.i18n.format("MGT2.Fleet.PoolEmpty",
-                { name: defender.name, left: available, wanted }));
+            ui.notifications.warn(game.i18n.format("MGT2.Fleet.PoolEmpty", {
+                name: defender.name,
+                left: MGT2Helper.plural("MGT2.Fleet.PoolLeft", available),
+                wanted: MGT2Helper.plural("MGT2.Fleet.PoolSpent", wanted) }));
             return this.parent;
         }
         await defender.system.spend("salvo", wanted);

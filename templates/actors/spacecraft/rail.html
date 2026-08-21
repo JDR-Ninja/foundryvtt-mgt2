@@ -20,7 +20,7 @@
 				<dd>{{ship.hull.severity}}</dd>
 			</div>
 		</dl>
-		<p class="hint">{{localize 'MGT2.Actor.spacecraft.SustainedHint' crossed=ship.hull.crossed steps=ship.hull.steps}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.SustainedWhy'}}"></i></p>
+		<p class="hint">{{plural 'MGT2.Actor.spacecraft.SustainedHint' ship.hull.steps crossed=ship.hull.crossed steps=ship.hull.steps}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.SustainedWhy'}}"></i></p>
 	</div>
 
 	{{! Three budgets, not one — a ship is constrained by tonnage, by power and by hardpoints, and

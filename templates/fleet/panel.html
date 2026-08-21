@@ -101,7 +101,7 @@
 					{{else}}{{#if panel.crewSkillOverride}}{{panel.crewSkillOverride}}{{else}}&mdash;{{/if}}{{/if}}
 				</span>
 			</div>
-			<span class="why">{{localize 'MGT2.Fleet.Screen.WingWhy' per=panel.hull.perFighter}}</span>
+			<span class="why">{{plural 'MGT2.Fleet.Screen.WingWhy' panel.hull.perFighter per=panel.hull.perFighter}}</span>
 		</div>
 		{{#if panel.uuid}}<div class="fbtns"><a class="need" data-action="openActor" data-uuid="{{panel.uuid}}">{{localize 'MGT2.Fleet.Screen.OpenSheet'}}</a></div>{{/if}}
 		{{/if}}

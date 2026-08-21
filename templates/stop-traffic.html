@@ -25,7 +25,7 @@
 			{{#if hull.linked}}
 			<b data-uuid="{{hull.uuid}}" data-action="openDocument">{{hull.name}}</b>
 			<span class="uwp">{{localize 'MGT2.Trade.Hold' used=hull.used capacity=hull.capacity}}</span>
-			<span class="uwp">{{localize 'MGT2.Trade.Berths' rooms=hull.staterooms berths=hull.berths}}</span>
+			<span class="uwp">{{localize 'MGT2.Trade.Berths' rooms=(plural 'MGT2.Trade.BerthsRooms' hull.staterooms) berths=(plural 'MGT2.Trade.BerthsLow' hull.berths)}}</span>
 			<span class="st{{#if hull.over}} shut{{/if}}">{{localize 'MGT2.Trade.HoldFree' tons=hull.free}}</span>
 			<a class="rm" data-action="slotClear" data-slot="ship" data-tooltip="{{localize 'MGT2.Trade.ClearSlot'}}"><i class="fa-solid fa-xmark"></i></a>
 			{{else}}

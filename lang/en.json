@@ -1466,7 +1466,10 @@
         "Cost": "Cost",
         "Spaces": "Spaces",
         "HullChain": "the whole pool",
-        "SustainedHint": "{crossed} of {steps} sustained-damage thresholds crossed.",
+        "SustainedHint": {
+          "one": "{crossed} of {steps} sustained-damage threshold crossed.",
+          "other": "{crossed} of {steps} sustained-damage thresholds crossed."
+        },
         "SustainedWhy": "A Severity 1 critical for each threshold crossed. There is no counter: it is floor(damage ÷ 10% of Hull) before and after every hit.",
         "CrossCheck": "Cross-check",
         "Mismatch": "Disagrees with Spaces",
@@ -1583,7 +1586,10 @@
         "HullChain": "the whole pool",
         "HullPoints": "Hull points",
         "HullSeverity": "Hull severity",
-        "SustainedHint": "{crossed} of {steps} sustained-damage thresholds crossed.",
+        "SustainedHint": {
+          "one": "{crossed} of {steps} sustained-damage threshold crossed.",
+          "other": "{crossed} of {steps} sustained-damage thresholds crossed."
+        },
         "SustainedWhy": "A Severity 1 critical for each threshold crossed. There is no counter: it is floor(damage ÷ 10% of Hull) before and after every hit.",
         "Armour": "Armour",
         "ArmourFit": "Armour",
@@ -1775,7 +1781,7 @@
           "special": "Referee's call — see High Guard p.46"
         },
         "CarriedCraft": "Carried craft",
-        "BayCount": "{bays} bays · {craft} craft",
+        "BayCount": "{bays} · {craft}",
         "Each": "each",
         "HowMany": "How many craft in this bay",
         "TonsEach": "Tons each craft costs the hull",
@@ -1946,7 +1952,15 @@
         "StealthType": "Stealth type",
         "StealthDM": "Detection DM",
         "StealthTLWhy": "A further DM-1 for every Tech Level the ship is above the sensors looking for it.",
-        "RadsAbsorbed": "Rads absorbed"
+        "RadsAbsorbed": "Rads absorbed",
+        "BayCountBays": {
+          "one": "{n} bay",
+          "other": "{n} bays"
+        },
+        "BayCountCraft": {
+          "one": "{n} craft",
+          "other": "{n} craft"
+        }
       },
       "robot": {
         "TL": "TL",
@@ -2126,7 +2140,10 @@
         "Paste": "Paste a UWP line",
         "PasteHint": "the eight cells are stored, the line is a reading of them",
         "PasteFailed": "\"{line}\" is not a Universal World Profile.",
-        "GasGiantsN": "{n} gas giants",
+        "GasGiantsN": {
+          "one": "{n} gas giant",
+          "other": "{n} gas giants"
+        },
         "Location": "Location",
         "SectorPlaceholder": "Spinward Marches",
         "WorldSpace": "Charted Space coordinate {x}, {y} — the sector's own position folded in, so two worlds of different sectors compare.",
@@ -2443,7 +2460,7 @@
         "skillCost": "Each level is bought in turn, including level 0.",
         "charCost": "A physical characteristic costs its new value, a mental one twice it."
       },
-      "Cost": "{periods} periods · {weeks} weeks",
+      "Cost": "{periods} · {weeks}",
       "CostPhysical": {
         "one": "{n} point — the new value",
         "other": "{n} points — the new value"
@@ -2452,8 +2469,14 @@
         "one": "{n} point — a mental one costs double",
         "other": "{n} points — a mental one costs double"
       },
-      "RailCore": "{count} core · {weeks} weeks logged",
-      "RailCompanion": "{count} companion · {points} points dedicated",
+      "RailCore": {
+        "one": "{count} core · {weeks} week logged",
+        "other": "{count} core · {weeks} weeks logged"
+      },
+      "RailCompanion": {
+        "one": "{count} companion · {points} point dedicated",
+        "other": "{count} companion · {points} points dedicated"
+      },
       "RailWeekRule": "a week belongs to one programme (Core p.55)",
       "NoteLabel": "Where the weeks went",
       "NotePlaceholder": "Jump to Regina, ship's library…",
@@ -2480,7 +2503,15 @@
         "Entries": "Entries"
       },
       "Abandon": "Abandon",
-      "DeleteRecord": "Delete record"
+      "DeleteRecord": "Delete record",
+      "CostPeriods": {
+        "one": "{n} period",
+        "other": "{n} periods"
+      },
+      "CostWeeks": {
+        "one": "{n} week",
+        "other": "{n} weeks"
+      }
     },
     "RobotPower": {
       "internal": "Internal",
@@ -2736,7 +2767,10 @@
         "other": "{rounds} rounds"
       },
       "ReachHint": "Reach — paid for in PSI points",
-      "ReachCost": "{points} PSI points",
+      "ReachCost": {
+        "one": "{points} PSI point",
+        "other": "{points} PSI points"
+      },
       "PhysicalOnly": "The rule puts this on physical actions — it follows the characteristic being rolled, until you say otherwise.",
       "SkillOnly": "The augment was bought for one skill — it follows the skill being rolled, until you say otherwise.",
       "Ceiling": "{grade} brain · up to {ceiling}",
@@ -3827,7 +3861,7 @@
       "NotACommandBridge": "{name} has no command bridge and cannot fly the flag.",
       "TacticsTerm": "Tactics (naval)",
       "Morale": "Morale",
-      "PoolEmpty": "{name} has {left} points left and {wanted} were spent.",
+      "PoolEmpty": "{name} has {left} and {wanted}.",
       "DetachLarge": "High Guard sends a group of {max} ships or fewer back to the standard space combat rules; {count} were detached.",
       "SplitOf": "{name} (split)",
       "Mode": {
@@ -3917,7 +3951,10 @@
         "Fighters": "Fighters",
         "WingCount": "Fighters in the wing",
         "WingSkill": "Crew skill (typed)",
-        "WingWhy": "{per} adjusted hull points per fighter",
+        "WingWhy": {
+          "one": "{per} adjusted hull point per fighter",
+          "other": "{per} adjusted hull points per fighter"
+        },
         "InFlight": "In flight",
         "Warhead": "Warhead",
         "FiredAt": "Fired at",
@@ -4003,7 +4040,10 @@
       "Ion": {
         "Title": "Ion weapons",
         "Immune": "{name} is Hardened and ignores ion weapons.",
-        "Total": "Ion effect {effect} against {hull} adjusted hull points",
+        "Total": {
+          "one": "Ion effect {effect} against {hull} adjusted hull point",
+          "other": "Ion effect {effect} against {hull} adjusted hull points"
+        },
         "Result": {
           "one": "{name} reduces Thrust by {n} or eliminates {n} weapon system",
           "other": "{name} reduces Thrust by {n} or eliminates {n} weapon systems"
@@ -4035,6 +4075,14 @@
           "veryLong": "VL",
           "distant": "D"
         }
+      },
+      "PoolLeft": {
+        "one": "{n} point left",
+        "other": "{n} points left"
+      },
+      "PoolSpent": {
+        "one": "{n} was spent",
+        "other": "{n} were spent"
       }
     },
     "FleetTraits": {
@@ -4566,11 +4614,19 @@
       "VeryBadJump": "Very bad jump",
       "Core": {
         "Clean": "The Engineer (j-drive) check held, so there is no misjump to read.",
-        "Late": "The ship arrives in the target system {days} days later than normal. At the referee's option the crew perceive {perceived} extra days in jumpspace.",
+        "Late": "The ship arrives in the target system {days} later than normal. At the referee's option the crew perceive {perceived} in jumpspace.",
         "Displaced": "The ship arrives in the target system {diameters} × 100 diameters from the intended world.",
         "Adrift": {
           "one": "The most survivable misjump: the ship ends up {parsecs} parsec in a random direction, potentially in deep and empty space.",
           "other": "The most survivable misjump: the ship ends up {parsecs} parsecs in a random direction, potentially in deep and empty space."
+        },
+        "LateDays": {
+          "one": "{n} day",
+          "other": "{n} days"
+        },
+        "LatePerceived": {
+          "one": "{n} extra day",
+          "other": "{n} extra days"
         }
       },
       "Misjump": {
@@ -4587,10 +4643,18 @@
           "one": "The ship misjumps {parsecs} parsec in a random direction.",
           "other": "The ship misjumps {parsecs} parsecs in a random direction."
         },
-        "Recalibrate": "Duration increased or decreased by {days} days. The jump drive needs extensive recalibration — {work} days of work — but no repairs.",
+        "Recalibrate": "Duration increased or decreased by {days}. The jump drive needs extensive recalibration — {work} of work — but no repairs.",
         "Rough": {
           "one": "A very rough jump: emergence is {diameters} diameter from the target world.",
           "other": "A very rough jump: emergence is {diameters} diameters from the target world."
+        },
+        "RecalibrateDays": {
+          "one": "{n} day",
+          "other": "{n} days"
+        },
+        "RecalibrateWork": {
+          "one": "{n} day",
+          "other": "{n} days"
         }
       },
       "VeryBad": {
@@ -4619,10 +4683,18 @@
       "BadJump": {
         "Checks": "Everyone aboard makes a {first} check and an {second} check, one at {routine} and the other at {difficult}. Each Traveller chooses which is taken at which level.",
         "VeryBadDM": "A very bad jump puts DM{dm} on both.",
-        "Physical": "{first} failed: a DM equal to the Effect of the failure on every check for {hours} hours after entry, and again after emergence. At {at} or worse the Traveller is incapacitated for {out} minutes, then DM{then} for {thenHours} hours.",
+        "Physical": "{first} failed: a DM equal to the Effect of the failure on every check for {hours} after entry, and again after emergence. At {at} or worse the Traveller is incapacitated for {out}, then DM{then} for {thenHours}.",
         "Mental": {
           "one": "{second} failed: DM{dm} on mental and interpersonal checks for the whole jump and {days} day after it. At {at} or worse the effects are serious.",
           "other": "{second} failed: DM{dm} on mental and interpersonal checks for the whole jump and {days} days after it. At {at} or worse the effects are serious."
+        },
+        "PhysicalHours": {
+          "one": "{n} hour",
+          "other": "{n} hours"
+        },
+        "PhysicalMinutes": {
+          "one": "{n} minute",
+          "other": "{n} minutes"
         }
       }
     },
@@ -4773,7 +4845,7 @@
       "LocalBroker": "Hired local broker",
       "FeeAdded": "The broker takes {rate}% of the gross: Cr{fee} on top, Cr{credits} in all.",
       "FeeTaken": "A hired local broker's cut is already out of every figure in this column (Core p.242).",
-      "Berths": "{rooms} staterooms · {berths} low berths",
+      "Berths": "{rooms} · {berths}",
       "BookingHint": "for the berths and the hold a booking needs",
       "DueIn": "Due in (days)",
       "DueInHint": "The chapter prints no deadline, so this is yours: a lot is stamped with the campaign day it falls due on, and nothing counts it down.",
@@ -4798,7 +4870,7 @@
       "NoneOffered": "None on offer here.",
       "FreightOnDelivery": "Freight is paid on delivery, at the far end (Core p.241).",
       "MailAllOrNone": "Every container or none at all (Core p.241).",
-      "BerthLine": "{used} of {rooms} staterooms and {low} of {berths} low berths are already booked — a shortage is the crew's to solve, not this screen's to refuse.",
+      "BerthLine": "{rooms} and {berths} are already booked — a shortage is the crew's to solve, not this screen's to refuse.",
       "BooksOnto": "bookings are written onto {ship}",
       "PassageName": "{grade} × {n}",
       "PassageReason": "{n} × {grade} to {world}, fare collected at booking.",
@@ -4893,7 +4965,23 @@
       },
       "RevivalTL": "TL12 ship",
       "RevivalEmergency": "Emergency low berth",
-      "RevivalEndurance": "{name}'s END"
+      "RevivalEndurance": "{name}'s END",
+      "BerthsRooms": {
+        "one": "{n} stateroom",
+        "other": "{n} staterooms"
+      },
+      "BerthsLow": {
+        "one": "{n} low berth",
+        "other": "{n} low berths"
+      },
+      "BerthLineRooms": {
+        "one": "{used} of {n} stateroom",
+        "other": "{used} of {n} staterooms"
+      },
+      "BerthLineLow": {
+        "one": "{low} of {n} low berth",
+        "other": "{low} of {n} low berths"
+      }
     },
     "WorldBases": {
       "naval": "Naval base",

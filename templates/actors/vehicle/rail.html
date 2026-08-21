@@ -20,7 +20,7 @@
 				<dd class="word">{{#if vehicle.hull.wrecked}}{{localize 'MGT2.Actor.vehicle.Wrecked'}}{{else if vehicle.hull.damage}}{{localize 'MGT2.Actor.vehicle.Damaged'}}{{else}}{{localize 'MGT2.Actor.vehicle.Intact'}}{{/if}}</dd>
 			</div>
 		</dl>
-		<p class="hint">{{localize 'MGT2.Actor.vehicle.SustainedHint' crossed=vehicle.hull.crossed steps=vehicle.hull.steps}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.SustainedWhy'}}"></i></p>
+		<p class="hint">{{plural 'MGT2.Actor.vehicle.SustainedHint' vehicle.hull.steps crossed=vehicle.hull.crossed steps=vehicle.hull.steps}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.SustainedWhy'}}"></i></p>
 	</div>
 
 	{{! One number plus modes, not a base plus a table: the printed AGILITY is the value in the

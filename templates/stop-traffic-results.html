@@ -168,7 +168,7 @@
 		    crew's problem to solve, not this screen's to forbid. }}
 		{{#if booking.berths}}
 		<p class="hint{{#if (or booking.berths.over booking.berths.overLow)}} bad{{/if}}">
-			{{localize 'MGT2.Trade.BerthLine' used=booking.berths.used rooms=booking.berths.staterooms low=booking.berths.low berths=booking.berths.berths}}
+			{{localize 'MGT2.Trade.BerthLine' rooms=(plural 'MGT2.Trade.BerthLineRooms' booking.berths.staterooms used=booking.berths.used) berths=(plural 'MGT2.Trade.BerthLineLow' booking.berths.berths low=booking.berths.low)}}
 		</p>
 		{{/if}}
 		{{#unless booking.canTrade}}<p class="hint">{{localize 'MGT2.Trade.RefereeBooks'}}</p>{{/unless}}

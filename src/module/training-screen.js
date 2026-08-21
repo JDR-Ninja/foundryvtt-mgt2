@@ -141,11 +141,11 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         context.live = live.map(([id, programme]) => this.#row(id, programme));
         context.closed = closed.map(([id, programme]) => this.#row(id, programme));
         context.totals = {
-            core: game.i18n.format("MGT2.Training.RailCore", {
+            core: MGT2Helper.plural("MGT2.Training.RailCore", training.weeksLogged, {
                 count: live.filter(([, p]) => p.engine === "core").length,
                 weeks: training.weeksLogged
             }),
-            companion: game.i18n.format("MGT2.Training.RailCompanion", {
+            companion: MGT2Helper.plural("MGT2.Training.RailCompanion", training.pointsDedicated, {
                 count: live.filter(([, p]) => p.engine === "companion").length,
                 points: training.pointsDedicated
             })
@@ -370,6 +370,14 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         if ( programme.target.kind !== "skill" ) return false;
         const capacity = Grants.capacity(this.#actor);
         return capacity.enforced && (programme.next > 0) && (capacity.room < 1);
+    }
+
+    /** Two counts in one chip, so each carries its own plural. */
+    static #cost(periods, weeks) {
+        return game.i18n.format("MGT2.Training.Cost", {
+            periods: MGT2Helper.plural("MGT2.Training.CostPeriods", periods),
+            weeks: MGT2Helper.plural("MGT2.Training.CostWeeks", weeks)
+        });
     }
 
     static #ordinal(n) {
@@ -686,8 +694,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
                     why: barred ? game.i18n.localize("MGT2.Training.Barred.jackOfAllTrades")
                         : training(item.name) ? game.i18n.localize("MGT2.Training.Barred.alreadyTraining")
                             : (core && athletics) ? game.i18n.localize("MGT2.Training.AthleticsNote")
-                                : core ? game.i18n.format("MGT2.Training.Cost",
-                                    { periods: Math.max(1, next), weeks: Math.max(1, next) * period })
+                                : core ? TrainingScreen.#cost(Math.max(1, next), Math.max(1, next) * period)
                                     : game.i18n.localize("MGT2.Training.Rule.skillCost")
                 });
             }
@@ -721,7 +728,7 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         const typed = engines.map(engine => ({
             engine, value: `${engine}:skill:`, badge: `MGT2.Training.Badge.${engine}`,
             why: (engine === "core")
-                ? game.i18n.format("MGT2.Training.Cost", { periods: 1, weeks: period })
+                ? TrainingScreen.#cost(1, period)
                 : game.i18n.localize("MGT2.Training.Rule.skillCost")
         }));
 

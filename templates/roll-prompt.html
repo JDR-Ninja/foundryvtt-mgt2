@@ -124,7 +124,7 @@
 			<span class="seg" data-name="psiBoost" role="radiogroup"
 				aria-label="{{ localize 'MGT2.RollPrompt.ReachHint' }}">
 				{{#each reach as |r|}}
-				<label title="{{ localize 'MGT2.RollPrompt.ReachCost' points=r.points }}"><input type="radio"
+				<label title="{{ plural 'MGT2.RollPrompt.ReachCost' r.points points=r.points }}"><input type="radio"
 					name="psiBoost" value="{{r.cost}}"{{#if r.checked}} checked{{/if}} /><span>{{r.band}}</span><span class="v">{{r.points}}</span></label>
 				{{/each}}
 			</span>

@@ -1466,7 +1466,10 @@
         "Cost": "Coût",
         "Spaces": "Espaces",
         "HullChain": "toute la réserve",
-        "SustainedHint": "{crossed} des {steps} seuils de dégâts soutenus franchis.",
+        "SustainedHint": {
+          "one": "{crossed} sur {steps} seuil de dégâts soutenus franchi.",
+          "other": "{crossed} sur {steps} seuils de dégâts soutenus franchis."
+        },
         "SustainedWhy": "Un critique de Sévérité 1 par seuil franchi. Il n'y a pas de compteur : c'est partie entière(dégâts ÷ 10 % de la Coque) avant et après chaque impact.",
         "CrossCheck": "Recoupement",
         "Mismatch": "En désaccord avec les Espaces",
@@ -1583,7 +1586,10 @@
         "HullChain": "toute la réserve",
         "HullPoints": "Points de coque",
         "HullSeverity": "Sévérité de la coque",
-        "SustainedHint": "{crossed} des {steps} seuils de dégâts soutenus franchis.",
+        "SustainedHint": {
+          "one": "{crossed} sur {steps} seuil de dégâts soutenus franchi.",
+          "other": "{crossed} sur {steps} seuils de dégâts soutenus franchis."
+        },
         "SustainedWhy": "Un critique de Sévérité 1 par seuil franchi. Il n'y a pas de compteur : c'est partie entière(dégâts ÷ 10 % de la Coque) avant et après chaque impact.",
         "Armour": "Blindage",
         "ArmourFit": "Blindage",
@@ -1775,7 +1781,7 @@
           "special": "à la discrétion de l'Arbitre — voir Garde Haute p. 46"
         },
         "CarriedCraft": "Appareils embarqués",
-        "BayCount": "{bays} baies · {craft} appareils",
+        "BayCount": "{bays} · {craft}",
         "Each": "chacun",
         "HowMany": "Combien d'appareils dans cette baie",
         "TonsEach": "Tonnes que coûte chaque appareil à la coque",
@@ -1946,7 +1952,15 @@
         "StealthType": "Type de furtivité",
         "StealthDM": "MD de détection",
         "StealthTLWhy": "Un MD-1 supplémentaire pour chaque Niveau technologique dont le vaisseau surpasse les capteurs qui tentent de le localiser.",
-        "RadsAbsorbed": "Rads absorbés"
+        "RadsAbsorbed": "Rads absorbés",
+        "BayCountBays": {
+          "one": "{n} baie",
+          "other": "{n} baies"
+        },
+        "BayCountCraft": {
+          "one": "{n} appareil",
+          "other": "{n} appareils"
+        }
       },
       "robot": {
         "TL": "NT",
@@ -2126,7 +2140,10 @@
         "Paste": "Coller un PUM",
         "PasteHint": "les huit cases sont stockées, la ligne n'en est qu'une lecture",
         "PasteFailed": "« {line} » n'est pas un Profil Universel de Monde.",
-        "GasGiantsN": "{n} géantes gazeuses",
+        "GasGiantsN": {
+          "one": "{n} géante gazeuse",
+          "other": "{n} géantes gazeuses"
+        },
         "Location": "Localisation",
         "SectorPlaceholder": "Spinward Marches",
         "WorldSpace": "Coordonnée de l'Espace Reconnu {x}, {y} — la position du secteur y est intégrée, ce qui permet de comparer deux mondes de secteurs différents.",
@@ -2443,7 +2460,7 @@
         "skillCost": "Chaque niveau de compétence doit être acheté de manière séquentielle, y compris le niveau 0.",
         "charCost": "Une caractéristique physique coûte sa nouvelle valeur, une mentale le double."
       },
-      "Cost": "{periods} périodes · {weeks} semaines",
+      "Cost": "{periods} · {weeks}",
       "CostPhysical": {
         "one": "{n} point — la nouvelle valeur",
         "other": "{n} points — la nouvelle valeur"
@@ -2452,8 +2469,14 @@
         "one": "{n} point — une mentale coûte le double",
         "other": "{n} points — une mentale coûte le double"
       },
-      "RailCore": "{count} base · {weeks} semaines notées",
-      "RailCompanion": "{count} compagnon · {points} points dédiés",
+      "RailCore": {
+        "one": "{count} base · {weeks} semaine notée",
+        "other": "{count} base · {weeks} semaines notées"
+      },
+      "RailCompanion": {
+        "one": "{count} compagnon · {points} point dédié",
+        "other": "{count} compagnon · {points} points dédiés"
+      },
       "RailWeekRule": "une semaine appartient à un seul programme (Livre de règles de Traveller p.54)",
       "NoteLabel": "Où sont passées les semaines",
       "NotePlaceholder": "Saut vers Regina, bibliothèque du bord…",
@@ -2480,7 +2503,15 @@
         "Entries": "Entrées"
       },
       "Abandon": "Abandonner",
-      "DeleteRecord": "Supprimer le registre"
+      "DeleteRecord": "Supprimer le registre",
+      "CostPeriods": {
+        "one": "{n} période",
+        "other": "{n} périodes"
+      },
+      "CostWeeks": {
+        "one": "{n} semaine",
+        "other": "{n} semaines"
+      }
     },
     "RobotPower": {
       "internal": "Interne",
@@ -2726,7 +2757,10 @@
         "other": "{rounds} balles"
       },
       "ReachHint": "Portée — payée en points de PSI",
-      "ReachCost": "{points} points de PSI",
+      "ReachCost": {
+        "one": "{points} point de PSI",
+        "other": "{points} points de PSI"
+      },
       "PhysicalOnly": "La règle applique ceci aux actions physiques — le modificateur suit la caractéristique jetée, jusqu'à ce que vous en décidiez autrement.",
       "SkillOnly": "L'augmentation a été acquise pour une seule compétence — le modificateur suit la compétence jetée, jusqu'à ce que vous en décidiez autrement.",
       "Ceiling": "cerveau {grade} · jusqu'à {ceiling}",
@@ -2919,7 +2953,7 @@
       "NotACommandBridge": "{name} n’a pas de passerelle de commandement et ne peut pas être le vaisseau amiral.",
       "TacticsTerm": "Tactique (navale)",
       "Morale": "Moral",
-      "PoolEmpty": "{name} n’a plus que {left} points et {wanted} ont été dépensés.",
+      "PoolEmpty": "{name} n’a plus que {left} et {wanted}.",
       "DetachLarge": "Garde Haute renvoie un groupe de {max} vaisseaux ou moins aux règles de combat spatial standard ; {count} ont été détachés.",
       "SplitOf": "{name} (détachement)",
       "Mode": {
@@ -3009,7 +3043,10 @@
         "Fighters": "Chasseurs",
         "WingCount": "Chasseurs de l’escadron",
         "WingSkill": "Compétence d’équipage (saisie)",
-        "WingWhy": "{per} points de coque ajustés par chasseur",
+        "WingWhy": {
+          "one": "{per} point de coque ajusté par chasseur",
+          "other": "{per} points de coque ajustés par chasseur"
+        },
         "InFlight": "En vol",
         "Warhead": "Ogive",
         "FiredAt": "Tirée à",
@@ -3095,7 +3132,10 @@
       "Ion": {
         "Title": "Armes à ions",
         "Immune": "{name} a le Blindage EM et ignore les armes à ions.",
-        "Total": "Effet ionique {effect} contre {hull} points de coque ajustés",
+        "Total": {
+          "one": "Effet ionique {effect} contre {hull} point de coque ajusté",
+          "other": "Effet ionique {effect} contre {hull} points de coque ajustés"
+        },
         "Result": {
           "one": "{name} réduit sa Poussée de {n} ou élimine {n} système d’armes",
           "other": "{name} réduit sa Poussée de {n} ou élimine {n} systèmes d’armes"
@@ -3127,6 +3167,14 @@
           "veryLong": "TL",
           "distant": "L"
         }
+      },
+      "PoolLeft": {
+        "one": "{n} point",
+        "other": "{n} points"
+      },
+      "PoolSpent": {
+        "one": "{n} a été dépensé",
+        "other": "{n} ont été dépensés"
       }
     },
     "FleetTraits": {
@@ -3385,11 +3433,19 @@
       "VeryBadJump": "Très mauvais saut",
       "Core": {
         "Clean": "Le jet d'Ingénieur (propulseur de saut) a réussi : il n'y a pas de saut manqué à lire.",
-        "Late": "Le vaisseau arrive dans le système visé avec {days} jours de retard. Au choix de l'arbitre, l'équipage perçoit {perceived} jours supplémentaires dans l'espace de saut.",
+        "Late": "Le vaisseau arrive dans le système visé avec {days} de retard. Au choix de l'arbitre, l'équipage perçoit {perceived} dans l'espace de saut.",
         "Displaced": "Le vaisseau arrive dans le système visé à {diameters} × 100 diamètres du monde visé.",
         "Adrift": {
           "one": "Le saut manqué le plus survivable : le vaisseau se retrouve à {parsecs} parsec dans une direction aléatoire, éventuellement en plein espace vide.",
           "other": "Le saut manqué le plus survivable : le vaisseau se retrouve à {parsecs} parsecs dans une direction aléatoire, éventuellement en plein espace vide."
+        },
+        "LateDays": {
+          "one": "{n} jour",
+          "other": "{n} jours"
+        },
+        "LatePerceived": {
+          "one": "{n} jour supplémentaire",
+          "other": "{n} jours supplémentaires"
         }
       },
       "Misjump": {
@@ -3406,10 +3462,18 @@
           "one": "Le vaisseau saute de {parsecs} parsec dans une direction aléatoire.",
           "other": "Le vaisseau saute de {parsecs} parsecs dans une direction aléatoire."
         },
-        "Recalibrate": "Durée allongée ou raccourcie de {days} jours. Le propulseur de saut exige un recalibrage complet — {work} jours de travail — mais aucune réparation.",
+        "Recalibrate": "Durée allongée ou raccourcie de {days}. Le propulseur de saut exige un recalibrage complet — {work} de travail — mais aucune réparation.",
         "Rough": {
           "one": "Saut très chaotique : la sortie se fait à {diameters} diamètre du monde visé.",
           "other": "Saut très chaotique : la sortie se fait à {diameters} diamètres du monde visé."
+        },
+        "RecalibrateDays": {
+          "one": "{n} jour",
+          "other": "{n} jours"
+        },
+        "RecalibrateWork": {
+          "one": "{n} jour",
+          "other": "{n} jours"
         }
       },
       "VeryBad": {
@@ -3438,10 +3502,18 @@
       "BadJump": {
         "Checks": "Toute personne à bord fait un jet de {first} et un jet de {second}, l'un en {routine} et l'autre en {difficult}. Chaque voyageur choisit lequel se fait à quel niveau.",
         "VeryBadDM": "Un très mauvais saut impose un MD{dm} aux deux.",
-        "Physical": "{first} échoué : un MD égal à l'Effet de l'échec sur tous les jets pendant {hours} heures après l'entrée, puis de nouveau après la sortie. À {at} ou pire, le voyageur est incapacité pendant {out} minutes, puis subit un MD{then} pendant {thenHours} heures.",
+        "Physical": "{first} échoué : un MD égal à l'Effet de l'échec sur tous les jets pendant {hours} après l'entrée, puis de nouveau après la sortie. À {at} ou pire, le voyageur est incapacité pendant {out}, puis subit un MD{then} pendant {thenHours}.",
         "Mental": {
           "one": "{second} échoué : MD{dm} sur les jets mentaux et sociaux pendant tout le saut et {days} jour après. À {at} ou pire, les effets sont graves.",
           "other": "{second} échoué : MD{dm} sur les jets mentaux et sociaux pendant tout le saut et {days} jours après. À {at} ou pire, les effets sont graves."
+        },
+        "PhysicalHours": {
+          "one": "{n} heure",
+          "other": "{n} heures"
+        },
+        "PhysicalMinutes": {
+          "one": "{n} minute",
+          "other": "{n} minutes"
         }
       }
     },
@@ -3592,7 +3664,7 @@
       "LocalBroker": "Courtier local engagé",
       "FeeAdded": "Le courtier prend {rate} % du montant brut : {fee} Cr en plus, {credits} Cr au total.",
       "FeeTaken": "La commission du courtier local engagé est déjà déduite de chaque montant de cette colonne (Livre de règles de Traveller p.242).",
-      "Berths": "{rooms} cabines · {berths} cryocapsules",
+      "Berths": "{rooms} · {berths}",
       "BookingHint": "pour les couchettes et la soute qu'exige une réservation",
       "DueIn": "Échéance (jours)",
       "DueInHint": "Le chapitre n'imprime aucun délai : ce nombre est le vôtre. Un lot est marqué du jour de campagne où il arrive à échéance, et rien ne le décompte.",
@@ -3617,7 +3689,7 @@
       "NoneOffered": "Rien d'offert ici.",
       "FreightOnDelivery": "La cargaison est payée à la livraison, à l'autre bout (Livre de règles de Traveller p.241).",
       "MailAllOrNone": "Tous les conteneurs ou aucun (Livre de règles de Traveller p.241).",
-      "BerthLine": "{used} cabines sur {rooms} et {low} cryocapsules sur {berths} sont déjà réservés — un manque revient à l'équipage, pas à cet écran de le refuser.",
+      "BerthLine": "{rooms} et {berths} sont déjà réservées — un manque revient à l'équipage, pas à cet écran de le refuser.",
       "BooksOnto": "les réservations s'inscrivent sur {ship}",
       "PassageName": "{grade} × {n}",
       "PassageReason": "{n} × {grade} vers {world}, prix encaissé à la réservation.",
@@ -3712,7 +3784,23 @@
       },
       "RevivalTL": "Vaisseau de NT12",
       "RevivalEmergency": "Cryocapsule d'urgence",
-      "RevivalEndurance": "END de {name}"
+      "RevivalEndurance": "END de {name}",
+      "BerthsRooms": {
+        "one": "{n} cabine",
+        "other": "{n} cabines"
+      },
+      "BerthsLow": {
+        "one": "{n} cryocapsule",
+        "other": "{n} cryocapsules"
+      },
+      "BerthLineRooms": {
+        "one": "{used} sur {n} cabine",
+        "other": "{used} sur {n} cabines"
+      },
+      "BerthLineLow": {
+        "one": "{low} sur {n} cryocapsule",
+        "other": "{low} sur {n} cryocapsules"
+      }
     },
     "WorldBases": {
       "naval": "Base navale",

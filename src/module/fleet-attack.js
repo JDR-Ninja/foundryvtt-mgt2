@@ -355,10 +355,10 @@ export class FleetAttack {
             rollTypeName: attacker.name,
             rollObjectName: localize("MGT2.Fleet.Ion.Title"),
             lines: result > 0
-                ? [localize("MGT2.Fleet.Ion.Total", { effect, hull }),
+                ? [MGT2Helper.plural("MGT2.Fleet.Ion.Total", hull, { effect, hull }),
                     MGT2Helper.plural("MGT2.Fleet.Ion.Result", result, { name: target.name }),
                     MGT2Helper.plural("MGT2.Fleet.Ion.Rounds", rounds)]
-                : [localize("MGT2.Fleet.Ion.Total", { effect, hull }),
+                : [MGT2Helper.plural("MGT2.Fleet.Ion.Total", hull, { effect, hull }),
                     localize("MGT2.Fleet.Ion.NoEffect")]
         });
         return { immune: false, effect, result, rounds };

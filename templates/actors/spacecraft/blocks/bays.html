@@ -4,7 +4,7 @@
 <div class="block">
 	<div class="sect">
 		<h3>{{localize 'MGT2.Actor.spacecraft.CarriedCraft'}}</h3>
-		<span class="count">{{localize 'MGT2.Actor.spacecraft.BayCount' bays=ship.bays.length craft=ship.craftCount}}</span>
+		<span class="count">{{localize 'MGT2.Actor.spacecraft.BayCount' bays=(plural 'MGT2.Actor.spacecraft.BayCountBays' ship.bays.length) craft=(plural 'MGT2.Actor.spacecraft.BayCountCraft' ship.craftCount)}}</span>
 		<a class="add edit-only" data-action="rowCreate" data-rows="bays" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddBay'}}"><i class="fa-solid fa-plus"></i></a>
 	</div>
 	{{#if ship.bays.length}}

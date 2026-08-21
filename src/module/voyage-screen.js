@@ -292,9 +292,13 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         const label = entry.row.plural
             ? MGT2Helper.plural(entry.row.label, Number(values[entry.row.plural]))
             : game.i18n.localize(entry.row.label);
+        // A sentence counting two things needs one group per count, so those values arrive as
+        // already-plural fragments; `answered` still reads the raw ones.
+        const parts = Object.entries(entry.row.plurals ?? {}).reduce((all, [key, fragment]) =>
+            Object.assign(all, { [key]: MGT2Helper.plural(fragment, Number(values[key])) }), {});
         return label
             .split(/(?<=\.)\s+/).filter(answered).join(" ")
-            .replace(/{(\w+)}/g, (token, key) => values[key]);
+            .replace(/{(\w+)}/g, (token, key) => parts[key] ?? values[key]);
     }
 
     /** `2D 7 −1 = 6` — the read, so the table can be checked against the page it came from. */
@@ -375,11 +379,14 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             veryBad: game.i18n.format("MGT2.Jump.BadJump.VeryBadDM", {
                 dm: MGT2Helper.signed(rules.veryBadDM) }),
             physical: game.i18n.format("MGT2.Jump.BadJump.Physical", {
-                first, hours: rules.physical.hours, at: rules.physical.incapacitatedAt,
+                first, at: rules.physical.incapacitatedAt,
+                hours: MGT2Helper.plural("MGT2.Jump.BadJump.PhysicalHours", rules.physical.hours),
                 // The only place a printed `2Dx30` reaches a player, and `*` is Foundry's operator
-                // rather than the book's sign.
-                out: rules.physical.outFor.replace("*", "×"),
-                then: MGT2Helper.signed(rules.physical.thenDM), thenHours: rules.physical.thenHours
+                // rather than the book's sign. It is a formula, so it takes the plural form.
+                out: MGT2Helper.plural("MGT2.Jump.BadJump.PhysicalMinutes", Number.NaN,
+                    { n: rules.physical.outFor.replace("*", "×") }),
+                then: MGT2Helper.signed(rules.physical.thenDM),
+                thenHours: MGT2Helper.plural("MGT2.Jump.BadJump.PhysicalHours", rules.physical.thenHours)
             }),
             mental: MGT2Helper.plural("MGT2.Jump.BadJump.Mental", rules.mental.afterDays, {
                 second, dm: MGT2Helper.signed(rules.mental.dm), at: rules.mental.seriousAt,

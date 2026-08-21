@@ -22,7 +22,11 @@ export class MGT2Helper {
         // The active language first, so one still holding the key as a plain string keeps its text;
         // then `other`, because French selects `many` at a million and defines none.
         const id = [`${key}.${rule}`, key, `${key}.other`].find(has) ?? `${key}.other`;
-        return game.i18n.format(id, { n, ...data });
+        const all = { n, ...data };
+        // ⚠ Not `format`: it substitutes EVERY placeholder from the data it is handed, so one the
+        // caller does not hold prints the word "undefined" at the player. Leave it for whoever does.
+        return game.i18n.localize(id).replace(/\{(\w+)\}/g, (token, name) =>
+            (name in all) ? all[name] : token);
     }
 
     static hasValue(object, property) {
