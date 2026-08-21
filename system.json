@@ -154,6 +154,30 @@
 					"lockedDescription"
 				]
 			},
+			"contract": {
+				"htmlFields": [
+					"notes"
+				],
+				"gmOnlyFields": [
+					"referee",
+					"given",
+					"employer",
+					"subject",
+					"hunter",
+					"parties",
+					"client",
+					"priority",
+					"wantedFor",
+					"alive",
+					"fee",
+					"paid",
+					"issued",
+					"status",
+					"notes",
+					"description",
+					"source"
+				]
+			},
 			"disease": {},
 			"role": {},
 			"equipment": {},

@@ -439,6 +439,71 @@ MGT2.Attitudes = Object.freeze({
     Complicated: "MGT2.Contact.Attitude.Complicated"
 });
 
+// Where a job stands, on both siblings: a ticket is offered and taken the same way a contract is.
+MGT2.JobStatus = Object.freeze({
+    offered: "MGT2.Job.Status.offered",
+    taken: "MGT2.Job.Status.taken",
+    done: "MGT2.Job.Status.done",
+    failed: "MGT2.Job.Status.failed",
+    cancelled: "MGT2.Job.Status.cancelled"
+});
+
+// Bounty Hunter p.22's six issuers.
+MGT2.ContractClients = Object.freeze({
+    organisedCrime: "MGT2.Contract.Client.organisedCrime",
+    corporate: "MGT2.Contract.Client.corporate",
+    bailBondsman: "MGT2.Contract.Client.bailBondsman",
+    lawEnforcement: "MGT2.Contract.Client.lawEnforcement",
+    government: "MGT2.Contract.Client.government",
+    patron: "MGT2.Contract.Client.patron"
+});
+
+// Bounty Hunter p.18: how important the contract is to the issuer, and what the bounty tracks.
+MGT2.ContractPriorities = Object.freeze({
+    low: "MGT2.Contract.Priority.low",
+    mid: "MGT2.Contract.Priority.mid",
+    high: "MGT2.Contract.Priority.high",
+    critical: "MGT2.Contract.Priority.critical"
+});
+
+// Bounty Hunter p.18 pays for bringing in the individual "or finding a place or thing".
+MGT2.ContractSubjectKinds = Object.freeze({
+    person: "MGT2.Contract.Kind.person",
+    place: "MGT2.Contract.Kind.place",
+    thing: "MGT2.Contract.Kind.thing"
+});
+
+// Bounty Hunter p.18: what state the bounty is paid for the mark in.
+MGT2.ContractWanted = Object.freeze({
+    alive: "MGT2.Contract.Wanted.alive",
+    either: "MGT2.Contract.Wanted.either"
+});
+
+// Bounty Hunter p.19's referee side, in the order the book prints it.
+MGT2.ContractRefereeRows = Object.freeze({
+    repMin: "MGT2.Contract.Referee.repMin",
+    lastSeen: "MGT2.Contract.Referee.lastSeen",
+    describe: "MGT2.Contract.Referee.describe",
+    information: "MGT2.Contract.Referee.information",
+    complications: "MGT2.Contract.Referee.complications"
+});
+
+// Bounty Hunter p.10's Bounty Negotiation table: 2D + REP DM, read as a percentage of the offer.
+// The printed table runs 1-or-less to 15, which is the reachable range of 2D plus a +3 REP DM.
+MGT2.BountyNegotiation = Object.freeze([
+    {max: 2, percent: -40}, {max: 3, percent: -30}, {max: 4, percent: -20}, {max: 5, percent: -10},
+    {max: 8, percent: 0}, {max: 9, percent: 10}, {max: 10, percent: 15}, {max: 11, percent: 25},
+    {max: 13, percent: 35}, {max: 14, percent: 40}, {max: null, percent: 50}
+]);
+
+// Bounty Hunter p.10: a hunter under the client's minimum REP may ask anyway, at the difficulty the
+// difference dictates. `max: null` is the last rung, which the book prints as "9 or more".
+MGT2.RepQualification = Object.freeze([
+    {max: 2, difficulty: "Average"}, {max: 4, difficulty: "Difficult"},
+    {max: 6, difficulty: "VeryDifficult"}, {max: 8, difficulty: "Formidable"},
+    {max: null, difficulty: "Impossible"}
+]);
+
 MGT2.Characteristics = Object.freeze({
     strength: "MGT2.Characteristics.strength.name",
     dexterity: "MGT2.Characteristics.dexterity.name",

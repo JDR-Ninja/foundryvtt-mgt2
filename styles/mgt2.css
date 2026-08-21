@@ -6229,6 +6229,365 @@ ul.softwares li:hover a {
   color: var(--danger);
 }
 
+.mgt2 .terms {
+  grid-column: 3;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+.mgt2 .terms .bounty {
+  font-family: var(--cond);
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mgt2 .terms .bounty u {
+  margin-right: 3px;
+  font-size: 12px;
+  text-decoration: none;
+  color: var(--mute);
+}
+.mgt2 .terms .was {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+  text-decoration: line-through;
+}
+.mgt2 .terms .prio {
+  padding: 1px 7px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--accent-text);
+  border: 1px solid var(--accent-line);
+}
+.mgt2 .terms .prio.crit {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.mgt2 nav.horizontal-tabs a.item.gmtab {
+  color: var(--danger);
+  opacity: 0.72;
+}
+.mgt2 nav.horizontal-tabs a.item.gmtab:hover {
+  color: var(--danger);
+}
+.mgt2 nav.horizontal-tabs a.item.gmtab.active {
+  color: var(--danger);
+  opacity: 1;
+}
+.mgt2 nav.horizontal-tabs a.item.gmtab.active::after {
+  border-bottom-color: var(--danger);
+}
+
+.mgt2 .pref {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+.mgt2 .pref .av {
+  flex: none;
+  align-self: center;
+  width: 16px;
+  height: 16px;
+  background: var(--track);
+  border: 1px solid var(--rule);
+}
+.mgt2 .pref .nm {
+  font-size: 13.5px;
+}
+.mgt2 .pref .src {
+  font-style: normal;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .pref.linked .nm {
+  color: var(--accent-text);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .pref.plain .nm {
+  font-style: italic;
+  color: var(--mute);
+}
+.mgt2 .pref.none .nm {
+  font-style: italic;
+  color: var(--faint);
+}
+.mgt2 .pref.classified .nm {
+  color: var(--danger);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+}
+
+.mgt2 .fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .fields > li > .lbl {
+  display: block;
+  margin-bottom: 1px;
+}
+
+.mgt2 .subj {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.mgt2 .subj .kind {
+  padding: 0 5px;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--rule);
+}
+.mgt2 .subj .alt {
+  font-size: 12px;
+  color: var(--mute);
+}
+.mgt2 .subj .alt.gm {
+  color: var(--danger);
+}
+
+.mgt2 .taken {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  padding: 7px 9px;
+  background: var(--hover);
+  border: 1px solid var(--rule);
+}
+.mgt2 .taken .lbl {
+  flex: none;
+}
+.mgt2 .taken.empty {
+  border-style: dashed;
+}
+.mgt2 .taken .rep {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--faint);
+}
+.mgt2 .taken .rep.short {
+  color: var(--danger);
+}
+
+.mgt2 .reveal {
+  display: flex;
+  flex-direction: column;
+}
+.mgt2 .reveal .r {
+  display: grid;
+  grid-template-columns: 7.6rem minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .reveal .r:last-child {
+  border-bottom: 0;
+}
+.mgt2 .reveal .k {
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .reveal .v {
+  min-width: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.mgt2 .reveal .rowedit {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.mgt2 .reveal .rowedit input.num {
+  width: 4rem;
+}
+.mgt2 .reveal .tell {
+  padding: 2px 8px;
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--faint);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .reveal .tell:hover {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+}
+.mgt2 .reveal .r.told .tell {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+.mgt2 .reveal .r.told .k {
+  color: var(--accent-text);
+}
+.mgt2 .reveal .r.held .v {
+  color: var(--mute);
+}
+
+.mgt2 .secretnote {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: 9px 11px;
+  background: var(--hover);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--danger);
+}
+.mgt2 .secretnote i {
+  flex: none;
+  margin-top: 2px;
+  color: var(--danger);
+}
+.mgt2 .secretnote p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+
+.mgt2 .act {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 9px 11px;
+  background: var(--hover);
+  border: 1px solid var(--rule);
+}
+.mgt2 .act .top {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.mgt2 .act .top h4 {
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.mgt2 .act .top .cite {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+.mgt2 .act .line {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+.mgt2 .act .row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.mgt2 .act .out {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--accent-text);
+}
+.mgt2 .act .out.bad {
+  color: var(--danger);
+}
+.mgt2 .act.spent {
+  opacity: 0.75;
+}
+
+.mgt2 .genbar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.mgt2 .genbar .why {
+  font-size: 11.5px;
+  color: var(--danger);
+}
+
+.mgt2 .gen {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.mgt2 .gen .g {
+  display: grid;
+  grid-template-columns: 1.2rem 4.4rem minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .gen .g:last-child {
+  border-bottom: 0;
+}
+.mgt2 .gen .n {
+  color: var(--faint);
+}
+.mgt2 .gen .d {
+  color: var(--accent-text);
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .gen .t {
+  min-width: 0;
+  color: var(--mute);
+  overflow-wrap: anywhere;
+}
+.mgt2 .gen .t b {
+  font-weight: 400;
+  color: var(--ink);
+}
+.mgt2 .gen .f {
+  white-space: nowrap;
+  color: var(--faint);
+}
+.mgt2 .gen .g.chained .t::before {
+  content: "↳";
+  color: var(--danger);
+}
+.mgt2 .gen .g.waiting {
+  opacity: 0.45;
+}
+
 li.chat-message:has(> .message-content > .mgt2.card) {
   --cham: 15px;
   --cham-in: 11px;

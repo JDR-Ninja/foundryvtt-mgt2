@@ -1,0 +1,351 @@
+// The contract sheet's own components. The primitives — .block, .sect, .grid, .roster, .statline,
+// .btn — are _blocks.sass and are used as they ship; what is below exists only here.
+
+// --------------------------------------------
+//  TERMS — the masthead's third cell, where a carried item shows its supply
+// --------------------------------------------
+.mgt2 .terms
+	grid-column: 3
+	grid-row: 1
+	display: flex
+	flex-direction: column
+	align-items: flex-end
+	gap: 5px
+
+	.bounty
+		font-family: var(--cond)
+		font-size: 25px
+		font-weight: 700
+		line-height: 1
+		font-variant-numeric: tabular-nums
+		white-space: nowrap
+		u
+			margin-right: 3px
+			font-size: 12px
+			text-decoration: none
+			color: var(--mute)
+
+	// An agreed bounty replaces the offer; the offer stays visible struck through, because the
+	// pair is the record of the negotiation and one number is not.
+	.was
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--faint)
+		text-decoration: line-through
+
+	.prio
+		padding: 1px 7px
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.16em
+		text-transform: uppercase
+		white-space: nowrap
+		color: var(--accent-text)
+		border: 1px solid var(--accent-line)
+		&.crit
+			color: var(--danger)
+			border-color: var(--danger)
+
+// The two tabs whose content the players are not meant to read yet are drawn in the danger hue in
+// BOTH states. A tab that looks like its neighbours is one a referee shares in a screen-share by
+// reflex, which on this design is the actual failure mode.
+.mgt2 nav.horizontal-tabs a.item.gmtab
+	color: var(--danger)
+	opacity: 0.72
+	&:hover
+		color: var(--danger)
+	&.active
+		color: var(--danger)
+		opacity: 1
+		&::after
+			border-bottom-color: var(--danger)
+
+// --------------------------------------------
+//  PREF — one {uuid, name} reference outside a table, in three occupancy states
+// --------------------------------------------
+// Contract: a reference this viewer cannot observe prints as its stored name and NEVER as a chip
+// that will not open. `classified` is a fourth state and is not emptiness.
+
+.mgt2 .pref
+	display: inline-flex
+	align-items: baseline
+	gap: 7px
+	min-width: 0
+
+	.av
+		flex: none
+		align-self: center
+		width: 16px
+		height: 16px
+		background: var(--track)
+		border: 1px solid var(--rule)
+
+	.nm
+		font-size: 13.5px
+
+	.src
+		font-style: normal
+		font-family: var(--cond)
+		font-size: 9.5px
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		color: var(--faint)
+
+	&.linked .nm
+		color: var(--accent-text)
+		cursor: var(--cursor-pointer)
+	&.plain .nm
+		font-style: italic
+		color: var(--mute)
+	&.none .nm
+		font-style: italic
+		color: var(--faint)
+	// Folio 18's third state takes the danger rule so it cannot be read as a field somebody forgot.
+	&.classified .nm
+		color: var(--danger)
+		font-variant-caps: all-small-caps
+		letter-spacing: 0.1em
+
+.mgt2 .fields
+	display: flex
+	flex-direction: column
+	gap: 8px
+	margin: 0
+	padding: 0
+	list-style: none
+	> li > .lbl
+		display: block
+		margin-bottom: 1px
+
+// Folio 18 says the subject is not always a person: a kind of place or thing empties the mark line
+// on purpose, and folio 19 empties the last known location with it.
+.mgt2 .subj
+	display: flex
+	align-items: baseline
+	gap: 9px
+	flex-wrap: wrap
+	.kind
+		padding: 0 5px
+		font-family: var(--cond)
+		font-size: 9.5px
+		font-weight: 600
+		letter-spacing: 0.16em
+		text-transform: uppercase
+		color: var(--faint)
+		border: 1px solid var(--rule)
+	.alt
+		font-size: 12px
+		color: var(--mute)
+	.alt.gm
+		color: var(--danger)
+
+// Who took the job. Empty is the interesting state — both printed rolls need a sheet to write to.
+.mgt2 .taken
+	display: flex
+	align-items: center
+	gap: 9px
+	flex-wrap: wrap
+	padding: 7px 9px
+	background: var(--hover)
+	border: 1px solid var(--rule)
+	.lbl
+		flex: none
+	&.empty
+		border-style: dashed
+	.rep
+		margin-left: auto
+		font-family: var(--mono)
+		font-size: 11px
+		color: var(--faint)
+		&.short
+			color: var(--danger)
+
+// --------------------------------------------
+//  REVEAL — folio 19's rows, each with one switch
+// --------------------------------------------
+// Contract: `shown` is STORED. What the party has been told is a fact about the campaign and
+// survives a reload; held back is the DEFAULT state and must not read as an error.
+
+.mgt2 .reveal
+	display: flex
+	flex-direction: column
+
+	.r
+		display: grid
+		grid-template-columns: 7.6rem minmax(0, 1fr) auto
+		gap: 10px
+		align-items: baseline
+		padding: 8px 0
+		border-bottom: 1px solid var(--rule-soft)
+		&:last-child
+			border-bottom: 0
+
+	.k
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		color: var(--faint)
+
+	.v
+		min-width: 0
+		font-size: 13.5px
+		line-height: 1.5
+
+	.rowedit
+		display: flex
+		gap: 6px
+		align-items: center
+		input.num
+			width: 4rem
+
+	.tell
+		padding: 2px 8px
+		font: inherit
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		white-space: nowrap
+		color: var(--faint)
+		background: none
+		border: 1px solid var(--rule)
+		border-radius: 2px
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--accent-text)
+			border-color: var(--accent-line)
+
+	.r.told
+		.tell
+			color: var(--accent-text)
+			background: var(--accent-soft)
+			border-color: var(--accent-line)
+		.k
+			color: var(--accent-text)
+	.r.held .v
+		color: var(--mute)
+
+// The fold over folio 19's rows is a courtesy and not a permission, and this is where that is
+// said: in the danger hue, on the tab of the person who could leak it.
+.mgt2 .secretnote
+	display: flex
+	gap: 9px
+	align-items: flex-start
+	padding: 9px 11px
+	background: var(--hover)
+	border: 1px solid var(--rule)
+	border-left: 2px solid var(--danger)
+	i
+		flex: none
+		margin-top: 2px
+		color: var(--danger)
+	p
+		margin: 0
+		font-size: 12.5px
+		line-height: 1.5
+		color: var(--mute)
+
+// --------------------------------------------
+//  ACT — one printed rule the party rolls, and what it did to the document
+// --------------------------------------------
+.mgt2 .act
+	display: flex
+	flex-direction: column
+	gap: 7px
+	padding: 9px 11px
+	background: var(--hover)
+	border: 1px solid var(--rule)
+
+	.top
+		display: flex
+		align-items: baseline
+		gap: 9px
+		flex-wrap: wrap
+		h4
+			margin: 0
+			font-family: var(--cond)
+			font-size: 12px
+			font-weight: 700
+			letter-spacing: 0.14em
+			text-transform: uppercase
+		.cite
+			margin-left: auto
+			font-family: var(--mono)
+			font-size: 10px
+			color: var(--faint)
+
+	.line
+		font-size: 12.5px
+		line-height: 1.5
+		color: var(--mute)
+
+	.row
+		display: flex
+		gap: 8px
+		align-items: center
+		flex-wrap: wrap
+
+	.out
+		font-family: var(--mono)
+		font-size: 11.5px
+		color: var(--accent-text)
+		&.bad
+			color: var(--danger)
+
+	&.spent
+		opacity: 0.75
+
+// --------------------------------------------
+//  GEN — the eight declared draws, and not one row of what they return
+// --------------------------------------------
+.mgt2 .genbar
+	display: flex
+	align-items: center
+	gap: 9px
+	flex-wrap: wrap
+	.why
+		font-size: 11.5px
+		color: var(--danger)
+
+.mgt2 .gen
+	display: flex
+	flex-direction: column
+	font-family: var(--mono)
+	font-size: 11px
+
+	.g
+		display: grid
+		grid-template-columns: 1.2rem 4.4rem minmax(0, 1fr) auto
+		gap: 8px
+		align-items: baseline
+		padding: 5px 0
+		border-bottom: 1px solid var(--rule-soft)
+		&:last-child
+			border-bottom: 0
+
+	.n
+		color: var(--faint)
+	.d
+		color: var(--accent-text)
+		font-variant-numeric: tabular-nums
+	.t
+		min-width: 0
+		color: var(--mute)
+		overflow-wrap: anywhere
+		b
+			font-weight: 400
+			color: var(--ink)
+	.f
+		white-space: nowrap
+		color: var(--faint)
+
+	// A step whose table is named by an earlier result, and one that has not been drawn yet.
+	.g.chained .t::before
+		content: "\21b3 "
+		color: var(--danger)
+	.g.waiting
+		opacity: 0.45

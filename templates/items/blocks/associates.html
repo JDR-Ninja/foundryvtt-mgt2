@@ -1,0 +1,54 @@
+{{! Bounty Hunter p.18: people known to have links to the mark. On an alternate contract they are
+    people attached to the place or the thing, which is why the row is a reference and not a mark. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Contract.KnownAssociates'}}</h3>
+		<span class="count">{{localize 'MGT2.Contract.Folio18'}}</span>
+		<a class="add edit-only" data-action="entryCreate" data-property="parties" data-tooltip="{{localize 'MGT2.Contract.AddAssociate'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+
+	<table class="roster" data-property="parties" data-reference="associate" data-accept="Actor.character Actor.npc">
+		<thead>
+			<tr>
+				<th style="width:8rem">{{localize 'MGT2.Contract.Relation'}}</th>
+				<th>{{localize 'MGT2.Contract.Who'}}</th>
+				<th class="r">{{localize 'MGT2.Contract.Seen'}}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each contract.associates as |row|}}
+			<tr data-row-index="{{row.index}}" data-entry-index="{{row.index}}" data-reference="associate" data-accept="Actor.character Actor.npc"{{#unless row.person}} class="vacant"{{/unless}}>
+				<td class="station">
+					<b class="play-only">{{#if row.relation}}{{row.relation}}{{else}}&mdash;{{/if}}</b>
+					<input class="f edit-only" type="text" name="system.parties.{{row.index}}.relation" value="{{row.relation}}" />
+				</td>
+				<td class="who{{#if row.person}}{{#if row.person.linked}} linked{{else}} plain{{/if}}{{/if}}">
+					<span class="play-only">
+						{{#if row.person}}
+						{{#if row.person.linked}}
+						<span class="av"></span><a data-action="openReference" data-uuid="{{row.person.uuid}}">{{row.person.name}}</a>
+						<i class="src">{{localize 'MGT2.Contract.LinkedActor'}}</i>
+						{{else}}
+						<span class="av"></span><em>{{row.person.name}}</em><i class="src">{{localize 'MGT2.Contract.NameOnly'}}</i>
+						{{/if}}
+						{{else}}
+						{{localize 'MGT2.Contract.Vacant'}}
+						{{/if}}
+					</span>
+					<input class="f edit-only" type="text" name="system.parties.{{row.index}}.person.name" value="{{row.stored}}" placeholder="{{localize 'MGT2.Contract.Who'}}" />
+					{{! ⚠ `ArrayField._cast` rebuilds the array from the submitted keys alone, so the
+					    link is cleared on every sheet edit unless the form carries it back. }}
+					<input type="hidden" name="system.parties.{{row.index}}.person.uuid" value="{{row.uuid}}" />
+				</td>
+				<td class="r">
+					<span class="need play-only">{{#if row.note}}{{row.note}}{{else}}&mdash;{{/if}}</span>
+					<span class="edit-only rowedit">
+						<input class="f" type="text" name="system.parties.{{row.index}}.note" value="{{row.note}}" />
+						<a class="del" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+					</span>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</div>

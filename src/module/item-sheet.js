@@ -1,4 +1,5 @@
 import { MGT2 } from "./config.js";
+import { Contract } from "./contract.js";
 import { Doses } from "./doses.js";
 import { EFFECT_ACTIONS, prepareEffects } from "./effects.js";
 import { MGT2Helper } from "./helper.js";
@@ -14,7 +15,8 @@ const { ItemSheetV2 } = foundry.applications.sheets;
 /** Every block the sheet can compose from; each one is a partial of the same name. */
 const BLOCKS = ["roll", "hazard", "specs", "carried", "traits", "rules", "relationship", "description",
   "detail", "notes", "software", "contents", "trade", "events", "station", "actions", "effects",
-  "career", "careertables", "species", "speciesframe"];
+  "career", "careertables", "species", "speciesframe",
+  "bounty", "referee", "leads", "associates", "generate"];
 
 const blockPath = id => `systems/mgt2/templates/items/blocks/${id}.html`;
 
@@ -28,7 +30,10 @@ const SLOT = {
   contents: "contents", software: "contents", events: "contents", actions: "contents",
   trade: "contents", carried: "contents", careertables: "contents", speciesframe: "contents",
   effects: "effects",
-  description: "description", detail: "description", notes: "description"
+  description: "description", detail: "description", notes: "description",
+  // Bounty Hunter p.18-19's two portions, and the party's copy of what has been shown.
+  bounty: "contract", referee: "referee", leads: "leads", associates: "associates",
+  generate: "generate"
 };
 
 for ( const id of BLOCKS ) {
@@ -41,6 +46,13 @@ for ( const id of BLOCKS ) {
  */
 const TEMPLATE_ONLY = new Set(["career", "careertables"]);
 const RECORD_ONLY = new Set(["events"]);
+
+/**
+ * Bounty Hunter p.19's rows and p.22's generator are the referee's; the party gets `leads`, which
+ * draws only the rows already shown. The referee tab is not thinned for a player — it is not built.
+ */
+const GM_ONLY = new Set(["referee", "generate"]);
+const PLAYER_ONLY = new Set(["leads"]);
 
 /** Blocks whose heading only repeats the nav entry above it, so alone in a tab they drop it. */
 const EPONYMOUS = new Set(["effects", "description", "contents"]);
@@ -118,9 +130,18 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       nestedEdit: TravellerItemSheet.#onNestedEdit,
       nestedRemove: TravellerItemSheet.#onNestedRemove,
       nestedDelete: TravellerItemSheet.#onNestedDelete,
+      openReference: TravellerItemSheet.#onOpenReference,
+      contractHandover: TravellerItemSheet.#onContractHandover,
+      contractShow: TravellerItemSheet.#onContractShow,
+      contractNegotiate: TravellerItemSheet.#onContractNegotiate,
+      contractQualify: TravellerItemSheet.#onContractQualify,
+      contractGenerate: TravellerItemSheet.#onContractGenerate,
       ...EFFECT_ACTIONS
     }
   };
+
+  /** The last run of the eight draws, kept for this window only — a log, not a stored record. */
+  #drawLog = null;
 
   /** One root part, unwrapped into `.window-content`. @inheritDoc */
   static PARTS = {
@@ -135,21 +156,29 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         "systems/mgt2/templates/items/parts/standing-modifier.html",
         "systems/mgt2/templates/items/parts/step-outcome.html",
         "systems/mgt2/templates/items/parts/law-selectors.html",
-        "systems/mgt2/templates/items/parts/specialised.html"),
+        "systems/mgt2/templates/items/parts/specialised.html",
+        // One reference shape, drawn four times on a contract.
+        "systems/mgt2/templates/items/parts/person-ref.html"),
       // The masthead never scrolls, so the open tab is the only scroller — and `submitOnChange`
       // re-renders the whole sheet on every keystroke.
       scrollable: ['.tab[data-group="item"].active']
     }
   };
 
-  /** The five tabs, in nav order. @inheritDoc */
+  /** Every tab any type can fill, in nav order; `_getTabsConfig` keeps the ones with blocks in them. */
   static TABS = {
     item: {
       tabs: [
+        { id: "contract", cssClass: "item tab-select", icon: "fa-solid fa-file-signature", label: "MGT2.Contract.Tab" },
         { id: "details", cssClass: "item tab-select", icon: "fa-solid fa-gear", label: "MGT2.Items.Details" },
+        // Two tabs the player is not meant to read yet, drawn in the danger hue in both states.
+        { id: "referee", cssClass: "item tab-select gmtab", icon: "fa-solid fa-lock", label: "MGT2.Contract.RefereeTab" },
+        { id: "leads", cssClass: "item tab-select", icon: "fa-solid fa-eye", label: "MGT2.Contract.LeadsTab" },
+        { id: "associates", cssClass: "item tab-select", icon: "fa-solid fa-users", label: "MGT2.Contract.AssociatesTab" },
         { id: "traits", cssClass: "item tab-select", icon: "fa-solid fa-tag", label: "MGT2.Items.Traits" },
         { id: "contents", cssClass: "item tab-select", icon: "fa-solid fa-box-open", label: "MGT2.Items.Contents" },
         { id: "description", cssClass: "item tab-select", icon: "fa-solid fa-book", label: "MGT2.Items.Description" },
+        { id: "generate", cssClass: "item tab-select gmtab", icon: "fa-solid fa-dice", label: "MGT2.Contract.GenerateTab" },
         { id: "effects", cssClass: "item tab-select", icon: "fa-solid fa-person-rays", label: "MGT2.Effects.Title" }
       ]
     }
@@ -183,7 +212,11 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     cargo: ["specs", "trade", "effects", "description"],
     passage: ["specs", "effects", "description"],
     component: ["specs", "effects", "description"],
-    ammunition: ["specs", "carried", "traits", "rules", "effects", "description"]
+    ammunition: ["specs", "carried", "traits", "rules", "effects", "description"],
+    // Bounty Hunter p.18: one document rendered for two seats. `#composition` drops the two GM
+    // blocks for a player and the party's `leads` copy for the referee. `notes` is not listed: the
+    // referee's own prep belongs behind the fold, so the referee block draws it.
+    contract: ["bounty", "referee", "leads", "associates", "generate", "description"]
   };
 
   /**
@@ -201,6 +234,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     for ( const id of list ) {
       if ( TEMPLATE_ONLY.has(id) && !item.system.isTemplate ) continue;
       if ( RECORD_ONLY.has(id) && item.system.isTemplate ) continue;
+      if ( GM_ONLY.has(id) && !game.user.isGM ) continue;
+      if ( PLAYER_ONLY.has(id) && game.user.isGM ) continue;
       if ( id === "carried" ) {
         supply = true;
         if ( item.type !== "container" ) continue;
@@ -307,8 +342,97 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       careerTables: this.#careerTables(),
       careerIssues: this.#careerIssues(),
       eventTables: this.#eventTables(),
-      speciesFrame: this.#speciesFrame()
+      speciesFrame: this.#speciesFrame(),
+      contract: this.#contract()
     });
+  }
+
+  /**
+   * Bounty Hunter p.18-19's contract as one viewer reads it. The party's column is not a subset of
+   * the referee's: it is the same stored object read with a different viewer.
+   */
+  #contract() {
+    const item = this.item;
+    if ( item.type !== "contract" ) return null;
+    const system = item.system;
+    const gm = game.user.isGM;
+    const shown = system.referee.filter(row => row.shown);
+
+    return {
+      gm,
+      subject: (system.subject.kind === "person")
+        ? { person: this.#reference(system.subject.person) }
+        : { label: system.subject.label, kind: MGT2.ContractSubjectKinds[system.subject.kind] },
+      // Folio 18's third state: the party reads "Classified", the referee reads who it is, off one
+      // stored field.
+      issuer: {
+        classified: system.employer.classified,
+        person: (system.employer.classified && !gm) ? null : this.#reference(system.employer.person),
+        note: gm ? system.employer.note : ""
+      },
+      hunter: this.#reference(system.hunter),
+      rep: system.hunterRep,
+      hasRep: system.hunterRep !== null,
+      short: (system.hunterRep !== null) && (system.hunterRep < system.repFloor),
+      rows: system.referee.map((row, index) => ({
+        index, ...row,
+        label: MGT2.ContractRefereeRows[row.key] ?? row.label,
+        // Folio 19 leaves the last known location blank on an alternate contract, and that blank
+        // is the reading rather than an omission.
+        blanked: system.alternate && (row.key === "lastSeen")
+      })),
+      shownRows: shown,
+      shownCount: shown.length,
+      heldCount: system.referee.length - shown.length,
+      // `stored` is what the edit field binds: binding the RESOLVED name would copy the Actor's
+      // name into the document, and nothing here is a copy.
+      associates: system.parties.map((party, index) => ({
+        index, relation: party.relation, note: party.note,
+        stored: party.person.name, uuid: party.person.uuid ?? "",
+        person: this.#reference(party.person)
+      })),
+      negotiate: this.#contractAction("negotiate"),
+      qualify: this.#contractAction("qualify"),
+      // The floor is a referee-side field, so until it is shown the party does not know there is
+      // one to fall under — and folio 10's check is only for a hunter under it.
+      offerQualify: (system.repFloorShown && (system.hunterRep !== null)
+        && (system.hunterRep < system.repFloor)) || system.qualificationRolled,
+      difficulty: MGT2Helper.getDifficultyDisplay(
+        Contract.qualificationDifficulty(system.repFloor - (system.hunterRep ?? 0))),
+      generator: {
+        refused: Contract.generatorRefusal(item),
+        log: this.#generatorLog()
+      }
+    };
+  }
+
+  /** One printed roll: whether it can be made here, and the sentence saying why not. */
+  #contractAction(rule) {
+    const refused = Contract.refusal(this.item, rule);
+    return { refused, disabled: refused !== null };
+  }
+
+  /**
+   * The eight declared draws, carrying whatever the last run returned. The sequence is the system's;
+   * every row it shows came from the module.
+   */
+  #generatorLog() {
+    const drawn = this.#drawLog ?? [];
+    return Contract.sequence.map(step =>
+      ({ ...step, ...(drawn.find(row => row.step === step.step) ?? {}) }));
+  }
+
+  /**
+   * One `{uuid, name}` reference as this viewer reads it — three occupancy states, and a link the
+   * viewer cannot observe degrades to the stored name rather than to a chip that will not open.
+   * @returns {{name: string, linked: boolean}|null}   Null is VACANT, and vacant is a state
+   */
+  #reference(reference) {
+    const actor = reference?.uuid ? foundry.utils.fromUuidSync(reference.uuid) : null;
+    const visible = actor?.testUserPermission?.(game.user, "LIMITED") === true;
+    if ( visible ) return { uuid: reference.uuid, name: actor.name, linked: true };
+    const name = reference?.name?.trim() || actor?.name || "";
+    return name ? { uuid: reference.uuid, name, linked: false } : null;
   }
 
   /**
@@ -411,6 +535,12 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       tags.push(`${game.i18n.localize("MGT2.Items.Level")} ${system.level}`);
     }
     if ( type === "weapon" ) tags.push(game.i18n.localize(MGT2.WeaponScales[system.scale]?.label ?? ""));
+    if ( type === "contract" ) {
+      tags.push(game.i18n.localize(MGT2.ContractClients[system.client] ?? ""));
+      tags.push(game.i18n.localize(MGT2.JobStatus[system.status] ?? ""));
+      tags.push(game.i18n.localize((system.subject.kind === "person")
+        ? MGT2.ContractWanted[system.alive] : "MGT2.Contract.ToBeFound"));
+    }
     if ( "tl" in system ) tags.push(game.i18n.localize(MGT2.TL[system.tl] ?? ""));
     return tags.filter(tag => tag !== "");
   }
@@ -874,6 +1004,9 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   async _onDrop(event) {
     const data = MGT2Helper.getDataFromDropEvent(event);
     const container = this.item;
+    if ( (container.type === "contract") && (data?.type === "Actor") ) {
+      return this.#onDropPerson(event, data);
+    }
     if ( (container.type !== "container") || (data?.type !== "Item") ) return super._onDrop(event);
     if ( !this.isEditable ) return;
     if ( Hooks.call("dropItemSheetData", container, this, data) === false ) return;
@@ -904,6 +1037,96 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     for ( const entry of toCreate ) entry.folder = container.folder?.id ?? null;
     await getDocumentClass("Item").createDocuments(toCreate,
       { parent: container.parent, pack: container.pack, keepId: true });
+    return this.render();
+  }
+
+  /**
+   * A person dropped on a contract fills whichever slot they landed on. The stored uuid is the
+   * WORLD Actor: a contract names a person, not an instance on a map, so a token resolves to its
+   * base — the distinction `lines[].actor` shipped a release blocker on.
+   */
+  async #onDropPerson(event, data) {
+    if ( !this.isEditable ) return false;
+    const dropped = await fromUuid(data.uuid);
+    const actor = dropped?.isToken ? dropped.token?.baseActor ?? dropped : dropped;
+    if ( !["character", "npc"].includes(actor?.type) ) {
+      ui.notifications.warn(game.i18n.localize("MGT2.Contract.NotAPerson"));
+      return false;
+    }
+    const slot = event.target.closest("[data-reference]")?.dataset.reference;
+    if ( !slot ) return false;
+    const reference = { uuid: actor.uuid, name: actor.name };
+
+    if ( slot === "associate" ) {
+      const index = Number(event.target.closest("[data-row-index]")?.dataset.rowIndex ?? -1);
+      const parties = this.item.system.parties.map(party => ({ ...party }));
+      if ( parties[index] ) parties[index].person = reference;
+      else parties.push({ relation: "", person: reference, note: "" });
+      await this.item.update({ "system.parties": parties });
+      return true;
+    }
+    const path = { subject: "system.subject.person", issuer: "system.employer.person",
+      hunter: "system.hunter" }[slot];
+    if ( !path ) return false;
+    await this.item.update({ [path]: reference });
+    return true;
+  }
+
+  /** A zone refuses at the pointer or not at all. @inheritDoc */
+  _onDragOver(event) {
+    const zone = event.target.closest("[data-accept]");
+    if ( !zone ) return super._onDragOver(event);
+    const accepted = MGT2Helper.dropAccepted(zone);
+    zone.classList.toggle("over", accepted);
+    zone.classList.toggle("deny", !accepted);
+  }
+
+  /** A stored reference opened by whoever can see it. @this {TravellerItemSheet} */
+  static async #onOpenReference(event, target) {
+    const document = await fromUuid(target.dataset.uuid);
+    return document?.sheet?.render({ force: true });
+  }
+
+  /**
+   * Folio 18's handover, and the one job ownership does on this type. Held back, the party's client
+   * never receives the document; handed over, it receives all of it.
+   * @this {TravellerItemSheet}
+   */
+  static async #onContractHandover() {
+    const given = !this.item.system.given;
+    const update = { "system.given": given };
+    // An embedded Item inherits its Actor's ownership and can express neither state.
+    if ( !this.item.isEmbedded ) {
+      update["ownership.default"] = given
+        ? CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER : CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE;
+    }
+    return this.item.update(update);
+  }
+
+  /** Showing one of folio 19's rows to the party, which is a stored fact. @this {TravellerItemSheet} */
+  static async #onContractShow(event, target) {
+    await this.submit();
+    const index = Number(target.closest("[data-row-index]").dataset.rowIndex);
+    const rows = this.item.system.referee.map((row, at) =>
+      ((at === index) ? { ...row, shown: !row.shown } : { ...row }));
+    return this.item.update({ "system.referee": rows });
+  }
+
+  /** @this {TravellerItemSheet} */
+  static #onContractNegotiate() {
+    return Contract.negotiate(this.item);
+  }
+
+  /** @this {TravellerItemSheet} */
+  static #onContractQualify() {
+    return Contract.qualify(this.item);
+  }
+
+  /** @this {TravellerItemSheet} */
+  static async #onContractGenerate() {
+    await this.submit();
+    const log = await Contract.generate(this.item);
+    if ( log ) this.#drawLog = log;
     return this.render();
   }
 

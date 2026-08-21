@@ -1,0 +1,51 @@
+{{! Bounty Hunter p.19's five rows, each with one switch. `shown` is stored: what the party has been
+    told is a fact about the campaign and must survive a reload. }}
+<div class="secretnote">
+	<i class="fa-solid fa-lock"></i>
+	<p>{{localize 'MGT2.Contract.CourtesyNote'}}</p>
+</div>
+
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Contract.RefereeSide'}}</h3>
+		<span class="count">{{plural 'MGT2.Contract.ShownCount' contract.rows.length shown=contract.shownCount total=contract.rows.length}}</span>
+		<span class="gm">{{localize 'MGT2.Contract.Folio19'}}</span>
+	</div>
+
+	<div class="reveal">
+		{{#each contract.rows as |row|}}
+		<div class="r {{#if row.shown}}told{{else}}held{{/if}}" data-row-index="{{row.index}}">
+			<span class="k">{{localize row.label}}</span>
+			<span class="v">
+				{{#if row.blanked}}
+				<em>{{localize 'MGT2.Contract.LocationBlank'}}</em>
+				{{else if (eq row.key 'repMin')}}
+				<span class="play-only">{{#if row.number}}{{localize 'MGT2.Characteristics.reputation.short'}} {{row.number}}{{else}}{{localize 'MGT2.Contract.NoFloor'}}{{/if}}{{#if row.value}} &mdash; {{row.value}}{{/if}}</span>
+				{{else}}
+				<span class="play-only">{{#if row.value}}{{row.value}}{{else}}&mdash;{{/if}}</span>
+				{{/if}}
+				<span class="edit-only rowedit">
+					{{#if (eq row.key 'repMin')}}
+					<input class="f num" type="number" step="1" min="0" name="system.referee.{{row.index}}.number" value="{{row.number}}" data-dtype="Number" />
+					{{/if}}
+					<input class="f" type="text" name="system.referee.{{row.index}}.value" value="{{row.value}}" />
+				</span>
+				{{! ⚠ `ArrayField._cast` rebuilds the array from the submitted keys alone, so a field
+				    the form does not round-trip is cleared on every sheet edit. }}
+				<input type="hidden" name="system.referee.{{row.index}}.key" value="{{row.key}}" />
+				<input type="hidden" name="system.referee.{{row.index}}.shown" value="{{row.shown}}" data-dtype="Boolean" />
+			</span>
+			<button type="button" class="tell" data-action="contractShow">
+				{{#if row.shown}}{{localize 'MGT2.Contract.Shown'}}{{else}}{{localize 'MGT2.Contract.ShowTheParty'}}{{/if}}
+			</button>
+		</div>
+		{{/each}}
+	</div>
+
+	<p class="hint">{{localize 'MGT2.Contract.FloorHint'}}</p>
+</div>
+
+<div class="block">
+	<div class="sect"><h3>{{localize 'MGT2.Items.Notes'}}</h3><span class="gm">{{localize 'MGT2.Contract.RefereeOnly'}}</span></div>
+	<prose-mirror name="system.notes" value="{{system.notes}}" toggled></prose-mirror>
+</div>

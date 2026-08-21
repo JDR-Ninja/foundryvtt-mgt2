@@ -27,6 +27,17 @@
 			{{/if}}
 		</div>
 
+		{{! A contract is never carried, equipped or stored, so what stands in the supply cell is the
+		    TERMS: what it pays, what the offer was before it was negotiated, and how badly the
+		    issuer wants it. }}
+		{{#if contract}}
+		<div class="terms">
+			<div class="bounty" data-derived="system.bounty"><u>Cr</u>{{credits system.bounty}}</div>
+			{{#if system.negotiated}}<span class="was">{{localize 'MGT2.Contract.WasOffered'}} Cr{{credits system.fee}}</span>{{/if}}
+			<span class="prio{{#if (eq system.priority 'critical')}} crit{{/if}}">{{localize (lookup config.ContractPriorities system.priority)}}</span>
+		</div>
+		{{/if}}
+
 		{{#if supply}}
 		<div class="supply">
 			{{#if (eq item.type "container")}}

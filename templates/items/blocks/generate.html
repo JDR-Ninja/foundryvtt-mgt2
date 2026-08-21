@@ -1,0 +1,28 @@
+{{! Bounty Hunter p.22-27. The system holds the sequence — which table, into which field, and which
+    three take their table from an earlier result — and not one row of what those tables say. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Contract.DrawAContract'}}</h3>
+		<span class="count">{{localize 'MGT2.Contract.EightDraws'}}</span>
+		<span class="gm">{{localize 'MGT2.Contract.RefereeOnly'}}</span>
+	</div>
+
+	<div class="genbar">
+		<button type="button" class="btn hot" data-action="contractGenerate"{{#if contract.generator.refused}} disabled{{/if}}>{{localize 'MGT2.Contract.RollTheEight'}}</button>
+		{{#if contract.generator.refused}}<span class="why">{{contract.generator.refused}}</span>{{/if}}
+	</div>
+
+	<div class="gen">
+		{{#each contract.generator.log as |step|}}
+		<div class="g{{#if step.after}} chained{{/if}}{{#unless step.total}} waiting{{/unless}}">
+			<span class="n">{{step.step}}</span>
+			<span class="d">{{#if step.formula}}{{step.formula}}&rarr;{{step.total}}{{else}}&mdash;{{/if}}</span>
+			<span class="t">{{#if step.text}}<b>{{step.text}}</b> &larr; {{step.name}}{{else}}{{#if step.name}}{{step.name}}{{else}}{{localize 'MGT2.Contract.FromEarlier'}}{{/if}}{{#if step.missing}} &mdash; {{localize 'MGT2.Contract.TableMissing'}}{{/if}}{{/if}}</span>
+			<span class="f">p.{{step.folio}}</span>
+		</div>
+		{{/each}}
+	</div>
+
+	<p class="hint">{{localize 'MGT2.Contract.ChainHint'}}</p>
+	<p class="hint">{{localize 'MGT2.Contract.RedrawHint'}}</p>
+</div>

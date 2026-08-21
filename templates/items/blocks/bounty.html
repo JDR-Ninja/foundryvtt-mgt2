@@ -1,0 +1,186 @@
+{{! Bounty Hunter p.18's Traveller side, whole. Every field here is on the party's sheet too — the
+    issuer only as far as it is not classified, which is folio 18's own exception and the one place
+    the two halves meet inside a single field. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Contract.TravellerSide'}}</h3>
+		<span class="count">{{localize 'MGT2.Contract.Folio18'}}</span>
+		{{#if contract.gm}}
+		<button type="button" class="btn{{#unless system.given}} hot{{/unless}}" data-action="contractHandover">
+			{{#if system.given}}{{localize 'MGT2.Contract.HandedOver'}}{{else}}{{localize 'MGT2.Contract.HandOver'}}{{/if}}
+		</button>
+		{{/if}}
+	</div>
+
+	<dl class="statline" data-derived="system.bounty">
+		<div class="stat lead"><dt>{{localize 'MGT2.Contract.Bounty'}}</dt><dd><i>Cr</i>{{credits system.bounty}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Contract.PriorityLabel'}}</dt><dd class="word">{{localize (lookup config.ContractPriorities system.priority)}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Contract.WantedLabel'}}</dt><dd class="word">{{#if contract.subject.label}}{{localize 'MGT2.Contract.ToBeFound'}}{{else}}{{localize (lookup config.ContractWanted system.alive)}}{{/if}}</dd></div>
+		<div class="stat"><dt>{{localize 'MGT2.Contract.Status'}}</dt><dd class="word">{{localize (lookup config.JobStatus system.status)}}</dd></div>
+	</dl>
+
+	<ul class="fields">
+		{{! Folio 18 pays for the individual "or finding a place or thing", and folio 30 prints a
+		    contract whose MARK line is EMPTY because the subject is a file. }}
+		<li data-reference="subject" data-accept="Actor.character Actor.npc">
+			<span class="lbl">{{localize 'MGT2.Contract.Mark'}}</span>
+			<div class="subj">
+				{{#if contract.subject.person}}
+				{{> systems/mgt2/templates/items/parts/person-ref.html person=contract.subject.person}}
+				{{else if contract.subject.kind}}
+				<span class="kind">{{localize contract.subject.kind}}</span>
+				<span class="alt">{{#if contract.subject.label}}{{contract.subject.label}}{{else}}{{localize 'MGT2.Contract.Undescribed'}}{{/if}} &mdash; {{localize 'MGT2.Contract.AlternateContract'}}</span>
+				{{else}}
+				{{> systems/mgt2/templates/items/parts/person-ref.html person=contract.subject.person}}
+				{{/if}}
+			</div>
+			<div class="grid edit-only">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Contract.SubjectKind'}}</span>
+					<select class="f" name="system.subject.kind">{{selectOptions config.ContractSubjectKinds selected=system.subject.kind localize=true}}</select>
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Contract.MarkName'}}</span>
+					{{formInput systemFields.subject.fields.person.fields.name name="system.subject.person.name" value=source.subject.person.name classes="f"}}
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Contract.SubjectLabel'}}</span>
+					{{formInput systemFields.subject.fields.label name="system.subject.label" value=source.subject.label classes="f"}}
+				</label>
+			</div>
+		</li>
+
+		<li>
+			<span class="lbl">{{localize 'MGT2.Contract.WantedFor'}}</span>
+			<div class="play-only prose">{{#if system.wantedFor}}{{system.wantedFor}}{{else}}&mdash;{{/if}}</div>
+			{{formInput systemFields.wantedFor name="system.wantedFor" value=source.wantedFor classes="f edit-only"}}
+		</li>
+
+		{{! Folio 18: handled through a guild, the issuer may be listed as classified. }}
+		<li data-reference="issuer" data-accept="Actor.character Actor.npc">
+			<span class="lbl">{{localize 'MGT2.Contract.Issuer'}}</span>
+			<div class="subj">
+				{{#if contract.issuer.classified}}
+				<span class="pref classified"><span class="nm">{{localize 'MGT2.Contract.Classified'}}</span></span>
+				{{/if}}
+				{{#if contract.issuer.person}}
+				{{> systems/mgt2/templates/items/parts/person-ref.html person=contract.issuer.person}}
+				{{else}}
+				{{#unless contract.issuer.classified}}
+				{{> systems/mgt2/templates/items/parts/person-ref.html person=contract.issuer.person}}
+				{{/unless}}
+				{{/if}}
+				{{#if contract.issuer.note}}<span class="alt gm">{{contract.issuer.note}}</span>{{/if}}
+			</div>
+			<div class="grid edit-only">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Contract.IssuerName'}}</span>
+					{{formInput systemFields.employer.fields.person.fields.name name="system.employer.person.name" value=source.employer.person.name classes="f"}}
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Contract.ClientLabel'}}</span>
+					<select class="f" name="system.client">{{selectOptions config.ContractClients selected=system.client localize=true}}</select>
+				</label>
+				<label class="check">
+					{{formInput systemFields.employer.fields.classified name="system.employer.classified" value=system.employer.classified}}
+					<span>{{localize 'MGT2.Contract.ListedClassified'}}</span>
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Contract.IssuerNote'}}</span>
+					{{formInput systemFields.employer.fields.note name="system.employer.note" value=source.employer.note classes="f"}}
+				</label>
+			</div>
+		</li>
+	</ul>
+
+	{{! Who took the job. Empty is the interesting state: both printed rolls write a Traveller, so
+	    with nobody linked they are refused rather than faked. }}
+	<div class="taken{{#unless contract.hunter}} empty{{/unless}}" data-reference="hunter" data-accept="Actor.character Actor.npc">
+		<span class="lbl">{{localize 'MGT2.Contract.TakenBy'}}</span>
+		{{> systems/mgt2/templates/items/parts/person-ref.html person=contract.hunter}}
+		{{#if contract.hasRep}}<span class="rep{{#if contract.short}} short{{/if}}">{{localize 'MGT2.Characteristics.reputation.short'}} {{contract.rep}}</span>{{/if}}
+	</div>
+
+	<div class="grid edit-only">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Contract.HunterName'}}</span>
+			{{formInput systemFields.hunter.fields.name name="system.hunter.name" value=source.hunter.name classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Contract.WantedLabel'}}</span>
+			<select class="f" name="system.alive">{{selectOptions config.ContractWanted selected=system.alive localize=true}}</select>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Contract.Offered'}}</span>
+			{{formInput systemFields.fee name="system.fee" value=source.fee classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Contract.PriorityLabel'}}</span>
+			<select class="f" name="system.priority">{{selectOptions config.ContractPriorities selected=system.priority localize=true}}</select>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Contract.Issued'}}</span>
+			{{formInput systemFields.issued name="system.issued" value=source.issued classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Contract.Status'}}</span>
+			<select class="f" name="system.status">{{selectOptions config.JobStatus selected=system.status localize=true}}</select>
+		</label>
+		<label class="check">
+			{{formInput systemFields.paid name="system.paid" value=system.paid}}
+			<span>{{localize 'MGT2.Contract.Paid'}}</span>
+		</label>
+	</div>
+</div>
+
+{{! THE TWO PRINTED PLAYER ACTIONS, and they are the answer to what this document is FOR: both are
+    rules the party rolls, and both write it. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Contract.WhatTheyCanDo'}}</h3>
+		<span class="count">{{localize 'MGT2.Contract.Folio10'}}</span>
+	</div>
+
+	<div class="act{{#if system.negotiated}} spent{{/if}}">
+		<div class="top">
+			<h4>{{localize 'MGT2.Contract.Negotiate'}}</h4>
+			<span class="cite">{{localize 'MGT2.Contract.NegotiateCite'}}</span>
+		</div>
+		<div class="line">
+			{{#if system.negotiated}}
+			{{localize 'MGT2.Contract.NegotiatedReading' total=system.negotiation.total percent=(showDM system.negotiation.percent) from=(credits system.negotiation.offered) to=(credits system.bounty)}}
+			{{else}}
+			{{localize 'MGT2.Contract.NegotiateReading' offered=(credits system.fee)}}
+			{{/if}}
+		</div>
+		<div class="row">
+			<button type="button" class="btn hot" data-action="contractNegotiate"{{#if contract.negotiate.disabled}} disabled{{/if}}>{{localize 'MGT2.Contract.NegotiateDo'}}</button>
+			{{#if contract.negotiate.refused}}<span class="out bad">{{contract.negotiate.refused}}</span>{{/if}}
+		</div>
+	</div>
+
+	{{! Folio 10's floor is on the referee's side, so until it is shown the party does not know
+	    there is one to fall under — a referee-side field with a player-side consequence. }}
+	{{#if contract.offerQualify}}
+	<div class="act{{#if system.qualificationRolled}} spent{{/if}}">
+		<div class="top">
+			<h4>{{localize 'MGT2.Contract.Qualify'}}</h4>
+			<span class="cite">{{localize 'MGT2.Contract.QualifyCite'}}</span>
+		</div>
+		<div class="line">
+			{{#if system.qualificationRolled}}
+			{{localize 'MGT2.Contract.QualifiedReading' total=system.qualification.total target=system.qualification.target}}
+			{{#if system.qualification.passed}}{{localize 'MGT2.Contract.QualifiedHired'}}{{else}}{{localize 'MGT2.Contract.QualifiedRefused'}}{{/if}}
+			{{else}}
+			{{localize 'MGT2.Contract.QualifyReading' rep=contract.rep floor=system.repFloor difficulty=contract.difficulty}}
+			{{/if}}
+		</div>
+		<div class="row">
+			<button type="button" class="btn hot" data-action="contractQualify"{{#if contract.qualify.disabled}} disabled{{/if}}>{{localize 'MGT2.Contract.QualifyDo'}}</button>
+			{{#if contract.qualify.refused}}<span class="out bad">{{contract.qualify.refused}}</span>{{/if}}
+		</div>
+	</div>
+	{{/if}}
+
+	<p class="hint">{{localize 'MGT2.Contract.ActionsHint'}}</p>
+</div>

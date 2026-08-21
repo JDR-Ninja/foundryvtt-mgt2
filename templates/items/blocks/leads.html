@@ -1,0 +1,22 @@
+{{! The party's copy of folio 19: only the rows the referee has shown. Each line arrived when it was
+    given — at the briefing, or when the Travellers went looking. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Contract.WhatWeWereTold'}}</h3>
+		<span class="count">{{plural 'MGT2.Contract.LeadCount' contract.shownCount n=contract.shownCount}}</span>
+	</div>
+
+	{{#if contract.shownCount}}
+	<div class="reveal">
+		{{#each contract.shownRows as |row|}}
+		<div class="r told">
+			<span class="k">{{localize (lookup ../config.ContractRefereeRows row.key)}}</span>
+			<span class="v">{{#if (eq row.key 'repMin')}}{{localize 'MGT2.Characteristics.reputation.short'}} {{row.number}}{{#if row.value}} &mdash; {{row.value}}{{/if}}{{else}}{{row.value}}{{/if}}</span>
+		</div>
+		{{/each}}
+	</div>
+	<p class="hint">{{localize 'MGT2.Contract.LeadsHint'}}</p>
+	{{else}}
+	<p class="hint">{{localize 'MGT2.Contract.NoLeads'}}</p>
+	{{/if}}
+</div>

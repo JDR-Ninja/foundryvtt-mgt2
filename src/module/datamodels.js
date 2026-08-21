@@ -886,6 +886,174 @@ export class ContactData extends ItemBaseData {
     }
 }
 
+/**
+ * A person or an organisation named by a job: the world Actor where one exists, and the name
+ * always. The two cases `ContactData.actor` names, one field down — the person IS a document at
+ * this table, or the referee statblocks them later.
+ */
+function createReferenceField() {
+    return new fields.SchemaField({
+        // ⚠ `embedded: false` on purpose: a job names a person, not an instance on a map, and the
+        // sheet resolves a dropped token to its base Actor before storing this.
+        uuid: new fields.DocumentUUIDField({
+            type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
+        // Nothing is copied: this is what the reference reads as where the Actor is gone, or where
+        // the viewer cannot observe it.
+        name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
+    });
+}
+
+/**
+ * A job with terms, a fee, a success condition and a referee's tail — a bounty contract and a
+ * mercenary ticket, which are two books' names for the same document. `priority` is deliberately
+ * NOT here: a ticket has no priority ladder.
+ * @extends {ItemBaseData}
+ */
+export class JobData extends ItemBaseData {
+    static defineSchema() {
+        const schema = super.defineSchema();
+
+        // Who is paying, and whether the party is told. Bounty Hunter p.18: handled through a
+        // guild, the issuer may be listed as classified — a third state, not a name and not empty.
+        schema.employer = new fields.SchemaField({
+            person: createReferenceField(),
+            classified: new fields.BooleanField({ required: false, initial: false }),
+            note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
+        });
+        // Free text: the system states an interval and never schedules one.
+        schema.issued = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
+        schema.status = new fields.StringField({
+            required: false, blank: false, initial: "offered", choices: MGT2.JobStatus });
+
+        schema.fee = new fields.NumberField({
+            required: false, nullable: false, min: 0, integer: true, initial: 0 });
+        // Null until a negotiation settles one, and it can settle LOWER than the fee.
+        schema.agreed = new fields.NumberField({
+            required: false, nullable: true, min: 0, integer: true, initial: null });
+        schema.paid = new fields.BooleanField({ required: false, initial: false });
+
+        // `shown` is the mechanism and stored: what the party has been told is a fact about the
+        // campaign, not a render. Who may see an unshown row is the sub-type's policy.
+        schema.referee = new fields.ArrayField(new fields.SchemaField({
+            key: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            label: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            value: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            // A row whose value is also a quantity a rule reads — the REP floor is the only one.
+            number: new fields.NumberField({ required: false, nullable: true, integer: true, initial: null }),
+            shown: new fields.BooleanField({ required: false, initial: false })
+        }), { required: false, initial: () => [] });
+
+        schema.parties = new fields.ArrayField(new fields.SchemaField({
+            relation: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            person: createReferenceField(),
+            note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
+        }), { required: false, initial: () => [] });
+
+        // Mirrored in `system.json`'s `htmlFields`: the SERVER builds its sanitisation rules there
+        // and knows nothing about these classes. `initial` because `blank` alone starts `undefined`.
+        schema.notes = new fields.HTMLField({ required: false, blank: true, trim: true, initial: "" });
+
+        return schema;
+    }
+
+    /** What the job actually pays: the negotiated figure where there is one. */
+    get payout() {
+        return this.agreed ?? this.fee;
+    }
+}
+
+/**
+ * Bounty Hunter p.18-19's contract. It is the PLAYERS' document — folio 18 has the referee hand it
+ * over — and the referee's five rows fold behind the sheet as a courtesy rather than a permission.
+ * @extends {JobData}
+ */
+export class ContractData extends JobData {
+
+    /** The five rows folio 19 prints, in its order; `repMin` is the one a rule reads. */
+    static REFEREE_ROWS = Object.freeze(Object.keys(MGT2.ContractRefereeRows));
+
+    static defineSchema() {
+        const schema = super.defineSchema();
+        schema.subType.initial = "bounty";
+
+        // Bounty Hunter p.18 pays for the individual "or finding a place or thing", and p.30 prints
+        // a contract whose MARK line is EMPTY because the subject is a file. A blank mark is the
+        // kind of contract this is, never a field somebody forgot.
+        schema.subject = new fields.SchemaField({
+            kind: new fields.StringField({
+                required: false, blank: false, initial: "person", choices: MGT2.ContractSubjectKinds }),
+            person: createReferenceField(),
+            // What a place or a thing is called, since neither is an Actor.
+            label: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
+        });
+
+        schema.client = new fields.StringField({
+            required: false, blank: false, initial: "patron", choices: MGT2.ContractClients });
+        schema.priority = new fields.StringField({
+            required: false, blank: false, initial: "low", choices: MGT2.ContractPriorities });
+        schema.wantedFor = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
+        schema.alive = new fields.StringField({
+            required: false, blank: false, initial: "alive", choices: MGT2.ContractWanted });
+
+        // Folio 18's handover, expressed in the one mechanism Foundry has. The sheet raises the
+        // Item's ownership with it; an embedded Item inherits its Actor's and cannot express either
+        // state, which is why a contract is a world Item.
+        schema.given = new fields.BooleanField({ required: false, initial: false });
+
+        // Folio 10's REP-1 and the paid bounty are both writes to a Traveller, so both rules need
+        // this link. REP is READ off the Actor and never stored here.
+        schema.hunter = createReferenceField();
+
+        // Folio 10, rolled once: the total, what the table returned, and the offer it was read
+        // against. `total === null` is "not negotiated".
+        schema.negotiation = new fields.SchemaField({
+            total: new fields.NumberField({ required: false, nullable: true, integer: true, initial: null }),
+            percent: new fields.NumberField({ required: false, nullable: true, integer: true, initial: null }),
+            offered: new fields.NumberField({ required: false, nullable: true, integer: true, initial: null })
+        });
+        // Folio 10, rolled once. ⚠ `target` is STORED rather than re-derived: the failure's REP-1
+        // widens the difference the difficulty was read from, so a difficulty computed afterwards
+        // reports a harder check than the one that was made.
+        schema.qualification = new fields.SchemaField({
+            target: new fields.NumberField({ required: false, nullable: true, integer: true, initial: null }),
+            total: new fields.NumberField({ required: false, nullable: true, integer: true, initial: null }),
+            passed: new fields.BooleanField({ required: false, initial: false })
+        });
+
+        // A function, so each document gets its own array: `DataField#getInitialValue` hands a bare
+        // literal back BY REFERENCE and every contract would share one.
+        schema.referee.initial = () => ContractData.REFEREE_ROWS.map(key => ({ key }));
+
+        return schema;
+    }
+
+    prepareDerivedData() {
+        this.bounty = this.payout;
+        this.negotiated = this.negotiation.total !== null;
+        this.qualificationRolled = this.qualification.target !== null;
+        const floor = this.referee.find(row => row.key === "repMin");
+        this.repFloor = floor?.number ?? 0;
+        this.repFloorShown = floor?.shown === true;
+        // Folio 19 leaves the last known location blank where the goal is to find a location, and
+        // that blank reads as the kind of contract this is.
+        this.alternate = this.subject.kind !== "person";
+    }
+
+    /**
+     * The Actor who took the job, where one is linked and this client can see it.
+     * @returns {Actor|null}
+     */
+    get hunterActor() {
+        return this.hunter.uuid ? (foundry.utils.fromUuidSync(this.hunter.uuid) ?? null) : null;
+    }
+
+    /** Bounty Hunter p.10 reads REP off the Traveller. @returns {number|null} */
+    get hunterRep() {
+        const rep = this.hunterActor?.system?.characteristics?.reputation;
+        return Number.isFinite(rep?.value) ? rep.value : null;
+    }
+}
+
 export class WeaponData extends PhysicalItemData {
     /** Traits were `{name, description}`; a weapon's speak the `weapon` vocabulary. @inheritDoc */
     static migrateData(source, options) {

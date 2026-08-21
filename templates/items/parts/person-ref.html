@@ -1,0 +1,14 @@
+{{! One {uuid, name} reference in its own occupancy state: a linked Actor, a bare name, nobody. A
+    link this viewer cannot observe prints as the stored name, never as a chip that will not open. }}
+<span class="pref{{#if person}}{{#if person.linked}} linked{{else}} plain{{/if}}{{else}} none{{/if}}">
+	{{#if person}}
+	{{#if person.linked}}
+	<span class="av"></span><a class="nm" data-action="openReference" data-uuid="{{person.uuid}}">{{person.name}}</a>
+	<i class="src">{{localize 'MGT2.Contract.LinkedActor'}}</i>
+	{{else}}
+	<em class="nm">{{person.name}}</em><i class="src">{{localize 'MGT2.Contract.NameOnly'}}</i>
+	{{/if}}
+	{{else}}
+	<span class="nm">{{localize 'MGT2.Contract.Nobody'}}</span>
+	{{/if}}
+</span>
