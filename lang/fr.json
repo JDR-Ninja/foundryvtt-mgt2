@@ -140,7 +140,6 @@
       "companion": "Compagnon Traveller",
       "highGuard": "Garde Haute",
       "robot": "Robot Handbook",
-      "vehicle": "Vehicle Handbook 2017",
       "vehicle2026": "Vehicle Handbook 2026",
       "csc": "Central Supply Catalogue",
       "naval": "Naval Campaign"
@@ -893,6 +892,13 @@
         "PackageName": "Module",
         "PackageSkills": "Compétences",
         "PackageSave": "Enregistrer"
+      },
+      "Banner": {
+        "InProgress": "Création de personnage en cours",
+        "Resume": "Reprendre",
+        "NotStarted": "Création de personnage non commencée",
+        "NotStartedHint": "Aucune espèce, aucune carrière, aucune compétence.",
+        "Start": "Commencer"
       },
       "Screen": {
         "Title": "Création de Voyageurs",

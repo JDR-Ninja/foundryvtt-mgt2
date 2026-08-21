@@ -140,7 +140,6 @@
       "companion": "Traveller Companion",
       "highGuard": "High Guard",
       "robot": "Robot Handbook",
-      "vehicle": "Vehicle Handbook 2017",
       "vehicle2026": "Vehicle Handbook 2026",
       "csc": "Central Supply Catalogue",
       "naval": "Naval Campaign"
@@ -893,6 +892,13 @@
         "PackageName": "Package",
         "PackageSkills": "Skills",
         "PackageSave": "Save"
+      },
+      "Banner": {
+        "InProgress": "Character creation in progress",
+        "Resume": "Resume",
+        "NotStarted": "Character creation not started",
+        "NotStartedHint": "No species, no career, no skill yet.",
+        "Start": "Start"
       },
       "Screen": {
         "Title": "Traveller creation",

@@ -89,6 +89,13 @@ export const Chargen = {
         return actor?.getFlag(CHARGEN_SCOPE, CHARGEN_KEY) !== undefined;
     },
 
+    /** A Traveller nothing has been written on: no frame, no career, no skill, no score. */
+    isBlank(actor) {
+        if ( actor?.type !== "character" ) return false;
+        if ( actor.items.some(item => ["species", "career", "talent"].includes(item.type)) ) return false;
+        return actor.system.characteristicKeys.every(key => actor.system.characteristics[key].base === 0);
+    },
+
     /** **The roster, with no session document behind it**. @returns {Actor[]} */
     roster() {
         return game.actors.filter(actor => this.isInCreation(actor));

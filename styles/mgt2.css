@@ -3991,6 +3991,53 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   padding: 14px 16px 0;
   border-bottom: 1px solid var(--rule);
 }
+.mgt2 .mgt2-header .chargen-strip {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 7px 10px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  border-left-width: 3px;
+  border-radius: 2px;
+}
+.mgt2 .mgt2-header .chargen-strip > i {
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: var(--accent-text);
+}
+.mgt2 .mgt2-header .chargen-strip .txt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  min-width: 0;
+}
+.mgt2 .mgt2-header .chargen-strip .lbl {
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.mgt2 .mgt2-header .chargen-strip .at {
+  font-size: 12px;
+  color: var(--mute);
+}
+.mgt2 .mgt2-header .chargen-strip .btn {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+.mgt2 .mgt2-header .chargen-strip.blank {
+  background: none;
+  border-color: var(--rule);
+}
+.mgt2 .mgt2-header .chargen-strip.blank .lbl {
+  color: var(--mute);
+}
 .mgt2 .mgt2-header .portrait {
   width: 74px;
   height: 92px;

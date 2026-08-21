@@ -27,6 +27,55 @@
 	padding: 14px 16px 0
 	border-bottom: 1px solid var(--rule)
 
+	// Creation is a state of the Traveller and not an edit, so the strip stands in both modes. It
+	// takes a row of the header grid above the portrait, and renders only while there is one to state.
+	.chargen-strip
+		grid-column: 1 / -1
+		display: flex
+		align-items: center
+		gap: 10px
+		margin-bottom: 12px
+		padding: 7px 10px
+		background: var(--accent-soft)
+		border: 1px solid var(--accent-line)
+		border-left-width: 3px
+		border-radius: 2px
+
+		> i
+			flex: 0 0 auto
+			font-size: 13px
+			color: var(--accent-text)
+
+		.txt
+			display: flex
+			flex-wrap: wrap
+			align-items: baseline
+			gap: 2px 8px
+			min-width: 0
+
+		.lbl
+			font-family: var(--cond)
+			font-size: 11px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--accent-text)
+
+		.at
+			font-size: 12px
+			color: var(--mute)
+
+		.btn
+			flex: 0 0 auto
+			margin-left: auto
+
+		// Nothing is under way, so the ground goes quiet and the button keeps the accent.
+		&.blank
+			background: none
+			border-color: var(--rule)
+			.lbl
+				color: var(--mute)
+
 	.portrait
 		width: 74px
 		height: 92px

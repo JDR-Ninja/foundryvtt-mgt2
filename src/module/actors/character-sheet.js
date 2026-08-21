@@ -3,6 +3,8 @@ import { checkOf } from "../chat-message.js";
 import { Checks, renderRollCard } from "../checks.js";
 import { BenefitPicker } from "../benefit-picker.js";
 import { CompendiumExplorer } from "../compendium-explorer.js";
+import { Chargen } from "../chargen.js";
+import { ChargenScreen } from "../chargen-screen.js";
 import { Muster } from "../chargen-muster.js";
 import { MGT2 } from "../config.js";
 import { CreditSplit } from "../credit-split.js";
@@ -71,6 +73,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       trainingWeek: TravellerActorSheet.#onTrainingWeek,
       trainingCheck: TravellerActorSheet.#onTrainingCheck,
       trainingOpen: TravellerActorSheet.#onTrainingOpen,
+      chargenOpen: TravellerActorSheet.#onChargenOpen,
       roll: TravellerActorSheet.#onRoll,
       openConfig: TravellerActorSheet.#onOpenConfig,
       openCharacteristic: TravellerActorSheet.#onOpenCharacteristic,
@@ -298,6 +301,21 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
   }
 
   /**
+   * The creation strip: a state notice, so it stands in both modes and for an owner only.
+   * @returns {{resume: boolean, term: string, step: string}|null}
+   */
+  #prepareChargenNotice() {
+    if ( !this.actor.isOwner ) return null;
+    if ( !Chargen.isInCreation(this.actor) ) return Chargen.isBlank(this.actor) ? { resume: false } : null;
+    const state = Chargen.read(this.actor);
+    return {
+      resume: true,
+      term: game.i18n.format("MGT2.Chargen.Screen.Term", { n: state.term }),
+      step: state.step ? game.i18n.localize(MGT2.CreationSteps[state.step]) : ""
+    };
+  }
+
+  /**
    * The characteristics as an ordered list — the roster's order, which is the one the rulebook
    * prints and players read everywhere else.
    * @returns {object[]}
@@ -355,6 +373,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       systemFields: actor.system.schema.fields,
       isGM: game.user.isGM,
       canGive: actor.isOwner,
+      chargen: this.#prepareChargenNotice(),
       settings,
       initiative: actor.system.initiative,
       characteristics,
@@ -1311,6 +1330,10 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       update[`system.training.programmes.${id}.note`] = "";
     }
     return this.actor.update(update);
+  }
+
+  static #onChargenOpen() {
+    return ChargenScreen.open({ add: this.actor });
   }
 
   /** The training window, on the programme the clicked row names. */

@@ -1,4 +1,15 @@
 <section class="mgt2-header">
+	{{#if chargen}}
+	<div class="chargen-strip{{#unless chargen.resume}} blank{{/unless}}">
+		<i class="fa-solid fa-user-plus"></i>
+		<div class="txt">
+			<span class="lbl">{{#if chargen.resume}}{{localize 'MGT2.Chargen.Banner.InProgress'}}{{else}}{{localize 'MGT2.Chargen.Banner.NotStarted'}}{{/if}}</span>
+			<span class="at">{{#if chargen.resume}}{{chargen.term}}{{#if chargen.step}} &middot; {{chargen.step}}{{/if}}{{else}}{{localize 'MGT2.Chargen.Banner.NotStartedHint'}}{{/if}}</span>
+		</div>
+		<button type="button" class="btn hot" data-action="chargenOpen">{{#if chargen.resume}}{{localize 'MGT2.Chargen.Banner.Resume'}}{{else}}{{localize 'MGT2.Chargen.Banner.Start'}}{{/if}}</button>
+	</div>
+	{{/if}}
+
 	<img class="portrait" src="{{img}}" alt="{{name}}" data-edit="img" data-action="editImage" data-tooltip="{{name}}" />
 
 	<div class="idy">
