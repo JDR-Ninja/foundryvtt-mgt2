@@ -1381,8 +1381,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       || ((data.dualWeapons === true) && (MGT2.AttackModifiers.dualWeapons.suppress === "aiming"));
     const aiming = forfeitsAim ? 0
       : Math.min(aim.max, Math.max(0, MGT2Helper.getIntegerFromInput(data.aiming)));
-    const threshold = ((data["trait-scope"] === true) && (aiming > 0)) ? 0
-      : MGT2Helper.getIntegerFromInput(data.rangeThreshold);
+    const threshold = TravellerActorSheet.#rangeThreshold(data, aiming);
     if (aiming > 0) {
       terms.push([named("aiming"), aiming * aim.dm]);
       if (data.laserSight === true) {
@@ -1415,9 +1414,18 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
    * the player looked at it, an offered one only once confirmed, and a reminder never.
    * @returns {[string, number][]}
    */
+  /** Core p.79: a scoped weapon aimed before shooting is not held to the 100 m rule. */
+  static #rangeThreshold(data, aiming) {
+    return ((data["trait-scope"] === true) && (aiming > 0)) ? 0
+      : MGT2Helper.getIntegerFromInput(data.rangeThreshold);
+  }
+
   static #weaponTraitModifiers(data, weapon, strengthDM) {
     const terms = [];
-    for (const row of MGT2Helper.weaponTraitRows(weapon, strengthDM)) {
+    const distance = MGT2Helper.getNumberFromInput(data.distance);
+    const threshold = TravellerActorSheet.#rangeThreshold(data,
+      MGT2Helper.getIntegerFromInput(data.aiming));
+    for (const row of MGT2Helper.weaponTraitRows(weapon, strengthDM, distance, threshold)) {
       if (row.dm === 0) continue;
       if ((row.tone === "applied") || ((row.tone === "offered") && (data[row.name] === true))) {
         terms.push([row.term, row.dm]);

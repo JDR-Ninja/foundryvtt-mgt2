@@ -141,7 +141,7 @@ const REGISTRY = {
         "emissions-signature": {label: "Emissions Signature", params: [{slot: "level", type: "level"}], levels: ["minimal", "low", "normal", "high", "very high", "extreme"]},
         "fire": {label: "Fire"},
         "hazardous": {label: "Hazardous", params: [{slot: "score", type: "negative"}]},
-        "inaccurate": {label: "Inaccurate", params: [{slot: "score", type: "negative"}]},
+        "inaccurate": {label: "Inaccurate", params: [{slot: "score", type: "negative", optional: true}]},
         "incendiary": {label: "Incendiary", params: [{slot: "score", type: "int"}]},
         "ion": {label: "Ion"},
         "lo-pen": {label: "Lo-Pen", params: [{slot: "multiplier", type: "int"}], conflict: ["ap"]},
@@ -282,8 +282,10 @@ export const WEAPON_ROLL = Object.freeze({
     "very-bulky": { tone: "applied", strength: 2 },
     // FC p.7: "The DM is applied to attack rolls and the results of weapon malfunctions."
     "ramshackle": { tone: "applied", param: true },
-    // FC p.7: only "when shooting at a target more than 10m distant", and the distance is typed.
-    "inaccurate": { tone: "offered", param: true, when: "beyond", value: 10 },
+    // FC p.7 past 10 m when scored; VH2026 p.17 prints it bare and takes the Core's bands in metres.
+    "inaccurate": { tone: "offered", param: true, when: "beyond", value: 10,
+        tiers: [[50, 0], [250, -4], [500, -8], [null, -12]] },
+    "accurate": { tone: "offered", bands: { short: 2, normal: 2, long: 1, extreme: 1 } },   // VH2026 p.16
     // FC p.8: "the firer MAY add the Spread value", and only "within its base range".
     "spread": { tone: "offered", param: true, when: "within" },
     // Core p.79: the 100 m rule is ignored "so long as the Traveller aims before shooting".

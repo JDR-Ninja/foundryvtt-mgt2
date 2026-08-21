@@ -1,4 +1,5 @@
 import { Checks } from "../checks.js";
+import { Collision } from "../collision.js";
 import { MGT2 } from "../config.js";
 import { MGT2Helper } from "../helper.js";
 import { RollPromptHelper } from "../roll-prompt.js";
@@ -11,8 +12,8 @@ const PARTS_PATH = "systems/mgt2/templates/actors";
 const DM_KEYS = ["controlDM", "systemsDM", "sensorDM"];
 
 /**
- * The vehicle sheet: the eleven printed statblock lines in the books' own order, the five armour
- * facings, the six-line systems block and a critical track of nine locations.
+ * The vehicle sheet: the eleven printed statblock lines in the books' own order, the six armour
+ * facings, the six-line systems block and the critical track of the edition in force.
  * @extends {TravellerActorSheet}
  */
 export class VehicleActorSheet extends TravellerActorSheet {
@@ -25,6 +26,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
             criticalSet: VehicleActorSheet.#onCriticalSet,
             criticalRoll: VehicleActorSheet.#onCriticalRoll,
             criticalClear: VehicleActorSheet.#onCriticalClear,
+            collision: VehicleActorSheet.#onCollision,
             mountCreate: VehicleActorSheet.#onMountCreate,
             mountDelete: VehicleActorSheet.#onMountDelete,
             skillCreate: VehicleActorSheet.#onSkillCreate,
@@ -76,17 +78,21 @@ export class VehicleActorSheet extends TravellerActorSheet {
             vehicleSkills: MGT2.VehicleSkills,
             mountTypes: MGT2.VehicleMounts,
             arcs: MGT2.FireArcs,
-            interfaces: MGT2.RemoteInterfaces
+            interfaces: MGT2.RemoteInterfaces,
+            atmospheres: VehicleActorSheet.#atmospheres()
         };
 
         context.vehicle = {
+            runs2026: system.runs2026,
             hull: VehicleActorSheet.#hull(system),
             skills: VehicleActorSheet.#skills(system),
             speed: VehicleActorSheet.#speed(system),
             agility: VehicleActorSheet.#agility(system),
+            airborne: VehicleActorSheet.#airborne(system),
             armour: VehicleActorSheet.#armour(system),
             systems: VehicleActorSheet.#systems(system),
             crossCheck: VehicleActorSheet.#crossCheck(system),
+            terrainImpassible: system.terrainImpassible,
             criticals: this.#criticals(system),
             combat: VehicleActorSheet.#combat(system),
             mounts: this.#mounts(system, context.weapons)
@@ -135,42 +141,54 @@ export class VehicleActorSheet extends TravellerActorSheet {
     /** `Very slow (idle)` — the band names, off the numbers the schema stores. */
     static #speed(system) {
         const names = Object.values(MGT2.SpeedBands);
+        const row = MGT2.SpeedBandRows[system.speed.effective] ?? null;
+        const kph = row?.kph ?? null;
         return {
             max: names[system.speed.max] ?? null,
             cruise: names[system.speed.cruise] ?? null,
             effective: names[system.speed.effective] ?? null,
-            reduced: system.speed.effective < system.speed.max
+            reduced: system.speed.effective < system.speed.max,
+            rounds: system.roundsToReach(system.speed.effective),
+            metres: row?.metres ?? null,
+            kph: kph && ((kph[1] === null) ? `${kph[0]}+` : `${kph[0]}–${kph[1]}`)
         };
     }
 
     /** The printed number, what is standing between it and play, and the result. */
     static #agility(system) {
+        const gForce = system.gForce;
         return {
             printed: system.agility,
             effective: system.agilityEffective,
             penalties: system.agilityPenalties,
-            native: system.nativeModes.has(system.operatingMode)
+            native: system.nativeModes.has(system.operatingMode),
+            turning: system.turning,
+            delay: system.agilityDelay,
+            gForce: gForce && { ...gForce, pulled: Math.round(gForce.pulled * 10) / 10 }
         };
     }
 
-    /**
-     * Five facings, and the two derived ones say so: a dashed cell is the sheet reporting a
-     * fallback rather than a value, which is the distinction both books rest on.
-     */
+    /** The sixteen profile digits under the density band VH2026 p.21 files each of them in. */
+    static #atmospheres() {
+        return Array.fromRange(16).map(digit => ({ digit,
+            label: MGT2.VehicleAtmosphereBands.find(band => band.digits.includes(digit))?.label ?? null }));
+    }
+
+    /** VH2026 p.21-22: the ladder, with the two density bands it was read between. */
+    static #airborne(system) {
+        const air = system.airborne;
+        if (!air) return null;
+        const name = rung => MGT2.VehicleAtmosphereBands[rung]?.label ?? null;
+        return { ...air, fromLabel: name(air.from), toLabel: name(air.to),
+            percent: Math.round(air.range * 100), range: system.range };
+    }
+
+    /** Six faces, every one stored: VH2026 p.56 leaves nothing for the sheet to infer. */
     static #armour(system) {
         const armour = system.armour;
-        const facing = (key, value, reactive, derived) => ({
-            key, value, reactive, derived,
-            field: derived ? null : key
-        });
+        const facing = key => ({ key, value: armour[key], reactive: armour.reactive[key], field: key });
         return {
-            facings: [
-                facing("front", armour.front, armour.reactive.front, false),
-                facing("rear", armour.rear, armour.reactive.rear, false),
-                facing("sides", armour.sides, armour.reactive.sides, false),
-                facing("top", armour.effectiveRoof, 0, armour.top === null),
-                facing("bottom", armour.effectiveFloor, 0, armour.bottom === null)
-            ],
+            facings: ["forward", "aft", "port", "starboard", "dorsal", "ventral"].map(facing),
             vsLight: armour.vsLight,
             toHit: system.toHit,
             maintenance: system.maintenance
@@ -204,7 +222,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
         return { rows, mismatch: rows.some(row => !row.agrees), envelope: system.gasEnvelope };
     }
 
-    /** Nine locations × six pips, with the effect of the standing severity spelled out beside. */
+    /** One row per location of the table in force, six pips each, with the standing effect beside. */
     #criticals(system) {
         const locations = Object.entries(system.criticalTable).map(([key, location]) => {
             const severity = system.criticals[key] ?? 0;
@@ -220,6 +238,8 @@ export class VehicleActorSheet extends TravellerActorSheet {
             runs2026: system.runs2026, structure: system.structure,
             structureExceeded: system.structureExceeded,
             structureState: system.structureState && `MGT2.Actor.vehicle.StructureState.${system.structureState}`,
+            repairs: system.repairs, detection: system.detection,
+            spaces: system.spaces, comfort: system.comfortLevel,
             immunity: system.criticalImmunity && `MGT2.VehicleCriticalImmunity.${system.criticalImmunity}` };
     }
 
@@ -313,6 +333,11 @@ export class VehicleActorSheet extends TravellerActorSheet {
         if (cell.systemLoss) say("SystemLoss");
         if (cell.hullSeverity) say("HullSeverity", { value: cell.hullSeverity });
         return parts.length ? parts.join(" · ") : game.i18n.localize("MGT2.Criticals.RefereesCall");
+    }
+
+    /** @this {VehicleActorSheet} */
+    static async #onCollision() {
+        return Collision.run(this.actor);
     }
 
     /** Each mount with the embedded weapons it holds, and the ones no mount has claimed. */
@@ -436,9 +461,20 @@ export class VehicleActorSheet extends TravellerActorSheet {
 
         // "All skill checks used in these actions use the Agility of the vehicle as a DM" — as a
         // row the referee can untick, which is the treatment a ship's own station DM already gets.
-        if (system.agilityEffective !== 0) {
-            modifiers.push({ key: "agility", label: "MGT2.Actor.vehicle.Agility",
-                dm: system.agilityEffective });
+        // VH2026 p.19 splits it: the points a round of Minor Actions can buy off are their own row,
+        // and unticking that one is what spending them looks like.
+        const cancellable = system.agilityCancellable;
+        const standing = system.agilityEffective - cancellable;
+        if (standing !== 0) {
+            modifiers.push({ key: "agility", label: "MGT2.Actor.vehicle.Agility", dm: standing });
+        }
+        if (cancellable !== 0) {
+            modifiers.push({ key: "agilityMinor",
+                label: "MGT2.Actor.vehicle.AgilityMinorActions", dm: cancellable });
+        }
+        const air = system.airborne;
+        if (air?.dm) {
+            modifiers.push({ key: "airborne", label: "MGT2.Actor.vehicle.AirborneDM", dm: air.dm });
         }
         // "If one of the vehicles' drivers chooses to initiate a dogfight again in the following
         // combat round, the winner of the previous dogfight applies the difference between that

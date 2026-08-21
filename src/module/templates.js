@@ -4,6 +4,7 @@ export const preloadHandlebarsTemplates = async function() {
   const templatePaths = [
     "systems/mgt2/templates/roll-prompt.html",
     "systems/mgt2/templates/chat/roll.html",
+    "systems/mgt2/templates/chat/collision.html",
     "systems/mgt2/templates/chat/request.html",
     "systems/mgt2/templates/chat/credit-split.html",
     "systems/mgt2/templates/chat/trade-lot.html",

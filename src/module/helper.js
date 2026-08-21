@@ -168,7 +168,17 @@ export class MGT2Helper {
      * @param {number} strengthDM  The attacker's STR DM, which Bulky and Very Bulky read
      * @returns {object[]}
      */
-    static weaponTraitRows(weapon, strengthDM = 0) {
+    static tieredDM(rule, { distance = 0, range = 0, threshold = 0 } = {}) {
+        if ( rule.bands ) {
+            const band = this.rangeBand(distance, range, threshold);
+            return band ? (rule.bands[band.key] ?? 0) : 0;
+        }
+        if ( !rule.tiers || !(distance > 0) ) return 0;
+        const tier = rule.tiers.find(([ceiling]) => (ceiling === null) || (distance <= ceiling));
+        return tier ? tier[1] : 0;
+    }
+
+    static weaponTraitRows(weapon, strengthDM = 0, distance = 0, threshold = 0) {
         const range = this.getNumberFromInput(weapon?.system.range?.value);
         // The traits the loaded round leaves the weapon with: a shotgun firing pellets follows
         // rules its own line never carried, and a few rounds replace the list outright.
@@ -181,19 +191,26 @@ export class MGT2Helper {
             const numeric = Boolean(rule.param || rule.strength || rule.dm);
             let dm = rule.dm ?? 0;
             if (rule.param) dm = traitNumber(trait);
+            // A scored Inaccurate is the Field Catalogue's; a bare one is VH2026's, and Accurate is
+            // only ever banded. Both read the distance the prompt has, or nothing before it is typed.
+            const scaled = rule.bands || (rule.tiers && !dm);
+            if (scaled) dm = this.tieredDM(rule, { distance, range, threshold });
             // Core p.79: the penalty is what the wearer's STR DM falls short by, and nothing when
             // it does not fall short.
             if (rule.strength) dm = Math.min(0, strengthDM - rule.strength);
 
             return {
-                key: trait.key, term, tone, dm, numeric,
+                key: trait.key, term, tone, dm, numeric: numeric || Boolean(scaled),
+                tiers: (scaled && rule.tiers) ? JSON.stringify(rule.tiers) : "",
+                bands: rule.bands ? JSON.stringify(rule.bands) : "",
+                auto: Boolean(rule.when || scaled),
                 name: `trait-${trait.key}`,
                 display: numeric ? this.signed(dm, "+0") : "—",
                 params: (trait.params ?? []).map(p => p.value).filter(value => value !== ""),
                 checked: rule.checked === true,
                 requires: rule.requires ?? "",
                 suppress: rule.suppress ?? "",
-                when: rule.when ?? "",
+                when: scaled ? "" : (rule.when ?? ""),
                 whenValue: (rule.when === "within") ? range : (rule.value ?? 0),
                 status: rule.target ? "MGT2.RollPrompt.TraitNeedsTarget"
                     : (rule.control ? `MGT2.RollPrompt.TraitControl.${rule.control}` : TRAIT_STATUS[tone])

@@ -254,7 +254,8 @@ MGT2.AttackModifiers = Object.freeze({
     cover: {label: "MGT2.AttackModifiers.cover", dm: -2},
     prone: {label: "MGT2.AttackModifiers.prone", dm: -1},
     // Core folio 78: two one-handed weapons cost DM-2 each and forfeit aiming. Blades count too.
-    dualWeapons: {label: "MGT2.AttackModifiers.dualWeapons", dm: -2, suppress: "aiming"}
+    dualWeapons: {label: "MGT2.AttackModifiers.dualWeapons", dm: -2, suppress: "aiming"},
+    calledShot: {label: "MGT2.AttackModifiers.calledShot", dm: -2}   // VH2026 p.10; not artillery
 });
 
 // Core folio 77: 100 m in combat, and the 300 m a referee "is free to increase this to" outside one.
@@ -542,6 +543,26 @@ MGT2.SpeedBands = Object.freeze({
     Orbital: "MGT2.SpeedBands.Orbital"   // VH2026 p.18; the Core ladder stops at Hypersonic
 });
 
+// The three columns VH2026 p.18 prints beside the names above, in the same order, so the band
+// number indexes both. `rounds` is cumulative from a standstill and `metres` is one round at the
+// top of the band.
+MGT2.SpeedBandRows = Object.freeze([
+    {kph: [0, 0], rounds: 0, metres: 0},
+    {kph: [1, 20], rounds: 1, metres: 33},
+    {kph: [20, 50], rounds: 2, metres: 83},
+    {kph: [50, 100], rounds: 3, metres: 167},
+    {kph: [100, 200], rounds: 4, metres: 333},
+    {kph: [200, 300], rounds: 5, metres: 500},
+    {kph: [300, 500], rounds: 6, metres: 833},
+    {kph: [500, 800], rounds: 7, metres: 1333},
+    {kph: [800, 1200], rounds: 17, metres: 2000},
+    {kph: [1200, 6000], rounds: 27, metres: 10000},
+    {kph: [6000, null], rounds: 37, metres: null},
+    {kph: null, rounds: null, metres: null}   // Orbital: the cell reads "+10 per Size" and "+"
+]);
+
+MGT2.SpeedBandOrbitalRounds = 10;   // VH2026 p.18, per point of the world's Size, on top of band 10
+
 MGT2.Durations = Object.freeze({
     Seconds: "MGT2.Durations.Seconds",
     Minutes: "MGT2.Durations.Minutes",
@@ -724,8 +745,84 @@ MGT2.VehicleCriticals = Object.freeze({
     }
 });
 
-// VH2026 p.8-9, and it replaces the table above rather than extending it: eleven locations, and a
-// severity is read in isolation instead of stacking on the one already standing.
+MGT2.ComfortLevels = Object.freeze({
+    intolerable: {label: "MGT2.ComfortLevels.intolerable", effect: "MGT2.ComfortEffect.intolerable", from: 0},
+    uncomfortable: {label: "MGT2.ComfortLevels.uncomfortable", effect: "MGT2.ComfortEffect.uncomfortable", from: 0.5},
+    basicSeating: {label: "MGT2.ComfortLevels.basicSeating", effect: "MGT2.ComfortEffect.basicSeating", from: 1},
+    longDuration: {label: "MGT2.ComfortLevels.longDuration", effect: "MGT2.ComfortEffect.longDuration", from: 1.25},
+    extendedSeating: {label: "MGT2.ComfortLevels.extendedSeating", effect: "MGT2.ComfortEffect.extendedSeating", from: 1.5},
+    basicComfort: {label: "MGT2.ComfortLevels.basicComfort", effect: "MGT2.ComfortEffect.basicComfort", from: 2},
+    standardComfort: {label: "MGT2.ComfortLevels.standardComfort", effect: "MGT2.ComfortEffect.standardComfort", from: 4},
+    goodComfort: {label: "MGT2.ComfortLevels.goodComfort", effect: "MGT2.ComfortEffect.goodComfort", from: 8},
+    excellentComfort: {label: "MGT2.ComfortLevels.excellentComfort", effect: "MGT2.ComfortEffect.excellentComfort", from: 24},
+    luxuryComfort: {label: "MGT2.ComfortLevels.luxuryComfort", effect: "MGT2.ComfortEffect.luxuryComfort", from: 40}
+});
+
+MGT2.VehicleTerrain = Object.freeze({
+    clear: {label: "MGT2.VehicleTerrain.clear", none: 0, "off-roader": 0, atv: 0, tracked: 0},
+    offRoad: {label: "MGT2.VehicleTerrain.offRoad", none: -2, "off-roader": 0, atv: 0, tracked: 0},
+    rough: {label: "MGT2.VehicleTerrain.rough", none: null, "off-roader": -2, atv: -1, tracked: 0},
+    impassible: {label: "MGT2.VehicleTerrain.impassible", none: null, "off-roader": null, atv: null,
+        tracked: null}
+});
+
+MGT2.VehicleTurning = Object.freeze([   // VH2026 p.19; an Agility past ±6 reads the nearest row
+    {agility: 6, degrees: 360, rounds: 0.5},
+    {agility: 5, degrees: 300, rounds: 0.6},
+    {agility: 4, degrees: 240, rounds: 0.75},
+    {agility: 3, degrees: 180, rounds: 1},
+    {agility: 2, degrees: 120, rounds: 1.5},
+    {agility: 1, degrees: 90, rounds: 2},
+    {agility: 0, degrees: 60, rounds: 3},
+    {agility: -1, degrees: 45, rounds: 4},
+    {agility: -2, degrees: 36, rounds: 5},
+    {agility: -3, degrees: 30, rounds: 6},
+    {agility: -4, degrees: 25.7, rounds: 7},
+    {agility: -5, degrees: 22.5, rounds: 8},
+    {agility: -6, degrees: 20, rounds: 9}
+]);
+
+// VH2026 p.19-20, the optional rule: the G a 180° turn pulls is the Speed Band over the rounds the
+// turn takes, scaled by the band it is taken at, against a structure that stands TL × 1.5.
+MGT2.VehicleGForce = Object.freeze({
+    perTL: 1.5, agile: 1, afv: 1,
+    scale: [{from: 10, factor: 4}, {from: 9, factor: 2}, {from: 6, factor: 1}, {from: 0, factor: 0.5}]
+});
+
+// VH2026 p.21: Taint is ignored, so 2 and 3 are one rung. A digit naming no density — vacuum, the
+// exotic A to C, E and F — sits on no rung, and an aircraft for one of those is built for that world.
+MGT2.VehicleAtmosphereBands = Object.freeze([
+    {key: "trace", label: "MGT2.VehicleAtmosphere.trace", digits: [1]},
+    {key: "veryThin", label: "MGT2.VehicleAtmosphere.veryThin", digits: [2, 3]},
+    {key: "thin", label: "MGT2.VehicleAtmosphere.thin", digits: [4, 5]},
+    {key: "standard", label: "MGT2.VehicleAtmosphere.standard", digits: [6, 7]},
+    {key: "dense", label: "MGT2.VehicleAtmosphere.dense", digits: [8, 9]},
+    {key: "veryDense", label: "MGT2.VehicleAtmosphere.veryDense", digits: [13]}
+]);
+
+MGT2.VehicleAirborne = Object.freeze({   // VH2026 p.21-22
+    step: {dm: -1, agility: -1, band: -1, range: -0.5},
+    larger: {dm: -1, band: -1, range: -0.1},
+    smaller: {dm: -1, band: 1, range: 0.25},
+    liftBand: 3,   // an aeroplane needs Slow to stay up
+    ceiling: 8     // a smaller world grants no Supersonic the aircraft did not have at home
+});
+
+MGT2.CollisionModes = Object.freeze({   // VH2026 p.11: how two Speed Bands make the band of impact
+    headOn: {label: "MGT2.Collision.Modes.headOn", combine: "sum"},
+    fromBehind: {label: "MGT2.Collision.Modes.fromBehind", combine: "difference"},
+    object: {label: "MGT2.Collision.Modes.object", combine: "own"}
+});
+
+MGT2.CollisionHulls = Object.freeze({   // VH2026 p.12, the DM on each severity roll
+    standard: {label: "MGT2.Collision.Hulls.standard", dm: 0},
+    light: {label: "MGT2.Collision.Hulls.light", dm: 1},
+    reinforced: {label: "MGT2.Collision.Hulls.reinforced", dm: -1}
+});
+
+/** VH2026 p.11: a rammer adds a die per this many Spaces of its own. */
+MGT2.CollisionRamSpaces = 50;
+
 MGT2.VehicleCriticalImmunity = Object.freeze([   // VH2026 p.7, largest first; Spaces are integers
     {from: 200001, key: "largeBay"},
     {from: 20001, key: "mediumBay"},
@@ -733,6 +830,8 @@ MGT2.VehicleCriticalImmunity = Object.freeze([   // VH2026 p.7, largest first; S
     {from: 200, key: "destructive"}
 ]);
 
+// VH2026 p.8-9, and it replaces the table above rather than extending it: eleven locations, and a
+// severity is read in isolation instead of stacking on the one already standing.
 MGT2.VehicleCriticals2026 = Object.freeze({
     speed: {
         label: "MGT2.VehicleCriticals.speed", roll: [2, 2],

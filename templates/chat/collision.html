@@ -1,0 +1,42 @@
+<div class="mgt2 card collision">
+	<header class="cardhead">
+		<h3>{{localize 'MGT2.Collision.Title'}}</h3>
+		<span class="who">{{name}} &middot; {{localize mode}}</span>
+	</header>
+
+	<p class="line">
+		{{localize 'MGT2.Collision.Potential'}} <b>{{potential}}</b>
+		{{#if dm}}<i>({{localize 'MGT2.Collision.SeverityDM'}} {{showDM dm}})</i>{{/if}}
+	</p>
+	{{#if rolled}}
+	<p class="line dim">{{localize 'MGT2.Collision.Rolled'}} {{rolled}}{{#if discarded}} &middot;
+		{{localize 'MGT2.Collision.Discarded'}} {{discarded}}{{/if}}</p>
+	{{/if}}
+
+	{{#if criticals.length}}
+	<ol class="crits">
+		{{#each criticals as |critical|}}
+		<li>{{localize critical.label}} &middot; {{localize 'MGT2.Actor.vehicle.Severity'}} {{critical.severity}}
+			<i>(2D {{critical.roll}})</i></li>
+		{{/each}}
+	</ol>
+	{{else}}
+	<p class="line">{{localize 'MGT2.Collision.None'}}</p>
+	{{/if}}
+
+	{{#if size}}<p class="line">{{localize size}}</p>{{/if}}
+	{{#if ram}}
+	<p class="line">{{localize 'MGT2.Collision.Ram'}} <b>{{ram.total}}</b> <i>({{ram.formula}})</i></p>
+	{{/if}}
+	{{#if occupant}}
+	<p class="line">
+		{{localize 'MGT2.Collision.Occupants'}} <b>{{occupant.damage}}</b>
+		<i>({{occupant.formula}} = {{occupant.rolled}}{{#if occupant.restrained}} &middot;
+			{{localize 'MGT2.Collision.Belted'}}{{/if}})</i>
+	</p>
+	{{#if occupant.thrown}}
+	<p class="line">{{localize 'MGT2.Collision.Thrown'}} <b>{{occupant.thrown.metres}} m</b>
+		&middot; <b>{{occupant.thrown.damage}}</b> <i>({{occupant.thrown.formula}})</i></p>
+	{{/if}}
+	{{/if}}
+</div>

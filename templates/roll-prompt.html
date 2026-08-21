@@ -256,8 +256,9 @@
 				<li><label class="code pressable" data-status="{{t.name}}" data-trait-row="{{t.key}}"
 						title="{{ localize t.status }}">
 					<input type="checkbox" name="{{t.name}}" data-dtype="Boolean" data-dm="{{t.dm}}"
-						data-term="{{t.term}}" data-trait="{{t.key}}" data-auto="{{#if t.when}}true{{/if}}"
+						data-term="{{t.term}}" data-trait="{{t.key}}" data-auto="{{#if t.auto}}true{{/if}}"
 						data-when="{{t.when}}" data-when-value="{{t.whenValue}}"
+						data-tiers="{{t.tiers}}" data-bands="{{t.bands}}"
 						data-requires="{{t.requires}}" data-suppress="{{t.suppress}}"
 						{{#if t.checked}}checked{{/if}} />
 					<b>{{t.term}}</b>
@@ -302,6 +303,13 @@
 				<input type="checkbox" name="dualWeapons" data-dtype="Boolean" data-dm="{{dualWeapons.dm}}"
 					data-suppress="{{dualWeapons.suppress}}" data-term="{{dualWeapons.label}}" />
 				<span>{{dualWeapons.label}}</span><span class="v">{{dualWeapons.display}}</span>
+			</label>
+			{{/if}}
+			{{#if calledShot}}
+			<label class="tog neg" title="{{ localize 'MGT2.RollPrompt.CalledShotHint' }}">
+				<input type="checkbox" name="calledShot" data-dtype="Boolean" data-dm="{{calledShot.dm}}"
+					data-term="{{calledShot.label}}" />
+				<span>{{calledShot.label}}</span><span class="v">{{calledShot.display}}</span>
 			</label>
 			{{/if}}
 			<span class="numunit">

@@ -111,6 +111,7 @@ export class RollPromptHelper {
                     suppress: MGT2.AttackModifiers.dualWeapons.suppress,
                     label: game.i18n.localize(MGT2.AttackModifiers.dualWeapons.label)
                 } : null,
+                calledShot: this.#calledShotContext(options),
                 extended: options.blocks?.extended
                     ? { dm: MGT2.ExtendedAction.dm, per: MGT2.ExtendedAction.per } : null,
                 microgravity: this.#microgravityContext(options.microgravity),
@@ -174,6 +175,16 @@ export class RollPromptHelper {
         if ( !microgravity ) return null;
         return { exempt: microgravity.exempt === true,
             target: MGT2Helper.getDifficultyValue(MGT2.Microgravity.difficulty) };
+    }
+
+    /** VH2026 p.10: offered on an attack under that book, and never to artillery. */
+    static #calledShotContext(options) {
+        if ( !options.blocks?.attack ) return null;
+        if ( Rules.get("vehicleCombat") !== "vehicle2026" ) return null;
+        if ( MGT2Helper.hasTrait(options.weapon?.system?.traits, "artillery") ) return null;
+        const rule = MGT2.AttackModifiers.calledShot;
+        return { dm: rule.dm, display: MGT2Helper.signed(rule.dm),
+            label: game.i18n.localize(rule.label) };
     }
 
     /**
@@ -623,6 +634,25 @@ export class RollPromptHelper {
         return suppressed;
     }
 
+    /** A trait whose DM is a function of the shot: the row's DM is rewritten before it is summed. */
+    static #scaleTraits(form, suppressed) {
+        const distance = MGT2Helper.getNumberFromInput(form.elements.distance?.value);
+        const range = form.querySelector('[data-readout="band"]')?.dataset.range;
+        // Core p.79: a scoped weapon that aimed is not held to the 100 m rule, and Accurate follows it.
+        const threshold = suppressed.has("rangeThreshold") ? 0
+            : MGT2Helper.getIntegerFromInput(form.elements.rangeThreshold?.value);
+        for ( const box of form.querySelectorAll("input[data-tiers], input[data-bands]") ) {
+            const rule = { tiers: box.dataset.tiers ? JSON.parse(box.dataset.tiers) : null,
+                bands: box.dataset.bands ? JSON.parse(box.dataset.bands) : null };
+            if ( !rule.tiers && !rule.bands ) continue;
+            const dm = MGT2Helper.tieredDM(rule, { distance, range, threshold });
+            box.dataset.dm = String(dm);
+            if ( box.dataset.auto === "true" ) box.checked = dm !== 0;
+            const cell = box.closest("label")?.querySelector(".v");
+            if ( cell ) cell.textContent = dm ? MGT2Helper.signed(dm) : "—";
+        }
+    }
+
     /** A modifier whose rule reaches only some checks follows the select that decides them. */
     static #scoped(form) {
         const chosen = {
@@ -650,6 +680,7 @@ export class RollPromptHelper {
         const terms = [];
 
         const suppressed = this.#traits(form);
+        this.#scaleTraits(form, suppressed);
         this.#scoped(form);
 
         // A DM source is either a select or a segmented radio group; both name a chosen node that

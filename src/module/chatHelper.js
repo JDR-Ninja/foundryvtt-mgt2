@@ -1,6 +1,7 @@
 import { CharacterPrompts } from "./actors/character-prompts.js";
 import { checkOf, jumpToMessage } from "./chat-message.js";
 import { renderRollCard } from "./checks.js";
+import { Rules } from "./rules.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { injectAskTheSame, REQUEST, setupRequestCard } from "./request.js";
@@ -9,6 +10,7 @@ import { armChain } from "./roll-prompt.js";
 
 /** Core folio 140: the facings a vehicle answers an attack with; `left` and `right` are synonyms. */
 const FACINGS = ["front", "rear", "sides", "top", "bottom"];
+const FACINGS_2026 = ["forward", "aft", "port", "starboard", "dorsal", "ventral"];
 
 /** The lineage links: a chain strip's sources, an opposed line's one source, an answered request line. */
 export function wireChainSources(html) {
@@ -226,7 +228,7 @@ export class ChatHelper {
             scaleLabel: (MGT2.Scales[payload.scale] ?? MGT2.WeaponScales[payload.scale])?.label ?? payload.scale,
             typeLabels: payload.damageType.map(type => MGT2.DamageTypes[type] ?? type),
             floor: payload.effect >= 6,
-            facings: FACINGS,
+            facings: (Rules.get("vehicleCombat") === "vehicle2026") ? FACINGS_2026 : FACINGS,
             options: ChatHelper.#transformOptions(formula,
                 { full: full.total, reduced: reduced.total, minimum }, boost, flat, added)
         }, payload);

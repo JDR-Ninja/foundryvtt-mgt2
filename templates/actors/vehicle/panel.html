@@ -11,32 +11,22 @@
 		</div>
 		<div class="facings">
 			{{#each vehicle.armour.facings as |facing|}}
-			<div class="facing{{#if facing.derived}} derived{{/if}}">
+			<div class="facing">
 				<span class="lbl">{{localize (concat 'MGT2.Actor.vehicle.Facing.' facing.key)}}</span>
 				<b class="play-only">{{facing.value}}</b>
-				{{#if facing.field}}
 				{{formInput (lookup ../systemFields.armour.fields facing.key) name=(concat "system.armour." facing.key) value=facing.value classes="f edit-only"}}
-				{{else}}
-				{{formInput (lookup ../systemFields.armour.fields facing.key) name=(concat "system.armour." facing.key) value=(lookup ../system.armour facing.key) classes="f edit-only" placeholder="—"}}
-				{{/if}}
-				<span class="src">{{localize (concat 'MGT2.Actor.vehicle.ArmourSrc.' (ifThen facing.derived facing.key 'stored'))}}</span>
+				<span class="src">{{localize 'MGT2.Actor.vehicle.ArmourSrc.stored'}}</span>
 				{{#if facing.reactive}}<span class="re">+{{facing.reactive}} {{localize 'MGT2.Actor.vehicle.Reactive'}}</span>{{/if}}
 			</div>
 			{{/each}}
 		</div>
 		<div class="grid edit-only">
+			{{#each vehicle.armour.facings as |facing|}}
 			<label>
-				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Reactive'}} — {{localize 'MGT2.Actor.vehicle.Facing.front'}}</span>
-				{{formInput systemFields.armour.fields.reactive.fields.front name="system.armour.reactive.front" value=system.armour.reactive.front classes="f num"}}
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Reactive'}} — {{localize (concat 'MGT2.Actor.vehicle.Facing.' facing.key)}}</span>
+				{{formInput (lookup ../systemFields.armour.fields.reactive.fields facing.key) name=(concat "system.armour.reactive." facing.key) value=facing.reactive classes="f num"}}
 			</label>
-			<label>
-				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Reactive'}} — {{localize 'MGT2.Actor.vehicle.Facing.rear'}}</span>
-				{{formInput systemFields.armour.fields.reactive.fields.rear name="system.armour.reactive.rear" value=system.armour.reactive.rear classes="f num"}}
-			</label>
-			<label>
-				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Reactive'}} — {{localize 'MGT2.Actor.vehicle.Facing.sides'}}</span>
-				{{formInput systemFields.armour.fields.reactive.fields.sides name="system.armour.reactive.sides" value=system.armour.reactive.sides classes="f num"}}
-			</label>
+			{{/each}}
 		</div>
 		<dl class="statline" data-derived="system.armour">
 			<div class="stat"><dt>{{localize 'MGT2.Actor.vehicle.VsLight'}}</dt><dd>{{showDM vehicle.armour.vsLight}}</dd></div>
@@ -230,6 +220,30 @@
 				<dt>{{localize 'MGT2.Actor.vehicle.StructureExceeded'}}</dt>
 				<dd>{{vehicle.criticals.structureExceeded}}{{#if vehicle.criticals.structureState}} · {{localize vehicle.criticals.structureState}}{{/if}}</dd>
 			</div>
+			{{#if vehicle.criticals.spaces}}
+			<div class="stat">
+				<dt>{{localize 'MGT2.Actor.vehicle.Spaces'}}</dt>
+				<dd>{{vehicle.criticals.spaces}}</dd>
+			</div>
+			{{/if}}
+			{{#if vehicle.criticals.comfort}}
+			<div class="stat" data-tooltip="{{localize vehicle.criticals.comfort.effect}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.Comfort'}}</dt>
+				<dd>{{localize vehicle.criticals.comfort.label}}</dd>
+			</div>
+			{{/if}}
+			{{#if vehicle.criticals.repairs.total}}
+			<div class="stat">
+				<dt>{{localize 'MGT2.Actor.vehicle.Repairs'}}</dt>
+				<dd><i>Cr</i>{{credits vehicle.criticals.repairs.total}}</dd>
+			</div>
+			{{/if}}
+			{{#if vehicle.criticals.detection.dm}}
+			<div class="stat">
+				<dt>{{localize 'MGT2.Actor.vehicle.Detection'}}</dt>
+				<dd>{{showDM vehicle.criticals.detection.dm}}</dd>
+			</div>
+			{{/if}}
 			{{#if vehicle.criticals.immunity}}
 			<div class="stat">
 				<dt>{{localize 'MGT2.Actor.vehicle.CriticalImmunity'}}</dt>
@@ -256,6 +270,9 @@
 			</select>
 			<input class="f num" type="number" data-crit="effect" min="0" step="1" value="6" aria-label="{{localize 'MGT2.Actor.vehicle.Effect'}}" />
 			<button type="button" class="btn b-dmg" data-action="criticalRoll">{{localize 'MGT2.Actor.vehicle.ApplyCritical'}}</button>
+			{{#if vehicle.criticals.runs2026}}
+			<button type="button" class="btn" data-action="collision">{{localize 'MGT2.Collision.Title'}}</button>
+			{{/if}}
 		</div>
 	</div>
 

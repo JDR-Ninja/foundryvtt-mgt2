@@ -28,7 +28,7 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Agility'}}</h3>
-			<span class="count">{{localize (lookup (lookup choices.operatingModes system.operatingMode) 'label')}}{{#if system.towing}} · {{localize 'MGT2.Actor.vehicle.Towing'}}{{/if}}</span>
+			<span class="count">{{localize (lookup (lookup choices.operatingModes system.operatingMode) 'label')}}{{#if system.towing}} · {{localize 'MGT2.Actor.vehicle.Towing'}}{{/if}}{{#if vehicle.terrainImpassible}} · {{localize 'MGT2.Actor.vehicle.Impassible'}}{{/if}}</span>
 		</div>
 		{{! The two live controls come first and the track count is pinned: an edit-only cell placed
 		    ahead of them takes their column on the mode flip, and one joining an auto-fit row
@@ -42,6 +42,18 @@
 				{{formInput systemFields.towing name="system.towing" value=system.towing}}
 				<span>{{localize 'MGT2.Actor.vehicle.Towing'}}</span>
 			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Terrain'}}</span>
+				{{formInput systemFields.terrain name="system.terrain" value=system.terrain localize=true classes="f"}}
+			</label>
+			<label class="check edit-only">
+				{{formInput systemFields.smartWheels name="system.smartWheels" value=system.smartWheels}}
+				<span>{{localize 'MGT2.Actor.vehicle.SmartWheels'}}</span>
+			</label>
+			<label class="check edit-only">
+				{{formInput systemFields.agile name="system.agile" value=system.agile}}
+				<span>{{localize 'MGT2.Actor.vehicle.Agile'}}</span>
+			</label>
 			<label class="edit-only">
 				<span class="lbl">{{localize 'MGT2.Actor.vehicle.AgilityNative'}}</span>
 				{{formInput systemFields.agility name="system.agility" value=system.agility classes="f num"}}
@@ -54,6 +66,29 @@
 				<dd>{{showDM vehicle.agility.effective}}</dd>
 			</div>
 		</dl>
+		{{! The turn rate is a function of Agility alone, and the G a turn pulls is the band it is
+		    taken at over the rounds it takes — an optional rule, so the pair is printed and never
+		    applied (VH2026 p.19-20). }}
+		{{#if vehicle.runs2026}}
+		<dl class="statline" data-derived="system.turning">
+			<div class="stat" data-tooltip="{{localize 'MGT2.Actor.vehicle.TurnHint'}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.TurnRate'}}</dt>
+				<dd>{{vehicle.agility.turning.degrees}}&deg;</dd>
+			</div>
+			<div class="stat">
+				<dt>{{localize 'MGT2.Actor.vehicle.TurnHalf'}}</dt>
+				<dd>{{vehicle.agility.turning.rounds}}</dd>
+			</div>
+			<div class="stat{{#if vehicle.agility.delay}} hurt{{/if}}" data-tooltip="{{localize 'MGT2.Actor.vehicle.AgilityDelayHint'}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.AgilityDelay'}}</dt>
+				<dd>{{vehicle.agility.delay}}</dd>
+			</div>
+			<div class="stat{{#if vehicle.agility.gForce.criticals}} hurt{{/if}}" data-tooltip="{{localize 'MGT2.Actor.vehicle.GForceHint'}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.GForce'}}</dt>
+				<dd>{{vehicle.agility.gForce.pulled}}<span class="of">/{{vehicle.agility.gForce.limit}}</span></dd>
+			</div>
+		</dl>
+		{{/if}}
 		{{#if vehicle.agility.penalties.length}}
 		<ul class="codes">
 			{{#each vehicle.agility.penalties as |penalty|}}
@@ -132,7 +167,91 @@
 			</div>
 		</dl>
 		{{/if}}
+		{{! The three columns VH2026 p.18 added, read at the band in play. Rounds to Reach is
+		    cumulative from a standstill, so Responsive and Unresponsive scale it whole. }}
+		{{#if vehicle.runs2026}}
+		<dl class="statline" data-derived="system.speed.rows">
+			<div class="stat">
+				<dt>{{localize 'MGT2.Actor.vehicle.RoundsToReach'}}</dt>
+				<dd>{{#if (eq vehicle.speed.rounds null)}}&mdash;{{else}}{{vehicle.speed.rounds}}{{/if}}</dd>
+			</div>
+			<div class="stat">
+				<dt>{{localize 'MGT2.Actor.vehicle.DistancePerRound'}}</dt>
+				<dd>{{#if (eq vehicle.speed.metres null)}}+{{else}}{{vehicle.speed.metres}}<i>m</i>{{/if}}</dd>
+			</div>
+			<div class="stat{{#unless vehicle.speed.kph}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.Kph'}}</dt>
+				<dd>{{#if vehicle.speed.kph}}{{vehicle.speed.kph}}{{else}}&mdash;{{/if}}</dd>
+			</div>
+		</dl>
+		{{/if}}
 	</div>
+
+	{{! An aircraft is built for one Atmosphere and one world Size and pays for every step it flies
+	    away from them (VH2026 p.21-22). The world it is over now is the referee's standing state,
+	    on the precedent of the terrain flag above; the pair it was designed for is transcription. }}
+	{{#if vehicle.runs2026}}
+	<div class="block">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Actor.vehicle.Environment'}}</h3>
+			<span class="count">{{localize 'MGT2.Actor.vehicle.EnvironmentCount'}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.EnvironmentHint'}}"></i>
+		</div>
+		<div class="grid cols2">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.WorldAtmosphere'}}</span>
+				<select class="f" name="system.environment.atmosphere" data-dtype="Number">
+					<option value=""{{#if (eq system.environment.atmosphere null)}} selected{{/if}}>&mdash;</option>
+					{{#each choices.atmospheres as |row|}}
+					<option value="{{row.digit}}"{{#if (eq row.digit ../system.environment.atmosphere)}} selected{{/if}}>{{row.digit}}{{#if row.label}} &middot; {{localize row.label}}{{/if}}</option>
+					{{/each}}
+				</select>
+			</label>
+			<label>
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.WorldSize'}}</span>
+				{{! A number, not the <range-picker> a min-and-max NumberField would otherwise render. }}
+				<input class="f num" type="number" min="0" max="15" step="1"
+					name="system.environment.size" value="{{system.environment.size}}" data-dtype="Number" />
+			</label>
+			<label class="edit-only">
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.DesignAtmosphere'}}</span>
+				<select class="f" name="system.design.atmosphere" data-dtype="Number">
+					<option value=""{{#if (eq system.design.atmosphere null)}} selected{{/if}}>&mdash;</option>
+					{{#each choices.atmospheres as |row|}}
+					<option value="{{row.digit}}"{{#if (eq row.digit ../system.design.atmosphere)}} selected{{/if}}>{{row.digit}}{{#if row.label}} &middot; {{localize row.label}}{{/if}}</option>
+					{{/each}}
+				</select>
+			</label>
+			<label class="edit-only">
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.DesignSize'}}</span>
+				<input class="f num" type="number" min="0" max="15" step="1"
+					name="system.design.size" value="{{system.design.size}}" data-dtype="Number" />
+			</label>
+		</div>
+		{{#if vehicle.airborne}}
+		<dl class="statline" data-derived="system.airborne">
+			<div class="stat{{#if vehicle.airborne.grounded}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.Atmosphere'}}</dt>
+				<dd class="word">{{#if vehicle.airborne.unrated}}{{localize 'MGT2.Actor.vehicle.AtmosphereUnrated'}}{{else}}{{localize vehicle.airborne.fromLabel}} &rarr; {{localize vehicle.airborne.toLabel}}{{/if}}</dd>
+			</div>
+			<div class="stat{{#if vehicle.airborne.dm}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.AirborneDM'}}</dt>
+				<dd>{{showDM vehicle.airborne.dm}}</dd>
+			</div>
+			<div class="stat">
+				<dt>{{localize 'MGT2.Actor.vehicle.SpeedShift'}}</dt>
+				<dd>{{showDM vehicle.airborne.bands}}</dd>
+			</div>
+			<div class="stat{{#unless vehicle.airborne.range.max}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.RangeEffective'}}</dt>
+				<dd>{{vehicle.airborne.range.effective}}<span class="of"> ({{vehicle.airborne.percent}}%)</span></dd>
+			</div>
+		</dl>
+		{{#if vehicle.airborne.grounded}}<p class="hint">{{localize 'MGT2.Actor.vehicle.Grounded'}}</p>{{/if}}
+		{{#if vehicle.airborne.lift}}<p class="hint">{{localize 'MGT2.Actor.vehicle.LiftFloor'}}</p>{{/if}}
+		{{/if}}
+	</div>
+	{{/if}}
 
 	{{! The chassis sets both, and an array because a multi-mode vehicle prints more than one pair. }}
 	<div class="block">
