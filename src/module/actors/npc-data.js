@@ -69,6 +69,7 @@ export class NpcData extends ActorBaseData {
                 charm: createCharacteristicField(false),
                 psionic: createCharacteristicField(false),
                 other: createCharacteristicField(false),
+                reputation: createCharacteristicField(false),
                 // Core p.85 calls this "the Hits characteristic" in its own words, which is why it
                 // sits in the record rather than beside it: `damageOrder`, `life`, the token bar
                 // and the chain editor then need no special case.

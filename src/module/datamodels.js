@@ -573,6 +573,17 @@ export class CareerData extends ItemBaseData {
             // "DM-1 for every previous career" is printed on each career's own Qualification line
             // and is ABSENT from four of the sixteen, so it is not a general rule.
             perPreviousCareer: new fields.NumberField({ required: false, initial: 0, integer: true }),
+            // The two shapes the corpus prints beyond the count and the age: "DM+2 if SOC 9+"
+            // and "DM+2 if the last term was in the Agent or Rogue careers".
+            conditionalDMs: new fields.ArrayField(new fields.SchemaField({
+                characteristic: new fields.StringField({
+                    required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
+                min: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                // Template ids, as `qualificationOverride.exceptCareers` names them.
+                afterCareers: new fields.ArrayField(new fields.StringField({
+                    required: true, blank: false, trim: true }), { initial: [] }),
+                dm: new fields.NumberField({ required: false, initial: 0, integer: true })
+            }), { initial: [] }),
             requiresPermission: new fields.BooleanField({ required: false, initial: false })
         });
 

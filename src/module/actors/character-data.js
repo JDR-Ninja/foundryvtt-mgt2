@@ -49,7 +49,8 @@ export class CharacterData extends ActorBaseData {
                 sanity: createCharacteristicField(false),
                 charm: createCharacteristicField(false),
                 psionic: createCharacteristicField(true),
-                other: createCharacteristicField(false)
+                other: createCharacteristicField(false),
+                reputation: createCharacteristicField(false)
             }),
 
             health: new fields.SchemaField({

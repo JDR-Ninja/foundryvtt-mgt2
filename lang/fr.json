@@ -753,6 +753,7 @@
         "freeTrader": "Franc-Marchand",
         "farTrader": "Marchand au long cours",
         "gun": "Pistolet",
+        "guildMembership": "Adhésion à une guilde",
         "labShip": "Vaisseau-laboratoire",
         "personalVehicle": "Véhicule personnel",
         "safariShip": "Vaisseau safari",
@@ -957,6 +958,8 @@
         "NeedsPermission": "Cette carrière requiert l'accord du référent.",
         "NoReturn": "Vous ne pouvez pas revenir dans {career} au cours de la période suivant votre départ.",
         "PreviousCareers": "Carrières précédentes ({n})",
+        "ConditionalCharacteristic": "{characteristic} {min}+",
+        "ConditionalLastCareer": "Dernière période dans {career}",
         "AgeDM": "Âgé de {age} ans ou plus",
         "SpeciesOverride": "Espèce",
         "Qualified": "Qualifié.",
@@ -2570,6 +2573,10 @@
       "other": {
         "name": "Autre",
         "short": "AUT"
+      },
+      "reputation": {
+        "name": "Réputation",
+        "short": "REP"
       },
       "hits": {
         "name": "Points de vie",

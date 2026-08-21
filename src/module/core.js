@@ -182,7 +182,8 @@ Hooks.once("init", async function () {
         "characteristics.sanity",
         "characteristics.charm",
         "characteristics.psionic",
-        "characteristics.other"
+        "characteristics.other",
+        "characteristics.reputation"
       ],
       // `life.value` is derived: a value-attribute write to it is discarded on the next prepare.
       value: ["health.radiations",
@@ -197,7 +198,8 @@ Hooks.once("init", async function () {
         "characteristics.sanity.value",
         "characteristics.charm.value",
         "characteristics.psionic.value",
-        "characteristics.other.value"]
+        "characteristics.other.value",
+        "characteristics.reputation.value"]
     },
     // A non-empty map with no entry for a type unions every OTHER type's attributes
     // (token.mjs:4071-4093), so a missing entry is not a fallback — it is nonsense in the picker.
@@ -216,7 +218,8 @@ Hooks.once("init", async function () {
         "characteristics.sanity",
         "characteristics.charm",
         "characteristics.psionic",
-        "characteristics.other"
+        "characteristics.other",
+        "characteristics.reputation"
       ],
       value: ["stun",
         "characteristics.hits.value",
@@ -231,7 +234,8 @@ Hooks.once("init", async function () {
         "characteristics.sanity.value",
         "characteristics.charm.value",
         "characteristics.psionic.value",
-        "characteristics.other.value"]
+        "characteristics.other.value",
+        "characteristics.reputation.value"]
     },
     // `life` and `characteristics.hull` are the same pool named twice; both are offered because the
     // picker prints the raw path and a referee looking for a hull bar looks for "hull".

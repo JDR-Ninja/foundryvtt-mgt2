@@ -185,6 +185,20 @@ async function qualify(view, key) {
         rows.push([game.i18n.format("MGT2.Chargen.Term.PreviousCareers", { n: previous }),
             system.qualification.perPreviousCareer * previous]);
     }
+    const served = previousRecord(view);
+    for ( const row of system.qualification.conditionalDMs ) {
+        if ( !row.dm ) continue;
+        if ( row.characteristic && (row.min !== null) ) {
+            if ( (actor.system.characteristics[row.characteristic]?.value ?? 0) < row.min ) continue;
+            rows.push([game.i18n.format("MGT2.Chargen.Term.ConditionalCharacteristic", {
+                characteristic: game.i18n.localize(MGT2.Characteristics[row.characteristic]),
+                min: row.min }), row.dm]);
+        }
+        else if ( served && namesThisCareer(served, row.afterCareers) ) {
+            rows.push([game.i18n.format("MGT2.Chargen.Term.ConditionalLastCareer",
+                { career: served.name }), row.dm]);
+        }
+    }
     // "DM-2 if you are aged 30 or more" — three career names and two numbers, as one typed pair.
     if ( (system.ageDM.from !== null) && (Chargen.age(actor) >= system.ageDM.from) && system.ageDM.dm ) {
         rows.push([game.i18n.format("MGT2.Chargen.Term.AgeDM", { age: system.ageDM.from }), system.ageDM.dm]);
@@ -1465,11 +1479,16 @@ function bestCharacteristic(actor, keys) {
             ? key : best);
 }
 
+/** The career served before this one, which is the one a term-order rule reads. @returns {Item|null} */
+function previousRecord({ actor, record }) {
+    return Chargen.careers(actor).filter(career => career !== record).at(-1) ?? null;
+}
+
 /** Whether the Traveller left a career last term, which folio 18 closes to them for one term. */
-function leftLastTerm({ actor, record }) {
-    const previous = Chargen.careers(actor).filter(career => career !== record).at(-1);
+function leftLastTerm(view) {
+    const previous = previousRecord(view);
     if ( !previous || (previous.system.exitMode === "stillServing") ) return false;
-    return namesThisCareer(record, [previous.name, previous._stats?.compendiumSource ?? ""]);
+    return namesThisCareer(view.record, [previous.name, previous._stats?.compendiumSource ?? ""]);
 }
 
 /** Whether a referee-typed list of template ids names this record. */

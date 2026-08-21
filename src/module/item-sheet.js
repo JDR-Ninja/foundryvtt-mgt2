@@ -503,8 +503,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     // and every number on the weapon's own line is wrong while it is in there.
     const magazine = system.effective?.magazine ?? system.magazine;
     if ( (type !== "weapon") || !(magazine > 0) ) return null;
-    // One null closes the whole count: the loaded readout, the Reload button and the round selector
-    // all render off this.
+    // Core p.77 counts the shots: one null closes the loaded readout and the Reload button. The
+    // round selector renders off `rounds` and is not gated here — a loaded round is a damage rule.
     if ( !Rules.on("magazines") ) return null;
     return {
       value: system.ammo,

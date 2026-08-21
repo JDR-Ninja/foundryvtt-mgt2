@@ -753,6 +753,7 @@
         "freeTrader": "Free Trader",
         "farTrader": "Far Trader",
         "gun": "Gun",
+        "guildMembership": "Guild Membership",
         "labShip": "Lab Ship",
         "personalVehicle": "Personal Vehicle",
         "safariShip": "Safari Ship",
@@ -957,6 +958,8 @@
         "NeedsPermission": "This career needs the referee's permission.",
         "NoReturn": "You may not return to {career} in the term after leaving it.",
         "PreviousCareers": "Previous careers ({n})",
+        "ConditionalCharacteristic": "{characteristic} {min}+",
+        "ConditionalLastCareer": "Last term in {career}",
         "AgeDM": "Aged {age} or more",
         "SpeciesOverride": "Species",
         "Qualified": "Qualified.",
@@ -2570,6 +2573,10 @@
       "other": {
         "name": "Other",
         "short": "OTH"
+      },
+      "reputation": {
+        "name": "Reputation",
+        "short": "REP"
       },
       "hits": {
         "name": "Hits",

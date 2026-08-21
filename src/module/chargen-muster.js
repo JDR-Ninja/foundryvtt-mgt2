@@ -53,14 +53,16 @@ export const Muster = {
 
     /**
      * The printed row a 1D Benefit roll landed on, read off the career's own packed columns — the
-     * seventh row is what a rank DM reaches.
+     * last row is what a rank DM reaches.
      * @returns {{cell: object|null, cash: number}}
      */
     rowFor(record, column, total) {
-        const table = record?.system.benefits;
-        const at = Math.clamp(total, 1, 7) - 1;
-        if ( column === "cash" ) return { cell: null, cash: table?.cash?.[at] ?? 0 };
-        return { cell: table?.other?.[at] ?? null, cash: 0 };
+        const rows = (column === "cash") ? record?.system.benefits.cash : record?.system.benefits.other;
+        // The ceiling is the printed column's own length: the Core sets out seven rows and Bounty
+        // Hunter p.6 eight, and a fixed clamp puts the eighth out of reach of every DM.
+        const at = Math.clamp(total, 1, Math.max(1, rows?.length ?? 0)) - 1;
+        if ( column === "cash" ) return { cell: null, cash: rows?.[at] ?? 0 };
+        return { cell: rows?.[at] ?? null, cash: 0 };
     },
 
     /**

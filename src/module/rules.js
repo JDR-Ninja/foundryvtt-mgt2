@@ -13,8 +13,13 @@ export const MENU_ID = "mgt2-optional-rules";
 /** Which rules have already been through `seedRules`. */
 export const SEEDED_SETTING = "seededRules";
 
-/** The five the Core Rulebook never defines. */
-export const EXTRA_CHARACTERISTICS = Object.freeze(["morale", "luck", "sanity", "charm", "other"]);
+/** The characteristics no Core rule defines, each adopted per table. */
+export const EXTRA_CHARACTERISTICS = Object.freeze(["morale", "luck", "sanity", "charm", "other",
+    "reputation"]);
+
+// Written out rather than read off the list above: the seed is what an UPGRADED world is given,
+// so a key appended later would switch itself on at a table that never adopted it.
+const SEEDED_EXTRA_CHARACTERISTICS = Object.freeze(["morale", "luck", "sanity", "charm", "other"]);
 
 /** The sections the menu draws, in the order it draws them. */
 export const RULE_GROUPS = Object.freeze(["travellers", "creation", "combat", "health", "space", "craft"]);
@@ -33,7 +38,7 @@ export const RULES = Object.freeze({
     extraCharacteristics: {
         group: "travellers", book: "robot", page: "112",
         choices: EXTRA_CHARACTERISTICS, choiceLabel: "MGT2.Characteristics.{key}.name",
-        default: [], seed: EXTRA_CHARACTERISTICS
+        default: [], seed: SEEDED_EXTRA_CHARACTERISTICS
     },
     // Not a flag, because a table may legitimately run the Companion's Experience Points *and*
     // Core's Study Periods — one Traveller at a downport university, another taught by a comrade.

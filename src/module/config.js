@@ -450,7 +450,8 @@ MGT2.Characteristics = Object.freeze({
     sanity: "MGT2.Characteristics.sanity.name",
     charm: "MGT2.Characteristics.charm.name",
     psionic: "MGT2.Characteristics.psionic.name",
-    other: "MGT2.Characteristics.other.name"
+    other: "MGT2.Characteristics.other.name",
+    reputation: "MGT2.Characteristics.reputation.name"
 });
 
 // Core folio 9's "PHYSICAL CHARACTERISTICS" heading, the only such partition the books state.
@@ -2294,6 +2295,8 @@ MGT2.Benefits = Object.freeze({
         alternative: "farTrader", pick: { doc: "Actor", types: ["spacecraft"] } },
     gun: { kind: "voucher", credits: 3000, tl: 12, onRepeat: "skillLevel", constraint: "ranged",
         pick: { doc: "Item", types: ["weapon"], melee: false } },
+    // Bounty Hunter p.6: joined with no REP check, not transferable, and the referee details it.
+    guildMembership: { kind: "membership", onRepeat: "another" },
     labShip: { kind: "ship", onRepeat: "stackMortgage", constraint: "mortgage",
         pick: { doc: "Actor", types: ["spacecraft"] } },
     personalVehicle: { kind: "voucher", credits: 300000, tl: 10, onRepeat: "skillLevel",
