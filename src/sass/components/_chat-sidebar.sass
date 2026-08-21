@@ -1,5 +1,4 @@
-// The chat card. Bodies ported from docs/sketch-dialogs-chat.html, frame and band from
-// docs/sketch-chat-cards.html.
+// The chat card: the frame, the band, and the bodies each message type fills them with.
 // ONE GROUND ONLY: Foundry hard-codes `themed theme-light` on ol.chat-log, so a card never renders
 // on the dark ground whatever the viewer's colour scheme says. The card element carries
 // `theme-light` itself, which the `:not(.theme-light)` guard in _colors.sass then honours.
@@ -348,7 +347,7 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 		display: none
 	&.immune
 		.dmgpick > div
-			opacity: 0.4
+			color: var(--faint)
 			text-decoration: line-through
 		.dmgvoid
 			display: block

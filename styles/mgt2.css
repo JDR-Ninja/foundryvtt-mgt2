@@ -6,15 +6,19 @@
   --ink: #16110f;
   --danger: #c8372a;
   --good: #1f7a4d;
-  --lgt: min(l, 0.55);
+  --lgt: min(l, 0.52);
   --lgt-hot: min(l, 0.40);
   --rule: color-mix(in oklab, var(--ink) 22%, transparent);
   --rule-soft: color-mix(in oklab, var(--ink) 11%, transparent);
-  --mute: color-mix(in oklab, var(--ink) 60%, var(--paper));
-  --faint: color-mix(in oklab, var(--ink) 40%, var(--paper));
+  --mute: color-mix(in oklab, var(--ink) 70%, var(--paper));
+  --faint: color-mix(in oklab, var(--ink) 55%, var(--paper));
+  --fill: color-mix(in oklab, var(--ink) 45%, var(--paper));
   --hover: color-mix(in oklab, var(--ink) 6%, transparent);
   --track: color-mix(in oklab, var(--ink) 13%, transparent);
-  --fill: color-mix(in oklab, var(--ink) 45%, var(--paper));
+  --sunk: color-mix(in oklab, var(--ink) 4%, var(--paper));
+  --table-header-bg-color: var(--hover);
+  --table-row-color-even: transparent;
+  --table-row-color-odd: transparent;
   --accent-text: oklch(from var(--accent) var(--lgt) c h);
   --accent-hot: oklch(from var(--accent) var(--lgt-hot) c h);
   --accent-line: color-mix(in oklab, var(--accent-text) 45%, transparent);
@@ -34,9 +38,9 @@
   --mgt2-depletion: var(--danger);
   --mgt2-color-warning: var(--danger);
   --mgt2-bgcolor-primary: var(--chrome);
-  --mgt2-color-dm: #e9e7e4;
+  --mgt2-color-dm: #f2f0ed;
   --mgt2-bgcolor-dm: var(--chrome);
-  --mgt2-color-software: #e9e7e4;
+  --mgt2-color-software: #f2f0ed;
   --mgt2-bgcolor-software: var(--chrome);
   --mgt2-encumbrance-normal: #D94826;
   --mgt2-encumbrance-heavy: #D82727;
@@ -55,18 +59,22 @@ body.theme-dark .mgt2:not(.theme-light),
 .mgt2 .window-header,
 .mgt2 .itemsheet-header {
   --paper: var(--chrome);
-  --ink: #e9e7e4;
+  --ink: #f2f0ed;
   --danger: #e86152;
   --good: #4fbe8b;
   --lgt: max(l, 0.72);
   --lgt-hot: max(l, 0.86);
   --rule: color-mix(in oklab, var(--ink) 22%, transparent);
   --rule-soft: color-mix(in oklab, var(--ink) 11%, transparent);
-  --mute: color-mix(in oklab, var(--ink) 60%, var(--paper));
-  --faint: color-mix(in oklab, var(--ink) 40%, var(--paper));
+  --mute: color-mix(in oklab, var(--ink) 70%, var(--paper));
+  --faint: color-mix(in oklab, var(--ink) 55%, var(--paper));
+  --fill: color-mix(in oklab, var(--ink) 45%, var(--paper));
   --hover: color-mix(in oklab, var(--ink) 6%, transparent);
   --track: color-mix(in oklab, var(--ink) 13%, transparent);
-  --fill: color-mix(in oklab, var(--ink) 45%, var(--paper));
+  --sunk: color-mix(in oklab, var(--ink) 4%, var(--paper));
+  --table-header-bg-color: var(--hover);
+  --table-row-color-even: transparent;
+  --table-row-color-odd: transparent;
   --accent-text: oklch(from var(--accent) var(--lgt) c h);
   --accent-hot: oklch(from var(--accent) var(--lgt-hot) c h);
   --accent-line: color-mix(in oklab, var(--accent-text) 45%, transparent);
@@ -93,15 +101,19 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   --ink: #16110f;
   --danger: #c8372a;
   --good: #1f7a4d;
-  --lgt: min(l, 0.55);
+  --lgt: min(l, 0.52);
   --lgt-hot: min(l, 0.40);
   --rule: color-mix(in oklab, var(--ink) 22%, transparent);
   --rule-soft: color-mix(in oklab, var(--ink) 11%, transparent);
-  --mute: color-mix(in oklab, var(--ink) 60%, var(--paper));
-  --faint: color-mix(in oklab, var(--ink) 40%, var(--paper));
+  --mute: color-mix(in oklab, var(--ink) 70%, var(--paper));
+  --faint: color-mix(in oklab, var(--ink) 55%, var(--paper));
+  --fill: color-mix(in oklab, var(--ink) 45%, var(--paper));
   --hover: color-mix(in oklab, var(--ink) 6%, transparent);
   --track: color-mix(in oklab, var(--ink) 13%, transparent);
-  --fill: color-mix(in oklab, var(--ink) 45%, var(--paper));
+  --sunk: color-mix(in oklab, var(--ink) 4%, var(--paper));
+  --table-header-bg-color: var(--hover);
+  --table-row-color-even: transparent;
+  --table-row-color-odd: transparent;
   --accent-text: oklch(from var(--accent) var(--lgt) c h);
   --accent-hot: oklch(from var(--accent) var(--lgt-hot) c h);
   --accent-line: color-mix(in oklab, var(--accent-text) 45%, transparent);
@@ -110,18 +122,22 @@ li.chat-message:has(> .message-content > .mgt2.card) {
 
 li.chat-message > .message-header:has(~ .message-content > .mgt2.card) {
   --paper: var(--chrome);
-  --ink: #e9e7e4;
+  --ink: #f2f0ed;
   --danger: #e86152;
   --good: #4fbe8b;
   --lgt: max(l, 0.72);
   --lgt-hot: max(l, 0.86);
   --rule: color-mix(in oklab, var(--ink) 22%, transparent);
   --rule-soft: color-mix(in oklab, var(--ink) 11%, transparent);
-  --mute: color-mix(in oklab, var(--ink) 60%, var(--paper));
-  --faint: color-mix(in oklab, var(--ink) 40%, var(--paper));
+  --mute: color-mix(in oklab, var(--ink) 70%, var(--paper));
+  --faint: color-mix(in oklab, var(--ink) 55%, var(--paper));
+  --fill: color-mix(in oklab, var(--ink) 45%, var(--paper));
   --hover: color-mix(in oklab, var(--ink) 6%, transparent);
   --track: color-mix(in oklab, var(--ink) 13%, transparent);
-  --fill: color-mix(in oklab, var(--ink) 45%, var(--paper));
+  --sunk: color-mix(in oklab, var(--ink) 4%, var(--paper));
+  --table-header-bg-color: var(--hover);
+  --table-row-color-even: transparent;
+  --table-row-color-odd: transparent;
   --accent-text: oklch(from var(--accent) var(--lgt) c h);
   --accent-hot: oklch(from var(--accent) var(--lgt-hot) c h);
   --accent-line: color-mix(in oklab, var(--accent-text) 45%, transparent);
@@ -398,7 +414,7 @@ body {
   letter-spacing: 0.18em;
   line-height: 1.4;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--mute);
   background: none;
   border: 1px solid var(--rule);
   border-radius: 2px;
@@ -939,7 +955,7 @@ body {
   border-color: color-mix(in oklab, var(--danger) 45%, transparent);
 }
 .mgt2 .tog.disabled {
-  opacity: 0.4;
+  color: var(--faint);
   text-decoration: line-through;
   cursor: var(--cursor-default);
 }
@@ -1106,7 +1122,7 @@ body {
 
 .mgt2 .dm-source.voided,
 .mgt2 .seggrp.voided {
-  opacity: 0.45;
+  color: var(--faint);
 }
 
 .mgt2 .seggrp.voided .seg {
@@ -1149,7 +1165,10 @@ body {
   color: var(--ink);
 }
 .mgt2 .readout .vs.assumed {
-  opacity: 0.55;
+  color: var(--faint);
+}
+.mgt2 .readout .vs.assumed b {
+  color: var(--mute);
 }
 .mgt2 .readout .terms {
   display: flex;
@@ -2838,7 +2857,7 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--mute);
   text-align: left;
   border-bottom: 1px solid var(--rule-soft);
 }
@@ -2926,13 +2945,14 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   border-color: var(--accent-text);
 }
 .mgt2 .btn[disabled] {
-  opacity: 0.35;
+  color: var(--faint);
+  border-color: var(--rule-soft);
   cursor: not-allowed;
 }
 .mgt2 .btn[disabled]:hover {
-  color: var(--mute);
+  color: var(--faint);
   background: none;
-  border-color: var(--rule);
+  border-color: var(--rule-soft);
 }
 .mgt2 .vacts {
   display: flex;
@@ -3189,7 +3209,7 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   text-align: left;
-  color: var(--faint);
+  color: var(--mute);
   border-bottom: 1px solid var(--rule-soft);
 }
 .mgt2 .roster td {
@@ -3390,8 +3410,11 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   color: var(--faint);
 }
 .mgt2 .codes .code.off {
-  opacity: 0.45;
+  color: var(--faint);
   text-decoration: line-through;
+}
+.mgt2 .codes .code.off .ps {
+  color: var(--faint);
 }
 .mgt2 .codes .addtag {
   display: inline-flex;
@@ -3607,12 +3630,12 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
-  color: var(--faint);
+  color: var(--mute);
 }
 .mgt2 .grp .order i {
   padding: 0 2px;
   font-style: normal;
-  color: color-mix(in oklab, var(--faint) 60%, transparent);
+  color: var(--faint);
 }
 .mgt2 .grp .order ~ .cfg {
   margin-left: 0;
@@ -4981,7 +5004,7 @@ ul.softwares li:hover a {
 }
 
 .mgt2 table.rows tr.off {
-  opacity: 0.5;
+  color: var(--faint);
 }
 
 .mgt2 .effect-icon {
@@ -5113,7 +5136,7 @@ ul.softwares li:hover a {
   color: var(--good);
 }
 .mgt2 .dlg.loss input.locked {
-  opacity: 0.55;
+  color: var(--faint);
   cursor: default;
 }
 
@@ -5303,6 +5326,9 @@ ul.softwares li:hover a {
 .mgt2 .uwp .u.port {
   background: var(--accent-soft);
 }
+.mgt2 .uwp .u.port dt {
+  color: var(--mute);
+}
 .mgt2 .uwp .u.port dd {
   color: var(--accent-text);
   font-weight: 600;
@@ -5401,7 +5427,10 @@ ul.softwares li:hover a {
   color: var(--good);
 }
 .mgt2 .ledger .lr.off {
-  opacity: 0.42;
+  color: var(--faint);
+}
+.mgt2 .ledger .lr.off .ov button {
+  color: var(--faint);
 }
 .mgt2 .ledger .lr.forced .st {
   color: var(--danger);
@@ -5687,7 +5716,7 @@ ul.softwares li:hover a {
   box-shadow: none;
 }
 .mgt2 .mgt2-damage-order .chip:disabled {
-  opacity: 0.45;
+  color: var(--faint);
   cursor: not-allowed;
 }
 .mgt2 .mgt2-damage-order .chip[hidden] {
@@ -5960,13 +5989,14 @@ ul.softwares li:hover a {
   border-color: var(--accent-text);
 }
 .mgt2 .btn-roll[disabled] {
-  opacity: 0.35;
+  color: var(--faint);
+  border-color: var(--rule);
   cursor: not-allowed;
 }
 .mgt2 .btn-roll[disabled]:hover {
-  color: var(--accent-text);
+  color: var(--faint);
   background: none;
-  border-color: var(--accent-line);
+  border-color: var(--rule);
 }
 
 .mgt2 .btn-roll + .btn-roll {
@@ -6097,7 +6127,11 @@ ul.softwares li:hover a {
   flex: 0 0 auto;
 }
 .mgt2 .imain label.off {
-  opacity: 0.45;
+  color: var(--faint);
+}
+.mgt2 .imain label.off input.f,
+.mgt2 .imain label.off select.f {
+  color: var(--faint);
 }
 
 .mgt2 .codes .code input {
@@ -6479,7 +6513,7 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
   display: none;
 }
 .mgt2.card.immune .dmgpick > div {
-  opacity: 0.4;
+  color: var(--faint);
   text-decoration: line-through;
 }
 .mgt2.card.immune .dmgvoid {
@@ -6857,7 +6891,10 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
   color: var(--accent-text);
 }
 .mgt2 .bands .band.out {
-  opacity: 0.45;
+  color: var(--faint);
+}
+.mgt2 .bands .band.out .fig {
+  color: var(--faint);
 }
 .mgt2 .bands .pins {
   position: absolute;
@@ -7786,7 +7823,8 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
   color: var(--mute);
 }
 .mgt2 .stage2 .dm.inert {
-  opacity: 0.55;
+  color: var(--faint);
+  border-color: var(--rule-soft);
 }
 .mgt2 .stage2 .dm.neg {
   border-color: var(--danger);
@@ -8820,8 +8858,9 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 .mgt2 .dcompose .skillfld input.f {
   width: 100%;
 }
-.mgt2 .dcompose .skillfld.off {
-  opacity: 0.4;
+.mgt2 .dcompose .skillfld.off input.f {
+  color: var(--faint);
+  border-color: var(--rule-soft);
 }
 .mgt2 .dcompose .echo {
   font-family: var(--cond);
@@ -9906,7 +9945,7 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 }
 .mgt2.chargen .steps li.cut {
   text-decoration: line-through;
-  opacity: 0.45;
+  color: var(--faint);
 }
 .mgt2.chargen .steps .why {
   margin: 6px 0 0;
@@ -10102,7 +10141,7 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
   color: var(--danger);
 }
 .mgt2 .mustergrid .vouchers li.spent {
-  opacity: 0.5;
+  color: var(--faint);
   text-decoration: line-through;
 }
 .mgt2 .mustergrid .none {
@@ -10330,7 +10369,10 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
   gap: 6px;
 }
 .mgt2 .careertbl .entry, .mgt2 .speciesblk .entry, .mgt2 .speciesfrm .entry {
-  border: 1px solid var(--line);
+  --mute: color-mix(in oklab, var(--ink) 70%, var(--sunk));
+  --faint: color-mix(in oklab, var(--ink) 55%, var(--sunk));
+  --fill: color-mix(in oklab, var(--ink) 45%, var(--sunk));
+  border: 1px solid var(--rule);
   border-radius: 3px;
   padding: 5px 7px;
   background: var(--sunk);
@@ -10355,7 +10397,7 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 .mgt2 .careertbl .nest, .mgt2 .speciesblk .nest, .mgt2 .speciesfrm .nest {
   margin: 5px 0 0 10px;
   padding-left: 8px;
-  border-left: 1px solid var(--line);
+  border-left: 1px solid var(--rule);
 }
 .mgt2 .careertbl .nlbl, .mgt2 .speciesblk .nlbl, .mgt2 .speciesfrm .nlbl {
   display: block;
@@ -10436,7 +10478,6 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 }
 .mgt2 .careertbl .grantcount.none, .mgt2 .speciesblk .grantcount.none, .mgt2 .speciesfrm .grantcount.none {
   color: var(--faint);
-  opacity: 0.5;
 }
 .mgt2 .careertbl .grants, .mgt2 .speciesblk .grants, .mgt2 .speciesfrm .grants {
   margin-left: 6px;

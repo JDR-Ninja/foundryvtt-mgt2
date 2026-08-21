@@ -1,5 +1,5 @@
-// The creation screen. Ported from docs/sketch-chargen.html: the masthead, the term grid, the step
-// strip and the tray, in that order down the window.
+// The creation screen: the masthead, the term grid, the step strip and the tray, in that order down
+// the window.
 //
 // THE HEIGHT BUDGET, measured at the default 700 px: window bar 36, masthead 40, strip 107, tray 94 —
 // leaving the grid 422, which is five term rows before it scrolls. The grid is THE ONLY SCROLLER, and
@@ -325,7 +325,7 @@
 		font-weight: 600
 	li.cut
 		text-decoration: line-through
-		opacity: 0.45
+		color: var(--faint)
 	.why
 		margin: 6px 0 0
 		font-size: 12px
@@ -496,7 +496,7 @@
 			color: var(--danger)
 	// Redeemed or given up: kept on the row rather than removed — a referee auditing a sheet needs it.
 	.vouchers li.spent
-		opacity: 0.5
+		color: var(--faint)
 		text-decoration: line-through
 	.none
 		font-size: 10px

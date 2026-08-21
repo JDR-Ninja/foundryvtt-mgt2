@@ -103,6 +103,8 @@
 	// the supplier search all key off it — so it reads as the heading it is.
 	.u.port
 		background: var(--accent-soft)
+		dt
+			color: var(--mute)
 		dd
 			color: var(--accent-text)
 			font-weight: 600
@@ -199,7 +201,9 @@
 	.lr.on .st
 		color: var(--good)
 	.lr.off
-		opacity: 0.42
+		color: var(--faint)
+		.ov button
+			color: var(--faint)
 	.lr.forced .st
 		color: var(--danger)
 	.lr.forced .c

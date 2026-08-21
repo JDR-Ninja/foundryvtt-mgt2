@@ -1,9 +1,9 @@
 {{! Pinned light: Foundry hard-codes `themed theme-light` on ol.chat-log, so a card never renders
     on the dark ground whatever the viewer's colour scheme says. }}
 <div class="mgt2 theme-light card {{effectTone}}">
-	{{! The handoff strip, `sketch-task-chain.html`: the whole visual cost of a chain on the receiving
-	    side. It renders from the stored ids — click one and the log scrolls to that message, which
-	    is what makes a chain auditable without storing a chain anywhere. }}
+	{{! The handoff strip: the whole visual cost of a chain on the receiving side. It renders from the
+	    stored ids — click one and the log scrolls to that message, which is what makes a chain
+	    auditable without storing a chain anywhere. }}
 	{{#if chainedFrom.length}}
 	<div class="from">
 		<i class="fa-solid fa-link"></i>

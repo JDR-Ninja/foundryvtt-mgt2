@@ -13,8 +13,9 @@
  * an extract destroys the source directory and writes one flat file in its place, so a pack whose
  * layout means something cannot survive one:
  *
- * - `generated` names the workspace document a pack is built from. The source files are the
- *   generator's to lay out, and an extract would flatten its per-language files into one.
+ * - `generated` names what a pack is built from, which lives outside this repository. The source
+ *   files are the generator's to lay out, and an extract would flatten its per-language files into
+ *   one.
  * - `authored` marks a pack written by hand, one JSON file per document. An
  *   extract would take every `flags.mgt2.demo` with it. Such a pack also answers to the linter,
  *   `tools/lint-packs.mjs`, which is what replaces the sheet that never filled it in.
@@ -24,7 +25,7 @@
 
 export const PACKS = [
     { name: "docs", label: "Rules coverage", i18n: "MGT2.Compendium.Docs", type: "JournalEntry",
-        generated: "docs/RULES-AUDIT.md" }
+        generated: "the rules audit" }
 ];
 
 export const PACK_BY_NAME = Object.fromEntries(PACKS.map(pack => [pack.name, pack]));

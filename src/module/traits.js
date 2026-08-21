@@ -2,8 +2,8 @@
 
 const fields = foundry.data.fields;
 
-// >>> generated from docs/traits-registry.json 137 entries over 122 names, 44 parameterised, across
-// 7 families.
+// >>> generated — 137 entries over 122 names, 44 parameterised, across 7 families. Emitted whole
+// from the trait extraction; edit the extraction and re-emit rather than patching a row here.
 const REGISTRY = {
     animal: {
         "alarm": {label: "Alarm"},

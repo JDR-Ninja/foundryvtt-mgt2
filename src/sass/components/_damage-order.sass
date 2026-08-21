@@ -35,6 +35,8 @@
 			border: 1px solid color-mix(in srgb, var(--mgt2-depletion) 45%, transparent)
 		&[hidden]
 			display: none
+		// The one fade left in the system: a drag ghost is transient and nothing is read off it.
+		// Every other inactive state recolours, because a fade multiplies the muting a token holds.
 		&.is-dragged
 			opacity: 0.4
 		.grip
@@ -73,7 +75,7 @@
 			background: transparent
 			box-shadow: none
 		&:disabled
-			opacity: 0.45
+			color: var(--faint)
 			cursor: not-allowed
 		&[hidden]
 			display: none

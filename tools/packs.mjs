@@ -99,7 +99,7 @@ async function compileAll() {
         const documents = fs.existsSync(dir) ? readSource(dir) : [];
         if ( !documents.length ) {
             fail(`No source documents in packs/_source/${pack.name}.`, pack.generated
-                ? `That pack is generated from ${pack.generated}: run its generator from the workspace.`
+                ? `That pack is generated from ${pack.generated}, by a generator that is not part of this repository.`
                 : "They are committed — a checkout missing them is incomplete.");
         }
         const keys = await compile(pack, documents);

@@ -1,3 +1,5 @@
+@use '../utils/colors'
+
 // The two creation forms — a career template and a species frame — in one stylesheet. Scoped under
 // its own four blocks throughout: `.cell` is already three other things in this stylesheet.
 
@@ -73,8 +75,13 @@
 		gap: 6px
 
 	// One ladder, one assignment, one table, one event row — the unit that carries a delete.
+	// It takes the recessed ground, and re-grounds the tokens that mix into it: --faint is
+	// calibrated against --paper with 0.06 to spare on the dark ground, so a card wash under it
+	// fails on the spot unless the mix re-runs against the wash itself. The accent has no such
+	// escape — it is clamped, not mixed — which is what holds --sunk down to 4%.
 	.entry
-		border: 1px solid var(--line)
+		@include colors.grounded(var(--sunk))
+		border: 1px solid var(--rule)
 		border-radius: 3px
 		padding: 5px 7px
 		background: var(--sunk)
@@ -97,7 +104,7 @@
 	.nest
 		margin: 5px 0 0 10px
 		padding-left: 8px
-		border-left: 1px solid var(--line)
+		border-left: 1px solid var(--rule)
 
 	.nlbl
 		display: block
@@ -174,7 +181,6 @@
 		color: var(--accent-text)
 	.grantcount.none
 		color: var(--faint)
-		opacity: 0.5
 
 	.grants
 		margin-left: 6px

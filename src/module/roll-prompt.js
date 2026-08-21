@@ -13,7 +13,7 @@ const AVERAGE_2D = 7;
 /** The strip spans this many bands either side of zero; anything beyond clamps onto the end. */
 const LADDER_REACH = 6;
 
-/** Checks a card has offered to the next roll — `sketch-task-chain.html`'s "Chain into…". */
+/** Checks a card has offered to the next roll — what the card's "Chain into…" control arms. */
 const armedHere = new Set();
 
 /** Offer a check to whatever is rolled next. @param {string} id   A ChatMessage id */

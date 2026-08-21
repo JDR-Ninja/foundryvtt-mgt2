@@ -1,6 +1,6 @@
-// The voyage screen. Ported from docs/sketch-voyage.html: the statline, the fuel budget, the world
-// code rows, the roster and the segmented control are the kit unchanged, and what is here is the
-// window skeleton plus the two things this screen owns — the leg and the queue.
+// The voyage screen. The statline, the fuel budget, the world code rows, the roster and the
+// segmented control are the kit unchanged, and what is here is the window skeleton plus the two
+// things this screen owns — the leg and the queue.
 //
 // The window grid is a sixth copy of the five in `utils/_window.sass` and it lives here rather than
 // there because the screen is not a sheet and the file that holds it is the one this build owns.
@@ -321,7 +321,8 @@
 		color: var(--mute)
 		// Stated and deliberately not computed: the 100-diameter limit is a position nothing tracks.
 		&.inert
-			opacity: 0.55
+			color: var(--faint)
+			border-color: var(--rule-soft)
 		&.neg
 			border-color: var(--danger)
 			color: var(--danger)

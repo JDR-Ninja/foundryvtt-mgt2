@@ -1,10 +1,10 @@
 // The shared kit: primitives and the layout blocks every Actor sheet composes from.
-// Ported verbatim from docs/sketch-blocks.html; `npc`, `vehicle`, `spacecraft` and `robot` all
-// consume it unchanged, so nothing here may be narrowed to one screen.
+// `npc`, `vehicle`, `spacecraft` and `robot` all consume it unchanged, so nothing here may be
+// narrowed to one screen.
 //
-// Two systematic deviations from the sketch, both forced by Foundry:
-//  - the sketch draws its icons as inline <svg>; the system uses FontAwesome glyphs, so each icon
-//    box also carries a font-size beside the svg rule.
+// Two shapes Foundry forces on the kit:
+//  - icons are FontAwesome glyphs rather than inline <svg>, so each icon box carries a font-size
+//    beside the svg rule.
 //  - core styles `button` and `input` with a height and a background, so the controls below restate
 //    `height: auto` and `background` to win.
 
@@ -232,7 +232,7 @@ li.chat-message:has(> .message-content > .mgt2.card)
 			font-weight: 600
 			letter-spacing: 0.16em
 			text-transform: uppercase
-			color: var(--faint)
+			color: var(--mute)
 			text-align: left
 			border-bottom: 1px solid var(--rule-soft)
 		th.r,
@@ -306,12 +306,13 @@ li.chat-message:has(> .message-content > .mgt2.card)
 				background: var(--accent-soft)
 				border-color: var(--accent-text)
 		&[disabled]
-			opacity: 0.35
+			color: var(--faint)
+			border-color: var(--rule-soft)
 			cursor: not-allowed
 			&:hover
-				color: var(--mute)
+				color: var(--faint)
 				background: none
-				border-color: var(--rule)
+				border-color: var(--rule-soft)
 
 	// Core folio 138's vehicular actions: buttons on their own line, in a block whose other rows
 	// are readouts. Live in both modes — a dogfight is play, not transcription.
@@ -578,7 +579,7 @@ li.chat-message:has(> .message-content > .mgt2.card)
 		letter-spacing: 0.16em
 		text-transform: uppercase
 		text-align: left
-		color: var(--faint)
+		color: var(--mute)
 		border-bottom: 1px solid var(--rule-soft)
 
 	td
@@ -762,8 +763,10 @@ li.chat-message:has(> .message-content > .mgt2.card)
 			.ps
 				color: var(--faint)
 		&.off
-			opacity: 0.45
+			color: var(--faint)
 			text-decoration: line-through
+			.ps
+				color: var(--faint)
 
 	.addtag
 		display: inline-flex
@@ -980,11 +983,11 @@ li.chat-message:has(> .message-content > .mgt2.card)
 		letter-spacing: 0.1em
 		text-transform: uppercase
 		white-space: nowrap
-		color: var(--faint)
+		color: var(--mute)
 		i
 			padding: 0 2px
 			font-style: normal
-			color: color-mix(in oklab, var(--faint) 60%, transparent)
+			color: var(--faint)
 
 	// Two `margin-left: auto` in one flex row split the free space between them. The order claims
 	// it and the gear follows in both modes — the damage order is a play decision, so the mode flip

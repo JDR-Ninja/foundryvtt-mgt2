@@ -62,7 +62,9 @@
 	// A demand that names no skill has no name to type, and a greyed field says so better than a
 	// field that accepts text nothing will ever read.
 	.skillfld.off
-		opacity: 0.4
+		input.f
+			color: var(--faint)
+			border-color: var(--rule-soft)
 
 	// What the characteristic cardinality MEANS, live: 0 = the player picks, 1 = fixed, 2+ = offered.
 	.echo

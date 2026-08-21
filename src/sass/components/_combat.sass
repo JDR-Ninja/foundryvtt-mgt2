@@ -1,6 +1,6 @@
-// The space combat screen. Ported from docs/sketch-space-combat.html: the statline, the two
-// budgets, the roster and the code row are the kit unchanged, and what is here is the window
-// skeleton plus the three things this screen owns — the range strip, the order and the reactions.
+// The space combat screen. The statline, the two budgets, the roster and the code row are the kit
+// unchanged, and what is here is the window skeleton plus the three things this screen owns — the
+// range strip, the order and the reactions.
 
 // --------------------------------------------
 //  The header, and the distance a referee types
@@ -115,7 +115,9 @@
 	// Beyond the furthest band a mounted weapon reaches, nothing may be fired at all — so the cell
 	// is not dimmed for taste, it is unreachable and it reads that way.
 	.band.out
-		opacity: 0.45
+		color: var(--faint)
+		.fig
+			color: var(--faint)
 
 	.pins
 		position: absolute

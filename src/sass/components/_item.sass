@@ -276,12 +276,13 @@
 		background: var(--accent-soft)
 		border-color: var(--accent-text)
 	&[disabled]
-		opacity: 0.35
+		color: var(--faint)
+		border-color: var(--rule)
 		cursor: not-allowed
 		&:hover
-			color: var(--accent-text)
+			color: var(--faint)
 			background: none
-			border-color: var(--accent-line)
+			border-color: var(--rule)
 
 // The first button pushes the group to the right edge; the ones after it sit against it. Without
 // this each takes its own share of the free space and Reload drifts a hundred pixels off Roll.
@@ -416,7 +417,10 @@
 			flex: 0 0 auto
 	// A field the current scale does not reach still occupies its cell, greyed.
 	label.off
-		opacity: 0.45
+		color: var(--faint)
+		input.f,
+		select.f
+			color: var(--faint)
 
 // The code row's edit face: a custom chip becomes its own name field, a registered one keeps its
 // name and opens its printed parameters, and both carry the owner's note.
