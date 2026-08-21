@@ -44,6 +44,12 @@ const REGISTRY = {
     biotech: {
         "ectothermic": {label: "Ectothermic", conflict: ["endothermic"]},
         "endothermic": {label: "Endothermic", conflict: ["ectothermic"]},
+        // The book prints the effect on the STRUCTURE line -- "3 (heals every 6 hours)" -- and
+        // never the trait beside a number, so the parameter is the interval it buys. Base rate is
+        // once a day and each of the three applications shortens it. VH2026 p.132.
+        "fast-regenerator": {label: "Fast Regenerator",
+            params: [{slot: "interval", type: "level"}],
+            levels: ["12 hours", "6 hours", "3 hours"]},
         "invertebrate": {label: "Invertebrate", conflict: ["vertebrate"]},
         "vertebrate": {label: "Vertebrate", conflict: ["invertebrate"]},
     },
