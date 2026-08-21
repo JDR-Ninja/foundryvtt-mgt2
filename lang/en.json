@@ -140,7 +140,8 @@
       "companion": "Traveller Companion",
       "highGuard": "High Guard",
       "robot": "Robot Handbook",
-      "vehicle": "Vehicle Handbook",
+      "vehicle": "Vehicle Handbook 2017",
+      "vehicle2026": "Vehicle Handbook 2026",
       "csc": "Central Supply Catalogue",
       "naval": "Naval Campaign"
     },
@@ -307,6 +308,12 @@
       "fleetBattles": {
         "name": "Fleet battles",
         "hint": "An alternative way to resolve a battle between fleets, where ships move as a unit and attacks are not rolled. Switching it on adds the fleet ship sheet to every spacecraft — the evaluation the chapter asks for before a battle. The crew skill it reads is stored on the ship and stays there either way."
+      },
+      "vehicleCombat": {
+        "name": "Vehicle damage and criticals",
+        "hint": "Which printed procedure resolves a hit on a vehicle. The Core Rulebook runs a Hull track, with a critical at every 10 % threshold crossed and severity that stacks on a location. The Vehicle Handbook 2026 runs Structure — Hull ÷ 10 — takes severity from damage ÷ Structure, treats each critical in isolation, has its own 2D location table, and destroys at 10×, 20× and 40×. The 2026 book states that it replaces the Core's, and the same choice carries its Light Weapons armour rule, its target-size DM, collisions and sensors.",
+        "core": "Core Rulebook — Hull and thresholds",
+        "vehicle2026": "Vehicle Handbook 2026 — Structure"
       },
       "designValidation": {
         "name": "Ship design checks",
@@ -1546,6 +1553,14 @@
         "CriticalsCount": "9 locations · severity = Effect − 5",
         "ClearCriticals": "Clear every critical",
         "Severity": "Severity",
+        "Structure": "Structure",
+        "StructureExceeded": "Structure exceeded",
+        "CriticalImmunity": "Effect criticals",
+        "StructureState": {
+          "disabled": "disabled",
+          "brokenUp": "broken up",
+          "obliterated": "obliterated"
+        },
         "HullSeverity": "Hull Severity",
         "ControlDM": "Control DM",
         "SystemsDM": "Systems DM",
@@ -3505,7 +3520,8 @@
       "VeryFast": "Very Fast",
       "Subsonic": "Subsonic",
       "Supersonic": "Supersonic",
-      "Hypersonic": "Hypersonic"
+      "Hypersonic": "Hypersonic",
+      "Orbital": "Orbital"
     },
     "DamageTracks": {
       "hits": "Hits",
@@ -3533,7 +3549,6 @@
     },
     "Criticals": {
       "RefereesCall": "Referee's call",
-      "All": "All",
       "States": {
         "dm": "Impaired",
         "disabled": "Disabled",
@@ -3556,16 +3571,24 @@
       "ControlDM": "Control checks {dm}",
       "SystemsDM": "Comms, sensors and computer checks {dm}",
       "SensorDM": "Sensor checks {dm}",
-      "Weapon": "{n} weapon: {state}",
-      "WeaponDM": "{n} weapon: {state} {dm}",
+      "Weapon": {
+        "one": "{n} weapon: {state}",
+        "other": "{n} weapons: {state}"
+      },
+      "WeaponDM": {
+        "one": "{n} weapon: {state} {dm}",
+        "other": "{n} weapons: {state} {dm}"
+      },
+      "WeaponSome": "Random weapons: {state}",
       "Cargo": "{amount} of cargo destroyed",
+      "CargoAll": "All cargo destroyed",
       "Occupants": {
         "one": "{n} occupant takes {dice}",
         "other": "{n} occupants take {dice}"
       },
+      "OccupantsAll": "All occupants take {dice}",
       "SystemLoss": "1D — comms, sensors or computer lost",
       "HullSeverity": "Hull Severity +{value}",
-      "Some": "Random",
       "Power": "Power −{pct}%",
       "PowerZero": "Power reduced to zero",
       "Thrust": "Thrust −{value}",
@@ -3576,12 +3599,35 @@
         "one": "Fuel leak — {amount} ton per {per}",
         "other": "Fuel leak — {amount} tons per {per}"
       },
+      "FuelLeakShare": "Fuel leak — {amount} of fuel",
       "Jump": "Jump drive: {state}",
       "JumpDM": "Jump checks {dm}",
       "LifeSupport": "Life support fails within {time}",
       "LifeSupportNow": "Life support fails",
       "Computer": "Computer: {state}",
       "Bridge": "Random bridge station: {state}",
+      "Agility": "Agility −{value}",
+      "Steering": "Steering disabled",
+      "Range": "Range −{value}",
+      "RangeDecay": "then −{rate} per {unit}",
+      "PowerLoss": "Power −{value}",
+      "PowerPlant": "Power plant: {state}",
+      "HullBreach": "Hull breached: {breach}",
+      "HullLostIn": "Whole vehicle compromised in {time}",
+      "Equipment": "{n} × equipment: {state}",
+      "EquipmentAll": "All equipment: {state}",
+      "Operator": "Operator takes {dice}",
+      "Cascade": "Roll another effect at Severity {severity}",
+      "CascadeMany": "Roll {n} effects at Severity {severity}",
+      "StructureHalved": "Structure halved",
+      "ArmourZero": "Armour on the facing hit reduced to zero",
+      "CargoDamaged": "{amount} of cargo damaged",
+      "CargoDamagedAll": "All cargo damaged",
+      "Breach": {
+        "exposed": "compartment exposed",
+        "compromised": "compartment compromised",
+        "shattered": "hull shattered"
+      },
       "Units": {
         "hours": "hours",
         "minutes": "minutes",
@@ -3636,7 +3682,18 @@
       "eliteNonCombatant": "Elite Non-combatant",
       "eliteCombatant": "Elite Combatant"
     },
+    "VehicleCriticalImmunity": {
+      "destructive": "Destructive weapons only",
+      "bay": "Spacecraft bay weapons only",
+      "mediumBay": "Medium and large bay weapons only",
+      "largeBay": "Large bay weapons only"
+    },
     "VehicleCriticals": {
+      "speed": "Speed",
+      "agility": "Agility",
+      "power": "Power",
+      "equipment": "Equipment",
+      "operator": "Operator",
       "fuel": "Fuel",
       "powerPlant": "Power Plant",
       "weapon": "Weapon",
@@ -4207,6 +4264,7 @@
       "threshold": "Threshold"
     },
     "Traits": {
+      "accurate": "Accurate",
       "acv": "ACV",
       "afv": "AFV",
       "alarm": "Alarm",
@@ -4279,6 +4337,7 @@
       "natural-weapons": "Natural Weapons",
       "off-roader": "Off-Roader",
       "one-use": "One Use",
+      "open-topped": "Open-Topped",
       "open-vehicle": "Open Vehicle",
       "orbital-bombardment": "Orbital Bombardment",
       "orbital-strike": "Orbital Strike",
@@ -4296,6 +4355,7 @@
       "ramshackle": "Ramshackle",
       "reductor": "Reductor",
       "regeneration": "Regeneration",
+      "responsive": "Responsive",
       "scope": "Scope",
       "seafarer": "Seafarer",
       "sense-of-smell-no-sense-of-smell": "Sense of Smell/No Sense of Smell",
@@ -4322,10 +4382,12 @@
       "toxic": "Toxic",
       "tracked": "Tracked",
       "unreliable": "Unreliable",
+      "unresponsive": "Unresponsive",
       "vacuum": "Vacuum",
       "vertebrate": "Vertebrate",
       "very-bulky": "Very Bulky",
       "very-dangerous": "Very Dangerous",
+      "vtol": "VTOL",
       "weak": "Weak",
       "wings": "Wings",
       "zero-g": "Zero-G"

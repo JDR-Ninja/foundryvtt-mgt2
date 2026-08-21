@@ -720,6 +720,16 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         // The interval is dice plus a unit, and the unit is a key: it reaches an already-translated
         // sentence, so a literal here prints half in one language and half in the other.
         const interval = ({ dice, unit: key }) => (dice ? `${dice} ` : "") + unit(key);
+        // A critical counts in three shapes and only the first is a number: `1`, a dice expression
+        // (`D3`, `1D`) or a share of the whole (`10%`, `1Dx10%`). Where the sentence is a plural
+        // group the raw value goes to `MGT2Helper.plural`, which floors both non-numbers to
+        // `other` — the form each of them wants.
+        // ⚠ `all` is a fourth shape and is NOT one of these: it is a quantifier, not a quantity, so
+        // it cannot be substituted into the slot a quantity fills. One word cannot agree with a
+        // masculine plural and a feminine mass noun at once — *Toutes occupants*, *All of cargo
+        // destroyed*. Each sentence carries its own `…All` member instead, and the weapon row's
+        // unstated count is the same case under another word.
+        const keyFor = (key, n) => (n === "all") ? `${key}All` : key;
 
         if (cell.damage) say("Damage", { dice: cell.damage });
         if (cell.power === 0) say("PowerZero");
@@ -737,22 +747,37 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             }
         }
         if (cell.weapons) {
-            say("Weapon", { n: cell.weapons.n ?? game.i18n.localize("MGT2.Criticals.Some"),
-                state: state(cell.weapons.state) });
+            // ⚠ A plural group, so `say` would print the key at the player — and the count is real
+            // here: severities 5 and 6 print `D3` and `1D` where the rest print `1`.
+            // Core p.164's third cell states no count at all, printing *"Random weapons destroyed"*
+            // in the plural. That is a quantifier, not a quantity, so it is its own sentence.
+            if (cell.weapons.n === undefined) say("WeaponSome", { state: state(cell.weapons.state) });
+            else {
+                parts.push(MGT2Helper.plural("MGT2.Criticals.Weapon", cell.weapons.n,
+                    { n: cell.weapons.n, state: state(cell.weapons.state) }));
+            }
         }
-        if (cell.fuel?.leak) say("FuelLeak", { amount: cell.fuel.leak, per: unit(cell.fuel.per) });
+        if (cell.fuel?.leak) {
+            // ⚠ A plural group, so `say` would print the key at the player. The leak is a dice
+            // expression at every severity, so it always selects `other` — but the group is what
+            // makes a numeric row right the day one is printed.
+            // Core p.164's third cell loses a share of the tank in one go, with no interval and no
+            // tonnage, so it is its own sentence rather than this one with `per` left empty.
+            if (cell.fuel.per) {
+                parts.push(MGT2Helper.plural("MGT2.Criticals.FuelLeak", cell.fuel.leak,
+                    { amount: cell.fuel.leak, per: unit(cell.fuel.per) }));
+            } else say("FuelLeakShare", { amount: cell.fuel.leak });
+        }
         if (cell.fuel?.state) say("FuelState", { state: state(cell.fuel.state) });
-        if (cell.cargo) {
-            say("Cargo", {
-                amount: (cell.cargo === "all") ? game.i18n.localize("MGT2.Criticals.All") : cell.cargo
-            });
-        }
+        if (cell.cargo) say(keyFor("Cargo", cell.cargo), { amount: cell.cargo });
         if (cell.jump) say("Jump", { state: state(cell.jump) });
         if (cell.occupants) {
-            say("Occupants", {
-                n: (cell.occupants.n === "all") ? game.i18n.localize("MGT2.Criticals.All") : cell.occupants.n,
-                dice: cell.occupants.damage
-            });
+            // ⚠ A plural group, so `say` would print the key at the player.
+            if (cell.occupants.n === "all") say("OccupantsAll", { dice: cell.occupants.damage });
+            else {
+                parts.push(MGT2Helper.plural("MGT2.Criticals.Occupants", cell.occupants.n,
+                    { n: cell.occupants.n, dice: cell.occupants.damage }));
+            }
         }
         if (cell.lifeSupport) {
             // Core p.164 prints the sixth cell as "Life support fails" with no interval.
@@ -1228,6 +1253,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 loPen: MGT2Helper.traitScore(traits, "lo-pen"),
                 stun: MGT2Helper.hasTrait(traits, "stun"),
                 destructive: MGT2Helper.hasTrait(traits, "destructive"),
+                blast: MGT2Helper.hasTrait(traits, "blast"),
                 damageType: Array.from(weapon.system.damageType ?? [])
             };
         }

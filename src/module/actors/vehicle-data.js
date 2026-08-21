@@ -1,7 +1,8 @@
 import { MGT2 } from "../config.js";
 import { MGT2Helper } from "../helper.js";
-import { CraftData } from "./craft-data.js";
+import { CraftData, MAX_SEVERITY } from "./craft-data.js";
 import { createTraitsField } from "../traits.js";
+import { Rules } from "../rules.js";
 
 const fields = foundry.data.fields;
 
@@ -23,6 +24,14 @@ const ENVELOPE_FRACTION = 0.1;
 /** Core folio 140: the dice a weapon must fall below for a vehicle's TL to count as extra armour. */
 const LIGHT_WEAPON_DICE = 4;
 
+const VH2026_COMBAT = "vehicle2026";
+
+/** VH2026 p.6: Structure is a tenth of the Hull, rounded up. */
+const STRUCTURE_DIVISOR = 10;
+
+/** VH2026 p.7: Structure exceeded this many times over, cumulatively, and the vehicle is disabled. */
+const DISABLED_AT = 10;
+
 /**
  * Schema and behaviour of the `vehicle` Actor sub-type — the eleven printed statblock lines, the
  * six-line systems block, five armour facings and a critical track.
@@ -32,6 +41,13 @@ export class VehicleData extends CraftData {
 
     static CRITICALS = MGT2.VehicleCriticals;
 
+    static CRITICALS_2026 = MGT2.VehicleCriticals2026;
+
+    /** Both books' locations, because a world setting cannot change a schema. @inheritDoc */
+    static get CRITICAL_KEYS() {
+        return [...new Set([...Object.keys(this.CRITICALS), ...Object.keys(this.CRITICALS_2026)])];
+    }
+
     static WRECKED_LABEL = "MGT2.Actor.vehicle.Wrecked";
 
     /** The medium a vehicle with no chassis skill stored is assumed to be built for. */
@@ -39,14 +55,14 @@ export class VehicleData extends CraftData {
 
     static defineSchema() {
         const schema = super.defineSchema();
-        // The registry's `vehicle` family is five flag traits and that is complete: the six lines
+        // The registry's `vehicle` family is nine flag traits and that is complete: the six lines
         // that look missing are the systems block below, not traits.
         schema.traits = createTraitsField("vehicle");
 
         const facing = () => new fields.NumberField({
             required: false, nullable: false, integer: true, min: 0, initial: 0 });
         const band = () => new fields.NumberField({
-            required: false, nullable: false, integer: true, min: 0, max: 10, initial: 0 });
+            required: false, nullable: false, integer: true, min: 0, max: 11, initial: 0 });
 
         Object.assign(schema, {
             // The chassis sets skill and speciality (VH p.14-33), and an array because a multi-mode
@@ -63,6 +79,13 @@ export class VehicleData extends CraftData {
             // towing cost per 25 % towed, and the per-Space price of armour, camouflage and
             // stealth.
             spaces: new fields.NumberField({
+                required: false, nullable: false, integer: true, min: 0, initial: 0 }),
+
+            // VH2026 p.7: how many times over this vehicle's Structure has been exceeded, summed
+            // across every attack, and how many Hull criticals have halved the Structure itself.
+            structureExceeded: new fields.NumberField({
+                required: false, nullable: false, integer: true, min: 0, initial: 0 }),
+            structureHalvings: new fields.NumberField({
                 required: false, nullable: false, integer: true, min: 0, initial: 0 }),
 
             // Signed: 36 of the 78 Vehicle Handbook statblocks print a negative Agility.
@@ -202,9 +225,72 @@ export class VehicleData extends CraftData {
         return penalties;
     }
 
-    /** Core p.140: DM+1, plus DM+1 per full 10 tons of Shipping, capped at DM+6. */
+    /** Core p.140: DM+1, and DM+1 per full 10 tons of Shipping, max DM+6; VH2026 p.5 uses Spaces. */
     get toHitBonus() {
+        if (Rules.get("vehicleCombat") === VH2026_COMBAT) {
+            return MGT2.VehicleTargetSize.find(row => this.spaces <= row.max).dm;
+        }
         return Math.min(6, 1 + Math.floor(this.shipping / 10));
+    }
+
+    /** Whether the Vehicle Handbook 2026 procedures are the ones in force. */
+    get runs2026() {
+        return Rules.get("vehicleCombat") === VH2026_COMBAT;
+    }
+
+    /** VH2026 p.6: a tenth of the Hull, rounded up, halved again by each Hull critical that says so. */
+    get structure() {
+        const base = Math.ceil(this.characteristics.hull.max / STRUCTURE_DIVISOR);
+        return Math.max(0, Math.floor(base / (2 ** this.structureHalvings)));
+    }
+
+    /** VH2026 p.6: how many times a wound past armour covers the Structure. Uncapped, unlike severity. */
+    structureMultiple(wound) {
+        const structure = this.structure;
+        return (structure > 0) ? Math.floor(wound / structure) : 0;
+    }
+
+    /** `null`, or how far past disabled the accumulated exceedances have taken it (VH2026 p.7). */
+    get structureState() {
+        const times = this.structureExceeded;
+        if (times >= DISABLED_AT * 4) return "obliterated";
+        if (times >= DISABLED_AT * 2) return "brokenUp";
+        return (times >= DISABLED_AT) ? "disabled" : null;
+    }
+
+    /** VH2026 p.7: what an Effect critical's weapon must be to affect a vehicle this large, or null. */
+    get criticalImmunity() {
+        if (!this.runs2026) return null;
+        return MGT2.VehicleCriticalImmunity.find(row => this.spaces >= row.from)?.key ?? null;
+    }
+
+    /** The table in force, which decides both what a location does and which ones are rolled. */
+    get criticalTable() {
+        return this.runs2026 ? this.constructor.CRITICALS_2026 : this.constructor.CRITICALS;
+    }
+
+    /** @inheritDoc */
+    criticalEffect(location) {
+        const severity = this.criticals?.[location] ?? 0;
+        if (severity <= 0) return null;
+        return this.criticalTable[location]?.severities?.[severity - 1] ?? null;
+    }
+
+    /** VH2026 p.6: severity is not cumulative, so a repeat hit stands at the worse of the two. @inheritDoc */
+    async applyCritical(location, severity) {
+        if (!this.runs2026) return super.applyCritical(location, severity);
+        const current = this.criticals?.[location];
+        if (current === undefined) return null;
+        const next = Math.min(MAX_SEVERITY, Math.max(1, Math.trunc(severity) || 0));
+        if (next > current) await this.parent.update({ [`system.criticals.${location}`]: next });
+        return { location, severity: Math.max(next, current), overflow: null };
+    }
+
+    /** VH2026 p.7: ten exceedances disable the vehicle, whatever the hull still reads. @inheritDoc */
+    damageStatesFor(characteristics) {
+        const states = super.damageStatesFor(characteristics);
+        if (!this.runs2026) return states;
+        return { ...states, wrecked: states.wrecked || (this.structureExceeded >= DISABLED_AT) };
     }
 
     /** Core p.143: one mounted weapon per ten points of Hull. */
@@ -370,9 +456,15 @@ export class VehicleData extends CraftData {
      * vehicle will have an extra amount of armour equal to its TL on each facing." The dice are
      * counted off the attack's own expression, so a wound typed by hand or dragged onto a token bar
      * — which names no weapon and states no dice — earns nothing.
-     * @param {object} options   `applyDamage`'s options: `formula` and `stun`
+     * @param {object} options   `applyDamage`'s: `formula`, `stun`, `destructive`, `blast`, `effect`
      */
-    lightWeaponArmour({ formula, stun } = {}) {
+    lightWeaponArmour({ formula, stun, destructive, blast, effect } = {}) {
+        if (Rules.get("vehicleCombat") === VH2026_COMBAT) {
+            // The Critical Hit here is the Effect trigger: the damage trigger is computed from the
+            // wound this armour produces, so reading it that way would be circular.
+            if (destructive || (blast && (stun !== true))) return 0;
+            return (this.constructor.severityFor(effect) > 0) ? 0 : this.armour.vsLight;
+        }
         if (stun === true) return this.armour.vsLight;
         const dice = MGT2Helper.damageDice(formula);
         return ((dice > 0) && (dice < LIGHT_WEAPON_DICE)) ? this.armour.vsLight : 0;
@@ -380,9 +472,22 @@ export class VehicleData extends CraftData {
 
     /** CSC p.151: an ion weapon disrupts a vehicle's electronics; no book wounds its hull. @inheritDoc */
     async applyDamage(amount, options = {}) {
-        if (!options.ion || options.raw || !(amount > 0)) return super.applyDamage(amount, options);
-        return { wound: 0, rounds: 0, crossings: 0,
-            disrupted: true, armour: this.armourAt(options.facing ?? "front") };
+        if (options.ion && !options.raw && (amount > 0)) {
+            return { wound: 0, rounds: 0, crossings: 0,
+                disrupted: true, armour: this.armourAt(options.facing ?? "front") };
+        }
+        const result = await super.applyDamage(amount, options);
+        if (!result || !this.runs2026) return result;
+        // VH2026 p.6-7: the multiple is what raises a critical, and the running total is what
+        // disables — the book counts seven exceedances from a wound whose severity caps at six.
+        const multiple = this.structureMultiple(result.wound);
+        if (multiple > 0) {
+            result.structureMultiple = multiple;
+            result.structureSeverity = Math.min(MAX_SEVERITY, multiple);
+            result.structureExceeded = this.parent.system.structureExceeded + multiple;
+            await this.parent.update({ "system.structureExceeded": result.structureExceeded });
+        }
+        return result;
     }
 
     /**

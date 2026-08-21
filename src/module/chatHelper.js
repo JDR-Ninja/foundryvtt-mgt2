@@ -181,6 +181,7 @@ export class ChatHelper {
             reduced: { formula: reduced.formula, total: reduced.total * boost },
             minimum: minimum * boost,
             destructive: boost > 1,
+            blast: damage.blast === true,
             effect: damage.effect ?? 0,
             scale: damage.scale ?? "ground",
             ap: damage.ap ?? 0,
@@ -348,6 +349,7 @@ export class ChatHelper {
             const result = await token.actor.applyDamage(amount, {
                 scale: payload.scale, ap: payload.ap, loPen: payload.loPen,
                 effect: payload.effect, stun: payload.stun, formula: payload.formula,
+                destructive: payload.destructive, blast: payload.blast,
                 multiple: payload.multiple, damageType: payload.damageType, ion: payload.ion,
                 ignoreArmour: payload.ignoreArmour, facing
             });

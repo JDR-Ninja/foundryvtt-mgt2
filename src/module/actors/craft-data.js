@@ -3,7 +3,7 @@ import { ActorBaseData, createCharacteristicField } from "./actor-base-data.js";
 const fields = foundry.data.fields;
 
 /** Severity runs 1–6; 0 is "this location has not been hit" (Core p.140). */
-const MAX_SEVERITY = 6;
+export const MAX_SEVERITY = 6;
 
 /** Core p.140: a further critical on a location already at 6 deals this instead of a seventh step. */
 const OVERFLOW_DAMAGE = "6d6";
@@ -19,6 +19,11 @@ export class CraftData extends ActorBaseData {
 
     /** The critical table this craft rolls on — `MGT2.VehicleCriticals` or `MGT2.ShipCriticals`. */
     static CRITICALS = {};
+
+    /** The stored locations. A craft whose table changes with a rule stores the union of both. */
+    static get CRITICAL_KEYS() {
+        return Object.keys(this.CRITICALS);
+    }
 
     /** Core p.140, p.169: the ladder fires each time the wound passes another tenth of the hull. */
     static SUSTAINED_FRACTION = 0.1;
@@ -46,7 +51,7 @@ export class CraftData extends ActorBaseData {
             // Severity per location, stored; what a severity *does* is a lookup in `CRITICALS`
             //, which keeps the books' prose out of the document.
             criticals: new fields.SchemaField(Object.fromEntries(
-                Object.keys(this.CRITICALS).map(location => [location, severity()]))),
+                this.CRITICAL_KEYS.map(location => [location, severity()]))),
             // Its own track rather than a tenth location: eight of the vehicle's cells and sixteen
             // of the ship's raise this instead of damaging the location that was hit.
             hullSeverity: severity(),

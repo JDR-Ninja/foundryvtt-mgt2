@@ -206,7 +206,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
 
     /** Nine locations × six pips, with the effect of the standing severity spelled out beside. */
     #criticals(system) {
-        const locations = Object.entries(MGT2.VehicleCriticals).map(([key, location]) => {
+        const locations = Object.entries(system.criticalTable).map(([key, location]) => {
             const severity = system.criticals[key] ?? 0;
             return {
                 key, label: location.label, severity,
@@ -216,7 +216,11 @@ export class VehicleActorSheet extends TravellerActorSheet {
                 effect: VehicleActorSheet.#effectText(system.criticalEffect(key))
             };
         });
-        return { locations, hullSeverity: system.hullSeverity, standing: system.criticalEffects };
+        return { locations, hullSeverity: system.hullSeverity, standing: system.criticalEffects,
+            runs2026: system.runs2026, structure: system.structure,
+            structureExceeded: system.structureExceeded,
+            structureState: system.structureState && `MGT2.Actor.vehicle.StructureState.${system.structureState}`,
+            immunity: system.criticalImmunity && `MGT2.VehicleCriticalImmunity.${system.criticalImmunity}` };
     }
 
     /** One critical cell as localised fragments. */
@@ -224,6 +228,15 @@ export class VehicleActorSheet extends TravellerActorSheet {
         if (!cell) return null;
         const parts = [];
         const say = (key, data) => parts.push(game.i18n.format(`MGT2.Criticals.${key}`, data));
+        // A critical counts in three shapes and only the first is a number: `1`, a dice expression
+        // (`D3`, `1D`) or a share of the whole (`10%`, `1Dx10%`). Where the sentence is a plural
+        // group the raw value goes to `MGT2Helper.plural`, which floors both non-numbers to
+        // `other` — the form each of them wants.
+        // ⚠ `all` is a fourth shape and is NOT one of these: it is a quantifier, not a quantity, so
+        // it cannot be substituted into the slot a quantity fills. One word cannot agree with a
+        // masculine plural, a feminine mass noun and a `×` multiplier at once — *Toutes occupants*,
+        // *All of cargo destroyed*. Each sentence carries its own `…All` member instead.
+        const keyFor = (key, n) => (n === "all") ? `${key}All` : key;
 
         if (cell.damage) say("Damage", { dice: cell.damage });
         if (cell.fuel?.dryIn) {
@@ -233,28 +246,69 @@ export class VehicleActorSheet extends TravellerActorSheet {
         if (cell.fuel?.state) say("FuelState", { state: game.i18n.localize(`MGT2.Criticals.States.${cell.fuel.state}`) });
         if (cell.speedBands === 0) say("SpeedZero");
         else if (cell.speedBands) say("SpeedBands", { bands: String(cell.speedBands).replace("-", "") });
-        if (cell.armour) say("Armour", { value: String(cell.armour).replace("-", "") });
+        if (cell.armour === 0) say("ArmourZero");
+        else if (cell.armour) say("Armour", { value: String(cell.armour).replace("-", "") });
+        if (cell.agility) say("Agility", { value: String(cell.agility).replace("-", "") });
+        if (cell.steering) say("Steering");
+        if (cell.range) say("Range", { value: String(cell.range).replace("-", "") });
+        if (cell.rangeDecay) {
+            say("RangeDecay", { rate: String(cell.rangeDecay.rate).replace("-", ""),
+                unit: game.i18n.localize(`MGT2.Criticals.Units.${cell.rangeDecay.unit}`) });
+        }
+        if (cell.power) say("PowerLoss", { value: String(cell.power).replace("-", "") });
+        if (cell.powerPlant) {
+            say("PowerPlant", { state: game.i18n.localize(`MGT2.Criticals.States.${cell.powerPlant}`) });
+        }
+        if (cell.hull?.breach) {
+            say("HullBreach", { breach: game.i18n.localize(`MGT2.Criticals.Breach.${cell.hull.breach}`) });
+        }
+        if (cell.hull?.lostIn) {
+            say("HullLostIn", { time: `${cell.hull.lostIn.dice} `
+                + game.i18n.localize(`MGT2.Criticals.Units.${cell.hull.lostIn.unit}`) });
+        }
         for (const key of DM_KEYS) {
             if (cell[key] !== undefined) {
                 say(key[0].toUpperCase() + key.slice(1), { dm: MGT2Helper.signed(cell[key]) });
             }
         }
         if (cell.weapons) {
+            // ⚠ Both are plural groups, so `say` would print the key at the player. Every vehicle
+            // severity states `1`, but the count is the table's to choose and the spacecraft's
+            // fifth and sixth already print `D3` and `1D`.
+            // Both keys stay spelled out: one assembled from a branch names no group a check
+            // outside this file could ever see, which is how these two went unnoticed to begin with.
             const state = game.i18n.localize(`MGT2.Criticals.States.${cell.weapons.state}`);
+            const n = cell.weapons.n;
             if (cell.weapons.state === "dm") {
-                say("WeaponDM", { n: cell.weapons.n, state, dm: MGT2Helper.signed(cell.weapons.dm ?? 0) });
-            } else say("Weapon", { n: cell.weapons.n, state });
+                parts.push(MGT2Helper.plural("MGT2.Criticals.WeaponDM", n,
+                    { n, state, dm: MGT2Helper.signed(cell.weapons.dm ?? 0) }));
+            } else parts.push(MGT2Helper.plural("MGT2.Criticals.Weapon", n, { n, state }));
         }
         if (cell.cargo) {
-            say("Cargo", {
-                amount: (cell.cargo === "all") ? game.i18n.localize("MGT2.Criticals.All") : cell.cargo
-            });
+            say(keyFor((cell.cargoState === "damaged") ? "CargoDamaged" : "Cargo", cell.cargo),
+                { amount: cell.cargo });
         }
         if (cell.occupants) {
-            say("Occupants", {
-                n: (cell.occupants.n === "all") ? game.i18n.localize("MGT2.Criticals.All") : cell.occupants.n,
-                dice: cell.occupants.damage
+            // ⚠ A plural group, so `say` would print the key at the player.
+            if (cell.occupants.n === "all") say("OccupantsAll", { dice: cell.occupants.damage });
+            else {
+                parts.push(MGT2Helper.plural("MGT2.Criticals.Occupants", cell.occupants.n,
+                    { n: cell.occupants.n, dice: cell.occupants.damage }));
+            }
+        }
+        if (cell.equipment) {
+            say(keyFor("Equipment", cell.equipment.n), {
+                n: cell.equipment.n,
+                state: game.i18n.localize(`MGT2.Criticals.States.${cell.equipment.state}`)
             });
+        }
+        if (cell.operator) say("Operator", { dice: cell.operator.damage });
+        if (cell.structureHalved) say("StructureHalved");
+        if (cell.cascade) {
+            const many = (typeof cell.cascade === "object");
+            say(many ? "CascadeMany" : "Cascade", many
+                ? { n: cell.cascade.n, severity: cell.cascade.severity }
+                : { severity: cell.cascade });
         }
         if (cell.systemLoss) say("SystemLoss");
         if (cell.hullSeverity) say("HullSeverity", { value: cell.hullSeverity });
@@ -315,7 +369,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
 
         const result = await this.actor.system.applyCritical(location, severity);
         if (!result) return;
-        const label = game.i18n.localize(MGT2.VehicleCriticals[location].label);
+        const label = game.i18n.localize(this.actor.system.criticalTable[location]?.label ?? location);
         // The fourteen cells raising Hull Severity are applied here, two of them being a 1D roll.
         const cell = this.actor.system.criticalEffect(location);
         if (cell?.hullSeverity && !result.overflow) {

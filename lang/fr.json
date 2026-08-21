@@ -140,7 +140,8 @@
       "companion": "Compagnon Traveller",
       "highGuard": "Garde Haute",
       "robot": "Robot Handbook",
-      "vehicle": "Vehicle Handbook",
+      "vehicle": "Vehicle Handbook 2017",
+      "vehicle2026": "Vehicle Handbook 2026",
       "csc": "Central Supply Catalogue",
       "naval": "Naval Campaign"
     },
@@ -307,6 +308,12 @@
       "fleetBattles": {
         "name": "Batailles entre flottes",
         "hint": "Une autre façon de résoudre une bataille entre flottes, où les vaisseaux se déplacent en bloc et où les attaques ne se lancent pas aux dés. L'activer ajoute la fiche de vaisseau de flotte à chaque vaisseau : l'évaluation que le chapitre demande avant une bataille. La compétence d'équipage qu'elle lit est enregistrée sur le vaisseau et y reste dans les deux cas."
+      },
+      "vehicleCombat": {
+        "name": "Dégâts et critiques des véhicules",
+        "hint": "Quelle procédure imprimée résout un impact sur un véhicule. Le Livre de règles fait tourner une jauge de Coque, avec un critique à chaque seuil de 10 % franchi et une sévérité qui s'empile sur une localisation. Le Vehicle Handbook 2026 fait tourner la Structure — Coque ÷ 10 —, tire la sévérité de dégâts ÷ Structure, traite chaque critique isolément, a sa propre table de localisation en 2D et détruit à 10×, 20× et 40×. Le livre de 2026 dit qu'il remplace celle du Livre de règles, et le même choix emporte sa règle de blindage contre les armes légères, son DM de taille de cible, les collisions et les capteurs.",
+        "core": "Livre de règles — Coque et seuils",
+        "vehicle2026": "Vehicle Handbook 2026 — Structure"
       },
       "designValidation": {
         "name": "Vérifications de conception des vaisseaux",
@@ -1546,6 +1553,14 @@
         "CriticalsCount": "9 localisations · sévérité = Effet − 5",
         "ClearCriticals": "Effacer tous les critiques",
         "Severity": "Sévérité",
+        "Structure": "Structure",
+        "StructureExceeded": "Structure dépassée",
+        "CriticalImmunity": "Critiques par Effet",
+        "StructureState": {
+          "disabled": "hors service",
+          "brokenUp": "disloqué",
+          "obliterated": "pulvérisé"
+        },
         "HullSeverity": "Sévérité de la coque",
         "ControlDM": "MD de contrôle",
         "SystemsDM": "MD des systèmes",
@@ -4890,7 +4905,8 @@
       "VeryFast": "Très rapide",
       "Subsonic": "Subsonique",
       "Supersonic": "Supersonique",
-      "Hypersonic": "Hypersonique"
+      "Hypersonic": "Hypersonique",
+      "Orbital": "Orbital"
     },
     "DamageTracks": {
       "hull": "Coque",
@@ -4918,7 +4934,6 @@
     },
     "Criticals": {
       "RefereesCall": "Au choix de l'arbitre",
-      "All": "Toutes",
       "States": {
         "dm": "Dégradé",
         "disabled": "Désactivé",
@@ -4941,16 +4956,24 @@
       "ControlDM": "Tests de contrôle {dm}",
       "SystemsDM": "Tests de comms, de capteurs et d'ordinateur {dm}",
       "SensorDM": "Tests de capteurs {dm}",
-      "Weapon": "{n} arme : {state}",
-      "WeaponDM": "{n} arme : {state} {dm}",
-      "Cargo": "{amount} de cargaison détruits",
+      "Weapon": {
+        "one": "{n} × armement : {state}",
+        "other": "{n} × armement : {state}"
+      },
+      "WeaponDM": {
+        "one": "{n} × armement : {state} {dm}",
+        "other": "{n} × armement : {state} {dm}"
+      },
+      "WeaponSome": "Armement (au hasard) : {state}",
+      "Cargo": "{amount} de la cargaison détruite",
+      "CargoAll": "Toute la cargaison détruite",
       "Occupants": {
         "one": "{n} occupant subit {dice}",
         "other": "{n} occupants subissent {dice}"
       },
+      "OccupantsAll": "Tous les occupants subissent {dice}",
       "SystemLoss": "1D — comms, capteurs ou ordinateur perdus",
       "HullSeverity": "Sévérité de la coque +{value}",
-      "Some": "Au hasard",
       "Power": "Énergie −{pct} %",
       "PowerZero": "Énergie réduite à zéro",
       "Thrust": "Poussée −{value}",
@@ -4961,12 +4984,35 @@
         "one": "Fuite de carburant — {amount} tonne par {per}",
         "other": "Fuite de carburant — {amount} tonnes par {per}"
       },
+      "FuelLeakShare": "Fuite de carburant — {amount} du carburant",
       "Jump": "Propulseur-S : {state}",
       "JumpDM": "Tests de saut {dm}",
       "LifeSupport": "Défaillance du support de vie en {time}",
       "LifeSupportNow": "Défaillance du support de vie",
       "Computer": "Ordinateur : {state}",
       "Bridge": "Poste de la passerelle (au hasard) : {state}",
+      "Agility": "Manœuvrabilité −{value}",
+      "Steering": "Direction hors service",
+      "Range": "Autonomie −{value}",
+      "RangeDecay": "puis −{rate} par {unit}",
+      "PowerLoss": "Énergie −{value}",
+      "PowerPlant": "Générateur : {state}",
+      "HullBreach": "Coque percée : {breach}",
+      "HullLostIn": "Véhicule entier compromis en {time}",
+      "Equipment": "{n} × équipement : {state}",
+      "EquipmentAll": "Tout l'équipement : {state}",
+      "Operator": "Le pilote subit {dice}",
+      "Cascade": "Relancer un effet de Sévérité {severity}",
+      "CascadeMany": "Relancer {n} effets de Sévérité {severity}",
+      "StructureHalved": "Structure réduite de moitié",
+      "ArmourZero": "Blindage de la face touchée réduit à zéro",
+      "CargoDamaged": "{amount} de la cargaison endommagée",
+      "CargoDamagedAll": "Toute la cargaison endommagée",
+      "Breach": {
+        "exposed": "compartiment exposé",
+        "compromised": "compartiment compromis",
+        "shattered": "coque brisée"
+      },
       "Units": {
         "hours": "heures",
         "minutes": "minutes",
@@ -5021,7 +5067,18 @@
       "eliteNonCombatant": "Élite non-combattant",
       "eliteCombatant": "Élite combattant"
     },
+    "VehicleCriticalImmunity": {
+      "destructive": "armes Destructive uniquement",
+      "bay": "armes de baie de vaisseau uniquement",
+      "mediumBay": "baies moyennes et grandes uniquement",
+      "largeBay": "grandes baies uniquement"
+    },
     "VehicleCriticals": {
+      "speed": "Vitesse",
+      "agility": "Manœuvrabilité",
+      "power": "Énergie",
+      "equipment": "Équipement",
+      "operator": "Pilote",
       "fuel": "Carburant",
       "powerPlant": "Générateur",
       "weapon": "Arme",
@@ -5264,6 +5321,7 @@
       "stealth": "Furtivité",
       "hardened": "Blindage EM",
       "open-vehicle": "Véhicule ouvert",
+      "accurate": "Accurate",
       "acv": "ACV",
       "afv": "AFV",
       "aquatic": "Aquatic",
@@ -5300,12 +5358,14 @@
       "mesmerise": "Mesmerise",
       "natural-weapons": "Natural Weapons",
       "off-roader": "Off-Roader",
+      "open-topped": "Open-Topped",
       "ozone-immunity": "Ozone Immunity",
       "physical-coward": "Physical Coward",
       "physical-signature": "Physical Signature",
       "radiation-resistance": "Radiation Resistance",
       "ramshackle": "Ramshackle",
       "regeneration": "Regeneration",
+      "responsive": "Responsive",
       "sense-of-smell-no-sense-of-smell": "Sense of Smell/No Sense of Smell",
       "silent": "Silent",
       "slow-loader": "Slow Loader",
@@ -5321,8 +5381,10 @@
       "thruster": "Thruster",
       "tracked": "Tracked",
       "unreliable": "Unreliable",
+      "unresponsive": "Unresponsive",
       "vertebrate": "Vertebrate",
       "very-dangerous": "Very Dangerous",
+      "vtol": "VTOL",
       "weak": "Faible",
       "wings": "Wings"
     },

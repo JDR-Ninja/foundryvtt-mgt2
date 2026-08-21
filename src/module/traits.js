@@ -2,8 +2,9 @@
 
 const fields = foundry.data.fields;
 
-// >>> generated — 137 entries over 122 names, 44 parameterised, across 7 families. Emitted whole
+// >>> generated — 142 entries over 127 names, 44 parameterised, across 7 families. Emitted whole
 // from the trait extraction; edit the extraction and re-emit rather than patching a row here.
+// ⚠ The five Vehicle Handbook 2026 rows are hand-added; a re-emit drops them.
 const REGISTRY = {
     animal: {
         "alarm": {label: "Alarm"},
@@ -118,10 +119,15 @@ const REGISTRY = {
         "afv": {label: "AFV"},
         "atv": {label: "ATV"},
         "off-roader": {label: "Off-Roader"},
+        "open-topped": {label: "Open-Topped"},
         "open-vehicle": {label: "Open Vehicle"},
+        "responsive": {label: "Responsive"},
         "tracked": {label: "Tracked"},
+        "unresponsive": {label: "Unresponsive"},
+        "vtol": {label: "VTOL"},
     },
     weapon: {
+        "accurate": {label: "Accurate"},
         "ap": {label: "AP", params: [{slot: "score", type: "int"}], conflict: ["lo-pen"]},
         "artillery": {label: "Artillery"},
         "auto": {label: "Auto", params: [{slot: "score", type: "int"}]},

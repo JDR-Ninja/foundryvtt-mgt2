@@ -26,7 +26,10 @@ export class SkipDebts {
         const steps = Math.floor(Math.max(0, input.purchase) / rules.creditsPerStep);
         const band = rules.overdue[input.overdue] ?? rules.overdue.under4;
         return [
-            SkipDebts.term(say("Parsecs", { n: input.parsecs }), input.parsecs * rules.perParsec),
+            // ⚠ `Parsecs` is a plural group and `say` would print its key at the player, so this one
+            // row goes through the helper. The rest are plain strings and stay with `say`.
+            SkipDebts.term(MGT2Helper.plural("MGT2.SkipDebts.Terms.Parsecs", input.parsecs),
+                input.parsecs * rules.perParsec),
             SkipDebts.term(say("Disguise"), -input.disguise),
             SkipDebts.term(say("Value", { n: steps }), steps * rules.perStep),
             SkipDebts.term(say("Revisited"), input.revisited ? rules.revisited : 0),

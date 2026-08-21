@@ -538,7 +538,8 @@ MGT2.SpeedBands = Object.freeze({
     VeryFast: "MGT2.SpeedBands.VeryFast",
     Subsonic: "MGT2.SpeedBands.Subsonic",
     Supersonic: "MGT2.SpeedBands.Supersonic",
-    Hypersonic: "MGT2.SpeedBands.Hypersonic"
+    Hypersonic: "MGT2.SpeedBands.Hypersonic",
+    Orbital: "MGT2.SpeedBands.Orbital"   // VH2026 p.18; the Core ladder stops at Hypersonic
 });
 
 MGT2.Durations = Object.freeze({
@@ -723,6 +724,144 @@ MGT2.VehicleCriticals = Object.freeze({
     }
 });
 
+// VH2026 p.8-9, and it replaces the table above rather than extending it: eleven locations, and a
+// severity is read in isolation instead of stacking on the one already standing.
+MGT2.VehicleCriticalImmunity = Object.freeze([   // VH2026 p.7, largest first; Spaces are integers
+    {from: 200001, key: "largeBay"},
+    {from: 20001, key: "mediumBay"},
+    {from: 4001, key: "bay"},
+    {from: 200, key: "destructive"}
+]);
+
+MGT2.VehicleCriticals2026 = Object.freeze({
+    speed: {
+        label: "MGT2.VehicleCriticals.speed", roll: [2, 2],
+        severities: [
+            {speedBands: -1},
+            {speedBands: "D3"},
+            {speedBands: "1D"},
+            {speedBands: "1D", agility: -1},
+            {speedBands: 0, cascade: 1},
+            {speedBands: 0, cascade: "1D"}
+        ]
+    },
+    agility: {
+        label: "MGT2.VehicleCriticals.agility", roll: [3, 3],
+        severities: [
+            {agility: -1},
+            {agility: "-D3"},
+            {agility: "-1D"},
+            {steering: "disabled"},
+            {steering: "disabled", speedBands: -1},
+            {steering: "disabled", speedBands: "D3"}
+        ]
+    },
+    fuel: {
+        label: "MGT2.VehicleCriticals.fuel", roll: [4, 4],
+        severities: [
+            {range: "-2D%"},
+            {range: "-1Dx10%"},
+            {range: "-50%", rangeDecay: {rate: "-10%", unit: "minutes"}},
+            {range: "-50%", rangeDecay: {rate: "-10%", unit: "rounds"}},
+            {fuel: {state: "explodes"}, cascade: 1},
+            {fuel: {state: "explodes"}, cascade: "1D"}
+        ]
+    },
+    // Severities 5 and 6 print the plant destroyed and name no Speed Band; a destroyed plant is
+    // read as covering the disabled one at 4, so the ladder does not soften at its top.
+    power: {
+        label: "MGT2.VehicleCriticals.power", roll: [5, 5],
+        severities: [
+            {speedBands: -1, power: "-10%"},
+            {speedBands: "D3", power: "-D3x10%"},
+            {speedBands: "1D", power: "-1Dx10%"},
+            {powerPlant: "disabled", speedBands: 0},
+            {powerPlant: "destroyed", speedBands: 0},
+            {powerPlant: "destroyed", speedBands: 0, cascade: "1D"}
+        ]
+    },
+    armour: {
+        label: "MGT2.VehicleCriticals.armour", roll: [6, 6],
+        severities: [
+            {armour: -1},
+            {armour: "-D3"},
+            {armour: "-1D"},
+            {armour: "-2D"},
+            {armour: 0, cascade: 1},
+            {armour: 0, cascade: "1D"}
+        ]
+    },
+    hull: {
+        label: "MGT2.VehicleCriticals.hull", roll: [7, 7],
+        severities: [
+            {hull: {breach: "exposed"}},
+            {hull: {breach: "exposed"}, cascade: 1},
+            {hull: {breach: "compromised"}, cascade: "D3"},
+            {hull: {breach: "compromised", lostIn: {dice: "1D", unit: "hours"}}, cascade: "1D"},
+            {hull: {breach: "compromised", lostIn: {dice: "1D", unit: "minutes"}},
+                cascade: "1D", structureHalved: true},
+            {hull: {breach: "shattered", lostIn: {dice: "D3", unit: "minutes"}},
+                cascade: {n: "1D", severity: "1D"}, structureHalved: true}
+        ]
+    },
+    weapon: {
+        label: "MGT2.VehicleCriticals.weapon", roll: [8, 8],
+        severities: [
+            {weapons: {n: 1, state: "dm", dm: -2}},
+            {weapons: {n: 1, state: "disabled"}},
+            {weapons: {n: 1, state: "destroyed"}},
+            {weapons: {n: 1, state: "destroyed"}, cascade: 1},
+            {weapons: {n: 1, state: "destroyed"}, cascade: "D3"},
+            {weapons: {n: 1, state: "destroyed"}, cascade: "1D"}
+        ]
+    },
+    cargo: {
+        label: "MGT2.VehicleCriticals.cargo", roll: [9, 9],
+        severities: [
+            {cargo: "10%", cargoState: "damaged"},
+            {cargo: "10%"},
+            {cargo: "D3x10%"},
+            {cargo: "1Dx10%", cascade: 1},
+            {cargo: "1Dx10%", cascade: "D3"},
+            {cargo: "all", cascade: "1D"}
+        ]
+    },
+    occupants: {
+        label: "MGT2.VehicleCriticals.occupants", roll: [10, 10],
+        severities: [
+            {occupants: {n: 1, damage: "1D"}},
+            {occupants: {n: 1, damage: "2D"}},
+            {occupants: {n: "D3", damage: "2D"}},
+            {occupants: {n: "1D", damage: "2D"}},
+            {occupants: {n: "1D", damage: "3D"}},
+            {occupants: {n: "all", damage: "1Dx1D"}}
+        ]
+    },
+    // Severities 4 and 5 print "1D Random equipment" and name no state; severity 3 destroys.
+    equipment: {
+        label: "MGT2.VehicleCriticals.equipment", roll: [11, 11],
+        severities: [
+            {equipment: {n: 1, state: "disabled"}},
+            {equipment: {n: 1, state: "destroyed"}},
+            {equipment: {n: "D3", state: "destroyed"}},
+            {equipment: {n: "1D", state: "destroyed"}, cascade: 1},
+            {equipment: {n: "1D", state: "destroyed"}, cascade: "D3"},
+            {equipment: {n: "all", state: "destroyed"}, cascade: "1D"}
+        ]
+    },
+    operator: {
+        label: "MGT2.VehicleCriticals.operator", roll: [12, 12],
+        severities: [
+            {operator: {damage: "1D"}},
+            {operator: {damage: "2D"}},
+            {operator: {damage: "3D"}},
+            {operator: {damage: "4D"}, cascade: 1},
+            {operator: {damage: "5D"}, cascade: "D3"},
+            {operator: {damage: "6D"}, cascade: "1D"}
+        ]
+    }
+});
+
 MGT2.VehicleMounts = Object.freeze({
     fixed: "MGT2.VehicleMounts.fixed",
     pintle: "MGT2.VehicleMounts.pintle",
@@ -800,6 +939,11 @@ MGT2.VehicleNativeModes = Object.freeze({
     flyer: "flying",
     seafarer: "afloat"
 });
+
+MGT2.VehicleTargetSize = Object.freeze([   // VH2026 p.5, and its sensor rules read it again at p.13
+    {max: 3, dm: 0}, {max: 19, dm: 1}, {max: 99, dm: 2}, {max: 199, dm: 3},
+    {max: 999, dm: 4}, {max: 1999, dm: 5}, {max: Infinity, dm: 6}
+]);
 
 // Shipping tonnage per Space by chassis speciality; `min`-`max` spans what the two editions print,
 // and the Open Vehicle trait halves it again at read time (VH p.15-34; VH 2026 p.29-35, p.40).

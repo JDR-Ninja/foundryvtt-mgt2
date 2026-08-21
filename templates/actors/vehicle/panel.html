@@ -215,10 +215,28 @@
 			</label>
 		</div>
 		<dl class="statline">
+			{{#unless vehicle.criticals.runs2026}}
 			<div class="stat{{#if vehicle.criticals.hullSeverity}} hurt{{/if}}">
 				<dt>{{localize 'MGT2.Actor.vehicle.HullSeverity'}}</dt>
 				<dd>{{vehicle.criticals.hullSeverity}}</dd>
 			</div>
+			{{/unless}}
+			{{#if vehicle.criticals.runs2026}}
+			<div class="stat">
+				<dt>{{localize 'MGT2.Actor.vehicle.Structure'}}</dt>
+				<dd>{{vehicle.criticals.structure}}</dd>
+			</div>
+			<div class="stat{{#if vehicle.criticals.structureState}} hurt{{/if}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.StructureExceeded'}}</dt>
+				<dd>{{vehicle.criticals.structureExceeded}}{{#if vehicle.criticals.structureState}} · {{localize vehicle.criticals.structureState}}{{/if}}</dd>
+			</div>
+			{{#if vehicle.criticals.immunity}}
+			<div class="stat">
+				<dt>{{localize 'MGT2.Actor.vehicle.CriticalImmunity'}}</dt>
+				<dd>{{localize vehicle.criticals.immunity}}</dd>
+			</div>
+			{{/if}}
+			{{/if}}
 			<div class="stat{{#unless vehicle.criticals.standing.controlDM}} none{{/unless}}">
 				<dt>{{localize 'MGT2.Actor.vehicle.ControlDM'}}</dt>
 				<dd>{{showDM vehicle.criticals.standing.controlDM}}</dd>

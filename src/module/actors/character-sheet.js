@@ -1782,6 +1782,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
           ion: MGT2Helper.hasTrait(traits, "ion"),
           // Core p.78: most Destructive weapons say so in the score itself, which the card reads.
           destructive: MGT2Helper.hasTrait(traits, "destructive"),
+          blast: MGT2Helper.hasTrait(traits, "blast"),
           // Poison and Diseased become an Item the DEFENDER owns, so the parameters travel
           // with the rest of the pipeline's inputs and are built on the apply path.
           hazards: hazardTraits(traits),

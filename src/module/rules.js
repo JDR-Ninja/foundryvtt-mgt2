@@ -295,6 +295,15 @@ export const RULES = Object.freeze({
         default: false
     },
 
+    // VH2026 p.5-6: its Critical Hit, damage and Light Weapons rules replace the Core's. One choice
+    // for the five: Structure, the location table, the thresholds and collisions are one machine.
+    vehicleCombat: {
+        group: "craft", book: "vehicle2026", page: "5-14",
+        options: { core: "MGT2.Rules.vehicleCombat.core",
+            vehicle2026: "MGT2.Rules.vehicleCombat.vehicle2026" },
+        default: "core"
+    },
+
     // Both are advisory readings rather than gates, and both stay that way: the switch decides
     // whether the reading is drawn, never whether it blocks (RH p.115).
     designValidation: {
