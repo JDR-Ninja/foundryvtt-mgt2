@@ -356,10 +356,11 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     if ( item.type !== "contract" ) return null;
     const system = item.system;
     const gm = game.user.isGM;
+    const mayEdit = this.canEditContent;
     const shown = system.referee.filter(row => row.shown);
 
     return {
-      gm,
+      gm, mayEdit,
       subject: (system.subject.kind === "person")
         ? { person: this.#reference(system.subject.person) }
         : { label: system.subject.label, kind: MGT2.ContractSubjectKinds[system.subject.kind] },
@@ -1000,6 +1001,16 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     event.dataTransfer.setData("text/plain", JSON.stringify(nested.toDragData()));
   }
 
+  /**
+   * A contract is handed over at OWNER so the PARTY can roll folio 10's two rules; every stored row
+   * stays the GM's, refused at the server by `gmOnlyFields`. Offering a player the edit toggle and
+   * the drop zones therefore only offers what always fails, so the sheet stops offering them.
+   * @inheritDoc
+   */
+  get canEditContent() {
+    return super.canEditContent && ((this.item.type !== "contract") || game.user.isGM);
+  }
+
   /** Storing something is a drop on the container's own sheet. @inheritDoc */
   async _onDrop(event) {
     const data = MGT2Helper.getDataFromDropEvent(event);
@@ -1046,7 +1057,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
    * base — the distinction `lines[].actor` shipped a release blocker on.
    */
   async #onDropPerson(event, data) {
-    if ( !this.isEditable ) return false;
+    if ( !this.canEditContent ) return false;
     const dropped = await fromUuid(data.uuid);
     const actor = dropped?.isToken ? dropped.token?.baseActor ?? dropped : dropped;
     if ( !["character", "npc"].includes(actor?.type) ) {

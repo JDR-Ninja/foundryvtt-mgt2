@@ -86,7 +86,7 @@ export class Contract {
         if ( refused ) return ui.notifications.warn(refused);
 
         const actor = item.system.hunterActor;
-        const { parts, labels } = Checks.modifiers([Contract.#repRow(actor)]);
+        const { parts, terms } = Checks.modifiers([Contract.#repRow(actor)]);
         const outcome = await Checks.resolve({ formula: ["2d6", ...parts].join("") });
         if ( !outcome ) return null;
 
@@ -104,7 +104,7 @@ export class Contract {
             label: game.i18n.localize("MGT2.Contract.Negotiate"),
             rollTypeName: game.i18n.localize("MGT2.Contract.Negotiate"),
             rollObjectName: item.name,
-            modifiers: labels,
+            modifiers: terms,
             lines: [game.i18n.format("MGT2.Contract.NegotiatedLine", {
                 percent: MGT2Helper.signed(percent),
                 from: MGT2Helper.credits(offered), to: MGT2Helper.credits(agreed)
@@ -130,7 +130,7 @@ export class Contract {
 
         const actor = system.hunterActor;
         const difficulty = Contract.qualificationDifficulty(system.repFloor - system.hunterRep);
-        const { parts, labels } = Checks.modifiers([Contract.#repRow(actor)]);
+        const { parts, terms } = Checks.modifiers([Contract.#repRow(actor)]);
         const outcome = await Checks.resolve({ formula: ["2d6", ...parts].join(""), difficulty });
         if ( !outcome ) return null;
 
@@ -150,7 +150,7 @@ export class Contract {
             rollTypeName: game.i18n.localize("MGT2.Contract.Qualify"),
             rollObjectName: item.name,
             difficulty,
-            modifiers: labels,
+            modifiers: terms,
             lines
         });
     }

@@ -151,7 +151,7 @@ export const Psionics = {
             rollTypeName: game.i18n.localize("MGT2.Chargen.Psi.Training"),
             rollObjectName: talent.skills[0],
             difficulty: MGT2.PsionicTraining.difficulty,
-            modifiers: composed.labels
+            modifiers: composed.terms
         });
 
         const tracks = foundry.utils.deepClone(Chargen.read(actor).tracks);

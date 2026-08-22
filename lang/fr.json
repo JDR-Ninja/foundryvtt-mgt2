@@ -161,7 +161,7 @@
       "Negotiate": "Négocier la prime",
       "NegotiateCite": "2D + MD de REP",
       "NegotiateDo": "Négocier",
-      "NegotiateReading": "L'émetteur propose Cr{offered}. Un seul jet, et la table va de -40 % à +50 % : la prime peut baisser.",
+      "NegotiateReading": "L'émetteur propose Cr{offered}. Un seul jet, et la table va de −40 % à +50 % : la prime peut baisser.",
       "NegotiatedReading": "Jet de {total}, soit {percent} %. L'émetteur proposait Cr{from} et a conclu à Cr{to}.",
       "NegotiatedLine": "{percent} % — Cr{from} conclu à Cr{to}.",
       "Qualify": "Demander le contrat malgré tout",
@@ -238,10 +238,31 @@
     "Save": "Sauvegarder",
     "Cancel": "Annuler",
     "Close": "Fermer",
-    "Themes": {
-      "BlackAndRed": "Couverture Classique Traveller",
-      "Mwamba": "Oppa Mwamba Style",
-      "Blue": "Bleu"
+    "Palette": {
+      "Preset": {
+        "classic": "Classique",
+        "warm": "Chaud",
+        "cool": "Froid",
+        "contrast": "Contrasté"
+      },
+      "Accent": {
+        "red": "Rouge",
+        "orange": "Orange",
+        "gold": "Or",
+        "green": "Vert",
+        "teal": "Sarcelle",
+        "cyan": "Cyan",
+        "blue": "Bleu",
+        "violet": "Violet",
+        "magenta": "Magenta",
+        "pink": "Rose",
+        "steel": "Acier"
+      },
+      "Ground": {
+        "auto": "Suivre Foundry",
+        "light": "Toujours clair",
+        "dark": "Toujours sombre"
+      }
     },
     "Sheet": {
       "ModePlay": "Jeu",
@@ -249,9 +270,25 @@
       "ModeToggle": "Mode jeu / édition"
     },
     "Settings": {
-      "theme": {
-        "name": "Thème de couleurs",
-        "hint": "La palette utilisée par les feuilles et les fenêtres de ce système. Elle n'appartient qu'à vous : elle ne change rien pour les autres à la table."
+      "palettePreset": {
+        "name": "Palette",
+        "hint": "Les fonds et le grain des feuilles, des fenêtres et des cartes de chat de ce système. Elle n'appartient qu'à vous : elle ne change rien pour les autres à la table."
+      },
+      "paletteAccent": {
+        "name": "Couleur d'accent",
+        "hint": "L'unique couleur dont dérivent les surlignages, les filets de titre et les contrôles actifs. Elle n'appartient qu'à vous."
+      },
+      "paletteGround": {
+        "name": "Clair ou sombre",
+        "hint": "Lequel des deux visages de la palette prennent les feuilles et les fenêtres. Par défaut, le schéma de couleurs de Foundry décide ; les deux autres valeurs le remplacent pour ce système seulement."
+      },
+      "paletteChrome": {
+        "name": "Bandeau de fenêtre sombre",
+        "hint": "Garde le bandeau de fenêtre et la tranche des objets sombres sur les deux fonds. Désactivé, ils prennent le fond de la feuille et celle-ci se lit à plat."
+      },
+      "paletteCvd": {
+        "name": "Statuts adaptés au daltonisme",
+        "hint": "Remplace la paire réussite/échec par le vermillon et le bleu, qui restent distincts en deutéranopie. L'activer déplace une couleur d'accent qui entrerait en collision avec eux."
       },
       "campaignDay": {
         "name": "Jour de campagne",
@@ -268,6 +305,10 @@
       "showLife": {
         "name": "Afficher la Vie sur la fiche",
         "hint": "Affiche le compteur de vie sur la fiche"
+      },
+      "chainInto": {
+        "name": "Cartes de test : bouton Enchaîner vers",
+        "hint": "Ajoute un bouton Enchaîner vers… sur chaque carte de test ayant produit un Effet : il propose ce test au prochain jet. Celui-ci appartient à toute la table et pas seulement à l'Arbitre — l'interrupteur décide si la table en dispose."
       },
       "worldPacks": {
         "name": "Compendiums du monde",
@@ -349,7 +390,7 @@
       },
       "ageingTableFloor": {
         "name": "La dernière ligne de vieillissement se lit « ou moins »",
-        "hint": "La table s'arrête à -6, imprimé tel quel — or le MD est le total des périodes du Voyageur, donc un Voyageur de neuf périodes qui fait un double 1 est à -7, et le livre n'imprime ni ligne ni consigne de plafonnement."
+        "hint": "La table s'arrête à −6, imprimé tel quel — or le MD est le total des périodes du Voyageur, donc un Voyageur de neuf périodes qui fait un double 1 est à −7, et le livre n'imprime ni ligne ni consigne de plafonnement."
       },
       "psiCeiling": {
         "name": "PSI suit le plafond général des caractéristiques",
@@ -1389,10 +1430,10 @@
       "AugmentSkill": "{augment} améliore {skill}",
       "Encumbrance": "Encombrement",
       "EncumbranceFlag": "MD−2",
-      "EncumbranceHint": "MD -2 à tous les tests d'action physique. Elles comptent aussi comme un travail de force.",
+      "EncumbranceHint": "MD −2 à tous les tests d'action physique. Elles comptent aussi comme un travail de force.",
       "EquipUnequip": "Équiper/Déséquiper",
       "Fatigue": "Fatigue",
-      "FatigueHint": "MD -2 à tous les tests jusqu'à un repos complet.",
+      "FatigueHint": "MD −2 à tous les tests jusqu'à un repos complet.",
       "Finance": "Finance",
       "Dead": "Mort",
       "DeadHint": "Tous les maillons de la chaîne de dégâts sont vidés.",
@@ -2994,8 +3035,8 @@
       "PrivateGMRoll": "Jet Privé au MJ",
       "BlindGMRoll": "Jet Aveugle au MJ",
       "SelfRoll": "Jet pour Soi",
-      "EncumbranceDM": "Encombrement (MD -2)",
-      "FatigueDM": "Fatigue (MD -2)",
+      "EncumbranceDM": "Encombrement (MD −2)",
+      "FatigueDM": "Fatigue (MD −2)",
       "Boon": "Coup de pouce",
       "Bane": "Coup du sort",
       "Check": "Test",
@@ -3234,7 +3275,7 @@
         "Terrain": "Terrain céleste",
         "TerrainDM": "MD défensif +{dm} pour supériorité de Poussée",
         "BreakingOff": "Rompre le combat",
-        "BreakingOffWhy": "MD défensif -1, pas de monture spinale",
+        "BreakingOffWhy": "MD défensif −1, pas de monture spinale",
         "Dispersal": "Dispersion",
         "EffectPlaceholder": "effet",
         "DispersalState": {
@@ -4526,7 +4567,7 @@
       "Brain": "le cerveau perd INT -{points} et Bande passante -{points}, définitivement",
       "Cumulative": "Cumul",
       "Nausea": "Nausée",
-      "NauseaHint": "MD -1 à tous les tests jusqu'à recevoir des soins médicaux.",
+      "NauseaHint": "MD −1 à tous les tests jusqu'à recevoir des soins médicaux.",
       "HairLoss": "Perte de cheveux",
       "Sterile": "Stérile",
       "Bleeding": "Hémorragie interne",
@@ -4952,6 +4993,14 @@
         "visibility": {
           "name": "Demandes de jet : qui les voit",
           "hint": "Ce sur quoi une nouvelle demande démarre. Publique l'affiche à toute la table ; Aux destinataires la chuchote aux Voyageurs sollicités, et à vous. Il n'y a pas de mode caché : une demande que personne ne voit est une demande à laquelle personne ne peut répondre."
+        },
+        "askTheSame": {
+          "name": "Demandes de jet : bouton Demander le même",
+          "hint": "Ajoute un bouton Demander le même sur chaque carte de test de la discussion : il ouvre le dossier déjà rempli avec la compétence et le niveau de difficulté de ce test. Seul l'Arbitre le voit."
+        },
+        "askAgain": {
+          "name": "Demandes de jet : bouton Redemander",
+          "hint": "Ajoute un bouton Redemander sur chaque carte de demande : il republie la même demande aux mêmes Voyageurs, sur une nouvelle carte. Seul l'Arbitre le voit, et une demande retirée n'offre rien d'autre."
         },
         "nudge": {
           "name": "Demandes de jet : me signaler leur arrivée",

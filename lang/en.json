@@ -161,7 +161,7 @@
       "Negotiate": "Negotiate the bounty",
       "NegotiateCite": "2D + REP DM",
       "NegotiateDo": "Negotiate",
-      "NegotiateReading": "The issuer offers Cr{offered}. Rolled once, and the table runs from -40% to +50%, so it can settle lower.",
+      "NegotiateReading": "The issuer offers Cr{offered}. Rolled once, and the table runs from −40% to +50%, so it can settle lower.",
       "NegotiatedReading": "Rolled {total} for {percent}%. The issuer put up Cr{from} and settled at Cr{to}.",
       "NegotiatedLine": "{percent}% — Cr{from} settled at Cr{to}.",
       "Qualify": "Ask for the job anyway",
@@ -238,10 +238,31 @@
     "Save": "Save",
     "Cancel": "Cancel",
     "Close": "Close",
-    "Themes": {
-      "BlackAndRed": "Classic Traveller Cover",
-      "Mwamba": "Oppa Mwamba Style",
-      "Blue": "Blue"
+    "Palette": {
+      "Preset": {
+        "classic": "Classic",
+        "warm": "Warm",
+        "cool": "Cool",
+        "contrast": "High contrast"
+      },
+      "Accent": {
+        "red": "Red",
+        "orange": "Orange",
+        "gold": "Gold",
+        "green": "Green",
+        "teal": "Teal",
+        "cyan": "Cyan",
+        "blue": "Blue",
+        "violet": "Violet",
+        "magenta": "Magenta",
+        "pink": "Pink",
+        "steel": "Steel"
+      },
+      "Ground": {
+        "auto": "Follow Foundry",
+        "light": "Always light",
+        "dark": "Always dark"
+      }
     },
     "Sheet": {
       "ModePlay": "Play",
@@ -249,9 +270,25 @@
       "ModeToggle": "Play / edit mode"
     },
     "Settings": {
-      "theme": {
-        "name": "Colour theme",
-        "hint": "The colour scheme used by this system's sheets and dialogs. Yours alone — it changes nothing for anyone else at the table."
+      "palettePreset": {
+        "name": "Palette",
+        "hint": "The grounds and the grain used by this system's sheets, dialogs and chat cards. Yours alone — it changes nothing for anyone else at the table."
+      },
+      "paletteAccent": {
+        "name": "Accent colour",
+        "hint": "The one colour every highlight, heading rule and active control derives from. Yours alone."
+      },
+      "paletteGround": {
+        "name": "Light or dark",
+        "hint": "Which of the palette's two faces the sheets and dialogs take. Foundry's own colour scheme decides by default; the other two values overrule it for this system alone."
+      },
+      "paletteChrome": {
+        "name": "Dark window bar",
+        "hint": "Keeps the window bar and the item spine dark on both grounds. Off, they take the sheet's own ground and the sheet reads flat."
+      },
+      "paletteCvd": {
+        "name": "Colour-blind statuses",
+        "hint": "Swaps the success and failure pair for vermillion and blue, which stay apart under deuteranopia. Turning it on moves an accent colour that would collide with them."
       },
       "campaignDay": {
         "name": "Campaign day",
@@ -268,6 +305,10 @@
       "showLife": {
         "name": "Show Life in sheet",
         "hint": "Show life information in actor sheet"
+      },
+      "chainInto": {
+        "name": "Check cards: Chain into button",
+        "hint": "Puts a Chain into… button on every check card that produced an Effect, offering that check to whatever is rolled next. This one is everyone's button and not only the referee's — the switch decides whether the table has it at all."
       },
       "worldPacks": {
         "name": "World compendium packs",
@@ -349,7 +390,7 @@
       },
       "ageingTableFloor": {
         "name": "The ageing table's last row reads \"or less\"",
-        "hint": "The table stops at -6, printed bare - but the DM is the Traveller's total terms, so a nine-term Traveller rolling snake eyes sits at -7 and the book prints neither a row nor an instruction to floor."
+        "hint": "The table stops at −6, printed bare - but the DM is the Traveller's total terms, so a nine-term Traveller rolling snake eyes sits at −7 and the book prints neither a row nor an instruction to floor."
       },
       "psiCeiling": {
         "name": "PSI obeys the general characteristic ceiling",
@@ -1389,10 +1430,10 @@
       "AugmentSkill": "{augment} boosts {skill}",
       "Encumbrance": "Encumbrance",
       "EncumbranceFlag": "DM−2",
-      "EncumbranceHint": "DM -2 on all physical actions. They will also count as performing heavy labour.",
+      "EncumbranceHint": "DM −2 on all physical actions. They will also count as performing heavy labour.",
       "EquipUnequip": "Equip/Unequip",
       "Fatigue": "Fatigue",
-      "FatigueHint": "DM -2 to all checks until full rest.",
+      "FatigueHint": "DM −2 to all checks until full rest.",
       "Finance": "Finance",
       "Dead": "Dead",
       "DeadHint": "Every link of the damage chain emptied.",
@@ -2948,8 +2989,8 @@
       "PrivateGMRoll": "Private GM Roll",
       "BlindGMRoll": "Blind GM Roll",
       "SelfRoll": "Self Roll",
-      "EncumbranceDM": "Encumbrance (DM -2)",
-      "FatigueDM": "Fatigue (DM -2)",
+      "EncumbranceDM": "Encumbrance (DM −2)",
+      "FatigueDM": "Fatigue (DM −2)",
       "Boon": "Boon",
       "Bane": "Bane",
       "Check": "Check",
@@ -3142,7 +3183,7 @@
       "Brain": "the brain loses INT -{points} and Bandwidth -{points}, permanently",
       "Cumulative": "Cumulative",
       "Nausea": "Nausea",
-      "NauseaHint": "DM -1 to all checks until medical treatment is received.",
+      "NauseaHint": "DM −1 to all checks until medical treatment is received.",
       "HairLoss": "Hair loss",
       "Sterile": "Sterile",
       "Bleeding": "Internal bleeding",
@@ -3568,6 +3609,14 @@
         "visibility": {
           "name": "Roll requests: who sees them",
           "hint": "What a new request starts on. Public posts it to the whole table; Addressed whispers it to the Travellers asked, and to you. There is no hidden mode: a request nobody can see is a request nobody can answer."
+        },
+        "askTheSame": {
+          "name": "Roll requests: Ask the same button",
+          "hint": "Puts an Ask the same button on every check card in the log, which opens the docket already carrying that check's skill and difficulty. Only the referee ever sees it."
+        },
+        "askAgain": {
+          "name": "Roll requests: Ask again button",
+          "hint": "Puts an Ask again button on every request card, which re-posts the same demand to the same roster as a new card. Only the referee ever sees it, and a withdrawn card offers nothing else."
         },
         "nudge": {
           "name": "Roll requests: tell me one arrived",

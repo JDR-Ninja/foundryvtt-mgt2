@@ -47,12 +47,26 @@
 	{{#if rollMessage}}
 	<div class="cmsg{{#if opposedMessage}} jump{{/if}}"{{#if opposedMessage}} data-action="chainSource" data-message-id="{{opposedMessage}}"{{/if}}>{{rollMessage}}</div>
 	{{/if}}
-	{{! A recovery card that placed points rolled no dice at all. }}
+	{{! A recovery card that placed points rolled no dice, so it has no expand to name its terms in. }}
 	{{#if formula}}
 	<div class="cdice dice-roll" data-action="expandRoll">
-		<div class="line"><span class="f">{{formula}}</span><span class="t">{{total}}</span></div>
+		<div class="line"><span class="f">{{showFormula formula}}</span><span class="t">{{total}}</span></div>
 		{{{tooltip}}}
+		{{#if (or rollModifiers.length rollTargetAssumed)}}
+		<div class="cmods">
+			<div class="wrap">
+				{{#each rollModifiers as |rollModifier|}}<span class="k">{{rollModifier.name}}</span><span class="v{{#if (lt rollModifier.dm 0)}} neg{{/if}}">{{showDM rollModifier.dm}}</span>{{/each}}
+				{{#if rollTargetAssumed}}<span class="k">{{ localize 'MGT2.Chat.Roll.AssumedAverage' }}</span><span class="v"></span>{{/if}}
+			</div>
+		</div>
+		{{/if}}
 	</div>
+	{{else}}
+	{{#if rollModifiers.length}}
+	<div class="cmods">
+		<div class="wrap">{{#each rollModifiers as |rollModifier|}}<span class="k">{{rollModifier.name}}</span><span class="v{{#if (lt rollModifier.dm 0)}} neg{{/if}}">{{showDM rollModifier.dm}}</span>{{/each}}</div>
+	</div>
+	{{/if}}
 	{{/if}}
 	{{#if effectBand}}
 	<div class="eff">
@@ -61,12 +75,6 @@
 			<span class="lbl">{{#if rollTargetAssumed}}{{localize 'MGT2.Chat.Roll.EffectVs' target=rollTarget}}{{else}}{{localize 'MGT2.Chat.Roll.Effect'}}{{/if}}</span>
 			<b>{{effectDisplay}}</b>
 		</span>
-	</div>
-	{{/if}}
-	{{#if (or rollModifiers.length rollTargetAssumed)}}
-	<div class="cmods">
-		{{#each rollModifiers as |rollModifier|}}<span>{{rollModifier}}</span>{{/each}}
-		{{#if rollTargetAssumed}}<span>{{ localize 'MGT2.Chat.Roll.AssumedAverage' }}</span>{{/if}}
 	</div>
 	{{/if}}
 	{{#if showButtons}}

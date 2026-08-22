@@ -1,37 +1,38 @@
 // One accent and two anchors — --ink and --paper. Rules, mutes, hovers and tracks are a
 // color-mix() of ink into paper, so the ground flips with no duplicated declaration.
-$ink-dark: #e9e7e4
-
-// The chrome is DARKER than the dark theme’s paper, and the same ink does not hold the same
-// contrast on it: --faint measured 4.44:1 there against 4.56 on the dark ground. The chrome grounds
-// therefore carry an ink of their own, which puts --faint at 4.72 and leaves the brand black alone.
-// Moving --chrome instead was the other lever and a worse one: it repaints every window bar, the
-// chat band, the item spine and every portrait backing, and the curve peaks at 4.61 (oklab L 0.18)
-// because a mix darkens with its ground — past that point a lighter chrome makes it worse again.
-$ink-chrome: #f2f0ed
+//
+// Everything a PRESET owns is an --i-* input declared on `body`: the anchors and clamps for both
+// grounds, the chrome pair, the eight rates and the three status hues. `.mgt2` maps them onto the
+// anchors and nothing else reads them, so a preset is one class on one element.
 
 // The three tokens that mix INTO the ground rather than sitting over it, so an element painting
 // itself a different ground re-runs exactly these against it — `@include grounded(var(--sunk))` on a
 // sunken card. Both mutes carry text and are held above 4.5:1 against whatever ground they are
 // mixed into: 40% measured 2.79:1 on the dark ground and 2.97:1 on the light one, failing even
-// the 3:1 floor.
+// the 3:1 floor. A percentage held in a variable substitutes into color-mix() like any other token.
 @mixin grounded($on: var(--paper))
-    --mute: color-mix(in oklab, var(--ink) 70%, #{$on})
-    --faint: color-mix(in oklab, var(--ink) 55%, #{$on})
-    --fill: color-mix(in oklab, var(--ink) 45%, #{$on})
+    --mute: color-mix(in oklab, var(--ink) var(--i-mute), #{$on})
+    --faint: color-mix(in oklab, var(--ink) var(--i-faint), #{$on})
+    --fill: color-mix(in oklab, var(--ink) var(--i-fill), #{$on})
 
 // A custom property is computed where it is DECLARED, so re-anchoring --ink on a descendant does
 // not re-run a color-mix() written higher up: every re-anchoring element includes these again.
 @mixin derived
-    --rule: color-mix(in oklab, var(--ink) 22%, transparent)
-    --rule-soft: color-mix(in oklab, var(--ink) 11%, transparent)
+    --rule: color-mix(in oklab, var(--ink) var(--i-rule), transparent)
+    --rule-soft: color-mix(in oklab, var(--ink) var(--i-rule-soft), transparent)
+    // A CONTROL's boundary, not a rule between two things. WCAG 1.4.11 asks 3:1 of it where a rule
+    // needs none, and --rule measured 1.6:1 on both grounds: a button read as text until hovered.
+    --edge: color-mix(in oklab, var(--ink) var(--i-edge), transparent)
     @include grounded
-    --hover: color-mix(in oklab, var(--ink) 6%, transparent)
-    --track: color-mix(in oklab, var(--ink) 13%, transparent)
+    --hover: color-mix(in oklab, var(--ink) var(--i-hover), transparent)
+    --track: color-mix(in oklab, var(--ink) var(--i-track), transparent)
     // A recessed card ground. Opaque rather than a wash so it does not compound where an
     // .entry nests inside another, and 4% rather than the 6% the kit fills a box with: the
     // accent cannot re-ground onto it, and mwamba measures 4.45:1 on a 6% card even at 0.52.
-    --sunk: color-mix(in oklab, var(--ink) 4%, var(--paper))
+    --sunk: color-mix(in oklab, var(--ink) var(--i-sunk), var(--paper))
+    // The window's third value, under the band and the page. Its rate is per-ground where every
+    // other rate is not: the accent cannot re-ground onto it, so the clamp decides how deep it goes.
+    --plinth: color-mix(in oklab, var(--ink) var(--plinth-rate), var(--paper))
     // Core stripes rows with a hard-coded rgba(255,255,255,.1) the palette never sees, lifting
     // the dark ground under --faint text; the kit already draws its own row rule and hover.
     --table-header-bg-color: var(--hover)
@@ -40,6 +41,10 @@ $ink-chrome: #f2f0ed
     // The accent is clamped rather than mixed: hue and chroma pass through untouched and only
     // lightness is disciplined. min()/max() survives inside a custom property because the token
     // is substituted before oklch() is parsed.
+    // The statuses take the same clamp: as raw hexes their floor was 4.73:1 on a sunken card.
+    --danger: oklch(from var(--i-danger) var(--lgt) c h)
+    --good: oklch(from var(--i-good) var(--lgt) c h)
+    --warn: oklch(from var(--i-warn) var(--lgt) c h)
     --accent-text: oklch(from var(--accent) var(--lgt) c h)
     --accent-hot: oklch(from var(--accent) var(--lgt-hot) c h)
     --accent-line: color-mix(in oklab, var(--accent-text) 45%, transparent)
@@ -61,62 +66,62 @@ $ink-chrome: #f2f0ed
     --mgt2-row-inactive-icon: var(--faint)
     --mgt2-track: var(--track)
     --mgt2-depletion: var(--danger)
-    --mgt2-color-warning: var(--danger)
+    --mgt2-color-warning: var(--warn)
 
 .mgt2
-    --chrome: #0a0405
-    --paper: #ffffff
-    --ink: #16110f
-    --danger: #c8372a
-    --good: #1f7a4d
-    // 0.52 and not 0.55: the clamp has to hold the floor for the WORST hue, not the average
-    // one, and WCAG luminance is not oklab lightness — a green at L 0.55 measures 4.51:1 on the
-    // paper where the same L in red measures 5.35, and mwamba sat on that worst case at 4.52.
-    // At 0.52 every in-gamut hue clears 5.14, and the accent survives the 4% --sunk card, which
-    // it cannot re-ground onto. The dark clamp needs no such move: max(l, 0.72) bottoms out at
-    // 6.84 on the dark paper and 7.07 on the chrome.
-    --lgt: min(l, 0.52)
-    --lgt-hot: min(l, 0.40)
+    --chrome: var(--i-chrome)
+    --paper: var(--i-paper)
+    --ink: var(--i-ink)
+    --lgt: var(--i-lgt)
+    --lgt-hot: var(--i-lgt-hot)
+    --plinth-rate: var(--i-plinth)
     @include derived
     @include legacy-names
 
-    --mgt2-bgcolor-primary: var(--chrome)
     // The DM and software chips are painted on the chrome fill, so they carry its ink and not
     // the page's — otherwise they vanish on the dark ground.
-    --mgt2-color-dm: #{$ink-chrome}
+    --mgt2-color-dm: var(--i-ink-chrome)
     --mgt2-bgcolor-dm: var(--chrome)
-    --mgt2-color-software: #{$ink-chrome}
+    --mgt2-color-software: var(--i-ink-chrome)
     --mgt2-bgcolor-software: var(--chrome)
-    // A status colour never uses the accent: on the black-and-red theme it would read as its
-    // opposite. Load is not depletion either, hence a pair of its own.
-    --mgt2-encumbrance-normal: #D94826
-    --mgt2-encumbrance-heavy: #D82727
 
-// Two mechanisms put a sheet on the dark theme: the body class from the user's colourScheme
-// setting, and the per-document override that pushes `themed theme-<x>` onto the sheet itself.
-// The :not() keeps an explicitly-light sheet light while the body is dark. Only the anchors move:
-// the derived block is declared on this same element, so it re-runs against the new ink.
-body.theme-dark .mgt2:not(.theme-light),
+// Three mechanisms put a sheet on the dark ground: MGT2's own ground setting, which outranks the
+// other two; Foundry's colourScheme, as the body class; and the per-document `themed theme-<x>`.
+// The :not()s keep an explicitly-light sheet light and let the setting overrule Foundry. Only the
+// anchors move: the derived block is declared on this same element, so it re-runs against the ink.
+body.theme-dark:not(.mgt2-ground-light) .mgt2:not(.theme-light),
+body.mgt2-ground-dark .mgt2:not(.theme-light),
 .mgt2.theme-dark
-    --paper: #0b0a13
-    --ink: #{$ink-dark}
-    --danger: #e86152
-    --good: #4fbe8b
-    --lgt: max(l, 0.72)
-    --lgt-hot: max(l, 0.86)
+    --paper: var(--i-paper-d)
+    --ink: var(--i-ink-d)
+    --lgt: var(--i-lgt-d)
+    --lgt-hot: var(--i-lgt-hot-d)
+    --plinth-rate: var(--i-plinth-d)
 
 // The window bar and the item-sheet spine keep their dark fill on both grounds, so they
 // re-anchor instead of being special-cased — and re-declare everything derived from the anchors.
 .mgt2 .window-header,
 .mgt2 .itemsheet-header
-    --paper: var(--chrome)
-    --ink: #{$ink-chrome}
-    --danger: #e86152
-    --good: #4fbe8b
-    --lgt: max(l, 0.72)
-    --lgt-hot: max(l, 0.86)
+    --paper: var(--i-chrome)
+    --ink: var(--i-ink-chrome)
+    --lgt: var(--i-lgt-d)
+    --lgt-hot: var(--i-lgt-hot-d)
     @include derived
     @include legacy-names
+
+// The chrome switch, off. It is the RE-ANCHOR that is switched and not the derived block above:
+// those elements still re-declare every token, simply against the ground they inherited. `inherit`
+// and not the light input, because the parent has already resolved which of the two grounds it is on.
+// All THREE bands, the chat card's included: the switch is named for the always-dark band, and a
+// flat sheet beside a black-banded card is the switch half-applied. The DM and software chips are
+// not bands and keep their fill.
+body.mgt2-chrome-off .mgt2 .window-header,
+body.mgt2-chrome-off .mgt2 .itemsheet-header,
+body.mgt2-chrome-off li.chat-message > .message-header:has(~ .message-content > .mgt2.card)
+    --paper: inherit
+    --ink: inherit
+    --lgt: inherit
+    --lgt-hot: inherit
 
 // A chat card's frame is on the `li`, not on `.mgt2.card`, because core emits the head and the
 // body as SIBLINGS (`templates/sidebar/chat-message.hbs`) and nothing inside the card can enclose
@@ -124,36 +129,149 @@ body.theme-dark .mgt2:not(.theme-light),
 // inside `.message-content`, so the `li` inherits none of the anchors. Light only — core hard-codes
 // `themed theme-light` on `ol.chat-log`, so a card never meets the dark ground.
 li.chat-message:has(> .message-content > .mgt2.card)
-    --chrome: #0a0405
-    --paper: #ffffff
-    --ink: #16110f
-    --danger: #c8372a
-    --good: #1f7a4d
-    --lgt: min(l, 0.52)
-    --lgt-hot: min(l, 0.40)
+    --chrome: var(--i-chrome)
+    --paper: var(--i-paper)
+    --ink: var(--i-ink)
+    --lgt: var(--i-lgt)
+    --lgt-hot: var(--i-lgt-hot)
     @include derived
 
 // The band re-anchors on the chrome exactly as the window bar does, and for the same reason.
 li.chat-message > .message-header:has(~ .message-content > .mgt2.card)
-    --paper: var(--chrome)
-    --ink: #{$ink-chrome}
-    --danger: #e86152
-    --good: #4fbe8b
-    --lgt: max(l, 0.72)
-    --lgt-hot: max(l, 0.86)
+    --paper: var(--i-chrome)
+    --ink: var(--i-ink-chrome)
+    --lgt: var(--i-lgt-d)
+    --lgt-hot: var(--i-lgt-hot-d)
     @include derived
 
-// A theme is now just its accent, carried by the body so one class swap reaches every sheet,
-// every dialog and the chat sidebar. `body` alone holds the default, which a theme class on that
-// same element outranks.
+// --------------------------------------------
+//  PRESETS — the grounds and the grain
+// --------------------------------------------
+// Classic sits on bare `body` (0,0,1) so a preset class on that same element outranks it, which is
+// the rule the accent already lived by. With the Red accent this IS the old `black-and-red`.
+// A tinted DARK ground must be LIFTED as well as tinted. At classic's near-black every preset
+// measured within 0.05 in oklab of every other, and the axis did nothing on the commoner ground.
 body
+    --i-paper: #ffffff
+    --i-ink: #16110f
+    // 0.52 and not 0.55: the clamp has to hold the floor for the WORST hue, not the average one,
+    // and WCAG luminance is not oklab lightness — a green at L 0.55 measures 4.51:1 on the paper
+    // where the same L in red measures 5.35, and mwamba sat on that worst case at 4.52.
+    --i-lgt: min(l, 0.52)
+    --i-lgt-hot: min(l, 0.40)
+    --i-paper-d: #0b0a13
+    --i-ink-d: #e9e7e4
+    // The dark clamp needs no such move: max(l, 0.72) bottoms out at 6.84 on the dark paper.
+    --i-lgt-d: max(l, 0.72)
+    --i-lgt-hot-d: max(l, 0.86)
+    // The chrome is DARKER than the dark ground, and a mix darkens with its ground, so the band
+    // carries an ink of its own: --faint sits at 4.72:1 there against 4.44 on the page's ink.
+    --i-chrome: #0a0405
+    --i-ink-chrome: #f2f0ed
+    --i-mute: 70%
+    --i-faint: 55%
+    --i-fill: 45%
+    --i-rule: 22%
+    --i-rule-soft: 11%
+    --i-edge: 48%
+    --i-hover: 6%
+    --i-track: 13%
+    --i-sunk: 4%
+    // 4% on the light ground is the same ceiling --sunk sits under and for the same reason: at 5%
+    // a green accent measures 4.47:1 on it. The dark clamp is loose enough to carry 9% at 4.52.
+    --i-plinth: 4%
+    --i-plinth-d: 9%
+    // One hue per status, clamped by `derived` against whatever ground it runs on. A status never
+    // uses the accent: on a red accent a success would read as its opposite.
+    --i-danger: #c8372a
+    --i-good: #1f7a4d
+    --i-warn: #c98a2b
     --accent: #d13b46
 
-.black-and-red
-    --accent: #d13b46
+// WARM — a printed sheet rather than a screen. A tinted paper narrows the ink/paper span and drags
+// --faint under the floor, so the INK moves WITH the paper on both grounds; raising the rate instead
+// would collapse the two mute steps into one.
+body.mgt2-preset-warm
+    --i-paper: #faf5ea
+    --i-ink: #18110a
+    --i-paper-d: #241a12
+    --i-ink-d: #f8f1e6
+    --i-chrome: #120b06
+    --i-ink-chrome: #f3ebdd
+    --i-lgt: min(l, 0.50)
+    --i-lgt-d: max(l, 0.73)
 
-.mwamba
+// COOL — a ship's console. The same correction as warm, mirrored.
+body.mgt2-preset-cool
+    --i-paper: #f1f4f8
+    --i-ink: #0b1017
+    --i-paper-d: #121b28
+    --i-ink-d: #edf4fc
+    --i-chrome: #050a10
+    --i-ink-chrome: #eef4fb
+    --i-lgt: min(l, 0.50)
+    --i-lgt-d: max(l, 0.73)
+
+// CONTRAST — the one preset that moves the RATES and not only the anchors. --sunk may go to 6% here
+// where it may not elsewhere: the card ceiling is set by the accent, which cannot re-ground onto it,
+// and the tighter clamp buys back what the deeper card costs.
+body.mgt2-preset-contrast
+    --i-paper: #ffffff
+    --i-ink: #000000
+    --i-paper-d: #000000
+    --i-ink-d: #ffffff
+    --i-chrome: #000000
+    --i-ink-chrome: #ffffff
+    --i-danger: #b02718
+    --i-good: #0d6b3d
+    --i-mute: 82%
+    --i-faint: 68%
+    --i-fill: 55%
+    --i-rule: 40%
+    --i-rule-soft: 22%
+    --i-edge: 58%
+    --i-hover: 10%
+    --i-track: 22%
+    --i-sunk: 6%
+    --i-plinth: 6%
+    --i-plinth-d: 14%
+    --i-lgt: min(l, 0.45)
+    --i-lgt-hot: min(l, 0.34)
+    --i-lgt-d: max(l, 0.78)
+    --i-lgt-hot-d: max(l, 0.90)
+
+// The colour-blind switch. Not a preset: it touches no anchor, only the pair that appears SIDE BY
+// SIDE. Red against green loses three quarters of its separation under deuteranopia — 0.266 to
+// 0.075 in oklab — where Okabe-Ito's vermillion/blue goes 0.286 to 0.241.
+body.mgt2-cvd
+    --i-danger: #d55e00
+    --i-good: #0072b2
+
+// --------------------------------------------
+//  ACCENTS — eleven, spaced in hue
+// --------------------------------------------
+// Only hue and chroma pass the clamp, so two entries differing in lightness alone would render
+// identically. Red and Green are the old black-and-red and mwamba unchanged; the old washed-out
+// blue survives as Steel, which is what it was, and Blue is a real blue.
+body.mgt2-accent-red
+    --accent: #d13b46
+body.mgt2-accent-orange
+    --accent: #c86a1e
+body.mgt2-accent-gold
+    --accent: #a98416
+body.mgt2-accent-green
     --accent: #2a9932
-
-.blue
-    --accent: #91aac8
+body.mgt2-accent-teal
+    --accent: #0f9384
+body.mgt2-accent-cyan
+    --accent: #2a86a8
+body.mgt2-accent-blue
+    --accent: #4a7fd0
+body.mgt2-accent-violet
+    --accent: #7a6ad8
+body.mgt2-accent-magenta
+    --accent: #b455c8
+body.mgt2-accent-pink
+    --accent: #c94a86
+body.mgt2-accent-steel
+    --accent: #8a8f99

@@ -8,8 +8,10 @@
 	// computing colours for a dark ground they never had.
 	.window-header
 		color: var(--mute)
-		background-color: var(--mgt2-bgcolor-primary)
-		padding-left: 0
+		background-color: var(--paper)
+		// The inset belongs to the band and not to the toggle: a window without one — every dialog,
+		// every screen, a sheet a player cannot edit — had the mark flush against the frame.
+		padding-left: 9px
 		gap: 9px
 		// The hatch, the same 42 × 16 mark the chat band carries — `--hatch` is declared once in
 		// `components/_blocks.sass` and both hosts paint it in `currentColor` through a mask.
@@ -27,6 +29,10 @@
 			-webkit-mask-image: var(--hatch)
 			-webkit-mask-size: 100% 100%
 			-webkit-mask-repeat: no-repeat
+		// Core sets `--button-text-color: var(--color-light-1)` on the control itself, for a band
+		// it assumes is dark. With the chrome switch off on a light ground that was white on white.
+		.header-control
+			--button-text-color: var(--ink)
 	// The title is the muted ink, as the printed panel's title is quieter than its body. The colour
 	// has to be set HERE and not inherited from the band: core declares
 	// `.application .window-header .window-title { color: var(--color-light-1) }`, and a value
@@ -57,6 +63,65 @@
 .nopad
 	.window-content
 		padding: 0
+
+// --------------------------------------------
+//  The step — the window's own silhouette
+// --------------------------------------------
+// the page is never cut, all the shape is in the bands. So the frame keeps core's rectangle, its radius and its
+// shadow — this costs no shadow, no grip, no clickable pixel and no element — and three parallel
+// profiles at one angle carry it: a plate behind the band, the band, and the accent as the top rule
+// of the content, which is the job the page's orange line does.
+.mgt2.application
+	--rise: 10px
+	// 32.6 : 27.0 pt off the page, which is 39.6° and not 45.
+	--dog: 1.207
+	--run: calc(var(--rise) * var(--dog))
+	--step-at: 45%
+	--back: 4px
+	--acc-dy: 7px
+
+	// Deep where the toggle, the mark and the title are; shallow where the controls are.
+	> .window-header
+		clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--rise)), calc(var(--step-at) + var(--run)) calc(100% - var(--rise)), var(--step-at) 100%, 0 100%)
+		// A control centred on the deep band overhangs the shallow half by exactly the rise.
+		.header-control
+			margin-bottom: var(--rise)
+
+	// The plate behind the band, the same profile offset down and right. `z-index: 0` puts it over
+	// the content and under the band, which core already lifts to 1.
+	&::before
+		content: ""
+		position: absolute
+		inset: 0 0 auto 0
+		height: calc(var(--header-height) + var(--back))
+		z-index: 0
+		pointer-events: none
+		background: color-mix(in oklab, var(--chrome) 70%, var(--i-ink-chrome))
+		clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--rise)), calc(var(--step-at) + var(--back) + var(--run)) calc(100% - var(--rise)), calc(var(--step-at) + var(--back)) 100%, 0 100%)
+
+	// The accent, the same profile a third time. 1px measured vertically, so the diagonal reads a
+	// hair finer — as a 1pt stroke does at 39°.
+	&::after
+		content: ""
+		position: absolute
+		left: 0
+		right: 0
+		top: calc(var(--header-height) - var(--rise) + var(--acc-dy))
+		height: calc(var(--rise) + 1px)
+		z-index: 2
+		pointer-events: none
+		background: var(--accent-text)
+		clip-path: polygon(0 calc(100% - 1px), calc(var(--step-at) + 22px) calc(100% - 1px), calc(var(--step-at) + 22px + var(--run)) 0, 100% 0, 100% 1px, calc(var(--step-at) + 22px + var(--run)) 1px, calc(var(--step-at) + 22px) 100%, 0 100%)
+
+	// Minimised is the band alone: the plate would hang under it and the rule would float on nothing.
+	&.minimized::before,
+	&.minimized::after
+		display: none
+
+// With the chrome switch off the band takes the page's ground, so the plate behind it has to follow
+// or the ledge reads as a leftover.
+body.mgt2-chrome-off .mgt2.application::before
+	background: color-mix(in oklab, var(--paper) 88%, var(--ink))
 
 // The character sheet is a grid of parts: the parts render in PARTS order but are placed by
 // area, so the six sidebar panels can share one cell and only the active one occupies it.

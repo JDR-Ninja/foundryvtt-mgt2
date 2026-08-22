@@ -8,10 +8,31 @@
     "Pronouns": "Pronomes",
     "Specie": "Espécie",
     "Species": "Espécies",
-    "Themes": {
-      "BlackAndRed": "Capa clássica de Traveller",
-      "Mwamba": "Estilo Oppa Mwamba",
-      "Blue": "Azul"
+    "Palette": {
+      "Preset": {
+        "classic": "Clássico",
+        "warm": "Quente",
+        "cool": "Frio",
+        "contrast": "Alto contraste"
+      },
+      "Accent": {
+        "red": "Vermelho",
+        "orange": "Laranja",
+        "gold": "Ouro",
+        "green": "Verde",
+        "teal": "Verde-azulado",
+        "cyan": "Ciano",
+        "blue": "Azul",
+        "violet": "Violeta",
+        "magenta": "Magenta",
+        "pink": "Rosa",
+        "steel": "Aço"
+      },
+      "Ground": {
+        "auto": "Seguir o Foundry",
+        "light": "Sempre claro",
+        "dark": "Sempre escuro"
+      }
     },
     "Sheet": {
       "ModePlay": "Jogo",
@@ -19,9 +40,25 @@
       "ModeToggle": "Modo jogo / edição"
     },
     "Settings": {
-      "theme": {
-        "name": "Tema de cores",
-        "hint": "A paleta de cores usada pelas fichas e janelas deste sistema. É só sua: não muda nada para os outros na mesa."
+      "palettePreset": {
+        "name": "Paleta",
+        "hint": "Os fundos e o grão usados pelas fichas, janelas e cartões de chat deste sistema. É só sua: não muda nada para os outros na mesa."
+      },
+      "paletteAccent": {
+        "name": "Cor de destaque",
+        "hint": "A única cor da qual derivam os realces, os filetes de título e os controles ativos. É só sua."
+      },
+      "paletteGround": {
+        "name": "Claro ou escuro",
+        "hint": "Qual das duas faces da paleta as fichas e janelas assumem. Por padrão, quem decide é o esquema de cores do Foundry; os outros dois valores o substituem apenas para este sistema."
+      },
+      "paletteChrome": {
+        "name": "Barra de janela escura",
+        "hint": "Mantém a barra de janela e a lombada do item escuras nos dois fundos. Desligado, elas assumem o fundo da própria ficha e ela fica plana."
+      },
+      "paletteCvd": {
+        "name": "Estados para daltonismo",
+        "hint": "Troca o par de sucesso e falha por vermelhão e azul, que continuam distintos na deuteranopia. Ligá-lo move uma cor de destaque que colidiria com eles."
       },
       "campaignDay": {
         "name": "Dia de campanha",

@@ -341,7 +341,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
         hurt: c.damage > 0,
         depleted: c.max > 0 && c.value <= 0,
         // The roll target is the DM itself, so its tooltip states what clicking it will roll.
-        formula: `2D${MGT2Helper.signed(c.dm, "")}`
+        formula: MGT2Helper.showFormula(`2D${MGT2Helper.signed(c.dm, "")}`)
       };
     });
   }
@@ -578,7 +578,7 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
       canMedicalCare: states.canMedicalCare,
       unconscious: states.unconscious,
       reviveDM: actor.system.enduranceDM + states.reviveFailures,
-      naturalFormula: actor.system.naturalHealingFormula,
+      naturalFormula: MGT2Helper.showFormula(actor.system.naturalHealingFormula),
       mental: actor.system.constructor.MENTAL_LINKS.some(k => actor.system.characteristics[k].damage > 0),
       // The reserve is outside the damage chain, so no other procedure on this block reaches it.
       psi: (Rules.on("psionics") && (actor.system.config.psionic === true))

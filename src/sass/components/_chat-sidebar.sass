@@ -44,7 +44,9 @@ li.chat-message:has(> .message-content > .mgt2.card)
 		display: flex
 		align-items: center
 		gap: 9px
-		padding: 4px 9px 5px 0
+		// The same inset the window band takes: the mark sits 9px off its own band on both hosts,
+		// and at 0 it was flush against the card's edge.
+		padding: 4px 9px 5px 9px
 		line-height: 1.2
 		background: var(--paper)
 		color: var(--mute)
@@ -227,6 +229,21 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 			display: flex
 			align-items: center
 			gap: 10px
+		// Core's `.dice-roll` is a flex column and orders its tooltip 1; the terms take 0 to sit above.
+		.cmods
+			order: 0
+			display: grid
+			grid-template-rows: 0fr
+			overflow: hidden
+			padding: 0
+			border-top: 0
+			transition: grid-template-rows 250ms ease, padding-top 250ms ease
+			.wrap
+				min-height: 0
+				overflow: hidden
+		&.expanded .cmods
+			grid-template-rows: 1fr
+			padding-top: 8px
 		.f
 			font-family: var(--mono)
 			font-size: 12px
@@ -392,12 +409,23 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 		text-transform: uppercase
 		color: var(--faint)
 		border-top: 1px solid var(--rule-soft)
+		.wrap
+			flex: 1 1 100%
+			display: grid
+			grid-template-columns: minmax(0, 1fr) auto
+			gap: 2px 10px
+			.v
+				font-family: var(--mono)
+				font-size: 10px
+				letter-spacing: 0
+				text-align: right
+				color: var(--mute)
+				font-variant-numeric: tabular-nums
+				&.neg
+					color: var(--danger)
 		.neg
 			color: var(--danger)
 
-	// Separated by the printed sheet's double-dash rule rather than a hairline. The ONE place the
-	// mark is used, because it earns its keep exactly once: everything above the row is a reading,
-	// everything below it is an act.
 	.cbtns
 		position: relative
 		display: flex
@@ -409,9 +437,22 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 			left: 11px
 			right: 11px
 			top: 0
-			height: 3px
-			background: repeating-linear-gradient(90deg, var(--rule) 0 4px, transparent 4px 8px) 0 0/100% 1px no-repeat, repeating-linear-gradient(90deg, var(--rule) 0 4px, transparent 4px 8px) 2px 2px/100% 1px no-repeat
+			height: 6px
+			background: var(--rule)
+			mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0), linear-gradient(#000 0 0)
+			mask-size: 100% 1px, 1px 6px, 1px 6px
+			mask-position: 0 0, 0 0, 100% 0
+			mask-repeat: no-repeat
+			-webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0), linear-gradient(#000 0 0)
+			-webkit-mask-size: 100% 1px, 1px 6px, 1px 6px
+			-webkit-mask-position: 0 0, 0 0, 100% 0
+			-webkit-mask-repeat: no-repeat
+		// The card's bottom-left cut, as two clips: the button paints the ink, its `::before` the
+		// paper 1px smaller. Two parallel 45° lines 1px apart measure 1.414px vertically.
 		button
+			--cut: 9px
+			position: relative
+			isolation: isolate
 			flex: 1 1 0
 			height: auto
 			padding: 5px 6px
@@ -422,18 +463,33 @@ li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::bef
 			letter-spacing: 0.14em
 			text-transform: uppercase
 			color: var(--accent-text)
-			background: none
-			border: 1px solid var(--accent-line)
-			border-radius: 2px
+			background: var(--accent-line)
+			border: 0
+			border-radius: 0
 			cursor: var(--cursor-pointer)
+			clip-path: polygon(0 0, 100% 0, 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)))
+			&::before
+				content: ""
+				position: absolute
+				inset: 1px
+				z-index: -1
+				background: var(--paper)
+				clip-path: polygon(0 0, 100% 0, 100% 100%, calc(var(--cut) - 0.6px) 100%, 0 calc(100% - var(--cut) + 0.6px))
 			&:hover
-				background: var(--accent-soft)
-				border-color: var(--accent-text)
-			// Conclude goes hot when every line is in. Nothing auto-closes — -1 and 0 are
-			// referee-decision states (Core p.61), so this says "ready", never "done".
+				background: var(--accent-text)
+				&::before
+					background: linear-gradient(var(--accent-soft), var(--accent-soft)), var(--paper)
+			// Core p.61: -1 and 0 are referee-decision states, so `.hot` says "ready", never "done".
 			&.hot
-				background: var(--accent-soft)
-				border-color: var(--accent-text)
+				background: var(--accent-text)
+				&::before
+					background: linear-gradient(var(--accent-soft), var(--accent-soft)), var(--paper)
+			// ⚠ `clip-path` clips an outline away entirely, so focus thickens the trait instead.
+			&:focus-visible
+				outline: none
+				background: var(--accent-text)
+				&::before
+					inset: 2px
 			i
 				margin-right: 5px
 

@@ -8,10 +8,31 @@
     "Pronouns": "Pronombres",
     "Specie": "Especie",
     "Species": "Especies",
-    "Themes": {
-      "BlackAndRed": "Portada clásica de Traveller",
-      "Mwamba": "Estilo Oppa Mwamba",
-      "Blue": "Azul"
+    "Palette": {
+      "Preset": {
+        "classic": "Clásico",
+        "warm": "Cálido",
+        "cool": "Frío",
+        "contrast": "Alto contraste"
+      },
+      "Accent": {
+        "red": "Rojo",
+        "orange": "Naranja",
+        "gold": "Oro",
+        "green": "Verde",
+        "teal": "Verde azulado",
+        "cyan": "Cian",
+        "blue": "Azul",
+        "violet": "Violeta",
+        "magenta": "Magenta",
+        "pink": "Rosa",
+        "steel": "Acero"
+      },
+      "Ground": {
+        "auto": "Seguir a Foundry",
+        "light": "Siempre claro",
+        "dark": "Siempre oscuro"
+      }
     },
     "Sheet": {
       "ModePlay": "Juego",
@@ -19,9 +40,25 @@
       "ModeToggle": "Modo juego / edición"
     },
     "Settings": {
-      "theme": {
-        "name": "Tema de colores",
-        "hint": "La paleta de colores que usan las hojas y ventanas de este sistema. Es solo tuya: no cambia nada para los demás en la mesa."
+      "palettePreset": {
+        "name": "Paleta",
+        "hint": "Los fondos y el grano que usan las hojas, ventanas y tarjetas de chat de este sistema. Es solo tuya: no cambia nada para los demás en la mesa."
+      },
+      "paletteAccent": {
+        "name": "Color de acento",
+        "hint": "El único color del que derivan los resaltados, los filetes de título y los controles activos. Es solo tuyo."
+      },
+      "paletteGround": {
+        "name": "Claro u oscuro",
+        "hint": "Cuál de las dos caras de la paleta toman las hojas y las ventanas. Por defecto lo decide el esquema de color de Foundry; los otros dos valores lo anulan solo para este sistema."
+      },
+      "paletteChrome": {
+        "name": "Barra de ventana oscura",
+        "hint": "Mantiene la barra de ventana y el lomo del objeto oscuros en ambos fondos. Desactivado, toman el fondo de la propia hoja y esta se lee plana."
+      },
+      "paletteCvd": {
+        "name": "Estados para daltonismo",
+        "hint": "Cambia el par de éxito y fallo por bermellón y azul, que siguen distinguiéndose con deuteranopía. Activarlo mueve un color de acento que chocaría con ellos."
       },
       "campaignDay": {
         "name": "Día de campaña",

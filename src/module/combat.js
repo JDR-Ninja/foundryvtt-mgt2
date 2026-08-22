@@ -500,7 +500,7 @@ export class MissileSalvoData extends foundry.abstract.TypeDataModel {
             difficulty: "Average",
             rollTypeName: this.parent.name,
             rollObjectName: missile?.name ?? game.i18n.localize("MGT2.SpaceCombat.Salvo"),
-            modifiers: rows.labels,
+            modifiers: rows.terms,
             lines,
             showRollDamage: Boolean(flags.mgt2.damage)
         });

@@ -38,7 +38,7 @@
 			<span class="i" data-action="rollFleet" data-tooltip="{{localize 'MGT2.Fleet.Screen.RollFleet'}}">{{#if fleet.hasInitiative}}{{fleet.initiative}}{{else}}&mdash;{{/if}}</span>
 			<span class="who">
 				<span class="nm">{{fleet.mode}}</span>
-				<span class="sub">{{fleet.formula}}</span>
+				<span class="sub">{{showFormula fleet.formula}}</span>
 			</span>
 			<a class="need" data-action="rollShips" data-tooltip="{{localize 'MGT2.Fleet.Screen.RollShipsHint'}}">{{localize 'MGT2.Fleet.Screen.RollShips'}}</a>
 		</div>

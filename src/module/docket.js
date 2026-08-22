@@ -347,7 +347,7 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
         const ambush = ambushDM(demand.ambush, base.self);
         if ( ambush ) terms.push([game.i18n.localize("MGT2.Request.Ambush"), ambush]);
 
-        const { total, labels, parts } = Checks.modifiers(terms);
+        const { total, terms: reduced, parts } = Checks.modifiers(terms);
         return {
             ...base,
             parts,
@@ -359,7 +359,7 @@ export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
             charShort: Docket.#shortName(characteristic.key),
             charDM: MGT2Helper.signed(characteristic.dm, "+0"),
             status: base.self ? "waiting" : (user ? "waiting" : "unclaimed"),
-            terms: labels,
+            terms: reduced,
             total,
             totalDisplay: MGT2Helper.signed(total, "+0"),
             negative: total < 0,

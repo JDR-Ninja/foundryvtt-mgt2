@@ -608,14 +608,14 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
     /** Folio 122's Morale check, made each round. */
     async moraleCheck(against = null) {
         const rows = this.moraleRows(against);
-        const { parts, labels } = Checks.modifiers(rows);
+        const { parts, terms } = Checks.modifiers(rows);
         const outcome = await Checks.resolve({ formula: ["2d6", ...parts].join("") });
         if ( !outcome ) return null;
         return Checks.post(outcome, {
             label: game.i18n.localize("MGT2.Fleet.Morale"),
             rollTypeName: game.i18n.localize("MGT2.Fleet.Morale"),
             rollObjectName: this.parent.name,
-            modifiers: labels
+            modifiers: terms
         });
     }
 

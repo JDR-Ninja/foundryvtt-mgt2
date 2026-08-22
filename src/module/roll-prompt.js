@@ -322,7 +322,8 @@ export class RollPromptHelper {
      * @param {object} data              What `RollPromptHelper.roll` came back with
      * @param {Actor} actor              Whose characteristics and skills the prompt offered
      * @param {object[]} checkModifiers  The sources the prompt listed, with their `key`
-     * @returns {{formula: string, modifiers: string[], chainSources: object[], stance: object}}
+     * @returns {{formula: string, modifiers: {name: string, dm: number}[],
+     *     chainSources: object[], stance: object}}
      */
     static terms(data, actor, checkModifiers = [], extra = []) {
         const modifiers = [];
@@ -339,30 +340,30 @@ export class RollPromptHelper {
         if ( Object.hasOwn(data, "characteristic") && (data.characteristic !== "") ) {
             const dm = actor.system.characteristics[data.characteristic]?.dm ?? 0;
             parts.push(MGT2Helper.getFormulaDM(dm));
-            modifiers.push(game.i18n.localize(`MGT2.Characteristics.${data.characteristic}.name`)
-                + MGT2Helper.getDisplayDM(dm));
+            modifiers.push({ name: game.i18n.localize(
+                `MGT2.Characteristics.${data.characteristic}.name`), dm });
         }
 
         if ( Object.hasOwn(data, "skill") && (data.skill !== "") ) {
             if ( data.skill === "NP" ) {
                 const untrained = this.untrained(actor);
                 parts.push(MGT2Helper.getFormulaDM(untrained.dm));
-                // The card has no DM column, so each name carries its own number like the others.
-                modifiers.push(untrained.label + MGT2Helper.getDisplayDM(untrained.dm));
+                modifiers.push({ name: untrained.label, dm: untrained.dm });
             }
             else {
                 const skillObj = actor.getEmbeddedDocument("Item", data.skill);
                 if ( skillObj ) {
                     parts.push(MGT2Helper.getFormulaDM(skillObj.system.level));
-                    modifiers.push(skillObj.getRollDisplay());
+                    modifiers.push({ name: skillObj.getRollDisplay(false),
+                        dm: skillObj.system.level });
                 }
             }
         }
 
         const timeframeDM = MGT2Helper.getTimeframeDM(data.timeframes);
         if ( timeframeDM !== 0 ) {
-            modifiers.push(game.i18n.localize(`MGT2.Timeframes.${data.timeframes}`)
-                + MGT2Helper.getDisplayDM(timeframeDM));
+            modifiers.push({ name: game.i18n.localize(`MGT2.Timeframes.${data.timeframes}`),
+                dm: timeframeDM });
             parts.push(MGT2Helper.getFormulaDM(timeframeDM));
         }
 
@@ -395,7 +396,7 @@ export class RollPromptHelper {
 
         const reduced = Checks.modifiers(rows);
         parts.push(...reduced.parts);
-        modifiers.push(...reduced.labels);
+        modifiers.push(...reduced.terms);
 
         if ( Object.hasOwn(data, "customDM") && (data.customDM !== "") ) {
             const typed = String(data.customDM).trim();

@@ -28,6 +28,15 @@ export const SheetModeMixin = Base => class extends Base {
     return this._mode === this.constructor.MODES.EDIT;
   }
 
+  /**
+   * Whether this sheet may edit its own document's stored rows. Ownership is not the same question:
+   * a document may be owned so that it can be ROLLED while every stored row stays the GM's.
+   * @type {boolean}
+   */
+  get canEditContent() {
+    return this.isEditable;
+  }
+
   /** @inheritDoc */
   _configureRenderOptions(options) {
     super._configureRenderOptions(options);
@@ -37,7 +46,7 @@ export const SheetModeMixin = Base => class extends Base {
   /** @inheritDoc */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
-    context.editable = this.isEditable && this.isEditMode;
+    context.editable = this.canEditContent && this.isEditMode;
     return context;
   }
 
@@ -63,7 +72,7 @@ export const SheetModeMixin = Base => class extends Base {
     const header = this.element.querySelector(".window-header");
     if ( !header ) return;
     let toggle = header.querySelector(".mgt2-mode");
-    if ( !this.isEditable ) return toggle?.remove();
+    if ( !this.canEditContent ) return toggle?.remove();
     if ( !toggle ) {
       toggle = document.createElement("button");
       toggle.type = "button";

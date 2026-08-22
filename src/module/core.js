@@ -83,10 +83,12 @@ import { preloadHandlebarsTemplates } from "./templates.js";
 import {ChatHelper} from "./chatHelper.js";
 import { migrateWorld } from "./migration.js";
 
-import { applyTheme, registerSettings } from "./settings.js";
+import { applyPalette, groundWindow, migrateDarkPreset, migrateLegacyTheme, registerSettings,
+  wirePalettePickers } from "./settings.js";
 
 function registerHandlebarsHelpers() {
   Handlebars.registerHelper('showDM', dm => MGT2Helper.signed(dm));
+  Handlebars.registerHelper('showFormula', text => MGT2Helper.showFormula(text));
   Handlebars.registerHelper('credits', value => MGT2Helper.credits(value));
   // What an optional rule is set to.
   Handlebars.registerHelper('rule', key => Rules.get(key));
@@ -351,7 +353,9 @@ Hooks.once("init", async function () {
 
   registerHandlebarsHelpers();
   registerSettings();
-  applyTheme();
+  applyPalette();
+  migrateLegacyTheme();
+  migrateDarkPreset();
 
   CONFIG.Actor.documentClass = TravellerActor;
   CONFIG.Item.documentClass = TravellerItem;
@@ -470,6 +474,9 @@ Hooks.once("init", async function () {
     "ammunition": AmmunitionData
   });
 
+
+  Hooks.on("renderSettingsConfig", wirePalettePickers);
+  Hooks.on("renderApplicationV2", (app, element) => groundWindow(element));
 
   Hooks.on("renderChatMessageHTML", (message, html, messageData) => {
     ChatHelper.setupCardListeners(message, html, messageData);

@@ -565,7 +565,7 @@ export class CharacterData extends ActorBaseData {
     get naturalHealingFormula() {
         const dm = this.enduranceDM;
         if (this.states.needsSurgery) return String(dm);
-        return (dm === 0) ? "1d6" : `1d6${MGT2Helper.signed(dm)}`;
+        return (dm === 0) ? "1d6" : `1d6${MGT2Helper.getFormulaDM(dm)}`;
     }
 
     /**

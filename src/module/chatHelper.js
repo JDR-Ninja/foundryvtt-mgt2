@@ -12,6 +12,27 @@ import { armChain } from "./roll-prompt.js";
 const FACINGS = ["front", "rear", "sides", "top", "bottom"];
 const FACINGS_2026 = ["forward", "aft", "port", "starboard", "dorsal", "ventral"];
 
+/** The check card's own chain control, offered only where the referee turns it on. */
+export const CHAIN_INTO_SETTING = "check.chainInto";
+
+/** Take a card's button out, and the row with it when that button was all the row held. */
+export function stripCardButton(button) {
+    const buttons = button?.closest(".cbtns");
+    button?.remove();
+    if (buttons && !buttons.childElementCount) buttons.remove();
+}
+
+/**
+ * The switch reaches the cards already in the log. The button is baked into the message's stored
+ * content, so restoring it is a re-render and never an injection.
+ */
+export function refreshChainInto() {
+    for (const li of ui.chat?.element?.querySelectorAll(".chat-message[data-message-id]") ?? []) {
+        const message = game.messages.get(li.dataset.messageId);
+        if (checkOf(message)) ui.chat.updateMessage(message);
+    }
+}
+
 /** The lineage links: a chain strip's sources, an opposed line's one source, an answered request line. */
 export function wireChainSources(html) {
     for (const link of html.querySelectorAll('[data-action="chainSource"]')) {
@@ -97,7 +118,10 @@ export class ChatHelper {
 
         // The offering side of the chain: this check is held for whatever is rolled next.
         const chainInto = html.querySelector('button[data-action="chainInto"]');
-        if (chainInto) {
+        if (!game.settings.get("mgt2", CHAIN_INTO_SETTING)) {
+            stripCardButton(chainInto);
+        }
+        else if (chainInto) {
             chainInto.addEventListener("click", event => {
                 event.preventDefault();
                 const check = checkOf(message);

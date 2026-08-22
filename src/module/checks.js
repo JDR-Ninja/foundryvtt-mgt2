@@ -11,22 +11,22 @@ const CARD = "systems/mgt2/templates/chat/roll.html";
 export class Checks {
 
     /**
-     * The rows of a check, reduced once: the terms the formula reads, the labels the card prints,
+     * The rows of a check, reduced once: the terms the formula reads, the ones the card prints,
      * and the total the prompt previews.
      * @param {[string, number][]} rows   Each name already localised, with its DM
-     * @returns {{parts: string[], labels: string[], total: number}}
+     * @returns {{parts: string[], terms: {name: string, dm: number}[], total: number}}
      */
     static modifiers(rows) {
         const parts = [];
-        const labels = [];
+        const terms = [];
         let total = 0;
         for ( const [name, dm] of rows ) {
             // A row worth nothing is still named — it was offered and taken — but adds no term.
             if ( dm !== 0 ) parts.push(MGT2Helper.getFormulaDM(dm));
-            labels.push(dm === 0 ? name : name + MGT2Helper.getDisplayDM(dm));
+            terms.push({ name, dm });
             total += dm;
         }
-        return { parts, labels, total };
+        return { parts, terms, total };
     }
 
     /**
@@ -118,7 +118,7 @@ export class Checks {
  * The context `templates/chat/roll.html` reads. @returns {Promise<object>}
  * @param {Roll} [options.roll]           The dice, where any were rolled
  * @param {object} [options.outcome]      What `Checks.resolve` returned
- * @param {string[]} [options.modifiers]  The named terms, in the order the formula reads them
+ * @param {{name: string, dm: number}[]} [options.modifiers]  The named terms, in formula order
  * @param {string[]} [options.lines]      Sentences appended to the opposed verdict
  */
 export async function buildRollCardContext({

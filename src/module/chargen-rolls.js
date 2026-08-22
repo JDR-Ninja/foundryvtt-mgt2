@@ -20,7 +20,7 @@ export const CreationRoll = {
      * @param {number|null} [options.target]     The printed target number
      * @param {[string, number][]} [options.rows]  Rows the printed line grants and nothing derives
      *     — `−1 per previous career`, an age DM, a species DM
-     * @returns {{formula: string, rows: [string, number][], parts: string[], labels: string[],
+     * @returns {{formula: string, rows: [string, number][], parts: string[], terms: object[],
      *           total: number, target: number|null, untrained: boolean}}
      */
     compose(actor, { characteristic = "", skill = "", check = "", career = "", target = null, rows = [] } = {}) {
@@ -43,12 +43,12 @@ export const CreationRoll = {
         composed.push(...CreationRoll.standing(actor, check, career));
         composed.push(...CreationRoll.tray(actor, check, career));
 
-        const { parts, labels, total } = Checks.modifiers(composed);
+        const { parts, terms, total } = Checks.modifiers(composed);
         return {
             // `2d6` and not the books' `2D`: the parser reads none of the printed forms, which is
             // what `MGT2Helper.damageFormula` exists to normalise everywhere a page is transcribed.
             formula: ["2d6", ...parts].join(""),
-            rows: composed, parts, labels, total, target, untrained
+            rows: composed, parts, terms, total, target, untrained
         };
     },
 
@@ -149,7 +149,7 @@ export const CreationRoll = {
             difficulty,
             rollDifficultyLabel: (printed === null)
                 ? "" : game.i18n.format("MGT2.Chargen.Term.Target", { n: printed }),
-            modifiers: composed.labels,
+            modifiers: composed.terms,
             lines
         });
         const passed = (printed === null) ? null : (outcome.roll.total >= printed);
@@ -167,7 +167,7 @@ export const CreationRoll = {
                 roll,
                 rollTypeName: game.i18n.localize("MGT2.Chargen.Roll.Title"),
                 rollObjectName: label,
-                modifiers: composed.labels,
+                modifiers: composed.terms,
                 lines
             })
         });

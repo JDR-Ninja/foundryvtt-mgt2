@@ -167,7 +167,7 @@ export const Muster = {
      * The DMs on one Benefit roll.
      * @param {string} [options.column]   `cash` or `other`
      * @param {string} [options.career]   The career record's id
-     * @returns {{formula: string, rows: [string, number][], labels: string[], total: number}}
+     * @returns {{formula: string, rows: [string, number][], terms: object[], total: number}}
      */
     compose(actor, { column = "other", career = "" } = {}) {
         const rows = [];
@@ -190,8 +190,8 @@ export const Muster = {
                 rows.push([entry.note || game.i18n.localize("MGT2.Chargen.Roll.Pending"), entry.dm]);
             }
         }
-        const { parts, labels, total } = Checks.modifiers(rows);
-        return { formula: ["1d6", ...parts].join(""), rows, labels, total };
+        const { parts, terms, total } = Checks.modifiers(rows);
+        return { formula: ["1d6", ...parts].join(""), rows, terms, total };
     },
 
     /** Roll one benefit and post it. */
@@ -210,7 +210,7 @@ export const Muster = {
                 roll,
                 rollTypeName: game.i18n.localize("MGT2.Chargen.Muster.Title"),
                 rollObjectName: game.i18n.localize(`MGT2.Chargen.Muster.Column.${column}`),
-                modifiers: composed.labels
+                modifiers: composed.terms
             })
         });
         return { roll, composed };

@@ -7,7 +7,7 @@
 		<a class="add edit-only" data-action="entryCreate" data-property="parties" data-tooltip="{{localize 'MGT2.Contract.AddAssociate'}}"><i class="fa-solid fa-plus"></i></a>
 	</div>
 
-	<table class="roster" data-property="parties" data-reference="associate" data-accept="Actor.character Actor.npc">
+	<table class="roster" data-property="parties"{{#if contract.mayEdit}} data-reference="associate" data-accept="Actor.character Actor.npc"{{/if}}>
 		<thead>
 			<tr>
 				<th style="width:8rem">{{localize 'MGT2.Contract.Relation'}}</th>
@@ -17,7 +17,7 @@
 		</thead>
 		<tbody>
 			{{#each contract.associates as |row|}}
-			<tr data-row-index="{{row.index}}" data-entry-index="{{row.index}}" data-reference="associate" data-accept="Actor.character Actor.npc"{{#unless row.person}} class="vacant"{{/unless}}>
+			<tr data-row-index="{{row.index}}" data-entry-index="{{row.index}}"{{#if contract.mayEdit}} data-reference="associate" data-accept="Actor.character Actor.npc"{{/if}}{{#unless row.person}} class="vacant"{{/unless}}>
 				<td class="station">
 					<b class="play-only">{{#if row.relation}}{{row.relation}}{{else}}&mdash;{{/if}}</b>
 					<input class="f edit-only" type="text" name="system.parties.{{row.index}}.relation" value="{{row.relation}}" />

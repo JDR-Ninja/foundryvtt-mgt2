@@ -26,17 +26,17 @@
 
 	{{#if size}}<p class="line">{{localize size}}</p>{{/if}}
 	{{#if ram}}
-	<p class="line">{{localize 'MGT2.Collision.Ram'}} <b>{{ram.total}}</b> <i>({{ram.formula}})</i></p>
+	<p class="line">{{localize 'MGT2.Collision.Ram'}} <b>{{ram.total}}</b> <i>({{showFormula ram.formula}})</i></p>
 	{{/if}}
 	{{#if occupant}}
 	<p class="line">
 		{{localize 'MGT2.Collision.Occupants'}} <b>{{occupant.damage}}</b>
-		<i>({{occupant.formula}} = {{occupant.rolled}}{{#if occupant.restrained}} &middot;
+		<i>({{showFormula occupant.formula}} = {{occupant.rolled}}{{#if occupant.restrained}} &middot;
 			{{localize 'MGT2.Collision.Belted'}}{{/if}})</i>
 	</p>
 	{{#if occupant.thrown}}
 	<p class="line">{{localize 'MGT2.Collision.Thrown'}} <b>{{occupant.thrown.metres}} m</b>
-		&middot; <b>{{occupant.thrown.damage}}</b> <i>({{occupant.thrown.formula}})</i></p>
+		&middot; <b>{{occupant.thrown.damage}}</b> <i>({{showFormula occupant.thrown.formula}})</i></p>
 	{{/if}}
 	{{/if}}
 </div>

@@ -47,10 +47,24 @@ export class MGT2Helper {
         return n < 10 ? String(n) : String.fromCharCode(55 + n);
     }
 
-    /** @param {string} [zero]   What to render for 0 — a roll formula needs "+0", a label wants "0". */
+    /**
+     * ⚠ Display only — `Roll` cannot parse the typographic minus this prints.
+     * @param {string} [zero]   What to render for 0 — a readout wants "+0", a label wants "0".
+     */
     static signed(value, zero = "0") {
         if (value === 0) return zero;
-        return value > 0 ? `+${value}` : `${value}`;
+        return value > 0 ? `+${value}` : `−${-value}`;
+    }
+
+    /** A formula as the books print it rather than as the parser reads it. */
+    static showFormula(formula) {
+        const say = key => game?.i18n?.localize?.(key) ?? key;
+        return String(formula ?? "")
+            .replace(/3d6dl\b/gi, () => say("MGT2.RollPrompt.BoonDice"))
+            .replace(/3d6dh\b/gi, () => say("MGT2.RollPrompt.BaneDice"))
+            .replace(/(\d+)d(6|3)\b/gi, (_m, n, faces) => `${n}D${faces === "3" ? "3" : ""}`)
+            .replace(/\s*([+\-−])\s*(?=[\d@(])/g, (_m, sign) => (sign === "+") ? " +" : " −")
+            .trim();
     }
 
     static getDisplayDM(dm) {
@@ -65,7 +79,7 @@ export class MGT2Helper {
     }
 
     static getFormulaDM(dm) {
-        return this.signed(dm, "+0");
+        return (dm === 0) ? "+0" : (dm > 0) ? `+${dm}` : String(dm);
     }
 
     /**
@@ -411,8 +425,8 @@ export class MGT2Helper {
 
         if (typeof data === "string") {
             // Every string reaching here is a distance, a quantity or a percentage, none of which is
-            // written with grouping — so a comma is always the decimal point, whatever the locale.
-            const converted = Number(data.replace(/\s+/g, "").replace(/,/g, "."));
+            // written with grouping — so a comma is always the decimal point, and a pasted − is a minus.
+            const converted = Number(data.replace(/\s+/g, "").replace(/,/g, ".").replace(/−/g, "-"));
             if (isNaN(converted))
                 return 0;
 

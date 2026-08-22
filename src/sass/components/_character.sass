@@ -622,11 +622,12 @@
 //  Footer — the budget block's compact face
 // --------------------------------------------
 
-// The only strip of always-on real estate the sheet has.
+// The only strip of always-on real estate the sheet has, and the window's third value: the band is
+// the chrome, the page is the paper, the foot is the plinth. At the card's 4% it read as the page.
 .mgt2 .mgt2-footer
 	padding: 7px 16px
-	border-top: 1px solid var(--rule)
-	background: color-mix(in oklab, var(--ink) 4%, transparent)
+	border-top: 1px solid var(--edge)
+	background: var(--plinth)
 	.cfg
 		display: inline-flex
 		font-size: 12px

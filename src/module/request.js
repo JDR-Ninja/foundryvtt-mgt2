@@ -1,4 +1,4 @@
-import { wireChainSources } from "./chatHelper.js";
+import { stripCardButton, wireChainSources } from "./chatHelper.js";
 import { checkOf } from "./chat-message.js";
 import { Checks, renderRollCard } from "./checks.js";
 import { MGT2 } from "./config.js";
@@ -55,6 +55,10 @@ export const NUDGE_MODES = Object.freeze({
     open: "MGT2.Request.Nudge.open",
     off: "MGT2.Request.Nudge.off"
 });
+
+/** The two referee-only card buttons, neither of which is offered until the switch is turned on. */
+export const ASK_SAME_SETTING = "request.askTheSame";
+export const ASK_AGAIN_SETTING = "request.askAgain";
 
 /**
  * One demand the referee composed and sent: the skill, the characteristic(s), the rung, the stance,
@@ -544,6 +548,7 @@ function footOf(request, reading, answered, chain) {
 /** Everything `templates/chat/request.html` prints, built per client from the live reading. */
 function cardContext(request) {
     const gm = game.user.isGM;
+    const again = gm && game.settings.get("mgt2", ASK_AGAIN_SETTING);
     // Off does not hide the rung with CSS: the card is rendered per client, so it is not emitted.
     const showTarget = request.showTarget || gm;
     const withdrawn = request.state === "withdrawn";
@@ -565,7 +570,7 @@ function cardContext(request) {
     };
 
     if ( withdrawn ) {
-        if ( gm ) {
+        if ( again ) {
             context.buttons.push({ action: "requestAskAgain",
                 label: game.i18n.localize("MGT2.Request.Chat.AskAgain") });
         }
@@ -671,8 +676,10 @@ function cardContext(request) {
                 label: game.i18n.localize("MGT2.Request.Chat.Conclude"),
                 hot: reading.every(read => read.status !== "waiting") });
         }
-        context.buttons.push({ action: "requestAskAgain",
-            label: game.i18n.localize("MGT2.Request.Chat.AskAgain") });
+        if ( again ) {
+            context.buttons.push({ action: "requestAskAgain",
+                label: game.i18n.localize("MGT2.Request.Chat.AskAgain") });
+        }
         if ( request.state === "open" ) {
             context.buttons.push({ action: "requestWithdraw",
                 label: game.i18n.localize("MGT2.Request.Chat.Withdraw") });
@@ -721,6 +728,13 @@ async function renderInPlace(id) {
             html.addEventListener("pointerleave", hover);
         }
         li.replaceWith(html);
+    }
+}
+
+/** The card is a render and not an injection, so a switch flip re-renders rather than edits. */
+export function refreshRequestCards() {
+    for ( const message of game.messages ) {
+        if ( message.type === REQUEST ) rerenderRequest(message.id);
     }
 }
 
@@ -977,8 +991,12 @@ function injectDocketControl(root) {
  * that template unchanged, so a check posted before this feature existed still gets the button.
  */
 export function injectAskTheSame(message, html) {
+    const existing = html.querySelector('[data-action="askTheSame"]');
     const check = checkOf(message);
-    if ( !game.user.isGM || !check ) return;
+    if ( !game.user.isGM || !check || !game.settings.get("mgt2", ASK_SAME_SETTING) ) {
+        return stripCardButton(existing);
+    }
+    if ( existing ) return;
     const card = html.querySelector(".mgt2.card");
     if ( !card ) return;
 
@@ -989,6 +1007,7 @@ export function injectAskTheSame(message, html) {
         card.append(buttons);
     }
     const button = document.createElement("button");
+    button.dataset.action = "askTheSame";
     button.textContent = game.i18n.localize("MGT2.Request.Chat.AskTheSame");
     button.addEventListener("click", event => {
         event.preventDefault();
@@ -999,4 +1018,12 @@ export function injectAskTheSame(message, html) {
         openDocket({ from: "check", skillMode: "named", skill: check.label ?? "", difficulty });
     });
     buttons.append(button);
+}
+
+/** The switch reaches the cards already in the log — sidebar, popout and notifications alike. */
+export function refreshAskTheSame() {
+    for ( const li of document.querySelectorAll(".chat-message[data-message-id]") ) {
+        const message = game.messages.get(li.dataset.messageId);
+        if ( message ) injectAskTheSame(message, li);
+    }
 }

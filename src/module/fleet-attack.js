@@ -253,7 +253,7 @@ export class FleetAttack {
         await this.#post(attacker, {
             rollTypeName: attacker.name,
             rollObjectName: localize("MGT2.Fleet.Attack.Weapons", { count, name: weapon.name }),
-            modifiers: factor.rows.labels,
+            modifiers: factor.rows.terms,
             lines: this.#lines(target, factor, damage, options)
         });
         return { factor, damage, band: at };
@@ -295,7 +295,7 @@ export class FleetAttack {
 
         await Checks.post(outcome, {
             actor: attacker.actor, label: weapon.name, difficulty,
-            rollTypeName: attacker.name, rollObjectName: weapon.name, modifiers: rows.labels,
+            rollTypeName: attacker.name, rollObjectName: weapon.name, modifiers: rows.terms,
             lines: hit
                 ? [localize("MGT2.Fleet.Attack.Final", { damage: damage.total, target: target.name })]
                 : [localize("MGT2.Fleet.Spinal.Missed")]
@@ -323,7 +323,7 @@ export class FleetAttack {
         await this.#post(attacker, {
             rollTypeName: attacker.name,
             rollObjectName: localize(entry?.label ?? "MGT2.Fleet.Attack.Missiles"),
-            modifiers: factor?.rows.labels ?? [],
+            modifiers: factor?.rows.terms ?? [],
             lines: [MGT2Helper.plural("MGT2.Fleet.Attack.Salvo", hits, { hits, damage: adjusted }),
                 localize("MGT2.Fleet.Attack.Final", { damage: total, target: target.name })]
         });
