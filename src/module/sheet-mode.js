@@ -7,7 +7,8 @@ async function onToggleSheetMode() {
 }
 
 /**
- * Play / edit mode, shared by the actor and item sheets — which have no common base of their own.
+ * Play / edit mode and the window title, shared by the actor and item sheets — which have no
+ * common base of their own.
  * @returns {typeof DocumentSheetV2}
  */
 export const SheetModeMixin = Base => class extends Base {
@@ -22,6 +23,11 @@ export const SheetModeMixin = Base => class extends Base {
 
   /** @type {number|null} */
   _mode = null;
+
+  /** The name alone: the type core prefixes is already on the sheet. @inheritDoc */
+  get title() {
+    return this.document.name || this.document.id;
+  }
 
   /** @type {boolean} */
   get isEditMode() {

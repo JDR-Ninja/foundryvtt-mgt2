@@ -341,6 +341,7 @@ body.mgt2-accent-steel {
 .mgt2 .window-header {
   color: var(--mute);
   background-color: var(--paper);
+  border-bottom: none;
   padding-left: 9px;
   gap: 9px;
 }
@@ -383,7 +384,7 @@ body.mgt2-accent-steel {
   --run: calc(var(--rise) * var(--dog));
   --step-at: 45%;
   --back: 4px;
-  --acc-dy: 7px;
+  background: var(--mgt2-bgcolor-form);
 }
 .mgt2.application > .window-header {
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--rise)), calc(var(--step-at) + var(--run)) calc(100% - var(--rise)), var(--step-at) 100%, 0 100%);
@@ -406,12 +407,12 @@ body.mgt2-accent-steel {
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(var(--header-height) - var(--rise) + var(--acc-dy));
+  top: calc(var(--header-height) - var(--rise));
   height: calc(var(--rise) + 1px);
   z-index: 2;
   pointer-events: none;
   background: var(--accent-text);
-  clip-path: polygon(0 calc(100% - 1px), calc(var(--step-at) + 22px) calc(100% - 1px), calc(var(--step-at) + 22px + var(--run)) 0, 100% 0, 100% 1px, calc(var(--step-at) + 22px + var(--run)) 1px, calc(var(--step-at) + 22px) 100%, 0 100%);
+  clip-path: polygon(0 calc(100% - 1px), var(--step-at) calc(100% - 1px), calc(var(--step-at) + var(--run)) 0, 100% 0, 100% 1px, calc(var(--step-at) + var(--run)) 1px, var(--step-at) 100%, 0 100%);
 }
 .mgt2.application.minimized::before, .mgt2.application.minimized::after {
   display: none;

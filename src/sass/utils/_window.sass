@@ -9,6 +9,9 @@
 	.window-header
 		color: var(--mute)
 		background-color: var(--paper)
+		// The clip cuts core's rule off the diagonal and the shallow half, so it reaches only the
+		// deep third of the band. The accent below draws that edge across the whole profile.
+		border-bottom: none
 		// The inset belongs to the band and not to the toggle: a window without one — every dialog,
 		// every screen, a sheet a player cannot edit — had the mark flush against the frame.
 		padding-left: 9px
@@ -68,9 +71,9 @@
 //  The step — the window's own silhouette
 // --------------------------------------------
 // the page is never cut, all the shape is in the bands. So the frame keeps core's rectangle, its radius and its
-// shadow — this costs no shadow, no grip, no clickable pixel and no element — and three parallel
-// profiles at one angle carry it: a plate behind the band, the band, and the accent as the top rule
-// of the content, which is the job the page's orange line does.
+// shadow — this costs no shadow, no grip, no clickable pixel and no element — and three profiles at
+// one angle carry it: the band, the accent rule on its edge, and a plate offset behind both, which
+// shows under the rule as the ledge.
 .mgt2.application
 	--rise: 10px
 	// 32.6 : 27.0 pt off the page, which is 39.6° and not 45.
@@ -78,7 +81,8 @@
 	--run: calc(var(--rise) * var(--dog))
 	--step-at: 45%
 	--back: 4px
-	--acc-dy: 7px
+	// The step exposes the frame itself, where core paints a sheet with its own parchment.
+	background: var(--mgt2-bgcolor-form)
 
 	// Deep where the toggle, the mark and the title are; shallow where the controls are.
 	> .window-header
@@ -99,19 +103,19 @@
 		background: color-mix(in oklab, var(--chrome) 70%, var(--i-ink-chrome))
 		clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--rise)), calc(var(--step-at) + var(--back) + var(--run)) calc(100% - var(--rise)), calc(var(--step-at) + var(--back)) 100%, 0 100%)
 
-	// The accent, the same profile a third time. 1px measured vertically, so the diagonal reads a
-	// hair finer — as a 1pt stroke does at 39°.
+	// The accent, the band's own profile a third time and flush to its edge. 1px measured vertically,
+	// so the diagonal reads a hair finer — as a 1pt stroke does at 39°.
 	&::after
 		content: ""
 		position: absolute
 		left: 0
 		right: 0
-		top: calc(var(--header-height) - var(--rise) + var(--acc-dy))
+		top: calc(var(--header-height) - var(--rise))
 		height: calc(var(--rise) + 1px)
 		z-index: 2
 		pointer-events: none
 		background: var(--accent-text)
-		clip-path: polygon(0 calc(100% - 1px), calc(var(--step-at) + 22px) calc(100% - 1px), calc(var(--step-at) + 22px + var(--run)) 0, 100% 0, 100% 1px, calc(var(--step-at) + 22px + var(--run)) 1px, calc(var(--step-at) + 22px) 100%, 0 100%)
+		clip-path: polygon(0 calc(100% - 1px), var(--step-at) calc(100% - 1px), calc(var(--step-at) + var(--run)) 0, 100% 0, 100% 1px, calc(var(--step-at) + var(--run)) 1px, var(--step-at) 100%, 0 100%)
 
 	// Minimised is the band alone: the plate would hang under it and the rule would float on nothing.
 	&.minimized::before,
