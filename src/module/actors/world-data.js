@@ -41,8 +41,8 @@ export class WorldData extends foundry.abstract.TypeDataModel {
             // WHAT THE BOOKS PRINT, and only that: the sector by name and the hex INSIDE that
             // sector, so `0605` is column 6 row 5 of its own grid — the pair a referee reads off a
             // subsector map and can type for a world of their own.
-            sector: new fields.StringField({ required: false, blank: true, trim: true }),
-            hex: new fields.StringField({ required: false, blank: true, trim: true }),
+            sector: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            hex: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
 
             // Read by BOTH traffic tables with opposite signs — passengers Amber +1 / Red −4 (Core
             // p.239), freight Amber −2 / Red −6 (Core p.240) — and a Red Zone is forbidden.
@@ -75,8 +75,8 @@ export class WorldData extends foundry.abstract.TypeDataModel {
                 new fields.BooleanField({ required: true }),
                 { initial: {}, validateKey: key => MGT2.TradeCodes.some(row => row.code === key) }),
 
-            description: new fields.HTMLField({ required: false, blank: true, trim: true }),
-            notes: new fields.HTMLField({ required: false, blank: true, trim: true })
+            description: new fields.HTMLField({ required: false, blank: true, trim: true, initial: "" }),
+            notes: new fields.HTMLField({ required: false, blank: true, trim: true, initial: "" })
         };
     }
 

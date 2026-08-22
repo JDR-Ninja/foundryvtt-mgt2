@@ -87,7 +87,7 @@ export class Contract {
 
         const actor = item.system.hunterActor;
         const { parts, labels } = Checks.modifiers([Contract.#repRow(actor)]);
-        const outcome = await Checks.resolve({ formula: ["2d6", ...parts].join(" ") });
+        const outcome = await Checks.resolve({ formula: ["2d6", ...parts].join("") });
         if ( !outcome ) return null;
 
         const percent = Contract.negotiationPercent(outcome.roll.total);
@@ -131,7 +131,7 @@ export class Contract {
         const actor = system.hunterActor;
         const difficulty = Contract.qualificationDifficulty(system.repFloor - system.hunterRep);
         const { parts, labels } = Checks.modifiers([Contract.#repRow(actor)]);
-        const outcome = await Checks.resolve({ formula: ["2d6", ...parts].join(" "), difficulty });
+        const outcome = await Checks.resolve({ formula: ["2d6", ...parts].join(""), difficulty });
         if ( !outcome ) return null;
 
         const passed = outcome.effect >= 0;

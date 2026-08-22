@@ -34,7 +34,7 @@ export class CharacterData extends ActorBaseData {
         });
 
         return Object.assign(schema, withPersonal(), {
-            biography: new fields.HTMLField({ required: false, blank: true, trim: true }),
+            biography: new fields.HTMLField({ required: false, blank: true, trim: true, initial: "" }),
 
             characteristics: new fields.SchemaField({
                 strength: createCharacteristicField(true),
@@ -80,16 +80,17 @@ export class CharacterData extends ActorBaseData {
                         ok: new fields.BooleanField({ required: false, nullable: true, initial: null }),
                         amount: new fields.NumberField({ required: false, initial: 0, integer: true }),
                         roll: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
-                        note: new fields.StringField({ required: false, blank: true, trim: true })
+                        note: new fields.StringField({
+                            required: false, blank: true, trim: true, initial: "" })
                     }), { initial: [] }),
                     // Core only, and the ONLY stored counter in either engine — the rest is log summed.
                     weeks: new fields.NumberField({ required: false, initial: 0, min: 0, max: 8, integer: true }),
                     // The open period's note, promoted into its `period` row when the check closes it.
-                    note: new fields.StringField({ required: false, blank: true, trim: true }),
+                    note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                     // Core p.55 lets ANY physical characteristic buy Athletics 0, so the choice is
                     // stored.
                     characteristic: new fields.StringField({ required: false, blank: true, trim: true,
-                        choices: MGT2.Characteristics }),
+                        choices: MGT2.Characteristics, initial: "" }),
                     // Companion p.39's comrade: their level caps what may be learned, so it is read
                     // at the roll and never copied here.
                     teacher: new fields.DocumentUUIDField({ required: false, nullable: true, initial: null,
@@ -128,7 +129,7 @@ export class CharacterData extends ActorBaseData {
                     { initial: {}, validateKey: key => key in MGT2.Characteristics }),
                 // Cr paid where a source has a price; what the Traveller could not pay becomes debt.
                 cost: new fields.NumberField({ required: false, nullable: false, min: 0, integer: true, initial: 0 }),
-                note: new fields.StringField({ required: false, blank: true, trim: true })
+                note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             }), { initial: [] }),
 
             // Other Benefits are RIGHTS WITH LIMITS and not objects — "any armour up to Cr10000 and
@@ -140,14 +141,14 @@ export class CharacterData extends ActorBaseData {
                 // Which `MGT2.Benefits` definition this row came from; blank is the referee's own.
                 ref: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 // What the row entitles you to, as the book prints it.
-                category: new fields.StringField({ required: false, blank: true, trim: true }),
+                category: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 // Null where the row prints no ceiling; an improved cybernetic implant exceeds both.
                 credits: new fields.NumberField({
                     required: false, nullable: true, initial: null, min: 0, integer: true }),
                 tl: new fields.NumberField({
                     required: false, nullable: true, initial: null, min: 0, integer: true }),
                 // "Unarmed" on the Personal Vehicle is neither a credit nor a TL ceiling.
-                constraint: new fields.StringField({ required: false, blank: true, trim: true }),
+                constraint: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 // How a second roll of the same row reads — four printed shapes, not one.
                 onRepeat: new fields.StringField({
                     required: false, blank: false, initial: "another", choices: MGT2.BenefitRepeats }),
@@ -159,19 +160,19 @@ export class CharacterData extends ActorBaseData {
                 // Given up rather than taken, for one printed rule: only one Traveller may start
                 // owning a ship, and each of the others takes Cr25000 a year instead (folio 48).
                 surrendered: new fields.BooleanField({ required: false, initial: false }),
-                note: new fields.StringField({ required: false, blank: true, trim: true }),
+                note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 provenance: new fields.SchemaField({
                     term: new fields.NumberField({
                         required: false, nullable: true, initial: null, min: 0, integer: true }),
-                    career: new fields.StringField({ required: false, blank: true, trim: true }),
-                    table: new fields.StringField({ required: false, blank: true, trim: true }),
-                    note: new fields.StringField({ required: false, blank: true, trim: true })
+                    career: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+                    table: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+                    note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
                 })
             }), { initial: [] }),
 
             // State that outlives a dose and so cannot live on the `drug` Item (Core p.115).
             drugCounters: new fields.ArrayField(new fields.SchemaField({
-                drug: new fields.StringField({ required: false, blank: true, trim: true }),
+                drug: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 doses: new fields.NumberField({
                     required: false, nullable: false, min: 0, integer: true, initial: 0 }),
                 resetOn: new fields.StringField({

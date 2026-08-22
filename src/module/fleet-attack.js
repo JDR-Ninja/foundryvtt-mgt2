@@ -285,7 +285,7 @@ export class FleetAttack {
 
         const rows = Checks.modifiers(entries);
         const outcome = await Checks.resolve({
-            formula: ["2d6", ...rows.parts].join(" + "), difficulty });
+            formula: ["2d6", ...rows.parts].join(""), difficulty });
         if ( !outcome ) return null;
 
         const hit = outcome.effect >= 0;

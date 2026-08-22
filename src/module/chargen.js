@@ -32,7 +32,7 @@ export class ChargenState extends foundry.abstract.DataModel {
             // status that gates career access and moves NON-monotonically.
             tracks: new fields.TypedObjectField(new fields.SchemaField({
                 value: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
-                rung: new fields.StringField({ required: false, blank: true, trim: true }),
+                rung: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 // The high-water mark "highest rank reached" has to read, kept because a
                 // track that falls cannot reconstruct it afterwards.
                 high: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true })
@@ -41,9 +41,9 @@ export class ChargenState extends foundry.abstract.DataModel {
             // Folio 19's Connections Rule, which is an ALLOWANCE and not an outcome: two at most,
             // each with a different Traveller.
             connections: new fields.ArrayField(new fields.SchemaField({
-                with: new fields.StringField({ required: false, blank: true, trim: true }),
-                skill: new fields.StringField({ required: false, blank: true, trim: true }),
-                note: new fields.StringField({ required: false, blank: true, trim: true })
+                with: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+                skill: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+                note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             }), { initial: [] }),
 
             // Folio 50's shared skills package, and only the half that is spent: what a Traveller
@@ -60,9 +60,9 @@ function createCounterEntryField() {
         value: new fields.NumberField({ required: false, initial: 1, integer: true }),
         // Which career record earned or lost it, so a row that wipes a career's rolls can be
         // applied to that career and no other.
-        career: new fields.StringField({ required: false, blank: true, trim: true }),
+        career: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         term: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
-        note: new fields.StringField({ required: false, blank: true, trim: true })
+        note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
     });
 }
 
@@ -243,12 +243,13 @@ export const Chargen = {
                 age += years;
             }
             // `events[]` is dated by age and not by term, so each one lands in the term its age
-            // falls in — the last one taking whatever runs past the end, because dropping a line
-            // silently is worse than printing it late.
+            // falls in — the last term taking anything past the end or undated, because dropping a
+            // line silently is worse than printing it late.
             const mine = rows.slice(first);
             if ( !mine.length ) continue;
             for ( const event of system.events ?? [] ) {
-                (mine.find(row => row.to > event.age) ?? mine.at(-1)).events.push(event);
+                const row = Number.isFinite(event.age) ? mine.find(one => one.to > event.age) : null;
+                (row ?? mine.at(-1)).events.push(event);
             }
         }
         return rows;

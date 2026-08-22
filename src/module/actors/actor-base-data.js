@@ -35,14 +35,14 @@ export function createCharacteristicField(show = true) {
 export function withPersonal() {
     return {
         personal: new fields.SchemaField({
-            title: new fields.StringField({ required: false, blank: true, trim: true }),
+            title: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             // The embedded Item, or the name a table shipping no content typed instead.
             species: new LocalDocumentField(foundry.documents.BaseItem, {
                 required: false, blank: true, trim: true, initial: "", fallback: true }),
-            age: new fields.StringField({ required: false, blank: true, trim: true }),
-            gender: new fields.StringField({ required: false, blank: true, trim: true }),
-            pronouns: new fields.StringField({ required: false, blank: true, trim: true }),
-            homeworld: new fields.StringField({ required: false, blank: true, trim: true })
+            age: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            gender: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            pronouns: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            homeworld: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         })
     };
 }
@@ -96,7 +96,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             }),
             // Clamped to `life.damage` on every prepare: an hour of rest clears exactly this (Core p.79).
             stun: new fields.NumberField({ required: false, nullable: false, initial: 0, min: 0, integer: true }),
-            notes: new fields.HTMLField({ required: false, blank: true, trim: true }),
+            notes: new fields.HTMLField({ required: false, blank: true, trim: true, initial: "" }),
 
             // A Traveller's traits come from their species, so that is where a new entry starts.
             traits: createTraitsField("species"),

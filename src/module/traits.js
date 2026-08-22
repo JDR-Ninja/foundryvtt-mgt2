@@ -409,11 +409,11 @@ export function createTraitsField(family) {
         family: new fields.StringField({ required: true, blank: false, initial: family, choices: TRAIT_FAMILIES }),
         key: new fields.StringField({ required: true, blank: false, initial: CUSTOM_KEY }),
         params: new fields.ArrayField(new fields.SchemaField({
-            slot: new fields.StringField({ required: false, blank: true }),
+            slot: new fields.StringField({ required: false, blank: true, initial: "" }),
             value: new fields.StringField({ required: true, blank: true }),
             num: new fields.NumberField({ required: false, nullable: true, initial: null })
         })),
-        note: new fields.StringField({ required: false, blank: true, trim: true })
+        note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
     }));
 }
 

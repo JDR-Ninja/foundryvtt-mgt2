@@ -92,8 +92,9 @@ class ItemBaseData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         const fields = foundry.data.fields;
         const schema = {
-            description: new fields.StringField({ required: false, blank: true, trim: true, nullable: true }),
-            subType: new fields.StringField({ required: false, blank: false, nullable: true }),
+            description: new fields.StringField({
+                required: false, blank: true, trim: true, nullable: true, initial: "" }),
+            subType: new fields.StringField({ required: false, blank: false, nullable: true, initial: null }),
             source: createSourceField()
         };
 
@@ -116,9 +117,9 @@ class PhysicalItemData extends ItemBaseData {
         });
 
         schema.roll = new fields.SchemaField({
-            characteristic: new fields.StringField({ required: false, blank: true, trim: true }),
-            skill: new fields.StringField({ required: false, blank: true, trim: true }),
-            difficulty: new fields.StringField({ required: false, blank: true, trim: true })
+            characteristic: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            skill: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            difficulty: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         });
 
 
@@ -189,16 +190,18 @@ export class EquipmentData extends PhysicalItemData {
         // a characteristic, a skill DM, Protection, computer capacity and prose — so the printed
         // cell stays a string and each computable kind is declared beside it.
         schema.augment = new fields.SchemaField({
-            improvement: new fields.StringField({ required: false, blank: true, trim: true }),
+            improvement: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             modifiers: new fields.ArrayField(
                 new fields.SchemaField({
-                    characteristic: new fields.StringField({ required: false, blank: true, trim: true }),
-                    value: new fields.NumberField({ required: false, integer: true, nullable: true })
+                    characteristic: new fields.StringField({
+                        required: false, blank: true, trim: true, initial: "" }),
+                    value: new fields.NumberField({
+                        required: false, integer: true, nullable: true, initial: null })
                 })
             ),
             // Core p.107 names the skill the table would not: the augment is bought FOR one.
             skill: new fields.SchemaField({
-                name: new fields.StringField({ required: false, blank: true, trim: true }),
+                name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 value: new fields.NumberField({ required: false, initial: 0, integer: true })
             }),
             // Core p.107: subdermal armour "stacks with other protection" — additive over worn armour.
@@ -223,10 +226,10 @@ export class DiseaseData extends ItemBaseData {
         const schema = super.defineSchema();
         schema.subType.initial = "disease"; // disease;poison
         schema.difficulty = new fields.StringField({ required: true, initial: "Average" });
-        schema.damage = new FormulaField({ required: false, blank: true });
+        schema.damage = new FormulaField({ required: false, blank: true, initial: "" });
         // The referee's own word — `paralysis` — and never what that word does.
         schema.effect = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
-        schema.interval = new fields.StringField({ required: false, blank: true });
+        schema.interval = new fields.StringField({ required: false, blank: true, initial: "" });
         return schema;
     }
 }
@@ -237,7 +240,7 @@ export class DiseaseData extends ItemBaseData {
  */
 function createCellField(options = {}) {
     return new fields.SchemaField({
-        text: new fields.StringField({ required: false, blank: true, trim: true }),
+        text: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         mode: new fields.StringField({
             required: false, blank: false, initial: "all", choices: MGT2.CellModes }),
         grants: new fields.ArrayField(new fields.SchemaField({
@@ -246,10 +249,10 @@ function createCellField(options = {}) {
             // Free text and never a `choices` list: no skill list ships at all, so a grant names
             // one and `MGT2Helper.matchesSkill` resolves it against whatever the referee's library
             // holds.
-            skill: new fields.StringField({ required: false, blank: true, trim: true }),
+            skill: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             // Blank picks none, which is what a level-0 grant does: the choice happens when the
             // skill reaches level 1 (folio 58).
-            speciality: new fields.StringField({ required: false, blank: true, trim: true }),
+            speciality: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             specialities: new fields.ArrayField(
                 new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] }),
             // `Gun Combat (any)`, `Science (any)`, and the Psion's `Any Talent`.
@@ -257,14 +260,14 @@ function createCellField(options = {}) {
             characteristic: new fields.StringField({
                 required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
             // `1D Ship Shares`, `D3 Enemies` — a quantity that is rolled rather than counted.
-            formula: new FormulaField({ required: false, blank: true }),
+            formula: new FormulaField({ required: false, blank: true, initial: "" }),
             value: new fields.NumberField({ required: false, initial: 1, integer: true }),
             mode: new fields.StringField({
                 required: false, blank: false, initial: "raise", choices: MGT2.GrantModes }),
             // The per-row floor of `SOC 10 or SOC +1, whichever is higher`. Null is the ordinary case.
             floor: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
             // Which shared Other Benefits definition a `benefit` grant points at, typed by the referee.
-            ref: new fields.StringField({ required: false, blank: true, trim: true }),
+            ref: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             // Which relationship a `contact` grant makes: an Ally is a benefit row of its own.
             relation: new fields.StringField({
                 required: false, blank: true, trim: true, initial: "", choices: MGT2.ContactRelations })
@@ -302,14 +305,14 @@ function createStandingModifierField() {
         appliesTo: new fields.SetField(new fields.StringField({
             required: true, blank: false, choices: MGT2.CreationChecks }), { initial: [] }),
         // A career NAME the referee typed, matched case- and space-insensitively; blank is every career.
-        career: new fields.StringField({ required: false, blank: true, trim: true }),
+        career: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         // Blank is ungated, which is what every frame entry written before this field meant.
         gate: new fields.SchemaField({
             characteristic: new fields.StringField({
                 required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
             min: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true })
         }),
-        note: new fields.StringField({ required: false, blank: true, trim: true })
+        note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
     });
 }
 
@@ -321,14 +324,14 @@ export function createTrayEntryField() {
         // The number a `dm` carries. Every other kind reads `value` instead.
         dm: new fields.NumberField({ required: false, initial: 0, integer: true }),
         // What an `unlock`, `careerOffer`, `careerBlock` or `grant` names — a career name or a skill.
-        value: new fields.StringField({ required: false, blank: true, trim: true }),
+        value: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         // A SET: "event bonuses to advancement rolls may be applied to commission rolls instead".
         appliesTo: new fields.SetField(new fields.StringField({
             required: true, blank: false, choices: MGT2.TrayChecks }), { initial: [] }),
         scope: new fields.StringField({
             required: false, blank: false, initial: "thisCareer", choices: MGT2.TrayScopes }),
         // Which career, when the scope is a named one or this one.
-        career: new fields.StringField({ required: false, blank: true, trim: true }),
+        career: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         duration: new fields.StringField({
             required: false, blank: false, initial: "oneShot", choices: MGT2.TrayDurations }),
         // Null is unlimited. A `thisCareer` DM on every Survival roll has no count.
@@ -342,7 +345,7 @@ export function createTrayEntryField() {
         // modifier stops applying.
         condition: new fields.StringField({
             required: false, blank: false, initial: "always", choices: MGT2.TrayConditions }),
-        note: new fields.StringField({ required: false, blank: true, trim: true })
+        note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
     });
 }
 
@@ -350,7 +353,7 @@ export function createTrayEntryField() {
 function createEventRowField({ ejects = "stays", ...options } = {}) {
     return new fields.SchemaField({
         roll: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
-        text: new fields.StringField({ required: false, blank: true, trim: true }),
+        text: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         ejects: new fields.StringField({
             required: false, blank: false, initial: ejects, choices: MGT2.EjectionOutcomes }),
         benefit: new fields.StringField({
@@ -360,26 +363,26 @@ function createEventRowField({ ejects = "stays", ...options } = {}) {
         benefitFormula: new FormulaField({ required: false, blank: true, initial: "" }),
         // A career NAME the referee typed: a row may send a Traveller to another career, offer one
         // with qualification waived, or borrow another career's tables for a single roll.
-        career: new fields.StringField({ required: false, blank: true, trim: true }),
+        career: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         // WHICH of the three senses the reference above carries.
         careerMode: new fields.StringField({
             required: false, blank: false, initial: "offer", choices: MGT2.RowCareerModes }),
         // Sub-tables must be ADDRESSABLE: two careers' rows jump straight to the Unusual Event 1D
         // branch, skipping the 2D Life Event roll above it.
-        subTable: new fields.StringField({ required: false, blank: true, trim: true }),
+        subTable: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         // The sub-roll printed INSIDE the prose: "roll 9+ on any skill you have learned during this
         // term".
         check: new fields.SchemaField({
             characteristic: new fields.StringField({
                 required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
-            skill: new fields.StringField({ required: false, blank: true, trim: true }),
+            skill: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             target: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true })
         }),
         // A named track this row moves, and by how much: prison events shift a parole threshold by
         // +2, +1, -1, -2, -1D or a full re-roll.
         track: new fields.SchemaField({
-            key: new fields.StringField({ required: false, blank: true, trim: true }),
-            formula: new FormulaField({ required: false, blank: true }),
+            key: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            formula: new FormulaField({ required: false, blank: true, initial: "" }),
             value: new fields.NumberField({ required: false, initial: 0, integer: true }),
             // A row that re-rolls the track from its own definition rather than adjusting it.
             reroll: new fields.BooleanField({ required: false, initial: false })
@@ -408,9 +411,9 @@ function createEventRowField({ ejects = "stays", ...options } = {}) {
 function createProvenanceField() {
     return new fields.SchemaField({
         term: new fields.NumberField({ required: false, nullable: true, initial: null, min: 0, integer: true }),
-        career: new fields.StringField({ required: false, blank: true, trim: true }),
-        table: new fields.StringField({ required: false, blank: true, trim: true }),
-        note: new fields.StringField({ required: false, blank: true, trim: true })
+        career: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+        table: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+        note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
     });
 }
 
@@ -420,11 +423,11 @@ function createProvenanceField() {
  */
 function createTrackDefinitionField() {
     return new fields.SchemaField({
-        key: new fields.StringField({ required: false, blank: true, trim: true }),
-        label: new fields.StringField({ required: false, blank: true, trim: true }),
+        key: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+        label: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         kind: new fields.StringField({
             required: false, blank: false, initial: "numeric", choices: MGT2.TrackKinds }),
-        initial: new FormulaField({ required: false, blank: true }),
+        initial: new FormulaField({ required: false, blank: true, initial: "" }),
         cap: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
         monotone: new fields.BooleanField({ required: false, initial: false }),
         // The rungs of an enumerated track, in order, so "fell to the one below" is computable.
@@ -475,7 +478,7 @@ function createStepField() {
             // A DM the named term does not supply and no characteristic derives: "caste number as a
             // negative DM" reads a track the frame itself declared.
             trackModifiers: new fields.ArrayField(new fields.SchemaField({
-                track: new fields.StringField({ required: false, blank: true, trim: true }),
+                track: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 per: new fields.NumberField({ required: false, initial: 1, integer: true })
             }), { initial: [] }),
 
@@ -494,9 +497,9 @@ function createStepOutcomeField() {
             required: true, blank: false, choices: MGT2.TermOutcomes }), { initial: [] }),
         // "Elevated one degree": `value` is RUNGS on an enumerated track and points on a numeric one.
         track: new fields.SchemaField({
-            key: new fields.StringField({ required: false, blank: true, trim: true }),
+            key: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             value: new fields.NumberField({ required: false, initial: 0, integer: true }),
-            formula: new FormulaField({ required: false, blank: true })
+            formula: new FormulaField({ required: false, blank: true, initial: "" })
         }),
         // A cell with text and no grants is legitimate and is what the unwritable half looks like.
         grant: createCellField()
@@ -523,8 +526,8 @@ function liftLaw(source, key, leaves) {
 /** A law printed once per sex or per role: a row naming neither is the default, first match wins. */
 function createRoleAxisField(values) {
     return new fields.ArrayField(new fields.SchemaField({
-        sex: new fields.StringField({ required: false, blank: true, trim: true }),
-        role: new fields.StringField({ required: false, blank: true, trim: true }),
+        sex: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+        role: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         ...values
     }), { initial: [] });
 }
@@ -623,28 +626,29 @@ export class CareerData extends ItemBaseData {
         // The template-named leaving rule that DISPLACES the generic outcomes rather than layering
         // on them: a roll under the terms served cannot end the career, and a natural 12 releases.
         schema.exitRule = new fields.SchemaField({
-            track: new fields.StringField({ required: false, blank: true, trim: true }),
-            test: new fields.StringField({ required: false, blank: true, trim: true })
+            track: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            test: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         });
         // Which row of the Medical Bills table this career's employer sits on — the three rows are
         // career GROUPS.
-        schema.medicalBillsRow = new fields.StringField({ required: false, blank: true, trim: true });
+        schema.medicalBillsRow = new fields.StringField({
+            required: false, blank: true, trim: true, initial: "" });
         // Species careers are ordinary templates carrying a restriction, and for the Aslan a gender gate.
         schema.restrictedTo = new fields.SchemaField({
-            species: new fields.StringField({ required: false, blank: true, trim: true }),
-            gender: new fields.StringField({ required: false, blank: true, trim: true })
+            species: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            gender: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         });
 
         // Rank ladders are a NAMED SET the assignments point at, which dissolves four apparent
         // exceptions: three services share one enlisted and one officer ladder, one career runs two
         // ladders for three assignments, and one runs three whose rank numbers do not line up.
         schema.rankLadders = new fields.ArrayField(new fields.SchemaField({
-            id: new fields.StringField({ required: false, blank: true, trim: true }),
-            name: new fields.StringField({ required: false, blank: true, trim: true }),
+            id: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             officer: new fields.BooleanField({ required: false, initial: false }),
             rows: new fields.ArrayField(new fields.SchemaField({
                 rank: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true }),
-                title: new fields.StringField({ required: false, blank: true, trim: true }),
+                title: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 bonus: createCellField({ required: false })
             }), { initial: [] })
         }), { initial: [] });
@@ -652,9 +656,9 @@ export class CareerData extends ItemBaseData {
         // The survival and advancement targets are per ASSIGNMENT and Assignment Skills is one
         // sub-table per assignment, which is why the tables number up to seven rather than five.
         schema.assignments = new fields.ArrayField(new fields.SchemaField({
-            name: new fields.StringField({ required: false, blank: true, trim: true }),
-            ladder: new fields.StringField({ required: false, blank: true, trim: true }),
-            officerLadder: new fields.StringField({ required: false, blank: true, trim: true }),
+            name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            ladder: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            officerLadder: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             survival: new fields.SchemaField({
                 characteristic: new fields.StringField({
                     required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
@@ -697,18 +701,18 @@ export class CareerData extends ItemBaseData {
 
         /* ---- RECORD: what this Traveller DID. Empty on a template. ---- */
 
-        schema.assignment = new fields.StringField({ required: false, blank: true });
+        schema.assignment = new fields.StringField({ required: false, blank: true, initial: "" });
         schema.terms = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
         schema.rank = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
         // Which of the template's ladders this record is on, because a commission moves it.
-        schema.ladder = new fields.StringField({ required: false, blank: true, trim: true });
+        schema.ladder = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
         // The rank reached before a commission moved the record to the officer ladder, which resets
         // `rank` to 1 — so the number is gone the moment it is needed, and cannot be reconstructed.
         schema.enlistedRank = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
         schema.events = new fields.ArrayField(
             new fields.SchemaField({
-                age: new fields.NumberField({ required: false, integer: true }),
-                description: new fields.StringField({ required: false, blank: true, trim: true })
+                age: new fields.NumberField({ required: false, integer: true, initial: null }),
+                description: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             })
         );
 
@@ -732,26 +736,26 @@ export class CareerData extends ItemBaseData {
             // Core folio 48 puts 34 "at the end of" the fourth term: a term is served once it closes.
             closed: new fields.BooleanField({ required: false, initial: false }),
             // What the frame said this term yields, so a term that grants nothing stays legible.
-            kind: new fields.StringField({ required: false, blank: true, trim: true }),
+            kind: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             // What the term PRODUCED, as facts a later step reads rather than as prose: a
             // commission and an advancement in the same term are two members here.
             outcomes: new fields.SetField(new fields.StringField({
                 required: true, blank: false, choices: MGT2.TermOutcomes }), { initial: [] }),
             steps: new fields.SetField(new fields.StringField({
                 required: true, blank: false, choices: MGT2.CreationSteps }), { initial: [] }),
-            note: new fields.StringField({ required: false, blank: true, trim: true })
+            note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         }), { initial: [] });
 
         // The Parole Threshold: a possibly-dice initial, a cap, named adjustments carrying
         // provenance.
         schema.track = new fields.SchemaField({
-            key: new fields.StringField({ required: false, blank: true, trim: true }),
+            key: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             value: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
             cap: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
             adjustments: new fields.ArrayField(new fields.SchemaField({
                 value: new fields.NumberField({ required: false, initial: 0, integer: true }),
                 term: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
-                note: new fields.StringField({ required: false, blank: true, trim: true })
+                note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             }), { initial: [] })
         });
 
@@ -811,21 +815,21 @@ export class TalentData extends ItemBaseData {
         schema.cost = new fields.NumberField({ required: true, initial: 0, min: 0, integer: true })
         schema.level = new fields.NumberField({ required: true, initial: 0, min: 0, integer: true })
         schema.skill = new fields.SchemaField({
-            speciality: new fields.StringField({ required: false, blank: true, trim: true }),
+            speciality: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             reduceEncumbrance: new fields.BooleanField({ required: false, initial: false })
         });
 
         schema.psionic = new fields.SchemaField({
-            reach: new fields.StringField({ required: false, blank: true, trim: true }),
+            reach: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             cost: new fields.NumberField({ required: false, initial: 1, min: 0, integer: true }),
-            duration: new fields.StringField({ required: false, blank: true, trim: true }),
-            durationUnit: new fields.StringField({ required: false })
+            duration: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            durationUnit: new fields.StringField({ required: false, initial: "" })
         });
 
         schema.roll = new fields.SchemaField({
-            characteristic: new fields.StringField({ required: false, blank: true, trim: true }),
-            skill: new fields.StringField({ required: false, blank: true, trim: true }),
-            difficulty: new fields.StringField({ required: false, blank: true, trim: true })
+            characteristic: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            skill: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            difficulty: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         });
 
         // Creation grants skills faster than a player can invent fiction, and a level raised twice
@@ -856,8 +860,8 @@ export class ContactData extends ItemBaseData {
         schema.cost = new fields.NumberField({ required: true, initial: 1, min: 0, integer: true })
 
         schema.skill = new fields.SchemaField({
-            speciality: new fields.StringField({ required: false, blank: true, trim: true }),
-            characteristic: new fields.StringField({ required: false, blank: true, trim: true })
+            speciality: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            characteristic: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         });
 
         // `choices` on the two the LEDGER writes, because a bad key from code renders as a raw i18n
@@ -867,15 +871,15 @@ export class ContactData extends ItemBaseData {
         schema.attitude = new fields.StringField({ required: false, blank: true, trim: true, initial: "Unknow" });
         schema.relation = new fields.StringField({
             required: false, blank: true, trim: true, initial: "Contact", choices: MGT2.ContactRelations });
-        schema.title = new fields.StringField({ required: false, blank: true, trim: true });
-        schema.nickname = new fields.StringField({ required: false, blank: true, trim: true });
-        schema.species = new fields.StringField({ required: false, blank: true, trim: true });
-        schema.gender = new fields.StringField({ required: false, blank: true, trim: true });
-        schema.pronouns = new fields.StringField({ required: false, blank: true, trim: true });
-        schema.homeworld = new fields.StringField({ required: false, blank: true, trim: true });
-        schema.location = new fields.StringField({ required: false, blank: true, trim: true });
-        schema.occupation = new fields.StringField({ required: false, blank: true, trim: true });
-        schema.notes = new fields.HTMLField({ required: false, blank: true, trim: true });
+        schema.title = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
+        schema.nickname = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
+        schema.species = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
+        schema.gender = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
+        schema.pronouns = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
+        schema.homeworld = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
+        schema.location = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
+        schema.occupation = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
+        schema.notes = new fields.HTMLField({ required: false, blank: true, trim: true, initial: "" });
 
         // Exactly two cases: the Connections Rule, where the contact IS another Traveller at the
         // table, and ordinary play, where the referee eventually statblocks them.
@@ -1111,15 +1115,15 @@ export class WeaponData extends PhysicalItemData {
         schema.equipped = new fields.BooleanField({ required: false, initial: false });
         schema.range = new fields.SchemaField({
             isMelee: new fields.BooleanField({ required: false, initial: false }),
-            value: new fields.NumberField({ required: false, integer: true, nullable: true }),
+            value: new fields.NumberField({ required: false, integer: true, nullable: true, initial: null }),
             unit: new fields.StringField({
-                required: false, blank: true, nullable: true, choices: MGT2.MetricRange }),
+                required: false, blank: true, nullable: true, choices: MGT2.MetricRange, initial: "" }),
             // Core p.165-167: a spacecraft weapon is printed with the furthest RANGE BAND it
             // reaches and not with a Range score.
             band: new fields.StringField({
                 required: false, blank: true, initial: "", choices: MGT2.ShipRangeBands })
         });
-        schema.damage = new FormulaField({ required: false, blank: true, trim: true });
+        schema.damage = new FormulaField({ required: false, blank: true, trim: true, initial: "" });
         // Companion p.93-94. A set because the printed vocabulary is not a partition, and empty
         // because no book types every weapon: guessing a type would be inventing a rule.
         schema.damageType = new fields.SetField(
@@ -1132,7 +1136,7 @@ export class WeaponData extends PhysicalItemData {
             required: false, nullable: true, initial: null, min: 0, integer: true });
         // WHICH round is in it — an `ammunition` Item on the same actor, by id, blank for the
         // weapon's own.
-        schema.ammunition = new fields.StringField({ required: false, blank: true });
+        schema.ammunition = new fields.StringField({ required: false, blank: true, initial: "" });
         // One enum selects which range vocabulary the weapon speaks and which accuracy fields it
         // has, instead of a vehicleWeapon type duplicating the whole roll path.
         schema.scale = new fields.StringField({
@@ -1182,7 +1186,8 @@ export class ArmorData extends PhysicalItemData {
         // DM-1 to every check per missing level of the required skill; not having the skill at all
         // inflicts the usual DM-3 unskilled penalty instead.
         schema.requireSkill = new fields.StringField({ required: false, blank: false });
-        schema.requireSkillLevel = new fields.NumberField({ required: false, min: 0, integer: true });
+        schema.requireSkillLevel = new fields.NumberField({
+            required: false, min: 0, integer: true, initial: null });
 
 
         // Powered battle dress supports its own weight and is effectively weightless while active.
@@ -1240,7 +1245,7 @@ export class CargoData extends ItemBaseData {
         schema.destination = new fields.SchemaField({
             world: new fields.DocumentUUIDField({
                 type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
-            name: new fields.StringField({ required: false, blank: true, trim: true })
+            name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         });
         // In campaign days, against `mgt2.campaignDay`. Core p.241 docks a late delivery 1D+4 × 10%.
         schema.dueDay = new fields.NumberField({
@@ -1253,11 +1258,11 @@ export class CargoData extends ItemBaseData {
 
         // Core p.243 applies the LARGEST applicable DM rather than their sum, hence pairs and not a sum.
         schema.purchaseDM = new fields.ArrayField(new fields.SchemaField({
-            code: new fields.StringField({ required: false, blank: true, trim: true }),
+            code: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             dm: new fields.NumberField({ required: false, nullable: false, integer: true, initial: 0 })
         }), { initial: [] });
         schema.saleDM = new fields.ArrayField(new fields.SchemaField({
-            code: new fields.StringField({ required: false, blank: true, trim: true }),
+            code: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             dm: new fields.NumberField({ required: false, nullable: false, integer: true, initial: 0 })
         }), { initial: [] });
 
@@ -1303,7 +1308,7 @@ export class PassageData extends ItemBaseData {
         schema.destination = new fields.SchemaField({
             world: new fields.DocumentUUIDField({
                 type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
-            name: new fields.StringField({ required: false, blank: true, trim: true })
+            name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         });
         schema.farePerHead = new fields.NumberField({ required: false, nullable: false, min: 0, initial: 0 });
 
@@ -1404,13 +1409,15 @@ export class DrugData extends PhysicalItemData {
     static defineSchema() {
         const schema = super.defineSchema();
 
-        schema.dose = new fields.StringField({ required: false, blank: true, trim: true });
-        schema.onset = new fields.StringField({ required: false, blank: true, trim: true, nullable: true });
-        schema.duration = new fields.StringField({ required: false, blank: true, trim: true, nullable: true });
+        schema.dose = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
+        schema.onset = new fields.StringField({
+            required: false, blank: true, trim: true, nullable: true, initial: "" });
+        schema.duration = new fields.StringField({
+            required: false, blank: true, trim: true, nullable: true, initial: "" });
 
         // What it leaves behind, and which pipeline that goes down: "Fatigued" and "2D damage" differ.
         schema.afterEffect = new fields.StringField({
-            required: false, blank: true, trim: true, nullable: true });
+            required: false, blank: true, trim: true, nullable: true, initial: "" });
         schema.afterKind = new fields.StringField({
             required: false, blank: false, initial: "none", choices: MGT2.DrugAfterKinds });
 
@@ -1419,7 +1426,7 @@ export class DrugData extends PhysicalItemData {
             dosesBefore: new fields.NumberField({
                 required: false, nullable: true, initial: null, min: 0, integer: true }),
             checkInterval: new fields.StringField({
-                required: false, blank: true, trim: true, nullable: true }),
+                required: false, blank: true, trim: true, nullable: true, initial: "" }),
             cravingDM: new fields.NumberField({
                 required: false, nullable: true, initial: null, integer: true })
         });
@@ -1447,13 +1454,13 @@ export class AmmunitionData extends PhysicalItemData {
         const schema = super.defineSchema();
 
         // Free text: what a magazine fits is a catalogue fact and no book prints a closed list.
-        schema.weaponType = new fields.StringField({ required: false, blank: true, trim: true });
+        schema.weaponType = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
         schema.magazine = new fields.NumberField({
             required: false, nullable: true, initial: null, min: 0, integer: true });
         schema.magazineCost = new fields.NumberField({
             required: false, nullable: true, initial: null, min: 0, integer: true });
         schema.damage = new FormulaField({
-            required: false, blank: true, trim: true, nullable: true });
+            required: false, blank: true, trim: true, nullable: true, initial: "" });
         schema.traits = createTraitsField("weapon");
         // CSC p.179-182: a few rounds REPLACE the weapon's traits, which the list itself cannot say.
         schema.replaceTraits = new fields.BooleanField({ required: false, initial: false });
@@ -1537,15 +1544,18 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         const fields = foundry.data.fields;
         const schema = {
-            description: new fields.StringField({ required: false, blank: true, trim: true, nullable: true }),
-            descriptionLong: new fields.HTMLField({ required: false, blank: true, trim: true }),
+            description: new fields.StringField({
+                required: false, blank: true, trim: true, nullable: true, initial: "" }),
+            descriptionLong: new fields.HTMLField({ required: false, blank: true, trim: true, initial: "" }),
             // Declared rather than inherited: this class is the one that does not extend `ItemBaseData`.
             source: createSourceField(),
             traits: createTraitsField("species"),
             modifiers: new fields.ArrayField(
                 new fields.SchemaField({
-                    characteristic: new fields.StringField({ required: false, blank: true, trim: true }),
-                    value: new fields.NumberField({ required: false, integer: true, nullable: true })
+                    characteristic: new fields.StringField({
+                        required: false, blank: true, trim: true, initial: "" }),
+                    value: new fields.NumberField({
+                        required: false, integer: true, nullable: true, initial: null })
                 })
             ),
 
@@ -1557,13 +1567,13 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
                 }),
                 termYears: new fields.NumberField({ required: false, initial: 4, min: 0, integer: true }),
                 // The frame's own justification: a frame that deletes three steps owes the table a why.
-                why: new fields.StringField({ required: false, blank: true, trim: true }),
+                why: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
 
                 // A term declares what it YIELDS: re-education burns terms and yields nothing, and
                 // one printed term explicitly "is not counted toward your physical age".
                 termKinds: new fields.ArrayField(new fields.SchemaField({
-                    key: new fields.StringField({ required: false, blank: true, trim: true }),
-                    label: new fields.StringField({ required: false, blank: true, trim: true }),
+                    key: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+                    label: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                     // WHICH TERM NUMBERS the kind governs, because one published table is indexed
                     // by term number: its first term is one thing and every term after it another.
                     fromTerm: new fields.NumberField({ required: false, nullable: true, initial: null, min: 1, integer: true }),
@@ -1592,8 +1602,8 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
                 // The book's own name for a slot: BOL, RES and FOL read as Other or Charm without it.
                 // `label` is the full name and `short` the printed abbreviation; the sheet needs both,
                 // because the cell prints one and its tooltip the other.
-                label: new fields.StringField({ required: false, blank: true, trim: true }),
-                short: new fields.StringField({ required: false, blank: true, trim: true })
+                label: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+                short: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             }), { initial: [] }),
             // Characteristics this species does not have at all, which is not one it does not roll for.
             withoutCharacteristics: new fields.SetField(new fields.StringField({
@@ -1621,7 +1631,7 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
             qualificationOverride: new fields.SchemaField({
                 kind: new fields.StringField({
                     required: false, blank: false, initial: "none", choices: MGT2.QualificationOverrides }),
-                formula: new FormulaField({ required: false, blank: true }),
+                formula: new FormulaField({ required: false, blank: true, initial: "" }),
                 characteristic: new fields.StringField({
                     required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
                 // Template ids the referee typed — every override is printed with its own exceptions.
@@ -1631,7 +1641,7 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
             // `EDU DM + 3` is a DEFAULT and not arithmetic: every published species prints its own
             // count and its own mandatory skills.
             backgroundSkills: createRoleAxisField({
-                formula: new FormulaField({ required: false, blank: true }),
+                formula: new FormulaField({ required: false, blank: true, initial: "" }),
                 mandatory: new fields.ArrayField(
                     new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] }),
             // The list the count draws from, typed by the referee: the Core's seventeen are the
@@ -1652,7 +1662,7 @@ export class ItemContainerData extends ItemBaseData {
         const schema = super.defineSchema();
 
         schema.onHand = new fields.BooleanField({ required: false, initial: false });
-        schema.location = new fields.StringField({ required: false, blank: true, trim: true });
+        schema.location = new fields.StringField({ required: false, blank: true, trim: true, initial: "" });
         schema.weightless = new fields.BooleanField({ required: false, initial: false });
         // A container is stored like anything else: a bag inside a bag is the same reference.
         schema.container = new fields.SchemaField({
@@ -1660,7 +1670,8 @@ export class ItemContainerData extends ItemBaseData {
         });
 
         schema.locked = new fields.BooleanField({ required: false, initial: false }); // GM only
-        schema.lockedDescription = new fields.StringField({ required: false, blank: true, trim: true, nullable: true });
+        schema.lockedDescription = new fields.StringField({
+            required: false, blank: true, trim: true, nullable: true, initial: "" });
         return schema;
     }
 
@@ -1692,7 +1703,7 @@ export class RoleData extends ItemBaseData {
         schema.show = new fields.BooleanField({ required: false, initial: true });
 
         schema.actions = new fields.ArrayField(new fields.SchemaField({
-            label: new fields.StringField({ required: false, blank: true, trim: true }),
+            label: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             // `skill` needs a sheet to read the level off, so the roster refuses it on a vacant slot.
             kind: new fields.StringField({
                 required: false, blank: false, initial: "skill", choices: MGT2.RoleActions }),
@@ -1701,7 +1712,7 @@ export class RoleData extends ItemBaseData {
             // zero.
             characteristic: new fields.StringField({
                 required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
-            skill: new fields.StringField({ required: false, blank: true, trim: true }),
+            skill: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             difficulty: new fields.StringField({
                 required: false, blank: true, initial: "", choices: MGT2.Difficulty }),
             dm: new fields.NumberField({ required: false, initial: 0, integer: true }),

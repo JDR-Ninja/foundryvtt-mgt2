@@ -120,7 +120,7 @@ export class ShipGroupData extends foundry.abstract.TypeDataModel {
                 // no closed list of manoeuvres — so a row is the station action's own label and the
                 // points the pilot put behind it.
                 spent: new fields.ArrayField(new fields.SchemaField({
-                    label: new fields.StringField({ required: false, blank: true, trim: true }),
+                    label: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                     points: new fields.NumberField({
                         required: true, nullable: false, integer: true, min: 0, initial: 1 }),
                     // Only movement pays for a band change; docking and aiding gunners do not.
@@ -460,7 +460,7 @@ export class MissileSalvoData extends foundry.abstract.TypeDataModel {
         }
         const rows = this.attackRows;
         const outcome = await Checks.resolve({
-            formula: ["2d6", ...rows.parts].join(" + "), difficulty: "Average" });
+            formula: ["2d6", ...rows.parts].join(""), difficulty: "Average" });
         if ( !outcome ) return null;
 
         const missile = this.missile;

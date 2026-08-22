@@ -87,7 +87,7 @@ export class SpacecraftData extends CraftData {
                     { required: false, initial: [] }),
                 stealth: new fields.StringField({
                     required: false, blank: true, initial: "", choices: MGT2.StealthTypes }),
-                shipClass: new fields.StringField({ required: false, blank: true, trim: true }),
+                shipClass: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 // The one figure of the six a book prints as a countable pool rather than as a
                 // measured quantity, and `characteristics.hull.max` is summed from it — so a
                 // fraction here would leave the ship a fractional hull and a fractional token bar.
@@ -219,12 +219,12 @@ export class SpacecraftData extends CraftData {
                 // A UUID rather than a ForeignDocumentField, because it resolves across collections.
                 actor: new fields.DocumentUUIDField({
                     type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
-                name: new fields.StringField({ required: false, blank: true, trim: true }),
+                name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 // How many bodies this station holds — the printed crew line says `Engineers x2`.
                 count: new fields.NumberField({
                     required: false, nullable: false, integer: true, min: 1, initial: 1 }),
                 // The mount this station sits at.
-                dutyTarget: new fields.StringField({ required: false, blank: true })
+                dutyTarget: new fields.StringField({ required: false, blank: true, initial: "" })
             }), { initial: [] }),
 
             // The mount is not packaging: it multiplies damage by up to a thousand, and it is the
@@ -232,7 +232,7 @@ export class SpacecraftData extends CraftData {
             mounts: new fields.ArrayField(new fields.SchemaField({
                 type: new fields.StringField({
                     required: false, blank: false, initial: "singleTurret", choices: MGT2.ShipMounts }),
-                label: new fields.StringField({ required: false, blank: true, trim: true }),
+                label: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 // Ids of this ship's own embedded weapons, as `mounts` already does on a vehicle.
                 weapons: new fields.ArrayField(new fields.DocumentIdField(), { initial: [] }),
                 // HG p.28: a ship whose weapons are all pop-up scans as unarmed.
@@ -294,7 +294,7 @@ export class SpacecraftData extends CraftData {
             }),
 
             // A free string nobody reads, kept deliberately.
-            homeport: new fields.StringField({ required: false, blank: true, trim: true }),
+            homeport: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
 
             // THE LEG, and not an ordered array of stops: exactly one set of parsecs exists at a
             // time, so nothing can chain on a previous leg and there is no index to shift.
@@ -317,7 +317,7 @@ export class SpacecraftData extends CraftData {
                 queue: new fields.ArrayField(new fields.SchemaField({
                     world: new fields.DocumentUUIDField({
                         type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
-                    name: new fields.StringField({ required: false, blank: true, trim: true })
+                    name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
                 }), { initial: [] }),
                 // Stored per hull, because the screen that shows it reads one hull and a jump
                 // procedure is a property of the drive being fired.

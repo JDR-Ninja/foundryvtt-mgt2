@@ -54,7 +54,7 @@ export class NpcData extends ActorBaseData {
         Object.assign(schema, withPersonal(), {
             subType: new fields.StringField({
                 required: true, blank: false, initial: "person", choices: MGT2.NpcSubTypes }),
-            biography: new fields.HTMLField({ required: false, blank: true, trim: true }),
+            biography: new fields.HTMLField({ required: false, blank: true, trim: true, initial: "" }),
 
             characteristics: new fields.SchemaField({
                 strength: createCharacteristicField(true),
@@ -83,7 +83,7 @@ export class NpcData extends ActorBaseData {
                 swim: new fields.NumberField({ required: false, nullable: true, min: 0, initial: null }),
                 fly: new fields.NumberField({
                     required: false, nullable: true, integer: true, min: 0, max: 10, initial: null }),
-                note: new fields.StringField({ required: false, blank: true, trim: true })
+                note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             }),
 
             // Core p.89-90. The two are independent: the published statblocks pair them freely —
@@ -95,7 +95,7 @@ export class NpcData extends ActorBaseData {
                     required: false, blank: true, initial: "", choices: MGT2.Reactions })
             }),
 
-            role: new fields.StringField({ required: false, blank: true, trim: true }),
+            role: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             attitude: new fields.StringField({
                 required: false, blank: true, initial: "Unknow", choices: MGT2.Attitudes }),
 
@@ -120,7 +120,7 @@ export class NpcData extends ActorBaseData {
         // The printed identity code is kept here and derived on `character`: a referee transcribing
         // an NPC has the code and may never type the six characteristics.
         schema.personal.extendFields({
-            ucp: new fields.StringField({ required: false, blank: true, trim: true })
+            ucp: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         });
         return schema;
     }

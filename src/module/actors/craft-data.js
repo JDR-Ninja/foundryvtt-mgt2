@@ -56,9 +56,9 @@ export class CraftData extends ActorBaseData {
             // of the ship's raise this instead of damaging the location that was hit.
             hullSeverity: severity(),
 
-            registration: new fields.StringField({ required: false, blank: true, trim: true }),
-            owner: new fields.StringField({ required: false, blank: true, trim: true }),
-            description: new fields.HTMLField({ required: false, blank: true, trim: true })
+            registration: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            owner: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            description: new fields.HTMLField({ required: false, blank: true, trim: true, initial: "" })
         });
         return schema;
     }

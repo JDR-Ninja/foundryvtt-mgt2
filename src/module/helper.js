@@ -382,6 +382,9 @@ export class MGT2Helper {
     }
 
     static getRangeDisplay(range) {
+        // A weapon with no printed range stores null, and Number(null) is 0 rather than NaN.
+        if (range.value === null || range.value === undefined || range.value === "") return null;
+
         const value = Number(range.value);
 
         if (isNaN(value)) return null;

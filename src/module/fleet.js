@@ -609,7 +609,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
     async moraleCheck(against = null) {
         const rows = this.moraleRows(against);
         const { parts, labels } = Checks.modifiers(rows);
-        const outcome = await Checks.resolve({ formula: ["2d6", ...parts].join(" ") });
+        const outcome = await Checks.resolve({ formula: ["2d6", ...parts].join("") });
         if ( !outcome ) return null;
         return Checks.post(outcome, {
             label: game.i18n.localize("MGT2.Fleet.Morale"),

@@ -114,10 +114,10 @@ export class RobotData extends ActorBaseData {
             // Options are rows rather than `equipment` Items: a robot option has no use for weight,
             // quantity or an equipped flag.
             options: new fields.ArrayField(new fields.SchemaField({
-                name: new fields.StringField({ required: false, blank: true, trim: true }),
+                name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 slots: new fields.NumberField({ required: false, nullable: false, min: 0, initial: 1 }),
                 zeroSlot: new fields.BooleanField({ required: false, initial: false }),
-                note: new fields.StringField({ required: false, blank: true, trim: true })
+                note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             }), { initial: [] }),
 
             // A robot may carry a primary and a secondary mode, each granting its own traits (RH
@@ -196,8 +196,8 @@ export class RobotData extends ActorBaseData {
                 required: false, nullable: false, integer: true, initial: 0 }),
 
             cost: new fields.NumberField({ required: false, nullable: false, min: 0, initial: 0 }),
-            owner: new fields.StringField({ required: false, blank: true, trim: true }),
-            description: new fields.HTMLField({ required: false, blank: true, trim: true })
+            owner: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            description: new fields.HTMLField({ required: false, blank: true, trim: true, initial: "" })
         });
         return schema;
     }

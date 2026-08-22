@@ -117,7 +117,7 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
                     type: "Actor", required: false, nullable: true, initial: null }),
                 // The name as it read at compose time: a line whose actor is not loaded degrades to
                 // this and never throws — the roster contract.
-                name: new fields.StringField({ required: false, blank: true, trim: true }),
+                name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 // Frozen at Post so two owners cannot both be told "yours" and the card does not
                 // re-read differently on every client.
                 user: new fields.DocumentIdField({
@@ -162,10 +162,10 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
             // Written once, at Conclude, and `kind` is narrowed now that the control exists.
             outcome: new fields.SchemaField({
                 kind: new fields.StringField({
-                    required: false, blank: true, trim: true, choices: ["", ...OUTCOME_KINDS] }),
+                    required: false, blank: true, trim: true, choices: ["", ...OUTCOME_KINDS], initial: "" }),
                 value: new fields.NumberField({
                     required: false, integer: true, nullable: true, initial: null }),
-                label: new fields.StringField({ required: false, blank: true, trim: true })
+                label: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             }, { required: false, nullable: true, initial: null })
         };
     }

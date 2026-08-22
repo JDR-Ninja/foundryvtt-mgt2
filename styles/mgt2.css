@@ -2652,7 +2652,7 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   --cond: "Barlow Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
   --body: "Barlow", "Segoe UI", system-ui, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
-  --hatch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 262 100' preserveAspectRatio='none'%3E%3Cpath d='M0 0h34.5L92.2 100H57.7Z M56.5 0h34.5L148.7 100H114.2Z M113 0h34.5L205.2 100H170.7Z M169.5 0h34.5L261.7 100H227.2Z'/%3E%3C/svg%3E");
+  --hatch: repeating-linear-gradient(90deg, #000 0 13.2%, transparent 13.2% 28.93%);
 }
 
 .mgt2 .lbl {

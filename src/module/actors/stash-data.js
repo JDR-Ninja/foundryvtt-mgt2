@@ -15,19 +15,19 @@ export class StashData extends foundry.abstract.TypeDataModel {
         return {
             // What kind of stash this is, in the referee's own words — "shop stock · Regina
             // downport", "buried · left by Ilai Vosk, deceased".
-            kind: new fields.StringField({ required: false, blank: true, trim: true }),
+            kind: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
 
             // The first document in the system where a lock has a job: a player can see a stash
             // without being able to open it.
             locked: new fields.BooleanField({ required: false, initial: false }),
             lockedDescription: new fields.StringField({
-                required: false, blank: true, trim: true, nullable: true }),
+                required: false, blank: true, trim: true, nullable: true, initial: "" }),
 
             // The weight total is optional because a shop's shelves are not a load anybody carries.
             showWeight: new fields.BooleanField({ required: false, initial: true }),
 
-            description: new fields.HTMLField({ required: false, blank: true, trim: true }),
-            notes: new fields.HTMLField({ required: false, blank: true, trim: true })
+            description: new fields.HTMLField({ required: false, blank: true, trim: true, initial: "" }),
+            notes: new fields.HTMLField({ required: false, blank: true, trim: true, initial: "" })
         };
     }
 
