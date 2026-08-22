@@ -1,4 +1,6 @@
-// The chat card: the frame, the band, and the bodies each message type fills them with.
+// The chat log: the frame every message takes, the band, and the bodies each message type fills
+// them with. The frame is not the system's cards alone — core dresses what it draws in parchment,
+// and one line of talk in it beside a card was two languages in one column.
 // ONE GROUND ONLY: Foundry hard-codes `themed theme-light` on ol.chat-log, so a card never renders
 // on the dark ground whatever the viewer's colour scheme says. The card element carries
 // `theme-light` itself, which the `:not(.theme-light)` guard in _colors.sass then honours.
@@ -6,7 +8,8 @@
 // its opposite.
 
 // --------------------------------------------
-//  THE FRAME — the Referee Screen panel, as a chat message
+//  THE FRAME — the Referee Screen panel, as a chat message. EVERY message takes it; what tells a
+//  card from a line of talk is what the body holds, never the frame around it.
 //
 //  The silhouette is on the `li` and not on `.card`, because core emits the head and the body as
 //  SIBLINGS (`templates/sidebar/chat-message.hbs`): nothing inside the card can enclose both, and
@@ -22,7 +25,7 @@
 //  180° symmetry and falls out of the split for free.
 // --------------------------------------------
 
-li.chat-message:has(> .message-content > .mgt2.card)
+li.chat-message
 	--cham: 15px
 	--cham-in: 11px
 	// What core gives every message and what has to go (`public/css/foundry2.css`): 8px of padding,
@@ -39,6 +42,10 @@ li.chat-message:has(> .message-content > .mgt2.card)
 	color: var(--ink)
 	font-family: var(--body)
 	clip-path: polygon(0 0, calc(100% - var(--cham)) 0, 100% var(--cham), 100% 100%, var(--cham) 100%, 0 calc(100% - var(--cham)))
+
+	// Core collapses a message it is removing to nothing, and the trait would hold it open.
+	&.deleting
+		padding: 0
 
 	> .message-header
 		display: flex
@@ -130,6 +137,155 @@ li.chat-message:has(> .message-content > .mgt2.card.bad) > .message-header::befo
 	color: var(--danger)
 li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::before
 	color: var(--mute)
+
+// --------------------------------------------
+//  TALK — a body the system did not draw
+// --------------------------------------------
+// Core's own text, a module's, an emote, a whisper. The frame and the band are a card's; only the
+// body is core's, so it takes the kit's face and measure and the padding a card's blocks carry.
+li.chat-message:not(:has(> .message-content > .mgt2.card)) > .message-content
+	padding: 8px 11px 9px
+	font-size: 13px
+	line-height: 1.5
+	color: var(--ink)
+	> :first-child
+		margin-top: 0
+	> :last-child
+		margin-bottom: 0
+	p
+		margin: 0 0 6px
+
+// Core tells the three kinds apart by tinting the whole message — pastel violet, sand and blue.
+// The frame is monochrome, so the mark moves into the type; a whisper already names its target in
+// the band, and a blind roll is the GM's alone.
+li.chat-message.emote > .message-content
+	font-style: italic
+	color: var(--mute)
+
+// --------------------------------------------
+//  THE DICE BLOCK — core's markup, on both hosts
+// --------------------------------------------
+// A roll core drew itself and the tooltip `Roll#getTooltip` builds are the same HTML, and the
+// system's own check card embeds the second (`templates/chat/roll.html`), so one treatment covers
+// a bare `/roll` and an expanded check alike: the formula in the mono face, the total in the
+// condensed one, and the terms as hairline rows rather than grey dice.
+li.chat-message
+	// Only core draws `.dice-result`; the check card lays out its own line. Formula and total share
+	// a row, and the tooltip takes the one below — core orders it above the result.
+	.dice-result
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 10px
+		padding: 9px 11px
+		.dice-formula
+			order: 0
+		.dice-total
+			order: 1
+			margin-left: auto
+		.dice-tooltip
+			order: 2
+			flex: 0 0 100%
+			margin-top: 8px
+
+	.dice-roll[data-action]:not(.cdice):hover
+		background: var(--hover)
+
+	// Core boxes both: a 1px #999, a 3px radius, an inset white shadow and centred text.
+	.dice-formula,
+	.dice-total
+		flex: 0 0 auto
+		margin: 0
+		padding: 0
+		text-align: left
+		background: none
+		border: 0
+		border-radius: 0
+		box-shadow: none
+	.dice-formula
+		flex: 1 1 auto
+		font-family: var(--mono)
+		font-size: 12px
+		line-height: 1.4
+		color: var(--mute)
+	.dice-total
+		font-family: var(--cond)
+		font-size: 30px
+		font-weight: 700
+		line-height: 1
+		font-variant-numeric: tabular-nums
+		&.success
+			color: var(--good)
+		&.failure
+			color: var(--danger)
+
+	.dice-tooltip
+		font-size: 12px
+		.tooltip-part + .tooltip-part
+			margin-top: 9px
+		.part-header
+			display: flex
+			align-items: baseline
+			gap: 8px
+			margin: 0
+			padding-bottom: 3px
+			line-height: 1.4
+			border-bottom: 1px solid var(--rule-soft)
+		.part-formula
+			font-family: var(--mono)
+			font-size: 11px
+			font-weight: 400
+			color: var(--mute)
+		.part-flavor
+			margin-right: 0
+			font-family: var(--cond)
+			font-size: 10px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--faint)
+		.part-total
+			margin-left: auto
+			padding: 0
+			font-family: var(--cond)
+			font-size: 15px
+			font-weight: 700
+			font-variant-numeric: tabular-nums
+			background: none
+			border: 0
+			border-radius: 0
+		// Core floats each die over a grey SVG of its own shape and greys a dropped one with
+		// `opacity(0.4)`. A dropped die is a boon or a bane here, so it recolours instead.
+		.dice-rolls
+			display: flex
+			flex-wrap: wrap
+			gap: 4px
+			margin: 7px 0 0
+			padding: 0
+			.roll
+				float: none
+				min-width: 22px
+				margin: 0
+				padding: 0 4px
+				line-height: 20px
+				font-family: var(--mono)
+				font-size: 12px
+				font-weight: 400
+				color: var(--ink)
+				background: var(--sunk)
+				background-image: none
+				border: 1px solid var(--rule-soft)
+				filter: none
+				&.max,
+				&.success
+					color: var(--good)
+				&.min,
+				&.failure
+					color: var(--danger)
+				&.discarded,
+				&.rerolled
+					color: var(--faint)
+					background: none
 
 .mgt2.card
 	font-family: var(--body)

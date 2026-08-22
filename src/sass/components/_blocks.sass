@@ -9,10 +9,11 @@
 //    `height: auto` and `background` to win.
 
 // The chat message's `li` is listed beside `.mgt2` rather than repeating the three stacks: the
-// card's band is core's own `.message-header`, a SIBLING of the content and therefore outside
-// `.mgt2`, so it reaches these from the list item or not at all.
+// band is core's own `.message-header`, a SIBLING of the content and therefore outside `.mgt2`,
+// so it reaches these from the list item or not at all. EVERY message and not only the system's
+// cards: the log is one surface, and core dresses what it draws in parchment.
 .mgt2,
-li.chat-message:has(> .message-content > .mgt2.card)
+li.chat-message
 	--cond: "Barlow Condensed", "Roboto Condensed", "Arial Narrow", sans-serif
 	--body: "Barlow", "Segoe UI", system-ui, sans-serif
 	--mono: "JetBrains Mono", ui-monospace, Consolas, monospace

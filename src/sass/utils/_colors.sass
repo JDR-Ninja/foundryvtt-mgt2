@@ -117,18 +117,19 @@ body.mgt2-ground-dark .mgt2:not(.theme-light),
 // not bands and keep their fill.
 body.mgt2-chrome-off .mgt2 .window-header,
 body.mgt2-chrome-off .mgt2 .itemsheet-header,
-body.mgt2-chrome-off li.chat-message > .message-header:has(~ .message-content > .mgt2.card)
+body.mgt2-chrome-off li.chat-message > .message-header
     --paper: inherit
     --ink: inherit
     --lgt: inherit
     --lgt-hot: inherit
 
-// A chat card's frame is on the `li`, not on `.mgt2.card`, because core emits the head and the
+// A message's frame is on the `li`, not on `.mgt2.card`, because core emits the head and the
 // body as SIBLINGS (`templates/sidebar/chat-message.hbs`) and nothing inside the card can enclose
 // both. That makes the list item a third re-anchoring site: `mgt2` is on the card, one level down
-// inside `.message-content`, so the `li` inherits none of the anchors. Light only — core hard-codes
-// `themed theme-light` on `ol.chat-log`, so a card never meets the dark ground.
-li.chat-message:has(> .message-content > .mgt2.card)
+// inside `.message-content`, so the `li` inherits none of the anchors — and a message with no card
+// in it inherits nothing at all. Light only — core hard-codes `themed theme-light` on
+// `ol.chat-log`, so the log never meets the dark ground.
+li.chat-message
     --chrome: var(--i-chrome)
     --paper: var(--i-paper)
     --ink: var(--i-ink)
@@ -137,7 +138,7 @@ li.chat-message:has(> .message-content > .mgt2.card)
     @include derived
 
 // The band re-anchors on the chrome exactly as the window bar does, and for the same reason.
-li.chat-message > .message-header:has(~ .message-content > .mgt2.card)
+li.chat-message > .message-header
     --paper: var(--i-chrome)
     --ink: var(--i-ink-chrome)
     --lgt: var(--i-lgt-d)

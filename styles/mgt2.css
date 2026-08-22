@@ -101,14 +101,14 @@ body.mgt2-ground-dark .mgt2:not(.theme-light),
 
 body.mgt2-chrome-off .mgt2 .window-header,
 body.mgt2-chrome-off .mgt2 .itemsheet-header,
-body.mgt2-chrome-off li.chat-message > .message-header:has(~ .message-content > .mgt2.card) {
+body.mgt2-chrome-off li.chat-message > .message-header {
   --paper: inherit;
   --ink: inherit;
   --lgt: inherit;
   --lgt-hot: inherit;
 }
 
-li.chat-message:has(> .message-content > .mgt2.card) {
+li.chat-message {
   --chrome: var(--i-chrome);
   --paper: var(--i-paper);
   --ink: var(--i-ink);
@@ -136,7 +136,7 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   --accent-soft: color-mix(in oklab, var(--accent-text) 13%, transparent);
 }
 
-li.chat-message > .message-header:has(~ .message-content > .mgt2.card) {
+li.chat-message > .message-header {
   --paper: var(--i-chrome);
   --ink: var(--i-ink-chrome);
   --lgt: var(--i-lgt-d);
@@ -2823,7 +2823,7 @@ body.mgt2-chrome-off .mgt2.application::before {
 }
 
 .mgt2,
-li.chat-message:has(> .message-content > .mgt2.card) {
+li.chat-message {
   --cond: "Barlow Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
   --body: "Barlow", "Segoe UI", system-ui, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
@@ -6763,7 +6763,7 @@ ul.softwares li:hover a {
   opacity: 0.45;
 }
 
-li.chat-message:has(> .message-content > .mgt2.card) {
+li.chat-message {
   --cham: 15px;
   --cham-in: 11px;
   margin: 0 4px 9px;
@@ -6775,7 +6775,10 @@ li.chat-message:has(> .message-content > .mgt2.card) {
   font-family: var(--body);
   clip-path: polygon(0 0, calc(100% - var(--cham)) 0, 100% var(--cham), 100% 100%, var(--cham) 100%, 0 calc(100% - var(--cham)));
 }
-li.chat-message:has(> .message-content > .mgt2.card) > .message-header {
+li.chat-message.deleting {
+  padding: 0;
+}
+li.chat-message > .message-header {
   display: flex;
   align-items: center;
   gap: 9px;
@@ -6786,7 +6789,7 @@ li.chat-message:has(> .message-content > .mgt2.card) > .message-header {
   border: 0;
   clip-path: polygon(0 0, calc(100% - var(--cham-in)) 0, 100% var(--cham-in), 100% 100%, 0 100%);
 }
-li.chat-message:has(> .message-content > .mgt2.card) > .message-header::before {
+li.chat-message > .message-header::before {
   content: "";
   flex: none;
   width: 42px;
@@ -6800,7 +6803,7 @@ li.chat-message:has(> .message-content > .mgt2.card) > .message-header::before {
   -webkit-mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat;
 }
-li.chat-message:has(> .message-content > .mgt2.card) > .message-header .message-sender {
+li.chat-message > .message-header .message-sender {
   flex: 0 1 auto;
   margin: 0;
   font-family: var(--cond);
@@ -6812,7 +6815,7 @@ li.chat-message:has(> .message-content > .mgt2.card) > .message-header .message-
   overflow: hidden;
   text-overflow: ellipsis;
 }
-li.chat-message:has(> .message-content > .mgt2.card) > .message-header .message-metadata {
+li.chat-message > .message-header .message-metadata {
   flex: none;
   margin-left: auto;
   gap: 7px;
@@ -6823,11 +6826,11 @@ li.chat-message:has(> .message-content > .mgt2.card) > .message-header .message-
   text-transform: uppercase;
   color: var(--faint);
 }
-li.chat-message:has(> .message-content > .mgt2.card) > .message-header .message-metadata a:hover {
+li.chat-message > .message-header .message-metadata a:hover {
   color: var(--accent-text);
 }
-li.chat-message:has(> .message-content > .mgt2.card) > .message-header .whisper-to,
-li.chat-message:has(> .message-content > .mgt2.card) > .message-header .flavor-text {
+li.chat-message > .message-header .whisper-to,
+li.chat-message > .message-header .flavor-text {
   flex: 0 0 100%;
   padding-left: 43px;
   font-family: var(--cond);
@@ -6836,7 +6839,7 @@ li.chat-message:has(> .message-content > .mgt2.card) > .message-header .flavor-t
   text-transform: uppercase;
   color: var(--faint);
 }
-li.chat-message:has(> .message-content > .mgt2.card) > .message-content {
+li.chat-message > .message-content {
   padding: 0 0 7px;
   background: var(--paper);
   clip-path: polygon(0 0, 100% 0, 100% 100%, var(--cham-in) 100%, 0 calc(100% - var(--cham-in)));
@@ -6852,6 +6855,154 @@ li.chat-message:has(> .message-content > .mgt2.card.bad) > .message-header::befo
 
 li.chat-message:has(> .message-content > .mgt2.card.edge) > .message-header::before {
   color: var(--mute);
+}
+
+li.chat-message:not(:has(> .message-content > .mgt2.card)) > .message-content {
+  padding: 8px 11px 9px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+li.chat-message:not(:has(> .message-content > .mgt2.card)) > .message-content > :first-child {
+  margin-top: 0;
+}
+li.chat-message:not(:has(> .message-content > .mgt2.card)) > .message-content > :last-child {
+  margin-bottom: 0;
+}
+li.chat-message:not(:has(> .message-content > .mgt2.card)) > .message-content p {
+  margin: 0 0 6px;
+}
+
+li.chat-message.emote > .message-content {
+  font-style: italic;
+  color: var(--mute);
+}
+
+li.chat-message .dice-result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+}
+li.chat-message .dice-result .dice-formula {
+  order: 0;
+}
+li.chat-message .dice-result .dice-total {
+  order: 1;
+  margin-left: auto;
+}
+li.chat-message .dice-result .dice-tooltip {
+  order: 2;
+  flex: 0 0 100%;
+  margin-top: 8px;
+}
+li.chat-message .dice-roll[data-action]:not(.cdice):hover {
+  background: var(--hover);
+}
+li.chat-message .dice-formula,
+li.chat-message .dice-total {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+li.chat-message .dice-formula {
+  flex: 1 1 auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--mute);
+}
+li.chat-message .dice-total {
+  font-family: var(--cond);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+li.chat-message .dice-total.success {
+  color: var(--good);
+}
+li.chat-message .dice-total.failure {
+  color: var(--danger);
+}
+li.chat-message .dice-tooltip {
+  font-size: 12px;
+}
+li.chat-message .dice-tooltip .tooltip-part + .tooltip-part {
+  margin-top: 9px;
+}
+li.chat-message .dice-tooltip .part-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  padding-bottom: 3px;
+  line-height: 1.4;
+  border-bottom: 1px solid var(--rule-soft);
+}
+li.chat-message .dice-tooltip .part-formula {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--mute);
+}
+li.chat-message .dice-tooltip .part-flavor {
+  margin-right: 0;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+li.chat-message .dice-tooltip .part-total {
+  margin-left: auto;
+  padding: 0;
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+li.chat-message .dice-tooltip .dice-rolls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 7px 0 0;
+  padding: 0;
+}
+li.chat-message .dice-tooltip .dice-rolls .roll {
+  float: none;
+  min-width: 22px;
+  margin: 0;
+  padding: 0 4px;
+  line-height: 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--sunk);
+  background-image: none;
+  border: 1px solid var(--rule-soft);
+  filter: none;
+}
+li.chat-message .dice-tooltip .dice-rolls .roll.max, li.chat-message .dice-tooltip .dice-rolls .roll.success {
+  color: var(--good);
+}
+li.chat-message .dice-tooltip .dice-rolls .roll.min, li.chat-message .dice-tooltip .dice-rolls .roll.failure {
+  color: var(--danger);
+}
+li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice-tooltip .dice-rolls .roll.rerolled {
+  color: var(--faint);
+  background: none;
 }
 
 .mgt2.card {
