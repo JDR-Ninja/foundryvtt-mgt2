@@ -258,6 +258,7 @@
 						<span class="ro">{{salvo.remaining}} / {{salvo.count}}</span>
 						<span class="at">{{localize salvo.bandLabel}}</span>
 						<span class="at">{{#if salvo.arriving}}{{localize 'MGT2.SpaceCombat.SalvoArriving'}}{{else}}{{plural 'MGT2.SpaceCombat.SalvoRounds' salvo.roundsLeft}}{{/if}}</span>
+						{{#if salvo.classLabel}}<span class="at">{{localize salvo.classLabel}}</span>{{/if}}
 						{{#if salvo.smart}}<span class="at">{{localize 'MGT2.SpaceCombat.SalvoSmartChip'}}</span>{{/if}}
 						{{#if salvo.inert}}<span class="at"><b class="noarm">{{localize 'MGT2.SpaceCombat.SalvoInert'}}</b></span>{{/if}}
 					</td>
@@ -265,6 +266,11 @@
 						{{#if ../canEdit}}
 						<input class="f n" type="number" step="1" name="salvoEffect" value="0"
 							aria-label="{{localize 'MGT2.SpaceCombat.SalvoEffect'}}" />
+						{{#if ../panel.layers}}
+						<select class="f" name="salvoLayer" aria-label="{{localize 'MGT2.SpaceCombat.SalvoLayer'}}">
+							{{selectOptions ../panel.layers selected="closeIn" labelAttr="label" localize=true}}
+						</select>
+						{{/if}}
 						{{/if}}
 					</td>
 					<td class="r act">
@@ -296,6 +302,11 @@
 				<option value="{{target.id}}">{{target.name}}</option>
 				{{/each}}
 			</select>
+			{{#if panel.launch.classes}}
+			<select class="f" name="salvoClass" aria-label="{{localize 'MGT2.SpaceCombat.SalvoClass'}}">
+				{{selectOptions panel.launch.classes selected="standard" labelAttr="label" localize=true}}
+			</select>
+			{{/if}}
 			<input class="f n" type="number" min="1" step="1" name="salvoCount" value="1"
 				aria-label="{{localize 'MGT2.SpaceCombat.SalvoCount'}}" />
 			<button type="button" class="btn" data-action="launchSalvo">{{localize 'MGT2.SpaceCombat.SalvoFire'}}</button>

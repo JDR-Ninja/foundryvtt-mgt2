@@ -1,7 +1,8 @@
 import { MGT2 } from "./config.js";
-import { Checks } from "./checks.js";
+import { Checks, renderRollCard } from "./checks.js";
 import { CREW } from "./combatant.js";
 import { MGT2Helper } from "./helper.js";
+import { Rules } from "./rules.js";
 
 const fields = foundry.data.fields;
 
@@ -19,6 +20,9 @@ const DISTANT_SALVO_DM = -2;
 
 /** Core folio 173's Smart bounds, which the referee reads against the target's Tech Level. */
 const SMART_BOUNDS = Object.freeze({ min: 1, max: 6 });
+
+/** Companion p.168: one die per hit, read against the layer's own kill number. */
+const KILL_DIE = "d6";
 
 /** The seven bands closest first, which is the order Core folio 165 prints and a step walks. */
 const BANDS = Object.freeze(Object.keys(MGT2.ShipRangeBands));
@@ -351,8 +355,28 @@ export class MissileSalvoData extends foundry.abstract.TypeDataModel {
             // Core folio 173: "a salvo may only be subjected to Electronic Warfare once per round,
             // no matter how many sensor operators are available".
             jammedRound: new fields.NumberField({
-                required: false, nullable: true, integer: true, min: 0, initial: null })
+                required: false, nullable: true, integer: true, min: 0, initial: null }),
+            // Companion p.167: what is in the air. Stored rather than read off the launcher, which
+            // carries a rack and never says what the rack holds.
+            missileClass: new fields.StringField({
+                required: true, blank: false, initial: "standard", choices: MGT2.MissileClasses })
         };
+    }
+
+    /** The class row, which is `standard` for anything the referee did not label. */
+    get classRow() {
+        return MGT2.MissileClasses[this.missileClass] ?? MGT2.MissileClasses.standard;
+    }
+
+    /** Companion p.168: a torpedo survives a hit that kills a missile outright. */
+    get tough() {
+        return this.classRow.tough === true;
+    }
+
+    /** Companion p.167 gives the DM "within this range", which is the band the class may be fired at. */
+    get inClassRange() {
+        const max = this.classRow.maxBand;
+        return !max || (BANDS.indexOf(this.launchBand) <= BANDS.indexOf(max));
     }
 
     #group(id) {
@@ -444,7 +468,45 @@ export class MissileSalvoData extends foundry.abstract.TypeDataModel {
         if ( this.launchBand === "distant" ) {
             entries.push([game.i18n.localize(MGT2.ShipRangeBands.distant.label), DISTANT_SALVO_DM]);
         }
+        const row = this.classRow;
+        if ( Rules.on("defenceMissiles") && row.attackDM && this.inClassRange ) {
+            entries.push([game.i18n.localize(row.label), row.attackDM]);
+        }
         return Checks.modifiers(entries);
+    }
+
+    /**
+     * Companion p.168: each hit kills one missile outright, and a torpedo only on its layer's own
+     * number — so the roll is one die per hit and the kills are the faces that reach it.
+     * @param {string} layer   A key of `MGT2.MissileDefenceLayers`
+     * @param {number} hits    How many of the defending missiles hit, which the referee has rolled
+     */
+    async intercept(layer, hits) {
+        const kills = MGT2.MissileDefenceLayers[layer]?.kills;
+        // "Each interceptor missile can target one incoming missile", so a hit past the last one in
+        // the air has nothing to kill and rolls no die.
+        const wanted = Math.min(this.remaining, Math.max(0, Math.trunc(Number(hits) || 0)));
+        if ( !kills || !wanted ) return this.parent;
+
+        const threshold = kills[this.tough ? "torpedo" : "missile"];
+        if ( threshold === null ) return this.remove(wanted);
+
+        const roll = await new Roll(`${wanted}${KILL_DIE}`).roll();
+        const killed = roll.dice[0].results.filter(die => die.result >= threshold).length;
+        const defender = this.targetGroup?.system.ship ?? null;
+        await roll.toMessage({
+            author: game.user.id,
+            speaker: defender ? ChatMessage.getSpeaker({ actor: defender }) : null,
+            content: await renderRollCard({
+                roll,
+                rollTypeName: this.parent.name,
+                rollObjectName: game.i18n.localize(MGT2.MissileDefenceLayers[layer].label),
+                lines: [MGT2Helper.plural(this.tough
+                    ? "MGT2.SpaceCombat.SalvoKilledTorpedoes" : "MGT2.SpaceCombat.SalvoKilledMissiles",
+                killed, { target: threshold })]
+            })
+        });
+        return this.remove(killed);
     }
 
     /**
@@ -576,11 +638,23 @@ export class MGT2Combat extends Combat {
      * @param {string} [options.weapon]  The missile Item id on the firing ship
      * @param {number} [options.count]   How many are in the air
      * @param {string} [options.band]    The band it was fired at, which sets its flight time
+     * @param {string} [options.missileClass]  A key of `MGT2.MissileClasses`
      * @returns {Promise<Combatant|null>}
      */
-    async addSalvo(from, at, { weapon = null, count = 1, name } = {}) {
+    async addSalvo(from, at, { weapon = null, count = 1, name, missileClass = "standard" } = {}) {
         if ( (this.type !== SPACE) || (from?.type !== SHIP) || (at?.type !== SHIP) ) return null;
         const band = this.system.bandBetween(from, at);
+        const launchBand = MGT2.ShipRangeBands[band] ? band : "medium";
+        const row = MGT2.MissileClasses[missileClass] ?? MGT2.MissileClasses.standard;
+        // Companion p.167 caps each defence missile at a band, and the launch is refused past it
+        // rather than flown at a penalty — the folio prints no penalty.
+        if ( Rules.on("defenceMissiles") && row.maxBand
+            && (BANDS.indexOf(launchBand) > BANDS.indexOf(row.maxBand)) ) {
+            ui.notifications.warn(game.i18n.format("MGT2.SpaceCombat.SalvoOutOfClassRange", {
+                name: game.i18n.localize(row.label),
+                band: game.i18n.localize(MGT2.ShipRangeBands[row.maxBand].label) }));
+            return null;
+        }
         const missile = weapon ? from.system.ship?.items.get(weapon) : null;
         const [combatant] = await this.createEmbeddedDocuments("Combatant", [{
             type: MISSILE_SALVO, actorId: null,
@@ -590,7 +664,8 @@ export class MGT2Combat extends Combat {
             system: {
                 count: Math.max(1, Math.trunc(count)),
                 target: at.id, firedBy: from.id, weapon: missile?.id ?? null,
-                launchBand: MGT2.ShipRangeBands[band] ? band : "medium"
+                launchBand,
+                missileClass: MGT2.MissileClasses[missileClass] ? missileClass : "standard"
             }
         }]);
         return combatant ?? null;

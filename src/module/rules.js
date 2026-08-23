@@ -302,6 +302,21 @@ export const RULES = Object.freeze({
         group: "space", book: "companion", page: "179",
         default: false
     },
+    // One printed table, and one machine: a band a class may not be fired past, and a DM inside it.
+    defenceMissiles: {
+        group: "space", book: "companion", page: "167",
+        default: false
+    },
+    // Area then point defence, each hit rolling 1D per the layer's own kill number.
+    stagedMissileDefence: {
+        group: "space", book: "companion", page: "168",
+        default: false
+    },
+    // One more `component` category, and the only one that spends a hardpoint without being a mount.
+    containerLaunchers: {
+        group: "space", book: "companion", page: "168",
+        default: false
+    },
 
     // VH2026 p.5-6: its Critical Hit, damage and Light Weapons rules replace the Core's. One choice
     // for the five: Structure, the location table, the thresholds and collisions are one machine.

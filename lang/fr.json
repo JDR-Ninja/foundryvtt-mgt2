@@ -571,6 +571,18 @@
       "graviticShielding": {
         "name": "Blindage gravitique",
         "hint": "Propose une pièce de blindage gravitique sur la fiche de composant. TL16 et plus."
+      },
+      "defenceMissiles": {
+        "name": "Missiles de combat rapproché et intercepteurs",
+        "hint": "Une salve indique lequel des quatre l'Arbitre a mis en vol. Un missile de combat rapproché ne peut pas être tiré au-delà de la portée Proche et attaque à MD+4 en deçà ; un missile intercepteur ne peut pas être tiré au-delà de la portée Courte et attaque à MD+2. Les rapports d'encombrement et les rails de point fixe sont des règles de conception et ne sont pas appliqués."
+      },
+      "stagedMissileDefence": {
+        "name": "Défense antimissile en plusieurs étapes",
+        "hint": "Le contrôle placé à côté d'une salve en approche gagne les trois couches ordonnées. La défense de zone détruit un missile par touche et une torpille sur un jet de 1D de 4+ ; la défense à bout portant détruit un missile sur un 3+ et une torpille sur un 5+ ; la défense rapprochée est celle du Livre de règles de Traveller, où le chiffre saisi est l'Effet du canonnier."
+      },
+      "containerLaunchers": {
+        "name": "Lance-conteneurs",
+        "hint": "Propose une pièce de lance-conteneurs sur la fiche de composant. Il contient quatre missiles ou une torpille prêts à être lancés, il occupe un point d'emport comme une monture, et il ne peut pas être rechargé pendant une bataille."
       }
     },
     "Chargen": {
@@ -3231,7 +3243,18 @@
         "one": "{name} est touché : lancez les dégâts comme pour un missile unique, déduisez le blindage, puis multipliez par {multiple} — l'Effet, plafonné au {missiles} missile restant.",
         "other": "{name} est touché : lancez les dégâts comme pour un missile unique, déduisez le blindage, puis multipliez par {multiple} — l'Effet, plafonné aux {missiles} missiles restants."
       },
-      "SalvoMissed": "{name} n'est pas touché."
+      "SalvoMissed": "{name} n'est pas touché.",
+      "SalvoClass": "Classe de missile",
+      "SalvoLayer": "Couche de défense",
+      "SalvoOutOfClassRange": "Un {name} ne peut pas être tiré au-delà de la portée {band}.",
+      "SalvoKilledMissiles": {
+        "one": "{n} missile détruit, sur un jet de 1D de {target}+ par touche.",
+        "other": "{n} missiles détruits, sur un jet de 1D de {target}+ par touche."
+      },
+      "SalvoKilledTorpedoes": {
+        "one": "{n} torpille détruite, sur un jet de 1D de {target}+ par touche.",
+        "other": "{n} torpilles détruites, sur un jet de 1D de {target}+ par touche."
+      }
     },
     "Fleet": {
       "NewFleet": "Nouvelle flotte",
@@ -3495,6 +3518,17 @@
       "round": "Une fois par round",
       "salvo": "Une fois par salve",
       "attack": "Une attaque"
+    },
+    "MissileClasses": {
+      "standard": "Missile standard",
+      "dogfight": "Missile de combat rapproché",
+      "interceptor": "Missile intercepteur",
+      "torpedo": "Torpille"
+    },
+    "MissileDefence": {
+      "area": "Défense de zone",
+      "point": "Défense à bout portant",
+      "closeIn": "Défense rapprochée"
     },
     "HullConfigurations": {
       "standard": "Standard",
@@ -4286,7 +4320,8 @@
       "software": "Logiciel",
       "option": "Option",
       "automation": "Automatisation",
-      "gravShield": "Blindage gravitique"
+      "gravShield": "Blindage gravitique",
+      "containerLauncher": "Lance-conteneurs"
     },
     "DrugAfterKinds": {
       "none": "Aucun",

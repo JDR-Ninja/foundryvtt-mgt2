@@ -1410,6 +1410,21 @@ MGT2.ActionCaps = Object.freeze({
     attack: "MGT2.ActionCaps.attack"
 });
 
+// Companion p.167: `maxBand` is the furthest band the class may be fired at, `tough` a torpedo.
+MGT2.MissileClasses = Object.freeze({
+    standard: {label: "MGT2.MissileClasses.standard", maxBand: null, attackDM: 0, tough: false},
+    dogfight: {label: "MGT2.MissileClasses.dogfight", maxBand: "close", attackDM: 4, tough: false},
+    interceptor: {label: "MGT2.MissileClasses.interceptor", maxBand: "short", attackDM: 2, tough: false},
+    torpedo: {label: "MGT2.MissileClasses.torpedo", maxBand: null, attackDM: 0, tough: true}
+});
+
+// Companion p.168: three ordered layers. A null kills without a roll, `kills: null` is close-in.
+MGT2.MissileDefenceLayers = Object.freeze({
+    area: {label: "MGT2.MissileDefence.area", by: "interceptor", kills: {missile: null, torpedo: 4}},
+    point: {label: "MGT2.MissileDefence.point", by: "dogfight", kills: {missile: 3, torpedo: 5}},
+    closeIn: {label: "MGT2.MissileDefence.closeIn", by: null, kills: null}
+});
+
 // Hull configuration (HG p.11).
 MGT2.HullConfigurations = Object.freeze({
     standard: {label: "MGT2.HullConfigurations.standard", streamlined: "partial", armourVolume: 1, hullPoints: 1, hullCost: 1, protection: 0},
@@ -2226,13 +2241,15 @@ MGT2.ComponentCategories = Object.freeze({
     software: "MGT2.ComponentCategories.software",
     automation: "MGT2.ComponentCategories.automation",
     gravShield: "MGT2.ComponentCategories.gravShield",
+    containerLauncher: "MGT2.ComponentCategories.containerLauncher",
     option: "MGT2.ComponentCategories.option"
 });
 
 // Which categories a rule the table has not adopted keeps off the component sheet.
 MGT2.OptionalComponentCategories = Object.freeze({
     automation: "shipAutomation",
-    gravShield: "graviticShielding"
+    gravShield: "graviticShielding",
+    containerLauncher: "containerLaunchers"
 });
 
 // Companion p.178: the six printed rows, read off an `automation` component's `rating`. `crew` is

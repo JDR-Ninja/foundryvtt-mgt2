@@ -1106,9 +1106,10 @@ export class SpacecraftData extends CraftData {
                 powered++;
                 if (part.hardened) hardened++;
             }
-            // HG p.26 counts hardpoints against turrets, and a component's `quantity` is how many
-            // of that row the design fits.
+            // HG p.26 counts hardpoints against turrets and Companion p.168 puts a container-
+            // launcher on one, never a firmpoint; `quantity` is how many of that row is fitted.
             if (part.category === "weapon") weapons += quantity;
+            if ((part.category === "containerLauncher") && Rules.on("containerLaunchers")) weapons += quantity;
             if (part.category === "fuel") fuel += row.tons;
             if (budgetRow[part.category]) {
                 mapped.add(budgetRow[part.category]);

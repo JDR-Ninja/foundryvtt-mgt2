@@ -571,6 +571,18 @@
       "graviticShielding": {
         "name": "Gravitic shielding",
         "hint": "Offers a gravitic shield part on the component sheet. TL16 and up."
+      },
+      "defenceMissiles": {
+        "name": "Dogfight and interceptor missiles",
+        "hint": "A salvo says which of the four the referee put in the air. A dogfight missile cannot be fired past Close and attacks at DM+4 inside it; an interceptor cannot be fired past Short and attacks at DM+2. The magazine ratios and the firmpoint rails are design rules and are not applied."
+      },
+      "stagedMissileDefence": {
+        "name": "Staged missile defence",
+        "hint": "The control beside an incoming salvo gains the three ordered layers. Area defence kills a missile per hit and a torpedo on 1D 4+; point defence kills a missile on 3+ and a torpedo on 5+; close-in defence is the Core Rulebook's point defence, where the figure typed is the gunner's Effect."
+      },
+      "containerLaunchers": {
+        "name": "Container-launchers",
+        "hint": "Offers a container-launcher part on the component sheet. It holds four missiles or one torpedo ready to launch, it spends a hardpoint like a mount, and it cannot be reloaded during a battle."
       }
     },
     "Chargen": {
@@ -4266,7 +4278,18 @@
         "one": "{name} is hit: roll damage as for one missile, deduct armour, then multiply by {multiple} — the Effect, capped at the {missiles} missile left.",
         "other": "{name} is hit: roll damage as for one missile, deduct armour, then multiply by {multiple} — the Effect, capped at the {missiles} missiles left."
       },
-      "SalvoMissed": "{name} is missed."
+      "SalvoMissed": "{name} is missed.",
+      "SalvoClass": "Missile class",
+      "SalvoLayer": "Defence layer",
+      "SalvoOutOfClassRange": "A {name} cannot be fired beyond {band} range.",
+      "SalvoKilledMissiles": {
+        "one": "{n} missile destroyed, on 1D of {target}+ per hit.",
+        "other": "{n} missiles destroyed, on 1D of {target}+ per hit."
+      },
+      "SalvoKilledTorpedoes": {
+        "one": "{n} torpedo destroyed, on 1D of {target}+ per hit.",
+        "other": "{n} torpedoes destroyed, on 1D of {target}+ per hit."
+      }
     },
     "Fleet": {
       "NewFleet": "New fleet",
@@ -4809,6 +4832,17 @@
       "round": "Once per round",
       "salvo": "Once per salvo",
       "attack": "One attack"
+    },
+    "MissileClasses": {
+      "standard": "Standard missile",
+      "dogfight": "Dogfight missile",
+      "interceptor": "Interceptor missile",
+      "torpedo": "Torpedo"
+    },
+    "MissileDefence": {
+      "area": "Area defence",
+      "point": "Point defence",
+      "closeIn": "Close-in defence"
     },
     "HullConfigurations": {
       "standard": "Standard",
@@ -5600,7 +5634,8 @@
       "software": "Software",
       "option": "Option",
       "automation": "Automation",
-      "gravShield": "Gravitic shield"
+      "gravShield": "Gravitic shield",
+      "containerLauncher": "Container-launcher"
     },
     "DrugAfterKinds": {
       "none": "None",

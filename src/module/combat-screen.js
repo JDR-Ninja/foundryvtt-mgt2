@@ -2,6 +2,7 @@ import { MGT2 } from "./config.js";
 import { CREW } from "./combatant.js";
 import { SPACE, SpaceCombatData, STEPS } from "./combat.js";
 import { MGT2Helper } from "./helper.js";
+import { Rules } from "./rules.js";
 import { SpacecraftActorSheet } from "./actors/spacecraft-sheet.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -293,6 +294,7 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         panel.reactions = this.#reactions(group);
         panel.issues = group.system.dutyIssues;
         panel.salvoes = this.#salvoes(group);
+        panel.layers = Rules.on("stagedMissileDefence") ? MGT2.MissileDefenceLayers : null;
         panel.launch = this.#launch(group);
         return panel;
     }
@@ -315,7 +317,8 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
                 roundsLeft: salvo.roundsLeft, arriving: salvo.arriving, inert: salvo.inert,
                 bandLabel: MGT2.ShipRangeBands[salvo.launchBand]?.label ?? "",
                 jammed: salvo.jammedRound === this.#combat.round,
-                smart: salvo.smart
+                smart: salvo.smart,
+                classLabel: (salvo.missileClass === "standard") ? null : salvo.classRow.label
             });
         }
         return rows;
@@ -330,6 +333,8 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
             .map(weapon => ({ id: weapon.id, name: weapon.name }));
         return {
             missiles,
+            classes: (Rules.on("defenceMissiles") || Rules.on("stagedMissileDefence"))
+                ? MGT2.MissileClasses : null,
             targets: this.ships.filter(other => other.id !== group.id)
                 .map(other => ({ id: other.id, name: other.name }))
         };
@@ -715,7 +720,8 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         }
         const salvo = await this.#combat.addSalvo(group, at, {
             weapon: form.querySelector('[name="salvoWeapon"]').value,
-            count: MGT2Helper.getIntegerFromInput(form.querySelector('[name="salvoCount"]').value)
+            count: MGT2Helper.getIntegerFromInput(form.querySelector('[name="salvoCount"]').value),
+            missileClass: form.querySelector('[name="salvoClass"]')?.value ?? "standard"
         });
         return salvo ? this.render() : null;
     }
@@ -737,10 +743,14 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         return salvo?.system.jam(SpaceCombatScreen.#salvoEffect(target));
     }
 
-    /** Core folio 171: the Effect of the gunner's check removes that many missiles. */
+    /** Core folio 171's Effect, or a count of HITS under Companion p.168 — the layer says which. */
     static async #onSalvoDefend(event, target) {
         const salvo = this.#salvoOf(target);
-        return salvo?.system.remove(SpaceCombatScreen.#salvoEffect(target));
+        if ( !salvo ) return null;
+        const layer = target.closest("[data-salvo-id]")?.querySelector('[name="salvoLayer"]')?.value;
+        const number = SpaceCombatScreen.#salvoEffect(target);
+        return MGT2.MissileDefenceLayers[layer]?.kills
+            ? salvo.system.intercept(layer, number) : salvo.system.remove(number);
     }
 
     /** @this {SpaceCombatScreen} */

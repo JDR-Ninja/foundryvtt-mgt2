@@ -337,6 +337,9 @@
 
 .mgt2 table.roster td.act
 	width: 1px
+	// Shrink-to-fit reads INLINE content, and a flex child reports a min-content of zero — which
+	// collapsed the salvo column to 18px and left its buttons outside the panel, unclickable.
+	min-width: min-content
 	white-space: nowrap
 	.need[data-action]
 		cursor: var(--cursor-pointer)

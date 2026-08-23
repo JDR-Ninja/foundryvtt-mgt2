@@ -7916,6 +7916,7 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 
 .mgt2 table.roster td.act {
   width: 1px;
+  min-width: min-content;
   white-space: nowrap;
 }
 .mgt2 table.roster td.act .need[data-action] {
