@@ -40,7 +40,13 @@ export function withPersonal() {
             species: new LocalDocumentField(foundry.documents.BaseItem, {
                 required: false, blank: true, trim: true, initial: "", fallback: true }),
             age: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            // Identity, and free: what the sheet prints, and what a statblock's printed GENDER line
+            // transcribes. Nothing mechanical reads it.
             gender: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            // Mechanics, and closed: which row of a species' sexed laws answers for this Traveller.
+            // Its values are the species Item's `frame.sexes`, so a species declaring none puts no
+            // control on the sheet at all — which is every human.
+            sex: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             pronouns: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             homeworld: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         })

@@ -324,7 +324,7 @@
       },
       "useGender": {
         "name": "Utiliser le Genre",
-        "hint": "Afficher le champ qui permet de saisir le genre"
+        "hint": "Affiche le champ d'identité où se note le genre. Une espèce dont une règle dépend du sexe déclare son propre jeu, et ce champ-là est sur la fiche quoi qu'en dise celui-ci."
       },
       "showLife": {
         "name": "Afficher la Vie sur la fiche",
@@ -629,7 +629,7 @@
         "BlocksAnagathics": "Interdit les anagathiques",
         "RequiresPermission": "Nécessite l'accord de l'arbitre",
         "RestrictedSpecies": "Réservée à l'espèce",
-        "RestrictedGender": "Réservée au genre",
+        "RestrictedSex": "Réservée au sexe",
         "ExitRule": "Règle de sortie (piste / test)",
         "ExitTest": "test",
         "RankLadders": "Échelles de rang",
@@ -797,6 +797,9 @@
         "RollLabel": "nom imprimé",
         "LawSex": "sexe",
         "LawRole": "rôle",
+        "LawApplies": "S'applique à ce voyageur",
+        "Sexes": "Sexes",
+        "SexValues": "Valeurs",
         "LawRow": "Variante",
         "LawDefault": "tout Voyageur",
         "CheckKind": "Le total",
@@ -1386,6 +1389,7 @@
     "Specie": "Espèce",
     "Species": "Espèces",
     "Gender": "Genre",
+    "Sex": "Sexe",
     "Pronouns": "Pronoms",
     "Actor": {
       "SpeciesSingleton": "Ce voyageur a déjà une espèce : {species}. Retirez-la avant d'en ajouter une autre.",
@@ -3277,6 +3281,9 @@
         "repair": "Points de réparation"
       },
       "Screen": {
+        "NoDirectFireSalvoHint": "Le folio 111 renvoie les armes à missiles et à torpilles au folio 36 : elles sont lancées en salve et résolues contre la Défense antisalve de la cible, jamais tirées comme des batteries en tir direct. Utilisez le contrôle de salve ci-dessous.",
+        "NoDirectFireIonHint": "Le folio 111 exclut les armes ioniques de la table des armes de combat de flotte : elles n'infligent aucun dégât et se lisent sur la table des armes ioniques, à part.",
+        "IonOnly": "ionique seulement",
         "Create": "Nouvelle bataille entre flottes",
         "Open": "Ouvrir l’écran de bataille entre flottes",
         "RangeFrom": "Portée depuis",

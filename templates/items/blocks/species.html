@@ -74,7 +74,8 @@
 	<div class="stack" data-property="ageing">
 		{{#each system.ageing as |law a|}}
 		<div class="entry" data-entry-index="{{a}}">
-			{{> systems/mgt2/templates/items/parts/law-selectors.html law=law path=(concat "ageing." a)}}
+			{{> systems/mgt2/templates/items/parts/law-selectors.html law=law path=(concat "ageing." a)
+				matched=(eq a @root.speciesFrame.matched.ageing)}}
 			<div class="pfields">
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Frame.AgeingFrom'}}</span>
@@ -135,7 +136,8 @@
 	<div class="stack" data-property="backgroundSkills">
 		{{#each system.backgroundSkills as |law b|}}
 		<div class="entry" data-entry-index="{{b}}">
-			{{> systems/mgt2/templates/items/parts/law-selectors.html law=law path=(concat "backgroundSkills." b)}}
+			{{> systems/mgt2/templates/items/parts/law-selectors.html law=law path=(concat "backgroundSkills." b)
+				matched=(eq b @root.speciesFrame.matched.backgroundSkills)}}
 			<div class="pfields">
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Frame.SkillCount'}}</span>

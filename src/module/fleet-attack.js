@@ -89,6 +89,10 @@ export function fleetWeaponRow(actor, mountIndex, weaponId = "") {
         // Folio 111: ortillery "is expected to be used specifically as ortillery and not typically
         // employed during fleet combat against other ships", so it is excluded rather than costed.
         ortillery: Boolean(traits["orbital-bombardment"] || traits["orbital-strike"]),
+        // Folio 111 keeps three things out of the Fleet Combat Weapons table: ortillery, ion — which
+        // "do not inflict damage" — and missiles, which it sends to folio 36 to be salvoed instead.
+        salvo: MGT2Helper.isMissileWeapon(weapon),
+        directFire: !traits.ion && !MGT2Helper.isMissileWeapon(weapon),
         traits
     };
 }

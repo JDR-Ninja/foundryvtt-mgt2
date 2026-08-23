@@ -24,6 +24,8 @@
 			{{#if system.personal.age}}<span>{{system.personal.age}}</span>{{/if}}
 			{{#if settings.usePronouns}}{{#if system.personal.pronouns}}<span>{{system.personal.pronouns}}</span>{{/if}}{{/if}}
 			{{#if settings.useGender}}{{#if system.personal.gender}}<span>{{system.personal.gender}}</span>{{/if}}{{/if}}
+			{{! Mechanics, so no switch hides it: it is on screen exactly where a species declares a sex. }}
+			{{#if system.personal.sex}}<span>{{system.personal.sex}}</span>{{/if}}
 		</div>
 
 		<div class="meta edit-only">
@@ -51,6 +53,17 @@
 			<label>
 				<span class="lbl">{{localize 'MGT2.Gender'}}</span>
 				{{formInput systemFields.personal.fields.gender name="system.personal.gender" value=system.personal.gender classes="f"}}
+			</label>
+			{{/if}}
+			{{! The species owns this set, and its emptiness is the control's own switch — `useGender` has
+			    no say, because a law that cannot be reached is not a display preference. }}
+			{{#if sexes.length}}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Sex'}}</span>
+				<select class="f" name="system.personal.sex">
+					<option value="">&mdash;</option>
+					{{selectOptions sexes selected=system.personal.sex}}
+				</select>
 			</label>
 			{{/if}}
 		</div>

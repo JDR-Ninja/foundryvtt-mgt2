@@ -638,6 +638,10 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
     model.traits = prepareTraitBlock(actor.system.ownTraits, "traits",
       actor.system.traitFamily, "MGT2.Items.Traits");
     model.species = this.#prepareSpecies();
+    // Empty for every human, which is what keeps the sex control off the sheet — not a setting.
+    // Paired here because `selectOptions` reads a BARE string array positionally and would write
+    // the index: an unpaired `["Female", "Male"]` stores `0` and no law would ever match again.
+    model.sexes = Chargen.sexes(actor).map(value => ({ value, label: value }));
     model.effects = prepareEffects(actor);
     model.loss = this.#prepareLoss();
     model.training = this.#prepareProgrammes();

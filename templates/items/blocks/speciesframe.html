@@ -2,15 +2,27 @@
     career's behaviour. The Core sequence is the default frame, so an empty step list is not unfinished. }}
 <div class="block speciesfrm">
 
+	{{! The closed set a Traveller's `personal.sex` may hold, and the only thing that puts that
+	    control on a sheet: a species printing no sexed rule declares none and is never asked. The
+	    `role` half of the same axis is declared by the tracks further down. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Frame.Sexes'}}</h3>
+		<span class="count">{{system.frame.sexes.length}}</span>
+	</div>
+	{{> systems/mgt2/templates/items/parts/string-list.html list=system.frame.sexes
+		path="frame.sexes" label='MGT2.Chargen.Frame.SexValues' add='MGT2.Chargen.Frame.LawSex'}}
+
 	<div class="sect">
 		<h3>{{localize 'MGT2.Chargen.Frame.Term'}}</h3>
 		<span class="count">{{speciesFrame.sequence.length}}</span>
 	</div>
-	{{! One published species starts its Travellers at two ages, by which of its three sexes they are. }}
+	{{! One published species starts its Travellers at two ages, by which rung of a declared track
+	    they hold — the axis carries a sex selector too, and no published start age uses it. }}
 	<div class="stack" data-property="frame.startAge">
 		{{#each system.frame.startAge as |law s|}}
 		<div class="entry" data-entry-index="{{s}}">
-			{{> systems/mgt2/templates/items/parts/law-selectors.html law=law path=(concat "frame.startAge." s)}}
+			{{> systems/mgt2/templates/items/parts/law-selectors.html law=law path=(concat "frame.startAge." s)
+				matched=(eq s @root.speciesFrame.matched.startAge)}}
 			<div class="pfields">
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Frame.StartAge'}}</span>

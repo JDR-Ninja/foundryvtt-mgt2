@@ -113,17 +113,18 @@
 	</div>
 
 	<div class="pfields">
-		{{! Species careers are ordinary templates carrying a restriction, and for the Aslan a gender
-		    gate as well. Both free text, because a species is an Item the referee typed. }}
+		{{! Species careers are ordinary templates carrying a restriction, and for the Aslan a sex gate
+		    as well: one of the strings that species declares, and never the identity field. Both free
+		    text, because a species is an Item the referee typed. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.RestrictedSpecies'}}</span>
 			<input class="f edit-only" type="text" name="system.restrictedTo.species" value="{{system.restrictedTo.species}}" />
 			<b class="play-only word">{{#if system.restrictedTo.species}}{{system.restrictedTo.species}}{{else}}&mdash;{{/if}}</b>
 		</label>
 		<label>
-			<span class="lbl">{{localize 'MGT2.Chargen.Template.RestrictedGender'}}</span>
-			<input class="f edit-only" type="text" name="system.restrictedTo.gender" value="{{system.restrictedTo.gender}}" />
-			<b class="play-only word">{{#if system.restrictedTo.gender}}{{system.restrictedTo.gender}}{{else}}&mdash;{{/if}}</b>
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.RestrictedSex'}}</span>
+			<input class="f edit-only" type="text" name="system.restrictedTo.sex" value="{{system.restrictedTo.sex}}" />
+			<b class="play-only word">{{#if system.restrictedTo.sex}}{{system.restrictedTo.sex}}{{else}}&mdash;{{/if}}</b>
 		</label>
 		{{! The leaving rule that DISPLACES the generic outcomes rather than layering on them.
 		    `track` names one of the tracks below. }}

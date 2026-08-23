@@ -633,10 +633,11 @@ export class CareerData extends ItemBaseData {
         // career GROUPS.
         schema.medicalBillsRow = new fields.StringField({
             required: false, blank: true, trim: true, initial: "" });
-        // Species careers are ordinary templates carrying a restriction, and for the Aslan a gender gate.
+        // Species careers are ordinary templates carrying a restriction, and for the Aslan a sex
+        // gate — one of the strings that species declares in `frame.sexes`, never the identity field.
         schema.restrictedTo = new fields.SchemaField({
             species: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-            gender: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
+            sex: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         });
 
         // Rank ladders are a NAMED SET the assignments point at, which dissolves four apparent
@@ -1571,6 +1572,11 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
             frame: new fields.SchemaField({
                 // Empty runs the Core sequence.
                 steps: new fields.ArrayField(createStepField(), { initial: [] }),
+                // The closed set `personal.sex` may hold, declared because a scrape of the `sex`
+                // strings the laws below use answers nothing for a species whose only sexed rule is
+                // a career gate. The `role` half of the same axis is declared by `tracks`.
+                sexes: new fields.ArrayField(
+                    new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] }),
                 startAge: createRoleAxisField({
                     age: new fields.NumberField({ required: false, initial: 18, min: 0, integer: true })
                 }),

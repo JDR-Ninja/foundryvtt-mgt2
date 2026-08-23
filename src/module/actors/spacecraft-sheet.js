@@ -230,9 +230,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             batteries: fleetBatteries(this.actor).map(row => ({
                 ...row,
                 mountLabel: game.i18n.localize(row.mountLabel),
-                bandLabel: row.band ? MGT2.ShipRangeBands[row.band]?.label : null,
-                // HG p.112: what gets through is a salvo's multiple, so the mount's is not one.
-                salvo: MGT2Helper.isMissileWeapon(this.actor.items.get(row.id))
+                bandLabel: row.band ? MGT2.ShipRangeBands[row.band]?.label : null
             }))
         };
     }

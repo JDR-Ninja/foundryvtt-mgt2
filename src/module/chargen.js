@@ -133,6 +133,16 @@ export const Chargen = {
     },
 
     /**
+     * The sexes this Traveller's species declares — the closed set `personal.sex` may hold, and the
+     * only thing that puts the control on a sheet: a species printing no sexed law declares none,
+     * and its Travellers are never asked.
+     * @returns {string[]}
+     */
+    sexes(actor) {
+        return this.frame(actor)?.system.frame.sexes ?? [];
+    },
+
+    /**
      * The term as this Traveller's frame declares it, plus what that frame adds to the Core
      * sequence and what it deletes from it.
      * @returns {{sequence: string[], own: Set<string>, cut: Set<string>}}
@@ -147,9 +157,13 @@ export const Chargen = {
     /** The first law row that answers: sex is the Traveller's, role a rung on a declared track. */
     law(actor, rows) {
         if ( !rows?.length ) return null;
-        const sex = fold(actor?.system.personal?.gender);
+        const sex = fold(actor?.system.personal?.sex);
+        // Through `track()` and never the stored rung: `trackRungPermanence` is printed as *"the
+        // highest rung ever attained is the one that answers"*, and reading `rung` raw made that
+        // world rule mean one thing to a standing modifier (`chargen-term.js`) and another to a
+        // species law — a fallen Za'tachk matriarch answered two ages at once.
         const roles = rows.some(row => row.role)
-            ? Object.values(this.read(actor).tracks).map(track => fold(track.rung)) : [];
+            ? Object.keys(this.read(actor).tracks).map(key => fold(this.track(actor, key).rung)) : [];
         return rows.find(row => (!row.sex || (fold(row.sex) === sex))
             && (!row.role || roles.includes(fold(row.role)))) ?? null;
     },

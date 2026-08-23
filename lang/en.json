@@ -324,7 +324,7 @@
       },
       "useGender": {
         "name": "Use Gender",
-        "hint": "Displays the fields that allow you to enter a gender"
+        "hint": "Displays the identity field a gender is written in. A species that gates a rule on sex declares its own set, and that control is on the sheet whatever this says."
       },
       "showLife": {
         "name": "Show Life in sheet",
@@ -629,7 +629,7 @@
         "BlocksAnagathics": "Blocks anagathics",
         "RequiresPermission": "Needs the referee's permission",
         "RestrictedSpecies": "Restricted to species",
-        "RestrictedGender": "Restricted to gender",
+        "RestrictedSex": "Restricted to sex",
         "ExitRule": "Exit rule (track / test)",
         "ExitTest": "test",
         "RankLadders": "Rank ladders",
@@ -797,6 +797,9 @@
         "RollLabel": "printed name",
         "LawSex": "sex",
         "LawRole": "role",
+        "LawApplies": "Applies to this Traveller",
+        "Sexes": "Sexes",
+        "SexValues": "Values",
         "LawRow": "Variant",
         "LawDefault": "any Traveller",
         "CheckKind": "The total",
@@ -1386,6 +1389,7 @@
     "Specie": "Specie",
     "Species": "Species",
     "Gender": "Gender",
+    "Sex": "Sex",
     "Pronouns": "Pronouns",
     "Actor": {
       "SpeciesSingleton": "This Traveller already has a species: {species}. Remove it before adding another.",
@@ -4312,6 +4316,9 @@
         "repair": "Repair points"
       },
       "Screen": {
+        "NoDirectFireSalvoHint": "Folio 111 sends missile and torpedo weapons to folio 36: they are launched as a salvo and resolved against the target's Salvo Defence, not fired as direct-fire batteries. Use the salvo control below.",
+        "NoDirectFireIonHint": "Folio 111 keeps ion weapons out of the Fleet Combat Weapons table — they inflict no damage at all and are read off the separate Ion Weapons table instead.",
+        "IonOnly": "ion only",
         "Create": "New fleet battle",
         "Open": "Open the fleet battle screen",
         "RangeFrom": "Range from",

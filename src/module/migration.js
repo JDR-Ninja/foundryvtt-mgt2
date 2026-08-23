@@ -14,7 +14,7 @@ const NPC_CHAIN_FIXED = ["endurance", "strength", "dexterity"];
 const MIGRATIONS = [
   {
     version: "0.2.0",
-    label: "damageOrder, protection, NPC damage chain, species unwind, species link, durationUnit, world geometry, training programmes, augment Computer/0, term log closure",
+    label: "damageOrder, protection, NPC damage chain, species unwind, species link, durationUnit, world geometry, training programmes, augment Computer/0, term log closure, sex split off gender",
     async migrate() {
       // Before the sweep: it rewrites `characteristics.<k>.base`, which the sweep then persists.
       for ( const actor of game.actors ) await unwindSpecies(actor);
@@ -131,6 +131,18 @@ function collectActorUpdate(actor) {
   if ( species ) {
     if ( source.personal?.species !== species.id ) {
       update["system.personal.species"] = species.id;
+      dirty = true;
+    }
+    // `personal.gender` was answering two questions until the two were split: identity stayed
+    // where it was, the mechanical half moved to `personal.sex`. Only a value this species actually
+    // declares carries over, in the species' own spelling — anything else never matched a law, and
+    // writing it into a now-closed field would only make the miss look like a hit. A world whose
+    // species Items predate `frame.sexes` declares nothing and copies nothing — correct, and worth
+    // knowing: that world needs the pack re-imported before this step has anything to read.
+    const typed = source.personal?.gender?.trim().toLowerCase();
+    const declared = (species.system.frame?.sexes ?? []).find(value => value.toLowerCase() === typed);
+    if ( declared && !source.personal?.sex ) {
+      update["system.personal.sex"] = declared;
       dirty = true;
     }
     const traits = withoutSpeciesTraits(source.traits ?? [], species.system.traits ?? []);

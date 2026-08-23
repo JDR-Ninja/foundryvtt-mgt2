@@ -298,7 +298,11 @@
 					</td>
 					<td class="num act">
 						{{#if ../panel.editable}}
+						{{#if row.directFire}}
 						<button type="button" class="btn" data-action="fire" data-battery="{{row.key}}">{{#if row.spinal}}{{localize 'MGT2.Fleet.Screen.FireSpinal'}}{{else}}{{localize 'MGT2.Fleet.Screen.Fire'}}{{/if}}</button>
+						{{else}}
+						<span class="need" data-tooltip="{{#if row.salvo}}{{localize 'MGT2.Fleet.Screen.NoDirectFireSalvoHint'}}{{else}}{{localize 'MGT2.Fleet.Screen.NoDirectFireIonHint'}}{{/if}}">{{#if row.salvo}}{{localize 'MGT2.Actor.spacecraft.Fleet.AsSalvo'}}{{else}}{{localize 'MGT2.Fleet.Screen.IonOnly'}}{{/if}}</span>
+						{{/if}}
 						{{#if row.ion}}<button type="button" class="btn" data-action="fire" data-kind="ion" data-battery="{{row.key}}">{{localize 'MGT2.Fleet.Ion.Title'}}</button>{{/if}}
 						{{/if}}
 					</td>

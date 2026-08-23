@@ -1,9 +1,11 @@
 {{! The two selectors a species law is printed per: a sex the Traveller carries, a role matched against
     a rung of a track the frame declares. A row naming neither is the default and the first row that
-    answers wins. Callers pass `law` and `path` under `system.`. }}
+    answers wins. Callers pass `law` and `path` under `system.`, and `matched` where the Item is
+    embedded — both selectors are folded strings, so a rung typed in the wrong language is a silence
+    everywhere else and this mark is the only place it reads. }}
 <div class="entryhead">
 	<input class="f edit-only" type="text" name="system.{{path}}.sex" value="{{law.sex}}" placeholder="{{localize 'MGT2.Chargen.Frame.LawSex'}}" />
 	<input class="f edit-only" type="text" name="system.{{path}}.role" value="{{law.role}}" placeholder="{{localize 'MGT2.Chargen.Frame.LawRole'}}" />
-	<b class="play-only word">{{#if law.sex}}{{law.sex}}{{/if}}{{#if law.role}}{{#if law.sex}} &middot; {{/if}}{{law.role}}{{/if}}{{#unless law.sex}}{{#unless law.role}}{{localize 'MGT2.Chargen.Frame.LawDefault'}}{{/unless}}{{/unless}}</b>
+	<b class="play-only word">{{#if law.sex}}{{law.sex}}{{/if}}{{#if law.role}}{{#if law.sex}} &middot; {{/if}}{{law.role}}{{/if}}{{#unless law.sex}}{{#unless law.role}}{{localize 'MGT2.Chargen.Frame.LawDefault'}}{{/unless}}{{/unless}}{{#if matched}} <i class="fa-solid fa-user-check" data-tooltip="{{localize 'MGT2.Chargen.Frame.LawApplies'}}"></i>{{/if}}</b>
 	<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
 </div>

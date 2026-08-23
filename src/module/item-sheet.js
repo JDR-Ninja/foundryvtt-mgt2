@@ -1,4 +1,5 @@
 import { MGT2 } from "./config.js";
+import { Chargen } from "./chargen.js";
 import { Contract } from "./contract.js";
 import { Doses } from "./doses.js";
 import { EFFECT_ACTIONS, prepareEffects } from "./effects.js";
@@ -469,7 +470,25 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         summary: stepCheckSummary(step.check)
       })),
       without: Array.from(this.item.system.withoutCharacteristics,
-        key => game.i18n.localize(MGT2.Characteristics[key]))
+        key => game.i18n.localize(MGT2.Characteristics[key])),
+      matched: this.#matchedLaws()
+    };
+  }
+
+  /**
+   * Which row of each sexed law answers for the Traveller this species Item is embedded in. Both
+   * selectors are strings matched by `fold`, so a rung typed in the wrong language reads as a
+   * silence everywhere else; this is the one place it shows. `-1` off an Actor and where the law
+   * has no answer.
+   */
+  #matchedLaws() {
+    const actor = this.item.actor;
+    const system = this.item.system;
+    const at = rows => (actor && rows?.length) ? rows.indexOf(Chargen.law(actor, rows)) : -1;
+    return {
+      startAge: at(system.frame.startAge),
+      ageing: at(system.ageing),
+      backgroundSkills: at(system.backgroundSkills)
     };
   }
 
