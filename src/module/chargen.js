@@ -22,11 +22,13 @@ export class ChargenState extends foundry.abstract.DataModel {
                 required: false, blank: true, initial: "", choices: MGT2.CreationSteps }),
 
             // The tray of decisions creation defers.
-            tray: new fields.ArrayField(createTrayEntryField(), { initial: [] }),
+            // ⚠ `() => []` and never `[]` here and below: a bare initial is ONE shared array, and
+            // this model is built by hand, so `updateSource` writes it back into the schema itself.
+            tray: new fields.ArrayField(createTrayEntryField(), { initial: () => [] }),
 
             // Two ledgers, and neither can be derived.
-            benefitRolls: new fields.ArrayField(createCounterEntryField(), { initial: [] }),
-            skillRolls: new fields.ArrayField(createCounterEntryField(), { initial: [] }),
+            benefitRolls: new fields.ArrayField(createCounterEntryField(), { initial: () => [] }),
+            skillRolls: new fields.ArrayField(createCounterEntryField(), { initial: () => [] }),
 
             // Named tracks scoped to the Traveller rather than to one career — a species
             // status that gates career access and moves NON-monotonically.
@@ -36,7 +38,7 @@ export class ChargenState extends foundry.abstract.DataModel {
                 // The high-water mark "highest rank reached" has to read, kept because a
                 // track that falls cannot reconstruct it afterwards.
                 high: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true })
-            }), { initial: {} }),
+            }), { initial: () => ({}) }),
 
             // Folio 19's Connections Rule, which is an ALLOWANCE and not an outcome: two at most,
             // each with a different Traveller.
@@ -44,12 +46,12 @@ export class ChargenState extends foundry.abstract.DataModel {
                 with: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 skill: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
-            }), { initial: [] }),
+            }), { initial: () => [] }),
 
             // Folio 50's shared skills package, and only the half that is spent: what a Traveller
             // has already taken out of the pool the table chose.
             packagePicks: new fields.ArrayField(
-                new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] })
+                new fields.StringField({ required: true, blank: false, trim: true }), { initial: () => [] })
         };
     }
 }
