@@ -133,12 +133,12 @@
 	</div>
 </div>
 
-{{! THE TWO PRINTED PLAYER ACTIONS, and they are the answer to what this document is FOR: both are
-    rules the party rolls, and both write it. }}
+{{! THE PRINTED ROLLS, and they are the answer to what this document is FOR: each one is a rule the
+    book states, and each one writes its result down. }}
 <div class="block">
 	<div class="sect">
 		<h3>{{localize 'MGT2.Contract.WhatTheyCanDo'}}</h3>
-		<span class="count">{{localize 'MGT2.Contract.Folio10'}}</span>
+		<span class="count">{{localize 'MGT2.Contract.Folio9to10'}}</span>
 	</div>
 
 	<div class="act{{#if system.negotiated}} spent{{/if}}">
@@ -178,6 +178,31 @@
 		<div class="row">
 			<button type="button" class="btn hot" data-action="contractQualify"{{#if contract.qualify.disabled}} disabled{{/if}}>{{localize 'MGT2.Contract.QualifyDo'}}</button>
 			{{#if contract.qualify.refused}}<span class="out bad">{{contract.qualify.refused}}</span>{{/if}}
+		</div>
+	</div>
+	{{/if}}
+
+	{{! Folio 9's third printed roll. The referee decides when it happens and which circumstance
+	    applies, so the control is theirs and the card speaks under the hunter. }}
+	{{#if (and contract.repInPlay contract.gm)}}
+	<div class="act">
+		<div class="top">
+			<h4>{{localize 'MGT2.Contract.RepChange'}}</h4>
+			<span class="cite">{{localize 'MGT2.Contract.RepChangeCite'}}</span>
+		</div>
+		{{#if contract.hasRep}}
+		<div class="line">{{localize 'MGT2.Contract.RepChangeReading' rep=contract.rep dm=contract.repDM}}</div>
+		{{/if}}
+		<div class="grid">
+			<label>
+				<span class="lbl">{{localize 'MGT2.Contract.RepCircumstance'}}</span>
+				{{! Several may apply and the reader takes only the highest of them. }}
+				<select class="f" multiple size="4" data-rep-circumstance>{{selectOptions contract.circumstances valueAttr="value" labelAttr="label"}}</select>
+			</label>
+		</div>
+		<div class="row">
+			<button type="button" class="btn hot" data-action="contractRepChange"{{#if contract.repChange.disabled}} disabled{{/if}}>{{localize 'MGT2.Contract.RepChangeDo'}}</button>
+			{{#if contract.repChange.refused}}<span class="out bad">{{contract.repChange.refused}}</span>{{/if}}
 		</div>
 	</div>
 	{{/if}}

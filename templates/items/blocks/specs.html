@@ -101,6 +101,10 @@
 		{{#if system.powered}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Powered'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
 		{{/if}}
+		{{! Only the Companion's vacuum table reads it, so only that reading prints the row. }}
+		{{#if showSuitBreach}}
+		<li{{#if (eq system.breach "intact")}} class="off"{{/if}}><span class="lbl">{{localize 'MGT2.Items.SuitBreach'}}</span><b class="word">{{localize (lookup config.SuitBreaches system.breach)}}</b></li>
+		{{/if}}
 		{{! A null test and not a truthy one: Computer/0 is a rating and prints as one. }}
 		{{#unless (eq system.processing null)}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.processingUsed}}<span class="u">/ {{system.processingCap}}</span></b></li>
@@ -346,6 +350,13 @@
 			{{formInput systemFields.powered name="system.powered" value=system.powered}}
 			<span>{{localize 'MGT2.Items.Powered'}}</span>
 		</label>
+		{{! Companion p.68: which row of the vacuum table this suit puts its wearer on. }}
+		{{#if showSuitBreach}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.SuitBreach'}}</span>
+			<select class="f" name="system.breach">{{selectOptions config.SuitBreaches selected=system.breach localize=true}}</select>
+		</label>
+		{{/if}}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Processing'}}</span>
 			{{formInput systemFields.processing name="system.processing" value=system.processing classes="f num"}}

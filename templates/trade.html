@@ -80,6 +80,20 @@
 			</label>
 		</div>
 
+		{{! Core p.241 is a Traveller's own check, so the screen has to know whose: the hull's
+		    stations, then whoever is selected, then the player's Traveller. }}
+		<label class="fld">
+			<span>{{localize 'MGT2.Trade.Searcher'}}</span>
+			<select class="f" data-field="searcher">{{selectOptions searchers selected=input.searcher}}</select>
+		</label>
+
+		{{! Core p.241 prints the online search as a third row a TL8+ world offers, not as one that
+		    replaces the others, and prints no online black market at all. }}
+		<label class="fld ck" data-tooltip="{{localize 'MGT2.Trade.OnlineHint' tl=online.minTL}}">
+			<input type="checkbox" data-field="online" {{checked online.on}} {{disabled (not online.offered)}} />
+			<span>{{localize 'MGT2.Trade.Online'}}</span>
+		</label>
+
 		<label class="fld ck">
 			<input type="checkbox" data-field="blackMarket" {{checked input.blackMarket}} />
 			<span>{{localize 'MGT2.Trade.BlackMarket'}}</span>

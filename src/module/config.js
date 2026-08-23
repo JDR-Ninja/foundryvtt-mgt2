@@ -504,6 +504,26 @@ MGT2.RepQualification = Object.freeze([
     {max: null, difficulty: "Impossible"}
 ]);
 
+// Bounty Hunter p.9's Reputation Change table. A DM takes the total outside the printed 2-12.
+MGT2.RepChange = Object.freeze([
+    {max: 4, change: -1}, {max: 9, change: 0}, {max: null, change: 1}
+]);
+
+// Bounty Hunter p.9's Reputation Modification table, in printed order. Only the highest applies.
+MGT2.RepModification = Object.freeze({
+    criticalAgainstOdds: {label: "MGT2.Contract.RepMod.criticalAgainstOdds", dm: 3},
+    outwitCompetitors: {label: "MGT2.Contract.RepMod.outwitCompetitors", dm: 2},
+    highAgainstOdds: {label: "MGT2.Contract.RepMod.highAgainstOdds", dm: 2},
+    gainAlly: {label: "MGT2.Contract.RepMod.gainAlly", dm: 1},
+    bringInHigh: {label: "MGT2.Contract.RepMod.bringInHigh", dm: 1},
+    outmanoeuvreCompetitor: {label: "MGT2.Contract.RepMod.outmanoeuvreCompetitor", dm: 1},
+    loseMarkToCompetitors: {label: "MGT2.Contract.RepMod.loseMarkToCompetitors", dm: -1},
+    loseAlly: {label: "MGT2.Contract.RepMod.loseAlly", dm: -1},
+    markEludes: {label: "MGT2.Contract.RepMod.markEludes", dm: -1},
+    collateralDamage: {label: "MGT2.Contract.RepMod.collateralDamage", dm: -2},
+    refuseToTurnOver: {label: "MGT2.Contract.RepMod.refuseToTurnOver", dm: -3}
+});
+
 MGT2.Characteristics = Object.freeze({
     strength: "MGT2.Characteristics.strength.name",
     dexterity: "MGT2.Characteristics.dexterity.name",
@@ -2173,6 +2193,20 @@ MGT2.SpeculativeTrade = Object.freeze({
     population: Object.freeze([{max: 3, dm: -3}, {max: 8, dm: 0}, {max: null, dm: 3}])
 });
 
+// Core p.241: three checks find a supplier, told apart by what is being sought. `names` is matched
+// against the roller's own skill Items, so each carries the French name Modül's books print.
+MGT2.SupplierSearch = Object.freeze({
+    broker: Object.freeze({label: "MGT2.Trade.Search.broker",
+        names: Object.freeze(["broker", "courtier"]),
+        characteristics: Object.freeze(["education", "social"]), dice: 1, unit: "days"}),
+    streetwise: Object.freeze({label: "MGT2.Trade.Search.streetwise",
+        names: Object.freeze(["streetwise", "sens de la rue"]),
+        characteristics: Object.freeze(["education", "social"]), dice: 1, unit: "days"}),
+    online: Object.freeze({label: "MGT2.Trade.Search.online",
+        names: Object.freeze(["admin", "administration"]),
+        characteristics: Object.freeze(["education"]), dice: 1, unit: "hours", minTL: 8})
+});
+
 // The leading word of a transcribed component row (HG p.9-64).
 MGT2.ComponentCategories = Object.freeze({
     hull: "MGT2.ComponentCategories.hull",
@@ -2745,6 +2779,24 @@ MGT2.VacuumPressures = Object.freeze({
     hard: {label: "MGT2.VacuumPressures.hard", cumulative: true},
     partial: {label: "MGT2.VacuumPressures.partial", cumulative: false},
     minimal: {label: "MGT2.VacuumPressures.minimal", cumulative: false}
+});
+
+// Companion p.68. What state a sealed suit is in; an intact one stops vacuum outright.
+MGT2.SuitBreaches = Object.freeze({
+    intact: "MGT2.SuitBreaches.intact",
+    minor: "MGT2.SuitBreaches.minor",
+    major: "MGT2.SuitBreaches.major"
+});
+
+// Companion p.67's Vacuum Damage table, in its printed row order and read on `[row][pressure]`.
+// `none` is its No Protection row; `interval` is the minimal column, printed and never rolled.
+MGT2.VacuumDamage = Object.freeze({
+    none: Object.freeze({label: "MGT2.VacuumDamage.none",
+        hard: "2D", partial: "1D", interval: "MGT2.VacuumDamage.intervalNone"}),
+    major: Object.freeze({label: "MGT2.VacuumDamage.major",
+        hard: "2D-4", partial: "1D-2", interval: "MGT2.VacuumDamage.intervalMajor"}),
+    minor: Object.freeze({label: "MGT2.VacuumDamage.minor",
+        hard: "2D-8", partial: "1D-4", interval: "MGT2.VacuumDamage.intervalMinor"})
 });
 
 // WHERE A SECTOR SITS, and what its subsectors are called.

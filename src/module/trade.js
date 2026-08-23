@@ -1,7 +1,9 @@
+import { Checks } from "./checks.js";
 import { MGT2 } from "./config.js";
 import { CreditSplit } from "./credit-split.js";
 import { CargoData } from "./datamodels.js";
 import { MGT2Helper } from "./helper.js";
+import { RollPromptHelper } from "./roll-prompt.js";
 import { StopTraffic } from "./stop-traffic.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -29,6 +31,12 @@ const DICE_PER_ROW = 2;
  * re-rolled one await at a time.
  */
 const STOCK_TRIES = 4;
+
+/** Core p.241 puts all three supplier searches on the same rung. */
+const SEARCH_DIFFICULTY = "Average";
+
+/** Who can be sent looking: an Actor type that carries characteristics and skill Items. */
+const SEARCHERS = new Set(["character", "npc"]);
 
 /** Speculative trade: the shelf a supplier has, and what one lot costs or fetches. */
 export class SpecTrade {
@@ -132,20 +140,36 @@ export class SpecTrade {
         return { parts, dm, raw, tons: Math.max(0, raw) * goods.multiplier };
     }
 
-    /** Finding the supplier at all. */
-    static search(uwp, attempts, roll = null) {
+    /**
+     * Core p.241's three rows, told apart by what is being sought. The online one is offered and
+     * not derived — the book prints it as a choice a TL8+ world makes available.
+     */
+    static searchKind({ blackMarket, online, uwp }) {
+        if ( blackMarket ) return "streetwise";
+        const reach = uwp && (uwp.techLevel >= MGT2.SupplierSearch.online.minTL);
+        return (online && reach) ? "online" : "broker";
+    }
+
+    /** Finding the supplier at all: the check Core p.241 asks for, and what the world adds to it. */
+    static search(uwp, attempts, kind = "broker") {
+        const rule = MGT2.SupplierSearch[kind] ?? MGT2.SupplierSearch.broker;
         const port = MGT2.Starports[uwp.starport] ?? MGT2.Starports.X;
-        const terms = [StopTraffic.term(
-            game.i18n.format("MGT2.Trade.Terms.Starport", { port: uwp.starport }), port.searchDM)];
+        const terms = [{ key: "searchPort", ...StopTraffic.term(
+            game.i18n.format("MGT2.Trade.Terms.Starport", { port: uwp.starport }), port.searchDM) }];
         if ( attempts ) {
-            terms.push(StopTraffic.term(MGT2Helper.plural("MGT2.Trade.Terms.Attempts", attempts),
-                attempts * MGT2.SpeculativeTrade.attemptDM));
+            terms.push({ key: "searchAttempts",
+                ...StopTraffic.term(MGT2Helper.plural("MGT2.Trade.Terms.Attempts", attempts),
+                    attempts * MGT2.SpeculativeTrade.attemptDM) });
         }
         const dm = terms.reduce((sum, term) => sum + term.dm, 0);
-        const target = MGT2.DifficultyTargets.Average;
-        if ( roll === null ) return { terms, dm, target };
-        const total = roll + dm;
-        return { terms, dm, target, roll, total, effect: total - target, found: total >= target };
+        return { kind, rule, terms, dm, target: MGT2.DifficultyTargets[SEARCH_DIFFICULTY],
+            check: game.i18n.localize(rule.label) };
+    }
+
+    /** Core p.241 prints how long the hunt takes beside the check: 1D days, or 1D hours online. */
+    static searchTook(rule, count) {
+        return (rule.unit === "hours") ? MGT2Helper.plural("MGT2.Trade.SearchHours", count)
+            : MGT2Helper.plural("MGT2.Trade.SearchDays", count);
     }
 }
 
@@ -186,7 +210,8 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     #input = {
         world: "", zone: "green", goods: "11",
         broker: 0, otherBroker: MGT2.SpeculativeTrade.otherBroker,
-        attempts: 0, blackMarket: false, bannedAt: "", localBroker: false
+        attempts: 0, blackMarket: false, online: false, searcher: "",
+        bannedAt: "", localBroker: false
     };
 
     /**
@@ -206,13 +231,12 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     #priceRoll = null;
 
     /**
-     * The supplier search, kept as the 2D AND the attempt count it was rolled at.
-     * @type {{attempts: number, roll: number}|null}
+     * The supplier search, scored: the check carried the Starport and attempt DMs, so the reading
+     * is frozen and never re-derived against a count the stamp has since moved.
+     * @type {{total: number, target: number, effect: number, found: boolean, who: string,
+     *     check: string, took: string}|null}
      */
     #search = null;
-
-    /** The `Roll` behind `#search`, on the card for the same reason as the price's. */
-    #searchRoll = null;
 
     /** The market, when one was dropped. @type {Actor|null} */
     #world = null;
@@ -276,7 +300,6 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         this.#price = null;
         this.#priceRoll = null;
         this.#search = null;
-        this.#searchRoll = null;
         this.#bought.clear();
     }
 
@@ -342,6 +365,8 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             attempts: standing ? standing.attemptsThisMonth
                 : Math.max(0, Math.trunc(Number(this.#input.attempts) || 0)),
             blackMarket: this.#input.blackMarket === true,
+            online: this.#input.online === true,
+            searcher: String(this.#input.searcher ?? ""),
             localBroker: this.#input.localBroker === true,
             // Blank is "nobody bans this", which is a different statement from Law Level 0.
             bannedAt: banned === "" ? null : Math.max(0, Math.trunc(Number(banned) || 0))
@@ -353,10 +378,17 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         const context = await super._prepareContext(options);
         const input = this.reading;
         this.#syncRegistrations([this.#world, this.#ship]);
+        const online = MGT2.SupplierSearch.online;
+        const onlineOffered = !input.blackMarket && (input.uwp?.techLevel >= online.minTL);
         Object.assign(context, {
             config: MGT2,
             // The count is the world's while one is in the slot, so the box shows what drives the DM.
             input: { ...this.#input, attempts: input.attempts },
+            searchers: Object.fromEntries((await this.#roster()).map(row => [row.uuid, row.name])),
+            // Core p.241 gates the online search on the world's Tech Level, and prints no online
+            // black market at all: the box keeps the choice and stops driving the fork.
+            online: { minTL: online.minTL, offered: onlineOffered,
+                on: onlineOffered && input.online },
             zones: MGT2.TravelZones,
             goodsList: Object.fromEntries(Object.values(MGT2.TradeGoods)
                 .map(row => [row.d66, `${row.d66} · ${game.i18n.localize(row.label)}`])),
@@ -380,11 +412,9 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
         context.codes = codes.map(code => ({ code, label: SpecTrade.codeLabel(code),
             zone: !MGT2.TradeCodes.some(row => row.code === code) }));
-        // Two readings of the same rule: what the NEXT search costs, and the one already rolled
-        // read against the count it was rolled at.
-        context.search = SpecTrade.search(input.uwp, input.attempts);
-        context.searched = this.#search
-            ? SpecTrade.search(input.uwp, this.#search.attempts, this.#search.roll) : null;
+        // What the NEXT search asks for; the one already rolled is kept whole beside it.
+        context.search = SpecTrade.search(input.uwp, input.attempts, SpecTrade.searchKind(input));
+        context.searched = this.#search;
         context.shelf = SpecTrade.stock(codes, input.blackMarket)
             .map(row => this.#shelfRow(row, input, codes));
         context.drawn = (this.#dice?.stock ?? [])
@@ -465,6 +495,39 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         });
     }
 
+    /**
+     * Who the screen can send looking: the hull's stations, then whoever is selected, then the
+     * player's own Traveller.
+     * @returns {Promise<{uuid: string, name: string}[]>}
+     */
+    async #roster() {
+        const actors = [];
+        for ( const station of this.#ship?.system.crew ?? [] ) {
+            const actor = station.actor ? await fromUuid(station.actor).catch(() => null) : null;
+            if ( actor ) actors.push(actor);
+        }
+        actors.push(...(canvas?.tokens?.controlled ?? []).map(token => token.actor));
+        if ( game.user.character ) actors.push(game.user.character);
+
+        const seen = new Set();
+        const rows = [];
+        for ( const actor of actors ) {
+            if ( !SEARCHERS.has(actor?.type) || seen.has(actor.uuid) ) continue;
+            seen.add(actor.uuid);
+            rows.push({ uuid: actor.uuid, name: actor.name });
+        }
+        return rows;
+    }
+
+    /** The picker's Traveller — the first on the roster while the picker names nobody on it. */
+    async #searcher() {
+        const roster = await this.#roster();
+        const picked = roster.some(row => row.uuid === this.#input.searcher);
+        const uuid = picked ? this.#input.searcher : roster[0]?.uuid;
+        const actor = uuid ? await fromUuid(uuid).catch(() => null) : null;
+        return SEARCHERS.has(actor?.type) ? actor : null;
+    }
+
     /** The market slot: which document is in it, and the two facts this screen can write to it. */
     #slot() {
         const standing = this.standing;
@@ -533,6 +596,7 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             if ( !field ) return;
             this.#input[field] = (event.target.type === "checkbox") ? event.target.checked : event.target.value;
             this.#syncGloss();
+            this.#syncOnline();
             this.render({ parts: ["results"] });
         });
     }
@@ -542,6 +606,17 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         await super._onRender(context, options);
         // Re-bound on every render because the form part carries the slots and is replaced.
         this.dragDrop.bind(this.element);
+    }
+
+    /** Core p.241's TL gate, patched for the same reason as the gloss below it. */
+    #syncOnline() {
+        const box = this.element.querySelector('[data-field="online"]');
+        if ( !box ) return;
+        const input = this.reading;
+        const offered = !input.blackMarket
+            && (input.uwp?.techLevel >= MGT2.SupplierSearch.online.minTL);
+        box.disabled = !offered;
+        box.checked = offered && input.online;
     }
 
     /** The readout beside the profile field lives in the part that never re-renders, so it is patched. */
@@ -568,14 +643,62 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     /**
-     * Finding a supplier at all: an Average (8+) check at the Starport DM (Core p.242), less one
-     * per search already made here this month (Core p.241).
+     * Core p.241: an Average (8+) Broker check at EDU or SOC — Streetwise for a black market,
+     * Admin online — at the Starport DM (Core p.242), less one per search already made this month.
      */
     static async #onRollSearch() {
         const input = this.reading;
         if ( !input.uwp ) return;
-        this.#searchRoll = await new Roll("2d6").roll();
-        this.#search = { attempts: input.attempts, roll: this.#searchRoll.total };
+        const actor = await this.#searcher();
+        if ( !actor ) {
+            return void ui.notifications.warn(game.i18n.localize("MGT2.Trade.NeedASearcher"));
+        }
+
+        const search = SpecTrade.search(input.uwp, input.attempts, SpecTrade.searchKind(input));
+        const rule = search.rule;
+        // The world's own contributions ride the prompt as waivable modifiers, the way a station
+        // action's do.
+        const modifiers = search.terms.map(term => ({ key: term.key, label: term.label, dm: term.dm }));
+        const skill = actor.items.find(item => (item.type === "talent")
+            && (item.system.subType === "skill")
+            && rule.names.some(name => MGT2Helper.matchesSkill(item.name, name)));
+
+        const label = game.i18n.localize("MGT2.Trade.RollSearch");
+        const rollOptions = {
+            rollTypeName: this.#marketName(),
+            rollObjectName: label,
+            characteristics: RollPromptHelper.actorCharacteristics(actor),
+            // Core p.241 allows EDU or SOC, and EDU alone online: the first is seeded, the select
+            // offers the rest.
+            characteristic: rule.characteristics[0],
+            skills: RollPromptHelper.actorSkills(actor),
+            skill: skill?.id ?? "NP",
+            checkModifiers: modifiers,
+            difficulty: SEARCH_DIFFICULTY,
+            blocks: { skill: true, range: false, traits: false },
+            strengthDM: 0
+        };
+        const answered = await RollPromptHelper.roll(rollOptions);
+        if ( !answered ) return;
+
+        const { formula, modifiers: named, chainSources } =
+            RollPromptHelper.terms(answered, actor, modifiers);
+        if ( MGT2Helper.hasValue(answered, "difficulty") ) rollOptions.difficulty = answered.difficulty;
+        const outcome = await Checks.resolve({ formula, rollData: actor.getRollData(),
+            difficulty: rollOptions.difficulty, prompt: answered });
+        if ( !outcome ) return;
+
+        const took = await new Roll(`${rule.dice}d6`).roll();
+        this.#search = {
+            total: outcome.roll.total, target: outcome.target, effect: outcome.effect,
+            found: outcome.effect >= 0, who: actor.name, check: search.check,
+            took: SpecTrade.searchTook(rule, took.total)
+        };
+        await Checks.post(outcome, { actor, label, mode: answered.rollMode,
+            rollTypeName: rollOptions.rollTypeName, rollObjectName: label,
+            difficulty: rollOptions.difficulty, modifiers: named, chainSources,
+            showButtons: true, lines: [search.check, this.#search.took] });
+
         // The stamp redraws every client through `apps`; with no world there is nothing to write
         // and the typed count keeps driving the DM.
         if ( this.canWrite ) await this.#world.system.recordSearch(campaignDay());
@@ -865,8 +988,8 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
             author: game.user.id,
             speaker: ChatMessage.getSpeaker(),
             // v14 appends no display of its own once `content` is set, so this costs the card
-            // nothing and buys Dice So Nice and an auditable record.
-            rolls: [this.#searchRoll, this.#priceRoll].filter(roll => roll),
+            // nothing and buys Dice So Nice and an auditable record. The search posts its own.
+            rolls: [this.#priceRoll].filter(roll => roll),
             content: `<div class="mgt2 theme-light card spectrade">
                 <div class="chd"><div class="what"><h4>${
                     foundry.utils.escapeHTML(game.i18n.localize("MGT2.Trade.Speculative"))

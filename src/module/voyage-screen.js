@@ -255,8 +255,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         const jump = [];
         if ( !system.fuel.refined ) jump.push({ label: chip("UnrefinedChip"), negative: true });
         // Core p.157 prints two more and neither is applied: the 100-diameter limit is a position
-        // nothing on this screen tracks, and DM−1 per month behind maintenance reads a counter the
-        // design declined.
+        // nothing on this screen tracks, and the DM per month behind maintenance is the referee's.
         jump.push({ label: chip("MaintenanceChip"), inert: true },
             { label: chip("DiameterChip"), inert: true });
         return {
@@ -676,8 +675,7 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
                 params: { parsecs }, plural: "parsecs", dm: -parsecs }];
         }
         // Core p.157. The other two printed modifiers are the referee's: the 100-diameter limit is
-        // a position nothing here tracks, and DM−1 per month behind maintenance reads a counter the
-        // design declined.
+        // a position nothing here tracks, and the DM per month behind maintenance is not derived.
         return system.fuel.refined ? []
             : [{ key: "unrefined", label: "MGT2.Voyage.UnrefinedDM", dm: -2 }];
     }

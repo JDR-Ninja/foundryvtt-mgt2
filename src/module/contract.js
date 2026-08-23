@@ -66,6 +66,17 @@ export class Contract {
         return rung(MGT2.RepQualification, difference).difficulty;
     }
 
+    /** Bounty Hunter p.9: DM-1 for every four REP, so a name already made is harder to grow. */
+    static repChangeDM(rep) {
+        return -Math.floor(Math.max(0, rep ?? 0) / 4);
+    }
+
+    /** Bounty Hunter p.9: one circumstance modifies a roll, the highest — never their sum. */
+    static circumstance(...keys) {
+        return keys.map(key => MGT2.RepModification[key]).filter(Boolean)
+            .reduce((best, row) => (!best || (row.dm > best.dm)) ? row : best, null);
+    }
+
     /** Why a printed roll cannot be made, never a silent no-op. @returns {string|null} */
     static refusal(item, rule) {
         const system = item.system;
@@ -76,6 +87,9 @@ export class Contract {
         }
         if ( (rule === "qualify") && system.qualificationRolled ) {
             return game.i18n.localize("MGT2.Contract.Refused.Qualified");
+        }
+        if ( (rule === "repChange") && !system.hunterShowsRep ) {
+            return game.i18n.localize("MGT2.Contract.Refused.NoRep");
         }
         return null;
     }
@@ -155,7 +169,40 @@ export class Contract {
         });
     }
 
-    /** The one named DM both printed rolls carry, read off the Traveller. */
+    /** Bounty Hunter p.9: 2D, the REP DM and one circumstance; the row lands on the Traveller. */
+    static async reputationChange(item, ...circumstances) {
+        const refused = Contract.refusal(item, "repChange");
+        if ( refused ) return ui.notifications.warn(refused);
+
+        const actor = item.system.hunterActor;
+        const rows = [[game.i18n.localize("MGT2.Contract.RepEarned"),
+            Contract.repChangeDM(item.system.hunterRep)]];
+        const applied = Contract.circumstance(...circumstances);
+        if ( applied ) rows.push([game.i18n.localize(applied.label), applied.dm]);
+        const { parts, terms } = Checks.modifiers(rows);
+        const outcome = await Checks.resolve({ formula: ["2d6", ...parts].join("") });
+        if ( !outcome ) return null;
+
+        const change = rung(MGT2.RepChange, outcome.roll.total).change;
+        const before = actor.system.characteristics.reputation.base;
+        const after = Math.max(0, before + change);
+        if ( after !== before ) {
+            await actor.update({ "system.characteristics.reputation.base": after });
+        }
+        const key = (after > before) ? "RepGainedLine" : (after < before) ? "RepLostLine"
+            : change ? "RepFlooredLine" : "RepHeldLine";
+
+        return Checks.post(outcome, {
+            actor,
+            label: game.i18n.localize("MGT2.Contract.RepChange"),
+            rollTypeName: game.i18n.localize("MGT2.Contract.RepChange"),
+            rollObjectName: item.name,
+            modifiers: terms,
+            lines: [game.i18n.format(`MGT2.Contract.${key}`, { name: actor.name, rep: after })]
+        });
+    }
+
+    /** The one named DM the two REP checks carry, read off the Traveller. */
     static #repRow(actor) {
         return [game.i18n.localize("MGT2.Characteristics.reputation.name"),
             actor.system.characteristics.reputation.dm];

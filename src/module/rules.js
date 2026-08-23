@@ -249,6 +249,14 @@ export const RULES = Object.freeze({
         group: "health", book: "companion", page: "80-81",
         default: false
     },
+    // Two whole damage models, not one row: Core escalates a die per round, the Companion reads a
+    // flat table on the suit's breach. Nothing per-region — two regions disagreeing is incoherent.
+    vacuumRuleset: {
+        group: "health", book: "companion", page: "67-68",
+        options: { core: "MGT2.Rules.vacuumRuleset.core",
+            companion: "MGT2.Rules.vacuumRuleset.companion" },
+        default: "core"
+    },
     // The default a NEW hull is created with.
     jumpRuleset: {
         group: "space", book: "core", page: "158",

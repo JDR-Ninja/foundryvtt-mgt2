@@ -1,6 +1,7 @@
 import { ChatHelper } from "./chatHelper.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
+import { Rules } from "./rules.js";
 
 const fields = foundry.data.fields;
 const { RegionBehaviorType } = foundry.data.regionBehaviors;
@@ -31,6 +32,20 @@ async function applyHazard(actor, formula, label, note = "") {
 /** Whether this actor is one an environmental row can reach at all. */
 function canBeHurt(actor) {
     return (actor?.isOwner === true) && (typeof actor.system.applyDamage === "function");
+}
+
+/**
+ * The gear the referee named as protection, as worn — the item and not a yes, because the vacuum
+ * table reads a breach off the suit it finds.
+ * @param {Set<string>} named   Gear names, as typed on the behaviour
+ */
+function protectingItem(named, actor) {
+    if ( named.size === 0 ) return null;
+    const wanted = new Set([...named].map(gear => gear.toLowerCase()));
+    // Core p.82: a Traveller is protected by what they are wearing, never by what is in their
+    // pack. `=== true` is also the type test — the skill and the suit share a name.
+    return actor.items.find(item =>
+        wanted.has(item.name.trim().toLowerCase()) && (item.system.equipped === true)) ?? null;
 }
 
 /** Companion p.59-64. A standing modifier, and the one hazard that outlives leaving the region. */
@@ -123,12 +138,7 @@ export class TemperatureBehaviorData extends RegionBehaviorType {
 
     /** Whether this actor carries what the referee named as negating the row. */
     protects(actor) {
-        if ( this.protectedBy.size === 0 ) return false;
-        const named = new Set([...this.protectedBy].map(gear => gear.toLowerCase()));
-        // Core p.82: a Traveller is protected by what they are wearing, never by what is in their
-        // pack. `=== true` is also the type test — the skill and the suit share a name.
-        return actor.items.some(item =>
-            named.has(item.name.trim().toLowerCase()) && (item.system.equipped === true));
+        return protectingItem(this.protectedBy, actor) !== null;
     }
 
     static async #onTokenRoundStart(event) {
@@ -148,7 +158,10 @@ export class TemperatureBehaviorData extends RegionBehaviorType {
     };
 }
 
-/** Companion p.65-71. Hard vacuum escalates a die per round; the thinner two do not. */
+/**
+ * Companion p.65-71. Two books print two vacuum systems and `vacuumRuleset` picks one: Core
+ * escalates a die per round, the Companion reads a flat table off the state of the worn suit.
+ */
 export class VacuumBehaviorData extends RegionBehaviorType {
 
     static LOCALIZATION_PREFIXES = ["MGT2.Region.vacuum"];
@@ -157,7 +170,11 @@ export class VacuumBehaviorData extends RegionBehaviorType {
         return {
             pressure: new fields.StringField({
                 required: false, blank: false, initial: "hard", choices: MGT2.VacuumPressures }),
-            damage: new fields.StringField({ required: false, blank: true, trim: true, initial: "1D" })
+            damage: new fields.StringField({ required: false, blank: true, trim: true, initial: "1D" }),
+            // Which worn item the Companion's table reads its breach off; Core never looks.
+            protectedBy: new fields.SetField(
+                new fields.StringField({ required: true, blank: false, trim: true }),
+                { required: false, initial: [] })
         };
     }
 
@@ -184,16 +201,55 @@ export class VacuumBehaviorData extends RegionBehaviorType {
         if ( !event.user.isSelf ) return;
         // A skipped round is one the referee jumped over; the escalation still reads off the round
         // number, so landing on round 5 hits at round 5's severity and not four times over.
-        if ( event.data.skipped || !this.damage ) return;
+        if ( event.data.skipped ) return;
 
         const { token, round } = event.data;
         if ( !canBeHurt(token.actor) ) return;
+        // Read here and never derived: `refreshRuleUI` re-prepares actors, not scenes, so a flip
+        // would leave a cached answer on the behaviour until the page reloads.
+        return (Rules.get("vacuumRuleset") === "companion")
+            ? this.#companionRound(token, round) : this.#coreRound(token, round);
+    }
+
+    /** The pressure's own free-text row, escalated where the pressure says to. */
+    async #coreRound(token, round) {
+        if ( !this.damage ) return;
         const exposure = await this.#exposureRound(token, round);
         // Core p.82: "a cumulative 1D damage every round" — 1D, then 2D, then 3D.
         const formula = this.cumulative ? VacuumBehaviorData.#escalate(this.damage, exposure) : this.damage;
-        return applyHazard(token.actor, formula,
-            MGT2.VacuumPressures[this.pressure]?.label ?? "MGT2.Region.Hazard",
+        return applyHazard(token.actor, formula, this.#label(),
             game.i18n.format("MGT2.Region.Exposure", { round: exposure }));
+    }
+
+    /**
+     * Companion p.67: a flat `[breach][pressure]` cell, where the row is the state of the suit this
+     * region names as its protection and no such suit at all is the No Protection row.
+     */
+    async #companionRound(token, round) {
+        const suit = protectingItem(this.protectedBy, token.actor);
+        const breach = suit ? (suit.system.breach ?? "intact") : "none";
+        // An unbreached sealed suit is complete protection, which is the whole point of wearing one.
+        const row = MGT2.VacuumDamage[breach];
+        if ( !row ) return;
+
+        const exposure = await this.#exposureRound(token, round);
+        const note = [game.i18n.format("MGT2.Region.Exposure", { round: exposure }),
+            game.i18n.localize(row.label)].join(" · ");
+
+        // The minimal column is an interval longer than a round, so it is stated once on the round
+        // the exposure begins and never scheduled.
+        const formula = row[this.pressure];
+        if ( formula ) return applyHazard(token.actor, formula, this.#label(), note);
+        if ( exposure > 1 ) return;
+        const interval = game.i18n.format("MGT2.Region.Interval",
+            { rule: game.i18n.localize(row.interval) });
+        return ChatHelper.postRecovery(token.actor, this.#label(),
+            [note, interval].join(" · "), null, "MGT2.Region.Hazard");
+    }
+
+    /** The card's title: which of the three pressures this region is. */
+    #label() {
+        return MGT2.VacuumPressures[this.pressure]?.label ?? "MGT2.Region.Hazard";
     }
 
     /** @param {RegionTokenExitEvent} event @this {VacuumBehaviorData} */

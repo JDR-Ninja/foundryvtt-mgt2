@@ -207,6 +207,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             manifest: this.#manifest(),
             manoeuvre: system.manoeuvre,
             fuel: SpacecraftActorSheet.#fuel(system),
+            maintenance: SpacecraftActorSheet.#maintenance(system),
             drives: SpacecraftActorSheet.#drives(system),
             finance: SpacecraftActorSheet.#finance(system),
             design: SpacecraftActorSheet.#design(system),
@@ -353,6 +354,13 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             jumps: jumpTons > 0 ? Math.floor(system.ops.fuel / jumpTons) : 0,
             rated: system.drives.jump
         };
+    }
+
+    /** The service stamp read against the campaign's own *now* — `mgt2.campaignDay`, not a field. */
+    static #maintenance(system) {
+        const standing = system.maintenanceStanding(game.settings.get("mgt2", "campaignDay"));
+        if (!standing) return { recorded: false, overdue: false };
+        return { recorded: true, overdue: standing.periodsOverdue > 0, ...standing };
     }
 
     /** The second drive and the G-force it costs the crew, resolved to what the hint prints. */

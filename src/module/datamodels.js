@@ -1056,6 +1056,11 @@ export class ContractData extends JobData {
         const rep = this.hunterActor?.system?.characteristics?.reputation;
         return Number.isFinite(rep?.value) ? rep.value : null;
     }
+
+    /** REP is optional and unseeded, so a linked hunter may carry no reputation at all. */
+    get hunterShowsRep() {
+        return this.hunterActor?.system?.isCharacteristicShown?.("reputation") === true;
+    }
 }
 
 export class WeaponData extends PhysicalItemData {
@@ -1192,6 +1197,10 @@ export class ArmorData extends PhysicalItemData {
 
         // Powered battle dress supports its own weight and is effectively weightless while active.
         schema.powered = new fields.BooleanField({ required: false, initial: false });
+        // Companion p.68: a breached sealed suit still protects, by less. Read only where a vacuum
+        // region names this suit as its protection, and only under the Companion reading.
+        schema.breach = new fields.StringField({
+            required: false, blank: false, initial: "intact", choices: MGT2.SuitBreaches });
         schema.options = createTraitsField("custom");
 
         // Characteristics Modifiers (Pirate of Drinax - ASLAN BATTLE DRESS STR/DEX, Slot)

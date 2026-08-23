@@ -109,7 +109,7 @@
       },
       "TravellerSide": "Traveller side",
       "RefereeSide": "Referee side",
-      "Folio10": "Bounty Hunter p.10",
+      "Folio9to10": "Bounty Hunter p.9-10",
       "Folio18": "Bounty Hunter p.18 — handed over whole",
       "Folio19": "Bounty Hunter p.19",
       "HandOver": "Hand it over",
@@ -172,7 +172,30 @@
       "QualifiedHired": "The client took the hunter on.",
       "QualifiedRefused": "Refused, and REP-1 was written to the sheet.",
       "QualifyFailedLine": "{name} loses REP-1.",
-      "ActionsHint": "Both rolls need a Traveller who has taken the contract: a failed qualification costs REP-1 and the bounty pays Credits, and both are writes to a sheet.",
+      "RepChange": "Reputation change",
+      "RepChangeCite": "2D, DM−1 per four REP",
+      "RepChangeDo": "Roll the change",
+      "RepChangeReading": "REP {rep} gives {dm} on this table. 2–4 loses REP-1, 10–12 gains REP+1, and the row is written to the Traveller. Pick every circumstance that applied — only the highest of them modifies the roll.",
+      "RepCircumstance": "Circumstance",
+      "RepEarned": "Reputation already earned",
+      "RepGainedLine": "{name} gains REP+1, now REP {rep}.",
+      "RepLostLine": "{name} loses REP-1, now REP {rep}.",
+      "RepHeldLine": "{name} holds at REP {rep}.",
+      "RepFlooredLine": "{name} is already at REP {rep} and cannot fall further.",
+      "RepMod": {
+        "criticalAgainstOdds": "Overcame extremely long odds and opposition to bring in a Critical Priority mark",
+        "outwitCompetitors": "Outwitted and outmanoeuvred several competitors to bring in a mark",
+        "highAgainstOdds": "Overcame long odds and opposition to bring in a High Priority mark",
+        "gainAlly": "Gained a powerful and wealthy Ally",
+        "bringInHigh": "Brought in a High Priority mark",
+        "outmanoeuvreCompetitor": "Outmanoeuvred a more accomplished competitor",
+        "loseMarkToCompetitors": "Lost a High or Critical Priority mark to a group of competitors",
+        "loseAlly": "Lost a powerful Ally",
+        "markEludes": "A High or Critical Priority mark found a way to permanently elude them",
+        "collateralDamage": "Caused a great deal of collateral damage when bringing in a mark",
+        "refuseToTurnOver": "Captured a mark but refused to turn them over"
+      },
+      "ActionsHint": "Every roll here needs a Traveller who has taken the contract: a failed qualification costs REP-1, a reputation change writes REP either way, and the bounty pays Credits — all of them land on a sheet.",
       "DrawAContract": "Draw a contract",
       "EightDraws": "eight draws, Bounty Hunter p.22-27",
       "RefereeOnly": "Referee only",
@@ -188,6 +211,7 @@
         "Qualified": "The REP check has already been made.",
         "FloorHidden": "The client's minimum REP has not been shown to the party.",
         "NotShort": "The hunter already meets the client’s minimum REP, so there is nothing to ask for.",
+        "NoRep": "This hunter carries no REP — the characteristic is optional and is not in play here.",
         "NoModule": "The tables are not installed — the sequence is here, the rows are not.",
         "AlreadyGiven": "Handed over — the party is reading it, so it is not re-drawn."
       },
@@ -533,6 +557,12 @@
       "starvation": {
         "name": "Starvation and thirst",
         "hint": "Adds a starving state the referee ticks: DM−2 on physical actions and no natural healing, with the END-derived day counts printed beside it."
+      },
+      "vacuumRuleset": {
+        "name": "How vacuum exposure is worked out",
+        "hint": "The Core Rulebook escalates the region's own damage figure by a die each round — 1D, then 2D, then 3D. The Traveller Companion reads a flat table instead: 2D per round in hard vacuum and 1D in partial, cut to 2D−4 and 1D−2 by a major suit breach and to 2D−8 and 1D−4 by a minor one, with an intact sealed suit stopping the row outright. Under the Companion the region's Damage box goes unread, the region names which worn item is the sealed suit, and each suit carries its own breach. Thin atmosphere is an interval in both books, so it is printed for the referee and never rolled.",
+        "core": "Core Rulebook — cumulative 1D per round",
+        "companion": "Traveller Companion — the Vacuum Damage table"
       },
       "shipAutomation": {
         "name": "Starship automation",
@@ -1827,6 +1857,13 @@
         "WreckedHint": "Hull at zero — the rules give a ship no state under this one.",
         "ScansUnarmed": "Scans unarmed",
         "ScansUnarmedHint": "Every mount is pop-up, so an exterior sensor scan reads the ship as unarmed.",
+        "MaintenanceOverdue": {
+          "one": "Maintenance {n} period overdue",
+          "other": "Maintenance {n} periods overdue"
+        },
+        "MaintenanceOverdueHint": "Core p.154: maintenance falls due every four-week Maintenance Period, and once a year it must be done at a shipyard. Counted from the last service recorded on the Finance tab against the campaign day; no modifier is derived from it.",
+        "ServicedOn": "Last serviced, day",
+        "MaintenanceDue": "Next due on day {n}",
         "HullChain": "the whole pool",
         "HullPoints": "Hull points",
         "HullSeverity": "Hull severity",
@@ -3378,6 +3415,7 @@
       "Storage": "Storage",
       "Software": "Software",
       "Softwares": "Softwares",
+      "SuitBreach": "Suit breach",
       "TL": "TL",
       "Terms": "Terms",
       "Title": "Title",
@@ -4922,7 +4960,7 @@
       "JumpTarget": "Easy (4+) Engineer (j-drive) · EDU",
       "ParsecChip": "{dm} · 1 per parsec, ×{parsecs}",
       "UnrefinedChip": "Unrefined fuel −2",
-      "MaintenanceChip": "maintenance — not tracked",
+      "MaintenanceChip": "months behind maintenance — the referee's",
       "DiameterChip": "100-diameter limit — the referee's",
       "ParsecDM": {
         "one": "Jump distance · {parsecs} parsec",
@@ -5151,10 +5189,14 @@
       "Attempts": "Searches this month",
       "BannedAt": "Banned at law",
       "BlackMarket": "Black market supplier",
+      "Online": "Online supplier",
+      "OnlineHint": "An online supplier is searched for on TL{tl}+ worlds only, and never for illegal goods (Core p.241).",
+      "Searcher": "Searching Traveller",
+      "NeedASearcher": "Nobody to search with. Drop a ship above, select a token, or assign a character to your user.",
       "NeedAWorld": "Drop a world above, or type a profile: the trade codes, and everything read off them, come from it.",
       "Codes": "Trade codes here",
       "NoCodes": "no codes — common goods only",
-      "SearchLine": "finding a supplier: {dm} against {target}+",
+      "SearchLine": "{check} · {dm} against {target}+",
       "Shelf": "On the shelf",
       "ShelfCount": {
         "one": "{n} type · common goods, plus every matching code",
@@ -5197,8 +5239,16 @@
       "HoldFree": "{tons} t free",
       "AttemptsFromWorld": "The count is {world}'s own — every search made here this month, stamped on the document.",
       "RollSearch": "Find a supplier",
-      "SearchFound": "Supplier found — {roll} {dm} = {total} against {target}+, Effect {effect}.",
-      "SearchMissed": "No supplier — {roll} {dm} = {total}, needed {target}+.",
+      "SearchFound": "{who} found a supplier — {check}, {total} against {target}+, Effect {effect}.",
+      "SearchMissed": "{who} found no supplier — {check}, {total} against {target}+.",
+      "SearchDays": {
+        "one": "The hunt took {n} day.",
+        "other": "The hunt took {n} days."
+      },
+      "SearchHours": {
+        "one": "The hunt took {n} hour.",
+        "other": "The hunt took {n} hours."
+      },
       "WalkAway": "Walk away",
       "WritesBack": "the search and the refusal are written to {world}; nothing else is stored",
       "RefereeWrites": "{world} is the referee's — nothing here writes to it",
@@ -5318,6 +5368,11 @@
         "broker": "Broker",
         "carouse": "Carouse",
         "streetwise": "Streetwise"
+      },
+      "Search": {
+        "broker": "Broker check (EDU or SOC), 1D days",
+        "streetwise": "Streetwise check (EDU or SOC), 1D days",
+        "online": "Admin check (EDU), 1D hours"
       },
       "Terms": {
         "Population": "Population {n}",
@@ -5625,6 +5680,7 @@
       "Damage": "{points} damage",
       "Ambient": "{celsius} °C",
       "Exposure": "round {round} of exposure",
+      "Interval": "the referee applies {rule}",
       "Shielded": {
         "one": "{rads} rad, all of it absorbed by the region's {shielded}",
         "other": "{rads} rads, all of it absorbed by the region's {shielded}"
@@ -5662,7 +5718,12 @@
             "label": "Pressure"
           },
           "damage": {
-            "label": "Damage"
+            "label": "Damage",
+            "hint": "Read under the Core reading only. The Companion's table carries its own figures."
+          },
+          "protectedBy": {
+            "label": "Sealed suit",
+            "hint": "Equipped gear named here is the sealed suit, and the Companion's table reads its breach off it. The Core reading has no protection step and ignores this."
           }
         }
       },
@@ -5699,6 +5760,19 @@
       "hard": "Hard vacuum",
       "partial": "Partial vacuum",
       "minimal": "Thin atmosphere"
+    },
+    "SuitBreaches": {
+      "intact": "Sealed and intact",
+      "minor": "Minor breach",
+      "major": "Major breach"
+    },
+    "VacuumDamage": {
+      "none": "No protection",
+      "major": "Suit with a major breach",
+      "minor": "Suit with a minor breach",
+      "intervalNone": "1 point of damage per minute, after END in minutes",
+      "intervalMajor": "1 point of damage per 90 seconds, after END × 2 in minutes",
+      "intervalMinor": "1 point of damage per 120 seconds, after END × 3 in minutes"
     },
     "SkipDebts": {
       "Title": "Skipping on debts",

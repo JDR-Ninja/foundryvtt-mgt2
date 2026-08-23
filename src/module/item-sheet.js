@@ -135,6 +135,7 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       contractShow: TravellerItemSheet.#onContractShow,
       contractNegotiate: TravellerItemSheet.#onContractNegotiate,
       contractQualify: TravellerItemSheet.#onContractQualify,
+      contractRepChange: TravellerItemSheet.#onContractRepChange,
       contractGenerate: TravellerItemSheet.#onContractGenerate,
       ...EFFECT_ACTIONS
     }
@@ -304,6 +305,8 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
         usePronouns: game.settings.get("mgt2", "usePronouns"),
         useGender: game.settings.get("mgt2", "useGender")
       },
+      // Only the Companion's vacuum table reads a suit's breach, so only it puts the control up.
+      showSuitBreach: (item.type === "armor") && (Rules.get("vacuumRuleset") === "companion"),
       binding: slots.masthead?.[0] ?? null,
       supply,
       spine: this.#spine(),
@@ -394,6 +397,12 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
       })),
       negotiate: this.#contractAction("negotiate"),
       qualify: this.#contractAction("qualify"),
+      repChange: this.#contractAction("repChange"),
+      repInPlay: Rules.characteristic("reputation"),
+      repDM: MGT2Helper.signed(Contract.repChangeDM(system.hunterRep ?? 0), "+0"),
+      circumstances: Object.entries(MGT2.RepModification).map(([value, row]) => ({
+        value, label: `${MGT2Helper.signed(row.dm)} · ${game.i18n.localize(row.label)}`
+      })),
       // The floor is a referee-side field, so until it is shown the party does not know there is
       // one to fall under — and folio 10's check is only for a hunter under it.
       offerQualify: (system.repFloorShown && (system.hunterRep !== null)
@@ -734,6 +743,10 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
     this.element.classList.toggle("hazard", context.roll.hazard);
     const select = this.element.querySelector("[data-scale-select]");
     select?.addEventListener("change", () => this.#applyScale(select.value));
+    // ⚠ This control binds to no field. Left to bubble, `submitOnChange` re-renders the sheet and
+    // silently clears the choice before the button beside it is ever clicked.
+    this.element.querySelector("[data-rep-circumstance]")
+      ?.addEventListener("change", event => event.stopPropagation());
     bindTraitInput(this.element, (property, text) => this.#addTrait(property, text));
   }
 
@@ -1131,6 +1144,13 @@ export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixi
   /** @this {TravellerItemSheet} */
   static #onContractQualify() {
     return Contract.qualify(this.item);
+  }
+
+  /** The circumstances are chosen at the moment of the roll and stored nowhere. @this {TravellerItemSheet} */
+  static #onContractRepChange() {
+    const select = this.element.querySelector("[data-rep-circumstance]");
+    const chosen = [...(select?.selectedOptions ?? [])].map(option => option.value);
+    return Contract.reputationChange(this.item, ...chosen);
   }
 
   /** @this {TravellerItemSheet} */

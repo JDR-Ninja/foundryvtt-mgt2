@@ -8,17 +8,17 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Trade.Codes'}}</h3>
-			<span class="count">{{localize 'MGT2.Trade.SearchLine' dm=(showDM search.dm) target=search.target}}</span>
+			<span class="count">{{localize 'MGT2.Trade.SearchLine' check=search.check dm=(showDM search.dm) target=search.target}}</span>
 		</div>
 		<div class="codes">
 			{{#each codes as |code|}}<span class="code{{#if code.zone}} zone{{/if}}">{{localize code.label}}</span>{{else}}<span class="none">{{localize 'MGT2.Trade.NoCodes'}}</span>{{/each}}
 			<span class="terms">{{#each search.terms as |term|}}<span class="dm {{term.tone}}">{{term.label}} {{showDM term.dm}}</span>{{/each}}</span>
 		</div>
-		{{! The search already made, read against the count it was rolled at — stamping the world moves
-		    that count, and a reading re-derived from now would worsen the roll that earned it. }}
+		{{! The search already made. Its check carried the Starport and attempt DMs, so the reading is
+		    frozen: stamping the world moves that count, and re-deriving would worsen the roll. }}
 		{{#if searched}}
 		<p class="hint">
-			{{~#if searched.found}}{{localize 'MGT2.Trade.SearchFound' roll=searched.roll dm=(showDM searched.dm) total=searched.total target=searched.target effect=(showDM searched.effect)}}{{else}}{{localize 'MGT2.Trade.SearchMissed' roll=searched.roll dm=(showDM searched.dm) total=searched.total target=searched.target}}{{/if~}}
+			{{~#if searched.found}}{{localize 'MGT2.Trade.SearchFound' who=searched.who check=searched.check total=searched.total target=searched.target effect=(showDM searched.effect)}}{{else}}{{localize 'MGT2.Trade.SearchMissed' who=searched.who check=searched.check total=searched.total target=searched.target}}{{/if}} {{searched.took~}}
 		</p>
 		{{/if}}
 	</div>

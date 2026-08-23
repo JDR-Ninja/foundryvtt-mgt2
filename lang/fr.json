@@ -109,7 +109,7 @@
       },
       "TravellerSide": "Partie remise aux Voyageurs",
       "RefereeSide": "Partie de l'arbitre",
-      "Folio10": "Bounty Hunter p.10",
+      "Folio9to10": "Bounty Hunter p.9-10",
       "Folio18": "Bounty Hunter p.18 — remise en entier",
       "Folio19": "Bounty Hunter p.19",
       "HandOver": "Remettre le contrat",
@@ -172,7 +172,30 @@
       "QualifiedHired": "Le client a engagé le chasseur.",
       "QualifiedRefused": "Refusé, et le REP-1 a été inscrit sur la feuille.",
       "QualifyFailedLine": "{name} perd REP-1.",
-      "ActionsHint": "Les deux jets exigent un Voyageur ayant accepté le contrat : une qualification ratée coûte REP-1 et la prime se paie en Crédits, et les deux s'inscrivent sur une feuille.",
+      "RepChange": "Changement de réputation",
+      "RepChangeCite": "2D, MD−1 par tranche de quatre REP",
+      "RepChangeDo": "Lancer le jet",
+      "RepChangeReading": "REP {rep} donne {dm} sur cette table. 2–4 fait perdre REP-1, 10–12 fait gagner REP+1, et la ligne est inscrite sur la feuille du Voyageur. Choisissez toutes les circonstances survenues — seule la plus élevée modifie le jet.",
+      "RepCircumstance": "Circonstance",
+      "RepEarned": "Réputation déjà acquise",
+      "RepGainedLine": "{name} gagne REP+1, soit REP {rep}.",
+      "RepLostLine": "{name} perd REP-1, soit REP {rep}.",
+      "RepHeldLine": "{name} reste à REP {rep}.",
+      "RepFlooredLine": "{name} est déjà à REP {rep} et ne peut pas descendre plus bas.",
+      "RepMod": {
+        "criticalAgainstOdds": "Ont surmonté une adversité et une opposition extrêmes pour ramener une cible de priorité Critical",
+        "outwitCompetitors": "Ont devancé et déjoué plusieurs concurrents pour ramener une cible",
+        "highAgainstOdds": "Ont surmonté une forte adversité et une opposition pour ramener une cible de priorité High",
+        "gainAlly": "Ont gagné un Allié puissant et fortuné",
+        "bringInHigh": "Ont ramené une cible de priorité High",
+        "outmanoeuvreCompetitor": "Ont déjoué un concurrent plus chevronné",
+        "loseMarkToCompetitors": "Ont perdu une cible de priorité High ou Critical au profit d'un groupe de concurrents",
+        "loseAlly": "Ont perdu un Allié puissant",
+        "markEludes": "Une cible de priorité High ou Critical leur a échappé définitivement",
+        "collateralDamage": "Ont causé de gros dégâts collatéraux en ramenant une cible",
+        "refuseToTurnOver": "Ont capturé une cible mais refusent de la livrer"
+      },
+      "ActionsHint": "Chaque jet ici exige un Voyageur ayant accepté le contrat : une qualification ratée coûte REP-1, un changement de réputation inscrit le REP dans les deux sens et la prime se paie en Crédits — tous s'inscrivent sur une feuille.",
       "DrawAContract": "Tirer un contrat",
       "EightDraws": "huit tirages, Bounty Hunter p.22-27",
       "RefereeOnly": "Arbitre uniquement",
@@ -188,6 +211,7 @@
         "Qualified": "Le jet de REP a déjà été fait.",
         "FloorHidden": "Le REP minimum du client n'a pas été révélé au groupe.",
         "NotShort": "Le chasseur atteint déjà le REP minimum du client : il n’y a rien à demander.",
+        "NoRep": "Ce chasseur n'a pas de REP — la caractéristique est optionnelle et n'est pas en jeu ici.",
         "NoModule": "Les tables ne sont pas installées — la séquence est ici, les lignes ne le sont pas.",
         "AlreadyGiven": "Remis — le groupe est en train de le lire, il n'est donc pas retiré."
       },
@@ -533,6 +557,12 @@
       "starvation": {
         "name": "Faim et soif",
         "hint": "Ajoute un état de famine que l'Arbitre coche : MD-2 aux actions physiques et plus de guérison naturelle, avec le nombre de jours dérivé de l'END affiché à côté."
+      },
+      "vacuumRuleset": {
+        "name": "Calcul de l'exposition au vide",
+        "hint": "Le Livre de règles de Traveller ajoute un dé aux dégâts propres à la région à chaque round — 1D, puis 2D, puis 3D. Le Compagnon lit une table fixe à la place : 2D par round dans le vide absolu et 1D dans le vide partiel, ramenés à 2D−4 et 1D−2 par une rupture majeure de combinaison et à 2D−8 et 1D−4 par une rupture mineure, une combinaison étanche et intacte annulant entièrement la ligne. Avec le Compagnon, la case Dégâts de la région n'est plus lue, la région nomme l'objet porté qui tient lieu de combinaison étanche, et chaque combinaison porte sa propre rupture. L'atmosphère ténue est un intervalle dans les deux livres : elle est affichée pour l'arbitre et jamais lancée.",
+        "core": "Livre de règles de Traveller — 1D cumulatif par round",
+        "companion": "Compagnon Traveller — la table des dégâts liés au vide"
       },
       "shipAutomation": {
         "name": "Automatisation des vaisseaux",
@@ -1827,6 +1857,13 @@
         "WreckedHint": "Coque à zéro — les règles ne donnent au vaisseau aucun état en dessous de celui-ci.",
         "ScansUnarmed": "Scanné comme désarmé",
         "ScansUnarmedHint": "Toutes les montures sont escamotables : un balayage de capteurs extérieur lit donc le vaisseau comme désarmé.",
+        "MaintenanceOverdue": {
+          "one": "Maintenance en retard de {n} période",
+          "other": "Maintenance en retard de {n} périodes"
+        },
+        "MaintenanceOverdueHint": "Core p.154 : la maintenance est due à chaque période de maintenance de quatre semaines, et une fois par an elle doit être effectuée dans un chantier naval. Comptée depuis la dernière maintenance enregistrée dans l'onglet Finances, face au jour de campagne ; aucun modificateur n'en est dérivé.",
+        "ServicedOn": "Dernière maintenance, jour",
+        "MaintenanceDue": "Prochaine échéance au jour {n}",
         "HullChain": "toute la réserve",
         "HullPoints": "Points de coque",
         "HullSeverity": "Sévérité de la coque",
@@ -3609,7 +3646,7 @@
       "JumpTarget": "Facile (4+) Ingénieur (propulseur de saut) · EDU",
       "ParsecChip": "{dm} · 1 par parsec, ×{parsecs}",
       "UnrefinedChip": "Carburant non raffiné −2",
-      "MaintenanceChip": "entretien — non suivi",
+      "MaintenanceChip": "mois de retard de maintenance — à l'arbitre",
       "DiameterChip": "limite des 100 diamètres — à l'arbitre",
       "ParsecDM": {
         "one": "Distance de saut · {parsecs} parsec",
@@ -3838,10 +3875,14 @@
       "Attempts": "Recherches ce mois-ci",
       "BannedAt": "Interdit au niveau de loi",
       "BlackMarket": "Fournisseur du marché noir",
+      "Online": "Fournisseur en ligne",
+      "OnlineHint": "Un fournisseur en ligne ne se cherche que sur les mondes NT{tl}+, et jamais pour des biens illégaux (livre de base p.241).",
+      "Searcher": "Voyageur qui cherche",
+      "NeedASearcher": "Personne pour chercher. Déposez un vaisseau ci-dessus, sélectionnez un pion, ou assignez un personnage à votre utilisateur.",
       "NeedAWorld": "Déposez un monde ci-dessus, ou saisissez un profil : les codes commerciaux, et tout ce qui s'en déduit, en viennent.",
       "Codes": "Codes commerciaux ici",
       "NoCodes": "aucun code — marchandises communes seulement",
-      "SearchLine": "trouver un fournisseur : {dm} contre {target}+",
+      "SearchLine": "{check} · {dm} contre {target}+",
       "Shelf": "En rayon",
       "ShelfCount": {
         "one": "{n} type · marchandises communes, plus tout code correspondant",
@@ -3884,8 +3925,16 @@
       "HoldFree": "{tons} t libres",
       "AttemptsFromWorld": "Le compte est celui de {world} — chaque recherche faite ici ce mois-ci, inscrite sur le document.",
       "RollSearch": "Trouver un fournisseur",
-      "SearchFound": "Fournisseur trouvé — {roll} {dm} = {total} contre {target}+, Effet {effect}.",
-      "SearchMissed": "Aucun fournisseur — {roll} {dm} = {total}, il fallait {target}+.",
+      "SearchFound": "{who} a trouvé un fournisseur — {check}, {total} contre {target}+, Effet {effect}.",
+      "SearchMissed": "{who} n'a trouvé aucun fournisseur — {check}, {total} contre {target}+.",
+      "SearchDays": {
+        "one": "La recherche a pris {n} jour.",
+        "other": "La recherche a pris {n} jours."
+      },
+      "SearchHours": {
+        "one": "La recherche a pris {n} heure.",
+        "other": "La recherche a pris {n} heures."
+      },
       "WalkAway": "Quitter la table",
       "WritesBack": "la recherche et le refus sont inscrits sur {world} ; rien d'autre n'est enregistré",
       "RefereeWrites": "{world} appartient au MJ — rien ici n'y écrit",
@@ -4005,6 +4054,11 @@
         "broker": "Courtier",
         "carouse": "Mondanités",
         "streetwise": "Sens de la rue"
+      },
+      "Search": {
+        "broker": "Test de Courtier (ÉDU ou SOC), 1D jours",
+        "streetwise": "Test de Sens de la rue (ÉDU ou SOC), 1D jours",
+        "online": "Test d'Administration (ÉDU), 1D heures"
       },
       "Terms": {
         "Population": "Population {n}",
@@ -4312,6 +4366,7 @@
       "Damage": "{points} dégâts",
       "Ambient": "{celsius} °C",
       "Exposure": "round {round} d'exposition",
+      "Interval": "l'arbitre applique {rule}",
       "Shielded": {
         "one": "{rads} rad, entièrement absorbé par les {shielded} de la région",
         "other": "{rads} rads, entièrement absorbés par les {shielded} de la région"
@@ -4349,7 +4404,12 @@
             "label": "Pression"
           },
           "damage": {
-            "label": "Dégâts"
+            "label": "Dégâts",
+            "hint": "Lu uniquement avec la lecture du Livre de règles. La table du Compagnon porte ses propres valeurs."
+          },
+          "protectedBy": {
+            "label": "Combinaison étanche",
+            "hint": "L'équipement porté dont le nom figure ici est la combinaison étanche, et la table du Compagnon y lit sa rupture. La lecture du Livre de règles n'a pas d'étape de protection et l'ignore."
           }
         }
       },
@@ -4381,6 +4441,19 @@
       "minute": "Par minute",
       "hour": "Par heure",
       "day": "Par jour"
+    },
+    "SuitBreaches": {
+      "intact": "Étanche et intacte",
+      "minor": "Rupture mineure",
+      "major": "Rupture majeure"
+    },
+    "VacuumDamage": {
+      "none": "Aucune protection",
+      "major": "Combinaison avec rupture majeure",
+      "minor": "Combinaison avec rupture mineure",
+      "intervalNone": "1 point de dégât par minute, après un nombre de minutes égal à l'END",
+      "intervalMajor": "1 point de dégât par 90 secondes, après un nombre de minutes égal à END × 2",
+      "intervalMinor": "1 point de dégât par 120 secondes, après un nombre de minutes égal à END × 3"
     },
     "VacuumPressures": {
       "hard": "Vide absolu",
@@ -4773,6 +4846,7 @@
       "Storage": "Stockage",
       "Software": "Logiciel",
       "Softwares": "Logiciels",
+      "SuitBreach": "Rupture de combinaison",
       "TL": "NT",
       "Terms": "Périodes",
       "Title": "Titre",

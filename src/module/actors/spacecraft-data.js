@@ -326,11 +326,15 @@ export class SpacecraftData extends CraftData {
                     choices: MGT2.JumpRulesets })
             }),
 
-            // One scalar (Core p.154-155).
+            // What changes between sessions and nothing derives (Core p.153-154).
             ops: new fields.SchemaField({
                 // The REAL level, distinct from `fuel.tons` — which is design tonnage summed into
                 // the hull budget and the divisor of `jumpCapacity`.
-                fuel: tons(0)
+                fuel: tons(0),
+                // The campaign day the hull was last serviced. Null is "never recorded", and the
+                // readout stays blank rather than declaring a brand-new hull overdue.
+                servicedOn: new fields.NumberField({
+                    required: false, nullable: true, integer: true, initial: null })
             })
         });
 
@@ -501,6 +505,22 @@ export class SpacecraftData extends CraftData {
     get fuelPerPeriod() {
         return Math.max(this.power.plant > 0 ? 1 : 0,
             Math.ceil(this.plantTons * MGT2.ShipFuel.plantFraction));
+    }
+
+    /**
+     * Core p.154: maintenance is owed every four-week period, and once a year at a shipyard. The
+     * stamp is counted against the day it is read; no modifier is derived and nothing is scheduled.
+     * @param {number} day   `mgt2.campaignDay`
+     * @returns {{dueOn: number, periodsOverdue: number}|null}   Null where nothing was recorded.
+     */
+    maintenanceStanding(day) {
+        if (this.ops.servicedOn === null) return null;
+        const period = MGT2.Calendar.daysPerMonth;
+        const elapsed = Math.max(0, day - this.ops.servicedOn);
+        return {
+            dueOn: this.ops.servicedOn + period,
+            periodsOverdue: Math.floor(elapsed / period)
+        };
     }
 
     /** The plant's own tonnage, back-derived from its output and the ship's Tech Level. */
