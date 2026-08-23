@@ -433,8 +433,13 @@ export class MissileSalvoData extends foundry.abstract.TypeDataModel {
      * trait they possess."
      */
     get smart() {
-        return MGT2Helper.hasTrait(this.missile?.system.traits, "smart")
+        return MGT2Helper.hasTrait(this.loaded?.traits, "smart")
             && !MGT2.ShipRangeBands[this.launchBand]?.dogfight;
+    }
+
+    /** Core p.77: the round in the launcher overrides the launcher's own damage and traits. */
+    get loaded() {
+        return this.missile?.system.effective ?? this.missile?.system ?? null;
     }
 
     /** Take rounds out of the flight. */
@@ -526,6 +531,8 @@ export class MissileSalvoData extends foundry.abstract.TypeDataModel {
         if ( !outcome ) return null;
 
         const missile = this.missile;
+        const loaded = this.loaded;
+        const round = missile?.system.round ?? null;
         const hit = outcome.effect >= 0;
         // Folio 173: "the Effect cannot be higher than the number of remaining missiles". The floor
         // of 1 is the damage pipeline's own, which multiplies after armour and never by zero.
@@ -538,10 +545,10 @@ export class MissileSalvoData extends foundry.abstract.TypeDataModel {
             this.remaining, { name: target.name, multiple, missiles: this.remaining }));
 
         const flags = { mgt2: {} };
-        if ( hit && missile?.system.damage ) {
+        if ( hit && loaded?.damage ) {
             flags.mgt2.damage = {
-                formula: missile.system.damage,
-                rollObjectName: missile.name,
+                formula: loaded.damage,
+                rollObjectName: round?.name ?? missile.name,
                 rollTypeName: this.parent.name,
                 // The Effect is the multiplier here and never an addition to the dice, which is the
                 // whole of folio 173's Impact paragraph.
@@ -549,8 +556,8 @@ export class MissileSalvoData extends foundry.abstract.TypeDataModel {
                 strengthDM: 0,
                 scale: missile.system.scale ?? "spacecraft",
                 multiple,
-                ap: MGT2Helper.traitScore(missile.system.traits, "ap"),
-                loPen: MGT2Helper.traitScore(missile.system.traits, "lo-pen"),
+                ap: MGT2Helper.traitScore(loaded.traits, "ap"),
+                loPen: MGT2Helper.traitScore(loaded.traits, "lo-pen"),
                 damageType: Array.from(missile.system.damageType ?? [])
             };
         }
@@ -561,7 +568,8 @@ export class MissileSalvoData extends foundry.abstract.TypeDataModel {
             flags,
             difficulty: "Average",
             rollTypeName: this.parent.name,
-            rollObjectName: missile?.name ?? game.i18n.localize("MGT2.SpaceCombat.Salvo"),
+            rollObjectName: round?.name ?? missile?.name
+                ?? game.i18n.localize("MGT2.SpaceCombat.Salvo"),
             modifiers: rows.terms,
             lines,
             showRollDamage: Boolean(flags.mgt2.damage)
@@ -656,11 +664,14 @@ export class MGT2Combat extends Combat {
             return null;
         }
         const missile = weapon ? from.system.ship?.items.get(weapon) : null;
+        // The contact is named for what is in the air, so a rack loaded with a round flies the
+        // round's name and not the launcher's.
+        const flew = missile?.system.round ?? missile ?? null;
         const [combatant] = await this.createEmbeddedDocuments("Combatant", [{
             type: MISSILE_SALVO, actorId: null,
             name: name || game.i18n.format("MGT2.SpaceCombat.SalvoName",
-                { name: missile?.name ?? game.i18n.localize("MGT2.SpaceCombat.Salvo"), target: at.name }),
-            ...(missile?.img ? { img: missile.img } : {}),
+                { name: flew?.name ?? game.i18n.localize("MGT2.SpaceCombat.Salvo"), target: at.name }),
+            ...(flew?.img ? { img: flew.img } : {}),
             system: {
                 count: Math.max(1, Math.trunc(count)),
                 target: at.id, firedBy: from.id, weapon: missile?.id ?? null,
