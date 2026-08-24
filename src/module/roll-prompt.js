@@ -277,10 +277,21 @@ export class RollPromptHelper {
         return options;
     }
 
-    /** The skills a given actor offers, "Not proficient" first. */
+    /**
+     * The skills a given actor offers, "Not proficient" first.
+     *
+     * Core folio 69's Jack-of-All-Trades is **not** among them, and neither is Modül's Polyvalent:
+     * the book makes it a reduction of the unskilled penalty, never a skill a Traveller rolls, and
+     * this prompt already spends it that way in the "Not proficient" row above. Offering it a
+     * second time as an ordinary row let a player roll it at its own level against any check —
+     * counting it twice, once as the reduction and once as a bonus. Matched through
+     * `MGT2.Untrained.skills`, the same list `untrained()` reads, so the two can never disagree.
+     */
     static actorSkills(actor) {
+        const reducers = MGT2.Untrained.skills;
         const skills = actor.items
-            .filter(item => (item.type === "talent") && (item.system.subType === "skill"))
+            .filter(item => (item.type === "talent") && (item.system.subType === "skill")
+                && !reducers.some(name => MGT2Helper.matchesSkill(item.name, name)))
             // The prompt prints every row's DM in its own cell, so the option names the skill only.
             .map(item => ({ _id: item.id, name: item.getRollDisplay(false), term: item.name,
                 dm: item.system.level }))
