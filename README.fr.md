@@ -38,7 +38,29 @@ Le détail version par version est dans le [changelog](CHANGELOG.fr.md).
 
 <!-- Les captures françaises se placent dans web/screenshots/fr/ — voir web/screenshots/README.md -->
 
-![Inventaire](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/master/web/foundryvtt/inventory.jpg)
+La feuille de Voyageur en mode jeu : compétences, carrières et piste de dégâts.
+
+![Feuille de Voyageur](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/fr/character-sheet.webp)
+
+L'inventaire : ce qui est porté, ce qui est rangé, un conteneur et son contenu.
+
+![Inventaire](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/fr/inventory.webp)
+
+La fenêtre de jet : la formule et l'Effet, calculés pendant qu'on choisit.
+
+![Fenêtre de jet](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/fr/roll-prompt.webp)
+
+La création en groupe : une grille de Voyageurs × périodes, interruptible sans rien perdre.
+
+![Création de Voyageurs](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/fr/chargen.webp)
+
+Le combat spatial : une zone de portée par paire de vaisseaux, et les postes de l'équipage.
+
+![Combat spatial](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/fr/space-combat.webp)
+
+La fiche de monde : Profil Universel analysé, codes commerciaux dérivés.
+
+![Fiche de monde](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/fr/world.webp)
 
 ## Licence et statut
 

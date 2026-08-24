@@ -36,7 +36,29 @@ Release by release detail is in the [changelog](CHANGELOG.en.md).
 
 <!-- English screenshots go in web/screenshots/en/ - see web/screenshots/README.md -->
 
-![Inventory](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/master/web/foundryvtt/inventory.jpg)
+The Traveller sheet in play mode: skills, careers and the damage track.
+
+![Traveller sheet](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/en/character-sheet.webp)
+
+The inventory: what is carried, what is stowed, a container and what is in it.
+
+![Inventory](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/en/inventory.webp)
+
+The roll window: the formula and the Effect, worked out while you choose.
+
+![Roll window](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/en/roll-prompt.webp)
+
+Group creation: a grid of Travellers x terms, interruptible without losing anything.
+
+![Traveller creation](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/en/chargen.webp)
+
+Space combat: a range band for each pair of ships, and the crew's stations.
+
+![Space combat](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/en/space-combat.webp)
+
+The world sheet: parsed Universal World Profile, derived trade codes.
+
+![World sheet](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/en/world.webp)
 
 ## Licence and status
 

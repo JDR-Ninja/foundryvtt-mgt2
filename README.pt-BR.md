@@ -40,7 +40,29 @@ O detalhe versão a versão está no [changelog](CHANGELOG.pt-BR.md).
 
 <!-- As capturas em português vão em web/screenshots/pt-BR/ — ver web/screenshots/README.md -->
 
-![Inventário](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/master/web/foundryvtt/inventory.jpg)
+A ficha de Viajante em modo jogo: perícias, carreiras e a trilha de dano.
+
+![Ficha de Viajante](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/pt-BR/character-sheet.webp)
+
+O inventário: o que se carrega, o que fica guardado, um contêiner e o que há nele.
+
+![Inventário](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/pt-BR/inventory.webp)
+
+A janela de rolagem: a fórmula e o Efeito, calculados enquanto se escolhe.
+
+![Janela de rolagem](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/pt-BR/roll-prompt.webp)
+
+A criação em grupo: uma grade de Viajantes × períodos, interrompível sem perder nada.
+
+![Criação de Viajantes](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/pt-BR/chargen.webp)
+
+O combate espacial: uma faixa de alcance para cada par de naves, e os postos da tripulação.
+
+![Combate espacial](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/pt-BR/space-combat.webp)
+
+A ficha de mundo: Perfil Universal de Mundo analisado, códigos comerciais derivados.
+
+![Ficha de mundo](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/pt-BR/world.webp)
 
 ## Licença e situação
 

@@ -41,7 +41,29 @@ El detalle versión por versión está en el [changelog](CHANGELOG.es.md).
 
 <!-- Las capturas en español van en web/screenshots/es/ — ver web/screenshots/README.md -->
 
-![Inventario](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/master/web/foundryvtt/inventory.jpg)
+La hoja de Viajero en modo juego: habilidades, carreras y la pista de daño.
+
+![Hoja de Viajero](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/es/character-sheet.webp)
+
+El inventario: lo que se lleva encima, lo guardado, un contenedor y su contenido.
+
+![Inventario](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/es/inventory.webp)
+
+La ventana de tirada: la fórmula y el Efecto, calculados mientras se elige.
+
+![Ventana de tirada](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/es/roll-prompt.webp)
+
+La creación en grupo: una cuadrícula de Viajeros × periodos, interrumpible sin perder nada.
+
+![Creación de Viajeros](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/es/chargen.webp)
+
+El combate espacial: una banda de alcance por cada par de naves, y los puestos de la tripulación.
+
+![Combate espacial](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/es/space-combat.webp)
+
+La ficha de mundo: Perfil Universal de Mundo analizado, códigos comerciales derivados.
+
+![Ficha de mundo](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/es/world.webp)
 
 ## Licencia y estado
 
