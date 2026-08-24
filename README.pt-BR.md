@@ -8,8 +8,9 @@ Traveller da Mongoose Publishing — desenvolvido especialmente para a edição 
 
 > **Exige o Foundry VTT v14** (14.366 no mínimo).
 >
-> A interface em português cobre os elementos genéricos; o vocabulário Traveller permanece em inglês,
-> chave por chave, como o Foundry resolve.
+> A interface está completa em português. O vocabulário Traveller segue as traduções comunitárias da
+> Mongoose onde elas nomeiam um termo; os títulos dos livros e os nomes de traços permanecem em
+> inglês, à falta de uma edição brasileira que os nomeie.
 
 ## O que o sistema faz
 
