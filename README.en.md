@@ -11,7 +11,7 @@ Publishing's Traveller — built specially for the French edition translated by
 ## What the system does
 
 * **Seven Actor types** — Traveller, NPC, Vehicle, Spacecraft, Robot, World, Stash.
-* **Seventeen Item types** — from weapon and armour to cargo lot, passage, ship component and crew
+* **Eighteen Item types** — from weapon and armour to cargo lot, passage, ship component and crew
   role.
 * **Group Traveller creation**, on a grid of Travellers x terms, interruptible without losing
   anything. Careers and species are templates the referee writes.
@@ -20,7 +20,8 @@ Publishing's Traveller — built specially for the French edition translated by
   hold manifest.
 * **Voyages and jump**, with real fuel, the ship mortgage and crew finances.
 * **The whole damage chain**, resolved on the defender's side, with first aid, surgery and recovery.
-* **Thirty-six optional and variant rules**, every one off by default.
+* **Forty-nine optional and variant rules** in one settings screen, each naming the book and page it
+  comes from — or saying that no book settles it. The defaults are the game as printed.
 * **Four languages** — French, English, Spanish, Brazilian Portuguese.
 
 Release by release detail is in the [changelog](CHANGELOG.en.md).

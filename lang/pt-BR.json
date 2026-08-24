@@ -353,7 +353,7 @@
       "Title": "Regras opcionais e variantes",
       "MenuHint": "Quais das opções e variantes impressas estão em vigor na sua mesa. As fichas e os diálogos mostram o que você ligar aqui, e nada mais.",
       "MenuLabel": "Configurar regras",
-      "Hint": "As regras opcionais e variantes começam desligadas. Desligar uma nunca apaga nada — o que já está numa ficha é preservado e volta quando você a liga de novo.",
+      "Hint": "Nem toda regra começa desligada: cada valor padrão é a leitura que os livros melhor sustentam, então as que eles imprimem como regras já estão ligadas. Desligar uma nunca apaga nada — o que já está numa ficha é preservado e volta quando você a liga de novo.",
       "Footer": "As rolagens já publicadas no chat não são tocadas: cada cartão registra as regras que estavam em vigor quando foi rolada.",
       "Source": "{book} p.{page}",
       "HouseRule": "regra da casa — nenhum livro diz isto",

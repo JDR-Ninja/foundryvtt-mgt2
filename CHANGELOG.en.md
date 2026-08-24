@@ -7,8 +7,8 @@
 ## [0.2.0]
 
 **The largest release this system has had.** 0.1.x was a character sheet; 0.2.0 is a game system.
-Seven Actor types, seventeen Item types, group Traveller creation, space combat and fleet battles,
-speculative trade and stop traffic, voyages and jump, training, the whole damage chain, thirty-six
+Seven Actor types, eighteen Item types, group Traveller creation, space combat and fleet battles,
+speculative trade and stop traffic, voyages and jump, training, the whole damage chain, forty-nine
 optional rules, and a documentation compendium in four languages.
 
 ### ⚠ Breaking changes
@@ -43,8 +43,8 @@ optional rules, and a documentation compendium in four languages.
   tables and tracks. The Core sequence is the default frame.
 * **Mustering out**: benefits, pension, ship shares, and a group-level close where only one Traveller
   may start owning a ship.
-* **Twenty-two optional creation rules** (see below), sixteen of them house rules taken deliberately,
-  where the books are silent rather than ambiguous.
+* **Twenty-two optional creation rules** (see below), sixteen of them where no book settles the
+  question — the books are silent, or they say two things within two lines.
 * **A signed log of permanent characteristic loss** — ageing, injury, medical care — whose sum is
   derived. It works without creation and is just as useful in play.
 * **Training**: a register of programmes, one per endeavour, each carrying *which book runs it*. Core
@@ -165,23 +165,27 @@ optional rules, and a documentation compendium in four languages.
 
 ### Optional and variant rules
 
-**Thirty-six rules over six groups**, every one off by default: *Travellers* 3, *Creation* 22,
-*Combat* 2, *Health* 2, *Space* 5, *Craft* 2. One menu in the world settings.
+**Forty-nine rules over six groups**: *Travellers* 4, *Creation* 22, *Combat* 5, *Health* 4,
+*Space* 11, *Craft* 3. One menu in the world settings, and **they do not all start off** — each
+default is the reading the books best support, so an optional rule ships off and a rule the books
+print *as* a rule (encumbrance, magazines, radiation) ships on.
 
-Three shapes: a switch, a picker (a set) and a choice of procedure — because a boolean cannot say
-*which printed procedure is in force* when two chapters are not the negation of one another. Sixteen
-rows cite no book and print *house rule*: a house rule exists precisely where the books are silent.
+Four shapes: a switch, a picker (a set), a choice of procedure and a count — because a boolean cannot
+say *which printed procedure is in force* when two chapters are not the negation of one another.
+Sixteen rows cite no book: fourteen print *house rule* and two *unofficial*. A house rule exists
+precisely where the books are silent, or where they say two things within two lines.
 
 Changing a switch re-prepares and re-renders open sheets; nothing asks you to reload.
 
 ### Documentation and languages
 
-* **The system ships its first compendium**: `mgt2.docs`, one journal per language, twenty-one pages
+* **The system ships its first compendium**: `mgt2.docs`, one journal per language, twenty-three pages
   each. Every page says two things about one screen — **what it handles for you** and **what it leaves
   to you at the table**. It is documentation *about the system*, never rules text.
-* **Four declared languages** — French, English, Spanish, Brazilian Portuguese. French is the
-  system's target; Spanish and Portuguese cover the generic interface, with Foundry falling back to
-  English key by key.
+* **Four declared languages** — French, English, Spanish, Brazilian Portuguese, and **all four are
+  complete**. French is the system's target; the Spanish and Brazilian Portuguese vocabulary follows
+  Mongoose's community translations, and book titles and trait names stay in English where no
+  published edition names them.
 
 ### Fixes
 
@@ -195,8 +199,8 @@ Changing a switch re-prepares and re-renders open sheets; nothing asks you to re
 * The vertical label on item sheets stayed red on the Mwamba and Blue themes
 * Dropping an item on a container row in the inventory stored nothing: the handler looked for a CSS
   class no template emitted
-* **Six of the seventeen Item types could not be dropped on any sheet in the system**, four of them
-  the ones a hull is made of: a hard-coded exclusion list was inherited by every Actor sheet
+* **Six Item types could not be dropped on any sheet in the system**, four of them the ones a hull is
+  made of: a hard-coded exclusion list was inherited by every Actor sheet
 * **No drop zone ever highlighted correctly**: the drag cache was permanently empty, so all three
   zones painted "deny" on everything
 * **Dropping a person on the second gunner's row wrote them onto the first gunner's**

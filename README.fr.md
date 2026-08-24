@@ -11,7 +11,7 @@ Traveller de Mongoose Publishing — et développé spécialement pour la versio
 ## Ce que le système fait
 
 * **Sept types d'Acteur** — Voyageur, PNJ, Véhicule, Vaisseau, Robot, Monde, Réserve.
-* **Dix-sept types d'Objet** — de l'arme et l'armure au lot de fret, au passage, au composant de
+* **Dix-huit types d'Objet** — de l'arme et l'armure au lot de fret, au passage, au composant de
   vaisseau et au poste d'équipage.
 * **Création de Voyageurs en groupe**, dans une grille Voyageurs × périodes, interruptible sans rien
   perdre. Les carrières et les espèces sont des modèles que l'arbitre écrit lui-même.
@@ -21,7 +21,9 @@ Traveller de Mongoose Publishing — et développé spécialement pour la versio
 * **Voyage et saut**, avec le carburant réel, l'hypothèque du vaisseau et les finances de l'équipage.
 * **Chaîne de dégâts complète**, résolue côté défenseur, avec premiers soins, chirurgie et
   récupération.
-* **Trente-six règles optionnelles et variantes**, toutes désactivées par défaut.
+* **Quarante-neuf règles optionnelles et variantes** dans un seul écran de paramètres, chacune
+  indiquant l'ouvrage et la page dont elle vient — ou qu'aucun ouvrage ne tranche. Par défaut, c'est
+  le jeu tel qu'il est imprimé.
 * **Quatre langues** — français, anglais, espagnol, portugais (Brésil).
 
 Le détail version par version est dans le [changelog](CHANGELOG.fr.md).

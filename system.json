@@ -25,8 +25,18 @@
 		},
 		{
 			"type": "screenshot",
-			"url": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/foundryvtt/inventory.jpg",
-			"caption": "Character sheet — inventory"
+			"url": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/session/session-space.webp",
+			"caption": "Space combat — a range band for every pair of ships"
+		},
+		{
+			"type": "screenshot",
+			"url": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/session/session-deck.webp",
+			"caption": "A boarding action — the damage chain on the defender's side"
+		},
+		{
+			"type": "screenshot",
+			"url": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/session/session-request.webp",
+			"caption": "A roll request — one demand, the whole crew answering"
 		}
 	],
 	"esmodules": [

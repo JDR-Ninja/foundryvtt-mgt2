@@ -2,18 +2,18 @@
 
 [Français](CHANGELOG.fr.md) · [English](CHANGELOG.en.md) · [Português (Brasil)](CHANGELOG.pt-BR.md)
 
-> La interfaz del sistema en español cubre los elementos genéricos (botones, ajustes, errores).
-> El vocabulario Traveller sigue en inglés, clave por clave, tal y como Foundry lo resuelve.
-> Los términos de esta página siguen la traducción comunitaria del sistema oficial de Mongoose.
+> La interfaz está completa en español. El vocabulario Traveller sigue las traducciones comunitarias
+> de Mongoose allí donde nombran un término; los títulos de los libros y los nombres de rasgos se
+> quedan en inglés, a falta de una edición española que los nombre.
 
 ---
 
 ## [0.2.0]
 
 **La versión más grande que ha tenido este sistema.** 0.1.x era una hoja de personaje; 0.2.0 es un
-sistema de juego. Siete tipos de Actor, diecisiete tipos de Objeto, creación de Viajeros en grupo,
+sistema de juego. Siete tipos de Actor, dieciocho tipos de Objeto, creación de Viajeros en grupo,
 combate espacial y batallas entre flotas, comercio especulativo y tráfico de escala, viajes y salto,
-formación, la cadena de daño completa, treinta y seis reglas opcionales y un compendio de
+formación, la cadena de daño completa, cuarenta y nueve reglas opcionales y un compendio de
 documentación en cuatro idiomas.
 
 ### ⚠ Cambios que rompen
@@ -47,8 +47,8 @@ documentación en cuatro idiomas.
   periodos, tiradas, tablas y escalas. La secuencia del libro básico es el marco por defecto.
 * **Licenciamiento**: beneficios, pensión, participaciones de nave y un cierre de grupo en el que solo
   un Viajero puede empezar siendo propietario de una nave.
-* **Veintidós reglas opcionales de creación** (más abajo), dieciséis de ellas reglas de la casa
-  asumidas, allí donde los libros callan en vez de ser ambiguos.
+* **Veintidós reglas opcionales de creación** (más abajo), dieciséis de ellas allí donde ningún libro
+  lo decide: los libros callan, o dicen dos cosas en dos líneas.
 * **Registro firmado de pérdidas permanentes de Atributos** — envejecimiento, heridas, atención
   médica — cuya suma se deriva. Funciona sin la creación y sirve igual en partida.
 * **Formación**: un registro de programas, uno por aprendizaje en curso, cada uno indicando *qué libro
@@ -176,24 +176,29 @@ documentación en cuatro idiomas.
 
 ### Reglas opcionales y variantes
 
-**Treinta y seis reglas en seis grupos**, todas desactivadas por defecto: *Viajeros* 3, *Creación* 22,
-*Combate* 2, *Salud* 2, *Espacio* 5, *Naves y robots* 2. Un único menú en los ajustes del mundo.
+**Cuarenta y nueve reglas en seis grupos**: *Viajeros* 4, *Creación* 22, *Combate* 5, *Salud* 4,
+*Espacio* 11, *Naves y robots* 3. Un único menú en los ajustes del mundo, y **no todas empiezan
+apagadas** — cada valor por defecto es la lectura que mejor sostienen los libros, así que una regla
+opcional se entrega apagada y una regla que los libros imprimen *como* regla (carga, cargadores,
+radiación) se entrega encendida.
 
-Tres formas: un interruptor, una selección múltiple (un conjunto) y una elección de procedimiento —
-porque un booleano no puede decir *qué procedimiento impreso está en vigor* cuando dos capítulos no
-son la negación el uno del otro. Dieciséis filas no citan libro y muestran *regla de la casa*: una
-regla de la casa existe precisamente allí donde los libros callan.
+Cuatro formas: un interruptor, una selección múltiple (un conjunto), una elección de procedimiento y
+un recuento — porque un booleano no puede decir *qué procedimiento impreso está en vigor* cuando dos
+capítulos no son la negación el uno del otro. Dieciséis filas no citan libro: catorce muestran *regla
+de la casa* y dos *no oficial*. Una regla de la casa existe precisamente allí donde los libros callan,
+o allí donde dicen dos cosas en dos líneas.
 
 Cambiar un interruptor vuelve a preparar y redibujar las hojas abiertas; nada pide recargar.
 
 ### Documentación e idiomas
 
-* **El sistema incluye su primer compendio**: `mgt2.docs`, un diario por idioma, veintiuna páginas
+* **El sistema incluye su primer compendio**: `mgt2.docs`, un diario por idioma, veintitrés páginas
   cada uno. Cada página dice dos cosas sobre una pantalla — **de qué se encarga por ti** y **qué te
   deja a ti en la mesa**. Es documentación *sobre el sistema*, nunca texto de reglas.
-* **Cuatro idiomas declarados** — francés, inglés, español y portugués (Brasil). El francés es el
-  objetivo del sistema; el español y el portugués cubren la interfaz genérica, y Foundry recurre al
-  inglés clave por clave.
+* **Cuatro idiomas declarados** — francés, inglés, español y portugués (Brasil), y **los cuatro están
+  completos**. El francés es el objetivo del sistema; el vocabulario español y portugués sigue las
+  traducciones comunitarias de Mongoose, y los títulos de los libros y los nombres de rasgos se quedan
+  en inglés allí donde ninguna edición publicada los nombra.
 
 ### Correcciones
 
@@ -206,8 +211,8 @@ Cambiar un interruptor vuelve a preparar y redibujar las hojas abiertas; nada pi
 * La etiqueta vertical de las hojas de objeto seguía en rojo en los temas Mwamba y Azul
 * Soltar un objeto sobre la fila de un contenedor no guardaba nada: el gestor buscaba una clase CSS
   que ninguna plantilla emitía
-* **Seis de los diecisiete tipos de Objeto no podían soltarse en ninguna hoja del sistema**, cuatro de
-  ellos de los que se compone un casco
+* **Seis tipos de Objeto no podían soltarse en ninguna hoja del sistema**, cuatro de ellos de los que
+  se compone un casco
 * **Ninguna zona de soltado se resaltaba correctamente**: la caché de arrastre estaba siempre vacía
 * **Soltar una persona en la fila del segundo artillero la inscribía en la del primero**
 * Una nave portadora pagaba el mantenimiento de todas las naves transportadas menos una

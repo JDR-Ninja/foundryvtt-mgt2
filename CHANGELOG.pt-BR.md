@@ -2,18 +2,18 @@
 
 [Français](CHANGELOG.fr.md) · [English](CHANGELOG.en.md) · [Español](CHANGELOG.es.md)
 
-> A interface do sistema em português cobre os elementos genéricos (botões, ajustes, erros).
-> O vocabulário Traveller permanece em inglês, chave por chave, como o Foundry resolve.
-> Os termos desta página seguem a tradução comunitária do sistema oficial da Mongoose.
+> A interface está completa em português. O vocabulário Traveller segue as traduções comunitárias da
+> Mongoose onde elas nomeiam um termo; os títulos dos livros e os nomes de traços permanecem em
+> inglês, à falta de uma edição brasileira que os nomeie.
 
 ---
 
 ## [0.2.0]
 
 **A maior versão que este sistema já teve.** A 0.1.x era uma ficha de personagem; a 0.2.0 é um sistema
-de jogo. Sete tipos de Ator, dezessete tipos de Item, criação de Viajantes em grupo, combate espacial
+de jogo. Sete tipos de Ator, dezoito tipos de Item, criação de Viajantes em grupo, combate espacial
 e batalhas entre frotas, comércio especulativo e tráfego de escala, viagens e salto, adestramento, a
-cadeia de dano completa, trinta e seis regras opcionais e um compêndio de documentação em quatro
+cadeia de dano completa, quarenta e nove regras opcionais e um compêndio de documentação em quatro
 idiomas.
 
 ### ⚠ Mudanças incompatíveis
@@ -47,8 +47,8 @@ idiomas.
   períodos, testes, tabelas e trilhas. A sequência do livro básico é a moldura padrão.
 * **Baixa**: benefícios, pensão, cotas de nave e um encerramento de grupo em que apenas um Viajante
   pode começar como proprietário de uma nave.
-* **Vinte e duas regras opcionais de criação** (mais abaixo), dezesseis delas regras da casa assumidas,
-  onde os livros se calam em vez de serem ambíguos.
+* **Vinte e duas regras opcionais de criação** (mais abaixo), dezesseis delas onde nenhum livro
+  decide: os livros se calam, ou dizem duas coisas em duas linhas.
 * **Registro assinado das perdas permanentes de Características** — envelhecimento, ferimentos,
   cuidados médicos — cuja soma é derivada. Funciona sem a criação e serve igualmente em jogo.
 * **Adestramento**: um registro de programas, um por estudo em andamento, cada um indicando *qual
@@ -173,24 +173,29 @@ idiomas.
 
 ### Regras opcionais e variantes
 
-**Trinta e seis regras em seis grupos**, todas desligadas por padrão: *Viajantes* 3, *Criação* 22,
-*Combate* 2, *Saúde* 2, *Espaço* 5, *Naves e robôs* 2. Um único menu nos ajustes do mundo.
+**Quarenta e nove regras em seis grupos**: *Viajantes* 4, *Criação* 22, *Combate* 5, *Saúde* 4,
+*Espaço* 11, *Naves e robôs* 3. Um único menu nos ajustes do mundo, e **nem todas começam
+desligadas** — cada valor padrão é a leitura que os livros melhor sustentam, então uma regra opcional
+vem desligada e uma regra que os livros imprimem *como* regra (carga, carregadores, radiação) vem
+ligada.
 
-Três formas: um interruptor, uma seleção múltipla (um conjunto) e uma escolha de procedimento —
-porque um booleano não consegue dizer *qual procedimento impresso está em vigor* quando dois capítulos
-não são a negação um do outro. Dezesseis linhas não citam livro e exibem *regra da casa*: uma regra da
-casa existe exatamente onde os livros se calam.
+Quatro formas: um interruptor, uma seleção múltipla (um conjunto), uma escolha de procedimento e uma
+contagem — porque um booleano não consegue dizer *qual procedimento impresso está em vigor* quando
+dois capítulos não são a negação um do outro. Dezesseis linhas não citam livro: catorze exibem *regra
+da casa* e duas *não oficial*. Uma regra da casa existe exatamente onde os livros se calam, ou onde
+dizem duas coisas em duas linhas.
 
 Mudar um interruptor reprepara e redesenha as fichas abertas; nada pede para recarregar.
 
 ### Documentação e idiomas
 
-* **O sistema traz seu primeiro compêndio**: `mgt2.docs`, um diário por idioma, vinte e uma páginas
+* **O sistema traz seu primeiro compêndio**: `mgt2.docs`, um diário por idioma, vinte e três páginas
   cada. Cada página diz duas coisas sobre uma tela — **do que ela cuida por você** e **o que ela deixa
   para você na mesa**. É documentação *sobre o sistema*, nunca texto de regras.
-* **Quatro idiomas declarados** — francês, inglês, espanhol e português (Brasil). O francês é o alvo
-  do sistema; o espanhol e o português cobrem a interface genérica, com o Foundry recorrendo ao inglês
-  chave por chave.
+* **Quatro idiomas declarados** — francês, inglês, espanhol e português (Brasil), e **os quatro estão
+  completos**. O francês é o alvo do sistema; o vocabulário espanhol e português segue as traduções
+  comunitárias da Mongoose, e os títulos dos livros e os nomes de traços permanecem em inglês onde
+  nenhuma edição publicada os nomeia.
 
 ### Correções
 
@@ -203,8 +208,8 @@ Mudar um interruptor reprepara e redesenha as fichas abertas; nada pede para rec
 * O rótulo vertical das fichas de item continuava vermelho nos temas Mwamba e Azul
 * Soltar um item sobre a linha de um recipiente no inventário não guardava nada: o gerenciador
   procurava uma classe CSS que nenhum modelo emitia
-* **Seis dos dezessete tipos de Item não podiam ser soltos em nenhuma ficha do sistema**, quatro deles
-  dos que compõem uma estrutura
+* **Seis tipos de Item não podiam ser soltos em nenhuma ficha do sistema**, quatro deles dos que
+  compõem uma estrutura
 * **Nenhuma zona de soltura era destacada corretamente**: o cache de arrasto ficava sempre vazio
 * **Soltar uma pessoa na linha do segundo artilheiro a inscrevia na do primeiro**
 * Uma nave-mãe pagava manutenção de todas as naves transportadas menos uma

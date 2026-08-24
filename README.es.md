@@ -15,7 +15,7 @@ de Mongoose Publishing — desarrollado especialmente para la edición francesa 
 ## Qué hace el sistema
 
 * **Siete tipos de Actor** — Viajero, PNJ, Vehículo, Astronave, Robot, Mundo, Reserva.
-* **Diecisiete tipos de Objeto** — del arma y la armadura al lote de carga, el pasaje, el componente
+* **Dieciocho tipos de Objeto** — del arma y la armadura al lote de carga, el pasaje, el componente
   de nave y el puesto de tripulación.
 * **Creación de Viajeros en grupo**, en una cuadrícula de Viajeros × periodos, interrumpible sin
   perder nada. Las carreras y las especies son plantillas que escribe el árbitro.
@@ -26,7 +26,9 @@ de Mongoose Publishing — desarrollado especialmente para la edición francesa 
   tripulación.
 * **La cadena de daño completa**, resuelta del lado del defensor, con primeros auxilios, cirugía y
   recuperación.
-* **Treinta y seis reglas opcionales y variantes**, todas desactivadas por defecto.
+* **Cuarenta y nueve reglas opcionales y variantes** en una sola pantalla de configuración, cada una
+  con el libro y la página de donde viene — o con la advertencia de que ningún libro la establece.
+  Por defecto se juega tal como está impreso.
 * **Cuatro idiomas** — francés, inglés, español y portugués (Brasil).
 
 El detalle versión por versión está en el [changelog](CHANGELOG.es.md).

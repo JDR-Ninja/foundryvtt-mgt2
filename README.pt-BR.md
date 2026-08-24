@@ -15,7 +15,7 @@ Traveller da Mongoose Publishing — desenvolvido especialmente para a edição 
 ## O que o sistema faz
 
 * **Sete tipos de Ator** — Viajante, NPC, Veículo, Espaçonave, Robô, Mundo, Reserva.
-* **Dezessete tipos de Item** — da arma e da armadura ao lote de carga, à passagem, ao componente de
+* **Dezoito tipos de Item** — da arma e da armadura ao lote de carga, à passagem, ao componente de
   nave e ao posto de tripulação.
 * **Criação de Viajantes em grupo**, numa grade de Viajantes × períodos, interrompível sem perder
   nada. As carreiras e as espécies são modelos que o árbitro escreve.
@@ -25,7 +25,9 @@ Traveller da Mongoose Publishing — desenvolvido especialmente para a edição 
 * **Viagens e salto**, com o combustível real, a hipoteca da nave e as finanças da tripulação.
 * **A cadeia de dano completa**, resolvida do lado do defensor, com primeiros socorros, cirurgia e
   recuperação.
-* **Trinta e seis regras opcionais e variantes**, todas desligadas por padrão.
+* **Quarenta e nove regras opcionais e variantes** numa única tela de configurações, cada uma com o
+  livro e a página de onde vem — ou com o aviso de que nenhum livro a estabelece. Por padrão, vale o
+  jogo tal como está impresso.
 * **Quatro idiomas** — francês, inglês, espanhol e português (Brasil).
 
 O detalhe versão a versão está no [changelog](CHANGELOG.pt-BR.md).

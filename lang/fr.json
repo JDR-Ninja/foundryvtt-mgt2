@@ -353,7 +353,7 @@
       "Title": "Règles optionnelles et variantes",
       "MenuHint": "Les options et variantes imprimées qui s'appliquent à votre table. Les fiches et les fenêtres n'affichent que ce que vous activez ici.",
       "MenuLabel": "Configurer les règles",
-      "Hint": "Les règles optionnelles et variantes sont désactivées au départ. Désactiver une règle n'efface jamais rien : ce qui est déjà sur une fiche est conservé et réapparaît si vous la réactivez.",
+      "Hint": "Toutes les règles ne sont pas désactivées au départ — chaque valeur par défaut est la lecture que les ouvrages soutiennent le mieux, si bien que celles qu'ils impriment comme des règles sont déjà actives. Désactiver une règle n'efface jamais rien : ce qui est déjà sur une fiche est conservé et réapparaît si vous la réactivez.",
       "Footer": "Les jets déjà envoyés dans le chat ne changent pas : une carte garde les règles en vigueur au moment du jet.",
       "Source": "{book} p.{page}",
       "HouseRule": "règle maison — aucun ouvrage ne tranche",

@@ -1,5 +1,3 @@
-const { fields } = foundry.data;
-
 /** The optional and variant rules a referee turns on, and what the interface then obeys. */
 
 /** Every rule setting is registered under this prefix, so one loop covers them and one call reads them. */
@@ -24,12 +22,7 @@ const SEEDED_EXTRA_CHARACTERISTICS = Object.freeze(["morale", "luck", "sanity", 
 /** The sections the menu draws, in the order it draws them. */
 export const RULE_GROUPS = Object.freeze(["travellers", "creation", "combat", "health", "space", "craft"]);
 
-/**
- * The registry, and one row is three shapes: - a **switch** — a boolean, and what most rules are; -
- * a **picker** (`choices`) — a set, for a rule that is several adoptions wearing one name; - a
- * **choice** (`options`) — a string, for the two rules that are not on-or-off but *which of the
- * printed procedures is in force*.
- */
+/** The registry: a `choices` row is a Set, `options` a string, `number` a number, none a boolean. */
 export const RULES = Object.freeze({
     psionics: {
         group: "travellers", book: "core", page: "226-233",
@@ -341,7 +334,7 @@ export const RULES = Object.freeze({
 
 export const Rules = {
 
-    /** The stored value: a boolean for a switch, a Set for a picker, a key for a choice. */
+    /** The stored value: a switch is a boolean, a picker a Set, a choice a key, a cap a number. */
     get(key) {
         return game.settings.get(...ruleSetting(key));
     },

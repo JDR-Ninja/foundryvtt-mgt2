@@ -353,7 +353,7 @@
       "Title": "Optional and variant rules",
       "MenuHint": "Which of the printed options and variants are in force at your table. The sheets and dialogs show what you turn on here, and nothing else.",
       "MenuLabel": "Configure rules",
-      "Hint": "Optional and variant rules start switched off. Turning one off never deletes anything — what is already on a sheet is kept and comes back when you switch the rule on again.",
+      "Hint": "Not every rule here starts off — each default is the reading the books best support, so the ones they print as rules are already on. Turning one off never deletes anything: what is already on a sheet is kept and comes back when you switch the rule on again.",
       "Footer": "Rolls already posted to chat are left alone: a card records the rules that were in force when it was rolled.",
       "Source": "{book} p.{page}",
       "HouseRule": "house rule — no book states this",

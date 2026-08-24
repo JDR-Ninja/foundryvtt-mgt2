@@ -353,7 +353,7 @@
       "Title": "Reglas opcionales y variantes",
       "MenuHint": "Cuáles de las opciones y variantes impresas están en vigor en tu mesa. Las hojas y los diálogos muestran lo que enciendas aquí, y nada más.",
       "MenuLabel": "Configurar reglas",
-      "Hint": "Las reglas opcionales y variantes empiezan apagadas. Apagar una nunca borra nada — lo que ya está en una hoja se conserva y vuelve cuando vuelves a encenderla.",
+      "Hint": "No todas las reglas empiezan apagadas: cada valor por defecto es la lectura que mejor sostienen los libros, así que las que ellos imprimen como reglas ya están encendidas. Apagar una nunca borra nada — lo que ya está en una hoja se conserva y vuelve cuando vuelves a encenderla.",
       "Footer": "Las tiradas ya publicadas en el chat no se tocan: cada carta registra las reglas que estaban en vigor cuando se tiró.",
       "Source": "{book} p.{page}",
       "HouseRule": "regla de la casa — ningún libro dice esto",

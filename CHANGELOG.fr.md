@@ -7,10 +7,10 @@
 ## [0.2.0]
 
 **La plus grosse version du système à ce jour.** 0.1.x était une feuille de personnage ; 0.2.0 est un
-système de jeu. Sept types d'Acteur, dix-sept types d'Objet, la création de Voyageurs en groupe, le
+système de jeu. Sept types d'Acteur, dix-huit types d'Objet, la création de Voyageurs en groupe, le
 combat spatial et les batailles entre flottes, le commerce spéculatif et le trafic, le voyage et le
-saut, la formation, la chaîne de dégâts complète, trente-six règles optionnelles, et un compendium de
-documentation en quatre langues.
+saut, la formation, la chaîne de dégâts complète, quarante-neuf règles optionnelles, et un
+compendium de documentation en quatre langues.
 
 ### ⚠ Ruptures
 
@@ -45,8 +45,8 @@ documentation en quatre langues.
   défaut.
 * **Fin de carrière** : bénéfices, pension, parts de vaisseau, et une clôture de groupe où un seul
   Voyageur peut commencer propriétaire d'un vaisseau.
-* **Vingt-deux règles optionnelles de création** (voir plus bas), dont seize règles maison assumées,
-  là où les livres se taisent plutôt que d'être ambigus.
+* **Vingt-deux règles optionnelles de création** (voir plus bas), dont seize là où aucun livre ne
+  tranche : les livres se taisent, ou ils disent deux choses en deux lignes.
 * **Journal signé des pertes permanentes de caractéristiques** — vieillissement, blessures, soins —
   dont la somme est dérivée. Il fonctionne sans la création et sert aussi en jeu.
 * **Formation** : un registre de programmes, un par apprentissage en cours, chacun portant *quel livre
@@ -176,24 +176,29 @@ documentation en quatre langues.
 
 ### Règles optionnelles et variantes
 
-**Trente-six règles sur six groupes**, toutes désactivées par défaut : *Voyageurs* 3, *Création* 22,
-*Combat* 2, *Santé* 2, *Espace* 5, *Vaisseaux et robots* 2. Un seul menu dans les réglages du monde.
+**Quarante-neuf règles sur six groupes** : *Voyageurs* 4, *Création* 22, *Combat* 5, *Santé* 4,
+*Espace* 11, *Vaisseaux et robots* 3. Un seul menu dans les réglages du monde, et **elles ne sont pas
+toutes désactivées au départ** — chaque valeur par défaut est la lecture que les ouvrages soutiennent
+le mieux, si bien qu'une règle optionnelle est livrée inactive et qu'une règle que les livres
+impriment *comme* une règle (encombrement, chargeurs, radiations) est livrée active.
 
-Trois formes : un interrupteur, un choix multiple (un ensemble) et un choix de procédure — parce
-qu'un booléen ne peut pas dire *quelle procédure imprimée est en vigueur* quand deux chapitres ne
-sont pas la négation l'un de l'autre. Seize lignes ne citent aucun livre et affichent *règle maison* :
-une règle maison existe précisément là où les livres se taisent.
+Quatre formes : un interrupteur, un choix multiple (un ensemble), un choix de procédure et un compte —
+parce qu'un booléen ne peut pas dire *quelle procédure imprimée est en vigueur* quand deux chapitres
+ne sont pas la négation l'un de l'autre. Seize lignes ne citent aucun livre : quatorze affichent
+*règle maison* et deux *non officiel*. Une règle maison existe précisément là où les livres se
+taisent, ou là où ils disent deux choses en deux lignes.
 
 Changer un interrupteur reprépare et redessine les fiches ouvertes ; rien ne demande de recharger.
 
 ### Documentation et langues
 
-* **Le système livre son premier compendium** : `mgt2.docs`, un journal par langue, vingt-et-une pages
+* **Le système livre son premier compendium** : `mgt2.docs`, un journal par langue, vingt-trois pages
   chacun. Chaque page dit deux choses pour un écran — **ce qu'il traite pour vous** et **ce qu'il vous
   laisse à la table**. C'est de la documentation *sur le système*, jamais du texte de règles.
-* **Quatre langues déclarées** — français, anglais, espagnol, portugais (Brésil). Le français est la
-  cible du système ; l'espagnol et le portugais couvrent l'interface générique, Foundry retombant sur
-  l'anglais clé par clé.
+* **Quatre langues déclarées** — français, anglais, espagnol, portugais (Brésil), **complètes toutes
+  les quatre**. Le français est la cible du système ; le vocabulaire espagnol et portugais suit les
+  traductions communautaires de Mongoose, et les titres d'ouvrages et les noms de traits restent en
+  anglais là où aucune édition publiée ne les nomme.
 
 ### Correctifs
 
@@ -207,9 +212,9 @@ Changer un interrupteur reprépare et redessine les fiches ouvertes ; rien ne de
 * Le libellé vertical des feuilles d'objet restait rouge sur les thèmes Mwamba et Bleu
 * Déposer un objet sur la ligne d'un conteneur dans l'inventaire ne rangeait rien : le gestionnaire
   cherchait une classe CSS qu'aucun gabarit n'émettait
-* **Six des dix-sept types d'Objet ne pouvaient être déposés sur aucune fiche du système**, dont
-  quatre de ceux dont une coque est faite : une liste d'exclusion codée en dur était héritée par
-  toutes les fiches d'Acteur
+* **Six types d'Objet ne pouvaient être déposés sur aucune fiche du système**, dont quatre de ceux
+  dont une coque est faite : une liste d'exclusion codée en dur était héritée par toutes les fiches
+  d'Acteur
 * **Aucune zone de dépôt ne se colorait correctement** : le cache de glisser-déposer était vide en
   permanence, donc les trois zones affichaient « refusé » sur tout
 * **Déposer une personne sur la ligne du second artilleur l'inscrivait sur celle du premier**
