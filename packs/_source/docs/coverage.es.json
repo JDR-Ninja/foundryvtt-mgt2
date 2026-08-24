@@ -12,7 +12,7 @@
       },
       "text": {
         "format": 1,
-        "content": "<p><em>Una página por pantalla: las reglas impresas que aplica por ti, y las que enuncia y deja a tu criterio. Cada línea nombra el libro y la página de la que procede.</em></p>\n<p><em>Esta página está en inglés: todavía no se ha traducido a este idioma.</em></p>\n<p><strong>Every line in these pages names a book and a page.</strong> A figure you doubt is checked against the book on the table rather than against the software, and where the two differ the book wins: this system computes the rules, it does not arbitrate them.</p>\n<p><strong>The system works out what a rule is worth. It never decides when a rule applies.</strong> Nothing here runs a clock: a hazard interval, a maintenance period, a study week, a jump's hundred diameters are printed where you will be looking and are yours to apply. The combat round is the single exception, and only because a combat is advanced by hand. A wrong automatic number is worse than an absent one, because nobody checks it.</p>\n<p><strong>An attack roll never reads its target.</strong> What a dodge, a parry or an evasive manoeuvre costs the attacker is stated on the card for you to apply, and everything that needs a victim — armour, Lo-Pen, scale, radiation, a robot's hardening — is resolved when the damage is applied, where the target is known.</p>\n<p><strong>Some rules ship with a switch, and the switch starts off.</strong> Where two books print different procedures for the same thing, or where a book prints a rule as optional, both are built and a world setting decides which is in force: the Core's vehicle criticals or the 2026 Vehicle Handbook's, the Core's vacuum or the Companion's, the Companion's defence missiles and its layered missile defence, fleet battles, and a dozen more. <strong>The default is always the Core's</strong>, so a table that does not own the other book never gets its numbers by accident, and a page below that names a switched rule says so.</p>\n<p><strong>Where a rule is left to you, the screen says so where you are looking</strong>, not only here. These pages gather those statements in one place, so a table can see before play what it will be calling itself.</p>\n<p><strong>Page numbers are the ones printed on the page</strong>, so you can open the book straight at them.</p>\n<h2>Pantalla por pantalla</h2>\n<table><thead><tr><th>Pantalla</th><th>Cubierto</th><th>A tu criterio</th></tr></thead><tbody><tr><td>Roll prompt</td><td>11</td><td>1</td></tr><tr><td>Chat card — roll result</td><td>5</td><td>—</td></tr><tr><td>Chat card — damage</td><td>12</td><td>—</td></tr><tr><td>Character sheet</td><td>15</td><td>—</td></tr><tr><td>NPC sheet</td><td>6</td><td>—</td></tr><tr><td>Vehicle sheet</td><td>8</td><td>—</td></tr><tr><td>Spacecraft sheet</td><td>14</td><td>2</td></tr><tr><td>Robot sheet</td><td>9</td><td>—</td></tr><tr><td>Item sheets</td><td>9</td><td>—</td></tr><tr><td>Combat tracker</td><td>4</td><td>—</td></tr><tr><td>Character creation</td><td>13</td><td>1</td></tr><tr><td>World sheet</td><td>7</td><td>2</td></tr><tr><td>Voyage screen</td><td>6</td><td>2</td></tr><tr><td>Speculative trade</td><td>10</td><td>—</td></tr><tr><td>Passengers, freight and mail</td><td>10</td><td>1</td></tr><tr><td>Ship finance</td><td>8</td><td>2</td></tr><tr><td>Space combat screen</td><td>17</td><td>2</td></tr><tr><td>Fleet battles</td><td>16</td><td>1</td></tr><tr><td>Training</td><td>9</td><td>1</td></tr><tr><td>Environment regions</td><td>4</td><td>2</td></tr><tr><td>The Docket</td><td>11</td><td>—</td></tr><tr><td>Bounty contracts</td><td>8</td><td>1</td></tr></tbody></table>\n<p>22 pantallas: 212 reglas aplicadas por ti, 18 a tu criterio.</p>"
+        "content": "<p><em>Una página por pantalla: las reglas impresas que aplica por ti, y las que enuncia y deja a tu criterio. Cada línea nombra el libro y la página de la que procede.</em></p>\n<p><strong>Cada línea de estas páginas nombra un libro y una página.</strong> Una cifra que te parezca dudosa se comprueba contra el libro que tienes en la mesa y no contra el software, y donde ambos difieran manda el libro: este sistema calcula las reglas, no las arbitra.</p>\n<p><strong>El sistema calcula cuánto vale una regla. Nunca decide cuándo se aplica.</strong> Aquí nada hace correr un reloj: un intervalo de peligro, un periodo de mantenimiento, una semana de estudio o los cien diámetros de un salto se imprimen donde vas a estar mirando y te toca a ti aplicarlos. El asalto de combate es la única excepción, y solo porque un combate se avanza a mano. Un número automático equivocado es peor que uno ausente, porque nadie lo comprueba.</p>\n<p><strong>Una tirada de ataque nunca lee a su objetivo.</strong> Lo que esquivar, una parada o una maniobra evasiva le cuestan al atacante se enuncia en la tarjeta para que tú lo apliques, y todo lo que necesita una víctima —armadura, Débil, escala, radiación, el refuerzo de un robot— se resuelve al aplicar el daño, allí donde el objetivo se conoce.</p>\n<p><strong>Algunas reglas se entregan con un interruptor, y el interruptor empieza apagado.</strong> Donde dos libros imprimen dos procedimientos para lo mismo, o donde un libro imprime una regla como opcional, ambos están construidos y un ajuste del mundo dice cuál rige: los críticos de vehículo del Core o los del Vehicle Handbook de 2026, el vacío del Core o el del Companion, los misiles de defensa del Companion y su defensa antimisiles por capas, las batallas de flota y una docena más. <strong>Lo predeterminado es siempre lo del Core</strong>, para que una mesa que no tenga el otro libro no reciba sus cifras por accidente, y una página que más abajo nombre una regla con interruptor lo dice.</p>\n<p><strong>Donde una regla se te deja a ti, la pantalla lo dice allí donde estás mirando</strong>, y no solo aquí. Estas páginas reúnen esas advertencias en un solo sitio, para que una mesa vea antes de jugar lo que tendrá que decidir por su cuenta.</p>\n<p><strong>Los números de página son los impresos en la página</strong>, para que puedas abrir el libro directamente por ellos.</p>\n<p><strong>Esta introducción está en español; las dos listas de cada pantalla siguen en inglés.</strong> Cada regla enumerada allí lleva terminología Traveller, y este proyecto no la inventa: se traducirá cuando alguien con los libros en español la fije. Mientras tanto no se pierde nada — la página cae al inglés línea por línea y la compilación cuenta cuánto falta.</p>\n<h2>Pantalla por pantalla</h2>\n<table><thead><tr><th>Pantalla</th><th>Cubierto</th><th>A tu criterio</th></tr></thead><tbody><tr><td>Ventana de tirada</td><td>11</td><td>1</td></tr><tr><td>Tarjeta de chat — resultado de la tirada</td><td>5</td><td>—</td></tr><tr><td>Tarjeta de chat — daño</td><td>12</td><td>—</td></tr><tr><td>Hoja de Viajero</td><td>15</td><td>—</td></tr><tr><td>Hoja de PNJ</td><td>6</td><td>—</td></tr><tr><td>Hoja de vehículo</td><td>8</td><td>—</td></tr><tr><td>Hoja de nave espacial</td><td>14</td><td>2</td></tr><tr><td>Hoja de robot</td><td>9</td><td>—</td></tr><tr><td>Hojas de objeto</td><td>9</td><td>—</td></tr><tr><td>Seguimiento de combate</td><td>4</td><td>—</td></tr><tr><td>Creación de personaje</td><td>13</td><td>1</td></tr><tr><td>Hoja de mundo</td><td>7</td><td>2</td></tr><tr><td>Pantalla de viaje</td><td>6</td><td>2</td></tr><tr><td>Comercio especulativo</td><td>10</td><td>—</td></tr><tr><td>Pasajeros, mercancías y correo</td><td>10</td><td>1</td></tr><tr><td>Finanzas de la nave</td><td>8</td><td>2</td></tr><tr><td>Pantalla de combate espacial</td><td>17</td><td>2</td></tr><tr><td>Batallas de flota</td><td>16</td><td>1</td></tr><tr><td>Formación</td><td>9</td><td>1</td></tr><tr><td>Regiones de entorno</td><td>4</td><td>2</td></tr><tr><td>Solicitudes de tirada</td><td>11</td><td>—</td></tr><tr><td>Contratos de recompensa</td><td>8</td><td>1</td></tr></tbody></table>\n<p>22 pantallas: 212 reglas aplicadas por ti, 18 a tu criterio.</p>"
       },
       "ownership": {
         "default": -2
@@ -20,8 +20,8 @@
       "sort": 100
     },
     {
-      "_id": "OMLHPm0ptQ8HcpTE",
-      "name": "1. Roll prompt",
+      "_id": "qAcmuKmGuPu21DbR",
+      "name": "1. Ventana de tirada",
       "type": "text",
       "title": {
         "show": true,
@@ -37,8 +37,8 @@
       "sort": 200
     },
     {
-      "_id": "7sU5WXiSlK4a9xgk",
-      "name": "2. Chat card — roll result",
+      "_id": "dWb3VbSgaJvjMuhD",
+      "name": "2. Tarjeta de chat — resultado de la tirada",
       "type": "text",
       "title": {
         "show": true,
@@ -54,8 +54,8 @@
       "sort": 300
     },
     {
-      "_id": "0IKc3BagiLXorYgX",
-      "name": "3. Chat card — damage",
+      "_id": "iLYLZCr8PQ77aR07",
+      "name": "3. Tarjeta de chat — daño",
       "type": "text",
       "title": {
         "show": true,
@@ -71,8 +71,8 @@
       "sort": 400
     },
     {
-      "_id": "WjXfRCoFlGiCqvy7",
-      "name": "4. Character sheet",
+      "_id": "Jz7jDRSQJtwfl3n8",
+      "name": "4. Hoja de Viajero",
       "type": "text",
       "title": {
         "show": true,
@@ -88,8 +88,8 @@
       "sort": 500
     },
     {
-      "_id": "eFbeLXR4ClRFQsuV",
-      "name": "5. NPC sheet",
+      "_id": "gRDuSuYl8kAvOcXM",
+      "name": "5. Hoja de PNJ",
       "type": "text",
       "title": {
         "show": true,
@@ -105,8 +105,8 @@
       "sort": 600
     },
     {
-      "_id": "3qh3AwcSZyj75Tm5",
-      "name": "6. Vehicle sheet",
+      "_id": "OxhqJECgNourIkWZ",
+      "name": "6. Hoja de vehículo",
       "type": "text",
       "title": {
         "show": true,
@@ -122,8 +122,8 @@
       "sort": 700
     },
     {
-      "_id": "pM68ul5dc3GuiLXY",
-      "name": "7. Spacecraft sheet",
+      "_id": "olLIaqhso30T80bC",
+      "name": "7. Hoja de nave espacial",
       "type": "text",
       "title": {
         "show": true,
@@ -139,8 +139,8 @@
       "sort": 800
     },
     {
-      "_id": "DAy3EJXCWPLx8ynB",
-      "name": "8. Robot sheet",
+      "_id": "43tfQfHWubYTkdot",
+      "name": "8. Hoja de robot",
       "type": "text",
       "title": {
         "show": true,
@@ -156,8 +156,8 @@
       "sort": 900
     },
     {
-      "_id": "JMuxpGtrLh9DUJyu",
-      "name": "9. Item sheets",
+      "_id": "OXG6VnAjqGvMarWa",
+      "name": "9. Hojas de objeto",
       "type": "text",
       "title": {
         "show": true,
@@ -173,8 +173,8 @@
       "sort": 1000
     },
     {
-      "_id": "EBrPUYZvLAUpIlsc",
-      "name": "10. Combat tracker",
+      "_id": "kTSLmYjH6Jk6EPKt",
+      "name": "10. Seguimiento de combate",
       "type": "text",
       "title": {
         "show": true,
@@ -190,8 +190,8 @@
       "sort": 1100
     },
     {
-      "_id": "jNKVMU5Gql8xIueA",
-      "name": "11. Character creation",
+      "_id": "JiLRL8gv1YGiBopB",
+      "name": "11. Creación de personaje",
       "type": "text",
       "title": {
         "show": true,
@@ -207,8 +207,8 @@
       "sort": 1200
     },
     {
-      "_id": "uO4UVKuV9JbHyFCK",
-      "name": "12. World sheet",
+      "_id": "jmJNmqCV57fAk1Hd",
+      "name": "12. Hoja de mundo",
       "type": "text",
       "title": {
         "show": true,
@@ -224,8 +224,8 @@
       "sort": 1300
     },
     {
-      "_id": "cT9hWbQyst3qbHC7",
-      "name": "13. Voyage screen",
+      "_id": "BMZjDVO37n81XSNX",
+      "name": "13. Pantalla de viaje",
       "type": "text",
       "title": {
         "show": true,
@@ -241,8 +241,8 @@
       "sort": 1400
     },
     {
-      "_id": "30wBtwlUWsbYwi96",
-      "name": "14. Speculative trade",
+      "_id": "xAJ4L2fWs18H0uBT",
+      "name": "14. Comercio especulativo",
       "type": "text",
       "title": {
         "show": true,
@@ -258,8 +258,8 @@
       "sort": 1500
     },
     {
-      "_id": "2K8G8mtxyhC5rNJ1",
-      "name": "15. Passengers, freight and mail",
+      "_id": "ZentlFPo2HmoMvP4",
+      "name": "15. Pasajeros, mercancías y correo",
       "type": "text",
       "title": {
         "show": true,
@@ -275,8 +275,8 @@
       "sort": 1600
     },
     {
-      "_id": "F3eHAeu3nypf93Wb",
-      "name": "16. Ship finance",
+      "_id": "IMjm3zaC9riC6Q5G",
+      "name": "16. Finanzas de la nave",
       "type": "text",
       "title": {
         "show": true,
@@ -292,8 +292,8 @@
       "sort": 1700
     },
     {
-      "_id": "3RaWF2yi6YwmgkJg",
-      "name": "17. Space combat screen",
+      "_id": "CbT80aziVsCCrUpC",
+      "name": "17. Pantalla de combate espacial",
       "type": "text",
       "title": {
         "show": true,
@@ -309,8 +309,8 @@
       "sort": 1800
     },
     {
-      "_id": "S5DWOuhXi0283GtG",
-      "name": "18. Fleet battles",
+      "_id": "ZZKxfrzsrXwPuQVP",
+      "name": "18. Batallas de flota",
       "type": "text",
       "title": {
         "show": true,
@@ -326,8 +326,8 @@
       "sort": 1900
     },
     {
-      "_id": "5LYkYlHHa4RRtPB7",
-      "name": "19. Training",
+      "_id": "Z1sOnIESyTtXUF45",
+      "name": "19. Formación",
       "type": "text",
       "title": {
         "show": true,
@@ -343,8 +343,8 @@
       "sort": 2000
     },
     {
-      "_id": "ul1mmtpdAJ48Uy5g",
-      "name": "20. Environment regions",
+      "_id": "u9mNjHMvJJhSCerp",
+      "name": "20. Regiones de entorno",
       "type": "text",
       "title": {
         "show": true,
@@ -360,8 +360,8 @@
       "sort": 2100
     },
     {
-      "_id": "DMRf443Mcg4nXIgA",
-      "name": "21. The Docket",
+      "_id": "FW9eY5rChpYTmsFO",
+      "name": "21. Solicitudes de tirada",
       "type": "text",
       "title": {
         "show": true,
@@ -377,8 +377,8 @@
       "sort": 2200
     },
     {
-      "_id": "6DGwQB8vqhRX3PHT",
-      "name": "22. Bounty contracts",
+      "_id": "Zhu5xXcuC7wPelJy",
+      "name": "22. Contratos de recompensa",
       "type": "text",
       "title": {
         "show": true,
