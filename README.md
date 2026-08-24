@@ -54,6 +54,35 @@ the demand that produced it.
 
 ---
 
+## Sheets, kit and creation
+
+**Twenty-two skills, two careers, and a programme five weeks into its eight.**
+
+![The Traveller sheet](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/session/session-sheet.webp)
+
+The training strip names the level it is buying, the weeks logged against it and the button that
+grants it. On the left, what the boarding action left behind: Endurance at 3 of 8, the Endurance DM
+that follows it, and the carrying limit that follows that.
+
+**Four containers, and a locker ashore that is an Actor of its own.**
+
+![The inventory and a Stash](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/session/session-inventory.webp)
+
+Every row names the container it is in. Beside it, a Stash: a bonded locker at the highport, with
+its own weight, its own value, a lock, and a row per player saying who may open it. The pilot owns
+it, the astrogator may read it, nobody else sees the sheet at all.
+
+**Six Travellers, five terms, one career that went wrong.**
+
+![Group character creation](https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/session/session-chargen.webp)
+
+Creation runs as a grid of Travellers by terms, and it is interruptible: close it, play a session,
+come back. Each cell carries the career, the assignment and whether survival was passed — and where
+it was not, the ejection and the note that says why. The strip underneath is the term itself, ten
+steps in the order the book prints them.
+
+---
+
 ## What the system does
 
 ### At the table
@@ -89,8 +118,9 @@ the demand that produced it.
 ### The world
 
 * **Forty-nine optional and variant rules** in one settings screen — psionics, wealth, radiation,
-  encumbrance, magazines, starvation, vacuum, the jump procedure, fleet battles and design
-  validation among them.
+  encumbrance, starvation, vacuum, the jump procedure, fleet battles and design validation among
+  them. Each names the book and page it comes from, or says that no book settles it. The defaults
+  are the game as printed.
 * **Four languages** — French, English, Spanish and Brazilian Portuguese, interface and content
   strings alike.
 * **One accent recolours everything.** Four palette presets, eleven accents, light, dark or

@@ -58,14 +58,24 @@ one system, and one shot at a different width shows.
 | `session-space.webp` | round one of a space combat over a nebula, the screen and the log |
 | `session-deck.webp` | a boarding action: the deck, the wounded pilot's sheet, the damage chain |
 | `session-request.webp` | the referee's roll-request compose window and the card answering it |
+| `session-sheet.webp` | the Traveller sheet on *Traits & Skills*, with an open training programme |
+| `session-inventory.webp` | the inventory's *Storage* tab and a Stash sheet beside it |
+| `session-chargen.webp` | the creation grid, six Travellers by five terms |
 
 **The whole interface, 1600 × 1000 at scale 2** — 3200 × 2000, 200-280 KB. Sidebar expanded on the
 chat log, hotbar loaded, scene navigation visible, and **four player clients actually connected**,
 because an offline roster reads "GM rolls" on every surface that names who answers.
 
-**One continuous session, in this order.** The three are stages of the same fight, taken in one
-pass without clearing the log between them, so the cards visible in a later shot are the ones the
-earlier shot produced. Re-take all three together or none.
+**One continuous session, in this order.** The six are stages of the same fight, taken in one pass
+without clearing the log between them, so the cards visible in a later shot are the ones the earlier
+shot produced, and the wound on the sheet is the one the damage card applied. Re-take all six
+together or none.
+
+**The fixture is fuller here than in the sheet shots.** The session set adds eight skills, an open
+training programme, the five recurring characters, four containers and a Stash to the same Camille
+Ferrand, because a landing image has to show a Traveller who has been played. The per-language
+sheet shots were taken against the leaner seed and have not been re-taken; the crew, the ship and
+the world are the same in both.
 
 **The board is drawn, never sourced.** The space scene is one of the deep-sky plates this system
 already ships. The deck is a set of Drawings — hull, spine corridor, compartments — generated for

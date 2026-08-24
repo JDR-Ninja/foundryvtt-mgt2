@@ -37,6 +37,21 @@
 			"type": "screenshot",
 			"url": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/session/session-request.webp",
 			"caption": "A roll request — one demand, the whole crew answering"
+		},
+		{
+			"type": "screenshot",
+			"url": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/session/session-sheet.webp",
+			"caption": "The Traveller sheet — skills, careers and an open training programme"
+		},
+		{
+			"type": "screenshot",
+			"url": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/session/session-inventory.webp",
+			"caption": "Inventory and a Stash — containers, and a locker with a lock"
+		},
+		{
+			"type": "screenshot",
+			"url": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/web/screenshots/session/session-chargen.webp",
+			"caption": "Group creation — a grid of Travellers by terms"
 		}
 	],
 	"esmodules": [
