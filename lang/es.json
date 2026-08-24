@@ -1760,7 +1760,7 @@
           "other": "Dirigible: la envoltura de gas no puede exceder {spaces} Espacios."
         },
         "Armour": "Blindaje",
-        "ArmourCount": "6 caras, todas guardadas",
+        "ArmourCount": "6 caras, 4 guardadas",
         "Facing": {
           "forward": "Proa",
           "aft": "Popa",
@@ -1784,7 +1784,7 @@
         "VsLight": "contra armas ligeras",
         "ToHit": "Para impactarlo",
         "Maintenance": "Mantenimiento",
-        "ArmourHint": "El Vehicle Handbook 2026 imprime seis caras en cada perfil y las seis se guardan. Babor y estribor suelen ser iguales. Un vehículo escrito bajo la edición de 2017 conserva sus números: frente, trasera y laterales se trasladan, y las caras dorsal y ventral toman las mitades que la hoja solía deducir.",
+        "ArmourHint": "El Vehicle Handbook 2026 imprime seis caras en cada perfil y las indica todas. Babor y estribor suelen ser iguales. El Core p.140 responde cuando el techo o el suelo se deja en blanco — la mitad del blindaje de babor contra el techo, la mitad de la trasera contra el suelo —, de modo que una casilla vacía es el «salvo que se indique lo contrario» del libro, y un número, incluido el 0, lo sustituye. Un vehículo escrito bajo la edición de 2017 conserva sus números: frente, trasera y laterales se trasladan, y una cara que nunca nombró queda en blanco.",
         "Systems": "Sistemas",
         "SystemsCount": "6 líneas · 4 MD, un nivel de habilidad y una distancia",
         "System": "Sistema",

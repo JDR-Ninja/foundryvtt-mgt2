@@ -1760,7 +1760,7 @@
           "other": "Airship: the gas envelope may not exceed {spaces} Spaces."
         },
         "Armour": "Armour",
-        "ArmourCount": "6 faces, all stored",
+        "ArmourCount": "6 faces, 4 stored",
         "Facing": {
           "forward": "Forward",
           "aft": "Aft",
@@ -1784,7 +1784,7 @@
         "VsLight": "vs. light weapons",
         "ToHit": "To-hit against it",
         "Maintenance": "Maintenance",
-        "ArmourHint": "The Vehicle Handbook 2026 prints six faces on every statblock and all six are stored. Port and starboard are normally equal. A vehicle written under the 2017 edition keeps its numbers: front, rear and sides carry over, and the dorsal and ventral faces take the halves the sheet used to infer.",
+        "ArmourHint": "The Vehicle Handbook 2026 prints six faces on every statblock and states all six. Port and starboard are normally equal. Core p.140 answers when a roof or a floor is left blank — half the port armour against the roof, half the rear against the floor — so a blank cell is the book's “unless otherwise stated” and a number, 0 included, overrides it. A vehicle written under the 2017 edition keeps its numbers: front, rear and sides carry over, and a face it never named stays blank.",
         "Systems": "Systems",
         "SystemsCount": "6 lines · 4 DMs, a skill level and a distance",
         "System": "System",

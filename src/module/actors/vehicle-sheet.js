@@ -183,10 +183,17 @@ export class VehicleActorSheet extends TravellerActorSheet {
             percent: Math.round(air.range * 100), range: system.range };
     }
 
-    /** Six faces, every one stored: VH2026 p.56 leaves nothing for the sheet to infer. */
+    /**
+     * Six faces. VH2026 p.56 states all six on every card, but Core p.140 lets a roof or a floor be
+     * left unstated — so a facing carries both the effective number and the stored one, and `src`
+     * says which of the three `ArmourSrc` labels the cell has earned.
+     */
     static #armour(system) {
         const armour = system.armour;
-        const facing = key => ({ key, value: armour[key], reactive: armour.reactive[key], field: key });
+        const INFERRED = { dorsal: "top", ventral: "bottom" };
+        const facing = key => ({ key, value: armour[key], stored: system._source.armour[key],
+            reactive: armour.reactive[key], field: key,
+            src: armour.inferred?.[key] ? INFERRED[key] : "stored" });
         return {
             facings: ["forward", "aft", "port", "starboard", "dorsal", "ventral"].map(facing),
             vsLight: armour.vsLight,

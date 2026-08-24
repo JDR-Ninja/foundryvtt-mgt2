@@ -14,8 +14,8 @@
 			<div class="facing">
 				<span class="lbl">{{localize (concat 'MGT2.Actor.vehicle.Facing.' facing.key)}}</span>
 				<b class="play-only">{{facing.value}}</b>
-				{{formInput (lookup ../systemFields.armour.fields facing.key) name=(concat "system.armour." facing.key) value=facing.value classes="f edit-only"}}
-				<span class="src">{{localize 'MGT2.Actor.vehicle.ArmourSrc.stored'}}</span>
+				{{formInput (lookup ../systemFields.armour.fields facing.key) name=(concat "system.armour." facing.key) value=facing.stored classes="f edit-only"}}
+				<span class="src">{{localize (concat 'MGT2.Actor.vehicle.ArmourSrc.' facing.src)}}</span>
 				{{#if facing.reactive}}<span class="re">+{{facing.reactive}} {{localize 'MGT2.Actor.vehicle.Reactive'}}</span>{{/if}}
 			</div>
 			{{/each}}

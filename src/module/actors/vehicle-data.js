@@ -75,8 +75,11 @@ export class VehicleData extends CraftData {
             armour.forward = armour.front;
             armour.aft = armour.rear;
             armour.port = armour.starboard = armour.sides;
-            armour.dorsal = armour.top ?? Math.floor((armour.sides ?? 0) / 2);
-            armour.ventral = armour.bottom ?? Math.floor((armour.rear ?? 0) / 2);
+            // A 2017 record that named a roof or a floor keeps that number; one that named neither
+            // says nothing and folio 140 answers at read time. Baking the halves in here would make
+            // a stated 5 and an inferred 5 the same record for ever.
+            armour.dorsal = armour.top ?? null;
+            armour.ventral = armour.bottom ?? null;
             const reactive = armour.reactive;
             if ( reactive && (reactive.forward === undefined) ) {
                 reactive.forward = reactive.front;
@@ -95,6 +98,11 @@ export class VehicleData extends CraftData {
 
         const facing = () => new fields.NumberField({
             required: false, nullable: false, integer: true, min: 0, initial: 0 });
+        // Core folio 140 lets the roof and the floor go unstated, so those two need a value that
+        // MEANS unstated: `null` is the book's "unless otherwise stated" and a number is a
+        // statement — 0 among them, which an `initial: 0` could never tell from silence.
+        const inferable = () => new fields.NumberField({
+            required: false, nullable: true, integer: true, min: 0, initial: null });
         const band = () => new fields.NumberField({
             required: false, nullable: false, integer: true, min: 0, max: 11, initial: 0 });
         const worldDigit = () => new fields.NumberField({
@@ -176,7 +184,7 @@ export class VehicleData extends CraftData {
             // three arrive through migrateData, which is what keeps a packed vehicle readable.
             armour: new fields.SchemaField({
                 forward: facing(), aft: facing(), port: facing(), starboard: facing(),
-                dorsal: facing(), ventral: facing(),
+                dorsal: inferable(), ventral: inferable(),
                 // A second number per face that drops by 1 per hit and is destroyed outright by a
                 // Destructive or spacecraft-scale weapon (VH p.51), so it is mutable in play.
                 reactive: new fields.SchemaField({
@@ -671,8 +679,15 @@ export class VehicleData extends CraftData {
         super.prepareDerivedData();
 
         // Core p.140: the roof takes half the sides and the floor half the rear, and the two
-        // fallbacks are asymmetric on purpose.
+        // fallbacks are asymmetric on purpose. `null` is the book's "unless otherwise stated"; a
+        // number, 0 included, is a statement and displaces it. VH2026 states all six on every card,
+        // so this answers for a hand-typed vehicle and for a 2017 record that named neither face.
+        // Which side: `FACING_ALIAS` already resolves the 2017 `sides` to `port`, and the two are
+        // equal on every published card.
         const armour = this.armour;
+        armour.inferred = { dorsal: armour.dorsal === null, ventral: armour.ventral === null };
+        armour.dorsal ??= Math.floor(armour.port / 2);
+        armour.ventral ??= Math.floor(armour.aft / 2);
         // Core folio 140: against a weapon under 4D or with Stun, every facing gains the vehicle's
         // TL.
         armour.vsLight = this.tl;

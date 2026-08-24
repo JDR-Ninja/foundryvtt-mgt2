@@ -1760,7 +1760,7 @@
           "other": "Dirigível: o envelope de gás não pode exceder {spaces} Espaços."
         },
         "Armour": "Blindagem",
-        "ArmourCount": "6 faces, todas guardadas",
+        "ArmourCount": "6 faces, 4 guardadas",
         "Facing": {
           "forward": "Proa",
           "aft": "Popa",
@@ -1784,7 +1784,7 @@
         "VsLight": "contra armas leves",
         "ToHit": "Para acertá-lo",
         "Maintenance": "Manutenção",
-        "ArmourHint": "O Vehicle Handbook 2026 imprime seis faces em cada perfil e as seis são guardadas. Bombordo e estibordo costumam ser iguais. Um veículo escrito sob a edição de 2017 conserva seus números: frente, traseira e laterais são transpostas, e as faces dorsal e ventral tomam as metades que a ficha costumava deduzir.",
+        "ArmourHint": "O Vehicle Handbook 2026 imprime seis faces em cada perfil e informa todas elas. Bombordo e estibordo costumam ser iguais. O Core p.140 responde quando o teto ou o piso é deixado em branco — metade do blindagem de bombordo contra o teto, metade da traseira contra o piso —, de modo que uma célula vazia é o “salvo indicação em contrário” do livro, e um número, inclusive 0, o substitui. Um veículo escrito sob a edição de 2017 conserva seus números: frente, traseira e laterais são transpostas, e uma face que nunca nomeou fica em branco.",
         "Systems": "Sistemas",
         "SystemsCount": "6 linhas · 4 MDs, um nível de perícia e uma distância",
         "System": "Sistema",

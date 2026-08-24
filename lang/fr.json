@@ -1760,7 +1760,7 @@
           "other": "Dirigeable : l'enveloppe de gaz ne peut pas dépasser {spaces} Espaces."
         },
         "Armour": "Blindage",
-        "ArmourCount": "6 faces, toutes enregistrées",
+        "ArmourCount": "6 faces, 4 enregistrées",
         "Facing": {
           "forward": "Avant",
           "aft": "Arrière",
@@ -1784,7 +1784,7 @@
         "VsLight": "contre les armes légères",
         "ToHit": "Pour la toucher",
         "Maintenance": "Maintenance",
-        "ArmourHint": "Le Vehicle Handbook 2026 imprime six faces sur chaque statbloc et les six sont enregistrées. Bâbord et tribord sont normalement égaux. Un véhicule écrit sous l'édition 2017 garde ses valeurs : avant, arrière et flancs se reportent, et les faces dorsale et ventrale prennent les moitiés que la feuille déduisait.",
+        "ArmourHint": "Le Vehicle Handbook 2026 imprime six faces sur chaque statbloc et les renseigne toutes. Bâbord et tribord sont normalement égaux. Le Core p.140 répond quand le toit ou le plancher est laissé vide — la moitié du blindage bâbord contre le toit, la moitié de l'arrière contre le plancher — donc une case vide est le « sauf mention contraire » du livre, et un nombre, 0 compris, le remplace. Un véhicule écrit sous l'édition 2017 garde ses valeurs : avant, arrière et flancs se reportent, et une face jamais nommée reste vide.",
         "Systems": "Systèmes",
         "SystemsCount": "6 lignes · 4 MD, un niveau de compétence et une distance",
         "System": "Système",
