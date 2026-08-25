@@ -448,9 +448,11 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     model.containerShowAll = viewId === "";
     // With every container shown there is none to ask for the total, and asking nothing read 0
     // under a list of rows.
+    // A locked case weighs what it weighs: the lock withholds the CONTENTS below and never the mass,
+    // which the picker above already prints to every viewer and the single-container total never hid.
     model.containerWeight = model.containerShowAll
       ? MGT2Helper.roundWeight(actorContainers.reduce((sum, c) =>
-        (c.system.container?.id || (c.system.locked && !game.user.isGM)) ? sum : sum + c.system.weight, 0))
+        c.system.container?.id ? sum : sum + c.system.weight, 0))
       : (currentContainerView?.system.weight ?? 0);
     model.containerViewId = viewId;
     model.containerDropInId = dropInId;
