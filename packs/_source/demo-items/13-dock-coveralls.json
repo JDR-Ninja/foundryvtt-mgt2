@@ -1,0 +1,38 @@
+{
+  "_id": "demoClothCovrall",
+  "name": "Demo — Dock Coveralls",
+  "type": "equipment",
+  "img": "icons/svg/item-bag.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 13,
+        "cliff": "none — this is the plain case",
+        "teaches": [
+          "The four fields every physical Item has: `weight`, `cost`, `tl` and `legality`.",
+          "`weightless` is the flag that keeps a worn or implanted thing out of the encumbrance total.",
+          "`subType: \"clothing\"` files it under clothing in the explorer's sub-type filter."
+        ],
+        "trap": "`tl` on an Item is the string `TL09`, not the number 9. It is one of the two fields the compendium explorer indexes, and a `9` written here is stored as the string `\"9\"` and filters as its own value."
+      }
+    }
+  },
+  "system": {
+    "description": "Oiled canvas, four pockets and a harbour patch. Warm, and it dries.",
+    "subType": "clothing",
+    "source": { "book": "", "page": "" },
+    "quantity": 1,
+    "weight": 1,
+    "weightless": false,
+    "cost": 120,
+    "tl": "TL09",
+    "legality": 0,
+    "container": { "id": "" },
+    "roll": { "characteristic": "", "skill": "", "difficulty": "" },
+    "equipped": true,
+    "augment": { "improvement": "", "modifiers": [], "skill": { "name": "", "value": 0 }, "protection": 0 },
+    "processing": null,
+    "specialised": { "software": "", "bonus": 0 }
+  },
+  "effects": []
+}

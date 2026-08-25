@@ -1,0 +1,39 @@
+{
+  "_id": "demoComputerHand",
+  "name": "Demo — Handcomp",
+  "type": "computer",
+  "img": "icons/svg/clockwork.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 28,
+        "cliff": "the anchor a program points at",
+        "teaches": [
+          "processing is the budget every program running on this machine draws its bandwidth from.",
+          "options[] is a trait list under the custom family: it is where a hardened casing or a fitted interface is recorded.",
+          "specialised {software, bonus} is the one program this machine is built around and what it is worth."
+        ],
+        "trap": "Nothing on either side of the link stores a name. A program says which machine it runs on by holding this document's id in software.computerId, and this document holds no list of what runs on it. A computer Item is not the only host either: an equipped armour and a fitted augment both run software when they carry a Processing figure. This Item exists twice in the pack for that reason — loose here, and embedded on the Demo — Traveller where a program can actually point at it."
+      }
+    }
+  },
+  "system": {
+    "description": "A wrist unit with a cracked case and a good aerial. Runs two programs if neither is ambitious.",
+    "source": { "book": "", "page": "" },
+    "quantity": 1,
+    "weight": 0.5,
+    "weightless": false,
+    "cost": 3000,
+    "tl": "TL12",
+    "legality": 0,
+    "container": { "id": "" },
+    "roll": { "characteristic": "", "skill": "", "difficulty": "" },
+    "processing": 5,
+    "specialised": { "software": "Demo — Survey Suite", "bonus": 1 },
+    "options": [
+      { "family": "custom", "key": "custom", "params": [], "note": "Hardened casing" },
+      { "family": "custom", "key": "custom", "params": [], "note": "Harbour net interface" }
+    ]
+  },
+  "effects": []
+}

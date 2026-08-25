@@ -574,6 +574,10 @@ body.mgt2-chrome-off .mgt2.application::before {
   display: none !important;
 }
 
+body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
+  display: none;
+}
+
 .mgt2 .window-header .mgt2-mode {
   order: -1;
   flex: 0 0 auto;

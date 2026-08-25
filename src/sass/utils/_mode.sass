@@ -10,6 +10,12 @@
 .mgt2 [hidden]
 	display: none !important
 
+// The ? in the title bar, per client. A frame button is built on the FIRST render only, so
+// re-rendering can neither add nor remove one; the class swap reaches every open window instead,
+// and `display: none` takes the button out of the tab order with it.
+body.mgt2-guide-off .mgt2 .window-header button[data-action="openGuide"]
+	display: none
+
 // The toggle sits in the window header, a chrome island, so it reads the re-anchored tokens.
 // It leads the band: toggle, then the hatch, then the title. The hatch is the header's own
 // `::before`, which a flex container always lays out FIRST whatever the DOM order — so the

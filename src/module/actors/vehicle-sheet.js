@@ -18,6 +18,9 @@ const DM_KEYS = ["controlDM", "systemsDM", "sensorDM"];
  */
 export class VehicleActorSheet extends TravellerActorSheet {
 
+  /** Its own page lands with the reference chapter. @inheritDoc */
+  static GUIDE_TOPIC = null;
+
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
         classes: ["vehicle"],

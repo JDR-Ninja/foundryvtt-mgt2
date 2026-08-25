@@ -1074,7 +1074,8 @@ export class SpacecraftData extends CraftData {
         const hullTons = this.hull.tons;
         const rows = [];
         let tons = 0, cost = 0, draw = 0, generates = 0, weapons = 0, fuel = 0;
-        let powered = 0, hardened = 0;
+        let powered = 0, hardened = 0, claimsHardened = false;
+        const hardenedNames = MGT2.FleetTraits.hardened.names;
 
         // Which `budget` row each category is the parts-list spelling of.
         const budgetRow = { armour: "armour", mDrive: "mDrive", rDrive: "rDrive", jDrive: "jDrive",
@@ -1106,6 +1107,8 @@ export class SpacecraftData extends CraftData {
                 powered++;
                 if (part.hardened) hardened++;
             }
+            const plain = SpacecraftData.#plainName(item.name);
+            if (hardenedNames.some(match => plain.includes(match))) claimsHardened = true;
             // HG p.26 counts hardpoints against turrets and Companion p.168 puts a container-
             // launcher on one, never a firmpoint; `quantity` is how many of that row is fitted.
             if (part.category === "weapon") weapons += quantity;
@@ -1149,9 +1152,9 @@ export class SpacecraftData extends CraftData {
             { key: "backupComputer", applies: this.computer.backup !== null,
                 ok: this.computer.backup < this.computer.processing,
                 used: this.computer.backup ?? 0, cap: this.computer.processing },
-            // HG p.111: "at least 75% of systems that use Power are Hardened", a floor on a ratio.
-            { key: "hardened", applies: powered > 0, ok: (hardened * 4) >= (powered * 3),
-                used: hardened, cap: powered }
+            // HG p.111's Traits table: the 75% is the condition on a claimed Trait, not a red line.
+            { key: "hardened", applies: claimsHardened && (powered > 0),
+                ok: (hardened * 4) >= (powered * 3), used: hardened, cap: powered }
         ];
 
         this.components = {

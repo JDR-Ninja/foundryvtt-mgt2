@@ -1,0 +1,94 @@
+{
+  "_id": "demoSpeciesSopho",
+  "name": "Demo — Sophont",
+  "type": "species",
+  "img": "icons/svg/pawprint.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 23,
+        "cliff": "a species feeds .auto and owns no characteristics",
+        "teaches": [
+          "characteristicRolls[] is what a species rolls: one row per characteristic, with the formula, and — for a slot that stands in for another — replaces, label and short.",
+          "modifiers[] is the flat adjustment the species applies afterwards; traits[] is what it is born with.",
+          "ageing[] is the species' own ageing law, and racialMaximum its ceiling; both replace the printed defaults rather than adding to them.",
+          "frame is the whole shape of a term for this species: the steps it runs, when it starts, how long a term lasts, and the tracks it keeps."
+        ],
+        "trap": "A species has no characteristics field at all — one written here is dropped with no message. What it feeds is the Actor's characteristics.<k>.auto, which is why an Actor carrying a species must never write .auto itself. And frame.steps REPLACES the Core sequence rather than adding to it: the ten rows below are the Core loop retyped, with tide-sense standing where nothing stood; drop nine of them and the term loop loses nine steps in silence."
+      }
+    }
+  },
+  "system": {
+    "description": "A marsh-bred human population off Bellweather, invented for this pack. Not any book's sophont.",
+    "descriptionLong": "<p>Three centuries in the tidal flats gave them a sense for the turn of the water that the rest of the sector finds hard to credit and impossible to teach. They keep to the harbours, take the boats nobody else will, and count a term by tides rather than by years.</p>",
+    "source": { "book": "", "page": "" },
+    "traits": [
+      { "family": "species", "key": "swimmer", "params": [{ "slot": "speed", "value": "8m", "num": 8 }], "note": "" },
+      { "family": "species", "key": "heightened-senses", "params": [], "note": "The tide-sense, as a trait rather than as a characteristic." }
+    ],
+    "modifiers": [
+      { "characteristic": "endurance", "value": 1 },
+      { "characteristic": "social", "value": -1 }
+    ],
+    "frame": {
+      "steps": [
+        { "key": "elect" },
+        { "key": "qualify" },
+        { "key": "basic" },
+        { "key": "survival" },
+        { "key": "event" },
+        { "key": "commission" },
+        { "key": "advance" },
+        { "key": "skill" },
+        { "key": "status", "check": { "when": "everyTerm", "kind": "beat", "characteristic": "other",
+          "skills": [], "target": 8, "index": "", "indexCharacteristic": "", "ladder": [],
+          "trackModifiers": [{ "track": "standing", "per": 1 }],
+          "onPass": { "ejects": "stays", "outcomes": [],
+            "track": { "key": "standing", "value": 1, "formula": "" },
+            "grant": { "text": "", "mode": "all", "grants": [] } },
+          "onFail": { "ejects": "stays", "outcomes": [],
+            "track": { "key": "standing", "value": 0, "formula": "" },
+            "grant": { "text": "", "mode": "all", "grants": [] } } } },
+        { "key": "ageing" },
+        { "key": "decide" }
+      ],
+      "sexes": ["male", "female"],
+      "startAge": [{ "sex": "", "role": "", "age": 16 }],
+      "termYears": 4,
+      "why": "A marsh sophont counts standing in the harbour rather than rank in a service, so the term carries one step of its own between the skill roll and ageing.",
+      "termKinds": [],
+      "tracks": [
+        { "key": "standing", "label": "Harbour Standing", "kind": "numeric", "initial": "0",
+          "cap": 6, "monotone": false, "values": [] }
+      ],
+      "standingModifiers": [
+        { "dm": 1, "per": 0, "skills": [], "appliesTo": ["status"], "career": "",
+          "gate": { "characteristic": "other", "min": 9 },
+          "note": "A high tide-sense is read as judgement, and the harbour treats it that way." }
+      ]
+    },
+    "characteristicRolls": [
+      { "characteristic": "strength", "formula": "2D6", "replaces": "", "label": "", "short": "" },
+      { "characteristic": "dexterity", "formula": "2D6", "replaces": "", "label": "", "short": "" },
+      { "characteristic": "endurance", "formula": "2D6", "replaces": "", "label": "", "short": "" },
+      { "characteristic": "intellect", "formula": "2D6", "replaces": "", "label": "", "short": "" },
+      { "characteristic": "education", "formula": "2D6", "replaces": "", "label": "", "short": "" },
+      { "characteristic": "social", "formula": "2D6", "replaces": "", "label": "", "short": "" },
+      { "characteristic": "other", "formula": "2D6", "replaces": "", "label": "Tide-Sense", "short": "TID" }
+    ],
+    "withoutCharacteristics": [],
+    "racialMaximum": 15,
+    "ageing": [
+      { "sex": "", "role": "", "fromTerm": 5, "fromAge": 38, "perTerm": -1, "flat": 0 }
+    ],
+    "careerChange": { "minimumTerms": 1 },
+    "qualificationOverride": { "kind": "none", "formula": "", "characteristic": "", "exceptCareers": [] },
+    "backgroundSkills": [
+      { "sex": "", "role": "", "formula": "3 + @characteristics.education.dm",
+        "mandatory": ["Demo — Seafarer"],
+        "choices": ["Demo — Athletics", "Demo — Investigate", "Demo — Mechanic", "Demo — Persuade", "Demo — Vacc Suit"] }
+    ],
+    "psiWithoutTermPenalty": false
+  },
+  "effects": []
+}

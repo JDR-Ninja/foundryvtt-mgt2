@@ -1,0 +1,50 @@
+{
+  "_id": "demoWeaponTurret",
+  "name": "Demo — Turret Laser",
+  "type": "weapon",
+  "img": "icons/svg/light.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 31,
+        "cliff": "the trait family a spacecraft does not set for you",
+        "teaches": [
+          "scale: spacecraft is what puts a weapon on the ship damage track instead of the personal one.",
+          "power is the draw the ship's plant has to cover before this will fire.",
+          "range.band on a ship weapon is the band the mount reaches, and value stays null because the number is not in metres."
+        ],
+        "trap": "family is written as shipWeapon on every trait here, deliberately. A spacecraft does NOT override the trait family — it is left at species — so a ship weapon whose traits are typed by hand under the default family resolves to nothing, silently, and the ship scans as armed."
+      }
+    }
+  },
+  "system": {
+    "description": "A single-emitter turret laser off a yard on Bellweather. Cheap, and it holds its focus.",
+    "source": { "book": "", "page": "" },
+    "quantity": 1,
+    "weight": 0,
+    "weightless": true,
+    "cost": 500000,
+    "tl": "TL12",
+    "legality": 5,
+    "container": { "id": "" },
+    "roll": { "characteristic": "dexterity", "skill": "Demo — Gunner", "difficulty": "Average" },
+    "equipped": false,
+    "range": { "isMelee": false, "value": null, "unit": "", "band": "medium" },
+    "damage": "2D6",
+    "damageType": ["laser"],
+    "magazine": 0,
+    "magazineCost": 0,
+    "loaded": null,
+    "ammunition": "",
+    "scale": "spacecraft",
+    "fireControl": 2,
+    "power": 4,
+    "natural": false,
+    "traits": [
+      { "family": "shipWeapon", "key": "ap", "params": [{ "slot": "score", "value": "5", "num": 5 }], "note": "" },
+      { "family": "shipWeapon", "key": "smart", "params": [], "note": "" }
+    ],
+    "options": []
+  },
+  "effects": []
+}

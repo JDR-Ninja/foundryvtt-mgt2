@@ -24,7 +24,7 @@
     "system": { "tl": 8, "subType": "", "damage": "3D6",
       "traits": [ { "family": "weapon", "key": "ap", "params": [ { "slot": "", "value": "5", "num": null } ], "note": "" } ],
       "effects": [] },
-    "effects": [ { "name": "Steady", "changes": [ { "key": "system.characteristics.dexterity.mod", "mode": 2, "value": "1" } ] } ]
+    "effects": [ { "name": "Steady", "system": { "changes": [ { "key": "system.modifiers.check.custom", "type": "add", "value": 1 } ] } } ]
   },
   {
     "_id": "demoloosesoftw01",

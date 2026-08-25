@@ -1,5 +1,6 @@
 import { PACKAGE_SETTING } from "./chargen-close.js";
 import { CHAIN_INTO_SETTING, refreshChainInto } from "./chatHelper.js";
+import { applyGuideButton } from "./guide.js";
 import { PACKS_SETTING, WorldPacksMenu } from "./packs.js";
 import { ASK_AGAIN_SETTING, ASK_SAME_SETTING, NUDGE_MODES, refreshAskTheSame, refreshRequestCards,
     VISIBILITY_MODES } from "./request.js";
@@ -273,6 +274,20 @@ export const registerSettings = function () {
         config: false,
         type: String,
         default: ""
+    });
+
+    // Per person and not per table: whether someone still needs the help is not the referee's
+    // business. A frame button is built on the first render only, so this cannot add or remove one
+    // — `applyGuideButton` toggles a body class and every open window obeys at once.
+    game.settings.register("mgt2", "showGuideButton", {
+        name: "MGT2.Settings.showGuideButton.name",
+        hint: "MGT2.Settings.showGuideButton.hint",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: true,
+        requiresReload: false,
+        onChange: applyGuideButton
     });
 
     // The three display settings below are read into the render context and nowhere else, so

@@ -1,0 +1,38 @@
+{
+  "_id": "demoToolkitEngin",
+  "name": "Demo — Engineer's Toolkit",
+  "type": "equipment",
+  "img": "icons/svg/clockwork.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 15,
+        "cliff": "a roll lives on the thing that provokes it",
+        "teaches": [
+          "`subType: \"toolkit\"` is the fifth equipment sub-type, and the one a referee reaches for after `equipment` itself.",
+          "`roll {characteristic, skill, difficulty}` puts a ready-made check on the Item, which the sheet offers as a button.",
+          "`roll.skill` matches an owned skill Item by name, the same match `requireSkill` and `augment.skill` use."
+        ],
+        "trap": "A toolkit is not an augment: it carries no `augment` block that does anything, and the DM it gives comes from the rules for tools rather than from a stored modifier."
+      }
+    }
+  },
+  "system": {
+    "description": "A hard case of spanners, a meter and a spool of sealing tape. Enough to keep a launch running.",
+    "subType": "toolkit",
+    "source": { "book": "", "page": "" },
+    "quantity": 1,
+    "weight": 12,
+    "weightless": false,
+    "cost": 1000,
+    "tl": "TL10",
+    "legality": 0,
+    "container": { "id": "" },
+    "roll": { "characteristic": "intellect", "skill": "Demo — Mechanic", "difficulty": "Average" },
+    "equipped": false,
+    "augment": { "improvement": "", "modifiers": [], "skill": { "name": "", "value": 0 }, "protection": 0 },
+    "processing": null,
+    "specialised": { "software": "", "bonus": 0 }
+  },
+  "effects": []
+}

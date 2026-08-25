@@ -1,0 +1,123 @@
+{
+  "_id": "demoStashLocker1",
+  "name": "Demo — Dockside Locker",
+  "type": "stash",
+  "img": "icons/svg/chest.svg",
+  "prototypeToken": { "actorLink": true },
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 8,
+        "cliff": "an Actor that is only a place to put things",
+        "teaches": [
+          "A stash is an Actor with six stored fields and no derived ones. Its contents are ordinary embedded Items, exactly as on a Traveller.",
+          "kind is a subtitle the sheet prints under the name — a locker, a cache, a hold, a room.",
+          "showWeight is what turns the weight column on, which a locker wants and a scene dressing does not.",
+          "locked hides the contents behind lockedDescription, which is what a player sees instead."
+        ],
+        "trap": "prototypeToken.actorLink is written here as true because _preCreate does not run for a packed document. A stash with an unlinked token is a stash whose contents fork the moment a second token is dropped, and nothing warns about it."
+      }
+    }
+  },
+  "system": {
+    "kind": "Quayside locker, row C",
+    "locked": true,
+    "lockedDescription": "A patrol seal on a steel door. The number is stencilled over an older number.",
+    "showWeight": true,
+    "description": "<p>What the harbour patrol keeps at the quay rather than aboard: spare kit, a bag nobody has claimed, and the ammunition the office will not sign for twice.</p>",
+    "notes": "<p>The seal is the patrol's. Breaking it is a matter for the Harbourmaster.</p>"
+  },
+  "items": [
+    {
+      "_id": "stashContainrKit",
+      "name": "Demo — Field Kit",
+      "type": "container",
+      "img": "icons/svg/item-bag.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": "Demo — Field Kit",
+        "trap": "onHand is false here: the bag is in the locker rather than on a shoulder, which is what decides whether its contents count against anybody's encumbrance." } } },
+      "system": {
+        "description": "A patrol satchel: oilcloth, two buckles and a shoulder strap that has been replaced twice.",
+        "source": { "book": "", "page": "" },
+        "onHand": false,
+        "location": "Second shelf",
+        "weightless": false,
+        "container": { "id": "" },
+        "locked": false,
+        "lockedDescription": ""
+      },
+      "effects": []
+    },
+    {
+      "_id": "stashAmmoMagnum",
+      "name": "Demo — Magnum Rounds",
+      "type": "ammunition",
+      "img": "icons/svg/explosion.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": "Demo — Magnum Rounds",
+        "trap": "container.id names the field kit above, by id. A stash carries the same container graph a Traveller does." } } },
+      "system": {
+        "description": "Heavy slugs for the patrol sidearm. They hit harder and bite less deeply.",
+        "source": { "book": "", "page": "" },
+        "quantity": 48,
+        "weight": 0.02,
+        "weightless": false,
+        "cost": 40,
+        "tl": "TL08",
+        "legality": 3,
+        "container": { "id": "stashContainrKit" },
+        "roll": { "characteristic": "", "skill": "", "difficulty": "" },
+        "weaponType": "Demo — Sidearm",
+        "magazine": 8,
+        "magazineCost": 30,
+        "damage": "3D6+2",
+        "traits": [
+          { "family": "weapon", "key": "lo-pen", "params": [{ "slot": "multiplier", "value": "2", "num": 2 }], "note": "" }
+        ],
+        "replaceTraits": true,
+        "rules": ["A magazine of these holds eight rounds where the standard magazine holds twelve."]
+      },
+      "effects": []
+    },
+    {
+      "_id": "stashDrugSteady1",
+      "name": "Demo — Steadying Dose",
+      "type": "drug",
+      "img": "icons/svg/pill.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": "Demo — Steadying Dose",
+        "trap": "Its Active Effect is suppressed here as it is everywhere: a drug's effects are the template a swallowed dose copies, so a box in a locker changes nothing about anybody." } } },
+      "system": {
+        "description": "A patrol issue ampoule. It stops the shakes for an afternoon and charges for it afterwards.",
+        "source": { "book": "", "page": "" },
+        "quantity": 6,
+        "weight": 0.05,
+        "weightless": false,
+        "cost": 200,
+        "tl": "TL11",
+        "legality": 4,
+        "container": { "id": "" },
+        "roll": { "characteristic": "", "skill": "", "difficulty": "" },
+        "dose": "One ampoule",
+        "onset": "2D6 minutes",
+        "duration": "4 hours",
+        "afterEffect": "Endurance falls by 1 until the next full night's sleep.",
+        "afterKind": "condition",
+        "addiction": { "dosesBefore": 6, "checkInterval": "Weekly", "cravingDM": -2 }
+      },
+      "effects": [
+        {
+          "_id": "stashEffectDose1",
+          "name": "Demo — Steadied",
+          "img": "icons/svg/pill.svg",
+          "disabled": false,
+          "transfer": true,
+          "description": "<p>The template a swallowed dose copies onto the Traveller: +2 DEX for the duration.</p>",
+          "duration": { "value": 14400, "units": "seconds" },
+          "system": {
+            "changes": [
+              { "key": "system.characteristics.dexterity.base", "type": "add", "value": 2, "phase": "initial" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

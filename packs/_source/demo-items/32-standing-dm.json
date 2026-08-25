@@ -1,0 +1,65 @@
+{
+  "_id": "demoStandingDM01",
+  "name": "Demo — Standing DM",
+  "type": "equipment",
+  "img": "icons/svg/upgrade.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 32,
+        "cliff": "which phase a change belongs in",
+        "teaches": [
+          "An Active Effect lives on the Item that transfers it, and transfer: true is what carries it to whoever holds the Item.",
+          "A change has four parts: the key it writes, the type of write, the value, and the phase.",
+          "flags.mgt2.suspended is the referee's pause, kept apart from disabled, because an effect the player switched off and one the table is ignoring for a scene are different things."
+        ],
+        "trap": "The two effects below are the whole point of this document. Both add 1. The first writes a STORED accumulator and belongs in the initial phase. The second writes a DERIVED value and has to be final, because prepareDerivedData runs between the two phases and would overwrite an initial write with the number it recomputed. A change aimed at a derived value in the initial phase does not error, does not warn, and looks exactly like a broken effect. Core renders the phase as a hidden input, which is why this system ships its own effect configuration screen."
+      }
+    }
+  },
+  "system": {
+    "description": "A referee's teaching aid, not a piece of equipment. It carries one change of each phase so the difference can be watched on a sheet.",
+    "subType": "equipment",
+    "source": { "book": "", "page": "" },
+    "quantity": 1,
+    "weight": 0,
+    "weightless": true,
+    "cost": 0,
+    "tl": "TL12",
+    "legality": 0,
+    "container": { "id": "" },
+    "roll": { "characteristic": "", "skill": "", "difficulty": "" },
+    "equipped": true,
+    "augment": { "improvement": "", "modifiers": [], "skill": { "name": "", "value": 0 }, "protection": 0 },
+    "processing": null,
+    "specialised": { "software": "", "bonus": 0 }
+  },
+  "effects": [
+    {
+      "_id": "demoEffectInitia",
+      "name": "Demo — Initial phase",
+      "img": "icons/svg/upgrade.svg",
+      "disabled": false,
+      "transfer": true,
+      "description": "<p>A change on a stored accumulator. The initial phase is right, and the derived pass reads it afterwards.</p>",
+      "system": {
+        "changes": [
+          { "key": "system.modifiers.check.custom", "type": "add", "value": 1, "phase": "initial" }
+        ]
+      }
+    },
+    {
+      "_id": "demoEffectFinal1",
+      "name": "Demo — Final phase",
+      "img": "icons/svg/upgrade.svg",
+      "disabled": false,
+      "transfer": true,
+      "description": "<p>A change on a derived value. Move this one to the initial phase and it stops working, with no message anywhere.</p>",
+      "system": {
+        "changes": [
+          { "key": "system.characteristics.strength.value", "type": "add", "value": 1, "phase": "final" }
+        ]
+      }
+    }
+  ]
+}

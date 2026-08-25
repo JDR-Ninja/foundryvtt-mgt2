@@ -1,0 +1,39 @@
+{
+  "_id": "demoRolePilot001",
+  "name": "Demo — Pilot",
+  "type": "role",
+  "img": "icons/svg/wing.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 25,
+        "cliff": "a crew roster resolves through a role Item",
+        "teaches": [
+          "crewRole is the station this role fills, chosen from a closed list, and it is what the ship's code looks a station up by.",
+          "actions[] is the row of things this station may do in a combat round: a label, what kind of thing it is, the check it takes, and which step of the round it belongs to.",
+          "positions is how many people the station seats, salary what one of them is paid, and colour what the deck plan tints them."
+        ],
+        "trap": "The ship's roster stores the id of this Item, never its name. And the code finds the pilot by the derived crewRoleKey rather than by anything stored here — write crewRoleKey into a role by hand and it is dropped with no message, because the schema has no such field."
+      }
+    }
+  },
+  "system": {
+    "description": "Flies the ship. On a courier that is one person, and the same person as the captain more often than not.",
+    "source": { "book": "", "page": "" },
+    "positions": 1,
+    "crewRole": "pilot",
+    "department": "flight",
+    "salary": 6000,
+    "colour": "#3f6f9f",
+    "show": true,
+    "actions": [
+      { "label": "Evade", "kind": "skill", "characteristic": "dexterity", "skill": "Demo — Pilot",
+        "difficulty": "Average", "dm": 0, "step": "manoeuvre", "cap": "round" },
+      { "label": "Dock", "kind": "skill", "characteristic": "dexterity", "skill": "Demo — Pilot",
+        "difficulty": "Difficult", "dm": 0, "step": "actions", "cap": "none" },
+      { "label": "Reverse thrust", "kind": "special", "characteristic": "", "skill": "",
+        "difficulty": "", "dm": 0, "step": "reaction", "cap": "round" }
+    ]
+  },
+  "effects": []
+}

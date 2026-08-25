@@ -1,0 +1,45 @@
+{
+  "_id": "demoAugmentRefl1",
+  "name": "Demo — Reflex Wiring",
+  "type": "equipment",
+  "img": "icons/svg/lightning.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 12,
+        "cliff": "the only skill-scoped modifier",
+        "teaches": [
+          "`subType: \"augment\"` is what makes an equipment Item an augment; the four other sub-types are ordinary gear.",
+          "`augment.modifiers[]` raises a characteristic, and `augment.protection` adds to Protection.",
+          "`augment.skill {name, value}` is the system's only modifier scoped to one skill."
+        ],
+        "trap": "`augment.skill.name` matches a skill Item by name, exactly as an armour's `requireSkill` does. It reads `Demo — Gun Combat`, which matches the Item named `Demo — Gun Combat (slug)`; a bare `Gun Combat` here would match nothing."
+      }
+    }
+  },
+  "system": {
+    "description": "Nerve lace along the shooting arm. It steadies the hand it was fitted for and no other.",
+    "subType": "augment",
+    "source": { "book": "", "page": "" },
+    "quantity": 1,
+    "weight": 0,
+    "weightless": true,
+    "cost": 45000,
+    "tl": "TL12",
+    "legality": 5,
+    "container": { "id": "" },
+    "roll": { "characteristic": "", "skill": "", "difficulty": "" },
+    "equipped": true,
+    "augment": {
+      "improvement": "Reflex lace, one arm",
+      "modifiers": [
+        { "characteristic": "dexterity", "value": 1 }
+      ],
+      "skill": { "name": "Demo — Gun Combat", "value": 1 },
+      "protection": 0
+    },
+    "processing": null,
+    "specialised": { "software": "", "bonus": 0 }
+  },
+  "effects": []
+}

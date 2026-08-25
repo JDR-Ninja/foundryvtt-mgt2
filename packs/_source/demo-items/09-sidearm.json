@@ -1,0 +1,50 @@
+{
+  "_id": "demoWeaponSidear",
+  "name": "Demo — Sidearm",
+  "type": "weapon",
+  "img": "icons/svg/sword.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 9,
+        "cliff": "traits",
+        "teaches": [
+          "A trait entry stores the printed token and the number twice: `value` is what the sheet prints, `num` is what every rule reads.",
+          "`range.band` and `range.value` are two readings of one distance and both are stored.",
+          "`damageType` is what an armour or a creature answers with — it selects the damage-response reading."
+        ],
+        "trap": "`params[].num` is filled in here because `refreshTraitNumbers()` runs on sheet submit only. An `AP (3)` left at `num: null` scores 0 and nothing says so."
+      }
+    }
+  },
+  "system": {
+    "description": "The magazine pistol issued to Bellweather harbour patrol. Invented for this pack.",
+    "source": { "book": "", "page": "" },
+    "quantity": 1,
+    "weight": 0.8,
+    "weightless": false,
+    "cost": 250,
+    "tl": "TL08",
+    "legality": 3,
+    "container": { "id": "" },
+    "roll": { "characteristic": "dexterity", "skill": "Demo — Gun Combat", "difficulty": "Average" },
+    "equipped": false,
+    "range": { "isMelee": false, "value": 20, "unit": "meter", "band": "short" },
+    "damage": "3D6",
+    "damageType": ["projectile"],
+    "magazine": 12,
+    "magazineCost": 15,
+    "loaded": 12,
+    "ammunition": "",
+    "scale": "ground",
+    "fireControl": 0,
+    "power": 0,
+    "natural": false,
+    "traits": [
+      { "family": "weapon", "key": "ap", "params": [{ "slot": "score", "value": "3", "num": 3 }], "note": "" },
+      { "family": "weapon", "key": "scope", "params": [], "note": "" }
+    ],
+    "options": []
+  },
+  "effects": []
+}

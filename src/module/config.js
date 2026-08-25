@@ -6,6 +6,11 @@ export const MGT2 = {};
 MGT2.Traits = TRAITS;
 MGT2.TraitFamilies = TRAIT_FAMILIES;
 
+// What a guide page may answer and a sheet's `GUIDE_TOPIC` may name. A topic joins this list on the
+// day its page is written; the guide's build refuses a page or a sheet naming anything else, and
+// refuses a member here that no page answers.
+MGT2.GuideTopics = Object.freeze(["character", "item"]);
+
 MGT2.MetricRange = Object.freeze({
     meter: "MGT2.MetricRange.meter",
     kilometer: "MGT2.MetricRange.kilometer"

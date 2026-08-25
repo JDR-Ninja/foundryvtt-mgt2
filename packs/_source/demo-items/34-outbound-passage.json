@@ -1,0 +1,29 @@
+{
+  "_id": "demoPassageOutbd",
+  "name": "Demo — Outbound Passage",
+  "type": "passage",
+  "img": "icons/svg/door-exit.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 34,
+        "cliff": "three fields are stored and three are derived from the grade",
+        "teaches": [
+          "grade is the whole of what a passage is: high, middle, basic, low or working.",
+          "count is how many are booked on this ticket, and farePerHead what one of them paid.",
+          "The berth, the baggage allowance and whether it is a low berth all follow from the grade, so no document writes them."
+        ],
+        "trap": "Do not author baggage, fare or lowBerth — they are derived from the grade and a value written beside them is either ignored or fights the derivation. destination.world is left empty on purpose: a cross-Actor UUID does not survive a single drag out of a compendium, so destination.name carries the fact instead."
+      }
+    }
+  },
+  "system": {
+    "description": "Two berths out of Bellweather on the next courier, paid in advance and no questions on the manifest.",
+    "source": { "book": "", "page": "" },
+    "grade": "middle",
+    "count": 2,
+    "destination": { "world": null, "name": "Demo — Tallow Reach" },
+    "farePerHead": 6400
+  },
+  "effects": []
+}

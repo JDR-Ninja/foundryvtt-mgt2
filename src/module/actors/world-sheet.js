@@ -1,4 +1,5 @@
 import { MGT2 } from "../config.js";
+import { GuideButtonMixin } from "../guide.js";
 import { SheetModeMixin } from "../sheet-mode.js";
 import { SpecTradeDialog } from "../trade.js";
 import { WorldData } from "./world-data.js";
@@ -20,7 +21,7 @@ const UWP_TABLES = Object.freeze({
 });
 
 /** The world sheet: one line typed, everything else a reading of it. @extends {ActorSheetV2} */
-export class WorldActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(ActorSheetV2)) {
+export class WorldActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsApplicationMixin(ActorSheetV2))) {
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {

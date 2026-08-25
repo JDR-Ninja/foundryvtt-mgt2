@@ -1,0 +1,130 @@
+{
+  "_id": "demoVehicleSkimr",
+  "name": "Demo — Marsh Skimmer",
+  "type": "vehicle",
+  "img": "icons/svg/hazard.svg",
+  "prototypeToken": { "actorLink": false },
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 5,
+        "cliff": "null is not 0",
+        "teaches": [
+          "characteristics.hull.base on a VEHICLE is the printed Hull figure — the opposite of a spacecraft, where it must stay 0 because the points derive.",
+          "speed.max and speed.cruise are Speed Band indices and not numbers of kilometres per hour; range is in the unit range.unit names.",
+          "mounts[].arc is which way the mount points, and mounts[].weapons holds ids of weapon Items embedded on this same vehicle.",
+          "skill[] is what it takes to operate: a skill and a speciality, both from closed lists."
+        ],
+        "trap": "Six fields below are deliberately empty and each one carries a rule. armour.dorsal and armour.ventral are null, which means half the port and half the aft — a 0 there destroys the fallback and states a roof of nothing. systems.camouflage and systems.stealth are null because they are negative DMs on the observer and a positive value is silently clamped to 0, which is indistinguishable from none. submersible and remote are null because an empty object in either place means yes, at depth 0, with a primitive interface."
+      }
+    }
+  },
+  "system": {
+    "description": "<p>An air-cushion boat for the Bellweather flats. It goes anywhere the water is thinner than the mud, which is most places, most of the year.</p>",
+    "notes": "<p>The skirt tears on sedge. Carry a spare.</p>",
+    "registration": "BW-SK-12",
+    "owner": "Bellweather Harbour Patrol",
+    "tl": 9,
+    "config": {
+      "damageOrder": ["hull"],
+      "initiative": { "characteristic": "", "flat": 0 }
+    },
+    "characteristics": {
+      "hull": { "base": 40, "damage": 0, "show": true }
+    },
+    "criticals": {
+      "fuel": 0, "powerPlant": 0, "weapon": 0, "armour": 0, "hull": 0, "cargo": 0,
+      "occupants": 0, "driveSystem": 0, "systems": 0, "speed": 0, "agility": 0,
+      "power": 0, "equipment": 0, "operator": 0
+    },
+    "hullSeverity": 0,
+    "skill": [
+      { "skill": "drive", "speciality": "hovercraft" }
+    ],
+    "spaces": 6,
+    "structurePrinted": null,
+    "comfort": "basicSeating",
+    "terrain": "rough",
+    "smartWheels": false,
+    "agile": true,
+    "design": { "atmosphere": 6, "size": 5 },
+    "environment": { "atmosphere": 6, "size": 5 },
+    "structureExceeded": 0,
+    "structureHalvings": 0,
+    "agility": 1,
+    "operatingMode": "ground",
+    "towing": false,
+    "speed": { "max": 5, "cruise": 4 },
+    "range": { "max": 400, "cruise": 600, "unit": "km" },
+    "crew": 1,
+    "passengers": 4,
+    "cargo": 0.5,
+    "shipping": 8,
+    "cost": 42000,
+    "armour": {
+      "forward": 6,
+      "aft": 4,
+      "port": 4,
+      "starboard": 4,
+      "dorsal": null,
+      "ventral": null,
+      "reactive": { "forward": 0, "aft": 0, "port": 0, "starboard": 0, "dorsal": 0, "ventral": 0 }
+    },
+    "systems": {
+      "autopilot": 1,
+      "comms": 50,
+      "navigation": 1,
+      "sensors": 0,
+      "camouflage": null,
+      "stealth": null
+    },
+    "mounts": [
+      { "type": "pintle", "arc": "front", "fireControl": 0, "weapons": ["vehWeaponGun0001"] }
+    ],
+    "driver": null,
+    "combat": { "dogfight": 0, "carry": 2, "evasive": 1 },
+    "submersible": null,
+    "remote": null,
+    "traits": [
+      { "family": "vehicle", "key": "atv", "params": [], "note": "" },
+      { "family": "vehicle", "key": "open-topped", "params": [], "note": "A canopy, and nothing under it." },
+      { "family": "vehicle", "key": "responsive", "params": [], "note": "" }
+    ],
+    "modifiers": {
+      "check": { "custom": 0, "auto": 0, "effect": 0, "dm": 0 },
+      "initiative": { "custom": 0, "auto": 0, "effect": 0, "dm": 0 },
+      "skills": {}
+    },
+    "life": { "value": 0, "max": 0, "damage": 0 },
+    "stun": 0
+  },
+  "items": [
+    {
+      "_id": "vehWeaponGun0001",
+      "name": "Demo — Pintle Gun",
+      "type": "weapon",
+      "img": "icons/svg/sword.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": null,
+        "trap": "scale is vehicle, which is the middle of the three damage tracks. The mount above holds this document's id; a mount naming a label instead is the defect the ship's rule exists for, and it is the same defect here." } } },
+      "system": {
+        "description": "A belt-fed gun on the bow pintle. Mostly used to warn.",
+        "source": { "book": "", "page": "" },
+        "quantity": 1, "weight": 40, "weightless": false, "cost": 12000, "tl": "TL08", "legality": 5,
+        "container": { "id": "" },
+        "roll": { "characteristic": "dexterity", "skill": "Demo — Gun Combat", "difficulty": "Average" },
+        "equipped": true,
+        "range": { "isMelee": false, "value": 500, "unit": "meter", "band": "long" },
+        "damage": "4D6",
+        "damageType": ["projectile"],
+        "magazine": 200, "magazineCost": 400, "loaded": 200, "ammunition": "",
+        "scale": "vehicle", "fireControl": 0, "power": 0, "natural": false,
+        "traits": [
+          { "family": "weapon", "key": "auto", "params": [{ "slot": "score", "value": "4", "num": 4 }], "note": "" },
+          { "family": "weapon", "key": "ap", "params": [{ "slot": "score", "value": "5", "num": 5 }], "note": "" }
+        ],
+        "options": []
+      },
+      "effects": []
+    }
+  ]
+}

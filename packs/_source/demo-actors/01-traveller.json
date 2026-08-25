@@ -1,0 +1,2767 @@
+{
+  "_id": "demoCharTravellr",
+  "name": "Demo — Traveller",
+  "type": "character",
+  "img": "icons/svg/mystery-man.svg",
+  "prototypeToken": {
+    "actorLink": true
+  },
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 1,
+        "cliff": "skills are Items, and a species feeds .auto",
+        "teaches": [
+          "A skill is a talent Item with subType: skill embedded on the Actor. There is no system.skills anywhere in this system, and everything that reads a skill matches it by name.",
+          "personal.species holds the id of the species Item embedded below it — the Actor stores a pointer and copies nothing.",
+          "A career on a Traveller is the same Item type as the career in the compendium; the record half at the bottom of it is what says which one this is.",
+          "The inventory is embedded Items pointing at each other: a round names its weapon, a stack names its bag, an augment names a skill, an armour names the skill it needs."
+        ],
+        "trap": "Not one characteristic writes .auto. The species feeds that field, and a value written beside it is ADDED rather than replaced — so it grows every time the derivation runs. base, damage and show are the three a document may write; auto, effect, max and value all derive."
+      }
+    }
+  },
+  "system": {
+    "biography": "<p>Two terms on the Bellweather harbour patrol, one commendation, and a boat of their own at the marsh station. Left the patrol on their own terms and has not said why.</p>",
+    "notes": "<p>Carries the fob because the crew expect it to be there.</p>",
+    "personal": {
+      "title": "Senior Officer, retired",
+      "species": "charSpeciesSopho",
+      "age": "26",
+      "gender": "woman",
+      "sex": "female",
+      "pronouns": "she/her",
+      "homeworld": "Demo — Bellweather"
+    },
+    "config": {
+      "damageOrder": [
+        "endurance",
+        "strength",
+        "dexterity"
+      ],
+      "initiative": {
+        "characteristic": "dexterity",
+        "flat": 0
+      },
+      "psionic": false
+    },
+    "characteristics": {
+      "strength": {
+        "base": 8,
+        "damage": 0,
+        "show": true
+      },
+      "dexterity": {
+        "base": 9,
+        "damage": 0,
+        "show": true
+      },
+      "endurance": {
+        "base": 10,
+        "damage": 0,
+        "show": true
+      },
+      "intellect": {
+        "base": 7,
+        "damage": 0,
+        "show": true
+      },
+      "education": {
+        "base": 6,
+        "damage": 0,
+        "show": true
+      },
+      "social": {
+        "base": 8,
+        "damage": 0,
+        "show": true
+      },
+      "morale": {
+        "base": 0,
+        "damage": 0,
+        "show": false
+      },
+      "luck": {
+        "base": 0,
+        "damage": 0,
+        "show": false
+      },
+      "sanity": {
+        "base": 0,
+        "damage": 0,
+        "show": false
+      },
+      "charm": {
+        "base": 0,
+        "damage": 0,
+        "show": false
+      },
+      "psionic": {
+        "base": 0,
+        "damage": 0,
+        "show": false
+      },
+      "other": {
+        "base": 9,
+        "damage": 0,
+        "show": true
+      },
+      "reputation": {
+        "base": 0,
+        "damage": 0,
+        "show": false
+      }
+    },
+    "traits": [
+      {
+        "family": "species",
+        "key": "swimmer",
+        "params": [
+          {
+            "slot": "speed",
+            "value": "8m",
+            "num": 8
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "modifiers": {
+      "check": {
+        "custom": 0,
+        "auto": 0,
+        "effect": 0,
+        "dm": 0
+      },
+      "initiative": {
+        "custom": 0,
+        "auto": 0,
+        "effect": 0,
+        "dm": 0
+      },
+      "skills": {}
+    },
+    "health": {
+      "radiations": 0
+    },
+    "finance": {
+      "pension": 0,
+      "credits": 12000,
+      "debt": 0,
+      "livingCost": 1200,
+      "monthlyShipPayments": 0,
+      "shipShares": 1,
+      "notes": "One share, taken as a Benefit rather than as cash."
+    },
+    "training": {
+      "programmes": {
+        "demoSeafarerProg": {
+          "engine": "core",
+          "target": {
+            "kind": "skill",
+            "key": "Demo — Seafarer"
+          },
+          "log": [
+            {
+              "kind": "study",
+              "ok": true,
+              "amount": 1,
+              "roll": 9,
+              "note": "First fortnight, off watch."
+            },
+            {
+              "kind": "period",
+              "ok": null,
+              "amount": 0,
+              "roll": null,
+              "note": "Second fortnight, interrupted."
+            }
+          ],
+          "weeks": 2,
+          "note": "Working toward Demo — Seafarer 3.",
+          "characteristic": "",
+          "teacher": null,
+          "closed": false
+        }
+      }
+    },
+    "characteristicLog": [
+      {
+        "source": "event",
+        "term": 2,
+        "age": 26,
+        "roll": 10,
+        "changes": {
+          "social": 1
+        },
+        "cost": 0,
+        "note": "Event 10: the marsh station."
+      }
+    ],
+    "entitlements": [
+      {
+        "kind": "voucher",
+        "ref": "Demo — Deck Vest",
+        "category": "armour",
+        "credits": null,
+        "tl": null,
+        "constraint": "",
+        "onRepeat": "another",
+        "count": 1,
+        "redeemed": true,
+        "item": "Demo — Deck Vest",
+        "uuid": "",
+        "surrendered": false,
+        "note": "Benefit roll, second term.",
+        "provenance": {
+          "term": 2,
+          "career": "Demo — Harbour Patrol",
+          "table": "Benefits",
+          "note": ""
+        }
+      },
+      {
+        "kind": "shipShare",
+        "ref": "",
+        "category": "",
+        "credits": null,
+        "tl": null,
+        "constraint": "",
+        "onRepeat": "another",
+        "count": 1,
+        "redeemed": false,
+        "item": "",
+        "uuid": "",
+        "surrendered": false,
+        "note": "Not yet spent on anything.",
+        "provenance": {
+          "term": 2,
+          "career": "Demo — Harbour Patrol",
+          "table": "Benefits",
+          "note": ""
+        }
+      }
+    ],
+    "drugCounters": [
+      {
+        "drug": "Demo — Steadying Dose",
+        "doses": 2,
+        "resetOn": "day"
+      }
+    ],
+    "life": {
+      "value": 0,
+      "max": 0,
+      "damage": 0
+    },
+    "stun": 0,
+    "states": {
+      "fatigue": false,
+      "nausea": false,
+      "starving": false,
+      "unconscious": false,
+      "knockedOut": false,
+      "surgeryRequired": false,
+      "firstAidUsed": false,
+      "reviveFailures": 0,
+      "consciousWound": -1
+    }
+  },
+  "items": [
+    {
+      "_id": "charSpeciesSopho",
+      "name": "Demo — Sophont",
+      "type": "species",
+      "img": "icons/svg/pawprint.svg",
+      "system": {
+        "description": "A marsh-bred human population off Bellweather, invented for this pack. Not any book's sophont.",
+        "descriptionLong": "<p>Three centuries in the tidal flats gave them a sense for the turn of the water that the rest of the sector finds hard to credit and impossible to teach. They keep to the harbours, take the boats nobody else will, and count a term by tides rather than by years.</p>",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "traits": [
+          {
+            "family": "species",
+            "key": "swimmer",
+            "params": [
+              {
+                "slot": "speed",
+                "value": "8m",
+                "num": 8
+              }
+            ],
+            "note": ""
+          },
+          {
+            "family": "species",
+            "key": "heightened-senses",
+            "params": [],
+            "note": "The tide-sense, as a trait rather than as a characteristic."
+          }
+        ],
+        "modifiers": [
+          {
+            "characteristic": "endurance",
+            "value": 1
+          },
+          {
+            "characteristic": "social",
+            "value": -1
+          }
+        ],
+        "frame": {
+          "steps": [
+            {
+              "key": "elect"
+            },
+            {
+              "key": "qualify"
+            },
+            {
+              "key": "basic"
+            },
+            {
+              "key": "survival"
+            },
+            {
+              "key": "event"
+            },
+            {
+              "key": "commission"
+            },
+            {
+              "key": "advance"
+            },
+            {
+              "key": "skill"
+            },
+            {
+              "key": "status",
+              "check": {
+                "when": "everyTerm",
+                "kind": "beat",
+                "characteristic": "other",
+                "skills": [],
+                "target": 8,
+                "index": "",
+                "indexCharacteristic": "",
+                "ladder": [],
+                "trackModifiers": [
+                  {
+                    "track": "standing",
+                    "per": 1
+                  }
+                ],
+                "onPass": {
+                  "ejects": "stays",
+                  "outcomes": [],
+                  "track": {
+                    "key": "standing",
+                    "value": 1,
+                    "formula": ""
+                  },
+                  "grant": {
+                    "text": "",
+                    "mode": "all",
+                    "grants": []
+                  }
+                },
+                "onFail": {
+                  "ejects": "stays",
+                  "outcomes": [],
+                  "track": {
+                    "key": "standing",
+                    "value": 0,
+                    "formula": ""
+                  },
+                  "grant": {
+                    "text": "",
+                    "mode": "all",
+                    "grants": []
+                  }
+                }
+              }
+            },
+            {
+              "key": "ageing"
+            },
+            {
+              "key": "decide"
+            }
+          ],
+          "sexes": [
+            "male",
+            "female"
+          ],
+          "startAge": [
+            {
+              "sex": "",
+              "role": "",
+              "age": 16
+            }
+          ],
+          "termYears": 4,
+          "why": "A marsh sophont counts standing in the harbour rather than rank in a service, so the term carries one step of its own between the skill roll and ageing.",
+          "termKinds": [],
+          "tracks": [
+            {
+              "key": "standing",
+              "label": "Harbour Standing",
+              "kind": "numeric",
+              "initial": "0",
+              "cap": 6,
+              "monotone": false,
+              "values": []
+            }
+          ],
+          "standingModifiers": [
+            {
+              "dm": 1,
+              "per": 0,
+              "skills": [],
+              "appliesTo": [
+                "status"
+              ],
+              "career": "",
+              "gate": {
+                "characteristic": "other",
+                "min": 9
+              },
+              "note": "A high tide-sense is read as judgement, and the harbour treats it that way."
+            }
+          ]
+        },
+        "characteristicRolls": [
+          {
+            "characteristic": "strength",
+            "formula": "2D6",
+            "replaces": "",
+            "label": "",
+            "short": ""
+          },
+          {
+            "characteristic": "dexterity",
+            "formula": "2D6",
+            "replaces": "",
+            "label": "",
+            "short": ""
+          },
+          {
+            "characteristic": "endurance",
+            "formula": "2D6",
+            "replaces": "",
+            "label": "",
+            "short": ""
+          },
+          {
+            "characteristic": "intellect",
+            "formula": "2D6",
+            "replaces": "",
+            "label": "",
+            "short": ""
+          },
+          {
+            "characteristic": "education",
+            "formula": "2D6",
+            "replaces": "",
+            "label": "",
+            "short": ""
+          },
+          {
+            "characteristic": "social",
+            "formula": "2D6",
+            "replaces": "",
+            "label": "",
+            "short": ""
+          },
+          {
+            "characteristic": "other",
+            "formula": "2D6",
+            "replaces": "",
+            "label": "Tide-Sense",
+            "short": "TID"
+          }
+        ],
+        "withoutCharacteristics": [],
+        "racialMaximum": 15,
+        "ageing": [
+          {
+            "sex": "",
+            "role": "",
+            "fromTerm": 5,
+            "fromAge": 38,
+            "perTerm": -1,
+            "flat": 0
+          }
+        ],
+        "careerChange": {
+          "minimumTerms": 1
+        },
+        "qualificationOverride": {
+          "kind": "none",
+          "formula": "",
+          "characteristic": "",
+          "exceptCareers": []
+        },
+        "backgroundSkills": [
+          {
+            "sex": "",
+            "role": "",
+            "formula": "3 + @characteristics.education.dm",
+            "mandatory": [
+              "Demo — Seafarer"
+            ],
+            "choices": [
+              "Demo — Athletics",
+              "Demo — Investigate",
+              "Demo — Mechanic",
+              "Demo — Persuade",
+              "Demo — Vacc Suit"
+            ]
+          }
+        ],
+        "psiWithoutTermPenalty": false
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Sophont",
+            "trap": "The Actor points at this Item by id, in personal.species, and copies nothing out of it. Delete the species and the characteristics it fed go with it."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charCareerHarbor",
+      "name": "Demo — Harbour Patrol",
+      "type": "career",
+      "img": "icons/svg/anchor.svg",
+      "system": {
+        "description": "Bellweather's harbour patrol: tide watch, boat inspection, and whatever comes out of the marsh. Invented for this pack, and no book's career.",
+        "subType": "career",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "kind": "career",
+        "difficulty": 6,
+        "qualification": {
+          "entry": "target",
+          "characteristics": [
+            "endurance"
+          ],
+          "autoIf": {
+            "characteristic": "",
+            "min": null
+          },
+          "perPreviousCareer": -1,
+          "conditionalDMs": [
+            {
+              "characteristic": "",
+              "min": null,
+              "afterCareers": [
+                "Demo — Harbour Patrol"
+              ],
+              "dm": 2
+            }
+          ],
+          "requiresPermission": false
+        },
+        "ageDM": {
+          "from": 30,
+          "dm": -2
+        },
+        "commission": false,
+        "commissionCheck": {
+          "characteristic": "",
+          "target": null
+        },
+        "pensionable": true,
+        "assignmentChange": "",
+        "basicFrom": "service",
+        "alwaysAvailable": false,
+        "neverEjects": false,
+        "blocksAnagathics": false,
+        "eventRow7": "lifeEvent",
+        "exitRule": {
+          "track": "",
+          "test": ""
+        },
+        "medicalBillsRow": "",
+        "restrictedTo": {
+          "species": "",
+          "sex": ""
+        },
+        "rankLadders": [
+          {
+            "id": "patrol",
+            "name": "Patrol",
+            "officer": false,
+            "rows": [
+              {
+                "rank": 0,
+                "title": "Recruit",
+                "bonus": {
+                  "text": "Demo — Seafarer 1",
+                  "mode": "all",
+                  "grants": [
+                    {
+                      "kind": "skill",
+                      "skill": "Demo — Seafarer",
+                      "mode": "raise",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "rank": 1,
+                "title": "Patrol Officer",
+                "bonus": {
+                  "text": "",
+                  "mode": "all",
+                  "grants": []
+                }
+              },
+              {
+                "rank": 2,
+                "title": "Senior Officer",
+                "bonus": {
+                  "text": "Demo — Investigate 1",
+                  "mode": "all",
+                  "grants": [
+                    {
+                      "kind": "skill",
+                      "skill": "Demo — Investigate",
+                      "mode": "raise",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "rank": 3,
+                "title": "Watch Leader",
+                "bonus": {
+                  "text": "",
+                  "mode": "all",
+                  "grants": []
+                }
+              },
+              {
+                "rank": 4,
+                "title": "Deputy Harbourmaster",
+                "bonus": {
+                  "text": "SOC +1",
+                  "mode": "all",
+                  "grants": [
+                    {
+                      "kind": "characteristic",
+                      "characteristic": "social",
+                      "mode": "add",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "rank": 5,
+                "title": "Harbourmaster",
+                "bonus": {
+                  "text": "A Contact on every quay",
+                  "mode": "all",
+                  "grants": [
+                    {
+                      "kind": "contact",
+                      "relation": "Contact",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "assignments": [
+          {
+            "name": "Harbour Watch",
+            "ladder": "patrol",
+            "officerLadder": "",
+            "survival": {
+              "characteristic": "endurance",
+              "target": 6
+            },
+            "advancement": {
+              "characteristic": "intellect",
+              "target": 7
+            },
+            "skills": [
+              {
+                "text": "Demo — Seafarer",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Seafarer",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Gun Combat",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Gun Combat",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Athletics",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Athletics",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Investigate",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Investigate",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Vacc Suit",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Vacc Suit",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Mechanic or Demo — Persuade",
+                "mode": "oneOf",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Mechanic",
+                    "mode": "raise",
+                    "value": 1
+                  },
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Persuade",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "tables": {
+          "personalDevelopment": {
+            "present": true,
+            "gate": {
+              "characteristic": "",
+              "min": null
+            },
+            "requiresCommission": false,
+            "rows": [
+              {
+                "text": "STR +1",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "characteristic",
+                    "characteristic": "strength",
+                    "mode": "add",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "END +1",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "characteristic",
+                    "characteristic": "endurance",
+                    "mode": "add",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "INT +1",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "characteristic",
+                    "characteristic": "intellect",
+                    "mode": "add",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Athletics",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Athletics",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Persuade",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Persuade",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "SOC +1",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "characteristic",
+                    "characteristic": "social",
+                    "mode": "add",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          "service": {
+            "present": true,
+            "gate": {
+              "characteristic": "",
+              "min": null
+            },
+            "requiresCommission": false,
+            "rows": [
+              {
+                "text": "Demo — Seafarer",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Seafarer",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Vacc Suit",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Vacc Suit",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Mechanic",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Mechanic",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Investigate",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Investigate",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Gun Combat",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Gun Combat",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Athletics",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Athletics",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          "advancedEducation": {
+            "present": true,
+            "gate": {
+              "characteristic": "education",
+              "min": 8
+            },
+            "requiresCommission": false,
+            "rows": [
+              {
+                "text": "Demo — Investigate",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Investigate",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Persuade",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Persuade",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Mechanic",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Mechanic",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "EDU +1",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "characteristic",
+                    "characteristic": "education",
+                    "mode": "add",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Seafarer",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Seafarer",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "text": "Demo — Vacc Suit",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Demo — Vacc Suit",
+                    "mode": "raise",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          "officer": {
+            "present": false,
+            "gate": {
+              "characteristic": "",
+              "min": null
+            },
+            "requiresCommission": true,
+            "rows": []
+          }
+        },
+        "benefits": {
+          "cash": [
+            1000,
+            2000,
+            5000,
+            7500,
+            10000,
+            25000,
+            50000
+          ],
+          "other": [
+            {
+              "text": "A Contact on the quay",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "contact",
+                  "relation": "Contact",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "text": "Demo — Deck Vest",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "benefit",
+                  "ref": "Demo — Deck Vest",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "text": "END +1",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "characteristic",
+                  "characteristic": "endurance",
+                  "mode": "add",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "text": "Demo — Sidearm",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "benefit",
+                  "ref": "Demo — Sidearm",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "text": "One Ship Share",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "shipShare",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "text": "SOC +1",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "characteristic",
+                  "characteristic": "social",
+                  "mode": "add",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "text": "Two Ship Shares",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "shipShare",
+                  "value": 2
+                }
+              ]
+            }
+          ]
+        },
+        "eventTable": [
+          {
+            "roll": 2,
+            "text": "A hull comes apart in the channel. Roll on the Mishap table, but you are not ejected from this career.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "Mishap",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": []
+          },
+          {
+            "roll": 3,
+            "text": "A cargo you waved through was not what the manifest said. Gain a Rival on the quay.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "A Rival",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "contact",
+                  "relation": "Rival",
+                  "value": 1
+                }
+              ]
+            },
+            "tray": []
+          },
+          {
+            "roll": 4,
+            "text": "A winter of night watches. Gain one level of Demo — Vacc Suit or Demo — Athletics.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "Demo — Vacc Suit or Demo — Athletics",
+              "mode": "oneOf",
+              "grants": [
+                {
+                  "kind": "skill",
+                  "skill": "Demo — Vacc Suit",
+                  "mode": "raise",
+                  "value": 1
+                },
+                {
+                  "kind": "skill",
+                  "skill": "Demo — Athletics",
+                  "mode": "raise",
+                  "value": 1
+                }
+              ]
+            },
+            "tray": []
+          },
+          {
+            "roll": 5,
+            "text": "You pull a crew off a sinking launch. Make a Demo — Seafarer check (8+); success gains a Contact and a commendation.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "endurance",
+              "skill": "Demo — Seafarer",
+              "target": 8
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "A Contact",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "contact",
+                  "relation": "Contact",
+                  "value": 1
+                }
+              ]
+            },
+            "tray": [
+              {
+                "kind": "dm",
+                "dm": 2,
+                "value": "",
+                "appliesTo": [
+                  "advancement"
+                ],
+                "scope": "thisCareer",
+                "career": "",
+                "duration": "oneShot",
+                "uses": 1,
+                "expiresWhen": "",
+                "condition": "checkPassed",
+                "note": "The commendation is a +2 held back for one Advancement roll."
+              }
+            ]
+          },
+          {
+            "roll": 6,
+            "text": "The harbour puts you through a course you did not ask for. Gain one level of Demo — Mechanic.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "Demo — Mechanic 1",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "skill",
+                  "skill": "Demo — Mechanic",
+                  "mode": "raise",
+                  "value": 1
+                }
+              ]
+            },
+            "tray": []
+          },
+          {
+            "roll": 7,
+            "text": "Life Event. Roll on the Life Events table.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "Life Event",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": []
+          },
+          {
+            "roll": 8,
+            "text": "You take an inspection nobody else would sign. Gain one level of Demo — Investigate, and an extra Benefit roll.",
+            "ejects": "stays",
+            "benefit": "grant",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "Demo — Investigate 1",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "skill",
+                  "skill": "Demo — Investigate",
+                  "mode": "raise",
+                  "value": 1
+                }
+              ]
+            },
+            "tray": []
+          },
+          {
+            "roll": 9,
+            "text": "A quiet word from the Harbourmaster. Gain an Ally, and a DM+1 held for your next Qualification roll.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "An Ally",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "contact",
+                  "relation": "Allie",
+                  "value": 1
+                }
+              ]
+            },
+            "tray": [
+              {
+                "kind": "dm",
+                "dm": 1,
+                "value": "",
+                "appliesTo": [
+                  "qualification"
+                ],
+                "scope": "nextCareer",
+                "career": "",
+                "duration": "oneShot",
+                "uses": 1,
+                "expiresWhen": "",
+                "condition": "always",
+                "note": "A tray entry outlives the term it was won in: this one waits for the next Qualification roll."
+              }
+            ]
+          },
+          {
+            "roll": 10,
+            "text": "You are moved to the marsh station and given a boat of your own. Gain one level of Demo — Seafarer and SOC +1.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "Demo — Seafarer 1 and SOC +1",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "skill",
+                  "skill": "Demo — Seafarer",
+                  "mode": "raise",
+                  "value": 1
+                },
+                {
+                  "kind": "characteristic",
+                  "characteristic": "social",
+                  "mode": "add",
+                  "value": 1
+                }
+              ]
+            },
+            "tray": []
+          },
+          {
+            "roll": 11,
+            "text": "A season with nothing to show for it, and a promotion board that noticed anyway.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [
+                "advanced"
+              ],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": []
+          },
+          {
+            "roll": 12,
+            "text": "You bring in a smuggler half the sector wanted. Gain an automatic promotion.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [
+                "advanced"
+              ],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": []
+          }
+        ],
+        "mishapTable": [
+          {
+            "roll": 1,
+            "text": "A boat goes over on you. Roll on the Injury table and leave the patrol.",
+            "ejects": "ejects",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "Injury",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": []
+          },
+          {
+            "roll": 2,
+            "text": "You are blamed for a sinking that was nobody's fault. Gain an Enemy and leave the patrol.",
+            "ejects": "ejects",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "An Enemy",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "contact",
+                  "relation": "Enemy",
+                  "value": 1
+                }
+              ]
+            },
+            "tray": []
+          },
+          {
+            "roll": 3,
+            "text": "Dock fever, and a long winter in a bunk. Lose one level of Demo — Athletics and leave the patrol.",
+            "ejects": "ejects",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "Demo — Athletics falls by one level",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "skill",
+                  "skill": "Demo — Athletics",
+                  "mode": "add",
+                  "value": -1
+                }
+              ]
+            },
+            "tray": []
+          },
+          {
+            "roll": 4,
+            "text": "A bribe you did not take is reported as one you did. You keep your rank and lose the job.",
+            "ejects": "ejects",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": []
+          },
+          {
+            "roll": 5,
+            "text": "The marsh station is closed and you with it. A Social check (8+) keeps you on the payroll.",
+            "ejects": "choice",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "social",
+              "skill": "",
+              "target": 8
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": []
+          },
+          {
+            "roll": 6,
+            "text": "You are injured pulling someone else out. Roll on the Injury table; you may stay on.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "Injury",
+            "check": {
+              "characteristic": "",
+              "skill": "",
+              "target": null
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": []
+          }
+        ],
+        "standingModifiers": [
+          {
+            "dm": 1,
+            "per": 0,
+            "skills": [],
+            "appliesTo": [
+              "benefit"
+            ],
+            "career": "",
+            "gate": {
+              "characteristic": "social",
+              "min": 9
+            },
+            "note": "A patroller known on the quay adds DM+1 to Benefit rolls from this career."
+          }
+        ],
+        "tracks": [],
+        "assignment": "Harbour Watch",
+        "terms": 2,
+        "rank": 2,
+        "ladder": "patrol",
+        "enlistedRank": 2,
+        "events": [
+          {
+            "age": 22,
+            "description": "Pulled a crew off a sinking launch and was commended for it."
+          },
+          {
+            "age": 26,
+            "description": "Moved to the marsh station and given a boat."
+          }
+        ],
+        "entryMode": "qualified",
+        "exitMode": "voluntary",
+        "termLog": [
+          {
+            "term": 1,
+            "years": 4,
+            "ages": true,
+            "survived": true,
+            "ejected": false,
+            "closed": true,
+            "kind": "",
+            "outcomes": [
+              "basicTraining",
+              "skillRoll"
+            ],
+            "steps": [
+              "qualify",
+              "basic",
+              "survival",
+              "event",
+              "skill",
+              "ageing",
+              "decide"
+            ],
+            "note": "Qualified on Endurance, survived, and took the assignment skill table twice."
+          },
+          {
+            "term": 2,
+            "years": 4,
+            "ages": true,
+            "survived": true,
+            "ejected": false,
+            "closed": true,
+            "kind": "",
+            "outcomes": [
+              "advanced",
+              "skillRoll"
+            ],
+            "steps": [
+              "survival",
+              "event",
+              "advance",
+              "skill",
+              "ageing",
+              "decide"
+            ],
+            "note": "Event 10: the marsh station, and SOC +1 with it. Left the patrol voluntarily at the end of the term."
+          }
+        ],
+        "track": {
+          "key": "standing",
+          "value": 3,
+          "cap": 6,
+          "adjustments": [
+            {
+              "value": 2,
+              "term": 1,
+              "note": "Two tides read right in the first winter."
+            },
+            {
+              "value": 1,
+              "term": 2,
+              "note": "The marsh station."
+            }
+          ]
+        }
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Harbour Patrol",
+            "trap": "A career on a Traveller is a RECORD, and it is the same Item type as the template it was dragged from — the drop copies the whole thing. What tells them apart is the ten fields at the bottom: assignment, terms, rank, ladder, enlistedRank, events, entryMode, exitMode, termLog and track. A template leaves all ten empty."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charSkillSeafarr",
+      "name": "Demo — Seafarer",
+      "type": "talent",
+      "img": "icons/svg/book.svg",
+      "system": {
+        "description": "Handling a boat, and reading the water it is on.",
+        "subType": "skill",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "level": 2,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "dexterity",
+          "skill": "",
+          "difficulty": ""
+        },
+        "provenance": {
+          "term": 1,
+          "career": "Demo — Harbour Patrol",
+          "table": "Assignment",
+          "note": ""
+        }
+      },
+      "effects": []
+    },
+    {
+      "_id": "charSkillGunSlug",
+      "name": "Demo — Gun Combat (slug)",
+      "type": "talent",
+      "img": "icons/svg/target.svg",
+      "system": {
+        "description": "Firing a slug thrower. The speciality is the family of weapon, not the weapon.",
+        "subType": "skill",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "level": 1,
+        "skill": {
+          "speciality": "slug",
+          "reduceEncumbrance": false
+        },
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "dexterity",
+          "skill": "",
+          "difficulty": ""
+        },
+        "provenance": {
+          "term": 1,
+          "career": "Demo — Harbour Patrol",
+          "table": "Service",
+          "note": ""
+        }
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Gun Combat (slug)",
+            "trap": "The same skill Item as the loose one in demo-items, with a level on it. A level belongs to the Traveller, never to the template."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charSkillVaccSut",
+      "name": "Demo — Vacc Suit",
+      "type": "talent",
+      "img": "icons/svg/book.svg",
+      "system": {
+        "description": "Working in a sealed suit, and knowing when the seal has gone.",
+        "subType": "skill",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "level": 1,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "dexterity",
+          "skill": "",
+          "difficulty": ""
+        },
+        "provenance": {
+          "term": 1,
+          "career": "Demo — Harbour Patrol",
+          "table": "Assignment",
+          "note": ""
+        }
+      },
+      "effects": []
+    },
+    {
+      "_id": "charSkillInvestg",
+      "name": "Demo — Investigate",
+      "type": "talent",
+      "img": "icons/svg/book.svg",
+      "system": {
+        "description": "Finding what a manifest does not say.",
+        "subType": "skill",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "level": 1,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "intellect",
+          "skill": "",
+          "difficulty": ""
+        },
+        "provenance": {
+          "term": 2,
+          "career": "Demo — Harbour Patrol",
+          "table": "Rank bonus",
+          "note": "Senior Officer."
+        }
+      },
+      "effects": []
+    },
+    {
+      "_id": "charSkillAthletc",
+      "name": "Demo — Athletics",
+      "type": "talent",
+      "img": "icons/svg/book.svg",
+      "system": {
+        "description": "Climbing, swimming and hauling.",
+        "subType": "skill",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "level": 1,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "strength",
+          "skill": "",
+          "difficulty": ""
+        },
+        "provenance": {
+          "term": 1,
+          "career": "Demo — Harbour Patrol",
+          "table": "Personal development",
+          "note": ""
+        }
+      },
+      "effects": []
+    },
+    {
+      "_id": "charSkillMechanc",
+      "name": "Demo — Mechanic",
+      "type": "talent",
+      "img": "icons/svg/book.svg",
+      "system": {
+        "description": "Keeping an engine running with what is aboard.",
+        "subType": "skill",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "level": 0,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "intellect",
+          "skill": "",
+          "difficulty": ""
+        },
+        "provenance": {
+          "term": 2,
+          "career": "Demo — Harbour Patrol",
+          "table": "Event",
+          "note": "A course they did not ask for."
+        }
+      },
+      "effects": []
+    },
+    {
+      "_id": "charSkillPersuad",
+      "name": "Demo — Persuade",
+      "type": "talent",
+      "img": "icons/svg/book.svg",
+      "system": {
+        "description": "Getting a hull inspected without a warrant.",
+        "subType": "skill",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "level": 0,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "social",
+          "skill": "",
+          "difficulty": ""
+        },
+        "provenance": {
+          "term": null,
+          "career": "",
+          "table": "Background",
+          "note": ""
+        }
+      },
+      "effects": []
+    },
+    {
+      "_id": "charArmorDeckVst",
+      "name": "Demo — Deck Vest",
+      "type": "armor",
+      "img": "icons/svg/shield.svg",
+      "system": {
+        "description": "A patrol vest over a sealed liner. Enough against a boat hook, and rated for a wet deck.",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "quantity": 1,
+        "weight": 4,
+        "weightless": false,
+        "cost": 1500,
+        "tl": "TL09",
+        "legality": 4,
+        "container": {
+          "id": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        },
+        "equipped": true,
+        "radiations": 0,
+        "protection": 6,
+        "processing": null,
+        "specialised": {
+          "software": "",
+          "bonus": 0
+        },
+        "requireSkill": "Demo — Vacc Suit",
+        "requireSkillLevel": 1,
+        "powered": false,
+        "breach": "intact",
+        "options": [
+          {
+            "family": "custom",
+            "key": "custom",
+            "params": [],
+            "note": "Sealed liner, one hour of air"
+          }
+        ]
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Deck Vest",
+            "trap": "requireSkill reads Demo — Vacc Suit and this Traveller has it at 1, which is exactly requireSkillLevel — so no armour DM applies. Take the skill Item away and the penalty appears with no message."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charWeaponSidear",
+      "name": "Demo — Sidearm",
+      "type": "weapon",
+      "img": "icons/svg/sword.svg",
+      "system": {
+        "description": "The magazine pistol issued to Bellweather harbour patrol. Invented for this pack.",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "quantity": 1,
+        "weight": 0.8,
+        "weightless": false,
+        "cost": 250,
+        "tl": "TL08",
+        "legality": 3,
+        "container": {
+          "id": ""
+        },
+        "roll": {
+          "characteristic": "dexterity",
+          "skill": "Demo — Gun Combat",
+          "difficulty": "Average"
+        },
+        "equipped": true,
+        "range": {
+          "isMelee": false,
+          "value": 20,
+          "unit": "meter",
+          "band": "short"
+        },
+        "damage": "3D6",
+        "damageType": [
+          "projectile"
+        ],
+        "magazine": 12,
+        "magazineCost": 15,
+        "loaded": 8,
+        "ammunition": "charAmmoMagnum01",
+        "scale": "ground",
+        "fireControl": 0,
+        "power": 0,
+        "natural": false,
+        "traits": [
+          {
+            "family": "weapon",
+            "key": "ap",
+            "params": [
+              {
+                "slot": "score",
+                "value": "3",
+                "num": 3
+              }
+            ],
+            "note": ""
+          },
+          {
+            "family": "weapon",
+            "key": "scope",
+            "params": [],
+            "note": ""
+          }
+        ],
+        "options": []
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Sidearm",
+            "trap": "ammunition holds the id of the ammunition Item embedded on this same Actor — the fourth id graph in the pack. loaded is 8 because the magnum magazine holds eight where the standard one holds twelve."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charAmmoMagnum01",
+      "name": "Demo — Magnum Rounds",
+      "type": "ammunition",
+      "img": "icons/svg/explosion.svg",
+      "system": {
+        "description": "Heavy slugs for the patrol sidearm. They hit harder and bite less deeply.",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "quantity": 16,
+        "weight": 0.02,
+        "weightless": false,
+        "cost": 40,
+        "tl": "TL08",
+        "legality": 3,
+        "container": {
+          "id": "charContainerKit"
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        },
+        "weaponType": "Demo — Sidearm",
+        "magazine": 8,
+        "magazineCost": 30,
+        "damage": "3D6+2",
+        "traits": [
+          {
+            "family": "weapon",
+            "key": "lo-pen",
+            "params": [
+              {
+                "slot": "multiplier",
+                "value": "2",
+                "num": 2
+              }
+            ],
+            "note": ""
+          }
+        ],
+        "replaceTraits": true,
+        "rules": [
+          "A magazine of these holds eight rounds where the standard magazine holds twelve."
+        ]
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Magnum Rounds",
+            "trap": "container.id names the bag this stack is in. weaponType still says Demo — Sidearm in free text, because that half of the link is a hint and never an id."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charAugmentRefl1",
+      "name": "Demo — Reflex Wiring",
+      "type": "equipment",
+      "img": "icons/svg/lightning.svg",
+      "system": {
+        "description": "Nerve lace along the shooting arm. It steadies the hand it was fitted for and no other.",
+        "subType": "augment",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "quantity": 1,
+        "weight": 0,
+        "weightless": true,
+        "cost": 45000,
+        "tl": "TL12",
+        "legality": 5,
+        "container": {
+          "id": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        },
+        "equipped": true,
+        "augment": {
+          "improvement": "Reflex lace, one arm",
+          "modifiers": [
+            {
+              "characteristic": "dexterity",
+              "value": 1
+            }
+          ],
+          "skill": {
+            "name": "Demo — Gun Combat",
+            "value": 1
+          },
+          "protection": 0
+        },
+        "processing": null,
+        "specialised": {
+          "software": "",
+          "bonus": 0
+        }
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Reflex Wiring",
+            "trap": "augment.skill.name reads Demo — Gun Combat, which matches the Item named Demo — Gun Combat (slug) by the same prefix rule an armour uses."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charClothCovrall",
+      "name": "Demo — Dock Coveralls",
+      "type": "equipment",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "description": "Oiled canvas, four pockets and a harbour patch. Warm, and it dries.",
+        "subType": "clothing",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "quantity": 1,
+        "weight": 1,
+        "weightless": false,
+        "cost": 120,
+        "tl": "TL09",
+        "legality": 0,
+        "container": {
+          "id": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        },
+        "equipped": true,
+        "augment": {
+          "improvement": "",
+          "modifiers": [],
+          "skill": {
+            "name": "",
+            "value": 0
+          },
+          "protection": 0
+        },
+        "processing": null,
+        "specialised": {
+          "software": "",
+          "bonus": 0
+        }
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Dock Coveralls",
+            "trap": "Worn. Nothing about it is a cliff, which is why it is here."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charTrinketFob01",
+      "name": "Demo — Lucky Fob",
+      "type": "equipment",
+      "img": "icons/svg/coins.svg",
+      "system": {
+        "description": "A brass mooring tag off a boat that sank without her. Its owner will tell you it works.",
+        "subType": "trinket",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "quantity": 1,
+        "weight": 0.1,
+        "weightless": false,
+        "cost": 0,
+        "tl": "TL04",
+        "legality": 0,
+        "container": {
+          "id": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        },
+        "equipped": true,
+        "augment": {
+          "improvement": "",
+          "modifiers": [],
+          "skill": {
+            "name": "",
+            "value": 0
+          },
+          "protection": 0
+        },
+        "processing": null,
+        "specialised": {
+          "software": "",
+          "bonus": 0
+        }
+      },
+      "effects": [
+        {
+          "_id": "demoEffectFob001",
+          "name": "Demo — Held for luck",
+          "img": "icons/svg/coins.svg",
+          "disabled": false,
+          "transfer": true,
+          "description": "<p>A referee-invented trinket effect: +1 on every check while it is carried.</p>",
+          "system": {
+            "changes": [
+              {
+                "key": "system.modifiers.check.custom",
+                "type": "add",
+                "value": 1,
+                "phase": "initial"
+              }
+            ]
+          }
+        }
+      ],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Lucky Fob",
+            "trap": "Its Active Effect is live on this Traveller: an effect on an Item transfers to whoever holds it, and this is where that can be seen."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charContainerKit",
+      "name": "Demo — Field Kit",
+      "type": "container",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "description": "A patrol satchel: oilcloth, two buckles and a shoulder strap that has been replaced twice.",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "onHand": true,
+        "location": "Slung, left shoulder",
+        "weightless": false,
+        "container": {
+          "id": ""
+        },
+        "locked": false,
+        "lockedDescription": ""
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Field Kit",
+            "trap": "Two Items name this bag in their container.id. Nothing is stored on the bag itself."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charLootSparCell",
+      "name": "Demo — Spare Cells",
+      "type": "item",
+      "img": "icons/svg/lightning.svg",
+      "system": {
+        "description": "Four charged cells in an oilcloth roll. Fits the lamp, the beacon and the sidearm's sight.",
+        "subType": "loot",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "quantity": 4,
+        "weight": 0.5,
+        "weightless": false,
+        "cost": 60,
+        "tl": "TL09",
+        "legality": 0,
+        "container": {
+          "id": "charContainerKit"
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        }
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Spare Cells",
+            "trap": "In the bag, by id."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charComputerHand",
+      "name": "Demo — Handcomp",
+      "type": "computer",
+      "img": "icons/svg/clockwork.svg",
+      "system": {
+        "description": "A wrist unit with a cracked case and a good aerial. Runs two programs if neither is ambitious.",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "quantity": 1,
+        "weight": 0.5,
+        "weightless": false,
+        "cost": 3000,
+        "tl": "TL12",
+        "legality": 0,
+        "container": {
+          "id": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        },
+        "processing": 5,
+        "specialised": {
+          "software": "Demo — Survey Suite",
+          "bonus": 1
+        },
+        "options": [
+          {
+            "family": "custom",
+            "key": "custom",
+            "params": [],
+            "note": "Hardened casing"
+          },
+          {
+            "family": "custom",
+            "key": "custom",
+            "params": [],
+            "note": "Harbour net interface"
+          }
+        ]
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Handcomp",
+            "trap": "The host the program below names by id. Anything carrying a Processing figure can be one: this is a computer Item, but an equipped armour or a fitted augment would serve."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charSoftwareSurv",
+      "name": "Demo — Survey Suite",
+      "type": "item",
+      "img": "icons/svg/dice-target.svg",
+      "system": {
+        "description": "Reads a tide chart against a sounding and tells you where the channel moved. Rated for three, run at two.",
+        "subType": "software",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "quantity": 1,
+        "weight": 0,
+        "weightless": true,
+        "cost": 6000,
+        "tl": "TL12",
+        "legality": 0,
+        "container": {
+          "id": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        },
+        "software": {
+          "bandwidth": 3,
+          "runAt": 2,
+          "effect": "DM+1 on any check to navigate a tidal channel, and DM+2 with a fresh sounding.",
+          "computerId": "charComputerHand"
+        }
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Survey Suite",
+            "trap": "computerId filled in: it holds the id of the handcomp embedded beside it on this same Actor. Neither side stores a name."
+          }
+        }
+      }
+    },
+    {
+      "_id": "charContactClerk",
+      "name": "Demo — Harbourmaster's Clerk",
+      "type": "contact",
+      "img": "icons/svg/cowled.svg",
+      "system": {
+        "description": "Keeps the harbour ledger, and remembers every hull that ever came in light.",
+        "subType": "contact",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 1,
+        "skill": {
+          "speciality": "Bureaucracy",
+          "characteristic": "education"
+        },
+        "status": "Alive",
+        "attitude": "Owes a favour, and would rather not be reminded",
+        "relation": "Contact",
+        "title": "Clerk of the Harbour",
+        "nickname": "Tallies",
+        "species": "Demo — Sophont",
+        "gender": "non-binary",
+        "pronouns": "they/them",
+        "homeworld": "Demo — Bellweather",
+        "location": "Harbour office, second floor",
+        "occupation": "Ledger clerk",
+        "notes": "<p>Signed off a manifest they should not have, once, and has been careful ever since. Will trade a berth for a name.</p>",
+        "actor": null,
+        "provenance": {
+          "term": 2,
+          "career": "Demo — Harbour Patrol",
+          "table": "Event",
+          "note": "Event roll of 9: a quiet word from the Harbourmaster."
+        }
+      },
+      "effects": [],
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "copyOf": "Demo — Harbourmaster's Clerk",
+            "trap": "A contact won at a career event. system.actor is still empty: the link to a real Actor is made by hand in the world, because a compendium drag does not keep document ids."
+          }
+        }
+      }
+    }
+  ]
+}

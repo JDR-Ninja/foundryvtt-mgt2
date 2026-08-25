@@ -1,0 +1,362 @@
+{
+  "_id": "demoShipKestrel1",
+  "name": "Demo — Kestrel-class Courier",
+  "type": "spacecraft",
+  "img": "icons/svg/thrust.svg",
+  "prototypeToken": { "actorLink": true },
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 4,
+        "cliff": "three graphs of ids, and none of them stores a name",
+        "teaches": [
+          "crew[].role holds the id of a role Item embedded on THIS ship. The code then finds a station by the derived crewRoleKey — never by the role's name.",
+          "mounts[].weapons holds ids of weapon Items embedded on this same ship. A mount is not packaging: it decides the damage multiple.",
+          "computer.running is a Set of ids of the programs that are STARTED. A program aboard but not in that Set spends no bandwidth and does nothing.",
+          "hull.options and power.offline are Sets of closed, non-blank strings, and hull.pointsOverride is how a yard's printed Hull figure is stated without touching the derivation.",
+          "fuel.tons is the design tank and ops.fuel the level actually aboard; neither derives from the other."
+        ],
+        "trap": "characteristics.hull.base stays 0. Hull points are DERIVED from hull.tons, hull.configuration and hull.options, and a base written here silently ADDS to them — the opposite of a vehicle, where hull.base is the printed figure. Two more to watch: crew[].dutyTarget is matched by the mount's LABEL or its 1-based index rather than by an id, and a spacecraft does NOT override the trait family, so a ship weapon's traits must say shipWeapon in as many words."
+      }
+    }
+  },
+  "system": {
+    "description": "<p>A hundred tons of streamlined hull built on Bellweather for the mail run out to Tallow Reach. Two jumps, a small hold and a turret nobody has fired in anger.</p>",
+    "notes": "<p>The port scoop runs foul in marsh water. Filter it or lose a day refining.</p>",
+    "registration": "BW-4471",
+    "owner": "Bellweather Harbour Trust",
+    "homeport": "Demo — Bellweather",
+    "tl": 12,
+    "config": {
+      "damageOrder": ["hull"],
+      "initiative": { "characteristic": "", "flat": 0 }
+    },
+    "characteristics": {
+      "hull": { "base": 0, "damage": 0, "show": true }
+    },
+    "criticals": {
+      "sensors": 0, "powerPlant": 0, "fuel": 0, "weapon": 0, "armour": 0, "hull": 0,
+      "mDrive": 0, "cargo": 0, "jDrive": 0, "crew": 0, "bridge": 0
+    },
+    "hullSeverity": 0,
+    "hull": {
+      "tons": 100,
+      "configuration": "streamlined",
+      "options": ["reinforced"],
+      "installed": ["heatShielding"],
+      "stealth": "",
+      "shipClass": "Kestrel",
+      "pointsOverride": 50
+    },
+    "armour": {
+      "material": "crystaliron",
+      "points": 4,
+      "damage": 0,
+      "tonsOverride": null
+    },
+    "drives": {
+      "thrust": 3,
+      "jump": 2,
+      "reaction": false,
+      "reactionThrust": null,
+      "burning": false
+    },
+    "power": {
+      "plant": 60,
+      "offline": [],
+      "drawOverride": null,
+      "ionDrain": 0
+    },
+    "fuel": {
+      "tons": 22,
+      "refined": true,
+      "weeks": 4,
+      "jumpTonsOverride": null
+    },
+    "bridge": {
+      "type": "standard",
+      "tonsOverride": null,
+      "costOverride": null,
+      "holographic": false
+    },
+    "computer": {
+      "processing": 10,
+      "running": ["shipComponJump01", "shipComponFire01"],
+      "bis": true,
+      "fib": false,
+      "backup": 5,
+      "backupBis": false,
+      "backupFib": false,
+      "onBackup": false,
+      "ionDrain": 0
+    },
+    "sensors": { "grade": "civilian" },
+    "staterooms": { "standard": 4, "high": 0, "luxury": 0 },
+    "lowBerths": { "standard": 0, "emergency": 2 },
+    "passengers": { "high": 0, "middle": 2, "basic": 0, "low": 0 },
+    "cargo": { "capacity": 12 },
+    "role": "commercial",
+    "crewSkill": 1,
+    "crew": [
+      { "role": "shipRolePilot001", "actor": null, "name": "Ferrand", "count": 1, "dutyTarget": "" },
+      { "role": "shipRoleGunner01", "actor": null, "name": "Watch gunners", "count": 2, "dutyTarget": "Dorsal turret" }
+    ],
+    "mounts": [
+      { "type": "doubleTurret", "label": "Dorsal turret",
+        "weapons": ["shipWeaponLaser1", "shipWeaponLaser2"], "popup": false, "ammo": 0 }
+    ],
+    "screens": [],
+    "bays": [],
+    "traits": [
+      { "family": "custom", "key": "custom", "params": [], "note": "Marsh-water intake filter on the port scoop" }
+    ],
+    "modifiers": {
+      "check": { "custom": 0, "auto": 0, "effect": 0, "dm": 0 },
+      "initiative": { "custom": 0, "auto": 0, "effect": 0, "dm": 0 },
+      "crewSkill": { "custom": 0, "auto": 0, "effect": 0, "dm": 0 },
+      "skills": {}
+    },
+    "finance": {
+      "purchase": 42000000,
+      "mortgageOverride": null,
+      "benefitQuarters": 1,
+      "periodsPaid": 12,
+      "skipParsecs": 0,
+      "skipDisguise": 0
+    },
+    "voyage": {
+      "here": { "world": null, "name": "Demo — Bellweather" },
+      "next": { "world": null, "name": "Demo — Tallow Reach", "parsecs": 2 },
+      "queue": [
+        { "world": null, "name": "Demo — Sedge" }
+      ],
+      "ruleset": "core"
+    },
+    "ops": { "fuel": 18, "servicedOn": 196 },
+    "life": { "value": 0, "max": 0, "damage": 0 },
+    "stun": 0
+  },
+  "items": [
+    {
+      "_id": "shipRolePilot001",
+      "name": "Demo — Pilot",
+      "type": "role",
+      "img": "icons/svg/wing.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": "Demo — Pilot",
+        "trap": "The roster row above holds this document's id. A roster can only be shown on a ship, which is why this Item exists both here and loose in demo-items. Do not deduplicate them." } } },
+      "system": {
+        "description": "Flies the ship. On a courier that is one person, and the same person as the captain more often than not.",
+        "source": { "book": "", "page": "" },
+        "positions": 1,
+        "crewRole": "pilot",
+        "department": "flight",
+        "salary": 6000,
+        "colour": "#3f6f9f",
+        "show": true,
+        "actions": [
+          { "label": "Evade", "kind": "skill", "characteristic": "dexterity", "skill": "Demo — Pilot",
+            "difficulty": "Average", "dm": 0, "step": "manoeuvre", "cap": "round" },
+          { "label": "Dock", "kind": "skill", "characteristic": "dexterity", "skill": "Demo — Pilot",
+            "difficulty": "Difficult", "dm": 0, "step": "actions", "cap": "none" },
+          { "label": "Reverse thrust", "kind": "special", "characteristic": "", "skill": "",
+            "difficulty": "", "dm": 0, "step": "reaction", "cap": "round" }
+        ]
+      },
+      "effects": []
+    },
+    {
+      "_id": "shipRoleGunner01",
+      "name": "Demo — Gunner",
+      "type": "role",
+      "img": "icons/svg/target.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": "Demo — Gunner",
+        "trap": "One role Item, two seats: positions is 2 and the roster row holding this id has count 2. That is the case two roster rows sharing one role is built for." } } },
+      "system": {
+        "description": "Works a turret. Two of them on a courier, which is one more than the ship can usually spare.",
+        "source": { "book": "", "page": "" },
+        "positions": 2,
+        "crewRole": "gunner",
+        "department": "weapons",
+        "salary": 4000,
+        "colour": "#9f5a3f",
+        "show": true,
+        "actions": [
+          { "label": "Fire turret", "kind": "weapon", "characteristic": "dexterity", "skill": "Demo — Gunner",
+            "difficulty": "Average", "dm": 0, "step": "attack", "cap": "salvo" },
+          { "label": "Point defence", "kind": "weapon", "characteristic": "dexterity", "skill": "Demo — Gunner",
+            "difficulty": "Difficult", "dm": -2, "step": "reaction", "cap": "round" }
+        ]
+      },
+      "effects": []
+    },
+    {
+      "_id": "shipWeaponLaser1",
+      "name": "Demo — Turret Laser",
+      "type": "weapon",
+      "img": "icons/svg/light.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": "Demo — Turret Laser",
+        "trap": "The mount above holds this document's id. A mount carrying a label instead of a weapon id scans as armed and can fire nothing." } } },
+      "system": {
+        "description": "A single-emitter turret laser off a yard on Bellweather. Cheap, and it holds its focus.",
+        "source": { "book": "", "page": "" },
+        "quantity": 1, "weight": 0, "weightless": true, "cost": 500000, "tl": "TL12", "legality": 5,
+        "container": { "id": "" },
+        "roll": { "characteristic": "dexterity", "skill": "Demo — Gunner", "difficulty": "Average" },
+        "equipped": true,
+        "range": { "isMelee": false, "value": null, "unit": "", "band": "medium" },
+        "damage": "2D6",
+        "damageType": ["laser"],
+        "magazine": 0, "magazineCost": 0, "loaded": null, "ammunition": "",
+        "scale": "spacecraft", "fireControl": 2, "power": 4, "natural": false,
+        "traits": [
+          { "family": "shipWeapon", "key": "ap", "params": [{ "slot": "score", "value": "5", "num": 5 }], "note": "" },
+          { "family": "shipWeapon", "key": "smart", "params": [], "note": "" }
+        ],
+        "options": []
+      },
+      "effects": []
+    },
+    {
+      "_id": "shipWeaponLaser2",
+      "name": "Demo — Turret Laser",
+      "type": "weapon",
+      "img": "icons/svg/light.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": "Demo — Turret Laser",
+        "trap": "The second emitter in the same double turret, and a second Item rather than a quantity of 2: the mount lists weapons one id at a time." } } },
+      "system": {
+        "description": "The second emitter in the dorsal turret. Identical to the first, and a document of its own.",
+        "source": { "book": "", "page": "" },
+        "quantity": 1, "weight": 0, "weightless": true, "cost": 500000, "tl": "TL12", "legality": 5,
+        "container": { "id": "" },
+        "roll": { "characteristic": "dexterity", "skill": "Demo — Gunner", "difficulty": "Average" },
+        "equipped": true,
+        "range": { "isMelee": false, "value": null, "unit": "", "band": "medium" },
+        "damage": "2D6",
+        "damageType": ["laser"],
+        "magazine": 0, "magazineCost": 0, "loaded": null, "ammunition": "",
+        "scale": "spacecraft", "fireControl": 2, "power": 4, "natural": false,
+        "traits": [
+          { "family": "shipWeapon", "key": "ap", "params": [{ "slot": "score", "value": "5", "num": 5 }], "note": "" },
+          { "family": "shipWeapon", "key": "smart", "params": [], "note": "" }
+        ],
+        "options": []
+      },
+      "effects": []
+    },
+    {
+      "_id": "shipComponFuel01",
+      "name": "Demo — Fuel Processor",
+      "type": "component",
+      "img": "icons/svg/barrel.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": "Demo — Fuel Processor",
+        "trap": "Fitted rather than carried. A component on a ship is an ordinary embedded Item; nothing on the ship lists it." } } },
+      "system": {
+        "description": "Skims and refines what the scoops take. Two days on a gas giant and the tank is clean.",
+        "source": { "book": "", "page": "" },
+        "category": "fuel",
+        "tl": 9,
+        "tonnage": { "tons": 6, "percent": 0, "minimum": 0 },
+        "cost": 300000,
+        "power": 0,
+        "powerPerTon": 0.25,
+        "hardened": false,
+        "rating": 20,
+        "bandwidth": 0,
+        "runAt": null,
+        "quantity": 1,
+        "dm": 0
+      },
+      "effects": []
+    },
+    {
+      "_id": "shipComponJump01",
+      "name": "Demo — Jump Control",
+      "type": "component",
+      "img": "icons/svg/jump.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": null,
+        "trap": "A component with category software is one of the two shapes a ship program takes — the other is an item Item with subType software. This one is named in computer.running above, so it is STARTED and spends its bandwidth. Take its id out of that Set and it is still aboard, still listed, and doing nothing." } } },
+      "system": {
+        "description": "Plots and holds a two-parsec jump. Bandwidth 5, and it wants all of it.",
+        "source": { "book": "", "page": "" },
+        "category": "software",
+        "tl": 12,
+        "tonnage": { "tons": 0, "percent": 0, "minimum": 0 },
+        "cost": 200000,
+        "power": 0,
+        "powerPerTon": 0,
+        "hardened": false,
+        "rating": 0,
+        "bandwidth": 5,
+        "runAt": 5,
+        "quantity": 1,
+        "dm": 0
+      },
+      "effects": []
+    },
+    {
+      "_id": "shipComponFire01",
+      "name": "Demo — Fire Direction",
+      "type": "component",
+      "img": "icons/svg/dice-target.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": null,
+        "trap": "runAt below bandwidth is a stored choice: 2 under 3 makes downgraded come out true and nothing recomputes it. The courier runs it low because Jump Control has the rest of the budget." } } },
+      "system": {
+        "description": "Lays the turret onto whatever the sensors are holding. Rated for three, run at two.",
+        "source": { "book": "", "page": "" },
+        "category": "software",
+        "tl": 12,
+        "tonnage": { "tons": 0, "percent": 0, "minimum": 0 },
+        "cost": 6000,
+        "power": 0,
+        "powerPerTon": 0,
+        "hardened": false,
+        "rating": 0,
+        "bandwidth": 3,
+        "runAt": 2,
+        "quantity": 1,
+        "dm": 2
+      },
+      "effects": []
+    },
+    {
+      "_id": "shipCargoLot0001",
+      "name": "Demo — Cargo Lot",
+      "type": "cargo",
+      "img": "icons/svg/chest.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": "Demo — Cargo Lot",
+        "trap": "In the hold, and it is the hold that limits it: cargo.capacity is 12 tons and this lot is 12." } } },
+      "system": {
+        "description": "Sealed drums of marsh-cut fibre, bound out-system. Nobody asks what it is for.",
+        "source": { "book": "", "page": "" },
+        "tons": 12,
+        "destination": { "world": null, "name": "Demo — Tallow Reach" },
+        "dueDay": 214,
+        "farePerTon": 1000,
+        "basePrice": 3000,
+        "purchasePct": 85,
+        "purchaseDM": [{ "code": "Ag", "dm": 2 }, { "code": "In", "dm": -2 }],
+        "saleDM": [{ "code": "In", "dm": 3 }, { "code": "Ni", "dm": -1 }],
+        "legality": 2,
+        "illegal": false
+      },
+      "effects": []
+    },
+    {
+      "_id": "shipPassageOutbd",
+      "name": "Demo — Outbound Passage",
+      "type": "passage",
+      "img": "icons/svg/door-exit.svg",
+      "flags": { "mgt2": { "demo": { "copyOf": "Demo — Outbound Passage",
+        "trap": "Two middle passages booked, which is what passengers.middle above says the ship is carrying. The two numbers are not linked: the Item is the ticket and the field is the manifest." } } },
+      "system": {
+        "description": "Two berths out of Bellweather on the next courier, paid in advance and no questions on the manifest.",
+        "source": { "book": "", "page": "" },
+        "grade": "middle",
+        "count": 2,
+        "destination": { "world": null, "name": "Demo — Tallow Reach" },
+        "farePerHead": 6400
+      },
+      "effects": []
+    }
+  ]
+}

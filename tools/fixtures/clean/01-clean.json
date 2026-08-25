@@ -36,16 +36,17 @@
           "teaches": [
             "An empty field can carry a rule."
           ],
-          "trap": "armour top and bottom are null, which is half the sides and rear; camouflage and stealth are null because a positive value clamps to 0; submersible and remote are null, where an empty object would mean yes at depth 0."
+          "trap": "armour dorsal and ventral are null, which is half the port and half the aft; camouflage and stealth are null because a positive value clamps to 0; submersible and remote are null, where an empty object would mean yes at depth 0."
         }
       }
     },
     "system": {
       "tl": 9,
       "armour": {
-        "sides": 6,
-        "top": null,
-        "bottom": null
+        "port": 6,
+        "starboard": 6,
+        "dorsal": null,
+        "ventral": null
       },
       "systems": {
         "camouflage": null,

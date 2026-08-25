@@ -330,6 +330,10 @@
         "name": "Afficher la Vie sur la fiche",
         "hint": "Affiche le compteur de vie sur la fiche"
       },
+      "showGuideButton": {
+        "name": "Afficher le bouton du guide",
+        "hint": "Place un ? dans la barre de titre de chaque fiche, qui ouvre le guide à la page de cet écran."
+      },
       "chainInto": {
         "name": "Cartes de test : bouton Enchaîner vers",
         "hint": "Ajoute un bouton Enchaîner vers… sur chaque carte de test ayant produit un Effet : il propose ce test au prochain jet. Celui-ci appartient à toute la table et pas seulement à l'Arbitre — l'interrupteur décide si la table en dispose."
@@ -1343,7 +1347,34 @@
       }
     },
     "Compendium": {
-      "Docs": "MGT2 — Ce que ce système fait des règles"
+      "Docs": "MGT2 — Ce que ce système fait des règles",
+      "Guide": "MGT2 — Guide du système",
+      "DemoActors": "MGT2 — Acteurs de démonstration, annotés",
+      "DemoItems": "MGT2 — Objets de démonstration, annotés"
+    },
+    "Guide": {
+      "Journal": "Utiliser ce système",
+      "Open": "Ouvrir le guide",
+      "Untranslated": "Cette page est en anglais : le guide n'a pas encore été traduit dans cette langue.",
+      "Chrome": {
+        "Rule": "Règle",
+        "Default": "Par défaut",
+        "Source": "Où c'est imprimé",
+        "Setting": "Réglage",
+        "Scope": "S'applique à",
+        "Type": "Type",
+        "SubTypes": "Sous-types",
+        "Trait": "Trait",
+        "Parameters": "Paramètres",
+        "Key": "Valeur stockée",
+        "Meaning": "Signification",
+        "On": "Activé",
+        "Off": "Désactivé",
+        "None": "Aucun",
+        "World": "Toute la table",
+        "Client": "Chaque joueur",
+        "NoDemo": "Aucun contenu de démonstration n'est installé."
+      }
     },
     "Explorer": {
       "Title": "Explorateur de compendiums",

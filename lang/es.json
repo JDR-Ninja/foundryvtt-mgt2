@@ -330,6 +330,10 @@
         "name": "Mostrar la vida en la hoja",
         "hint": "Muestra la información de vida en la hoja de actor."
       },
+      "showGuideButton": {
+        "name": "Mostrar el botón de la guía",
+        "hint": "Coloca un ? en la barra de título de cada hoja, que abre la guía por la página de esa pantalla."
+      },
       "chainInto": {
         "name": "Cartas de tirada: botón Encadenar con…",
         "hint": "Pone un botón Encadenar con… en cada carta de tirada que haya producido un Efecto, ofreciendo esa tirada a lo siguiente que se tire. Este es el botón de todos y no solo el del árbitro — el interruptor decide si la mesa lo tiene o no."
@@ -1343,7 +1347,34 @@
       }
     },
     "Compendium": {
-      "Docs": "MGT2 — Lo que este sistema hace con las reglas"
+      "Docs": "MGT2 — Lo que este sistema hace con las reglas",
+      "Guide": "MGT2 — Guía del sistema",
+      "DemoActors": "MGT2 — Actores de demostración, anotados",
+      "DemoItems": "MGT2 — Objetos de demostración, anotados"
+    },
+    "Guide": {
+      "Journal": "Usar este sistema",
+      "Open": "Abrir la guía",
+      "Untranslated": "Esta página está en inglés: la guía todavía no se ha traducido a este idioma.",
+      "Chrome": {
+        "Rule": "Regla",
+        "Default": "Por defecto",
+        "Source": "Dónde está impreso",
+        "Setting": "Ajuste",
+        "Scope": "Se aplica a",
+        "Type": "Tipo",
+        "SubTypes": "Subtipos",
+        "Trait": "Rasgo",
+        "Parameters": "Parámetros",
+        "Key": "Valor almacenado",
+        "Meaning": "Significado",
+        "On": "Activado",
+        "Off": "Desactivado",
+        "None": "Ninguno",
+        "World": "Toda la mesa",
+        "Client": "Cada jugador",
+        "NoDemo": "No hay contenido de demostración instalado."
+      }
     },
     "Explorer": {
       "Title": "Explorador de compendios",

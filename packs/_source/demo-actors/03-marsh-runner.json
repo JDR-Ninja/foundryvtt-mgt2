@@ -1,0 +1,119 @@
+{
+  "_id": "demoNpcMarshRunr",
+  "name": "Demo — Marsh Runner",
+  "type": "npc",
+  "img": "icons/svg/pawprint.svg",
+  "prototypeToken": { "actorLink": false },
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 3,
+        "cliff": "a creature is one Actor type with a different configuration",
+        "teaches": [
+          "A creature and a person are the same Actor type. What separates them is subType, the damage order, which characteristics are shown, and whether the token is linked.",
+          "behaviour.diet and behaviour.pattern are the two fields that say how it hunts and what it wants.",
+          "group.count is a pack of them on one sheet: value is how many are left, max how many there were.",
+          "speed.fly is a Speed Band index and not a number of metres; speed.ground and speed.swim are metres."
+        ],
+        "trap": "A creature needs characteristics.hits.base above 0 AND the string hits in config.damageOrder. Miss either and the four creature damage states go quiet — no error, no warning, and a creature that cannot be hurt. The Armour trait below carries its number in params[].num as well as in value, because nothing recomputes it at load: an Armour (4) with a null num is Protection 0."
+      }
+    }
+  },
+  "system": {
+    "subType": "creature",
+    "biography": "<p>Long, low and patient. It works the channel edges at slack water and takes whatever comes down the bank.</p>",
+    "notes": "<p>Two of them will circle. Three will not bother.</p>",
+    "personal": {
+      "title": "",
+      "species": "",
+      "age": "",
+      "gender": "",
+      "sex": "",
+      "pronouns": "it/its",
+      "homeworld": "Demo — Bellweather",
+      "ucp": ""
+    },
+    "config": {
+      "damageOrder": ["hits"],
+      "initiative": { "characteristic": "", "flat": 0 }
+    },
+    "characteristics": {
+      "strength": { "base": 12, "damage": 0, "show": false },
+      "dexterity": { "base": 9, "damage": 0, "show": false },
+      "endurance": { "base": 11, "damage": 0, "show": false },
+      "intellect": { "base": 2, "damage": 0, "show": false },
+      "education": { "base": 0, "damage": 0, "show": false },
+      "social": { "base": 0, "damage": 0, "show": false },
+      "morale": { "base": 0, "damage": 0, "show": false },
+      "luck": { "base": 0, "damage": 0, "show": false },
+      "sanity": { "base": 0, "damage": 0, "show": false },
+      "charm": { "base": 0, "damage": 0, "show": false },
+      "psionic": { "base": 0, "damage": 0, "show": false },
+      "other": { "base": 0, "damage": 0, "show": false },
+      "reputation": { "base": 0, "damage": 0, "show": false },
+      "hits": { "base": 23, "damage": 0, "show": true }
+    },
+    "traits": [
+      { "family": "animal", "key": "armour", "params": [{ "slot": "score", "value": "4", "num": 4 }], "note": "Wet hide over plate." },
+      { "family": "animal", "key": "amphibious", "params": [], "note": "" },
+      { "family": "animal", "key": "large", "params": [{ "slot": "dm", "value": "+1", "num": 1 }], "note": "" },
+      { "family": "animal", "key": "poison", "params": [
+        { "slot": "difficulty", "value": "Difficult", "num": null },
+        { "slot": "damage", "value": "2D6+2", "num": null },
+        { "slot": "interval", "value": "10 minutes", "num": null }
+      ], "note": "The venom is its own Item — Demo — Marsh Venom." }
+    ],
+    "modifiers": {
+      "check": { "custom": 0, "auto": 0, "effect": 0, "dm": 0 },
+      "initiative": { "custom": 0, "auto": 0, "effect": 0, "dm": 0 },
+      "skills": {}
+    },
+    "speed": { "ground": 9, "swim": 12, "fly": null, "note": "Faster in the water than out of it." },
+    "behaviour": { "diet": "carnivore", "pattern": "pouncer" },
+    "role": "Ambush predator",
+    "attitude": "Hostile",
+    "experience": "average",
+    "combatant": true,
+    "group": { "count": { "value": 2, "max": 2 } },
+    "life": { "value": 0, "max": 0, "damage": 0 },
+    "stun": 0,
+    "states": { "fatigue": false }
+  },
+  "items": [
+    {
+      "_id": "npcWeaponBite001",
+      "name": "Demo — Bite",
+      "type": "weapon",
+      "img": "icons/svg/bones.svg",
+      "system": {
+        "description": "Takes hold and pulls back into the water.",
+        "source": { "book": "", "page": "" },
+        "quantity": 1,
+        "weight": 0,
+        "weightless": true,
+        "cost": 0,
+        "tl": "NA",
+        "legality": 0,
+        "container": { "id": "" },
+        "roll": { "characteristic": "strength", "skill": "", "difficulty": "Average" },
+        "equipped": true,
+        "range": { "isMelee": true, "value": null, "unit": "", "band": "adjacent" },
+        "damage": "2D6+2",
+        "damageType": ["stabbing"],
+        "magazine": 0,
+        "magazineCost": 0,
+        "loaded": null,
+        "ammunition": "",
+        "scale": "ground",
+        "fireControl": 0,
+        "power": 0,
+        "natural": true,
+        "traits": [
+          { "family": "weapon", "key": "ap", "params": [{ "slot": "score", "value": "2", "num": 2 }], "note": "" }
+        ],
+        "options": []
+      },
+      "effects": []
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "_id": "demoSkillGunSlug",
+  "name": "Demo — Gun Combat (slug)",
+  "type": "talent",
+  "img": "icons/svg/target.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 20,
+        "cliff": "skills are Items",
+        "teaches": [
+          "A skill is a `talent` Item with `system.subType: \"skill\"` embedded on the Actor. There is no `system.skills` anywhere in this system.",
+          "The speciality is stored twice on purpose: in the name, in brackets, and in `skill.speciality`.",
+          "`roll.characteristic` is the characteristic the skill is normally rolled on, which the sheet offers as the default."
+        ],
+        "trap": "`level` is 0 here because a loose skill in a compendium is a template — the level belongs to the Traveller who has it. Everything that reads a skill matches by *name*, so `Demo — Gun Combat` matches this Item and a bare `Gun Combat` does not."
+      }
+    }
+  },
+  "system": {
+    "description": "Firing a slug thrower. The speciality is the family of weapon, not the weapon.",
+    "subType": "skill",
+    "source": { "book": "", "page": "" },
+    "cost": 0,
+    "level": 0,
+    "skill": { "speciality": "slug", "reduceEncumbrance": false },
+    "psionic": { "reach": "", "cost": 1, "duration": "", "durationUnit": "" },
+    "roll": { "characteristic": "dexterity", "skill": "", "difficulty": "" },
+    "provenance": { "term": null, "career": "", "table": "", "note": "" }
+  },
+  "effects": []
+}

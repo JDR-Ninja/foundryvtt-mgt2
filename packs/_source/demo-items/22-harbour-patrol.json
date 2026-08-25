@@ -1,0 +1,289 @@
+{
+  "_id": "demoCareerHarbor",
+  "name": "Demo — Harbour Patrol",
+  "type": "career",
+  "img": "icons/svg/anchor.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 22,
+        "cliff": "chargen has nothing to run against without one",
+        "teaches": [
+          "One career Item carries the whole of a career: qualification, one rank ladder, one assignment with its survival and advancement checks, three skill tables, a benefit table, an event table and a mishap table.",
+          "Every row is a {text, mode, grants[]} triple — text is what the player reads, grants[] is what the screen applies, and mode: oneOf is what makes the player choose.",
+          "A tray entry on an event row is a modifier put aside for later: a DM that waits for the next qualification roll, an unlock, a prohibition.",
+          "standingModifiers[] is the career's own permanent DM, gated on a characteristic and scoped to one step."
+        ],
+        "trap": "The eleven fields below the tables — assignment, terms, rank, ladder, enlistedRank, events, entryMode, exitMode, termLog, track — are the record half of this type, and they stay empty on a template. The same Item type is both the career a Traveller may enter and the career a Traveller served; termLog is what tells the two apart."
+      }
+    }
+  },
+  "system": {
+    "description": "Bellweather's harbour patrol: tide watch, boat inspection, and whatever comes out of the marsh. Invented for this pack, and no book's career.",
+    "subType": "career",
+    "source": { "book": "", "page": "" },
+    "kind": "career",
+    "difficulty": 6,
+    "qualification": {
+      "entry": "target",
+      "characteristics": ["endurance"],
+      "autoIf": { "characteristic": "", "min": null },
+      "perPreviousCareer": -1,
+      "conditionalDMs": [
+        { "characteristic": "", "min": null, "afterCareers": ["Demo — Harbour Patrol"], "dm": 2 }
+      ],
+      "requiresPermission": false
+    },
+    "ageDM": { "from": 30, "dm": -2 },
+    "commission": false,
+    "commissionCheck": { "characteristic": "", "target": null },
+    "pensionable": true,
+    "assignmentChange": "",
+    "basicFrom": "service",
+    "alwaysAvailable": false,
+    "neverEjects": false,
+    "blocksAnagathics": false,
+    "eventRow7": "lifeEvent",
+    "exitRule": { "track": "", "test": "" },
+    "medicalBillsRow": "",
+    "restrictedTo": { "species": "", "sex": "" },
+    "rankLadders": [
+      {
+        "id": "patrol",
+        "name": "Patrol",
+        "officer": false,
+        "rows": [
+          { "rank": 0, "title": "Recruit", "bonus": { "text": "Demo — Seafarer 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Demo — Seafarer", "mode": "raise", "value": 1 }] } },
+          { "rank": 1, "title": "Patrol Officer", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 2, "title": "Senior Officer", "bonus": { "text": "Demo — Investigate 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Demo — Investigate", "mode": "raise", "value": 1 }] } },
+          { "rank": 3, "title": "Watch Leader", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 4, "title": "Deputy Harbourmaster", "bonus": { "text": "SOC +1", "mode": "all",
+            "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] } },
+          { "rank": 5, "title": "Harbourmaster", "bonus": { "text": "A Contact on every quay", "mode": "all",
+            "grants": [{ "kind": "contact", "relation": "Contact", "value": 1 }] } }
+        ]
+      }
+    ],
+    "assignments": [
+      {
+        "name": "Harbour Watch",
+        "ladder": "patrol",
+        "officerLadder": "",
+        "survival": { "characteristic": "endurance", "target": 6 },
+        "advancement": { "characteristic": "intellect", "target": 7 },
+        "skills": [
+          { "text": "Demo — Seafarer", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Demo — Seafarer", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Gun Combat", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Demo — Gun Combat", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Athletics", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Demo — Athletics", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Investigate", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Demo — Investigate", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Vacc Suit", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Demo — Vacc Suit", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Mechanic or Demo — Persuade", "mode": "oneOf",
+            "grants": [
+              { "kind": "skill", "skill": "Demo — Mechanic", "mode": "raise", "value": 1 },
+              { "kind": "skill", "skill": "Demo — Persuade", "mode": "raise", "value": 1 }
+            ] }
+        ]
+      }
+    ],
+    "tables": {
+      "personalDevelopment": {
+        "present": true,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "STR +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "strength", "mode": "add", "value": 1 }] },
+          { "text": "END +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "endurance", "mode": "add", "value": 1 }] },
+          { "text": "INT +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "intellect", "mode": "add", "value": 1 }] },
+          { "text": "Demo — Athletics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Athletics", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Persuade", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Persuade", "mode": "raise", "value": 1 }] },
+          { "text": "SOC +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] }
+        ]
+      },
+      "service": {
+        "present": true,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "Demo — Seafarer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Seafarer", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Vacc Suit", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Vacc Suit", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Mechanic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Mechanic", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Investigate", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Investigate", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Gun Combat", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Gun Combat", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Athletics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Athletics", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      "advancedEducation": {
+        "present": true,
+        "gate": { "characteristic": "education", "min": 8 },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "Demo — Investigate", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Investigate", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Persuade", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Persuade", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Mechanic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Mechanic", "mode": "raise", "value": 1 }] },
+          { "text": "EDU +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "education", "mode": "add", "value": 1 }] },
+          { "text": "Demo — Seafarer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Seafarer", "mode": "raise", "value": 1 }] },
+          { "text": "Demo — Vacc Suit", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Vacc Suit", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      "officer": {
+        "present": false,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": true,
+        "rows": []
+      }
+    },
+    "benefits": {
+      "cash": [1000, 2000, 5000, 7500, 10000, 25000, 50000],
+      "other": [
+        { "text": "A Contact on the quay", "mode": "all", "grants": [{ "kind": "contact", "relation": "Contact", "value": 1 }] },
+        { "text": "Demo — Deck Vest", "mode": "all", "grants": [{ "kind": "benefit", "ref": "Demo — Deck Vest", "value": 1 }] },
+        { "text": "END +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "endurance", "mode": "add", "value": 1 }] },
+        { "text": "Demo — Sidearm", "mode": "all", "grants": [{ "kind": "benefit", "ref": "Demo — Sidearm", "value": 1 }] },
+        { "text": "One Ship Share", "mode": "all", "grants": [{ "kind": "shipShare", "value": 1 }] },
+        { "text": "SOC +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] },
+        { "text": "Two Ship Shares", "mode": "all", "grants": [{ "kind": "shipShare", "value": 2 }] }
+      ]
+    },
+    "eventTable": [
+      { "roll": 2, "text": "A hull comes apart in the channel. Roll on the Mishap table, but you are not ejected from this career.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Mishap", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 3, "text": "A cargo you waved through was not what the manifest said. Gain a Rival on the quay.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "A Rival", "mode": "all", "grants": [{ "kind": "contact", "relation": "Rival", "value": 1 }] }, "tray": [] },
+      { "roll": 4, "text": "A winter of night watches. Gain one level of Demo — Vacc Suit or Demo — Athletics.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Demo — Vacc Suit or Demo — Athletics", "mode": "oneOf", "grants": [
+          { "kind": "skill", "skill": "Demo — Vacc Suit", "mode": "raise", "value": 1 },
+          { "kind": "skill", "skill": "Demo — Athletics", "mode": "raise", "value": 1 }] }, "tray": [] },
+      { "roll": 5, "text": "You pull a crew off a sinking launch. Make a Demo — Seafarer check (8+); success gains a Contact and a commendation.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "endurance", "skill": "Demo — Seafarer", "target": 8 },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "A Contact", "mode": "all", "grants": [{ "kind": "contact", "relation": "Contact", "value": 1 }] },
+        "tray": [{ "kind": "dm", "dm": 2, "value": "", "appliesTo": ["advancement"], "scope": "thisCareer", "career": "",
+          "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "checkPassed",
+          "note": "The commendation is a +2 held back for one Advancement roll." }] },
+      { "roll": 6, "text": "The harbour puts you through a course you did not ask for. Gain one level of Demo — Mechanic.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Demo — Mechanic 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Mechanic", "mode": "raise", "value": 1 }] }, "tray": [] },
+      { "roll": 7, "text": "Life Event. Roll on the Life Events table.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Life Event", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 8, "text": "You take an inspection nobody else would sign. Gain one level of Demo — Investigate, and an extra Benefit roll.",
+        "ejects": "stays", "benefit": "grant", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Demo — Investigate 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Demo — Investigate", "mode": "raise", "value": 1 }] }, "tray": [] },
+      { "roll": 9, "text": "A quiet word from the Harbourmaster. Gain an Ally, and a DM+1 held for your next Qualification roll.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "An Ally", "mode": "all", "grants": [{ "kind": "contact", "relation": "Allie", "value": 1 }] },
+        "tray": [{ "kind": "dm", "dm": 1, "value": "", "appliesTo": ["qualification"], "scope": "nextCareer", "career": "",
+          "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "always",
+          "note": "A tray entry outlives the term it was won in: this one waits for the next Qualification roll." }] },
+      { "roll": 10, "text": "You are moved to the marsh station and given a boat of your own. Gain one level of Demo — Seafarer and SOC +1.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Demo — Seafarer 1 and SOC +1", "mode": "all", "grants": [
+          { "kind": "skill", "skill": "Demo — Seafarer", "mode": "raise", "value": 1 },
+          { "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] }, "tray": [] },
+      { "roll": 11, "text": "A season with nothing to show for it, and a promotion board that noticed anyway.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": ["advanced"], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 12, "text": "You bring in a smuggler half the sector wanted. Gain an automatic promotion.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": ["advanced"], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] }
+    ],
+    "mishapTable": [
+      { "roll": 1, "text": "A boat goes over on you. Roll on the Injury table and leave the patrol.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Injury", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 2, "text": "You are blamed for a sinking that was nobody's fault. Gain an Enemy and leave the patrol.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "An Enemy", "mode": "all", "grants": [{ "kind": "contact", "relation": "Enemy", "value": 1 }] }, "tray": [] },
+      { "roll": 3, "text": "Dock fever, and a long winter in a bunk. Lose one level of Demo — Athletics and leave the patrol.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Demo — Athletics falls by one level", "mode": "all",
+          "grants": [{ "kind": "skill", "skill": "Demo — Athletics", "mode": "add", "value": -1 }] }, "tray": [] },
+      { "roll": 4, "text": "A bribe you did not take is reported as one you did. You keep your rank and lose the job.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 5, "text": "The marsh station is closed and you with it. A Social check (8+) keeps you on the payroll.",
+        "ejects": "choice", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "social", "skill": "", "target": 8 },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 6, "text": "You are injured pulling someone else out. Roll on the Injury table; you may stay on.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Injury", "check": { "characteristic": "", "skill": "", "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] }
+    ],
+    "standingModifiers": [
+      { "dm": 1, "per": 0, "skills": [], "appliesTo": ["benefit"], "career": "",
+        "gate": { "characteristic": "social", "min": 9 },
+        "note": "A patroller known on the quay adds DM+1 to Benefit rolls from this career." }
+    ],
+    "tracks": [],
+    "assignment": "",
+    "terms": 0,
+    "rank": 0,
+    "ladder": "",
+    "enlistedRank": 0,
+    "events": [],
+    "entryMode": "qualified",
+    "exitMode": "stillServing",
+    "termLog": [],
+    "track": { "key": "", "value": null, "cap": null, "adjustments": [] }
+  },
+  "effects": []
+}

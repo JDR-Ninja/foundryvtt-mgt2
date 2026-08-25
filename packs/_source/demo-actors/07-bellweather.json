@@ -1,0 +1,50 @@
+{
+  "_id": "demoWorldBellwth",
+  "name": "Demo — Bellweather",
+  "type": "world",
+  "img": "icons/svg/city.svg",
+  "prototypeToken": { "actorLink": true },
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 7,
+        "cliff": "the UWP cells are integers",
+        "teaches": [
+          "The seven cells after the starport are NUMBERS. A788899-C is starport A with size 7, atmosphere 8, hydrographics 8, population 8, government 9, law level 9 and tech level 12 — the pseudo-hex is a printing, and this is what is stored.",
+          "bases is a Set of closed strings, not a line of letters, and gasGiants is a count of them in the system.",
+          "sector and hex are the two halves of a location and neither is validated: a hex that is not four digits in range simply derives no coordinate.",
+          "codeOverrides is where a referee states a trade code the UWP would not have given, or takes one away."
+        ],
+        "trap": "berthing is null rather than 0, and the difference is real: null means the berthing cost has not been rolled yet, where 0 means it was rolled and came out free. And a codeOverrides key that is not a trade code is DROPPED with no message at all — the document loads, the sheet reads sanely, and the override is simply not there."
+      }
+    }
+  },
+  "system": {
+    "description": "<p>A wet, tidal world of shallow seas and sedge flats. Every settlement is a harbour and every harbour is an hour from open water at the wrong end of the tide.</p>",
+    "notes": "<p>The harbour trust runs the starport, the patrol and the ferry, and does not distinguish between them.</p>",
+    "uwp": {
+      "starport": "B",
+      "size": 7,
+      "atmosphere": 6,
+      "hydrographics": 9,
+      "population": 6,
+      "government": 4,
+      "lawLevel": 5,
+      "techLevel": 9
+    },
+    "sector": "Demo Reach",
+    "hex": "0605",
+    "zone": "green",
+    "bases": ["scout", "tas"],
+    "gasGiants": 1,
+    "berthing": null,
+    "trade": {
+      "attempts": [188, 196],
+      "refusedOn": null
+    },
+    "codeOverrides": {
+      "Wa": true,
+      "Ri": false
+    }
+  }
+}

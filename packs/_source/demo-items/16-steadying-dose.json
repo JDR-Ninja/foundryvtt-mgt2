@@ -1,0 +1,54 @@
+{
+  "_id": "demoDrugSteady01",
+  "name": "Demo — Steadying Dose",
+  "type": "drug",
+  "img": "icons/svg/pill.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 16,
+        "cliff": "a drug's effects are a template",
+        "teaches": [
+          "`dose`, `onset` and `duration` are the three strings a referee reads out; nothing in the system schedules any of them.",
+          "`afterKind` says what the after-effect *is* — `none`, a `condition` or `damage` — and `afterEffect` says it in words.",
+          "`addiction {dosesBefore, checkInterval, cravingDM}` is the counter's contract; the count itself lives on the Traveller, not on the box."
+        ],
+        "trap": "The Active Effect below never fires while the box is carried. `MGT2ActiveEffect#isSuppressed` returns true for anything whose parent is a `drug`, so these changes are a template that consuming a dose copies onto the Traveller."
+      }
+    }
+  },
+  "system": {
+    "description": "A patrol issue ampoule. It stops the shakes for an afternoon and charges for it afterwards.",
+    "source": { "book": "", "page": "" },
+    "quantity": 3,
+    "weight": 0.05,
+    "weightless": false,
+    "cost": 200,
+    "tl": "TL11",
+    "legality": 4,
+    "container": { "id": "" },
+    "roll": { "characteristic": "", "skill": "", "difficulty": "" },
+    "dose": "One ampoule",
+    "onset": "2D6 minutes",
+    "duration": "4 hours",
+    "afterEffect": "Endurance falls by 1 until the next full night's sleep.",
+    "afterKind": "condition",
+    "addiction": { "dosesBefore": 6, "checkInterval": "Weekly", "cravingDM": -2 }
+  },
+  "effects": [
+    {
+      "_id": "demoEffectDose01",
+      "name": "Demo — Steadied",
+      "img": "icons/svg/pill.svg",
+      "disabled": false,
+      "transfer": true,
+      "description": "<p>The template a swallowed dose copies onto the Traveller: +2 DEX for the duration.</p>",
+      "duration": { "value": 14400, "units": "seconds" },
+      "system": {
+        "changes": [
+          { "key": "system.characteristics.dexterity.base", "type": "add", "value": 2, "phase": "initial" }
+        ]
+      }
+    }
+  ]
+}

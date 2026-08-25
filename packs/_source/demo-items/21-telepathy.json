@@ -1,0 +1,32 @@
+{
+  "_id": "demoPsionicTelep",
+  "name": "Demo — Whisper",
+  "type": "talent",
+  "img": "icons/svg/aura.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 21,
+        "cliff": "a whole subsystem behind a world setting",
+        "teaches": [
+          "`subType: \"psionic\"` is the second talent sub-type, and it is where the `psionic` block stops being dead weight.",
+          "`psionic.cost` is the strength spent on each use; `reach` is the band it carries to; `duration` and `durationUnit` are stored apart so the sheet can print either half.",
+          "`roll.characteristic: \"psionic\"` is what puts the check on the psionic characteristic instead of a skill's usual one."
+        ],
+        "trap": "Psionics is an optional rule and it is off by default. Until the referee turns it on in the world settings, this Item is carried, listed and never rolled — and `characteristics.psionic` is not shown on any sheet."
+      }
+    }
+  },
+  "system": {
+    "description": "Pushing a sentence into a mind that is not listening. Invented for this pack, and not any book's talent.",
+    "subType": "psionic",
+    "source": { "book": "", "page": "" },
+    "cost": 0,
+    "level": 0,
+    "skill": { "speciality": "", "reduceEncumbrance": false },
+    "psionic": { "reach": "Close", "cost": 2, "duration": "2D6", "durationUnit": "Minutes" },
+    "roll": { "characteristic": "psionic", "skill": "Demo — Whisper", "difficulty": "Average" },
+    "provenance": { "term": null, "career": "", "table": "", "note": "" }
+  },
+  "effects": []
+}

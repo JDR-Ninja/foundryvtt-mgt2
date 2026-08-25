@@ -1,0 +1,42 @@
+{
+  "_id": "demoCargoLot0001",
+  "name": "Demo — Cargo Lot",
+  "type": "cargo",
+  "img": "icons/svg/chest.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 33,
+        "cliff": "a lot is not a thing you own",
+        "teaches": [
+          "tons is the size of the lot, basePrice what a ton of it is worth before any modifier, and farePerTon what a freight lot pays to carry.",
+          "purchaseDM[] and saleDM[] are the trade-code modifiers, one row per code, and they are stored on the lot rather than looked up.",
+          "purchasePct records what was actually paid as a percentage of base, which is what a later sale is measured against.",
+          "illegal and legality are two different questions: what the law says, and how far it goes."
+        ],
+        "trap": "destination.world is left empty, exactly as on the passage. It is a cross-Actor UUID and a single drag out of a compendium does not keep document ids, so destination.name is what survives. dueDay is a day-stamp on the world clock, not a countdown: nothing decrements it."
+      }
+    }
+  },
+  "system": {
+    "description": "Sealed drums of marsh-cut fibre, bound out-system. Nobody asks what it is for.",
+    "source": { "book": "", "page": "" },
+    "tons": 12,
+    "destination": { "world": null, "name": "Demo — Tallow Reach" },
+    "dueDay": 214,
+    "farePerTon": 1000,
+    "basePrice": 3000,
+    "purchasePct": 85,
+    "purchaseDM": [
+      { "code": "Ag", "dm": 2 },
+      { "code": "In", "dm": -2 }
+    ],
+    "saleDM": [
+      { "code": "In", "dm": 3 },
+      { "code": "Ni", "dm": -1 }
+    ],
+    "legality": 2,
+    "illegal": false
+  },
+  "effects": []
+}

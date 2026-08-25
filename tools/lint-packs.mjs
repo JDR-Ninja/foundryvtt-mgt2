@@ -59,7 +59,8 @@ const CLIFFS = [
     [10, "`null` is not `0`"],
     [11, "A world's UWP"],
     [12, "Hull points are derived"],
-    [13, "Two fuel fields"]
+    [13, "Two fuel fields"],
+    [14, "A ship's started software"]
 ];
 
 /**
@@ -71,8 +72,8 @@ const CLIFFS = [
  */
 const DELIBERATE = {
     vehicle: [
-        ["system.armour.top", "top"],
-        ["system.armour.bottom", "bottom"],
+        ["system.armour.dorsal", "dorsal"],
+        ["system.armour.ventral", "ventral"],
         ["system.systems.camouflage", "camouflage"],
         ["system.systems.stealth", "stealth"],
         ["system.submersible", "submersible"],
@@ -154,9 +155,12 @@ const RULES = [
         id: "effect-phase", cliff: 4, scope: "any",
         check(subject, report) {
             (subject.document.effects ?? []).forEach((effect, ei) => {
-                (effect?.changes ?? []).forEach((change, ci) => {
+                // v14 moved the array under `system` (`common/data/active-effect.mjs`); a top-level
+                // one is migrated with a deprecation warning rather than read where it sits.
+                if ( Array.isArray(effect?.changes) ) report(`effects[${ei}].changes is the pre-v14 place — the array is system.changes now`);
+                (effect?.system?.changes ?? []).forEach((change, ci) => {
                     if ( !change?.phase ) {
-                        report(`effects[${ei}].changes[${ci}] carries no phase — core renders it as a hidden input, so a change aimed at a derived value looks broken instead of failing`);
+                        report(`effects[${ei}].system.changes[${ci}] carries no phase — core renders it as a hidden input, so a change aimed at a derived value looks broken instead of failing`);
                     }
                 });
             });
@@ -168,8 +172,8 @@ const RULES = [
             for ( const [field, entries] of traitArrays(subject.system) ) {
                 entries.forEach((entry, index) => {
                     (entry?.params ?? []).forEach((param, pi) => {
-                        const printed = Number.parseFloat(param?.value);
-                        if ( !Number.isFinite(printed) ) return;
+                        const printed = printedNumber(param?.value);
+                        if ( printed === null ) return;
                         const where = `${field}[${index}] (${entry.key}) params[${pi}]`;
                         if ( param.num == null ) report(`${where} reads "${param.value}" and carries num: null — refreshTraitNumbers runs on sheet submit only, so the score is 0`);
                         else if ( param.num !== printed ) report(`${where} reads "${param.value}" but carries num: ${param.num}`);
@@ -251,6 +255,21 @@ const RULES = [
             const base = read(subject.document, "system.characteristics.hull.base");
             if ( (base !== undefined) && (base !== 0) ) {
                 report(`characteristics.hull.base is ${base} — on a spacecraft it ADDS to the derived points. Contrast a vehicle, where it is the printed figure`);
+            }
+        }
+    },
+    {
+        id: "software-started", cliff: 14, scope: "primary", type: "spacecraft",
+        check(subject, report) {
+            const running = subject.system?.computer?.running ?? [];
+            for ( const id of running ) {
+                const item = subject.embedded.get(id);
+                if ( !item ) report(`computer.running holds "${id}", which is not embedded on this Actor`);
+                else if ( !isProgram(item) ) report(`computer.running names "${item.name}", which is not a program — a ship program is a component of category software, or an item of subType software`);
+            }
+            const aboard = subject.items.filter(isProgram);
+            if ( aboard.length && !running.length ) {
+                report("programs are aboard and computer.running is empty — a program not in that Set spends no bandwidth and does nothing, which reads exactly like one that is running");
             }
         }
     },
@@ -506,6 +525,21 @@ function readTypeClasses() {
     return map;
 }
 
+/**
+ * The number a printed slot token carries, or null where it carries none. The registry decides this
+ * from the slot's declared type, which needs Foundry to read — so this mirrors the grammar instead:
+ * a dice expression carries no number, and neither does a figure followed by a word. `+7`, `3`, `8m`
+ * and `8/25` do (`traits.js`, `slotNumber` and `UNIT`).
+ */
+function printedNumber(value) {
+    const token = String(value ?? "").trim().replace(/[−–‐‑]/g, "-");
+    if ( /^[+-]?\d*[dD]\d*\s*(?:[+-]\s*\d+)?$/.test(token) ) return null;
+    const match = /^([+-]?\d+(?:[.,]\d+)?)\s*(.*)$/.exec(token);
+    if ( !match || !/^(?:[a-z]?|\/\S+)$/i.test(match[2]) ) return null;
+    const number = Number(match[1].replace(",", "."));
+    return Number.isFinite(number) ? number : null;
+}
+
 /** Every `{family, key, params}` array on a `system` object, by the field that holds it. */
 function traitArrays(system) {
     const found = [];
@@ -514,6 +548,12 @@ function traitArrays(system) {
         if ( value.every(entry => entry && (typeof entry === "object") && ("family" in entry) && ("key" in entry)) ) found.push([key, value]);
     }
     return found;
+}
+
+/** The two shapes a ship program takes — `spacecraft-data.js`, `#programOf`. */
+function isProgram(item) {
+    if ( item?.type === "component" ) return item.system?.category === "software";
+    return (item?.type === "item") && (item.system?.subType === "software");
 }
 
 /** Every string in a document, with the pointer that reaches it. */

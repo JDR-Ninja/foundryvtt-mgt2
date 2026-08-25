@@ -25,7 +25,13 @@
 
 export const PACKS = [
     { name: "docs", label: "Rules coverage", i18n: "MGT2.Compendium.Docs", type: "JournalEntry",
-        generated: "the rules audit" }
+        generated: "the rules audit" },
+    { name: "guide", label: "Guide", i18n: "MGT2.Compendium.Guide", type: "JournalEntry",
+        generated: "the guide's pages" },
+    { name: "demo-actors", label: "Demo actors", i18n: "MGT2.Compendium.DemoActors", type: "Actor",
+        authored: true },
+    { name: "demo-items", label: "Demo items", i18n: "MGT2.Compendium.DemoItems", type: "Item",
+        authored: true }
 ];
 
 export const PACK_BY_NAME = Object.fromEntries(PACKS.map(pack => [pack.name, pack]));

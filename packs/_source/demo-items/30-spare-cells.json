@@ -1,0 +1,34 @@
+{
+  "_id": "demoLootSparCell",
+  "name": "Demo — Spare Cells",
+  "type": "item",
+  "img": "icons/svg/lightning.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 30,
+        "cliff": "the other half of a type",
+        "teaches": [
+          "subType: loot is the item type's default, and it is what the type is for when nothing about software applies.",
+          "quantity above 1 is how a stack is carried: weight and cost are per unit, and the sheet multiplies.",
+          "container.id is where a stack says which bag it is in — the id of a container Item on the same Actor."
+        ],
+        "trap": "The software block below is absent rather than zeroed. A loot Item that carries an empty software block is not wrong, but it reads as a program with no computer; leaving it out says what this is."
+      }
+    }
+  },
+  "system": {
+    "description": "Four charged cells in an oilcloth roll. Fits the lamp, the beacon and the sidearm's sight.",
+    "subType": "loot",
+    "source": { "book": "", "page": "" },
+    "quantity": 4,
+    "weight": 0.5,
+    "weightless": false,
+    "cost": 60,
+    "tl": "TL09",
+    "legality": 0,
+    "container": { "id": "" },
+    "roll": { "characteristic": "", "skill": "", "difficulty": "" }
+  },
+  "effects": []
+}

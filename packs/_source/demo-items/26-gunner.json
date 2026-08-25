@@ -1,0 +1,37 @@
+{
+  "_id": "demoRoleGunner01",
+  "name": "Demo — Gunner",
+  "type": "role",
+  "img": "icons/svg/target.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 26,
+        "cliff": "two roster rows may share one role Item",
+        "teaches": [
+          "positions: 2 is one role Item seating two people, which is what lets two roster rows point at this same id.",
+          "An action of kind weapon is the one that reaches for a mount rather than for a skill of its own.",
+          "department groups the station on the deck plan and in the crew list; it is not the same axis as crewRole."
+        ],
+        "trap": "This Item exists twice in the pack on purpose: once here, loose, and once embedded on the Demo — Kestrel-class Courier. A roster can only be shown on a ship, because crew[].role holds the id of an Item embedded on that same Actor. Do not deduplicate them."
+      }
+    }
+  },
+  "system": {
+    "description": "Works a turret. Two of them on a courier, which is one more than the ship can usually spare.",
+    "source": { "book": "", "page": "" },
+    "positions": 2,
+    "crewRole": "gunner",
+    "department": "weapons",
+    "salary": 4000,
+    "colour": "#9f5a3f",
+    "show": true,
+    "actions": [
+      { "label": "Fire turret", "kind": "weapon", "characteristic": "dexterity", "skill": "Demo — Gunner",
+        "difficulty": "Average", "dm": 0, "step": "attack", "cap": "salvo" },
+      { "label": "Point defence", "kind": "weapon", "characteristic": "dexterity", "skill": "Demo — Gunner",
+        "difficulty": "Difficult", "dm": -2, "step": "reaction", "cap": "round" }
+    ]
+  },
+  "effects": []
+}

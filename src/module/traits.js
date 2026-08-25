@@ -2,9 +2,8 @@
 
 const fields = foundry.data.fields;
 
-// >>> generated — 142 entries over 127 names, 44 parameterised, across 7 families. Emitted whole
+// >>> generated — 147 entries over 128 names, 48 parameterised, across 7 families. Emitted whole
 // from the trait extraction; edit the extraction and re-emit rather than patching a row here.
-// ⚠ The five Vehicle Handbook 2026 rows are hand-added; a re-emit drops them.
 const REGISTRY = {
     animal: {
         "alarm": {label: "Alarm"},
@@ -14,10 +13,11 @@ const REGISTRY = {
         "bioelectricity": {label: "Bioelectricity", params: [{slot: "damage", type: "dice"}]},
         "camouflaged": {label: "Camouflaged"},
         "clever": {label: "Clever"},
-        "composite": {label: "Composite", params: [{slot: "main", type: "count"}, {slot: "parts", type: "count"}]},
+        "composite": {label: "Composite", params: [{slot: "main", type: "count"}, {slot: "parts", type: "count"}], separator: "+"},
         "diseased": {label: "Diseased", params: [{slot: "difficulty", type: "difficulty"}, {slot: "damage", type: "dice", optional: true}, {slot: "effect", type: "text", optional: true}, {slot: "interval", type: "interval"}]},
         "dispersed": {label: "Dispersed"},
-        "echolocation": {label: "Echolocation", params: [{slot: "range", type: "distance"}]},
+        // Core p.85 prints the animal trait bare; the range is a species printing, Aliens 3 p.114.
+        "echolocation": {label: "Echolocation", params: [{slot: "range", type: "distance", optional: true}]},
         "energy": {label: "Energy"},
         "explosive": {label: "Explosive", params: [{slot: "damage", type: "dice"}, {slot: "radius", type: "distance"}]},
         "fast-metabolism": {label: "Fast Metabolism", params: [{slot: "dm", type: "positive"}], conflict: ["slow-metabolism"]},
@@ -72,12 +72,15 @@ const REGISTRY = {
         "thruster": {label: "Thruster", params: [{slot: "acceleration", type: "decimal", default: "0.1"}]},
     },
     shipWeapon: {
+        "ap": {label: "AP", params: [{slot: "score", type: "int"}]},
+        "auto": {label: "Auto", params: [{slot: "score", type: "int"}]},
         "chain-reaction": {label: "Chain Reaction"},
         "ion": {label: "Ion"},
         "orbital-bombardment": {label: "Orbital Bombardment"},
         "orbital-strike": {label: "Orbital Strike"},
         "radiation": {label: "Radiation"},
         "reductor": {label: "Reductor"},
+        "smart": {label: "Smart"},
         "weak": {label: "Weak"},
     },
     species: {
@@ -104,6 +107,7 @@ const REGISTRY = {
         "heightened-senses": {label: "Heightened Senses"},
         "hiver-physiology": {label: "Hiver Physiology"},
         "hyper-acclimatisation": {label: "Hyper-acclimatisation"},
+        "large": {label: "Large", params: [{slot: "dm", type: "positive"}]},
         "manual-dexterity": {label: "Manual Dexterity"},
         "natural-weapons": {label: "Natural Weapons"},
         "ozone-immunity": {label: "Ozone Immunity"},
@@ -127,9 +131,9 @@ const REGISTRY = {
         "off-roader": {label: "Off-Roader"},
         "open-topped": {label: "Open-Topped"},
         "open-vehicle": {label: "Open Vehicle"},
-        "responsive": {label: "Responsive"},
+        "responsive": {label: "Responsive", conflict: ["unresponsive"]},
         "tracked": {label: "Tracked"},
-        "unresponsive": {label: "Unresponsive"},
+        "unresponsive": {label: "Unresponsive", conflict: ["responsive"]},
         "vtol": {label: "VTOL"},
     },
     weapon: {
@@ -139,7 +143,7 @@ const REGISTRY = {
         "auto": {label: "Auto", params: [{slot: "score", type: "int"}]},
         "blast": {label: "Blast", params: [{slot: "radius", type: "distance"}]},
         "bulky": {label: "Bulky", conflict: ["very-bulky"]},
-        "burn": {label: "Burn", params: [{slot: "rounds", type: "int"}]},
+        "burn": {label: "Burn", params: [{slot: "rounds", type: "count", optional: true}]},
         "corrosion-resistant": {label: "Corrosion-Resistant", params: [{slot: "score", type: "positive"}]},
         "corrosive": {label: "Corrosive"},
         "dangerous": {label: "Dangerous", conflict: ["very-dangerous"]},
@@ -148,7 +152,7 @@ const REGISTRY = {
         "fire": {label: "Fire"},
         "hazardous": {label: "Hazardous", params: [{slot: "score", type: "negative"}]},
         "inaccurate": {label: "Inaccurate", params: [{slot: "score", type: "negative", optional: true}]},
-        "incendiary": {label: "Incendiary", params: [{slot: "score", type: "int"}]},
+        "incendiary": {label: "Incendiary", params: [{slot: "score", type: "int", optional: true}]},
         "ion": {label: "Ion"},
         "lo-pen": {label: "Lo-Pen", params: [{slot: "multiplier", type: "int"}], conflict: ["ap"]},
         "one-use": {label: "One Use"},
@@ -194,9 +198,15 @@ export const CUSTOM_KEY = "custom";
 // `dice`, `interval`, `band`, `difficulty`, `level`, `text` — never do, so their `num` stays null.
 const NUMERIC_TYPES = new Set(["int", "positive", "negative", "distance", "decimal", "count"]);
 
-const DICE = /^\d*[dD]\d*\s*(?:[+-]\s*\d+)?$/;
+const DICE = /^[+-]?\d*[dD]\d*\s*(?:[+-]\s*\d+)?$/;
 const INTERVAL = /^\d*[dD]\d*\s*(?:[+-]\s*\d+)?\s+\S+/;
 const LEADING_NUMBER = /^([+-]?\d+(?:[.,]\d+)?)\s*(.*)$/;
+
+/** What the books print where a rating has no limit: a meson gun's AP, HG p.32. It has no number. */
+const UNLIMITED = "∞";
+
+/** All a number may carry: a unit, or a slash and a figure — `0m`, `Blast 8/25` (FC p.165). */
+const UNIT = /^(?:[a-z]?|\/\S+)$/i;
 
 /** Typographic stand-ins for `-`: true minus, en dash, hyphen, non-breaking hyphen. */
 const SIGNS = /[−–‐‑]/g;
@@ -204,6 +214,11 @@ const SIGNS = /[−–‐‑]/g;
 /** Folded for matching only: signs regularised, case dropped, length untouched. */
 function fold(text) {
     return String(text ?? "").replace(SIGNS, "-").toLowerCase();
+}
+
+/** A name folded further, a hyphen reading as a space: the books print `One-Use` for One Use. */
+function foldName(text) {
+    return fold(text).replace(/-/g, " ");
 }
 
 function deepFreeze(value) {
@@ -230,6 +245,7 @@ export const TRAITS = deepFreeze(REGISTRY);
  * Spellings the books print for a trait the registry names otherwise, canonical slug to alternates.
  */
 const ALIASES = Object.freeze({
+    blast: ["Burst"],
     camouflaged: ["Camouflage"],
     armour: ["Armoured"],
     // `One Shot` on the thrown weapons (Dart, Javelin — CSC p.154) is `One Use` said differently:
@@ -451,8 +467,8 @@ export function formatTrait(entry) {
     return params.length > 0 ? `${label} (${params.join(", ")})` : label;
 }
 
-/** Split on commas at depth zero: `Diseased (Average (8+), D3, 1D days)` nests its difficulty. */
-function splitTokens(text) {
+/** Split on any of `separators` at depth zero: `Diseased (Average (8+), D3, 1D days)` nests. */
+function splitTokens(text, separators = ",") {
     const tokens = [];
     let depth = 0;
     let start = 0;
@@ -460,7 +476,7 @@ function splitTokens(text) {
         const c = text[i];
         if (c === "(") depth++;
         else if (c === ")") depth--;
-        else if ((c === ",") && (depth === 0)) {
+        else if (separators.includes(c) && (depth === 0)) {
             tokens.push(text.slice(start, i).trim());
             start = i + 1;
         }
@@ -469,18 +485,28 @@ function splitTokens(text) {
     return tokens.filter(t => t !== "");
 }
 
-/** Whether a printed token can be what a slot of this type wants. */
-function fitsType(type, token) {
+/**
+ * Whether a printed token can be what a slot of this type wants.
+ * @param {boolean} [splits]   A `text` slot follows, so a trailing phrase is cut into it
+ */
+function fitsType(type, token, splits = false) {
     const folded = fold(token);
     switch (type) {
         case "dice": return DICE.test(folded);
         case "interval": return INTERVAL.test(folded);
         case "int": case "positive": case "negative": case "distance": case "decimal":
-            return LEADING_NUMBER.test(folded);
+            return numeric(folded, token, splits);
         // "an integer count, which may itself be printed as dice" — Composite (1D+3D).
-        case "count": return LEADING_NUMBER.test(folded) || DICE.test(folded);
+        case "count": return numeric(folded, token, splits) || DICE.test(folded);
         default: return true;
     }
+}
+
+/** A number and its unit. A phrase after it is a cell that lost its separator, not a value. */
+function numeric(folded, token, splits) {
+    if (token.trim() === UNLIMITED) return true;
+    const match = LEADING_NUMBER.exec(folded);
+    return Boolean(match) && (splits || UNIT.test(match[2]));
 }
 
 function slotNumber(type, token) {
@@ -501,17 +527,18 @@ function fillSlots(slots, tokens) {
     const queue = [...tokens];
     for (const [index, slot] of slots.entries()) {
         const remainingRequired = slots.slice(index + 1).filter(s => !s.optional).length;
+        const next = slots[index + 1];
+        const splits = NUMERIC_TYPES.has(slot.type) && (next?.type === "text");
         let token = queue[0];
         if (token === undefined || (slot.optional
-            && ((queue.length <= remainingRequired) || !fitsType(slot.type, token)))) {
+            && ((queue.length <= remainingRequired) || !fitsType(slot.type, token, splits)))) {
             if (slot.optional) continue;
             return null;
         }
-        if (!fitsType(slot.type, token)) return null;
+        if (!fitsType(slot.type, token, splits)) return null;
         queue.shift();
 
-        const next = slots[index + 1];
-        if (NUMERIC_TYPES.has(slot.type) && (next?.type === "text")) {
+        if (splits) {
             // Matched on the folded token and cut out of the printed one: folding preserves
             // offsets, so `−10 vs. lasers` keeps its typographic minus in `value`.
             const match = LEADING_NUMBER.exec(fold(token));
@@ -523,6 +550,13 @@ function fillSlots(slots, tokens) {
         params.push({ slot: slot.slot, value: token, num: slotNumber(slot.type, token) });
     }
     return queue.length === 0 ? params : null;
+}
+
+/** The printed slots, on commas then the trait's own separator — `/` by default (Core p.85). */
+function fillPrinted(entry, text) {
+    const own = entry.separator ?? "/";
+    return fillSlots(entry.params, splitTokens(text))
+        ?? (text.includes(own) ? fillSlots(entry.params, splitTokens(text, `,${own}`)) : null);
 }
 
 /**
@@ -537,20 +571,20 @@ export function parseTraitText(text, family) {
     const close = printed.lastIndexOf(")");
     const bracketed = (open > 0) && (close > open);
     const name = (bracketed ? printed.slice(0, open) : printed).trim();
-    const folded = fold(name);
+    const folded = foldName(name);
     const inner = bracketed ? printed.slice(open + 1, close) : "";
 
     for (const { label, entry } of FAMILY_LABELS[family] ?? []) {
-        const spelling = fold(label);
+        const spelling = foldName(label);
         if (folded === spelling) {
-            const params = fillSlots(entry.params, splitTokens(inner));
+            const params = fillPrinted(entry, inner);
             if (params) return { family, key: entry.slug, params };
         }
         // `AP 5`, `Armour +12`, and `AP3` — which the books print 27 times with no separator at
         // all.
         else if (!bracketed && (folded.length > spelling.length) && folded.startsWith(spelling)
             && /[^a-z]/.test(folded.charAt(spelling.length))) {
-            const params = fillSlots(entry.params, splitTokens(name.slice(label.length).trim()));
+            const params = fillPrinted(entry, name.slice(label.length).trim());
             if (params) return { family, key: entry.slug, params };
         }
     }

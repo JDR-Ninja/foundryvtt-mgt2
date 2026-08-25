@@ -1,0 +1,42 @@
+{
+  "_id": "demoAmmoMagnum01",
+  "name": "Demo — Magnum Rounds",
+  "type": "ammunition",
+  "img": "icons/svg/explosion.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 10,
+        "cliff": "free text is the whole link",
+        "teaches": [
+          "`weaponType` is free text and is the entire way a round says what it fits — no id, no link, and nothing filters on it.",
+          "A round may override the weapon's `damage` and carry its own `magazine` and `magazineCost`.",
+          "`replaceTraits: true` makes these traits *replace* the weapon's rather than add to them."
+        ],
+        "trap": "`replaceTraits` is the field that decides whether `AP (3)` on the pistol survives loading this round. Here it does not: the round is Lo-Pen and says so by replacing."
+      }
+    }
+  },
+  "system": {
+    "description": "Heavy slugs for the patrol sidearm. They hit harder and bite less deeply.",
+    "source": { "book": "", "page": "" },
+    "quantity": 24,
+    "weight": 0.02,
+    "weightless": false,
+    "cost": 40,
+    "tl": "TL08",
+    "legality": 3,
+    "container": { "id": "" },
+    "roll": { "characteristic": "", "skill": "", "difficulty": "" },
+    "weaponType": "Demo — Sidearm",
+    "magazine": 8,
+    "magazineCost": 30,
+    "damage": "3D6+2",
+    "traits": [
+      { "family": "weapon", "key": "lo-pen", "params": [{ "slot": "multiplier", "value": "2", "num": 2 }], "note": "" }
+    ],
+    "replaceTraits": true,
+    "rules": ["A magazine of these holds eight rounds where the standard magazine holds twelve."]
+  },
+  "effects": []
+}

@@ -1,5 +1,6 @@
 import { MGT2Helper } from "../helper.js";
 import { copyItemWithContents } from "../item.js";
+import { GuideButtonMixin } from "../guide.js";
 import { SheetModeMixin } from "../sheet-mode.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -15,7 +16,7 @@ const RUNGS = { 0: "none", 1: "limited", 2: "observer", 3: "owner" };
  * anything.
  * @extends {ActorSheetV2}
  */
-export class StashActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(ActorSheetV2)) {
+export class StashActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsApplicationMixin(ActorSheetV2))) {
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {

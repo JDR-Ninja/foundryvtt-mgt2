@@ -9,6 +9,7 @@
     "fuel": { "tons": 22 },
     "crew": [ { "role": "nosuchroleid0001", "count": 1 } ],
     "mounts": [ { "type": "singleTurret", "label": "Dorsal", "weapons": ["nosuchweapon0001"] } ],
+    "computer": { "processing": 10, "running": [] },
     "notes": "Repairs restore 1D hull points."
   },
   "items": [

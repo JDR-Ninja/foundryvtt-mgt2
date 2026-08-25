@@ -1,0 +1,61 @@
+{
+  "_id": "3wd9e5Iz4A9besSS",
+  "name": "Using this system",
+  "pages": [
+    {
+      "_id": "32DXnPgHrfV65dkn",
+      "name": "The character sheet",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<p>Not written yet. Until it is, the demo Traveller is the worked example: every part of it carries a note saying what the field is for and what reads it.</p>\n<h2 id=\"blocks\">The worked example</h2>\n<ul><li>@UUID[Compendium.mgt2.demo-actors.Actor.demoCharTravellr]{Demo — Traveller}</li></ul>"
+      },
+      "sort": 100,
+      "ownership": {
+        "default": -2
+      },
+      "flags": {
+        "mgt2": {
+          "guide": true,
+          "topic": "character",
+          "translated": true
+        }
+      }
+    },
+    {
+      "_id": "Kxn4HoBIv7mHLlDx",
+      "name": "Item sheets",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "format": 1,
+        "content": "<p>Not written yet. The Item types the system registers are below, from the manifest.</p>\n<h2 id=\"ammunition\">Ammunition</h2>\n<p>Rounds, and what they override on the weapon they are loaded into. Empty means the weapon's own.</p>\n<h2 id=\"armor\">Armor</h2>\n<h2 id=\"career\">Career</h2>\n<h2 id=\"cargo\">Cargo lot</h2>\n<p>A lot in the hold: freight with a destination and a deadline, or a speculative purchase with neither.</p>\n<h2 id=\"component\">Ship component</h2>\n<p>One row of a ship's design. Optional: a spacecraft stores its own ratings and is complete without any.</p>\n<h2 id=\"computer\">Computer</h2>\n<h2 id=\"contact\">Contact</h2>\n<h2 id=\"container\">Container (backpack, chest)</h2>\n<h2 id=\"contract\">Bounty contract</h2>\n<p>A bounty contract: the portion handed to the Travellers, and the referee's own.</p>\n<h2 id=\"disease\">Disease</h2>\n<p>Sub-types: Disease · Poison · Wound</p>\n<h2 id=\"drug\">Drug</h2>\n<p>A dose, what it does and what it leaves behind. The timing fields are empty where the book states none.</p>\n<h2 id=\"equipment\">Equipment</h2>\n<p>Sub-types: Augment · Clothing · Equipment · Trinket · Toolkit</p>\n<h2 id=\"item\">Item</h2>\n<p>Sub-types: Loot · Software</p>\n<h2 id=\"passage\">Passage</h2>\n<p>One booking rather than one passenger: a class, a head count and a fare, for a single jump.</p>\n<h2 id=\"role\">Crew Station</h2>\n<h2 id=\"species\">Species</h2>\n<h2 id=\"talent\">Skill &amp; Psionic Talent</h2>\n<p>Sub-types: Skill · Psionic talent</p>\n<h2 id=\"weapon\">Weapon</h2>"
+      },
+      "sort": 200,
+      "ownership": {
+        "default": -2
+      },
+      "flags": {
+        "mgt2": {
+          "guide": true,
+          "topic": "item",
+          "translated": true
+        }
+      }
+    }
+  ],
+  "folder": null,
+  "flags": {
+    "mgt2": {
+      "guide": true,
+      "lang": "en"
+    }
+  }
+}

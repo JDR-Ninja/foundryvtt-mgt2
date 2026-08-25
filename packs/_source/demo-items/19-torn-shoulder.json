@@ -1,0 +1,30 @@
+{
+  "_id": "demoWoundShoulde",
+  "name": "Demo — Torn Shoulder",
+  "type": "disease",
+  "img": "icons/svg/blood.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 19,
+        "cliff": "the sub-type this system added",
+        "teaches": [
+          "`wound` is the third sub-type of an affliction and it is this system's, not a book's — a lasting injury written as a document instead of as a note.",
+          "`difficulty` on a wound is the check to treat it rather than the check to resist it.",
+          "`damage` may be blank: a wound that only costs a DM has no formula to roll."
+        ],
+        "trap": "No Endurance check is ever offered for a `wound`. `MGT2.EnduranceResisted` is exactly `[\"disease\", \"poison\"]`, so this sub-type is carried, displayed and healed, and never resisted."
+      }
+    }
+  },
+  "system": {
+    "description": "A shoulder that came out of its socket against a mooring line and did not go back the same.",
+    "subType": "wound",
+    "source": { "book": "", "page": "" },
+    "difficulty": "Difficult",
+    "damage": "",
+    "effect": "DM-2 on any check that puts weight on the arm, until a Medic check of Difficult (10+) closes it.",
+    "interval": "Until treated"
+  },
+  "effects": []
+}

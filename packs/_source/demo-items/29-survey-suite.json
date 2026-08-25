@@ -1,0 +1,40 @@
+{
+  "_id": "demoSoftwareSurv",
+  "name": "Demo — Survey Suite",
+  "type": "item",
+  "img": "icons/svg/dice-target.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 29,
+        "cliff": "software points at its host by id",
+        "teaches": [
+          "subType: software is what turns an item Item into a program; the software block is dead weight on any other sub-type.",
+          "bandwidth is what the program wants, runAt what it has been told to settle for, and effect the sentence describing what it does.",
+          "software.computerId holds the id of a host Item embedded on the SAME Actor — a computer, or an equipped armour or fitted augment carrying a Processing figure."
+        ],
+        "trap": "computerId is blank here because this copy is loose in a compendium and there is no Actor for it to resolve against. runAt below bandwidth is a stored choice and never a derivation: 2 under a bandwidth of 3 makes downgraded come out true, and nothing recomputes runAt when the bandwidth changes. A SPACECRAFT does not use this graph at all — its budget is system.computer.processing and its started programs are ids in system.computer.running. See the Demo — Kestrel-class Courier."
+      }
+    }
+  },
+  "system": {
+    "description": "Reads a tide chart against a sounding and tells you where the channel moved. Rated for three, run at two.",
+    "subType": "software",
+    "source": { "book": "", "page": "" },
+    "quantity": 1,
+    "weight": 0,
+    "weightless": true,
+    "cost": 6000,
+    "tl": "TL12",
+    "legality": 0,
+    "container": { "id": "" },
+    "roll": { "characteristic": "", "skill": "", "difficulty": "" },
+    "software": {
+      "bandwidth": 3,
+      "runAt": 2,
+      "effect": "DM+1 on any check to navigate a tidal channel, and DM+2 with a fresh sounding.",
+      "computerId": ""
+    }
+  },
+  "effects": []
+}

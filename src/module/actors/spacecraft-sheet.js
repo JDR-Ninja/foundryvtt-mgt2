@@ -42,6 +42,9 @@ for ( const id of BLOCKS ) {
  */
 export class SpacecraftActorSheet extends TravellerActorSheet {
 
+  /** Its own page lands with the reference chapter. @inheritDoc */
+  static GUIDE_TOPIC = null;
+
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
         classes: ["spacecraft"],

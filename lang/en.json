@@ -330,6 +330,10 @@
         "name": "Show Life in sheet",
         "hint": "Show life information in actor sheet"
       },
+      "showGuideButton": {
+        "name": "Show the guide button",
+        "hint": "Put a ? in the title bar of every sheet, opening the guide at the page for that screen."
+      },
       "chainInto": {
         "name": "Check cards: Chain into button",
         "hint": "Puts a Chain into… button on every check card that produced an Effect, offering that check to whatever is rolled next. This one is everyone's button and not only the referee's — the switch decides whether the table has it at all."
@@ -1343,7 +1347,34 @@
       }
     },
     "Compendium": {
-      "Docs": "MGT2 — What this system does with the rules"
+      "Docs": "MGT2 — What this system does with the rules",
+      "Guide": "MGT2 — Guide to the system",
+      "DemoActors": "MGT2 — Demo actors, annotated",
+      "DemoItems": "MGT2 — Demo items, annotated"
+    },
+    "Guide": {
+      "Journal": "Using this system",
+      "Open": "Open the guide",
+      "Untranslated": "This page is in English: the guide has not been translated into this language yet.",
+      "Chrome": {
+        "Rule": "Rule",
+        "Default": "Default",
+        "Source": "Where it is printed",
+        "Setting": "Setting",
+        "Scope": "Applies to",
+        "Type": "Type",
+        "SubTypes": "Sub-types",
+        "Trait": "Trait",
+        "Parameters": "Parameters",
+        "Key": "Stored value",
+        "Meaning": "Meaning",
+        "On": "On",
+        "Off": "Off",
+        "None": "None",
+        "World": "The whole table",
+        "Client": "Each player",
+        "NoDemo": "No demonstration content is installed."
+      }
     },
     "Explorer": {
       "Title": "Compendium explorer",

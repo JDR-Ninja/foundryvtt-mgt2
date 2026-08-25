@@ -1,0 +1,30 @@
+{
+  "_id": "demoDiseaseFever",
+  "name": "Demo — Dock Fever",
+  "type": "disease",
+  "img": "icons/svg/biohazard.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 17,
+        "cliff": "the interval is displayed and never scheduled",
+        "teaches": [
+          "The four fields of an affliction: `difficulty`, `damage`, `effect` and `interval`.",
+          "`subType: \"disease\"` is one of the two the system resists with Endurance — the pair is exactly `disease` and `poison`.",
+          "`damage` is a real Foundry formula and goes through the damage chain like any other wound."
+        ],
+        "trap": "`interval` is a sentence the referee reads. Nothing in this system ticks a clock: no timer fires, no reminder appears, and the only automatic interval anywhere is the combat round."
+      }
+    }
+  },
+  "system": {
+    "description": "Caught off the tidal flats. It starts as a cough and ends as a week in a bunk.",
+    "subType": "disease",
+    "source": { "book": "", "page": "" },
+    "difficulty": "Average",
+    "damage": "2D6",
+    "effect": "While it runs, every physical check is made at DM-1.",
+    "interval": "One day"
+  },
+  "effects": []
+}

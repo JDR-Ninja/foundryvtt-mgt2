@@ -1,0 +1,38 @@
+{
+  "_id": "demoComponentFul",
+  "name": "Demo — Fuel Processor",
+  "type": "component",
+  "img": "icons/svg/barrel.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 27,
+        "cliff": "tonnage is three numbers, not one",
+        "teaches": [
+          "tonnage is a triple — tons, percent and minimum — because a component may be a flat figure, a share of the hull, or a share with a floor.",
+          "power and powerPerTon are the same choice for the power draw, and both are read.",
+          "rating is the component's own grade: how many tons of fuel this one refines in a day.",
+          "tl on a component is a number, unlike every other Item type, where it is the string TL12."
+        ],
+        "trap": "dm is a grade rather than a modifier the sheet adds up. A component that improves a check states it here, and the ship reads it when the check is made — writing it as if it were a bonus on the component itself changes nothing."
+      }
+    }
+  },
+  "system": {
+    "description": "Skims and refines what the scoops take. Two days on a gas giant and the tank is clean.",
+    "source": { "book": "", "page": "" },
+    "category": "fuel",
+    "tl": 9,
+    "tonnage": { "tons": 6, "percent": 0, "minimum": 0 },
+    "cost": 300000,
+    "power": 0,
+    "powerPerTon": 0.25,
+    "hardened": false,
+    "rating": 20,
+    "bandwidth": 0,
+    "runAt": null,
+    "quantity": 1,
+    "dm": 0
+  },
+  "effects": []
+}

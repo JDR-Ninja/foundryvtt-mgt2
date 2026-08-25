@@ -7,6 +7,7 @@ import { MGT2Helper } from "./helper.js";
 import { copyItemWithContents } from "./item.js";
 import { RollPromptHelper } from "./roll-prompt.js";
 import { Rules } from "./rules.js";
+import { GuideButtonMixin } from "./guide.js";
 import { SheetModeMixin } from "./sheet-mode.js";
 import { appendTraitText, bindTraitInput, prepareTraitBlock, refreshTraitNumbers } from "./traits.js";
 
@@ -102,7 +103,15 @@ const SUBTYPES = {
 };
 
 /** The Traveller item sheet, shared by all item sub-types. @extends {ItemSheetV2} */
-export class TravellerItemSheet extends SheetModeMixin(HandlebarsApplicationMixin(ItemSheetV2)) {
+export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsApplicationMixin(ItemSheetV2))) {
+
+  /** @inheritDoc */
+  static GUIDE_TOPIC = "item";
+
+  /** One page serves every Item type, and the type is its own heading on it. @inheritDoc */
+  get guideAnchor() {
+    return this.item.type;
+  }
 
   /** @inheritDoc */
   static DEFAULT_OPTIONS = {

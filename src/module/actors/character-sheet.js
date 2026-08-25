@@ -13,6 +13,7 @@ import { MGT2Helper } from "../helper.js";
 import { MGT2Combatant } from "../combatant.js";
 import { copyItemWithContents } from "../item.js";
 import { RollPromptHelper } from "../roll-prompt.js";
+import { GuideButtonMixin } from "../guide.js";
 import { Rules } from "../rules.js";
 import { SheetModeMixin } from "../sheet-mode.js";
 import { appendTraitText, bindTraitInput, formatTrait, hazardTraits, prepareTraitBlock, refreshTraitNumbers } from "../traits.js";
@@ -25,7 +26,10 @@ const { DragDrop } = foundry.applications.ux;
 const PARTS_PATH = "systems/mgt2/templates/actors";
 
 /** The Traveller character sheet. @extends {ActorSheetV2} */
-export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMixin(ActorSheetV2)) {
+export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsApplicationMixin(ActorSheetV2))) {
+
+  /** @inheritDoc */
+  static GUIDE_TOPIC = "character";
 
   /**
    * The Item types this sheet accepts on a drop, declared so a subclass can say what it takes
@@ -2151,6 +2155,9 @@ export class TravellerActorSheet extends SheetModeMixin(HandlebarsApplicationMix
  * @extends {TravellerActorSheet}
  */
 export class NpcActorSheet extends TravellerActorSheet {
+
+  /** Its own page lands with the reference chapter. @inheritDoc */
+  static GUIDE_TOPIC = null;
 
   /** @inheritDoc */
   static DEFAULT_OPTIONS = {

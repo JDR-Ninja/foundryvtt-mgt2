@@ -1,0 +1,31 @@
+{
+  "_id": "demoContainerKit",
+  "name": "Demo — Field Kit",
+  "type": "container",
+  "img": "icons/svg/item-bag.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 35,
+        "cliff": "weight rolls up through the bag",
+        "teaches": [
+          "A container holds nothing itself: the things inside it are ordinary Items on the same Actor, each naming this document's id in container.id.",
+          "onHand is the difference between a bag being carried and a bag being in the hold — it is what decides whether the contents count against encumbrance.",
+          "locked and lockedDescription hide the contents from a player without hiding the bag."
+        ],
+        "trap": "weightless on a container removes the BAG from the total and never its contents. A grav harness that carries its own load is weightless with contents that still weigh; a bag of holding is not a thing this schema can express."
+      }
+    }
+  },
+  "system": {
+    "description": "A patrol satchel: oilcloth, two buckles and a shoulder strap that has been replaced twice.",
+    "source": { "book": "", "page": "" },
+    "onHand": true,
+    "location": "Slung, left shoulder",
+    "weightless": false,
+    "container": { "id": "" },
+    "locked": false,
+    "lockedDescription": ""
+  },
+  "effects": []
+}

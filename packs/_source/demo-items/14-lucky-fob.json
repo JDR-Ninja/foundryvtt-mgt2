@@ -1,0 +1,52 @@
+{
+  "_id": "demoTrinketFob01",
+  "name": "Demo — Lucky Fob",
+  "type": "equipment",
+  "img": "icons/svg/coins.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 14,
+        "cliff": "an effect belongs to the Item that carries it",
+        "teaches": [
+          "`subType: \"trinket\"` is the sub-type for a thing with no mechanical weight of its own.",
+          "An Active Effect on an Item transfers to whoever holds it — there is no pack of loose effects and there should not be.",
+          "`transfer: true` and `disabled: false` are what make it live; `flags.mgt2.suspended` is the referee's pause, kept apart from `disabled`."
+        ],
+        "trap": "The change is aimed at `system.modifiers.check.custom`, a stored accumulator, so `phase: \"initial\"` is right. Aim one at a derived value in that phase and the next `prepareDerivedData` overwrites it — see the `Demo — Standing DM` pair."
+      }
+    }
+  },
+  "system": {
+    "description": "A brass mooring tag off a boat that sank without her. Its owner will tell you it works.",
+    "subType": "trinket",
+    "source": { "book": "", "page": "" },
+    "quantity": 1,
+    "weight": 0.1,
+    "weightless": false,
+    "cost": 0,
+    "tl": "TL04",
+    "legality": 0,
+    "container": { "id": "" },
+    "roll": { "characteristic": "", "skill": "", "difficulty": "" },
+    "equipped": true,
+    "augment": { "improvement": "", "modifiers": [], "skill": { "name": "", "value": 0 }, "protection": 0 },
+    "processing": null,
+    "specialised": { "software": "", "bonus": 0 }
+  },
+  "effects": [
+    {
+      "_id": "demoEffectFob001",
+      "name": "Demo — Held for luck",
+      "img": "icons/svg/coins.svg",
+      "disabled": false,
+      "transfer": true,
+      "description": "<p>A referee-invented trinket effect: +1 on every check while it is carried.</p>",
+      "system": {
+        "changes": [
+          { "key": "system.modifiers.check.custom", "type": "add", "value": 1, "phase": "initial" }
+        ]
+      }
+    }
+  ]
+}

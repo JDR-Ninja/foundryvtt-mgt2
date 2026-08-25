@@ -85,6 +85,7 @@ import { migrateWorld } from "./migration.js";
 
 import { applyPalette, groundWindow, migrateDarkPreset, migrateLegacyTheme, registerSettings,
   wirePalettePickers } from "./settings.js";
+import { applyGuideButton } from "./guide.js";
 
 function registerHandlebarsHelpers() {
   Handlebars.registerHelper('showDM', dm => MGT2Helper.signed(dm));
@@ -354,6 +355,9 @@ Hooks.once("init", async function () {
   registerHandlebarsHelpers();
   registerSettings();
   applyPalette();
+  // A class written only on change is missing on the first load of a client who switched it off in
+  // an earlier session.
+  applyGuideButton();
   migrateLegacyTheme();
   migrateDarkPreset();
 

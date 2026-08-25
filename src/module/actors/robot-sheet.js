@@ -14,6 +14,9 @@ const ROW_ARRAYS = new Set(["options", "locomotion", "manipulators"]);
 /** The robot sheet. @extends {TravellerActorSheet} */
 export class RobotActorSheet extends TravellerActorSheet {
 
+  /** Its own page lands with the reference chapter. @inheritDoc */
+  static GUIDE_TOPIC = null;
+
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
         classes: ["robot"],

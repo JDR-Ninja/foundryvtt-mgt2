@@ -330,6 +330,10 @@
         "name": "Mostrar a vida na ficha",
         "hint": "Exibe as informações de vida na ficha de ator."
       },
+      "showGuideButton": {
+        "name": "Mostrar o botão do guia",
+        "hint": "Coloca um ? na barra de título de cada ficha, que abre o guia na página daquela tela."
+      },
       "chainInto": {
         "name": "Cartões de teste: botão Encadear em…",
         "hint": "Coloca um botão Encadear em… em cada cartão de teste que tenha produzido um Efeito, oferecendo esse teste ao que for rolado em seguida. Este botão é de todos e não só do árbitro — a chave decide se a mesa o tem ou não."
@@ -1343,7 +1347,34 @@
       }
     },
     "Compendium": {
-      "Docs": "MGT2 — O que este sistema faz com as regras"
+      "Docs": "MGT2 — O que este sistema faz com as regras",
+      "Guide": "MGT2 — Guia do sistema",
+      "DemoActors": "MGT2 — Atores de demonstração, anotados",
+      "DemoItems": "MGT2 — Itens de demonstração, anotados"
+    },
+    "Guide": {
+      "Journal": "Usando este sistema",
+      "Open": "Abrir o guia",
+      "Untranslated": "Esta página está em inglês: o guia ainda não foi traduzido para este idioma.",
+      "Chrome": {
+        "Rule": "Regra",
+        "Default": "Padrão",
+        "Source": "Onde está impresso",
+        "Setting": "Configuração",
+        "Scope": "Aplica-se a",
+        "Type": "Tipo",
+        "SubTypes": "Subtipos",
+        "Trait": "Traço",
+        "Parameters": "Parâmetros",
+        "Key": "Valor armazenado",
+        "Meaning": "Significado",
+        "On": "Ligado",
+        "Off": "Desligado",
+        "None": "Nenhum",
+        "World": "A mesa inteira",
+        "Client": "Cada jogador",
+        "NoDemo": "Nenhum conteúdo de demonstração está instalado."
+      }
     },
     "Explorer": {
       "Title": "Explorador de compêndios",

@@ -1,0 +1,30 @@
+{
+  "_id": "demoPoisonVenom1",
+  "name": "Demo — Marsh Venom",
+  "type": "disease",
+  "img": "icons/svg/poison.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 18,
+        "cliff": "two sub-types share one schema",
+        "teaches": [
+          "A poison is the same four fields as a disease under a different sub-type — the schema does not branch.",
+          "`poison` is the second of the two Endurance-resisted sub-types, so the sheet offers the check here as it does on a disease.",
+          "A creature's `Poison` trait names a difficulty, a damage and an interval; this Item is where those become a document."
+        ],
+        "trap": "The sub-type is the whole of the difference. Change `poison` to `wound` on this document and the Endurance check silently stops being offered, because `MGT2.EnduranceResisted` lists only `disease` and `poison`."
+      }
+    }
+  },
+  "system": {
+    "description": "What a marsh runner leaves in a bite. Slow, and it wants attention within the hour.",
+    "subType": "poison",
+    "source": { "book": "", "page": "" },
+    "difficulty": "Difficult",
+    "damage": "2D6+2",
+    "effect": "The victim is stunned for as long as the venom runs.",
+    "interval": "10 minutes"
+  },
+  "effects": []
+}

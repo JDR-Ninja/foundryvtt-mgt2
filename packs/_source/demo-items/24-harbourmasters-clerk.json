@@ -1,0 +1,43 @@
+{
+  "_id": "demoContactClerk",
+  "name": "Demo — Harbourmaster's Clerk",
+  "type": "contact",
+  "img": "icons/svg/cowled.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 24,
+        "cliff": "which fields the ledger writes and which the referee does",
+        "teaches": [
+          "relation and status carry a closed list because chargen writes them from code — Allie, Contact, Rival, Enemy, Patron, and Alive, Unknow, Dead.",
+          "attitude deliberately carries no list: it is the referee's word for how this person is taking things today.",
+          "skill.speciality and skill.characteristic are what the contact is good for, so a check can be offered against them.",
+          "provenance records where the contact came from: which term, which career, which table."
+        ],
+        "trap": "system.actor is left empty on purpose. It is a cross-Actor UUID, and a single drag out of a compendium does not keep document ids — the reference would arrive broken in the referee's world. The written details below are what survive; link the Actor by hand once both are in the world."
+      }
+    }
+  },
+  "system": {
+    "description": "Keeps the harbour ledger, and remembers every hull that ever came in light.",
+    "subType": "contact",
+    "source": { "book": "", "page": "" },
+    "cost": 1,
+    "skill": { "speciality": "Bureaucracy", "characteristic": "education" },
+    "status": "Alive",
+    "attitude": "Owes a favour, and would rather not be reminded",
+    "relation": "Contact",
+    "title": "Clerk of the Harbour",
+    "nickname": "Tallies",
+    "species": "Demo — Sophont",
+    "gender": "non-binary",
+    "pronouns": "they/them",
+    "homeworld": "Demo — Bellweather",
+    "location": "Harbour office, second floor",
+    "occupation": "Ledger clerk",
+    "notes": "<p>Signed off a manifest they should not have, once, and has been careful ever since. Will trade a berth for a name.</p>",
+    "actor": null,
+    "provenance": { "term": 2, "career": "Demo — Harbour Patrol", "table": "Event", "note": "Event roll of 9: a quiet word from the Harbourmaster." }
+  },
+  "effects": []
+}

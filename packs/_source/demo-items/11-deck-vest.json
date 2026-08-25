@@ -1,0 +1,45 @@
+{
+  "_id": "demoArmorDeckVst",
+  "name": "Demo — Deck Vest",
+  "type": "armor",
+  "img": "icons/svg/shield.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 11,
+        "cliff": "the armour skill DM",
+        "teaches": [
+          "`protection` is the number subtracted from every wound before it reaches a characteristic.",
+          "`requireSkill` and `requireSkillLevel` are the pair behind the armour DM: a wearer short of the level takes a penalty on every check.",
+          "`processing` on an armour is what lets a suit run software — `null` means it runs none."
+        ],
+        "trap": "`requireSkill` matches an owned skill Item by name, so it reads `Demo — Vacc Suit` and not `Vacc Suit`. A name that matches nothing silently penalises everyone who wears it."
+      }
+    }
+  },
+  "system": {
+    "description": "A patrol vest over a sealed liner. Enough against a boat hook, and rated for a wet deck.",
+    "source": { "book": "", "page": "" },
+    "quantity": 1,
+    "weight": 4,
+    "weightless": false,
+    "cost": 1500,
+    "tl": "TL09",
+    "legality": 4,
+    "container": { "id": "" },
+    "roll": { "characteristic": "", "skill": "", "difficulty": "" },
+    "equipped": true,
+    "radiations": 0,
+    "protection": 6,
+    "processing": null,
+    "specialised": { "software": "", "bonus": 0 },
+    "requireSkill": "Demo — Vacc Suit",
+    "requireSkillLevel": 1,
+    "powered": false,
+    "breach": "intact",
+    "options": [
+      { "family": "custom", "key": "custom", "params": [], "note": "Sealed liner, one hour of air" }
+    ]
+  },
+  "effects": []
+}

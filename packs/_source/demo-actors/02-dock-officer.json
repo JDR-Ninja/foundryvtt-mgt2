@@ -1,0 +1,111 @@
+{
+  "_id": "demoNpcDockOffcr",
+  "name": "Demo — Dock Officer",
+  "type": "npc",
+  "img": "icons/svg/cowled.svg",
+  "prototypeToken": { "actorLink": true },
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 2,
+        "cliff": "_preCreate never runs for a packed document",
+        "teaches": [
+          "subType: person is one half of this Actor type; the other half, a creature, shares the schema and almost none of the configuration.",
+          "role, attitude and experience are the three fields a referee sets before the officer says anything.",
+          "combatant is what puts this one into the initiative order rather than into the scene.",
+          "personal.ucp is the person's own profile line, and it exists on npc and on no other type."
+        ],
+        "trap": "Everything under config, and every characteristics.*.show below, is written by hand because _preCreate does not run for a document that arrives from a pack. It also bails out entirely if config.damageOrder is already present, so a packed npc gets no preset at all: an empty damageOrder means the four damage states go quiet, with no error and no warning."
+      }
+    }
+  },
+  "system": {
+    "subType": "person",
+    "biography": "<p>Runs the day watch on the Bellweather quay. Has signed off nine thousand manifests and remembers the four that were wrong.</p>",
+    "notes": "<p>Will help, for a price that is never money.</p>",
+    "personal": {
+      "title": "Dock Officer",
+      "species": "",
+      "age": "41",
+      "gender": "man",
+      "sex": "male",
+      "pronouns": "he/him",
+      "homeworld": "Demo — Bellweather",
+      "ucp": "798746"
+    },
+    "config": {
+      "damageOrder": ["endurance", "strength", "dexterity"],
+      "initiative": { "characteristic": "dexterity", "flat": 0 }
+    },
+    "characteristics": {
+      "strength": { "base": 7, "damage": 0, "show": true },
+      "dexterity": { "base": 9, "damage": 0, "show": true },
+      "endurance": { "base": 8, "damage": 0, "show": true },
+      "intellect": { "base": 7, "damage": 0, "show": true },
+      "education": { "base": 4, "damage": 0, "show": true },
+      "social": { "base": 6, "damage": 0, "show": true },
+      "morale": { "base": 0, "damage": 0, "show": false },
+      "luck": { "base": 0, "damage": 0, "show": false },
+      "sanity": { "base": 0, "damage": 0, "show": false },
+      "charm": { "base": 0, "damage": 0, "show": false },
+      "psionic": { "base": 0, "damage": 0, "show": false },
+      "other": { "base": 0, "damage": 0, "show": false },
+      "reputation": { "base": 0, "damage": 0, "show": false },
+      "hits": { "base": 0, "damage": 0, "show": false }
+    },
+    "traits": [],
+    "modifiers": {
+      "check": { "custom": 0, "auto": 0, "effect": 0, "dm": 0 },
+      "initiative": { "custom": 0, "auto": 0, "effect": 0, "dm": 0 },
+      "skills": {}
+    },
+    "speed": { "ground": 6, "swim": 4, "fly": null, "note": "Slower than he looks on a wet quay." },
+    "behaviour": { "diet": "", "pattern": "" },
+    "role": "Harbour official",
+    "attitude": "Indifferent",
+    "experience": "experienced",
+    "combatant": false,
+    "group": { "count": { "value": 1, "max": 1 } },
+    "life": { "value": 0, "max": 0, "damage": 0 },
+    "stun": 0,
+    "states": { "fatigue": false }
+  },
+  "items": [
+    {
+      "_id": "npcSkillAdmin001",
+      "name": "Demo — Admin",
+      "type": "talent",
+      "img": "icons/svg/book.svg",
+      "system": {
+        "description": "Paperwork, and the people who move it.",
+        "subType": "skill",
+        "source": { "book": "", "page": "" },
+        "cost": 0,
+        "level": 2,
+        "skill": { "speciality": "", "reduceEncumbrance": false },
+        "psionic": { "reach": "", "cost": 1, "duration": "", "durationUnit": "" },
+        "roll": { "characteristic": "education", "skill": "", "difficulty": "" },
+        "provenance": { "term": null, "career": "", "table": "", "note": "" }
+      },
+      "effects": []
+    },
+    {
+      "_id": "npcSkillInvestg1",
+      "name": "Demo — Investigate",
+      "type": "talent",
+      "img": "icons/svg/book.svg",
+      "system": {
+        "description": "Finding what a manifest does not say.",
+        "subType": "skill",
+        "source": { "book": "", "page": "" },
+        "cost": 0,
+        "level": 1,
+        "skill": { "speciality": "", "reduceEncumbrance": false },
+        "psionic": { "reach": "", "cost": 1, "duration": "", "durationUnit": "" },
+        "roll": { "characteristic": "intellect", "skill": "", "difficulty": "" },
+        "provenance": { "term": null, "career": "", "table": "", "note": "" }
+      },
+      "effects": []
+    }
+  ]
+}
