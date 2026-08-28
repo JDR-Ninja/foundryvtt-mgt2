@@ -123,6 +123,9 @@ steps in the order the book prints them.
   are the game as printed.
 * **Four languages** — French, English, Spanish and Brazilian Portuguese, interface and content
   strings alike.
+* **Three compendiums it writes itself** — what the system does with the rules, one journal per
+  language, and an annotated demo document for every type and sub-type it registers. A worked
+  example, not a starter world: every figure in it is invented.
 * **One accent recolours everything.** Four palette presets, eleven accents, light, dark or
   follow-the-system — and every text token clears 4.5:1 contrast in all of them.
 

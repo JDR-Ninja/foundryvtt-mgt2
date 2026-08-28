@@ -29,6 +29,11 @@ de Mongoose Publishing — desarrollado especialmente para la edición francesa 
 * **Cuarenta y nueve reglas opcionales y variantes** en una sola pantalla de configuración, cada una
   con el libro y la página de donde viene — o con la advertencia de que ningún libro la establece.
   Por defecto se juega tal como está impreso.
+* **Una sola paleta, y es del lector** — cuatro ajustes preestablecidos, once colores de acento, claro
+  u oscuro, y un par de éxito y fallo apto para daltonismo. Cada color de texto medido a 4,5:1 o
+  mejor.
+* **Tres compendios que el sistema escribe él mismo** — qué hace con las reglas, un diario por idioma,
+  y un documento de demostración anotado para cada tipo y subtipo que declara.
 * **Cuatro idiomas** — francés, inglés, español y portugués (Brasil).
 
 El detalle versión por versión está en el [changelog](CHANGELOG.es.md).

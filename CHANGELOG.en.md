@@ -9,7 +9,8 @@
 **The largest release this system has had.** 0.1.x was a character sheet; 0.2.0 is a game system.
 Seven Actor types, eighteen Item types, group Traveller creation, space combat and fleet battles,
 speculative trade and stop traffic, voyages and jump, training, the whole damage chain, forty-nine
-optional rules, and a documentation compendium in four languages.
+optional rules, a documentation compendium in four languages, and a worked demo of every type the
+system registers.
 
 ### ⚠ Breaking changes
 
@@ -41,6 +42,8 @@ optional rules, and a documentation compendium in four languages.
   runs them.
 * **Species are creation frames**, not parameter blocks: a species declares its own terms, checks,
   tables and tracks. The Core sequence is the default frame.
+* **A qualification roll can carry a conditional DM** — *DM+2 if SOC 9+*, the shape some careers and
+  some species print, which until now had to be remembered and applied by hand.
 * **Mustering out**: benefits, pension, ship shares, and a group-level close where only one Traveller
   may start owning a ship.
 * **Twenty-two optional creation rules** (see below), sixteen of them where no book settles the
@@ -60,6 +63,10 @@ optional rules, and a documentation compendium in four languages.
   spacecraft, an engine that resolves on an Attack Factor **with no roll to hit**, fighter squadrons,
   missile salvos in flight, morale and dispersal. In a fleet battle the group is the fleet and a ship
   becomes a combatant.
+* **Missiles and torpedoes** (Companion ch. 29), behind three switches. A salvo is **typed** —
+  standard, dogfight, interceptor or torpedo — and its class decides the range bands it may be
+  launched in. Defence resolves in three layers: area defence, point defence, and the Core's close-in
+  fire. A container launcher spends a hardpoint, so a hull under 100 tons may carry none.
 * **Grappling** — the book's eight outcomes: prone, disarm, throw, damage, pistol or small blade,
   escape, drag, continue.
 * **Dual weapons**, **Jack-of-All-Trades** and **the interrupted extended action** are applied.
@@ -101,6 +108,9 @@ optional rules, and a documentation compendium in four languages.
   TL that caps, never the computer's.
 * **Ship mortgage**, with its shares, its schedule, an option for a four-week period, and **Skipping
   on Debts**.
+* **A maintenance stamp**: the ship records the campaign day it was last serviced, and the sheet says
+  how many four-week periods it is overdue. Nothing is rolled and no modifier is derived — Core p.154
+  says maintenance *should* be done, so the DMs for skipping it stay the referee's.
 * **Credit transfer** — the first screen in this system that moves money on demand.
 * **Crew role** as an Item type: a role is a job description, and two gunners may share one.
 
@@ -120,6 +130,23 @@ optional rules, and a documentation compendium in four languages.
 * **Cargo lot** and **Passage** as Item types, with destination, due day and fare — three fields that
   had existed since the type did and that nothing had ever written.
 * **The counter closes**: a settled price buys a lot and debits the crew, and the hold sells back.
+
+### Reputation and contracts
+
+* **Reputation (REP)** joins the characteristics a table may adopt, off by default. It reads like any
+  other — `REP 0` is DM−3 — and the Reputation Change roll takes **DM−1 for every four REP already
+  held**, so a name already made is harder to grow. The eleven printed circumstances overlap on
+  purpose, and **only the highest one applies**: they are never summed.
+* **A bounty contract** as an Item type, and it is the **party's** document — the portion the book
+  hands over. The referee's own rows fold behind a courtesy on the same sheet: the reward floor, the
+  last known location, who knows what, the complications. The subject may be a person, a place or a
+  thing, and the subject, the issuer, the associates and the hunter are each a dropped world Actor
+  that degrades to a stored name for a reader who cannot see it.
+* **The party rolls its own contract.** The two rolls the book gives them — negotiating the fee, and
+  qualifying for a contract their Reputation does not reach — are made from the players' seats, on a
+  document they cannot otherwise edit.
+* **A generator tab** draws one from the printed tables: client, priority, subject, reward,
+  complication, eight draws each landing in the field its step names.
 
 ### The world around the Travellers
 
@@ -153,6 +180,12 @@ optional rules, and a documentation compendium in four languages.
   brought back inside the sheet, lighter tables.
 * **Play mode and edit mode** on the sheets, on the dnd5e model: structural controls disappear while
   you play.
+* **One palette, and it belongs to the reader.** Four presets, eleven accent colours, and a *light or
+  dark* axis that follows Foundry by default or overrules it for this system alone. Every colour on a
+  sheet derives from that one accent, and every text token was measured at 4.5:1 or better on every
+  ground. Two switches go with it: a dark window bar on both grounds, and a colour-blind pair for
+  success and failure. Five client settings, and none of them asks for a reload. **The three themes of
+  0.1.x are gone** — a client holding one is migrated and keeps its colour.
 * **Sheets, dialogs and chat cards follow the player's light or dark theme.**
 * **Item sheets moved to five tabs** over the same blocks, with a masthead above them: a weapon sheet
   goes from 956 px to 489 px.
@@ -182,6 +215,10 @@ Changing a switch re-prepares and re-renders open sheets; nothing asks you to re
 * **The system ships its first compendium**: `mgt2.docs`, one journal per language, twenty-three pages
   each. Every page says two things about one screen — **what it handles for you** and **what it leaves
   to you at the table**. It is documentation *about the system*, never rules text.
+* **Two demo compendiums, annotated**: one document for **every type and sub-type the system
+  registers** — 8 Actors and 27 Items, each named `Demo — `. Every one carries what the document is
+  for, what reads each field, and the one trap it exists to show. A worked example rather than a
+  starter world, and every figure in it is invented.
 * **Four declared languages** — French, English, Spanish, Brazilian Portuguese, and **all four are
   complete**. French is the system's target; the Spanish and Brazilian Portuguese vocabulary follows
   Mongoose's community translations, and book titles and trait names stay in English where no

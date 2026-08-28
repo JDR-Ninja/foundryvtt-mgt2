@@ -76,22 +76,6 @@
 			}
 		},
 		{
-			"name": "guide",
-			"label": "MGT2.Compendium.Guide",
-			"path": "packs/guide",
-			"type": "JournalEntry",
-			"system": "mgt2",
-			"ownership": {
-				"PLAYER": "OBSERVER",
-				"ASSISTANT": "OWNER"
-			},
-			"flags": {
-				"mgt2": {
-					"guide": true
-				}
-			}
-		},
-		{
 			"name": "demo-actors",
 			"label": "MGT2.Compendium.DemoActors",
 			"path": "packs/demo-actors",
@@ -120,7 +104,6 @@
 			"sorting": "m",
 			"packs": [
 				"docs",
-				"guide",
 				"demo-actors",
 				"demo-items"
 			]
@@ -308,7 +291,7 @@
 	},
 	"compatibility": {
 		"minimum": "14.366",
-		"verified": "14.366"
+		"verified": "14.367"
 	},
 	"grid": {
 		"type": 1,

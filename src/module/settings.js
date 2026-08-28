@@ -283,7 +283,8 @@ export const registerSettings = function () {
         name: "MGT2.Settings.showGuideButton.name",
         hint: "MGT2.Settings.showGuideButton.hint",
         scope: "client",
-        config: true,
+        // Out of the pane while no pack answers: a switch for a button nobody can see is noise.
+        config: false,
         type: Boolean,
         default: true,
         requiresReload: false,

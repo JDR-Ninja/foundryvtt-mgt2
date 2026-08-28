@@ -9,8 +9,9 @@
 **La plus grosse version du système à ce jour.** 0.1.x était une feuille de personnage ; 0.2.0 est un
 système de jeu. Sept types d'Acteur, dix-huit types d'Objet, la création de Voyageurs en groupe, le
 combat spatial et les batailles entre flottes, le commerce spéculatif et le trafic, le voyage et le
-saut, la formation, la chaîne de dégâts complète, quarante-neuf règles optionnelles, et un
-compendium de documentation en quatre langues.
+saut, la formation, la chaîne de dégâts complète, quarante-neuf règles optionnelles, un compendium de
+documentation en quatre langues, et une démonstration commentée de chaque type que le système
+déclare.
 
 ### ⚠ Ruptures
 
@@ -43,6 +44,8 @@ compendium de documentation en quatre langues.
 * **Les espèces sont des cadres de création**, pas des blocs de paramètres : une espèce déclare ses
   propres périodes, ses tests, ses tables et ses pistes. La séquence du livre de base est le cadre par
   défaut.
+* **Un jet de qualification peut porter un MD conditionnel** — *MD+2 si SOC 9+*, la forme qu'impriment
+  certaines carrières et certaines espèces, et qu'il fallait jusqu'ici retenir et appliquer à la main.
 * **Fin de carrière** : bénéfices, pension, parts de vaisseau, et une clôture de groupe où un seul
   Voyageur peut commencer propriétaire d'un vaisseau.
 * **Vingt-deux règles optionnelles de création** (voir plus bas), dont seize là où aucun livre ne
@@ -64,6 +67,11 @@ compendium de documentation en quatre langues.
   jet pour toucher**, les escadrons de chasseurs, les salves de missiles en vol, le moral et la
   dispersion. Dans une bataille de flotte, le groupe est la flotte et le vaisseau devient un
   combattant.
+* **Missiles et torpilles** (Companion ch. 29), derrière trois interrupteurs. Une salve a désormais un
+  **type** — standard, dogfight, intercepteur ou torpille — et sa classe décide des zones de portée
+  d'où elle peut partir. La défense se résout en trois couches : défense de zone, défense ponctuelle,
+  et le tir rapproché du livre de base. Un lanceur en conteneur consomme un point d'emport, si bien
+  qu'une coque de moins de 100 tonneaux n'en porte aucun.
 * **Empoignade** — les huit issues du livre : à terre, désarmer, projeter, dégâts, pistolet ou lame
   courte, se dégager, entraîner, continuer.
 * **Deux armes**, **Touche-à-tout** et **l'action prolongée interrompue** sont appliquées.
@@ -108,6 +116,10 @@ compendium de documentation en quatre langues.
   l'ordinateur.
 * **Hypothèque du vaisseau**, avec ses parts, son échéancier, l'option d'un prélèvement toutes les
   quatre semaines, et **Fuite devant les dettes**.
+* **Un horodatage de maintenance** : le vaisseau retient le jour de campagne de sa dernière
+  maintenance, et la fiche annonce de combien de périodes de quatre semaines elle est en retard. Rien
+  n'est lancé et aucun modificateur n'en est dérivé — le livre de base p.154 dit que la maintenance
+  *devrait* être faite, donc les MD de l'avoir sautée restent à l'arbitre.
 * **Transfert de crédits** — le premier écran du système qui déplace de l'argent à la demande.
 * **Poste d'équipage** comme type d'Objet : un poste est une description de fonction, et deux
   artilleurs peuvent partager le même.
@@ -128,6 +140,24 @@ compendium de documentation en quatre langues.
 * **Lot de fret** et **Passage** comme types d'Objet, avec destination, échéance et tarif — trois
   champs qui existaient depuis le début et que rien n'écrivait jamais.
 * **Le compteur se referme** : un prix négocié achète un lot et débite l'équipage, et la soute revend.
+
+### Réputation et contrats
+
+* **La Réputation (REP)** rejoint les caractéristiques qu'une table peut adopter, inactive par défaut.
+  Elle se lit comme les autres — `REP 0` vaut MD−3 — et le jet de Changement de réputation prend
+  **MD−1 par tranche de quatre REP déjà acquis** : une réputation déjà faite est plus dure à grandir.
+  Les onze circonstances imprimées se recouvrent volontairement, et **seule la plus forte s'applique**
+  — elles ne s'additionnent jamais.
+* **Un contrat de prime** comme type d'Objet, et c'est le document **des Voyageurs** — la partie que le
+  livre leur remet. Les lignes de l'arbitre se replient par courtoisie sur la même fiche : la
+  Réputation minimale, le dernier lieu connu, qui sait quoi, les complications. La cible peut être une
+  personne, un lieu ou un objet, et la cible, le commanditaire, les proches et le chasseur sont chacun
+  un Acteur du monde déposé, qui retombe sur un nom stocké pour qui ne peut pas le voir.
+* **Le groupe lance son propre contrat.** Les deux jets que le livre lui donne — négocier la prime, et
+  se qualifier pour un contrat que sa Réputation n'atteint pas — se font depuis le siège des joueurs,
+  sur un document qu'ils ne peuvent pas modifier par ailleurs.
+* **Un onglet de génération** en tire un des tables imprimées : commanditaire, priorité, cible, prime,
+  complication — huit tirages, chacun atterrissant dans le champ que son étape nomme.
 
 ### Le monde autour des Voyageurs
 
@@ -162,6 +192,13 @@ compendium de documentation en quatre langues.
   barre d'onglets ramenée dans la fiche, tableaux allégés.
 * **Mode jeu et mode édition** sur les fiches, à la façon de dnd5e : les contrôles de structure
   disparaissent quand on joue.
+* **Une seule palette, et elle appartient au lecteur.** Quatre préréglages, onze couleurs d'accent, et
+  un axe *clair ou sombre* qui suit Foundry par défaut ou le remplace pour ce système seulement.
+  Toutes les couleurs d'une fiche dérivent de cet unique accent, et chaque couleur de texte a été
+  mesurée à 4,5:1 ou mieux sur tous les fonds. Deux interrupteurs l'accompagnent : un bandeau de
+  fenêtre sombre sur les deux fonds, et une paire réussite/échec adaptée au daltonisme. Cinq réglages
+  personnels, et aucun ne demande de recharger. **Les trois thèmes de 0.1.x disparaissent** — un
+  client qui en portait un est migré et garde sa couleur.
 * **Les feuilles, les dialogues et les cartes de chat suivent le thème clair ou sombre du joueur.**
 * **Les fiches d'objet passent à cinq onglets** sur les mêmes blocs, avec un bandeau au-dessus : une
   fiche d'arme passe de 956 px à 489 px.
@@ -195,6 +232,10 @@ Changer un interrupteur reprépare et redessine les fiches ouvertes ; rien ne de
 * **Le système livre son premier compendium** : `mgt2.docs`, un journal par langue, vingt-trois pages
   chacun. Chaque page dit deux choses pour un écran — **ce qu'il traite pour vous** et **ce qu'il vous
   laisse à la table**. C'est de la documentation *sur le système*, jamais du texte de règles.
+* **Deux compendiums de démonstration, annotés** : un document pour **chaque type et sous-type que le
+  système déclare** — 8 Acteurs et 27 Objets, tous nommés `Demo — `. Chacun porte à quoi sert le
+  document, ce qui lit chaque champ, et le seul piège qu'il existe pour montrer. Un exemple travaillé
+  plutôt qu'un monde de départ, et tous ses chiffres sont inventés.
 * **Quatre langues déclarées** — français, anglais, espagnol, portugais (Brésil), **complètes toutes
   les quatre**. Le français est la cible du système ; le vocabulaire espagnol et portugais suit les
   traductions communautaires de Mongoose, et les titres d'ouvrages et les noms de traits restent en

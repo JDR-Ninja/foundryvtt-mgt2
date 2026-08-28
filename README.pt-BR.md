@@ -28,6 +28,10 @@ Traveller da Mongoose Publishing — desenvolvido especialmente para a edição 
 * **Quarenta e nove regras opcionais e variantes** numa única tela de configurações, cada uma com o
   livro e a página de onde vem — ou com o aviso de que nenhum livro a estabelece. Por padrão, vale o
   jogo tal como está impresso.
+* **Uma só paleta, e ela é do leitor** — quatro predefinições, onze cores de destaque, claro ou
+  escuro, e um par de sucesso e falha para daltonismo. Cada cor de texto medida em 4,5:1 ou melhor.
+* **Três compêndios que o próprio sistema escreve** — o que ele faz com as regras, um diário por
+  idioma, e um documento de demonstração anotado para cada tipo e subtipo que ele declara.
 * **Quatro idiomas** — francês, inglês, espanhol e português (Brasil).
 
 O detalhe versão a versão está no [changelog](CHANGELOG.pt-BR.md).

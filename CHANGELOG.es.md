@@ -13,8 +13,8 @@
 **La versión más grande que ha tenido este sistema.** 0.1.x era una hoja de personaje; 0.2.0 es un
 sistema de juego. Siete tipos de Actor, dieciocho tipos de Objeto, creación de Viajeros en grupo,
 combate espacial y batallas entre flotas, comercio especulativo y tráfico de escala, viajes y salto,
-formación, la cadena de daño completa, cuarenta y nueve reglas opcionales y un compendio de
-documentación en cuatro idiomas.
+formación, la cadena de daño completa, cuarenta y nueve reglas opcionales, un compendio de
+documentación en cuatro idiomas y una demostración comentada de cada tipo que el sistema declara.
 
 ### ⚠ Cambios que rompen
 
@@ -45,6 +45,8 @@ documentación en cuatro idiomas.
   incluye ninguna tabla de carrera — incluye el registro que las hace funcionar.
 * **Las especies son marcos de creación**, no bloques de parámetros: una especie declara sus propios
   periodos, tiradas, tablas y escalas. La secuencia del libro básico es el marco por defecto.
+* **Una tirada de cualificación puede llevar un DM condicional** — *DM+2 si SOC 9+*, la forma que
+  imprimen algunas carreras y algunas especies, y que hasta ahora había que recordar y aplicar a mano.
 * **Licenciamiento**: beneficios, pensión, participaciones de nave y un cierre de grupo en el que solo
   un Viajero puede empezar siendo propietario de una nave.
 * **Veintidós reglas opcionales de creación** (más abajo), dieciséis de ellas allí donde ningún libro
@@ -65,6 +67,11 @@ documentación en cuatro idiomas.
   flota sobre la astronave, un motor que resuelve sobre un Factor de Ataque **sin tirada para
   impactar**, escuadrones de cazas, salvas de misiles en vuelo, moral y dispersión. En una batalla de
   flotas el grupo es la flota y la nave pasa a ser un combatiente.
+* **Misiles y torpedos** (Companion cap. 29), tras tres interruptores. Una salva tiene ahora un
+  **tipo** — estándar, dogfight, interceptor o torpedo — y su clase decide las bandas de alcance desde
+  las que puede lanzarse. La defensa se resuelve en tres capas: defensa de área, defensa puntual y el
+  fuego cercano del básico. Un lanzador en contenedor consume un punto duro, así que un casco de menos
+  de 100 toneladas no lleva ninguno.
 * **Presa** — los ocho resultados del libro: derribado, desarmar, proyectar, daño, pistola u hoja
   corta, escapar, arrastrar, continuar.
 * **Dos armas**, **Aprendiz de todo** y **la acción prolongada interrumpida** se aplican.
@@ -107,6 +114,10 @@ documentación en cuatro idiomas.
   Interfaz. En una nave, el tope lo pone el NT **del casco**, nunca el del computador.
 * **Hipoteca de la nave**, con sus participaciones, su calendario, la opción de cobro cada cuatro
   semanas, y **Huida de las deudas**.
+* **Un sello de mantenimiento**: la nave guarda el día de campaña de su último servicio, y la hoja
+  dice de cuántos periodos de cuatro semanas va con retraso. No se tira nada y de ahí no se deriva
+  ningún modificador — el básico p.154 dice que el mantenimiento *debería* hacerse, así que los DM por
+  haberlo saltado siguen siendo del árbitro.
 * **Transferencia de créditos** — la primera pantalla del sistema que mueve dinero a petición.
 * **Puesto de tripulación** como tipo de Objeto: un puesto es una descripción de función, y dos
   artilleros pueden compartirlo.
@@ -129,6 +140,23 @@ documentación en cuatro idiomas.
   existían desde el principio y que nada llegaba a escribir.
 * **El circuito se cierra**: un precio negociado compra un lote y carga el gasto a la tripulación, y
   la bodega revende.
+
+### Reputación y contratos
+
+* **La Reputación (REP)** se suma a los Atributos que una mesa puede adoptar, desactivada por defecto.
+  Se lee como cualquier otro — `REP 0` es DM−3 — y la tirada de Cambio de reputación toma **DM−1 por
+  cada cuatro REP ya conseguidos**: un nombre ya hecho cuesta más de agrandar. Las once circunstancias
+  impresas se solapan a propósito, y **solo se aplica la más alta**: nunca se suman.
+* **Un contrato de recompensa** como tipo de Objeto, y es el documento **de los Viajeros** — la parte
+  que el libro les entrega. Las filas del árbitro se pliegan por cortesía en la misma hoja: la
+  Reputación mínima, la última localización, quién sabe qué, las complicaciones. El objetivo puede ser
+  una persona, un lugar o un objeto, y el objetivo, el cliente, los asociados y el cazador son cada
+  uno un Actor del mundo soltado, que decae a un nombre guardado para quien no puede verlo.
+* **El grupo tira su propio contrato.** Las dos tiradas que el libro les da — negociar la recompensa y
+  cualificarse para un contrato que su Reputación no alcanza — se hacen desde el asiento de los
+  jugadores, sobre un documento que por lo demás no pueden editar.
+* **Una pestaña de generación** saca uno de las tablas impresas: cliente, prioridad, objetivo,
+  recompensa, complicación — ocho tiradas, cada una cayendo en el campo que nombra su paso.
 
 ### El mundo alrededor de los Viajeros
 
@@ -162,6 +190,12 @@ documentación en cuatro idiomas.
   pestañas devuelta al interior de la hoja, tablas aligeradas.
 * **Modo de juego y modo de edición** en las hojas, al estilo de dnd5e: los controles de estructura
   desaparecen mientras juegas.
+* **Una sola paleta, y es del lector.** Cuatro ajustes preestablecidos, once colores de acento y un eje
+  *claro u oscuro* que sigue a Foundry por defecto o lo anula solo para este sistema. Todos los colores
+  de una hoja derivan de ese único acento, y cada color de texto se midió a 4,5:1 o mejor sobre todos
+  los fondos. Le acompañan dos interruptores: una barra de ventana oscura en ambos fondos, y un par de
+  éxito y fallo apto para daltonismo. Cinco ajustes personales, y ninguno pide recargar. **Los tres
+  temas de 0.1.x desaparecen** — un cliente que llevaba uno se migra y conserva su color.
 * **Hojas, diálogos y cartas de chat siguen el tema claro u oscuro del jugador.**
 * **Las hojas de objeto pasan a cinco pestañas** sobre los mismos bloques, con una cabecera encima:
   una hoja de arma pasa de 956 px a 489 px.
@@ -195,6 +229,10 @@ Cambiar un interruptor vuelve a preparar y redibujar las hojas abiertas; nada pi
 * **El sistema incluye su primer compendio**: `mgt2.docs`, un diario por idioma, veintitrés páginas
   cada uno. Cada página dice dos cosas sobre una pantalla — **de qué se encarga por ti** y **qué te
   deja a ti en la mesa**. Es documentación *sobre el sistema*, nunca texto de reglas.
+* **Dos compendios de demostración, anotados**: un documento para **cada tipo y subtipo que el sistema
+  declara** — 8 Actores y 27 Objetos, todos llamados `Demo — `. Cada uno lleva para qué sirve el
+  documento, qué lee cada campo y la única trampa que existe para mostrar. Un ejemplo trabajado antes
+  que un mundo de partida, y todas sus cifras son inventadas.
 * **Cuatro idiomas declarados** — francés, inglés, español y portugués (Brasil), y **los cuatro están
   completos**. El francés es el objetivo del sistema; el vocabulario español y portugués sigue las
   traducciones comunitarias de Mongoose, y los títulos de los libros y los nombres de rasgos se quedan
