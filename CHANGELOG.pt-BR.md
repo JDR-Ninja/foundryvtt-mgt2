@@ -19,8 +19,12 @@ idiomas e uma demonstração comentada de cada tipo que o sistema declara.
 ### ⚠ Mudanças incompatíveis
 
 * **Exige o Foundry VTT v14** (14.366 no mínimo). Não funciona mais nas v11 a v13.
-* **O tipo de Ator `vehicule` desaparece**, substituído por `vehicle`. Nenhuma migração é fornecida:
-  nenhum mundo conhecido o usava.
+* **O tipo de Ator `vehicule` desaparece**, substituído por `vehicle`, e **nenhuma migração é
+  fornecida** — os dois não compartilham quase nenhum campo, então uma conversão não levaria quase
+  nada. Um Ator do tipo antigo **não é apagado**: a linha dele continua no banco. Mas o Foundry não
+  consegue mais construí-lo, então ele some do diretório de Atores e o console informa *is not a
+  valid type* a cada carregamento. Se você tem veículos, **anote o que eles carregavam antes de
+  atualizar** e digite-os de novo na ficha nova.
 * **Soltar uma Espécie não altera mais a Característica armazenada.** A Espécie passa a ser um Item
   embarcado e seu modificador é derivado. A migração subtrai o bônus já gravado e **registra cada
   subtração** no console, por nome de Ator. Dois casos não podem ser resolvidos e são relatados em vez

@@ -19,8 +19,12 @@ documentación en cuatro idiomas y una demostración comentada de cada tipo que 
 ### ⚠ Cambios que rompen
 
 * **Requiere Foundry VTT v14** (14.366 como mínimo). Ya no funciona en v11 a v13.
-* **El tipo de Actor `vehicule` desaparece**, sustituido por `vehicle`. No se incluye migración:
-  ningún mundo conocido lo usaba.
+* **El tipo de Actor `vehicule` desaparece**, sustituido por `vehicle`, y **no se incluye migración**
+  — los dos no comparten casi ningún campo, así que una conversión no traería casi nada. Un Actor del
+  tipo antiguo **no se borra**: su fila sigue en la base de datos. Pero Foundry ya no puede
+  construirlo, así que desaparece del directorio de Actores y la consola informa *is not a valid
+  type* en cada carga. Si tienes vehículos, **anota lo que llevaban antes de actualizar** y vuelve a
+  introducirlos en la hoja nueva.
 * **Soltar una Especie ya no modifica el Atributo almacenado.** La Especie pasa a ser un Objeto
   incrustado y su modificador se deriva. La migración resta el bonificador ya escrito y **registra
   cada resta** en la consola, por nombre de Actor. Dos casos no pueden resolverse y se informan en

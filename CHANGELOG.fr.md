@@ -16,8 +16,12 @@ déclare.
 ### ⚠ Ruptures
 
 * **Nécessite Foundry VTT v14** (14.366 minimum). Le système ne fonctionne plus sur les v11 à v13.
-* **Le type d'Acteur `vehicule` disparaît** au profit de `vehicle`. Aucune migration n'est fournie :
-  aucun monde connu n'en portait.
+* **Le type d'Acteur `vehicule` disparaît** au profit de `vehicle`, et **aucune migration n'est
+  fournie** — les deux ne partagent presque aucun champ, une conversion ne reprendrait presque rien.
+  Un Acteur de l'ancien type **n'est pas supprimé** : sa ligne reste en base. Mais Foundry ne sait
+  plus le construire, donc il disparaît du répertoire des Acteurs et la console signale *is not a
+  valid type* à chaque chargement. Si vous avez des véhicules, **notez ce qu'ils portaient avant de
+  mettre à jour** et ressaisissez-les sur la nouvelle fiche.
 * **Déposer une espèce ne modifie plus la caractéristique stockée.** L'espèce devient un Objet
   embarqué et son modificateur est dérivé. La migration retire le bonus déjà inscrit et **journalise
   chaque soustraction** dans la console, par nom d'Acteur. Deux cas ne peuvent pas être résolus et

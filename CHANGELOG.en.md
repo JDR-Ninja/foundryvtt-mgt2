@@ -15,8 +15,12 @@ system registers.
 ### ⚠ Breaking changes
 
 * **Requires Foundry VTT v14** (14.366 minimum). It no longer runs on v11 to v13.
-* **The `vehicule` Actor type is gone**, replaced by `vehicle`. No migration is shipped: no known
-  world held one.
+* **The `vehicule` Actor type is gone**, replaced by `vehicle`, and **no migration is shipped** — the
+  two share almost no field, so a conversion would carry almost nothing across. An Actor of the old
+  type is **not deleted**: its row stays in the database. But Foundry can no longer build it, so it
+  disappears from the Actors directory and the console reports *is not a valid type* on every load.
+  If you have vehicles, **write down what they carried before you upgrade** and enter them again on
+  the new sheet.
 * **Dropping a species no longer edits the stored characteristic.** The species becomes an embedded
   Item and its modifier is derived. The migration subtracts the bonus already written and **logs every
   subtraction** to the console, by Actor name. Two cases cannot be resolved and are reported rather

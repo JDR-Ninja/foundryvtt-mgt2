@@ -218,10 +218,9 @@ export async function migrateWorld() {
   if ( !game.user.isGM ) return;
 
   const last = game.settings.get("mgt2", "migrationVersion");
-  // Before anything stamps the version: an empty `migrationVersion` is the only thing that tells a
-  // world which has never loaded from one that was playing before a rule switch existed, and the
-  // second must keep the behaviour it had (`rules.js`, `seed`).
-  await seedRules(Boolean(last));
+  // A world that was playing keeps the behaviour it had; a first-ever load takes the default.
+  // 0.1.x never registered `migrationVersion`, so an empty stamp asks the documents instead.
+  await seedRules(Boolean(last) || (game.actors.size > 0) || (game.items.size > 0));
 
   const pending = MIGRATIONS.filter(m => !last || foundry.utils.isNewerVersion(m.version, last));
 
