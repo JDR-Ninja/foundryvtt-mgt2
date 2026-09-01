@@ -12,9 +12,9 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
 
@@ -41,11 +41,14 @@ jobs:
       - name: Package
         run: npm run package
 
-      - name: Create release
+      # A tag made from the Releases page arrives here with its release already created, and `create`
+      # then refuses; uploading instead is what puts the two files on it. `-e` does not fire on `||`.
+      - name: Create the release, or fill one that already exists
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
             --title "$VERSION" \
             --notes "See CHANGELOG.md" \
-            system.json mgt2.zip
+            system.json mgt2.zip \
+          || gh release upload "$GITHUB_REF_NAME" system.json mgt2.zip --clobber
