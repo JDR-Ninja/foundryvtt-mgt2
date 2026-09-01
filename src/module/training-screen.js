@@ -5,6 +5,7 @@ import { Grants } from "./chargen-grants.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
+import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { DragDrop } = foundry.applications.ux;
@@ -22,7 +23,7 @@ const AWARDS = Object.freeze(["study", "fullTime", "adventure"]);
  * The training window: every programme a Traveller has open, and the loop that moves them.
  * @extends {ApplicationV2}
  */
-export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
+export class TrainingScreen extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     constructor(options) {
         super(options);
@@ -115,6 +116,9 @@ export class TrainingScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         await super._preFirstRender(context, options);
         this.#actor.apps[this.id] = this;
     }
+
+    /** The Traveller being trained: this window is about them and nothing else. @inheritDoc */
+    get closesOn() { return [this.#actor]; }
 
     /** Synchronous and before the state flips to CLOSED, which `_onClose` is not. @inheritDoc */
     _tearDown(options) {

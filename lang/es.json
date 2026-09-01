@@ -1178,7 +1178,7 @@
         "Serving": "{serving} de {total} siguen sirviendo",
         "NobodyYet": "todavía no hay nadie en la lista",
         "Age": "{n} años",
-        "NoSpecies": "sin Objeto de especie",
+        "NoSpecies": "sin especie",
         "LeftAfter": "se marchó tras el periodo {n}",
         "InProgress": "en curso",
         "Survived": "Supervivencia superada",
@@ -1186,6 +1186,7 @@
         "Ejected": "Expulsado",
         "DropRefused": "La lista solo admite Viajeros — arrastra aquí un personaje para inscribirlo.",
         "DropSpecies": "Una especie va sobre un Viajero — suéltala en su columna aquí, o en su propia ficha.",
+        "DropCareer": "Una carrera va sobre la ficha del Viajero — suéltala ahí y un registro nace de ella.",
         "FrameSet": "{name} toma el marco {frame}.",
         "FrameReplaceTitle": "Sustituir el marco",
         "FrameReplace": "¿Sustituir {old} por {frame} como marco de {name}?",
@@ -1346,9 +1347,11 @@
         "AnagathicsRefused": "La tirada de anagáticos falló.",
         "AnagathicsForced": "Un 2 exacto: este periodo va directo a una carrera de entrada forzada.",
         "DecideHint": {
-          "one": "{career}, {n} periodo servido. ¿Continuar, cambiar de destino o marcharse?",
-          "other": "{career}, {n} periodos servidos. ¿Continuar, cambiar de destino o marcharse?"
+          "one": "{career}, {n} periodo servido. ¿Qué hace ahora este Viajero?",
+          "other": "{career}, {n} periodos servidos. ¿Qué hace ahora este Viajero?"
         },
+        "AwardForfeited": "Ganancia abandonada.",
+        "ForfeitAsk": "No se eligió nada. ¿Renunciar a esta ganancia?",
         "DecideSkipped": "Este periodo nunca se resolvió: {steps}. Cerrarlo ahora sigue costando cuatro años y sigue ganando su tirada de Beneficio.",
         "Continue": "Continuar",
         "LeaveCareer": "Dejar la carrera",
@@ -1385,7 +1388,13 @@
         "Skill": "Una habilidad de juventud",
         "Take": "Tomarlas",
         "Again": "{name} ya tiene habilidades de juventud. ¿Tomarlas de nuevo?",
-        "None": "El marco de {name} no permite ninguna habilidad de juventud.",
+        "NoneFrame": "El marco de {name} no permite ninguna habilidad de juventud.",
+        "NoneEdu": "{name} no tiene derecho a ninguna habilidad de juventud: DM de EDU {dm} más 3 no deja ninguna.",
+        "Held": "Ya adquiridas:",
+        "Unspent": {
+          "one": "{n} habilidad de juventud sin gastar para {name}: una fila estaba vacía, o nombraba una habilidad ya adquirida.",
+          "other": "{n} habilidades de juventud sin gastar para {name}: había filas vacías, o que nombraban habilidades ya adquiridas."
+        },
         "Allowance": {
           "one": "{n} habilidad de juventud",
           "other": "{n} habilidades de juventud"

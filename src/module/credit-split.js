@@ -1,4 +1,5 @@
 import { MGT2Helper } from "./helper.js";
+import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { DragDrop } = foundry.applications.ux;
@@ -44,7 +45,7 @@ const GIFT_TIMEOUT = 15000;
  * them, applied on one explicit validation.
  * @extends {ApplicationV2}
  */
-export class CreditSplit extends HandlebarsApplicationMixin(ApplicationV2) {
+export class CreditSplit extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {

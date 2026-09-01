@@ -59,7 +59,7 @@
 				</td>
 				<td class="a">
 					{{#if column.canEdit}}
-					<button type="button" data-action="benefit">{{localize 'MGT2.Chargen.Close.RollBenefit'}}</button>
+					<button type="button" data-action="benefit" {{#unless column.canBenefit}}disabled{{/unless}}>{{localize 'MGT2.Chargen.Close.RollBenefit'}}</button>
 					<button type="button" data-action="finish">{{localize 'MGT2.Chargen.Close.Finish'}}</button>
 					{{/if}}
 				</td>

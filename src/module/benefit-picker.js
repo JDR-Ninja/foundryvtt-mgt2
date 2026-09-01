@@ -1,6 +1,7 @@
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { Muster } from "./chargen-muster.js";
+import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -12,7 +13,7 @@ const PAGE = 200;
  * are the filter, and a world holding no pack simply has nothing to offer.
  * @extends {ApplicationV2}
  */
-export class BenefitPicker extends HandlebarsApplicationMixin(ApplicationV2) {
+export class BenefitPicker extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {

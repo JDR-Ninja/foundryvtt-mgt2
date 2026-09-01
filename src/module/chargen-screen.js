@@ -8,6 +8,7 @@ import { Grants } from "./chargen-grants.js";
 import { CreationPsi } from "./chargen-psi.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
+import { MGT2Screen } from "./screens.js";
 import { Rules } from "./rules.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -25,7 +26,7 @@ const FRAME_TYPES = "Item.species";
  * The creation screen: a grid of Travellers × terms, and no session document behind it.
  * @extends {ApplicationV2}
  */
-export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
+export class ChargenScreen extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
@@ -183,8 +184,16 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         // yields and names it, so the label comes off the frame and never off a list in this file.
         const kind = frame?.termKinds?.find(entry => entry.key === row.kind);
         if ( row.kind ) lines.push({ tone: "", mark: "·", text: kind?.label || row.kind });
-        if ( row.note ) lines.push({ tone: "", mark: "·", text: row.note });
-        for ( const event of row.events ) lines.push({ tone: "", mark: "·", text: event.description });
+        // Each step appends to one note field, joined on " · "; the cell is a list of them.
+        const notes = row.note ? row.note.split(" · ").filter(part => part.trim()) : [];
+        for ( const part of notes ) lines.push({ tone: "", mark: "·", text: part });
+        // An event writes its description into the note as it fires, so the row's own copy of it
+        // would print the sentence twice.
+        for ( const event of row.events ) {
+            if ( !notes.includes(event.description) ) {
+                lines.push({ tone: "", mark: "·", text: event.description });
+            }
+        }
         return {
             career: row.careerName, assignment: row.assignment, lines,
             track: row.track ? { ...row.track, display: ChargenScreen.#trackDisplay(row.track) } : null
@@ -274,13 +283,26 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
      */
     static #background(column) {
         const plan = CreationBackground.plan(column.actor);
-        const count = (plan.count === null) ? MGT2Helper.showFormula(plan.formula) : String(plan.count);
+        const allowance = (plan.count === null)
+            ? ChargenScreen.#allowance(column.actor, plan.formula) : String(plan.count);
+        const taken = CreationBackground.taken(column.actor);
         return {
-            set: CreationBackground.isSet(column.actor),
-            count,
+            set: taken > 0,
+            // Against the allowance, since a row naming a skill already held buys nothing. A frame
+            // printing dice has no number until they are rolled, so there it stays a count.
+            count: taken ? (Number.isNaN(Number(allowance)) ? String(taken) : `${taken}/${allowance}`)
+                : allowance,
             hint: game.i18n.format("MGT2.Chargen.Background.Hint",
-                { n: count, dm: MGT2Helper.signed(plan.eduDM) })
+                { n: allowance, dm: MGT2Helper.signed(plan.eduDM) })
         };
+    }
+
+    /** A frame's printed allowance as the player reads it — never a raw `@` path. */
+    static #allowance(actor, formula) {
+        const filled = Roll.replaceFormulaData(formula ?? "", actor.getRollData(), { missing: "0" });
+        if ( /\d*d\d/i.test(filled) ) return MGT2Helper.showFormula(filled);
+        try { return String(Math.max(0, Roll.safeEval(filled))); }
+        catch { return MGT2Helper.showFormula(filled); }
     }
 
     /**
@@ -431,24 +453,45 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         if ( roster.length < 2 ) {
             return ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Connect.NeedsTwo"));
         }
-        const option = (actor, selected) => `<option value="${actor.id}"${selected
-            ? " selected" : ""}>${foundry.utils.escapeHTML(actor.name)}</option>`;
-        const first = roster.find(actor => actor.id === this.#selectedId) ?? roster[0];
-        const second = roster.find(actor => actor !== first);
         // Every skill anyone on the roster already holds, so the two are typing against one list.
         const known = [...new Set(roster.flatMap(actor =>
             Grants.skills(actor).map(item => item.name)))].sort((a, b) => a.localeCompare(b));
+        const first = roster.find(actor => actor.id === this.#selectedId) ?? roster[0];
+        const opening = { a: first.id, b: roster.find(actor => actor !== first).id,
+            skills: { a: "", b: "" }, note: "" };
 
+        // A refusal reopens on the same words: the pair is chosen and the sentence is written
+        // before either can be checked, and losing both to one warning costs the table twice.
+        for ( let seed = opening; seed; ) {
+            const agreed = await ChargenScreen.#askConnection(roster, known, seed);
+            if ( !agreed ) return;
+            const [a, b] = [game.actors.get(agreed.a), game.actors.get(agreed.b)];
+            const written = await Grants.connect(a, b,
+                { [agreed.a]: agreed.skills.a, [agreed.b]: agreed.skills.b }, agreed.note);
+            if ( written ) {
+                ui.notifications.info(game.i18n.format("MGT2.Chargen.Connect.Made",
+                    { name: a.name, other: b.name }));
+                return this.render();
+            }
+            seed = agreed;
+        }
+    }
+
+    /** @returns {Promise<object|null>}   What the two agreed, or null where the dialog was closed */
+    static async #askConnection(roster, known, seed) {
+        const option = (actor, selected) => `<option value="${actor.id}"${selected
+            ? " selected" : ""}>${foundry.utils.escapeHTML(actor.name)}</option>`;
         const content = document.createElement("div");
         content.innerHTML = await foundry.applications.handlebars.renderTemplate(
             `${PARTS_PATH}/connect.html`, {
-                first: roster.map(actor => option(actor, actor === first)).join(""),
-                second: roster.map(actor => option(actor, actor === second)).join(""),
+                first: roster.map(actor => option(actor, actor.id === seed.a)).join(""),
+                second: roster.map(actor => option(actor, actor.id === seed.b)).join(""),
+                skillA: seed.skills.a, skillB: seed.skills.b, note: seed.note,
                 skills: known.map(name =>
                     `<option value="${foundry.utils.escapeHTML(name)}"></option>`).join("")
             });
 
-        const agreed = await DialogV2.prompt({
+        return DialogV2.prompt({
             window: { title: "MGT2.Chargen.Connect.Title", icon: "fa-solid fa-link" },
             classes: ["mgt2"],
             position: { width: 460 },
@@ -468,15 +511,6 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             render: (click, dialog) => ChargenScreen.#nameSkillRows(dialog.element),
             rejectClose: false
         });
-        if ( !agreed ) return;
-        const [a, b] = [game.actors.get(agreed.a), game.actors.get(agreed.b)];
-        const written = await Grants.connect(a, b,
-            { [agreed.a]: agreed.skills.a, [agreed.b]: agreed.skills.b }, agreed.note);
-        if ( written ) {
-            ui.notifications.info(game.i18n.format("MGT2.Chargen.Connect.Made",
-                { name: a.name, other: b.name }));
-        }
-        return this.render();
     }
 
     /** The two skill labels, kept on the Travellers the two selects are actually holding. */
@@ -498,10 +532,11 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     static async #onRunStep(event, target) {
         const actor = game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId);
         if ( !actor ) return;
-        await ChargenTerm.run(actor, target.dataset.step);
-        // The document writes redraw every client through `apps`; this catches the case where the
-        // step wrote only the cursor, which lives on a flag the screen reads but no document update
-        // names.
+        const step = target.dataset.step;
+        await ChargenTerm.run(actor, step);
+        // The document writes redraw every client through `apps`; this catches the case where
+        // the step wrote only the cursor, which lives on a flag the screen reads but no
+        // document update names.
         return this.render();
     }
 
@@ -530,8 +565,8 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         if ( MGT2Helper.dropAccepted(event.target.closest("[data-accept]"), data) ) return;
         let record = null;
         try { record = foundry.utils.fromUuidSync(data.uuid); } catch { /* an index entry is enough */ }
-        ui.notifications.warn(game.i18n.localize(record?.type === "species"
-            ? "MGT2.Chargen.Screen.DropSpecies" : "MGT2.Chargen.Screen.DropRefused"));
+        const said = { species: "MGT2.Chargen.Screen.DropSpecies", career: "MGT2.Chargen.Screen.DropCareer" };
+        ui.notifications.warn(game.i18n.localize(said[record?.type] ?? "MGT2.Chargen.Screen.DropRefused"));
     }
 
     /**

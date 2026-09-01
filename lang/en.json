@@ -1178,7 +1178,7 @@
         "Serving": "{serving} of {total} still serving",
         "NobodyYet": "nobody on the roster yet",
         "Age": "age {n}",
-        "NoSpecies": "no species Item",
+        "NoSpecies": "no species",
         "LeftAfter": "left after term {n}",
         "InProgress": "in progress",
         "Survived": "Survival passed",
@@ -1186,6 +1186,7 @@
         "Ejected": "Ejected",
         "DropRefused": "The roster takes Travellers — drag a character here to put them on it.",
         "DropSpecies": "A species goes on a Traveller — drop it on their column here, or on their own sheet.",
+        "DropCareer": "A career goes on the Traveller's own sheet — drop it there and a record is born from it.",
         "FrameSet": "{name} takes the {frame} frame.",
         "FrameReplaceTitle": "Replace the frame",
         "FrameReplace": "Replace {old} with {frame} as {name}’s frame?",
@@ -1346,9 +1347,11 @@
         "AnagathicsRefused": "The anagathics roll failed.",
         "AnagathicsForced": "An exact 2: go straight to a forced-entry career this term.",
         "DecideHint": {
-          "one": "{career}, {n} term served. Continue, change assignment, or leave?",
-          "other": "{career}, {n} terms served. Continue, change assignment, or leave?"
+          "one": "{career}, {n} term served. What does this Traveller do now?",
+          "other": "{career}, {n} terms served. What does this Traveller do now?"
         },
+        "AwardForfeited": "Award forfeited.",
+        "ForfeitAsk": "Nothing was chosen. Give up this award?",
         "DecideSkipped": "This term never resolved: {steps}. Closing it now still costs four years and still earns its Benefit roll.",
         "Continue": "Continue",
         "LeaveCareer": "Leave the career",
@@ -1385,7 +1388,13 @@
         "Skill": "A background skill",
         "Take": "Take them",
         "Again": "{name} already has background skills. Take them again?",
-        "None": "{name}'s frame allows no background skill at all.",
+        "NoneFrame": "{name}'s frame allows no background skill at all.",
+        "NoneEdu": "{name} is allowed no background skill: EDU DM {dm} plus 3 leaves none.",
+        "Held": "Already held:",
+        "Unspent": {
+          "one": "{n} background skill went unspent for {name}: a row was blank, or named a skill already held.",
+          "other": "{n} background skills went unspent for {name}: rows were blank, or named skills already held."
+        },
         "Allowance": {
           "one": "{n} background skill",
           "other": "{n} background skills"

@@ -1289,9 +1289,9 @@ export async function applyCell(actor, cell, { level = null, provenance = {} } =
     let grants = cell.grants ?? [];
     if ( !grants.length ) return cell.text ? [cell.text] : [];
     if ( (cell.mode === "oneOf") && (grants.length > 1) ) {
-        const picked = await pickOne(grants.map((grant, index) => [String(index), grantLabel(grant)]),
+        const picked = await insist(grants.map((grant, index) => [String(index), grantLabel(grant)]),
             "MGT2.Chargen.Term.PickGrant");
-        if ( picked === null ) return [];
+        if ( picked === null ) return [game.i18n.localize("MGT2.Chargen.Term.AwardForfeited")];
         grants = [grants[Number(picked)]];
     }
     const applied = [];
@@ -1533,6 +1533,25 @@ function namesThisCareer(record, ids) {
 }
 
 /** One select, one answer. Null is the player closing the dialog rather than choosing. */
+/**
+ * The rest of the row is written by the time this picker opens, so closing it cannot rewind the
+ * step: a forfeit is confirmed out loud and goes to the term log.
+ * @returns {Promise<string|null>}   Null only where the player confirmed the forfeit
+ */
+async function insist(options, title) {
+    for ( ;; ) {
+        const picked = await pickOne(options, title);
+        if ( picked !== null ) return picked;
+        const forfeit = await DialogV2.confirm({
+            window: { title },
+            classes: ["mgt2"],
+            content: `<p>${game.i18n.localize("MGT2.Chargen.Term.ForfeitAsk")}</p>`,
+            rejectClose: false
+        });
+        if ( forfeit ) return null;
+    }
+}
+
 async function pickOne(options, title) {
     if ( !options.length ) return null;
     if ( options.length === 1 ) return options[0][0];

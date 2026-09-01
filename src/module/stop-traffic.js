@@ -2,6 +2,7 @@ import { MGT2 } from "./config.js";
 import { CreditSplit } from "./credit-split.js";
 import { MGT2Helper } from "./helper.js";
 import { WorldData } from "./actors/world-data.js";
+import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { DragDrop } = foundry.applications.ux;
@@ -188,7 +189,7 @@ export class StopTraffic {
  * the booking.
  * @extends {ApplicationV2}
  */
-export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2) {
+export class StopTrafficDialog extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
@@ -278,6 +279,14 @@ export class StopTrafficDialog extends HandlebarsApplicationMixin(ApplicationV2)
     /** Back to hand mode for one end. */
     #unseed(end) {
         if ( end in this.#worlds ) this.#worlds[end] = null;
+    }
+
+    /** A slot whose document was deleted goes back to hand mode. @inheritDoc */
+    dropDocument(document) {
+        if ( document === this.#ship ) this.#ship = null;
+        for ( const end of Object.keys(this.#worlds) ) {
+            if ( this.#worlds[end] === document ) this.#unseed(end);
+        }
     }
 
     /** Every document this screen has written into `apps`, which is not the same as the three slots. */

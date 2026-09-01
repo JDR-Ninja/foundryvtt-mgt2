@@ -1178,7 +1178,7 @@
         "Serving": "{serving} de {total} ainda servem",
         "NobodyYet": "ainda não há ninguém na lista",
         "Age": "{n} anos",
-        "NoSpecies": "sem Item de espécie",
+        "NoSpecies": "sem espécie",
         "LeftAfter": "saiu após o período {n}",
         "InProgress": "em andamento",
         "Survived": "Sobrevivência passou",
@@ -1186,6 +1186,7 @@
         "Ejected": "Expulso",
         "DropRefused": "A lista só aceita Viajantes — arraste um personagem para cá para inscrevê-lo.",
         "DropSpecies": "Uma espécie vai sobre um Viajante — solte-a na coluna dele aqui, ou na ficha dele.",
+        "DropCareer": "Uma carreira vai sobre a ficha do Viajante — solte-a ali e um registro nasce dela.",
         "FrameSet": "{name} assume o quadro {frame}.",
         "FrameReplaceTitle": "Substituir o quadro",
         "FrameReplace": "Substituir {old} por {frame} como quadro de {name}?",
@@ -1346,9 +1347,11 @@
         "AnagathicsRefused": "A rolagem de anagáticos falhou.",
         "AnagathicsForced": "Um 2 exato: este período vai direto para uma carreira de entrada forçada.",
         "DecideHint": {
-          "one": "{career}, {n} período servido. Continuar, mudar de designação ou sair?",
-          "other": "{career}, {n} períodos servidos. Continuar, mudar de designação ou sair?"
+          "one": "{career}, {n} período servido. O que este Viajante faz agora?",
+          "other": "{career}, {n} períodos servidos. O que este Viajante faz agora?"
         },
+        "AwardForfeited": "Ganho abandonado.",
+        "ForfeitAsk": "Nada foi escolhido. Abandonar este ganho?",
         "DecideSkipped": "Este período nunca foi resolvido: {steps}. Encerrá-lo agora continua custando quatro anos e continua rendendo sua rolagem de Benefício.",
         "Continue": "Continuar",
         "LeaveCareer": "Deixar a carreira",
@@ -1385,7 +1388,13 @@
         "Skill": "Uma perícia de juventude",
         "Take": "Tomá-las",
         "Again": "{name} já tem perícias de juventude. Tomá-las de novo?",
-        "None": "O quadro de {name} não permite nenhuma perícia de juventude.",
+        "NoneFrame": "O quadro de {name} não permite nenhuma perícia de juventude.",
+        "NoneEdu": "{name} não tem direito a nenhuma perícia de juventude: DM de EDU {dm} mais 3 não deixa nenhuma.",
+        "Held": "Já adquiridas:",
+        "Unspent": {
+          "one": "{n} perícia de juventude não gasta para {name}: uma linha estava vazia, ou nomeava uma perícia já adquirida.",
+          "other": "{n} perícias de juventude não gastas para {name}: havia linhas vazias, ou que nomeavam perícias já adquiridas."
+        },
         "Allowance": {
           "one": "{n} perícia de juventude",
           "other": "{n} perícias de juventude"

@@ -2,6 +2,7 @@ import { Psionics } from "./chargen-psionics.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
+import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -62,7 +63,7 @@ export const CreationPsi = {
  * the course itself as a control, because four months and Cr100000 is not a side effect of looking.
  * @extends {ApplicationV2}
  */
-class PsiTraining extends HandlebarsApplicationMixin(ApplicationV2) {
+class PsiTraining extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {

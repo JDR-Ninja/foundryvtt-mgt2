@@ -1,5 +1,6 @@
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
+import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -55,7 +56,7 @@ export class SkipDebts {
 }
 
 /** The skip check for one hull. @extends {ApplicationV2} */
-export class SkipDebtsDialog extends HandlebarsApplicationMixin(ApplicationV2) {
+export class SkipDebtsDialog extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {

@@ -3,10 +3,11 @@
 <div class="mgt2-dialog">
 	<div class="dlg bgskills">
 		<p class="hint"><b>{{name}}</b> — {{count}} <span class="dm">EDU {{eduDM}}</span></p>
+		{{#if held}}<p class="hint held">{{localize 'MGT2.Chargen.Background.Held'}} {{held}}</p>{{/if}}
 		<div class="dblock">
 			{{#each rows as |row|}}
 			<div class="drow">
-				<label>{{@index}}</label>
+				<label>{{row.n}}</label>
 				{{#if row.fixed}}
 				<span class="fx">{{row.fixed}}</span>
 				<input type="hidden" name="{{row.name}}" value="{{row.value}}" />

@@ -6,6 +6,7 @@ import { CreationOptions } from "./chargen-rolls.js";
 import { applyCell } from "./chargen-term.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
+import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -145,7 +146,7 @@ const Ships = {
  * of creation.
  * @extends {ApplicationV2}
  */
-export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
+export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
@@ -241,6 +242,8 @@ export class ChargenClose extends HandlebarsApplicationMixin(ApplicationV2) {
         return {
             id: actor.id, name: actor.name, actor,
             canEdit: actor.canUserModify(game.user, "update"),
+            // Mustering out reads CLOSED careers: a Traveller still in their first has none.
+            canBenefit: Chargen.careers(actor).some(record => record.system.exitMode !== "stillServing"),
             age: summary.age,
             serving: Chargen.isServing(actor),
             terms: Chargen.termsServed(actor),

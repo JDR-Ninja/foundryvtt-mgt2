@@ -11,19 +11,19 @@
 			</div>
 			<div class="drow">
 				<label data-for="a">{{localize 'MGT2.Chargen.Connect.Skill'}}</label>
-				<input class="f" type="text" name="skill-a" list="mgt2-connect-skills"
+				<input class="f" type="text" name="skill-a" value="{{skillA}}" list="mgt2-connect-skills"
 					aria-label="{{localize 'MGT2.Chargen.Connect.Skill'}}" />
 			</div>
 			<div class="drow">
 				<label data-for="b">{{localize 'MGT2.Chargen.Connect.Skill'}}</label>
-				<input class="f" type="text" name="skill-b" list="mgt2-connect-skills"
+				<input class="f" type="text" name="skill-b" value="{{skillB}}" list="mgt2-connect-skills"
 					aria-label="{{localize 'MGT2.Chargen.Connect.Skill'}}" />
 			</div>
 			{{! The shared event, in the table's own words: the book asks the two players to discuss
 			    exactly what happened, and that sentence is the whole record of it. }}
 			<div class="drow">
 				<label>{{localize 'MGT2.Chargen.Connect.Note'}}</label>
-				<input class="f" type="text" name="note" aria-label="{{localize 'MGT2.Chargen.Connect.Note'}}" />
+				<input class="f" type="text" name="note" value="{{note}}" aria-label="{{localize 'MGT2.Chargen.Connect.Note'}}" />
 			</div>
 		</div>
 		<datalist id="mgt2-connect-skills">{{{skills}}}</datalist>

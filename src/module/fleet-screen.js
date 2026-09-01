@@ -5,6 +5,7 @@ import { FleetAttack, fleetBatteries } from "./fleet-attack.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
 import { SpaceCombatScreen } from "./combat-screen.js";
+import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -29,7 +30,7 @@ const CHART_VIEW = Object.freeze({ centre: 210, hub: 16, edge: 200, size: 420 })
  * The fleet battle screen (HG folios 105-124): the referee's surface for the second engine.
  * @extends {ApplicationV2}
  */
-export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2) {
+export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     constructor(options) {
         super(options);
@@ -148,6 +149,9 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         applied.uniqueId = options.combat.id;
         return applied;
     }
+
+    /** The Combat this screen resolves: it is the whole subject. @inheritDoc */
+    get closesOn() { return [this.#combat]; }
 
     /** The same registration `DocumentSheetV2` makes, so a document write reaches this window. */
     async _onFirstRender(context, options) {
@@ -981,7 +985,7 @@ export class FleetCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
  * writes the pair bands the rest of the engine already reads.
  * @extends {ApplicationV2}
  */
-export class FleetChartScreen extends HandlebarsApplicationMixin(ApplicationV2) {
+export class FleetChartScreen extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     constructor(options) {
         super(options);
@@ -1032,6 +1036,9 @@ export class FleetChartScreen extends HandlebarsApplicationMixin(ApplicationV2) 
         applied.uniqueId = options.combat.id;
         return applied;
     }
+
+    /** The Combat this screen resolves: it is the whole subject. @inheritDoc */
+    get closesOn() { return [this.#combat]; }
 
     /** The same registration `DocumentSheetV2` makes, so a document write reaches this window. */
     async _onFirstRender(context, options) {

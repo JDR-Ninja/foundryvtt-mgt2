@@ -5,6 +5,7 @@ import { CargoData } from "./datamodels.js";
 import { MGT2Helper } from "./helper.js";
 import { RollPromptHelper } from "./roll-prompt.js";
 import { StopTraffic } from "./stop-traffic.js";
+import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { DragDrop } = foundry.applications.ux;
@@ -177,7 +178,7 @@ export class SpecTrade {
  * The speculative block — the shelf, the tonnage and both prices of one stop.
  * @extends {ApplicationV2}
  */
-export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
+export class SpecTradeDialog extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
@@ -292,6 +293,12 @@ export class SpecTradeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     #unseed() {
         this.#input.attempts = this.standing?.attemptsThisMonth ?? this.#input.attempts;
         this.#world = null;
+    }
+
+    /** A slot whose document was deleted goes back to hand mode. @inheritDoc */
+    dropDocument(document) {
+        if ( document === this.#ship ) this.#ship = null;
+        if ( document === this.#world ) this.#unseed();
     }
 
     /** A different market is a different shelf, a different price and a different supplier. */

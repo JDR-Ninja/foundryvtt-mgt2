@@ -1178,7 +1178,7 @@
         "Serving": "{serving} sur {total} encore en service",
         "NobodyYet": "personne d'inscrit pour l'instant",
         "Age": "âge {n}",
-        "NoSpecies": "aucun Objet espèce",
+        "NoSpecies": "aucune espèce",
         "LeftAfter": "parti après la période {n}",
         "InProgress": "en cours",
         "Survived": "Survie réussie",
@@ -1186,6 +1186,7 @@
         "Ejected": "Évincé",
         "DropRefused": "La liste n’accepte que des Voyageurs — glissez-y un personnage pour l’inscrire.",
         "DropSpecies": "Une espèce se dépose sur un Voyageur — sur sa colonne ici, ou sur sa propre fiche.",
+        "DropCareer": "Une carrière se dépose sur la fiche du Voyageur — un dossier y naît du modèle.",
         "FrameSet": "{name} prend le cadre {frame}.",
         "FrameReplaceTitle": "Remplacer le cadre",
         "FrameReplace": "Remplacer {old} par {frame} comme cadre de {name} ?",
@@ -1346,9 +1347,11 @@
         "AnagathicsRefused": "Le jet d'anagathiques a échoué.",
         "AnagathicsForced": "Un 2 exact : allez directement dans une carrière à entrée forcée cette période.",
         "DecideHint": {
-          "one": "{career}, {n} période servie. Continuer, changer d'affectation, ou partir ?",
-          "other": "{career}, {n} périodes servies. Continuer, changer d'affectation, ou partir ?"
+          "one": "{career}, {n} période servie. Que fait ce Voyageur maintenant ?",
+          "other": "{career}, {n} périodes servies. Que fait ce Voyageur maintenant ?"
         },
+        "AwardForfeited": "Gain abandonné.",
+        "ForfeitAsk": "Rien n'a été choisi. Abandonner ce gain ?",
         "DecideSkipped": "Cette période n'a jamais été résolue : {steps}. La clôturer maintenant coûte quand même quatre ans et rapporte quand même son jet d'Avantage.",
         "Continue": "Continuer",
         "LeaveCareer": "Quitter la carrière",
@@ -1385,7 +1388,13 @@
         "Skill": "Une compétence de jeunesse",
         "Take": "Les prendre",
         "Again": "{name} a déjà des compétences de jeunesse. En reprendre ?",
-        "None": "Le cadre de {name} n'autorise aucune compétence de jeunesse.",
+        "NoneFrame": "Le cadre de {name} n'autorise aucune compétence de jeunesse.",
+        "NoneEdu": "{name} n'a droit à aucune compétence de jeunesse : DM d'EDU {dm} plus 3 ne laisse rien.",
+        "Held": "Déjà acquises :",
+        "Unspent": {
+          "one": "{n} compétence de jeunesse non dépensée pour {name} : une ligne était vide, ou nommait une compétence déjà acquise.",
+          "other": "{n} compétences de jeunesse non dépensées pour {name} : des lignes étaient vides, ou nommaient des compétences déjà acquises."
+        },
         "Allowance": {
           "one": "{n} compétence de jeunesse",
           "other": "{n} compétences de jeunesse"

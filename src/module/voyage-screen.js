@@ -5,6 +5,7 @@ import { Rules } from "./rules.js";
 import { distance } from "./space.js";
 import { checkOf } from "./chat-message.js";
 import { SpacecraftActorSheet } from "./actors/spacecraft-sheet.js";
+import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { DragDrop } = foundry.applications.ux;
@@ -30,7 +31,7 @@ const JUMP_STEPS = Object.freeze({
  * The voyage screen: one leg, the stop it lands on, and the two checks that fly it.
  * @extends {ApplicationV2}
  */
-export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
+export class VoyageScreen extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     constructor(options) {
         super(options);
@@ -130,6 +131,9 @@ export class VoyageScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         for ( const document of wanted ) document.apps[this.id] = this;
         this.#registered = wanted;
     }
+
+    /** The ship whose voyage this is. A stop it reads is a document it can lose. @inheritDoc */
+    get closesOn() { return [this.#ship]; }
 
     /**
      * `_tearDown` and not `_onClose`: it runs synchronously before the state flips to CLOSED, while

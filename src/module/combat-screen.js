@@ -4,6 +4,7 @@ import { SPACE, SpaceCombatData, STEPS } from "./combat.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
 import { SpacecraftActorSheet } from "./actors/spacecraft-sheet.js";
+import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -19,7 +20,7 @@ const BANDS = Object.freeze(Object.keys(MGT2.ShipRangeBands));
  * The space combat screen: the range strip, the order and the stations.
  * @extends {ApplicationV2}
  */
-export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2) {
+export class SpaceCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     constructor(options) {
         super(options);
@@ -108,6 +109,9 @@ export class SpaceCombatScreen extends HandlebarsApplicationMixin(ApplicationV2)
         applied.uniqueId = options.combat.id;
         return applied;
     }
+
+    /** The Combat this screen resolves: it is the whole subject. @inheritDoc */
+    get closesOn() { return [this.#combat]; }
 
     /** The same registration `DocumentSheetV2` makes, so a document write reaches this window. */
     async _onFirstRender(context, options) {

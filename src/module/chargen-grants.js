@@ -29,6 +29,7 @@ export const Grants = {
                 ? (Number.isFinite(fixed) ? fixed : null)
                 : Math.clamp(eduDM + limits.backgroundBase, limits.backgroundMin, limits.backgroundMax),
             formula: (declared && !Number.isFinite(fixed)) ? declared : "",
+            fromFrame: !!declared,
             eduDM,
             // Empty is the honest state of a world that has typed no list: the referee's whole
             // library is open, and a list of names pointing at nothing would be worse than none.

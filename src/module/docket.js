@@ -4,6 +4,7 @@ import { MGT2Helper } from "./helper.js";
 import { ambushDM, postRequest, SKILL_MODES, UNRESOLVED } from "./request.js";
 import { RollPromptHelper } from "./roll-prompt.js";
 import { TravellerActorSheet } from "./actors/character-sheet.js";
+import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { DragDrop } = foundry.applications.ux;
@@ -27,7 +28,7 @@ const FIELD = "req";
  * The GM's compose window: one Traveller demand, resolved against a named roster BEFORE it is sent.
  * @extends {ApplicationV2}
  */
-export class Docket extends HandlebarsApplicationMixin(ApplicationV2) {
+export class Docket extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
