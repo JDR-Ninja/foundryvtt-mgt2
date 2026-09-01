@@ -1,6 +1,6 @@
 {
   "name": "foundryvtt-mgt2",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Build tooling for the MGT2 - Mongoose Traveller (Unofficial) Foundry VTT system",
   "private": true,
   "type": "module",

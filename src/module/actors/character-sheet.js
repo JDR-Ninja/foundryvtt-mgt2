@@ -4,6 +4,7 @@ import { Checks, renderRollCard } from "../checks.js";
 import { BenefitPicker } from "../benefit-picker.js";
 import { CompendiumExplorer } from "../compendium-explorer.js";
 import { Chargen } from "../chargen.js";
+import { CreationCharacteristics } from "../chargen-characteristics.js";
 import { ChargenScreen } from "../chargen-screen.js";
 import { Muster } from "../chargen-muster.js";
 import { MGT2 } from "../config.js";
@@ -78,6 +79,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       trainingCheck: TravellerActorSheet.#onTrainingCheck,
       trainingOpen: TravellerActorSheet.#onTrainingOpen,
       chargenOpen: TravellerActorSheet.#onChargenOpen,
+      rollCharacteristics: TravellerActorSheet.#onRollCharacteristics,
       roll: TravellerActorSheet.#onRoll,
       openConfig: TravellerActorSheet.#onOpenConfig,
       openCharacteristic: TravellerActorSheet.#onOpenCharacteristic,
@@ -1344,6 +1346,11 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
 
   static #onChargenOpen() {
     return ChargenScreen.open({ add: this.actor });
+  }
+
+  /** Core p.9's first step, from the Traveller's own sheet rather than from the group's grid. */
+  static #onRollCharacteristics() {
+    return CreationCharacteristics.run(this.actor);
   }
 
   /** The training window, on the programme the clicked row names. */

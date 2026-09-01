@@ -914,7 +914,8 @@
         "cash": "Argent",
         "shipShare": "Part de vaisseau",
         "benefit": "Autre Avantage",
-        "note": "À lire à voix haute"
+        "note": "À lire à voix haute",
+        "convert": "Une relation change de camp"
       },
       "GrantModes": {
         "raise": "Donner au niveau 1, ou augmenter de 1",
@@ -1005,6 +1006,17 @@
         "numeric": "Un nombre",
         "enumerated": "Un échelon"
       },
+      "Characteristics": {
+        "Title": "Caractéristiques",
+        "Hint": "Lancez les caractéristiques de ce Voyageur et attribuez les valeurs.",
+        "Assign": "Attribuer",
+        "Again": "{name} a déjà des caractéristiques. En tirer de nouvelles ?",
+        "Nothing": "Le cadre de ce Voyageur ne déclare aucune caractéristique à tirer.",
+        "Unassigned": "Tiré : {values}",
+        "Dice": "Dés : {dice}",
+        "NoteBoon": "Les dés de bonus sont en jeu : chaque caractéristique lance donc ses propres dés au lieu de les prendre dans une réserve.",
+        "NoteFrame": "{characteristic} se tire sur {formula} : chaque caractéristique lance donc ses propres dés au lieu de les prendre dans une réserve."
+      },
       "Roll": {
         "Title": "Test de création",
         "Characteristics": "Caractéristiques",
@@ -1019,7 +1031,23 @@
           "one": "PSI {score}, après {terms} période de service.",
           "other": "PSI {score}, après {terms} périodes de service."
         },
-        "None": "PSI {score} — aucun potentiel pour les talents psioniques."
+        "None": "PSI {score} — aucun potentiel pour les talents psioniques.",
+        "TestHint": "Tirez la Force Psionique : {formula}. Le PSI baisse à chaque période de service ; le moment du test est donc toute la décision.",
+        "TrainHint": "Ouvrez la formation psionique et tentez les talents.",
+        "NoneHint": "PSI 0 — aucun potentiel pour les talents psioniques.",
+        "Again": "{name} a déjà un PSI de {score}. Refaire le test et le remplacer ?",
+        "Held": "Acquis",
+        "Free": "Gratuit",
+        "Take": "Prendre",
+        "Attempt": "Tenter",
+        "Spent": {
+          "one": "{n} test tenté",
+          "other": "{n} tests tentés"
+        },
+        "NewCourse": "Commencer une nouvelle formation",
+        "NewCourseHint": "Quatre mois et Cr100000. Une nouvelle formation remet le malus cumulatif à zéro.",
+        "NewCourseAsk": "Commencer une nouvelle formation pour {name} ? Le malus cumulatif repart de zéro.",
+        "Lifetime": "À cette table, le malus de formation est un compteur à vie : une nouvelle formation n'y change rien."
       },
       "Connect": {
         "Solo": "La création en solo est en vigueur, et elle supprime la règle des Connexions.",
@@ -1027,7 +1055,16 @@
         "Full": "{name} a déjà deux connexions, ce qui est la limite imprimée.",
         "Repeat": "{name} est déjà connecté à {other} — chaque connexion doit concerner un Voyageur différent.",
         "Excluded": "Une connexion ne peut jamais accorder Polyvalent.",
-        "TooHigh": "Une connexion ne peut pas porter une compétence au-delà du niveau 3."
+        "TooHigh": "Une connexion ne peut pas porter une compétence au-delà du niveau 3.",
+        "Title": "Relier deux Voyageurs",
+        "Hint": "L'événement d'un Voyageur impliquait l'autre. Chacun prend une compétence, jamais au-delà du niveau 3.",
+        "Pair": "Les deux qui s'accordent",
+        "Skill": "La compétence prise",
+        "SkillFor": "{name} prend",
+        "Note": "L'événement partagé",
+        "Agree": "S'accorder",
+        "Made": "{name} et {other} sont reliés.",
+        "NeedsTwo": "Une connexion demande deux Voyageurs sur la liste."
       },
       "Muster": {
         "Title": "Fin de carrière",
@@ -1036,7 +1073,8 @@
         "Column": {
           "cash": "Cash",
           "other": "Autres Avantages"
-        }
+        },
+        "Owed": "Cr{credits} portés en dette"
       },
       "Close": {
         "Title": "Fin de carrière",
@@ -1127,7 +1165,7 @@
         "InProgress": "Création de personnage en cours",
         "Resume": "Reprendre",
         "NotStarted": "Création de personnage non commencée",
-        "NotStartedHint": "Aucune espèce, aucune carrière, aucune compétence.",
+        "NotStartedHint": "Aucune carrière, aucune compétence, aucune caractéristique tirée.",
         "Start": "Commencer"
       },
       "Screen": {
@@ -1146,6 +1184,12 @@
         "Survived": "Survie réussie",
         "SurvivalFailed": "Survie échouée",
         "Ejected": "Évincé",
+        "DropRefused": "La liste n’accepte que des Voyageurs — glissez-y un personnage pour l’inscrire.",
+        "DropSpecies": "Une espèce se dépose sur un Voyageur — sur sa colonne ici, ou sur sa propre fiche.",
+        "FrameSet": "{name} prend le cadre {frame}.",
+        "FrameReplaceTitle": "Remplacer le cadre",
+        "FrameReplace": "Remplacer {old} par {frame} comme cadre de {name} ?",
+        "FrameReplaceTracks": "Toute piste déclarée par {old} et non par {frame} est abandonnée avec lui.",
         "DropHint": "Glissez un Voyageur ici pour l'inscrire",
         "Leave": "Retirer de la liste",
         "LeaveHint": "{name} quitte la table. Tout ce qui a déjà été décidé reste sur le Voyageur — les carrières servies, les compétences acquises, les contacts noués. Seul le registre de création est abandonné.",
@@ -1166,7 +1210,18 @@
         "Unlimited": "illimité",
         "Counters": "Jets d'Avantage {benefit} · jets de compétence {skill}",
         "Closing": "Fin de carrière ({n})",
-        "ClosingHint": "Ouvrir l'écran de clôture — la fin de carrière se joue après la dernière carrière et avant que le registre ne soit démonté."
+        "ClosingHint": "Ouvrir l'écran de clôture — la fin de carrière se joue après la dernière carrière et avant que le registre ne soit démonté.",
+        "Option": {
+          "Hint": "Les termes de la table, et seulement là où ils s'écartent du jeu imprimé.",
+          "ironMan": "Mode implacable",
+          "pickedSkills": "Compétences choisies, non tirées",
+          "solo": "Création en solo",
+          "boon": "Dés de bonus : {n}",
+          "maximumTerms": {
+            "one": "{n} période au plus",
+            "other": "{n} périodes au plus"
+          }
+        }
       },
       "TermOutcomes": {
         "elected": "Choix de début de période",
@@ -1308,7 +1363,9 @@
         "StepNotTriggered": "{step} ne se déclenche pas cette période.",
         "TrackAtCap": "{track} est déjà à son dernier échelon.",
         "TrackHeld": "{track} ne peut plus être perdu une fois obtenu.",
-        "ReadOnTable": "{step} : lisez {total} sur la table imprimée dans votre livre."
+        "ReadOnTable": "{step} : lisez {total} sur la table imprimée dans votre livre.",
+        "PickAssociate": "Quel Contact ou Allié le trahit ?",
+        "Unseen": "Quelqu'un que vous n'aviez pas vu venir"
       },
       "StepCheckTriggers": {
         "everyTerm": "À chaque période",
@@ -1321,6 +1378,18 @@
       "CreationCheckKinds": {
         "beat": "Atteint une difficulté",
         "index": "Indique une ligne de table"
+      },
+      "Background": {
+        "Title": "Compétences de jeunesse",
+        "Hint": "Core p.9 : DM d'EDU {dm} plus 3, soit {n}, prises au niveau 0 avant la première période.",
+        "Skill": "Une compétence de jeunesse",
+        "Take": "Les prendre",
+        "Again": "{name} a déjà des compétences de jeunesse. En reprendre ?",
+        "None": "Le cadre de {name} n'autorise aucune compétence de jeunesse.",
+        "Allowance": {
+          "one": "{n} compétence de jeunesse",
+          "other": "{n} compétences de jeunesse"
+        }
       }
     },
     "Packs": {
@@ -1852,7 +1921,6 @@
         "CriticalsCount": "9 localisations · sévérité = Effet − 5",
         "ClearCriticals": "Effacer tous les critiques",
         "Severity": "Sévérité",
-        "Spaces": "Espaces",
         "Comfort": "Confort",
         "Structure": "Structure",
         "Repairs": "Réparations",

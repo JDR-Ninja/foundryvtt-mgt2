@@ -914,7 +914,8 @@
         "cash": "Efectivo",
         "shipShare": "Participación de nave",
         "benefit": "Otro Beneficio",
-        "note": "Léelo en voz alta"
+        "note": "Léelo en voz alta",
+        "convert": "Una relación cambia de bando"
       },
       "GrantModes": {
         "raise": "Conceder a 1, o subir en 1",
@@ -1005,6 +1006,17 @@
         "numeric": "Un número",
         "enumerated": "Un peldaño"
       },
+      "Characteristics": {
+        "Title": "Características",
+        "Hint": "Tira las características de este Viajero y asigna las puntuaciones.",
+        "Assign": "Asignar",
+        "Again": "{name} ya tiene características. ¿Tirar unas nuevas?",
+        "Nothing": "El marco de este Viajero no declara ninguna característica que tirar.",
+        "Unassigned": "Tirado: {values}",
+        "Dice": "Dados: {dice}",
+        "NoteBoon": "Hay dados de ventaja en juego, así que cada característica tira sus propios dados en vez de tomarlos de una reserva.",
+        "NoteFrame": "{characteristic} se tira con {formula}, así que cada característica tira sus propios dados en vez de tomarlos de una reserva."
+      },
       "Roll": {
         "Title": "Tirada de creación",
         "Characteristics": "Características",
@@ -1019,7 +1031,23 @@
           "one": "PSI {score}, tras {terms} periodo servido.",
           "other": "PSI {score}, tras {terms} periodos servidos."
         },
-        "None": "PSI {score} — ningún potencial para talentos psiónicos."
+        "None": "PSI {score} — ningún potencial para talentos psiónicos.",
+        "TestHint": "Tira la Fuerza Psiónica: {formula}. El PSI baja con cada periodo servido, así que cuándo se hace la prueba lo decide todo.",
+        "TrainHint": "Abre el entrenamiento psiónico e intenta los talentos.",
+        "NoneHint": "PSI 0 — ningún potencial para talentos psiónicos.",
+        "Again": "{name} ya tiene PSI {score}. ¿Repetir la prueba y sustituirlo?",
+        "Held": "Adquirido",
+        "Free": "Gratis",
+        "Take": "Tomar",
+        "Attempt": "Intentar",
+        "Spent": {
+          "one": "{n} tirada intentada",
+          "other": "{n} tiradas intentadas"
+        },
+        "NewCourse": "Empezar un nuevo entrenamiento",
+        "NewCourseHint": "Cuatro meses y Cr100000. Un nuevo entrenamiento reinicia la penalización acumulada.",
+        "NewCourseAsk": "¿Empezar un nuevo entrenamiento para {name}? La penalización acumulada vuelve a cero.",
+        "Lifetime": "En esta mesa la penalización de entrenamiento es un contador vitalicio, así que un nuevo entrenamiento no cambia nada."
       },
       "Connect": {
         "Solo": "La generación en solitario está en vigor, y quita la Regla de Conexiones.",
@@ -1027,7 +1055,16 @@
         "Full": "{name} ya tiene dos conexiones, que es el límite impreso.",
         "Repeat": "{name} ya está conectado con {other} — cada conexión debe ser con un Viajero distinto.",
         "Excluded": "Una conexión nunca puede conceder Polivalencia.",
-        "TooHigh": "Una conexión no puede subir una habilidad por encima del nivel 3."
+        "TooHigh": "Una conexión no puede subir una habilidad por encima del nivel 3.",
+        "Title": "Conectar dos Viajeros",
+        "Hint": "El suceso de un Viajero implicó al otro. Ambos toman una habilidad por ello, nunca por encima del nivel 3.",
+        "Pair": "Los dos que acuerdan",
+        "Skill": "La habilidad tomada",
+        "SkillFor": "{name} toma",
+        "Note": "El suceso compartido",
+        "Agree": "Acordar",
+        "Made": "{name} y {other} están conectados.",
+        "NeedsTwo": "Una conexión necesita dos Viajeros en la lista."
       },
       "Muster": {
         "Title": "Licenciamiento",
@@ -1036,7 +1073,8 @@
         "Column": {
           "cash": "Efectivo",
           "other": "Otros Beneficios"
-        }
+        },
+        "Owed": "Cr{credits} asumidos como deuda"
       },
       "Close": {
         "Title": "Licenciamiento",
@@ -1127,7 +1165,7 @@
         "InProgress": "Creación de personaje en curso",
         "Resume": "Reanudar",
         "NotStarted": "Creación de personaje no iniciada",
-        "NotStartedHint": "Todavía no hay especie, ni carrera, ni habilidad.",
+        "NotStartedHint": "Todavía no hay carrera, ni habilidad, ni característica tirada.",
         "Start": "Empezar"
       },
       "Screen": {
@@ -1146,6 +1184,12 @@
         "Survived": "Supervivencia superada",
         "SurvivalFailed": "Supervivencia fallada",
         "Ejected": "Expulsado",
+        "DropRefused": "La lista solo admite Viajeros — arrastra aquí un personaje para inscribirlo.",
+        "DropSpecies": "Una especie va sobre un Viajero — suéltala en su columna aquí, o en su propia ficha.",
+        "FrameSet": "{name} toma el marco {frame}.",
+        "FrameReplaceTitle": "Sustituir el marco",
+        "FrameReplace": "¿Sustituir {old} por {frame} como marco de {name}?",
+        "FrameReplaceTracks": "Toda pista declarada por {old} y no por {frame} se descarta con él.",
         "DropHint": "Arrastra aquí un Viajero para ponerlo en la lista",
         "Leave": "Sacar de la lista",
         "LeaveHint": "{name} deja la mesa. Todo lo decidido hasta ahora se queda en el Viajero — las carreras servidas, las habilidades ganadas, los contactos hechos. Solo se descarta el registro de creación.",
@@ -1166,7 +1210,18 @@
         "Unlimited": "ilimitado",
         "Counters": "Tiradas de Beneficio {benefit} · tiradas de habilidad {skill}",
         "Closing": "Licenciarse ({n})",
-        "ClosingHint": "Abre la pantalla de cierre — el licenciamiento corre después de la última carrera y antes de desmontar el registro."
+        "ClosingHint": "Abre la pantalla de cierre — el licenciamiento corre después de la última carrera y antes de desmontar el registro.",
+        "Option": {
+          "Hint": "Los términos de la mesa, y solo donde difieren del juego impreso.",
+          "ironMan": "Modo implacable",
+          "pickedSkills": "Habilidades elegidas, no tiradas",
+          "solo": "Creación en solitario",
+          "boon": "Dados de ventaja: {n}",
+          "maximumTerms": {
+            "one": "{n} periodo como máximo",
+            "other": "{n} periodos como máximo"
+          }
+        }
       },
       "TermOutcomes": {
         "elected": "Elección de principio de periodo",
@@ -1308,7 +1363,9 @@
         "StepNotTriggered": "{step} no se dispara este periodo.",
         "TrackAtCap": "{track} ya está en su último peldaño.",
         "TrackHeld": "{track} no puede perderse una vez alcanzado.",
-        "ReadOnTable": "{step}: lee {total} en la tabla que imprima tu libro."
+        "ReadOnTable": "{step}: lee {total} en la tabla que imprima tu libro.",
+        "PickAssociate": "¿Qué Contacto o Aliado le traiciona?",
+        "Unseen": "Alguien a quien no viste venir"
       },
       "StepCheckTriggers": {
         "everyTerm": "Cada periodo",
@@ -1321,6 +1378,18 @@
       "CreationCheckKinds": {
         "beat": "Supera un objetivo",
         "index": "Indexa una tabla"
+      },
+      "Background": {
+        "Title": "Habilidades de juventud",
+        "Hint": "Core p.9: DM de EDU {dm} más 3, o sea {n}, tomadas a nivel 0 antes del primer periodo.",
+        "Skill": "Una habilidad de juventud",
+        "Take": "Tomarlas",
+        "Again": "{name} ya tiene habilidades de juventud. ¿Tomarlas de nuevo?",
+        "None": "El marco de {name} no permite ninguna habilidad de juventud.",
+        "Allowance": {
+          "one": "{n} habilidad de juventud",
+          "other": "{n} habilidades de juventud"
+        }
       }
     },
     "Packs": {

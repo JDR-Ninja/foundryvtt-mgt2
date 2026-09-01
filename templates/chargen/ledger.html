@@ -6,12 +6,17 @@
     who has stopped has no cell where the others still have one, and a VACATED cell is not an empty
     one. A term simply not played yet stays blank. }}
 <div class="termgridwrap">
-	<table class="termgrid">
+	{{! `--cols` is the count the stylesheet's floor multiplies: fixed layout divides the width the
+	    table has, so the number of columns has to reach the CSS. }}
+	<table class="termgrid" style="--cols: {{columns.length}}">
 		<thead>
 			<tr>
 				<th class="tcol">{{localize 'MGT2.Chargen.Screen.TermColumn'}}</th>
+				{{! A column takes the frame it is missing: the head prints the species, so the head is
+				    where one is dropped, and the cells below it answer the same drag. }}
 				{{#each columns as |column|}}
-				<th data-actor-id="{{column.id}}" class="{{#if column.selected}}sel{{/if}}">
+				<th data-actor-id="{{column.id}}" data-accept="{{../frameTypes}}"
+					class="{{#if column.selected}}sel{{/if}}">
 					<div class="who {{#if column.done}}done{{/if}}" data-action="selectColumn">
 						<b><a data-action="openActor">{{column.name}}</a></b>
 						<span class="sp">{{#if column.species}}{{column.species}}{{else}}{{localize 'MGT2.Chargen.Screen.NoSpecies'}}{{/if}}</span>
@@ -34,7 +39,8 @@
 			<tr>
 				<td class="tno">{{row.n}}</td>
 				{{#each row.cells as |cell|}}
-				<td class="cell {{cell.state}}" data-actor-id="{{cell.id}}" data-action="selectColumn">
+				<td class="cell {{cell.state}}" data-actor-id="{{cell.id}}"
+					data-accept="{{../../frameTypes}}" data-action="selectColumn">
 					{{#if cell.gone}}{{else if cell.live}}
 					<span class="asg">{{localize 'MGT2.Chargen.Screen.InProgress'}}</span>
 					{{else if cell.career}}

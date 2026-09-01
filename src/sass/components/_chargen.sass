@@ -89,6 +89,8 @@
 // Fixed layout, because the point of the grid is seeing every column at once: with auto layout one
 // verbose cell widens its whole column and pushes the fourth Traveller off the edge, which is the one
 // thing this screen must not do.
+// Every Traveller column has a floor and the table states the width those floors need, so a roster
+// too wide for the window scrolls sideways at 23 characters a cell.
 
 .mgt2 .termgridwrap
 	overflow: auto
@@ -97,7 +99,10 @@
 .mgt2 table.termgrid
 	border-collapse: separate
 	border-spacing: 0
+	// `--cols` is the column count, set on the element by the template. Fixed layout divides the
+	// width the table has, so the floor belongs here: `min-width` on a cell is ignored under it.
 	width: 100%
+	min-width: calc(4.2rem + (var(--cols, 1) * 11rem))
 	table-layout: fixed
 
 	th,
@@ -112,6 +117,7 @@
 		border-bottom: 1px solid var(--rule)
 		padding: 8px 9px 9px
 		text-align: left
+	// The one declared column; the rest share what is left. 4.2rem is repeated in `min-width` above.
 	thead th.tcol
 		width: 4.2rem
 	thead th.sel
@@ -120,6 +126,8 @@
 	.who
 		position: relative
 		cursor: pointer
+		// Without this a name clips at the cell edge: `b` carries no wrapping rule of its own.
+		overflow-wrap: break-word
 		b
 			display: block
 			font-family: var(--cond)
@@ -184,7 +192,9 @@
 		padding: 6px 9px 7px
 		border-bottom: 1px solid var(--rule-soft)
 		border-left: 1px solid var(--rule-soft)
-		overflow-wrap: anywhere
+		// `anywhere` reports a one-glyph min-content and lets fixed layout squeeze the column that
+		// far; `break-word` breaks the same words without offering it.
+		overflow-wrap: break-word
 		cursor: pointer
 	tbody tr:last-child td
 		border-bottom: 0
@@ -254,6 +264,15 @@
 	box-shadow: inset 0 0 0 1px var(--accent-text)
 	background: var(--accent-soft)
 
+// A column taking a frame: an outline rather than a ground, because `.now` already owns the accent
+// ground and an accepting cell has to read over it. `deny` is deliberately unpainted here — a
+// Traveller dragged to the roster row crosses every column on the way, and each one flashing a
+// refusal is noise the drop's own message already covers.
+.mgt2 .termgrid th.over,
+.mgt2 .termgrid td.cell.over
+	outline: 2px solid var(--accent-text)
+	outline-offset: -2px
+
 // The drop row is one cell across the whole width: split over the columns it would land in a cell
 // the width of a term number and wrap to three lines.
 .mgt2 .termgrid tr.drop td
@@ -290,7 +309,8 @@
 		letter-spacing: 0.16em
 		text-transform: uppercase
 		color: var(--faint)
-	ol
+	ol,
+	ul.pre
 		margin: 5px 0 0
 		padding: 0
 		list-style: none
@@ -326,6 +346,31 @@
 	li.cut
 		text-decoration: line-through
 		color: var(--faint)
+	// The one step that is not a term step. Dashed until it has been taken, and then it carries the
+	// code it produced.
+	li.once
+		display: flex
+		align-items: baseline
+		gap: 6px
+		border-style: dashed
+	li.once.set
+		border-style: solid
+		border-color: var(--good)
+		color: var(--good)
+		b
+			font-weight: 600
+			letter-spacing: 0.08em
+	// The allowance is a reading and not an outcome: it moves with EDU right up to the moment it is
+	// spent, so the chip carries it in both states.
+	li.once.bg b
+		font-family: var(--mono)
+		font-weight: 600
+	// PSI 0 is a taken step whose answer is no, so it reads as settled rather than as achieved.
+	li.once.set.nil
+		border-color: var(--rule)
+		color: var(--faint)
+	li.once span[data-tooltip]
+		cursor: help
 	.why
 		margin: 6px 0 0
 		font-size: 12px
@@ -395,8 +440,11 @@
 		margin: 14px
 		font-size: 12px
 		color: var(--faint)
+	// Seven fixed columns, and a resizable window: the floor is the width the screen opens at, so it
+	// scrolls below that.
 	table
 		width: 100%
+		min-width: 58rem
 		border-collapse: separate
 		border-spacing: 0
 		table-layout: fixed
@@ -426,7 +474,7 @@
 		font-family: var(--mono)
 		font-size: 10.5px
 		color: var(--mute)
-		overflow-wrap: anywhere
+		overflow-wrap: break-word
 	td.big
 		font-size: 15px
 		font-weight: 600
@@ -616,3 +664,148 @@
 		&:hover
 			color: var(--accent-text)
 			border-color: var(--accent-text)
+
+// --------------------------------------------
+//  Psionic training — Core p.228's ladder
+// --------------------------------------------
+
+.mgt2 .psi-train
+	display: flex
+	flex-direction: column
+	gap: 10px
+	padding: 11px 14px 13px
+
+	.hd
+		display: flex
+		align-items: baseline
+		gap: 10px
+		.who
+			font-family: var(--cond)
+			font-size: 13px
+			font-weight: 700
+			letter-spacing: 0.1em
+			text-transform: uppercase
+		.psi
+			font-family: var(--mono)
+			font-size: 11px
+			color: var(--mute)
+			b
+				color: var(--accent-text)
+		.spent
+			margin-left: auto
+			font-family: var(--cond)
+			font-size: 10px
+			font-weight: 600
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--faint)
+
+	.opts
+		display: flex
+		flex-direction: column
+
+		.opt
+			display: flex
+			align-items: baseline
+			gap: 9px
+			padding: 5px 2px
+			border-bottom: 1px solid var(--rule-soft)
+			&:last-child
+				border-bottom: 0
+			b
+				flex: 0 0 8rem
+				font-family: var(--cond)
+				font-size: 12.5px
+				font-weight: 700
+				letter-spacing: 0.09em
+				text-transform: uppercase
+			.dm,
+			.tot
+				font-family: var(--mono)
+				font-size: 10.5px
+				color: var(--faint)
+			.tot
+				color: var(--mute)
+			.why
+				margin-left: auto
+				font-family: var(--cond)
+				font-size: 10px
+				font-weight: 600
+				letter-spacing: 0.12em
+				text-transform: uppercase
+				color: var(--faint)
+			.why.fr
+				color: var(--good)
+			.btn
+				margin-left: auto
+
+		.opt.held b
+			color: var(--faint)
+
+	.course
+		display: flex
+		align-items: center
+		gap: 10px
+		border-top: 1px solid var(--rule)
+		padding-top: 10px
+		.hint
+			flex: 1 1 auto
+			margin: 0
+		.btn
+			flex: 0 0 auto
+
+// The table's terms on the masthead, and the connection control beside them. Both are session-level:
+// what the whole roster is playing under, rather than anything one Traveller decided.
+
+.mgt2 .mgt2-chargen-head
+	.terms
+		display: flex
+		flex-wrap: wrap
+		gap: 4px
+		cursor: help
+		i
+			font-style: normal
+			padding: 1px 6px 2px
+			font-family: var(--cond)
+			font-size: 9px
+			font-weight: 700
+			letter-spacing: 0.13em
+			text-transform: uppercase
+			color: var(--faint)
+			border: 1px solid var(--rule)
+			border-radius: 2px
+	.connect
+		flex: none
+		width: auto
+		padding: 2px 9px 3px
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 700
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		line-height: 1.6
+
+// Two pre-term pickers on the dialog ground: the connection's pair, and the background allowance.
+
+.mgt2 .dlg.connect .drow select.f
+	flex: 1 1 8rem
+	width: auto
+
+.mgt2 .dlg.bgskills
+	.hint .dm
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--faint)
+	.drow label
+		flex: 0 0 1.5rem
+		font-family: var(--mono)
+		color: var(--faint)
+	// A frame that DECLARED a skill did not offer it, so the row states it rather than taking a type.
+	.drow .fx
+		flex: 1 1 auto
+		font-family: var(--cond)
+		font-size: 12.5px
+		font-weight: 700
+		letter-spacing: 0.09em
+		text-transform: uppercase
+		color: var(--accent-text)

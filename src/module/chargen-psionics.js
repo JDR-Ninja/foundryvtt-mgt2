@@ -8,6 +8,9 @@ import { Rules } from "./rules.js";
 
 const TRAINING_TRACK = "psionicTraining";
 
+// PSI 0 is a result and not an absence, and `base` reads 0 for both — so the test records itself.
+const TEST_TRACK = "psionicTest";
+
 /**
  * Psionics in creation, which needs **no new machinery** — and proving that is the point.
  * The PSI test is an ordinary first roll into `base` with a DM read off the history; the two Core
@@ -41,6 +44,13 @@ export const Psionics = {
         const ceiling = this.ceiling(actor);
         const score = Math.max(0, ceiling === null ? roll.total : Math.min(roll.total, ceiling));
         await Grants.assignCharacteristics(actor, { psionic: score });
+        // Outside creation there is no ledger to write, and `Chargen.update` would open one.
+        if ( Chargen.isInCreation(actor) ) {
+            const tracks = foundry.utils.deepClone(Chargen.read(actor).tracks);
+            const taken = (tracks[TEST_TRACK]?.value ?? 0) + 1;
+            tracks[TEST_TRACK] = { value: taken, rung: "", high: taken };
+            await Chargen.update(actor, { tracks });
+        }
         await ChatMessage.create({
             author: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor }),
@@ -60,21 +70,6 @@ export const Psionics = {
     ceiling(actor) {
         if ( !Rules.on("psiCeiling") ) return null;
         return Chargen.frame(actor)?.system.racialMaximum ?? MGT2.CreationDefaults.racialMaximum;
-    },
-
-    /**
-     * Qualification for the psionic career: **PSI 6+ at DM−1 per previous career** (folio 236) —
-     * against a PSI that was itself `2D − terms`.
-     */
-    qualification(actor, template) {
-        const previous = Chargen.careers(actor).length;
-        return CreationRoll.compose(actor, {
-            characteristic: template?.system.qualification.characteristics[0] ?? "psionic",
-            check: "qualification",
-            target: template?.system.difficulty ?? null,
-            rows: previous
-                ? [[game.i18n.localize("MGT2.Chargen.Roll.PreviousCareers"), -previous]] : []
-        });
     },
 
     /**
@@ -109,6 +104,11 @@ export const Psionics = {
     /** How many learning checks this Traveller has made. */
     attempts(actor) {
         return Chargen.read(actor).tracks[TRAINING_TRACK]?.value ?? 0;
+    },
+
+    /** Whether the test has been taken, which is the one thing a PSI of 0 cannot say for itself. */
+    tested(actor) {
+        return (Chargen.read(actor).tracks[TEST_TRACK]?.value ?? 0) > 0;
     },
 
     /** Wipe the counter, which is what starting a fresh course of training means. */
@@ -154,10 +154,13 @@ export const Psionics = {
             modifiers: composed.terms
         });
 
-        const tracks = foundry.utils.deepClone(Chargen.read(actor).tracks);
-        const spent = (tracks[TRAINING_TRACK]?.value ?? 0) + 1;
-        tracks[TRAINING_TRACK] = { value: spent, rung: "", high: spent };
-        await Chargen.update(actor, { tracks });
+        // Outside creation there is no ledger to write, and `Chargen.update` would open one.
+        if ( Chargen.isInCreation(actor) ) {
+            const tracks = foundry.utils.deepClone(Chargen.read(actor).tracks);
+            const spent = (tracks[TRAINING_TRACK]?.value ?? 0) + 1;
+            tracks[TRAINING_TRACK] = { value: spent, rung: "", high: spent };
+            await Chargen.update(actor, { tracks });
+        }
 
         return { free: false, passed, granted: passed ? await grant() : null, outcome };
     }

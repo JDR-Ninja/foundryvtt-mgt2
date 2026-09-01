@@ -4,6 +4,45 @@
 
 ---
 
+## [0.2.1]
+
+**The steps creation never had.** 0.2.0 shipped the term loop without the three steps that come
+before it, and without controls for several rules it was already computing.
+
+### Traveller creation
+
+* **Characteristics roll**, from the creation screen — a chip ahead of the terms, carrying the UPP it
+  produced — and from the sheet's banner once creation is running.
+* **All four assignment methods in the setting work**: any order, the printed order, or the
+  Companion's 12D assigned in pairs, heroic variant included. Where a frame has dice of its own, or
+  boon dice are in play, the pool is refused **in a sentence** rather than in silence.
+* **Background skills are taken** (Core p.9) — EDU DM + 3, a second chip ahead of the terms, at level
+  0. A skill the frame *declares* fills its own row: it is imposed rather than offered.
+* **Psionic Strength is tested and trained** (Core p.228), where the table has adopted the
+  characteristic — the test first, then the training window: the talent ladder, Telepathy free as the
+  first, the cumulative penalty per attempt. **A new course is a control of its own** — four months
+  and Cr100000 are not a side effect of looking — and it is what finally resets that penalty, as its
+  setting has always said.
+* **The Connections Rule is playable** (Core p.19) — two Travellers, one skill each, the shared event
+  noted. It lives on the screen's masthead because it writes two Travellers at once, which no sheet
+  can do; the four printed refusals are each named.
+* **A betrayal turns an associate rather than inventing one** (Core p.20): a Contact or Ally becomes
+  a Rival or Enemy, and the printed fallback applies where there is none.
+* **A column takes the species dropped on it** — head or cell — and **replaces** the one standing
+  there, after a confirm. Tracks the old frame alone declared go with it.
+* **The masthead states the table's terms**: the assignment method, and only what departs from the
+  printed game.
+
+### Fixes
+
+* Dropping a species on a blank Traveller **took the *Start* button off their sheet**.
+* What the creation screen cannot take is now **refused out loud** instead of vanishing.
+* ⚠ **A cost incurred during creation drove credits below zero**, and the *Money spent during
+  creation becomes debt* setting had no effect at all. Such a cost now pays what is available,
+  carries the rest as debt, and **refuses whole** where the rule is off.
+
+---
+
 ## [0.2.0]
 
 **The largest release this system has had.** 0.1.x was a character sheet; 0.2.0 is a game system.

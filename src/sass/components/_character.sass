@@ -67,6 +67,9 @@
 
 		.btn
 			flex: 0 0 auto
+		// Only the FIRST takes the free space. Flexbox splits it between every auto margin it finds,
+		// so the pair came out with 131 px down the middle of the strip.
+		.btn:first-of-type
 			margin-left: auto
 
 		// Nothing is under way, so the ground goes quiet and the button keeps the accent.

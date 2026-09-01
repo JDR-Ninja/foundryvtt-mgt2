@@ -1,0 +1,34 @@
+{{! Core p.228's training ladder. Refusals are drawn rather than hidden, the training picker's own
+    rule: a talent already held keeps its row and says so, where an absent row says nothing. }}
+<div class="psi-train">
+	<div class="hd">
+		<span class="who">{{who}}</span>
+		<span class="psi">{{localize 'MGT2.Characteristics.psionic.short'}} {{score}} <b>{{psiDM}}</b></span>
+		<span class="spent">{{spent}}</span>
+	</div>
+
+	<div class="opts">
+		{{#each rows as |row|}}
+		<div class="opt{{#if row.held}} held{{/if}}" data-talent="{{row.key}}">
+			<b>{{row.name}}</b>
+			<span class="dm">{{row.learn}}</span>
+			<span class="dm">{{row.attempt}}</span>
+			<span class="tot">{{row.sum}} / {{row.target}}+</span>
+			{{#if row.held}}<span class="why">{{localize 'MGT2.Chargen.Psi.Held'}}</span>{{/if}}
+			{{#if row.free}}<span class="why fr">{{localize 'MGT2.Chargen.Psi.Free'}}</span>{{/if}}
+			{{#if row.canAttempt}}
+			<button type="button" class="btn{{#if row.free}} hot{{/if}}" data-action="learn">{{#if row.free}}{{localize 'MGT2.Chargen.Psi.Take'}}{{else}}{{localize 'MGT2.Chargen.Psi.Attempt'}}{{/if}}</button>
+			{{/if}}
+		</div>
+		{{/each}}
+	</div>
+
+	{{! Four months and Cr100000, so the course is a control of its own and never a side effect of
+	    opening this window to read the ladder. }}
+	<div class="course">
+		<p class="hint">{{courseWhy}}</p>
+		{{#if canEdit}}
+		<button type="button" class="btn" data-action="beginCourse" {{#unless resets}}disabled{{/unless}}>{{localize 'MGT2.Chargen.Psi.NewCourse'}}</button>
+		{{/if}}
+	</div>
+</div>

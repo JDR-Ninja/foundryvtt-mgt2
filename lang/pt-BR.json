@@ -914,7 +914,8 @@
         "cash": "Dinheiro",
         "shipShare": "Cota de nave",
         "benefit": "Outro Benefício",
-        "note": "Leia em voz alta"
+        "note": "Leia em voz alta",
+        "convert": "Uma relação muda de lado"
       },
       "GrantModes": {
         "raise": "Conceder em 1, ou subir em 1",
@@ -1005,6 +1006,17 @@
         "numeric": "Um número",
         "enumerated": "Um degrau"
       },
+      "Characteristics": {
+        "Title": "Características",
+        "Hint": "Role as características deste Viajante e atribua os valores.",
+        "Assign": "Atribuir",
+        "Again": "{name} já tem características. Rolar um novo conjunto?",
+        "Nothing": "O quadro deste Viajante não declara nenhuma característica para rolar.",
+        "Unassigned": "Rolado: {values}",
+        "Dice": "Dados: {dice}",
+        "NoteBoon": "Há dados de vantagem em jogo, então cada característica rola seus próprios dados em vez de tirá-los de uma reserva.",
+        "NoteFrame": "{characteristic} é rolada com {formula}, então cada característica rola seus próprios dados em vez de tirá-los de uma reserva."
+      },
       "Roll": {
         "Title": "Rolagem de criação",
         "Characteristics": "Características",
@@ -1019,7 +1031,23 @@
           "one": "PSI {score}, após {terms} período servido.",
           "other": "PSI {score}, após {terms} períodos servidos."
         },
-        "None": "PSI {score} — nenhum potencial para talentos psiônicos."
+        "None": "PSI {score} — nenhum potencial para talentos psiônicos.",
+        "TestHint": "Role a Força Psiônica: {formula}. O PSI cai a cada período servido, então quando o Viajante testa é toda a decisão.",
+        "TrainHint": "Abra o treinamento psiônico e tente os talentos.",
+        "NoneHint": "PSI 0 — nenhum potencial para talentos psiônicos.",
+        "Again": "{name} já tem PSI {score}. Testar de novo e substituir?",
+        "Held": "Adquirido",
+        "Free": "Grátis",
+        "Take": "Pegar",
+        "Attempt": "Tentar",
+        "Spent": {
+          "one": "{n} teste tentado",
+          "other": "{n} testes tentados"
+        },
+        "NewCourse": "Começar um novo treinamento",
+        "NewCourseHint": "Quatro meses e Cr100000. Um novo treinamento reinicia a penalidade cumulativa.",
+        "NewCourseAsk": "Começar um novo treinamento para {name}? A penalidade cumulativa recomeça.",
+        "Lifetime": "Nesta mesa a penalidade de treinamento é um contador vitalício, então um novo treinamento não muda nada."
       },
       "Connect": {
         "Solo": "A geração solo está em vigor, e ela retira a Regra de Conexões.",
@@ -1027,7 +1055,16 @@
         "Full": "{name} já tem duas conexões, que é o limite impresso.",
         "Repeat": "{name} já está conectado com {other} — cada conexão deve ser com um Viajante diferente.",
         "Excluded": "Uma conexão nunca pode conceder Polivalência.",
-        "TooHigh": "Uma conexão não pode subir uma perícia acima do nível 3."
+        "TooHigh": "Uma conexão não pode subir uma perícia acima do nível 3.",
+        "Title": "Conectar dois Viajantes",
+        "Hint": "O evento de um Viajante envolveu o outro. Ambos tomam uma perícia por isso, nunca acima do nível 3.",
+        "Pair": "Os dois que concordam",
+        "Skill": "A perícia tomada",
+        "SkillFor": "{name} toma",
+        "Note": "O evento compartilhado",
+        "Agree": "Concordar",
+        "Made": "{name} e {other} estão conectados.",
+        "NeedsTwo": "Uma conexão precisa de dois Viajantes na lista."
       },
       "Muster": {
         "Title": "Baixa",
@@ -1036,7 +1073,8 @@
         "Column": {
           "cash": "Dinheiro",
           "other": "Outros Benefícios"
-        }
+        },
+        "Owed": "Cr{credits} assumidos como dívida"
       },
       "Close": {
         "Title": "Baixa",
@@ -1127,7 +1165,7 @@
         "InProgress": "Criação de personagem em andamento",
         "Resume": "Retomar",
         "NotStarted": "Criação de personagem não iniciada",
-        "NotStartedHint": "Ainda não há espécie, nem carreira, nem perícia.",
+        "NotStartedHint": "Ainda não há carreira, nem perícia, nem característica rolada.",
         "Start": "Começar"
       },
       "Screen": {
@@ -1146,6 +1184,12 @@
         "Survived": "Sobrevivência passou",
         "SurvivalFailed": "Sobrevivência falhou",
         "Ejected": "Expulso",
+        "DropRefused": "A lista só aceita Viajantes — arraste um personagem para cá para inscrevê-lo.",
+        "DropSpecies": "Uma espécie vai sobre um Viajante — solte-a na coluna dele aqui, ou na ficha dele.",
+        "FrameSet": "{name} assume o quadro {frame}.",
+        "FrameReplaceTitle": "Substituir o quadro",
+        "FrameReplace": "Substituir {old} por {frame} como quadro de {name}?",
+        "FrameReplaceTracks": "Toda trilha declarada por {old} e não por {frame} é descartada com ele.",
         "DropHint": "Arraste um Viajante para cá para pô-lo na lista",
         "Leave": "Tirar da lista",
         "LeaveHint": "{name} deixa a mesa. Tudo o que foi decidido até agora fica no Viajante — as carreiras servidas, as perícias ganhas, os contatos feitos. Apenas o registro de criação é descartado.",
@@ -1166,7 +1210,18 @@
         "Unlimited": "ilimitado",
         "Counters": "Rolagens de Benefício {benefit} · rolagens de perícia {skill}",
         "Closing": "Dar baixa ({n})",
-        "ClosingHint": "Abre a tela de encerramento — a baixa corre depois da última carreira e antes de o registro ser desmontado."
+        "ClosingHint": "Abre a tela de encerramento — a baixa corre depois da última carreira e antes de o registro ser desmontado.",
+        "Option": {
+          "Hint": "Os termos da mesa, e apenas onde diferem do jogo impresso.",
+          "ironMan": "Modo implacável",
+          "pickedSkills": "Perícias escolhidas, não roladas",
+          "solo": "Criação solo",
+          "boon": "Dados de vantagem: {n}",
+          "maximumTerms": {
+            "one": "{n} período no máximo",
+            "other": "{n} períodos no máximo"
+          }
+        }
       },
       "TermOutcomes": {
         "elected": "Eleição de início de período",
@@ -1308,7 +1363,9 @@
         "StepNotTriggered": "{step} não dispara neste período.",
         "TrackAtCap": "{track} já está em seu último degrau.",
         "TrackHeld": "{track} não pode ser perdido depois de alcançado.",
-        "ReadOnTable": "{step}: leia {total} na tabela que seu livro imprime."
+        "ReadOnTable": "{step}: leia {total} na tabela que seu livro imprime.",
+        "PickAssociate": "Qual Contato ou Aliado o trai?",
+        "Unseen": "Alguém que você não viu chegando"
       },
       "StepCheckTriggers": {
         "everyTerm": "A cada período",
@@ -1321,6 +1378,18 @@
       "CreationCheckKinds": {
         "beat": "Supera um alvo",
         "index": "Indexa uma tabela"
+      },
+      "Background": {
+        "Title": "Perícias de juventude",
+        "Hint": "Core p.9: DM de EDU {dm} mais 3, ou seja {n}, tomadas no nível 0 antes do primeiro período.",
+        "Skill": "Uma perícia de juventude",
+        "Take": "Tomá-las",
+        "Again": "{name} já tem perícias de juventude. Tomá-las de novo?",
+        "None": "O quadro de {name} não permite nenhuma perícia de juventude.",
+        "Allowance": {
+          "one": "{n} perícia de juventude",
+          "other": "{n} perícias de juventude"
+        }
       }
     },
     "Packs": {

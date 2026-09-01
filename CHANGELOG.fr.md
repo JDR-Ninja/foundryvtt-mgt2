@@ -4,6 +4,48 @@
 
 ---
 
+## [0.2.1]
+
+**Les pas que la création n'avait jamais eus.** 0.2.0 livrait la boucle des périodes sans les trois
+étapes qui la précèdent, et sans les contrôles de plusieurs règles qu'il calculait pourtant déjà.
+
+### Création de Voyageurs
+
+* **Les caractéristiques se lancent**, depuis l'écran de création — une pastille avant les périodes,
+  qui garde le PUP obtenu — et depuis le bandeau de la fiche une fois la création lancée.
+* **Les quatre méthodes d'attribution du réglage fonctionnent** : ordre libre, ordre imprimé, ou les
+  12D du Companion répartis par paires, variante héroïque comprise. Là où un cadre impose ses propres
+  dés, ou là où les dés de bonus sont en jeu, la réserve est refusée **en une phrase** plutôt qu'en
+  silence.
+* **Les compétences de jeunesse se prennent** (Core p.9) — DM d'EDU + 3, une deuxième pastille avant
+  les périodes, au niveau 0. Une compétence que le cadre *déclare* remplit sa ligne : elle est
+  imposée et non proposée.
+* **La Force Psionique se teste et se travaille** (Core p.228), là où la table a adopté la
+  caractéristique — le test d'abord, puis la fenêtre de formation : l'échelle des talents, la
+  Télépathie offerte en premier, le malus cumulatif par tentative. **Une nouvelle formation est un
+  contrôle à part** — quatre mois et Cr100000 ne sont pas un effet de bord de la consultation — et
+  c'est elle qui remet enfin le malus à zéro, comme son réglage l'annonce.
+* **La règle des connexions est jouable** (Core p.19) — deux Voyageurs, une compétence chacun,
+  l'événement partagé noté. Elle vit sur le fronton de l'écran parce qu'elle écrit sur deux Voyageurs
+  à la fois, ce qu'aucune fiche ne peut faire ; les quatre refus imprimés sont dits par leur nom.
+* **Une trahison retourne une relation au lieu d'en inventer une** (Core p.20) : un Contact ou un
+  Allié devient Rival ou Ennemi, et le repli imprimé s'applique quand il n'y en a aucun.
+* **Une colonne accepte l'espèce qu'on y dépose** — en-tête ou cellule — et **remplace** celle qui s'y
+  trouve, après confirmation. Les pistes déclarées par le seul ancien cadre partent avec lui.
+* **Le fronton dit les termes de la table** : la méthode d'attribution, et seulement ce qui s'écarte
+  du jeu imprimé.
+
+### Correctifs
+
+* Déposer une espèce sur un Voyageur vierge **retirait le bouton *Commencer* de sa fiche**.
+* Ce que l'écran de création ne peut pas prendre est **refusé à voix haute** au lieu de disparaître.
+* ⚠ **Un coût encouru pendant la création descendait les crédits sous zéro**, et le réglage
+  *L'argent dépensé en création devient une dette* n'avait aucun effet. Un tel coût paie désormais
+  ce qui est disponible, porte le reste en dette, et **refuse en entier** là où la règle est
+  désactivée.
+
+---
+
 ## [0.2.0]
 
 **La plus grosse version du système à ce jour.** 0.1.x était une feuille de personnage ; 0.2.0 est un

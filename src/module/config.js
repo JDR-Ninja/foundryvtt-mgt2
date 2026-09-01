@@ -2336,6 +2336,11 @@ MGT2.CoreTermSequence = Object.freeze(["elect", "qualify", "basic", "survival", 
 MGT2.CreationDefaults = Object.freeze({ startAge: 18, termYears: 4, racialMaximum: 15,
     ageingFromTerm: 4, ageingFromAge: 34, ageingPerTerm: -1, ageingFlat: 0 });
 
+// Companion p.13's assignment method: 12D for the printed six, so two dice per slot a frame
+// declares, and the heroic variant replaces two of them with 5s.
+MGT2.CreationPool = Object.freeze({ methods: ["pool", "heroic"], heroic: "heroic", printed: "printed",
+    dicePerSlot: 2, slot: "2d6", replace: 2, face: 5 });
+
 // Folio 19's two commission gates, which are GENERAL rules and not a list of career names: the
 // attempt is the first term of a career unless the named characteristic is high enough, and every
 // term after the first costs a DM.
@@ -2540,6 +2545,8 @@ MGT2.CreationGrantKinds = Object.freeze({
     skill: "MGT2.Chargen.GrantKinds.skill",
     characteristic: "MGT2.Chargen.GrantKinds.characteristic",
     contact: "MGT2.Chargen.GrantKinds.contact",
+    // Core p.20's betrayal, which is not a new associate: an existing one changes side.
+    convert: "MGT2.Chargen.GrantKinds.convert",
     cash: "MGT2.Chargen.GrantKinds.cash",
     shipShare: "MGT2.Chargen.GrantKinds.shipShare",
     benefit: "MGT2.Chargen.GrantKinds.benefit",
@@ -2610,7 +2617,9 @@ MGT2.CreationLimits = Object.freeze({
     // 3 and never Jack-of-All-Trades — named in both spellings the system targets.
     connections: 2,
     connectionLevel: 3,
-    connectionExcluded: Object.freeze(["Jack-of-All-Trades", "Polyvalent"])
+    connectionExcluded: Object.freeze(["Jack-of-All-Trades", "Polyvalent"]),
+    // "One of your Contacts or Allies betrays you" — a Rival or an Enemy has nothing left to turn.
+    convertibleRelations: Object.freeze(["Contact", "Allie"])
 });
 
 // Folio 46-48's mustering out.

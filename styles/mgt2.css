@@ -828,6 +828,18 @@ body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
   font-weight: 600;
   color: var(--mute);
 }
+.mgt2 .upproll {
+  --lbl-col: 8.5rem;
+}
+.mgt2 .upproll .slots {
+  display: flex;
+  gap: 6px;
+}
+.mgt2 .upproll .fx {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--faint);
+}
 
 .mgt2 .dmgdlg {
   --lbl-col: 9.5rem;
@@ -4208,6 +4220,8 @@ li.chat-message {
 }
 .mgt2 .mgt2-header .chargen-strip .btn {
   flex: 0 0 auto;
+}
+.mgt2 .mgt2-header .chargen-strip .btn:first-of-type {
   margin-left: auto;
 }
 .mgt2 .mgt2-header .chargen-strip.blank {
@@ -10496,6 +10510,7 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   border-collapse: separate;
   border-spacing: 0;
   width: 100%;
+  min-width: calc(4.2rem + var(--cols, 1) * 11rem);
   table-layout: fixed;
 }
 .mgt2 table.termgrid th,
@@ -10520,6 +10535,7 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 .mgt2 table.termgrid .who {
   position: relative;
   cursor: pointer;
+  overflow-wrap: break-word;
 }
 .mgt2 table.termgrid .who b {
   display: block;
@@ -10594,7 +10610,7 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   padding: 6px 9px 7px;
   border-bottom: 1px solid var(--rule-soft);
   border-left: 1px solid var(--rule-soft);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   cursor: pointer;
 }
 .mgt2 table.termgrid tbody tr:last-child td {
@@ -10675,6 +10691,12 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   background: var(--accent-soft);
 }
 
+.mgt2 .termgrid th.over,
+.mgt2 .termgrid td.cell.over {
+  outline: 2px solid var(--accent-text);
+  outline-offset: -2px;
+}
+
 .mgt2 .termgrid tr.drop td {
   padding: 7px 9px 9px;
   border-top: 1px solid var(--rule-soft);
@@ -10710,7 +10732,8 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   text-transform: uppercase;
   color: var(--faint);
 }
-.mgt2.chargen .steps ol {
+.mgt2.chargen .steps ol,
+.mgt2.chargen .steps ul.pre {
   margin: 5px 0 0;
   padding: 0;
   list-style: none;
@@ -10748,6 +10771,32 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 .mgt2.chargen .steps li.cut {
   text-decoration: line-through;
   color: var(--faint);
+}
+.mgt2.chargen .steps li.once {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  border-style: dashed;
+}
+.mgt2.chargen .steps li.once.set {
+  border-style: solid;
+  border-color: var(--good);
+  color: var(--good);
+}
+.mgt2.chargen .steps li.once.set b {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.mgt2.chargen .steps li.once.bg b {
+  font-family: var(--mono);
+  font-weight: 600;
+}
+.mgt2.chargen .steps li.once.set.nil {
+  border-color: var(--rule);
+  color: var(--faint);
+}
+.mgt2.chargen .steps li.once span[data-tooltip] {
+  cursor: help;
 }
 .mgt2.chargen .steps .why {
   margin: 6px 0 0;
@@ -10825,6 +10874,7 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 }
 .mgt2 .mustergrid table {
   width: 100%;
+  min-width: 58rem;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -10858,7 +10908,7 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   font-family: var(--mono);
   font-size: 10.5px;
   color: var(--mute);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .mgt2 .mustergrid td.big {
   font-size: 15px;
@@ -11091,6 +11141,160 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 .mgt2.chargen-close .packagedraft li button:hover {
   color: var(--accent-text);
   border-color: var(--accent-text);
+}
+
+.mgt2 .psi-train {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 11px 14px 13px;
+}
+.mgt2 .psi-train .hd {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.mgt2 .psi-train .hd .who {
+  font-family: var(--cond);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.mgt2 .psi-train .hd .psi {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--mute);
+}
+.mgt2 .psi-train .hd .psi b {
+  color: var(--accent-text);
+}
+.mgt2 .psi-train .hd .spent {
+  margin-left: auto;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .psi-train .opts {
+  display: flex;
+  flex-direction: column;
+}
+.mgt2 .psi-train .opts .opt {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding: 5px 2px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .psi-train .opts .opt:last-child {
+  border-bottom: 0;
+}
+.mgt2 .psi-train .opts .opt b {
+  flex: 0 0 8rem;
+  font-family: var(--cond);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.mgt2 .psi-train .opts .opt .dm,
+.mgt2 .psi-train .opts .opt .tot {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.mgt2 .psi-train .opts .opt .tot {
+  color: var(--mute);
+}
+.mgt2 .psi-train .opts .opt .why {
+  margin-left: auto;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .psi-train .opts .opt .why.fr {
+  color: var(--good);
+}
+.mgt2 .psi-train .opts .opt .btn {
+  margin-left: auto;
+}
+.mgt2 .psi-train .opts .opt.held b {
+  color: var(--faint);
+}
+.mgt2 .psi-train .course {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--rule);
+  padding-top: 10px;
+}
+.mgt2 .psi-train .course .hint {
+  flex: 1 1 auto;
+  margin: 0;
+}
+.mgt2 .psi-train .course .btn {
+  flex: 0 0 auto;
+}
+
+.mgt2 .mgt2-chargen-head .terms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  cursor: help;
+}
+.mgt2 .mgt2-chargen-head .terms i {
+  font-style: normal;
+  padding: 1px 6px 2px;
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.mgt2 .mgt2-chargen-head .connect {
+  flex: none;
+  width: auto;
+  padding: 2px 9px 3px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+
+.mgt2 .dlg.connect .drow select.f {
+  flex: 1 1 8rem;
+  width: auto;
+}
+
+.mgt2 .dlg.bgskills .hint .dm {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.mgt2 .dlg.bgskills .drow label {
+  flex: 0 0 1.5rem;
+  font-family: var(--mono);
+  color: var(--faint);
+}
+.mgt2 .dlg.bgskills .drow .fx {
+  flex: 1 1 auto;
+  font-family: var(--cond);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--accent-text);
 }
 
 .mgt2 .careerblk .pfields, .mgt2 .careertbl .pfields, .mgt2 .speciesblk .pfields, .mgt2 .speciesfrm .pfields {

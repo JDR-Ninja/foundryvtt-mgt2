@@ -914,7 +914,8 @@
         "cash": "Cash",
         "shipShare": "Ship Share",
         "benefit": "Other Benefit",
-        "note": "Read it out"
+        "note": "Read it out",
+        "convert": "An associate changes side"
       },
       "GrantModes": {
         "raise": "Grant at 1, or raise by 1",
@@ -1005,6 +1006,17 @@
         "numeric": "A number",
         "enumerated": "A rung"
       },
+      "Characteristics": {
+        "Title": "Characteristics",
+        "Hint": "Roll this Traveller's characteristics and assign the scores.",
+        "Assign": "Assign",
+        "Again": "{name} already has characteristics. Roll a new set?",
+        "Nothing": "This Traveller's frame declares no characteristic to roll.",
+        "Unassigned": "Rolled: {values}",
+        "Dice": "Dice: {dice}",
+        "NoteBoon": "Boon dice are in play, so each characteristic rolls its own dice rather than taking them from a pool.",
+        "NoteFrame": "{characteristic} is rolled on {formula}, so each characteristic rolls its own dice rather than taking them from a pool."
+      },
       "Roll": {
         "Title": "Creation check",
         "Characteristics": "Characteristics",
@@ -1019,7 +1031,23 @@
           "one": "PSI {score}, after {terms} term served.",
           "other": "PSI {score}, after {terms} terms served."
         },
-        "None": "PSI {score} — no potential for psionic talents at all."
+        "None": "PSI {score} — no potential for psionic talents at all.",
+        "TestHint": "Roll Psionic Strength: {formula}. PSI falls with every term served, so when a Traveller tests is the whole decision.",
+        "TrainHint": "Open psionic training and attempt the talents.",
+        "NoneHint": "PSI 0 — no potential for psionic talents at all.",
+        "Again": "{name} already carries PSI {score}. Test again and replace it?",
+        "Held": "Held",
+        "Free": "Free",
+        "Take": "Take",
+        "Attempt": "Attempt",
+        "Spent": {
+          "one": "{n} check attempted",
+          "other": "{n} checks attempted"
+        },
+        "NewCourse": "Begin a new course",
+        "NewCourseHint": "Four months and Cr100000. A new course starts the cumulative penalty again.",
+        "NewCourseAsk": "Begin a new course of training for {name}? The cumulative penalty starts again.",
+        "Lifetime": "The training penalty is a lifetime counter at this table, so a new course changes nothing."
       },
       "Connect": {
         "Solo": "Solo generation is in force, and it removes the Connections Rule.",
@@ -1027,7 +1055,16 @@
         "Full": "{name} already holds two connections, which is the printed limit.",
         "Repeat": "{name} is already connected to {other} — each connection must be with a different Traveller.",
         "Excluded": "A connection may never grant Jack-of-All-Trades.",
-        "TooHigh": "A connection may not raise a skill above level 3."
+        "TooHigh": "A connection may not raise a skill above level 3.",
+        "Title": "Connect two Travellers",
+        "Hint": "One Traveller's event involved the other. Both take one skill for it, never above level 3.",
+        "Pair": "The two who agree",
+        "Skill": "The skill taken",
+        "SkillFor": "{name} takes",
+        "Note": "The shared event",
+        "Agree": "Agree",
+        "Made": "{name} and {other} are connected.",
+        "NeedsTwo": "A connection needs two Travellers on the roster."
       },
       "Muster": {
         "Title": "Mustering out",
@@ -1036,7 +1073,8 @@
         "Column": {
           "cash": "Cash",
           "other": "Other Benefits"
-        }
+        },
+        "Owed": "Cr{credits} carried as debt"
       },
       "Close": {
         "Title": "Mustering out",
@@ -1127,7 +1165,7 @@
         "InProgress": "Character creation in progress",
         "Resume": "Resume",
         "NotStarted": "Character creation not started",
-        "NotStartedHint": "No species, no career, no skill yet.",
+        "NotStartedHint": "No career, no skill, no characteristic rolled yet.",
         "Start": "Start"
       },
       "Screen": {
@@ -1146,6 +1184,12 @@
         "Survived": "Survival passed",
         "SurvivalFailed": "Survival failed",
         "Ejected": "Ejected",
+        "DropRefused": "The roster takes Travellers — drag a character here to put them on it.",
+        "DropSpecies": "A species goes on a Traveller — drop it on their column here, or on their own sheet.",
+        "FrameSet": "{name} takes the {frame} frame.",
+        "FrameReplaceTitle": "Replace the frame",
+        "FrameReplace": "Replace {old} with {frame} as {name}’s frame?",
+        "FrameReplaceTracks": "Any track {old} declared and {frame} does not is discarded with it.",
         "DropHint": "Drag a Traveller here to put them on the roster",
         "Leave": "Take off the roster",
         "LeaveHint": "{name} leaves the table. Everything decided so far stays on the Traveller — the careers served, the skills gained, the contacts made. Only the creation ledger is discarded.",
@@ -1166,7 +1210,18 @@
         "Unlimited": "unlimited",
         "Counters": "Benefit rolls {benefit} · skill rolls {skill}",
         "Closing": "Muster out ({n})",
-        "ClosingHint": "Open the closing screen — mustering out runs after the last career and before the ledger is torn down."
+        "ClosingHint": "Open the closing screen — mustering out runs after the last career and before the ledger is torn down.",
+        "Option": {
+          "Hint": "The table's terms, and only where they differ from the printed game.",
+          "ironMan": "Iron man",
+          "pickedSkills": "Skills picked, not rolled",
+          "solo": "Solo generation",
+          "boon": "Boon dice: {n}",
+          "maximumTerms": {
+            "one": "{n} term at most",
+            "other": "{n} terms at most"
+          }
+        }
       },
       "TermOutcomes": {
         "elected": "Start-of-term election",
@@ -1308,7 +1363,9 @@
         "StepNotTriggered": "{step} does not fire this term.",
         "TrackAtCap": "{track} is already at its last rung.",
         "TrackHeld": "{track} cannot be lost once attained.",
-        "ReadOnTable": "{step}: read {total} on the table your book prints."
+        "ReadOnTable": "{step}: read {total} on the table your book prints.",
+        "PickAssociate": "Which Contact or Ally betrays them?",
+        "Unseen": "Someone you never saw coming"
       },
       "StepCheckTriggers": {
         "everyTerm": "Every term",
@@ -1321,6 +1378,18 @@
       "CreationCheckKinds": {
         "beat": "Beats a target",
         "index": "Indexes a table"
+      },
+      "Background": {
+        "Title": "Background skills",
+        "Hint": "Core p.9: EDU DM {dm} plus 3, so {n} of them, taken at level 0 before term 1.",
+        "Skill": "A background skill",
+        "Take": "Take them",
+        "Again": "{name} already has background skills. Take them again?",
+        "None": "{name}'s frame allows no background skill at all.",
+        "Allowance": {
+          "one": "{n} background skill",
+          "other": "{n} background skills"
+        }
       }
     },
     "Packs": {
@@ -1852,7 +1921,6 @@
         "CriticalsCount": "9 locations · severity = Effect − 5",
         "ClearCriticals": "Clear every critical",
         "Severity": "Severity",
-        "Spaces": "Spaces",
         "Comfort": "Comfort",
         "Structure": "Structure",
         "Repairs": "Repairs",

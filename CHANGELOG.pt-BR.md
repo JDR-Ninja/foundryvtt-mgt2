@@ -8,6 +8,47 @@
 
 ---
 
+## [0.2.1]
+
+**Os passos que a criação nunca teve.** A 0.2.0 trouxe o laço de períodos sem os três passos que vêm
+antes dele, e sem controles para várias regras que ela já calculava.
+
+### Criação de Viajantes
+
+* **As características agora rolam**, pela tela de criação — um chip antes dos períodos, que guarda o
+  PUP obtido — e pelo banner da ficha assim que a criação começa.
+* **Os quatro métodos de atribuição do ajuste funcionam**: em qualquer ordem, na ordem impressa, ou os
+  12D do Companion atribuídos aos pares, variante heroica incluída. Onde um quadro impõe seus
+  próprios dados, ou há dados de vantagem em jogo, a reserva é recusada **em uma frase** em vez de em
+  silêncio.
+* **As perícias de juventude agora são tomadas** (Core p.9) — DM de EDU + 3, um segundo chip antes
+  dos períodos, no nível 0. Uma perícia que o quadro *declara* preenche sua própria linha: ela é
+  imposta e não oferecida.
+* **A Força Psiônica é testada e treinada** (Core p.228), onde a mesa adotou a característica:
+  primeiro o teste, depois a janela de treinamento — a escada de talentos, a Telepatia grátis como
+  primeira, a penalidade cumulativa por tentativa. **Um novo treinamento é um controle à parte**,
+  porque quatro meses e Cr100000 não são efeito colateral de olhar, e é ele que enfim zera essa
+  penalidade, como sua configuração sempre disse.
+* **A regra de conexões agora é jogável** (Core p.19): dois Viajantes, uma perícia cada, o evento
+  compartilhado anotado. Ela fica no cabeçalho da tela porque escreve em dois Viajantes de uma vez,
+  o que nenhuma ficha consegue; as quatro recusas impressas são ditas pelo nome.
+* **Uma traição vira uma relação em vez de inventar outra** (Core p.20): um Contato ou Aliado vira
+  Rival ou Inimigo, e o recuo impresso vale quando não há nenhum.
+* **Uma coluna aceita a espécie solta nela** — cabeçalho ou célula — e **substitui** a que já está
+  lá, após confirmação. As trilhas que só o quadro anterior declarava vão junto.
+* **O cabeçalho declara os termos da mesa**: o método de atribuição, e apenas o que se afasta do
+  jogo impresso.
+
+### Correções
+
+* Soltar uma espécie em um Viajante em branco **tirava o botão *Começar* da ficha dele**.
+* O que a tela de criação não pode aceitar agora é **recusado em voz alta** em vez de sumir.
+* ⚠ **Um custo incorrido durante a criação levava os créditos abaixo de zero**, e a configuração
+  *O dinheiro gasto durante a criação vira dívida* não tinha efeito nenhum. Esse custo agora paga o
+  que há, carrega o resto como dívida, e **recusa por inteiro** onde a regra está desligada.
+
+---
+
 ## [0.2.0]
 
 **A maior versão que este sistema já teve.** A 0.1.x era uma ficha de personagem; a 0.2.0 é um sistema

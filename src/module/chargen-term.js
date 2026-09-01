@@ -1320,7 +1320,7 @@ async function applyGrant(actor, grant, { level, provenance }) {
         return `${written.item.name} ${written.to}`;
     }
     if ( grant.kind === "characteristic" ) return grantCharacteristic(actor, grant, provenance);
-    if ( (grant.kind === "cash") || (grant.kind === "shipShare") ) return grantFinance(actor, grant);
+    if ( (grant.kind === "cash") || (grant.kind === "shipShare") ) return grantFinance(actor, grant, provenance);
     if ( grant.kind === "contact" ) {
         const count = grant.formula
             ? (await new Roll(MGT2Helper.damageFormula(grant.formula)).roll()).total : grant.value;
@@ -1328,6 +1328,7 @@ async function applyGrant(actor, grant, { level, provenance }) {
         for ( let i = 0; i < count; i++ ) await Grants.contact(actor, { relation, provenance });
         return `${game.i18n.localize(MGT2.ContactRelations[relation])} ×${count}`;
     }
+    if ( grant.kind === "convert" ) return convertAssociate(actor, grant, provenance);
     if ( grant.kind === "benefit" ) {
         const row = await Muster.take(actor, Muster.fromRef(grant.ref, { provenance }), { spend: false });
         return Muster.label(row);
@@ -1352,11 +1353,42 @@ async function grantCharacteristic(actor, grant, provenance) {
     return `${game.i18n.localize(MGT2.Characteristics[grant.characteristic])} ${MGT2Helper.signed(delta)}`;
 }
 
-async function grantFinance(actor, grant) {
+/**
+ * Core p.20: *"One of your Contacts or Allies betrays you… That Contact or Ally becomes a Rival or
+ * Enemy. If you have no Contacts or Allies, then you are betrayed by someone you never saw coming
+ * and still gain a Rival or Enemy."* The fallback is printed, so an empty list is not a refusal.
+ */
+async function convertAssociate(actor, grant, provenance) {
+    const relation = grant.relation || "Rival";
+    const friends = actor.items.filter(item => (item.type === "contact")
+        && MGT2.CreationLimits.convertibleRelations.includes(item.system.relation));
+    if ( !friends.length ) {
+        const made = await Grants.contact(actor, { relation, provenance,
+            name: game.i18n.localize("MGT2.Chargen.Term.Unseen") });
+        return made ? `${game.i18n.localize(MGT2.ContactRelations[relation])} · ${made.name}` : "";
+    }
+    const picked = await pickOne(friends.map(item => [item.id, item.name]),
+        "MGT2.Chargen.Term.PickAssociate");
+    const turned = picked === null ? null : actor.items.get(picked);
+    if ( !turned ) return "";
+    await Grants.convert(turned, relation, provenance.table ?? "");
+    return `${turned.name} → ${game.i18n.localize(MGT2.ContactRelations[relation])}`;
+}
+
+async function grantFinance(actor, grant, provenance = {}) {
     const amount = grant.formula
         ? (await new Roll(MGT2Helper.damageFormula(grant.formula)).roll()).total : grant.value;
     if ( !amount ) return "";
     const key = (grant.kind === "cash") ? "credits" : "shipShares";
+    // A negative cash grant is a COST, and creation produces no cash before mustering out: `spend`
+    // pays what there is, carries the rest as debt, and refuses outright where the rule says so.
+    if ( (grant.kind === "cash") && (amount < 0) ) {
+        const spent = await Muster.spend(actor, -amount, { note: provenance.table ?? "" });
+        if ( spent.refused ) return "";
+        return `${game.i18n.localize(MGT2.CreationGrantKinds.cash)} ${MGT2Helper.signed(amount)}`
+            + (spent.owed ? ` · ${game.i18n.format("MGT2.Chargen.Muster.Owed",
+                { credits: MGT2Helper.credits(spent.owed) })}` : "");
+    }
     await actor.update({ [`system.finance.${key}`]: (actor.system.finance[key] ?? 0) + amount });
     return `${game.i18n.localize(MGT2.CreationGrantKinds[grant.kind])} ${MGT2Helper.signed(amount)}`;
 }

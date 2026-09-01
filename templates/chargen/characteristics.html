@@ -1,0 +1,25 @@
+{{! Core p.9's first step. One row per slot the frame declares and one picker per die the method
+    leaves open; a change swaps the two pickers, so what the player is holding is always a
+    permutation of what was rolled and no assignment can be illegal. }}
+<div class="mgt2-dialog">
+	<div class="dlg">
+		<p class="hint"><b>{{name}}</b> — {{method}}</p>
+		{{#if note}}<p class="hint">{{note}}</p>{{/if}}
+		<div class="dblock upproll">
+			{{#each rows as |row|}}
+			<div class="drow" data-row="{{row.key}}">
+				<label>{{row.label}}</label>
+				<span class="slots">
+					{{#if ../fixed}}<span class="fx">{{row.formula}}</span>
+					{{else}}
+					{{#each row.slots as |slot|}}
+					<select class="slot f" name="{{slot.name}}" aria-label="{{../label}}">{{selectOptions ../values selected=slot.index}}</select>
+					{{/each}}
+					{{/if}}
+				</span>
+				<span class="dm tot">{{row.total}}</span>
+			</div>
+			{{/each}}
+		</div>
+	</div>
+</div>

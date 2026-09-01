@@ -6,6 +6,12 @@
 			<span class="lbl">{{#if chargen.resume}}{{localize 'MGT2.Chargen.Banner.InProgress'}}{{else}}{{localize 'MGT2.Chargen.Banner.NotStarted'}}{{/if}}</span>
 			<span class="at">{{#if chargen.resume}}{{chargen.term}}{{#if chargen.step}} &middot; {{chargen.step}}{{/if}}{{else}}{{localize 'MGT2.Chargen.Banner.NotStartedHint'}}{{/if}}</span>
 		</div>
+		{{! Core p.9's first step, offered here only once creation is running: a Traveller nothing has
+		    been written on is not blank once a score is, and the banner would take itself away. }}
+		{{#if chargen.resume}}
+		<button type="button" class="btn" data-action="rollCharacteristics"
+			data-tooltip="{{localize 'MGT2.Chargen.Characteristics.Hint'}}">{{localize 'MGT2.Chargen.Characteristics.Title'}}</button>
+		{{/if}}
 		<button type="button" class="btn hot" data-action="chargenOpen">{{#if chargen.resume}}{{localize 'MGT2.Chargen.Banner.Resume'}}{{else}}{{localize 'MGT2.Chargen.Banner.Start'}}{{/if}}</button>
 	</div>
 	{{/if}}

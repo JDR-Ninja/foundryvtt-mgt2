@@ -23,9 +23,12 @@ import { MGT2 } from "./config.js";
 import { CHECK, CheckMessageData } from "./chat-message.js";
 import { Chargen } from "./chargen.js";
 import { ChargenClose, Package } from "./chargen-close.js";
+import { CreationCharacteristics } from "./chargen-characteristics.js";
 import { Grants } from "./chargen-grants.js";
 import { Muster } from "./chargen-muster.js";
 import { Psionics } from "./chargen-psionics.js";
+import { CreationPsi } from "./chargen-psi.js";
+import { CreationBackground } from "./chargen-background.js";
 import { CreationOptions, CreationRoll } from "./chargen-rolls.js";
 import { ChargenScreen, registerChargenScreen } from "./chargen-screen.js";
 import { ChargenTerm } from "./chargen-term.js";
@@ -331,6 +334,12 @@ Hooks.once("init", async function () {
     chargen: Chargen,
     // The grid of Travellers x terms that reads it. One window, no session document behind it.
     chargenScreen: ChargenScreen.open,
+    // The step before the loop, which runs once: `run(actor)` rolls the set, asks where each score
+    // lands and writes it.
+    creationCharacteristics: CreationCharacteristics,
+    // The second one, read off the EDU the first produced: folio 9's EDU DM + 3, picked and granted
+    // at level 0.
+    creationBackground: CreationBackground,
     // The term loop, driven from the step strip and reachable here for a macro: `run(actor)` plays
     // the step the frame's own sequence says is next.
     chargenTerm: ChargenTerm,
@@ -342,6 +351,9 @@ Hooks.once("init", async function () {
     package: Package,
     grants: Grants,
     psionics: Psionics,
+    // Folio 228's two steps behind the strip's second chip: test where PSI is untested, train where
+    // it is above 0. Referee-gated, so the chip exists only where the table adopted the characteristic.
+    creationPsi: CreationPsi,
     creationRoll: CreationRoll,
     creationOptions: CreationOptions,
     // HG folios 116-121's attack path, which is the half of the chapter that does not roll.

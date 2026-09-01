@@ -7,6 +7,15 @@
 		{{#if empty}}{{localize 'MGT2.Chargen.Screen.NobodyYet'}}
 		{{else}}{{localize 'MGT2.Chargen.Screen.Serving' serving=serving total=columns.length}}{{/if}}
 	</span>
+	{{! The table's terms, said once and before anyone rolls. Only what differs from the printed game,
+	    plus the assignment method, which every table chooses and which decides the first step. }}
+	<span class="terms" data-tooltip="{{localize 'MGT2.Chargen.Screen.Option.Hint'}}">{{#each options as |term|}}<i>{{term}}</i>{{/each}}</span>
+	{{#unless empty}}
+	<button type="button" class="connect" data-action="connect">
+		<i class="fa-solid fa-link" inert></i>
+		<span>{{localize 'MGT2.Chargen.Connect.Title'}}</span>
+	</button>
+	{{/unless}}
 	{{! The hand-off to the close: mustering out reads the whole roster and consumes this ledger, so it
 	    is a second reading of the same actors and not a step of anybody's term. }}
 	{{#unless empty}}

@@ -1,0 +1,26 @@
+{{! Core p.9's background skills. One row per skill the allowance buys; a mandatory one fills its own
+    row and cannot be typed over, because the frame declared it rather than offered it. }}
+<div class="mgt2-dialog">
+	<div class="dlg bgskills">
+		<p class="hint"><b>{{name}}</b> — {{count}} <span class="dm">EDU {{eduDM}}</span></p>
+		<div class="dblock">
+			{{#each rows as |row|}}
+			<div class="drow">
+				<label>{{@index}}</label>
+				{{#if row.fixed}}
+				<span class="fx">{{row.fixed}}</span>
+				<input type="hidden" name="{{row.name}}" value="{{row.value}}" />
+				{{else}}
+				<input class="f" type="text" name="{{row.name}}" value="{{row.value}}"
+					list="mgt2-background-skills" aria-label="{{localize 'MGT2.Chargen.Background.Skill'}}" />
+				{{/if}}
+			</div>
+			{{/each}}
+		</div>
+		{{! A world that has typed no list leaves the field open: the referee's whole library is what
+		    a background skill may be, and a shortlist of nothing would be worse than none. }}
+		<datalist id="mgt2-background-skills">
+			{{#each known as |name|}}<option value="{{name}}"></option>{{/each}}
+		</datalist>
+	</div>
+</div>

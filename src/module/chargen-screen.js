@@ -1,8 +1,14 @@
 import { Chargen } from "./chargen.js";
 import { ChargenClose } from "./chargen-close.js";
 import { ChargenTerm } from "./chargen-term.js";
+import { CreationBackground } from "./chargen-background.js";
+import { CreationCharacteristics } from "./chargen-characteristics.js";
+import { CreationOptions } from "./chargen-rolls.js";
+import { Grants } from "./chargen-grants.js";
+import { CreationPsi } from "./chargen-psi.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
+import { Rules } from "./rules.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { DragDrop } = foundry.applications.ux;
@@ -11,6 +17,9 @@ const PARTS_PATH = "systems/mgt2/templates/chargen";
 
 /** Creation produces a Traveller, so a Traveller is what the roster takes. */
 const ROSTER_TYPES = "Actor.character";
+
+/** A column is one Traveller, and the frame is the one thing it takes. */
+const FRAME_TYPES = "Item.species";
 
 /**
  * The creation screen: a grid of Travellers × terms, and no session document behind it.
@@ -30,6 +39,10 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             selectColumn: ChargenScreen.#onSelectColumn,
             leave: ChargenScreen.#onLeave,
             openActor: ChargenScreen.#onOpenActor,
+            rollCharacteristics: ChargenScreen.#onRollCharacteristics,
+            rollPsi: ChargenScreen.#onRollPsi,
+            connect: ChargenScreen.#onConnect,
+            takeBackground: ChargenScreen.#onTakeBackground,
             runStep: ChargenScreen.#onRunStep,
             openClose: ChargenScreen.#onOpenClose
         }
@@ -116,6 +129,7 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         for ( const column of columns ) column.selected = column.id === selected?.id;
 
         context.rosterTypes = ROSTER_TYPES;
+        context.frameTypes = FRAME_TYPES;
         context.columns = columns;
         context.colspan = columns.length + 1;
         context.empty = !columns.length;
@@ -126,6 +140,7 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         // The table's clock, DERIVED and not stored: the furthest cursor on the roster.
         context.term = columns.reduce((furthest, column) => Math.max(furthest, column.cursor), 0);
         context.rows = ChargenScreen.#rows(columns);
+        context.options = ChargenScreen.#options();
         context.strip = selected ? this.#strip(selected) : null;
         context.tray = selected ? ChargenScreen.#tray(selected) : null;
         return context;
@@ -200,6 +215,29 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         }));
     }
 
+    /**
+     * The table's terms, stated before anyone rolls. Only what DIFFERS from the printed game, plus
+     * the assignment method, which every table chooses and which decides the very first step.
+     * @returns {string[]}
+     */
+    static #options() {
+        const all = CreationOptions.all();
+        const say = key => game.i18n.localize(`MGT2.Chargen.Screen.Option.${key}`);
+        const terms = [game.i18n.localize(`MGT2.Rules.creationAssignment.${all.assignment}`)];
+        if ( all.boonDice !== "none" ) {
+            terms.push(game.i18n.format("MGT2.Chargen.Screen.Option.boon",
+                { n: game.i18n.localize(`MGT2.Rules.creationBoonDice.${all.boonDice}`) }));
+        }
+        if ( all.ironMan ) terms.push(say("ironMan"));
+        if ( all.maximumTerms ) {
+            terms.push(MGT2Helper.plural("MGT2.Chargen.Screen.Option.maximumTerms", all.maximumTerms,
+                { n: all.maximumTerms }));
+        }
+        if ( all.pickedSkills ) terms.push(say("pickedSkills"));
+        if ( all.solo ) terms.push(say("solo"));
+        return terms;
+    }
+
     /** The frame's whole argument, on screen. */
     #strip(column) {
         const { sequence, own, cut } = Chargen.steps(column.actor);
@@ -207,10 +245,16 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         const frame = species?.system.frame;
         // The step the loop is on.
         const cursor = ChargenTerm.current(column.actor);
+        const rolled = CreationCharacteristics.isSet(column.actor);
         return {
             id: column.id,
             name: column.name,
             canRun: column.canEdit,
+            // Core p.9's first step, and it stands outside the numbered list because it runs once
+            // rather than once a term.
+            characteristics: { set: rolled, upp: rolled ? (column.actor.system.upp ?? "") : "" },
+            psi: ChargenScreen.#psi(column),
+            background: ChargenScreen.#background(column),
             steps: sequence.map((key, index) => ({
                 key, order: index + 1, own: own.has(key), now: key === cursor,
                 label: ChargenScreen.#label(MGT2.CreationSteps, key)
@@ -221,6 +265,40 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
             // runs.
             frameName: species?.name ?? game.i18n.localize("MGT2.Chargen.Screen.DefaultFrame"),
             source: ChargenScreen.#source(species?.system.source)
+        };
+    }
+
+    /**
+     * Core p.9's second pre-term step. The chip carries the allowance rather than a code, because
+     * the allowance is what the step is about and it moves with EDU right up to the moment it runs.
+     */
+    static #background(column) {
+        const plan = CreationBackground.plan(column.actor);
+        const count = (plan.count === null) ? MGT2Helper.showFormula(plan.formula) : String(plan.count);
+        return {
+            set: CreationBackground.isSet(column.actor),
+            count,
+            hint: game.i18n.format("MGT2.Chargen.Background.Hint",
+                { n: count, dm: MGT2Helper.signed(plan.eduDM) })
+        };
+    }
+
+    /**
+     * The third chip, which exists only where the table adopted PSI. It walks Core p.228's own two
+     * steps and the state picks: test, then train, and nothing at all once PSI 0 is the answer.
+     * @returns {object|null}
+     */
+    static #psi(column) {
+        if ( !CreationPsi.available() ) return null;
+        const state = CreationPsi.state(column.actor);
+        const hint = { test: "MGT2.Chargen.Psi.TestHint", train: "MGT2.Chargen.Psi.TrainHint",
+            none: "MGT2.Chargen.Psi.NoneHint" }[state.step];
+        return {
+            score: state.score,
+            untested: !state.tested,
+            none: state.step === "none",
+            canRun: column.canEdit && (state.step !== "none"),
+            hint: game.i18n.format(hint, { formula: state.formula })
         };
     }
 
@@ -319,6 +397,103 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return ChargenClose.open();
     }
 
+    /** Roll and assign the set, which is the one step that precedes the term loop. */
+    static async #onRollCharacteristics(event, target) {
+        const actor = game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId);
+        if ( !actor ) return;
+        await CreationCharacteristics.run(actor);
+        return this.render();
+    }
+
+    /** Core p.9's second step: the allowance is read now and spent now. */
+    static async #onTakeBackground(event, target) {
+        const actor = game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId);
+        if ( !actor ) return;
+        await CreationBackground.run(actor);
+        return this.render();
+    }
+
+    /** Core p.228's step, which is testing or training depending on where this Traveller is. */
+    static async #onRollPsi(event, target) {
+        const actor = game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId);
+        if ( !actor ) return;
+        await CreationPsi.run(actor);
+        return this.render();
+    }
+
+    /**
+     * Core p.19's Connections Rule: two Travellers agree that one's event involved the other, and
+     * both take a skill for it. It is the one transaction a single sheet cannot express.
+     * @this {ChargenScreen}
+     */
+    static async #onConnect() {
+        const roster = Chargen.roster().sort((a, b) => a.name.localeCompare(b.name));
+        if ( roster.length < 2 ) {
+            return ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Connect.NeedsTwo"));
+        }
+        const option = (actor, selected) => `<option value="${actor.id}"${selected
+            ? " selected" : ""}>${foundry.utils.escapeHTML(actor.name)}</option>`;
+        const first = roster.find(actor => actor.id === this.#selectedId) ?? roster[0];
+        const second = roster.find(actor => actor !== first);
+        // Every skill anyone on the roster already holds, so the two are typing against one list.
+        const known = [...new Set(roster.flatMap(actor =>
+            Grants.skills(actor).map(item => item.name)))].sort((a, b) => a.localeCompare(b));
+
+        const content = document.createElement("div");
+        content.innerHTML = await foundry.applications.handlebars.renderTemplate(
+            `${PARTS_PATH}/connect.html`, {
+                first: roster.map(actor => option(actor, actor === first)).join(""),
+                second: roster.map(actor => option(actor, actor === second)).join(""),
+                skills: known.map(name =>
+                    `<option value="${foundry.utils.escapeHTML(name)}"></option>`).join("")
+            });
+
+        const agreed = await DialogV2.prompt({
+            window: { title: "MGT2.Chargen.Connect.Title", icon: "fa-solid fa-link" },
+            classes: ["mgt2"],
+            position: { width: 460 },
+            content,
+            ok: {
+                label: "MGT2.Chargen.Connect.Agree",
+                icon: "fa-solid fa-check",
+                callback: (click, button) => ({
+                    a: button.form.elements.a.value, b: button.form.elements.b.value,
+                    skills: { a: button.form.elements["skill-a"].value.trim(),
+                        b: button.form.elements["skill-b"].value.trim() },
+                    note: button.form.elements.note.value.trim()
+                })
+            },
+            // Each side's skill row names the Traveller it belongs to, and the pair may be changed
+            // after the dialog opens — so the labels follow the selects rather than the seed.
+            render: (click, dialog) => ChargenScreen.#nameSkillRows(dialog.element),
+            rejectClose: false
+        });
+        if ( !agreed ) return;
+        const [a, b] = [game.actors.get(agreed.a), game.actors.get(agreed.b)];
+        const written = await Grants.connect(a, b,
+            { [agreed.a]: agreed.skills.a, [agreed.b]: agreed.skills.b }, agreed.note);
+        if ( written ) {
+            ui.notifications.info(game.i18n.format("MGT2.Chargen.Connect.Made",
+                { name: a.name, other: b.name }));
+        }
+        return this.render();
+    }
+
+    /** The two skill labels, kept on the Travellers the two selects are actually holding. */
+    static #nameSkillRows(element) {
+        const paint = () => {
+            for ( const side of ["a", "b"] ) {
+                const chosen = element.querySelector(`select[name="${side}"]`).selectedOptions[0];
+                element.querySelector(`label[data-for="${side}"]`).textContent =
+                    game.i18n.format("MGT2.Chargen.Connect.SkillFor", { name: chosen?.textContent ?? "" });
+            }
+        };
+        for ( const side of ["a", "b"] ) {
+            element.querySelector(`select[name="${side}"]`).addEventListener("change", paint);
+        }
+        paint();
+    }
+
     /** Run one step of the term on the selected Traveller. */
     static async #onRunStep(event, target) {
         const actor = game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId);
@@ -330,11 +505,33 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         return this.render();
     }
 
+    /**
+     * The window hears every drop and not just the zone's, because what is dropped elsewhere on this
+     * screen used to land in silence. It reaches here at all only because `Game#_onPreventDragover`
+     * (`client/game.mjs`, *"target.type !== 'file'"*) prevents `dragover` on the whole document.
+     * @inheritDoc
+     */
+    async _onFirstRender(context, options) {
+        await super._onFirstRender(context, options);
+        this.element.addEventListener("drop", ChargenScreen.#onRefused);
+    }
+
     /** @inheritDoc */
     async _onRender(context, options) {
         await super._onRender(context, options);
         // Re-bound on every render because the ledger part carries the zone and is replaced.
         this.dragDrop.bind(this.element);
+    }
+
+    /** Say what the roster takes, and where the commonest refusal actually belongs. */
+    static #onRefused(event) {
+        const data = MGT2Helper.getDataFromDropEvent(event);
+        if ( !data?.uuid ) return;
+        if ( MGT2Helper.dropAccepted(event.target.closest("[data-accept]"), data) ) return;
+        let record = null;
+        try { record = foundry.utils.fromUuidSync(data.uuid); } catch { /* an index entry is enough */ }
+        ui.notifications.warn(game.i18n.localize(record?.type === "species"
+            ? "MGT2.Chargen.Screen.DropSpecies" : "MGT2.Chargen.Screen.DropRefused"));
     }
 
     /**
@@ -373,11 +570,68 @@ export class ChargenScreen extends HandlebarsApplicationMixin(ApplicationV2) {
         const data = MGT2Helper.getDataFromDropEvent(event);
         zone?.classList.remove("over", "deny");
         if ( !zone || !MGT2Helper.dropAccepted(zone, data) ) return;
-        // Awaited end to end: a packed Actor answers `fromUuidSync` with an index entry.
-        const actor = data.uuid ? await fromUuid(data.uuid) : null;
-        if ( !actor ) return;
-        await this.add(actor);
+        // Awaited end to end: a packed document answers `fromUuidSync` with an index entry.
+        const dropped = data.uuid ? await fromUuid(data.uuid) : null;
+        if ( !dropped ) return;
+        if ( dropped.documentName === "Item" ) await this.#setFrame(zone, dropped);
+        else await this.add(dropped);
         return this.render();
+    }
+
+    /**
+     * The frame, dropped on the Traveller it is for. `SpeciesData` owns the link on
+     * `personal.species`, so this places the Item and lets the frame's own tracks be born.
+     */
+    async #setFrame(zone, item) {
+        const actor = game.actors.get(zone.closest("[data-actor-id]")?.dataset.actorId);
+        if ( !actor ) return null;
+        if ( !actor.canUserModify(game.user, "update") ) {
+            ui.notifications.warn(game.i18n.format("MGT2.Chargen.Screen.NoPermission", { name: actor.name }));
+            return null;
+        }
+        // The sub-variant rule is the one case where a second frame is meant to stand beside the
+        // first, so under it a drop adds and nothing is replaced.
+        const standing = Rules.on("speciesModifiersStack") ? null : Chargen.frame(actor);
+        if ( standing ) {
+            const orphans = ChargenScreen.#orphanTracks(standing, item);
+            if ( !await ChargenScreen.#confirmReplace(actor, standing, item, orphans) ) return null;
+            await Chargen.dropTracks(actor, orphans);
+            await standing.delete();
+        }
+        const [created] = await actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(item)]);
+        if ( !created ) return null;
+        // The column dropped on becomes the selected one: the strip is where a frame states its case.
+        this.#selectedId = actor.id;
+        ui.notifications.info(game.i18n.format("MGT2.Chargen.Screen.FrameSet",
+            { name: actor.name, frame: created.name }));
+        return Chargen.ensureTracks(actor);
+    }
+
+    /**
+     * The tracks the frame leaving declared and the one arriving does not. A key both declare keeps
+     * its value: the Traveller is still on that track, and only the frame stating it has changed.
+     * @returns {string[]}
+     */
+    static #orphanTracks(leaving, arriving) {
+        const keys = item => (item?.system.frame.tracks ?? []).map(track => track.key).filter(key => key);
+        const kept = new Set(keys(arriving));
+        return keys(leaving).filter(key => !kept.has(key));
+    }
+
+    /** Replacing a frame is not a merge, so the ledger it wrote on is part of what is being asked. */
+    static #confirmReplace(actor, leaving, arriving, orphans) {
+        const lines = [game.i18n.format("MGT2.Chargen.Screen.FrameReplace",
+            { name: actor.name, old: leaving.name, frame: arriving.name })];
+        if ( orphans.length ) {
+            lines.push(game.i18n.format("MGT2.Chargen.Screen.FrameReplaceTracks",
+                { old: leaving.name, frame: arriving.name }));
+        }
+        return DialogV2.confirm({
+            window: { title: "MGT2.Chargen.Screen.FrameReplaceTitle" },
+            classes: ["mgt2"],
+            content: lines.map(line => `<p>${line}</p>`).join(""),
+            rejectClose: false
+        });
     }
 }
 

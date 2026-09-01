@@ -219,7 +219,8 @@ export const Grants = {
 
     /**
      * What this Traveller rolls, and with which dice.
-     * @returns {{method: string, boon: number, entries: object[]}}
+     * @returns {{method: string, boon: number, entries: object[],
+     *            pool: {dice: number, heroic: boolean}|null, note: string}}
      */
     plan(actor) {
         const species = Chargen.frame(actor);
@@ -238,16 +239,30 @@ export const Grants = {
                 || game.i18n.localize(MGT2.Characteristics[entry.characteristic] ?? entry.characteristic);
             entry.rolled = entry.boon ? boon.formula : MGT2Helper.damageFormula(entry.formula);
         }
-        return { method: Rules.get("creationAssignment"), boon: boon.count, entries };
+        const method = Rules.get("creationAssignment");
+        return { method, boon: boon.count, entries, ...pooling(method, entries, boon.count) };
     },
 
-    /** Roll the set and post it. @returns {Promise<{method: string, results: object[]}|null>} */
+    /**
+     * Roll the set and post it — the totals under a per-characteristic method, the loose dice under
+     * an assignment one.
+     * @returns {Promise<{method: string, plan: object, results: object[], dice: number[]}|null>}
+     */
     async rollCharacteristics(actor) {
         const plan = this.plan(actor);
         if ( !plan.entries.length ) return null;
         const results = [];
-        for ( const entry of plan.entries ) {
+        const dice = [];
+        const rolls = [];
+        if ( plan.pool ) {
+            const roll = await new Roll(`${plan.pool.dice}d6`).roll();
+            rolls.push(roll);
+            dice.push(...roll.dice[0].results.map(die => die.result));
+            if ( plan.pool.heroic ) replaceLowest(dice);
+        }
+        else for ( const entry of plan.entries ) {
             const roll = await new Roll(entry.rolled).roll();
+            rolls.push(roll);
             results.push({ ...entry, total: roll.total, roll });
         }
         // One card carrying every die, rather than six cards: the set is read across, and the
@@ -255,14 +270,14 @@ export const Grants = {
         await ChatMessage.create({
             author: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor }),
-            rolls: results.map(r => r.roll),
+            rolls,
             content: await renderRollCard({
                 rollTypeName: game.i18n.localize("MGT2.Chargen.Roll.Characteristics"),
                 rollObjectName: game.i18n.localize(`MGT2.Rules.creationAssignment.${plan.method}`),
-                lines: results.map(r => `${r.label} ${r.total}`)
+                lines: [cardLine(plan, results, dice)]
             })
         });
-        return { method: plan.method, results };
+        return { method: plan.method, plan, results, dice };
     },
 
     /**
@@ -278,3 +293,40 @@ export const Grants = {
         return Object.keys(update).length ? actor.update(update) : actor;
     }
 };
+
+/**
+ * Whether Companion p.13's loose dice can express this Traveller's set: a pair of d6 is not a
+ * frame's own formula and not a boon die, so either one sends the set back to per-slot rolls.
+ * @returns {{pool: {dice: number, heroic: boolean}|null, note: string}}
+ */
+function pooling(method, entries, boon) {
+    const rule = MGT2.CreationPool;
+    if ( !rule.methods.includes(method) ) return { pool: null, note: "" };
+    if ( boon ) return { pool: null, note: game.i18n.localize("MGT2.Chargen.Characteristics.NoteBoon") };
+    const own = entries.find(entry => MGT2Helper.damageFormula(entry.formula) !== rule.slot);
+    if ( own ) {
+        return { pool: null, note: game.i18n.format("MGT2.Chargen.Characteristics.NoteFrame",
+            { characteristic: own.label, formula: MGT2Helper.showFormula(own.formula) }) };
+    }
+    return { pool: { dice: entries.length * rule.dicePerSlot, heroic: method === rule.heroic }, note: "" };
+}
+
+/** Companion p.13's heroic variant. The two lowest is the only choice of two that is never worse. */
+function replaceLowest(dice) {
+    const rule = MGT2.CreationPool;
+    [...dice.keys()].sort((a, b) => dice[a] - dice[b]).slice(0, rule.replace)
+        .filter(index => dice[index] < rule.face)
+        .forEach(index => { dice[index] = rule.face; });
+}
+
+/** The card names each slot only where the method has already decided which one a total lands in. */
+function cardLine(plan, results, dice) {
+    if ( plan.pool ) {
+        return game.i18n.format("MGT2.Chargen.Characteristics.Dice", { dice: dice.join(" · ") });
+    }
+    if ( plan.method === MGT2.CreationPool.printed ) {
+        return results.map(result => `${result.label} ${result.total}`).join(" · ");
+    }
+    return game.i18n.format("MGT2.Chargen.Characteristics.Unassigned",
+        { values: results.map(result => result.total).join(" · ") });
+}

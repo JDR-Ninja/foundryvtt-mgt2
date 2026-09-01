@@ -4,6 +4,37 @@
 <div class="steps" data-actor-id="{{strip.id}}">
 	{{#if strip}}
 	<span class="lbl">{{localize 'MGT2.Chargen.Screen.StepsFor' name=strip.name frame=strip.frameName}}</span>
+	{{! Core p.9's first step, outside the numbered list because it runs once and not once a term.
+	    The chip is its own readout: the code it produced is the whole state it has. }}
+	<ul class="pre">
+		<li class="once{{#if strip.characteristics.set}} set{{/if}}">
+			{{#if strip.canRun}}
+			<button type="button" data-action="rollCharacteristics"
+				data-tooltip="{{localize 'MGT2.Chargen.Characteristics.Hint'}}">{{localize 'MGT2.Chargen.Characteristics.Title'}}</button>
+			{{else}}{{localize 'MGT2.Chargen.Characteristics.Title'}}{{/if}}
+			{{#if strip.characteristics.upp}}<b>{{strip.characteristics.upp}}</b>{{/if}}
+		</li>
+		{{! Core p.9's second step. EDU DM + 3, read at this moment and spent once, so it stands
+		    beside the roll that produced the EDU rather than inside the term loop. }}
+		<li class="once bg{{#if strip.background.set}} set{{/if}}">
+			{{#if strip.canRun}}
+			<button type="button" data-action="takeBackground"
+				data-tooltip="{{strip.background.hint}}">{{localize 'MGT2.Chargen.Background.Title'}}</button>
+			{{else}}{{localize 'MGT2.Chargen.Background.Title'}}{{/if}}
+			<b>{{strip.background.count}}</b>
+		</li>
+		{{! Core p.228's own step, and it is on the strip only where the table adopted PSI at all —
+		    which is the referee's permission the folio requires. }}
+		{{#if strip.psi}}
+		<li class="once psi{{#unless strip.psi.untested}} set{{/unless}}{{#if strip.psi.none}} nil{{/if}}">
+			{{#if strip.psi.canRun}}
+			<button type="button" data-action="rollPsi"
+				data-tooltip="{{strip.psi.hint}}">{{localize 'MGT2.Chargen.Psi.Title'}}</button>
+			{{else}}<span data-tooltip="{{strip.psi.hint}}">{{localize 'MGT2.Chargen.Psi.Title'}}</span>{{/if}}
+			{{#unless strip.psi.untested}}<b>{{strip.psi.score}}</b>{{/unless}}
+		</li>
+		{{/if}}
+	</ul>
 	<ol>
 		{{#each strip.steps as |step|}}
 		<li class="{{#if step.own}}own{{/if}} {{#if step.now}}now{{/if}}">

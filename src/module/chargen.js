@@ -91,10 +91,13 @@ export const Chargen = {
         return actor?.getFlag(CHARGEN_SCOPE, CHARGEN_KEY) !== undefined;
     },
 
-    /** A Traveller nothing has been written on: no frame, no career, no skill, no score. */
+    /**
+     * A Traveller creation has written nothing on: no career, no skill, no score. A species is the
+     * frame creation reads, never something it produced, so choosing one first keeps the door open.
+     */
     isBlank(actor) {
         if ( actor?.type !== "character" ) return false;
-        if ( actor.items.some(item => ["species", "career", "talent"].includes(item.type)) ) return false;
+        if ( actor.items.some(item => ["career", "talent"].includes(item.type)) ) return false;
         return actor.system.characteristicKeys.every(key => actor.system.characteristics[key].base === 0);
     },
 
@@ -294,6 +297,19 @@ export const Chargen = {
         }
         if ( wrote ) await this.update(actor, { tracks });
         return tracks;
+    },
+
+    /**
+     * Take named tracks off the ledger — what a frame leaving is owed. ⚠ Not `update`: a
+     * `TypedObjectField` merges, so a key absent from the payload survives it and only the document's
+     * own `-=` deletion reaches one.
+     */
+    async dropTracks(actor, keys) {
+        const update = {};
+        for ( const key of keys ?? [] ) {
+            update[`flags.${CHARGEN_SCOPE}.${CHARGEN_KEY}.tracks.-=${key}`] = null;
+        }
+        return Object.keys(update).length ? actor.update(update) : actor;
     },
 
     /**

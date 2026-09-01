@@ -8,6 +8,49 @@
 
 ---
 
+## [0.2.1]
+
+**Los pasos que la creación nunca tuvo.** 0.2.0 traía el bucle de periodos sin los tres pasos que
+lo preceden, y sin controles para varias reglas que ya calculaba.
+
+### Creación de Viajeros
+
+* **Las características ya se tiran**, desde la pantalla de creación —una marca antes de los
+  periodos, que conserva el PUP obtenido— y desde el banner de la ficha una vez iniciada la creación.
+* **Los cuatro métodos de asignación del ajuste funcionan**: en cualquier orden, en el orden impreso,
+  o los 12D del Companion repartidos por parejas, variante heroica incluida. Donde un marco impone
+  sus propios dados, o hay dados de ventaja en juego, la reserva se rechaza **con una frase** en vez
+  de en silencio.
+* **Las habilidades de juventud ya se toman** (Core p.9) —DM de EDU + 3, una segunda marca antes de
+  los periodos, a nivel 0—. Una habilidad que el marco *declara* llena su propia fila: se impone en
+  vez de ofrecerse.
+* **La Fuerza Psiónica se prueba y se entrena** (Core p.228), donde la mesa ha adoptado la
+  característica: primero la prueba, luego la ventana de entrenamiento —la escala de talentos, la
+  Telepatía gratis como primera, la penalización acumulada por intento—. **Un nuevo entrenamiento es
+  un control aparte**, porque cuatro meses y Cr100000 no son un efecto secundario de mirar, y es lo
+  que por fin reinicia esa penalización, como su ajuste siempre dijo.
+* **La regla de conexiones ya es jugable** (Core p.19): dos Viajeros, una habilidad cada uno, el
+  suceso compartido anotado. Vive en la cabecera de la pantalla porque escribe en dos Viajeros a la
+  vez, algo que ninguna ficha puede hacer; los cuatro rechazos impresos se nombran uno a uno.
+* **Una traición cambia de bando a una relación en vez de inventar otra** (Core p.20): un Contacto o
+  Aliado pasa a Rival o Enemigo, y el repliegue impreso se aplica cuando no hay ninguno.
+* **Una columna acepta la especie que se suelta en ella** —cabecera o celda— y **sustituye** la que ya
+  está allí, tras confirmar. Las pistas que solo declaraba el marco anterior se van con él.
+* **La cabecera declara los términos de la mesa**: el método de asignación, y solo lo que se aparta
+  del juego impreso.
+
+### Correcciones
+
+* Soltar una especie sobre un Viajero en blanco **le quitaba el botón *Empezar* de la ficha**.
+* Lo que la pantalla de creación no puede aceptar ahora **se rechaza en voz alta** en vez de
+  desaparecer.
+* ⚠ **Un coste incurrido durante la creación llevaba los créditos por debajo de cero**, y el ajuste
+  *El dinero gastado durante la creación se convierte en deuda* no tenía ningún efecto. Ese coste
+  ahora paga lo disponible, lleva el resto como deuda, y **rechaza por entero** donde la regla está
+  desactivada.
+
+---
+
 ## [0.2.0]
 
 **La versión más grande que ha tenido este sistema.** 0.1.x era una hoja de personaje; 0.2.0 es un
