@@ -22,7 +22,7 @@ export class OptionalRulesMenu extends HandlebarsApplicationMixin(ApplicationV2)
     static DEFAULT_OPTIONS = {
         id: MENU_ID,
         tag: "form",
-        classes: ["mgt2", "mgt2-rules"],
+        classes: ["mgt2", "mgt2-rules", "scrollpart"],
         position: { width: 560, height: "auto" },
         window: { title: "MGT2.Rules.Title", icon: "fa-solid fa-sliders", resizable: true },
         // Each control writes as it is clicked: a switch that has to be saved afterwards is a

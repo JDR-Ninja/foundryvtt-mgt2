@@ -18,7 +18,7 @@ export class BenefitPicker extends MGT2Screen(HandlebarsApplicationMixin(Applica
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
         id: "mgt2-benefit-picker",
-        classes: ["mgt2"],
+        classes: ["mgt2", "scrollpart"],
         position: { width: 700, height: 620 },
         window: { resizable: true, icon: "fa-solid fa-ticket",
             title: "MGT2.Chargen.Benefits.Redeem" },

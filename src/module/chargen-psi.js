@@ -68,7 +68,7 @@ class PsiTraining extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
         id: "mgt2-psi-training",
-        classes: ["mgt2"],
+        classes: ["mgt2", "scrollpart"],
         position: { width: 460 },
         window: { icon: "fa-solid fa-brain", title: "MGT2.Chargen.Psi.Training" },
         actions: {

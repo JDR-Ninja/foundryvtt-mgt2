@@ -67,6 +67,17 @@
 	.window-content
 		padding: 0
 
+// One part, and it scrolls: core caps the window at the viewport and clips `.window-content`. The
+// part takes core's padding unless it declares its own.
+.mgt2.scrollpart > .window-content
+	padding: 0
+	> [data-application-part]
+		flex: 1 1 auto
+		min-height: 0
+		overflow-y: auto
+:where(.mgt2.scrollpart > .window-content) > [data-application-part]
+	padding: var(--spacer-16)
+
 // --------------------------------------------
 //  The step — the window's own silhouette
 // --------------------------------------------

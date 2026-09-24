@@ -4,6 +4,19 @@
 
 ---
 
+## [0.2.2]
+
+**Verified on Foundry VTT 14.368.**
+
+### Fixes
+
+* **The *Optional and variant rules* window scrolls**: the end of the list was out of reach, even
+  full-screen ([#6](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/6)). Three windows had the
+  same defect: a species' full description, the mustering-out Benefit picker and *Psionic training*.
+* Changing species during creation no longer logs a compatibility warning to the console.
+
+---
+
 ## [0.2.1]
 
 **The steps creation never had.** 0.2.0 shipped the term loop without the three steps that come

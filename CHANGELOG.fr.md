@@ -4,6 +4,21 @@
 
 ---
 
+## [0.2.2]
+
+**Vérifié sur Foundry VTT 14.368.**
+
+### Correctifs
+
+* **La fenêtre *Règles optionnelles et variantes* défile** : la fin de la liste était inaccessible,
+  même en plein écran ([#6](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/6)). Trois fenêtres
+  avaient le même défaut : la description complète d'une espèce, le choix d'un bénéfice de fin de
+  carrière et la *Formation psionique*.
+* Changer d'espèce pendant la création n'affiche plus d'avertissement de compatibilité dans la
+  console.
+
+---
+
 ## [0.2.1]
 
 **Les pas que la création n'avait jamais eus.** 0.2.0 livrait la boucle des périodes sans les trois

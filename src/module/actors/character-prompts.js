@@ -35,7 +35,7 @@ class EditorFullView extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
-        classes: ["mgt2"],
+        classes: ["mgt2", "scrollpart"],
         position: { width: 640, height: 520 },
         window: { resizable: true, title: "" }
     };

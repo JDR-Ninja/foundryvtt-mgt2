@@ -8,6 +8,20 @@
 
 ---
 
+## [0.2.2]
+
+**Verificado no Foundry VTT 14.368.**
+
+### Correções
+
+* **A janela *Regras opcionais e variantes* rola**: o fim da lista ficava inacessível, mesmo em tela
+  cheia ([#6](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/6)). Três janelas tinham o mesmo
+  defeito: a descrição completa de uma espécie, a escolha de um benefício de baixa e o *Treinamento
+  psiônico*.
+* Trocar de espécie durante a criação não exibe mais um aviso de compatibilidade no console.
+
+---
+
 ## [0.2.1]
 
 **Os passos que a criação nunca teve.** A 0.2.0 trouxe o laço de períodos sem os três passos que vêm

@@ -301,15 +301,14 @@ export const Chargen = {
 
     /**
      * Take named tracks off the ledger — what a frame leaving is owed. ⚠ Not `update`: a
-     * `TypedObjectField` merges, so a key absent from the payload survives it and only the document's
-     * own `-=` deletion reaches one.
+     * `TypedObjectField` merges, so a key absent from the payload survives it and only a
+     * `ForcedDeletion` reaches one.
      */
     async dropTracks(actor, keys) {
-        const update = {};
-        for ( const key of keys ?? [] ) {
-            update[`flags.${CHARGEN_SCOPE}.${CHARGEN_KEY}.tracks.-=${key}`] = null;
-        }
-        return Object.keys(update).length ? actor.update(update) : actor;
+        const tracks = {};
+        for ( const key of keys ?? [] ) tracks[key] = new foundry.data.operators.ForcedDeletion();
+        return Object.keys(tracks).length
+            ? actor.update({ flags: { [CHARGEN_SCOPE]: { [CHARGEN_KEY]: { tracks } } } }) : actor;
     },
 
     /**
