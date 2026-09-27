@@ -19,8 +19,9 @@ export const EXTRA_CHARACTERISTICS = Object.freeze(["morale", "luck", "sanity", 
 // so a key appended later would switch itself on at a table that never adopted it.
 const SEEDED_EXTRA_CHARACTERISTICS = Object.freeze(["morale", "luck", "sanity", "charm", "other"]);
 
-/** The sections the menu draws, in the order it draws them. */
+/** The menu's pages, then the sections of its page of interpretations, each in the order it draws them. */
 export const RULE_GROUPS = Object.freeze(["travellers", "creation", "combat", "health", "space", "craft"]);
+export const INTERPRETATION_SECTIONS = Object.freeze(["careers", "skills", "ageing", "species"]);
 
 /** The registry: a `choices` row is a Set, `options` a string, `number` a number, none a boolean. */
 export const RULES = Object.freeze({
@@ -51,25 +52,25 @@ export const RULES = Object.freeze({
 
     // "Instead of rolling" binds only the first-career sentence, and 1st edition allowed both.
     secondCareerBasicTraining: {
-        group: "creation",
+        group: "creation", section: "careers",
         default: true
     },
     // A Mongoose staff answer of 2018 says the untrained DM−3 applies during creation and that
     // characteristic DMs do not.
     untrainedDMInCreation: {
-        group: "creation", unofficial: "2018",
+        group: "creation", section: "skills", unofficial: "2018",
         default: true
     },
     // Folio 55 prints the only on-breach procedure in the book — for post-career study — and it is
     // transposed here.
     skillCapBreach: {
-        group: "creation",
+        group: "creation", section: "skills",
         default: true
     },
     // The two ladders are numbered independently and a commission restarts at 1, so the printed
     // number is the number.
     officerRankNumbering: {
-        group: "creation",
+        group: "creation", section: "careers",
         options: { printed: "MGT2.Rules.officerRankNumbering.printed",
             combined: "MGT2.Rules.officerRankNumbering.combined" },
         default: "printed"
@@ -78,13 +79,13 @@ export const RULES = Object.freeze({
     // have no use otherwise, so a successful advancement promotes AND grants the extra skill roll
     // as well as testing the track.
     trackedAdvancementPromotes: {
-        group: "creation",
+        group: "creation", section: "careers",
         default: true
     },
     // The book gives two assignment-change rules by career group and a third for one career, and
     // leaves one career in none of the lists — the only career in that state.
     undeclaredAssignmentChange: {
-        group: "creation",
+        group: "creation", section: "careers",
         options: { requalifyKeepRank: "MGT2.Chargen.AssignmentChange.requalifyKeepRank",
             newCareer: "MGT2.Chargen.AssignmentChange.newCareer",
             separateCareers: "MGT2.Chargen.AssignmentChange.separateCareers",
@@ -94,34 +95,34 @@ export const RULES = Object.freeze({
     // The ageing crisis is the only printed rule for a characteristic at zero during creation, so
     // it is transposed to the injury that causes one.
     creationInjuryToZero: {
-        group: "creation",
+        group: "creation", section: "ageing",
         default: true
     },
     // No volume states whether species modifiers replace or stack.
     speciesModifiersStack: {
-        group: "creation",
+        group: "creation", section: "species",
         default: false
     },
     // The cap counts skill LEVELS and a speciality level is a level.
     specialitiesCountToCap: {
-        group: "creation",
+        group: "creation", section: "skills",
         default: true
     },
     // The ageing table stops at −6, printed bare, while its DM is every term served: a nine-term
     // Traveller rolling snake-eyes sits at −7, with neither a row nor a printed floor.
     ageingTableFloor: {
-        group: "creation",
+        group: "creation", section: "ageing",
         default: true
     },
     // The general ceiling is printed and nothing exempts PSI, and no species maximum is printed for
     // anyone.
     psiCeiling: {
-        group: "creation",
+        group: "creation", section: "species",
         default: true
     },
     // One published species prints an ageing age and a term count that do not agree.
     ageingTriggerPrecedence: {
-        group: "creation", unofficial: "2009",
+        group: "creation", section: "ageing", unofficial: "2009",
         options: { terms: "MGT2.Rules.ageingTriggerPrecedence.terms",
             age: "MGT2.Rules.ageingTriggerPrecedence.age" },
         default: "terms"
@@ -129,13 +130,13 @@ export const RULES = Object.freeze({
     // The cumulative −1 is per check attempted within a session; a lifetime counter would make the
     // second training the book prices at Cr100000 pointless.
     psionicTrainingReset: {
-        group: "creation",
+        group: "creation", section: "skills",
         default: true
     },
     // One species' folio contradicts itself within two lines — a status is "for life once attained"
     // and "possible to fall from and regain, perhaps multiple times".
     trackRungPermanence: {
-        group: "creation",
+        group: "creation", section: "species",
         options: { canFall: "MGT2.Rules.trackRungPermanence.canFall",
             heldThenPermanent: "MGT2.Rules.trackRungPermanence.heldThenPermanent",
             permanent: "MGT2.Rules.trackRungPermanence.permanent" },
@@ -143,23 +144,23 @@ export const RULES = Object.freeze({
     },
     // Events, medical care, anagathics and a new psionic course spend money before mustering out makes any.
     creationCostsBecomeDebt: {
-        group: "creation",
+        group: "creation", section: "ageing",
         default: true
     },
     // Official errata: an event draft "(and similar effects) can cause a Traveller to be drafted
     // more than once", printed as a general statement rather than a local exception.
     eventDraftBudget: {
-        group: "creation",
+        group: "creation", section: "careers",
         default: true
     },
     // A ruling: Core p.16 calls education "in place of a career" and never says it is a previous one.
     preCareerCountsAsCareer: {
-        group: "creation",
+        group: "creation", section: "careers",
         default: false
     },
     // Core p.18 costs a failed Survival its Benefit roll and says nothing of the skill: a ruling, stated on the log.
     ejectedTermSkillRoll: {
-        group: "creation",
+        group: "creation", section: "careers",
         default: true
     },
 
@@ -339,6 +340,12 @@ export const RULES = Object.freeze({
         default: true
     }
 });
+
+for ( const [key, rule] of Object.entries(RULES) ) {
+    if ( !rule.book && !INTERPRETATION_SECTIONS.includes(rule.section) ) {
+        throw new Error(`MGT2 | the rule "${key}" prints in no book and names no interpretation section.`);
+    }
+}
 
 export const Rules = {
 

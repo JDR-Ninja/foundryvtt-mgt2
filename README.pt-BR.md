@@ -28,9 +28,10 @@ Traveller da Mongoose Publishing — desenvolvido especialmente para a edição 
 * **Viagens e salto**, com o combustível real, a hipoteca da nave e as finanças da tripulação.
 * **A cadeia de dano completa**, resolvida do lado do defensor, com primeiros socorros, cirurgia e
   recuperação.
-* **Cinquenta e uma regras opcionais e variantes** numa única tela de configurações, cada uma com o
-  livro e a página de onde vem — ou com o aviso de que nenhum livro a estabelece. Por padrão, vale o
-  jogo tal como está impresso.
+* **Cinquenta e uma regras opcionais e variantes** numa única tela de configurações, organizadas por
+  domínio, cada uma com o livro e a página de onde vem; as que nenhum livro estabelece têm uma
+  página própria. Uma busca encontra qualquer uma delas, e um filtro mostra o que a sua mesa
+  alterou. Por padrão, vale o jogo tal como está impresso.
 * **Uma só paleta, e ela é do leitor** — quatro predefinições, onze cores de destaque, claro ou
   escuro, e um par de sucesso e falha para daltonismo. Cada cor de texto medida em 4,5:1 ou melhor.
 * **Três compêndios que o próprio sistema escreve** — o que ele faz com as regras, um diário por

@@ -9564,33 +9564,159 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   flex: 1;
 }
 
+.mgt2.mgt2-rules.scrollpart > .window-content > [data-application-part] {
+  overflow: hidden;
+}
 .mgt2.mgt2-rules .rules {
   gap: 10px;
 }
-.mgt2.mgt2-rules fieldset {
+.mgt2.mgt2-rules .rules > .hint {
   margin: 0;
-  border: 1px solid var(--rule-soft);
 }
-.mgt2.mgt2-rules fieldset legend {
+.mgt2.mgt2-rules .find {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mgt2.mgt2-rules .find .q {
+  flex: 1 1 auto;
+}
+.mgt2.mgt2-rules .find .chk {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--mute);
+  cursor: pointer;
+}
+.mgt2.mgt2-rules .find .chk input {
+  margin: 0;
+}
+.mgt2.mgt2-rules .frame {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  border-top: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2.mgt2-rules .rail {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 8px 8px 0;
+  border-right: 1px solid var(--rule-soft);
+  overflow-y: auto;
+}
+.mgt2.mgt2-rules .rail button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 6px 8px 6px 10px;
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  outline: none;
   font-family: var(--cond);
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  text-align: left;
   text-transform: uppercase;
   color: var(--mute);
+  cursor: pointer;
+}
+.mgt2.mgt2-rules .rail button:hover {
+  color: var(--accent-hot);
+  background: var(--hover);
+}
+.mgt2.mgt2-rules .rail button.active {
+  color: var(--accent-text);
+  border-left-color: var(--accent-text);
+  outline: none;
+}
+.mgt2.mgt2-rules .rail button:focus-visible {
+  outline: 1px solid var(--accent-line);
+  outline-offset: -1px;
+}
+.mgt2.mgt2-rules .rail button.interpretations {
+  position: relative;
+  margin-top: 10px;
+}
+.mgt2.mgt2-rules .rail button.interpretations::before {
+  content: "";
+  position: absolute;
+  inset: -6px 0 auto 10px;
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.mgt2-rules .rail .lb {
+  flex: 1 1 auto;
+}
+.mgt2.mgt2-rules .rail .ct, .mgt2.mgt2-rules .rail .mod {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.mgt2.mgt2-rules .rail .ct {
+  color: var(--faint);
+}
+.mgt2.mgt2-rules .rail .mod {
+  padding: 0 5px;
+  border-radius: 3px;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+.mgt2.mgt2-rules .pane {
+  overflow-y: auto;
+  padding: 2px 4px 12px 16px;
+}
+.mgt2.mgt2-rules .pane h3.ttl, .mgt2.mgt2-rules .pane h4 {
+  margin: 12px 0 2px;
+  padding: 0;
+  border: none;
+  font-family: var(--cond);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.mgt2.mgt2-rules .pane h3.ttl {
+  display: none;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--accent-text);
+}
+.mgt2.mgt2-rules .pane h4 {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--mute);
+}
+.mgt2.mgt2-rules .pane .intro, .mgt2.mgt2-rules .pane .none {
+  margin: 8px 0 0;
+}
+.mgt2.mgt2-rules .rules.filtering h3.ttl {
+  display: block;
 }
 .mgt2.mgt2-rules .rule {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
   column-gap: 10px;
-  padding: 6px 0;
-}
-.mgt2.mgt2-rules .rule + .rule {
-  border-top: 1px solid var(--rule-soft);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--rule-soft);
 }
 .mgt2.mgt2-rules .rule .nm {
   font-weight: 600;
+}
+.mgt2.mgt2-rules .rule .nm:not(.sw) {
+  padding-left: 23px;
 }
 .mgt2.mgt2-rules .rule .nm.sw {
   display: flex;
@@ -9600,7 +9726,19 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 }
 .mgt2.mgt2-rules .rule .nm.sw input {
   margin: 0;
-  flex: 0 0 auto;
+  flex: 0 0 16px;
+}
+.mgt2.mgt2-rules .rule .tag {
+  display: none;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.mgt2.mgt2-rules .rule.changed .tag {
+  display: inline;
 }
 .mgt2.mgt2-rules .rule .src {
   font-family: var(--mono);
@@ -9608,15 +9746,40 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   color: var(--faint);
   white-space: nowrap;
 }
+.mgt2.mgt2-rules .rule .why {
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0 2px;
+  border: none;
+  background: none;
+  box-shadow: none;
+  outline: none;
+  line-height: 1;
+  color: var(--faint);
+  cursor: pointer;
+}
+.mgt2.mgt2-rules .rule .why:hover, .mgt2.mgt2-rules .rule .why[aria-expanded=true] {
+  color: var(--accent-text);
+}
+.mgt2.mgt2-rules .rule .why:focus-visible {
+  outline: 1px solid var(--accent-line);
+}
 .mgt2.mgt2-rules .rule .hint {
+  display: none;
   grid-column: 1/-1;
+  margin: 4px 0 2px 23px;
+}
+.mgt2.mgt2-rules .rule.open .hint {
+  display: block;
 }
 .mgt2.mgt2-rules .picker {
   grid-column: 1/-1;
   display: flex;
   flex-wrap: wrap;
   gap: 4px 14px;
-  margin-top: 5px;
+  margin: 4px 0 0 23px;
 }
 .mgt2.mgt2-rules .picker label {
   display: flex;
@@ -9630,7 +9793,13 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 }
 .mgt2.mgt2-rules .picker select {
   font-size: 12px;
-  max-width: 22rem;
+  max-width: 26rem;
+}
+.mgt2.mgt2-rules .picker input[type=number] {
+  width: 5rem;
+}
+.mgt2.mgt2-rules .rules [hidden] {
+  display: none;
 }
 
 .mgt2.application.docket {

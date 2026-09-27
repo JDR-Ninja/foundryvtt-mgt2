@@ -161,6 +161,11 @@ ninguna carrera ni ninguna tabla: hace funcionar las que el árbitro escribe o i
 
 ### Reglas opcionales y variantes
 
+* **La ventana de reglas se recorre por ámbito**: un menú a la izquierda muestra una sola página a
+  la vez, y las dieciocho interpretaciones de la creación —donde el libro calla o es ambiguo— tienen
+  su propia página, ordenada por etapa. Cada regla cabe en una línea y abre su explicación a
+  petición; una búsqueda recorre todas las páginas, y un filtro muestra lo que tu mesa ha
+  modificado, que el menú también cuenta.
 * **Nueva, activada**: *Un Viajero expulsado conserva la tirada de habilidad del periodo* —una
   interpretación, ya que el libro quita la tirada de Beneficio y la carrera sin decir nada de la
   tirada de habilidad (Core p.18)—. El registro del periodo dice en qué sentido juega.

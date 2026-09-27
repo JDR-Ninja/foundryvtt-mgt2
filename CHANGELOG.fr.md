@@ -163,6 +163,11 @@ carrière ni aucune table : il fait tourner celles que l'arbitre saisit ou impor
 
 ### Règles optionnelles et variantes
 
+* **La fenêtre des règles se parcourt par domaine** : un menu à gauche n'affiche qu'une page à la
+  fois, et les dix-huit interprétations de la création — là où le livre est muet ou ambigu — ont
+  leur propre page, rangée par étape. Chaque règle tient sur une ligne et son explication s'ouvre à
+  la demande ; une recherche parcourt toutes les pages, et un filtre montre ce que votre table a
+  modifié, que le menu compte aussi.
 * **Nouvelle, activée** : *Un Voyageur éjecté garde le jet de compétence de la période* — une
   interprétation, le livre faisant perdre le jet d'Avantage et la carrière sans rien dire du jet de
   compétence (Core p.18). Le journal de la période dit dans quel sens elle joue.

@@ -29,9 +29,10 @@ de Mongoose Publishing — desarrollado especialmente para la edición francesa 
   tripulación.
 * **La cadena de daño completa**, resuelta del lado del defensor, con primeros auxilios, cirugía y
   recuperación.
-* **Cincuenta y una reglas opcionales y variantes** en una sola pantalla de configuración, cada una
-  con el libro y la página de donde viene — o con la advertencia de que ningún libro la establece.
-  Por defecto se juega tal como está impreso.
+* **Cincuenta y una reglas opcionales y variantes** en una sola pantalla de configuración, ordenadas
+  por ámbito, cada una con el libro y la página de donde viene; las que ningún libro establece
+  tienen su propia página. Una búsqueda las encuentra todas, y un filtro muestra lo que tu mesa ha
+  modificado. Por defecto se juega tal como está impreso.
 * **Una sola paleta, y es del lector** — cuatro ajustes preestablecidos, once colores de acento, claro
   u oscuro, y un par de éxito y fallo apto para daltonismo. Cada color de texto medido a 4,5:1 o
   mejor.

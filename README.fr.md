@@ -24,9 +24,10 @@ Traveller de Mongoose Publishing — et développé spécialement pour la versio
 * **Voyage et saut**, avec le carburant réel, l'hypothèque du vaisseau et les finances de l'équipage.
 * **Chaîne de dégâts complète**, résolue côté défenseur, avec premiers soins, chirurgie et
   récupération.
-* **Cinquante et une règles optionnelles et variantes** dans un seul écran de paramètres, chacune
-  indiquant l'ouvrage et la page dont elle vient — ou qu'aucun ouvrage ne tranche. Par défaut, c'est
-  le jeu tel qu'il est imprimé.
+* **Cinquante et une règles optionnelles et variantes** dans un seul écran de paramètres, rangées
+  par domaine, chacune indiquant l'ouvrage et la page dont elle vient ; celles qu'aucun ouvrage ne
+  tranche ont leur propre page. Une recherche les retrouve toutes, et un filtre montre ce que votre
+  table a modifié. Par défaut, c'est le jeu tel qu'il est imprimé.
 * **Une seule palette, et elle appartient au lecteur** — quatre préréglages, onze couleurs d'accent,
   clair ou sombre, et une paire réussite/échec adaptée au daltonisme. Chaque couleur de texte mesurée
   à 4,5:1 ou mieux.

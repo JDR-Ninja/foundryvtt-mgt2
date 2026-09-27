@@ -1,60 +1,91 @@
 <div class="dlg rules">
 	<p class="hint">{{localize 'MGT2.Rules.Hint'}}</p>
 
-	{{#each groups as |group|}}
-	<fieldset>
-		<legend>{{localize group.label}}</legend>
-		{{#each group.rules as |rule|}}
-		{{! Four shapes on one row. A switch is its own control; a picker states the rule once and
-		    puts the choice in a strip under it, because the five it offers are five separate
-		    adoptions rather than one rule with parameters; a choice is a select; and a count is a
-		    number the referee sets, which no box or list can express. }}
-		<div class="rule">
-			{{#if rule.choices}}
-			<span class="nm">{{localize rule.name}}</span>
-			{{else if rule.options}}
-			<span class="nm">{{localize rule.name}}</span>
-			{{else if rule.number}}
-			<span class="nm">{{localize rule.name}}</span>
-			{{else}}
-			<label class="nm sw">
-				<input type="checkbox" name="{{rule.key}}" {{checked rule.checked}} />
-				<span>{{localize rule.name}}</span>
-			</label>
-			{{/if}}
-			{{#if rule.source}}<span class="src">{{rule.source}}</span>{{/if}}
-			<p class="hint">{{localize rule.hint}}</p>
-			{{#if rule.choices}}
-			<div class="picker">
-				{{#each rule.choices as |choice|}}
-				<label>
-					<input type="checkbox" name="{{choice.name}}" {{checked choice.checked}} />
-					<span>{{localize choice.label}}</span>
-				</label>
-				{{/each}}
-			</div>
-			{{/if}}
-			{{! A choice between printed procedures: neither is the absence of the other, so it is a
-			    select and not a box. }}
-			{{#if rule.options}}
-			<div class="picker">
-				<select name="{{rule.key}}">
-					{{#each rule.options as |option|}}
-					<option value="{{option.value}}"{{#if option.selected}} selected{{/if}}>{{localize option.label}}</option>
+	<div class="find">
+		<input class="q" type="search" value="{{view.query}}" placeholder="{{localize 'MGT2.Rules.Search'}}"
+			aria-label="{{localize 'MGT2.Rules.Search'}}" />
+		<label class="chk">
+			<input class="changed" type="checkbox" {{checked view.changed}} />
+			<span>{{localize 'MGT2.Rules.ChangedOnly'}}</span>
+		</label>
+	</div>
+
+	<div class="frame">
+		<nav class="rail">
+			{{#each pages as |page|}}
+			<button type="button" class="{{page.key}}" data-action="page" data-page="{{page.key}}">
+				<span class="lb">{{localize page.label}}</span>
+				<span class="mod" data-tooltip="{{localize 'MGT2.Rules.ChangedTooltip'}}" hidden></span>
+				<span class="ct">{{page.count}}</span>
+			</button>
+			{{/each}}
+		</nav>
+
+		<div class="pane">
+			{{#each pages as |page|}}
+			<section class="page" data-page="{{page.key}}">
+				<h3 class="ttl">{{localize page.label}}</h3>
+				{{#if page.intro}}<p class="hint intro">{{localize page.intro}}</p>{{/if}}
+				{{#each page.sections as |section|}}
+				<div class="sec">
+					{{#if section.label}}<h4>{{localize section.label}}</h4>{{/if}}
+					{{#each section.rules as |rule|}}
+					{{! A switch is its own control; a picker, a choice and a count name the rule and put their
+					    control under it. The explanation stays folded until the referee asks for it. }}
+					<div class="rule{{#if rule.open}} open{{/if}}" data-rule="{{rule.key}}">
+						{{#if rule.choices}}
+						<span class="nm">{{localize rule.name}}</span>
+						{{else if rule.options}}
+						<span class="nm">{{localize rule.name}}</span>
+						{{else if rule.number}}
+						<span class="nm">{{localize rule.name}}</span>
+						{{else}}
+						<label class="nm sw">
+							<input type="checkbox" name="{{rule.key}}" {{checked rule.checked}} />
+							<span>{{localize rule.name}}</span>
+						</label>
+						{{/if}}
+						<span class="tag">{{localize 'MGT2.Rules.Changed'}}</span>
+						<span class="src">{{rule.source}}</span>
+						<button type="button" class="why" data-action="explain" aria-expanded="{{#if rule.open}}true{{else}}false{{/if}}"
+							aria-label="{{localize 'MGT2.Rules.Explain'}}" data-tooltip="{{localize 'MGT2.Rules.Explain'}}">
+							<i class="fa-solid fa-circle-info" inert></i>
+						</button>
+						{{#if rule.choices}}
+						<div class="picker">
+							{{#each rule.choices as |choice|}}
+							<label>
+								<input type="checkbox" name="{{choice.name}}" {{checked choice.checked}} />
+								<span>{{localize choice.label}}</span>
+							</label>
+							{{/each}}
+						</div>
+						{{/if}}
+						{{#if rule.options}}
+						<div class="picker">
+							<select name="{{rule.key}}">
+								{{#each rule.options as |option|}}
+								<option value="{{option.value}}"{{#if option.selected}} selected{{/if}}>{{localize option.label}}</option>
+								{{/each}}
+							</select>
+						</div>
+						{{/if}}
+						{{#if rule.number}}
+						<div class="picker">
+							<input type="number" name="{{rule.key}}" value="{{rule.number.value}}"
+								min="{{rule.number.min}}" max="{{rule.number.max}}" step="{{rule.number.step}}" />
+						</div>
+						{{/if}}
+						<p class="hint">{{localize rule.hint}}</p>
+					</div>
 					{{/each}}
-				</select>
-			</div>
-			{{/if}}
-			{{#if rule.number}}
-			<div class="picker">
-				<input type="number" name="{{rule.key}}" value="{{rule.number.value}}"
-					min="{{rule.number.min}}" max="{{rule.number.max}}" step="{{rule.number.step}}" />
-			</div>
-			{{/if}}
+				</div>
+				{{/each}}
+			</section>
+			{{/each}}
+			<p class="hint none" hidden>{{localize 'MGT2.Rules.NoMatch'}}</p>
 		</div>
-		{{/each}}
-	</fieldset>
-	{{/each}}
+	</div>
 
 	<p class="hint">{{localize 'MGT2.Rules.Footer'}}</p>
 </div>

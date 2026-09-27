@@ -595,7 +595,21 @@
       "ejectedTermSkillRoll": {
         "name": "Un Viajero expulsado conserva la tirada de habilidad del periodo",
         "hint": "Una interpretación: el Core hace perder a una Supervivencia fallida la tirada de Beneficio del periodo y la carrera, sin decir nada de la tirada de habilidad; por defecto, un periodo que sirvió sus cuatro años la conserva. Desactivada, la tirada de habilidad se va con la carrera. En ambos casos, el registro del periodo lo dice."
-      }
+      },
+      "Interpretations": "Interpretaciones",
+      "InterpretationsHint": "Donde el libro calla o es ambiguo. Cada una tiene ya la lectura más común: cámbiala solo si tu mesa decide otra cosa.",
+      "Sections": {
+        "careers": "Carreras y periodos",
+        "skills": "Habilidades y talentos",
+        "ageing": "Envejecimiento, lesiones y gastos",
+        "species": "Especies y características"
+      },
+      "Search": "Buscar una regla",
+      "ChangedOnly": "Solo las modificadas",
+      "Changed": "modificada",
+      "ChangedTooltip": "Cambios respecto al valor por defecto",
+      "Explain": "Qué hace esta regla",
+      "NoMatch": "Ninguna regla coincide."
     },
     "Chargen": {
       "Steps": {

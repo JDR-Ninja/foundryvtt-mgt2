@@ -147,6 +147,11 @@ The system still ships no career and no table: it runs the ones the referee type
 
 ### Optional and variant rules
 
+* **The rules window is read one domain at a time**: a rail on the left shows one page at a time,
+  and creation's eighteen interpretations — where the book is silent or ambiguous — have a page of
+  their own, sorted by step. Each rule fits on one line and opens its explanation on request; a
+  search reads every page, and a filter shows what your table changed, which the rail counts as
+  well.
 * **New, on**: *An ejected Traveller still takes the term's skill roll* — a ruling, since the book
   takes the Benefit roll and the career and says nothing of the skill roll (Core p.18). The term's
   log says which way it runs.

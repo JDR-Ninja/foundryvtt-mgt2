@@ -595,7 +595,21 @@
       "ejectedTermSkillRoll": {
         "name": "Um Viajante expulso mantém a rolagem de perícia do período",
         "hint": "Uma interpretação: o Core faz uma Sobrevivência falha perder a rolagem de Benefício do período e a carreira, sem dizer nada da rolagem de perícia; por padrão, um período que serviu seus quatro anos a mantém. Desativada, a rolagem de perícia vai com a carreira. Em ambos os casos, o registro do período o diz."
-      }
+      },
+      "Interpretations": "Interpretações",
+      "InterpretationsHint": "Onde o livro é omisso ou ambíguo. Cada uma já tem a leitura mais comum: só a altere se a sua mesa decidir de outro modo.",
+      "Sections": {
+        "careers": "Carreiras e períodos",
+        "skills": "Perícias e talentos",
+        "ageing": "Envelhecimento, ferimentos e custos",
+        "species": "Espécies e características"
+      },
+      "Search": "Buscar uma regra",
+      "ChangedOnly": "Só as modificadas",
+      "Changed": "modificada",
+      "ChangedTooltip": "Mudanças em relação ao padrão",
+      "Explain": "O que esta regra faz",
+      "NoMatch": "Nenhuma regra corresponde."
     },
     "Chargen": {
       "Steps": {

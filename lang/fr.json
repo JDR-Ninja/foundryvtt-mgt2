@@ -595,7 +595,21 @@
       "ejectedTermSkillRoll": {
         "name": "Un Voyageur éjecté garde le jet de compétence de la période",
         "hint": "Une interprétation : le livre de base fait perdre à une Survie ratée le jet d'Avantage de la période et la carrière, sans rien dire du jet de compétence ; par défaut, une période qui a servi ses quatre ans le garde donc. Désactivée, le jet de compétence part avec la carrière. Dans les deux cas, le journal de la période le dit."
-      }
+      },
+      "Interpretations": "Interprétations",
+      "InterpretationsHint": "Là où le livre est muet ou ambigu. Chacune a déjà la lecture la plus courante : ne la changez que si votre table tranche autrement.",
+      "Sections": {
+        "careers": "Carrières et périodes",
+        "skills": "Compétences et talents",
+        "ageing": "Vieillissement, blessures et frais",
+        "species": "Espèces et caractéristiques"
+      },
+      "Search": "Chercher une règle",
+      "ChangedOnly": "Modifiées seulement",
+      "Changed": "modifiée",
+      "ChangedTooltip": "Écarts avec les valeurs par défaut",
+      "Explain": "Ce que fait cette règle",
+      "NoMatch": "Aucune règle ne correspond."
     },
     "Chargen": {
       "Steps": {

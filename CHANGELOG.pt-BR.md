@@ -161,6 +161,10 @@ carreira e nenhuma tabela: ele faz funcionar as que o árbitro digita ou importa
 
 ### Regras opcionais e variantes
 
+* **A janela de regras é percorrida por domínio**: um menu à esquerda mostra uma página por vez, e
+  as dezoito interpretações da criação — onde o livro é omisso ou ambíguo — têm uma página própria,
+  organizada por etapa. Cada regra cabe numa linha e abre a sua explicação quando pedida; uma busca
+  percorre todas as páginas, e um filtro mostra o que a sua mesa alterou, que o menu também conta.
 * **Nova, ativada**: *Um Viajante expulso mantém a rolagem de perícia do período* — uma
   interpretação, já que o livro tira a rolagem de Benefício e a carreira sem dizer nada da rolagem de
   perícia (Core p.18). O registro do período diz em que sentido ela vale.

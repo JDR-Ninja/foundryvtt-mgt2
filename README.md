@@ -119,10 +119,11 @@ steps in the order the book prints them.
 
 ### The world
 
-* **Fifty-one optional and variant rules** in one settings screen — psionics, wealth, radiation,
-  encumbrance, starvation, vacuum, the jump procedure, fleet battles and design validation among
-  them. Each names the book and page it comes from, or says that no book settles it. The defaults
-  are the game as printed.
+* **Fifty-one optional and variant rules** in one settings screen, sorted by domain — psionics,
+  wealth, radiation, encumbrance, starvation, vacuum, the jump procedure, fleet battles and design
+  validation among them. Each names the book and page it comes from; those no book settles have a
+  page of their own, and a search and a changed-only filter find any of them. The defaults are the
+  game as printed.
 * **Four languages** — French, English, Spanish and Brazilian Portuguese, interface and content
   strings alike.
 * **Three compendiums it writes itself** — what the system does with the rules, one journal per

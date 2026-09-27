@@ -22,8 +22,9 @@ Publishing's Traveller — built specially for the French edition translated by
   hold manifest.
 * **Voyages and jump**, with real fuel, the ship mortgage and crew finances.
 * **The whole damage chain**, resolved on the defender's side, with first aid, surgery and recovery.
-* **Fifty-one optional and variant rules** in one settings screen, each naming the book and page it
-  comes from — or saying that no book settles it. The defaults are the game as printed.
+* **Fifty-one optional and variant rules** in one settings screen, sorted by domain, each naming the
+  book and page it comes from; those no book settles have a page of their own. A search finds any of
+  them, and a filter shows what your table changed. The defaults are the game as printed.
 * **One palette, and it belongs to the reader** — four presets, eleven accent colours, light or dark,
   and a colour-blind pair for success and failure. Every text colour measured at 4.5:1 or better.
 * **Three compendiums the system writes itself** — what it does with the rules, one journal per

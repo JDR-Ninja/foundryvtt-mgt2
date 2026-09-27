@@ -595,7 +595,21 @@
       "ejectedTermSkillRoll": {
         "name": "An ejected Traveller still takes the term's skill roll",
         "hint": "A ruling: Core p.18 costs a failed Survival the term's Benefit roll and the career, and says nothing of the term's skill roll, so by default a term that served its four years keeps it. Off, the skill roll goes with the career. Either way, the term's log says which."
-      }
+      },
+      "Interpretations": "Interpretations",
+      "InterpretationsHint": "Where the book is silent or ambiguous. Each already holds the most common reading: change one only where your table rules otherwise.",
+      "Sections": {
+        "careers": "Careers and terms",
+        "skills": "Skills and talents",
+        "ageing": "Ageing, injury and costs",
+        "species": "Species and characteristics"
+      },
+      "Search": "Search the rules",
+      "ChangedOnly": "Changed only",
+      "Changed": "changed",
+      "ChangedTooltip": "Changes from the default",
+      "Explain": "What this rule does",
+      "NoMatch": "No rule matches."
     },
     "Chargen": {
       "Steps": {
