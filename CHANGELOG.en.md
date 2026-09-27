@@ -63,6 +63,8 @@ The system still ships no career and no table: it runs the ones the referee type
 * **Life Events, the Unusual Event, the Draft, the Pre-Career Events and the Background Skills have a
   home**: each is a career of the *Shared table* kind, which the referee links in the *Shared creation
   tables* menu of the world settings. The system ships none of them.
+* **A shared table's sheet shows only its kind and its Events**: the rest of the career, which a
+  table never reads, stays stored and comes back if the kind is set back to *Career*.
 * **Once linked, they play like a career's own rows**: a 7 on Events rolls Life Events, and a row
   naming a table rolls it and applies it — a contact, a betrayal, a pending DM, a lost Benefit roll,
   the Prisoner. With no table linked, the system still says which one to roll from the book.
@@ -155,7 +157,13 @@ The system still ships no career and no table: it runs the ones the referee type
 ### Demo and documentation
 
 * **`Demo — Harbour Cadet School`** joins the demo items: an academy tied to `Demo — Harbour Patrol`,
-  to see an education from start to finish. The patrol now pays its rank-0 bonus.
+  to see an education from start to finish.
+* **`Demo — Harbour Life Events`** too: an invented shared table, to link in *Shared creation tables*,
+  whose rows show what a table does — the Unusual Event and the Injury table as sub-tables, a lost
+  Benefit roll, a Rival or an Enemy, a betrayal, pending DMs, a prohibition.
+* **`Demo — Harbour Patrol` shows the new Events rows**: an optional check, a wager with its grant
+  first, a check on two skills that raises the one used, a pending automatic success. It pays its
+  rank-0 bonus and names its Medical Bills row.
 * **The rules audit journal** (`mgt2.docs`) describes creation as it now stands.
 
 ### Fixes

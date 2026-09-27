@@ -70,6 +70,8 @@ ninguna carrera ni ninguna tabla: hace funcionar las que el árbitro escribe o i
   Habilidades de trasfondo tienen un lugar**: cada una es una carrera del tipo *Tabla compartida*,
   que el árbitro vincula en el menú *Tablas de creación compartidas* de los ajustes del mundo. El
   sistema no trae ninguna.
+* **La ficha de una tabla compartida solo muestra su tipo y sus Sucesos**: el resto de la carrera,
+  que una tabla no lee, sigue guardado y vuelve si se regresa al tipo *Carrera*.
 * **Una vez vinculadas, se juegan como las filas de una carrera**: un 7 en Sucesos tira los Sucesos
   Vitales, y una fila que nombra una tabla la tira y la aplica —un contacto, una traición, un MD
   pendiente, una tirada de Beneficio perdida, el Prisionero—. Sin tabla vinculada, el sistema sigue
@@ -169,8 +171,15 @@ ninguna carrera ni ninguna tabla: hace funcionar las que el árbitro escribe o i
 ### Demostración y documentación
 
 * **`Demo — Harbour Cadet School`** se une a los objetos de demostración: una academia vinculada a
-  `Demo — Harbour Patrol`, para ver una educación de principio a fin. La patrulla paga ahora su
-  bonificación de rango 0.
+  `Demo — Harbour Patrol`, para ver una educación de principio a fin.
+* **`Demo — Harbour Life Events`** también: una tabla compartida inventada, que se vincula en *Tablas
+  de creación compartidas*, cuyas filas muestran lo que hace una tabla —el Suceso insólito y las
+  Lesiones como subtablas, una tirada de Beneficio perdida, un Rival o un Enemigo, una traición, MD
+  pendientes, una prohibición—.
+* **`Demo — Harbour Patrol` muestra las nuevas filas de Sucesos**: una prueba opcional, una apuesta
+  con lo concedido antes de la prueba, una prueba sobre dos habilidades que sube un nivel la usada,
+  un éxito automático pendiente. Paga su bonificación de rango 0 y nombra su línea de Facturas
+  médicas.
 * **El diario de auditoría de reglas** (`mgt2.docs`) describe la creación tal como es ahora.
 
 ### Correcciones

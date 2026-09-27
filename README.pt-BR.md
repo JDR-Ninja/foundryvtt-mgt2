@@ -18,14 +18,17 @@ Traveller da Mongoose Publishing — desenvolvido especialmente para a edição 
 * **Dezoito tipos de Item** — da arma e da armadura ao lote de carga, à passagem, ao componente de
   nave e ao posto de tripulação.
 * **Criação de Viajantes em grupo**, numa grade de Viajantes × períodos, interrompível sem perder
-  nada. As carreiras e as espécies são modelos que o árbitro escreve.
+  nada, e jogada como o livro a imprime, da qualificação à baixa: educação pré-carreira,
+  recrutamento, Eventos de Vida, ferimentos e cuidados médicos, anagáticos, leis das espécies.
+  As carreiras, as educações, as tabelas compartilhadas e as espécies são modelos que o árbitro
+  escreve.
 * **Combate espacial** e **batalhas entre frotas**, com uma faixa de alcance para cada par de naves.
 * **Comércio** — Perfil Universal de Mundo analisado, códigos comerciais derivados, comércio
   especulativo, tráfego de escala, manifesto de porão.
 * **Viagens e salto**, com o combustível real, a hipoteca da nave e as finanças da tripulação.
 * **A cadeia de dano completa**, resolvida do lado do defensor, com primeiros socorros, cirurgia e
   recuperação.
-* **Quarenta e nove regras opcionais e variantes** numa única tela de configurações, cada uma com o
+* **Cinquenta e uma regras opcionais e variantes** numa única tela de configurações, cada uma com o
   livro e a página de onde vem — ou com o aviso de que nenhum livro a estabelece. Por padrão, vale o
   jogo tal como está impresso.
 * **Uma só paleta, e ela é do leitor** — quatro predefinições, onze cores de destaque, claro ou

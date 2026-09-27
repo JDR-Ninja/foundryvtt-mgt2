@@ -2,6 +2,7 @@
     dotted path and every row a `data-entry-index`, so two generic handlers serve eighteen arrays. }}
 <div class="block careertbl">
 
+	{{#unless (eq system.kind "table")}}
 	{{! Rank ladders are a NAMED SET the assignments point at, and that one generalisation dissolves
 	    four apparent exceptions: three services run one enlisted plus one officer ladder shared by
 	    every assignment, one runs two ladders for three assignments, and one runs three whose rank
@@ -153,6 +154,7 @@
 			<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Row'}}</a>
 		</div>
 	</div>
+	{{/unless}}
 
 	{{! The prose stays the referee's and nothing parses it — but three facts printed INSIDE it are
 	    decisions the ledger makes automatically, so they ride beside it. `ejects` defaults per TABLE:
@@ -258,6 +260,7 @@
 	</div>
 	{{/each}}
 
+	{{#unless (eq system.kind "table")}}
 	{{! A career may print a standing FOOTNOTE rather than an event row — "Travellers with FOL 10+ add
 	    +1 to their Benefit rolls" — which is career-level, never granted and never spent. The gate is
 	    a precondition read at each roll, so it switches off again when the score falls. }}
@@ -301,4 +304,5 @@
 		{{/each}}
 	</div>
 	<p class="hint{{#if careerIssues.failed}} bad{{/if}}">{{#if careerIssues.failed}}{{localize 'MGT2.Chargen.Template.IntegrityFailed' n=careerIssues.failed}}{{else}}{{localize 'MGT2.Chargen.Template.IntegrityAdvisory'}}{{/if}}</p>
+	{{/unless}}
 </div>

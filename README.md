@@ -103,7 +103,9 @@ steps in the order the book prints them.
 * **Eighteen Item types** — weapon, armour, ammunition, computer, drug, cargo lot, passage, ship
   component, crew role, contract, contact, disease, species, career and more.
 * **Group character creation**, on a grid of Travellers × terms, interruptible without losing
-  anything. Careers and species are templates the referee writes.
+  anything, and played as the book prints it from qualification to mustering out: pre-career
+  education, the draft, Life Events, injury and medical care, anagathics, species laws. Careers,
+  educations, shared tables and species are templates the referee writes.
 * **Training, ageing, benefits and mustering out**, on one log per Traveller.
 
 ### The ship
@@ -117,7 +119,7 @@ steps in the order the book prints them.
 
 ### The world
 
-* **Forty-nine optional and variant rules** in one settings screen — psionics, wealth, radiation,
+* **Fifty-one optional and variant rules** in one settings screen — psionics, wealth, radiation,
   encumbrance, starvation, vacuum, the jump procedure, fleet battles and design validation among
   them. Each names the book and page it comes from, or says that no book settles it. The defaults
   are the game as printed.

@@ -18,7 +18,10 @@ de Mongoose Publishing — desarrollado especialmente para la edición francesa 
 * **Dieciocho tipos de Objeto** — del arma y la armadura al lote de carga, el pasaje, el componente
   de nave y el puesto de tripulación.
 * **Creación de Viajeros en grupo**, en una cuadrícula de Viajeros × periodos, interrumpible sin
-  perder nada. Las carreras y las especies son plantillas que escribe el árbitro.
+  perder nada, y jugada como la imprime el libro, de la cualificación al licenciamiento: educación
+  previa a la carrera, reclutamiento, Sucesos Vitales, lesiones y atención médica, anagáticos,
+  leyes de las especies. Las carreras, las educaciones, las tablas compartidas y las especies son
+  plantillas que escribe el árbitro.
 * **Combate espacial** y **batallas entre flotas**, con una banda de alcance por cada par de naves.
 * **Comercio** — Perfil Universal de Mundo analizado, códigos comerciales derivados, comercio
   especulativo, tráfico de escala, manifiesto de bodega.
@@ -26,7 +29,7 @@ de Mongoose Publishing — desarrollado especialmente para la edición francesa 
   tripulación.
 * **La cadena de daño completa**, resuelta del lado del defensor, con primeros auxilios, cirugía y
   recuperación.
-* **Cuarenta y nueve reglas opcionales y variantes** en una sola pantalla de configuración, cada una
+* **Cincuenta y una reglas opcionales y variantes** en una sola pantalla de configuración, cada una
   con el libro y la página de donde viene — o con la advertencia de que ningún libro la establece.
   Por defecto se juega tal como está impreso.
 * **Una sola paleta, y es del lector** — cuatro ajustes preestablecidos, once colores de acento, claro

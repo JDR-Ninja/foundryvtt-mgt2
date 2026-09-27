@@ -11,6 +11,7 @@
 			<select class="f edit-only" name="system.kind">{{selectOptions config.CareerKinds selected=system.kind localize=true}}</select>
 			<b class="play-only word">{{localize (lookup config.CareerKinds system.kind)}}</b>
 		</label>
+		{{#unless (eq system.kind "table")}}
 		{{! The qualification target number, 0 where the career takes anyone. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.Difficulty'}}</span>
@@ -21,8 +22,10 @@
 			<select class="f edit-only" name="system.qualification.entry">{{selectOptions config.QualificationEntry selected=system.qualification.entry localize=true}}</select>
 			<b class="play-only word">{{localize (lookup config.QualificationEntry system.qualification.entry)}}</b>
 		</label>
+		{{/unless}}
 	</div>
 
+	{{#unless (eq system.kind "table")}}
 	<div class="pfields">
 		{{! A LIST because the Entertainer prints "DEX or INT 5+". Same control the Docket uses for
 		    the same question. }}
@@ -162,7 +165,7 @@
 			<input class="f edit-only" type="text" name="system.exitRule.test" value="{{system.exitRule.test}}" placeholder="{{localize 'MGT2.Chargen.Template.ExitTest'}}" />
 		</label>
 	</div>
-
+	{{/unless}}
 
 	{{#if (eq system.kind "preCareer")}}
 	{{! Core p.16-17: the window, the entry DM by term, the tied career, the skills taken on entry, and a

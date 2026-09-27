@@ -263,11 +263,13 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     const byType = TravellerItemSheet.#BLOCKS_BY_TYPE;
     const list = byType[`${item.type}:${item.system.subType}`] ?? byType[item.type] ?? byType._default;
     const slots = {};
+    const sharedTable = (item.type === "career") && (item.system.kind === "table");
     let supply = false;
 
     for ( const id of list ) {
       if ( TEMPLATE_ONLY.has(id) && !item.system.isTemplate ) continue;
       if ( RECORD_ONLY.has(id) && item.system.isTemplate ) continue;
+      if ( sharedTable && (id === "specs") ) continue;
       if ( GM_ONLY.has(id) && !game.user.isGM ) continue;
       if ( PLAYER_ONLY.has(id) && game.user.isGM ) continue;
       if ( id === "carried" ) {
@@ -563,13 +565,13 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     };
   }
 
-  /** Events and Mishaps are the same row shape twice over, differing only in what `ejects` defaults to. */
+  /** Events and Mishaps are one row shape, differing in what `ejects` defaults to; a shared table has Events alone. */
   #eventTables() {
     if ( (this.item.type !== "career") || !this.item.system.isTemplate ) return null;
-    return [
-      { key: "eventTable", label: "MGT2.Chargen.Template.EventTable", rows: this.item.system.eventTable },
-      { key: "mishapTable", label: "MGT2.Chargen.Template.MishapTable", rows: this.item.system.mishapTable }
-    ];
+    const events = { key: "eventTable", label: "MGT2.Chargen.Template.EventTable", rows: this.item.system.eventTable };
+    if ( this.item.system.kind === "table" ) return [events];
+    return [events,
+      { key: "mishapTable", label: "MGT2.Chargen.Template.MishapTable", rows: this.item.system.mishapTable }];
   }
 
   /** The spine reads the sub-type where there is one, because that is the name on the character sheet. */

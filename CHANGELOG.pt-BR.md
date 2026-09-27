@@ -71,6 +71,8 @@ carreira e nenhuma tabela: ele faz funcionar as que o árbitro digita ou importa
   antecedentes têm um lugar**: cada uma é uma carreira do tipo *Tabela compartilhada*, que o árbitro
   vincula no menu *Tabelas de criação compartilhadas* das configurações do mundo. O sistema não traz
   nenhuma.
+* **A ficha de uma tabela compartilhada mostra apenas o seu tipo e os seus Eventos**: o resto da
+  carreira, que uma tabela não lê, continua salvo e volta se o tipo voltar a ser *Carreira*.
 * **Uma vez vinculadas, elas são jogadas como as linhas de uma carreira**: um 7 em Eventos rola os
   Eventos de Vida, e uma linha que nomeia uma tabela a rola e a aplica — um contato, uma traição, um MD
   pendente, uma rolagem de Benefício perdida, o Prisioneiro. Sem tabela vinculada, o sistema continua
@@ -169,8 +171,14 @@ carreira e nenhuma tabela: ele faz funcionar as que o árbitro digita ou importa
 ### Demonstração e documentação
 
 * **`Demo — Harbour Cadet School`** entra nos itens de demonstração: uma academia vinculada a
-  `Demo — Harbour Patrol`, para ver uma educação do começo ao fim. A patrulha agora paga o seu bônus
-  de patente 0.
+  `Demo — Harbour Patrol`, para ver uma educação do começo ao fim.
+* **`Demo — Harbour Life Events`** também: uma tabela compartilhada inventada, a vincular em *Tabelas
+  de criação compartilhadas*, cujas linhas mostram o que uma tabela faz — o Evento incomum e os
+  Ferimentos como subtabelas, uma rolagem de Benefício perdida, um Rival ou um Inimigo, uma traição,
+  MD pendentes, uma proibição.
+* **`Demo — Harbour Patrol` mostra as novas linhas de Eventos**: um teste opcional, uma aposta com a
+  concessão antes do teste, um teste sobre duas perícias que sobe um nível na usada, um sucesso
+  automático pendente. Ela paga o seu bônus de patente 0 e nomeia a sua linha de Contas médicas.
 * **O diário de auditoria das regras** (`mgt2.docs`) descreve a criação como ela está agora.
 
 ### Correções

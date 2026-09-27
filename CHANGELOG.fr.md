@@ -68,6 +68,8 @@ carrière ni aucune table : il fait tourner celles que l'arbitre saisit ou impor
   pré-carrière et les Compétences de base ont un emplacement** : chacune est une carrière du type
   *Table commune*, que l'arbitre relie dans le menu *Tables de création communes* des réglages du
   monde. Le système n'en livre aucune.
+* **La fiche d'une table commune n'affiche que son type et ses Événements** : le reste de la
+  carrière, qu'une table ne lit pas, reste enregistré et revient si l'on repasse au type *Carrière*.
 * **Une fois reliées, elles se jouent comme les lignes d'une carrière** : un 7 aux Événements tire
   les Événements de la vie, et une ligne qui nomme une table la tire et l'applique — contact,
   trahison, MD en attente, jet d'Avantage perdu, Prisonnier. Sans table reliée, le système dit
@@ -171,8 +173,15 @@ carrière ni aucune table : il fait tourner celles que l'arbitre saisit ou impor
 ### Démonstration et documentation
 
 * **`Demo — Harbour Cadet School`** rejoint les objets de démonstration : une académie liée à
-  `Demo — Harbour Patrol`, pour voir une éducation du début à la fin. La patrouille verse désormais
-  son bonus de rang 0.
+  `Demo — Harbour Patrol`, pour voir une éducation du début à la fin.
+* **`Demo — Harbour Life Events`** aussi : une table commune inventée, à relier dans *Tables de
+  création communes*, dont les lignes montrent ce qu'une table fait — l'Événement inhabituel et les
+  Blessures en renvoi, un jet d'Avantage perdu, un Rival ou un Ennemi, une trahison, des MD en
+  attente, une interdiction.
+* **`Demo — Harbour Patrol` montre les nouvelles lignes d'Événement** : un test facultatif, un pari
+  avec l'attribution avant le test, un test sur deux compétences qui fait gagner un niveau à celle
+  utilisée, une réussite automatique en attente. Elle verse son bonus de rang 0 et nomme sa ligne des
+  Factures médicales.
 * **Le journal d'audit des règles** (`mgt2.docs`) décrit la création telle qu'elle est maintenant.
 
 ### Correctifs

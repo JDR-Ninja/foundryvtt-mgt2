@@ -14,13 +14,15 @@ Publishing's Traveller — built specially for the French edition translated by
 * **Eighteen Item types** — from weapon and armour to cargo lot, passage, ship component and crew
   role.
 * **Group Traveller creation**, on a grid of Travellers x terms, interruptible without losing
-  anything. Careers and species are templates the referee writes.
+  anything, and played as the book prints it from qualification to mustering out: pre-career
+  education, the draft, Life Events, injury and medical care, anagathics, species laws. Careers,
+  educations, shared tables and species are templates the referee writes.
 * **Space combat** and **fleet battles**, with a range band for each pair of ships.
 * **Trade** — parsed Universal World Profile, derived trade codes, speculative trade, stop traffic,
   hold manifest.
 * **Voyages and jump**, with real fuel, the ship mortgage and crew finances.
 * **The whole damage chain**, resolved on the defender's side, with first aid, surgery and recovery.
-* **Forty-nine optional and variant rules** in one settings screen, each naming the book and page it
+* **Fifty-one optional and variant rules** in one settings screen, each naming the book and page it
   comes from — or saying that no book settles it. The defaults are the game as printed.
 * **One palette, and it belongs to the reader** — four presets, eleven accent colours, light or dark,
   and a colour-blind pair for success and failure. Every text colour measured at 4.5:1 or better.
