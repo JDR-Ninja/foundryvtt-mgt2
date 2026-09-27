@@ -41,13 +41,37 @@
 				<option value="">&mdash;</option>
 				{{selectOptions config.Characteristics selected=system.qualification.autoIf.characteristic localize=true}}
 			</select>
-			{{formInput systemFields.qualification.fields.autoIf.fields.min name="system.qualification.autoIf.min" value=system.qualification.autoIf.min classes="f num"}}
+			{{formInput systemFields.qualification.fields.autoIf.fields.min name="system.qualification.autoIf.min" value=system.qualification.autoIf.min classes="f num" placeholder="min"}}
+			{{formInput systemFields.qualification.fields.autoIf.fields.max name="system.qualification.autoIf.max" value=system.qualification.autoIf.max classes="f num" placeholder="max"}}
 		</label>
 		{{! ABSENT from two of the twelve, so 0 is the honest initial and this field is per template. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.PerPrevious'}}</span>
 			{{formInput systemFields.qualification.fields.perPreviousCareer name="system.qualification.perPreviousCareer" value=system.qualification.perPreviousCareer classes="f num"}}
 		</label>
+	</div>
+
+	{{! "DM+2 if SOC 9+" and "DM+2 if the last term was in the Agent or Rogue careers": a row takes
+	    either a characteristic threshold or the careers typed on one line. }}
+	<div class="stack" data-property="qualification.conditionalDMs">
+		<span class="lbl">{{localize 'MGT2.Chargen.Template.ConditionalDMs'}}</span>
+		{{#each system.qualification.conditionalDMs as |row c|}}
+		<div class="entry pfields" data-entry-index="{{c}}">
+			<select class="f edit-only" name="system.qualification.conditionalDMs.{{c}}.characteristic">
+				<option value="">&mdash;</option>
+				{{selectOptions @root.config.Characteristics selected=row.characteristic localize=true}}
+			</select>
+			<input class="f num edit-only" type="number" step="1" name="system.qualification.conditionalDMs.{{c}}.min"
+				value="{{row.min}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.ConditionalMin'}}" />
+			<input class="f edit-only" type="text" name="system.qualification.conditionalDMs.{{c}}.afterCareers"
+				value="{{row.afterCareers}}" placeholder="{{localize 'MGT2.Chargen.Template.ConditionalAfter'}}" />
+			<input class="f num edit-only" type="number" step="1" name="system.qualification.conditionalDMs.{{c}}.dm"
+				value="{{row.dm}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.ConditionalDM'}}" />
+			<b class="play-only word">{{#if row.characteristic}}{{localize (lookup @root.config.Characteristics row.characteristic)}} {{row.min}}+{{else}}{{row.afterCareers}}{{/if}} {{showDM row.dm}}</b>
+			<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+		</div>
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.ConditionalDM'}}</a>
 	</div>
 
 	<div class="pfields">
@@ -96,8 +120,12 @@
 		    the Prisoner nor the Psion appears in any row, and a prisoner has no employer to bill. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.MedicalBillsRow'}}</span>
-			<input class="f edit-only" type="text" name="system.medicalBillsRow" value="{{system.medicalBillsRow}}" />
-			<b class="play-only word">{{#if system.medicalBillsRow}}{{system.medicalBillsRow}}{{else}}&mdash;{{/if}}</b>
+			<select class="f edit-only" name="system.medicalBillsRow">
+				<option value="">&mdash;</option>
+				{{selectOptions @root.config.MedicalBillsGroups selected=system.medicalBillsRow localize=true}}
+				{{#if system.medicalBillsRow}}{{#unless (lookup @root.config.MedicalBillsGroups system.medicalBillsRow)}}<option value="{{system.medicalBillsRow}}" selected>{{system.medicalBillsRow}}</option>{{/unless}}{{/if}}
+			</select>
+			<b class="play-only word">{{#if system.medicalBillsRow}}{{#if (lookup @root.config.MedicalBillsGroups system.medicalBillsRow)}}{{localize (lookup @root.config.MedicalBillsGroups system.medicalBillsRow)}}{{else}}{{system.medicalBillsRow}}{{/if}}{{else}}&mdash;{{/if}}</b>
 		</label>
 	</div>
 
@@ -134,4 +162,85 @@
 			<input class="f edit-only" type="text" name="system.exitRule.test" value="{{system.exitRule.test}}" placeholder="{{localize 'MGT2.Chargen.Template.ExitTest'}}" />
 		</label>
 	</div>
+
+
+	{{#if (eq system.kind "preCareer")}}
+	{{! Core p.16-17: the window, the entry DM by term, the tied career, the skills taken on entry, and a
+	    graduation whose arms grant, raise and leave entries on the tray. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Education.Title'}}</h3>
+	</div>
+	<div class="pfields">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Education.LastTerm'}}</span>
+			<input class="f num edit-only" type="number" step="1" min="1" name="system.preCareer.lastTerm" value="{{system.preCareer.lastTerm}}" data-dtype="Number" />
+			<b class="play-only word">{{system.preCareer.lastTerm}}</b>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Education.TermDMs'}}</span>
+			<input class="f edit-only" type="text" name="system.preCareer.termDMs" value="{{system.preCareer.termDMs}}" placeholder="0, -1, -2" />
+			<b class="play-only word">{{#each system.preCareer.termDMs as |dm|}}{{#unless @first}}, {{/unless}}{{showDM dm}}{{else}}&mdash;{{/each}}</b>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Education.Tied'}}</span>
+			<input class="f edit-only" type="text" name="system.preCareer.tied" value="{{system.preCareer.tied}}" />
+			<b class="play-only word">{{#if system.preCareer.tied}}{{system.preCareer.tied}}{{else}}&mdash;{{/if}}</b>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Education.Years'}}</span>
+			<input class="f edit-only" type="text" name="system.preCareer.years" value="{{system.preCareer.years}}" placeholder="4" />
+			<b class="play-only word">{{#if system.preCareer.years}}{{system.preCareer.years}}{{else}}&mdash;{{/if}}</b>
+		</label>
+	</div>
+	{{> systems/mgt2/templates/items/parts/education-picks.html picks=system.preCareer.picks path="preCareer.picks"}}
+	<div class="nest">
+		<span class="nlbl">{{localize 'MGT2.Chargen.Education.EntryGrant'}}</span>
+		{{> systems/mgt2/templates/items/parts/career-cell.html cell=system.preCareer.grant path="preCareer.grant"}}
+	</div>
+
+	<div class="pfields">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Education.Graduation'}}</span>
+			<select class="f edit-only" name="system.preCareer.graduation.characteristic">
+				<option value="">&mdash;</option>
+				{{selectOptions config.Characteristics selected=system.preCareer.graduation.characteristic localize=true}}
+			</select>
+			<input class="f num edit-only" type="number" step="1" name="system.preCareer.graduation.target" value="{{system.preCareer.graduation.target}}" data-dtype="Number" />
+			<b class="play-only word">{{#if system.preCareer.graduation.characteristic}}{{localize (lookup config.Characteristics system.preCareer.graduation.characteristic)}} {{system.preCareer.graduation.target}}+{{else}}&mdash;{{/if}}</b>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Education.HonoursAt'}}</span>
+			<input class="f num edit-only" type="number" step="1" name="system.preCareer.graduation.honoursAt" value="{{system.preCareer.graduation.honoursAt}}" data-dtype="Number" />
+			<b class="play-only word">{{#if system.preCareer.graduation.honoursAt}}{{system.preCareer.graduation.honoursAt}}+{{else}}&mdash;{{/if}}</b>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Education.FailFloor'}}</span>
+			<input class="f num edit-only" type="number" step="1" name="system.preCareer.graduation.failFloor" value="{{system.preCareer.graduation.failFloor}}" data-dtype="Number" />
+			<b class="play-only word">{{#if system.preCareer.graduation.failFloor}}{{system.preCareer.graduation.failFloor}}{{else}}&mdash;{{/if}}</b>
+		</label>
+	</div>
+	<div class="stack" data-property="preCareer.graduation.conditionalDMs">
+		<span class="lbl{{#unless system.preCareer.graduation.conditionalDMs.length}} edit-only{{/unless}}">{{localize 'MGT2.Chargen.Education.GraduationDMs'}}</span>
+		{{#each system.preCareer.graduation.conditionalDMs as |row c|}}
+		<div class="entry pfields" data-entry-index="{{c}}">
+			<select class="f edit-only" name="system.preCareer.graduation.conditionalDMs.{{c}}.characteristic">
+				<option value="">&mdash;</option>
+				{{selectOptions @root.config.Characteristics selected=row.characteristic localize=true}}
+			</select>
+			<input class="f num edit-only" type="number" step="1" name="system.preCareer.graduation.conditionalDMs.{{c}}.min"
+				value="{{row.min}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.ConditionalMin'}}" />
+			<input class="f num edit-only" type="number" step="1" name="system.preCareer.graduation.conditionalDMs.{{c}}.dm"
+				value="{{row.dm}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.ConditionalDM'}}" />
+			<b class="play-only word">{{#if row.characteristic}}{{localize (lookup @root.config.Characteristics row.characteristic)}} {{row.min}}+{{/if}} {{showDM row.dm}}</b>
+			<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+		</div>
+		{{/each}}
+		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.ConditionalDM'}}</a>
+	</div>
+	<div class="stack">
+		{{> systems/mgt2/templates/items/parts/education-arm.html arm=system.preCareer.graduation.pass path="preCareer.graduation.pass" label="MGT2.Chargen.Education.Pass"}}
+		{{> systems/mgt2/templates/items/parts/education-arm.html arm=system.preCareer.graduation.honours path="preCareer.graduation.honours" label="MGT2.Chargen.Education.HonoursArm"}}
+		{{> systems/mgt2/templates/items/parts/education-arm.html arm=system.preCareer.graduation.fail path="preCareer.graduation.fail" label="MGT2.Chargen.Education.Fail"}}
+	</div>
+	{{/if}}
 </div>

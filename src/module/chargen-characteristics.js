@@ -6,18 +6,15 @@ const { DialogV2 } = foundry.applications.api;
 
 const TEMPLATE = "systems/mgt2/templates/chargen/characteristics.html";
 
-/**
- * Core p.9's first step, which is not a step of a term: it runs once, before term 1, and the frame
- * decides which slots it fills and with which dice.
- */
+/** Core p.9's first step, run once before term 1: the frame decides which slots it fills, and with which dice. */
 export const CreationCharacteristics = {
 
-    /** Whether the step has been taken — every slot the frame declares carries a score. */
+    /** Whether the step has been taken — every slot the frame declares carries a score, or prints one. */
     isSet(actor) {
         const characteristics = actor?.system.characteristics ?? {};
         const entries = Grants.plan(actor).entries;
-        return (entries.length > 0)
-            && entries.every(entry => (characteristics[entry.characteristic]?.base ?? 0) > 0);
+        return (entries.length > 0) && entries.every(entry => !rolls(entry)
+            || ((characteristics[entry.characteristic]?.base ?? 0) > 0));
     },
 
     /**
@@ -52,13 +49,22 @@ export const CreationCharacteristics = {
     }
 };
 
+/** A slot rolls dice; a printed constant — the Aslan's TER 0 — is written as printed. */
+function rolls(entry) {
+    return /d/i.test(MGT2Helper.damageFormula(entry.formula));
+}
+
 /** The picker: one row per slot the frame declares, one control per die the method leaves open. */
 async function assign(actor, rolled) {
     const { plan } = rolled;
     const fixed = plan.method === MGT2.CreationPool.printed;
     const amounts = plan.pool ? rolled.dice : rolled.results.map(result => result.total);
-    const values = amounts.map((amount, index) => ({ value: index, label: String(amount) }));
     const per = plan.pool ? MGT2.CreationPool.dicePerSlot : 1;
+    // A slot on the species' own dice keeps its roll: the Hiver's 1D+6 is RES, never a STR swapped in.
+    const pinned = entry => !plan.pool && (MGT2Helper.damageFormula(entry.formula) !== MGT2.CreationPool.slot);
+    const held = new Set(plan.entries.flatMap((entry, index) => (pinned(entry) ? [index] : [])));
+    const values = amounts.map((amount, index) => ({ value: index, label: String(amount) }))
+        .filter(option => !held.has(option.value));
     let cursor = 0;
     const rows = plan.entries.map(entry => {
         const own = Array.fromRange(per).map(() => cursor++);
@@ -66,6 +72,7 @@ async function assign(actor, rolled) {
             key: entry.characteristic,
             label: entry.label,
             formula: MGT2Helper.showFormula(entry.rolled),
+            own: pinned(entry),
             values,
             slots: own.map(index => ({ name: `s${index}`, index })),
             total: own.reduce((sum, index) => sum + amounts[index], 0)
@@ -99,7 +106,7 @@ async function assign(actor, rolled) {
 function read(form, rows, amounts, fixed) {
     const scores = {};
     for ( const row of rows ) {
-        scores[row.key] = fixed ? row.total
+        scores[row.key] = (fixed || row.own) ? row.total
             : row.slots.reduce((sum, slot) => sum + amounts[Number(form.elements[slot.name].value)], 0);
     }
     return scores;

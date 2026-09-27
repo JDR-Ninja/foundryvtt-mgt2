@@ -179,6 +179,8 @@
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Template.BenefitEffect'}}</span>
 					<select class="f" name="system.{{et.key}}.{{r}}.benefit">{{selectOptions @root.config.BenefitRowEffects selected=row.benefit localize=true}}</select>
+					<select class="f" name="system.{{et.key}}.{{r}}.benefitCondition"
+						data-tooltip="{{localize 'MGT2.Chargen.Template.BenefitCondition'}}">{{selectOptions @root.config.TrayConditions selected=row.benefitCondition localize=true}}</select>
 					<input class="f num" type="number" step="1" name="system.{{et.key}}.{{r}}.benefitCount" value="{{row.benefitCount}}" data-dtype="Number" />
 					{{! One row awards `D3 Benefit rolls`, so the formula sits beside the count and wins
 					    where it is filled. }}
@@ -190,6 +192,7 @@
 					<span class="lbl">{{localize 'MGT2.Chargen.Template.OtherCareer'}}</span>
 					<input class="f" type="text" name="system.{{et.key}}.{{r}}.career" value="{{row.career}}" />
 					<select class="f" name="system.{{et.key}}.{{r}}.careerMode">{{selectOptions @root.config.RowCareerModes selected=row.careerMode localize=true}}</select>
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.careerAssignment" value="{{row.careerAssignment}}" placeholder="{{localize 'MGT2.Chargen.Template.CareerAssignment'}}" />
 				</label>
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Template.SubTable'}}</span>
@@ -205,8 +208,10 @@
 						<option value="">&mdash;</option>
 						{{selectOptions @root.config.Characteristics selected=row.check.characteristic localize=true}}
 					</select>
-					<input class="f" type="text" name="system.{{et.key}}.{{r}}.check.skill" value="{{row.check.skill}}" placeholder="{{localize 'MGT2.Items.Skill'}}" />
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.check.skills" value="{{row.check.skills}}" placeholder="{{localize 'MGT2.Chargen.Template.CheckSkills'}}" />
 					<input class="f num" type="number" step="1" name="system.{{et.key}}.{{r}}.check.target" value="{{row.check.target}}" data-dtype="Number" />
+					<label class="chk"><input type="checkbox" name="system.{{et.key}}.{{r}}.check.optional" {{checked row.check.optional}} /><span>{{localize 'MGT2.Chargen.Template.CheckOptional'}}</span></label>
+					<label class="chk"><input type="checkbox" name="system.{{et.key}}.{{r}}.check.raisesSkill" {{checked row.check.raisesSkill}} /><span>{{localize 'MGT2.Chargen.Template.RaisesSkill'}}</span></label>
 				</label>
 				{{! Prison events shift a parole threshold by +2, +1, -1, -2, -1D or a full re-roll,
 				    which is neither a tray entry nor a characteristic. }}
@@ -216,6 +221,7 @@
 					<input class="f num" type="number" step="1" name="system.{{et.key}}.{{r}}.track.value" value="{{row.track.value}}" data-dtype="Number" />
 					<input class="f" type="text" name="system.{{et.key}}.{{r}}.track.formula" value="{{row.track.formula}}" placeholder="{{localize 'MGT2.Chargen.Template.Formula'}}" />
 					<label class="chk"><input type="checkbox" name="system.{{et.key}}.{{r}}.track.reroll" {{checked row.track.reroll}} /><span>{{localize 'MGT2.Chargen.Template.Reroll'}}</span></label>
+					<select class="f" name="system.{{et.key}}.{{r}}.track.condition" data-tooltip="{{localize 'MGT2.Chargen.Template.TrackCondition'}}">{{selectOptions @root.config.TrayConditions selected=row.track.condition localize=true}}</select>
 				</label>
 				{{! Row 12 on six careers promotes or commissions outright, with no roll. The mode is
 				    load-bearing: one career prints "a promotion OR a commission", while the errata is
@@ -229,10 +235,12 @@
 					{{! "You MAY gain a promotion or a commission": declining both arms is a different
 					    fact from which arm is taken, and `mode` has no value for it. }}
 					<label class="chk"><input type="checkbox" name="system.{{et.key}}.{{r}}.awards.optional" {{checked row.awards.optional}} /><span>{{localize 'MGT2.Chargen.Template.AwardOptional'}}</span></label>
+					<select class="f" name="system.{{et.key}}.{{r}}.awards.condition" data-tooltip="{{localize 'MGT2.Chargen.Template.AwardCondition'}}">{{selectOptions @root.config.TrayConditions selected=row.awards.condition localize=true}}</select>
 				</label>
 			</div>
 			<div class="nest">
 				<span class="nlbl">{{localize 'MGT2.Chargen.Template.RowGrant'}}</span>
+				<label class="chk edit-only"><input type="checkbox" name="system.{{et.key}}.{{r}}.grantFirst" {{checked row.grantFirst}} /><span>{{localize 'MGT2.Chargen.Template.GrantFirst'}}</span></label>
 				{{> systems/mgt2/templates/items/parts/career-cell.html cell=row.grant path=(concat et.key "." r ".grant")}}
 			</div>
 			{{! A DM on a Benefit roll modifies a roll rather than awarding one, so it is none of the
@@ -240,27 +248,7 @@
 			<div class="nest edit-only" data-property="{{et.key}}.{{r}}.tray">
 				<span class="nlbl">{{localize 'MGT2.Chargen.Template.Tray'}}</span>
 				{{#each row.tray as |pending p|}}
-				<div class="trayrow" data-entry-index="{{p}}">
-					<select class="f kind" name="system.{{et.key}}.{{r}}.tray.{{p}}.kind">{{selectOptions @root.config.TrayKinds selected=pending.kind localize=true}}</select>
-					{{! What EARNS the entry, which is not what `expiresWhen` says: most printed entries
-					    belong to one branch of the row, and the loop pushed them all. }}
-					<select class="f" name="system.{{et.key}}.{{r}}.tray.{{p}}.condition" data-tooltip="{{localize 'MGT2.Chargen.Template.TrayCondition'}}">{{selectOptions @root.config.TrayConditions selected=pending.condition localize=true}}</select>
-					<input class="f num" type="number" step="1" name="system.{{et.key}}.{{r}}.tray.{{p}}.dm" value="{{pending.dm}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayValue'}}" />
-					<input class="f" type="text" name="system.{{et.key}}.{{r}}.tray.{{p}}.value" value="{{pending.value}}" placeholder="{{localize 'MGT2.Chargen.Screen.TrayValue'}}" />
-					<select class="f" name="system.{{et.key}}.{{r}}.tray.{{p}}.appliesTo" multiple size="3" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayApplies'}}">
-						{{selectOptions @root.config.TrayChecks selected=pending.appliesTo localize=true}}
-					</select>
-					<select class="f" name="system.{{et.key}}.{{r}}.tray.{{p}}.scope" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayScope'}}">{{selectOptions @root.config.TrayScopes selected=pending.scope localize=true}}</select>
-					<input class="f" type="text" name="system.{{et.key}}.{{r}}.tray.{{p}}.career" value="{{pending.career}}" placeholder="{{localize 'MGT2.Chargen.Template.OtherCareer'}}" />
-					<select class="f" name="system.{{et.key}}.{{r}}.tray.{{p}}.duration" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayDuration'}}">{{selectOptions @root.config.TrayDurations selected=pending.duration localize=true}}</select>
-					<input class="f num" type="number" step="1" min="0" name="system.{{et.key}}.{{r}}.tray.{{p}}.uses" value="{{pending.uses}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayUses'}}" />
-					<select class="f" name="system.{{et.key}}.{{r}}.tray.{{p}}.expiresWhen" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayExpires'}}">
-						<option value="">&mdash;</option>
-						{{selectOptions @root.config.CareerExitModes selected=pending.expiresWhen localize=true}}
-					</select>
-					<input class="f wide" type="text" name="system.{{et.key}}.{{r}}.tray.{{p}}.note" value="{{pending.note}}" placeholder="{{localize 'MGT2.Chargen.Template.TrayNote'}}" />
-					<a class="del" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
-				</div>
+				{{> systems/mgt2/templates/items/parts/tray-row.html pending=pending p=p path=(concat et.key "." r ".tray." p)}}
 				{{/each}}
 				<a class="add" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.TrayEntry'}}</a>
 			</div>

@@ -45,6 +45,19 @@
 			<select class="f edit-only" name="system.{{../path}}.grants.{{g}}.mode">
 				{{selectOptions @root.config.GrantModes selected=grant.mode localize=true}}
 			</select>
+			{{! The floor of `SOC 10 or SOC +1`, the Other Benefit a `benefit` grant names, the relationship a
+			    `contact` or `convert` grant makes, and a speciality shortlist typed as one line. }}
+			<input class="f num edit-only" type="number" step="1" name="system.{{../path}}.grants.{{g}}.floor"
+				value="{{grant.floor}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.GrantFloor'}}" />
+			<input class="f edit-only" type="text" name="system.{{../path}}.grants.{{g}}.ref"
+				value="{{grant.ref}}" placeholder="{{localize 'MGT2.Chargen.Template.GrantRef'}}" />
+			<select class="f edit-only" name="system.{{../path}}.grants.{{g}}.relation"
+				data-tooltip="{{localize 'MGT2.Chargen.Template.GrantRelation'}}">
+				<option value="">&mdash;</option>
+				{{selectOptions @root.config.ContactRelations selected=grant.relation localize=true}}
+			</select>
+			<input class="f edit-only" type="text" name="system.{{../path}}.grants.{{g}}.specialities"
+				value="{{grant.specialities}}" placeholder="{{localize 'MGT2.Chargen.Template.GrantShortlist'}}" />
 			<label class="chk edit-only" data-tooltip="{{localize 'MGT2.Chargen.Template.FamilyHint'}}">
 				<input type="checkbox" name="system.{{../path}}.grants.{{g}}.family" {{checked grant.family}} />
 				<span>{{localize 'MGT2.Chargen.Template.Family'}}</span>

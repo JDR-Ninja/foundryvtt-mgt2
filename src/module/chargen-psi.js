@@ -104,11 +104,11 @@ class PsiTraining extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) 
             score: actor?.system.characteristics.psionic?.base ?? 0,
             psiDM: MGT2Helper.signed(actor?.system.characteristics.psionic?.dm ?? 0),
             spent: MGT2Helper.plural("MGT2.Chargen.Psi.Spent", ladder.attempts, { n: ladder.attempts }),
-            resets,
-            // The rule off makes the counter a lifetime one, so a new course changes nothing and the
-            // control says which rule made it inert rather than disappearing.
-            courseWhy: game.i18n.localize(resets
-                ? "MGT2.Chargen.Psi.NewCourseHint" : "MGT2.Chargen.Psi.Lifetime"),
+            // The rule off makes the counter a lifetime one, and the control says which rule made it inert;
+            // a new course is bought only once the running one has attempted something.
+            canBegin: resets && (ladder.attempts > 0),
+            courseWhy: resets ? game.i18n.format("MGT2.Chargen.Psi.NewCourseHint",
+                { credits: MGT2Helper.credits(MGT2.PsionicTraining.course) }) : game.i18n.localize("MGT2.Chargen.Psi.Lifetime"),
             rows: ladder.rows.map(row => ({
                 ...row,
                 canAttempt: canEdit && !row.held,
@@ -136,7 +136,7 @@ class PsiTraining extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) 
             window: { title: "MGT2.Chargen.Psi.NewCourse" },
             classes: ["mgt2"],
             content: `<p>${game.i18n.format("MGT2.Chargen.Psi.NewCourseAsk",
-                { name: this.#actor.name })}</p>`,
+                { name: this.#actor.name, credits: MGT2Helper.credits(MGT2.PsionicTraining.course) })}</p>`,
             rejectClose: false
         });
         if ( !confirmed ) return;

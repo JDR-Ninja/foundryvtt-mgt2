@@ -107,9 +107,8 @@ export const RULES = Object.freeze({
         group: "creation",
         default: true
     },
-    // The ageing table stops at −6, printed bare rather than as "−6 or less", while the DM is the
-    // Traveller's total terms — so a nine-term Traveller rolling snake-eyes sits at −7 and the book
-    // prints neither a row nor an instruction to floor.
+    // The ageing table stops at −6, printed bare, while its DM is every term served: a nine-term
+    // Traveller rolling snake-eyes sits at −7, with neither a row nor a printed floor.
     ageingTableFloor: {
         group: "creation",
         default: true
@@ -142,8 +141,7 @@ export const RULES = Object.freeze({
             permanent: "MGT2.Rules.trackRungPermanence.permanent" },
         default: "heldThenPermanent"
     },
-    // One career's event spends money mid-creation, and the cash model produces none before
-    // mustering out.
+    // Events, medical care, anagathics and a new psionic course spend money before mustering out makes any.
     creationCostsBecomeDebt: {
         group: "creation",
         default: true
@@ -151,6 +149,16 @@ export const RULES = Object.freeze({
     // Official errata: an event draft "(and similar effects) can cause a Traveller to be drafted
     // more than once", printed as a general statement rather than a local exception.
     eventDraftBudget: {
+        group: "creation",
+        default: true
+    },
+    // A ruling: Core p.16 calls education "in place of a career" and never says it is a previous one.
+    preCareerCountsAsCareer: {
+        group: "creation",
+        default: false
+    },
+    // Core p.18 costs a failed Survival its Benefit roll and says nothing of the skill: a ruling, stated on the log.
+    ejectedTermSkillRoll: {
         group: "creation",
         default: true
     },

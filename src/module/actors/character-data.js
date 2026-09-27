@@ -19,9 +19,8 @@ export class CharacterData extends ActorBaseData {
     // Core p.83 names INT and EDU as the mental characteristics, and PSI as the exception.
     static MENTAL_LINKS = ["intellect", "education"];
 
-    // Sixteen alphanumerics, as `training.programmes` validates, and DETERMINISTIC: a fresh
-    // `randomID` would give two clients two keys for the same Traveller until the migration
-    // persisted one.
+    // Sixteen alphanumerics, as `training.programmes` validates, and DETERMINISTIC: a fresh `randomID`
+    // would give two clients two keys for one Traveller until the migration persisted one.
     static LEGACY_PROGRAMME = "studyPeriod00000";
 
     /** The six the core rulebook defines, in the order the UPP prints them. */
@@ -109,6 +108,8 @@ export class CharacterData extends ActorBaseData {
                 monthlyShipPayments: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
                 // Core p.150: MCr1 each, deducted before the mortgage. They exist before any ship does.
                 shipShares: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
+                // Core p.48: the shares put towards the ship the table keeps, which pay no pension.
+                shipSharesCommitted: new fields.NumberField({ required: true, initial: 0, min: 0, integer: true }),
                 notes: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             }),
 
@@ -285,10 +286,12 @@ export class CharacterData extends ActorBaseData {
         // Replace, not stack: no volume states which, and the corpus says "ADDITIONAL modifiers" on
         // the one occasion it means to add.
         const species = {};
+        const sex = MGT2Helper.skillSlug(this.personal.sex);
         for ( const item of this.speciesItems ) {
             for ( const modifier of item.system.modifiers ?? [] ) {
                 if ( !this.characteristics[modifier.characteristic] ) continue;
                 if ( !Number.isFinite(modifier.value) ) continue;
+                if ( modifier.sex && (MGT2Helper.skillSlug(modifier.sex) !== sex) ) continue;
                 species[modifier.characteristic] = (species[modifier.characteristic] ?? 0) + modifier.value;
             }
         }
@@ -323,8 +326,9 @@ export class CharacterData extends ActorBaseData {
         this.#prepareLossLog();
 
         // Derived, never typed: a typed code would be a second source of truth for the same fact.
+        const replaced = Object.assign({}, ...this.speciesItems.map(item => item.system.replacements ?? {}));
         this.upp = CharacterData.UPP_ORDER
-            .map(key => MGT2Helper.uppDigit(this.characteristics[key].max)).join("");
+            .map(key => MGT2Helper.uppDigit((this.characteristics[replaced[key]] ?? this.characteristics[key]).max)).join("");
 
         this.#prepareTreatment();
         this.#prepareTraining();

@@ -37,7 +37,10 @@
 					</ul>
 				</td>
 				<td class="n big">{{column.rolls}}</td>
-				<td class="n">{{localize 'MGT2.Chargen.Close.CashOf' taken=column.cash.taken limit=column.cash.limit}}</td>
+				<td class="n">
+					{{localize 'MGT2.Chargen.Close.CashOf' taken=column.cash.taken limit=column.cash.limit}}
+					<span class="pre" data-tooltip="{{localize 'MGT2.Chargen.Close.PreplayHint'}}">{{localize 'MGT2.Chargen.Close.Preplay' credits=column.preplay}}</span>
+				</td>
 				<td class="n">
 					{{localize 'MGT2.Chargen.Close.PerYear' credits=column.pensionText}}
 					{{#if column.shipShares}}<span class="sh">{{plural 'MGT2.Chargen.Close.Shares' column.shipShares}}</span>{{/if}}

@@ -443,7 +443,7 @@
       },
       "creationCostsBecomeDebt": {
         "name": "Money spent during creation becomes debt",
-        "hint": "A few printed events spend money before mustering out has produced any. The only printed mechanism for a cost incurred during creation is debt against benefits, with the unpaid remainder following the Traveller into play."
+        "hint": "Some costs fall due before mustering out has produced any money: a few printed events, medical care, anagathics and a new course of psionic training. The only printed mechanism for a cost incurred during creation is debt against benefits, with the unpaid remainder following the Traveller into play. Off, a cost the Traveller's cash cannot cover is refused."
       },
       "eventDraftBudget": {
         "name": "An event-forced draft has its own budget",
@@ -587,6 +587,14 @@
       "containerLaunchers": {
         "name": "Container-launchers",
         "hint": "Offers a container-launcher part on the component sheet. It holds four missiles or one torpedo ready to launch, it spends a hardpoint like a mount, and it cannot be reloaded during a battle."
+      },
+      "preCareerCountsAsCareer": {
+        "name": "Pre-career education counts as a previous career",
+        "hint": "A ruling: the Core calls education \"in place of a career\" and speaks of \"the first career attempted after graduation\", so by default a university or academy term takes no DM−1 per previous career and leaves the first career its full basic training. On, it counts like any other career."
+      },
+      "ejectedTermSkillRoll": {
+        "name": "An ejected Traveller still takes the term's skill roll",
+        "hint": "A ruling: Core p.18 costs a failed Survival the term's Benefit roll and the career, and says nothing of the term's skill roll, so by default a term that served its four years keeps it. Off, the skill roll goes with the career. Either way, the term's log says which."
       }
     },
     "Chargen": {
@@ -609,7 +617,8 @@
       },
       "CareerKinds": {
         "career": "Career",
-        "preCareer": "Pre-career education"
+        "preCareer": "Pre-career education",
+        "table": "Shared table"
       },
       "Template": {
         "Career": "Career template",
@@ -727,7 +736,24 @@
           "officerLadder": "declared above, and marked officer",
           "exitTrack": "the track the exit rule reads, against the tracks declared above",
           "rowTrack": "the track a row moves, against the tracks declared above"
-        }
+        },
+        "GrantFloor": "The floor of \"SOC 10 or SOC +1, whichever is higher\"; blank for none",
+        "GrantRef": "other benefit",
+        "GrantRelation": "The relationship a contact or a betrayal makes",
+        "GrantShortlist": "specialities, comma-separated",
+        "ConditionalDMs": "Conditional qualification DMs",
+        "ConditionalMin": "The score the characteristic must reach",
+        "ConditionalAfter": "or: after these careers, comma-separated",
+        "ConditionalDM": "Conditional DM",
+        "BenefitCondition": "What earns the Benefit effect",
+        "CareerAssignment": "assignment",
+        "CheckOptional": "may be declined",
+        "TrackCondition": "What earns the move",
+        "AwardCondition": "What earns the award",
+        "TrayEntryMode": "Entered as",
+        "CheckSkills": "skills, comma-separated; the best is thrown",
+        "RaisesSkill": "the skill thrown gains a level",
+        "GrantFirst": "before the throw"
       },
       "Frame": {
         "Term": "The term this frame runs",
@@ -807,7 +833,11 @@
         "LawRow": "Variant",
         "LawDefault": "any Traveller",
         "CheckKind": "The total",
-        "RollShort": "abbr."
+        "RollShort": "abbr.",
+        "InAddition": "In addition to the allowance",
+        "InAdditionHint": "Tick when the book prints the always-taken skills \"in addition\": they then take no row of the allowance.",
+        "CareerChangeExcept": "Careers free of that minimum",
+        "CoreCheck": "{characteristic}, in every career"
       },
       "Qualification": {
         "target": "Roll against a target",
@@ -833,7 +863,10 @@
         "voluntary": "Left voluntarily",
         "ejectedByMishap": "Ejected by a mishap",
         "forcedOutByAdvancement": "Forced out by the advancement roll",
-        "paroled": "Released"
+        "paroled": "Released",
+        "died": "Died",
+        "blocked": "Barred from continuing",
+        "graduated": "Graduated"
       },
       "AssignmentChange": {
         "requalifyKeepRank": "Re-qualify, keep rank",
@@ -859,7 +892,8 @@
         "keep": "Keeps this term's roll",
         "lose": "Loses a roll",
         "grant": "Grants a roll",
-        "wipe": "Wipes this career's rolls"
+        "wipe": "Wipes this career's rolls",
+        "wager": "Wager rolls on the check"
       },
       "TrayKinds": {
         "dm": "DM",
@@ -1000,7 +1034,15 @@
         "shipsBoat": "Ship's Boat",
         "tas": "TAS Membership",
         "weapon": "Weapon",
-        "yacht": "Yacht"
+        "yacht": "Yacht",
+        "Repeat": {
+          "blade": "Melee (blade)",
+          "gun": "Gun Combat — for a weapon already received",
+          "personalVehicle": "Drive or Flyer — which speciality",
+          "scientificEquipment": "Electronics or Science — which speciality",
+          "shipsBoat": "Pilot (small craft)",
+          "weapon": "Melee or Gun Combat — for a weapon already received"
+        }
       },
       "TrackKinds": {
         "numeric": "A number",
@@ -1015,7 +1057,8 @@
         "Unassigned": "Rolled: {values}",
         "Dice": "Dice: {dice}",
         "NoteBoon": "Boon dice are in play, so each characteristic rolls its own dice rather than taking them from a pool.",
-        "NoteFrame": "{characteristic} is rolled on {formula}, so each characteristic rolls its own dice rather than taking them from a pool."
+        "NoteFrame": "{characteristic} is rolled on {formula}, so each characteristic rolls its own dice rather than taking them from a pool.",
+        "NoteSex": "This species rolls by sex: set the Traveller's sex first, or its unsexed dice are rolled."
       },
       "Roll": {
         "Title": "Creation check",
@@ -1045,9 +1088,10 @@
           "other": "{n} checks attempted"
         },
         "NewCourse": "Begin a new course",
-        "NewCourseHint": "Four months and Cr100000. A new course starts the cumulative penalty again.",
-        "NewCourseAsk": "Begin a new course of training for {name}? The cumulative penalty starts again.",
-        "Lifetime": "The training penalty is a lifetime counter at this table, so a new course changes nothing."
+        "NewCourseHint": "The first course is free. A new one takes four months and costs Cr{credits}, and starts the cumulative penalty again.",
+        "NewCourseAsk": "Begin a new course of training for {name}? It costs Cr{credits}, and the cumulative penalty starts again.",
+        "Lifetime": "The training penalty is a lifetime counter at this table, so a new course changes nothing.",
+        "CoursePaid": "{name} begins a new course of training: Cr{credits}"
       },
       "Connect": {
         "Solo": "Solo generation is in force, and it removes the Connections Rule.",
@@ -1074,7 +1118,17 @@
           "cash": "Cash",
           "other": "Other Benefits"
         },
-        "Owed": "Cr{credits} carried as debt"
+        "Owed": "Cr{credits} carried as debt",
+        "CashAsk": "This career carries no Cash column. Enter the amount its table prints for a roll of {n}, or cancel to spend nothing.",
+        "NoRollsLeft": "{career} owes no Benefit roll now.",
+        "RepeatTitle": "A Benefit rolled again",
+        "RepeatAsk": "{what} was rolled again. Take another, or what the book gives instead — for a skill, name it below.",
+        "Repeat": {
+          "another": "Another one",
+          "skill": "The skill instead",
+          "shipShare": "A Ship Share instead"
+        },
+        "Reroll": "{what} is already held: the book says to re-roll this Benefit."
       },
       "Close": {
         "Title": "Mustering out",
@@ -1148,6 +1202,7 @@
         "ShipSettled": "{name} starts the campaign owning a ship.",
         "NoShips": "Nobody has rolled a ship.",
         "SoloOff": "Solo generation is on, and it removes this step.",
+        "SoloPackage": "Solo generation is on: in place of the package, each Traveller takes any one skill at level 1.",
         "PackageTitle": "Shared skills package",
         "PackageTurn": "{name} is up — take one skill.",
         "PackageDone": {
@@ -1159,7 +1214,22 @@
         "PackageHint": "The group chooses one package together, then takes it in turns to pick one skill each until the list is empty. No package ships with this system — type the one your book prints, separated by commas. A trailing number is the level.",
         "PackageName": "Package",
         "PackageSkills": "Skills",
-        "PackageSave": "Save"
+        "PackageSave": "Save",
+        "Preplay": "pre-play up to Cr{credits}",
+        "PreplayHint": "Money left may buy personal equipment worth up to this before play; costlier items have to be sought out in play.",
+        "SoloTake": "Take one skill at level 1",
+        "SoloHint": "Solo generation: type the one skill this Traveller gains at level 1, in place of the skills package.",
+        "SharesHint": "Ship Shares put towards {name}'s ship pay no Cr{share} a year. Say how many each Traveller commits.",
+        "SharesHeld": {
+          "one": "{n} Ship Share",
+          "other": "{n} Ship Shares"
+        },
+        "SharesCommitted": {
+          "one": "{n} committed",
+          "other": "{n} committed"
+        },
+        "CommitShares": "Commit",
+        "WarnShip": "Ships not yet settled: {names} would bank no pension for them"
       },
       "Banner": {
         "InProgress": "Character creation in progress",
@@ -1222,7 +1292,13 @@
             "one": "{n} term at most",
             "other": "{n} terms at most"
           }
-        }
+        },
+        "ResetStep": "Reopen this step (referee)",
+        "ResetStepAsk": "Reopen {step} for {name}? It may then be rolled again this term. What it already wrote stays; only its own result, a refusal or a Survival verdict, is cleared.",
+        "TrayAdd": "Add an entry",
+        "TrayRemove": "Remove this entry",
+        "TrayDM": "The DM, for a DM entry",
+        "TrayNames": "What it names — a career or a skill"
       },
       "TermOutcomes": {
         "elected": "Start-of-term election",
@@ -1235,7 +1311,9 @@
         "mustContinue": "Must continue",
         "released": "Released by the track",
         "skillRoll": "Skill roll",
-        "aged": "Ageing roll"
+        "aged": "Ageing roll",
+        "graduated": "Graduated",
+        "honours": "Honours"
       },
       "Tables": {
         "personalDevelopment": "Personal Development",
@@ -1277,7 +1355,6 @@
         "NoEventTable": "This career has no Events table entered.",
         "NoMishapTable": "This career has no Mishaps table entered.",
         "NoRow": "No row {n} on that table.",
-        "LifeEvents": "Life Events",
         "RollShared": "Roll on the shared {table} table and apply what it says.",
         "CannotEject": "Not ejected: this career cannot eject.",
         "Ejected": "Ejected from {career}.",
@@ -1358,7 +1435,7 @@
         "ChangeAssignment": "Change assignment ({rule})",
         "PickAssignment": "Which assignment?",
         "AssignmentKept": "The change failed: you continue in the old assignment, without penalty.",
-        "AssignmentNewCareer": "This career counts an assignment change as a new career: leave, then drop the template on again.",
+        "AssignmentNewCareer": "This career counts an assignment change as a new career: this term closes it, and the next term qualifies for the new assignment.",
         "SubRollPassed": "The row's own check passed.",
         "SubRollFailed": "The row's own check failed.",
         "RefereeStep": "{step} is this frame's own step: the referee resolves it.",
@@ -1368,7 +1445,94 @@
         "TrackHeld": "{track} cannot be lost once attained.",
         "ReadOnTable": "{step}: read {total} on the table your book prints.",
         "PickAssociate": "Which Contact or Ally betrays them?",
-        "Unseen": "Someone you never saw coming"
+        "Unseen": "Someone you never saw coming",
+        "NoAdvanceAfterCommission": "A commission was gained this term, so this term's advancement roll is not made.",
+        "StepTaken": "{step} has already been taken this term. Only the referee can reopen it.",
+        "RefusedThisTerm": "A qualification was already refused this term, so {career} cannot be entered: the term goes to the draft or to a career that is always open.",
+        "AgeingDistinct": "Each loss goes to a different characteristic.",
+        "AgeingOwed": "The ageing roll is made: its losses have to be applied.",
+        "ExcessShares": {
+          "one": "{n} point over the maximum becomes a Ship Share",
+          "other": "{n} points over the maximum become Ship Shares"
+        },
+        "ExcessLost": {
+          "one": "{n} point over the maximum is lost",
+          "other": "{n} points over the maximum are lost"
+        },
+        "TalentLearned": "{talent} learned.",
+        "TalentMissed": "{talent} not learned.",
+        "WagerWon": {
+          "one": "Wager won: {n} Benefit roll gained",
+          "other": "Wager won: {n} Benefit rolls gained"
+        },
+        "WagerLost": {
+          "one": "Wager lost: {n} Benefit roll lost",
+          "other": "Wager lost: {n} Benefit rolls lost"
+        },
+        "WagerTitle": "Wager Benefit rolls",
+        "WagerFixed": {
+          "one": "Wager {n} Benefit roll?",
+          "other": "Wager {n} Benefit rolls?"
+        },
+        "WagerAsk": "How many Benefit rolls do you wager? None is no throw.",
+        "AnagathicsContinue": "Keep taking anagathics this term? They cost 1D × Cr25000; stopping forces an ageing roll at once.",
+        "AnagathicsCost": "Anagathics",
+        "AnagathicsDM": "Anagathics (terms taken)",
+        "AnagathicsPaid": "Anagathics: Cr{credits}",
+        "AnagathicsStopped": "Anagathics stopped: the ageing roll is made at once.",
+        "AutoSuccessAsk": "Use it now, and pass this roll without rolling?",
+        "LendAsk": "Apply these Advancement DMs to this commission roll? They are spent on it.",
+        "Prohibited": "{name} may not make this roll in {career}.",
+        "Blocked": "{career} cannot be continued: this term is its last.",
+        "Forced": "Entered: compelled into {career}, with no qualification roll.",
+        "MustEnter": "{name} must enter {other} this term, not {career}.",
+        "NotVoluntary": "{career} cannot be entered voluntarily: only a sentence, a draft or the referee opens it.",
+        "OfferTitle": "A career offered",
+        "OfferAsk": "{career} is offered with qualification waived. Take it?",
+        "OfferTaken": "Entered: {career} was offered, with no qualification roll.",
+        "PickGrantedSkill": "Which skill, at level 1?",
+        "RefusedTitle": "Qualification refused",
+        "TakeDraft": "Apply to the draft",
+        "TakeDrifter": "A career always open",
+        "DecideLater": "Decide later",
+        "DraftAsk": "No Draft table is linked. Which career does the draft send this Traveller to?",
+        "DraftEntry": "Entered: drafted into {career}, with no qualification roll.",
+        "DraftedByEvent": "Drafted ({n}): {career} next term.",
+        "DropNamed": "{career} is in neither the world nor a compendium: drop it on {name} to enter it.",
+        "NoFallback": "No career that is always open is in the world or a compendium: drop one on this Traveller.",
+        "PickFallback": "Which career that is always open?",
+        "CheckOptional": "Take this chance?",
+        "InjuryHow": "How does this row roll on the Injury table?",
+        "InjuryOnce": "Once",
+        "InjuryLower": "Twice, keeping the lower",
+        "InjuryHigher": "Twice, keeping the higher",
+        "InjurySevere": "Severely injured (a result of 2)",
+        "Injured": "Injury {n}: {changes}",
+        "CareTitle": "Medical care",
+        "CareAsk": {
+          "one": "Restore the point lost? Care costs Cr{credits} before the employer's share.",
+          "other": "Restore the {n} points lost? Care costs Cr{credits} before the employer's share."
+        },
+        "CareBills": "Medical Bills",
+        "CareRank": "Rank",
+        "CareNoGroup": "This career names no Medical Bills row: the whole bill is the Traveller's.",
+        "CareShare": "{share}% covered by the employer",
+        "CarePaid": "Medical care: Cr{credits} for the Traveller ({share}% covered).",
+        "OneCareer": "{name} is still serving in {career}: one career at a time, so leave it first.",
+        "TableNotCareer": "{career} is a shared table, not a career: link it in the shared creation tables setting.",
+        "InjuryNone": "No injury: this branch of the row was not taken",
+        "MinimumTerms": {
+          "one": "{species} serves at least {n} term in a career before attempting another: leave now, and only mustering out follows.",
+          "other": "{species} serves at least {n} terms in a career before attempting another: leave now, and only mustering out follows."
+        },
+        "MinimumTermsRefused": {
+          "one": "{species} may not attempt another career: {career} was left before {n} term was served. Muster out instead.",
+          "other": "{species} may not attempt another career: {career} was left before {n} terms were served. Muster out instead."
+        },
+        "RestrictedSpecies": "{career} is open only to {species}.",
+        "RestrictedSex": "{career} is open only to Travellers of sex {sex}.",
+        "EjectedSkillKept": "The term's skill roll is still taken (a world rule).",
+        "EjectedSkillLost": "The term's skill roll goes with the career (a world rule)."
       },
       "StepCheckTriggers": {
         "everyTerm": "Every term",
@@ -1399,6 +1563,65 @@
           "one": "{n} background skill",
           "other": "{n} background skills"
         }
+      },
+      "MedicalBills": {
+        "military": "Army/Navy/Marine",
+        "civilian": "Agent/Noble/Scholar/Entertainer/Merchant/Citizen",
+        "independent": "Scout/Rogue/Drifter"
+      },
+      "Shared": {
+        "Title": "Shared creation tables",
+        "MenuLabel": "Link tables",
+        "MenuHint": "The tables every career shares — Life Events, the Draft and the rest — each a career template of kind Shared table. The system ships none.",
+        "Hint": "Drop a career template of kind Shared table on each row. Its Events rows apply exactly as a career's own do.",
+        "Drop": "Drop a shared table here",
+        "Save": "Save",
+        "lifeEvents": "Life Events",
+        "unusualEvent": "Unusual Event",
+        "draft": "Draft",
+        "preCareerEvents": "Pre-Career Events",
+        "background": "Background Skills",
+        "injury": "Injury"
+      },
+      "Education": {
+        "Title": "Education",
+        "LastTerm": "Open until term",
+        "TermDMs": "Entry DM by term",
+        "Tied": "Tied career",
+        "Years": "Years",
+        "EntryGrant": "On entry",
+        "Picks": "Skills picked",
+        "Pick": "Pick",
+        "FromTied": "from the tied career",
+        "Count": "How many — 0 is every row",
+        "Level": "At level — blank is as printed",
+        "Random": "rolled",
+        "Graduation": "Graduation",
+        "HonoursAt": "Honours at",
+        "FailFloor": "A failure at or below this keeps nothing",
+        "Pass": "Graduated",
+        "HonoursArm": "With honours, on top",
+        "Fail": "Not graduated, above the floor",
+        "Raise": "Raises what education gave",
+        "RaiseBy": "By — 0 raises nothing",
+        "RaiseBelow": "Only skills below this level",
+        "AssignmentTable": "Assignment skills",
+        "TermDM": "Term {n}",
+        "Closed": "{career} is no longer open: education ends with term {n}.",
+        "OneAttempt": "One attempt at education a term: {career} cannot be tried again this term.",
+        "Refused": "Attempt a career this term — failing that, the draft.",
+        "Skills": "Education: {skills}",
+        "NoTied": "The tied career {career} is in neither the world nor a compendium.",
+        "PickSkill": "Which skill?",
+        "PickRaise": "Which skill to raise?",
+        "Honours": "Graduated with honours.",
+        "Graduated": "Graduated.",
+        "NotGraduated": "Did not graduate.",
+        "GraduationDMs": "Graduation DMs",
+        "EveryRow": "every row",
+        "AtLevel": "level {n}",
+        "AsPrinted": "as printed",
+        "PickAtLevel": "Which skill, at level {n}?"
       }
     },
     "Packs": {
@@ -3094,7 +3317,10 @@
         "Alive": "Alive",
         "Unknow": "Unknow",
         "Dead": "Dead"
-      }
+      },
+      "Actor": "Their sheet",
+      "Unlink": "Unlink this sheet",
+      "NotAPerson": "A contact is a Traveller or an NPC."
     },
     "TL": {
       "NA": "N/A",
@@ -3902,7 +4128,9 @@
         "one": "MGT2: world migration complete. {count} actor changed life maximum.",
         "other": "MGT2: world migration complete. {count} actors changed life maximum."
       },
-      "Failed": "MGT2: world migration failed. Check the console; it will be retried on the next load."
+      "Failed": "MGT2: world migration failed. Check the console; it will be retried on the next load.",
+      "Done": "MGT2: world migration complete.",
+      "MissedRankBonuses": "These career records were entered before this version gave a record its rank ladder, so their rank bonuses were never paid. The migration filled in the ladder and paid nothing: apply any of these by hand if your table wants them."
     },
     "Notifications": {
       "HealViaCharacteristics": "Life is derived from STR+DEX+END. Restore those characteristics to heal."
@@ -5791,7 +6019,7 @@
       "ageing": "Core p.48. It repeats every term from the fourth on, and the player chooses which characteristics take it — so the choice is recorded and the total derived.",
       "injury": "Core p.49. A creation injury is a permanent reduction, and it arrives by a mishap, a life event, or the referee saying so.",
       "event": "A characteristic a career event or mishap took or gave, several of which are the player's choice.",
-      "medicalCare": "Core p.49. Restoring a lost point costs Cr5000, and an employer may cover part of it — the Medical Bills roll is the referee's and only the outcome is recorded here.",
+      "medicalCare": "Core p.49. Restoring a lost point costs Cr5000, and an employer may cover part of it — rolled on the career's Medical Bills row when a creation injury is treated, and the referee's roll otherwise; only the outcome is recorded here.",
       "ageingCrisisCare": "Core p.49. One rolled price whatever it restores, and it sets every zeroed characteristic back to 1 — not to where it was.",
       "referee": "A permanent change nothing printed covers. It is recorded like any other, so it can be undone by deleting the row.",
       "training": "Companion p.42. A characteristic bought with Experience Points: a physical one costs its new value, a mental one twice it, and each value is bought in turn. SOC cannot be trained at all."

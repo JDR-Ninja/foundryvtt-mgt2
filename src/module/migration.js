@@ -41,8 +41,52 @@ const MIGRATIONS = [
       // Last, so the chains this entry rewrote are the ones counted.
       return countRescaledLife();
     }
+  },
+  {
+    version: "0.2.3",
+    label: "career record assignment and rank ladder",
+    async migrate() {
+      const missed = [];
+      for ( const actor of game.actors ) {
+        const entries = actor.items.map(collectCareerEntry).filter(Boolean);
+        if ( !entries.length ) continue;
+        await actor.updateEmbeddedDocuments("Item", entries.map(entry => entry.change));
+        for ( const entry of entries.filter(one => one.missed.length) ) missed.push({ actor, ...entry });
+      }
+      if ( missed.length ) await reportMissedBonuses(missed);
+    }
   }
 ];
+
+/** A 0.2.x record's blank assignment and ladder, filled where the template leaves one answer; never its rank. */
+export function collectCareerEntry(item) {
+  const source = item._source.system;
+  if ( (item.type !== "career") || !item.actor || !source ) return null;
+  const assignments = source.assignments ?? [];
+  const assignment = assignments.find(entry => entry.name === source.assignment)
+    ?? (((source.assignment ?? "") === "") && (assignments.length === 1) ? assignments[0] : null);
+  const change = { _id: item.id };
+  if ( !source.assignment && assignment ) change["system.assignment"] = assignment.name;
+  const ladder = (source.rankLadders ?? []).find(entry => entry.id && (entry.id === assignment?.ladder));
+  if ( !source.ladder && ladder ) change["system.ladder"] = ladder.id;
+  if ( Object.keys(change).length === 1 ) return null;
+  const missed = change["system.ladder"] ? ladder.rows
+    .filter(row => (row.rank <= (source.rank ?? 0)) && (row.bonus?.text || row.bonus?.grants?.length))
+    .map(row => `${row.title || row.rank} — ${row.bonus.text || row.bonus.grants.map(grant => grant.skill
+      || grant.characteristic || grant.relation || grant.ref).join(", ")}`) : [];
+  return { change, name: item.name, missed };
+}
+
+/** One card, to the referees alone, listing what each filled-in record would have been paid. */
+async function reportMissedBonuses(missed) {
+  const escape = foundry.utils.escapeHTML;
+  const rows = missed.map(({ actor, name, missed: bonuses }) =>
+    `<li><b>${escape(actor.name)}</b> · ${escape(name)}: ${bonuses.map(escape).join("; ")}</li>`).join("");
+  return ChatMessage.create({
+    content: `<p>${game.i18n.localize("MGT2.Migration.MissedRankBonuses")}</p><ul>${rows}</ul>`,
+    whisper: game.users.filter(user => user.isGM).map(user => user.id)
+  });
+}
 
 /**
  * How many actors come out of this with a different `life.max` — the number the completion
@@ -133,12 +177,8 @@ function collectActorUpdate(actor) {
       update["system.personal.species"] = species.id;
       dirty = true;
     }
-    // `personal.gender` was answering two questions until the two were split: identity stayed
-    // where it was, the mechanical half moved to `personal.sex`. Only a value this species actually
-    // declares carries over, in the species' own spelling — anything else never matched a law, and
-    // writing it into a now-closed field would only make the miss look like a hit. A world whose
-    // species Items predate `frame.sexes` declares nothing and copies nothing — correct, and worth
-    // knowing: that world needs the pack re-imported before this step has anything to read.
+    // Only a value this species declares moves to `personal.sex`, in the species' own spelling; a
+    // world whose species Items predate `frame.sexes` copies nothing until the pack is re-imported.
     const typed = source.personal?.gender?.trim().toLowerCase();
     const declared = (species.system.frame?.sexes ?? []).find(value => value.toLowerCase() === typed);
     if ( declared && !source.personal?.sex ) {
@@ -240,7 +280,8 @@ export async function migrateWorld() {
       count += (await migration.migrate()) ?? 0;
     }
     await game.settings.set("mgt2", "migrationVersion", game.system.version);
-    ui.notifications.info(MGT2Helper.plural("MGT2.Migration.Complete", count, { count }));
+    ui.notifications.info(count ? MGT2Helper.plural("MGT2.Migration.Complete", count, { count })
+      : game.i18n.localize("MGT2.Migration.Done"));
   } catch(err) {
     // Leave migrationVersion untouched so the next load retries rather than skipping ahead.
     ui.notifications.error(game.i18n.localize("MGT2.Migration.Failed"), { permanent: true });

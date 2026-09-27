@@ -75,12 +75,31 @@ const STANDING_LISTS = ["standingModifiers", "frame.standingModifiers"];
 /** A submitted list arrives keyed by index, so it is an object here and an array afterwards. */
 const compact = list => Object.values(list ?? {}).filter(entry => entry?.trim());
 
+/** The lists a career form types as one comma-separated line, wherever they sit in the tree. */
+const TYPED_LISTS = new Set(["specialities", "afterCareers", "termDMs", "skills"]);
+
+function splitTypedLists(node) {
+  if ( !node || (typeof node !== "object") ) return;
+  for ( const [key, value] of Object.entries(node) ) {
+    if ( TYPED_LISTS.has(key) && (typeof value === "string") ) {
+      node[key] = value.split(",").map(entry => entry.trim()).filter(entry => entry);
+    }
+    else splitTypedLists(value);
+  }
+}
+
 /**
  * A declared step's check as the book prints it — `Patriarchy 4+`, `Caste 2+`, `Patriarchy, by SOC`
  * — or nothing at all where the frame declares no check.
  * @returns {string}
  */
-function stepCheckSummary(check) {
+function stepCheckSummary(check, key) {
+  // On a Core step the loop reads one thing, the characteristic a career's own roll is made on.
+  if ( MGT2.CoreTermSequence.includes(key) ) {
+    return (["survival", "commission", "advance"].includes(key) && check.characteristic)
+      ? game.i18n.format("MGT2.Chargen.Frame.CoreCheck",
+        { characteristic: game.i18n.localize(MGT2.Characteristics[check.characteristic]) }) : "";
+  }
   const named = check.skills.length ? check.skills.join(" / ")
     : (check.characteristic ? game.i18n.localize(MGT2.Characteristics[check.characteristic]) : "");
   if ( !named ) return "";
@@ -141,6 +160,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       nestedRemove: TravellerItemSheet.#onNestedRemove,
       nestedDelete: TravellerItemSheet.#onNestedDelete,
       openReference: TravellerItemSheet.#onOpenReference,
+      contactUnlink: TravellerItemSheet.#onContactUnlink,
       contractHandover: TravellerItemSheet.#onContractHandover,
       contractShow: TravellerItemSheet.#onContractShow,
       contractNegotiate: TravellerItemSheet.#onContractNegotiate,
@@ -166,6 +186,9 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
         "systems/mgt2/templates/items/parts/track-definition.html",
         "systems/mgt2/templates/items/parts/standing-modifier.html",
         "systems/mgt2/templates/items/parts/step-outcome.html",
+        "systems/mgt2/templates/items/parts/tray-row.html",
+        "systems/mgt2/templates/items/parts/education-picks.html",
+        "systems/mgt2/templates/items/parts/education-arm.html",
         "systems/mgt2/templates/items/parts/law-selectors.html",
         "systems/mgt2/templates/items/parts/specialised.html",
         // One reference shape, drawn four times on a contract.
@@ -356,6 +379,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       careerIssues: this.#careerIssues(),
       eventTables: this.#eventTables(),
       speciesFrame: this.#speciesFrame(),
+      contactActor: (item.type === "contact") ? this.#reference({ uuid: item.system.actor, name: "" }) : null,
       contract: this.#contract()
     });
   }
@@ -476,7 +500,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
         key: step.key,
         check: step.check,
         label: game.i18n.localize(MGT2.CreationSteps[step.key] ?? step.key),
-        summary: stepCheckSummary(step.check)
+        summary: stepCheckSummary(step.check, step.key)
       })),
       without: Array.from(this.item.system.withoutCharacteristics,
         key => game.i18n.localize(MGT2.Characteristics[key])),
@@ -511,11 +535,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       (key === current) || !optional[key] || Rules.on(optional[key])));
   }
 
-  /**
-   * The four skill tables as a list the template can walk, because `tables` is a SchemaField and
-   * not an array — a career has these four slots or fewer, never a fifth, and `present` is what
-   * says which exist rather than the key being absent.
-   */
+  /** The four skill tables as a list the template can walk: `tables` is a SchemaField, not an array. */
   #careerTables() {
     if ( (this.item.type !== "career") || !this.item.system.isTemplate ) return null;
     const tables = this.item.system.tables;
@@ -862,6 +882,8 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       }
     }
 
+    splitTypedLists(system);
+
     // The chip row lets a printed parameter be retyped; the number a rule reads follows from it.
     for ( const property of ["traits", "options"] ) refreshTraitNumbers(system?.[property]);
 
@@ -1059,6 +1081,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     if ( (container.type === "contract") && (data?.type === "Actor") ) {
       return this.#onDropPerson(event, data);
     }
+    if ( (container.type === "contact") && (data?.type === "Actor") ) return this.#onDropContactActor(data);
     if ( (container.type !== "container") || (data?.type !== "Item") ) return super._onDrop(event);
     if ( !this.isEditable ) return;
     if ( Hooks.call("dropItemSheetData", container, this, data) === false ) return;
@@ -1122,6 +1145,24 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     if ( !path ) return false;
     await this.item.update({ [path]: reference });
     return true;
+  }
+
+  /** The Actor a contact is, once the referee statblocks them or the contact is a Traveller at the table. */
+  async #onDropContactActor(data) {
+    if ( !this.isEditable ) return false;
+    const dropped = await fromUuid(data.uuid);
+    const actor = dropped?.isToken ? dropped.token?.baseActor ?? dropped : dropped;
+    if ( !["character", "npc"].includes(actor?.type) ) {
+      ui.notifications.warn(game.i18n.localize("MGT2.Contact.NotAPerson"));
+      return false;
+    }
+    await this.item.update({ "system.actor": actor.uuid });
+    return true;
+  }
+
+  /** @this {TravellerItemSheet} */
+  static async #onContactUnlink() {
+    return this.item.update({ "system.actor": null });
   }
 
   /** A zone refuses at the pointer or not at all. @inheritDoc */

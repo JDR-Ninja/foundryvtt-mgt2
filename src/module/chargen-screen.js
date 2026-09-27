@@ -45,6 +45,9 @@ export class ChargenScreen extends MGT2Screen(HandlebarsApplicationMixin(Applica
             connect: ChargenScreen.#onConnect,
             takeBackground: ChargenScreen.#onTakeBackground,
             runStep: ChargenScreen.#onRunStep,
+            resetStep: ChargenScreen.#onResetStep,
+            addTray: ChargenScreen.#onAddTray,
+            removeTray: ChargenScreen.#onRemoveTray,
             openClose: ChargenScreen.#onOpenClose
         }
     };
@@ -205,10 +208,7 @@ export class ChargenScreen extends MGT2Screen(HandlebarsApplicationMixin(Applica
         return (track.cap === null) ? `${track.value}` : `${track.value} / ${track.cap}`;
     }
 
-    /**
-     * The grid, and the one rule that makes the tail ragged: **a vacated cell is not an empty
-     * one**.
-     */
+    /** The grid, and the rule that makes its tail ragged: a vacated cell is not an empty one. */
     static #rows(columns) {
         const last = columns.reduce((furthest, column) =>
             Math.max(furthest, column.lastTerm, column.done ? 0 : column.cursor), 0);
@@ -254,18 +254,20 @@ export class ChargenScreen extends MGT2Screen(HandlebarsApplicationMixin(Applica
         const frame = species?.system.frame;
         // The step the loop is on.
         const cursor = ChargenTerm.current(column.actor);
+        const taken = ChargenTerm.taken(column.actor);
         const rolled = CreationCharacteristics.isSet(column.actor);
         return {
             id: column.id,
             name: column.name,
-            canRun: column.canEdit,
+            canRun: column.canEdit && !Chargen.isDead(column.actor),
+            canReset: game.user.isGM,
             // Core p.9's first step, and it stands outside the numbered list because it runs once
             // rather than once a term.
             characteristics: { set: rolled, upp: rolled ? (column.actor.system.upp ?? "") : "" },
             psi: ChargenScreen.#psi(column),
             background: ChargenScreen.#background(column),
             steps: sequence.map((key, index) => ({
-                key, order: index + 1, own: own.has(key), now: key === cursor,
+                key, order: index + 1, own: own.has(key), now: key === cursor, done: taken.has(key),
                 label: ChargenScreen.#label(MGT2.CreationSteps, key)
             })),
             cut: [...cut].map(key => ({ key, label: ChargenScreen.#label(MGT2.CreationSteps, key) })),
@@ -339,7 +341,9 @@ export class ChargenScreen extends MGT2Screen(HandlebarsApplicationMixin(Applica
     static #tray(column) {
         const state = Chargen.read(column.actor);
         return {
+            id: column.id,
             name: column.name,
+            canEdit: game.user.isGM,
             // The two counters are LEDGERS and not derivations — thirty printed rows wipe, grant,
             // remove or retain Benefit rolls, and two let a player wager them mid-term.
             benefitRolls: Chargen.benefitRolls(column.actor),
@@ -537,6 +541,51 @@ export class ChargenScreen extends MGT2Screen(HandlebarsApplicationMixin(Applica
         // The document writes redraw every client through `apps`; this catches the case where
         // the step wrote only the cursor, which lives on a flag the screen reads but no
         // document update names.
+        return this.render();
+    }
+
+    /** The referee's own entry, for what no printed row covers: the entry's schema, and never a bare DM. */
+    static async #onAddTray(event, target) {
+        const actor = game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId);
+        if ( !actor || !game.user.isGM ) return;
+        const content = await foundry.applications.handlebars.renderTemplate(`${PARTS_PATH}/tray-entry.html`,
+            { config: MGT2 });
+        const entry = await DialogV2.prompt({
+            window: { title: "MGT2.Chargen.Screen.TrayAdd", icon: "fa-solid fa-plus" },
+            classes: ["mgt2"],
+            content,
+            ok: { label: "MGT2.Chargen.Screen.TrayAdd",
+                callback: (click, button) => new foundry.applications.ux.FormDataExtended(button.form).object },
+            rejectClose: false
+        });
+        if ( !entry ) return;
+        await Chargen.pushPending(actor, { ...entry, appliesTo: [entry.appliesTo ?? []].flat().filter(check => check) });
+        return this.render({ parts: ["tray"] });
+    }
+
+    /** @this {ChargenScreen} */
+    static async #onRemoveTray(event, target) {
+        const actor = game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId);
+        if ( !actor || !game.user.isGM ) return;
+        const index = Number(target.closest("[data-index]")?.dataset.index);
+        await Chargen.spendEntry(actor, (entry, at) => at === index, { whole: true });
+        return this.render({ parts: ["tray"] });
+    }
+
+    /** The referee takes one step of the term back, after saying what it does not undo. */
+    static async #onResetStep(event, target) {
+        const actor = game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId);
+        if ( !actor || !game.user.isGM ) return;
+        const step = target.dataset.step;
+        const confirmed = await DialogV2.confirm({
+            window: { title: "MGT2.Chargen.Screen.ResetStep" },
+            classes: ["mgt2"],
+            content: `<p>${game.i18n.format("MGT2.Chargen.Screen.ResetStepAsk", { name: actor.name,
+                step: game.i18n.localize(MGT2.CreationSteps[step] ?? step) })}</p>`,
+            rejectClose: false
+        });
+        if ( !confirmed ) return;
+        await ChargenTerm.resetStep(actor, step);
         return this.render();
     }
 

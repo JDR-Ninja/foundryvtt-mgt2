@@ -1,0 +1,17 @@
+{{! An education's skill picks: so many rows of a table, its own or its tied career's, at one level
+    or as printed. Callers pass `picks` and `path`, the route to the list under `system.`. }}
+<div class="nest{{#unless picks.length}} edit-only{{/unless}}" data-property="{{path}}">
+	<span class="nlbl">{{localize 'MGT2.Chargen.Education.Picks'}}</span>
+	{{#each picks as |pick k|}}
+	<div class="entry pfields" data-entry-index="{{k}}">
+		<select class="f edit-only" name="system.{{../path}}.{{k}}.table">{{selectOptions @root.config.EducationTables selected=pick.table localize=true}}</select>
+		<label class="chk edit-only"><input type="checkbox" name="system.{{../path}}.{{k}}.tied" {{checked pick.tied}} /><span>{{localize 'MGT2.Chargen.Education.FromTied'}}</span></label>
+		<input class="f num edit-only" type="number" step="1" min="0" name="system.{{../path}}.{{k}}.count" value="{{pick.count}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Education.Count'}}" />
+		<input class="f num edit-only" type="number" step="1" min="0" name="system.{{../path}}.{{k}}.level" value="{{pick.level}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Education.Level'}}" />
+		<label class="chk edit-only"><input type="checkbox" name="system.{{../path}}.{{k}}.random" {{checked pick.random}} /><span>{{localize 'MGT2.Chargen.Education.Random'}}</span></label>
+		<b class="play-only word">{{#if pick.count}}{{pick.count}}{{else}}{{localize 'MGT2.Chargen.Education.EveryRow'}}{{/if}} &middot; {{localize (lookup @root.config.EducationTables pick.table)}}{{#if pick.tied}} ({{localize 'MGT2.Chargen.Education.FromTied'}}){{/if}} &middot; {{#if (eq pick.level null)}}{{localize 'MGT2.Chargen.Education.AsPrinted'}}{{else}}{{localize 'MGT2.Chargen.Education.AtLevel' n=pick.level}}{{/if}}{{#if pick.random}} &middot; {{localize 'MGT2.Chargen.Education.Random'}}{{/if}}</b>
+		<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+	</div>
+	{{/each}}
+	<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Education.Pick'}}</a>
+</div>

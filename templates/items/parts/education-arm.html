@@ -1,0 +1,26 @@
+{{! One arm of a graduation: what it grants, the picks it offers, the skills of the education it raises,
+    and what it leaves on the tray. Callers pass `arm`, `path` and `label`. }}
+<div class="entry">
+	<div class="entryhead"><b>{{localize label}}</b></div>
+	<div class="nest">
+		<span class="nlbl">{{localize 'MGT2.Chargen.Template.RowGrant'}}</span>
+		{{> systems/mgt2/templates/items/parts/career-cell.html cell=arm.grant path=(concat path ".grant")}}
+	</div>
+	{{> systems/mgt2/templates/items/parts/education-picks.html picks=arm.picks path=(concat path ".picks")}}
+	<div class="pfields{{#unless arm.raise.by}} edit-only{{/unless}}">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Education.Raise'}}</span>
+			<b class="play-only word">+{{arm.raise.by}}{{#if arm.raise.count}} &middot; {{arm.raise.count}}{{/if}}{{#unless (eq arm.raise.below null)}} &middot; &lt; {{arm.raise.below}}{{/unless}}</b>
+			<input class="f num edit-only" type="number" step="1" min="0" name="system.{{path}}.raise.count" value="{{arm.raise.count}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Education.Count'}}" />
+			<input class="f num edit-only" type="number" step="1" min="0" name="system.{{path}}.raise.by" value="{{arm.raise.by}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Education.RaiseBy'}}" />
+			<input class="f num edit-only" type="number" step="1" min="0" name="system.{{path}}.raise.below" value="{{arm.raise.below}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Education.RaiseBelow'}}" />
+		</label>
+	</div>
+	<div class="nest edit-only" data-property="{{path}}.tray">
+		<span class="nlbl">{{localize 'MGT2.Chargen.Template.Tray'}}</span>
+		{{#each arm.tray as |pending p|}}
+		{{> systems/mgt2/templates/items/parts/tray-row.html pending=pending p=p path=(concat ../path ".tray." p)}}
+		{{/each}}
+		<a class="add" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.TrayEntry'}}</a>
+	</div>
+</div>

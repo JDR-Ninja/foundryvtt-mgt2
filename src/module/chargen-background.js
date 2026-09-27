@@ -1,4 +1,5 @@
 import { Grants } from "./chargen-grants.js";
+import { SharedTables } from "./chargen-tables.js";
 import { MGT2Helper } from "./helper.js";
 
 const { DialogV2 } = foundry.applications.api;
@@ -7,10 +8,7 @@ const TEMPLATE = "systems/mgt2/templates/chargen/background.html";
 
 const TABLE = "background";
 
-/**
- * Core p.9's second step, which is not a step of a term either: the allowance is read off EDU at
- * one moment, before term 1, and spent once.
- */
+/** Core p.9's second step, outside the term: the allowance is read off EDU once, before term 1. */
 export const CreationBackground = {
 
     /** Whether the step has been taken — a skill this step granted says so on its own provenance. */
@@ -39,9 +37,11 @@ export const CreationBackground = {
             return null;
         }
         const plan = this.plan(actor);
+        // Core p.9's list, where the frame prints none of its own: the linked shared table's skills.
+        if ( !plan.choices.length ) plan.choices = await SharedTables.backgroundChoices();
         // A frame printing dice states an allowance nobody can count, so the roll comes first and
         // its total is what the picker then spends.
-        const count = (plan.count === null) ? await rollAllowance(plan.formula) : plan.count;
+        const count = (plan.count === null) ? await rollAllowance(actor, plan.formula) : plan.count;
         if ( count === null ) return null;
         if ( this.isSet(actor) ) {
             const again = await DialogV2.confirm({
@@ -64,7 +64,7 @@ export const CreationBackground = {
             held.add(grant.item.name);
             written.push(grant.item.name);
         }
-        const unspent = count - written.length;
+        const unspent = count + (plan.inAddition ? plan.mandatory.length : 0) - written.length;
         if ( unspent > 0 ) {
             ui.notifications.warn(MGT2Helper.plural("MGT2.Chargen.Background.Unspent", unspent,
                 { name: actor.name, n: unspent }));
@@ -73,10 +73,10 @@ export const CreationBackground = {
     }
 };
 
-/** A frame's own dice, rolled once so the picker knows how many rows to open. */
-async function rollAllowance(formula) {
+/** A frame's own dice, rolled once with the Traveller's data so an `@edu` term reads their EDU. */
+async function rollAllowance(actor, formula) {
     if ( !formula ) return null;
-    const roll = await new Roll(MGT2Helper.damageFormula(formula)).roll();
+    const roll = await new Roll(MGT2Helper.damageFormula(formula), actor.getRollData()).roll();
     return Math.max(0, roll.total);
 }
 
@@ -85,8 +85,10 @@ async function pick(actor, plan, count) {
     const held = Grants.skills(actor).map(item => item.name);
     const offered = [...new Set([...plan.mandatory, ...plan.choices])]
         .sort((a, b) => a.localeCompare(b));
-    // The mandatory ones are not a choice: they fill their rows and the allowance pays for them.
-    const rows = Array.fromRange(Math.max(count, plan.mandatory.length)).map(index => ({
+    // The mandatory ones are not a choice: they fill their rows, and the allowance pays for them
+    // unless the frame prints them in addition to it.
+    const total = plan.inAddition ? (count + plan.mandatory.length) : Math.max(count, plan.mandatory.length);
+    const rows = Array.fromRange(total).map(index => ({
         name: `s${index}`,
         n: index + 1,
         fixed: plan.mandatory[index] ?? "",

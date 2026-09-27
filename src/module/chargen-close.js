@@ -1,6 +1,6 @@
 import { BenefitPicker } from "./benefit-picker.js";
 import { Chargen } from "./chargen.js";
-import { Grants } from "./chargen-grants.js";
+import { Grants, MUSTER_TABLE } from "./chargen-grants.js";
 import { Muster } from "./chargen-muster.js";
 import { CreationOptions } from "./chargen-rolls.js";
 import { applyCell } from "./chargen-term.js";
@@ -83,6 +83,14 @@ export const Package = {
         return roster.find(actor => this.picks(actor).length === fewest) ?? null;
     },
 
+    /** The solo option's one skill, taken once and recorded where the package's picks are. */
+    async takeSolo(actor, name) {
+        if ( !actor?.canUserModify(game.user, "update") || this.picks(actor).length ) return null;
+        await Chargen.update(actor, { packagePicks: [name] });
+        return Grants.grantSkill(actor, { name, level: 1, mode: "atLeast",
+            provenance: { term: Chargen.read(actor).term, table: PACKAGE_TABLE, note: name } });
+    },
+
     /** Take one entry out of the pool. */
     async take(actor, text) {
         const entry = this.entry(text);
@@ -116,8 +124,9 @@ const Ships = {
         return this.rows(actor).filter(row => !row.surrendered).length;
     },
 
+    /** Folio 48 pays per ship ROLLED, and a mortgaged ship rolled again stacks on its row as a count. */
     givenUp(actor) {
-        return this.rows(actor).filter(row => row.surrendered).length;
+        return this.rows(actor).filter(row => row.surrendered).reduce((sum, row) => sum + (row.count || 1), 0);
     },
 
     /**
@@ -158,7 +167,9 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
             benefit: ChargenClose.#onBenefit,
             redeem: ChargenClose.#onRedeem,
             keepShip: ChargenClose.#onKeepShip,
+            commitShares: ChargenClose.#onCommitShares,
             takeSkill: ChargenClose.#onTakeSkill,
+            takeSoloSkill: ChargenClose.#onTakeSoloSkill,
             editPackage: ChargenClose.#onEditPackage,
             finish: ChargenClose.#onFinish,
             finishAll: ChargenClose.#onFinishAll,
@@ -182,12 +193,7 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
     /** Every actor this screen has written into `apps`, which is not the same as the current roster. */
     #registered = new Set();
 
-    /**
-     * The same two registrations the creation grid needs, and the same array hazard:
-     * `game.actors.apps` is an ARRAY where a document's `apps` is a Record, so a window reopened
-     * during its own closing animation leaves an orphan in it that re-renders for the rest of the
-     * session.
-     */
+    /** The creation grid's two registrations: `game.actors.apps` is an ARRAY, and keeps an orphan otherwise. */
     #syncRegistrations(actors) {
         const wanted = new Set(actors.filter(actor => actor));
         for ( const actor of this.#registered ) {
@@ -223,15 +229,15 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         context.solo = solo;
         context.empty = !roster.length;
         context.columns = roster.map(actor => ChargenClose.#row(actor));
-        // Tearing the table down is a GROUP action, so it is offered only to a user who may write
-        // every column: a player who may write one gets a half-applied roster — measured, one
-        // Traveller torn down and one refused — which is the state `Ships.elect` already refuses
-        // whole for.
+        // Tearing the table down is a GROUP action, offered only to a user who may write every column:
+        // anyone else would half-apply it, the state `Ships.elect` already refuses whole.
         context.canFinishAll = !context.empty && context.columns.every(column => column.canEdit);
         context.serving = context.columns.filter(column => column.serving).length;
         context.owed = context.columns.reduce((sum, column) => sum + column.rolls, 0);
         context.ship = solo ? null : ChargenClose.#ship(context.columns);
         context.package = solo ? null : ChargenClose.#package(roster);
+        context.soloPicks = solo ? roster.map(actor => ({ id: actor.id, name: actor.name,
+            canEdit: actor.canUserModify(game.user, "update"), taken: Package.picks(actor)[0] ?? "" })) : [];
         return context;
     }
 
@@ -242,14 +248,14 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         return {
             id: actor.id, name: actor.name, actor,
             canEdit: actor.canUserModify(game.user, "update"),
-            // Mustering out reads CLOSED careers: a Traveller still in their first has none.
-            canBenefit: Chargen.careers(actor).some(record => record.system.exitMode !== "stillServing"),
+            // Mustering out reads CLOSED careers still owed a roll: a Traveller still in their first has none.
+            canBenefit: Chargen.careers(actor).some(record => (record.system.exitMode !== "stillServing")
+                && (Muster.rollsLeft(actor, record.id) > 0)),
             age: summary.age,
             serving: Chargen.isServing(actor),
             terms: Chargen.termsServed(actor),
-            // What the ledger still owes, plus the rank bonus that is DERIVED and never written
-            // into it — writing a derivation into a ledger double-counts it on the next recompute
-            //.
+            // What the ledger still owes, plus the rank bonus that is DERIVED and never written into it:
+            // written, it would count twice on the next recompute.
             rolls: summary.rolls,
             careers: summary.careers.map(career => ({
                 id: career.id, name: career.name, terms: career.terms, rank: career.rank,
@@ -257,11 +263,13 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
                 pension: career.pension ? MGT2Helper.credits(career.pension) : ""
             })),
             cash: summary.cash,
+            preplay: MGT2Helper.credits(summary.preplayLimit),
             pension: summary.pension,
             pensionText: MGT2Helper.credits(summary.pension
                 + Muster.pensionInLieuOfShip(actor, Ships.givenUp(actor))),
             shipShares: summary.shipShares,
-            ships: { held: ships.length, kept: Ships.kept(actor), givenUp: Ships.givenUp(actor) },
+            ships: { held: ships.reduce((sum, row) => sum + (row.count || 1), 0), kept: Ships.kept(actor),
+                givenUp: Ships.givenUp(actor) },
             benefits: (actor.system.entitlements ?? []).map((row, index) => ({
                 index,
                 kind: game.i18n.localize(MGT2.BenefitKinds[row.kind] ?? row.kind),
@@ -282,6 +290,10 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         return {
             holders: holders.map(column => ({ ...column, keeps: settled && !!column.ships.kept })),
             keeperName: settled ? kept[0].name : "",
+            // Core p.48: shares put towards the kept ship pay no Cr1000 a year, so each Traveller says how many.
+            sharers: settled ? columns.filter(column => column.shipShares).map(column => ({ id: column.id,
+                name: column.name, canEdit: column.canEdit, shares: column.shipShares,
+                committed: column.actor.system.finance.shipSharesCommitted ?? 0 })) : [],
             perYear: MGT2Helper.credits(MGT2.MusterOut.shipForgone),
             shareYear: MGT2Helper.credits(MGT2.MusterOut.shipShareUnspent)
         };
@@ -318,17 +330,23 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         if ( !asked ) return;
         const rolled = await Muster.roll(actor, asked);
         if ( !rolled ) return;
-        const provenance = { career: asked.career, table: "muster",
+        const provenance = { career: asked.career, table: MUSTER_TABLE,
             note: game.i18n.localize(`MGT2.Chargen.Muster.Column.${asked.column}`) };
         const printed = Muster.rowFor(actor.items.get(asked.career), asked.column, rolled.roll.total);
 
         if ( asked.column === "cash" ) {
-            await Muster.take(actor, { kind: "cash", credits: printed.cash, provenance,
+            // A template with no Cash column spends nothing until the referee reads the amount off the book.
+            const credits = printed.cash ?? await Muster.promptCash(rolled.roll.total);
+            if ( credits === null ) return ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Close.RollDiscarded"));
+            await Muster.take(actor, { kind: "cash", credits, provenance,
                 category: game.i18n.localize("MGT2.Chargen.Muster.Column.cash") });
             return this.render();
         }
         // The career template carries its own printed column, so the row the dice landed on IS the
         // outcome; asking is what a career whose template holds no table falls back to.
+        if ( printed.cell && Muster.rerolls(actor, printed.cell) ) {
+            return ui.notifications.warn(game.i18n.format("MGT2.Chargen.Muster.Reroll", { what: printed.cell.text }));
+        }
         if ( printed.cell ) {
             await applyCell(actor, printed.cell, { provenance });
             await Muster.spendRoll(actor, provenance, printed.cell.text);
@@ -345,7 +363,8 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
     /** Which career the roll belongs to and which column it is made on. */
     static async #askBenefit(actor) {
         const entitlement = Muster.entitlement(actor);
-        const careers = entitlement.careers.filter(career => career.record.system.exitMode !== "stillServing");
+        const careers = entitlement.careers.filter(career => (career.record.system.exitMode !== "stillServing")
+            && (Muster.rollsLeft(actor, career.id) > 0));
         if ( !careers.length ) {
             ui.notifications.warn(game.i18n.format("MGT2.Chargen.Close.NoCareers", { name: actor.name }));
             return null;
@@ -392,11 +411,38 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         return this.render();
     }
 
+    /** How many of a Traveller's Ship Shares go towards the ship the table kept. */
+    static async #onCommitShares(event, target) {
+        const actor = ChargenClose.#actorOf(target);
+        if ( !actor?.canUserModify(game.user, "update") ) return;
+        const field = target.closest("[data-actor-id]").querySelector("input[name=committed]");
+        const committed = Math.clamp(Math.round(Number(field?.value) || 0), 0, actor.system.finance.shipShares ?? 0);
+        await actor.update({ "system.finance.shipSharesCommitted": committed });
+        return this.render();
+    }
+
     /** @this {ChargenClose} */
     static async #onTakeSkill(event, target) {
         const actor = ChargenClose.#actorOf(target);
         if ( !actor ) return;
         await Package.take(actor, target.dataset.entry);
+        return this.render();
+    }
+
+    /** Companion p.13's solo generation: one skill at level 1, typed by the player, in place of the package. */
+    static async #onTakeSoloSkill(event, target) {
+        const actor = ChargenClose.#actorOf(target);
+        if ( !actor ) return;
+        const typed = await DialogV2.prompt({
+            window: { title: "MGT2.Chargen.Close.SoloTake" },
+            classes: ["mgt2"],
+            content: `<p>${game.i18n.localize("MGT2.Chargen.Close.SoloHint")}</p>
+                <div class="form-group"><input type="text" name="skill" value=""></div>`,
+            ok: { label: "MGT2.Chargen.Close.Take", callback: (event, button) => button.form.elements.skill.value.trim() },
+            rejectClose: false
+        });
+        if ( !typed ) return;
+        await Package.takeSolo(actor, typed);
         return this.render();
     }
 
@@ -451,11 +497,7 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         return this.render();
     }
 
-    /**
-     * Finishing is irreversible in one direction only — the flag goes and the decided history stays
-     * — so what is confirmed is the state that is being thrown away: rolls not taken, a career
-     * still open, a package not drained.
-     */
+    /** Finishing drops the flag and keeps the history, so it confirms what is thrown away: rolls, a career, the pool. */
     static async #confirmFinish(actors) {
         const warnings = [];
         const serving = actors.filter(actor => Chargen.isServing(actor));
@@ -465,6 +507,13 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
                 { names: serving.map(actor => actor.name).join(", ") }));
         }
         if ( owed > 0 ) warnings.push(MGT2Helper.plural("MGT2.Chargen.Close.WarnRolls", owed));
+        // Core p.48: one Traveller keeps a ship, so a holder who leaves before the others give theirs up banks nothing.
+        const keepers = Chargen.roster().filter(actor => Ships.kept(actor));
+        const unsettled = (keepers.length > 1) ? actors.filter(actor => keepers.includes(actor)) : [];
+        if ( unsettled.length ) {
+            warnings.push(game.i18n.format("MGT2.Chargen.Close.WarnShip",
+                { names: unsettled.map(actor => actor.name).join(", ") }));
+        }
         const left = CreationOptions.solo() ? 0 : Package.remaining(Chargen.roster()).length;
         if ( left ) warnings.push(MGT2Helper.plural("MGT2.Chargen.Close.WarnPackage", left));
         const list = warnings.map(text => `<li>${foundry.utils.escapeHTML(text)}</li>`).join("");
@@ -485,6 +534,12 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
             return null;
         }
         await Muster.applyPension(actor, { shipsGivenUp: Ships.givenUp(actor) });
+        // Core p.52: medical care and anagathics are paid out of the Benefits first; the rest stays debt.
+        const { credits, debt } = actor.system.finance;
+        if ( Math.min(credits, debt) > 0 ) {
+            const paid = Math.min(credits, debt);
+            await actor.update({ "system.finance.credits": credits - paid, "system.finance.debt": debt - paid });
+        }
         return Chargen.finish(actor);
     }
 

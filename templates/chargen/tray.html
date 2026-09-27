@@ -1,8 +1,9 @@
 {{! THE TRAY. An entry is never a bare value: it carries a kind, a duration, a use count, the checks
     it may be spent on, a scope and an expiry that is a predicate over the record's EXIT MODE. }}
-<div class="tray2">
+<div class="tray2"{{#if tray}} data-actor-id="{{tray.id}}"{{/if}}>
 	{{#if tray}}
 	<span class="lbl">{{localize 'MGT2.Chargen.Screen.TrayFor' name=tray.name}}</span>
+	{{#if tray.canEdit}}<a class="add" data-action="addTray" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayAdd'}}"><i class="fa-solid fa-plus"></i></a>{{/if}}
 	{{! The two counters. Ledgers and not derivations, and they live here because the tray is where
 	    they are stored — a wager needs the pending total to exist before mustering out. }}
 	<span class="counts">{{localize 'MGT2.Chargen.Screen.Counters' benefit=tray.benefitRolls skill=tray.skillRolls}}</span>
@@ -17,11 +18,12 @@
 				<th>{{localize 'MGT2.Chargen.Screen.TrayDuration'}}</th>
 				<th>{{localize 'MGT2.Chargen.Screen.TrayUses'}}</th>
 				<th>{{localize 'MGT2.Chargen.Screen.TrayExpires'}}</th>
+				{{#if @root.tray.canEdit}}<th></th>{{/if}}
 			</tr>
 		</thead>
 		<tbody>
 			{{#each tray.entries as |entry|}}
-			<tr{{#if entry.note}} data-tooltip="{{entry.note}}"{{/if}}>
+			<tr data-index="{{@index}}"{{#if entry.note}} data-tooltip="{{entry.note}}"{{/if}}>
 				<td class="k">{{entry.kind}}</td>
 				<td>{{entry.value}}</td>
 				<td>{{entry.appliesTo}}</td>
@@ -29,6 +31,7 @@
 				<td>{{entry.duration}}</td>
 				<td>{{entry.uses}}</td>
 				<td>{{entry.expiresWhen}}</td>
+				{{#if @root.tray.canEdit}}<td><a class="del" data-action="removeTray" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayRemove'}}"><i class="fa-solid fa-xmark"></i></a></td>{{/if}}
 			</tr>
 			{{/each}}
 		</tbody>

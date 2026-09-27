@@ -8,6 +8,200 @@
 
 ---
 
+## [0.2.3]
+
+**Verificado no Foundry VTT 14.368.**
+
+**A criação, relida regra por regra contra o livro.** Uma auditoria completa da criação de Viajantes
+encontrou uns trinta pontos onde um campo, um controle ou uma regra existiam sem que nada os lesse: um
+bônus de patente que nunca era pago, entradas pendentes sem efeito, um recrutamento reduzido a uma
+frase. Todos foram corrigidos, e a educação pré-carreira enfim funciona
+([#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). O sistema continua sem trazer nenhuma
+carreira e nenhuma tabela: ele faz funcionar as que o árbitro digita ou importa.
+
+### ⚠ Mudanças incompatíveis
+
+* **Uma comissão obtida fecha a rolagem de Progressão do período** (Core p.19). Da 0.2.0 à 0.2.2
+  seguia-se a antiga atualização do livro, que permitia; a edição 2022 diz o contrário, e é ela que
+  vale. Uma rolagem de Comissão falha deixa a Progressão aberta.
+* **Cada rolagem do período é feita uma única vez** (Core p.18-19): uma etapa já feita é recusada em
+  vez de ser repetida, e uma qualificação recusada fecha o período às outras carreiras, exceto a uma
+  que esteja sempre aberta. O árbitro pode reabrir uma etapa feita por engano (↺ *Reabrir esta
+  etapa*).
+* **Uma carreira de cada vez**: soltar uma carreira em um Viajante que já serve em outra é recusado.
+* **Uma carreira de entrada forçada, como o Prisioneiro, não se escolhe mais voluntariamente** (Core
+  p.52): entra-se nela por uma condenação deixada pendente, pelo recrutamento ou pela mão do árbitro.
+* **Migração dos mundos.** Nenhuma carreira servida tinha recebido sua designação nem sua escala de
+  patentes. Na primeira vez que um mundo abre na 0.2.3, cada carreira já servida recebe sua designação
+  onde ela falta e o modelo só oferece uma, e depois a escala que essa designação nomeia. **A patente
+  nunca é alterada**, e os bônus de patente que a carreira nunca pagou não são pagos depois: o árbitro
+  recebe a lista numa mensagem privada.
+* **Para scripts e módulos**: o teste de uma linha de Eventos agora nomeia uma lista, `check.skills`,
+  em vez de `check.skill` — um modelo salvo antes é lido como está. A linha de Contas médicas de uma
+  carreira (`medicalBillsRow`) aceita um de três identificadores, `military`, `civilian` ou
+  `independent`, e um rótulo digitado como o livro o imprime continua reconhecido.
+
+### Educação pré-carreira
+
+* **Uma carreira do tipo *Educação pré-carreira* enfim segue suas próprias regras** (Core p.16-17):
+  só se entra durante os três primeiros períodos, uma tentativa por período, com o MD do período; uma
+  recusa deixa o período para uma carreira.
+* **Durante a educação**: as perícias que ela ensina — uma universidade as escolhe na própria tabela,
+  uma academia militar as lê nas Perícias de Serviço da sua carreira —, uma rolagem nos Eventos
+  pré-carreira, e **nem rolagem de Sobrevivência, nem Comissão, nem rolagem de Benefício**. O período
+  conta mesmo assim para a idade, o envelhecimento e a PSI.
+* **A formatura** é rolada como a educação a imprime, com suas honras, seu piso de fracasso e seus MD
+  condicionais. O que ela deixa — um MD de qualificação, um MD ou um sucesso automático na primeira
+  rolagem de Comissão, a entrada direta na carreira da academia — vale para **a primeira carreira
+  tentada depois**, e se perde se essa carreira recusar o Viajante. Um cadete que fracassa sem tirar 2
+  ou menos mantém sua vaga, sem rolagem de Comissão no primeiro período; um Evento «você não se forma»
+  proíbe a rolagem.
+* **Uma educação não é uma carreira anterior** (Core p.16): a primeira carreira depois dela mantém
+  todo o seu treinamento básico e não sofre o MD−1 por carreira anterior, a menos que a nova regra
+  opcional diga outra coisa. Duas educações seguidas são possíveis — uma interpretação: o livro só
+  fixa a janela e uma tentativa por período.
+* **O formulário de carreira ganha um bloco *Educação***: a janela, os MD por período, a carreira
+  vinculada, a duração (os 22 + 2D3 anos do Companion se escrevem `4+2D3`), as perícias escolhidas, o
+  que se concede ao entrar, e a formatura com seus três resultados. As opções do Companion (p.32-34)
+  também se escrevem ali.
+
+### Tabelas compartilhadas
+
+* **Os Eventos de Vida, o Evento incomum, o Recrutamento, os Eventos pré-carreira e as Perícias de
+  antecedentes têm um lugar**: cada uma é uma carreira do tipo *Tabela compartilhada*, que o árbitro
+  vincula no menu *Tabelas de criação compartilhadas* das configurações do mundo. O sistema não traz
+  nenhuma.
+* **Uma vez vinculadas, elas são jogadas como as linhas de uma carreira**: um 7 em Eventos rola os
+  Eventos de Vida, e uma linha que nomeia uma tabela a rola e a aplica — um contato, uma traição, um MD
+  pendente, uma rolagem de Benefício perdida, o Prisioneiro. Sem tabela vinculada, o sistema continua
+  dizendo qual rolar no livro.
+* **O recrutamento é jogado** (Core p.19): uma qualificação recusada oferece o recrutamento, uma vez
+  na vida, uma carreira sempre aberta como o Andarilho, ou decidir depois. O recrutamento rola a
+  tabela vinculada e entra na carreira sorteada, na designação impressa, sem rolagem de qualificação.
+  Um Evento que recruta impõe essa carreira no período seguinte (Core p.17).
+* **As Perícias de antecedentes** oferecem sua lista onde a espécie não imprime nenhuma (Core p.9).
+
+### O período
+
+* **Entrar em uma carreira pede a designação**, antes da rolagem, e escreve a escala que ela nomeia.
+  Mudar de designação no Agente, no Cidadão, no Artista ou no Mercador abre uma carreira nova (Core
+  p.20): o período se fecha, e o seguinte se qualifica para a nova designação.
+* **As entradas pendentes fazem o que dizem**: um sucesso automático passa a promoção ou a comissão
+  sem dados, uma proibição impede a sua rolagem, uma carreira oferecida é entrada sem qualificação,
+  uma carreira imposta é a única aberta, uma carreira bloqueada tira o *Continuar*, uma carreira
+  desbloqueada dispensa a permissão do árbitro. Um MD de Progressão pode servir à rolagem de
+  Comissão, à escolha do jogador (Core p.19). **O árbitro acrescenta ou retira uma entrada à mão.**
+* **As linhas de Eventos**: seu efeito nas rolagens de Benefício pode depender do seu próprio teste,
+  e as apostas da Marinha, do Mercador e do Malandro são jogadas (Core p.35, p.37, p.41) — uma aposta
+  aceita, recusada ou escolhida entre as rolagens devidas, e uma vitória que rende metade da aposta,
+  arredondada para cima. Um teste «se você aproveitar esta oportunidade» pode ser recusado. Uma linha
+  pode conceder sua perícia **antes** do seu teste, como a Marinha e o Malandro imprimem; um teste
+  impresso sobre duas ou três perícias é feito com a melhor do Viajante, e uma linha pode subir um
+  nível na perícia usada, como o Mercador — uma interpretação da ordem impressa, que nenhuma errata
+  resolve.
+* **Ferimentos e cuidados médicos** (Core p.49): uma linha que remete aos Ferimentos os rola como a
+  linha os imprime, o jogador distribui as perdas, e os cuidados custam Cr5000 por ponto, menos a
+  parte do empregador lida nas Contas médicas; o resto é uma dívida, paga primeiro com o dinheiro da
+  baixa (Core p.52).
+* **Os anagáticos** (Core p.49): a partir de SOC 10, duas rolagens de Sobrevivência por período, os
+  períodos de tratamento como MD positivo no envelhecimento, 1D × Cr25000 por período levados como
+  dívida, e uma rolagem de envelhecimento assim que param; um 2 exato leva ao Prisioneiro.
+* **O Prisioneiro** (Core p.52, p.57): o Limiar de Condicional é rolado na entrada, um detento não
+  pode sair, e a libertação — pela Progressão ou por uma fuga — encerra a carreira.
+
+### Espécies
+
+* **Os três períodos mínimos dos Aslan numa carreira antes de tentar outra** (Aliens of Charted Space
+  1 p.19): a decisão do período o lembra, uma carreira deixada por escolha antes da hora recusa a
+  seguinte — a baixa continua aberta —, e uma carreira que a espécie isenta, ou que um Evento oferece
+  ou impõe, nunca é recusada.
+* **Uma carreira reservada a uma espécie ou a um sexo** recusa os outros Viajantes; uma espécie
+  nomeada sem a sua variante admite todas elas.
+* **Uma característica de substituição** — o CHA dos Vargr, a RES dos Hiver (Aliens of Charted Space 1
+  p.179, 2 p.255) — aparece no lugar da que ela substitui e ocupa a posição dela no PUP.
+* **Os modificadores e os dados de uma espécie podem depender do sexo**, como os do Gurvin (Aliens of
+  Charted Space 4 p.167); um Viajante cujo sexo ainda não foi fixado rola os dados comuns, e a janela
+  o diz.
+* **A atribuição de características**: uma casa com os dados próprios da espécie, como o 1D+6 dos
+  Hiver, mantém sua rolagem; um dado de vantagem se soma a esses dados; um valor impresso em vez de
+  rolado, como o TER 0 dos Aslan, conta como fixado.
+* **Um contador que *apenas sobe* nunca desce**, seja qual for a regra do mundo.
+* **Um quadro de espécie impõe sua característica à rolagem de Sobrevivência e à Comissão**, como já
+  fazia com a Progressão.
+
+### Baixa
+
+* **Uma rolagem de Benefício só é oferecida a uma carreira que ainda a deve** (Core p.46), e a
+  contagem não fica mais abaixo de zero.
+* **As cláusulas de repetição impressas** (Core p.47): uma arma recebida duas vezes pode virar um
+  nível de perícia, mais um quarto da hipoteca é pago, uma Nave Batedora é rolada de novo.
+* **Um aumento de característica para no máximo da espécie**, 15 para um humano (Core p.9), e o SOC
+  excedente vindo de uma tabela de Benefícios vira cotas de nave (Core p.47).
+* **As cotas de nave investidas na nave mantida** não pagam mais os Cr1000 anuais (Core p.48; contá-las
+  por cota é uma interpretação), e encerrar a criação quando vários Viajantes mantêm uma nave é
+  sinalizado.
+* **Os modificadores permanentes chegam à rolagem de Benefício**, como o FOL 10+ dos Truthers
+  (Companion p.36).
+* **Os Cr10000 de equipamento que se pode comprar antes do jogo** são exibidos (Core p.46).
+
+### Psiônica
+
+* **Um novo treinamento psiônico custa Cr100000** (Core p.228): o primeiro é gratuito, e cada novo,
+  que zera a penalidade cumulativa, é pago com o dinheiro do Viajante ou como dívida. Uma
+  interpretação: o livro não dá nenhum preço durante a criação.
+* **Um talento tirado numa tabela de perícias** é um teste para aprendê-lo (Core p.229), e não mais um
+  talento ganho de imediato.
+
+### Contatos
+
+* **Um contato pode ser vinculado à ficha de um Viajante ou de um NPC**: solte o Ator na ficha do
+  contato, que o abre com um clique e pode desvinculá-lo.
+
+### Regras opcionais e variantes
+
+* **Nova, ativada**: *Um Viajante expulso mantém a rolagem de perícia do período* — uma
+  interpretação, já que o livro tira a rolagem de Benefício e a carreira sem dizer nada da rolagem de
+  perícia (Core p.18). O registro do período diz em que sentido ela vale.
+* **Nova, desativada**: *A educação pré-carreira conta como uma carreira anterior*.
+* *O dinheiro gasto durante a criação vira dívida* cobre também os cuidados médicos, os anagáticos e
+  um novo treinamento psiônico.
+
+### Demonstração e documentação
+
+* **`Demo — Harbour Cadet School`** entra nos itens de demonstração: uma academia vinculada a
+  `Demo — Harbour Patrol`, para ver uma educação do começo ao fim. A patrulha agora paga o seu bônus
+  de patente 0.
+* **O diário de auditoria das regras** (`mgt2.docs`) descreve a criação como ela está agora.
+
+### Correções
+
+* **Os bônus de patente de praça e civis nunca eram pagos**: só um posto de oficial pagava, depois de
+  uma comissão. A patente 0 é paga na entrada, e cada promoção paga a sua (Core p.19).
+* **«Role na tabela de Reveses» não rolava a tabela** (Core p.23). Agora ela é rolada, e o Viajante
+  permanece na carreira quando a linha o diz.
+* ⚠ **O formulário de carreira apagava dados a cada salvamento**: a referência a um Outro Benefício,
+  a relação de um contato (Aliado, Rival, Inimigo), o piso de «SOC 10 ou SOC +1» e uma lista de
+  especialidades sumiam assim que outro campo era editado, e um MD de qualificação condicional não
+  podia ser digitado. Uma carreira importada e depois retocada pode ter perdido algum: confira-a.
+* **Um MD «para a sua próxima rolagem de Sobrevivência» era gasto pela rolagem de envelhecimento**, e
+  um MD de Progressão duradouro se somava aos testes dos Eventos.
+* **Um Revés que não expulsa anulava mesmo assim** o Evento, a Comissão e a Progressão do período
+  (Core p.18).
+* **Uma Conexão não acrescentava nada a uma perícia já possuída** (Core p.19): ela a sobe um nível,
+  até 3.
+* **As perdas do envelhecimento podiam cair todas na mesma característica** (Core p.49).
+* **A Telepatia só era gratuita enquanto nenhum talento era possuído**: ela é gratuita enquanto
+  nenhum teste foi tentado (Core p.228-229).
+* **O número de perícias de antecedentes** diferia entre o chip e a janela de escolha, e uma espécie
+  que as dá «além disso», como os Hiver, as via ocupar a contagem.
+* **Uma coluna de Dinheiro vazia**, numa carreira digitada à mão, pagava Cr0 e gastava uma rolagem:
+  agora ela pede o valor. Um benefício de característica ou de perícia escolhido à mão se aplica na
+  hora.
+* **A geração solo não concedia a sua perícia de nível 1**, e um Viajante morto em Iron Man seguia
+  com o seu período (Companion p.13).
+
+---
+
 ## [0.2.2]
 
 **Verificado no Foundry VTT 14.368.**

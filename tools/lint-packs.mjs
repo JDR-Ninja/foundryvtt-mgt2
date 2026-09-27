@@ -210,6 +210,19 @@ const RULES = [
     {
         id: "career-complete", cliff: 8, scope: "any", type: "career",
         check(subject, report) {
+            const kind = subject.system?.kind ?? "career";
+            if ( kind === "table" ) {
+                if ( !size(subject.system?.eventTable) ) report("eventTable is empty — a shared table with no rows rolls nothing");
+                return;
+            }
+            if ( kind === "preCareer" ) {
+                const education = subject.system?.preCareer;
+                if ( !education?.graduation?.characteristic || !Number.isInteger(education?.graduation?.target) ) {
+                    report("preCareer.graduation has no characteristic and target — an education nobody graduates from");
+                }
+                if ( !size(education?.picks) && !size(education?.grant?.grants) ) report("preCareer teaches nothing — no picks and no entry grant");
+                return;
+            }
             for ( const key of ["rankLadders", "assignments", "tables", "benefits", "eventTable"] ) {
                 if ( !size(subject.system?.[key]) ) report(`${key} is empty — chargen cannot run against a career missing it`);
             }

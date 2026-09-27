@@ -2081,10 +2081,7 @@ const goods = (d66, key, availability, dice, multiplier, basePrice, purchase, sa
         sale: Object.freeze(sale.map(([code, dm]) => Object.freeze({code, dm})))
     });
 
-/**
- * The 36 rows of the Trade Goods table, keyed by their D66 index — also their insertion order,
- * since integer-like keys enumerate numerically.
- */
+/** The 36 Trade Goods rows, keyed by D66 index — their order too, as integer-like keys enumerate numerically. */
 MGT2.TradeGoods = Object.freeze(Object.fromEntries([
     goods("11", "commonElectronics", null, 2, 10, 20000,
         [["In", 2], ["Ht", 3], ["Ri", 1]], [["Ni", 2], ["Lt", 1], ["Po", 1]]),
@@ -2341,16 +2338,14 @@ MGT2.CreationDefaults = Object.freeze({ startAge: 18, termYears: 4, racialMaximu
 MGT2.CreationPool = Object.freeze({ methods: ["pool", "heroic"], heroic: "heroic", printed: "printed",
     dicePerSlot: 2, slot: "2d6", replace: 2, face: 5 });
 
-// Folio 19's two commission gates, which are GENERAL rules and not a list of career names: the
-// attempt is the first term of a career unless the named characteristic is high enough, and every
-// term after the first costs a DM.
+// Folio 19's two commission gates, GENERAL rules and not career names: the first term only unless the
+// characteristic is high enough, and a DM for every term after the first.
 MGT2.CommissionGate = Object.freeze({
     characteristic: "social", min: 9, laterTermDM: -1
 });
 
-// Core p.49's Ageing table as EFFECTS: `physical` and `mental` are one entry per characteristic the
-// Traveller chooses, each the number of points it loses — "pick this many, take that much off
-// each".
+// Core p.49's Ageing table as EFFECTS: `physical` and `mental` hold one entry per characteristic the
+// Traveller chooses, each the points it loses.
 MGT2.AgeingEffects = Object.freeze([
     { roll: -6, physical: [2, 2, 2], mental: [1] },
     { roll: -5, physical: [2, 2, 2], mental: [] },
@@ -2362,11 +2357,61 @@ MGT2.AgeingEffects = Object.freeze([
     { roll: 1, physical: [], mental: [] }
 ]);
 
+// Core p.49's Injury table, read like the ageing rows: points per chosen characteristic, `keys` narrowing the choice.
+MGT2.InjuryEffects = Object.freeze([
+    { roll: 1, losses: ["1D", 2, 2], keys: null },
+    { roll: 2, losses: ["1D"], keys: null },
+    { roll: 3, losses: [2], keys: ["strength", "dexterity"] },
+    { roll: 4, losses: [2], keys: null },
+    { roll: 5, losses: [1], keys: null },
+    { roll: 6, losses: [], keys: null }
+]);
+
+// Core p.49's Medical Bills: the employer's share by career group, on 2D + rank against three columns.
+MGT2.MedicalBills = Object.freeze({
+    columns: Object.freeze([4, 8, 12]),
+    groups: Object.freeze({
+        military: Object.freeze([75, 100, 100]),
+        civilian: Object.freeze([50, 75, 100]),
+        independent: Object.freeze([0, 50, 75])
+    }),
+    printed: Object.freeze({ military: "Army/Navy/Marine", civilian: "Agent/Noble/Scholar/Entertainer/Merchant/Citizen",
+        independent: "Scout/Rogue/Drifter" })
+});
+
+MGT2.MedicalBillsGroups = Object.freeze({
+    military: "MGT2.Chargen.MedicalBills.military",
+    civilian: "MGT2.Chargen.MedicalBills.civilian",
+    independent: "MGT2.Chargen.MedicalBills.independent"
+});
+
+// Core p.49's anagathics: SOC 10+ to begin, an exact 2 sends to a forced-entry career, 1D × Cr25000 a term.
+MGT2.Anagathics = Object.freeze({ characteristic: "social", target: 10, forcedOn: 2, cost: "1D*25000",
+    track: "anagathics" });
+
+// The shared tables a row may name (Core p.46, p.19, p.17), each a `career` Item of kind `table` a world
+// setting points at; `names` are what a row's `subTable` may print for it, beside the label.
+MGT2.SharedCreationTables = Object.freeze({
+    lifeEvents: Object.freeze({ label: "MGT2.Chargen.Shared.lifeEvents", dice: "2d6",
+        names: Object.freeze(["Life Event", "Life Events"]) }),
+    unusualEvent: Object.freeze({ label: "MGT2.Chargen.Shared.unusualEvent", dice: "1d6",
+        names: Object.freeze(["Unusual Event", "Unusual Events"]) }),
+    draft: Object.freeze({ label: "MGT2.Chargen.Shared.draft", dice: "1d6", names: Object.freeze(["Draft"]) }),
+    preCareerEvents: Object.freeze({ label: "MGT2.Chargen.Shared.preCareerEvents", dice: "2d6",
+        names: Object.freeze(["Pre-Career Event", "Pre-Career Events"]) }),
+    background: Object.freeze({ label: "MGT2.Chargen.Shared.background", dice: "",
+        names: Object.freeze(["Background Skills"]) })
+});
+
+// The one sub-table a row names that no shared table holds: Core p.49's Injury, rolled off the ladder above.
+MGT2.InjuryTableNames = Object.freeze(["Injury", "Injury Table"]);
+
 // University and the military academy are a KIND on the same `career` Item and not a document type
 // of their own: what a Traveller ends up with is a term, an assignment and an event log either way.
 MGT2.CareerKinds = Object.freeze({
     career: "MGT2.Chargen.CareerKinds.career",
-    preCareer: "MGT2.Chargen.CareerKinds.preCareer"
+    preCareer: "MGT2.Chargen.CareerKinds.preCareer",
+    table: "MGT2.Chargen.CareerKinds.table"
 });
 
 // Six qualification modes across three fields: this one says whether a roll happens at all,
@@ -2401,7 +2446,10 @@ MGT2.CareerExitModes = Object.freeze({
     voluntary: "MGT2.Chargen.ExitModes.voluntary",
     ejectedByMishap: "MGT2.Chargen.ExitModes.ejectedByMishap",
     forcedOutByAdvancement: "MGT2.Chargen.ExitModes.forcedOutByAdvancement",
-    paroled: "MGT2.Chargen.ExitModes.paroled"
+    paroled: "MGT2.Chargen.ExitModes.paroled",
+    died: "MGT2.Chargen.ExitModes.died",
+    blocked: "MGT2.Chargen.ExitModes.blocked",
+    graduated: "MGT2.Chargen.ExitModes.graduated"
 });
 
 // The book's three values plus a fourth its own groups do not contain: the Prisoner picks a new
@@ -2417,6 +2465,15 @@ MGT2.AssignmentChangeRules = Object.freeze({
 MGT2.BasicTrainingTables = Object.freeze({
     service: "MGT2.Chargen.BasicFrom.service",
     assignment: "MGT2.Chargen.BasicFrom.assignment"
+});
+
+// Core p.16: the table an education's skills are picked from — its own, or its tied career's.
+MGT2.EducationTables = Object.freeze({
+    service: "MGT2.Chargen.Tables.service",
+    personalDevelopment: "MGT2.Chargen.Tables.personalDevelopment",
+    advancedEducation: "MGT2.Chargen.Tables.advancedEducation",
+    officer: "MGT2.Chargen.Tables.officer",
+    assignment: "MGT2.Chargen.Education.AssignmentTable"
 });
 
 // What a term PRODUCED, as facts rather than prose.
@@ -2436,6 +2493,8 @@ MGT2.TermOutcomes = Object.freeze({
     // A template-named leaving rule fired instead of the generic outcomes, which it DISPLACES.
     released: "MGT2.Chargen.TermOutcomes.released",
     skillRoll: "MGT2.Chargen.TermOutcomes.skillRoll",
+    graduated: "MGT2.Chargen.TermOutcomes.graduated",
+    honours: "MGT2.Chargen.TermOutcomes.honours",
     aged: "MGT2.Chargen.TermOutcomes.aged"
 });
 
@@ -2460,7 +2519,8 @@ MGT2.BenefitRowEffects = Object.freeze({
     keep: "MGT2.Chargen.BenefitEffects.keep",
     lose: "MGT2.Chargen.BenefitEffects.lose",
     grant: "MGT2.Chargen.BenefitEffects.grant",
-    wipe: "MGT2.Chargen.BenefitEffects.wipe"
+    wipe: "MGT2.Chargen.BenefitEffects.wipe",
+    wager: "MGT2.Chargen.BenefitEffects.wager"
 });
 
 // Seven kinds, each with a printed source: an `autoSuccess` is deferred and player-directed, a
@@ -2594,10 +2654,7 @@ MGT2.TrackKinds = Object.freeze({
     enumerated: "MGT2.Chargen.TrackKinds.enumerated"
 });
 
-/**
- * Everything to the end of the creation block is ARITHMETIC the chapter prints once and every
- * career reads: numbers a rule states in prose, not content a publisher owns.
- */
+/** To the end of the creation block, ARITHMETIC the chapter prints once and every career reads, never content. */
 
 // Folio 9's printed order, which is also the harsher method: assign in this sequence rather than
 // choosing.
@@ -2653,7 +2710,7 @@ MGT2.Benefits = Object.freeze({
     armour: { kind: "voucher", credits: 10000, tl: 12, onRepeat: "upgradeCeiling",
         repeatCredits: 25000, names: ["armor"], pick: { doc: "Item", types: ["armor"] } },
     ally: { kind: "contact", relation: "Allie", onRepeat: "another" },
-    blade: { kind: "voucher", credits: 1000, tl: 12, onRepeat: "skillLevel",
+    blade: { kind: "voucher", credits: 1000, tl: 12, onRepeat: "skillLevel", repeat: ["another", "skill"],
         pick: { doc: "Item", types: ["weapon"], melee: true } },
     characteristic: { kind: "characteristic", onRepeat: "another",
         names: ["characteristicincrease", "characteristicincreases"] },
@@ -2666,24 +2723,24 @@ MGT2.Benefits = Object.freeze({
         pick: { doc: "Item", types: ["equipment"], subTypes: ["augment"] } },
     freeTrader: { kind: "ship", onRepeat: "stackMortgage", constraint: "mortgage",
         alternative: "farTrader", pick: { doc: "Actor", types: ["spacecraft"] } },
-    gun: { kind: "voucher", credits: 3000, tl: 12, onRepeat: "skillLevel", constraint: "ranged",
-        pick: { doc: "Item", types: ["weapon"], melee: false } },
+    gun: { kind: "voucher", credits: 3000, tl: 12, onRepeat: "skillLevel", repeat: ["another", "skill"],
+        constraint: "ranged", pick: { doc: "Item", types: ["weapon"], melee: false } },
     // Bounty Hunter p.6: joined with no REP check, not transferable, and the referee details it.
     guildMembership: { kind: "membership", onRepeat: "another" },
     labShip: { kind: "ship", onRepeat: "stackMortgage", constraint: "mortgage",
         pick: { doc: "Actor", types: ["spacecraft"] } },
-    personalVehicle: { kind: "voucher", credits: 300000, tl: 10, onRepeat: "skillLevel",
+    personalVehicle: { kind: "voucher", credits: 300000, tl: 10, onRepeat: "skillLevel", repeat: ["skill"],
         constraint: "unarmed", pick: { doc: "Actor", types: ["vehicle"] } },
     scientificEquipment: { kind: "voucher", credits: 2000, tl: 12, onRepeat: "skillLevel",
-        pick: { doc: "Item", types: ["equipment"] } },
+        repeat: ["another", "skill"], pick: { doc: "Item", types: ["equipment"] } },
     scoutShip: { kind: "ship", onRepeat: "reroll", constraint: "scoutService",
         pick: { doc: "Actor", types: ["spacecraft"] } },
     shipShares: { kind: "shipShare", onRepeat: "another", names: ["shipshare"] },
-    shipsBoat: { kind: "ship", credits: 10000000, tl: 12, onRepeat: "skillLevel",
+    shipsBoat: { kind: "ship", credits: 10000000, tl: 12, onRepeat: "skillLevel", repeat: ["skill", "shipShare"],
         pick: { doc: "Actor", types: ["spacecraft"] } },
     tas: { kind: "membership", onRepeat: "convert", names: ["tasmembership"],
         convert: { ref: "shipShares", kind: "shipShare", count: 2 } },
-    weapon: { kind: "voucher", credits: 3000, tl: 12, onRepeat: "skillLevel",
+    weapon: { kind: "voucher", credits: 3000, tl: 12, onRepeat: "skillLevel", repeat: ["another", "skill"],
         pick: { doc: "Item", types: ["weapon"] } },
     yacht: { kind: "ship", onRepeat: "stackMortgage", constraint: "mortgage",
         alternative: "safariShip", pick: { doc: "Actor", types: ["spacecraft"] } }
@@ -2706,7 +2763,9 @@ MGT2.PsionicTraining = Object.freeze({
     // PSI is `2D − the terms served so far`, and one species tests it without the subtraction.
     formula: "2D",
     // A learned talent arrives at level 0.
-    level: 0
+    level: 0,
+    // A new course's price; creation prices none, so its first course is free (a ruling).
+    course: 100000
 });
 
 /* Post-career training. Core p.55's Study Periods and Compagnon p.39-40's Experience Points are two

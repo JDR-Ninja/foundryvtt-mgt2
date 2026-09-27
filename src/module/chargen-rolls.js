@@ -4,10 +4,7 @@ import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
 
-/**
- * The one rule that simplifies every roll character creation makes, and the one that is easiest to
- * get wrong.
- */
+/** Every roll character creation makes, composed one way. */
 export const CreationRoll = {
 
     /**
@@ -40,8 +37,10 @@ export const CreationRoll = {
         }
 
         composed.push(...rows.filter(row => row));
-        composed.push(...CreationRoll.standing(actor, check, career));
-        composed.push(...CreationRoll.tray(actor, check, career));
+        // A roll that is no check — a table index, ageing, a row's own sub-roll — takes no DM it did not print.
+        if ( check ) {
+            composed.push(...CreationRoll.standing(actor, check, career), ...CreationRoll.tray(actor, check, career));
+        }
 
         const { parts, terms, total } = Checks.modifiers(composed);
         return {
@@ -215,12 +214,11 @@ export const CreationOptions = {
     },
 
     /**
-     * How many characteristics roll 3D and drop the lowest, and the dice they roll.
-     * @returns {{count: number, formula: string}}
+     * How many characteristics roll with a Boon, one more die than their own dice and the lowest dropped.
+     * @returns {{count: number}}
      */
     boon() {
         const picked = Rules.get("creationBoonDice");
-        const count = { none: 0, two: 2, four: 4, all: Number.POSITIVE_INFINITY }[picked] ?? 0;
-        return { count, formula: "3d6kh2" };
+        return { count: { none: 0, two: 2, four: 4, all: Number.POSITIVE_INFINITY }[picked] ?? 0 };
     }
 };

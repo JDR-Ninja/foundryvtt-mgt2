@@ -26,6 +26,23 @@
 	</ul>
 	{{#if ship.keeperName}}
 	<p class="settled">{{localize 'MGT2.Chargen.Close.ShipSettled' name=ship.keeperName}}</p>
+	{{#if ship.sharers.length}}
+	<p class="why">{{localize 'MGT2.Chargen.Close.SharesHint' name=ship.keeperName share=ship.shareYear}}</p>
+	<ul class="shares">
+		{{#each ship.sharers as |sharer|}}
+		<li data-actor-id="{{sharer.id}}">
+			<b>{{sharer.name}}</b>
+			<span class="n">{{plural 'MGT2.Chargen.Close.SharesHeld' sharer.shares}}</span>
+			{{#if sharer.canEdit}}
+			<input type="number" name="committed" value="{{sharer.committed}}" min="0" max="{{sharer.shares}}" step="1" />
+			<button type="button" data-action="commitShares">{{localize 'MGT2.Chargen.Close.CommitShares'}}</button>
+			{{else}}
+			<span class="n">{{plural 'MGT2.Chargen.Close.SharesCommitted' sharer.committed}}</span>
+			{{/if}}
+		</li>
+		{{/each}}
+	</ul>
+	{{/if}}
 	{{/if}}
 	{{else}}
 	<p class="none">{{localize 'MGT2.Chargen.Close.NoShips'}}</p>

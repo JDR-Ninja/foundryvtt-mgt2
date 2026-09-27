@@ -5,10 +5,10 @@ import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
 
-/**
- * What creation writes to a Traveller that is not a `career` record: skills, relationships and the
- * six characteristics themselves.
- */
+/** The provenance a mustering-out Benefit roll writes, and the one folio 47's conversion reads. */
+export const MUSTER_TABLE = "muster";
+
+/** What creation writes to a Traveller that is not a `career` record: skills, relationships, characteristics. */
 export const Grants = {
 
     /**
@@ -16,7 +16,7 @@ export const Grants = {
      * rather than a display: the DM is read off EDU at this moment, which is `base + auto` with the
      * species contribution already derived in.
      * @returns {{count: number|null, formula: string, eduDM: number, choices: string[],
-     *            mandatory: string[]}}
+     *            mandatory: string[], inAddition: boolean}}
      */
     backgroundSkills(actor) {
         const block = Chargen.law(actor, Chargen.frame(actor)?.system.backgroundSkills);
@@ -31,10 +31,10 @@ export const Grants = {
             formula: (declared && !Number.isFinite(fixed)) ? declared : "",
             fromFrame: !!declared,
             eduDM,
-            // Empty is the honest state of a world that has typed no list: the referee's whole
-            // library is open, and a list of names pointing at nothing would be worse than none.
+            // Empty is the honest state of a world that typed no list: the referee's whole library is open.
             choices: [...(block?.choices ?? [])],
-            mandatory: [...(block?.mandatory ?? [])]
+            mandatory: [...(block?.mandatory ?? [])],
+            inAddition: block?.inAddition === true
         };
     },
 
@@ -61,8 +61,7 @@ export const Grants = {
             .reduce((sum, key) => sum + (characteristics[key]?.value ?? 0), 0);
         return {
             held, cap, room: cap - held, breached: held > cap,
-            // Off leaves the cap untracked entirely, which is the referee who does not want the
-            // bookkeeping rather than one who reads the limit differently.
+            // Off leaves the cap untracked, for a referee who does not want the bookkeeping.
             enforced: Rules.on("skillCapBreach")
         };
     },
@@ -93,8 +92,7 @@ export const Grants = {
         const lost = Math.max(0, to - ceiling);
         to = Math.min(to, ceiling);
 
-        // The cap counts what is HELD, so a grant is measured against the room left rather than
-        // against the total it would produce — which is the same number and the cheaper reading.
+        // The cap counts what is HELD, so a grant is measured against the room left.
         const capacity = this.capacity(actor);
         const degraded = capacity.enforced && (to > from) && ((to - from) > Math.max(0, capacity.room));
         if ( degraded ) to = existing ? from : 0;
@@ -112,10 +110,37 @@ export const Grants = {
         return { item: created, from, to, lost, degraded };
     },
 
+    /** A characteristic change is a signed row in the log and never a write to `base`. */
+    async grantCharacteristic(actor, grant, provenance = {}) {
+        if ( !grant.characteristic ) return "";
+        const held = actor.system.characteristics[grant.characteristic];
+        const current = (held?.base ?? 0) + (held?.auto ?? 0);
+        // The one form that lives on rank rows: `SOC 10 or SOC +1, whichever is higher` is max(current
+        // + 1, floor), and the floor is per ROW because one ladder prints 10 then 12.
+        const wanted = (grant.mode === "floor")
+            ? Math.max(current + 1, grant.floor ?? 0) - current : grant.value;
+        // Core p.9 and p.47: an increase stops at the racial maximum, augments aside. Capping every
+        // creation increase is a ruling; only a Benefit's excess SOC becomes Ship Shares, as p.47 prints.
+        const ceiling = Chargen.frame(actor)?.system.racialMaximum ?? MGT2.CreationDefaults.racialMaximum;
+        const delta = (wanted > 0) ? Math.min(wanted, Math.max(0, ceiling - current)) : wanted;
+        const excess = wanted - delta;
+        const shares = ((grant.characteristic === "social") && (provenance.table === MUSTER_TABLE)) ? excess : 0;
+        if ( delta ) {
+            const log = actor.system.characteristicLog.map(entry => ({ ...entry }));
+            log.push({ source: "event", term: provenance.term ?? null, age: Chargen.age(actor), roll: null,
+                changes: { [grant.characteristic]: delta }, cost: 0, note: provenance.table ?? "" });
+            await actor.update({ "system.characteristicLog": log });
+        }
+        if ( shares ) await actor.update({ "system.finance.shipShares": (actor.system.finance.shipShares ?? 0) + shares });
+        if ( !wanted ) return "";
+        const lines = [`${game.i18n.localize(MGT2.Characteristics[grant.characteristic])} ${MGT2Helper.signed(delta)}`];
+        if ( shares ) lines.push(MGT2Helper.plural("MGT2.Chargen.Term.ExcessShares", shares, { n: shares }));
+        else if ( excess ) lines.push(MGT2Helper.plural("MGT2.Chargen.Term.ExcessLost", excess, { n: excess }));
+        return lines.join(" · ");
+    },
+
     /**
-     * A blank contact is a first-class row, and that is the design rule rather than a tolerance
-     *: the book says outright to note each one at whatever level of detail suits, and
-     * *"Rival in Navy"* is enough.
+     * A blank contact is a first-class row: the book notes each at whatever detail suits, *"Rival in Navy"*.
      * @param {string} [contact.relation]   A `MGT2.ContactRelations` key
      * @param {string} [contact.uuid]       The Actor this relationship stands for, where one exists
      * @returns {Promise<Item|null>}
@@ -210,7 +235,7 @@ export const Grants = {
                 connections: [...this.connections(side), { with: partner.id, skill, note }]
             });
             if ( skill ) {
-                written.push(await this.grantSkill(side, { name: skill, level: 1, mode: "atLeast",
+                written.push(await this.grantSkill(side, { name: skill, level: 1, mode: "raise",
                     provenance: { term: Chargen.read(side).term, table: "connection",
                         note: note || partner.name } }));
             }
@@ -225,7 +250,10 @@ export const Grants = {
      */
     plan(actor) {
         const species = Chargen.frame(actor);
-        const declared = species?.system.characteristicRolls ?? [];
+        const sex = MGT2Helper.skillSlug(actor.system.personal?.sex);
+        const sexed = (species?.system.characteristicRolls ?? []).filter(row => row.sex);
+        const declared = (species?.system.characteristicRolls ?? []).filter(row => !row.sex).map(row =>
+            sexed.find(one => (one.characteristic === row.characteristic) && (MGT2Helper.skillSlug(one.sex) === sex)) ?? row);
         const without = species?.system.withoutCharacteristics ?? new Set();
         const boon = CreationOptions.boon();
         const entries = (declared.length
@@ -238,10 +266,14 @@ export const Grants = {
             entry.boon = index < boon.count;
             entry.label = entry.label
                 || game.i18n.localize(MGT2.Characteristics[entry.characteristic] ?? entry.characteristic);
-            entry.rolled = entry.boon ? boon.formula : MGT2Helper.damageFormula(entry.formula);
+            entry.rolled = entry.boon ? boonOn(entry.formula) : MGT2Helper.damageFormula(entry.formula);
         }
         const method = Rules.get("creationAssignment");
-        return { method, boon: boon.count, entries, ...pooling(method, entries, boon.count) };
+        const planned = { method, boon: boon.count, entries, ...pooling(method, entries, boon.count) };
+        // ACS 4 p.167: a species rolling by sex rolls its generic dice until the Traveller's sex is set.
+        if ( sexed.length && !sex ) planned.note = [planned.note, game.i18n.localize("MGT2.Chargen.Characteristics.NoteSex")]
+            .filter(line => line).join(" ");
+        return planned;
     },
 
     /**
@@ -310,6 +342,12 @@ function pooling(method, entries, boon) {
             { characteristic: own.label, formula: MGT2Helper.showFormula(own.formula) }) };
     }
     return { pool: { dice: entries.length * rule.dicePerSlot, heroic: method === rule.heroic }, note: "" };
+}
+
+/** A Boon on the slot's own dice, one more die and the lowest dropped (Core p.62); a printed constant takes none. */
+function boonOn(formula) {
+    return MGT2Helper.damageFormula(formula).replace(/(\d*)d6(?!k)/, (match, count) =>
+        `${(Number(count) || 1) + 1}d6kh${Number(count) || 1}`);
 }
 
 /** Companion p.13's heroic variant. The two lowest is the only choice of two that is never worse. */

@@ -1,5 +1,6 @@
 import { Chargen } from "./chargen.js";
 import { Grants } from "./chargen-grants.js";
+import { Muster } from "./chargen-muster.js";
 import { CreationRoll } from "./chargen-rolls.js";
 import { Checks, renderRollCard } from "./checks.js";
 import { MGT2 } from "./config.js";
@@ -11,14 +12,7 @@ const TRAINING_TRACK = "psionicTraining";
 // PSI 0 is a result and not an absence, and `base` reads 0 for both — so the test records itself.
 const TEST_TRACK = "psionicTest";
 
-/**
- * Psionics in creation, which needs **no new machinery** — and proving that is the point.
- * The PSI test is an ordinary first roll into `base` with a DM read off the history; the two Core
- * openings are tray entries differing only in **scope**; the Psion career is a `career`
- * template with three flags the generic loop already reads (`basicFrom: assignment`,
- * `assignmentChange: separateCareers`, and its qualification mode); and talents are the `talent`
- * Items that already ship.
- */
+/** Psionics in creation, from what already ships: a first roll into `base`, tray entries, a template, talents. */
 export const Psionics = {
 
     /**
@@ -81,8 +75,6 @@ export const Psionics = {
         const attempts = this.attempts(actor);
         const psiDM = actor?.system.characteristics?.psionic?.dm ?? 0;
         const held = Grants.skills(actor);
-        const anyHeld = MGT2.PsionicTraining.talents.some(talent =>
-            held.some(skill => talent.skills.some(name => MGT2Helper.matchesSkill(skill.name, name))));
         return {
             attempts,
             rows: MGT2.PsionicTraining.talents.map(talent => {
@@ -95,10 +87,17 @@ export const Psionics = {
                     attemptDM: attempts * MGT2.PsionicTraining.perAttempt,
                     total: psiDM + talent.dm + (attempts * MGT2.PsionicTraining.perAttempt),
                     held: already,
-                    free: (talent.key === MGT2.PsionicTraining.freeFirst) && !already && !anyHeld
+                    // Core p.228's "first talent" is the first chosen for a check, not the first held.
+                    free: (talent.key === MGT2.PsionicTraining.freeFirst) && !already && (attempts === 0)
                 };
             })
         };
+    },
+
+    /** The training talent a skill name is, or null. */
+    talentFor(name) {
+        return MGT2.PsionicTraining.talents.find(talent =>
+            talent.skills.some(skill => MGT2Helper.matchesSkill(name, skill))) ?? null;
     },
 
     /** How many learning checks this Traveller has made. */
@@ -111,9 +110,15 @@ export const Psionics = {
         return (Chargen.read(actor).tracks[TEST_TRACK]?.value ?? 0) > 0;
     },
 
-    /** Wipe the counter, which is what starting a fresh course of training means. */
+    /** Wipe the counter, which is what starting a fresh course of training means, and pay for the course. */
     async beginTraining(actor) {
-        if ( !Rules.on("psionicTrainingReset") ) return actor;
+        if ( !Rules.on("psionicTrainingReset") || !this.attempts(actor) ) return actor;
+        const price = MGT2.PsionicTraining.course;
+        const spent = await Muster.spend(actor, price, { note: game.i18n.localize("MGT2.Chargen.Psi.Training") });
+        if ( spent.refused ) return actor;
+        ui.notifications.info(game.i18n.format("MGT2.Chargen.Psi.CoursePaid", { name: actor.name,
+            credits: MGT2Helper.credits(price) }) + (spent.owed ? ` · ${game.i18n.format("MGT2.Chargen.Muster.Owed",
+            { credits: MGT2Helper.credits(spent.owed) })}` : ""));
         const tracks = foundry.utils.deepClone(Chargen.read(actor).tracks);
         tracks[TRAINING_TRACK] = { value: 0, rung: "", high: null };
         return Chargen.update(actor, { tracks });

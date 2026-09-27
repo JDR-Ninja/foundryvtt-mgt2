@@ -4,7 +4,15 @@
 <div class="packagedraft" data-actor-id="{{package.turnId}}">
 	{{#if solo}}
 	<span class="lbl">{{localize 'MGT2.Chargen.Close.PackageTitle'}}</span>
-	<p class="none">{{localize 'MGT2.Chargen.Close.SoloOff'}}</p>
+	<p class="why">{{localize 'MGT2.Chargen.Close.SoloPackage'}}</p>
+	<ol class="solo">
+		{{#each soloPicks as |who|}}
+		<li data-actor-id="{{who.id}}"><b>{{who.name}}</b>
+			{{#if who.taken}}<span>{{who.taken}}</span>
+			{{else if who.canEdit}}<button type="button" data-action="takeSoloSkill">{{localize 'MGT2.Chargen.Close.SoloTake'}}</button>{{/if}}
+		</li>
+		{{/each}}
+	</ol>
 	{{else}}
 	<span class="lbl">
 		{{localize 'MGT2.Chargen.Close.PackageTitle'}}

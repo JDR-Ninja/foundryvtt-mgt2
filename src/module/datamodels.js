@@ -22,10 +22,7 @@ export class FormulaField extends fields.StringField {
     }
 }
 
-/**
- * An id for a Document embedded in the same parent, reading back as that Document. `fallback` hands
- * an unresolved id back as the stored string, and a resolved one stringifies to its name.
- */
+/** An embedded Document's id read back as the Document: unresolved it stays the string, resolved it prints its name. */
 export class LocalDocumentField extends fields.DocumentIdField {
     constructor(model, options = {}, context = {}) {
         super(options, context);
@@ -129,10 +126,7 @@ class PhysicalItemData extends ItemBaseData {
 
 export class ItemData extends PhysicalItemData {
 
-    /**
-     * Reset for every `item` and not only software: the owning actor decides `tlBlocked`, so a
-     * loose package has to read sanely without one.
-     */
+    /** Reset for every `item`, not only software: the owning actor decides `tlBlocked`, and a loose one must read sanely. */
     prepareBaseData() {
         const bandwidth = this.software.bandwidth;
         this.software.bandwidthRun = Math.min(this.software.runAt ?? bandwidth, bandwidth);
@@ -275,6 +269,32 @@ function createCellField(options = {}) {
     }, options);
 }
 
+/** An education's pick: so many rows of a table, its own or its tied career's, at a level (null: as printed). */
+function createEducationPickField() {
+    return new fields.SchemaField({
+        table: new fields.StringField({ required: false, blank: false, initial: "service", choices: MGT2.EducationTables }),
+        tied: new fields.BooleanField({ required: false, initial: false }),
+        count: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true }),
+        level: new fields.NumberField({ required: false, nullable: true, initial: null, min: 0, integer: true }),
+        random: new fields.BooleanField({ required: false, initial: false })
+    });
+}
+
+/** What graduation grants — on a pass, with honours on top, or on a failure above the floor. */
+function createGraduationArmField() {
+    return new fields.SchemaField({
+        grant: createCellField(),
+        picks: new fields.ArrayField(createEducationPickField(), { initial: [] }),
+        // "Increase both of the skills chosen before by one level": `count` 0 is every one, `below` a ceiling.
+        raise: new fields.SchemaField({
+            count: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true }),
+            by: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true }),
+            below: new fields.NumberField({ required: false, nullable: true, initial: null, min: 0, integer: true })
+        }),
+        tray: new fields.ArrayField(createTrayEntryField(), { initial: [] })
+    });
+}
+
 /** One of a career's skill tables. */
 function createCareerTableField() {
     return new fields.SchemaField({
@@ -345,6 +365,10 @@ export function createTrayEntryField() {
         // modifier stops applying.
         condition: new fields.StringField({
             required: false, blank: false, initial: "always", choices: MGT2.TrayConditions }),
+        // How a career a `careerForce` compels is entered, and on which assignment: an event's draft is no sentence.
+        entryMode: new fields.StringField({
+            required: false, blank: true, initial: "", choices: MGT2.CareerEntryModes }),
+        assignment: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
     });
 }
@@ -359,6 +383,9 @@ function createEventRowField({ ejects = "stays", ...options } = {}) {
         benefit: new fields.StringField({
             required: false, blank: false, initial: "none", choices: MGT2.BenefitRowEffects }),
         benefitCount: new fields.NumberField({ required: false, initial: 1, integer: true }),
+        // What earns the Benefit effect, in the tray's own vocabulary: Core p.37's throw wins or loses it.
+        benefitCondition: new fields.StringField({
+            required: false, blank: false, initial: "always", choices: MGT2.TrayConditions }),
         // One printed row awards `D3 Benefit rolls`, so the count is rolled rather than counted.
         benefitFormula: new FormulaField({ required: false, blank: true, initial: "" }),
         // A career NAME the referee typed: a row may send a Traveller to another career, offer one
@@ -367,25 +394,32 @@ function createEventRowField({ ejects = "stays", ...options } = {}) {
         // WHICH of the three senses the reference above carries.
         careerMode: new fields.StringField({
             required: false, blank: false, initial: "offer", choices: MGT2.RowCareerModes }),
-        // Sub-tables must be ADDRESSABLE: two careers' rows jump straight to the Unusual Event 1D
-        // branch, skipping the 2D Life Event roll above it.
+        // Core p.19's Draft fixes an assignment on two of its six rows: Merchant marine, law enforcement.
+        careerAssignment: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+        // Sub-tables must be ADDRESSABLE: two careers' rows jump straight to the Unusual Event's 1D branch.
         subTable: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-        // The sub-roll printed INSIDE the prose: "roll 9+ on any skill you have learned during this
-        // term".
+        // The sub-roll printed INSIDE the prose: "roll Gambler 8+ or Broker 8+" is thrown on the better skill.
         check: new fields.SchemaField({
             characteristic: new fields.StringField({
                 required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
-            skill: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-            target: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true })
+            skills: new fields.ArrayField(
+                new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] }),
+            target: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+            // "If you take this opportunity, roll …": the Traveller may decline, and then no branch is earned.
+            optional: new fields.BooleanField({ required: false, initial: false }),
+            // Core p.35: "Either way, gain one level in whichever skill you used."
+            raisesSkill: new fields.BooleanField({ required: false, initial: false })
         }),
-        // A named track this row moves, and by how much: prison events shift a parole threshold by
-        // +2, +1, -1, -2, -1D or a full re-roll.
+        // A named track this row moves, and by how much: a prison event shifts the parole threshold.
         track: new fields.SchemaField({
             key: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             formula: new FormulaField({ required: false, blank: true, initial: "" }),
             value: new fields.NumberField({ required: false, initial: 0, integer: true }),
             // A row that re-rolls the track from its own definition rather than adjusting it.
-            reroll: new fields.BooleanField({ required: false, initial: false })
+            reroll: new fields.BooleanField({ required: false, initial: false }),
+            // Which branch of the row's own check moves it: Core p.57's failed escape raises it.
+            condition: new fields.StringField({
+                required: false, blank: false, initial: "always", choices: MGT2.TrayConditions })
         }),
         // Row 12 on six careers awards a promotion or a commission OUTRIGHT, with no roll.
         awards: new fields.SchemaField({
@@ -395,9 +429,14 @@ function createEventRowField({ ejects = "stays", ...options } = {}) {
                 required: false, blank: false, initial: "oneOf", choices: MGT2.CellModes }),
             // "You MAY gain a promotion or a commission" — a different fact from which arm is
             // taken, so it rides beside `mode`: no cell in the books offers "or nothing".
-            optional: new fields.BooleanField({ required: false, initial: false })
+            optional: new fields.BooleanField({ required: false, initial: false }),
+            // Which branch of the row's own check earns it: Core p.57's escape ends the sentence on a success.
+            condition: new fields.StringField({
+                required: false, blank: false, initial: "always", choices: MGT2.TrayConditions })
         }),
         grant: createCellField({ required: false }),
+        // Core p.37 and p.41 print the grant before the throw it then serves; by default it follows.
+        grantFirst: new fields.BooleanField({ required: false, initial: false }),
         // A DM on a Benefit roll is a MODIFIER and not an award, so it is none of `benefit`'s five
         // values: at least six printed rows carry one, and the tray already models it exactly.
         tray: new fields.ArrayField(createTrayEntryField(), { initial: [] })
@@ -468,10 +507,8 @@ function createStepField() {
                 from: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
                 to: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
                 target: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
-                // What this row awards over what the check awards on every row, and NOT conditioned
-                // on the roll — one row of the household timetable separates its two clauses
-                // explicitly ("if the Patriarchy check is successful"), so a column the book
-                // conditions where it means to is read as unconditional where it does not.
+                // What this row awards over the check's own award, and NOT conditioned on the roll: the book
+                // conditions a column where it means to ("if the Patriarchy check is successful").
                 award: createStepOutcomeField()
             }), { initial: [] }),
 
@@ -532,18 +569,28 @@ function createRoleAxisField(values) {
     }), { initial: [] });
 }
 
-/**
- * A career, in either of its two roles: a `career` embedded in an Actor is the RECORD of a career
- * served, the same type in a pack or the world is the TEMPLATE carrying that career's tables.
- */
+/** A career: embedded in an Actor, the RECORD of one served; in a pack or the world, the TEMPLATE and its tables. */
 export class CareerData extends ItemBaseData {
 
-    /**
-     * An Item's parent is the Actor it is embedded in, or null in a pack or the world directory.
-     * @type {boolean}
-     */
+    /** Whether this is a template: an embedded Item's parent is its Actor, and null in a pack or the world. */
     get isTemplate() {
         return !this.parent?.parent;
+    }
+
+    /** A Medical Bills row typed as Core p.49 prints it reads as its group, and a throw's one skill as a list. @inheritDoc */
+    static migrateData(source, options) {
+        const typed = source.medicalBillsRow;
+        const fold = text => String(text).toLowerCase().replace(/[^a-z]/g, "");
+        const group = typed && !(typed in MGT2.MedicalBills.groups)
+            && Object.entries(MGT2.MedicalBills.printed).find(([, label]) => fold(label) === fold(typed))?.[0];
+        if ( group ) source.medicalBillsRow = group;
+        for ( const row of [...(source.eventTable ?? []), ...(source.mishapTable ?? [])] ) {
+            const check = row?.check;
+            if ( !check || (typeof check.skill !== "string") || Array.isArray(check.skills) ) continue;
+            check.skills = check.skill.trim() ? [check.skill.trim()] : [];
+            delete check.skill;
+        }
+        return super.migrateData(source, options);
     }
 
     static defineSchema() {
@@ -571,7 +618,8 @@ export class CareerData extends ItemBaseData {
             autoIf: new fields.SchemaField({
                 characteristic: new fields.StringField({
                     required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
-                min: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true })
+                min: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                max: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true })
             }),
             // "DM-1 for every previous career" is printed on each career's own Qualification line
             // and is ABSENT from four of the sixteen, so it is not a general rule.
@@ -700,6 +748,34 @@ export class CareerData extends ItemBaseData {
         // Career-scoped tracks, which `exitRule.track` names.
         schema.tracks = new fields.ArrayField(createTrackDefinitionField(), { initial: [] });
 
+        // Core p.16-17's education: a window of terms, an entry DM by term, the skills taken on entry
+        // and a graduation. Read only where `kind` is `preCareer`; `tied` names the career it feeds.
+        schema.preCareer = new fields.SchemaField({
+            lastTerm: new fields.NumberField({ required: false, initial: 3, min: 1, integer: true }),
+            termDMs: new fields.ArrayField(new fields.NumberField({ required: true, initial: 0, integer: true }),
+                { initial: [] }),
+            tied: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            years: new FormulaField({ required: false, blank: true, initial: "" }),
+            picks: new fields.ArrayField(createEducationPickField(), { initial: [] }),
+            grant: createCellField(),
+            graduation: new fields.SchemaField({
+                characteristic: new fields.StringField({
+                    required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
+                target: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                honoursAt: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                failFloor: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                conditionalDMs: new fields.ArrayField(new fields.SchemaField({
+                    characteristic: new fields.StringField({
+                        required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
+                    min: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                    dm: new fields.NumberField({ required: false, initial: 0, integer: true })
+                }), { initial: [] }),
+                pass: createGraduationArmField(),
+                honours: createGraduationArmField(),
+                fail: createGraduationArmField()
+            })
+        });
+
         /* ---- RECORD: what this Traveller DID. Empty on a template. ---- */
 
         schema.assignment = new fields.StringField({ required: false, blank: true, initial: "" });
@@ -710,6 +786,9 @@ export class CareerData extends ItemBaseData {
         // The rank reached before a commission moved the record to the officer ladder, which resets
         // `rank` to 1 — so the number is gone the moment it is needed, and cannot be reconstructed.
         schema.enlistedRank = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
+        // The skills this record's education granted or raised, by name, which its graduation reads.
+        schema.gained = new fields.ArrayField(new fields.StringField({ required: true, blank: false, trim: true }),
+            { initial: [] });
         schema.events = new fields.ArrayField(
             new fields.SchemaField({
                 age: new fields.NumberField({ required: false, integer: true, initial: null }),
@@ -717,9 +796,7 @@ export class CareerData extends ItemBaseData {
             })
         );
 
-        // Four rules read the MANNER of entering or leaving rather than the fact, and
-        // `stillServing` is what makes parallel records possible: the loop iterates the records
-        // that are still open.
+        // Four rules read the MANNER of entering or leaving; one record is `stillServing` at a time.
         schema.entryMode = new fields.StringField({ required: false, blank: false,
             initial: "qualified", choices: MGT2.CareerEntryModes });
         schema.exitMode = new fields.StringField({ required: false, blank: false,
@@ -1513,13 +1590,29 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
         return false;
     }
 
-    /** Here and not in the sheet's drop handler, so every creation path points the field at this
-     *  Item — a drop, a macro, an import, the creation screen. @inheritDoc */
+    /** Here, so every creation path — a drop, a macro, an import, the screen — links the Item and shows the
+     *  slots it rolls, once: a referee who shows a replaced slot again keeps it. @inheritDoc */
     _onCreate(data, options, userId) {
         const actor = this.#owner;
         if ( (game.user.id !== userId) || !actor ) return;
-        if ( actor.system.personal.species?.id === this.parent.id ) return;
-        actor.update({ "system.personal.species": this.parent.id });
+        const update = {};
+        if ( actor.system.personal.species?.id !== this.parent.id ) update["system.personal.species"] = this.parent.id;
+        const shown = actor.system.characteristics;
+        for ( const row of this.characteristicRolls ) {
+            if ( !(row.characteristic in shown) ) continue;
+            update[`system.characteristics.${row.characteristic}.show`] = true;
+            if ( row.replaces in shown ) update[`system.characteristics.${row.replaces}.show`] = false;
+        }
+        for ( const key of this.withoutCharacteristics ) {
+            if ( key in shown ) update[`system.characteristics.${key}.show`] = false;
+        }
+        if ( !foundry.utils.isEmpty(update) ) actor.update(update);
+    }
+
+    /** The slots this species rolls in another's place, as `{replaced: replacement}`. */
+    get replacements() {
+        return Object.fromEntries(this.characteristicRolls.filter(row => row.replaces && row.characteristic)
+            .map(row => [row.replaces, row.characteristic]));
     }
 
     /** @inheritDoc */
@@ -1565,7 +1658,9 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
                     characteristic: new fields.StringField({
                         required: false, blank: true, trim: true, initial: "" }),
                     value: new fields.NumberField({
-                        required: false, integer: true, nullable: true, initial: null })
+                        required: false, integer: true, nullable: true, initial: null }),
+                    // ACS 4 p.167 prints the Gurvin's modifiers once per sex; blank is every Traveller.
+                    sex: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
                 })
             ),
 
@@ -1614,6 +1709,7 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
                 formula: new FormulaField({ required: false, blank: true, initial: "2D" }),
                 replaces: new fields.StringField({
                     required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
+                sex: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 // The book's own name for a slot: BOL, RES and FOL read as Other or Charm without it.
                 // `label` is the full name and `short` the printed abbreviation; the sheet needs both,
                 // because the cell prints one and its tooltip the other.
@@ -1641,7 +1737,9 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
             careerChange: new fields.SchemaField({
                 // The Core rule is only that you may not return to the career you just left; one
                 // species must serve three terms before attempting another at all.
-                minimumTerms: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true })
+                minimumTerms: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true }),
+                exceptCareers: new fields.ArrayField(
+                    new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] })
             }),
             qualificationOverride: new fields.SchemaField({
                 kind: new fields.StringField({
@@ -1659,6 +1757,8 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
                 formula: new FormulaField({ required: false, blank: true, initial: "" }),
                 mandatory: new fields.ArrayField(
                     new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] }),
+                // ACS 2's Hivers: "In addition, all Hivers gain Persuade 0 and Survival 0".
+                inAddition: new fields.BooleanField({ required: false, initial: false }),
             // The list the count draws from, typed by the referee: the Core's seventeen are the
             // HUMAN list.
                 choices: new fields.ArrayField(

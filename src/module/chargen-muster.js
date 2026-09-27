@@ -1,5 +1,6 @@
 import { Chargen } from "./chargen.js";
-import { Grants } from "./chargen-grants.js";
+import { Grants, MUSTER_TABLE } from "./chargen-grants.js";
+import { CreationRoll } from "./chargen-rolls.js";
 import { Checks, renderRollCard } from "./checks.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
@@ -31,11 +32,7 @@ export const Muster = {
         return found ? { slug: found[0], ...found[1], count } : null;
     },
 
-    /**
-     * One entitlement row from a printed ref. A ref the table does not define becomes a voucher
-     * carrying the words the cell printed, which is the only honest reading of a benefit whose
-     * definition this system does not hold.
-     */
+    /** One entitlement row from a printed ref; a ref the table does not define is a voucher in the cell's words. */
     fromRef(ref, extra = {}) {
         const found = this.definition(ref);
         if ( !found ) return { kind: "voucher", category: String(ref ?? "").trim(), ...extra };
@@ -61,8 +58,40 @@ export const Muster = {
         // The ceiling is the printed column's own length: the Core sets out seven rows and Bounty
         // Hunter p.6 eight, and a fixed clamp puts the eighth out of reach of every DM.
         const at = Math.clamp(total, 1, Math.max(1, rows?.length ?? 0)) - 1;
-        if ( column === "cash" ) return { cell: null, cash: rows?.[at] ?? 0 };
+        // Null is a column the template does not carry, which only the referee can read off the book.
+        if ( column === "cash" ) return { cell: null, cash: rows?.[at] ?? null };
         return { cell: rows?.[at] ?? null, cash: 0 };
+    },
+
+    /** Whether this printed cell names a Benefit the Traveller already holds that folio 47 says to re-roll. */
+    rerolls(actor, cell) {
+        return (cell?.grants ?? []).some(grant => (grant.kind === "benefit")
+            && (this.definition(grant.ref)?.onRepeat === "reroll")
+            && (actor.system.entitlements ?? []).some(held => held.ref === this.definition(grant.ref).slug));
+    },
+
+    /** Benefit rolls one closed career still owes, never more than the whole Traveller is owed. */
+    rollsLeft(actor, career) {
+        if ( actor.items.get(career)?.system.exitMode === "died" ) return 0;
+        const entitlement = this.entitlement(actor);
+        const one = entitlement.careers.find(entry => entry.id === career);
+        return one ? Math.min(one.ledger + one.bonusRolls, entitlement.rolls) : 0;
+    },
+
+    /** The amount a row pays where the template carries no Cash column: null is the referee declining. */
+    async promptCash(total) {
+        const typed = await DialogV2.prompt({
+            window: { title: "MGT2.Chargen.Close.RollBenefit" },
+            classes: ["mgt2"],
+            content: `<p>${game.i18n.format("MGT2.Chargen.Muster.CashAsk", { n: total })}</p>
+                <div class="form-group"><label>${game.i18n.localize("MGT2.Chargen.Close.Credits")}</label>
+                <input type="number" name="credits" value="" min="0" step="1"></div>`,
+            ok: { label: "MGT2.Chargen.Close.Take",
+                callback: (event, button) => button.form.elements.credits.value },
+            rejectClose: false
+        });
+        const credits = Number(typed);
+        return ((typed === null) || (typed === "") || !Number.isFinite(credits)) ? null : Math.max(0, Math.round(credits));
     },
 
     /**
@@ -104,10 +133,8 @@ export const Muster = {
      * @returns {{careers: object[], rolls: number}}
      */
     entitlement(actor) {
-        // Summed here rather than through `Chargen.benefitRolls`, and the difference is measurable:
-        // that reader answers *what this career is worth right now*, so a row naming no career — a
-        // Life Event's `lose one Benefit roll` — counts inside **every** career's total, which is
-        // what a mid-term wager needs and what a sum across careers must not do.
+        // Not `Chargen.benefitRolls`, which counts a row naming no career inside every career's total —
+        // what a mid-term wager needs, and what a sum across careers must not do.
         const rows = Chargen.read(actor).benefitRolls;
         const careers = Chargen.careers(actor).map(record => {
             const bonus = this.rankBonus(record, actor);
@@ -172,8 +199,7 @@ export const Muster = {
     compose(actor, { column = "other", career = "" } = {}) {
         const rows = [];
         if ( column === "cash" ) {
-            // "A Traveller with the Gambler skill gains DM+1 to all rolls on Cash columns" — any
-            // level of it, which is why the level is not read.
+            // "A Traveller with the Gambler skill gains DM+1 to all rolls on Cash columns", at any level.
             const gambler = MGT2.MusterOut.cashSkill;
             const held = Grants.skills(actor).find(skill =>
                 gambler.skills.some(name => MGT2Helper.matchesSkill(skill.name, name)));
@@ -184,6 +210,8 @@ export const Muster = {
             const bonus = this.rankBonus(record, actor);
             if ( bonus.dm ) rows.push([record.name, bonus.dm]);
         }
+        // A printed footnote — Companion p.36's "FOL 10+ add +1 to their Benefit rolls" — gated at the roll.
+        rows.push(...CreationRoll.standing(actor, "benefit", record?.name ?? ""));
         // Life Event 10's `DM+2 to any one Benefit roll` and everything shaped like it.
         for ( const entry of Chargen.pending(actor, "benefit", record?.name ?? "") ) {
             if ( (entry.kind === "dm") && entry.dm ) {
@@ -198,6 +226,12 @@ export const Muster = {
     async roll(actor, { column = "other", career = "" } = {}) {
         if ( (column === "cash") && !this.cash(actor).left ) {
             ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Muster.CashSpent"));
+            return null;
+        }
+        // Core p.46: one roll per full term plus the rank's, and a roll not owed is never taken.
+        if ( this.rollsLeft(actor, career) <= 0 ) {
+            ui.notifications.warn(game.i18n.format("MGT2.Chargen.Muster.NoRollsLeft",
+                { career: actor.items.get(career)?.name ?? "" }));
             return null;
         }
         const composed = this.compose(actor, { column, career });
@@ -232,6 +266,17 @@ export const Muster = {
             row = { ...row, ...convert, credits: null, tl: null, constraint: "",
                 category: game.i18n.localize(`MGT2.Chargen.Benefits.${convert.ref}`) };
         }
+        const repeated = await repeatOf(actor, row);
+        if ( repeated.reroll ) {
+            ui.notifications.warn(game.i18n.format("MGT2.Chargen.Muster.Reroll", { what: row.category }));
+            return null;
+        }
+        if ( repeated.stacked ) {
+            await actor.update({ "system.entitlements": repeated.stacked });
+            if ( spend ) await this.spendRoll(actor, row.provenance, row.category || row.kind);
+            return repeated.stacked[repeated.index];
+        }
+        row = repeated.row ?? row;
         if ( row.kind === "membership" ) row.redeemed = true;
         const update = { "system.entitlements": [...(actor.system.entitlements ?? []), row] };
 
@@ -246,9 +291,20 @@ export const Muster = {
             update["system.finance.shipShares"] = (actor.system.finance.shipShares ?? 0) + (row.count ?? 1);
         }
         // A relationship is a `contact` Item and never a voucher; the row survives so the ledger
-        // still says which roll produced it.
-        if ( row.kind === "contact" ) row.redeemed = true;
+        // still says which roll produced it. So is a characteristic or a skill that names what it raises.
+        const raises = { characteristic: row.characteristic, skill: row.category }[row.kind];
+        if ( (row.kind === "contact") || raises ) row.redeemed = true;
         await actor.update(update);
+        if ( (row.kind === "characteristic") && raises ) {
+            await Grants.grantCharacteristic(actor, { characteristic: raises, value: row.count || 1, mode: "add" },
+                { ...row.provenance, table: MUSTER_TABLE });
+        }
+        if ( (row.kind === "skill") && raises ) {
+            // "Melee (blade)" typed whole is a skill and its speciality, as a printed cell stores them.
+            const [, name, speciality] = raises.match(/^(.+?)\s*\(([^)]+)\)$/) ?? [null, raises, ""];
+            await Grants.grantSkill(actor, { name, speciality, level: row.count || 1, mode: "raise",
+                provenance: row.provenance });
+        }
         if ( row.kind === "contact" ) {
             const relation = MGT2.Benefits[row.ref]?.relation ?? "Contact";
             for ( let taken = 0; taken < (row.count || 1); taken++ ) {
@@ -293,6 +349,9 @@ export const Muster = {
                 <select name="kind">${kinds}</select></div>
                 <div class="form-group"><label>${game.i18n.localize("MGT2.Chargen.Close.What")}</label>
                 <input type="text" name="category" value=""></div>
+                <div class="form-group"><label>${game.i18n.localize("MGT2.Chargen.BenefitKinds.characteristic")}</label>
+                <select name="characteristic"><option value="">—</option>${Object.entries(MGT2.Characteristics)
+        .map(([key, label]) => `<option value="${key}">${escape(game.i18n.localize(label))}</option>`).join("")}</select></div>
                 <div class="form-group"><label>${game.i18n.localize("MGT2.Chargen.Close.Credits")}</label>
                 <input type="number" name="credits" value=""></div>
                 <div class="form-group"><label>${game.i18n.localize("MGT2.Chargen.Close.Tl")}</label>
@@ -305,7 +364,7 @@ export const Muster = {
                 callback: (event, button) => {
                     const form = button.form.elements;
                     const number = name => (form[name].value === "") ? null : Number(form[name].value);
-                    return { ref: form.ref.value, kind: form.kind.value,
+                    return { ref: form.ref.value, kind: form.kind.value, characteristic: form.characteristic.value,
                         category: form.category.value.trim(), credits: number("credits"),
                         tl: number("tl"), count: Math.max(1, number("count") ?? 1),
                         note: form.note.value.trim() };
@@ -316,9 +375,13 @@ export const Muster = {
         const extra = { note: typed.note, provenance };
         // A named row is the table's to describe; the fields below it only answer for a benefit
         // this system holds no definition for.
-        if ( typed.ref ) return this.fromRef(typed.ref, { ...extra, count: typed.count });
+        if ( typed.ref ) {
+            return this.fromRef(typed.ref, { ...extra, count: typed.count,
+                ...(typed.characteristic ? { characteristic: typed.characteristic } : {}) });
+        }
         return { kind: typed.kind, category: typed.category, credits: typed.credits, tl: typed.tl,
-            count: typed.count, ...extra };
+            count: typed.count, ...((typed.kind === "characteristic") ? { characteristic: typed.characteristic } : {}),
+            ...extra };
     },
 
     /**
@@ -349,10 +412,7 @@ export const Muster = {
             .filter(row => !row.redeemed);
     },
 
-    /**
-     * The pension, per career: *a Traveller that leaves a career after at least five terms is
-     * considered to have retired*.
-     */
+    /** The pension, per career: *a Traveller that leaves a career after at least five terms … has retired*. */
     pensionOf(record) {
         const { fromTerms, base, perTerm } = MGT2.MusterOut.pension;
         const terms = Chargen.termsIn(record);
@@ -361,12 +421,10 @@ export const Muster = {
         return base + (perTerm * (terms - fromTerms));
     },
 
-    /**
-     * Cr25000 a year for each ship given up when the table debates who keeps the only one, and
-     * Cr1000 a year for a Ship Share never spent on a hull.
-     */
+    /** Cr25000 a year per ship given up in the debate, and Cr1000 a year per Ship Share never spent on a hull. */
     pensionInLieuOfShip(actor, shipsGivenUp = 0) {
-        const shares = actor?.system.finance.shipShares ?? 0;
+        const finance = actor?.system.finance;
+        const shares = Math.max(0, (finance?.shipShares ?? 0) - (finance?.shipSharesCommitted ?? 0));
         return (shipsGivenUp * MGT2.MusterOut.shipForgone) + (shares * MGT2.MusterOut.shipShareUnspent);
     },
 
@@ -418,3 +476,37 @@ export const Muster = {
         return { paid, owed, refused: false };
     }
 };
+
+/** Core p.47's repeat clauses: a mortgage stacks a quarter, a Scout Ship re-rolls, a weapon or a boat may be a skill. */
+async function repeatOf(actor, row) {
+    const definition = MGT2.Benefits[row.ref];
+    const rows = (actor.system.entitlements ?? []).map(one => ({ ...one }));
+    const index = rows.findIndex(one => (one.ref === row.ref) && !one.surrendered);
+    if ( !definition || (index < 0) ) return {};
+    if ( definition.onRepeat === "reroll" ) return { reroll: true };
+    if ( definition.onRepeat === "stackMortgage" ) {
+        rows[index].count = Math.min(4, (rows[index].count || 1) + 1);
+        return { stacked: rows, index };
+    }
+    if ( definition.onRepeat !== "skillLevel" ) return {};
+    const options = definition.repeat ?? ["another", "skill"];
+    const escape = foundry.utils.escapeHTML;
+    const choice = await DialogV2.wait({
+        window: { title: "MGT2.Chargen.Muster.RepeatTitle" },
+        classes: ["mgt2"],
+        content: `<p>${escape(game.i18n.format("MGT2.Chargen.Muster.RepeatAsk", { what: row.category }))}</p>
+            <div class="form-group"><label>${escape(game.i18n.localize(`MGT2.Chargen.Benefits.Repeat.${row.ref}`))}</label>
+            <input type="text" name="skill" value=""></div>`,
+        buttons: options.map(option => ({ action: option, label: `MGT2.Chargen.Muster.Repeat.${option}`,
+            callback: (event, button) => ({ option, skill: button.form.elements.skill.value.trim() }) })),
+        rejectClose: false
+    });
+    if ( (choice?.option === "skill") && choice.skill ) {
+        return { row: { ...row, kind: "skill", category: choice.skill, credits: null, tl: null, constraint: "" } };
+    }
+    if ( choice?.option === "shipShare" ) {
+        return { row: { ...row, kind: "shipShare", ref: "shipShares", count: 1, credits: null, tl: null, constraint: "",
+            category: game.i18n.localize("MGT2.Chargen.Benefits.shipShares") } };
+    }
+    return {};
+}

@@ -4,6 +4,188 @@
 
 ---
 
+## [0.2.3]
+
+**Verified on Foundry VTT 14.368.**
+
+**Creation, re-read rule by rule against the book.** A complete audit of Traveller creation found
+some thirty places where a field, a control or a rule existed and nothing read it: a rank bonus never
+paid, pending entries with no effect, a draft reduced to a sentence. All of them are fixed, and
+pre-career education finally works ([#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)).
+The system still ships no career and no table: it runs the ones the referee types or imports.
+
+### ⚠ Breaking changes
+
+* **A commission gained closes that term's Advancement roll** (Core p.19). 0.2.0 to 0.2.2 followed
+  the book's old update, which allowed it; the 2022 edition says the opposite, and it governs. A
+  failed Commission roll leaves Advancement open.
+* **Each roll of a term is made once** (Core p.18-19): a step already taken is refused rather than
+  rolled again, and a refused qualification closes the term to other careers, except one that is
+  always open. The referee can reopen a step taken by mistake (↺ *Reopen this step*).
+* **One career at a time**: dropping a career on a Traveller already serving one is refused.
+* **A forced-entry career, such as the Prisoner, can no longer be entered voluntarily** (Core p.52):
+  it is entered through a sentence left pending, through the draft, or by the referee's hand.
+* **World migration.** No career served had ever been given its assignment or its rank ladder. The
+  first time a world opens in 0.2.3, each career already served receives its assignment where it is
+  missing and the template offers only one, then the ladder that assignment names. **Rank is never
+  changed**, and the rank bonuses the career never paid are not paid after the fact: the referee
+  receives the list in a private message.
+* **For scripts and modules**: an Events row's check now names a list, `check.skills`, rather than
+  `check.skill` — a template saved before is read as it stands. A career's Medical Bills row
+  (`medicalBillsRow`) takes one of three ids, `military`, `civilian` or `independent`, and a label
+  typed as the book prints it is still recognised.
+
+### Pre-career education
+
+* **A career of the *Pre-career education* kind finally follows its own rules** (Core p.16-17):
+  entry only during the first three terms, one attempt a term, with that term's DM; a refusal leaves
+  the term to a career.
+* **During the education**: the skills it teaches — a university picks them from its own table, a
+  military academy reads them off its career's Service Skills —, one roll on the Pre-Career Events,
+  and **no Survival roll, no Commission, no Benefit roll**. The term still counts for age, ageing and
+  PSI.
+* **Graduation** is rolled as the education prints it, with its honours, its failure floor and its
+  conditional DMs. What it leaves — a qualification DM, a DM or an automatic success on the first
+  Commission roll, automatic entry into the academy's career — applies to **the first career
+  attempted next**, and is lost if that career refuses the Traveller. A cadet who fails without
+  rolling 2 or less keeps their place, with no Commission roll the first term; an Event's *"you fail
+  to graduate"* forbids the roll.
+* **An education is not a previous career** (Core p.16): the first career after it keeps its whole
+  basic training and takes no DM−1 per previous career, unless the new optional rule says otherwise.
+  Two educations in a row are possible — a ruling: the book sets only the window and one attempt a
+  term.
+* **The career form gains an *Education* block**: the window, the DMs by term, the tied career, the
+  length (the Companion's 22 + 2D3 years is written `4+2D3`), the chosen skills, the entry grant, and
+  graduation with its three outcomes. The Companion's options (p.32-34) are written there too.
+
+### Shared tables
+
+* **Life Events, the Unusual Event, the Draft, the Pre-Career Events and the Background Skills have a
+  home**: each is a career of the *Shared table* kind, which the referee links in the *Shared creation
+  tables* menu of the world settings. The system ships none of them.
+* **Once linked, they play like a career's own rows**: a 7 on Events rolls Life Events, and a row
+  naming a table rolls it and applies it — a contact, a betrayal, a pending DM, a lost Benefit roll,
+  the Prisoner. With no table linked, the system still says which one to roll from the book.
+* **The draft is played** (Core p.19): a refused qualification offers the draft, once in a lifetime,
+  a career that is always open such as the Drifter, or deciding later. The draft rolls the linked
+  table and enters the career drawn, on the assignment printed, with no qualification roll. An Event
+  that drafts the Traveller compels that career the next term (Core p.17).
+* **The Background Skills** offer their list where the species prints none (Core p.9).
+
+### The term
+
+* **Entering a career asks for the assignment**, before the roll, and writes the rank ladder it
+  names. Changing assignment in the Agent, Citizen, Entertainer or Merchant opens a new career (Core
+  p.20): the term closes, and the next one qualifies for the new assignment.
+* **Pending entries do what they say**: an automatic success passes the promotion or the commission
+  without dice, a prohibition stops its roll, an offered career is entered without qualifying, a
+  compelled career is the only one open, a blocked career takes *Continue* away, an unlocked career
+  lifts the referee's permission. An Advancement DM can go to the Commission roll, at the player's
+  choice (Core p.19). **The referee adds or removes an entry by hand.**
+* **Events rows**: their effect on Benefit rolls can depend on their own check, and the Navy,
+  Merchant and Rogue wagers are played (Core p.35, p.37, p.41) — a stake taken, declined or chosen
+  from the rolls owed, and a win paying half the stake again, rounded up. A check *"if you take this
+  opportunity"* can be declined. A row can grant its skill **before** its check, as the Navy and the
+  Rogue print it; a check printed on two or three skills is made on the Traveller's best, and a row
+  can give a level to the skill used, as the Merchant does — a ruling on the printed order, which no
+  errata settles.
+* **Injury and medical care** (Core p.49): a row sending to the Injury table rolls it as the row
+  prints it, the player places the losses, and care costs Cr5000 a point, less the employer's share
+  read on Medical Bills; the rest is a debt, paid first out of mustering-out cash (Core p.52).
+* **Anagathics** (Core p.49): from SOC 10, two Survival rolls a term, the terms on them a positive DM
+  on ageing, 1D × Cr25000 a term carried as debt, and an ageing roll as soon as they stop; an exact 2
+  leads to the Prisoner.
+* **The Prisoner** (Core p.52, p.57): the Parole Threshold is rolled on entry, a prisoner cannot
+  leave, and release — through Advancement or an escape — ends the career.
+
+### Species
+
+* **The Aslan's three terms in a career before attempting another** (Aliens of Charted Space 1
+  p.19): the term's decision says so, a career left by choice too early refuses the next — mustering
+  out stays open —, and a career the species exempts, or one an Event offers or compels, is never
+  refused.
+* **A career open to one species or one sex** refuses other Travellers; a species named without its
+  variant admits every variant.
+* **A replacement characteristic** — the Vargr's CHA, the Hiver's RES (Aliens of Charted Space 1
+  p.179, 2 p.255) — shows in place of the one it replaces and takes its place in the UPP.
+* **A species' modifiers and dice can depend on sex**, like the Gurvin's (Aliens of Charted Space 4
+  p.167); a Traveller whose sex is not yet set rolls the shared dice, and the dialog says so.
+* **Characteristic assignment**: a slot on the species' own dice, like the Hiver's 1D+6, keeps its
+  roll; a boon die adds to those dice; a value printed rather than rolled, like the Aslan's TER of 0,
+  counts as set.
+* **A track that *only ever climbs* never falls**, whatever the world rule.
+* **A species frame imposes its characteristic on the Survival roll and the Commission**, as it
+  already did on Advancement.
+
+### Mustering out
+
+* **A Benefit roll is offered only to a career still owed one** (Core p.46), and the count no longer
+  goes below zero.
+* **The printed repeat clauses** (Core p.47): a weapon received twice can become a skill level,
+  another quarter of the mortgage is paid, a Scout Ship is rolled again.
+* **A characteristic increase stops at the species' maximum**, 15 for a human (Core p.9), and excess
+  SOC from a Benefit table becomes Ship Shares (Core p.47).
+* **Ship Shares put into the kept ship** no longer pay the Cr1000 a year (Core p.48; counting per
+  share is a ruling), and finishing creation while several Travellers keep a ship is flagged.
+* **Standing modifiers reach the Benefit roll**, like the Truthers' FOL 10+ (Companion p.36).
+* **The Cr10000 of equipment a Traveller may buy before play** is shown (Core p.46).
+
+### Psionics
+
+* **A new course of psionic training costs Cr100000** (Core p.228): the first is free, and each new
+  one, which starts the cumulative penalty again, is paid from the Traveller's cash or as debt. A
+  ruling: the book prices nothing during creation.
+* **A talent rolled on a skill table** is a check to learn it (Core p.229), no longer a talent gained
+  outright.
+
+### Contacts
+
+* **A contact can be linked to a Traveller's or an NPC's sheet**: drop the Actor on the contact's
+  sheet, which then opens it in one click and can unlink it.
+
+### Optional and variant rules
+
+* **New, on**: *An ejected Traveller still takes the term's skill roll* — a ruling, since the book
+  takes the Benefit roll and the career and says nothing of the skill roll (Core p.18). The term's
+  log says which way it runs.
+* **New, off**: *Pre-career education counts as a previous career*.
+* *Money spent during creation becomes debt* now also covers medical care, anagathics and a new
+  psionic course.
+
+### Demo and documentation
+
+* **`Demo — Harbour Cadet School`** joins the demo items: an academy tied to `Demo — Harbour Patrol`,
+  to see an education from start to finish. The patrol now pays its rank-0 bonus.
+* **The rules audit journal** (`mgt2.docs`) describes creation as it now stands.
+
+### Fixes
+
+* **Enlisted and civilian rank bonuses were never paid**: only an officer grade paid, after a
+  commission. Rank 0 is paid on entry, and each promotion pays its own (Core p.19).
+* **"Roll on the Mishap table" did not roll the table** (Core p.23). It rolls, and the Traveller
+  stays in the career where the row says so.
+* ⚠ **The career form erased data on every save**: an Other Benefit reference, a contact's relation
+  (Ally, Rival, Enemy), the floor of *"SOC 10 or SOC +1"* and a list of specialities vanished as soon
+  as another field was edited, and a conditional qualification DM could not be typed at all. A career
+  imported then edited may have lost some: check it.
+* **A DM "to your next Survival roll" was spent by the ageing roll**, and a lasting Advancement DM
+  was added to Events checks.
+* **A Mishap that does not eject still cancelled** the term's Event, Commission and Advancement
+  (Core p.18).
+* **A Connection added nothing to a skill already held** (Core p.19): it raises it by one level, up
+  to 3.
+* **Ageing losses could all fall on the same characteristic** (Core p.49).
+* **Telepathy was free only while no talent was held**: it is free while no check has been attempted
+  (Core p.228-229).
+* **The number of background skills** differed between the chip and the picker, and a species that
+  gives them *"in addition"*, like the Hivers, saw them fill the count.
+* **An empty Cash column**, on a career typed by hand, paid Cr0 and spent a roll: it now asks for the
+  amount. A characteristic or skill benefit chosen by hand applies at once.
+* **Solo generation did not grant its level-1 skill**, and a Traveller dead under Iron Man carried
+  on with the term (Companion p.13).
+
+---
+
 ## [0.2.2]
 
 **Verified on Foundry VTT 14.368.**

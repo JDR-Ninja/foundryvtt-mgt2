@@ -1,5 +1,7 @@
 import { PACKAGE_SETTING } from "./chargen-close.js";
+import { CreationTablesMenu, SharedTables } from "./chargen-tables.js";
 import { CHAIN_INTO_SETTING, refreshChainInto } from "./chatHelper.js";
+import { MGT2 } from "./config.js";
 import { applyGuideButton } from "./guide.js";
 import { PACKS_SETTING, WorldPacksMenu } from "./packs.js";
 import { ASK_AGAIN_SETTING, ASK_SAME_SETTING, NUDGE_MODES, refreshAskTheSame, refreshRequestCards,
@@ -184,10 +186,7 @@ export function migrateLegacyTheme() {
     applyPalette(undefined, accent);
 }
 
-/**
- * The stored field of a picker, a choice or a **count**; a switch needs none and registers as a
- * plain Boolean.
- */
+/** The stored field of a picker, a choice or a **count**; a switch needs none and registers as a plain Boolean. */
 function ruleField(rule) {
     if ( rule.options ) return new fields.StringField({
         required: true, blank: false, choices: rule.options, initial: rule.default });
@@ -465,6 +464,21 @@ export const registerSettings = function () {
         scope: "world",
         config: false,
         type: new fields.ObjectField()
+    });
+
+    // One per shared creation table, each the UUID of a `career` Item of kind `table`.
+    for ( const role of Object.keys(MGT2.SharedCreationTables) ) {
+        game.settings.register("mgt2", SharedTables.setting(role), {
+            scope: "world", config: false, type: String, default: "" });
+    }
+
+    game.settings.registerMenu("mgt2", "creationTables", {
+        name: "MGT2.Chargen.Shared.Title",
+        hint: "MGT2.Chargen.Shared.MenuHint",
+        label: "MGT2.Chargen.Shared.MenuLabel",
+        icon: "fa-solid fa-table-list",
+        type: CreationTablesMenu,
+        restricted: true
     });
 
     game.settings.registerMenu("mgt2", "rules", {

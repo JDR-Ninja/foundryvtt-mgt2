@@ -10785,6 +10785,18 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   text-decoration: line-through;
   color: var(--faint);
 }
+.mgt2.chargen .steps li.done {
+  border-color: var(--good);
+  color: var(--good);
+}
+.mgt2.chargen .steps li.done a.reset {
+  margin-left: 5px;
+  cursor: pointer;
+  color: var(--faint);
+}
+.mgt2.chargen .steps li.done a.reset:hover {
+  color: var(--accent-text);
+}
 .mgt2.chargen .steps li.once {
   display: flex;
   align-items: baseline;
@@ -10840,6 +10852,15 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   margin-left: 10px;
   font-family: var(--mono);
   font-size: 10.5px;
+  color: var(--accent-text);
+}
+.mgt2.chargen .tray2 .add, .mgt2.chargen .tray2 .del {
+  margin-left: 8px;
+  font-size: 10px;
+  color: var(--faint);
+  cursor: pointer;
+}
+.mgt2.chargen .tray2 .add:hover, .mgt2.chargen .tray2 .del:hover {
   color: var(--accent-text);
 }
 .mgt2.chargen .tray2 table {
@@ -10973,7 +10994,7 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 .mgt2 .mustergrid .careers li .pen {
   color: var(--accent-text);
 }
-.mgt2 .mustergrid .sh {
+.mgt2 .mustergrid .sh, .mgt2 .mustergrid .pre {
   display: block;
   font-size: 9.5px;
   color: var(--faint);
@@ -11117,6 +11138,13 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 }
 .mgt2.chargen-close .election li .up {
   color: var(--danger);
+}
+.mgt2.chargen-close .election li input[type=number] {
+  width: 3.4rem;
+  height: 1.5rem;
+  flex: none;
+  font-family: var(--mono);
+  font-size: 10.5px;
 }
 .mgt2.chargen-close .election li button {
   width: auto;
@@ -11320,6 +11348,7 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 }
 .mgt2 .careerblk .pfields > label, .mgt2 .careertbl .pfields > label, .mgt2 .speciesblk .pfields > label, .mgt2 .speciesfrm .pfields > label {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 5px;
   flex: 1 1 14rem;
@@ -11333,10 +11362,11 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 }
 .mgt2 .careerblk .pfields .f, .mgt2 .careertbl .pfields .f, .mgt2 .speciesblk .pfields .f, .mgt2 .speciesfrm .pfields .f {
   flex: 1 1 5rem;
-  min-width: 0;
+  min-width: 4.5rem;
 }
 .mgt2 .careerblk .pfields .f.num, .mgt2 .careertbl .pfields .f.num, .mgt2 .speciesblk .pfields .f.num, .mgt2 .speciesfrm .pfields .f.num {
   flex: 0 0 3.4rem;
+  min-width: 0;
   text-align: right;
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
@@ -11382,12 +11412,12 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   color: var(--accent-text);
 }
 
-.mgt2 .careertbl .stack, .mgt2 .speciesblk .stack, .mgt2 .speciesfrm .stack {
+.mgt2 .careerblk .stack, .mgt2 .careertbl .stack, .mgt2 .speciesblk .stack, .mgt2 .speciesfrm .stack {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.mgt2 .careertbl .entry, .mgt2 .speciesblk .entry, .mgt2 .speciesfrm .entry {
+.mgt2 .careerblk .entry, .mgt2 .careertbl .entry, .mgt2 .speciesblk .entry, .mgt2 .speciesfrm .entry {
   --mute: color-mix(in oklab, var(--ink) var(--i-mute), var(--sunk));
   --faint: color-mix(in oklab, var(--ink) var(--i-faint), var(--sunk));
   --fill: color-mix(in oklab, var(--ink) var(--i-fill), var(--sunk));
@@ -11396,29 +11426,29 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   padding: 5px 7px;
   background: var(--sunk);
 }
-.mgt2 .careertbl .entryhead, .mgt2 .speciesblk .entryhead, .mgt2 .speciesfrm .entryhead {
+.mgt2 .careerblk .entryhead, .mgt2 .careertbl .entryhead, .mgt2 .speciesblk .entryhead, .mgt2 .speciesfrm .entryhead {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 5px;
 }
-.mgt2 .careertbl .entryhead .f, .mgt2 .speciesblk .entryhead .f, .mgt2 .speciesfrm .entryhead .f {
+.mgt2 .careerblk .entryhead .f, .mgt2 .careertbl .entryhead .f, .mgt2 .speciesblk .entryhead .f, .mgt2 .speciesfrm .entryhead .f {
   flex: 1 1 6rem;
   min-width: 0;
 }
-.mgt2 .careertbl .entryhead .f.num, .mgt2 .speciesblk .entryhead .f.num, .mgt2 .speciesfrm .entryhead .f.num {
+.mgt2 .careerblk .entryhead .f.num, .mgt2 .careertbl .entryhead .f.num, .mgt2 .speciesblk .entryhead .f.num, .mgt2 .speciesfrm .entryhead .f.num {
   flex: 0 0 3rem;
   text-align: right;
 }
-.mgt2 .careertbl .entryhead .f.wide, .mgt2 .speciesblk .entryhead .f.wide, .mgt2 .speciesfrm .entryhead .f.wide {
+.mgt2 .careerblk .entryhead .f.wide, .mgt2 .careertbl .entryhead .f.wide, .mgt2 .speciesblk .entryhead .f.wide, .mgt2 .speciesfrm .entryhead .f.wide {
   flex: 4 1 16rem;
 }
-.mgt2 .careertbl .nest, .mgt2 .speciesblk .nest, .mgt2 .speciesfrm .nest {
+.mgt2 .careerblk .nest, .mgt2 .careertbl .nest, .mgt2 .speciesblk .nest, .mgt2 .speciesfrm .nest {
   margin: 5px 0 0 10px;
   padding-left: 8px;
   border-left: 1px solid var(--rule);
 }
-.mgt2 .careertbl .nlbl, .mgt2 .speciesblk .nlbl, .mgt2 .speciesfrm .nlbl {
+.mgt2 .careerblk .nlbl, .mgt2 .careertbl .nlbl, .mgt2 .speciesblk .nlbl, .mgt2 .speciesfrm .nlbl {
   display: block;
   font-family: var(--cond);
   font-size: 10px;
@@ -11426,26 +11456,26 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   text-transform: uppercase;
   color: var(--faint);
 }
-.mgt2 .careertbl .nrow, .mgt2 .speciesblk .nrow, .mgt2 .speciesfrm .nrow {
+.mgt2 .careerblk .nrow, .mgt2 .careertbl .nrow, .mgt2 .speciesblk .nrow, .mgt2 .speciesfrm .nrow {
   display: flex;
   align-items: flex-start;
   gap: 5px;
   padding: 2px 0;
 }
-.mgt2 .careertbl .nrow .f, .mgt2 .speciesblk .nrow .f, .mgt2 .speciesfrm .nrow .f {
+.mgt2 .careerblk .nrow .f, .mgt2 .careertbl .nrow .f, .mgt2 .speciesblk .nrow .f, .mgt2 .speciesfrm .nrow .f {
   flex: 1 1 6rem;
   min-width: 0;
 }
-.mgt2 .careertbl .nrow .f.num, .mgt2 .speciesblk .nrow .f.num, .mgt2 .speciesfrm .nrow .f.num {
+.mgt2 .careerblk .nrow .f.num, .mgt2 .careertbl .nrow .f.num, .mgt2 .speciesblk .nrow .f.num, .mgt2 .speciesfrm .nrow .f.num {
   flex: 0 0 3rem;
   text-align: right;
 }
-.mgt2 .careertbl .nrow.inline, .mgt2 .speciesblk .nrow.inline, .mgt2 .speciesfrm .nrow.inline {
+.mgt2 .careerblk .nrow.inline, .mgt2 .careertbl .nrow.inline, .mgt2 .speciesblk .nrow.inline, .mgt2 .speciesfrm .nrow.inline {
   display: inline-flex;
   align-items: center;
   margin-right: 8px;
 }
-.mgt2 .careertbl .ord, .mgt2 .speciesblk .ord, .mgt2 .speciesfrm .ord {
+.mgt2 .careerblk .ord, .mgt2 .careertbl .ord, .mgt2 .speciesblk .ord, .mgt2 .speciesfrm .ord {
   flex: 0 0 1.3rem;
   font-family: var(--mono);
   font-size: 11px;
@@ -11453,41 +11483,41 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   color: var(--faint);
   text-align: right;
 }
-.mgt2 .careertbl .trayrow, .mgt2 .speciesblk .trayrow, .mgt2 .speciesfrm .trayrow {
+.mgt2 .careerblk .trayrow, .mgt2 .careertbl .trayrow, .mgt2 .speciesblk .trayrow, .mgt2 .speciesfrm .trayrow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
   padding: 2px 0;
 }
-.mgt2 .careertbl .trayrow .f, .mgt2 .speciesblk .trayrow .f, .mgt2 .speciesfrm .trayrow .f {
+.mgt2 .careerblk .trayrow .f, .mgt2 .careertbl .trayrow .f, .mgt2 .speciesblk .trayrow .f, .mgt2 .speciesfrm .trayrow .f {
   flex: 1 1 5rem;
   min-width: 0;
 }
-.mgt2 .careertbl .trayrow .f.kind, .mgt2 .speciesblk .trayrow .f.kind, .mgt2 .speciesfrm .trayrow .f.kind {
+.mgt2 .careerblk .trayrow .f.kind, .mgt2 .careertbl .trayrow .f.kind, .mgt2 .speciesblk .trayrow .f.kind, .mgt2 .speciesfrm .trayrow .f.kind {
   flex: 0 0 7rem;
 }
-.mgt2 .careertbl .trayrow .f.num, .mgt2 .speciesblk .trayrow .f.num, .mgt2 .speciesfrm .trayrow .f.num {
+.mgt2 .careerblk .trayrow .f.num, .mgt2 .careertbl .trayrow .f.num, .mgt2 .speciesblk .trayrow .f.num, .mgt2 .speciesfrm .trayrow .f.num {
   flex: 0 0 3rem;
   text-align: right;
 }
-.mgt2 .careertbl .trayrow .f.wide, .mgt2 .speciesblk .trayrow .f.wide, .mgt2 .speciesfrm .trayrow .f.wide {
+.mgt2 .careerblk .trayrow .f.wide, .mgt2 .careertbl .trayrow .f.wide, .mgt2 .speciesblk .trayrow .f.wide, .mgt2 .speciesfrm .trayrow .f.wide {
   flex: 1 1 100%;
 }
-.mgt2 .careertbl .cell, .mgt2 .speciesblk .cell, .mgt2 .speciesfrm .cell {
+.mgt2 .careerblk .cell, .mgt2 .careertbl .cell, .mgt2 .speciesblk .cell, .mgt2 .speciesfrm .cell {
   flex: 1 1 auto;
   min-width: 0;
 }
-.mgt2 .careertbl .cellhead, .mgt2 .speciesblk .cellhead, .mgt2 .speciesfrm .cellhead {
+.mgt2 .careerblk .cellhead, .mgt2 .careertbl .cellhead, .mgt2 .speciesblk .cellhead, .mgt2 .speciesfrm .cellhead {
   display: flex;
   align-items: center;
   gap: 5px;
 }
-.mgt2 .careertbl .cellhead .f, .mgt2 .speciesblk .cellhead .f, .mgt2 .speciesfrm .cellhead .f {
+.mgt2 .careerblk .cellhead .f, .mgt2 .careertbl .cellhead .f, .mgt2 .speciesblk .cellhead .f, .mgt2 .speciesfrm .cellhead .f {
   flex: 1 1 auto;
   min-width: 0;
 }
-.mgt2 .careertbl .grantcount, .mgt2 .speciesblk .grantcount, .mgt2 .speciesfrm .grantcount {
+.mgt2 .careerblk .grantcount, .mgt2 .careertbl .grantcount, .mgt2 .speciesblk .grantcount, .mgt2 .speciesfrm .grantcount {
   flex: 0 0 auto;
   min-width: 1.1rem;
   font-family: var(--mono);
@@ -11495,27 +11525,27 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   text-align: center;
   color: var(--accent-text);
 }
-.mgt2 .careertbl .grantcount.none, .mgt2 .speciesblk .grantcount.none, .mgt2 .speciesfrm .grantcount.none {
+.mgt2 .careerblk .grantcount.none, .mgt2 .careertbl .grantcount.none, .mgt2 .speciesblk .grantcount.none, .mgt2 .speciesfrm .grantcount.none {
   color: var(--faint);
 }
-.mgt2 .careertbl .grants, .mgt2 .speciesblk .grants, .mgt2 .speciesfrm .grants {
+.mgt2 .careerblk .grants, .mgt2 .careertbl .grants, .mgt2 .speciesblk .grants, .mgt2 .speciesfrm .grants {
   margin-left: 6px;
 }
-.mgt2 .careertbl .grant, .mgt2 .speciesblk .grant, .mgt2 .speciesfrm .grant {
+.mgt2 .careerblk .grant, .mgt2 .careertbl .grant, .mgt2 .speciesblk .grant, .mgt2 .speciesfrm .grant {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
   padding: 2px 0;
 }
-.mgt2 .careertbl .grant .f, .mgt2 .speciesblk .grant .f, .mgt2 .speciesfrm .grant .f {
+.mgt2 .careerblk .grant .f, .mgt2 .careertbl .grant .f, .mgt2 .speciesblk .grant .f, .mgt2 .speciesfrm .grant .f {
   flex: 1 1 5rem;
   min-width: 0;
 }
-.mgt2 .careertbl .grant .f.kind, .mgt2 .speciesblk .grant .f.kind, .mgt2 .speciesfrm .grant .f.kind {
+.mgt2 .careerblk .grant .f.kind, .mgt2 .careertbl .grant .f.kind, .mgt2 .speciesblk .grant .f.kind, .mgt2 .speciesfrm .grant .f.kind {
   flex: 0 0 7rem;
 }
-.mgt2 .careertbl .grant .f.num, .mgt2 .speciesblk .grant .f.num, .mgt2 .speciesfrm .grant .f.num {
+.mgt2 .careerblk .grant .f.num, .mgt2 .careertbl .grant .f.num, .mgt2 .speciesblk .grant .f.num, .mgt2 .speciesfrm .grant .f.num {
   flex: 0 0 3rem;
   text-align: right;
 }

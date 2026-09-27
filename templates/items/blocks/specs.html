@@ -40,10 +40,11 @@
 			{{#each system.modifiers as |modifier i|}}
 			<tr class="modifiers-part" data-modifiers-part="{{i}}">
 				<td>
-					<span class="play-only">{{localize (lookup ../config.Characteristics modifier.characteristic)}}</span>
+					<span class="play-only">{{localize (lookup ../config.Characteristics modifier.characteristic)}}{{#if modifier.sex}} &middot; {{modifier.sex}}{{/if}}</span>
 					<select class="f edit-only" name="system.modifiers.{{i}}.characteristic">
 						{{selectOptions ../config.Characteristics selected=modifier.characteristic localize=true}}
 					</select>
+					<input class="f edit-only" type="text" name="system.modifiers.{{i}}.sex" value="{{modifier.sex}}" placeholder="{{localize 'MGT2.Chargen.Frame.LawSex'}}" />
 				</td>
 				<td class="c num">
 					<span class="play-only">{{showDM modifier.value}}</span>

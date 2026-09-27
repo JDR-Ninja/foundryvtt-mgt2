@@ -28,7 +28,8 @@
 				    all read as Other or Charm without it. }}
 				<input class="f edit-only" type="text" name="system.characteristicRolls.{{i}}.label" value="{{roll.label}}" placeholder="{{localize 'MGT2.Chargen.Frame.RollLabel'}}" />
 				<input class="f n edit-only" type="text" name="system.characteristicRolls.{{i}}.short" value="{{roll.short}}" placeholder="{{localize 'MGT2.Chargen.Frame.RollShort'}}" />
-				<b class="play-only word">{{#if roll.label}}{{roll.label}}{{else}}{{localize (lookup @root.config.Characteristics roll.characteristic)}}{{/if}} {{roll.formula}}{{#if roll.replaces}} &rarr; {{localize (lookup @root.config.Characteristics roll.replaces)}}{{/if}}</b>
+				<input class="f n edit-only" type="text" name="system.characteristicRolls.{{i}}.sex" value="{{roll.sex}}" placeholder="{{localize 'MGT2.Chargen.Frame.LawSex'}}" />
+				<b class="play-only word">{{#if roll.label}}{{roll.label}}{{else}}{{localize (lookup @root.config.Characteristics roll.characteristic)}}{{/if}} {{roll.formula}}{{#if roll.replaces}} &rarr; {{localize (lookup @root.config.Characteristics roll.replaces)}}{{/if}}{{#if roll.sex}} &middot; {{roll.sex}}{{/if}}</b>
 				<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
 			</div>
 		</div>
@@ -57,6 +58,8 @@
 			{{formInput systemFields.careerChange.fields.minimumTerms name="system.careerChange.minimumTerms" value=system.careerChange.minimumTerms classes="f num"}}
 		</label>
 	</div>
+	{{> systems/mgt2/templates/items/parts/string-list.html list=system.careerChange.exceptCareers
+		path="careerChange.exceptCareers" label='MGT2.Chargen.Frame.CareerChangeExcept' add='MGT2.Chargen.Frame.CareerId'}}
 
 	<div class="flags edit-only">
 		{{! The general rule is `2D − the terms served so far`, and one species is printed exempt. }}
@@ -147,6 +150,10 @@
 			</div>
 			{{> systems/mgt2/templates/items/parts/string-list.html list=law.mandatory
 				path=(concat "backgroundSkills." b ".mandatory") label='MGT2.Chargen.Frame.Mandatory' add='MGT2.Items.Skill'}}
+			<label class="chk" data-tooltip="{{localize 'MGT2.Chargen.Frame.InAdditionHint'}}">
+				<input class="edit-only" type="checkbox" name="system.backgroundSkills.{{b}}.inAddition" {{checked law.inAddition}} />
+				<span>{{localize 'MGT2.Chargen.Frame.InAddition'}}</span>
+			</label>
 			{{> systems/mgt2/templates/items/parts/string-list.html list=law.choices
 				path=(concat "backgroundSkills." b ".choices") label='MGT2.Chargen.Frame.SkillChoices' add='MGT2.Items.Skill'}}
 		</div>

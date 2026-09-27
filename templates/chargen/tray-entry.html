@@ -1,0 +1,36 @@
+<div class="form-group">
+	<label>{{localize 'MGT2.Chargen.Screen.TrayKind'}}</label>
+	<select name="kind">{{selectOptions config.TrayKinds selected="dm" localize=true}}</select>
+</div>
+<div class="form-group">
+	<label>{{localize 'MGT2.Chargen.Screen.TrayValue'}}</label>
+	<input type="number" name="dm" value="0" step="1" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayDM'}}" />
+	<input type="text" name="value" value="" placeholder="{{localize 'MGT2.Chargen.Screen.TrayNames'}}" />
+</div>
+<div class="form-group">
+	<label>{{localize 'MGT2.Chargen.Screen.TrayApplies'}}</label>
+	<select name="appliesTo" multiple size="4">{{selectOptions config.TrayChecks localize=true}}</select>
+</div>
+<div class="form-group">
+	<label>{{localize 'MGT2.Chargen.Screen.TrayScope'}}</label>
+	<select name="scope">{{selectOptions config.TrayScopes selected="anyCareer" localize=true}}</select>
+	<input type="text" name="career" value="" placeholder="{{localize 'MGT2.Chargen.Template.OtherCareer'}}" />
+</div>
+<div class="form-group">
+	<label>{{localize 'MGT2.Chargen.Screen.TrayDuration'}}</label>
+	<select name="duration">{{selectOptions config.TrayDurations selected="oneShot" localize=true}}</select>
+	<input type="number" name="uses" value="1" min="0" step="1" placeholder="{{localize 'MGT2.Chargen.Screen.Unlimited'}}" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayUses'}}" />
+</div>
+<div class="form-group">
+	<label>{{localize 'MGT2.Chargen.Screen.TrayExpires'}}</label>
+	<select name="expiresWhen"><option value="">&mdash;</option>{{selectOptions config.CareerExitModes localize=true}}</select>
+</div>
+<div class="form-group">
+	<label>{{localize 'MGT2.Chargen.Template.TrayEntryMode'}}</label>
+	<select name="entryMode"><option value="">&mdash;</option>{{selectOptions config.CareerEntryModes localize=true}}</select>
+	<input type="text" name="assignment" value="" placeholder="{{localize 'MGT2.Chargen.Template.CareerAssignment'}}" />
+</div>
+<div class="form-group">
+	<label>{{localize 'MGT2.Chargen.Template.TrayNote'}}</label>
+	<input type="text" name="note" value="" />
+</div>

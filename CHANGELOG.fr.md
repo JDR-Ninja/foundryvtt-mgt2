@@ -4,6 +4,208 @@
 
 ---
 
+## [0.2.3]
+
+**Vérifié sur Foundry VTT 14.368.**
+
+**La création relue règle par règle contre le livre.** Un audit complet de la création de Voyageurs
+a trouvé une trentaine d'endroits où un champ, un contrôle ou une règle existaient sans que rien ne
+les lise : un bonus de rang jamais versé, des entrées en attente sans effet, une conscription réduite
+à une phrase. Tous sont corrigés, et l'éducation pré-carrière fonctionne enfin
+([#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). Le système ne livre toujours aucune
+carrière ni aucune table : il fait tourner celles que l'arbitre saisit ou importe.
+
+### ⚠ Ruptures
+
+* **Un commandement obtenu ferme le jet d'Avancement de la période** (Core p.19). 0.2.0 à 0.2.2
+  suivaient l'ancienne mise à jour du livre, qui l'autorisait ; l'édition 2022 dit le contraire, et
+  c'est elle qui fait foi. Un jet de Commandement raté laisse l'Avancement ouvert.
+* **Chaque jet de la période ne se fait qu'une fois** (Core p.18-19) : une étape déjà jouée est
+  refusée au lieu d'être relancée, et une qualification refusée ferme la période aux autres
+  carrières, sauf à une carrière toujours ouverte. L'arbitre peut rouvrir une étape jouée par erreur
+  (↺ *Rouvrir cette étape*).
+* **Une seule carrière à la fois** : déposer une carrière sur un Voyageur qui en sert déjà une est
+  refusé.
+* **Une carrière à entrée forcée, comme le Prisonnier, ne s'entre plus volontairement** (Core p.52) :
+  on y entre par une condamnation laissée en attente, par la conscription ou par la main de l'arbitre.
+* **Migration des mondes.** Aucune carrière servie n'avait reçu son affectation ni son échelle de
+  rangs. À la première ouverture en 0.2.3, chaque carrière déjà servie reçoit son affectation là où
+  elle manque et où le modèle n'en propose qu'une, puis l'échelle que nomme cette affectation. **Le
+  rang n'est jamais modifié**, et les bonus de rang que la carrière n'a jamais versés ne sont pas
+  payés après coup : l'arbitre en reçoit la liste dans un message privé.
+* **Pour les scripts et les modules** : le test d'une ligne d'Événement nomme désormais une liste,
+  `check.skills`, et non plus `check.skill` — un modèle enregistré avant est lu tel quel. La ligne
+  des Factures médicales d'une carrière (`medicalBillsRow`) prend l'un de trois identifiants,
+  `military`, `civilian` ou `independent`, et un libellé saisi comme le livre l'imprime reste reconnu.
+
+### Éducation pré-carrière
+
+* **Une carrière du type *Formation pré-carrière* suit enfin ses propres règles** (Core p.16-17) :
+  l'entrée n'est possible que pendant les trois premières périodes, une tentative par période, avec
+  le MD de la période ; un refus laisse la période à une carrière.
+* **Pendant l'éducation** : les compétences qu'elle enseigne — une université les choisit dans sa
+  propre table, une académie militaire les lit dans les Compétences de service de sa carrière —, un
+  jet sur les Événements de pré-carrière, et **ni jet de Survie, ni Commandement, ni jet
+  d'Avantage**. La période compte quand même pour l'âge, le vieillissement et la PSI.
+* **Le diplôme** se lance comme l'éducation l'imprime, avec sa mention, son plancher d'échec et ses
+  MD conditionnels. Ce qu'il laisse — un MD de qualification, un MD ou une réussite automatique au
+  premier jet de Commandement, l'entrée d'office dans la carrière de l'académie — vaut pour **la
+  première carrière tentée ensuite**, et disparaît si elle refuse le Voyageur. Un cadet qui échoue
+  sans faire 2 ou moins garde sa place, sans jet de Commandement la première période ; un Événement
+  « vous échouez à votre diplôme » interdit le jet.
+* **Une éducation n'est pas une carrière précédente** (Core p.16) : la première carrière qui suit
+  garde toute sa formation de base et ne prend pas le MD−1 par carrière précédente, sauf si la
+  nouvelle règle optionnelle en décide autrement. Deux éducations successives sont possibles — une
+  interprétation : le livre ne fixe que la fenêtre et une tentative par période.
+* **Le formulaire de carrière gagne un bloc *Éducation*** : la fenêtre, les MD par période, la
+  carrière liée, la durée (les 22 + 2D3 ans du Compagnon s'écrivent `4+2D3`), les compétences
+  choisies, l'acquis d'entrée, et le diplôme avec ses trois issues. Les options du Compagnon
+  (p.32-34) s'y écrivent aussi.
+
+### Tables communes
+
+* **Les Événements de la vie, l'Événement inhabituel, la Conscription, les Événements de
+  pré-carrière et les Compétences de base ont un emplacement** : chacune est une carrière du type
+  *Table commune*, que l'arbitre relie dans le menu *Tables de création communes* des réglages du
+  monde. Le système n'en livre aucune.
+* **Une fois reliées, elles se jouent comme les lignes d'une carrière** : un 7 aux Événements tire
+  les Événements de la vie, et une ligne qui nomme une table la tire et l'applique — contact,
+  trahison, MD en attente, jet d'Avantage perdu, Prisonnier. Sans table reliée, le système dit
+  toujours laquelle lancer au livre.
+* **La conscription se joue** (Core p.19) : une qualification refusée propose la conscription, une
+  fois dans la vie, une carrière toujours ouverte comme le Vagabond, ou de décider plus tard. La
+  conscription tire la table reliée et fait entrer dans la carrière tirée, sur l'affectation
+  imprimée, sans jet de qualification. Un Événement qui enrôle impose cette carrière la période
+  suivante (Core p.17).
+* **Les Compétences de base** proposent leur liste là où l'espèce n'en imprime pas (Core p.9).
+
+### La période
+
+* **Entrer dans une carrière demande l'affectation**, avant le jet, et écrit l'échelle de rangs
+  qu'elle nomme. Changer d'affectation chez l'Agent, le Citoyen, le Média ou le Marchand ouvre une
+  nouvelle carrière (Core p.20) : la période se ferme, et la suivante se qualifie pour la nouvelle
+  affectation.
+* **Les entrées en attente font ce qu'elles disent** : une réussite automatique passe la promotion
+  ou le commandement sans dés, une interdiction empêche son jet, une carrière proposée s'entre sans
+  qualification, une carrière imposée est la seule ouverte, une carrière bloquée retire *Continuer*,
+  une carrière débloquée lève la permission de l'arbitre. Un MD d'Avancement peut servir au jet de
+  Commandement, au choix du joueur (Core p.19). **L'arbitre ajoute ou retire une entrée à la main.**
+* **Les lignes d'Événement** : leur effet sur les jets d'Avantage peut dépendre de leur propre test,
+  et les paris de la Marine spatiale, du Marchand et du Trafiquant se jouent (Core p.35, p.37, p.41)
+  — une mise acceptée, refusée ou choisie parmi les jets dus, et une victoire qui rapporte la
+  moitié de la mise en plus, arrondie au supérieur. Un test « si vous saisissez cette occasion » peut
+  être refusé. Une ligne peut accorder sa compétence **avant** son test, comme la Marine spatiale et
+  le Trafiquant l'impriment ; un test imprimé sur deux ou trois compétences se fait sur la meilleure
+  du Voyageur, et une ligne peut faire gagner un niveau à la compétence utilisée, comme le Marchand —
+  une interprétation de l'ordre imprimé, qu'aucun errata ne tranche.
+* **Blessures et soins** (Core p.49) : une ligne qui renvoie aux Blessures les tire comme elle
+  l'imprime, le joueur place les pertes, et les soins coûtent Cr5000 par point, moins la part de
+  l'employeur lue sur les Factures médicales ; le reste est une dette, payée d'abord sur l'argent de
+  la fin de carrière (Core p.52).
+* **Les anagathiques** (Core p.49) : à partir de SOC 10, deux jets de Survie par période, les
+  périodes sous traitement en MD positif au vieillissement, 1D × Cr25000 par période portés en
+  dette, et un jet de vieillissement dès qu'ils s'arrêtent ; un 2 exact mène au Prisonnier.
+* **Le Prisonnier** (Core p.52, p.57) : le seuil de libération conditionnelle est tiré à l'entrée,
+  un détenu ne peut pas partir, et la libération — par l'Avancement ou par une évasion — met fin à la
+  carrière.
+
+### Espèces
+
+* **Les trois périodes minimum des Aslan dans une carrière avant d'en tenter une autre** (Aliens of
+  Charted Space 1 p.19) : la décision de la période le rappelle, une carrière quittée volontairement
+  trop tôt refuse la suivante — la fin de carrière reste ouverte —, et une carrière que l'espèce
+  exempte, ou qu'un Événement propose ou impose, n'est jamais refusée.
+* **Une carrière réservée à une espèce ou à un sexe** refuse les autres Voyageurs ; une espèce nommée
+  sans sa variante les admet toutes.
+* **Une caractéristique de remplacement** — le CHA des Vargr, la RES des Hivers (Aliens of Charted
+  Space 1 p.179, 2 p.255) — s'affiche à la place de celle qu'elle remplace et prend sa place dans le
+  PUP.
+* **Les modificateurs et les dés d'une espèce peuvent dépendre du sexe**, comme ceux du Gurvin
+  (Aliens of Charted Space 4 p.167) ; un Voyageur dont le sexe n'est pas encore fixé lance les dés
+  communs, et la fenêtre le dit.
+* **L'attribution des caractéristiques** : une case sur les dés propres à l'espèce, comme le 1D+6
+  des Hivers, garde son jet ; un dé de bonus s'ajoute à ces dés-là ; une valeur imprimée plutôt que
+  tirée, comme le TER à 0 des Aslan, compte comme fixée.
+* **Une piste qui *ne fait que monter* ne redescend jamais**, quelle que soit la règle du monde.
+* **Un cadre d'espèce impose sa caractéristique au jet de Survie et au Commandement**, comme il le
+  faisait déjà pour l'Avancement.
+
+### Fin de carrière
+
+* **Un jet d'Avantage n'est proposé qu'à une carrière qui en doit encore** (Core p.46), et le compte
+  ne passe plus sous zéro.
+* **Les clauses de répétition imprimées** (Core p.47) : une arme reçue deux fois peut devenir un
+  niveau de compétence, un nouveau quart de l'hypothèque est payé, un Vaisseau Éclaireur se
+  relance.
+* **Une augmentation de caractéristique s'arrête au maximum de l'espèce**, 15 pour un humain (Core
+  p.9), et le SOC en excès tiré d'une table d'Avantages devient des parts de vaisseau (Core p.47).
+* **Les parts de vaisseau versées dans le vaisseau gardé** ne rapportent plus les Cr1000 annuels
+  (Core p.48 ; le compte par part est une interprétation), et finir la création quand plusieurs
+  Voyageurs gardent un vaisseau est signalé.
+* **Les modificateurs permanents atteignent le jet d'Avantage**, comme le FOL 10+ des Truthers
+  (Compagnon p.36).
+* **Les Cr10000 d'équipement achetable avant le jeu** s'affichent (Core p.46).
+
+### Psionique
+
+* **Une nouvelle formation psionique coûte Cr100000** (Core p.228) : la première est gratuite, et
+  chaque nouvelle, qui remet à zéro le malus cumulatif, se paie sur l'argent du Voyageur ou en dette.
+  Une interprétation : le livre ne donne aucun prix pendant la création.
+* **Un talent tiré sur une table de compétences** est un test pour l'apprendre (Core p.229), et non
+  plus un talent acquis d'office.
+
+### Contacts
+
+* **Un contact peut être lié à la fiche d'un Voyageur ou d'un PNJ** : déposez l'Acteur sur la fiche
+  du contact, qui l'ouvre d'un clic et peut le délier.
+
+### Règles optionnelles et variantes
+
+* **Nouvelle, activée** : *Un Voyageur éjecté garde le jet de compétence de la période* — une
+  interprétation, le livre faisant perdre le jet d'Avantage et la carrière sans rien dire du jet de
+  compétence (Core p.18). Le journal de la période dit dans quel sens elle joue.
+* **Nouvelle, désactivée** : *L'éducation pré-carrière compte comme une carrière précédente*.
+* *L'argent dépensé en création devient une dette* couvre aussi les soins, les anagathiques et une
+  nouvelle formation psionique.
+
+### Démonstration et documentation
+
+* **`Demo — Harbour Cadet School`** rejoint les objets de démonstration : une académie liée à
+  `Demo — Harbour Patrol`, pour voir une éducation du début à la fin. La patrouille verse désormais
+  son bonus de rang 0.
+* **Le journal d'audit des règles** (`mgt2.docs`) décrit la création telle qu'elle est maintenant.
+
+### Correctifs
+
+* **Les bonus de rang enrôlés et civils n'étaient jamais versés** : seul un grade d'officier payait,
+  après un commandement. Le rang 0 est versé à l'entrée, et chaque promotion verse le sien (Core
+  p.19).
+* **« Faites un jet sur la table des Aléas » ne lançait pas la table** (Core p.23). Elle se lance, et
+  le Voyageur reste dans la carrière quand la ligne le dit.
+* ⚠ **Le formulaire de carrière effaçait des données à chaque enregistrement** : la référence d'un
+  Autre Avantage, la relation d'un contact (Allié, Rival, Ennemi), le plancher de « SOC 10 ou SOC +1 »
+  et une liste de spécialités disparaissaient dès qu'on modifiait un autre champ, et un MD de
+  qualification conditionnel ne pouvait pas se saisir. Une carrière importée puis retouchée en a
+  peut-être perdu : vérifiez-la.
+* **Un MD « pour votre prochain jet de Survie » était dépensé par le jet de vieillissement**, et un
+  MD d'Avancement durable s'ajoutait aux tests des Événements.
+* **Un Aléa qui n'éjecte pas annulait quand même** l'Événement, le Commandement et l'Avancement de
+  la période (Core p.18).
+* **Une Connexion n'ajoutait rien à une compétence déjà tenue** (Core p.19) : elle l'élève d'un
+  niveau, jusqu'à 3.
+* **Les pertes du vieillissement pouvaient toutes tomber sur la même caractéristique** (Core p.49).
+* **La Télépathie n'était gratuite que tant qu'aucun talent n'était tenu** : elle l'est tant qu'aucun
+  test n'a été tenté (Core p.228-229).
+* **Le nombre de compétences de base** différait entre la pastille et la fenêtre de choix, et une
+  espèce qui les donne « en plus », comme les Hivers, les voyait occuper le compte.
+* **Une colonne *Cash* vide**, dans une carrière saisie à la main, versait Cr0 et consommait un
+  jet : elle demande désormais le montant. Un avantage de caractéristique ou de compétence choisi à
+  la main s'applique aussitôt.
+* **La création en solo n'accordait pas sa compétence de niveau 1**, et un Voyageur mort en Homme de
+  fer continuait sa période (Compagnon p.13).
+
+---
+
 ## [0.2.2]
 
 **Vérifié sur Foundry VTT 14.368.**

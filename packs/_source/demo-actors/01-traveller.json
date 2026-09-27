@@ -1139,7 +1139,7 @@
             "subTable": "Mishap",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1172,7 +1172,7 @@
             "subTable": "",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1211,7 +1211,7 @@
             "subTable": "",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1257,7 +1257,7 @@
             "subTable": "",
             "check": {
               "characteristic": "endurance",
-              "skill": "Demo — Seafarer",
+              "skills": ["Demo — Seafarer"],
               "target": 8
             },
             "track": {
@@ -1312,7 +1312,7 @@
             "subTable": "",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1352,7 +1352,7 @@
             "subTable": "Life Event",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1385,7 +1385,7 @@
             "subTable": "",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1425,7 +1425,7 @@
             "subTable": "",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1480,7 +1480,7 @@
             "subTable": "",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1526,7 +1526,7 @@
             "subTable": "",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1561,7 +1561,7 @@
             "subTable": "",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1598,7 +1598,7 @@
             "subTable": "Injury",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1631,7 +1631,7 @@
             "subTable": "",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1670,7 +1670,7 @@
             "subTable": "",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1710,7 +1710,7 @@
             "subTable": "",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {
@@ -1743,7 +1743,7 @@
             "subTable": "",
             "check": {
               "characteristic": "social",
-              "skill": "",
+              "skills": [],
               "target": 8
             },
             "track": {
@@ -1776,7 +1776,7 @@
             "subTable": "Injury",
             "check": {
               "characteristic": "",
-              "skill": "",
+              "skills": [],
               "target": null
             },
             "track": {

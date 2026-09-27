@@ -8,6 +8,200 @@
 
 ---
 
+## [0.2.3]
+
+**Verificado en Foundry VTT 14.368.**
+
+**La creación, releída regla por regla contra el libro.** Una auditoría completa de la creación de
+Viajeros encontró una treintena de lugares donde un campo, un control o una regla existían sin que
+nada los leyera: una bonificación de rango que nunca se pagaba, entradas pendientes sin efecto, un
+reclutamiento reducido a una frase. Todos están corregidos, y la educación previa a la carrera por fin
+funciona ([#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). El sistema sigue sin traer
+ninguna carrera ni ninguna tabla: hace funcionar las que el árbitro escribe o importa.
+
+### ⚠ Cambios que rompen
+
+* **Una comisión obtenida cierra la tirada de Progresión del periodo** (Core p.19). De 0.2.0 a 0.2.2
+  se seguía la antigua actualización del libro, que lo permitía; la edición 2022 dice lo contrario, y
+  es la que manda. Una tirada de Comisión fallida deja abierta la Progresión.
+* **Cada tirada del periodo se hace una sola vez** (Core p.18-19): un paso ya hecho se rechaza en vez
+  de repetirse, y una cualificación rechazada cierra el periodo a las demás carreras, salvo a una que
+  esté siempre abierta. El árbitro puede reabrir un paso hecho por error (↺ *Reabrir este paso*).
+* **Una sola carrera a la vez**: soltar una carrera sobre un Viajero que ya sirve en otra se rechaza.
+* **Una carrera de entrada forzosa, como el Prisionero, ya no se elige voluntariamente** (Core p.52):
+  se entra por una condena dejada pendiente, por el reclutamiento o por mano del árbitro.
+* **Migración de los mundos.** Ninguna carrera servida había recibido su destino ni su escalafón. La
+  primera vez que un mundo se abre en 0.2.3, cada carrera ya servida recibe su destino donde falta y
+  la plantilla solo ofrece uno, y luego el escalafón que ese destino nombra. **El rango nunca se
+  modifica**, y las bonificaciones de rango que la carrera nunca pagó no se pagan a posteriori: el
+  árbitro recibe la lista en un mensaje privado.
+* **Para scripts y módulos**: la prueba de una fila de Sucesos nombra ahora una lista,
+  `check.skills`, en vez de `check.skill` — una plantilla guardada antes se lee tal cual. La línea de
+  Facturas médicas de una carrera (`medicalBillsRow`) toma uno de tres identificadores, `military`,
+  `civilian` o `independent`, y una etiqueta escrita como la imprime el libro se sigue reconociendo.
+
+### Educación previa a la carrera
+
+* **Una carrera del tipo *Educación previa a la carrera* sigue por fin sus propias reglas** (Core
+  p.16-17): solo se entra durante los tres primeros periodos, un intento por periodo, con el MD del
+  periodo; un rechazo deja el periodo a una carrera.
+* **Durante la educación**: las habilidades que enseña —una universidad las elige en su propia tabla,
+  una academia militar las lee en las Habilidades de Servicio de su carrera—, una tirada en los
+  Sucesos previos a la carrera, y **ni tirada de Supervivencia, ni Comisión, ni tirada de
+  Beneficio**. El periodo cuenta igualmente para la edad, el envejecimiento y la PSI.
+* **La graduación** se tira como la educación la imprime, con sus honores, su umbral de fracaso y
+  sus MD condicionales. Lo que deja —un MD de cualificación, un MD o un éxito automático en la
+  primera tirada de Comisión, la entrada directa en la carrera de la academia— vale para **la primera
+  carrera que se intente después**, y se pierde si esa carrera rechaza al Viajero. Un cadete que
+  fracasa sin sacar 2 o menos conserva su plaza, sin tirada de Comisión el primer periodo; un Suceso
+  «no te gradúas» prohíbe la tirada.
+* **Una educación no es una carrera anterior** (Core p.16): la primera carrera que la sigue conserva
+  toda su instrucción básica y no sufre el MD−1 por carrera anterior, salvo que la nueva regla
+  opcional diga otra cosa. Se pueden cursar dos educaciones seguidas —una interpretación: el libro
+  solo fija la ventana y un intento por periodo.
+* **El formulario de carrera gana un bloque *Educación***: la ventana, los MD por periodo, la carrera
+  vinculada, la duración (los 22 + 2D3 años del Companion se escriben `4+2D3`), las habilidades
+  elegidas, lo concedido al entrar, y la graduación con sus tres resultados. Las opciones del
+  Companion (p.32-34) también se escriben ahí.
+
+### Tablas compartidas
+
+* **Los Sucesos Vitales, el Suceso insólito, el Reclutamiento, los Sucesos previos a la carrera y las
+  Habilidades de trasfondo tienen un lugar**: cada una es una carrera del tipo *Tabla compartida*,
+  que el árbitro vincula en el menú *Tablas de creación compartidas* de los ajustes del mundo. El
+  sistema no trae ninguna.
+* **Una vez vinculadas, se juegan como las filas de una carrera**: un 7 en Sucesos tira los Sucesos
+  Vitales, y una fila que nombra una tabla la tira y la aplica —un contacto, una traición, un MD
+  pendiente, una tirada de Beneficio perdida, el Prisionero—. Sin tabla vinculada, el sistema sigue
+  diciendo cuál tirar en el libro.
+* **El reclutamiento se juega** (Core p.19): una cualificación rechazada ofrece el reclutamiento, una
+  vez en la vida, una carrera siempre abierta como el Vagabundo, o decidir más tarde. El
+  reclutamiento tira la tabla vinculada y entra en la carrera obtenida, con el destino impreso, sin
+  tirada de cualificación. Un Suceso que recluta impone esa carrera el periodo siguiente (Core p.17).
+* **Las Habilidades de trasfondo** ofrecen su lista donde la especie no imprime ninguna (Core p.9).
+
+### El periodo
+
+* **Entrar en una carrera pide el destino**, antes de la tirada, y escribe el escalafón que nombra.
+  Cambiar de destino en el Agente, el Ciudadano, el Artista o el Mercader abre una carrera nueva
+  (Core p.20): el periodo se cierra, y el siguiente se cualifica para el nuevo destino.
+* **Las entradas pendientes hacen lo que dicen**: un éxito automático supera el ascenso o la comisión
+  sin dados, una prohibición impide su tirada, una carrera ofrecida se entra sin cualificarse, una
+  carrera impuesta es la única abierta, una carrera bloqueada retira *Continuar*, una carrera
+  desbloqueada levanta el permiso del árbitro. Un MD de Progresión puede servir para la tirada de
+  Comisión, a elección del jugador (Core p.19). **El árbitro añade o quita una entrada a mano.**
+* **Las filas de Sucesos**: su efecto en las tiradas de Beneficio puede depender de su propia prueba,
+  y las apuestas de la Armada, el Mercader y el Pícaro se juegan (Core p.35, p.37, p.41) —una apuesta
+  aceptada, rechazada o elegida entre las tiradas debidas, y una victoria que paga la mitad de lo
+  apostado, redondeando hacia arriba—. Una prueba «si aprovechas esta oportunidad» puede rechazarse.
+  Una fila puede conceder su habilidad **antes** de su prueba, como la imprimen la Armada y el Pícaro;
+  una prueba impresa sobre dos o tres habilidades se hace con la mejor del Viajero, y una fila puede
+  subir un nivel la habilidad usada, como el Mercader —una interpretación del orden impreso, que
+  ninguna errata zanja.
+* **Lesiones y atención médica** (Core p.49): una fila que remite a las Lesiones las tira como la
+  fila las imprime, el jugador reparte las pérdidas, y la atención cuesta Cr5000 por punto, menos la
+  parte del empleador leída en las Facturas médicas; el resto es una deuda, pagada primero con el
+  dinero del licenciamiento (Core p.52).
+* **Los anagáticos** (Core p.49): desde SOC 10, dos tiradas de Supervivencia por periodo, los
+  periodos de tratamiento como MD positivo al envejecimiento, 1D × Cr25000 por periodo llevados como
+  deuda, y una tirada de envejecimiento en cuanto se dejan; un 2 exacto lleva al Prisionero.
+* **El Prisionero** (Core p.52, p.57): el Umbral de Libertad Condicional se tira al entrar, un preso
+  no puede marcharse, y la liberación —por la Progresión o por una fuga— pone fin a la carrera.
+
+### Especies
+
+* **Los tres periodos mínimos de los Aslan en una carrera antes de intentar otra** (Aliens of Charted
+  Space 1 p.19): la decisión del periodo lo recuerda, una carrera dejada por decisión propia antes de
+  tiempo rechaza la siguiente —el licenciamiento sigue abierto—, y una carrera que la especie exime,
+  o que un Suceso ofrece o impone, nunca se rechaza.
+* **Una carrera reservada a una especie o a un sexo** rechaza a los demás Viajeros; una especie
+  nombrada sin su variante las admite todas.
+* **Una característica de sustitución** —el CHA de los Vargr, la RES de los Hiver (Aliens of Charted
+  Space 1 p.179, 2 p.255)— se muestra en lugar de la que sustituye y ocupa su puesto en el PUP.
+* **Los modificadores y los dados de una especie pueden depender del sexo**, como los del Gurvin
+  (Aliens of Charted Space 4 p.167); un Viajero cuyo sexo aún no está fijado tira los dados comunes, y
+  la ventana lo dice.
+* **La asignación de características**: una casilla con los dados propios de la especie, como el
+  1D+6 de los Hiver, conserva su tirada; un dado de ventaja se suma a esos dados; un valor impreso en
+  vez de tirado, como el TER de 0 de los Aslan, cuenta como fijado.
+* **Un contador que *solo sube* nunca baja**, sea cual sea la regla del mundo.
+* **Un marco de especie impone su característica a la tirada de Supervivencia y a la Comisión**,
+  como ya hacía con la Progresión.
+
+### Licenciamiento
+
+* **Una tirada de Beneficio solo se ofrece a una carrera que todavía la debe** (Core p.46), y la
+  cuenta ya no baja de cero.
+* **Las cláusulas de repetición impresas** (Core p.47): un arma recibida dos veces puede convertirse
+  en un nivel de habilidad, se paga otro cuarto de la hipoteca, una Nave Explorador se vuelve a tirar.
+* **Un aumento de característica se detiene en el máximo de la especie**, 15 para un humano (Core
+  p.9), y el SOC sobrante obtenido en una tabla de Beneficios se convierte en participaciones de nave
+  (Core p.47).
+* **Las participaciones de nave aportadas a la nave conservada** ya no pagan los Cr1000 anuales (Core
+  p.48; contarlas por participación es una interpretación), y terminar la creación cuando varios
+  Viajeros conservan una nave se señala.
+* **Los modificadores permanentes llegan a la tirada de Beneficio**, como el FOL 10+ de los Truthers
+  (Companion p.36).
+* **Los Cr10000 de equipo que se pueden comprar antes del juego** se muestran (Core p.46).
+
+### Psiónica
+
+* **Un nuevo entrenamiento psiónico cuesta Cr100000** (Core p.228): el primero es gratuito, y cada
+  nuevo, que reinicia la penalización acumulada, se paga con el dinero del Viajero o como deuda. Una
+  interpretación: el libro no pone ningún precio durante la creación.
+* **Un talento obtenido en una tabla de habilidades** es una prueba para aprenderlo (Core p.229), y ya
+  no un talento adquirido de entrada.
+
+### Contactos
+
+* **Un contacto puede vincularse a la ficha de un Viajero o de un PNJ**: suelta el Actor sobre la
+  ficha del contacto, que lo abre con un clic y puede desvincularlo.
+
+### Reglas opcionales y variantes
+
+* **Nueva, activada**: *Un Viajero expulsado conserva la tirada de habilidad del periodo* —una
+  interpretación, ya que el libro quita la tirada de Beneficio y la carrera sin decir nada de la
+  tirada de habilidad (Core p.18)—. El registro del periodo dice en qué sentido juega.
+* **Nueva, desactivada**: *La educación previa cuenta como una carrera anterior*.
+* *El dinero gastado durante la creación se convierte en deuda* cubre también la atención médica,
+  los anagáticos y un nuevo entrenamiento psiónico.
+
+### Demostración y documentación
+
+* **`Demo — Harbour Cadet School`** se une a los objetos de demostración: una academia vinculada a
+  `Demo — Harbour Patrol`, para ver una educación de principio a fin. La patrulla paga ahora su
+  bonificación de rango 0.
+* **El diario de auditoría de reglas** (`mgt2.docs`) describe la creación tal como es ahora.
+
+### Correcciones
+
+* **Las bonificaciones de rango de tropa y civiles nunca se pagaban**: solo pagaba un grado de
+  oficial, tras una comisión. El rango 0 se paga al entrar, y cada ascenso paga el suyo (Core p.19).
+* **«Tira en la tabla de Percances» no tiraba la tabla** (Core p.23). Ahora se tira, y el Viajero se
+  queda en la carrera cuando la fila lo dice.
+* ⚠ **El formulario de carrera borraba datos en cada guardado**: la referencia a un Otro Beneficio,
+  la relación de un contacto (Aliado, Rival, Enemigo), el mínimo de «SOC 10 o SOC +1» y una lista de
+  especialidades desaparecían en cuanto se editaba otro campo, y un MD de cualificación condicional
+  no se podía escribir. Una carrera importada y luego retocada puede haber perdido alguno:
+  compruébala.
+* **Un MD «para tu próxima tirada de Supervivencia» lo gastaba la tirada de envejecimiento**, y un MD
+  de Progresión duradero se sumaba a las pruebas de los Sucesos.
+* **Un Percance que no expulsa anulaba igualmente** el Suceso, la Comisión y la Progresión del
+  periodo (Core p.18).
+* **Una Conexión no añadía nada a una habilidad ya poseída** (Core p.19): la sube un nivel, hasta 3.
+* **Las pérdidas del envejecimiento podían caer todas en la misma característica** (Core p.49).
+* **La Telepatía solo era gratuita mientras no se poseía ningún talento**: lo es mientras no se ha
+  intentado ninguna prueba (Core p.228-229).
+* **El número de habilidades de trasfondo** difería entre la marca y la ventana de elección, y una
+  especie que las da «además», como los Hiver, las veía ocupar la cuenta.
+* **Una columna de Efectivo vacía**, en una carrera escrita a mano, pagaba Cr0 y gastaba una tirada:
+  ahora pide la cantidad. Un beneficio de característica o de habilidad elegido a mano se aplica en
+  el acto.
+* **La generación en solitario no concedía su habilidad de nivel 1**, y un Viajero muerto en Iron
+  Man seguía con su periodo (Companion p.13).
+
+---
+
 ## [0.2.2]
 
 **Verificado en Foundry VTT 14.368.**

@@ -37,10 +37,14 @@
 	</ul>
 	<ol>
 		{{#each strip.steps as |step|}}
-		<li class="{{#if step.own}}own{{/if}} {{#if step.now}}now{{/if}}">
+		<li class="{{#if step.own}}own{{/if}} {{#if step.now}}now{{/if}} {{#if step.done}}done{{/if}}">
 			{{#if ../strip.canRun}}
 			<button type="button" data-action="runStep" data-step="{{step.key}}">{{step.order}}. {{step.label}}</button>
 			{{else}}{{step.order}}. {{step.label}}{{/if}}
+			{{#if (and step.done ../strip.canReset)}}
+			<a class="reset" data-action="resetStep" data-step="{{step.key}}"
+				data-tooltip="{{localize 'MGT2.Chargen.Screen.ResetStep'}}"><i class="fa-solid fa-rotate-left"></i></a>
+			{{/if}}
 		</li>
 		{{/each}}
 		{{#each strip.cut as |step|}}

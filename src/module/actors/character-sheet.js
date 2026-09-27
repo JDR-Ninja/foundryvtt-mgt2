@@ -2082,6 +2082,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     if (this.constructor.DROP_ITEM_SIMPLE.has(sourceItemData.type)) {
       // A move, not a copy: `stripIds` would leave the duplicate unrecognisable downstream.
       if (this.actor.items.has(sourceItemData.id)) return false;
+      if ((sourceItemData.type === "career") && !(await Chargen.acceptsCareer(this.actor, sourceItemData))) return false;
       await this.actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(sourceItemData)]);
       return true;
     }

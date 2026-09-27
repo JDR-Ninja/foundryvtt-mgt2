@@ -1,0 +1,27 @@
+{{! One pending entry of the creation tray, every leaf its schema reads. `path` ends at the entry's index. }}
+<div class="trayrow" data-entry-index="{{p}}">
+	<select class="f kind" name="system.{{path}}.kind">{{selectOptions @root.config.TrayKinds selected=pending.kind localize=true}}</select>
+	{{! What EARNS the entry, which is not what `expiresWhen` says: most printed entries belong to one
+	    branch of the row, and the loop pushed them all. }}
+	<select class="f" name="system.{{path}}.condition" data-tooltip="{{localize 'MGT2.Chargen.Template.TrayCondition'}}">{{selectOptions @root.config.TrayConditions selected=pending.condition localize=true}}</select>
+	<input class="f num" type="number" step="1" name="system.{{path}}.dm" value="{{pending.dm}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayValue'}}" />
+	<input class="f" type="text" name="system.{{path}}.value" value="{{pending.value}}" placeholder="{{localize 'MGT2.Chargen.Screen.TrayValue'}}" />
+	<select class="f" name="system.{{path}}.appliesTo" multiple size="3" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayApplies'}}">
+		{{selectOptions @root.config.TrayChecks selected=pending.appliesTo localize=true}}
+	</select>
+	<select class="f" name="system.{{path}}.scope" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayScope'}}">{{selectOptions @root.config.TrayScopes selected=pending.scope localize=true}}</select>
+	<input class="f" type="text" name="system.{{path}}.career" value="{{pending.career}}" placeholder="{{localize 'MGT2.Chargen.Template.OtherCareer'}}" />
+	<select class="f" name="system.{{path}}.duration" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayDuration'}}">{{selectOptions @root.config.TrayDurations selected=pending.duration localize=true}}</select>
+	<input class="f num" type="number" step="1" min="0" name="system.{{path}}.uses" value="{{pending.uses}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayUses'}}" />
+	<select class="f" name="system.{{path}}.expiresWhen" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayExpires'}}">
+		<option value="">&mdash;</option>
+		{{selectOptions @root.config.CareerExitModes selected=pending.expiresWhen localize=true}}
+	</select>
+	<select class="f" name="system.{{path}}.entryMode" data-tooltip="{{localize 'MGT2.Chargen.Template.TrayEntryMode'}}">
+		<option value="">&mdash;</option>
+		{{selectOptions @root.config.CareerEntryModes selected=pending.entryMode localize=true}}
+	</select>
+	<input class="f" type="text" name="system.{{path}}.assignment" value="{{pending.assignment}}" placeholder="{{localize 'MGT2.Chargen.Template.CareerAssignment'}}" />
+	<input class="f wide" type="text" name="system.{{path}}.note" value="{{pending.note}}" placeholder="{{localize 'MGT2.Chargen.Template.TrayNote'}}" />
+	<a class="del" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+</div>

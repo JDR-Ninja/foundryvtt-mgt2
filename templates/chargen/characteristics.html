@@ -10,7 +10,7 @@
 			<div class="drow" data-row="{{row.key}}">
 				<label>{{row.label}}</label>
 				<span class="slots">
-					{{#if ../fixed}}<span class="fx">{{row.formula}}</span>
+					{{#if (or ../fixed row.own)}}<span class="fx">{{row.formula}}</span>
 					{{else}}
 					{{#each row.slots as |slot|}}
 					<select class="slot f" name="{{slot.name}}" aria-label="{{../label}}">{{selectOptions ../values selected=slot.index}}</select>

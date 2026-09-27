@@ -443,7 +443,7 @@
       },
       "creationCostsBecomeDebt": {
         "name": "El dinero gastado durante la creación se convierte en deuda",
-        "hint": "Unos pocos sucesos impresos gastan dinero antes de que el licenciamiento haya producido ninguno. El único mecanismo impreso para un coste contraído durante la creación es la deuda contra los beneficios, con el resto impagado siguiendo al Viajero al juego."
+        "hint": "Algunos costes vencen antes de que el licenciamiento haya producido dinero: unos pocos sucesos impresos, la atención médica, los anagáticos y un nuevo entrenamiento psiónico. El único mecanismo impreso para un coste contraído durante la creación es la deuda contra los beneficios, con el resto impagado siguiendo al Viajero al juego. Desactivada, se rechaza un coste que el dinero del Viajero no cubre."
       },
       "eventDraftBudget": {
         "name": "Un reclutamiento forzado por un suceso tiene su propio cupo",
@@ -587,6 +587,14 @@
       "containerLaunchers": {
         "name": "Lanzadores de contenedor",
         "hint": "Ofrece una pieza de lanzador de contenedor en la hoja de componentes. Guarda cuatro misiles o un torpedo listos para lanzar, gasta un punto duro como una montura y no puede recargarse durante una batalla."
+      },
+      "preCareerCountsAsCareer": {
+        "name": "La educación previa cuenta como una carrera anterior",
+        "hint": "Una interpretación: el Core llama a la educación «en lugar de una carrera» y habla de «la primera carrera intentada tras graduarse», así que por defecto un periodo de universidad o academia no aplica MD−1 por carrera anterior y deja a la primera carrera su formación básica completa. Activada, cuenta como cualquier otra carrera."
+      },
+      "ejectedTermSkillRoll": {
+        "name": "Un Viajero expulsado conserva la tirada de habilidad del periodo",
+        "hint": "Una interpretación: el Core hace perder a una Supervivencia fallida la tirada de Beneficio del periodo y la carrera, sin decir nada de la tirada de habilidad; por defecto, un periodo que sirvió sus cuatro años la conserva. Desactivada, la tirada de habilidad se va con la carrera. En ambos casos, el registro del periodo lo dice."
       }
     },
     "Chargen": {
@@ -609,7 +617,8 @@
       },
       "CareerKinds": {
         "career": "Carrera",
-        "preCareer": "Educación previa a la carrera"
+        "preCareer": "Educación previa a la carrera",
+        "table": "Tabla compartida"
       },
       "Template": {
         "Career": "Plantilla de carrera",
@@ -727,7 +736,24 @@
           "officerLadder": "declarado arriba, y marcado como de oficiales",
           "exitTrack": "el contador que lee la regla de salida, contra los contadores declarados arriba",
           "rowTrack": "el contador que mueve una línea, contra los contadores declarados arriba"
-        }
+        },
+        "GrantFloor": "El mínimo de «SOC 10 o SOC +1, lo que sea mayor»; vacío si no hay",
+        "GrantRef": "otro beneficio",
+        "GrantRelation": "La relación que crea un contacto o una traición",
+        "GrantShortlist": "especialidades, separadas por comas",
+        "ConditionalDMs": "MD de cualificación condicionales",
+        "ConditionalMin": "La puntuación que debe alcanzar la característica",
+        "ConditionalAfter": "o: tras estas carreras, separadas por comas",
+        "ConditionalDM": "MD condicional",
+        "BenefitCondition": "Qué activa el efecto sobre las tiradas de Beneficio",
+        "CareerAssignment": "destino",
+        "CheckOptional": "puede rechazarse",
+        "TrackCondition": "Qué activa el movimiento",
+        "AwardCondition": "Qué activa la concesión",
+        "TrayEntryMode": "Entrada como",
+        "CheckSkills": "habilidades, separadas por comas; se tira la mejor",
+        "RaisesSkill": "la habilidad tirada gana un nivel",
+        "GrantFirst": "antes de la tirada"
       },
       "Frame": {
         "Term": "El periodo que rige este marco",
@@ -807,7 +833,11 @@
         "LawRow": "Variante",
         "LawDefault": "cualquier Viajero",
         "CheckKind": "El total",
-        "RollShort": "abrev."
+        "RollShort": "abrev.",
+        "InAddition": "Además de la asignación",
+        "InAdditionHint": "Marca esta casilla cuando el libro da las habilidades que siempre se toman «además»: entonces no ocupan ninguna fila de la asignación.",
+        "CareerChangeExcept": "Carreras libres de ese mínimo",
+        "CoreCheck": "{characteristic}, en toda carrera"
       },
       "Qualification": {
         "target": "Tirar contra un objetivo",
@@ -833,7 +863,10 @@
         "voluntary": "Se marchó voluntariamente",
         "ejectedByMishap": "Expulsado por un percance",
         "forcedOutByAdvancement": "Obligado a salir por la tirada de progresión",
-        "paroled": "Liberado"
+        "paroled": "Liberado",
+        "died": "Murió",
+        "blocked": "Sin poder continuar",
+        "graduated": "Graduado"
       },
       "AssignmentChange": {
         "requalifyKeepRank": "Volver a cualificar, conservando el rango",
@@ -859,7 +892,8 @@
         "keep": "Conserva la tirada de este periodo",
         "lose": "Pierde una tirada",
         "grant": "Concede una tirada",
-        "wipe": "Borra las tiradas de esta carrera"
+        "wipe": "Borra las tiradas de esta carrera",
+        "wager": "Apuesta tiradas en la tirada de la línea"
       },
       "TrayKinds": {
         "dm": "MD",
@@ -1000,7 +1034,15 @@
         "shipsBoat": "Bote de nave",
         "tas": "Membresía de la TAS",
         "weapon": "Arma",
-        "yacht": "Yate"
+        "yacht": "Yate",
+        "Repeat": {
+          "blade": "Cuerpo a cuerpo (hoja)",
+          "gun": "Combate con armas — para un arma ya recibida",
+          "personalVehicle": "Conducir o Volar — qué especialidad",
+          "scientificEquipment": "Electrónica o Ciencia — qué especialidad",
+          "shipsBoat": "Pilotar (nave pequeña)",
+          "weapon": "Cuerpo a cuerpo o Combate con armas — para un arma ya recibida"
+        }
       },
       "TrackKinds": {
         "numeric": "Un número",
@@ -1015,7 +1057,8 @@
         "Unassigned": "Tirado: {values}",
         "Dice": "Dados: {dice}",
         "NoteBoon": "Hay dados de ventaja en juego, así que cada característica tira sus propios dados en vez de tomarlos de una reserva.",
-        "NoteFrame": "{characteristic} se tira con {formula}, así que cada característica tira sus propios dados en vez de tomarlos de una reserva."
+        "NoteFrame": "{characteristic} se tira con {formula}, así que cada característica tira sus propios dados en vez de tomarlos de una reserva.",
+        "NoteSex": "Esta especie tira según el sexo: fije primero el sexo del Viajero, o se tiran sus dados sin sexo."
       },
       "Roll": {
         "Title": "Tirada de creación",
@@ -1045,9 +1088,10 @@
           "other": "{n} tiradas intentadas"
         },
         "NewCourse": "Empezar un nuevo entrenamiento",
-        "NewCourseHint": "Cuatro meses y Cr100000. Un nuevo entrenamiento reinicia la penalización acumulada.",
-        "NewCourseAsk": "¿Empezar un nuevo entrenamiento para {name}? La penalización acumulada vuelve a cero.",
-        "Lifetime": "En esta mesa la penalización de entrenamiento es un contador vitalicio, así que un nuevo entrenamiento no cambia nada."
+        "NewCourseHint": "El primer entrenamiento es gratuito. Uno nuevo lleva cuatro meses, cuesta Cr{credits} y reinicia la penalización acumulada.",
+        "NewCourseAsk": "¿Empezar un nuevo entrenamiento para {name}? Cuesta Cr{credits}, y la penalización acumulada vuelve a cero.",
+        "Lifetime": "En esta mesa la penalización de entrenamiento es un contador vitalicio, así que un nuevo entrenamiento no cambia nada.",
+        "CoursePaid": "{name} empieza un nuevo entrenamiento: Cr{credits}"
       },
       "Connect": {
         "Solo": "La generación en solitario está en vigor, y quita la Regla de Conexiones.",
@@ -1074,7 +1118,17 @@
           "cash": "Efectivo",
           "other": "Otros Beneficios"
         },
-        "Owed": "Cr{credits} asumidos como deuda"
+        "Owed": "Cr{credits} asumidos como deuda",
+        "CashAsk": "Esta carrera no tiene columna de Efectivo. Escribe la cantidad que su tabla indica para una tirada de {n}, o cancela para no gastar nada.",
+        "NoRollsLeft": "{career} ya no debe ninguna tirada de Beneficio.",
+        "RepeatTitle": "Un Beneficio repetido",
+        "RepeatAsk": "{what} ha salido otra vez. Toma otro, o lo que el libro da en su lugar — para una habilidad, escríbela abajo.",
+        "Repeat": {
+          "another": "Otro más",
+          "skill": "La habilidad en su lugar",
+          "shipShare": "Una Participación de nave en su lugar"
+        },
+        "Reroll": "{what} ya se tiene: el libro dice que se vuelva a tirar este Beneficio."
       },
       "Close": {
         "Title": "Licenciamiento",
@@ -1148,6 +1202,7 @@
         "ShipSettled": "{name} empieza la campaña como propietario de una nave.",
         "NoShips": "Nadie ha tirado una nave.",
         "SoloOff": "La generación en solitario está encendida, y quita este paso.",
+        "SoloPackage": "La creación en solitario está activa: en lugar del paquete, cada Viajero toma una habilidad cualquiera a nivel 1.",
         "PackageTitle": "Paquete de habilidades compartidas",
         "PackageTurn": "Le toca a {name} — toma una habilidad.",
         "PackageDone": {
@@ -1159,7 +1214,22 @@
         "PackageHint": "El grupo elige un paquete entre todos, y después van tomando por turnos una habilidad cada uno hasta vaciar la lista. Este sistema no incluye ningún paquete — escribe el que imprima tu libro, separado por comas. Un número al final es el nivel.",
         "PackageName": "Paquete",
         "PackageSkills": "Habilidades",
-        "PackageSave": "Guardar"
+        "PackageSave": "Guardar",
+        "Preplay": "antes de jugar hasta Cr{credits}",
+        "PreplayHint": "El dinero que quede puede comprar equipo personal hasta este valor antes de jugar; los objetos más caros hay que buscarlos en juego.",
+        "SoloTake": "Tomar una habilidad a nivel 1",
+        "SoloHint": "Creación en solitario: escribe la única habilidad que este Viajero obtiene a nivel 1, en lugar del paquete de habilidades.",
+        "SharesHint": "Las Participaciones de nave invertidas en la nave de {name} no dan Cr{share} al año. Indica cuántas compromete cada Viajero.",
+        "SharesHeld": {
+          "one": "{n} Participación de nave",
+          "other": "{n} Participaciones de nave"
+        },
+        "SharesCommitted": {
+          "one": "{n} comprometida",
+          "other": "{n} comprometidas"
+        },
+        "CommitShares": "Comprometer",
+        "WarnShip": "Naves aún sin decidir: {names} no cobraría(n) pensión por ellas"
       },
       "Banner": {
         "InProgress": "Creación de personaje en curso",
@@ -1222,7 +1292,13 @@
             "one": "{n} periodo como máximo",
             "other": "{n} periodos como máximo"
           }
-        }
+        },
+        "ResetStep": "Reabrir este paso (árbitro)",
+        "ResetStepAsk": "¿Reabrir {step} para {name}? Podrá tirarse otra vez este periodo. Lo que ya escribió se queda; solo se borra su propio resultado, un rechazo o el veredicto de Supervivencia.",
+        "TrayAdd": "Añadir una entrada",
+        "TrayRemove": "Quitar esta entrada",
+        "TrayDM": "El MD, para una entrada de MD",
+        "TrayNames": "Lo que nombra — una carrera o una habilidad"
       },
       "TermOutcomes": {
         "elected": "Elección de principio de periodo",
@@ -1235,7 +1311,9 @@
         "mustContinue": "Debe continuar",
         "released": "Liberado por el contador",
         "skillRoll": "Tirada de habilidad",
-        "aged": "Tirada de envejecimiento"
+        "aged": "Tirada de envejecimiento",
+        "graduated": "Graduado",
+        "honours": "Con honores"
       },
       "Tables": {
         "personalDevelopment": "Desarrollo Personal",
@@ -1277,7 +1355,6 @@
         "NoEventTable": "Esta carrera no tiene ninguna tabla de Sucesos escrita.",
         "NoMishapTable": "Esta carrera no tiene ninguna tabla de Percances escrita.",
         "NoRow": "No hay línea {n} en esa tabla.",
-        "LifeEvents": "Sucesos Vitales",
         "RollShared": "Tira en la tabla compartida de {table} y aplica lo que diga.",
         "CannotEject": "No expulsado: esta carrera no puede expulsar.",
         "Ejected": "Expulsado de {career}.",
@@ -1358,7 +1435,7 @@
         "ChangeAssignment": "Cambiar de destino ({rule})",
         "PickAssignment": "¿Qué destino?",
         "AssignmentKept": "El cambio falló: continúas en el destino anterior, sin penalización.",
-        "AssignmentNewCareer": "Esta carrera cuenta un cambio de destino como una carrera nueva: márchate y vuelve a soltar la plantilla.",
+        "AssignmentNewCareer": "Esta carrera cuenta un cambio de destino como una carrera nueva: este periodo la cierra, y el siguiente se cualifica para el nuevo destino.",
         "SubRollPassed": "La tirada propia de la línea se superó.",
         "SubRollFailed": "La tirada propia de la línea se falló.",
         "RefereeStep": "{step} es un paso propio de este marco: lo resuelve el árbitro.",
@@ -1368,7 +1445,94 @@
         "TrackHeld": "{track} no puede perderse una vez alcanzado.",
         "ReadOnTable": "{step}: lee {total} en la tabla que imprima tu libro.",
         "PickAssociate": "¿Qué Contacto o Aliado le traiciona?",
-        "Unseen": "Alguien a quien no viste venir"
+        "Unseen": "Alguien a quien no viste venir",
+        "NoAdvanceAfterCommission": "Se obtuvo una comisión este periodo, así que no se hace la tirada de progresión de este periodo.",
+        "StepTaken": "{step} ya se hizo este periodo. Solo el árbitro puede reabrirlo.",
+        "RefusedThisTerm": "Ya se rechazó una cualificación este periodo, así que no se puede entrar en {career}: el periodo es para el reclutamiento o para una carrera que esté siempre abierta.",
+        "AgeingDistinct": "Cada pérdida va a una característica distinta.",
+        "AgeingOwed": "La tirada de envejecimiento ya está hecha: hay que aplicar sus pérdidas.",
+        "ExcessShares": {
+          "one": "{n} punto por encima del máximo se convierte en una Participación de nave",
+          "other": "{n} puntos por encima del máximo se convierten en Participaciones de nave"
+        },
+        "ExcessLost": {
+          "one": "{n} punto por encima del máximo se pierde",
+          "other": "{n} puntos por encima del máximo se pierden"
+        },
+        "TalentLearned": "{talent} aprendido.",
+        "TalentMissed": "{talent} no aprendido.",
+        "WagerWon": {
+          "one": "Apuesta ganada: {n} tirada de Beneficio ganada",
+          "other": "Apuesta ganada: {n} tiradas de Beneficio ganadas"
+        },
+        "WagerLost": {
+          "one": "Apuesta perdida: {n} tirada de Beneficio perdida",
+          "other": "Apuesta perdida: {n} tiradas de Beneficio perdidas"
+        },
+        "WagerTitle": "Apostar tiradas de Beneficio",
+        "WagerFixed": {
+          "one": "¿Apostar {n} tirada de Beneficio?",
+          "other": "¿Apostar {n} tiradas de Beneficio?"
+        },
+        "WagerAsk": "¿Cuántas tiradas de Beneficio apuestas? Ninguna es no tirar.",
+        "AnagathicsContinue": "¿Seguir tomando anagáticos este periodo? Cuestan 1D × Cr25000; dejarlos obliga a tirar envejecimiento en el acto.",
+        "AnagathicsCost": "Anagáticos",
+        "AnagathicsDM": "Anagáticos (periodos)",
+        "AnagathicsPaid": "Anagáticos: Cr{credits}",
+        "AnagathicsStopped": "Anagáticos abandonados: la tirada de envejecimiento se hace en el acto.",
+        "AutoSuccessAsk": "¿Usarlo ahora y superar esta tirada sin tirar?",
+        "LendAsk": "¿Aplicar estos MD de progresión a esta tirada de comisión? Se gastan en ella.",
+        "Prohibited": "{name} no puede hacer esta tirada en {career}.",
+        "Blocked": "{career} no puede continuarse: este periodo es el último.",
+        "Forced": "Entra: obligado a entrar en {career}, sin tirada de cualificación.",
+        "MustEnter": "{name} debe entrar en {other} este periodo, no en {career}.",
+        "NotVoluntary": "No se puede entrar en {career} voluntariamente: solo una condena, un reclutamiento o el árbitro la abren.",
+        "OfferTitle": "Una carrera ofrecida",
+        "OfferAsk": "Se ofrece {career} con la cualificación dispensada. ¿Aceptarla?",
+        "OfferTaken": "Entra: se ofreció {career}, sin tirada de cualificación.",
+        "PickGrantedSkill": "¿Qué habilidad, a nivel 1?",
+        "RefusedTitle": "Cualificación rechazada",
+        "TakeDraft": "Presentarse al reclutamiento",
+        "TakeDrifter": "Una carrera siempre abierta",
+        "DecideLater": "Decidir más tarde",
+        "DraftAsk": "No hay ninguna tabla de Reclutamiento enlazada. ¿A qué carrera envía el reclutamiento a este Viajero?",
+        "DraftEntry": "Entra: reclutado en {career}, sin tirada de cualificación.",
+        "DraftedByEvent": "Reclutado ({n}): {career} el periodo que viene.",
+        "DropNamed": "{career} no está ni en el mundo ni en un compendio: suéltala sobre {name} para entrar.",
+        "NoFallback": "No hay ninguna carrera siempre abierta en el mundo ni en un compendio: suelta una sobre este Viajero.",
+        "PickFallback": "¿Qué carrera siempre abierta?",
+        "CheckOptional": "¿Aprovechar esta ocasión?",
+        "InjuryHow": "¿Cómo tira esta fila en la tabla de Lesiones?",
+        "InjuryOnce": "Una vez",
+        "InjuryLower": "Dos veces, quedándose con la menor",
+        "InjuryHigher": "Dos veces, quedándose con la mayor",
+        "InjurySevere": "Gravemente herido (un resultado de 2)",
+        "Injured": "Lesión {n}: {changes}",
+        "CareTitle": "Atención médica",
+        "CareAsk": {
+          "one": "¿Restaurar el punto perdido? La atención cuesta Cr{credits} antes de la parte del empleador.",
+          "other": "¿Restaurar los {n} puntos perdidos? La atención cuesta Cr{credits} antes de la parte del empleador."
+        },
+        "CareBills": "Facturas médicas",
+        "CareRank": "Rango",
+        "CareNoGroup": "Esta carrera no indica ninguna fila de Facturas médicas: toda la factura es del Viajero.",
+        "CareShare": "{share}% cubierto por el empleador",
+        "CarePaid": "Atención médica: Cr{credits} para el Viajero ({share}% cubierto).",
+        "OneCareer": "{name} sigue sirviendo en {career}: una carrera cada vez, así que déjala primero.",
+        "TableNotCareer": "{career} es una tabla compartida, no una carrera: enlázala en el ajuste de tablas de creación compartidas.",
+        "InjuryNone": "Sin lesión: esta rama de la fila no se tomó",
+        "MinimumTerms": {
+          "one": "{species} sirve al menos {n} periodo en una carrera antes de intentar otra: si la deja ahora, solo queda licenciarse.",
+          "other": "{species} sirve al menos {n} periodos en una carrera antes de intentar otra: si la deja ahora, solo queda licenciarse."
+        },
+        "MinimumTermsRefused": {
+          "one": "{species} no puede intentar otra carrera: dejó {career} antes de servir {n} periodo. Licénciese en su lugar.",
+          "other": "{species} no puede intentar otra carrera: dejó {career} antes de servir {n} periodos. Licénciese en su lugar."
+        },
+        "RestrictedSpecies": "{career} solo está abierta a {species}.",
+        "RestrictedSex": "{career} solo está abierta a Viajeros de sexo {sex}.",
+        "EjectedSkillKept": "La tirada de habilidad del periodo se mantiene (regla del mundo).",
+        "EjectedSkillLost": "La tirada de habilidad del periodo se pierde con la carrera (regla del mundo)."
       },
       "StepCheckTriggers": {
         "everyTerm": "Cada periodo",
@@ -1399,6 +1563,65 @@
           "one": "{n} habilidad de juventud",
           "other": "{n} habilidades de juventud"
         }
+      },
+      "MedicalBills": {
+        "military": "Ejército/Armada/Infantería de Marina",
+        "civilian": "Agente/Noble/Académico/Artista/Mercader/Ciudadano",
+        "independent": "Explorador/Pícaro/Vagabundo"
+      },
+      "Shared": {
+        "Title": "Tablas de creación compartidas",
+        "MenuLabel": "Enlazar tablas",
+        "MenuHint": "Las tablas que comparten todas las carreras — Sucesos vitales, el Reclutamiento y las demás —, cada una una plantilla de carrera del tipo Tabla compartida. El sistema no incluye ninguna.",
+        "Hint": "Suelta en cada fila una plantilla de carrera del tipo Tabla compartida. Sus filas de Sucesos se aplican igual que las de una carrera.",
+        "Drop": "Suelta aquí una tabla compartida",
+        "Save": "Guardar",
+        "lifeEvents": "Sucesos Vitales",
+        "unusualEvent": "Suceso insólito",
+        "draft": "Reclutamiento",
+        "preCareerEvents": "Sucesos previos a la carrera",
+        "background": "Habilidades de trasfondo",
+        "injury": "Lesiones"
+      },
+      "Education": {
+        "Title": "Educación",
+        "LastTerm": "Abierta hasta el periodo",
+        "TermDMs": "MD de entrada por periodo",
+        "Tied": "Carrera vinculada",
+        "Years": "Años",
+        "EntryGrant": "Al entrar",
+        "Picks": "Habilidades elegidas",
+        "Pick": "Elección",
+        "FromTied": "de la carrera vinculada",
+        "Count": "Cuántas — 0 son todas las filas",
+        "Level": "A nivel — vacío: como está impreso",
+        "Random": "tirada",
+        "Graduation": "Graduación",
+        "HonoursAt": "Honores con",
+        "FailFloor": "Un fallo en este total o menos no conserva nada",
+        "Pass": "Graduado",
+        "HonoursArm": "Con honores, además",
+        "Fail": "No graduado, por encima del mínimo",
+        "Raise": "Sube lo que dio la educación",
+        "RaiseBy": "En — 0 no sube nada",
+        "RaiseBelow": "Solo habilidades por debajo de este nivel",
+        "AssignmentTable": "Habilidades de destino",
+        "TermDM": "Periodo {n}",
+        "Closed": "{career} ya no está abierta: la educación termina en el periodo {n}.",
+        "OneAttempt": "Un intento de educación por periodo: {career} no puede volver a intentarse este periodo.",
+        "Refused": "Intenta una carrera este periodo; si no, el reclutamiento.",
+        "Skills": "Educación: {skills}",
+        "NoTied": "La carrera vinculada {career} no está ni en el mundo ni en un compendio.",
+        "PickSkill": "¿Qué habilidad?",
+        "PickRaise": "¿Qué habilidad subir?",
+        "Honours": "Graduado con honores.",
+        "Graduated": "Graduado.",
+        "NotGraduated": "No se graduó.",
+        "GraduationDMs": "MD de graduación",
+        "EveryRow": "todas las filas",
+        "AtLevel": "nivel {n}",
+        "AsPrinted": "como está impreso",
+        "PickAtLevel": "¿Qué habilidad, a nivel {n}?"
       }
     },
     "Packs": {
@@ -3094,7 +3317,10 @@
         "Alive": "Vivo",
         "Unknow": "Desconocido",
         "Dead": "Muerto"
-      }
+      },
+      "Actor": "Su ficha",
+      "Unlink": "Desvincular esta ficha",
+      "NotAPerson": "Un contacto es un Viajero o un PNJ."
     },
     "TL": {
       "NA": "N/A",
@@ -3902,7 +4128,9 @@
         "one": "MGT2: migración del mundo completada. {count} actor cambió de máximo de vida.",
         "other": "MGT2: migración del mundo completada. {count} actores cambiaron de máximo de vida."
       },
-      "Failed": "MGT2: la migración del mundo ha fallado. Revisa la consola; se reintentará en la próxima carga."
+      "Failed": "MGT2: la migración del mundo ha fallado. Revisa la consola; se reintentará en la próxima carga.",
+      "Done": "MGT2: migración del mundo completada.",
+      "MissedRankBonuses": "Estos registros de carrera se abrieron antes de que esta versión diera a un registro su escalafón, así que sus bonificaciones de rango nunca se pagaron. La migración rellenó el escalafón sin pagar nada: aplícalas a mano si tu mesa las quiere."
     },
     "Notifications": {
       "HealViaCharacteristics": "La Vida se deriva de FUE+DES+RES. Restaura esas características para curar."
@@ -5791,7 +6019,7 @@
       "ageing": "Core p.48. Se repite en cada periodo a partir del cuarto, y el jugador elige qué características lo reciben — así que la elección se registra y el total se deriva.",
       "injury": "Core p.49. Una lesión de creación es una reducción permanente, y llega por un percance, un suceso vital o porque el árbitro lo diga.",
       "event": "Una característica que un suceso o percance de carrera quitó o dio, y varios de ellos son elección del jugador.",
-      "medicalCare": "Core p.49. Restaurar un punto perdido cuesta Cr5000, y un empleador puede cubrir parte — la tirada de Facturas médicas es del árbitro y aquí solo se registra el resultado.",
+      "medicalCare": "Core p.49. Restaurar un punto perdido cuesta Cr5000, y un empleador puede cubrir parte — se tira en la fila de Facturas médicas de la carrera cuando se trata una lesión de creación, y si no la tirada es del árbitro; aquí solo se registra el resultado.",
       "ageingCrisisCare": "Core p.49. Un precio tirado sea lo que sea lo que restaure, y devuelve a 1 cada característica puesta a cero — no a donde estaba.",
       "referee": "Un cambio permanente que nada impreso cubre. Se registra como cualquier otro, así que se deshace borrando la fila.",
       "training": "Companion p.42. Una característica comprada con Puntos de Experiencia: una física cuesta su nuevo valor, una mental el doble, y cada valor se compra por turno. SOC no se puede entrenar en absoluto."

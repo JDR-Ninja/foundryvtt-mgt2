@@ -13,6 +13,7 @@
 		margin: 4px 0
 		> label
 			display: inline-flex
+			flex-wrap: wrap
 			align-items: center
 			gap: 5px
 			flex: 1 1 14rem
@@ -21,11 +22,13 @@
 			flex: 1 1 100%
 		.lbl
 			flex: 0 0 auto
+		// A row of five controls wraps inside its label rather than crushing each to a caret.
 		.f
 			flex: 1 1 5rem
-			min-width: 0
+			min-width: 4.5rem
 		.f.num
 			flex: 0 0 3.4rem
+			min-width: 0
 			text-align: right
 			font-family: var(--mono)
 			font-variant-numeric: tabular-nums
@@ -68,7 +71,7 @@
 		&:hover
 			color: var(--accent-text)
 
-.mgt2 .careertbl, .mgt2 .speciesblk, .mgt2 .speciesfrm
+.mgt2 .careerblk, .mgt2 .careertbl, .mgt2 .speciesblk, .mgt2 .speciesfrm
 	.stack
 		display: flex
 		flex-direction: column

@@ -28,7 +28,7 @@
 	<div class="course">
 		<p class="hint">{{courseWhy}}</p>
 		{{#if canEdit}}
-		<button type="button" class="btn" data-action="beginCourse" {{#unless resets}}disabled{{/unless}}>{{localize 'MGT2.Chargen.Psi.NewCourse'}}</button>
+		<button type="button" class="btn" data-action="beginCourse" {{#unless canBegin}}disabled{{/unless}}>{{localize 'MGT2.Chargen.Psi.NewCourse'}}</button>
 		{{/if}}
 	</div>
 </div>

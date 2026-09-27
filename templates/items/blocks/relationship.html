@@ -2,6 +2,13 @@
 <div class="block">
 	<div class="sect"><h3>{{localize 'MGT2.Items.Relationship'}}</h3></div>
 
+	{{! The Actor this contact is: a Traveller at the table, or the statblock the referee wrote later. }}
+	<div class="taken{{#unless contactActor}} empty{{/unless}}"{{#if editable}} data-accept="Actor.character Actor.npc"{{/if}}>
+		<span class="lbl">{{localize 'MGT2.Contact.Actor'}}</span>
+		{{> systems/mgt2/templates/items/parts/person-ref.html person=contactActor}}
+		{{#if contactActor}}<a class="del edit-only" data-action="contactUnlink" data-tooltip="{{localize 'MGT2.Contact.Unlink'}}"><i class="fa-solid fa-link-slash"></i></a>{{/if}}
+	</div>
+
 	<ul class="specs play-only">
 		<li><span class="lbl">{{localize 'MGT2.Items.Relation'}}</span><b class="word">{{localize (concat "MGT2.Contact.Relation." system.relation)}}</b></li>
 		<li><span class="lbl">{{localize 'MGT2.Items.Attitude'}}</span><b class="word">{{localize (concat "MGT2.Contact.Attitude." system.attitude)}}</b></li>

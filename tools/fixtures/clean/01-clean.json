@@ -55,5 +55,35 @@
       "submersible": null,
       "remote": null
     }
+  },
+  {
+    "_id": "democadetsclean1",
+    "name": "Demo — Harbour Cadet School",
+    "type": "career",
+    "img": "icons/svg/book.svg",
+    "flags": {
+      "mgt2": {
+        "demo": {
+          "order": 36,
+          "cliff": "career",
+          "teaches": [
+            "An education is a career Item of the kind preCareer."
+          ],
+          "trap": "Its career half stays empty because nothing reads it."
+        }
+      }
+    },
+    "system": {
+      "kind": "preCareer",
+      "preCareer": {
+        "picks": [
+          { "table": "service", "tied": true, "count": 0, "level": 0 }
+        ],
+        "graduation": {
+          "characteristic": "intellect",
+          "target": 7
+        }
+      }
+    }
   }
 ]

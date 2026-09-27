@@ -443,7 +443,7 @@
       },
       "creationCostsBecomeDebt": {
         "name": "L'argent dépensé en création devient une dette",
-        "hint": "Quelques événements imprimés dépensent de l'argent avant que la fin de carrière n'en ait produit. Le seul mécanisme imprimé pour une dépense engagée pendant la création est la dette sur les Avantages, le reliquat suivant le Voyageur en jeu."
+        "hint": "Certaines dépenses tombent avant que la fin de carrière n'ait produit d'argent : quelques événements imprimés, les soins médicaux, les anagathiques et une nouvelle formation psionique. Le seul mécanisme imprimé pour une dépense engagée pendant la création est la dette sur les Avantages, le reliquat suivant le Voyageur en jeu. Désactivée, une dépense que l'argent du Voyageur ne couvre pas est refusée."
       },
       "eventDraftBudget": {
         "name": "Une conscription due à un événement a son propre compte",
@@ -587,6 +587,14 @@
       "containerLaunchers": {
         "name": "Lance-conteneurs",
         "hint": "Propose une pièce de lance-conteneurs sur la fiche de composant. Il contient quatre missiles ou une torpille prêts à être lancés, il occupe un point d'emport comme une monture, et il ne peut pas être rechargé pendant une bataille."
+      },
+      "preCareerCountsAsCareer": {
+        "name": "L'éducation pré-carrière compte comme une carrière précédente",
+        "hint": "Une interprétation : le livre de base parle d'éducation « à la place d'une carrière » et de « la première carrière choisie après le diplôme » ; par défaut, une période d'université ou d'académie n'impose donc aucun MD−1 par carrière précédente et laisse à la première carrière sa formation de base complète. Activée, elle compte comme toute autre carrière."
+      },
+      "ejectedTermSkillRoll": {
+        "name": "Un Voyageur éjecté garde le jet de compétence de la période",
+        "hint": "Une interprétation : le livre de base fait perdre à une Survie ratée le jet d'Avantage de la période et la carrière, sans rien dire du jet de compétence ; par défaut, une période qui a servi ses quatre ans le garde donc. Désactivée, le jet de compétence part avec la carrière. Dans les deux cas, le journal de la période le dit."
       }
     },
     "Chargen": {
@@ -609,7 +617,8 @@
       },
       "CareerKinds": {
         "career": "Carrière",
-        "preCareer": "Formation pré-carrière"
+        "preCareer": "Formation pré-carrière",
+        "table": "Table commune"
       },
       "Template": {
         "Career": "Modèle de carrière",
@@ -626,7 +635,7 @@
         "AssignmentChange": "Changement d'affectation",
         "Undeclared": "Non déclaré — le réglage du monde tranche",
         "EventRow7": "Événement, ligne 7",
-        "MedicalBillsRow": "Ligne des frais médicaux",
+        "MedicalBillsRow": "Ligne des Factures médicales",
         "Pensionable": "Ouvre droit à pension",
         "AlwaysAvailable": "Toujours disponible",
         "NeverEjects": "N'éjecte jamais",
@@ -727,7 +736,24 @@
           "officerLadder": "déclarée ci-dessus, et cochée officier",
           "exitTrack": "la piste que lit la règle de sortie, face aux pistes déclarées ci-dessus",
           "rowTrack": "la piste que déplace une ligne, face aux pistes déclarées ci-dessus"
-        }
+        },
+        "GrantFloor": "Le plancher de « SOC 10 ou SOC +1, le plus élevé des deux » ; vide s'il n'y en a pas",
+        "GrantRef": "autre avantage",
+        "GrantRelation": "La relation qu'un contact ou une trahison crée",
+        "GrantShortlist": "spécialités, séparées par des virgules",
+        "ConditionalDMs": "DM de qualification conditionnels",
+        "ConditionalMin": "Le score que la caractéristique doit atteindre",
+        "ConditionalAfter": "ou : après ces carrières, séparées par des virgules",
+        "ConditionalDM": "DM conditionnel",
+        "BenefitCondition": "Ce qui déclenche l'effet sur les jets d'Avantage",
+        "CareerAssignment": "affectation",
+        "CheckOptional": "peut être refusé",
+        "TrackCondition": "Ce qui déclenche le déplacement",
+        "AwardCondition": "Ce qui déclenche l'attribution",
+        "TrayEntryMode": "Entrée comme",
+        "CheckSkills": "compétences, séparées par des virgules ; la meilleure est jetée",
+        "RaisesSkill": "la compétence jetée gagne un niveau",
+        "GrantFirst": "avant le jet"
       },
       "Frame": {
         "Term": "La période que ce cadre fait courir",
@@ -807,7 +833,11 @@
         "LawRow": "Variante",
         "LawDefault": "tout Voyageur",
         "CheckKind": "Le total",
-        "RollShort": "abrégé"
+        "RollShort": "abrégé",
+        "InAddition": "En plus de l'allocation",
+        "InAdditionHint": "Cochez quand le livre donne les compétences toujours acquises « en plus » : elles ne prennent alors aucune ligne de l'allocation.",
+        "CareerChangeExcept": "Carrières libres de ce minimum",
+        "CoreCheck": "{characteristic}, dans toute carrière"
       },
       "Qualification": {
         "target": "Jet contre un seuil",
@@ -833,7 +863,10 @@
         "voluntary": "Parti volontairement",
         "ejectedByMishap": "Évincé par un aléa",
         "forcedOutByAdvancement": "Écarté par le jet d'Avancement",
-        "paroled": "Libéré"
+        "paroled": "Libéré",
+        "died": "Mort",
+        "blocked": "Interdit de poursuivre",
+        "graduated": "Diplômé"
       },
       "AssignmentChange": {
         "requalifyKeepRank": "Se requalifier, garder son rang",
@@ -859,7 +892,8 @@
         "keep": "Conserve le jet de la période",
         "lose": "Perd un jet",
         "grant": "Accorde un jet",
-        "wipe": "Annule les jets de cette carrière"
+        "wipe": "Annule les jets de cette carrière",
+        "wager": "Mise des jets sur le jet de la ligne"
       },
       "TrayKinds": {
         "dm": "MD",
@@ -1000,7 +1034,15 @@
         "shipsBoat": "Vedette",
         "tas": "Adhésion à la SAV",
         "weapon": "Arme",
-        "yacht": "Yacht"
+        "yacht": "Yacht",
+        "Repeat": {
+          "blade": "Mêlée (lames)",
+          "gun": "Combat Arme — pour une arme déjà reçue",
+          "personalVehicle": "Conduire ou Aéronef — quelle spécialité",
+          "scientificEquipment": "Électronique ou Science — quelle spécialité",
+          "shipsBoat": "Pilote (petits vaisseaux)",
+          "weapon": "Mêlée ou Combat Arme — pour une arme déjà reçue"
+        }
       },
       "TrackKinds": {
         "numeric": "Un nombre",
@@ -1015,7 +1057,8 @@
         "Unassigned": "Tiré : {values}",
         "Dice": "Dés : {dice}",
         "NoteBoon": "Les dés de bonus sont en jeu : chaque caractéristique lance donc ses propres dés au lieu de les prendre dans une réserve.",
-        "NoteFrame": "{characteristic} se tire sur {formula} : chaque caractéristique lance donc ses propres dés au lieu de les prendre dans une réserve."
+        "NoteFrame": "{characteristic} se tire sur {formula} : chaque caractéristique lance donc ses propres dés au lieu de les prendre dans une réserve.",
+        "NoteSex": "Cette espèce tire selon le sexe : fixez d'abord le sexe du Voyageur, sinon ses dés sans sexe sont lancés."
       },
       "Roll": {
         "Title": "Test de création",
@@ -1045,9 +1088,10 @@
           "other": "{n} tests tentés"
         },
         "NewCourse": "Commencer une nouvelle formation",
-        "NewCourseHint": "Quatre mois et Cr100000. Une nouvelle formation remet le malus cumulatif à zéro.",
-        "NewCourseAsk": "Commencer une nouvelle formation pour {name} ? Le malus cumulatif repart de zéro.",
-        "Lifetime": "À cette table, le malus de formation est un compteur à vie : une nouvelle formation n'y change rien."
+        "NewCourseHint": "La première formation est gratuite. Une nouvelle prend quatre mois, coûte Cr{credits} et remet le malus cumulatif à zéro.",
+        "NewCourseAsk": "Commencer une nouvelle formation pour {name} ? Elle coûte Cr{credits}, et le malus cumulatif repart de zéro.",
+        "Lifetime": "À cette table, le malus de formation est un compteur à vie : une nouvelle formation n'y change rien.",
+        "CoursePaid": "{name} commence une nouvelle formation : Cr{credits}"
       },
       "Connect": {
         "Solo": "La création en solo est en vigueur, et elle supprime la règle des Connexions.",
@@ -1074,7 +1118,17 @@
           "cash": "Cash",
           "other": "Autres Avantages"
         },
-        "Owed": "Cr{credits} portés en dette"
+        "Owed": "Cr{credits} portés en dette",
+        "CashAsk": "Cette carrière n'a pas de colonne Cash. Saisissez le montant que sa table indique pour un jet de {n}, ou annulez pour ne rien dépenser.",
+        "NoRollsLeft": "{career} ne doit plus aucun jet d'Avantage.",
+        "RepeatTitle": "Un Avantage obtenu à nouveau",
+        "RepeatAsk": "{what} est obtenu à nouveau. Prenez-en un autre, ou ce que le livre donne à la place — pour une compétence, nommez-la ci-dessous.",
+        "Repeat": {
+          "another": "Un autre",
+          "skill": "La compétence à la place",
+          "shipShare": "Une Part de vaisseau à la place"
+        },
+        "Reroll": "{what} est déjà détenu : le livre dit de relancer cet Avantage."
       },
       "Close": {
         "Title": "Fin de carrière",
@@ -1148,6 +1202,7 @@
         "ShipSettled": "{name} commence la campagne en possédant un vaisseau.",
         "NoShips": "Personne n'a tiré de vaisseau.",
         "SoloOff": "La génération en solo est active et supprime cette étape.",
+        "SoloPackage": "La création en solo est active : à la place du module, chaque Voyageur prend une compétence de son choix au niveau 1.",
         "PackageTitle": "Module de compétences partagé",
         "PackageTurn": "C'est au tour de {name} — prenez une compétence.",
         "PackageDone": {
@@ -1159,7 +1214,22 @@
         "PackageHint": "Le groupe choisit un module ensemble, puis chacun prend à tour de rôle une compétence jusqu'à épuisement de la liste. Aucun module n'est fourni avec ce système — saisissez celui que votre livre imprime, séparé par des virgules. Un nombre final indique le niveau.",
         "PackageName": "Module",
         "PackageSkills": "Compétences",
-        "PackageSave": "Enregistrer"
+        "PackageSave": "Enregistrer",
+        "Preplay": "avant le jeu jusqu'à Cr{credits}",
+        "PreplayHint": "L'argent restant peut acheter de l'équipement personnel jusqu'à ce montant avant le jeu ; les objets plus chers se cherchent en jeu.",
+        "SoloTake": "Prendre une compétence au niveau 1",
+        "SoloHint": "Création en solo : saisissez l'unique compétence que ce Voyageur obtient au niveau 1, à la place du module de compétences.",
+        "SharesHint": "Les Parts de vaisseau investies dans le vaisseau de {name} ne rapportent pas Cr{share} par an. Indiquez combien chaque Voyageur en engage.",
+        "SharesHeld": {
+          "one": "{n} Part de vaisseau",
+          "other": "{n} Parts de vaisseau"
+        },
+        "SharesCommitted": {
+          "one": "{n} engagée",
+          "other": "{n} engagées"
+        },
+        "CommitShares": "Engager",
+        "WarnShip": "Vaisseaux pas encore attribués : {names} ne toucherai(en)t aucune pension pour eux"
       },
       "Banner": {
         "InProgress": "Création de personnage en cours",
@@ -1222,7 +1292,13 @@
             "one": "{n} période au plus",
             "other": "{n} périodes au plus"
           }
-        }
+        },
+        "ResetStep": "Rouvrir cette étape (arbitre)",
+        "ResetStepAsk": "Rouvrir {step} pour {name} ? L'étape pourra être relancée cette période. Ce qu'elle a déjà écrit reste ; seul son propre résultat, un refus ou le verdict de Survie, est effacé.",
+        "TrayAdd": "Ajouter une entrée",
+        "TrayRemove": "Retirer cette entrée",
+        "TrayDM": "Le MD, pour une entrée de MD",
+        "TrayNames": "Ce qu'elle nomme — une carrière ou une compétence"
       },
       "TermOutcomes": {
         "elected": "Choix de début de période",
@@ -1235,7 +1311,9 @@
         "mustContinue": "Doit continuer",
         "released": "Libéré par la jauge",
         "skillRoll": "Jet de compétence",
-        "aged": "Jet de Vieillissement"
+        "aged": "Jet de Vieillissement",
+        "graduated": "Diplômé",
+        "honours": "Mention"
       },
       "Tables": {
         "personalDevelopment": "Développement personnel",
@@ -1277,7 +1355,6 @@
         "NoEventTable": "Aucune table d'Événements n'a été saisie pour cette carrière.",
         "NoMishapTable": "Aucune table d'Aléas n'a été saisie pour cette carrière.",
         "NoRow": "Aucune ligne {n} sur cette table.",
-        "LifeEvents": "Événements de la vie",
         "RollShared": "Faites un jet sur la table commune {table} et appliquez ce qu'elle indique.",
         "CannotEject": "Non évincé : cette carrière ne peut pas évincer.",
         "Ejected": "Évincé de {career}.",
@@ -1358,7 +1435,7 @@
         "ChangeAssignment": "Changer d'affectation ({rule})",
         "PickAssignment": "Quelle affectation ?",
         "AssignmentKept": "Le changement a échoué : vous continuez dans l'ancienne affectation, sans pénalité.",
-        "AssignmentNewCareer": "Pour cette carrière, un changement d'affectation compte comme une nouvelle carrière : partez, puis redéposez le modèle.",
+        "AssignmentNewCareer": "Pour cette carrière, un changement d'affectation compte comme une nouvelle carrière : cette période la clôt, et la suivante se qualifie pour la nouvelle affectation.",
         "SubRollPassed": "Le jet propre à cette ligne est réussi.",
         "SubRollFailed": "Le jet propre à cette ligne a échoué.",
         "RefereeStep": "{step} est une étape propre à ce cadre : c'est au référent de la résoudre.",
@@ -1368,7 +1445,94 @@
         "TrackHeld": "{track} ne peut plus être perdu une fois obtenu.",
         "ReadOnTable": "{step} : lisez {total} sur la table imprimée dans votre livre.",
         "PickAssociate": "Quel Contact ou Allié le trahit ?",
-        "Unseen": "Quelqu'un que vous n'aviez pas vu venir"
+        "Unseen": "Quelqu'un que vous n'aviez pas vu venir",
+        "NoAdvanceAfterCommission": "Un Commandement a été obtenu cette période : le jet d'Avancement de cette période n'est pas fait.",
+        "StepTaken": "{step} a déjà été fait cette période. Seul l'arbitre peut le rouvrir.",
+        "RefusedThisTerm": "Une qualification a déjà été refusée cette période, on ne peut donc pas entrer dans {career} : la période revient à la conscription ou à une carrière toujours ouverte.",
+        "AgeingDistinct": "Chaque perte porte sur une caractéristique différente.",
+        "AgeingOwed": "Le jet de vieillissement est fait : ses pertes doivent être appliquées.",
+        "ExcessShares": {
+          "one": "{n} point au-delà du maximum devient une Part de vaisseau",
+          "other": "{n} points au-delà du maximum deviennent des Parts de vaisseau"
+        },
+        "ExcessLost": {
+          "one": "{n} point au-delà du maximum est perdu",
+          "other": "{n} points au-delà du maximum sont perdus"
+        },
+        "TalentLearned": "{talent} appris.",
+        "TalentMissed": "{talent} non appris.",
+        "WagerWon": {
+          "one": "Pari gagné : {n} jet d'Avantage gagné",
+          "other": "Pari gagné : {n} jets d'Avantage gagnés"
+        },
+        "WagerLost": {
+          "one": "Pari perdu : {n} jet d'Avantage perdu",
+          "other": "Pari perdu : {n} jets d'Avantage perdus"
+        },
+        "WagerTitle": "Miser des jets d'Avantage",
+        "WagerFixed": {
+          "one": "Miser {n} jet d'Avantage ?",
+          "other": "Miser {n} jets d'Avantage ?"
+        },
+        "WagerAsk": "Combien de jets d'Avantage misez-vous ? Aucun, c'est ne pas lancer.",
+        "AnagathicsContinue": "Continuer les anagathiques cette période ? Ils coûtent 1D × Cr25000 ; les arrêter impose aussitôt un jet de Vieillissement.",
+        "AnagathicsCost": "Anagathiques",
+        "AnagathicsDM": "Anagathiques (périodes)",
+        "AnagathicsPaid": "Anagathiques : Cr{credits}",
+        "AnagathicsStopped": "Anagathiques arrêtés : le jet de Vieillissement se fait aussitôt.",
+        "AutoSuccessAsk": "L'utiliser maintenant, et réussir ce jet sans le lancer ?",
+        "LendAsk": "Appliquer ces MD d'Avancement à ce jet de Commandement ? Ils y sont dépensés.",
+        "Prohibited": "{name} ne peut pas faire ce jet dans {career}.",
+        "Blocked": "{career} ne peut pas être poursuivie : cette période est la dernière.",
+        "Forced": "Entrée : contraint d'entrer dans {career}, sans jet de qualification.",
+        "MustEnter": "{name} doit entrer dans {other} cette période, pas dans {career}.",
+        "NotVoluntary": "On ne peut pas entrer volontairement dans {career} : seuls une condamnation, une conscription ou l'arbitre l'ouvrent.",
+        "OfferTitle": "Une carrière proposée",
+        "OfferAsk": "{career} est proposée, qualification levée. L'accepter ?",
+        "OfferTaken": "Entrée : {career} a été proposée, sans jet de qualification.",
+        "PickGrantedSkill": "Quelle compétence, au niveau 1 ?",
+        "RefusedTitle": "Qualification refusée",
+        "TakeDraft": "Se présenter à la conscription",
+        "TakeDrifter": "Une carrière toujours ouverte",
+        "DecideLater": "Décider plus tard",
+        "DraftAsk": "Aucune table de Conscription n'est liée. Dans quelle carrière la conscription envoie-t-elle ce Voyageur ?",
+        "DraftEntry": "Entrée : conscrit dans {career}, sans jet de qualification.",
+        "DraftedByEvent": "Conscrit ({n}) : {career} à la période suivante.",
+        "DropNamed": "{career} n'est ni dans le monde ni dans un compendium : déposez-la sur {name} pour y entrer.",
+        "NoFallback": "Aucune carrière toujours ouverte n'est dans le monde ou un compendium : déposez-en une sur ce Voyageur.",
+        "PickFallback": "Quelle carrière toujours ouverte ?",
+        "CheckOptional": "Saisir cette occasion ?",
+        "InjuryHow": "Comment cette ligne fait-elle un jet sur la table des Blessures ?",
+        "InjuryOnce": "Une fois",
+        "InjuryLower": "Deux fois, en gardant le plus bas",
+        "InjuryHigher": "Deux fois, en gardant le plus haut",
+        "InjurySevere": "Gravement blessé (un résultat de 2)",
+        "Injured": "Blessure {n} : {changes}",
+        "CareTitle": "Soins médicaux",
+        "CareAsk": {
+          "one": "Restaurer le point perdu ? Les soins coûtent Cr{credits} avant la part de l'employeur.",
+          "other": "Restaurer les {n} points perdus ? Les soins coûtent Cr{credits} avant la part de l'employeur."
+        },
+        "CareBills": "Factures médicales",
+        "CareRank": "Rang",
+        "CareNoGroup": "Cette carrière ne nomme aucune ligne des Factures médicales : toute la facture revient au Voyageur.",
+        "CareShare": "{share} % pris en charge par l'employeur",
+        "CarePaid": "Soins médicaux : Cr{credits} pour le Voyageur ({share} % pris en charge).",
+        "OneCareer": "{name} sert encore dans {career} : une carrière à la fois, quittez-la d'abord.",
+        "TableNotCareer": "{career} est une table commune, pas une carrière : liez-la dans le réglage des tables de création communes.",
+        "InjuryNone": "Pas de blessure : cette branche de la ligne n'a pas été prise",
+        "MinimumTerms": {
+          "one": "{species} sert au moins {n} période dans une carrière avant d'en tenter une autre : quittez-la maintenant, et seule la fin de carrière suit.",
+          "other": "{species} sert au moins {n} périodes dans une carrière avant d'en tenter une autre : quittez-la maintenant, et seule la fin de carrière suit."
+        },
+        "MinimumTermsRefused": {
+          "one": "{species} ne peut pas tenter une autre carrière : {career} a été quittée avant {n} période servie. Passez plutôt à la fin de carrière.",
+          "other": "{species} ne peut pas tenter une autre carrière : {career} a été quittée avant {n} périodes servies. Passez plutôt à la fin de carrière."
+        },
+        "RestrictedSpecies": "{career} n'est ouverte qu'aux {species}.",
+        "RestrictedSex": "{career} n'est ouverte qu'aux Voyageurs de sexe {sex}.",
+        "EjectedSkillKept": "Le jet de compétence de la période est tout de même accordé (règle du monde).",
+        "EjectedSkillLost": "Le jet de compétence de la période part avec la carrière (règle du monde)."
       },
       "StepCheckTriggers": {
         "everyTerm": "À chaque période",
@@ -1399,6 +1563,65 @@
           "one": "{n} compétence de jeunesse",
           "other": "{n} compétences de jeunesse"
         }
+      },
+      "MedicalBills": {
+        "military": "Armée/Marine spatiale/Marine",
+        "civilian": "Agent/Noble/Scientifique/Média/Marchand/Citoyen",
+        "independent": "Éclaireur/Vagabond/Trafiquant"
+      },
+      "Shared": {
+        "Title": "Tables de création communes",
+        "MenuLabel": "Lier les tables",
+        "MenuHint": "Les tables que toutes les carrières partagent — Événements de la vie, Conscription et les autres —, chacune un modèle de carrière de type Table commune. Le système n'en fournit aucune.",
+        "Hint": "Déposez sur chaque ligne un modèle de carrière de type Table commune. Ses lignes d'Événements s'appliquent exactement comme celles d'une carrière.",
+        "Drop": "Déposez une table commune ici",
+        "Save": "Enregistrer",
+        "lifeEvents": "Événements de la vie",
+        "unusualEvent": "Événement inhabituel",
+        "draft": "Conscription",
+        "preCareerEvents": "Événements de pré-carrière",
+        "background": "Compétences de base",
+        "injury": "Blessures"
+      },
+      "Education": {
+        "Title": "Éducation",
+        "LastTerm": "Ouverte jusqu'à la période",
+        "TermDMs": "MD d'entrée par période",
+        "Tied": "Carrière liée",
+        "Years": "Années",
+        "EntryGrant": "À l'entrée",
+        "Picks": "Compétences choisies",
+        "Pick": "Choix",
+        "FromTied": "de la carrière liée",
+        "Count": "Combien — 0 pour toutes les lignes",
+        "Level": "Au niveau — vide : tel qu'imprimé",
+        "Random": "tirée au dé",
+        "Graduation": "Diplôme",
+        "HonoursAt": "Mention à",
+        "FailFloor": "Un échec à ce total ou moins ne garde rien",
+        "Pass": "Diplômé",
+        "HonoursArm": "Avec mention, en plus",
+        "Fail": "Non diplômé, au-dessus du plancher",
+        "Raise": "Augmente ce que l'éducation a donné",
+        "RaiseBy": "De — 0 n'augmente rien",
+        "RaiseBelow": "Seulement les compétences sous ce niveau",
+        "AssignmentTable": "Compétences d'affectation",
+        "TermDM": "Période {n}",
+        "Closed": "{career} n'est plus accessible : l'éducation s'arrête à la période {n}.",
+        "OneAttempt": "Une seule tentative d'éducation par période : {career} ne peut pas être retentée cette période.",
+        "Refused": "Tentez une carrière cette période — à défaut, la conscription.",
+        "Skills": "Éducation : {skills}",
+        "NoTied": "La carrière liée {career} n'est ni dans le monde ni dans un compendium.",
+        "PickSkill": "Quelle compétence ?",
+        "PickRaise": "Quelle compétence augmenter ?",
+        "Honours": "Diplômé avec mention.",
+        "Graduated": "Diplômé.",
+        "NotGraduated": "Non diplômé.",
+        "GraduationDMs": "MD de diplôme",
+        "EveryRow": "toutes les lignes",
+        "AtLevel": "niveau {n}",
+        "AsPrinted": "tel qu'imprimé",
+        "PickAtLevel": "Quelle compétence, au niveau {n} ?"
       }
     },
     "Packs": {
@@ -3094,7 +3317,10 @@
         "Alive": "En vie",
         "Unknow": "Inconnu",
         "Dead": "Mort"
-      }
+      },
+      "Actor": "Sa fiche",
+      "Unlink": "Délier cette fiche",
+      "NotAPerson": "Un contact est un Voyageur ou un PNJ."
     },
     "TL": {
       "NA": "N/A",
@@ -4477,7 +4703,7 @@
       "ageing": "Livre de règles de Traveller p.48. Il se répète à chaque période à partir de la quatrième, et le joueur choisit quelles caractéristiques l'encaissent — le choix est donc consigné et le total dérivé.",
       "injury": "Livre de règles de Traveller p.49. Une blessure de création est une réduction permanente : elle arrive par un revers, un événement de vie, ou parce que l'arbitre le dit.",
       "event": "Une caractéristique qu'un événement ou un revers de carrière a prise ou donnée, souvent au choix du joueur.",
-      "medicalCare": "Livre de règles de Traveller p.49. Rendre un point perdu coûte Cr5000, et un employeur peut en couvrir une part — le jet de Frais Médicaux appartient à l'arbitre et seul le résultat est consigné ici.",
+      "medicalCare": "Livre de règles de Traveller p.49. Rendre un point perdu coûte Cr5000, et un employeur peut en couvrir une part — lancée sur la ligne des Factures médicales de la carrière quand une blessure de création est soignée, sinon le jet appartient à l'arbitre ; seul le résultat est consigné ici.",
       "ageingCrisisCare": "Livre de règles de Traveller p.49. Un seul prix lancé quoi qu'il rende, et il remet chaque caractéristique tombée à 0 à 1 — pas là où elle était.",
       "referee": "Un changement permanent qu'aucune règle imprimée ne couvre. Il se consigne comme les autres, et se défait en supprimant la ligne.",
       "training": "Compagnon p.40. Une caractéristique achetée avec des points d'Expérience : une physique coûte sa nouvelle valeur, une mentale le double, et chaque valeur s'achète l'une après l'autre. Le SOC ne peut pas s'entraîner."
@@ -5348,7 +5574,9 @@
         "one": "MGT2 : migration du monde terminée. {count} acteur a changé de maximum de vie.",
         "other": "MGT2 : migration du monde terminée. {count} acteurs ont changé de maximum de vie."
       },
-      "Failed": "MGT2 : échec de la migration du monde. Consultez la console ; elle sera retentée au prochain chargement."
+      "Failed": "MGT2 : échec de la migration du monde. Consultez la console ; elle sera retentée au prochain chargement.",
+      "Done": "MGT2 : migration du monde terminée.",
+      "MissedRankBonuses": "Ces dossiers de carrière ont été ouverts avant que cette version ne donne son échelle de rang à un dossier : leurs bonus de rang n'ont jamais été versés. La migration a renseigné l'échelle sans rien verser ; appliquez-les à la main si votre table le souhaite."
     },
     "Notifications": {
       "HealViaCharacteristics": "Les points de vie découlent de FOR+DEX+END. Restaurez ces caractéristiques pour soigner."

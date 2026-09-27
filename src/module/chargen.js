@@ -15,9 +15,7 @@ export class ChargenState extends foundry.abstract.DataModel {
             // The term being played NOW, one-based.
             term: new fields.NumberField({ required: false, initial: 1, min: 1, integer: true }),
 
-            // Where inside that term the loop is — the same fact as `term`, one level finer, and it
-            // belongs here for the same reason: it is the term IN PROGRESS and must not outlive
-            // creation.
+            // Where inside that term the loop is: the term IN PROGRESS, which must not outlive creation.
             step: new fields.StringField({
                 required: false, blank: true, initial: "", choices: MGT2.CreationSteps }),
 
@@ -40,12 +38,22 @@ export class ChargenState extends foundry.abstract.DataModel {
                 high: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true })
             }), { initial: () => ({}) }),
 
-            // Folio 19's Connections Rule, which is an ALLOWANCE and not an outcome: two at most,
-            // each with a different Traveller.
+            // Folio 19's Connections Rule, an ALLOWANCE and not an outcome: two, each with a different Traveller.
             connections: new fields.ArrayField(new fields.SchemaField({
                 with: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 skill: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
+            }), { initial: () => [] }),
+
+            // Folio 18: a refused qualification closes the TERM, so the refusal outlives its record.
+            refusals: new fields.ArrayField(new fields.SchemaField({
+                term: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                career: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+                // Where the Traveller went instead: the career the draft named, entered with no roll.
+                drafted: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+                // Core p.16: a refused education leaves the term open to a career.
+                education: new fields.BooleanField({ required: false, initial: false }),
+                assignment: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             }), { initial: () => [] }),
 
             // Folio 50's shared skills package, and only the half that is spent: what a Traveller
@@ -77,11 +85,7 @@ export const CHARGEN_KEY = "chargen";
  */
 export const Chargen = {
 
-    /**
-     * Never null: an actor not in creation reads as a blank ledger, so a caller asks one question
-     * rather than two.
-     * @returns {ChargenState}
-     */
+    /** Never null: an actor not in creation reads as a blank ledger, so a caller asks one question. */
     read(actor) {
         const stored = actor?.getFlag(CHARGEN_SCOPE, CHARGEN_KEY);
         return new ChargenState(stored ?? {}, { strict: false });
@@ -128,11 +132,7 @@ export const Chargen = {
         return actor.unsetFlag(CHARGEN_SCOPE, CHARGEN_KEY);
     },
 
-    /**
-     * The species Item, which IS the creation frame and the ONLY route to the term loop
-     *.
-     * @returns {Item|undefined}
-     */
+    /** The species Item, which IS the creation frame and the only route to the term loop. @returns {Item|undefined} */
     frame(actor) {
         return actor?.items.find(item => item.type === "species");
     },
@@ -163,10 +163,8 @@ export const Chargen = {
     law(actor, rows) {
         if ( !rows?.length ) return null;
         const sex = fold(actor?.system.personal?.sex);
-        // Through `track()` and never the stored rung: `trackRungPermanence` is printed as *"the
-        // highest rung ever attained is the one that answers"*, and reading `rung` raw made that
-        // world rule mean one thing to a standing modifier (`chargen-term.js`) and another to a
-        // species law — a fallen Za'tachk matriarch answered two ages at once.
+        // Through `track()` and never the stored rung: read raw, `trackRungPermanence` meant one thing
+        // to a standing modifier and another to a species law — a fallen matriarch answered two ages.
         const roles = rows.some(row => row.role)
             ? Object.keys(this.read(actor).tracks).map(key => fold(this.track(actor, key).rung)) : [];
         return rows.find(row => (!row.sex || (fold(row.sex) === sex))
@@ -218,6 +216,11 @@ export const Chargen = {
         return { drafted, byEvent };
     },
 
+    /** Companion p.13's Iron Man: a failed Survival killed this Traveller, and creation stops. */
+    isDead(actor) {
+        return this.careers(actor).some(career => career.system.exitMode === "died");
+    },
+
     /** Is any career still open? */
     isServing(actor) {
         return this.careers(actor).some(career => career.system.exitMode === "stillServing");
@@ -226,7 +229,7 @@ export const Chargen = {
     /** A Traveller who has stopped but has not been torn down. */
     isDone(actor) {
         const careers = this.careers(actor);
-        return (careers.length > 0) && !careers.some(c => c.system.exitMode === "stillServing");
+        return careers.some(c => c.system.kind !== "preCareer") && !careers.some(c => c.system.exitMode === "stillServing");
     },
 
     /**
@@ -253,9 +256,8 @@ export const Chargen = {
                     from: age, to: age + years, years,
                     survived: entry.survived, ejected: entry.ejected,
                     kind: entry.kind, note: entry.note,
-                    // The track as of THIS term: the record stores the current value and every
-                    // adjustment carries the term it was made in, so a
-                    // past term reads by unwinding the ones that came after it.
+                    // The track as of THIS term: every adjustment carries its term, so a past term
+                    // reads by unwinding the ones that came after it.
                     track: trackAt(system.track, index),
                     events: []
                 });
@@ -337,7 +339,7 @@ export const Chargen = {
         if ( !definition ) return null;
         const next = foundry.utils.deepClone(await this.ensureTracks(actor));
         const held = next[key];
-        const floor = (Rules.get("trackRungPermanence") === "permanent") ? (held.value ?? 0) : -Infinity;
+        const floor = (definition.monotone || (Rules.get("trackRungPermanence") === "permanent")) ? (held.value ?? 0) : -Infinity;
         const value = Math.max(clampToTrack((held.value ?? 0) + delta, definition), floor);
         next[key] = {
             value,
@@ -371,14 +373,15 @@ export const Chargen = {
         return this.read(actor).tray.filter(entry => bears(entry, check, career));
     },
 
-    /** Spend what a roll on this check consumes. @returns {Promise<Actor>} */
+    /** Spend what a roll on this check consumed: its DMs, since every other kind is spent by its own reader. */
     async spendPending(actor, check, career) {
         if ( !check ) return actor;
         const state = this.read(actor);
         const tray = [];
         let spent = false;
         for ( const entry of state.tray ) {
-            if ( !bears(entry, check, career) || (entry.duration !== "oneShot") || (entry.uses === null) ) {
+            if ( !bears(entry, check, career) || (entry.kind !== "dm") || (entry.duration !== "oneShot")
+                || (entry.uses === null) ) {
                 tray.push(plain(entry));
                 continue;
             }
@@ -399,7 +402,8 @@ export const Chargen = {
         const key = MGT2Helper.skillSlug(career);
         const tray = state.tray.filter(entry => {
             if ( entry.expiresWhen === exitMode ) return false;
-            return !((entry.duration === "thisCareer")
+            // An entry waiting for the first career after graduation belongs to no career yet.
+            return (entry.scope === "firstAfterGraduation") || !((entry.duration === "thisCareer")
                 && (!entry.career || (MGT2Helper.skillSlug(entry.career) === key)));
         }).map(plain);
         return (tray.length === state.tray.length) ? actor : this.update(actor, { tray });
@@ -409,9 +413,81 @@ export const Chargen = {
         return this.update(actor, { tray: [...this.read(actor).tray.map(plain), entry] });
     },
 
+    /**
+     * Spend the first entry a reader used: one use off it, or the whole entry.
+     * @param {function(object): boolean} match   Over a plain tray entry
+     */
+    async spendEntry(actor, match, { whole = false } = {}) {
+        const tray = this.read(actor).tray.map(plain);
+        const index = tray.findIndex(match);
+        if ( index < 0 ) return actor;
+        if ( !whole && (tray[index].uses > 1) ) tray[index] = { ...tray[index], uses: tray[index].uses - 1 };
+        else if ( whole || (tray[index].uses !== null) ) tray.splice(index, 1);
+        return this.update(actor, { tray });
+    },
+
+    /** Whether a qualification was refused in the term being played. */
+    refusedThisTerm(actor, { education = false } = {}) {
+        const state = this.read(actor);
+        return state.refusals.some(entry => (entry.term === state.term) && (entry.education === education));
+    },
+
     /** The career records still open. @returns {Item[]} */
     serving(actor) {
         return this.careers(actor).filter(career => career.system.exitMode === "stillServing");
+    },
+
+    /** Core p.18: one career at a time, a record never entered giving way to the new one; a shared table is never served. */
+    async acceptsCareer(actor, data) {
+        if ( (data?.system?.kind ?? "career") === "table" ) {
+            ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.TableNotCareer", { career: data.name }));
+            return false;
+        }
+        const refusal = this.restricted(actor, data);
+        if ( refusal ) {
+            ui.notifications.warn(refusal);
+            return false;
+        }
+        const open = this.isInCreation(actor) ? this.serving(actor)[0] : null;
+        if ( open && !open.system.termLog.some(entry => entry.closed || entry.steps.has("qualify")) ) await open.delete();
+        else if ( open ) {
+            ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.OneCareer", { career: open.name, name: actor.name }));
+            return false;
+        }
+        return true;
+    },
+
+    /** A career's `restrictedTo`, and a species' minimum terms before another career: the refusal, or "". */
+    restricted(actor, data) {
+        const fold = MGT2Helper.skillSlug;
+        const only = data?.system?.restrictedTo ?? {};
+        const species = this.frame(actor);
+        const base = name => fold(String(name ?? "").replace(/\s*\([^)]*\)\s*$/, ""));
+        if ( only.species && !(species && [fold(species.name), base(species.name)].includes(fold(only.species))) ) {
+            return game.i18n.format("MGT2.Chargen.Term.RestrictedSpecies", { career: data.name, species: only.species });
+        }
+        if ( only.sex && (fold(only.sex) !== fold(actor.system.personal?.sex)) ) {
+            return game.i18n.format("MGT2.Chargen.Term.RestrictedSex", { career: data.name, sex: only.sex });
+        }
+        const barred = ((data?.system?.kind ?? "career") === "career") ? this.changeBarred(actor) : null;
+        const named = this.read(actor).tray.some(entry => ["careerOffer", "careerForce"].includes(entry.kind)
+            && (fold(entry.value) === fold(data?.name)));
+        if ( !barred || named ) return "";
+        return MGT2Helper.plural("MGT2.Chargen.Term.MinimumTermsRefused", barred.minimum,
+            { species: species.name, career: barred.career });
+    },
+
+    /** ACS 1 p.19's minimum terms in a career before another: a career left by choice short of them, unless exempt. */
+    changeBarred(actor, record = null) {
+        const change = this.frame(actor)?.system.careerChange;
+        if ( !change?.minimumTerms ) return null;
+        const fold = MGT2Helper.skillSlug;
+        const left = record ?? this.careers(actor).filter(career => (career.system.kind !== "preCareer")
+            && (career.system.exitMode !== "stillServing")).at(-1);
+        if ( !left || (!record && (left.system.exitMode !== "voluntary")) ) return null;
+        if ( change.exceptCareers.some(name => fold(name) === fold(left.name)) ) return null;
+        const terms = this.termsIn(left, { open: !!record });
+        return (terms >= change.minimumTerms) ? null : { career: left.name, terms, minimum: change.minimumTerms };
     },
 
     /** The assignment being served, off the record's own copy of its template's tables. */
@@ -426,7 +502,20 @@ export const Chargen = {
      * @param {Item} [exclude]   The record being qualified for, which is not previous to itself
      */
     previousCareers(actor, exclude = null) {
-        return this.careers(actor).filter(career => career !== exclude).length;
+        const counted = Rules.on("preCareerCountsAsCareer");
+        return this.careers(actor).filter(career => (career !== exclude)
+            && (counted || (career.system.kind !== "preCareer"))).length;
+    },
+
+    /** Core p.16's "the first career after graduation": entered, its entries bind to it; refused, they go. */
+    async bindGraduation(actor, record, entered) {
+        const tray = this.read(actor).tray.map(plain);
+        const kept = tray.flatMap(entry => {
+            if ( entry.scope !== "firstAfterGraduation" ) return [entry];
+            if ( !entered ) return [];
+            return [{ ...entry, scope: "thisCareer", career: record.name }];
+        });
+        return tray.some(entry => entry.scope === "firstAfterGraduation") ? this.update(actor, { tray: kept }) : actor;
     },
 
     /** The rank number a later rule reads. */

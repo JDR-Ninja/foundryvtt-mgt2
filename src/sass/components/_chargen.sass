@@ -346,6 +346,16 @@
 	li.cut
 		text-decoration: line-through
 		color: var(--faint)
+	// Taken this term: the loop refuses it again, and only the referee's reset reopens it.
+	li.done
+		border-color: var(--good)
+		color: var(--good)
+		a.reset
+			margin-left: 5px
+			cursor: pointer
+			color: var(--faint)
+			&:hover
+				color: var(--accent-text)
 	// The one step that is not a term step. Dashed until it has been taken, and then it carries the
 	// code it produced.
 	li.once
@@ -401,6 +411,13 @@
 		font-family: var(--mono)
 		font-size: 10.5px
 		color: var(--accent-text)
+	.add, .del
+		margin-left: 8px
+		font-size: 10px
+		color: var(--faint)
+		cursor: pointer
+		&:hover
+			color: var(--accent-text)
 	table
 		width: 100%
 		border-collapse: collapse
@@ -516,7 +533,7 @@
 			color: var(--faint)
 		.pen
 			color: var(--accent-text)
-	.sh
+	.sh, .pre
 		display: block
 		font-size: 9.5px
 		color: var(--faint)
@@ -632,6 +649,12 @@
 		color: var(--faint)
 	.up
 		color: var(--danger)
+	input[type=number]
+		width: 3.4rem
+		height: 1.5rem
+		flex: none
+		font-family: var(--mono)
+		font-size: 10.5px
 	button
 		width: auto
 		flex: none

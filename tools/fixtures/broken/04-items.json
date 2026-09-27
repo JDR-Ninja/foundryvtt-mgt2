@@ -16,6 +16,14 @@
     "system": { "kind": "career", "assignments": [], "rankLadders": [], "tables": [], "benefits": [], "eventTable": [] }
   },
   {
+    "_id": "democadetsbroke1",
+    "name": "Demo — Harbour Cadet School",
+    "type": "career",
+    "img": "icons/svg/book.svg",
+    "flags": { "mgt2": { "demo": { "order": 36, "cliff": "career", "teaches": ["An education is a career Item."], "trap": "Its career half stays empty." } } },
+    "system": { "kind": "preCareer", "preCareer": { "picks": [], "graduation": { "characteristic": "", "target": null } } }
+  },
+  {
     "_id": "demoweaponbroke1",
     "name": "Demo — Sidearm",
     "type": "weapon",
