@@ -192,9 +192,19 @@
 				    answering all three made every compulsion into an offer. }}
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Template.OtherCareer'}}</span>
-					<input class="f" type="text" name="system.{{et.key}}.{{r}}.career" value="{{row.career}}" />
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.career" value="{{row.career}}" data-tooltip="{{localize 'MGT2.Chargen.Template.OtherCareerHint'}}" />
 					<select class="f" name="system.{{et.key}}.{{r}}.careerMode">{{selectOptions @root.config.RowCareerModes selected=row.careerMode localize=true}}</select>
 					<input class="f" type="text" name="system.{{et.key}}.{{r}}.careerAssignment" value="{{row.careerAssignment}}" placeholder="{{localize 'MGT2.Chargen.Template.CareerAssignment'}}" />
+				</label>
+				{{! Drawn for every row, and shown for a borrowing one: a leaf the form leaves out is reset by the next save. }}
+				<label class="wide" {{#unless (eq row.careerMode "borrow")}}hidden{{/unless}}>
+					<span class="lbl">{{localize 'MGT2.Chargen.Template.BorrowTables'}}</span>
+					{{#each et.borrow as |b|}}
+					<select class="f" name="system.{{et.key}}.{{r}}.borrow.{{b.key}}">{{selectOptions b.choices selected=(lookup row.borrow b.key)}}</select>
+					{{#if (eq b.key "skill")}}
+					<select class="f" name="system.{{et.key}}.{{r}}.borrow.skillTable" data-tooltip="{{localize 'MGT2.Chargen.Template.BorrowSkillTable'}}">{{selectOptions @root.config.BorrowedSkillTables selected=row.borrow.skillTable localize=true}}</select>
+					{{/if}}
+					{{/each}}
 				</label>
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Template.SubTable'}}</span>

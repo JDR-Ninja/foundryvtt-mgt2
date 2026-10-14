@@ -8,6 +8,28 @@
 
 ---
 
+## [0.2.5]
+
+**Verificado no Foundry VTT 14.368.**
+
+### Criação
+
+* **Uma linha que toma emprestadas as tabelas de outra carreira enfim as rola** (Core p.23, evento 8
+  do Agente; [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). O modo *Suas tabelas são
+  tomadas emprestadas, sem entrar* só escrevia uma frase no registro do período. Cada uma das três
+  tabelas da carreira emprestada — Eventos, uma tabela de perícias, Reveses — é rolada no ramo que a
+  linha indica: sempre, apenas se o seu teste passou, apenas se falhou, ou se o Viajante o tomar. O
+  Viajante nunca entra nessa carreira.
+* **Várias carreiras, ou qualquer uma**: *Nomeia outra carreira* aceita vários nomes separados por
+  vírgulas («Rogue, Citizen») e o jogador escolhe um; em branco, qualquer outra carreira é oferecida.
+* **A tabela de perícias é escolhida**: qualquer uma das suas tabelas de Designação, ou a sua tabela
+  de Perícias de Serviço, Desenvolvimento Pessoal, Educação Avançada ou Oficial.
+* **Um Revés emprestado nunca expulsa da carreira em curso**: quem decide é a linha que o toma
+  emprestado, como em «Desastre! Role na tabela de Reveses». A rolagem de perícia emprestada não
+  custa nada à do período.
+
+---
+
 ## [0.2.4]
 
 **Verificado no Foundry VTT 14.368.**

@@ -665,9 +665,9 @@ async function event(view) {
     return rollTable(view, "event");
 }
 
-/** One roll on a career's own Events or Mishaps table, and everything the row then does. */
-async function rollTable(view, which, { nested = false } = {}) {
-    const { system } = view;
+/** One roll on a career's Events or Mishaps table — its own, or a borrowed one's — and everything the row then does. */
+async function rollTable(view, which, { nested = false, borrowed = null, depth = 0 } = {}) {
+    const system = borrowed?.system ?? view.system;
     const mishap = which === "mishap";
     const rows = mishap ? system.mishapTable : system.eventTable;
     if ( !rows.length ) {
@@ -676,31 +676,36 @@ async function rollTable(view, which, { nested = false } = {}) {
         return { advance: true };
     }
     const rolled = await roll(view, { step: mishap ? "survival" : "event",
-        formula: mishap ? "1d6" : "2d6", target: null });
+        formula: mishap ? "1d6" : "2d6", target: null,
+        title: borrowed ? borrowedLabel(borrowed.name, mishap ? "mishap" : "event") : "" });
     if ( !rolled ) return { advance: false };
 
     const row = rows.find(entry => entry.roll === rolled.total);
     // The routing is data: a 7 is the shared Life Events table unless the template says this
     // career owns that row.
     if ( !mishap && (rolled.total === 7) && (system.eventRow7 !== "own") ) {
-        return followSubTable(view, row?.subTable ?? "", { fallback: "lifeEvents" });
+        return followSubTable(view, row?.subTable ?? "", { fallback: "lifeEvents", depth });
     }
     if ( !row ) {
         ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.NoRow", { n: rolled.total }));
         return { advance: true };
     }
 
-    await applyRow(view, row, { mishap, nested });
-    if ( row.subTable ) await followSubTable(view, row.subTable);
+    const outcome = await applyRow(view, row, { mishap, nested, borrowed: borrowed?.name });
+    if ( row.careerMode === "borrow" ) await borrowTables(view, row, outcome, depth);
+    if ( row.subTable ) await followSubTable(view, row.subTable, { depth, borrowed });
     return { advance: true };
 }
 
-/** A row naming another table: the career's own Mishap table, Core p.49's Injury, or a shared one. */
-async function followSubTable(view, name, { fallback = "", depth = 0 } = {}) {
-    if ( MGT2Helper.skillSlug(name) === OWN_MISHAP_TABLE ) return rollTable(view, "mishap", { nested: true });
+/** A row naming another table: the Mishap table of the career it was rolled on, Core p.49's Injury, or a shared one. */
+async function followSubTable(view, name, { fallback = "", depth = 0, borrowed = null } = {}) {
+    if ( depth > 2 ) return { advance: true };
+    if ( MGT2Helper.skillSlug(name) === OWN_MISHAP_TABLE ) {
+        return rollTable(view, "mishap", { nested: true, borrowed, depth: depth + 1 });
+    }
     if ( SharedTables.isInjury(name) ) return rollInjury(view);
     const role = SharedTables.role(name) || fallback;
-    if ( !role || (depth > 2) ) return { advance: true };
+    if ( !role ) return { advance: true };
     const table = await SharedTables.table(role);
     const label = table?.name ?? game.i18n.localize(MGT2.SharedCreationTables[role].label);
     if ( !table?.system.eventTable.length ) {
@@ -720,9 +725,61 @@ async function followSubTable(view, name, { fallback = "", depth = 0 } = {}) {
     }
     // Core p.17: drafted through an event, the Traveller enters the drawn career next term.
     if ( role === "draft" ) return draftNextTerm(view, row, rolled.total);
-    await applyRow(view, row, { mishap: false });
+    const outcome = await applyRow(view, row, { mishap: false });
+    if ( row.careerMode === "borrow" ) await borrowTables(view, row, outcome, depth + 1);
     if ( row.subTable ) await followSubTable(view, row.subTable, { depth: depth + 1 });
     return { advance: true };
+}
+
+/** Core p.23, Agent event 8: a row rolls another career's tables, each on its own branch; naming none, any other career's. */
+async function borrowTables(view, row, { subPassed, declined }, depth) {
+    if ( depth > 2 ) return;
+    const typed = row.career.split(",").map(name => name.trim()).filter(name => name);
+    const tables = [];
+    for ( const key of Object.keys(MGT2.BorrowedTables) ) {
+        const condition = row.borrow?.[key];
+        const kind = typed.length ? borrowedLabel(typed.join(" / "), key) : game.i18n.localize(MGT2.BorrowedTables[key]);
+        if ( condition && await earned({ condition, kind }, row, subPassed, declined) ) tables.push(key);
+    }
+    if ( !tables.length ) return;
+    const names = typed.length ? typed : await CareerLibrary.names({ except: view.record.name });
+    const picked = names.length ? await insist(names.map(name => [name, name]), "MGT2.Chargen.Term.PickBorrowed") : null;
+    const template = picked && await CareerLibrary.find(picked, { kinds: ["career"] });
+    if ( !template ) {
+        if ( picked ) ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.BorrowedMissing", { career: picked }));
+        await logTerm(view.record, view.term, { note: picked
+            ? game.i18n.format("MGT2.Chargen.Term.CareerBorrowed", { career: picked })
+            : game.i18n.localize("MGT2.Chargen.Term.AwardForfeited") });
+        return;
+    }
+    const borrowed = { name: template.name, system: template.system };
+    for ( const key of tables ) {
+        if ( key === "skill" ) await borrowSkill(view, borrowed, row.borrow.skillTable);
+        else await rollTable(view, key, { nested: true, borrowed, depth: depth + 1 });
+    }
+}
+
+/** One roll on a borrowed career's skill table: any of its assignments' tables, or the one table named. */
+async function borrowSkill(view, borrowed, which) {
+    const { assignments, tables: own } = borrowed.system;
+    const tables = (which === "assignment")
+        ? assignments.filter(assignment => assignment.skills.length).map((assignment, index) => ({
+            key: `assignment.${index}`, rows: assignment.skills,
+            label: game.i18n.format("MGT2.Chargen.Tables.assignment", { name: assignment.name }) }))
+        : [{ key: which, rows: own[which]?.present ? own[which].rows : [],
+            label: game.i18n.localize(MGT2.BorrowedSkillTables[which]) }]
+            .filter(table => table.rows.length);
+    if ( !tables.length ) return void ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Term.NoSkillTables"));
+    const taken = await skillTableRoll(view, tables, { ask: insist, title: borrowedLabel(borrowed.name, "skill"),
+        heading: "MGT2.Chargen.Term.PickBorrowedTable" });
+    const line = game.i18n.format("MGT2.Chargen.Term.Borrowed", { career: borrowed.name,
+        what: taken ? game.i18n.format("MGT2.Chargen.Term.SkillGained", { skills: taken.applied.join(", ") || "—" })
+            : game.i18n.localize("MGT2.Chargen.Term.AwardForfeited") });
+    await logTerm(view.record, view.term, { note: line });
+}
+
+function borrowedLabel(career, key) {
+    return game.i18n.format("MGT2.Chargen.Term.Borrowed", { career, what: game.i18n.localize(MGT2.BorrowedTables[key]) });
 }
 
 /** An event draft: the career the table drew is compelled at the next qualification. */
@@ -809,10 +866,11 @@ async function offerMedicalCare(view, changes) {
     return cost;
 }
 
-/** Everything one event or mishap row does, each of it a field rather than a phrase. */
-async function applyRow(view, row, { mishap, nested = false }) {
+/** Everything one event or mishap row does, each of it a field rather than a phrase; returns how its own check went. */
+async function applyRow(view, row, { mishap, nested = false, borrowed = "" }) {
     const { actor, record, system, term } = view;
-    const lines = [row.text].filter(text => text);
+    const lines = [(borrowed && row.text) ? game.i18n.format("MGT2.Chargen.Term.Borrowed",
+        { career: borrowed, what: row.text }) : row.text].filter(text => text);
 
     // Ejection is a per-row fact that `neverEjects` flips for the whole template; Core p.23: the
     // event row that sends to the Mishap table decides it, not the mishap.
@@ -832,12 +890,8 @@ async function applyRow(view, row, { mishap, nested = false }) {
         }) === true;
     }
 
-    // Three senses, now that `careerMode` says which: send the Traveller there, offer it
-    // with qualification waived, or borrow its tables for a single roll without entering it.
-    if ( row.career && (row.careerMode === "borrow") ) {
-        lines.push(game.i18n.format("MGT2.Chargen.Term.CareerBorrowed", { career: row.career }));
-    }
-    else if ( row.career ) {
+    // Send the Traveller there, or offer it with qualification waived; `borrowTables` rolls a borrowed one's tables.
+    if ( row.career && (row.careerMode !== "borrow") ) {
         const forced = row.careerMode === "force";
         await Chargen.pushPending(actor, { kind: forced ? "careerForce" : "careerOffer",
             value: row.career, assignment: row.careerAssignment, appliesTo: ["qualification"],
@@ -903,7 +957,8 @@ async function applyRow(view, row, { mishap, nested = false }) {
         await record.update({ "system.exitMode": "ejectedByMishap" });
         ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.Ejected", { career: record.name }));
     }
-    return noteEvent(view, note);
+    await noteEvent(view, note);
+    return { subPassed, declined };
 }
 
 /** A row's Benefit-roll effect: a wager needs the total mid-term, which is why the count is a ledger. */
@@ -1297,36 +1352,43 @@ async function skill(view) {
         ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Term.NoSkillTables"));
         return { advance: true };
     }
-    const picked = await pickOne(tables.map(table => [table.key, table.label]),
-        game.i18n.format("MGT2.Chargen.Term.PickTable", { n: available }));
-    if ( picked === null ) return { advance: false };
+    const taken = await skillTableRoll(view, tables,
+        { heading: game.i18n.format("MGT2.Chargen.Term.PickTable", { n: available }) });
+    if ( !taken ) return { advance: false };
+    await credit(actor, "skillRolls", { value: -1, career: record.id, term,
+        note: game.i18n.localize("MGT2.Chargen.Term.SkillSpent") });
+    await logTerm(record, term, { outcomes: ["skillRoll"],
+        note: game.i18n.format("MGT2.Chargen.Term.SkillGained", { skills: taken.applied.join(", ") || "—" }) });
+    return { advance: true };
+}
+
+/** One roll on the skill table the player picks, or its row where the option allows; null where a choice was closed. */
+async function skillTableRoll(view, tables, { ask = pickOne, heading, title = "" }) {
+    const picked = await ask(tables.map(table => [table.key, table.label]), heading);
+    if ( picked === null ) return null;
     const rows = tables.find(table => table.key === picked).rows;
 
     // The table is chosen as always and gated as always — only the die is
     // removed, which is the whole of what the option changes.
     let row;
     if ( CreationOptions.pickedSkills() ) {
-        const chosen = await pickOne(rows.map((entry, index) => [String(index), cellLabel(entry)]),
+        const chosen = await ask(rows.map((entry, index) => [String(index), cellLabel(entry)]),
             "MGT2.Chargen.Term.PickSkillRow");
-        if ( chosen === null ) return { advance: false };
+        if ( chosen === null ) return null;
         row = rows[Number(chosen)];
     }
     else {
-        const rolled = await roll(view, { step: "skill", formula: "1d6", target: null });
-        if ( !rolled ) return { advance: false };
+        const rolled = await roll(view, { step: "skill", formula: "1d6", target: null, title });
+        if ( !rolled ) return null;
         row = rows[rolled.total - 1];
         if ( !row ) {
             ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.NoRow", { n: rolled.total }));
-            return { advance: false };
+            return null;
         }
     }
-    const applied = await applyCell(actor, row,
-        { provenance: { term, career: record.id, table: picked }, rolled: true });
-    await credit(actor, "skillRolls", { value: -1, career: record.id, term,
-        note: game.i18n.localize("MGT2.Chargen.Term.SkillSpent") });
-    await logTerm(record, term, { outcomes: ["skillRoll"],
-        note: game.i18n.format("MGT2.Chargen.Term.SkillGained", { skills: applied.join(", ") || "—" }) });
-    return { advance: true };
+    const applied = await applyCell(view.actor, row,
+        { provenance: { term: view.term, career: view.record.id, table: picked }, rolled: true });
+    return { applied };
 }
 
 /** Which of a career's tables this Traveller may roll on now — missing, gated and commissioned alike. */

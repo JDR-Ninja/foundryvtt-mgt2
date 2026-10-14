@@ -74,6 +74,21 @@ export const CareerLibrary = {
         return null;
     },
 
+    /** The names of every career a table can reach, once each and sorted, less the one named. @returns {Promise<string[]>} */
+    async names({ except = "" } = {}) {
+        const fits = entry => (entry.type === "career") && ((entry.system?.kind ?? "career") === "career");
+        const found = new Map(game.items.filter(fits).map(item => [MGT2Helper.skillSlug(item.name), item.name]));
+        for ( const pack of game.packs.filter(one => one.documentName === "Item") ) {
+            const index = await pack.getIndex({ fields: ["system.kind"] });
+            for ( const entry of index.filter(fits) ) {
+                const key = MGT2Helper.skillSlug(entry.name);
+                if ( !found.has(key) ) found.set(key, entry.name);
+            }
+        }
+        found.delete(MGT2Helper.skillSlug(except));
+        return [...found.values()].sort((a, b) => a.localeCompare(b, game.i18n.lang));
+    },
+
     /** The templates always open to a refused Traveller (Core p.19's Drifter), by field and never by name. */
     async fallbacks() {
         const open = entry => (entry.type === "career") && entry.system?.alwaysAvailable

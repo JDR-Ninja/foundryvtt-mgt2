@@ -568,10 +568,16 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
   /** Events and Mishaps are one row shape, differing in what `ejects` defaults to; a shared table has Events alone. */
   #eventTables() {
     if ( (this.item.type !== "career") || !this.item.system.isTemplate ) return null;
-    const events = { key: "eventTable", label: "MGT2.Chargen.Template.EventTable", rows: this.item.system.eventTable };
+    // Each option names its table, so a closed select still says which borrowed table it rolls.
+    const borrow = Object.entries(MGT2.BorrowedTables).map(([key, label]) => {
+      const table = game.i18n.localize(label);
+      return { key, choices: Object.fromEntries(["", ...Object.keys(MGT2.TrayConditions)].map(condition => [condition,
+        game.i18n.format(`MGT2.Chargen.Template.BorrowWhen.${condition || "never"}`, { table })])) };
+    });
+    const events = { key: "eventTable", label: "MGT2.Chargen.Template.EventTable", rows: this.item.system.eventTable, borrow };
     if ( this.item.system.kind === "table" ) return [events];
     return [events,
-      { key: "mishapTable", label: "MGT2.Chargen.Template.MishapTable", rows: this.item.system.mishapTable }];
+      { key: "mishapTable", label: "MGT2.Chargen.Template.MishapTable", rows: this.item.system.mishapTable, borrow }];
   }
 
   /** The spine reads the sub-type where there is one, because that is the name on the character sheet. */

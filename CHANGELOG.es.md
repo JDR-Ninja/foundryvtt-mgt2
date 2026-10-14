@@ -8,6 +8,28 @@
 
 ---
 
+## [0.2.5]
+
+**Verificado en Foundry VTT 14.368.**
+
+### Creación
+
+* **Una fila que toma prestadas las tablas de otra carrera por fin las tira** (Core p.23, suceso 8
+  del Agente; [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). El modo *Se toman
+  prestadas sus tablas, sin entrar* solo escribía una frase en el registro del periodo. Cada una de
+  las tres tablas de la carrera prestada —Sucesos, una tabla de habilidades, Percances— se tira en la
+  rama que indica la fila: siempre, solo si se superó su tirada, solo si se falló, o si el Viajero lo
+  toma. El Viajero nunca entra en esa carrera.
+* **Varias carreras, o cualquiera**: *Nombra otra carrera* admite varios nombres separados por comas
+  («Rogue, Citizen») y el jugador elige uno; en blanco, se ofrece cualquier otra carrera.
+* **La tabla de habilidades se elige**: cualquiera de sus tablas de Destino, o su tabla de
+  Habilidades de Servicio, Desarrollo Personal, Educación Avanzada u Oficial.
+* **Un Percance prestado nunca expulsa de la carrera en curso**: decide la fila que lo toma prestado,
+  como en «¡Desastre! Tira en la tabla de Percances». La tirada de habilidad prestada no le cuesta
+  nada a la del periodo.
+
+---
+
 ## [0.2.4]
 
 **Verificado en Foundry VTT 14.368.**

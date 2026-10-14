@@ -2556,6 +2556,21 @@ MGT2.RowCareerModes = Object.freeze({
     borrow: "MGT2.Chargen.RowCareerModes.borrow"
 });
 
+// A borrowed career's tables in the order a row rolls them, and the skill tables its one roll may be made on.
+MGT2.BorrowedTables = Object.freeze({
+    event: "MGT2.Chargen.Template.EventTable",
+    skill: "MGT2.Chargen.Template.BorrowSkill",
+    mishap: "MGT2.Chargen.Template.MishapTable"
+});
+
+MGT2.BorrowedSkillTables = Object.freeze({
+    assignment: "MGT2.Chargen.Template.BorrowAssignments",
+    service: "MGT2.Chargen.Tables.service",
+    personalDevelopment: "MGT2.Chargen.Tables.personalDevelopment",
+    advancedEducation: "MGT2.Chargen.Tables.advancedEducation",
+    officer: "MGT2.Chargen.Tables.officer"
+});
+
 MGT2.TrayDurations = Object.freeze({
     oneShot: "MGT2.Chargen.TrayDurations.oneShot",
     thisCareer: "MGT2.Chargen.TrayDurations.thisCareer",

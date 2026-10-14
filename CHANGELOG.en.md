@@ -4,6 +4,26 @@
 
 ---
 
+## [0.2.5]
+
+**Verified on Foundry VTT 14.368.**
+
+### Creation
+
+* **A row that borrows another career's tables finally rolls them** (Core p.23, Agent event 8;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). The *Its tables borrowed, without
+  entering* mode only wrote a sentence in the term log. Each of the borrowed career's three tables —
+  Events, a skill table, Mishaps — is rolled on the branch the row names: always, only if its check
+  passed, only if it failed, or if the Traveller takes it. The Traveller never enters that career.
+* **Several careers, or any**: *Names another career* takes several names separated by commas
+  ("Rogue, Citizen") and the player picks one; left blank, every other career is offered.
+* **The skill table is chosen**: any of its assignment tables, or its Service Skills, Personal
+  Development, Advanced Education or Officer table.
+* **A borrowed Mishap never ejects from the career being served**: the borrowing row decides, as for
+  "Disaster! Roll on the Mishap table". The borrowed skill roll costs the term's own nothing.
+
+---
+
 ## [0.2.4]
 
 **Verified on Foundry VTT 14.368.**

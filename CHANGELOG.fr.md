@@ -4,6 +4,29 @@
 
 ---
 
+## [0.2.5]
+
+**Vérifié sur Foundry VTT 14.368.**
+
+### Création
+
+* **Une ligne qui emprunte les tables d'une autre carrière les lance enfin** (Core p.23, événement 8
+  de l'Agent ; [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). Le mode *Ses tables
+  empruntées, sans y entrer* écrivait seulement une phrase dans le journal de la période. Chacune des
+  trois tables de la carrière empruntée — Événements, une table de compétences, Aléas — est lancée
+  sur la branche que la ligne indique : toujours, seulement si son jet est réussi, seulement s'il a
+  échoué, ou si le Voyageur la prend. Le Voyageur n'entre jamais dans cette carrière.
+* **Plusieurs carrières, ou n'importe laquelle** : *Nomme une autre carrière* accepte plusieurs noms
+  séparés par des virgules (« Rogue, Citizen ») et le joueur en choisit un ; laissé vide, toute autre
+  carrière est proposée.
+* **La table de compétences se choisit** : n'importe laquelle de ses tables d'affectation, ou sa
+  table de Compétences de service, de Développement personnel, d'Éducation avancée ou d'Officier.
+* **Un Aléa emprunté n'éjecte jamais de la carrière servie** : c'est la ligne qui emprunte qui en
+  décide, comme pour « Désastre ! Faites un jet sur la table des Aléas ». Le jet de compétence
+  emprunté ne coûte rien au jet de la période.
+
+---
+
 ## [0.2.4]
 
 **Vérifié sur Foundry VTT 14.368.**

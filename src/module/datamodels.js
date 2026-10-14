@@ -396,6 +396,14 @@ function createEventRowField({ ejects = "stays", ...options } = {}) {
             required: false, blank: false, initial: "offer", choices: MGT2.RowCareerModes }),
         // Core p.19's Draft fixes an assignment on two of its six rows: Merchant marine, law enforcement.
         careerAssignment: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+        // A borrowed career's tables, each rolled on the branch named; blank is not rolled.
+        borrow: new fields.SchemaField({
+            event: new fields.StringField({ required: false, blank: true, initial: "always", choices: MGT2.TrayConditions }),
+            skill: new fields.StringField({ required: false, blank: true, initial: "", choices: MGT2.TrayConditions }),
+            skillTable: new fields.StringField({
+                required: false, blank: false, initial: "assignment", choices: MGT2.BorrowedSkillTables }),
+            mishap: new fields.StringField({ required: false, blank: true, initial: "", choices: MGT2.TrayConditions })
+        }),
         // Sub-tables must be ADDRESSABLE: two careers' rows jump straight to the Unusual Event's 1D branch.
         subTable: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         // The sub-roll printed INSIDE the prose: "roll Gambler 8+ or Broker 8+" is thrown on the better skill.
