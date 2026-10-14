@@ -8,6 +8,20 @@
 
 ---
 
+## [0.2.4]
+
+**Verificado en Foundry VTT 14.368.**
+
+### Demostración
+
+* **`Demo — Harbour University`** se une a los objetos de demostración: una universidad inventada,
+  la contraparte de `Demo — Harbour Cadet School`. Enseña según su propia tabla de habilidades, una
+  habilidad a nivel 0 y otra a nivel 1, tira sus propios Sucesos, y la graduación, con o sin honores,
+  deja un MD de calificación para `Demo — Harbour Patrol` y, con honores, un MD en la primera tirada
+  de Comisión.
+
+---
+
 ## [0.2.3]
 
 **Verificado en Foundry VTT 14.368.**

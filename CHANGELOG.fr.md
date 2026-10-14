@@ -4,6 +4,20 @@
 
 ---
 
+## [0.2.4]
+
+**Vérifié sur Foundry VTT 14.368.**
+
+### Démonstration
+
+* **`Demo — Harbour University`** rejoint les objets de démonstration : une université inventée,
+  pendant de `Demo — Harbour Cadet School`. Elle enseigne d'après sa propre table de compétences,
+  une compétence au niveau 0 et une au niveau 1, lance ses propres Événements, et le diplôme, avec ou
+  sans mention, laisse un MD de qualification pour `Demo — Harbour Patrol` et, avec mention, un MD
+  sur le premier jet de Commandement.
+
+---
+
 ## [0.2.3]
 
 **Vérifié sur Foundry VTT 14.368.**

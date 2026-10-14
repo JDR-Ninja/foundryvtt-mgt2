@@ -8,6 +8,20 @@
 
 ---
 
+## [0.2.4]
+
+**Verificado no Foundry VTT 14.368.**
+
+### Demonstração
+
+* **`Demo — Harbour University`** entra nos itens de demonstração: uma universidade inventada, a
+  contraparte de `Demo — Harbour Cadet School`. Ela ensina pela sua própria tabela de perícias, uma
+  perícia no nível 0 e outra no nível 1, rola os seus próprios Eventos, e a formatura, com ou sem
+  honras, deixa um MD de qualificação para `Demo — Harbour Patrol` e, com honras, um MD na primeira
+  rolagem de Comissão.
+
+---
+
 ## [0.2.3]
 
 **Verificado no Foundry VTT 14.368.**

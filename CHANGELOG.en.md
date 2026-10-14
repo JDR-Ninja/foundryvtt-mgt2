@@ -4,6 +4,19 @@
 
 ---
 
+## [0.2.4]
+
+**Verified on Foundry VTT 14.368.**
+
+### Demo
+
+* **`Demo — Harbour University`** joins the demo items: an invented university, the counterpart to
+  `Demo — Harbour Cadet School`. It teaches from its own skill table, one skill at level 0 and one
+  at level 1, rolls its own Events, and graduation, with or without honours, leaves a qualification
+  DM for `Demo — Harbour Patrol` and, with honours, a DM on the first Commission roll.
+
+---
+
 ## [0.2.3]
 
 **Verified on Foundry VTT 14.368.**
