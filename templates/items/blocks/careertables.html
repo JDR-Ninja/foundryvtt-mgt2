@@ -28,8 +28,9 @@
 					<input class="f edit-only" type="text" name="system.rankLadders.{{l}}.rows.{{r}}.title" value="{{row.title}}" placeholder="{{localize 'MGT2.Chargen.Template.RankTitle'}}" />
 					<span class="play-only word">{{row.rank}} &middot; {{row.title}}</span>
 					{{! Rank 0 can carry a bonus, granted on entry — which the design never placed
-					    relative to basic training. }}
-					{{> systems/mgt2/templates/items/parts/career-cell.html cell=row.bonus path=(concat "rankLadders." l ".rows." r ".bonus")}}
+					    relative to basic training. Core p.18: a skill printed with a level is gained only
+					    if that is higher, as a rank bonus prints it, so a new grant starts there. }}
+					{{> systems/mgt2/templates/items/parts/career-cell.html cell=row.bonus path=(concat "rankLadders." l ".rows." r ".bonus") blank='{"mode":"atLeast"}'}}
 					<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
 				</div>
 				{{/each}}

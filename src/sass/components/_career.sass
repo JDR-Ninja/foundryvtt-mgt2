@@ -202,3 +202,21 @@
 		.f.num
 			flex: 0 0 3rem
 			text-align: right
+		// Wide enough to read `never below`, which names the floor box after it.
+		.f.g-mode
+			flex-basis: 12rem
+		.f.g-floor
+			flex-basis: 4.5rem
+
+	// A grant shows only the fields its kind reads, and the floor only in its own mode, where the value
+	// is not read at all.
+	.grant:not([data-kind="skill"]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family),
+	.grant:not([data-kind="characteristic"]) .g-characteristic,
+	.grant:is([data-kind="convert"], [data-kind="benefit"], [data-kind="note"]) .g-value,
+	.grant:not([data-kind="characteristic"], [data-kind="contact"], [data-kind="cash"], [data-kind="shipShare"]) .g-formula,
+	.grant:not([data-kind="skill"], [data-kind="characteristic"]) :is(.g-mode, .g-floor),
+	.grant:not([data-kind="contact"], [data-kind="convert"]) .g-relation,
+	.grant:not([data-kind="benefit"], [data-kind="note"]) .g-ref,
+	.grant:not([data-mode="floor"]) .g-floor,
+	.grant:is([data-kind="skill"], [data-kind="characteristic"])[data-mode="floor"] :is(.g-value, .g-formula)
+		display: none

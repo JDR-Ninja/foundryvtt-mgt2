@@ -610,7 +610,7 @@
                     {
                       "kind": "skill",
                       "skill": "Demo — Seafarer",
-                      "mode": "raise",
+                      "mode": "atLeast",
                       "value": 1
                     }
                   ]
@@ -635,7 +635,7 @@
                     {
                       "kind": "skill",
                       "skill": "Demo — Investigate",
-                      "mode": "raise",
+                      "mode": "atLeast",
                       "value": 1
                     }
                   ]

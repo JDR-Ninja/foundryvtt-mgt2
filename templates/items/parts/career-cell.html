@@ -1,6 +1,7 @@
 {{! One printed cell of a creation table, which is a small EXPRESSION and not a scalar. `text` is the
     cell as the book prints it and is always inline; the grants that make it mechanical unfold under it.
-    Callers pass `cell` and `path`, the dotted route to this cell under `system.`. }}
+    Callers pass `cell` and `path`, the dotted route to this cell under `system.`, and may pass `blank`,
+    the JSON a new grant starts from. }}
 <div class="cell" data-cell-path="{{path}}">
 	<div class="cellhead">
 		<span class="play-only">{{#if cell.text}}{{cell.text}}{{else}}&mdash;{{/if}}</span>
@@ -20,8 +21,10 @@
 		</label>
 		{{/if}}
 
+		{{! Every field stays in the form whatever the kind, the stylesheet hiding what the kind does not
+		    read: a submitted grant replaces the stored one whole. }}
 		{{#each cell.grants as |grant g|}}
-		<div class="grant" data-entry-index="{{g}}">
+		<div class="grant" data-entry-index="{{g}}" data-kind="{{grant.kind}}" data-mode="{{grant.mode}}">
 			<select class="f kind edit-only" name="system.{{../path}}.grants.{{g}}.kind">
 				{{selectOptions @root.config.CreationGrantKinds selected=grant.kind localize=true}}
 			</select>
@@ -29,36 +32,41 @@
 
 			{{! Free text and never a choices list: the system ships no skill list, a skill being a
 			    `talent` Item and no content shipping at all. }}
-			<input class="f edit-only" type="text" name="system.{{../path}}.grants.{{g}}.skill"
+			<input class="f g-skill edit-only" type="text" name="system.{{../path}}.grants.{{g}}.skill"
 				value="{{grant.skill}}" placeholder="{{localize 'MGT2.Items.Skill'}}" />
-			<input class="f edit-only" type="text" name="system.{{../path}}.grants.{{g}}.speciality"
+			<input class="f g-speciality edit-only" type="text" name="system.{{../path}}.grants.{{g}}.speciality"
 				value="{{grant.speciality}}" placeholder="{{localize 'MGT2.Chargen.Template.Speciality'}}" />
-			<select class="f edit-only" name="system.{{../path}}.grants.{{g}}.characteristic">
+			<select class="f g-characteristic edit-only" name="system.{{../path}}.grants.{{g}}.characteristic">
 				<option value="">&mdash;</option>
 				{{selectOptions @root.config.Characteristics selected=grant.characteristic localize=true}}
 			</select>
-			<input class="f num edit-only" type="number" step="1" name="system.{{../path}}.grants.{{g}}.value"
+			<input class="f num g-value edit-only" type="number" step="1" name="system.{{../path}}.grants.{{g}}.value"
 				value="{{grant.value}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.GrantValue'}}" />
 			{{! `1D Ship Shares`, `D3 Enemies` — a quantity rolled rather than counted. }}
-			<input class="f edit-only" type="text" name="system.{{../path}}.grants.{{g}}.formula"
+			<input class="f g-formula edit-only" type="text" name="system.{{../path}}.grants.{{g}}.formula"
 				value="{{grant.formula}}" placeholder="{{localize 'MGT2.Chargen.Template.Formula'}}" />
-			<select class="f edit-only" name="system.{{../path}}.grants.{{g}}.mode">
+			<select class="f g-mode edit-only" name="system.{{../path}}.grants.{{g}}.mode">
+				{{#if (eq grant.kind "characteristic")}}
+				{{selectOptions @root.config.CharacteristicGrantModes selected=grant.mode localize=true}}
+				{{else}}
 				{{selectOptions @root.config.GrantModes selected=grant.mode localize=true}}
+				{{/if}}
 			</select>
 			{{! The floor of `SOC 10 or SOC +1`, the Other Benefit a `benefit` grant names, the relationship a
 			    `contact` or `convert` grant makes, and a speciality shortlist typed as one line. }}
-			<input class="f num edit-only" type="number" step="1" name="system.{{../path}}.grants.{{g}}.floor"
-				value="{{grant.floor}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.GrantFloor'}}" />
-			<input class="f edit-only" type="text" name="system.{{../path}}.grants.{{g}}.ref"
+			<input class="f num g-floor edit-only" type="number" step="1" name="system.{{../path}}.grants.{{g}}.floor"
+				value="{{grant.floor}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Template.Floor'}}"
+				data-tooltip="{{localize 'MGT2.Chargen.Template.GrantFloor'}}" />
+			<input class="f g-ref edit-only" type="text" name="system.{{../path}}.grants.{{g}}.ref"
 				value="{{grant.ref}}" placeholder="{{localize 'MGT2.Chargen.Template.GrantRef'}}" />
-			<select class="f edit-only" name="system.{{../path}}.grants.{{g}}.relation"
+			<select class="f g-relation edit-only" name="system.{{../path}}.grants.{{g}}.relation"
 				data-tooltip="{{localize 'MGT2.Chargen.Template.GrantRelation'}}">
 				<option value="">&mdash;</option>
 				{{selectOptions @root.config.ContactRelations selected=grant.relation localize=true}}
 			</select>
-			<input class="f edit-only" type="text" name="system.{{../path}}.grants.{{g}}.specialities"
+			<input class="f g-shortlist edit-only" type="text" name="system.{{../path}}.grants.{{g}}.specialities"
 				value="{{grant.specialities}}" placeholder="{{localize 'MGT2.Chargen.Template.GrantShortlist'}}" />
-			<label class="chk edit-only" data-tooltip="{{localize 'MGT2.Chargen.Template.FamilyHint'}}">
+			<label class="chk g-family edit-only" data-tooltip="{{localize 'MGT2.Chargen.Template.FamilyHint'}}">
 				<input type="checkbox" name="system.{{../path}}.grants.{{g}}.family" {{checked grant.family}} />
 				<span>{{localize 'MGT2.Chargen.Template.Family'}}</span>
 			</label>
@@ -66,6 +74,6 @@
 		</div>
 		{{/each}}
 
-		<a class="add edit-only" data-action="entryCreate" data-tooltip="{{localize 'MGT2.Chargen.Template.AddGrant'}}"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Grant'}}</a>
+		<a class="add edit-only" data-action="entryCreate"{{#if blank}} data-blank="{{blank}}"{{/if}} data-tooltip="{{localize 'MGT2.Chargen.Template.AddGrant'}}"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Grant'}}</a>
 	</div>
 </div>

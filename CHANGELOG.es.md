@@ -8,6 +8,31 @@
 
 ---
 
+## [0.2.6]
+
+**Verificado en Foundry VTT 14.369.**
+
+### Creación
+
+* **Una bonificación de rango ya no sube una habilidad que el Viajero posee** (Core p.18;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). Un rango imprime su habilidad con un
+  nivel —Recon 1, Leadership 1— y el Viajero solo la obtiene si ese nivel es mayor que el que tiene.
+  Una concesión añadida a una fila de rango empieza ahora en *Solo si es mayor*; antes empezaba en
+  *Conceder a 1, o subir en 1*, que llevaba un Recon 1 a 2. **Las carreras introducidas antes de la
+  0.2.6 no cambian**: pasa sus bonificaciones de rango a *Solo si es mayor* a mano.
+* **«SOC 10 o SOC +1, lo que sea mayor» se encuentra más fácilmente**: una concesión de
+  Característica solo ofrece ya *Sumar* y *Subir en 1, pero nunca por debajo de*, y la casilla
+  *mínimo* aparece con la segunda, en lugar del valor que esta no lee.
+* **Una concesión solo muestra los campos que usa su tipo**: una concesión de Habilidad ya no
+  muestra una característica, un Contacto ya no muestra una habilidad, y así sucesivamente.
+
+### Demostración
+
+* **Las bonificaciones de rango de `Demo — Harbour Patrol` pasan a *Solo si es mayor***: Seafarer 1
+  en Recruit e Investigate 1 en Senior Officer ya no suben una habilidad que el Viajero ya posee.
+
+---
+
 ## [0.2.5]
 
 **Verificado en Foundry VTT 14.368.**

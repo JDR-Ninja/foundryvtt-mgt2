@@ -764,6 +764,7 @@
           "rowTrack": "the track a row moves, against the tracks declared above"
         },
         "GrantFloor": "The floor of \"SOC 10 or SOC +1, whichever is higher\"; blank for none",
+        "Floor": "floor",
         "GrantRef": "other benefit",
         "GrantRelation": "The relationship a contact or a betrayal makes",
         "GrantShortlist": "specialities, comma-separated",

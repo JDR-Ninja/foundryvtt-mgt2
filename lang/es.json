@@ -764,6 +764,7 @@
           "rowTrack": "el contador que mueve una línea, contra los contadores declarados arriba"
         },
         "GrantFloor": "El mínimo de «SOC 10 o SOC +1, lo que sea mayor»; vacío si no hay",
+        "Floor": "mínimo",
         "GrantRef": "otro beneficio",
         "GrantRelation": "La relación que crea un contacto o una traición",
         "GrantShortlist": "especialidades, separadas por comas",

@@ -4,6 +4,33 @@
 
 ---
 
+## [0.2.6]
+
+**Vérifié sur Foundry VTT 14.369.**
+
+### Création
+
+* **Un bonus de rang n'augmente plus une compétence déjà acquise** (Core p.18 ;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). Un rang imprime sa compétence avec
+  un niveau — Recon 1, Leadership 1 — et le Voyageur ne l'obtient que si ce niveau dépasse celui
+  qu'il possède. Un gain ajouté à une ligne de rang part désormais sur *Seulement si c'est plus
+  élevé* ; il partait sur *Donner au niveau 1, ou augmenter de 1*, qui faisait passer un Recon 1
+  à 2. **Les carrières saisies avant la 0.2.6 ne changent pas** : passez leurs bonus de rang à
+  *Seulement si c'est plus élevé* à la main.
+* **« SOC 10 ou SOC +1, le plus élevé des deux » se trouve plus facilement** : un gain de
+  Caractéristique ne propose plus que *Ajouter* et *Augmenter de 1, sans jamais descendre sous*, et
+  la case *plancher* apparaît avec le second, à la place de la valeur qu'il ne lit pas.
+* **Un gain n'affiche que les champs que son type utilise** : un gain de Compétence n'affiche plus
+  de caractéristique, un Contact plus de compétence, et ainsi de suite.
+
+### Démonstration
+
+* **Les bonus de rang de `Demo — Harbour Patrol` passent à *Seulement si c'est plus élevé*** :
+  Seafarer 1 au rang Recruit et Investigate 1 au rang Senior Officer n'augmentent plus une
+  compétence que le Voyageur possède déjà.
+
+---
+
 ## [0.2.5]
 
 **Vérifié sur Foundry VTT 14.368.**

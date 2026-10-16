@@ -764,6 +764,7 @@
           "rowTrack": "o contador que uma linha move, contra os contadores declarados acima"
         },
         "GrantFloor": "O piso de “SOC 10 ou SOC +1, o que for maior”; vazio se não houver",
+        "Floor": "piso",
         "GrantRef": "outro benefício",
         "GrantRelation": "A relação que um contato ou uma traição cria",
         "GrantShortlist": "especialidades, separadas por vírgulas",

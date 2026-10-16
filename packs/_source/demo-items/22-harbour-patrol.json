@@ -57,10 +57,10 @@
         "officer": false,
         "rows": [
           { "rank": 0, "title": "Recruit", "bonus": { "text": "Demo — Seafarer 1", "mode": "all",
-            "grants": [{ "kind": "skill", "skill": "Demo — Seafarer", "mode": "raise", "value": 1 }] } },
+            "grants": [{ "kind": "skill", "skill": "Demo — Seafarer", "mode": "atLeast", "value": 1 }] } },
           { "rank": 1, "title": "Patrol Officer", "bonus": { "text": "", "mode": "all", "grants": [] } },
           { "rank": 2, "title": "Senior Officer", "bonus": { "text": "Demo — Investigate 1", "mode": "all",
-            "grants": [{ "kind": "skill", "skill": "Demo — Investigate", "mode": "raise", "value": 1 }] } },
+            "grants": [{ "kind": "skill", "skill": "Demo — Investigate", "mode": "atLeast", "value": 1 }] } },
           { "rank": 3, "title": "Watch Leader", "bonus": { "text": "", "mode": "all", "grants": [] } },
           { "rank": 4, "title": "Deputy Harbourmaster", "bonus": { "text": "SOC +1", "mode": "all",
             "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] } },

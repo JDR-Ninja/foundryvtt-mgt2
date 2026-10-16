@@ -764,6 +764,7 @@
           "rowTrack": "la piste que déplace une ligne, face aux pistes déclarées ci-dessus"
         },
         "GrantFloor": "Le plancher de « SOC 10 ou SOC +1, le plus élevé des deux » ; vide s'il n'y en a pas",
+        "Floor": "plancher",
         "GrantRef": "autre avantage",
         "GrantRelation": "La relation qu'un contact ou une trahison crée",
         "GrantShortlist": "spécialités, séparées par des virgules",

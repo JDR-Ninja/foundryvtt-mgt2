@@ -2637,6 +2637,11 @@ MGT2.GrantModes = Object.freeze({
     floor: "MGT2.Chargen.GrantModes.floor"
 });
 
+MGT2.CharacteristicGrantModes = Object.freeze({
+    add: MGT2.GrantModes.add,
+    floor: MGT2.GrantModes.floor
+});
+
 // Other Benefits are RIGHTS WITH LIMITS and not objects — "any armour up to Cr10000 and TL12" —
 // because the system has no catalogue and never will.
 MGT2.BenefitKinds = Object.freeze({

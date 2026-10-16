@@ -8,6 +8,31 @@
 
 ---
 
+## [0.2.6]
+
+**Verificado no Foundry VTT 14.369.**
+
+### Criação
+
+* **Um bônus de patente não sobe mais uma perícia que o Viajante já tem** (Core p.18;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). Uma patente imprime sua perícia com
+  um nível — Recon 1, Leadership 1 — e o Viajante só a ganha se esse nível for maior que o que ele
+  tem. Uma concessão adicionada a uma linha de patente agora começa em *Apenas se for maior*; antes
+  começava em *Conceder em 1, ou subir em 1*, que levava um Recon 1 a 2. **As carreiras digitadas
+  antes da 0.2.6 não mudam**: passe os bônus de patente delas para *Apenas se for maior* à mão.
+* **«SOC 10 ou SOC +1, o que for maior» fica mais fácil de achar**: uma concessão de Característica
+  agora só oferece *Somar* e *Subir em 1, mas nunca abaixo de*, e a caixa *piso* aparece com o
+  segundo, no lugar do valor que ele não lê.
+* **Uma concessão só mostra os campos que o seu tipo usa**: uma concessão de Perícia não mostra mais
+  uma característica, um Contato não mostra mais uma perícia, e assim por diante.
+
+### Demonstração
+
+* **Os bônus de patente de `Demo — Harbour Patrol` passam a *Apenas se for maior***: Seafarer 1 em
+  Recruit e Investigate 1 em Senior Officer não sobem mais uma perícia que o Viajante já tem.
+
+---
+
 ## [0.2.5]
 
 **Verificado no Foundry VTT 14.368.**

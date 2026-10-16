@@ -4,6 +4,31 @@
 
 ---
 
+## [0.2.6]
+
+**Verified on Foundry VTT 14.369.**
+
+### Creation
+
+* **A rank bonus no longer raises a skill already held** (Core p.18;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). A rank prints its skill with a
+  level — Recon 1, Leadership 1 — and the Traveller gains it only if that level is higher than the
+  one they hold. A grant added to a rank row now starts at *Only if it is higher*; it used to start
+  at *Grant at 1, or raise by 1*, which took a held Recon 1 to 2. **Careers typed before 0.2.6 are
+  not changed**: set their rank bonuses to *Only if it is higher* by hand.
+* **"SOC 10 or SOC +1, whichever is higher" is easier to find**: a Characteristic grant now offers
+  only *Add* and *Raise by 1, but never below*, and the *floor* box appears with the second, in
+  place of the value it does not read.
+* **A grant shows only the fields its kind uses**: a Skill grant no longer shows a characteristic,
+  a Contact no longer shows a skill, and so on.
+
+### Demo
+
+* **`Demo — Harbour Patrol`'s rank bonuses are *Only if it is higher***: Seafarer 1 at Recruit and
+  Investigate 1 at Senior Officer no longer raise a skill the Traveller already holds.
+
+---
+
 ## [0.2.5]
 
 **Verified on Foundry VTT 14.368.**

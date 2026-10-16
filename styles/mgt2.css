@@ -11718,6 +11718,47 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   flex: 0 0 3rem;
   text-align: right;
 }
+.mgt2 .careerblk .grant .f.g-mode, .mgt2 .careertbl .grant .f.g-mode, .mgt2 .speciesblk .grant .f.g-mode, .mgt2 .speciesfrm .grant .f.g-mode {
+  flex-basis: 12rem;
+}
+.mgt2 .careerblk .grant .f.g-floor, .mgt2 .careertbl .grant .f.g-floor, .mgt2 .speciesblk .grant .f.g-floor, .mgt2 .speciesfrm .grant .f.g-floor {
+  flex-basis: 4.5rem;
+}
+.mgt2 .careerblk .grant:not([data-kind=skill]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family),
+.mgt2 .careerblk .grant:not([data-kind=characteristic]) .g-characteristic,
+.mgt2 .careerblk .grant:is([data-kind=convert], [data-kind=benefit], [data-kind=note]) .g-value,
+.mgt2 .careerblk .grant:not([data-kind=characteristic], [data-kind=contact], [data-kind=cash], [data-kind=shipShare]) .g-formula,
+.mgt2 .careerblk .grant:not([data-kind=skill], [data-kind=characteristic]) :is(.g-mode, .g-floor),
+.mgt2 .careerblk .grant:not([data-kind=contact], [data-kind=convert]) .g-relation,
+.mgt2 .careerblk .grant:not([data-kind=benefit], [data-kind=note]) .g-ref,
+.mgt2 .careerblk .grant:not([data-mode=floor]) .g-floor,
+.mgt2 .careerblk .grant:is([data-kind=skill], [data-kind=characteristic])[data-mode=floor] :is(.g-value, .g-formula), .mgt2 .careertbl .grant:not([data-kind=skill]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family),
+.mgt2 .careertbl .grant:not([data-kind=characteristic]) .g-characteristic,
+.mgt2 .careertbl .grant:is([data-kind=convert], [data-kind=benefit], [data-kind=note]) .g-value,
+.mgt2 .careertbl .grant:not([data-kind=characteristic], [data-kind=contact], [data-kind=cash], [data-kind=shipShare]) .g-formula,
+.mgt2 .careertbl .grant:not([data-kind=skill], [data-kind=characteristic]) :is(.g-mode, .g-floor),
+.mgt2 .careertbl .grant:not([data-kind=contact], [data-kind=convert]) .g-relation,
+.mgt2 .careertbl .grant:not([data-kind=benefit], [data-kind=note]) .g-ref,
+.mgt2 .careertbl .grant:not([data-mode=floor]) .g-floor,
+.mgt2 .careertbl .grant:is([data-kind=skill], [data-kind=characteristic])[data-mode=floor] :is(.g-value, .g-formula), .mgt2 .speciesblk .grant:not([data-kind=skill]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family),
+.mgt2 .speciesblk .grant:not([data-kind=characteristic]) .g-characteristic,
+.mgt2 .speciesblk .grant:is([data-kind=convert], [data-kind=benefit], [data-kind=note]) .g-value,
+.mgt2 .speciesblk .grant:not([data-kind=characteristic], [data-kind=contact], [data-kind=cash], [data-kind=shipShare]) .g-formula,
+.mgt2 .speciesblk .grant:not([data-kind=skill], [data-kind=characteristic]) :is(.g-mode, .g-floor),
+.mgt2 .speciesblk .grant:not([data-kind=contact], [data-kind=convert]) .g-relation,
+.mgt2 .speciesblk .grant:not([data-kind=benefit], [data-kind=note]) .g-ref,
+.mgt2 .speciesblk .grant:not([data-mode=floor]) .g-floor,
+.mgt2 .speciesblk .grant:is([data-kind=skill], [data-kind=characteristic])[data-mode=floor] :is(.g-value, .g-formula), .mgt2 .speciesfrm .grant:not([data-kind=skill]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family),
+.mgt2 .speciesfrm .grant:not([data-kind=characteristic]) .g-characteristic,
+.mgt2 .speciesfrm .grant:is([data-kind=convert], [data-kind=benefit], [data-kind=note]) .g-value,
+.mgt2 .speciesfrm .grant:not([data-kind=characteristic], [data-kind=contact], [data-kind=cash], [data-kind=shipShare]) .g-formula,
+.mgt2 .speciesfrm .grant:not([data-kind=skill], [data-kind=characteristic]) :is(.g-mode, .g-floor),
+.mgt2 .speciesfrm .grant:not([data-kind=contact], [data-kind=convert]) .g-relation,
+.mgt2 .speciesfrm .grant:not([data-kind=benefit], [data-kind=note]) .g-ref,
+.mgt2 .speciesfrm .grant:not([data-mode=floor]) .g-floor,
+.mgt2 .speciesfrm .grant:is([data-kind=skill], [data-kind=characteristic])[data-mode=floor] :is(.g-value, .g-formula) {
+  display: none;
+}
 
 .mgt2.application.stash {
   container-type: inline-size;
