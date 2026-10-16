@@ -8,6 +8,11 @@ const TRAIT_STATUS = {
     reminded: "MGT2.RollPrompt.TraitReminded"
 };
 
+// A skill name as `matchesSkill` reads it: any run of spaces, hyphens or underscores is one space, and
+// a name pasted from a PDF can carry a soft hyphen, a non-breaking hyphen or a dash.
+const skillWords = name => String(name ?? "").toLowerCase().replaceAll("\u00ad", "")
+    .replace(/[\s_\u2010-\u2015\u2212-]+/g, " ").trim();
+
 export class MGT2Helper {
 
     /** Substitute `{0}`, `{1}`… placeholders. The indexed form is persisted in chat message flags. */
@@ -248,12 +253,15 @@ export class MGT2Helper {
         return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(key);
     }
 
-    /** Whether a skill Item answers a requirement written as a bare skill name. */
+    /**
+     * Whether a skill Item answers a requirement written as a bare skill name. Neither case nor how the
+     * words are separated decides: `Jack of all Trades` and `JackOfAllTrades` are Jack-of-All-Trades.
+     */
     static matchesSkill(name, required) {
-        const skill = String(name ?? "").trim().toLowerCase();
-        const wanted = String(required ?? "").trim().toLowerCase();
+        const skill = skillWords(name);
+        const wanted = skillWords(required);
         if (!skill || !wanted) return false;
-        return (skill === wanted)
+        return (skill === wanted) || (skill.replaceAll(" ", "") === wanted.replaceAll(" ", ""))
             || (skill.startsWith(wanted) && /[^a-z0-9]/.test(skill.charAt(wanted.length)));
     }
 
