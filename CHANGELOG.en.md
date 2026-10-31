@@ -4,6 +4,34 @@
 
 ---
 
+## [0.2.8]
+
+**Verified on Foundry VTT 14.369.**
+
+### Rolls, cards and requests
+
+* **Another speciality of a skill rolls at +0** (Core p.58). A Traveller holding only Pilot
+  (spacecraft) 1 is no longer unskilled at flying a small craft: on Pilot (small craft) they roll at
+  +0, without the DM-3. A skill entered without a speciality, such as "Pilot" 2, counts at its level.
+  Only a Traveller who holds the skill in no form at all stays not proficient. Creation throws, an
+  armour's required skill, augments and training read the same level.
+* **The roll prompt offers *Pilot, another speciality* at +0**, for each skill the Traveller holds
+  only in specialities, after their own skills.
+* **A ship's station, the Docket and the *Roll request* card start on that entry**, instead of on
+  *Not proficient*, when the Traveller lacks the speciality asked for. The Docket then resolves the
+  demand for that Traveller instead of leaving it unresolved, and the card reads *Pilot, another
+  speciality 0*. With an `@Request` link the player still chooses, and the entry is in the list.
+
+### Fixes
+
+* **A speciality entered in the *Speciality* field, rather than in the skill's name, is recognised
+  everywhere** (Core p.58). A "Pilot" Item whose field says *spacecraft* is Pilot (spacecraft) for
+  creation throws, the Connections Rule, training, Dodge, a ship's stations, the Docket, `@Request`
+  links, augments and armour. Until now only its display and creation's grants read that field;
+  everywhere else, a roll on Pilot (spacecraft) did not find the skill.
+
+---
+
 ## [0.2.7]
 
 **Verified on Foundry VTT 14.369.**

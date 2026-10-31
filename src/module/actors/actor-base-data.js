@@ -551,10 +551,11 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             // The augment does nothing for a skill the Traveller does not have at all.
             if (!named || (dm === 0) || (this.skillLevel(named) === null)) continue;
 
-            // Resolved to Item ids here, where `matchesSkill` can settle the speciality form.
+            // Resolved to Item ids here, where `matchesSkillItem` can settle the speciality form.
             const skills = this.parent.items.filter(skill => (skill.type === "talent")
                 && (skill.system.subType === "skill")
-                && MGT2Helper.matchesSkill(skill.name, named)).map(skill => skill.id);
+                && MGT2Helper.matchesSkillItem(skill, named)).map(skill => skill.id);
+            if (!skills.length) skills.push(MGT2Helper.skillFallback(this.parent.items, named)._id);
             // Hyphenated, never dotted: the prompt names a form control after this key.
             sources.push({ key: `augment-${item.id}`, label: "MGT2.Actor.AugmentSkill", dm,
                 params: { augment: item.name, skill: named }, skills });
@@ -611,13 +612,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
 
     /** The best level in a named skill, or null when the actor does not have that skill at all. */
     skillLevel(name) {
-        let best = null;
-        for (const item of this.parent.items) {
-            if ((item.type !== "talent") || (item.system.subType !== "skill")) continue;
-            if (!MGT2Helper.matchesSkill(item.name, name)) continue;
-            best = Math.max(best ?? 0, item.system.level ?? 0);
-        }
-        return best;
+        return MGT2Helper.skillLevel(this.parent.items, name);
     }
 
     /**

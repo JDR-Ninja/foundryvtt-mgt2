@@ -3818,6 +3818,7 @@
       "OnHand": "On Hand",
       "Options": "Options",
       "OnFail": "fail",
+      "OtherSpeciality": "{skill}, another speciality",
       "OwnerNote": "note",
       "PSICost": "PSI Cost",
       "Powered": "Powered",

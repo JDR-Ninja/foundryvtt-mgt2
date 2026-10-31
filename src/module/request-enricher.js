@@ -190,7 +190,7 @@ async function rollRequest(demand) {
     // for — never a silent DM-3.
     const skill = (demand.skillMode === "named") && demand.skill
         ? actor.items.find(item => (item.type === "talent") && (item.system.subType === "skill")
-            && MGT2Helper.matchesSkill(item.name, demand.skill))
+            && MGT2Helper.matchesSkillItem(item, demand.skill))
         : null;
     return TravellerActorSheet.roll(actor,
         skill ? { ...what, roll: "skill", skill: skill.id } : what);

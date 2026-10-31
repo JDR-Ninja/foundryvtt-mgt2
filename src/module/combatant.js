@@ -391,7 +391,7 @@ export class MGT2Combatant extends Combatant {
         if ( Number.isInteger(reaction.dm) ) return reaction.dm;
         const level = actor?.items?.find(item => (item.type === "talent")
             && (item.system.subType === "skill")
-            && (reaction.skills ?? []).some(name => MGT2Helper.matchesSkill(item.name, name)))
+            && (reaction.skills ?? []).some(name => MGT2Helper.matchesSkillItem(item, name)))
             ?.system.level ?? null;
         const characteristic = reaction.characteristic
             ? (actor?.system.characteristics?.[reaction.characteristic]?.dm ?? 0) : null;

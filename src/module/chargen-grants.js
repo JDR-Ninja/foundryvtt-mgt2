@@ -210,7 +210,7 @@ export const Grants = {
 
     /** What a connection's extra level would take a skill to, which folio 19 caps at 3. */
     skillLevelOf(actor, skill) {
-        const held = this.skills(actor).find(item => MGT2Helper.matchesSkill(item.name, skill));
+        const held = this.skills(actor).find(item => MGT2Helper.matchesSkillItem(item, skill));
         return held?.system.level ?? 0;
     },
 

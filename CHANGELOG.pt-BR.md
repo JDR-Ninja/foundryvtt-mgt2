@@ -8,6 +8,36 @@
 
 ---
 
+## [0.2.8]
+
+**Verificado no Foundry VTT 14.369.**
+
+### Rolagens, cartas e pedidos
+
+* **Outra especialidade da perícia é rolada a +0** (Core p.58). Um Viajante que só tem Pilot
+  (spacecraft) 1 não está mais sem proficiência para pilotar uma nave pequena: em Pilot (small craft)
+  ele rola a +0, sem o MD-3. Uma perícia digitada sem especialidade, como «Pilot» 2, conta no seu
+  nível. Só um Viajante que não tem a perícia de forma alguma continua sem proficiência. As rolagens
+  de criação, a perícia que uma armadura exige, os aprimoramentos e o treinamento leem esse mesmo
+  nível.
+* **A janela de rolagem oferece *Pilot, outra especialidade* a +0**, para cada perícia que o Viajante
+  só tem em especialidades, depois das suas próprias perícias.
+* **O posto de uma nave, o Docket e a carta *Pedido de rolagem* partem dessa entrada**, em vez de *Sem
+  proficiência*, quando o Viajante não tem a especialidade pedida. O Docket então resolve o pedido
+  para esse Viajante em vez de deixá-lo sem resolução, e a carta mostra *Pilot, outra especialidade
+  0*. Com um link `@Request` quem escolhe continua sendo o jogador, e a entrada está na lista.
+
+### Correções
+
+* **Uma especialidade digitada no campo *Especialidade*, e não no nome da perícia, é reconhecida em
+  toda parte** (Core p.58). Um item «Pilot» cujo campo diz *spacecraft* é Pilot (spacecraft) para as
+  rolagens de criação, a regra de conexões, o treinamento, Esquivar, os postos de uma nave, o Docket,
+  os links `@Request`, os aprimoramentos e a armadura. Até agora só a sua exibição e as concessões de
+  criação liam esse campo; em todo o resto, uma rolagem de Pilot (spacecraft) não encontrava a
+  perícia.
+
+---
+
 ## [0.2.7]
 
 **Verificado no Foundry VTT 14.369.**

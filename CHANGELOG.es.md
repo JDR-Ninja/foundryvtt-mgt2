@@ -8,6 +8,35 @@
 
 ---
 
+## [0.2.8]
+
+**Verificado en Foundry VTT 14.369.**
+
+### Tiradas, cartas y peticiones
+
+* **Otra especialidad de la habilidad se tira a +0** (Core p.58). Un Viajero que solo tiene Pilot
+  (spacecraft) 1 ya no está sin competencia para pilotar una nave pequeña: en Pilot (small craft)
+  tira a +0, sin el MD-3. Una habilidad escrita sin especialidad, como «Pilot» 2, cuenta a su nivel.
+  Solo un Viajero que no tiene la habilidad de ninguna forma sigue sin competencia. Las tiradas de
+  creación, la habilidad que exige una armadura, los aumentos y el entrenamiento leen ese mismo nivel.
+* **La ventana de tirada ofrece *Pilot, otra especialidad* a +0**, para cada habilidad que el Viajero
+  solo tiene en especialidades, después de sus propias habilidades.
+* **El puesto de una nave, el Docket y la carta *Petición de tirada* parten de esa entrada**, en lugar
+  de *Sin competencia*, cuando el Viajero no tiene la especialidad pedida. El Docket resuelve entonces
+  la petición para ese Viajero en vez de dejarla sin resolver, y la carta muestra *Pilot, otra
+  especialidad 0*. Con un enlace `@Request` sigue eligiendo el jugador, y la entrada está en la lista.
+
+### Correcciones
+
+* **Una especialidad escrita en el campo *Especialidad*, y no en el nombre de la habilidad, se
+  reconoce en todas partes** (Core p.58). Un objeto «Pilot» cuyo campo dice *spacecraft* es Pilot
+  (spacecraft) para las tiradas de creación, la regla de conexiones, el entrenamiento, Esquivar, los
+  puestos de una nave, el Docket, los enlaces `@Request`, los aumentos y la armadura. Hasta ahora solo
+  su presentación y las concesiones de creación leían ese campo; en todo lo demás, una tirada de Pilot
+  (spacecraft) no encontraba la habilidad.
+
+---
+
 ## [0.2.7]
 
 **Verificado en Foundry VTT 14.369.**

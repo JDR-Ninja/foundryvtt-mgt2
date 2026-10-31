@@ -1182,7 +1182,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         // Core p.59: an unskilled check is DM−3, and a skill the crewman does not have is
         // unskilled.
         const skill = actor.items.find(item => (item.type === "talent")
-            && (item.system.subType === "skill") && MGT2Helper.matchesSkill(item.name, action.skill));
+            && (item.system.subType === "skill") && MGT2Helper.matchesSkillItem(item, action.skill));
 
         // The ship's own contributions ride the prompt as waivable modifiers, which is what they
         // are: a referee who rules that a critical has knocked the fire control out says so by
@@ -1216,7 +1216,8 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             characteristics: RollPromptHelper.actorCharacteristics(actor),
             characteristic: action.characteristic || "",
             skills: RollPromptHelper.actorSkills(actor),
-            skill: skill?.id ?? "NP",
+            // Core folio 58: a speciality not held is the skill at 0 to a crewman who holds it in another.
+            skill: skill?.id ?? MGT2Helper.skillFallback(actor.items, action.skill)?._id ?? "NP",
             checkModifiers: shipModifiers,
             difficulty: action.difficulty,
             damageFormula: weapon?.system.damage ?? null,

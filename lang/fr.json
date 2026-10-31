@@ -5275,6 +5275,7 @@
       "OnHand": "Sur Soi",
       "Options": "Options",
       "OnFail": "échec",
+      "OtherSpeciality": "{skill}, autre spécialité",
       "OwnerNote": "note",
       "PSICost": "Coût PSI",
       "Powered": "Alimenté",

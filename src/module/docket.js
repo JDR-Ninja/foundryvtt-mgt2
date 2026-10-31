@@ -253,11 +253,12 @@ export class Docket extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)
         let kind = "";
         for ( const actor of actors ) {
             for ( const item of actor?.items ?? [] ) {
-                if ( !Docket.#rollable(item) || !MGT2Helper.matchesSkill(item.name, name) ) continue;
+                if ( !Docket.#rollable(item) || !MGT2Helper.matchesSkillItem(item, name) ) continue;
                 if ( Docket.#isSkill(item) ) return "skill";
                 kind = "psionic";
             }
         }
+        if ( actors.some(actor => MGT2Helper.skillFallback(actor?.items, name)) ) return "skill";
         if ( kind ) return kind;
         return Docket.#vehicleSkillLabels().some(label => MGT2Helper.matchesSkill(label, name))
             ? "skill" : "";
@@ -402,10 +403,16 @@ export class Docket extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)
         if ( !named ) return { item: null, label: "", dm: 0 };
 
         const match = actor.items.find(item => Docket.#rollable(item)
-            && MGT2Helper.matchesSkill(item.name, typed));
+            && MGT2Helper.matchesSkillItem(item, typed));
         if ( match ) {
             return { item: match.id, label: match.getRollDisplay(false), dm: match.system.level,
                 display: match.getRollDisplay(), psionic: Docket.#isPower(match) };
+        }
+        // Core folio 58: a speciality not held is the skill at 0 to a Traveller who holds it in another.
+        const fallback = MGT2Helper.skillFallback(actor.items, typed);
+        if ( fallback ) {
+            return { item: fallback._id, label: fallback.item?.getRollDisplay(false) ?? fallback.name, dm: fallback.dm,
+                display: fallback.item?.getRollDisplay() ?? fallback.name, psionic: false };
         }
         // Nobody on the roster has heard of the name — and Core p.229's powers are known or not
         // known, so a Traveller without the power gets the same third state rather than folio 59's

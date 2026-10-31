@@ -4,6 +4,35 @@
 
 ---
 
+## [0.2.8]
+
+**Vérifié sur Foundry VTT 14.369.**
+
+### Jets, cartes et demandes
+
+* **Une autre spécialité de la compétence se lance à +0** (Core p.58). Un Voyageur qui n'a que Pilot
+  (spacecraft) 1 n'est plus incompétent pour piloter un petit vaisseau : sur Pilot (small craft), il
+  lance à +0, sans le MD-3. Une compétence saisie sans spécialité, comme « Pilot » 2, compte à son
+  niveau. Seul un Voyageur qui n'a la compétence sous aucune forme reste incompétent. Les jets de
+  création, la compétence qu'exige une armure, les augmentations et la formation lisent ce même niveau.
+* **La fenêtre de jet propose *Pilot, autre spécialité* à +0**, pour chaque compétence que le
+  Voyageur n'a que dans des spécialités, après ses propres compétences.
+* **Le poste d'un vaisseau, le Docket et la carte *Demande de jet* partent sur cette entrée**, au lieu
+  d'*Incompétent*, quand le Voyageur n'a pas la spécialité demandée. Le Docket résout alors la demande
+  pour ce Voyageur au lieu de la laisser non résolue, et la carte affiche *Pilot, autre spécialité 0*.
+  Avec un lien `@Request`, c'est toujours le joueur qui choisit, et l'entrée figure dans la liste.
+
+### Correctifs
+
+* **Une spécialité saisie dans le champ *Spécialité*, et non dans le nom de la compétence, est
+  reconnue partout** (Core p.58). Un objet « Pilot » dont le champ dit *spacecraft* est Pilot
+  (spacecraft) pour les jets de création, la règle des connexions, la formation, l'Esquive, les postes
+  d'un vaisseau, le Docket, les liens `@Request`, les augmentations et l'armure. Jusqu'ici, seuls son
+  affichage et les attributions de création lisaient ce champ ; partout ailleurs, un jet sur Pilot
+  (spacecraft) ne trouvait pas la compétence.
+
+---
+
 ## [0.2.7]
 
 **Vérifié sur Foundry VTT 14.369.**

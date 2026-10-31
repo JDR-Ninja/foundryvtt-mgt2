@@ -57,13 +57,7 @@ export const CreationRoll = {
      * @returns {number|null}
      */
     skillLevel(actor, skill) {
-        let best = null;
-        for ( const item of actor?.items ?? [] ) {
-            if ( (item.type !== "talent") || (item.system.subType !== "skill") ) continue;
-            if ( !MGT2Helper.matchesSkill(item.name, skill) ) continue;
-            best = Math.max(best ?? 0, item.system.level ?? 0);
-        }
-        return best;
+        return MGT2Helper.skillLevel(actor?.items, skill);
     },
 
     /** The tray's DM entries bearing on this check. @returns {[string, number][]} */

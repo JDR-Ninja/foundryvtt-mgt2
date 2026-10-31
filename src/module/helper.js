@@ -265,6 +265,75 @@ export class MGT2Helper {
             || (skill.startsWith(wanted) && /[^a-z0-9]/.test(skill.charAt(wanted.length)));
     }
 
+    /** `matchesSkill` for a skill Item: a `Pilot` whose field says `spacecraft` is `Pilot (spacecraft)` too. */
+    static matchesSkillItem(item, required) {
+        const speciality = item?.system?.skill?.speciality;
+        return this.matchesSkill(item?.name, required) || (!!speciality
+            && !this.nameStatesSpeciality(item.name, speciality)
+            && this.matchesSkill(`${item.name} (${speciality})`, required));
+    }
+
+    /** The skill a requirement names a speciality of — `Pilot` for `Pilot (small craft)` — or null. */
+    static skillParent(required) {
+        const split = /^(.+?)\s*\(([^)]+)\)$/.exec(String(required ?? "").trim());
+        return (split && (split[2].trim().toLowerCase() !== "any")) ? split[1].trim() : null;
+    }
+
+    /** The best level among skill Items answering a requirement, or **null for not proficient**. */
+    static skillLevel(items, required) {
+        let best = null;
+        for (const item of items ?? []) {
+            if ((item.type !== "talent") || (item.system.subType !== "skill")) continue;
+            if (this.matchesSkillItem(item, required)) best = Math.max(best ?? 0, item.system.level ?? 0);
+        }
+        return best ?? this.skillFallback(items, required)?.dm ?? null;
+    }
+
+    /** The roll prompt's key for a skill held only in specialities, at level 0. */
+    static otherSpecialityKey(parent) {
+        return `P0:${skillWords(parent)}`;
+    }
+
+    static isOtherSpecialityKey(value) {
+        return String(value ?? "").startsWith("P0:");
+    }
+
+    /**
+     * Core folio 58: a skill held only in specialities is level 0 for every other check in it, so each
+     * such skill is a prompt entry of its own. A skill held under its bare name needs none.
+     */
+    static otherSpecialities(items) {
+        const skills = [...(items ?? [])].filter(item => (item.type === "talent") && (item.system.subType === "skill"));
+        const parents = new Map();
+        for (const item of skills) {
+            const parent = this.skillParent(item.name) ?? (item.system.skill?.speciality ? item.name.trim() : null);
+            const key = parent && this.otherSpecialityKey(parent);
+            if (key && !parents.has(key)) parents.set(key, parent);
+        }
+        for (const item of skills) {
+            const bare = !this.skillParent(item.name) && !item.system.skill?.speciality;
+            if (bare) parents.delete(this.otherSpecialityKey(item.name));
+        }
+        return [...parents].map(([key, parent]) => ({ _id: key, term: parent, dm: 0,
+            name: game.i18n.format("MGT2.Items.OtherSpeciality", { skill: parent }) }));
+    }
+
+    /**
+     * What a check on a speciality no Item answers falls back on (folio 58): the skill's bare-named
+     * Item, or its other-speciality entry at 0; null when the Traveller holds the skill in no form.
+     * @returns {{_id: string, name: string, term: string, dm: number, item: Item|null}|null}
+     */
+    static skillFallback(items, required) {
+        const parent = this.skillParent(required);
+        if (!parent) return null;
+        const skills = [...(items ?? [])].filter(item => (item.type === "talent") && (item.system.subType === "skill"));
+        const bare = skills.filter(item => !this.skillParent(item.name) && !item.system.skill?.speciality
+            && this.matchesSkill(item.name, parent)).sort((a, b) => (b.system.level ?? 0) - (a.system.level ?? 0))[0];
+        if (bare) return { _id: bare.id, name: bare.name, term: bare.name, dm: bare.system.level ?? 0, item: bare };
+        const entry = this.otherSpecialities(skills).find(other => other._id === this.otherSpecialityKey(parent));
+        return entry ? { ...entry, item: null } : null;
+    }
+
     /** One number out of the three shapes a Tech Level is stored in. @returns {number|null} */
     static tlNumber(value) {
         if (typeof value === "number") return Number.isFinite(value) ? value : null;

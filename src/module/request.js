@@ -130,9 +130,9 @@ export class RequestMessageData extends foundry.abstract.TypeDataModel {
                 // choosing untrained, and `"unresolved"` is this client failing to match the name.
                 skillItem: new fields.StringField({
                     required: true, blank: false, nullable: true, initial: null,
-                    validate: value => (value === UNRESOLVED)
+                    validate: value => (value === UNRESOLVED) || MGT2Helper.isOtherSpecialityKey(value)
                         || foundry.data.validators.isValidId(value),
-                    validationError: `must be a Document ID or "${UNRESOLVED}"`
+                    validationError: `must be a Document ID, "${UNRESOLVED}" or a "P0:" key`
                 }),
                 // The four a line may disagree with the demand about. `null` is not a value — it is
                 // "the demand decides", which is why an empty `chars` cannot mean it: at demand
@@ -383,6 +383,12 @@ function untrainedLabel(actor) {
     return `${game.i18n.localize("MGT2.Items.NotProficient")} ${MGT2Helper.signed(MGT2.Untrained.dm)}`;
 }
 
+/** Core folio 58's entry a line froze, where it froze no Item: a skill held in another speciality. */
+function otherSpeciality(actor, key) {
+    if ( !actor || !MGT2Helper.isOtherSpecialityKey(key) ) return null;
+    return MGT2Helper.otherSpecialities(actor.items).find(entry => entry._id === key) ?? null;
+}
+
 /**
  * What one line cost this Traveller, in the words the rules use: the skill at its level, the
  * characteristic(s) offered, and the dice it landed on.
@@ -402,7 +408,9 @@ function lineDetail(request, read, actor, showTarget, opposed = null) {
             // `getRollDisplay()` prints nothing at all for a level of zero — which is the one
             // distinction Core p.58-59 makes and the one this card exists to keep legible.
             const item = actor?.items?.get(read.skillItem);
-            parts.push(item ? `${item.getRollDisplay(false)} ${item.system.level ?? 0}` : asked.skill);
+            const other = item ? null : otherSpeciality(actor, read.skillItem);
+            parts.push(item ? `${item.getRollDisplay(false)} ${item.system.level ?? 0}`
+                : (other ? `${other.name} 0` : asked.skill));
         }
     }
     parts.push(charsLabel(asked.chars));
@@ -440,7 +448,9 @@ function lineChit(request, read, actor, chain) {
     }
     else if ( skill ) {
         const item = actor?.items?.get(skill);
+        const other = item ? null : otherSpeciality(actor, skill);
         if ( item ) rows.push([item.name, item.system.level ?? 0]);
+        else if ( other ) rows.push([other.name, 0]);
     }
     const characteristic = key ? actor?.system?.characteristics?.[key] : null;
     if ( characteristic ) rows.push([game.i18n.localize(MGT2.Characteristics[key]), characteristic.dm]);

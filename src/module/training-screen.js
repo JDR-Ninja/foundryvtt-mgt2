@@ -590,7 +590,7 @@ export class TrainingScreen extends MGT2Screen(HandlebarsApplicationMixin(Applic
     /** Create the Item or raise it. */
     async #grantSkill(name, level) {
         const existing = Grants.skills(this.#actor)
-            .filter(item => MGT2Helper.matchesSkill(item.name, name))
+            .filter(item => MGT2Helper.matchesSkillItem(item, name))
             .sort((a, b) => b.system.level - a.system.level)[0];
         if ( existing ) return existing.update({ "system.level": level });
         return this.#actor.createEmbeddedDocuments("Item", [{

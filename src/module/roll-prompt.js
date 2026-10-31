@@ -297,8 +297,9 @@ export class RollPromptHelper {
                 dm: item.system.level }))
             .sort(MGT2Helper.compareByName);
         const untrained = this.untrained(actor);
+        // Last, so a lookup by name meets the Traveller's own Items first.
         return [{ _id: "NP", name: untrained.label, term: untrained.label, dm: untrained.dm },
-            ...skills];
+            ...skills, ...MGT2Helper.otherSpecialities(actor.items)];
     }
 
     /**
@@ -360,6 +361,13 @@ export class RollPromptHelper {
                 const untrained = this.untrained(actor);
                 parts.push(MGT2Helper.getFormulaDM(untrained.dm));
                 modifiers.push({ name: untrained.label, dm: untrained.dm });
+            }
+            else if ( MGT2Helper.isOtherSpecialityKey(data.skill) ) {
+                const other = MGT2Helper.otherSpecialities(actor.items).find(entry => entry._id === data.skill);
+                if ( other ) {
+                    parts.push(MGT2Helper.getFormulaDM(0));
+                    modifiers.push({ name: other.name, dm: 0 });
+                }
             }
             else {
                 const skillObj = actor.getEmbeddedDocument("Item", data.skill);
