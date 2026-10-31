@@ -384,7 +384,7 @@
       },
       "untrainedDMInCreation": {
         "name": "O MD-3 de leigo aplica-se durante a criação",
-        "hint": "Uma rolagem de criação é 2D mais o MD do termo nomeado e nada mais — sem MD de característica, sem nada do capítulo de equipamento. Se a penalidade de leigo sobrevive a essa exclusão, só responde uma resposta de um designer de 2018, que diz que sim."
+        "hint": "Uma rolagem de criação é 2D mais o MD do termo nomeado e nada mais — sem MD de característica, sem nada do capítulo de equipamento. Se a penalidade de leigo sobrevive a essa exclusão, só responde uma resposta de um designer de 2018, que diz que sim. Desligada por padrão: a impressão de 2022 do Básico diz que nenhum modificador posterior se aplica durante a criação."
       },
       "skillCapBreach": {
         "name": "Uma perícia concedida acima do teto cai para nível 0",
@@ -406,7 +406,7 @@
       },
       "creationInjuryToZero": {
         "name": "Uma lesão de criação que chega a zero é uma crise de envelhecimento",
-        "hint": "Uma lesão que leva uma característica a 0 durante a criação não tem resultado impresso, enquanto uma rolagem de envelhecimento que faz o mesmo significa a morte a menos que 1D x Cr10000 pague o atendimento médico. Ligada, a lesão toma emprestada essa regra. Pode matar um Viajante no meio da criação, então o preço é sempre enunciado antes de a rolagem ser aplicada."
+        "hint": "Uma lesão que leva uma característica a 0 durante a criação não é coberta pela regra do envelhecimento, enquanto uma rolagem de envelhecimento que faz o mesmo significa a morte a menos que 1D x Cr10000 pague o atendimento médico. Ligada, a lesão toma emprestado esse preço enquanto a característica ficar em 0; o atendimento que a restabelece encerra a crise, enquanto a do envelhecimento dura a vida toda. O preço é enunciado antes de as perdas serem aplicadas."
       },
       "speciesModifiersStack": {
         "name": "Os modificadores de espécie se acumulam",
@@ -703,12 +703,46 @@
           "always": "{table}: sempre",
           "choice": "{table}: se o tomar",
           "checkPassed": "{table}: se passar",
+          "rolledTwo": "{table}: com um 2 natural",
+          "accepted": "{table}: se aceitar",
+          "refused": "{table}: se recusar",
+          "gatePassed": "{table}: se a condição for atendida",
+          "gateFailed": "{table}: se a condição não for atendida",
           "checkFailed": "{table}: se falhar"
         },
+        "SubTableHint": "Eventos de Vida, Evento incomum, Recrutamento, Ferimentos, Mishap (os Reveses desta carreira), ou o nome de um modelo de carreira do tipo Tabela compartilhada.",
+        "EjectsCondition": "O que ativa a saída da carreira",
+        "CareerCondition": "O que ativa a carreira",
+        "Injury": "Tabela de Ferimentos",
+        "InjuryModes": "Como a linha rola: várias ficam à escolha do jogador, nenhuma marcada equivale às quatro",
+        "InjuryTraveller": "O Viajante",
+        "InjuryAssociate": "Um próximo",
+        "SubTableCondition": "O que ativa a rolagem na subtabela",
         "SubTable": "Subtabela",
         "SubCheck": "Sub-rolagem",
         "TrackMove": "Move um contador",
         "Reroll": "rolar de novo",
+        "RowGrant2": "O que a linha também concede",
+        "SkillPickNamed": "A perícia nomeada",
+        "SkillPickAny": "Qualquer perícia",
+        "SkillPickHeld": "Uma perícia que já possui",
+        "SkillPickTerm": "Uma perícia obtida neste período",
+        "SkillPickThrown": "A perícia rolada",
+        "SkillPickHint": "A perícia que esta concessão dá: a nomeada, ou uma que o jogador escolhe — qualquer uma, uma que já possui, uma obtida neste período, ou a da rolagem da linha.",
+        "SkillExcept": "exceto, separadas por vírgulas",
+        "SkillFromTyped": "com as perícias digitadas",
+        "SkillFromGranted": "com a perícia que a linha concedeu",
+        "SkillFromTerm": "com uma perícia obtida neste período",
+        "SkillFromHint": "Com qual perícia a rolagem é feita. A perícia que a linha concedeu faz a concessão vir primeiro, como imprime «role a perícia que escolheu».",
+        "CheckAssignmentHint": "Uma designação: um Viajante nela faz esta rolagem e nenhuma outra, sem pergunta; deixe em branco para uma rolagem que qualquer um pode fazer.",
+        "GateHint": "O que a linha lê do Viajante, uma única vez, antes de mudar qualquer coisa. Cada consequência escolhe seu lado com “Apenas se a condição da linha for atendida” ou “… não for atendida”; uma condição não atendida não faz a pergunta da linha.",
+        "GateCharacteristic": "uma característica",
+        "GateSex": "o sexo",
+        "GateTrack": "um contador",
+        "GateKey": "sexo ou chave do contador",
+        "GateKeyHint": "O sexo como a espécie o escreve, ou uma chave de contador: o da carreira, senão o da espécie. Um contador por degraus conta seus degraus a partir de 0.",
+        "GateMin": "mín",
+        "GateMax": "máx",
         "RowGrant": "O que a linha concede",
         "Awards": "Concede diretamente",
         "AwardOptional": "pode ser recusado",
@@ -761,9 +795,9 @@
           "assignmentLadder": "a escala que cada designação nomeia, contra as escalas declaradas acima",
           "officerLadder": "declarada acima, e marcada como de oficiais",
           "exitTrack": "o contador que a regra de saída lê, contra os contadores declarados acima",
-          "rowTrack": "o contador que uma linha move, contra os contadores declarados acima"
+          "rowTrack": "o contador que uma linha move ou lê, contra os contadores declarados acima; uma tabela compartilhada ou uma carreira de espécie pode nomear os contadores da sua espécie, que esta ficha não vê"
         },
-        "GrantFloor": "O piso de “SOC 10 ou SOC +1, o que for maior”; vazio se não houver",
+        "GrantFloor": "Com “Subir em 1, mas nunca abaixo de”: o piso de “SOC 10 ou SOC +1, o que for maior”. Com “Somar” numa característica: o valor onde uma perda para, sem nunca subir um valor já abaixo dele. Vazio se não houver",
         "Floor": "piso",
         "GrantRef": "outro benefício",
         "GrantRelation": "A relação que um contato ou uma traição cria",
@@ -778,8 +812,12 @@
         "TrackCondition": "O que ativa o movimento",
         "AwardCondition": "O que ativa a concessão",
         "TrayEntryMode": "Entrada como",
+        "CheckOr": "Ou em vez disso",
+        "CheckOrHint": "Outra rolagem que o Viajante pode fazer em vez disso, cada uma com o seu próprio alvo. O jogador escolhe uma, e os ramos da linha a seguem.",
+        "CheckAlternative": "Outra rolagem",
         "CheckSkills": "perícias, separadas por vírgulas; rola-se a melhor",
         "RaisesSkill": "a perícia rolada ganha um nível",
+        "GrantCondition": "O que ativa o que a linha concede",
         "GrantFirst": "antes da rolagem"
       },
       "Frame": {
@@ -912,6 +950,7 @@
       "Ejection": {
         "ejects": "Deixa a carreira",
         "stays": "Continua na carreira",
+        "mishap": "Como disser o Revés",
         "choice": "O Viajante escolhe"
       },
       "BenefitEffects": {
@@ -930,12 +969,18 @@
         "grant": "Concessão",
         "careerOffer": "Carreira oferecida",
         "careerForce": "Carreira imposta",
+        "commissionRoll": "Rolagem de comissão antes do primeiro período",
         "careerBlock": "Carreira bloqueada"
       },
       "TrayConditions": {
         "always": "Sempre",
         "choice": "Apenas se o Viajante o tomar",
         "checkPassed": "Apenas se o teste da linha passou",
+        "rolledTwo": "Apenas se o teste da linha tirar um 2 natural",
+        "accepted": "Apenas se o Viajante aceitar",
+        "refused": "Apenas se o Viajante recusar",
+        "gatePassed": "Apenas se a condição da linha for atendida",
+        "gateFailed": "Apenas se a condição da linha não for atendida",
         "checkFailed": "Apenas se o teste da linha falhou"
       },
       "RowCareerModes": {
@@ -946,6 +991,7 @@
       "TrayDurations": {
         "oneShot": "Uma vez",
         "thisCareer": "Esta carreira",
+        "nextTerm": "Apenas o período seguinte",
         "restOfCreation": "O resto da criação"
       },
       "TrayChecks": {
@@ -982,6 +1028,7 @@
         "raise": "Conceder em 1, ou subir em 1",
         "atLeast": "Apenas se for maior",
         "add": "Somar",
+        "set": "Definir como",
         "floor": "Subir em 1, mas nunca abaixo de"
       },
       "BenefitKinds": {
@@ -1138,6 +1185,8 @@
         "NeedsTwo": "Uma conexão precisa de dois Viajantes na lista."
       },
       "Muster": {
+        "PendingTitle": "MD nesta rolagem",
+        "PendingPick": "Cada um destes MD vale para uma única rolagem de Benefício. Marque os que esta rolagem usa; os outros esperam outra.",
         "Title": "Baixa",
         "CashSpent": "A coluna de Dinheiro pode ser rolada no máximo três vezes em toda a vida de um Viajante.",
         "NoFunds": "{name} não pode pagar {cost}, e os custos de criação não são levados ao jogo como dívida.",
@@ -1397,16 +1446,28 @@
         "CareerBorrowed": "Role nas tabelas próprias de {career}, sem entrar nela.",
         "Borrowed": "{career}: {what}",
         "BorrowedMissing": "{career} não está nem no mundo nem num compêndio: as suas tabelas não são roladas.",
+        "PickThrow": "Qual rolagem?",
+        "SubTableMissing": "Nenhuma tabela se chama {table}.",
+        "SkillExcepted": "{skill} não pode ser escolhida aqui.",
+        "NoSkillPicked": "Nenhuma perícia foi escolhida, então a rolagem da linha não é feita.",
         "PickBorrowed": "Nas tabelas de qual carreira?",
         "PickBorrowedTable": "Escolha uma tabela de perícias",
         "Pending": "Pendente: {what}.",
         "TrayConditionTitle": "Isto se aplica?",
         "TrayConditionAsk": "Esta linha deixa {what} pendente apenas num ramo: {detail}. Aplicar?",
+        "GateMet": "{gate}: atendida",
+        "GateUnmet": "{gate}: não atendida",
+        "TrackNoReroll": "{track} não tem rolagem a repetir; a linha o deixa como está.",
+        "TrackAtFloor": "{track} já está em seu primeiro degrau.",
         "TrackMoved": "Movido por um evento",
         "TrackAdjusted": "{track} {dm} → {value}",
         "TrackReroll": "{track} rolado de novo → {value}",
         "NoCommissionTarget": "Esta carreira tem comissão mas não tem alvo de comissão digitado.",
         "CommissionFirstTerm": "Uma comissão só pode ser tentada no primeiro período de uma carreira, a menos que {characteristic} seja {n} ou mais.",
+        "EarlyCommissionAsk": "A formatura permite uma rolagem de comissão antes do primeiro período de {career}. Tentá-la agora? Tentá-la é opcional.",
+        "EarlyCommissionLost": "{career} não oferece comissão, então a rolagem de comissão que a formatura permitia antes do primeiro período se perde.",
+        "EarlyCommissionFailed": "A rolagem de comissão antes do primeiro período falhou. O primeiro período ainda pode tentar uma.",
+        "EarlyCommissioned": "Comissionado antes do primeiro período: a carreira começa na patente 1 de oficiais.",
         "CommissionAsk": "Tentar uma comissão neste período? Tentá-la é opcional.",
         "CommissionLater": "Períodos depois do primeiro ({n})",
         "CommissionFailed": "Comissão falhou.",
@@ -1448,6 +1509,7 @@
         "LosePoints": "Perde {n}",
         "AgeingNoRow": "A tabela de Envelhecimento não imprime linha para {n}: o árbitro decide.",
         "Aged": "Rolagem de envelhecimento {n}: {changes}",
+        "InjuryToZero": "Colocadas assim, as perdas levam {characteristics} a 0. Pelas regras deste mundo, o Viajante então morre a menos que {price} sejam pagos em atendimento médico. Aplicá-las? Escolha Não para colocá-las de outra forma.",
         "AgeingCrisis": "Crise de envelhecimento — uma característica chegou a 0. O Viajante morre a menos que 1D × Cr10000 sejam pagos em atendimento médico.",
         "AnagathicsBlocked": "Nesta carreira não se pode usar anagáticos.",
         "AnagathicsAsk": "Começar a tomar anagáticos neste período? O teste é SOC 10+.",
@@ -1533,6 +1595,7 @@
         "NoFallback": "Nenhuma carreira sempre aberta está no mundo ou num compêndio: solte uma sobre este Viajante.",
         "PickFallback": "Qual carreira sempre aberta?",
         "CheckOptional": "Aproveitar esta oportunidade?",
+        "InjuredAssociate": "Um próximo fica ferido: {n} na tabela de Ferimentos.",
         "InjuryHow": "Como esta linha rola na tabela de Ferimentos?",
         "InjuryOnce": "Uma vez",
         "InjuryLower": "Duas vezes, ficando com a menor",
@@ -1551,7 +1614,6 @@
         "CarePaid": "Cuidados médicos: Cr{credits} para o Viajante ({share}% coberto).",
         "OneCareer": "{name} ainda serve em {career}: uma carreira por vez, então deixe-a primeiro.",
         "TableNotCareer": "{career} é uma tabela compartilhada, não uma carreira: vincule-a na configuração de tabelas de criação compartilhadas.",
-        "InjuryNone": "Sem ferimento: este ramo da linha não foi tomado",
         "MinimumTerms": {
           "one": "{species} serve pelo menos {n} período numa carreira antes de tentar outra: se deixá-la agora, só resta dar baixa.",
           "other": "{species} serve pelo menos {n} períodos numa carreira antes de tentar outra: se deixá-la agora, só resta dar baixa."
@@ -1639,6 +1701,7 @@
         "AssignmentTable": "Perícias de designação",
         "TermDM": "Período {n}",
         "Closed": "{career} não está mais aberta: a educação termina no período {n}.",
+        "Repeated": "{career} já foi cursada: outra educação pode seguir, mas não a mesma duas vezes.",
         "OneAttempt": "Uma tentativa de educação por período: {career} não pode ser tentada de novo neste período.",
         "Refused": "Tente uma carreira neste período; senão, o recrutamento.",
         "Skills": "Educação: {skills}",

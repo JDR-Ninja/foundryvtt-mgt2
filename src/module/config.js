@@ -2358,6 +2358,18 @@ MGT2.AgeingEffects = Object.freeze([
 ]);
 
 // Core p.49's Injury table, read like the ageing rows: points per chosen characteristic, `keys` narrowing the choice.
+// How a row rolls the Injury table, and on whom: Agent mishap 2 rolls twice keeping the lower, mishap 5 hurts an associate.
+MGT2.InjuryModes = Object.freeze({
+    once: "MGT2.Chargen.Term.InjuryOnce",
+    lower: "MGT2.Chargen.Term.InjuryLower",
+    higher: "MGT2.Chargen.Term.InjuryHigher",
+    severe: "MGT2.Chargen.Term.InjurySevere"
+});
+MGT2.InjuryTargets = Object.freeze({
+    traveller: "MGT2.Chargen.Template.InjuryTraveller",
+    associate: "MGT2.Chargen.Template.InjuryAssociate"
+});
+
 MGT2.InjuryEffects = Object.freeze([
     { roll: 1, losses: ["1D", 2, 2], keys: null },
     { roll: 2, losses: ["1D"], keys: null },
@@ -2510,8 +2522,13 @@ MGT2.EventRow7 = Object.freeze({
 MGT2.EjectionOutcomes = Object.freeze({
     ejects: "MGT2.Chargen.Ejection.ejects",
     stays: "MGT2.Chargen.Ejection.stays",
-    choice: "MGT2.Chargen.Ejection.choice"
+    choice: "MGT2.Chargen.Ejection.choice",
+    // Core p.18: a Mishap ejects "unless otherwise stated", so the one an event row sends to decides.
+    mishap: "MGT2.Chargen.Ejection.mishap"
 });
+// A frame step's arm sends to no Mishap table, so it has the first three alone.
+MGT2.StepEjectionOutcomes = Object.freeze(Object.fromEntries(Object.entries(MGT2.EjectionOutcomes)
+    .filter(([key]) => key !== "mishap")));
 
 // What an event or mishap row does to the term's Benefit roll.
 MGT2.BenefitRowEffects = Object.freeze({
@@ -2536,7 +2553,8 @@ MGT2.TrayKinds = Object.freeze({
     // "You must take the Prisoner career in your next term" — the exact opposite of an offer rather
     // than a variant of one: nothing may be declined.
     careerForce: "MGT2.Chargen.TrayKinds.careerForce",
-    careerBlock: "MGT2.Chargen.TrayKinds.careerBlock"
+    careerBlock: "MGT2.Chargen.TrayKinds.careerBlock",
+    commissionRoll: "MGT2.Chargen.TrayKinds.commissionRoll"
 });
 
 // What EARNS a tray entry, which is a different question from `expiresWhen`'s expiry.
@@ -2544,7 +2562,19 @@ MGT2.TrayConditions = Object.freeze({
     always: "MGT2.Chargen.TrayConditions.always",
     choice: "MGT2.Chargen.TrayConditions.choice",
     checkPassed: "MGT2.Chargen.TrayConditions.checkPassed",
-    checkFailed: "MGT2.Chargen.TrayConditions.checkFailed"
+    checkFailed: "MGT2.Chargen.TrayConditions.checkFailed",
+    rolledTwo: "MGT2.Chargen.TrayConditions.rolledTwo",
+    accepted: "MGT2.Chargen.TrayConditions.accepted",
+    refused: "MGT2.Chargen.TrayConditions.refused",
+    gatePassed: "MGT2.Chargen.TrayConditions.gatePassed",
+    gateFailed: "MGT2.Chargen.TrayConditions.gateFailed"
+});
+
+// ACS1 p.259, p.45: "If Soc 10+ …", "If male …" — what a row's gate reads off the Traveller; blank is no gate.
+MGT2.RowGateKinds = Object.freeze({
+    characteristic: "MGT2.Chargen.Template.GateCharacteristic",
+    sex: "MGT2.Chargen.Template.GateSex",
+    track: "MGT2.Chargen.Template.GateTrack"
 });
 
 // A row's career reference has three printed senses, and one field carrying all three made every
@@ -2574,7 +2604,8 @@ MGT2.BorrowedSkillTables = Object.freeze({
 MGT2.TrayDurations = Object.freeze({
     oneShot: "MGT2.Chargen.TrayDurations.oneShot",
     thisCareer: "MGT2.Chargen.TrayDurations.thisCareer",
-    restOfCreation: "MGT2.Chargen.TrayDurations.restOfCreation"
+    restOfCreation: "MGT2.Chargen.TrayDurations.restOfCreation",
+    nextTerm: "MGT2.Chargen.TrayDurations.nextTerm"
 });
 
 // A SET and not one value: "event bonuses to advancement rolls may be applied to commission rolls
@@ -2634,12 +2665,27 @@ MGT2.GrantModes = Object.freeze({
     raise: "MGT2.Chargen.GrantModes.raise",
     atLeast: "MGT2.Chargen.GrantModes.atLeast",
     add: "MGT2.Chargen.GrantModes.add",
-    floor: "MGT2.Chargen.GrantModes.floor"
+    floor: "MGT2.Chargen.GrantModes.floor",
+    set: "MGT2.Chargen.GrantModes.set"
 });
 
 MGT2.CharacteristicGrantModes = Object.freeze({
     add: MGT2.GrantModes.add,
-    floor: MGT2.GrantModes.floor
+    floor: MGT2.GrantModes.floor,
+    set: MGT2.GrantModes.set
+});
+
+// Core p.17, p.23, p.27: *"any skill of your choice"*, *"a skill you already have"*, *"whichever skill you chose"*.
+MGT2.SkillPicks = Object.freeze({
+    any: "MGT2.Chargen.Template.SkillPickAny",
+    held: "MGT2.Chargen.Template.SkillPickHeld",
+    term: "MGT2.Chargen.Template.SkillPickTerm",
+    thrown: "MGT2.Chargen.Template.SkillPickThrown"
+});
+
+MGT2.ThrowSkillSources = Object.freeze({
+    granted: "MGT2.Chargen.Template.SkillFromGranted",
+    term: "MGT2.Chargen.Template.SkillFromTerm"
 });
 
 // Other Benefits are RIGHTS WITH LIMITS and not objects — "any armour up to Cr10000 and TL12" —

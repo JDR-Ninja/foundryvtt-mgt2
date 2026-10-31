@@ -24,12 +24,18 @@
 		{{! Every field stays in the form whatever the kind, the stylesheet hiding what the kind does not
 		    read: a submitted grant replaces the stored one whole. }}
 		{{#each cell.grants as |grant g|}}
-		<div class="grant" data-entry-index="{{g}}" data-kind="{{grant.kind}}" data-mode="{{grant.mode}}">
+		<div class="grant" data-entry-index="{{g}}" data-kind="{{grant.kind}}" data-mode="{{grant.mode}}" data-pick="{{grant.pick}}">
 			<select class="f kind edit-only" name="system.{{../path}}.grants.{{g}}.kind">
 				{{selectOptions @root.config.CreationGrantKinds selected=grant.kind localize=true}}
 			</select>
 			<span class="play-only word">{{localize (lookup @root.config.CreationGrantKinds grant.kind)}}</span>
 
+			<select class="f g-pick edit-only" name="system.{{../path}}.grants.{{g}}.pick" data-tooltip="{{localize 'MGT2.Chargen.Template.SkillPickHint'}}">
+				<option value="">{{localize 'MGT2.Chargen.Template.SkillPickNamed'}}</option>
+				{{selectOptions @root.config.SkillPicks selected=grant.pick localize=true}}
+			</select>
+			<input class="f g-except edit-only" type="text" name="system.{{../path}}.grants.{{g}}.except"
+				value="{{grant.except}}" placeholder="{{localize 'MGT2.Chargen.Template.SkillExcept'}}" />
 			{{! Free text and never a choices list: the system ships no skill list, a skill being a
 			    `talent` Item and no content shipping at all. }}
 			<input class="f g-skill edit-only" type="text" name="system.{{../path}}.grants.{{g}}.skill"

@@ -384,7 +384,7 @@
       },
       "untrainedDMInCreation": {
         "name": "El MD-3 por falta de entrenamiento se aplica durante la creación",
-        "hint": "Una tirada de creación es 2D más el MD del término nombrado y nada más — sin MD de característica, sin nada del capítulo de equipo. Si la penalización por falta de entrenamiento sobrevive a esa exclusión solo lo responde una respuesta de un diseñador de 2018, que dice que sí."
+        "hint": "Una tirada de creación es 2D más el MD del término nombrado y nada más — sin MD de característica, sin nada del capítulo de equipo. Si la penalización por falta de entrenamiento sobrevive a esa exclusión solo lo responde una respuesta de un diseñador de 2018, que dice que sí. Apagada por defecto: la impresión de 2022 del Básico dice que ningún modificador posterior se aplica durante la creación."
       },
       "skillCapBreach": {
         "name": "Una habilidad concedida por encima del tope baja a nivel 0",
@@ -406,7 +406,7 @@
       },
       "creationInjuryToZero": {
         "name": "Una lesión de creación que llega a cero es una crisis de envejecimiento",
-        "hint": "Una lesión que lleva una característica a 0 durante la creación no tiene resultado impreso, mientras que una tirada de envejecimiento que hace lo mismo significa la muerte salvo que 1D x Cr10000 pague la atención médica. Encendida, la lesión toma prestada esa regla. Puede matar a un Viajero a mitad de la creación, así que el precio siempre se enuncia antes de aplicar la tirada."
+        "hint": "Una lesión que lleva una característica a 0 durante la creación no está cubierta por la regla del envejecimiento, mientras que una tirada de envejecimiento que hace lo mismo significa la muerte salvo que 1D x Cr10000 pague la atención médica. Encendida, la lesión toma prestado ese precio mientras la característica siga en 0; la atención que la restablece pone fin a la crisis, mientras que la del envejecimiento dura toda la vida. El precio se enuncia antes de aplicar las pérdidas."
       },
       "speciesModifiersStack": {
         "name": "Los modificadores de especie se acumulan",
@@ -703,12 +703,46 @@
           "always": "{table}: siempre",
           "choice": "{table}: si lo toma",
           "checkPassed": "{table}: si se supera",
+          "rolledTwo": "{table}: con un 2 natural",
+          "accepted": "{table}: si acepta",
+          "refused": "{table}: si se niega",
+          "gatePassed": "{table}: si se cumple la condición",
+          "gateFailed": "{table}: si no se cumple la condición",
           "checkFailed": "{table}: si se falla"
         },
+        "SubTableHint": "Sucesos Vitales, Suceso insólito, Reclutamiento, Lesiones, Mishap (los Percances de esta carrera), o el nombre de una plantilla de carrera del tipo Tabla compartida.",
+        "EjectsCondition": "Qué activa la salida de la carrera",
+        "CareerCondition": "Qué activa la carrera",
+        "Injury": "Tabla de Lesiones",
+        "InjuryModes": "Cómo tira la línea: varias son a elección del jugador, ninguna marcada equivale a las cuatro",
+        "InjuryTraveller": "El Viajero",
+        "InjuryAssociate": "Un allegado",
+        "SubTableCondition": "Qué activa la tirada en la subtabla",
         "SubTable": "Subtabla",
         "SubCheck": "Subtirada",
         "TrackMove": "Mueve un contador",
         "Reroll": "volver a tirar",
+        "RowGrant2": "Lo que la línea también concede",
+        "SkillPickNamed": "La habilidad nombrada",
+        "SkillPickAny": "Cualquier habilidad",
+        "SkillPickHeld": "Una habilidad que ya tiene",
+        "SkillPickTerm": "Una habilidad obtenida este periodo",
+        "SkillPickThrown": "La habilidad tirada",
+        "SkillPickHint": "La habilidad que da esta concesión: la nombrada, o una que el jugador elige — cualquiera, una que ya tiene, una obtenida este periodo, o la de la tirada de la línea.",
+        "SkillExcept": "excepto, separadas por comas",
+        "SkillFromTyped": "con las habilidades escritas",
+        "SkillFromGranted": "con la habilidad que concedió la línea",
+        "SkillFromTerm": "con una habilidad obtenida este periodo",
+        "SkillFromHint": "Con qué habilidad se hace la tirada. La habilidad que concedió la línea hace que la concesión vaya primero, como imprime «tira la habilidad que elegiste».",
+        "CheckAssignmentHint": "Un destino: un Viajero en él hace esta tirada y ninguna otra, sin pregunta; déjalo en blanco para una tirada que cualquiera puede hacer.",
+        "GateHint": "Lo que la línea lee del Viajero, una sola vez, antes de cambiar nada. Cada consecuencia elige su lado con «Solo si se cumple la condición de la línea» o «… no se cumple»; una condición no cumplida no hace la pregunta de la línea.",
+        "GateCharacteristic": "una característica",
+        "GateSex": "el sexo",
+        "GateTrack": "un contador",
+        "GateKey": "sexo o clave del contador",
+        "GateKeyHint": "El sexo tal como lo escribe la especie, o una clave de contador: el de la carrera, si no el de la especie. Un contador por peldaños cuenta sus peldaños desde 0.",
+        "GateMin": "mín",
+        "GateMax": "máx",
         "RowGrant": "Lo que concede la línea",
         "Awards": "Concede directamente",
         "AwardOptional": "puede rechazarse",
@@ -761,9 +795,9 @@
           "assignmentLadder": "el escalafón que nombra cada destino, contra los escalafones declarados arriba",
           "officerLadder": "declarado arriba, y marcado como de oficiales",
           "exitTrack": "el contador que lee la regla de salida, contra los contadores declarados arriba",
-          "rowTrack": "el contador que mueve una línea, contra los contadores declarados arriba"
+          "rowTrack": "el contador que mueve o lee una línea, contra los contadores declarados arriba; una tabla compartida o una carrera de especie puede nombrar los contadores de su especie, que esta hoja no ve"
         },
-        "GrantFloor": "El mínimo de «SOC 10 o SOC +1, lo que sea mayor»; vacío si no hay",
+        "GrantFloor": "Con «Subir en 1, pero nunca por debajo de»: el mínimo de «SOC 10 o SOC +1, lo que sea mayor». Con «Sumar» en una característica: el valor donde se detiene una pérdida, sin subir nunca un valor ya inferior. Vacío si no hay",
         "Floor": "mínimo",
         "GrantRef": "otro beneficio",
         "GrantRelation": "La relación que crea un contacto o una traición",
@@ -778,8 +812,12 @@
         "TrackCondition": "Qué activa el movimiento",
         "AwardCondition": "Qué activa la concesión",
         "TrayEntryMode": "Entrada como",
+        "CheckOr": "O en su lugar",
+        "CheckOrHint": "Otra tirada que el Viajero puede hacer en su lugar, cada una con su propio objetivo. El jugador elige una, y las ramas de la línea la siguen.",
+        "CheckAlternative": "Otra tirada",
         "CheckSkills": "habilidades, separadas por comas; se tira la mejor",
         "RaisesSkill": "la habilidad tirada gana un nivel",
+        "GrantCondition": "Qué activa lo que concede la línea",
         "GrantFirst": "antes de la tirada"
       },
       "Frame": {
@@ -912,6 +950,7 @@
       "Ejection": {
         "ejects": "Abandona la carrera",
         "stays": "Sigue en la carrera",
+        "mishap": "Como diga el Percance",
         "choice": "Lo elige el Viajero"
       },
       "BenefitEffects": {
@@ -930,12 +969,18 @@
         "grant": "Concesión",
         "careerOffer": "Carrera ofrecida",
         "careerForce": "Carrera impuesta",
+        "commissionRoll": "Tirada de comisión antes del primer periodo",
         "careerBlock": "Carrera bloqueada"
       },
       "TrayConditions": {
         "always": "Siempre",
         "choice": "Solo si el Viajero lo toma",
         "checkPassed": "Solo si se superó la tirada de la línea",
+        "rolledTwo": "Solo si la tirada de la línea saca un 2 natural",
+        "accepted": "Solo si el Viajero acepta",
+        "refused": "Solo si el Viajero se niega",
+        "gatePassed": "Solo si se cumple la condición de la línea",
+        "gateFailed": "Solo si no se cumple la condición de la línea",
         "checkFailed": "Solo si se falló la tirada de la línea"
       },
       "RowCareerModes": {
@@ -946,6 +991,7 @@
       "TrayDurations": {
         "oneShot": "Una vez",
         "thisCareer": "Esta carrera",
+        "nextTerm": "Solo el periodo siguiente",
         "restOfCreation": "El resto de la creación"
       },
       "TrayChecks": {
@@ -982,6 +1028,7 @@
         "raise": "Conceder a 1, o subir en 1",
         "atLeast": "Solo si es mayor",
         "add": "Sumar",
+        "set": "Fijar en",
         "floor": "Subir en 1, pero nunca por debajo de"
       },
       "BenefitKinds": {
@@ -1138,6 +1185,8 @@
         "NeedsTwo": "Una conexión necesita dos Viajeros en la lista."
       },
       "Muster": {
+        "PendingTitle": "MD en esta tirada",
+        "PendingPick": "Cada uno de estos MD vale para una sola tirada de Beneficio. Marca los que usa esta tirada; los demás esperan a otra.",
         "Title": "Licenciamiento",
         "CashSpent": "La columna de Efectivo puede tirarse tres veces como máximo en toda la vida de un Viajero.",
         "NoFunds": "{name} no puede pagar {cost}, y los costes de creación no se arrastran al juego como deuda.",
@@ -1397,16 +1446,28 @@
         "CareerBorrowed": "Tira en las tablas propias de {career}, sin entrar en ella.",
         "Borrowed": "{career}: {what}",
         "BorrowedMissing": "{career} no está ni en el mundo ni en un compendio: sus tablas no se tiran.",
+        "PickThrow": "¿Qué tirada?",
+        "SubTableMissing": "Ninguna tabla se llama {table}.",
+        "SkillExcepted": "{skill} no puede elegirse aquí.",
+        "NoSkillPicked": "No se eligió ninguna habilidad, así que la tirada de la línea no se hace.",
         "PickBorrowed": "¿En las tablas de qué carrera?",
         "PickBorrowedTable": "Elige una tabla de habilidades",
         "Pending": "Pendiente: {what}.",
         "TrayConditionTitle": "¿Se aplica esto?",
         "TrayConditionAsk": "Esta línea deja {what} pendiente solo en una rama: {detail}. ¿Aplicarlo?",
+        "GateMet": "{gate}: se cumple",
+        "GateUnmet": "{gate}: no se cumple",
+        "TrackNoReroll": "{track} no tiene tirada que repetir; la línea lo deja como está.",
+        "TrackAtFloor": "{track} ya está en su primer peldaño.",
         "TrackMoved": "Movido por un suceso",
         "TrackAdjusted": "{track} {dm} → {value}",
         "TrackReroll": "{track} vuelto a tirar → {value}",
         "NoCommissionTarget": "Esta carrera tiene comisión pero no tiene objetivo de comisión escrito.",
         "CommissionFirstTerm": "Una comisión solo puede intentarse en el primer periodo de una carrera, salvo que {characteristic} sea {n} o más.",
+        "EarlyCommissionAsk": "La graduación permite una tirada de comisión antes del primer periodo de {career}. ¿Intentarla ahora? Intentarla es opcional.",
+        "EarlyCommissionLost": "{career} no ofrece comisión, así que se pierde la tirada de comisión que la graduación permitía antes del primer periodo.",
+        "EarlyCommissionFailed": "La tirada de comisión antes del primer periodo falló. El primer periodo aún puede intentar una.",
+        "EarlyCommissioned": "Con comisión antes del primer periodo: la carrera empieza en el rango 1 de oficiales.",
         "CommissionAsk": "¿Intentar una comisión este periodo? Intentarla es opcional.",
         "CommissionLater": "Periodos después del primero ({n})",
         "CommissionFailed": "Comisión fallada.",
@@ -1448,6 +1509,7 @@
         "LosePoints": "Pierde {n}",
         "AgeingNoRow": "La tabla de Envejecimiento no imprime línea para {n}: decide el árbitro.",
         "Aged": "Tirada de envejecimiento {n}: {changes}",
+        "InjuryToZero": "Colocadas así, las pérdidas llevan {characteristics} a 0. Según las reglas de este mundo, el Viajero muere entonces salvo que se paguen {price} en atención médica. ¿Aplicarlas? Elige No para colocarlas de otra forma.",
         "AgeingCrisis": "Crisis de envejecimiento — una característica ha llegado a 0. El Viajero muere salvo que se paguen 1D × Cr10000 en atención médica.",
         "AnagathicsBlocked": "En esta carrera no pueden usarse anagáticos.",
         "AnagathicsAsk": "¿Empezar a tomar anagáticos este periodo? La tirada es SOC 10+.",
@@ -1533,6 +1595,7 @@
         "NoFallback": "No hay ninguna carrera siempre abierta en el mundo ni en un compendio: suelta una sobre este Viajero.",
         "PickFallback": "¿Qué carrera siempre abierta?",
         "CheckOptional": "¿Aprovechar esta ocasión?",
+        "InjuredAssociate": "Un allegado resulta herido: {n} en la tabla de Lesiones.",
         "InjuryHow": "¿Cómo tira esta fila en la tabla de Lesiones?",
         "InjuryOnce": "Una vez",
         "InjuryLower": "Dos veces, quedándose con la menor",
@@ -1551,7 +1614,6 @@
         "CarePaid": "Atención médica: Cr{credits} para el Viajero ({share}% cubierto).",
         "OneCareer": "{name} sigue sirviendo en {career}: una carrera cada vez, así que déjala primero.",
         "TableNotCareer": "{career} es una tabla compartida, no una carrera: enlázala en el ajuste de tablas de creación compartidas.",
-        "InjuryNone": "Sin lesión: esta rama de la fila no se tomó",
         "MinimumTerms": {
           "one": "{species} sirve al menos {n} periodo en una carrera antes de intentar otra: si la deja ahora, solo queda licenciarse.",
           "other": "{species} sirve al menos {n} periodos en una carrera antes de intentar otra: si la deja ahora, solo queda licenciarse."
@@ -1639,6 +1701,7 @@
         "AssignmentTable": "Habilidades de destino",
         "TermDM": "Periodo {n}",
         "Closed": "{career} ya no está abierta: la educación termina en el periodo {n}.",
+        "Repeated": "{career} ya se ha cursado: puede seguir otra educación, pero no la misma dos veces.",
         "OneAttempt": "Un intento de educación por periodo: {career} no puede volver a intentarse este periodo.",
         "Refused": "Intenta una carrera este periodo; si no, el reclutamiento.",
         "Skills": "Educación: {skills}",

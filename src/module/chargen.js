@@ -22,7 +22,7 @@ export class ChargenState extends foundry.abstract.DataModel {
             // The tray of decisions creation defers.
             // ⚠ `() => []` and never `[]` here and below: a bare initial is ONE shared array, and
             // this model is built by hand, so `updateSource` writes it back into the schema itself.
-            tray: new fields.ArrayField(createTrayEntryField(), { initial: () => [] }),
+            tray: new fields.ArrayField(createTrayEntryField({ pushed: true }), { initial: () => [] }),
 
             // Two ledgers, and neither can be derived.
             benefitRolls: new fields.ArrayField(createCounterEntryField(), { initial: () => [] }),
@@ -55,6 +55,12 @@ export class ChargenState extends foundry.abstract.DataModel {
                 education: new fields.BooleanField({ required: false, initial: false }),
                 assignment: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             }), { initial: () => [] }),
+
+            // The steps of a term no career record logs — an election made before the next career is dropped.
+            loose: new fields.SchemaField({
+                term: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                steps: new fields.ArrayField(new fields.StringField({ required: true, blank: false }), { initial: () => [] })
+            }),
 
             // Folio 50's shared skills package, and only the half that is spent: what a Traveller
             // has already taken out of the pool the table chose.
@@ -396,13 +402,15 @@ export const Chargen = {
      * may expire on HOW a career ended rather than on a term count, because a printed penalty runs
      * until the first career is left and then asks whether that was voluntary.
      */
-    async expirePending(actor, career, exitMode) {
+    async expirePending(actor, career, exitMode, { education = false } = {}) {
         if ( !exitMode ) return actor;
         const state = this.read(actor);
         const key = MGT2Helper.skillSlug(career);
         const tray = state.tray.filter(entry => {
             if ( entry.expiresWhen === exitMode ) return false;
-            // An entry waiting for the first career after graduation belongs to no career yet.
+            // An entry waiting for the first career after graduation belongs to no career yet, nor does an
+            // education's Benefit-roll entry, which `carryEducation` hands to that career.
+            if ( education && entry.appliesTo.has("benefit") ) return true;
             return (entry.scope === "firstAfterGraduation") || !((entry.duration === "thisCareer")
                 && (!entry.career || (MGT2Helper.skillSlug(entry.career) === key)));
         }).map(plain);
@@ -410,13 +418,39 @@ export const Chargen = {
     },
 
     async pushPending(actor, entry) {
-        return this.update(actor, { tray: [...this.read(actor).tray.map(plain), entry] });
+        const state = this.read(actor);
+        return this.update(actor, { tray: [...state.tray.map(plain), { ...entry, term: entry.term ?? state.term }] });
+    },
+
+    /** Core p.46's *"in your next term"*: an entry left in one term lapses when the term after it closes. */
+    async expireNextTerm(actor, closed) {
+        const state = this.read(actor);
+        const tray = state.tray.filter(entry => (entry.duration !== "nextTerm") || (entry.term === null)
+            || (entry.term >= closed)).map(plain);
+        return (tray.length === state.tray.length) ? actor : this.update(actor, { tray });
     },
 
     /**
      * Spend the first entry a reader used: one use off it, or the whole entry.
      * @param {function(object): boolean} match   Over a plain tray entry
      */
+    /** Spend the entry a reader picked, matched on every field and never on a look-alike. */
+    async spendExact(actor, entry, { whole = false } = {}) {
+        const key = entryKey(entry);
+        return this.spendEntry(actor, one => entryKey(one) === key, { whole });
+    },
+
+    /** The steps taken this term with no career record to log them on. @returns {string[]} */
+    looseSteps(actor, term) {
+        const loose = this.read(actor).loose;
+        return (loose.term === term) ? [...loose.steps] : [];
+    },
+
+    async markLoose(actor, term, steps, { drop = "" } = {}) {
+        const kept = [...this.looseSteps(actor, term), ...steps].filter(step => step !== drop);
+        return this.update(actor, { loose: { term, steps: [...new Set(kept)] } });
+    },
+
     async spendEntry(actor, match, { whole = false } = {}) {
         const tray = this.read(actor).tray.map(plain);
         const index = tray.findIndex(match);
@@ -512,10 +546,27 @@ export const Chargen = {
         const tray = this.read(actor).tray.map(plain);
         const kept = tray.flatMap(entry => {
             if ( entry.scope !== "firstAfterGraduation" ) return [entry];
-            if ( !entered ) return [];
+            // An offer of the first career is spent by entering it, and entering another ends it.
+            if ( !entered || CAREER_NAMING.has(entry.kind) ) return [];
             return [{ ...entry, scope: "thisCareer", career: record.name }];
         });
         return tray.some(entry => entry.scope === "firstAfterGraduation") ? this.update(actor, { tray: kept }) : actor;
+    },
+
+    /** An education yields no Benefit roll (Core p.16): one won or lost there goes to the career entered after it. */
+    async carryEducation(actor, record) {
+        const schools = this.careers(actor).filter(item => (item.system.kind === "preCareer") && (item !== record));
+        if ( !schools.length ) return actor;
+        const ids = new Set(schools.map(item => item.id));
+        const names = new Set(schools.map(item => MGT2Helper.skillSlug(item.name)));
+        const state = this.read(actor);
+        const moved = row => ids.has(row.career);
+        const bound = entry => entry.appliesTo.has("benefit") && names.has(MGT2Helper.skillSlug(entry.career));
+        if ( !state.benefitRolls.some(moved) && !state.tray.some(bound) ) return actor;
+        return this.update(actor, {
+            benefitRolls: state.benefitRolls.map(row => ({ ...row, ...(moved(row) ? { career: record.id } : {}) })),
+            tray: state.tray.map(entry => ({ ...plain(entry), ...(bound(entry) ? { career: record.name } : {}) }))
+        });
     },
 
     /** The rank number a later rule reads. */
@@ -563,6 +614,15 @@ function plain(entry) {
     const copy = { ...entry };
     if ( copy.appliesTo instanceof Set ) copy.appliesTo = [...copy.appliesTo];
     return copy;
+}
+
+/** The tray kinds whose `value` names a career. */
+const CAREER_NAMING = new Set(["careerOffer", "careerForce", "unlock"]);
+
+function entryKey(entry) {
+    const copy = plain(entry);
+    return JSON.stringify(Object.keys(copy).sort().map(key =>
+        [key, Array.isArray(copy[key]) ? [...copy[key]].sort() : copy[key]]));
 }
 
 /**

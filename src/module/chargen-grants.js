@@ -78,15 +78,20 @@ export const Grants = {
      */
     async grantSkill(actor, { name, speciality = "", level = 1, mode = "raise", floor = null,
         provenance = {} } = {}) {
-        const wanted = String(name ?? "").trim();
-        if ( !actor || !wanted ) return null;
+        const typed = String(name ?? "").trim();
+        if ( !actor || !typed ) return null;
+        // "Pilot (spacecraft)" typed whole is a skill and its speciality, as a printed cell stores them; "(any)" is no speciality.
+        const split = !speciality && typed.match(/^(.+?)\s*\(([^)]+)\)$/);
+        const [wanted, held] = (split && (split[2].trim().toLowerCase() !== "any")) ? [split[1], split[2].trim()]
+            : [typed, speciality];
+        speciality = held;
 
-        const existing = this.skills(actor).find(skill =>
-            MGT2Helper.matchesSkill(skill.name, wanted)
-            && ((skill.system.skill?.speciality ?? "") === speciality));
+        const existing = this.skills(actor).find(skill => MGT2Helper.matchesSkill(skill.name, wanted)
+            && (((skill.system.skill?.speciality ?? "") === speciality)
+                || (!skill.system.skill?.speciality && MGT2Helper.nameStatesSpeciality(skill.name, speciality))));
         const from = existing?.system.level ?? 0;
         let to = { raise: from + level, add: from + level, atLeast: Math.max(from, level),
-            floor: Math.max(from + 1, floor ?? level) }[mode] ?? (from + level);
+            floor: Math.max(from + 1, floor ?? level), set: level }[mode] ?? (from + level);
 
         const ceiling = MGT2.CreationLimits.skillLevel;
         const lost = Math.max(0, to - ceiling);
@@ -117,8 +122,11 @@ export const Grants = {
         const current = (held?.base ?? 0) + (held?.auto ?? 0);
         // The one form that lives on rank rows: `SOC 10 or SOC +1, whichever is higher` is max(current
         // + 1, floor), and the floor is per ROW because one ladder prints 10 then 12.
-        const wanted = (grant.mode === "floor")
-            ? Math.max(current + 1, grant.floor ?? 0) - current : grant.value;
+        const raised = Math.max(current + 1, grant.floor ?? 0) - current;
+        // ACS1 p.23's "drop your SOC to 2" sets the score; p.274's "to a minimum of 11" stops a loss without raising one.
+        const wanted = { floor: raised, set: grant.value - current }[grant.mode]
+            ?? (((grant.value < 0) && Number.isFinite(grant.floor))
+                ? Math.max(grant.value, Math.min(0, grant.floor - current)) : grant.value);
         // Core p.9 and p.47: an increase stops at the racial maximum, augments aside. Capping every
         // creation increase is a ruling; only a Benefit's excess SOC becomes Ship Shares, as p.47 prints.
         const ceiling = Chargen.frame(actor)?.system.racialMaximum ?? MGT2.CreationDefaults.racialMaximum;

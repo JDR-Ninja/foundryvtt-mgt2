@@ -32,6 +32,14 @@
 			text-align: right
 			font-family: var(--mono)
 			font-variant-numeric: tabular-nums
+		.f.whole
+			flex: 0 1 auto
+			width: auto
+		.gate[data-gate=""] :is(.g-characteristic, .g-key, .g-min, .g-max),
+		.gate[data-gate="characteristic"] .g-key,
+		.gate:not([data-gate="characteristic"]) .g-characteristic,
+		.gate[data-gate="sex"] :is(.g-min, .g-max)
+			display: none
 
 	// A checkbox reads as a statement, so the label follows the box and the pair does not stretch.
 	label.chk
@@ -207,16 +215,23 @@
 			flex-basis: 12rem
 		.f.g-floor
 			flex-basis: 4.5rem
+		.f.g-pick
+			flex: 0 1 auto
+			width: auto
+		.f.g-except
+			flex-basis: 14rem
 
-	// A grant shows only the fields its kind reads, and the floor only in its own mode, where the value
-	// is not read at all.
-	.grant:not([data-kind="skill"]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family),
+	// A grant shows only the fields its kind reads; the floor shows in its own mode and as a characteristic's minimum.
+	.grant:not([data-kind="skill"]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family, .g-pick, .g-except),
+	.grant[data-kind="skill"]:not([data-pick=""]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family),
+	.grant[data-pick=""] .g-except,
+	.trayrow.inarm .f.cond,
 	.grant:not([data-kind="characteristic"]) .g-characteristic,
 	.grant:is([data-kind="convert"], [data-kind="benefit"], [data-kind="note"]) .g-value,
 	.grant:not([data-kind="characteristic"], [data-kind="contact"], [data-kind="cash"], [data-kind="shipShare"]) .g-formula,
 	.grant:not([data-kind="skill"], [data-kind="characteristic"]) :is(.g-mode, .g-floor),
 	.grant:not([data-kind="contact"], [data-kind="convert"]) .g-relation,
 	.grant:not([data-kind="benefit"], [data-kind="note"]) .g-ref,
-	.grant:not([data-mode="floor"]) .g-floor,
+	.grant:not([data-mode="floor"]):not([data-kind="characteristic"][data-mode="add"]) .g-floor,
 	.grant:is([data-kind="skill"], [data-kind="characteristic"])[data-mode="floor"] :is(.g-value, .g-formula)
 		display: none

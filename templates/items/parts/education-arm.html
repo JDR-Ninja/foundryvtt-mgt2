@@ -19,7 +19,7 @@
 	<div class="nest edit-only" data-property="{{path}}.tray">
 		<span class="nlbl">{{localize 'MGT2.Chargen.Template.Tray'}}</span>
 		{{#each arm.tray as |pending p|}}
-		{{> systems/mgt2/templates/items/parts/tray-row.html pending=pending p=p path=(concat ../path ".tray." p)}}
+		{{> systems/mgt2/templates/items/parts/tray-row.html pending=pending p=p path=(concat ../path ".tray." p) inarm=true}}
 		{{/each}}
 		<a class="add" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.TrayEntry'}}</a>
 	</div>

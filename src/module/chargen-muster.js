@@ -14,6 +14,13 @@ const token = text => String(text ?? "").toLowerCase().replace(/[^a-z0-9]/g, "")
 const COUNTS = Object.freeze({ one: 1, two: 2, three: 3, four: 4, five: 5,
     six: 6, seven: 7, eight: 8, nine: 9, ten: 10 });
 
+/** The one-shot DMs the last Benefit roll of each Traveller used, which its spend then consumes. */
+const RIDING = new Map();
+
+/** One tray entry's identity, the same whether read off the model (a Set) or a plain copy (an array). */
+const entryKey = entry => JSON.stringify([entry.kind, entry.dm, entry.note, entry.career, entry.scope,
+    entry.duration, entry.expiresWhen, entry.condition, [...(entry.appliesTo ?? [])].sort()]);
+
 /** Mustering out — an **entitlement ledger**, and creation's full output map. */
 export const Muster = {
 
@@ -168,18 +175,30 @@ export const Muster = {
      */
     rankBonus(record, actor) {
         const ladders = record.system.rankLadders ?? [];
-        const mine = ladders.find(ladder => ladder.id === record.system.ladder);
-        const tracked = Chargen.read(actor).tracks[record.system.ladder]?.high;
-        let rank = Math.max(record.system.rank ?? 0, tracked ?? 0);
-        if ( (Rules.get("officerRankNumbering") === "combined") && mine?.officer ) {
-            const enlisted = ladders.filter(ladder => !ladder.officer)
-                .flatMap(ladder => ladder.rows.map(row => row.rank ?? 0));
-            rank += enlisted.length ? Math.max(...enlisted) : 0;
-        }
+        const tracks = Chargen.read(actor).tracks;
+        const enlistedTop = Math.max(0, ...ladders.filter(ladder => !ladder.officer)
+            .flatMap(ladder => ladder.rows.map(row => row.rank ?? 0)));
+        const combined = Rules.get("officerRankNumbering") === "combined";
+        const reached = (id, rank) => rank + ((combined && ladders.find(ladder => ladder.id === id)?.officer)
+            ? enlistedTop : 0);
+        // A sergeant commissioned at rank 4 reached 4, so the enlisted rank held before counts too.
+        const rank = Math.max(reached(record.system.ladder, record.system.rank ?? 0), record.system.enlistedRank ?? 0,
+            ...ladders.map(ladder => reached(ladder.id, this.rankHigh(record, ladder.id, tracks) ?? 0)));
         // `upTo` is the row's UPPER bound, so the first row the rank fits in is the answer.
         const row = MGT2.MusterOut.rankBonus.find(entry => rank <= entry.upTo)
             ?? MGT2.MusterOut.rankBonus.at(-1);
         return { rank, rolls: row.rolls, dm: row.dm };
+    },
+
+    /** The tracks key a demotion's high-water is kept under: one record's ladder, never every career sharing its id. */
+    rankTrackKey(record, ladder) {
+        return `rank-${record.id}-${String(ladder ?? "").replace(/[^\w-]/g, "_")}`;
+    },
+
+    /** A ladder's high-water for this record; a world written before the key was per record reads the ladder's own. */
+    rankHigh(record, ladder, tracks = null) {
+        const held = tracks ?? Chargen.read(record.parent).tracks;
+        return held[this.rankTrackKey(record, ladder)]?.high ?? held[ladder]?.high ?? null;
     },
 
     /** The lifetime Cash counter. @returns {{limit: number, taken: number, left: number}} */
@@ -196,7 +215,7 @@ export const Muster = {
      * @param {string} [options.career]   The career record's id
      * @returns {{formula: string, rows: [string, number][], terms: object[], total: number}}
      */
-    compose(actor, { column = "other", career = "" } = {}) {
+    compose(actor, { column = "other", career = "", riding = null } = {}) {
         const rows = [];
         if ( column === "cash" ) {
             // "A Traveller with the Gambler skill gains DM+1 to all rolls on Cash columns", at any level.
@@ -213,13 +232,33 @@ export const Muster = {
         // A printed footnote — Companion p.36's "FOL 10+ add +1 to their Benefit rolls" — gated at the roll.
         rows.push(...CreationRoll.standing(actor, "benefit", record?.name ?? ""));
         // Life Event 10's `DM+2 to any one Benefit roll` and everything shaped like it.
+        const chosen = riding ? new Set(riding.map(entryKey)) : null;
         for ( const entry of Chargen.pending(actor, "benefit", record?.name ?? "") ) {
-            if ( (entry.kind === "dm") && entry.dm ) {
-                rows.push([entry.note || game.i18n.localize("MGT2.Chargen.Roll.Pending"), entry.dm]);
-            }
+            if ( (entry.kind !== "dm") || !entry.dm ) continue;
+            if ( chosen && (entry.duration === "oneShot") && !chosen.has(entryKey(entry)) ) continue;
+            rows.push([entry.note || game.i18n.localize("MGT2.Chargen.Roll.Pending"), entry.dm]);
         }
         const { parts, terms, total } = Checks.modifiers(rows);
         return { formula: ["1d6", ...parts].join(""), rows, terms, total };
+    },
+
+    /** The one-shot DMs waiting for a Benefit roll of this career; with two or more, the player picks which this roll uses. */
+    async ridingDMs(actor, career = "") {
+        const name = actor?.items.get(career)?.name ?? "";
+        const pending = Chargen.pending(actor, "benefit", name)
+            .filter(entry => (entry.kind === "dm") && entry.dm && (entry.duration === "oneShot"));
+        if ( pending.length < 2 ) return pending;
+        const escape = foundry.utils.escapeHTML;
+        const boxes = pending.map((entry, index) => `<label class="checkbox"><input type="checkbox" name="dm${index}" checked>
+            ${escape(entry.note || game.i18n.localize("MGT2.Chargen.Roll.Pending"))} ${MGT2Helper.signed(entry.dm)}</label>`).join("");
+        const picked = await DialogV2.prompt({
+            window: { title: "MGT2.Chargen.Muster.PendingTitle" },
+            classes: ["mgt2"],
+            content: `<p>${game.i18n.localize("MGT2.Chargen.Muster.PendingPick")}</p>${boxes}`,
+            ok: { callback: (event, button) => pending.filter((entry, index) => button.form.elements[`dm${index}`].checked) },
+            rejectClose: false
+        });
+        return picked ?? null;
     },
 
     /** Roll one benefit and post it. */
@@ -234,7 +273,11 @@ export const Muster = {
                 { career: actor.items.get(career)?.name ?? "" }));
             return null;
         }
-        const composed = this.compose(actor, { column, career });
+        // Core p.46, Life Event 10: each "DM+2 to any one Benefit roll" rides on one roll, the player's pick.
+        const riding = await this.ridingDMs(actor, career);
+        if ( riding === null ) return null;
+        RIDING.set(actor.id, riding);
+        const composed = this.compose(actor, { column, career, riding });
         const roll = await new Roll(composed.formula).roll();
         await ChatMessage.create({
             author: game.user.id,
@@ -317,9 +360,19 @@ export const Muster = {
     },
 
     /** Spend one Benefit roll, and with it the one-shots that were riding on it. */
+    forget(actor) {
+        RIDING.delete(actor.id);
+    },
+
     async spendRoll(actor, provenance = {}, note = "") {
         // Folio 46, Life Event 10: the `DM+2 to any one Benefit roll` goes with the outcome kept.
-        await Chargen.spendPending(actor, "benefit", actor.items.get(provenance.career)?.name ?? "");
+        const riding = RIDING.get(actor.id);
+        RIDING.delete(actor.id);
+        if ( !riding ) await Chargen.spendPending(actor, "benefit", actor.items.get(provenance.career)?.name ?? "");
+        for ( const entry of riding ?? [] ) {
+            const key = entryKey(entry);
+            await Chargen.spendEntry(actor, one => entryKey(one) === key);
+        }
         return Chargen.update(actor, {
             benefitRolls: [...Chargen.read(actor).benefitRolls.map(entry => entry.toObject?.() ?? entry),
                 { value: -1, career: provenance.career ?? "",

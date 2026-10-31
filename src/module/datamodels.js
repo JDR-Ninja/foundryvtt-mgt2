@@ -264,7 +264,11 @@ function createCellField(options = {}) {
             ref: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             // Which relationship a `contact` grant makes: an Ally is a benefit row of its own.
             relation: new fields.StringField({
-                required: false, blank: true, trim: true, initial: "", choices: MGT2.ContactRelations })
+                required: false, blank: true, trim: true, initial: "", choices: MGT2.ContactRelations }),
+            // Blank grants the skill named; otherwise the player picks one from that pool, never one listed in `except`.
+            pick: new fields.StringField({ required: false, blank: true, initial: "", choices: MGT2.SkillPicks }),
+            except: new fields.ArrayField(
+                new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] })
         }), { initial: [] })
     }, options);
 }
@@ -337,8 +341,10 @@ function createStandingModifierField() {
 }
 
 /** One entry of the tray — a decision creation defers, wherever it was made. */
-export function createTrayEntryField() {
+export function createTrayEntryField({ pushed = false } = {}) {
     return new fields.SchemaField({
+        // The term a pushed entry was left in, which a `nextTerm` entry's expiry counts from.
+        ...(pushed ? { term: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }) } : {}),
         kind: new fields.StringField({
             required: false, blank: false, initial: "dm", choices: MGT2.TrayKinds }),
         // The number a `dm` carries. Every other kind reads `value` instead.
@@ -380,6 +386,8 @@ function createEventRowField({ ejects = "stays", ...options } = {}) {
         text: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         ejects: new fields.StringField({
             required: false, blank: false, initial: ejects, choices: MGT2.EjectionOutcomes }),
+        ejectsCondition: new fields.StringField({
+            required: false, blank: false, initial: "always", choices: MGT2.TrayConditions }),
         benefit: new fields.StringField({
             required: false, blank: false, initial: "none", choices: MGT2.BenefitRowEffects }),
         benefitCount: new fields.NumberField({ required: false, initial: 1, integer: true }),
@@ -394,6 +402,8 @@ function createEventRowField({ ejects = "stays", ...options } = {}) {
         // WHICH of the three senses the reference above carries.
         careerMode: new fields.StringField({
             required: false, blank: false, initial: "offer", choices: MGT2.RowCareerModes }),
+        careerCondition: new fields.StringField({
+            required: false, blank: false, initial: "always", choices: MGT2.TrayConditions }),
         // Core p.19's Draft fixes an assignment on two of its six rows: Merchant marine, law enforcement.
         careerAssignment: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
         // A borrowed career's tables, each rolled on the branch named; blank is not rolled.
@@ -406,6 +416,24 @@ function createEventRowField({ ejects = "stays", ...options } = {}) {
         }),
         // Sub-tables must be ADDRESSABLE: two careers' rows jump straight to the Unusual Event's 1D branch.
         subTable: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+        subTableCondition: new fields.StringField({
+            required: false, blank: false, initial: "always", choices: MGT2.TrayConditions }),
+        // Core p.49's Injury table as the row prints it: several modes are the player's pick, none is all four.
+        injury: new fields.SchemaField({
+            modes: new fields.SetField(new fields.StringField({
+                required: true, blank: false, choices: MGT2.InjuryModes }), { initial: [] }),
+            who: new fields.StringField({ required: false, blank: false, initial: "traveller", choices: MGT2.InjuryTargets })
+        }),
+        // ACS1 p.259, Zhodani Army mishap 3: "If Soc 10+ … If Soc 9- …" — read once, as the row finds the Traveller.
+        gate: new fields.SchemaField({
+            kind: new fields.StringField({ required: false, blank: true, initial: "", choices: MGT2.RowGateKinds }),
+            characteristic: new fields.StringField({
+                required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
+            // A sex as the species spells it, or a track key: the career's own, else its species frame's.
+            key: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            min: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+            max: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true })
+        }),
         // The sub-roll printed INSIDE the prose: "roll Gambler 8+ or Broker 8+" is thrown on the better skill.
         check: new fields.SchemaField({
             characteristic: new fields.StringField({
@@ -413,6 +441,18 @@ function createEventRowField({ ejects = "stays", ...options } = {}) {
             skills: new fields.ArrayField(
                 new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] }),
             target: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+            // Core p.37, Navy mishap 3: the skill "depends on your branch" — a throw keyed to one assignment.
+            assignment: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+            skillFrom: new fields.StringField({ required: false, blank: true, initial: "", choices: MGT2.ThrowSkillSources }),
+            // Core p.45, Scout 3: "run and roll Pilot 8+ … or treat … Persuade 10+" — the player picks, each its own target.
+            alternatives: new fields.ArrayField(new fields.SchemaField({
+                characteristic: new fields.StringField({
+                    required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
+                skills: new fields.ArrayField(
+                    new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] }),
+                target: new fields.NumberField({ required: false, nullable: true, initial: null, integer: true }),
+                assignment: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
+            }), { initial: [] }),
             // "If you take this opportunity, roll …": the Traveller may decline, and then no branch is earned.
             optional: new fields.BooleanField({ required: false, initial: false }),
             // Core p.35: "Either way, gain one level in whichever skill you used."
@@ -443,8 +483,14 @@ function createEventRowField({ ejects = "stays", ...options } = {}) {
                 required: false, blank: false, initial: "always", choices: MGT2.TrayConditions })
         }),
         grant: createCellField({ required: false }),
+        grantCondition: new fields.StringField({
+            required: false, blank: false, initial: "always", choices: MGT2.TrayConditions }),
         // Core p.37 and p.41 print the grant before the throw it then serves; by default it follows.
         grantFirst: new fields.BooleanField({ required: false, initial: false }),
+        // Core p.45, Scout 3: an Enemy "either way" and Electronics (sensors) 1 on a success — two grants, two branches.
+        grant2: createCellField(),
+        grant2Condition: new fields.StringField({
+            required: false, blank: false, initial: "always", choices: MGT2.TrayConditions }),
         // A DM on a Benefit roll is a MODIFIER and not an award, so it is none of `benefit`'s five
         // values: at least six printed rows carry one, and the tray already models it exactly.
         tray: new fields.ArrayField(createTrayEntryField(), { initial: [] })
@@ -537,7 +583,7 @@ function createStepField() {
 function createStepOutcomeField() {
     return new fields.SchemaField({
         ejects: new fields.StringField({
-            required: false, blank: false, initial: "stays", choices: MGT2.EjectionOutcomes }),
+            required: false, blank: false, initial: "stays", choices: MGT2.StepEjectionOutcomes }),
         outcomes: new fields.SetField(new fields.StringField({
             required: true, blank: false, choices: MGT2.TermOutcomes }), { initial: [] }),
         // "Elevated one degree": `value` is RUNGS on an enumerated track and points on a numeric one.
@@ -870,6 +916,10 @@ export class CareerData extends ItemBaseData {
         const duplicated = this.rankLadders.map(one => one.id).filter((id, index, all) =>
             id && (all.indexOf(id) !== index));
         const rows = [...this.eventTable, ...this.mishapTable];
+        // A shared table or a species career may name its species' own tracks, which no template can see.
+        const frames = (this.kind === "table") || !!this.restrictedTo?.species;
+        const rowTracks = [...named(rows, one => one.track?.key),
+            ...named(rows, one => ((one.gate?.kind === "track") ? one.gate.key : ""))];
 
         const checks = [
             {
@@ -887,7 +937,7 @@ export class CareerData extends ItemBaseData {
                 id => ladders.get(id)?.officer === true),
             check("exitTrack", this.exitRule.track ? [this.exitRule.track] : [],
                 key => tracks.has(key)),
-            check("rowTrack", named(rows, one => one.track?.key), key => tracks.has(key))
+            check("rowTrack", rowTracks, key => frames || tracks.has(key))
         ];
         return { checks, failed: checks.filter(one => one.applies && !one.ok).length };
     }

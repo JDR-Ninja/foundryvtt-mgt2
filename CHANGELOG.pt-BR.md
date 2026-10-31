@@ -8,6 +8,182 @@
 
 ---
 
+## [0.2.7]
+
+**Verificado no Foundry VTT 14.369.**
+
+**A criação, relida pela terceira vez a partir das linhas que os livros imprimem.** Uma nova auditoria
+partiu das tabelas de Eventos e de Reveses dos livros, e não do código. Ela encontrou um período que
+não se fechava depois de uma expulsão, uma dezena de outros defeitos, e mais de uma centena de linhas
+que o formulário de carreira não conseguia registrar: uma escolha com duas saídas, um 2 natural, uma
+perícia à escolha, uma consequência que depende do SOC ou do sexo do Viajante. Agora elas podem ser
+digitadas ([#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). O sistema continua sem trazer
+nenhuma carreira: ele faz funcionar as que o árbitro digita ou importa.
+
+### ⚠ Mudanças incompatíveis
+
+* **O MD-3 de leigo não se aplica mais durante a criação, a menos que você peça** (Core p.11). A
+  edição 2022 do livro deixa fora da criação todo modificador dos capítulos seguintes; a regra *O MD-3
+  de leigo aplica-se durante a criação*, que seguia uma resposta de 2018, fica portanto desativada por
+  padrão. Um mundo que nunca a tinha alterado joga agora sem ela: para mantê-la, reative-a em *Regras
+  opcionais e variantes*.
+* **Um Revés rolado a partir de um Evento expulsa quando diz que expulsa** (Core p.18: um Revés
+  expulsa salvo indicação em contrário). Uma linha de Eventos que remete aos Reveses pode deixar o
+  Revés decidir: *Como disser o Revés*, no seu menu *Expulsa*. Uma linha acrescentada a uma tabela de
+  Eventos começa nessa opção. **As linhas já digitadas não mudam**: em *Continua na carreira*, o Revés
+  que elas rolam continua sem expulsar. Passe para *Como disser o Revés* as que não imprimem «você não
+  é expulso», como o Evento 3 do Agente, o 8 do Artista e o 8 do Nobre.
+* **O menu de Ferimentos não oferece mais *Sem ferimento*** (Core p.49). Ele servia para afastar a
+  tabela no ramo que uma linha não tomava; agora quem faz isso é *O que ativa a rolagem na subtabela*.
+  **Uma linha já digitada que só fere num ramo**, uma falha por exemplo, agora rola os Ferimentos
+  toda vez: dê a ela essa condição.
+* **Uma lesão de criação que leva uma característica a 0 não é mais uma crise para a vida toda**
+  (Core p.49), sob a regra *Uma lesão de criação que chega a zero é uma crise de envelhecimento*,
+  ativada por padrão. A crise só dura enquanto a característica fica em 0: os cuidados que a
+  restabelecem lhe põem fim. Antes que as perdas se apliquem, o jogador vê o preço dos cuidados e pode
+  distribuí-las de outro modo. Uma perda por envelhecimento a 0 continua sendo uma crise para a vida
+  toda.
+* **A mesma educação não pode ser cursada duas vezes** (Core p.16): outra pode seguir a primeira, mas
+  a já cursada é recusada.
+* **Um 12 natural na Progressão não retém mais um Viajante que um Evento impede de se realistar ou
+  envia para outra carreira** (Core p.18; p.45, Evento 3 do Batedor): ele só pode sair, e a carreira
+  se fecha. O 12 só o obriga a ficar contra a sua própria decisão de sair. Uma interpretação: o livro
+  imprime as duas regras sem dizer qual prevalece.
+* **Um Revés que expulsa custa a rolagem de Benefício do período, venha de onde vier** (Core p.18;
+  p.23, Revés 2 do Agente). Até agora, só uma Sobrevivência falha a custava. Um Evento que expulsa sem
+  passar por um Revés mantém a rolagem. Uma interpretação.
+* **Um efeito sobre as rolagens de Benefício encontrado durante uma educação passa para a primeira
+  carreira seguinte**, ganho ou perda, como os MD da formatura (Core p.16). Ele se perdia com a
+  educação, que não tem rolagem de Benefício. Uma interpretação.
+
+### Linhas de Eventos e de Reveses
+
+O formulário de carreira agora registra o que essas linhas imprimem. Uma linha já digitada é jogada
+como antes, exceto pelo que dizem as mudanças incompatíveis acima.
+
+* **Duas rolagens à escolha, cada uma com a sua dificuldade** (Core p.45, Evento 3 do Batedor;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)): o bloco *Ou em vez disso* acrescenta
+  uma *Outra rolagem*, com as suas perícias e a sua dificuldade. O jogador escolhe qual tentar, e os
+  ramos da linha seguem a rolagem feita.
+* **Cada consequência de uma linha toma o seu ramo** (Core p.23, p.45;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)): *O que ativa o que a linha concede*,
+  *O que ativa a rolagem na subtabela*, *O que ativa a saída da carreira* e *O que ativa a carreira*
+  juntam-se às condições que as rolagens de Benefício, o contador e as entradas pendentes já tinham. A
+  saída e a carreira imposta agora são decididas depois da rolagem, e uma concessão feita *antes da
+  rolagem* mas ligada a um ramo espera a rolagem. Uma linha já digitada fica em *Sempre*.
+* **Um 2 natural** (Core p.23, Revés 3 do Agente; p.35, Evento 8 do Mercador): *Apenas se o teste da
+  linha tirar um 2 natural*. Uma linha que imprime «role 2D» sem perícia é digitada só com uma
+  dificuldade.
+* **«Se você aceitar… se você recusar…»: uma única pergunta por linha** (Core p.46, Evento de Vida 11;
+  p.57, Evento 3 do Prisioneiro). *Apenas se o Viajante aceitar* e *Apenas se o Viajante recusar* leem
+  uma única resposta, pedida uma vez antes da rolagem; uma recusa não faz a rolagem. *Apenas se o
+  Viajante o tomar* continua sendo uma pergunta por consequência.
+* **A linha diz como rola os Ferimentos, e quem se fere** (Core p.49; p.23, Reveses 2 e 5 do Agente):
+  *Uma vez*, *Duas vezes, ficando com a menor*, *Duas vezes, ficando com a maior*, *Gravemente ferido
+  (um resultado de 2)*. Um só modo não pergunta nada, vários ficam à escolha do jogador, nenhum oferece
+  os quatro. *Um próximo* se fere sem que o Viajante perca nada.
+* **Uma perícia à escolha** (Core p.17, p.23, p.25, p.57): uma concessão de perícia pode deixar o
+  jogador escolher — *Qualquer perícia*, *Uma perícia que já possui*, *Uma perícia obtida neste
+  período*, *A perícia rolada* — exceto as listadas em *exceto, separadas por vírgulas*, como
+  Jack-of-all-Trades. *Qualquer perícia* sugere as do Viajante, as do mundo e as dos compêndios, e
+  aceita um nome que não está na lista.
+* **Uma segunda concessão, com a sua própria condição** (Core p.17, Evento pré-carreira 4; p.31,
+  Evento 3 do Artista; p.45, Evento 3 do Batedor): *O que a linha também concede*, para uma linha que
+  dá uma coisa em cada ramo.
+* **Uma rolagem com a perícia que a linha acabou de conceder** (Core p.17, Evento pré-carreira 10;
+  p.27, Evento 3 do Cidadão): *com a perícia que a linha concedeu* ou *com uma perícia obtida neste
+  período*.
+* **Uma rolagem própria de uma designação** (Core p.37, Revés 3 da Marinha): o campo *Designação* de
+  uma rolagem. Um Viajante nessa designação faz essa rolagem sem que lhe perguntem, e as das outras
+  designações não lhe são oferecidas.
+* **Uma linha condicionada ao estado do Viajante** (Aliens of Charted Space 1 p.45, p.137, p.259):
+  *Condicionada a* uma característica entre dois limites, um sexo ou um degrau de contador. Cada
+  consequência toma um lado, *Apenas se a condição da linha for atendida* ou *Apenas se a condição da
+  linha não for atendida*, e o diário do período diz qual. A condição é lida uma vez, antes que a
+  linha mude qualquer coisa, de modo que a perda de SOC que ela impõe não a faz mudar de lado. Uma
+  condição não atendida não faz a pergunta da linha nem a sua rolagem opcional, e um Viajante sem
+  sexo registrado não atende a nenhuma condição de sexo. Três interpretações.
+* **Uma linha move um contador da espécie**, como o grau dos K'kree (Aliens of Charted Space 1
+  p.131-137), e não mais só o da carreira.
+* **Uma característica fixada, ou uma perda detida num mínimo** (Aliens of Charted Space 1 p.23,
+  p.274): o modo *Definir como* dá à característica o valor digitado, num sentido ou no outro, já que
+  um Aslan que virou Pária tem SOC 2 mesmo que estivesse mais baixo. A caixa *piso* aparece também com
+  *Somar*, onde detém uma perda sem nunca subir um valor que já está abaixo dele. Duas interpretações.
+* **Uma entrada pendente só para o período seguinte** (Core p.46, Evento incomum 1): *Apenas o período
+  seguinte* desaparece quando o período seguinte se fecha.
+
+### Tabelas compartilhadas
+
+* **Uma linha pode rolar uma tabela própria da carreira** (Core p.57, o Evento de prisão do
+  Prisioneiro; [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)): o campo *Subtabela*
+  aceita o nome de uma carreira do tipo *Tabela compartilhada*, rolada com 1D se as suas linhas param
+  em 6, senão com 2D. Um nome que nenhuma tabela traz mostra um aviso e uma linha no diário; antes ele
+  não fazia nada, ou rolava os Eventos de Vida no lugar.
+
+### Educação pré-carreira
+
+* **A rolagem de Comissão que a formatura permite é feita antes do primeiro período** (Core p.16-17;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). Uma nova entrada pendente, *Rolagem
+  de comissão antes do primeiro período*, vai no ramo *Formado* com o alcance *A primeira carreira
+  depois de se formar*. Ao entrar nessa carreira, o jogador pode tentá-la: bem-sucedida, o Viajante
+  começa na patente de oficial 1, com o seu bônus, e a Progressão do período continua aberta. Falha ou
+  recusada, o primeiro período mantém a sua própria rolagem de Comissão, e um oficial que entra assim
+  não recebe o bônus da patente 0 de praça: duas interpretações. **Uma educação já digitada não muda**:
+  o seu MD e o seu sucesso automático esperam a rolagem do primeiro período; para seguir o livro,
+  acrescente a entrada ao seu ramo *Formado*.
+* **O que a formatura deixa termina com a primeira carreira** (Core p.16): uma carreira oferecida,
+  imposta ou desbloqueada pela formatura desaparece assim que o Viajante entra numa carreira. Um
+  formado de academia que entrava primeiro na Marinha mantinha a entrada direta no Exército.
+
+### Psiônica
+
+* **Um talento recebido no treinamento básico é um teste para aprendê-lo** (Core p.229), como numa
+  tabela de perícias; antes ele era concedido no nível 0.
+* **A Telepatia só é gratuita como o primeiríssimo talento** (Core p.228): um novo curso não a torna
+  mais gratuita de novo.
+
+### Baixa
+
+* **As rolagens de Benefício extras por patente leem a patente mais alta alcançada** (Core p.46),
+  patente de praça incluída: um sargento de patente 4 que recebeu uma comissão não dá mais baixa na sua
+  patente de oficial 1. Duas carreiras que compartilham uma escala de patentes não compartilham mais a
+  sua patente mais alta.
+* **Vários MD de Benefício de uso único pendentes: a rolagem pergunta quais usa** (Core p.46). A
+  janela *MD nesta rolagem* marca todos por padrão; os desmarcados esperam uma rolagem posterior.
+* **Uma rolagem de Benefício descartada na tela de encerramento** não deixa mais pendente a sua
+  escolha de MD.
+
+### Documentação
+
+* **O diário de auditoria das regras** (`mgt2.docs`) descreve a criação como ela está agora, e diz
+  quais dos seus pontos são interpretações.
+
+### Correções
+
+* ⚠ **Um período encerrado por uma expulsão não se fechava** (Core p.11, p.18). Depois de um Revés que
+  expulsa, a rolagem de perícia que a regra *Um Viajante expulso mantém a rolagem de perícia do
+  período* mantém era recusada, e o período ficava aberto: nenhum período servido, quatro anos a menos
+  de idade, e tudo o que conta períodos, do envelhecimento à PSI e à pensão, igualmente curto. O
+  período agora se fecha com os seus quatro anos. **Um Viajante já criado não é corrigido**: se ele foi
+  expulso durante a criação, confira a sua idade e os seus períodos.
+* **Um nome de perícia é reconhecido seja como for que as suas palavras estejam separadas**
+  ([#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)): «Jack of all Trades» é
+  Jack-of-all-Trades. Escrito assim, ele mantinha o MD-3 de leigo, era oferecido como uma rolagem
+  comum, o treinamento não o excluía, e uma concessão de criação criava um segundo item ao lado.
+* **Uma perícia digitada com a sua especialidade**, «Pilot (spacecraft)», fica sob Pilot com a sua
+  especialidade, em vez de virar uma perícia separada (Core p.19).
+* **Mudar de designação repete a qualificação com os seus MD** (Core p.20): o MD de idade, o de
+  carreira anterior, os MD condicionais e os da espécie, que faltavam.
+* **Um MD de Progressão transferido para o teste de comissão, ou um sucesso automático, podia
+  remover outra entrada parecida**, como o MD de Benefício de outra carreira (Core p.19). Cada um
+  agora remove exatamente a entrada que usou.
+* **Uma etapa feita sem carreira em andamento**, como os anagáticos no início de um período, não se
+  repete mais (Core p.49).
+* **Uma linha de tabela compartilhada rolada a partir de um Revés que não expulsa** não pode mais
+  expulsar (Core p.23).
+
+---
+
 ## [0.2.6]
 
 **Verificado no Foundry VTT 14.369.**

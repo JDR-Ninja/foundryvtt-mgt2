@@ -73,6 +73,7 @@ export const Psionics = {
      */
     ladder(actor) {
         const attempts = this.attempts(actor);
+        const tried = this.tried(actor);
         const psiDM = actor?.system.characteristics?.psionic?.dm ?? 0;
         const held = Grants.skills(actor);
         return {
@@ -88,7 +89,7 @@ export const Psionics = {
                     total: psiDM + talent.dm + (attempts * MGT2.PsionicTraining.perAttempt),
                     held: already,
                     // Core p.228's "first talent" is the first chosen for a check, not the first held.
-                    free: (talent.key === MGT2.PsionicTraining.freeFirst) && !already && (attempts === 0)
+                    free: (talent.key === MGT2.PsionicTraining.freeFirst) && !already && !tried
                 };
             })
         };
@@ -103,6 +104,12 @@ export const Psionics = {
     /** How many learning checks this Traveller has made. */
     attempts(actor) {
         return Chargen.read(actor).tracks[TRAINING_TRACK]?.value ?? 0;
+    },
+
+    /** Core p.228's *"first talent"* is for life: a new course resets the attempts, never the fact one was made. */
+    tried(actor) {
+        const track = Chargen.read(actor).tracks[TRAINING_TRACK];
+        return ((track?.value ?? 0) > 0) || ((track?.high ?? 0) > 0);
     },
 
     /** Whether the test has been taken, which is the one thing a PSI of 0 cannot say for itself. */
@@ -120,7 +127,7 @@ export const Psionics = {
             credits: MGT2Helper.credits(price) }) + (spent.owed ? ` · ${game.i18n.format("MGT2.Chargen.Muster.Owed",
             { credits: MGT2Helper.credits(spent.owed) })}` : ""));
         const tracks = foundry.utils.deepClone(Chargen.read(actor).tracks);
-        tracks[TRAINING_TRACK] = { value: 0, rung: "", high: null };
+        tracks[TRAINING_TRACK] = { value: 0, rung: "", high: tracks[TRAINING_TRACK]?.high ?? null };
         return Chargen.update(actor, { tracks });
     },
 

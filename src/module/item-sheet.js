@@ -76,7 +76,7 @@ const STANDING_LISTS = ["standingModifiers", "frame.standingModifiers"];
 const compact = list => Object.values(list ?? {}).filter(entry => entry?.trim());
 
 /** The lists a career form types as one comma-separated line, wherever they sit in the tree. */
-const TYPED_LISTS = new Set(["specialities", "afterCareers", "termDMs", "skills"]);
+const TYPED_LISTS = new Set(["specialities", "afterCareers", "termDMs", "skills", "except"]);
 
 function splitTypedLists(node) {
   if ( !node || (typeof node !== "object") ) return;

@@ -337,7 +337,10 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         if ( asked.column === "cash" ) {
             // A template with no Cash column spends nothing until the referee reads the amount off the book.
             const credits = printed.cash ?? await Muster.promptCash(rolled.roll.total);
-            if ( credits === null ) return ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Close.RollDiscarded"));
+            if ( credits === null ) {
+                Muster.forget(actor);
+                return ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Close.RollDiscarded"));
+            }
             await Muster.take(actor, { kind: "cash", credits, provenance,
                 category: game.i18n.localize("MGT2.Chargen.Muster.Column.cash") });
             return this.render();
@@ -345,6 +348,7 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         // The career template carries its own printed column, so the row the dice landed on IS the
         // outcome; asking is what a career whose template holds no table falls back to.
         if ( printed.cell && Muster.rerolls(actor, printed.cell) ) {
+            Muster.forget(actor);
             return ui.notifications.warn(game.i18n.format("MGT2.Chargen.Muster.Reroll", { what: printed.cell.text }));
         }
         if ( printed.cell ) {
@@ -354,6 +358,7 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         }
         const benefit = await Muster.promptRow(actor, { total: rolled.roll.total, provenance });
         if ( !benefit ) {
+            Muster.forget(actor);
             return ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Close.RollDiscarded"));
         }
         await Muster.take(actor, benefit);

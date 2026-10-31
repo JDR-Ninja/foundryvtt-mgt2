@@ -346,22 +346,25 @@ export class CharacterData extends ActorBaseData {
     }
 
     /**
-     * Folio 49: a characteristic reduced to 0 by ageing — or by a creation injury, where the rule is
-     * on — is death unless 1D × Cr10000 buys care, and a crisis fails every later qualification roll.
+     * Folio 49: a characteristic reduced to 0 by ageing is a crisis for life; one reduced to 0 by a
+     * creation injury, where the rule is on, lasts only until care brings it back above 0.
      */
     #prepareLossLog() {
         const running = {};
-        const sources = Rules.on("creationInjuryToZero") ? ["ageing", "injury"] : ["ageing"];
-        let crisis = false;
+        const injury = Rules.on("creationInjuryToZero");
+        let aged = false;
+        const hurt = new Set();
         for ( const entry of this.characteristicLog ) {
             for ( const [key, delta] of Object.entries(entry.changes ?? {}) ) {
                 const c = this.characteristics[key];
                 if ( !c ) continue;
                 running[key] = (running[key] ?? c.base) + delta;
-                if ( sources.includes(entry.source) && (running[key] <= 0) ) crisis = true;
+                if ( running[key] > 0 ) hurt.delete(key);
+                else if ( entry.source === "ageing" ) aged = true;
+                else if ( injury && (entry.source === "injury") ) hurt.add(key);
             }
         }
-        this.states.ageingCrisis = crisis;
+        this.states.ageingCrisis = aged || (hurt.size > 0);
     }
 
     /**

@@ -59,7 +59,7 @@ export const RULES = Object.freeze({
     // characteristic DMs do not.
     untrainedDMInCreation: {
         group: "creation", section: "skills", unofficial: "2018",
-        default: true
+        default: false
     },
     // Folio 55 prints the only on-breach procedure in the book — for post-career study — and it is
     // transposed here.

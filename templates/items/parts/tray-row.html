@@ -1,9 +1,9 @@
 {{! One pending entry of the creation tray, every leaf its schema reads. `path` ends at the entry's index. }}
-<div class="trayrow" data-entry-index="{{p}}">
+<div class="trayrow{{#if inarm}} inarm{{/if}}" data-entry-index="{{p}}">
 	<select class="f kind" name="system.{{path}}.kind">{{selectOptions @root.config.TrayKinds selected=pending.kind localize=true}}</select>
 	{{! What EARNS the entry, which is not what `expiresWhen` says: most printed entries belong to one
 	    branch of the row, and the loop pushed them all. }}
-	<select class="f" name="system.{{path}}.condition" data-tooltip="{{localize 'MGT2.Chargen.Template.TrayCondition'}}">{{selectOptions @root.config.TrayConditions selected=pending.condition localize=true}}</select>
+	<select class="f cond" name="system.{{path}}.condition" data-tooltip="{{localize 'MGT2.Chargen.Template.TrayCondition'}}">{{selectOptions @root.config.TrayConditions selected=pending.condition localize=true}}</select>
 	<input class="f num" type="number" step="1" name="system.{{path}}.dm" value="{{pending.dm}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayValue'}}" />
 	<input class="f" type="text" name="system.{{path}}.value" value="{{pending.value}}" placeholder="{{localize 'MGT2.Chargen.Screen.TrayValue'}}" />
 	<select class="f" name="system.{{path}}.appliesTo" multiple size="3" data-tooltip="{{localize 'MGT2.Chargen.Screen.TrayApplies'}}">

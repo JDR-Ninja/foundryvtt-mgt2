@@ -4,6 +4,172 @@
 
 ---
 
+## [0.2.7]
+
+**Verified on Foundry VTT 14.369.**
+
+**Creation read a third time, from the rows the books print.** A new audit started from the books'
+Events and Mishaps tables rather than from the code. It found a term that never closed after an
+ejection, about ten other defects, and more than a hundred rows the career form could not hold: a
+choice with two outcomes, a natural 2, a skill of the player's choice, a consequence that turns on
+the Traveller's SOC or sex. They can be typed now
+([#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). The system still ships no career: it
+runs the ones the referee types or imports.
+
+### ⚠ Breaking changes
+
+* **The untrained DM-3 no longer applies during creation unless you ask for it** (Core p.11). The
+  2022 printing keeps every modifier from the later chapters out of creation; the rule *The untrained
+  DM-3 applies during creation*, which followed a 2018 answer, is therefore off by default. A world
+  that never changed it now plays without it: to keep it, turn it back on in *Optional and variant
+  rules*.
+* **A Mishap rolled from an Event ejects when it says so** (Core p.18: a Mishap ejects unless
+  otherwise stated). An Events row that sends to the Mishaps can let the Mishap decide: *As the Mishap
+  says*, in its *Ejects* menu. A row added to an Events table starts on that choice. **Rows already
+  typed do not change**: at *Stays in the career*, the Mishap they roll still never ejects. Set to *As
+  the Mishap says* those that do not print "you are not ejected", such as Agent event 3, Entertainer
+  event 8 and Noble event 8.
+* **The Injury menu no longer offers *No injury*** (Core p.49). It kept the table off the branch a
+  row did not take; *What earns the roll on the sub-table* does that now. **A row already typed that
+  injures on one branch only**, a failure for instance, now rolls the Injury table every time: give
+  it that condition.
+* **A creation injury that takes a characteristic to 0 is no longer a crisis for life** (Core p.49),
+  under the rule *A creation injury to zero is an ageing crisis*, on by default. The crisis lasts only
+  while the characteristic stays at 0: the care that restores it ends it. Before the losses apply,
+  the player sees the price of care and may place them differently. An ageing loss to 0 is still a
+  crisis for life.
+* **The same education cannot be attended twice** (Core p.16): another may follow the first, but the
+  one already attended is refused.
+* **A natural 12 on Advancement no longer holds a Traveller whom an Event bars from re-enlisting or
+  sends to another career** (Core p.18; p.45, Scout event 3): they can only leave, and the career
+  closes. The 12 holds them only against their own choice to leave. A ruling: the book prints both
+  rules without saying which wins.
+* **A Mishap that ejects costs the term's Benefit roll, wherever it came from** (Core p.18; p.23,
+  Agent mishap 2). Only a failed Survival roll cost it until now. An Event that ejects without going
+  through a Mishap keeps the roll. A ruling.
+* **An effect on Benefit rolls met during an education carries to the first career after it**, gain
+  or loss alike, as graduation's DMs do (Core p.16). It was lost with the education, which has no
+  Benefit roll. A ruling.
+
+### Events and Mishaps rows
+
+The career form now holds what these rows print. A row already typed plays as before, except for what
+the breaking changes above say.
+
+* **Two rolls to choose from, each at its own target** (Core p.45, Scout event 3;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)): the *Or instead* block adds an *Other
+  roll*, with its skills and its target. The player picks which to attempt, and the row's branches
+  follow the roll made.
+* **Every consequence of a row takes its branch** (Core p.23, p.45;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)): *What earns the grant*, *What earns
+  the roll on the sub-table*, *What earns the ejection* and *What earns the career* join the
+  conditions Benefit rolls, the track and pending entries already had. Ejection and a compelled
+  career are now decided after the roll, and a grant made *before the throw* but bound to a branch
+  waits for the roll. A row already typed stays at *Always*.
+* **A natural 2** (Core p.23, Agent mishap 3; p.35, Merchant event 8): *Only if the row's throw came
+  up a natural 2*. A row that prints "roll 2D" with no skill is typed with a target alone.
+* **"If you accept… if you refuse…": one question per row** (Core p.46, Life Event 11; p.57,
+  Prisoner event 3). *Only if the Traveller accepts* and *Only if the Traveller refuses* read a single
+  answer, asked once before the roll; a refusal makes no roll. *Only if the Traveller takes it* is
+  still one question per consequence.
+* **The row says how it rolls the Injury table, and who is hurt** (Core p.49; p.23, Agent mishaps 2
+  and 5): *Once*, *Twice, keeping the lower*, *Twice, keeping the higher*, *Severely injured (a result
+  of 2)*. One mode asks nothing, several are the player's pick, none offers all four. *An associate*
+  is hurt at no cost to the Traveller.
+* **A skill of the player's choice** (Core p.17, p.23, p.25, p.57): a skill grant can let the player
+  pick — *Any skill*, *A skill already held*, *A skill gained this term*, *The skill thrown* — except
+  those listed in *except, comma-separated*, such as Jack-of-all-Trades. *Any skill* suggests the
+  Traveller's own, the world's and the compendiums', and takes a name that is not on the list.
+* **A second grant, with its own condition** (Core p.17, Pre-career event 4; p.31, Entertainer event
+  3; p.45, Scout event 3): *What the row also grants*, for a row that gives one thing on each branch.
+* **A roll on the skill the row has just granted** (Core p.17, Pre-career event 10; p.27, Citizen
+  event 3): *on the skill the row granted* or *on a skill gained this term*.
+* **A roll keyed to an assignment** (Core p.37, Navy mishap 3): a roll's *Assignment* field. A
+  Traveller in that assignment makes that roll without being asked, and the other assignments' rolls
+  are not offered.
+* **A row gated on the Traveller's state** (Aliens of Charted Space 1 p.45, p.137, p.259): *Gated on*
+  a characteristic between two bounds, a sex or a track rung. Each consequence takes a side, *Only if
+  the row's gate is met* or *Only if the row's gate is not met*, and the term log says which. The gate
+  is read once, before the row changes anything, so the SOC loss it imposes cannot flip it. A gate not
+  met asks the row's question of no one and makes no optional roll, and a Traveller with no sex
+  recorded meets no sex gate. Three rulings.
+* **A row moves a species track**, such as the K'kree degree (Aliens of Charted Space 1 p.131-137),
+  and no longer only the career's own.
+* **A characteristic set, or a loss stopped at a minimum** (Aliens of Charted Space 1 p.23, p.274):
+  the *Set to* mode gives the characteristic the value typed, either way, since an Aslan made Outcast
+  has SOC 2 even from lower. The *floor* box now appears with *Add* too, where it stops a loss without
+  ever raising a score already below it. Two rulings.
+* **A pending entry for the next term only** (Core p.46, Unusual Event 1): *The next term only* lapses
+  when the term after it closes.
+
+### Shared tables
+
+* **A row can roll a table of the career's own** (Core p.57, the Prisoner's Prison Event;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)): the *Sub-table* field takes the name
+  of a career of kind *Shared table*, rolled on 1D where its rows stop at 6, else on 2D. A name no
+  table carries shows a warning and a line in the log; it used to do nothing, or roll Life Events
+  instead.
+
+### Pre-career education
+
+* **The commission roll graduation allows is made before the first term** (Core p.16-17;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). A new pending entry, *Commission roll
+  before the first term*, goes on the *Graduated* arm with the scope *The first career after
+  graduating*. On entering that career the player may attempt it: passed, the Traveller starts at
+  officer rank 1, with its bonus, and the term's Advancement stays open. Failed or declined, the first
+  term keeps its own commission roll, and an officer who entered this way takes no enlisted rank 0
+  bonus: two rulings. **An education already typed does not change**: its DM and its automatic pass
+  wait for the first term's roll; to follow the book, add the entry to its *Graduated* arm.
+* **What graduation leaves ends with the first career** (Core p.16): a career offered, compelled or
+  unlocked by graduation lapses as soon as the Traveller enters a career. An academy graduate who
+  joined the Navy first used to keep automatic entry to the Army.
+
+### Psionics
+
+* **A talent taken as basic training is a check to learn it** (Core p.229), as on a skill table; it
+  used to be granted at level 0.
+* **Telepathy is free only as the very first talent** (Core p.228): a new course no longer makes it
+  free again.
+
+### Mustering out
+
+* **The extra Benefit rolls for rank read the highest rank reached** (Core p.46), enlisted rank
+  included: a rank-4 sergeant who was commissioned no longer musters out on officer rank 1. Two
+  careers sharing a rank ladder no longer share their highest rank.
+* **Several one-shot Benefit DMs pending: the roll asks which it uses** (Core p.46). The *DMs on this
+  roll* window ticks them all by default; those unticked wait for a later roll.
+* **A Benefit roll discarded on the closing screen** no longer leaves its DM choice standing.
+
+### Documentation
+
+* **The rules audit journal** (`mgt2.docs`) describes creation as it now stands, and says which of
+  its points are rulings.
+
+### Fixes
+
+* ⚠ **A term ended by an ejection never closed** (Core p.11, p.18). After a Mishap that ejects, the
+  skill roll the rule *An ejected Traveller still takes the term's skill roll* keeps was refused, and
+  the term stayed open: no term served, four years short in age, and everything that counts terms,
+  from ageing to PSI and the pension, short with it. The term now closes with its four years. **A
+  Traveller already created is not corrected**: if they were ejected during creation, check their age
+  and terms.
+* **A skill name is recognised however its words are separated**
+  ([#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)): "Jack of all Trades" is
+  Jack-of-all-Trades. Typed that way, it kept the untrained DM-3, was offered as an ordinary roll,
+  training did not bar it, and a creation grant made a second Item beside it.
+* **A skill typed with its speciality**, "Pilot (spacecraft)", goes under Pilot with its speciality,
+  instead of becoming a separate skill (Core p.19).
+* **Changing assignment rolls qualification with its DMs** (Core p.20): the age DM, the DM per
+  previous career, the conditional DMs and the species' own, which were missing.
+* **An Advancement DM carried over to the commission roll, or an automatic pass, could remove
+  another entry that looked like it**, such as another career's Benefit DM (Core p.19). Each now
+  removes exactly the entry it used.
+* **A step taken with no career in progress**, such as anagathics at the start of a term, is not
+  taken again (Core p.49).
+* **A shared-table row rolled from a Mishap that does not eject** can no longer eject (Core p.23).
+
+---
+
 ## [0.2.6]
 
 **Verified on Foundry VTT 14.369.**

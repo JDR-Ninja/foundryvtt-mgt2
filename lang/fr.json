@@ -384,7 +384,7 @@
       },
       "untrainedDMInCreation": {
         "name": "Le MD-3 de non-formé s'applique pendant la création",
-        "hint": "Un jet de création est de 2D plus le seul MD nommé par l'étape : aucun MD de caractéristique, rien du chapitre de l'équipement. Que la pénalité de non-formé survive à cette exclusion n'est tranché que par une réponse d'auteur de 2018, qui dit oui."
+        "hint": "Un jet de création est de 2D plus le seul MD nommé par l'étape : aucun MD de caractéristique, rien du chapitre de l'équipement. Que la pénalité de non-formé survive à cette exclusion n'est tranché que par une réponse d'auteur de 2018, qui dit oui. Désactivée par défaut : l'impression 2022 du livre de base dit qu'aucun modificateur ultérieur ne s'applique pendant la création."
       },
       "skillCapBreach": {
         "name": "Une compétence au-delà du plafond tombe au niveau 0",
@@ -406,7 +406,7 @@
       },
       "creationInjuryToZero": {
         "name": "Une blessure de création à zéro est une crise de vieillissement",
-        "hint": "Une blessure qui met une caractéristique à 0 pendant la création n'a aucune issue imprimée, là où un jet de vieillissement qui fait de même signifie la mort à moins de payer 1D x Cr10000 de soins. Activé, la blessure emprunte cette règle. Elle peut tuer un Voyageur en pleine création : le prix est toujours annoncé avant que le jet ne soit appliqué."
+        "hint": "Une blessure qui met une caractéristique à 0 pendant la création n'est pas couverte par la règle du vieillissement, là où un jet de vieillissement qui fait de même signifie la mort à moins de payer 1D x Cr10000 de soins. Activée, la blessure en emprunte le prix tant que la caractéristique reste à 0 ; les soins qui la rétablissent mettent fin à la crise, là où celle du vieillissement dure toute la vie. Le prix est annoncé avant que les pertes ne soient appliquées."
       },
       "speciesModifiersStack": {
         "name": "Les modificateurs d'espèce se cumulent",
@@ -687,7 +687,7 @@
         "Cash": "Numéraire",
         "OtherBenefits": "Autres bénéfices",
         "EventTable": "Événements",
-        "MishapTable": "Incidents",
+        "MishapTable": "Aléas",
         "Roll": "jet",
         "RowText": "la ligne telle que le livre l'imprime",
         "Ejects": "Éjecte",
@@ -703,12 +703,46 @@
           "always": "{table} : toujours",
           "choice": "{table} : si choisie",
           "checkPassed": "{table} : si réussi",
+          "rolledTwo": "{table} : sur un 2 naturel",
+          "accepted": "{table} : si accepté",
+          "refused": "{table} : si refusé",
+          "gatePassed": "{table} : si la condition est remplie",
+          "gateFailed": "{table} : si la condition n'est pas remplie",
           "checkFailed": "{table} : si échoué"
         },
+        "SubTableHint": "Événements de la vie, Événement inhabituel, Conscription, Blessures, Mishap (les Aléas de cette carrière), ou le nom d'un modèle de carrière de type Table commune.",
+        "EjectsCondition": "Ce qui déclenche le départ de la carrière",
+        "CareerCondition": "Ce qui déclenche la carrière",
+        "Injury": "Table des Blessures",
+        "InjuryModes": "Comment la ligne fait le jet : plusieurs laissent le choix au joueur, aucun sélectionné vaut les quatre",
+        "InjuryTraveller": "Le Voyageur",
+        "InjuryAssociate": "Un proche",
+        "SubTableCondition": "Ce qui déclenche le jet sur la sous-table",
         "SubTable": "Sous-table",
         "SubCheck": "Jet secondaire",
         "TrackMove": "Déplace une piste",
         "Reroll": "relance",
+        "RowGrant2": "Ce que la ligne accorde aussi",
+        "SkillPickNamed": "La compétence nommée",
+        "SkillPickAny": "N'importe quelle compétence",
+        "SkillPickHeld": "Une compétence déjà possédée",
+        "SkillPickTerm": "Une compétence acquise cette période",
+        "SkillPickThrown": "La compétence jetée",
+        "SkillPickHint": "La compétence que donne cet acquis : celle nommée, ou une que le joueur choisit — n'importe laquelle, une déjà possédée, une acquise cette période, ou celle du jet de la ligne.",
+        "SkillExcept": "sauf, séparées par des virgules",
+        "SkillFromTyped": "sur les compétences saisies",
+        "SkillFromGranted": "sur la compétence accordée par la ligne",
+        "SkillFromTerm": "sur une compétence acquise cette période",
+        "SkillFromHint": "Sur quelle compétence le jet est fait. La compétence accordée par la ligne fait passer l'acquis en premier, comme l'imprime « lancez la compétence choisie ».",
+        "CheckAssignmentHint": "Une affectation : un Voyageur qui y sert fait ce jet et aucun autre, sans question ; laissez vide pour un jet que chacun peut faire.",
+        "GateHint": "Ce que la ligne lit sur le Voyageur, une seule fois, avant de rien changer. Chaque conséquence choisit son côté avec « Seulement si la condition de la ligne est remplie » ou « … n'est pas remplie » ; une condition non remplie ne pose pas la question de la ligne.",
+        "GateCharacteristic": "une caractéristique",
+        "GateSex": "le sexe",
+        "GateTrack": "une piste",
+        "GateKey": "sexe ou clé de piste",
+        "GateKeyHint": "Le sexe tel que l'espèce l'écrit, ou une clé de piste : celle de la carrière, sinon celle de l'espèce. Une piste à échelons compte ses échelons à partir de 0.",
+        "GateMin": "min",
+        "GateMax": "max",
         "RowGrant": "Ce que la ligne accorde",
         "Awards": "Accorde d'office",
         "AwardOptional": "peut être refusé",
@@ -761,9 +795,9 @@
           "assignmentLadder": "l'échelle nommée par chaque affectation, face aux échelles déclarées ci-dessus",
           "officerLadder": "déclarée ci-dessus, et cochée officier",
           "exitTrack": "la piste que lit la règle de sortie, face aux pistes déclarées ci-dessus",
-          "rowTrack": "la piste que déplace une ligne, face aux pistes déclarées ci-dessus"
+          "rowTrack": "la piste que déplace ou que lit une ligne, face aux pistes déclarées ci-dessus ; une table partagée ou une carrière d'espèce peut nommer les pistes de son espèce, que cette fiche ne voit pas"
         },
-        "GrantFloor": "Le plancher de « SOC 10 ou SOC +1, le plus élevé des deux » ; vide s'il n'y en a pas",
+        "GrantFloor": "Avec « Augmenter de 1, sans jamais descendre sous » : le plancher de « SOC 10 ou SOC +1, le plus élevé des deux ». Avec « Ajouter » sur une caractéristique : la valeur où s'arrête une perte, sans jamais relever une valeur déjà plus basse. Vide s'il n'y en a pas",
         "Floor": "plancher",
         "GrantRef": "autre avantage",
         "GrantRelation": "La relation qu'un contact ou une trahison crée",
@@ -778,8 +812,12 @@
         "TrackCondition": "Ce qui déclenche le déplacement",
         "AwardCondition": "Ce qui déclenche l'attribution",
         "TrayEntryMode": "Entrée comme",
+        "CheckOr": "Ou à la place",
+        "CheckOrHint": "Un autre jet que le Voyageur peut faire à la place, chacun avec sa propre cible. Le joueur en choisit un, et les branches de la ligne le suivent.",
+        "CheckAlternative": "Autre jet",
         "CheckSkills": "compétences, séparées par des virgules ; la meilleure est jetée",
         "RaisesSkill": "la compétence jetée gagne un niveau",
+        "GrantCondition": "Ce qui déclenche ce que la ligne accorde",
         "GrantFirst": "avant le jet"
       },
       "Frame": {
@@ -912,6 +950,7 @@
       "Ejection": {
         "ejects": "Quitte la carrière",
         "stays": "Reste dans la carrière",
+        "mishap": "Comme le dit l'Aléa",
         "choice": "Le Voyageur choisit"
       },
       "BenefitEffects": {
@@ -930,12 +969,18 @@
         "grant": "Acquis",
         "careerOffer": "Carrière proposée",
         "careerForce": "Carrière imposée",
+        "commissionRoll": "Jet de Commandement avant la première période",
         "careerBlock": "Carrière bloquée"
       },
       "TrayConditions": {
         "always": "Toujours",
         "choice": "Seulement si le Voyageur la prend",
         "checkPassed": "Seulement si le jet de la ligne est réussi",
+        "rolledTwo": "Seulement si le jet de la ligne fait un 2 naturel",
+        "accepted": "Seulement si le Voyageur accepte",
+        "refused": "Seulement si le Voyageur refuse",
+        "gatePassed": "Seulement si la condition de la ligne est remplie",
+        "gateFailed": "Seulement si la condition de la ligne n'est pas remplie",
         "checkFailed": "Seulement si le jet de la ligne a échoué"
       },
       "RowCareerModes": {
@@ -946,6 +991,7 @@
       "TrayDurations": {
         "oneShot": "Une fois",
         "thisCareer": "Cette carrière",
+        "nextTerm": "La période suivante seulement",
         "restOfCreation": "Le reste de la création"
       },
       "TrayChecks": {
@@ -982,6 +1028,7 @@
         "raise": "Donner au niveau 1, ou augmenter de 1",
         "atLeast": "Seulement si c'est plus élevé",
         "add": "Ajouter",
+        "set": "Fixer à",
         "floor": "Augmenter de 1, sans jamais descendre sous"
       },
       "BenefitKinds": {
@@ -1138,6 +1185,8 @@
         "NeedsTwo": "Une connexion demande deux Voyageurs sur la liste."
       },
       "Muster": {
+        "PendingTitle": "MD sur ce jet",
+        "PendingPick": "Chacun de ces MD vaut pour un seul jet d'Avantage. Cochez ceux que ce jet utilise ; les autres attendent un jet suivant.",
         "Title": "Fin de carrière",
         "CashSpent": "La colonne Cash ne peut être tirée que trois fois au maximum dans toute la vie d'un Voyageur.",
         "NoFunds": "{name} ne peut pas payer {cost}, et les frais de création ne sont pas reportés en dette.",
@@ -1397,16 +1446,28 @@
         "CareerBorrowed": "Jetez sur les tables de {career}, sans y entrer.",
         "Borrowed": "{career} : {what}",
         "BorrowedMissing": "{career} n'est ni dans le monde ni dans un compendium : ses tables ne sont pas lancées.",
+        "PickThrow": "Quel jet ?",
+        "SubTableMissing": "Aucune table ne s'appelle {table}.",
+        "SkillExcepted": "{skill} ne peut pas être choisie ici.",
+        "NoSkillPicked": "Aucune compétence n'a été choisie : le jet de la ligne n'est pas fait.",
         "PickBorrowed": "Sur les tables de quelle carrière ?",
         "PickBorrowedTable": "Choisissez une table de compétences",
         "Pending": "En attente : {what}.",
         "TrayConditionTitle": "Cela s'applique-t-il ?",
         "TrayConditionAsk": "Cette ligne ne laisse {what} en attente que sur une branche : {detail}. L'appliquer ?",
+        "GateMet": "{gate} : remplie",
+        "GateUnmet": "{gate} : non remplie",
+        "TrackNoReroll": "{track} n'a pas de jet à refaire ; la ligne la laisse telle quelle.",
+        "TrackAtFloor": "{track} est déjà à son premier échelon.",
         "TrackMoved": "Déplacée par un événement",
         "TrackAdjusted": "{track} {dm} → {value}",
         "TrackReroll": "{track} relancée → {value}",
         "NoCommissionTarget": "Cette carrière comporte un Commandement mais aucun seuil n'a été saisi.",
         "CommissionFirstTerm": "Un Commandement ne peut être tenté que lors de la première période d'une carrière, à moins que {characteristic} ne soit de {n} ou plus.",
+        "EarlyCommissionAsk": "Le diplôme permet un jet de Commandement avant la première période de {career}. Le tenter maintenant ? La tentative est facultative.",
+        "EarlyCommissionLost": "{career} n'offre pas de Commandement : le jet que le diplôme permettait avant la première période est perdu.",
+        "EarlyCommissionFailed": "Le jet de Commandement avant la première période a échoué. La première période peut encore en tenter un.",
+        "EarlyCommissioned": "Commandement obtenu avant la première période : la carrière commence au rang 1 des officiers.",
         "CommissionAsk": "Tenter un Commandement cette période ? La tentative est facultative.",
         "CommissionLater": "Périodes suivant la première ({n})",
         "CommissionFailed": "Commandement échoué.",
@@ -1448,6 +1509,7 @@
         "LosePoints": "Perdre {n}",
         "AgeingNoRow": "La table de Vieillissement n'imprime aucune ligne pour {n} : le référent tranche.",
         "Aged": "Jet de Vieillissement {n} : {changes}",
+        "InjuryToZero": "Placées ainsi, les pertes font tomber {characteristics} à 0. Selon les règles de ce monde, le Voyageur meurt alors à moins de payer {price} de soins médicaux. Les appliquer ? Choisissez Non pour les placer autrement.",
         "AgeingCrisis": "Crise de vieillissement — une caractéristique est tombée à 0. Le Voyageur meurt à moins de payer 1D × Cr10000 de soins médicaux.",
         "AnagathicsBlocked": "Les anagathiques ne peuvent pas être utilisés dans cette carrière.",
         "AnagathicsAsk": "Commencer à prendre des anagathiques cette période ? Le jet est SOC 10+.",
@@ -1533,6 +1595,7 @@
         "NoFallback": "Aucune carrière toujours ouverte n'est dans le monde ou un compendium : déposez-en une sur ce Voyageur.",
         "PickFallback": "Quelle carrière toujours ouverte ?",
         "CheckOptional": "Saisir cette occasion ?",
+        "InjuredAssociate": "Un proche est blessé : {n} sur la table des Blessures.",
         "InjuryHow": "Comment cette ligne fait-elle un jet sur la table des Blessures ?",
         "InjuryOnce": "Une fois",
         "InjuryLower": "Deux fois, en gardant le plus bas",
@@ -1551,7 +1614,6 @@
         "CarePaid": "Soins médicaux : Cr{credits} pour le Voyageur ({share} % pris en charge).",
         "OneCareer": "{name} sert encore dans {career} : une carrière à la fois, quittez-la d'abord.",
         "TableNotCareer": "{career} est une table commune, pas une carrière : liez-la dans le réglage des tables de création communes.",
-        "InjuryNone": "Pas de blessure : cette branche de la ligne n'a pas été prise",
         "MinimumTerms": {
           "one": "{species} sert au moins {n} période dans une carrière avant d'en tenter une autre : quittez-la maintenant, et seule la fin de carrière suit.",
           "other": "{species} sert au moins {n} périodes dans une carrière avant d'en tenter une autre : quittez-la maintenant, et seule la fin de carrière suit."
@@ -1639,6 +1701,7 @@
         "AssignmentTable": "Compétences d'affectation",
         "TermDM": "Période {n}",
         "Closed": "{career} n'est plus accessible : l'éducation s'arrête à la période {n}.",
+        "Repeated": "{career} a déjà été suivie : une autre éducation peut suivre, mais pas deux fois la même.",
         "OneAttempt": "Une seule tentative d'éducation par période : {career} ne peut pas être retentée cette période.",
         "Refused": "Tentez une carrière cette période — à défaut, la conscription.",
         "Skills": "Éducation : {skills}",
@@ -5168,7 +5231,7 @@
       "Equipped": "Équipé",
       "Equipment": "Équipement",
       "Equipments": "Équipements",
-      "EventsMishaps": "Événements & Incidents",
+      "EventsMishaps": "Événements & Aléas",
       "Every": "intervalle",
       "Band": "Zone de portée",
       "FireControl": "Contrôle de tir",

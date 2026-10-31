@@ -384,7 +384,7 @@
       },
       "untrainedDMInCreation": {
         "name": "The untrained DM-3 applies during creation",
-        "hint": "A creation roll is 2D plus the named term's DM and nothing else — no characteristic DM, nothing from the equipment chapter. Whether the untrained penalty survives that exclusion is answered only by a designer's reply of 2018, which says it does."
+        "hint": "A creation roll is 2D plus the named term's DM and nothing else — no characteristic DM, nothing from the equipment chapter. Whether the untrained penalty survives that exclusion is answered only by a designer's reply of 2018, which says it does. Off by default: Core's 2022 printing says no later modifier applies during creation."
       },
       "skillCapBreach": {
         "name": "A skill grant past the cap degrades to level 0",
@@ -406,7 +406,7 @@
       },
       "creationInjuryToZero": {
         "name": "A creation injury to zero is an ageing crisis",
-        "hint": "An injury that takes a characteristic to 0 during creation has no printed outcome, where an ageing roll that does the same means death unless 1D x Cr10000 buys medical care. On, the injury borrows that rule. It can kill a Traveller mid-creation, so the price is always stated before the roll is applied."
+        "hint": "An injury that takes a characteristic to 0 during creation is not covered by the ageing rule, where an ageing roll that does the same means death unless 1D x Cr10000 buys medical care. On, the injury borrows that price for as long as the score stays at 0; care that restores it ends the crisis, where ageing's lasts for life. The price is stated before the losses are applied."
       },
       "speciesModifiersStack": {
         "name": "Species modifiers stack",
@@ -703,12 +703,46 @@
           "always": "{table}: always",
           "choice": "{table}: if taken",
           "checkPassed": "{table}: if passed",
+          "rolledTwo": "{table}: on a natural 2",
+          "accepted": "{table}: if accepted",
+          "refused": "{table}: if refused",
+          "gatePassed": "{table}: if the gate is met",
+          "gateFailed": "{table}: if the gate is not met",
           "checkFailed": "{table}: if failed"
         },
+        "SubTableHint": "Life Event, Unusual Event, Draft, Injury, Mishap (this career's own), or the name of a career template of kind Shared table.",
+        "EjectsCondition": "What earns the ejection",
+        "CareerCondition": "What earns the career",
+        "Injury": "Injury table",
+        "InjuryModes": "How the row rolls it: several are the player's pick, none selected is all four",
+        "InjuryTraveller": "The Traveller",
+        "InjuryAssociate": "An associate",
+        "SubTableCondition": "What earns the roll on the sub-table",
         "SubTable": "Sub-table",
         "SubCheck": "Sub-roll",
         "TrackMove": "Moves a track",
         "Reroll": "re-roll",
+        "RowGrant2": "What the row also grants",
+        "SkillPickNamed": "The skill named",
+        "SkillPickAny": "Any skill",
+        "SkillPickHeld": "A skill already held",
+        "SkillPickTerm": "A skill gained this term",
+        "SkillPickThrown": "The skill thrown",
+        "SkillPickHint": "The skill this grant gives: the one named, or one the player picks — any, one already held, one gained this term, or the one the row's throw was made on.",
+        "SkillExcept": "except, comma-separated",
+        "SkillFromTyped": "on the skills typed",
+        "SkillFromGranted": "on the skill the row granted",
+        "SkillFromTerm": "on a skill gained this term",
+        "SkillFromHint": "Which skill the throw is made on. The skill the row granted makes the grant come first, as \"Roll whichever skill you chose\" prints it.",
+        "CheckAssignmentHint": "An assignment: a Traveller in it makes this throw and no other, with no question; leave it blank for a throw anyone may make.",
+        "GateHint": "What the row reads off the Traveller, once, before it changes anything. Each consequence takes a side with \"Only if the row's gate is met\" or \"… is not met\"; a gate not met leaves the row's question unasked.",
+        "GateCharacteristic": "a characteristic",
+        "GateSex": "the sex",
+        "GateTrack": "a track",
+        "GateKey": "sex or track key",
+        "GateKeyHint": "The sex as the species spells it, or a track key: the career's own, else its species'. An enumerated track counts its rungs from 0.",
+        "GateMin": "min",
+        "GateMax": "max",
         "RowGrant": "What the row grants",
         "Awards": "Awards outright",
         "AwardOptional": "may be declined",
@@ -761,9 +795,9 @@
           "assignmentLadder": "the ladder each assignment names, against the ladders declared above",
           "officerLadder": "declared above, and marked officer",
           "exitTrack": "the track the exit rule reads, against the tracks declared above",
-          "rowTrack": "the track a row moves, against the tracks declared above"
+          "rowTrack": "the track a row moves or is gated on, against the tracks declared above; a shared table or a species career may name its species' tracks, which this sheet cannot see"
         },
-        "GrantFloor": "The floor of \"SOC 10 or SOC +1, whichever is higher\"; blank for none",
+        "GrantFloor": "With \"Raise by 1, but never below\": the floor of \"SOC 10 or SOC +1, whichever is higher\". With \"Add\" on a characteristic: the score a loss stops at, never raising one already below it. Blank for none",
         "Floor": "floor",
         "GrantRef": "other benefit",
         "GrantRelation": "The relationship a contact or a betrayal makes",
@@ -778,8 +812,12 @@
         "TrackCondition": "What earns the move",
         "AwardCondition": "What earns the award",
         "TrayEntryMode": "Entered as",
+        "CheckOr": "Or instead",
+        "CheckOrHint": "Another roll the Traveller may make instead, each with its own target. The player picks one, and the row's branches follow it.",
+        "CheckAlternative": "Other roll",
         "CheckSkills": "skills, comma-separated; the best is thrown",
         "RaisesSkill": "the skill thrown gains a level",
+        "GrantCondition": "What earns the grant",
         "GrantFirst": "before the throw"
       },
       "Frame": {
@@ -912,6 +950,7 @@
       "Ejection": {
         "ejects": "Leaves the career",
         "stays": "Stays in the career",
+        "mishap": "As the Mishap says",
         "choice": "The Traveller chooses"
       },
       "BenefitEffects": {
@@ -930,12 +969,18 @@
         "grant": "Grant",
         "careerOffer": "Career offered",
         "careerForce": "Career compelled",
+        "commissionRoll": "Commission roll before the first term",
         "careerBlock": "Career blocked"
       },
       "TrayConditions": {
         "always": "Always",
         "choice": "Only if the Traveller takes it",
         "checkPassed": "Only if the row's check passed",
+        "rolledTwo": "Only if the row's throw came up a natural 2",
+        "accepted": "Only if the Traveller accepts",
+        "refused": "Only if the Traveller refuses",
+        "gatePassed": "Only if the row's gate is met",
+        "gateFailed": "Only if the row's gate is not met",
         "checkFailed": "Only if the row's check failed"
       },
       "RowCareerModes": {
@@ -946,6 +991,7 @@
       "TrayDurations": {
         "oneShot": "Once",
         "thisCareer": "This career",
+        "nextTerm": "The next term only",
         "restOfCreation": "The rest of creation"
       },
       "TrayChecks": {
@@ -982,6 +1028,7 @@
         "raise": "Grant at 1, or raise by 1",
         "atLeast": "Only if it is higher",
         "add": "Add",
+        "set": "Set to",
         "floor": "Raise by 1, but never below"
       },
       "BenefitKinds": {
@@ -1138,6 +1185,8 @@
         "NeedsTwo": "A connection needs two Travellers on the roster."
       },
       "Muster": {
+        "PendingTitle": "DMs on this roll",
+        "PendingPick": "Each of these is for one Benefit roll. Tick those this roll uses; the others wait for a later one.",
         "Title": "Mustering out",
         "CashSpent": "The Cash column may be rolled at most three times in a Traveller's entire life.",
         "NoFunds": "{name} cannot pay {cost}, and creation costs are not carried into play as debt.",
@@ -1397,16 +1446,28 @@
         "CareerBorrowed": "Roll on {career}'s own tables, without entering it.",
         "Borrowed": "{career}: {what}",
         "BorrowedMissing": "{career} is in neither the world nor a compendium, so its tables are not rolled.",
+        "PickThrow": "Which roll?",
+        "SubTableMissing": "No table is named {table}.",
+        "SkillExcepted": "{skill} cannot be chosen here.",
+        "NoSkillPicked": "No skill was picked, so the row's throw is not made.",
         "PickBorrowed": "On which career's tables?",
         "PickBorrowedTable": "Pick a skill table",
         "Pending": "Pending: {what}.",
         "TrayConditionTitle": "Does this apply?",
         "TrayConditionAsk": "This row leaves {what} pending only on one branch: {detail}. Apply it?",
+        "GateMet": "{gate}: met",
+        "GateUnmet": "{gate}: not met",
+        "TrackNoReroll": "{track} has no roll to repeat; the row leaves it as it is.",
+        "TrackAtFloor": "{track} is already at its first rung.",
         "TrackMoved": "Moved by an event",
         "TrackAdjusted": "{track} {dm} → {value}",
         "TrackReroll": "{track} re-rolled → {value}",
         "NoCommissionTarget": "This career has a commission but no commission target entered.",
         "CommissionFirstTerm": "A commission may only be attempted in the first term of a career, unless {characteristic} is {n} or higher.",
+        "EarlyCommissionAsk": "Graduation allows a commission roll before the first term of {career}. Attempt it now? Trying for one is optional.",
+        "EarlyCommissionLost": "{career} offers no commission, so the commission roll graduation allowed before the first term is lost.",
+        "EarlyCommissionFailed": "The commission roll before the first term failed. The first term may still try for one.",
+        "EarlyCommissioned": "Commissioned before the first term: the career begins at officer rank 1.",
         "CommissionAsk": "Attempt a commission this term? Trying for one is optional.",
         "CommissionLater": "Terms after the first ({n})",
         "CommissionFailed": "Commission failed.",
@@ -1448,6 +1509,7 @@
         "LosePoints": "Lose {n}",
         "AgeingNoRow": "The Ageing table prints no row for {n}: the referee decides.",
         "Aged": "Ageing roll {n}: {changes}",
+        "InjuryToZero": "Placed this way, the losses take {characteristics} to 0. Under this world's rules the Traveller then dies unless {price} is paid for medical care. Apply them? Choose No to place them again.",
         "AgeingCrisis": "Ageing crisis — a characteristic has reached 0. The Traveller dies unless 1D × Cr10000 is paid for medical care.",
         "AnagathicsBlocked": "Anagathics may not be used in this career.",
         "AnagathicsAsk": "Start taking anagathics this term? The roll is SOC 10+.",
@@ -1533,6 +1595,7 @@
         "NoFallback": "No career that is always open is in the world or a compendium: drop one on this Traveller.",
         "PickFallback": "Which career that is always open?",
         "CheckOptional": "Take this chance?",
+        "InjuredAssociate": "An associate is injured: {n} on the Injury table.",
         "InjuryHow": "How does this row roll on the Injury table?",
         "InjuryOnce": "Once",
         "InjuryLower": "Twice, keeping the lower",
@@ -1551,7 +1614,6 @@
         "CarePaid": "Medical care: Cr{credits} for the Traveller ({share}% covered).",
         "OneCareer": "{name} is still serving in {career}: one career at a time, so leave it first.",
         "TableNotCareer": "{career} is a shared table, not a career: link it in the shared creation tables setting.",
-        "InjuryNone": "No injury: this branch of the row was not taken",
         "MinimumTerms": {
           "one": "{species} serves at least {n} term in a career before attempting another: leave now, and only mustering out follows.",
           "other": "{species} serves at least {n} terms in a career before attempting another: leave now, and only mustering out follows."
@@ -1639,6 +1701,7 @@
         "AssignmentTable": "Assignment skills",
         "TermDM": "Term {n}",
         "Closed": "{career} is no longer open: education ends with term {n}.",
+        "Repeated": "{career} has already been attended: another education may follow, but not the same one twice.",
         "OneAttempt": "One attempt at education a term: {career} cannot be tried again this term.",
         "Refused": "Attempt a career this term — failing that, the draft.",
         "Skills": "Education: {skills}",

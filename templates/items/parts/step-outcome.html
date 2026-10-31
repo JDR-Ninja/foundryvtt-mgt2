@@ -5,7 +5,7 @@
 	<span class="nlbl">{{localize label}}</span>
 	<div class="trayrow">
 		<select class="f" name="system.{{path}}.ejects" data-tooltip="{{localize 'MGT2.Chargen.Frame.CheckEjects'}}">
-			{{selectOptions @root.config.EjectionOutcomes selected=outcome.ejects localize=true}}
+			{{selectOptions @root.config.StepEjectionOutcomes selected=outcome.ejects localize=true}}
 		</select>
 		<select class="f" name="system.{{path}}.outcomes" multiple size="3" data-tooltip="{{localize 'MGT2.Chargen.Template.Awards'}}">
 			{{selectOptions @root.config.TermOutcomes selected=outcome.outcomes localize=true}}

@@ -8,6 +8,185 @@
 
 ---
 
+## [0.2.7]
+
+**Verificado en Foundry VTT 14.369.**
+
+**La creación, releída por tercera vez a partir de las filas que imprimen los libros.** Una nueva
+auditoría partió de las tablas de Sucesos y de Percances de los libros y no del código. Encontró un
+periodo que no se cerraba tras una expulsión, una decena de defectos más, y más de un centenar de
+filas que el formulario de carrera no sabía recoger: una elección con dos salidas, un 2 natural, una
+habilidad a elección, una consecuencia que depende del SOC o del sexo del Viajero. Ahora se pueden
+escribir ([#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). El sistema sigue sin traer
+ninguna carrera: hace funcionar las que el árbitro escribe o importa.
+
+### ⚠ Cambios que rompen
+
+* **El MD-3 por falta de entrenamiento ya no se aplica durante la creación, salvo que lo pidas**
+  (Core p.11). La edición 2022 del libro deja fuera de la creación todo modificador de los capítulos
+  posteriores; la regla *El MD-3 por falta de entrenamiento se aplica durante la creación*, que seguía
+  una respuesta de 2018, queda por tanto desactivada por defecto. Un mundo que nunca la había tocado
+  juega ahora sin ella: para conservarla, reactívala en *Reglas opcionales y variantes*.
+* **Un Percance tirado desde un Suceso expulsa cuando lo dice** (Core p.18: un Percance expulsa salvo
+  que se indique lo contrario). Una fila de Sucesos que remite a los Percances puede dejar que el
+  Percance decida: *Como diga el Percance*, en su menú *Expulsa*. Una fila añadida a una tabla de
+  Sucesos empieza con esa opción. **Las filas ya escritas no cambian**: en *Sigue en la carrera*, el
+  Percance que tiran sigue sin expulsar. Pasa a *Como diga el Percance* las que no imprimen «no eres
+  expulsado», como el Suceso 3 del Agente, el 8 del Artista y el 8 del Noble.
+* **El menú de Lesiones ya no ofrece *Sin lesión*** (Core p.49). Servía para apartar la tabla en la
+  rama que una fila no tomaba; ahora lo hace *Qué activa la tirada en la subtabla*. **Una fila ya
+  escrita que solo lesiona en una rama**, un fallo por ejemplo, tira ahora las Lesiones cada vez: dale
+  esa condición.
+* **Una lesión de creación que lleva una característica a 0 ya no es una crisis para toda la vida**
+  (Core p.49), con la regla *Una lesión de creación que llega a cero es una crisis de envejecimiento*,
+  activada por defecto. La crisis solo dura mientras la característica sigue en 0: los cuidados que la
+  restablecen le ponen fin. Antes de que se apliquen las pérdidas, el jugador ve el precio de los
+  cuidados y puede repartirlas de otro modo. Una pérdida por envejecimiento a 0 sigue siendo una
+  crisis para toda la vida.
+* **La misma educación no se cursa dos veces** (Core p.16): otra puede seguir a la primera, pero la
+  ya cursada se rechaza.
+* **Un 12 natural en la Progresión ya no retiene a un Viajero al que un Suceso impide reengancharse o
+  envía a otra carrera** (Core p.18; p.45, Suceso 3 del Explorador): solo puede irse, y la carrera se
+  cierra. El 12 solo lo obliga a quedarse frente a su propia decisión de irse. Una interpretación: el
+  libro imprime las dos reglas sin decir cuál prevalece.
+* **Un Percance que expulsa cuesta la tirada de Beneficio del periodo, venga de donde venga** (Core
+  p.18; p.23, Percance 2 del Agente). Hasta ahora solo la costaba una Supervivencia fallida. Un Suceso
+  que expulsa sin pasar por un Percance conserva la tirada. Una interpretación.
+* **Un efecto sobre las tiradas de Beneficio encontrado durante una educación pasa a la primera
+  carrera que la sigue**, ganancia o pérdida, como los MD de la graduación (Core p.16). Se perdía con
+  la educación, que no tiene tirada de Beneficio. Una interpretación.
+
+### Filas de Sucesos y de Percances
+
+El formulario de carrera recoge ahora lo que imprimen estas filas. Una fila ya escrita se juega como
+antes, salvo lo que dicen los cambios que rompen de arriba.
+
+* **Dos tiradas a elegir, cada una con su dificultad** (Core p.45, Suceso 3 del Explorador;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)): el bloque *O en su lugar* añade una
+  *Otra tirada*, con sus habilidades y su dificultad. El jugador elige cuál intentar, y las ramas de la
+  fila siguen la tirada hecha.
+* **Cada consecuencia de una fila toma su rama** (Core p.23, p.45;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)): *Qué activa lo que concede la línea*,
+  *Qué activa la tirada en la subtabla*, *Qué activa la salida de la carrera* y *Qué activa la
+  carrera* se suman a las condiciones que ya tenían las tiradas de Beneficio, el contador y las
+  entradas pendientes. La salida y la carrera impuesta se deciden ahora después de la tirada, y una
+  concesión hecha *antes de la tirada* pero ligada a una rama espera a la tirada. Una fila ya escrita
+  se queda en *Siempre*.
+* **Un 2 natural** (Core p.23, Percance 3 del Agente; p.35, Suceso 8 del Mercader): *Solo si la tirada
+  de la línea saca un 2 natural*. Una fila que imprime «tira 2D» sin habilidad se escribe con una
+  dificultad sola.
+* **«Si aceptas… si te niegas…»: una sola pregunta por fila** (Core p.46, Suceso Vital 11; p.57,
+  Suceso 3 del Prisionero). *Solo si el Viajero acepta* y *Solo si el Viajero se niega* leen una sola
+  respuesta, pedida una vez antes de la tirada; una negativa no hace la tirada. *Solo si el Viajero lo
+  toma* sigue siendo una pregunta por consecuencia.
+* **La fila dice cómo tira las Lesiones, y quién resulta herido** (Core p.49; p.23, Percances 2 y 5 del
+  Agente): *Una vez*, *Dos veces, quedándose con la menor*, *Dos veces, quedándose con la mayor*,
+  *Gravemente herido (un resultado de 2)*. Un solo modo no pregunta nada, varios quedan a elección del
+  jugador, ninguno los ofrece todos. *Un allegado* resulta herido sin que el Viajero pierda nada.
+* **Una habilidad a elección** (Core p.17, p.23, p.25, p.57): una concesión de habilidad puede dejar
+  elegir al jugador —*Cualquier habilidad*, *Una habilidad que ya tiene*, *Una habilidad obtenida
+  este periodo*, *La habilidad tirada*— salvo las que lista *excepto, separadas por comas*, como
+  Jack-of-all-Trades. *Cualquier habilidad* sugiere las del Viajero, las del mundo y las de los
+  compendios, y acepta un nombre que no está en la lista.
+* **Una segunda concesión, con su propia condición** (Core p.17, Suceso previo a la carrera 4; p.31,
+  Suceso 3 del Artista; p.45, Suceso 3 del Explorador): *Lo que la línea también concede*, para una
+  fila que da una cosa en cada rama.
+* **Una tirada con la habilidad que la fila acaba de conceder** (Core p.17, Suceso previo a la carrera
+  10; p.27, Suceso 3 del Ciudadano): *con la habilidad que concedió la línea* o *con una habilidad
+  obtenida este periodo*.
+* **Una tirada propia de un destino** (Core p.37, Percance 3 de la Armada): el campo *Destino* de una
+  tirada. Un Viajero en ese destino hace esa tirada sin que se le pregunte, y no se le ofrecen las de
+  los otros destinos.
+* **Una fila condicionada al estado del Viajero** (Aliens of Charted Space 1 p.45, p.137, p.259):
+  *Condicionada a* una característica entre dos límites, un sexo o un escalón de contador. Cada
+  consecuencia toma un lado, *Solo si se cumple la condición de la línea* o *Solo si no se cumple la
+  condición de la línea*, y el diario del periodo dice cuál. La condición se lee una vez, antes de que
+  la fila cambie nada, así que la pérdida de SOC que impone no la hace cambiar de lado. Una condición
+  que no se cumple no plantea la pregunta de la fila ni hace su tirada opcional, y un Viajero sin sexo
+  registrado no cumple ninguna condición de sexo. Tres interpretaciones.
+* **Una fila mueve un contador de la especie**, como el grado de los K'kree (Aliens of Charted Space 1
+  p.131-137), y ya no solo el de la carrera.
+* **Una característica fijada, o una pérdida detenida en un mínimo** (Aliens of Charted Space 1 p.23,
+  p.274): el modo *Fijar en* da a la característica el valor escrito, en un sentido o en el otro, ya
+  que un Aslan convertido en Paria tiene SOC 2 aunque estuviera más bajo. La casilla *mínimo* aparece
+  también con *Sumar*, donde detiene una pérdida sin subir nunca un valor que ya está por debajo. Dos
+  interpretaciones.
+* **Una entrada pendiente solo para el periodo siguiente** (Core p.46, Suceso insólito 1): *Solo el
+  periodo siguiente* desaparece cuando se cierra el periodo que sigue.
+
+### Tablas compartidas
+
+* **Una fila puede tirar una tabla propia de la carrera** (Core p.57, el Suceso de prisión del
+  Prisionero; [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)): el campo *Subtabla* acepta
+  el nombre de una carrera del tipo *Tabla compartida*, tirada con 1D si sus filas se detienen en 6, y
+  si no con 2D. Un nombre que ninguna tabla lleva muestra un aviso y una línea en el diario; antes no
+  hacía nada, o tiraba los Sucesos Vitales en su lugar.
+
+### Educación previa a la carrera
+
+* **La tirada de Comisión que permite la graduación se hace antes del primer periodo** (Core p.16-17;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). Una nueva entrada pendiente, *Tirada
+  de comisión antes del primer periodo*, se pone en la rama *Graduado* con el alcance *La primera
+  carrera tras graduarse*. Al entrar en esa carrera, el jugador puede intentarla: superada, el Viajero
+  empieza en el rango de oficial 1, con su bonificación, y la Progresión del periodo sigue abierta.
+  Fallada o rechazada, el primer periodo conserva su propia tirada de Comisión, y un oficial que entra
+  así no recibe la bonificación del rango 0 de tropa: dos interpretaciones. **Una educación ya escrita
+  no cambia**: su MD y su éxito automático esperan a la tirada del primer periodo; para seguir el
+  libro, añade la entrada a su rama *Graduado*.
+* **Lo que deja la graduación termina con la primera carrera** (Core p.16): una carrera ofrecida,
+  impuesta o desbloqueada por la graduación desaparece en cuanto el Viajero entra en una carrera. Un
+  graduado de academia que entraba primero en la Armada conservaba la entrada directa en el Ejército.
+
+### Psiónica
+
+* **Un talento recibido en la instrucción básica es una prueba para aprenderlo** (Core p.229), como en
+  una tabla de habilidades; antes se concedía a nivel 0.
+* **La Telepatía solo es gratuita como primerísimo talento** (Core p.228): una nueva formación ya no
+  la vuelve gratuita.
+
+### Licenciamiento
+
+* **Las tiradas de Beneficio adicionales por rango leen el rango más alto alcanzado** (Core p.46),
+  rango de tropa incluido: un sargento de rango 4 que obtuvo una comisión ya no se licencia con su
+  rango de oficial 1. Dos carreras que comparten un escalafón ya no comparten su rango más alto.
+* **Varios MD de Beneficio de un solo uso pendientes: la tirada pregunta cuáles usa** (Core p.46). La
+  ventana *MD en esta tirada* los marca todos por defecto; los que se desmarcan esperan a una tirada
+  posterior.
+* **Una tirada de Beneficio descartada en la pantalla de cierre** ya no deja pendiente su elección de
+  MD.
+
+### Documentación
+
+* **El diario de auditoría de reglas** (`mgt2.docs`) describe la creación tal como es ahora, y dice
+  cuáles de sus puntos son interpretaciones.
+
+### Correcciones
+
+* ⚠ **Un periodo terminado por una expulsión no se cerraba** (Core p.11, p.18). Tras un Percance que
+  expulsa, la tirada de habilidad que conserva la regla *Un Viajero expulsado conserva la tirada de
+  habilidad del periodo* se rechazaba, y el periodo quedaba abierto: ningún periodo servido, cuatro
+  años menos de edad, y todo lo que cuenta periodos, del envejecimiento a la PSI y la pensión, igual
+  de corto. El periodo se cierra ahora con sus cuatro años. **Un Viajero ya creado no se corrige**: si
+  fue expulsado durante su creación, revisa su edad y sus periodos.
+* **Un nombre de habilidad se reconoce separe como separe sus palabras**
+  ([#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)): «Jack of all Trades» es
+  Jack-of-all-Trades. Escrito así, conservaba el MD-3 por falta de entrenamiento, se ofrecía como una
+  tirada normal, el entrenamiento no lo excluía, y una concesión de creación creaba un segundo objeto
+  a su lado.
+* **Una habilidad escrita con su especialidad**, «Pilot (spacecraft)», se coloca bajo Pilot con su
+  especialidad, en vez de convertirse en una habilidad aparte (Core p.19).
+* **Cambiar de destino repite la cualificación con sus MD** (Core p.20): el MD de edad, el de carrera
+  anterior, los MD condicionales y los de la especie, que faltaban.
+* **Un MD de Progresión trasladado a la tirada de comisión, o un éxito automático, podía retirar
+  otra entrada que se le pareciera**, como el MD de Beneficio de otra carrera (Core p.19). Cada uno
+  retira ahora exactamente la entrada que usó.
+* **Un paso hecho sin carrera en curso**, como los anagáticos al principio de un periodo, ya no se
+  repite (Core p.49).
+* **Una fila de tabla compartida tirada desde un Percance que no expulsa** ya no puede expulsar (Core
+  p.23).
+
+---
+
 ## [0.2.6]
 
 **Verificado en Foundry VTT 14.369.**

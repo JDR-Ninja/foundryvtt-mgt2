@@ -4,6 +4,186 @@
 
 ---
 
+## [0.2.7]
+
+**Vérifié sur Foundry VTT 14.369.**
+
+**La création relue une troisième fois, à partir des lignes que les livres impriment.** Un nouvel
+audit est parti des tables d'Événements et d'Aléas des livres plutôt que du code. Il a trouvé une
+période qui ne se fermait pas après une éjection, une dizaine d'autres défauts, et plus d'une centaine
+de lignes que le formulaire de carrière ne savait pas saisir : un choix à deux issues, un 2 naturel,
+une compétence au choix, une conséquence qui dépend du SOC ou du sexe du Voyageur. Elles se saisissent
+maintenant ([#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). Le système ne livre
+toujours aucune carrière : il fait tourner celles que l'arbitre saisit ou importe.
+
+### ⚠ Ruptures
+
+* **Le MD-3 de non-formé ne s'applique plus pendant la création, sauf si vous le demandez** (Core
+  p.11). L'édition 2022 du livre écarte de la création tout modificateur venu des chapitres suivants ;
+  la règle *Le MD-3 de non-formé s'applique pendant la création*, qui suivait une réponse de 2018,
+  est donc désactivée par défaut. Un monde qui ne l'avait jamais modifiée joue désormais sans : pour
+  la garder, réactivez-la dans *Règles optionnelles et variantes*.
+* **Un Aléa tiré depuis un Événement fait quitter la carrière quand il le dit** (Core p.18 : un Aléa
+  éjecte, sauf indication contraire). Une ligne d'Événement qui renvoie aux Aléas peut laisser l'Aléa
+  en décider : *Comme le dit l'Aléa*, dans son menu *Éjecte*. Une ligne ajoutée à une table
+  d'Événements part sur ce choix. **Les lignes déjà saisies ne changent pas** : à *Reste dans la
+  carrière*, l'Aléa qu'elles tirent n'éjecte toujours pas. Passez à *Comme le dit l'Aléa* celles
+  qui n'impriment pas « vous n'êtes pas éjecté », comme les Événements 3 de l'Agent, 8 du Média et 8
+  du Noble.
+* **Le menu des Blessures ne propose plus *Pas de blessure*** (Core p.49). Il servait à écarter la
+  table sur la branche qu'une ligne ne prenait pas ; c'est maintenant le rôle de *Ce qui déclenche le
+  jet sur la sous-table*. **Une ligne déjà saisie qui ne blesse que sur une branche**, un échec par
+  exemple, tire désormais les Blessures à chaque fois : donnez-lui cette condition.
+* **Une blessure de création qui mène une caractéristique à 0 n'est plus une crise pour la vie**
+  (Core p.49), sous la règle *Une blessure de création à zéro est une crise de vieillissement*,
+  activée par défaut. La crise ne dure que tant que la caractéristique reste à 0 : les soins qui la
+  rétablissent y mettent fin. Avant que les pertes s'appliquent, le joueur voit le prix des soins et
+  peut les placer autrement. Une perte de vieillissement à 0 reste une crise pour la vie.
+* **La même éducation ne se suit pas deux fois** (Core p.16) : une autre peut suivre la première,
+  mais celle déjà suivie est refusée.
+* **Un 12 naturel à l'Avancement ne retient plus un Voyageur qu'un Événement empêche de se réengager
+  ou envoie dans une autre carrière** (Core p.18 ; p.45, Événement 3 de l'Éclaireur) : il ne peut que
+  partir, et la carrière se ferme. Le 12 ne l'oblige à rester que contre son propre choix de partir.
+  Une interprétation : le livre imprime les deux règles sans dire laquelle l'emporte.
+* **Un Aléa qui fait quitter la carrière coûte le jet d'Avantage de la période, d'où qu'il vienne**
+  (Core p.18 ; p.23, Aléa 2 de l'Agent). Seul un échec de Survie le coûtait jusqu'ici. Un Événement
+  qui éjecte sans passer par un Aléa garde le jet. Une interprétation.
+* **Un effet sur les jets d'Avantage rencontré pendant une éducation passe à la première carrière qui
+  suit**, gain comme perte, comme les MD du diplôme (Core p.16). Il se perdait avec l'éducation, qui
+  n'a pas de jet d'Avantage. Une interprétation.
+
+### Lignes d'Événement et d'Aléa
+
+Le formulaire de carrière saisit maintenant ce que ces lignes impriment. Une ligne déjà saisie se joue
+comme avant, sauf ce que disent les ruptures ci-dessus.
+
+* **Deux jets au choix, chacun à sa difficulté** (Core p.45, Événement 3 de l'Éclaireur ;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)) : le bloc *Ou à la place* ajoute un
+  *Autre jet*, avec ses compétences et sa difficulté. Le joueur choisit lequel tenter, et les branches
+  de la ligne suivent le jet fait.
+* **Chaque conséquence d'une ligne prend sa branche** (Core p.23, p.45 ;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)) : *Ce qui déclenche ce que la ligne
+  accorde*, *Ce qui déclenche le jet sur la sous-table*, *Ce qui déclenche le départ de la carrière*
+  et *Ce qui déclenche la carrière* rejoignent les conditions qu'avaient déjà les jets d'Avantage, la
+  piste et les entrées en attente. Le départ et la carrière imposée se décident désormais après le
+  jet, et une attribution faite *avant le jet* mais liée à une branche attend le jet. Une ligne déjà
+  saisie reste sur *Toujours*.
+* **Un 2 naturel** (Core p.23, Aléa 3 de l'Agent ; p.35, Événement 8 du Marchand) : *Seulement si le
+  jet de la ligne fait un 2 naturel*. Une ligne qui imprime « lancez 2D » sans compétence se saisit
+  avec une difficulté seule.
+* **« Si vous acceptez… si vous refusez… » : une seule question par ligne** (Core p.46, Événement de
+  la vie 11 ; p.57, Événement 3 du Prisonnier). *Seulement si le Voyageur accepte* et *Seulement si
+  le Voyageur refuse* lisent une seule réponse, demandée une fois avant le jet ; un refus ne fait pas
+  le jet. *Seulement si le Voyageur la prend* reste une question par conséquence.
+* **La ligne dit comment elle tire les Blessures, et qui est blessé** (Core p.49 ; p.23, Aléas 2 et 5
+  de l'Agent) : *Une fois*, *Deux fois, en gardant le plus bas*, *Deux fois, en gardant le plus
+  haut*, *Gravement blessé (un résultat de 2)*. Un seul mode ne demande rien, plusieurs laissent le
+  choix au joueur, aucun les propose tous. *Un proche* est blessé sans que le Voyageur perde rien.
+* **Une compétence au choix** (Core p.17, p.23, p.25, p.57) : une attribution de compétence peut
+  laisser le joueur choisir — *N'importe quelle compétence*, *Une compétence déjà possédée*, *Une
+  compétence acquise cette période*, *La compétence jetée* — sauf celles que liste *sauf, séparées
+  par des virgules*, comme Jack-of-all-Trades. *N'importe quelle compétence* propose celles du
+  Voyageur, du monde et des compendiums, et accepte un nom absent de la liste.
+* **Une seconde attribution, avec sa propre condition** (Core p.17, Événement de pré-carrière 4 ;
+  p.31, Événement 3 du Média ; p.45, Événement 3 de l'Éclaireur) : *Ce que la ligne accorde aussi*,
+  pour une ligne qui donne une chose sur chaque branche.
+* **Un jet sur la compétence que la ligne vient d'accorder** (Core p.17, Événement de pré-carrière
+  10 ; p.27, Événement 3 du Citoyen) : *sur la compétence accordée par la ligne* ou *sur une
+  compétence acquise cette période*.
+* **Un jet propre à une affectation** (Core p.37, Aléa 3 de la Marine spatiale) : le champ
+  *Affectation* d'un jet. Un Voyageur dans cette affectation fait ce jet sans qu'on le lui demande, et
+  les jets des autres affectations ne lui sont pas proposés.
+* **Une ligne conditionnée à l'état du Voyageur** (Aliens of Charted Space 1 p.45, p.137, p.259) :
+  *Conditionnée à* une caractéristique entre deux bornes, un sexe ou un échelon de piste. Chaque
+  conséquence prend un côté, *Seulement si la condition de la ligne est remplie* ou *Seulement si la
+  condition de la ligne n'est pas remplie*, et le journal de la période dit lequel. La condition se lit
+  une fois, avant que la ligne ne change quoi que ce soit, si bien que la perte de SOC qu'elle impose
+  ne la fait pas basculer. Une condition non remplie ne pose pas la question de la ligne et ne fait
+  pas son jet facultatif, et un Voyageur sans sexe enregistré ne remplit aucune condition de sexe.
+  Trois interprétations.
+* **Une ligne déplace une piste de l'espèce**, comme le degré des K'kree (Aliens of Charted Space 1
+  p.131-137), et plus seulement celle de la carrière.
+* **Une caractéristique fixée, ou une perte arrêtée à un minimum** (Aliens of Charted Space 1 p.23,
+  p.274) : le mode *Fixer à* donne à la caractéristique la valeur saisie, dans un sens comme dans
+  l'autre, puisqu'un Aslan devenu Paria a SOC 2 même s'il était plus bas. La case *plancher* apparaît
+  aussi avec *Ajouter*, où elle arrête une perte sans jamais relever une valeur déjà plus basse. Deux
+  interprétations.
+* **Une entrée en attente pour la période suivante seulement** (Core p.46, Événement inhabituel 1) :
+  *La période suivante seulement* disparaît quand la période qui suit se ferme.
+
+### Tables communes
+
+* **Une ligne peut tirer une table propre à la carrière** (Core p.57, l'Événement de prison du
+  Prisonnier ; [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)) : le champ *Sous-table*
+  accepte le nom d'une carrière du type *Table commune*, tirée sur 1D si ses lignes s'arrêtent à 6,
+  sinon sur 2D. Un nom qu'aucune table ne porte affiche un avertissement et une ligne au journal ; il
+  ne faisait rien, ou tirait les Événements de la vie à la place.
+
+### Éducation pré-carrière
+
+* **Le jet de Commandement que permet le diplôme se fait avant la première période** (Core p.16-17 ;
+  [#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)). Une nouvelle entrée en attente, *Jet
+  de Commandement avant la première période*, se pose sur la branche *Diplômé* avec la portée *La
+  première carrière après le diplôme*. En entrant dans cette carrière, le joueur peut le tenter :
+  réussi, le Voyageur commence au rang d'officier 1, avec son bonus, et l'Avancement de la période
+  reste ouvert. Raté ou refusé, la première période garde son propre jet de Commandement, et un
+  officier entré ainsi ne touche pas le bonus du rang 0 enrôlé : deux interprétations. **Une éducation
+  déjà saisie ne change pas** : son MD et sa réussite automatique attendent le jet de la première
+  période ; pour suivre le livre, ajoutez l'entrée à sa branche *Diplômé*.
+* **Ce que le diplôme laisse s'arrête à la première carrière** (Core p.16) : une carrière proposée,
+  imposée ou débloquée par le diplôme disparaît dès que le Voyageur entre dans une carrière. Un
+  diplômé d'académie entré d'abord dans la Marine spatiale gardait l'entrée d'office dans l'Armée.
+
+### Psionique
+
+* **Un talent reçu en formation de base est un test pour l'apprendre** (Core p.229), comme sur une
+  table de compétences ; il était donné au niveau 0.
+* **La Télépathie n'est gratuite que comme tout premier talent** (Core p.228) : une nouvelle
+  formation ne la rend plus gratuite à nouveau.
+
+### Fin de carrière
+
+* **Les jets d'Avantage supplémentaires dus au rang lisent le rang le plus élevé atteint** (Core
+  p.46), rang enrôlé compris : un sergent de rang 4 devenu officier ne finit plus sur son rang
+  d'officier 1. Deux carrières qui partagent une échelle de rangs ne partagent plus leur plus haut
+  rang.
+* **Plusieurs MD d'Avantage à usage unique en attente : le jet demande lesquels il utilise** (Core
+  p.46). La fenêtre *MD sur ce jet* les coche tous par défaut ; ceux qu'on décoche attendent un jet
+  suivant.
+* **Un jet d'Avantage abandonné sur l'écran de clôture** ne laisse plus son choix de MD en suspens.
+
+### Documentation
+
+* **Le journal d'audit des règles** (`mgt2.docs`) décrit la création telle qu'elle est maintenant, et
+  dit lesquels de ses points sont des interprétations.
+
+### Correctifs
+
+* ⚠ **Une période terminée par une éjection ne se fermait pas** (Core p.11, p.18). Après un Aléa qui
+  fait quitter la carrière, le jet de compétence que garde la règle *Un Voyageur éjecté garde le jet
+  de compétence de la période* était refusé, et la période restait ouverte : aucune période servie,
+  quatre ans d'âge en moins, et tout ce qui compte les périodes, du vieillissement à la PSI et à la
+  pension, à l'avenant. La période se ferme maintenant avec ses quatre ans. **Un Voyageur déjà créé
+  n'est pas corrigé** : s'il a été éjecté pendant sa création, vérifiez son âge et ses périodes.
+* **Un nom de compétence se reconnaît quelle que soit la façon d'en séparer les mots**
+  ([#7](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/7)) : « Jack of all Trades » est
+  Jack-of-all-Trades. Écrit ainsi, il gardait le MD-3 de non-formé, était proposé comme un jet
+  ordinaire, la formation ne l'excluait pas, et une attribution de création créait un second objet à
+  côté.
+* **Une compétence saisie avec sa spécialité**, « Pilot (spacecraft) », se range sous Pilot avec sa
+  spécialité, au lieu de devenir une compétence distincte (Core p.19).
+* **Changer d'affectation relance la qualification avec ses MD** (Core p.20) : le MD d'âge, celui par
+  carrière précédente, les MD conditionnels et ceux de l'espèce, qui manquaient.
+* **Un MD d'Avancement reporté sur le jet de Commandement, ou une réussite automatique, pouvait
+  retirer une autre entrée qui lui ressemblait**, comme le MD d'Avantage d'une autre carrière (Core
+  p.19). Chacun retire désormais exactement l'entrée qu'il a utilisée.
+* **Une étape jouée sans carrière en cours**, comme les anagathiques en début de période, ne se rejoue
+  plus (Core p.49).
+* **Une ligne de table commune tirée depuis un Aléa qui n'éjecte pas** ne peut plus faire quitter la
+  carrière (Core p.23).
+
+---
+
 ## [0.2.6]
 
 **Vérifié sur Foundry VTT 14.369.**

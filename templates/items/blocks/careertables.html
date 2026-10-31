@@ -178,6 +178,7 @@
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Template.Ejects'}}</span>
 					<select class="f" name="system.{{et.key}}.{{r}}.ejects">{{selectOptions @root.config.EjectionOutcomes selected=row.ejects localize=true}}</select>
+					<select class="f" name="system.{{et.key}}.{{r}}.ejectsCondition" data-tooltip="{{localize 'MGT2.Chargen.Template.EjectsCondition'}}">{{selectOptions @root.config.TrayConditions selected=row.ejectsCondition localize=true}}</select>
 				</label>
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Template.BenefitEffect'}}</span>
@@ -195,6 +196,7 @@
 					<span class="lbl">{{localize 'MGT2.Chargen.Template.OtherCareer'}}</span>
 					<input class="f" type="text" name="system.{{et.key}}.{{r}}.career" value="{{row.career}}" data-tooltip="{{localize 'MGT2.Chargen.Template.OtherCareerHint'}}" />
 					<select class="f" name="system.{{et.key}}.{{r}}.careerMode">{{selectOptions @root.config.RowCareerModes selected=row.careerMode localize=true}}</select>
+					<select class="f" name="system.{{et.key}}.{{r}}.careerCondition" data-tooltip="{{localize 'MGT2.Chargen.Template.CareerCondition'}}">{{selectOptions @root.config.TrayConditions selected=row.careerCondition localize=true}}</select>
 					<input class="f" type="text" name="system.{{et.key}}.{{r}}.careerAssignment" value="{{row.careerAssignment}}" placeholder="{{localize 'MGT2.Chargen.Template.CareerAssignment'}}" />
 				</label>
 				{{! Drawn for every row, and shown for a borrowing one: a leaf the form leaves out is reset by the next save. }}
@@ -209,7 +211,27 @@
 				</label>
 				<label>
 					<span class="lbl">{{localize 'MGT2.Chargen.Template.SubTable'}}</span>
-					<input class="f" type="text" name="system.{{et.key}}.{{r}}.subTable" value="{{row.subTable}}" />
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.subTable" value="{{row.subTable}}" data-tooltip="{{localize 'MGT2.Chargen.Template.SubTableHint'}}" />
+					<select class="f" name="system.{{et.key}}.{{r}}.subTableCondition" data-tooltip="{{localize 'MGT2.Chargen.Template.SubTableCondition'}}">{{selectOptions @root.config.TrayConditions selected=row.subTableCondition localize=true}}</select>
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Chargen.Template.Injury'}}</span>
+					<select class="f" name="system.{{et.key}}.{{r}}.injury.modes" multiple size="2" data-tooltip="{{localize 'MGT2.Chargen.Template.InjuryModes'}}">{{selectOptions @root.config.InjuryModes selected=row.injury.modes localize=true}}</select>
+					<select class="f" name="system.{{et.key}}.{{r}}.injury.who">{{selectOptions @root.config.InjuryTargets selected=row.injury.who localize=true}}</select>
+				</label>
+				<label class="gate" data-gate="{{row.gate.kind}}">
+					<span class="lbl">{{localize 'MGT2.Chargen.Template.Gate'}}</span>
+					<select class="f whole" name="system.{{et.key}}.{{r}}.gate.kind" data-tooltip="{{localize 'MGT2.Chargen.Template.GateHint'}}">
+						<option value="">&mdash;</option>
+						{{selectOptions @root.config.RowGateKinds selected=row.gate.kind localize=true}}
+					</select>
+					<select class="f g-characteristic" name="system.{{et.key}}.{{r}}.gate.characteristic">
+						<option value="">&mdash;</option>
+						{{selectOptions @root.config.Characteristics selected=row.gate.characteristic localize=true}}
+					</select>
+					<input class="f g-key" type="text" name="system.{{et.key}}.{{r}}.gate.key" value="{{row.gate.key}}" placeholder="{{localize 'MGT2.Chargen.Template.GateKey'}}" data-tooltip="{{localize 'MGT2.Chargen.Template.GateKeyHint'}}" />
+					<input class="f num g-min" type="number" step="1" name="system.{{et.key}}.{{r}}.gate.min" value="{{row.gate.min}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Template.GateMin'}}" />
+					<input class="f num g-max" type="number" step="1" name="system.{{et.key}}.{{r}}.gate.max" value="{{row.gate.max}}" data-dtype="Number" placeholder="{{localize 'MGT2.Chargen.Template.GateMax'}}" />
 				</label>
 			</div>
 			<div class="pfields edit-only">
@@ -223,6 +245,11 @@
 					</select>
 					<input class="f" type="text" name="system.{{et.key}}.{{r}}.check.skills" value="{{row.check.skills}}" placeholder="{{localize 'MGT2.Chargen.Template.CheckSkills'}}" />
 					<input class="f num" type="number" step="1" name="system.{{et.key}}.{{r}}.check.target" value="{{row.check.target}}" data-dtype="Number" />
+					<select class="f whole" name="system.{{et.key}}.{{r}}.check.skillFrom" data-tooltip="{{localize 'MGT2.Chargen.Template.SkillFromHint'}}">
+						<option value="">{{localize 'MGT2.Chargen.Template.SkillFromTyped'}}</option>
+						{{selectOptions @root.config.ThrowSkillSources selected=row.check.skillFrom localize=true}}
+					</select>
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.check.assignment" value="{{row.check.assignment}}" placeholder="{{localize 'MGT2.Chargen.Template.CareerAssignment'}}" data-tooltip="{{localize 'MGT2.Chargen.Template.CheckAssignmentHint'}}" />
 					<label class="chk"><input type="checkbox" name="system.{{et.key}}.{{r}}.check.optional" {{checked row.check.optional}} /><span>{{localize 'MGT2.Chargen.Template.CheckOptional'}}</span></label>
 					<label class="chk"><input type="checkbox" name="system.{{et.key}}.{{r}}.check.raisesSkill" {{checked row.check.raisesSkill}} /><span>{{localize 'MGT2.Chargen.Template.RaisesSkill'}}</span></label>
 				</label>
@@ -251,10 +278,32 @@
 					<select class="f" name="system.{{et.key}}.{{r}}.awards.condition" data-tooltip="{{localize 'MGT2.Chargen.Template.AwardCondition'}}">{{selectOptions @root.config.TrayConditions selected=row.awards.condition localize=true}}</select>
 				</label>
 			</div>
+			<div class="nest edit-only" data-property="{{et.key}}.{{r}}.check.alternatives">
+				<span class="nlbl" data-tooltip="{{localize 'MGT2.Chargen.Template.CheckOrHint'}}">{{localize 'MGT2.Chargen.Template.CheckOr'}}</span>
+				{{#each row.check.alternatives as |alt a|}}
+				<div class="nrow" data-entry-index="{{a}}">
+					<select class="f" name="system.{{et.key}}.{{r}}.check.alternatives.{{a}}.characteristic">
+						<option value="">&mdash;</option>
+						{{selectOptions @root.config.Characteristics selected=alt.characteristic localize=true}}
+					</select>
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.check.alternatives.{{a}}.skills" value="{{alt.skills}}" placeholder="{{localize 'MGT2.Chargen.Template.CheckSkills'}}" />
+					<input class="f num" type="number" step="1" name="system.{{et.key}}.{{r}}.check.alternatives.{{a}}.target" value="{{alt.target}}" data-dtype="Number" />
+					<input class="f" type="text" name="system.{{et.key}}.{{r}}.check.alternatives.{{a}}.assignment" value="{{alt.assignment}}" placeholder="{{localize 'MGT2.Chargen.Template.CareerAssignment'}}" data-tooltip="{{localize 'MGT2.Chargen.Template.CheckAssignmentHint'}}" />
+					<a class="del" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+				</div>
+				{{/each}}
+				<a class="add" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.CheckAlternative'}}</a>
+			</div>
 			<div class="nest">
 				<span class="nlbl">{{localize 'MGT2.Chargen.Template.RowGrant'}}</span>
 				<label class="chk edit-only"><input type="checkbox" name="system.{{et.key}}.{{r}}.grantFirst" {{checked row.grantFirst}} /><span>{{localize 'MGT2.Chargen.Template.GrantFirst'}}</span></label>
+				<select class="f edit-only" name="system.{{et.key}}.{{r}}.grantCondition" data-tooltip="{{localize 'MGT2.Chargen.Template.GrantCondition'}}">{{selectOptions @root.config.TrayConditions selected=row.grantCondition localize=true}}</select>
 				{{> systems/mgt2/templates/items/parts/career-cell.html cell=row.grant path=(concat et.key "." r ".grant")}}
+			</div>
+			<div class="nest">
+				<span class="nlbl">{{localize 'MGT2.Chargen.Template.RowGrant2'}}</span>
+				<select class="f edit-only" name="system.{{et.key}}.{{r}}.grant2Condition" data-tooltip="{{localize 'MGT2.Chargen.Template.GrantCondition'}}">{{selectOptions @root.config.TrayConditions selected=row.grant2Condition localize=true}}</select>
+				{{> systems/mgt2/templates/items/parts/career-cell.html cell=row.grant2 path=(concat et.key "." r ".grant2")}}
 			</div>
 			{{! A DM on a Benefit roll modifies a roll rather than awarding one, so it is none of the
 			    five Benefit effects — it is a tray entry, which the ledger already holds. }}
@@ -267,7 +316,8 @@
 			</div>
 		</div>
 		{{/each}}
-		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Row'}}</a>
+		{{! Core p.18: a new event row lets the Mishap it sends to eject as printed; a row typed before keeps its own. }}
+		<a class="add edit-only" data-action="entryCreate" {{#if (eq et.key "eventTable")}}data-blank='{"ejects":"mishap"}'{{/if}}><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.Row'}}</a>
 	</div>
 	{{/each}}
 
