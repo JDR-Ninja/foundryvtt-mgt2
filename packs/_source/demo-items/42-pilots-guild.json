@@ -1,0 +1,326 @@
+{
+  "_id": "demoCareerGuildP",
+  "name": "Demo — Pilots' Guild",
+  "type": "career",
+  "img": "icons/svg/direction.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 42,
+        "cliff": "entry is three fields, and the engine reads them in an order the sheet does not show",
+        "teaches": [
+          "Entry reads three fields in a fixed order: requiresPermission can only refuse, autoIf can only admit, and the qualification roll decides the rest.",
+          "requiresPermission refuses a player unless the tray holds an unlock naming the guild; the referee's own hand needs none. A player refused for want of leave rolls nothing and records no refusal, so no draft is offered and the dropped career waits.",
+          "autoIf admits a Traveller with EDU 9 or more with no roll, logged as qualified. It reads its own characteristic rather than the DEX the roll uses, and an entry it grants is not barred by the rule against returning to the career just left.",
+          "Everyone else rolls DEX 7+, with DM-1 for each previous career, DM+1 straight after Demo — Harbour Patrol and DM-1 from age 38.",
+          "assignmentChange: requalifyKeepRank rolls that same line for a new assignment and asks neither autoIf nor the leave again. basicFrom: assignment trains a first career from its own assignment's table, so each assignment starts a pilot differently.",
+          "Row 5's throw is keyed to the assignment: check.assignment and each alternative's give every assignment its own skill and target. Row 11 reads a DEX gate, and grant and grant2 are its two branches.",
+          "Row 2 sends to the Mishap table with ejects: mishap, so the mishap rolled decides whether the pilot leaves. Mishap 3 leaves it to the player, mishap 4 keeps the term's Benefit roll on a pass, and mishap 5 ejects only on a failed check.",
+          "Row 9 offers Demo — Harbour Patrol with its qualification waived, and the Guild Membership benefit is a definition the system knows rather than a voucher."
+        ],
+        "trap": "An unlock is spent when the leave is read, before any roll, so a failed DEX roll still uses it up. Demo — Harbour Lock-up's row 8 leaves one; with none, a player is refused and the referee enters the Traveller or adds an unlock on the tray panel. The guild grants no commission: commissionCheck stays blank and tables.officer is not present. The record fields below the tables stay empty, as on every template."
+      }
+    }
+  },
+  "system": {
+    "description": "The pilots who bring every hull into Bellweather harbour, sea or space, through the marsh channels and down onto the water. Every applicant needs the Warden's leave; a well-schooled one is then let in without the test. Invented for this pack, and no book's career.",
+    "subType": "career",
+    "source": { "book": "", "page": "" },
+    "kind": "career",
+    "difficulty": 7,
+    "qualification": {
+      "entry": "target",
+      "characteristics": ["dexterity"],
+      "autoIf": { "characteristic": "education", "min": 9, "max": null },
+      "perPreviousCareer": -1,
+      "conditionalDMs": [
+        { "characteristic": "", "min": null, "afterCareers": ["Demo — Harbour Patrol"], "dm": 1 }
+      ],
+      "requiresPermission": true
+    },
+    "ageDM": { "from": 38, "dm": -1 },
+    "commission": false,
+    "commissionCheck": { "characteristic": "", "target": null },
+    "pensionable": true,
+    "assignmentChange": "requalifyKeepRank",
+    "basicFrom": "assignment",
+    "alwaysAvailable": false,
+    "neverEjects": false,
+    "blocksAnagathics": false,
+    "eventRow7": "lifeEvent",
+    "exitRule": { "track": "", "test": "" },
+    "medicalBillsRow": "civilian",
+    "restrictedTo": { "species": "", "sex": "" },
+    "rankLadders": [
+      {
+        "id": "guild",
+        "name": "Guild",
+        "officer": false,
+        "rows": [
+          { "rank": 0, "title": "Leadsman", "bonus": { "text": "Navigation 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Navigation", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 1, "title": "Second Pilot", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 2, "title": "Licensed Pilot", "bonus": { "text": "Persuade 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Persuade", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 3, "title": "First Pilot", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 4, "title": "Senior Pilot", "bonus": { "text": "Leadership 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Leadership", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 5, "title": "Master Pilot", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 6, "title": "Warden of the Guild", "bonus": { "text": "SOC +1", "mode": "all",
+            "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] } }
+        ]
+      }
+    ],
+    "assignments": [
+      {
+        "name": "Channel Pilot",
+        "ladder": "guild",
+        "officerLadder": "",
+        "survival": { "characteristic": "dexterity", "target": 6 },
+        "advancement": { "characteristic": "education", "target": 8 },
+        "skills": [
+          { "text": "Seafarer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Seafarer", "mode": "raise", "value": 1 }] },
+          { "text": "Navigation", "mode": "all", "grants": [{ "kind": "skill", "skill": "Navigation", "mode": "raise", "value": 1 }] },
+          { "text": "Recon", "mode": "all", "grants": [{ "kind": "skill", "skill": "Recon", "mode": "raise", "value": 1 }] },
+          { "text": "Persuade", "mode": "all", "grants": [{ "kind": "skill", "skill": "Persuade", "mode": "raise", "value": 1 }] },
+          { "text": "Leadership", "mode": "all", "grants": [{ "kind": "skill", "skill": "Leadership", "mode": "raise", "value": 1 }] },
+          { "text": "Mechanic or Electronics", "mode": "oneOf", "grants": [
+            { "kind": "skill", "skill": "Mechanic", "mode": "raise", "value": 1 },
+            { "kind": "skill", "skill": "Electronics", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      {
+        "name": "Approach Control",
+        "ladder": "guild",
+        "officerLadder": "",
+        "survival": { "characteristic": "education", "target": 5 },
+        "advancement": { "characteristic": "intellect", "target": 8 },
+        "skills": [
+          { "text": "Electronics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Electronics", "mode": "raise", "value": 1 }] },
+          { "text": "Pilot", "mode": "all", "grants": [{ "kind": "skill", "skill": "Pilot", "mode": "raise", "value": 1 }] },
+          { "text": "Astrogation", "mode": "all", "grants": [{ "kind": "skill", "skill": "Astrogation", "mode": "raise", "value": 1 }] },
+          { "text": "Admin", "mode": "all", "grants": [{ "kind": "skill", "skill": "Admin", "mode": "raise", "value": 1 }] },
+          { "text": "Vacc Suit", "mode": "all", "grants": [{ "kind": "skill", "skill": "Vacc Suit", "mode": "raise", "value": 1 }] },
+          { "text": "Diplomat", "mode": "all", "grants": [{ "kind": "skill", "skill": "Diplomat", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      {
+        "name": "Tug Master",
+        "ladder": "guild",
+        "officerLadder": "",
+        "survival": { "characteristic": "strength", "target": 6 },
+        "advancement": { "characteristic": "endurance", "target": 8 },
+        "skills": [
+          { "text": "Mechanic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Mechanic", "mode": "raise", "value": 1 }] },
+          { "text": "Seafarer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Seafarer", "mode": "raise", "value": 1 }] },
+          { "text": "Engineer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Engineer", "mode": "raise", "value": 1 }] },
+          { "text": "Athletics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Athletics", "mode": "raise", "value": 1 }] },
+          { "text": "Leadership", "mode": "all", "grants": [{ "kind": "skill", "skill": "Leadership", "mode": "raise", "value": 1 }] },
+          { "text": "Streetwise", "mode": "all", "grants": [{ "kind": "skill", "skill": "Streetwise", "mode": "raise", "value": 1 }] }
+        ]
+      }
+    ],
+    "tables": {
+      "personalDevelopment": {
+        "present": true,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "DEX +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "dexterity", "mode": "add", "value": 1 }] },
+          { "text": "EDU +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "education", "mode": "add", "value": 1 }] },
+          { "text": "Carouse", "mode": "all", "grants": [{ "kind": "skill", "skill": "Carouse", "mode": "raise", "value": 1 }] },
+          { "text": "INT +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "intellect", "mode": "add", "value": 1 }] },
+          { "text": "Athletics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Athletics", "mode": "raise", "value": 1 }] },
+          { "text": "Gambler", "mode": "all", "grants": [{ "kind": "skill", "skill": "Gambler", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      "service": {
+        "present": true,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "Seafarer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Seafarer", "mode": "raise", "value": 1 }] },
+          { "text": "Pilot", "mode": "all", "grants": [{ "kind": "skill", "skill": "Pilot", "mode": "raise", "value": 1 }] },
+          { "text": "Electronics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Electronics", "mode": "raise", "value": 1 }] },
+          { "text": "Navigation", "mode": "all", "grants": [{ "kind": "skill", "skill": "Navigation", "mode": "raise", "value": 1 }] },
+          { "text": "Vacc Suit", "mode": "all", "grants": [{ "kind": "skill", "skill": "Vacc Suit", "mode": "raise", "value": 1 }] },
+          { "text": "Persuade", "mode": "all", "grants": [{ "kind": "skill", "skill": "Persuade", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      "advancedEducation": {
+        "present": true,
+        "gate": { "characteristic": "education", "min": 8 },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "Navigation", "mode": "all", "grants": [{ "kind": "skill", "skill": "Navigation", "mode": "raise", "value": 1 }] },
+          { "text": "Astrogation", "mode": "all", "grants": [{ "kind": "skill", "skill": "Astrogation", "mode": "raise", "value": 1 }] },
+          { "text": "Admin", "mode": "all", "grants": [{ "kind": "skill", "skill": "Admin", "mode": "raise", "value": 1 }] },
+          { "text": "Advocate", "mode": "all", "grants": [{ "kind": "skill", "skill": "Advocate", "mode": "raise", "value": 1 }] },
+          { "text": "Electronics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Electronics", "mode": "raise", "value": 1 }] },
+          { "text": "Leadership", "mode": "all", "grants": [{ "kind": "skill", "skill": "Leadership", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      "officer": {
+        "present": false,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": true,
+        "rows": []
+      }
+    },
+    "benefits": {
+      "cash": [750, 2500, 4500, 8000, 12500, 22000, 35000],
+      "other": [
+        { "text": "A Contact among the ship masters", "mode": "all", "grants": [{ "kind": "contact", "relation": "Contact", "value": 1 }] },
+        { "text": "Demo — Lucky Fob", "mode": "all", "grants": [{ "kind": "benefit", "ref": "Demo — Lucky Fob", "value": 1 }] },
+        { "text": "EDU +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "education", "mode": "add", "value": 1 }] },
+        { "text": "Demo — Handcomp", "mode": "all", "grants": [{ "kind": "benefit", "ref": "Demo — Handcomp", "value": 1 }] },
+        { "text": "Guild Membership", "mode": "all", "grants": [{ "kind": "benefit", "ref": "Guild Membership", "value": 1 }] },
+        { "text": "Two Ship Shares", "mode": "all", "grants": [{ "kind": "shipShare", "value": 2 }] },
+        { "text": "SOC +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] }
+      ]
+    },
+    "eventTable": [
+      { "roll": 2, "text": "A bulk carrier's master overrules you in the narrows and puts her on the mud. Roll on the Mishap table; the mishap it lands on decides whether the guild keeps you.",
+        "ejects": "mishap", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Mishap", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 3, "text": "A gale shuts the bar with three hulls waiting outside it. Take one in on a Seafarer check (9+): pass, and DM+2 is held for your next Advancement roll; fail, and her master becomes a Rival.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": ["Seafarer"], "target": 9 },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "A Rival", "mode": "all", "grants": [{ "kind": "contact", "relation": "Rival", "value": 1 }] },
+        "grantCondition": "checkFailed",
+        "tray": [{ "kind": "dm", "dm": 2, "value": "", "appliesTo": ["advancement"], "scope": "thisCareer", "career": "",
+          "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "checkPassed",
+          "note": "Brought in through the gale: DM+2 held for one Advancement roll." }] },
+      { "roll": 4, "text": "A winter of nights in the beacon house at the harbour mouth. Gain one level of Electronics or Mechanic.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Electronics or Mechanic", "mode": "oneOf", "grants": [
+          { "kind": "skill", "skill": "Electronics", "mode": "raise", "value": 1 },
+          { "kind": "skill", "skill": "Mechanic", "mode": "raise", "value": 1 }] }, "tray": [] },
+      { "roll": 5, "text": "A crippled ship comes in at night and your watch takes her: Seafarer (8+) in the channels, Electronics (9+) at Approach Control, Mechanic (7+) on the tugs. Pass, and gain a Contact and an extra Benefit roll.",
+        "ejects": "stays", "benefit": "grant", "benefitCount": 1, "benefitCondition": "checkPassed", "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": ["Seafarer"], "target": 8, "assignment": "Channel Pilot",
+          "alternatives": [
+            { "characteristic": "", "skills": ["Electronics"], "target": 9, "assignment": "Approach Control" },
+            { "characteristic": "", "skills": ["Mechanic"], "target": 7, "assignment": "Tug Master" }] },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "A Contact", "mode": "all", "grants": [{ "kind": "contact", "relation": "Contact", "value": 1 }] },
+        "grantCondition": "checkPassed", "tray": [] },
+      { "roll": 6, "text": "The guild sends you up the coast for a season to learn another harbour's channels. Gain one level of Navigation, or of any skill you already hold.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Navigation, or a skill you hold", "mode": "oneOf", "grants": [
+          { "kind": "skill", "skill": "Navigation", "mode": "raise", "value": 1 },
+          { "kind": "skill", "skill": "", "pick": "held", "mode": "raise", "value": 1 }] }, "tray": [] },
+      { "roll": 7, "text": "Ashore between the tides, the town has its own plans for you. Roll on the Life Events table.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Life Event", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 8, "text": "The guild sets you the paper for a master's licence. Make an Education check (8+): pass, and DM+1 is held for your next Advancement roll; fail, and the resit costs you one Benefit roll.",
+        "ejects": "stays", "benefit": "lose", "benefitCount": 1, "benefitCondition": "checkFailed", "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "education", "skills": [], "target": 8 },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] },
+        "tray": [{ "kind": "dm", "dm": 1, "value": "", "appliesTo": ["advancement"], "scope": "thisCareer", "career": "",
+          "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "checkPassed",
+          "note": "A master's licence in the drawer: DM+1 held for one Advancement roll." }] },
+      { "roll": 9, "text": "The harbour patrol asks the guild to lend it a pilot for a season. You may enter Demo — Harbour Patrol with no qualification roll.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "Demo — Harbour Patrol", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 10, "text": "A shipping house whose best hull you saved from the bar asks for you by name ever after. Gain a Patron.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "A Patron", "mode": "all", "grants": [{ "kind": "contact", "relation": "Patron", "value": 1 }] }, "tray": [] },
+      { "roll": 11, "text": "A shuttle loses her instruments in the fog over the harbour. With DEX 9 or more you take the guild launch up and lead her down: gain one level of Pilot. Otherwise you talk her down from the tower: gain one level of Electronics.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "gate": { "kind": "characteristic", "characteristic": "dexterity", "key": "", "min": 9, "max": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Pilot 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Pilot", "mode": "raise", "value": 1 }] },
+        "grantCondition": "gatePassed",
+        "grant2": { "text": "Electronics 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Electronics", "mode": "raise", "value": 1 }] },
+        "grant2Condition": "gateFailed", "tray": [] },
+      { "roll": 12, "text": "The Warden offers you a seat on the guild council. Gain SOC +1, and you may take a promotion outright.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": ["advanced"], "mode": "oneOf", "optional": true },
+        "grant": { "text": "SOC +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] }, "tray": [] }
+    ],
+    "mishapTable": [
+      { "roll": 1, "text": "A ship in your charge grounds on the bar, and the inquiry finds against you. Her owners become an Enemy, and the guild takes back your licence.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "An Enemy", "mode": "all", "grants": [{ "kind": "contact", "relation": "Enemy", "value": 1 }] }, "tray": [] },
+      { "roll": 2, "text": "A towline parts under load and whips across the tug's deck. Roll on the Injury table; the guild pays you off and lets you go.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Injury", "injury": { "modes": ["once"], "who": "traveller" },
+        "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 3, "text": "You refuse to take a ship in on a falling tide, and her owners want your licence for it. Gain a Rival; whether you stay in the guild is your call.",
+        "ejects": "choice", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "A Rival", "mode": "all", "grants": [{ "kind": "contact", "relation": "Rival", "value": 1 }] }, "tray": [] },
+      { "roll": 4, "text": "The guild is caught selling licences, and its junior pilots go down with the scandal. You are out; a Social check (8+) still keeps this term's Benefit roll.",
+        "ejects": "ejects", "benefit": "keep", "benefitCount": 1, "benefitCondition": "checkPassed", "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "social", "skills": [], "target": 8 },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 5, "text": "Your night sight fails the guild's yearly test. Make an Intellect check (8+) to requalify for day work: pass, and you stay; fail, and you are out.",
+        "ejects": "ejects", "ejectsCondition": "checkFailed", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "intellect", "skills": [], "target": 8 },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 6, "text": "A winter of double watches wears you thin. Lose 1 END, but you keep your place in the guild.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "END -1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "endurance", "mode": "add", "value": -1 }] }, "tray": [] }
+    ],
+    "standingModifiers": [
+      { "dm": 0, "per": 1, "skills": ["Navigation"], "appliesTo": ["survival"], "career": "",
+        "gate": { "characteristic": "", "min": null },
+        "note": "A pilot who knows the channels by night: DM+1 per level of Navigation on Survival rolls in this career." }
+    ],
+    "tracks": [],
+    "assignment": "",
+    "terms": 0,
+    "rank": 0,
+    "ladder": "",
+    "enlistedRank": 0,
+    "events": [],
+    "entryMode": "qualified",
+    "exitMode": "stillServing",
+    "termLog": [],
+    "track": { "key": "", "value": null, "cap": null, "adjustments": [] }
+  },
+  "effects": []
+}

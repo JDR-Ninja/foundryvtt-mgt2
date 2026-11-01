@@ -1,0 +1,10 @@
+[
+  {
+    "_id": "demoskillclean01",
+    "name": "Gun Combat (slug)",
+    "type": "talent",
+    "img": "icons/svg/target.svg",
+    "flags": { "mgt2": { "demo": { "order": 20, "cliff": "skills are Items", "teaches": ["A skill takes its real name."], "trap": "A skill is matched by its name, so it carries no demo prefix." } } },
+    "system": { "subType": "skill", "level": 0, "skill": { "speciality": "slug" } }
+  }
+]

@@ -85,9 +85,10 @@ export const Grants = {
         const [wanted, held] = (split && (split[2].trim().toLowerCase() !== "any")) ? [split[1], split[2].trim()]
             : [typed, speciality];
         speciality = held;
+        const key = String(speciality ?? "").toLowerCase();
 
         const existing = this.skills(actor).find(skill => MGT2Helper.matchesSkill(skill.name, wanted)
-            && (((skill.system.skill?.speciality ?? "") === speciality)
+            && ((String(skill.system.skill?.speciality ?? "").toLowerCase() === key)
                 || (!skill.system.skill?.speciality && MGT2Helper.nameStatesSpeciality(skill.name, speciality))));
         const from = existing?.system.level ?? 0;
         let to = { raise: from + level, add: from + level, atLeast: Math.max(from, level),

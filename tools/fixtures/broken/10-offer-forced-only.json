@@ -1,0 +1,13 @@
+{
+  "_id": "demofixnightevt1",
+  "name": "Demo — Night Watch Events",
+  "type": "career",
+  "img": "icons/svg/book.svg",
+  "flags": { "mgt2": { "demo": { "order": 91, "cliff": "career", "teaches": ["A shared table's row may send a Traveller to a career."], "trap": "Rows 3 to 5 offer Demo — Cell Block, which clean/03 makes forcedOnly: by its name, by a spelling the engine folds to it, and from a row's own tray." } } },
+  "system": { "kind": "table",
+    "eventTable": [
+      { "roll": 3, "text": "Caught on the quay after curfew.", "career": "Demo — Cell Block", "careerMode": "offer" },
+      { "roll": 4, "text": "Caught again.", "career": "DEMO — CELL-BLOCK", "careerMode": "offer" },
+      { "roll": 5, "text": "A word in the right ear.", "tray": [ { "kind": "careerOffer", "value": "Demo — Cell Block", "appliesTo": ["qualification"] } ] }
+    ] }
+}

@@ -10,7 +10,7 @@
                 "cliff": "an education is a career Item that runs a different set of rolls",
                 "teaches": [
                     "A university has no tied career: its skills come from its own Service Skills table, and each pick says how many rows to take and at what level.",
-                    "A pick's Level is the level the skill ends at; blank takes the row as printed, so one pick at level 0 and one at level 1 give the book's 'a level 0 and a level 1 skill' and neither a blank nor a 0 on the second pick will do.",
+                    "A pick's Level is the level the skill ends at; blank takes the row as printed, so one pick at level 0 and one at level 1 give one skill at each level, and neither a blank nor a 0 on the second pick will do.",
                     "Graduation raises what the education gave by one level (the raise block), grants EDU, and leaves a DM+1 to qualify for each named career, DM+1 more with honours.",
                     "Honours also leave a DM+2 on the commission roll before the first term of the first career after the school, held until that roll is made."
                 ],
@@ -94,72 +94,72 @@
                 "requiresCommission": false,
                 "rows": [
                     {
-                        "text": "Demo — Investigate",
+                        "text": "Investigate",
                         "mode": "all",
                         "grants": [
                             {
                                 "kind": "skill",
-                                "skill": "Demo — Investigate",
+                                "skill": "Investigate",
                                 "mode": "raise",
                                 "value": 1
                             }
                         ]
                     },
                     {
-                        "text": "Demo — Seafarer",
+                        "text": "Seafarer",
                         "mode": "all",
                         "grants": [
                             {
                                 "kind": "skill",
-                                "skill": "Demo — Seafarer",
+                                "skill": "Seafarer",
                                 "mode": "raise",
                                 "value": 1
                             }
                         ]
                     },
                     {
-                        "text": "Demo — Mechanic",
+                        "text": "Mechanic",
                         "mode": "all",
                         "grants": [
                             {
                                 "kind": "skill",
-                                "skill": "Demo — Mechanic",
+                                "skill": "Mechanic",
                                 "mode": "raise",
                                 "value": 1
                             }
                         ]
                     },
                     {
-                        "text": "Demo — Athletics",
+                        "text": "Athletics",
                         "mode": "all",
                         "grants": [
                             {
                                 "kind": "skill",
-                                "skill": "Demo — Athletics",
+                                "skill": "Athletics",
                                 "mode": "raise",
                                 "value": 1
                             }
                         ]
                     },
                     {
-                        "text": "Demo — Gun Combat",
+                        "text": "Gun Combat",
                         "mode": "all",
                         "grants": [
                             {
                                 "kind": "skill",
-                                "skill": "Demo — Gun Combat",
+                                "skill": "Gun Combat",
                                 "mode": "raise",
                                 "value": 1
                             }
                         ]
                     },
                     {
-                        "text": "Demo — Vacc Suit",
+                        "text": "Vacc Suit",
                         "mode": "all",
                         "grants": [
                             {
                                 "kind": "skill",
-                                "skill": "Demo — Vacc Suit",
+                                "skill": "Vacc Suit",
                                 "mode": "raise",
                                 "value": 1
                             }
@@ -336,7 +336,7 @@
             },
             {
                 "roll": 5,
-                "text": "Long nights in the reading room. Gain one level of Demo — Investigate.",
+                "text": "Long nights in the reading room. Gain one level of Investigate.",
                 "ejects": "stays",
                 "benefit": "none",
                 "benefitCount": 1,
@@ -361,12 +361,12 @@
                     "optional": false
                 },
                 "grant": {
-                    "text": "Demo — Investigate 1",
+                    "text": "Investigate 1",
                     "mode": "all",
                     "grants": [
                         {
                             "kind": "skill",
-                            "skill": "Demo — Investigate",
+                            "skill": "Investigate",
                             "mode": "raise",
                             "value": 1
                         }
@@ -376,7 +376,7 @@
             },
             {
                 "roll": 6,
-                "text": "A summer crewing a survey launch. Gain one level of Demo — Seafarer.",
+                "text": "A summer crewing a survey launch. Gain one level of Seafarer.",
                 "ejects": "stays",
                 "benefit": "none",
                 "benefitCount": 1,
@@ -401,12 +401,12 @@
                     "optional": false
                 },
                 "grant": {
-                    "text": "Demo — Seafarer 1",
+                    "text": "Seafarer 1",
                     "mode": "all",
                     "grants": [
                         {
                             "kind": "skill",
-                            "skill": "Demo — Seafarer",
+                            "skill": "Seafarer",
                             "mode": "raise",
                             "value": 1
                         }
@@ -449,7 +449,7 @@
             },
             {
                 "roll": 8,
-                "text": "You captain the university's rowing eight. Gain one level of Demo — Athletics.",
+                "text": "You captain the university's rowing eight. Gain one level of Athletics.",
                 "ejects": "stays",
                 "benefit": "none",
                 "benefitCount": 1,
@@ -474,12 +474,12 @@
                     "optional": false
                 },
                 "grant": {
-                    "text": "Demo — Athletics 1",
+                    "text": "Athletics 1",
                     "mode": "all",
                     "grants": [
                         {
                             "kind": "skill",
-                            "skill": "Demo — Athletics",
+                            "skill": "Athletics",
                             "mode": "raise",
                             "value": 1
                         }
@@ -584,7 +584,7 @@
             },
             {
                 "roll": 11,
-                "text": "A season in the workshops between terms. Gain one level of Demo — Mechanic.",
+                "text": "A season in the workshops between terms. Gain one level of Mechanic.",
                 "ejects": "stays",
                 "benefit": "none",
                 "benefitCount": 1,
@@ -609,12 +609,12 @@
                     "optional": false
                 },
                 "grant": {
-                    "text": "Demo — Mechanic 1",
+                    "text": "Mechanic 1",
                     "mode": "all",
                     "grants": [
                         {
                             "kind": "skill",
-                            "skill": "Demo — Mechanic",
+                            "skill": "Mechanic",
                             "mode": "raise",
                             "value": 1
                         }

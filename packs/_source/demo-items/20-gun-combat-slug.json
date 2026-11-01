@@ -1,6 +1,6 @@
 {
   "_id": "demoSkillGunSlug",
-  "name": "Demo — Gun Combat (slug)",
+  "name": "Gun Combat (slug)",
   "type": "talent",
   "img": "icons/svg/target.svg",
   "flags": {
@@ -13,7 +13,7 @@
           "The speciality is stored twice on purpose: in the name, in brackets, and in `skill.speciality`.",
           "`roll.characteristic` is the characteristic the skill is normally rolled on, which the sheet offers as the default."
         ],
-        "trap": "`level` is 0 here because a loose skill in a compendium is a template — the level belongs to the Traveller who has it. Everything that reads a skill matches by *name*, so `Demo — Gun Combat` matches this Item and a bare `Gun Combat` does not."
+        "trap": "`level` is 0 here because a loose skill in a compendium is a template — the level belongs to the Traveller who has it. Everything that reads a skill matches by *name*, so this Item takes its real name and no `Demo — `: a check on `Gun Combat` or `Gun Combat (slug)` meets it, and `flags.mgt2.demo` is what marks it as a demo."
       }
     }
   },

@@ -1,0 +1,225 @@
+{
+  "_id": "demoCareerFenHld",
+  "name": "Demo — Fen Holders",
+  "type": "career",
+  "img": "icons/svg/windmill.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 40,
+        "cliff": "an assignment change is a rule the template declares, or a world setting decides it",
+        "teaches": [
+          "A civilian career with no commission: commission is false, both rank ladders are enlisted, and tables.officer stays absent.",
+          "Three assignments over two ladders: the reed cutters and the weir keepers climb the holding ladder, the dyke wardens their own.",
+          "assignmentChange: requalifyKeepRank lets the Traveller change assignment at the end of a term by passing this career's Qualification roll again: pass, and the rank is kept and read off the new assignment's ladder; fail, and nothing changes.",
+          "Event 9 holds DM+2 for this career's own Qualification roll, which a career already being served makes only to change assignment.",
+          "medicalBillsRow: independent, because a holder has no employer: the table pays nothing below 8 on two dice plus rank, half from 8 and three quarters from 12.",
+          "Event 2 rolls this career's Mishap table with ejects: stays, so the mishap is suffered and the holding kept; mishap 5 ejects only on a failed check, and mishap 6 only when the Traveller refuses.",
+          "Event 10 offers Demo — Harbour Patrol with qualification waived: careerMode offer leaves it on the tray, to be taken at a later qualification or declined.",
+          "Event 12 awards a promotion or an extra skill roll: two outcomes in oneOf mode, and the player picks one."
+        ],
+        "trap": "commission is false and tables.officer is absent: an officer ladder or table here would be read by nothing, and would promise a commission this career never offers. Event 9's DM is spent by an assignment change's re-qualification, or by entering this career again later, and by no other roll. pensionable is false for the reason the bills are independent: a holder has no employer to pay one. standingModifiers and tracks stay empty because the career prints neither, and the record fields below the tables stay empty, as on every template."
+      }
+    }
+  },
+  "system": {
+    "description": "The smallholders of Bellweather's marsh: reed beds, eel weirs, and the dykes that keep the sea off both. A civilian career with no commission, whose three assignments a holder moves between by qualifying again, and whose injuries are billed on the independent column, since a holder has no employer. Invented for this pack, and no book's career.",
+    "subType": "career",
+    "source": { "book": "", "page": "" },
+    "kind": "career",
+    "difficulty": 5,
+    "qualification": {
+      "entry": "target",
+      "characteristics": ["strength", "endurance"],
+      "autoIf": { "characteristic": "", "min": null, "max": null },
+      "perPreviousCareer": 0,
+      "conditionalDMs": [
+        { "characteristic": "", "min": null, "afterCareers": ["Demo — Quay Hands"], "dm": 1 }
+      ],
+      "requiresPermission": false
+    },
+    "ageDM": { "from": 40, "dm": -1 },
+    "commission": false,
+    "commissionCheck": { "characteristic": "", "target": null },
+    "pensionable": false,
+    "assignmentChange": "requalifyKeepRank",
+    "basicFrom": "service",
+    "alwaysAvailable": false,
+    "neverEjects": false,
+    "blocksAnagathics": false,
+    "eventRow7": "lifeEvent",
+    "exitRule": { "track": "", "test": "" },
+    "medicalBillsRow": "independent",
+    "restrictedTo": { "species": "", "sex": "" },
+    "rankLadders": [
+      {
+        "id": "holding",
+        "name": "Holding",
+        "officer": false,
+        "rows": [
+          { "rank": 0, "title": "Hand", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 1, "title": "Tenant", "bonus": { "text": "Survival 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Survival", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 2, "title": "Holder", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 3, "title": "Freeholder", "bonus": { "text": "Broker 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Broker", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 4, "title": "Fen Reeve", "bonus": { "text": "SOC +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] } },
+          { "rank": 5, "title": "Master of the Levels", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 6, "title": "Fen Elder", "bonus": { "text": "An Ally on the fen council", "mode": "all", "grants": [{ "kind": "contact", "relation": "Allie", "value": 1 }] } }
+        ]
+      },
+      {
+        "id": "warden",
+        "name": "Dyke Watch",
+        "officer": false,
+        "rows": [
+          { "rank": 0, "title": "Sluice Hand", "bonus": { "text": "Mechanic 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Mechanic", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 1, "title": "Bank Walker", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 2, "title": "Warden", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 3, "title": "Senior Warden", "bonus": { "text": "Leadership 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Leadership", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 4, "title": "Dykegrave", "bonus": { "text": "SOC +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] } },
+          { "rank": 5, "title": "Master of Sluices", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 6, "title": "Keeper of the Sea Wall", "bonus": { "text": "SOC +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] } }
+        ]
+      }
+    ],
+    "assignments": [
+      {
+        "name": "Reed Cutter",
+        "ladder": "holding",
+        "officerLadder": "",
+        "survival": { "characteristic": "endurance", "target": 5 },
+        "advancement": { "characteristic": "strength", "target": 7 },
+        "skills": [
+          { "text": "Athletics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Athletics", "mode": "raise", "value": 1 }] },
+          { "text": "Seafarer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Seafarer", "mode": "raise", "value": 1 }] },
+          { "text": "Melee", "mode": "all", "grants": [{ "kind": "skill", "skill": "Melee", "mode": "raise", "value": 1 }] },
+          { "text": "Survival", "mode": "all", "grants": [{ "kind": "skill", "skill": "Survival", "mode": "raise", "value": 1 }] },
+          { "text": "Stealth", "mode": "all", "grants": [{ "kind": "skill", "skill": "Stealth", "mode": "raise", "value": 1 }] },
+          { "text": "Mechanic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Mechanic", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      {
+        "name": "Weir Keeper",
+        "ladder": "holding",
+        "officerLadder": "",
+        "survival": { "characteristic": "dexterity", "target": 6 },
+        "advancement": { "characteristic": "intellect", "target": 8 },
+        "skills": [
+          { "text": "Seafarer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Seafarer", "mode": "raise", "value": 1 }] },
+          { "text": "Animals", "mode": "all", "grants": [{ "kind": "skill", "skill": "Animals", "mode": "raise", "value": 1 }] },
+          { "text": "Recon", "mode": "all", "grants": [{ "kind": "skill", "skill": "Recon", "mode": "raise", "value": 1 }] },
+          { "text": "Broker", "mode": "all", "grants": [{ "kind": "skill", "skill": "Broker", "mode": "raise", "value": 1 }] },
+          { "text": "Survival or Navigation", "mode": "oneOf", "grants": [{ "kind": "skill", "skill": "Survival", "mode": "raise", "value": 1 }, { "kind": "skill", "skill": "Navigation", "mode": "raise", "value": 1 }] },
+          { "text": "Gun Combat", "mode": "all", "grants": [{ "kind": "skill", "skill": "Gun Combat", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      {
+        "name": "Dyke Warden",
+        "ladder": "warden",
+        "officerLadder": "",
+        "survival": { "characteristic": "intellect", "target": 5 },
+        "advancement": { "characteristic": "education", "target": 7 },
+        "skills": [
+          { "text": "Mechanic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Mechanic", "mode": "raise", "value": 1 }] },
+          { "text": "Engineer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Engineer", "mode": "raise", "value": 1 }] },
+          { "text": "Leadership", "mode": "all", "grants": [{ "kind": "skill", "skill": "Leadership", "mode": "raise", "value": 1 }] },
+          { "text": "Electronics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Electronics", "mode": "raise", "value": 1 }] },
+          { "text": "Explosives", "mode": "all", "grants": [{ "kind": "skill", "skill": "Explosives", "mode": "raise", "value": 1 }] },
+          { "text": "Admin", "mode": "all", "grants": [{ "kind": "skill", "skill": "Admin", "mode": "raise", "value": 1 }] }
+        ]
+      }
+    ],
+    "tables": {
+      "personalDevelopment": {
+        "present": true,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "Survival", "mode": "all", "grants": [{ "kind": "skill", "skill": "Survival", "mode": "raise", "value": 1 }] },
+          { "text": "END +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "endurance", "mode": "add", "value": 1 }] },
+          { "text": "Animals", "mode": "all", "grants": [{ "kind": "skill", "skill": "Animals", "mode": "raise", "value": 1 }] },
+          { "text": "STR +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "strength", "mode": "add", "value": 1 }] },
+          { "text": "Carouse", "mode": "all", "grants": [{ "kind": "skill", "skill": "Carouse", "mode": "raise", "value": 1 }] },
+          { "text": "EDU +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "education", "mode": "add", "value": 1 }] }
+        ]
+      },
+      "service": {
+        "present": true,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "Animals", "mode": "all", "grants": [{ "kind": "skill", "skill": "Animals", "mode": "raise", "value": 1 }] },
+          { "text": "Seafarer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Seafarer", "mode": "raise", "value": 1 }] },
+          { "text": "Survival", "mode": "all", "grants": [{ "kind": "skill", "skill": "Survival", "mode": "raise", "value": 1 }] },
+          { "text": "Mechanic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Mechanic", "mode": "raise", "value": 1 }] },
+          { "text": "Drive", "mode": "all", "grants": [{ "kind": "skill", "skill": "Drive", "mode": "raise", "value": 1 }] },
+          { "text": "Broker", "mode": "all", "grants": [{ "kind": "skill", "skill": "Broker", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      "advancedEducation": {
+        "present": true,
+        "gate": { "characteristic": "education", "min": 9 },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "Advocate", "mode": "all", "grants": [{ "kind": "skill", "skill": "Advocate", "mode": "raise", "value": 1 }] },
+          { "text": "Medic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Medic", "mode": "raise", "value": 1 }] },
+          { "text": "Navigation", "mode": "all", "grants": [{ "kind": "skill", "skill": "Navigation", "mode": "raise", "value": 1 }] },
+          { "text": "Admin", "mode": "all", "grants": [{ "kind": "skill", "skill": "Admin", "mode": "raise", "value": 1 }] },
+          { "text": "Diplomat", "mode": "all", "grants": [{ "kind": "skill", "skill": "Diplomat", "mode": "raise", "value": 1 }] },
+          { "text": "INT +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "intellect", "mode": "add", "value": 1 }] }
+        ]
+      },
+      "officer": {
+        "present": false,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": true,
+        "rows": []
+      }
+    },
+    "benefits": {
+      "cash": [400, 1200, 2500, 4000, 6000, 10000, 18000],
+      "other": [
+        { "text": "A Contact at the eel market", "mode": "all", "grants": [{ "kind": "contact", "relation": "Contact", "value": 1 }] },
+        { "text": "Demo — Field Kit", "mode": "all", "grants": [{ "kind": "benefit", "ref": "Demo — Field Kit", "value": 1 }] },
+        { "text": "END +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "endurance", "mode": "add", "value": 1 }] },
+        { "text": "Demo — Engineer's Toolkit", "mode": "all", "grants": [{ "kind": "benefit", "ref": "Demo — Engineer's Toolkit", "value": 1 }] },
+        { "text": "An Ally among the holders", "mode": "all", "grants": [{ "kind": "contact", "relation": "Allie", "value": 1 }] },
+        { "text": "INT +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "intellect", "mode": "add", "value": 1 }] },
+        { "text": "Personal Vehicle", "mode": "all", "grants": [{ "kind": "benefit", "ref": "personalVehicle", "value": 1 }] }
+      ]
+    },
+    "eventTable": [
+      { "roll": 2, "text": "The spring flood breaks the lower dyke and takes a season's work with it. Roll on this career's Mishap table; whatever it says, the holding keeps you.", "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "Mishap", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 3, "text": "A buyer from the quay pays for a season's eels with a bad note. Make a Broker check (8+): succeed, and you get your price and DM+1 held for one Benefit roll from this career; fail, and the buyer becomes a Rival.", "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": ["Broker"], "target": 8 }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "A Rival", "mode": "all", "grants": [{ "kind": "contact", "relation": "Rival", "value": 1 }] }, "grantCondition": "checkFailed", "tray": [{ "kind": "dm", "dm": 1, "value": "", "appliesTo": ["benefit"], "scope": "thisCareer", "career": "", "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "checkPassed", "note": "The price recovered: DM+1 held for one Benefit roll from this career." }] },
+      { "roll": 4, "text": "A dry summer keeps you on the pumps day and night. Gain one level of Mechanic or Survival.", "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "Mechanic or Survival", "mode": "oneOf", "grants": [{ "kind": "skill", "skill": "Mechanic", "mode": "raise", "value": 1 }, { "kind": "skill", "skill": "Survival", "mode": "raise", "value": 1 }] }, "tray": [] },
+      { "roll": 5, "text": "A murrain runs through the buffalo on the levels. Make an Animals check (7+): succeed, and the holders whose herds you saved become a Contact; fail, and the loss costs you one Benefit roll.", "ejects": "stays", "benefit": "lose", "benefitCount": 1, "benefitCondition": "checkFailed", "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": ["Animals"], "target": 7 }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "A Contact", "mode": "all", "grants": [{ "kind": "contact", "relation": "Contact", "value": 1 }] }, "grantCondition": "checkPassed", "tray": [] },
+      { "roll": 6, "text": "A survey team from the starport hires you to take them through the back channels. Gain one level of Navigation or Recon, and a Contact among the surveyors.", "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "Navigation or Recon", "mode": "oneOf", "grants": [{ "kind": "skill", "skill": "Navigation", "mode": "raise", "value": 1 }, { "kind": "skill", "skill": "Recon", "mode": "raise", "value": 1 }] }, "grant2": { "text": "A Contact", "mode": "all", "grants": [{ "kind": "contact", "relation": "Contact", "value": 1 }] }, "grant2Condition": "always", "tray": [] },
+      { "roll": 7, "text": "Life Event: roll on the shared Life Events table.", "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "Life Event", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 8, "text": "A neighbour's barn burns, and you raise a new one with them before the rains. Gain an Ally among the holders.", "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "An Ally", "mode": "all", "grants": [{ "kind": "contact", "relation": "Allie", "value": 1 }] }, "tray": [] },
+      { "roll": 9, "text": "Your neighbours put their marks to a letter for you. DM+2 held for this career's next Qualification roll, the one a change of assignment makes.", "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [{ "kind": "dm", "dm": 2, "value": "", "appliesTo": ["qualification"], "scope": "thisCareer", "career": "", "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "always", "note": "The neighbours' letter: DM+2 held for this career's next Qualification roll." }] },
+      { "roll": 10, "text": "The patrol's marsh station wants someone who knows every channel by name. Gain one level of Seafarer, and a standing offer of a place in Demo — Harbour Patrol, with no Qualification roll.", "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "Demo — Harbour Patrol", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "Seafarer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Seafarer", "mode": "raise", "value": 1 }] }, "tray": [] },
+      { "roll": 11, "text": "A harvest that fills every barn on the levels. Gain one extra Benefit roll.", "ejects": "stays", "benefit": "grant", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 12, "text": "The holders elect you reeve of the levels for a season. Take a promotion, or an extra roll on any of this career's skill tables.", "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": ["advanced", "skillRoll"], "mode": "oneOf", "optional": false }, "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] }
+    ],
+    "mishapTable": [
+      { "roll": 1, "text": "A bank gives way under you in the dark. Roll on the Injury table.", "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "Injury", "injury": { "modes": ["once"], "who": "traveller" }, "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 2, "text": "Blight takes the reed beds two years running, and the holding is sold for its debts. One of your Benefit rolls goes with it.", "ejects": "ejects", "benefit": "lose", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 3, "text": "A quarrel over water with the holding upstream ends before the water court, and you lose it. Gain an Enemy.", "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "An Enemy", "mode": "all", "grants": [{ "kind": "contact", "relation": "Enemy", "value": 1 }] }, "tray": [] },
+      { "roll": 4, "text": "Marsh fever keeps you abed through a whole planting. END -1.", "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "END -1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "endurance", "mode": "add", "value": -1 }] }, "tray": [] },
+      { "roll": 5, "text": "The dyke board marks your land for a new channel. Make an Advocate check (9+) before the water court: fail, and the land is taken.", "ejects": "ejects", "ejectsCondition": "checkFailed", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": ["Advocate"], "target": 9 }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 6, "text": "The patrol finds smugglers' boats in your channels and asks you to name the holders who rent them. Name them, and you keep the holding with an Enemy among your neighbours; refuse, and the holding is taken.", "ejects": "ejects", "ejectsCondition": "refused", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer", "subTable": "", "check": { "characteristic": "", "skills": [], "target": null }, "track": { "key": "", "formula": "", "value": 0, "reroll": false }, "awards": { "outcomes": [], "mode": "oneOf", "optional": false }, "grant": { "text": "An Enemy", "mode": "all", "grants": [{ "kind": "contact", "relation": "Enemy", "value": 1 }] }, "grantCondition": "accepted", "tray": [] }
+    ],
+    "standingModifiers": [],
+    "tracks": [],
+    "assignment": "",
+    "terms": 0,
+    "rank": 0,
+    "ladder": "",
+    "enlistedRank": 0,
+    "events": [],
+    "entryMode": "qualified",
+    "exitMode": "stillServing",
+    "termLog": [],
+    "track": { "key": "", "value": null, "cap": null, "adjustments": [] }
+  },
+  "effects": []
+}

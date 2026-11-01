@@ -87,7 +87,7 @@
   "items": [
     {
       "_id": "botSkillSeafarr1",
-      "name": "Demo — Seafarer",
+      "name": "Seafarer",
       "type": "talent",
       "img": "icons/svg/book.svg",
       "flags": { "mgt2": { "demo": { "copyOf": null,
@@ -107,7 +107,7 @@
     },
     {
       "_id": "botSkillAthletc1",
-      "name": "Demo — Athletics",
+      "name": "Athletics",
       "type": "talent",
       "img": "icons/svg/book.svg",
       "system": {

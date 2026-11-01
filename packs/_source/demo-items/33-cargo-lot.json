@@ -21,7 +21,7 @@
   "system": {
     "description": "Sealed drums of marsh-cut fibre, bound out-system. Nobody asks what it is for.",
     "source": { "book": "", "page": "" },
-    "tons": 12,
+    "tons": 15,
     "destination": { "world": null, "name": "Demo — Tallow Reach" },
     "dueDay": 214,
     "farePerTon": 1000,

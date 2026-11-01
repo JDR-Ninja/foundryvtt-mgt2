@@ -720,7 +720,7 @@ export class CareerData extends ItemBaseData {
         // Beats the generic no-return check rather than being filtered by it, and it must: this is
         // the fallback, and closing it leaves a Traveller with nowhere to go.
         schema.alwaysAvailable = new fields.BooleanField({ required: false, initial: false });
-        // "May not leave or be ejected from this career, not even by a Mishap".
+        // No mishap, event row or frame check ejects from this career; leaving it, or being forced out, is unchanged.
         schema.neverEjects = new fields.BooleanField({ required: false, initial: false });
         schema.blocksAnagathics = new fields.BooleanField({ required: false, initial: false });
         schema.eventRow7 = new fields.StringField({

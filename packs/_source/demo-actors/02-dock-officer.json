@@ -73,7 +73,7 @@
   "items": [
     {
       "_id": "npcSkillAdmin001",
-      "name": "Demo — Admin",
+      "name": "Admin",
       "type": "talent",
       "img": "icons/svg/book.svg",
       "system": {
@@ -91,7 +91,7 @@
     },
     {
       "_id": "npcSkillInvestg1",
-      "name": "Demo — Investigate",
+      "name": "Investigate",
       "type": "talent",
       "img": "icons/svg/book.svg",
       "system": {

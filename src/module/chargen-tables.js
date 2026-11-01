@@ -18,7 +18,6 @@ export const SharedTables = {
         return game.settings.get("mgt2", this.setting(role)) || "";
     },
 
-    /** @returns {Promise<Item|null>} */
     async table(role) {
         const uuid = this.uuid(role);
         if ( !uuid ) return null;
@@ -55,11 +54,11 @@ export const SharedTables = {
     }
 };
 
-/** The career templates a table can reach by name — the world first, then every Item compendium. */
+/** What a lookup reaches: the world first, then every Item compendium, where a demo answers only to its name. */
 export const CareerLibrary = {
 
-    /** @returns {Promise<Item|null>} */
-    async find(name, { kinds = ["career", "preCareer"] } = {}) {
+    /** The career of that name, the world's first; `indexOnly` answers with a pack's index entry, loading nothing. */
+    async find(name, { kinds = ["career", "preCareer"], indexOnly = false } = {}) {
         const key = MGT2Helper.skillSlug(name);
         if ( !key ) return null;
         const named = entry => (entry.type === "career") && (MGT2Helper.skillSlug(entry.name) === key)
@@ -69,21 +68,26 @@ export const CareerLibrary = {
         for ( const pack of game.packs.filter(one => one.documentName === "Item") ) {
             const index = await pack.getIndex({ fields: ["system.kind"] });
             const entry = index.find(named);
-            if ( entry ) return pack.getDocument(entry._id);
+            if ( entry ) return indexOnly ? entry : pack.getDocument(entry._id);
         }
         return null;
+    },
+
+    /** Whether a career opens only to a sentence, a draft or the referee, as a nameless compulsion needs. */
+    async anyForcedOnly() {
+        const forced = entry => (entry.type === "career") && ((entry.system?.kind ?? "career") === "career")
+            && (entry.system?.qualification?.entry === "forcedOnly");
+        if ( game.items.some(forced) ) return true;
+        return (await this.entries(["system.kind", "system.qualification.entry"])).some(({ entry }) => forced(entry));
     },
 
     /** The names of every career a table can reach, once each and sorted, less the one named. @returns {Promise<string[]>} */
     async names({ except = "" } = {}) {
         const fits = entry => (entry.type === "career") && ((entry.system?.kind ?? "career") === "career");
         const found = new Map(game.items.filter(fits).map(item => [MGT2Helper.skillSlug(item.name), item.name]));
-        for ( const pack of game.packs.filter(one => one.documentName === "Item") ) {
-            const index = await pack.getIndex({ fields: ["system.kind"] });
-            for ( const entry of index.filter(fits) ) {
-                const key = MGT2Helper.skillSlug(entry.name);
-                if ( !found.has(key) ) found.set(key, entry.name);
-            }
+        for ( const { entry } of await this.entries(["system.kind"]) ) {
+            const key = MGT2Helper.skillSlug(entry.name);
+            if ( fits(entry) && !found.has(key) ) found.set(key, entry.name);
         }
         found.delete(MGT2Helper.skillSlug(except));
         return [...found.values()].sort((a, b) => a.localeCompare(b, game.i18n.lang));
@@ -94,14 +98,21 @@ export const CareerLibrary = {
         const open = entry => (entry.type === "career") && entry.system?.alwaysAvailable
             && ((entry.system?.kind ?? "career") === "career");
         const found = new Map(game.items.filter(open).map(item => [MGT2Helper.skillSlug(item.name), item]));
-        for ( const pack of game.packs.filter(one => one.documentName === "Item") ) {
-            const index = await pack.getIndex({ fields: ["system.kind", "system.alwaysAvailable"] });
-            for ( const entry of index.filter(open) ) {
-                const key = MGT2Helper.skillSlug(entry.name);
-                if ( !found.has(key) ) found.set(key, await pack.getDocument(entry._id));
-            }
+        for ( const { pack, entry } of await this.entries(["system.kind", "system.alwaysAvailable"]) ) {
+            const key = MGT2Helper.skillSlug(entry.name);
+            if ( open(entry) && !found.has(key) ) found.set(key, await pack.getDocument(entry._id));
         }
         return [...found.values()];
+    },
+
+    async entries(fields, packs = game.packs.filter(one => one.documentName === "Item")) {
+        const found = [];
+        for ( const pack of packs ) {
+            const index = await pack.getIndex({ fields: [...fields, "flags.mgt2.demo"] })
+                .catch(error => void console.error(error)) ?? [];
+            found.push(...index.filter(entry => !entry.flags?.mgt2?.demo).map(entry => ({ pack, entry })));
+        }
+        return found;
     }
 };
 

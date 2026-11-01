@@ -266,7 +266,7 @@ async function qualify(view, key) {
         ? { mode: "fallbackCareer", note: "MGT2.Chargen.Term.AlwaysOpen" } : automaticEntry(view);
     // Folio 18: no return to the career just left; a template always available and a new-career
     // assignment change beat it.
-    if ( !automatic && leftLastTerm(view) && !system.alwaysAvailable && (system.entryMode !== "assignmentChange") ) {
+    if ( leftLastTerm(view) && !system.alwaysAvailable && (system.entryMode !== "assignmentChange") ) {
         ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.NoReturn", { career: record.name }));
         return { advance: false };
     }
@@ -334,20 +334,29 @@ async function entryDecided(view) {
         return false;
     };
     if ( await prohibits(actor, "qualification", record.name) ) return refuse("MGT2.Chargen.Term.Prohibited");
-    // Core p.52's sentence and an event's draft are compelled: that career, and no other, this term.
+    // Core p.52's sentence and an event's draft compel that career and no other; one found nowhere is dropped.
     const force = tray.find(entry => (entry.kind === "careerForce")
         && (entry.value ? named(entry.value) : (system.qualification.entry === "forcedOnly")));
     if ( force ) {
         await Chargen.spendExact(actor, force);
         return { mode: force.entryMode || "automatic", note: "MGT2.Chargen.Term.Forced", assignment: force.assignment };
     }
-    const elsewhere = tray.find(entry => entry.kind === "careerForce");
-    if ( elsewhere ) return refuse("MGT2.Chargen.Term.MustEnter", { other: elsewhere.value || "—" });
+    await dropLostForces(actor);
+    const elsewhere = Chargen.read(actor).tray.find(entry => entry.kind === "careerForce");
+    if ( elsewhere ) {
+        return refuse(elsewhere.value ? "MGT2.Chargen.Term.MustEnter" : "MGT2.Chargen.Term.MustEnterForced",
+            { other: elsewhere.value });
+    }
     const refusal = Chargen.read(actor).refusals.find(entry => (entry.term === term) && entry.drafted);
     if ( refusal && named(refusal.drafted) ) {
         return { mode: "drafted", note: "MGT2.Chargen.Term.DraftEntry", assignment: refusal.assignment };
     }
     if ( DRAFTED.includes(system.entryMode) ) return { mode: system.entryMode, note: "MGT2.Chargen.Term.DraftEntry" };
+    // Core p.52: never entered voluntarily — only by a sentence, a draft, or the referee's own hand.
+    if ( system.qualification.entry === "forcedOnly" ) {
+        return game.user.isGM ? { mode: "automatic", note: "MGT2.Chargen.Term.ForcedEntry" }
+            : refuse("MGT2.Chargen.Term.NotVoluntary");
+    }
     const offer = tray.find(entry => (entry.kind === "careerOffer") && named(entry.value));
     if ( offer && await DialogV2.confirm({ window: { title: "MGT2.Chargen.Term.OfferTitle" }, classes: ["mgt2"],
         content: `<p>${game.i18n.format("MGT2.Chargen.Term.OfferAsk", { career: record.name })}</p>`,
@@ -355,18 +364,28 @@ async function entryDecided(view) {
         await Chargen.spendExact(actor, offer);
         return { mode: "automatic", note: "MGT2.Chargen.Term.OfferTaken", assignment: offer.assignment };
     }
-    // Core p.52: never entered voluntarily — only by a sentence, a draft, or the referee's own hand.
-    if ( system.qualification.entry === "forcedOnly" ) {
-        return game.user.isGM ? { mode: "automatic", note: "MGT2.Chargen.Term.ForcedEntry" }
-            : refuse("MGT2.Chargen.Term.NotVoluntary");
-    }
-    // Core p.229: the referee's permission, which an event that opens the career grants.
-    if ( system.qualification.requiresPermission ) {
-        const unlock = tray.find(entry => (entry.kind === "unlock") && named(entry.value));
-        if ( unlock ) await Chargen.spendExact(actor, unlock);
-        else if ( !game.user.isGM ) return refuse("MGT2.Chargen.Term.NeedsPermission");
+    // Core p.229: the referee's permission, which an event that opens the career grants; entering spends it.
+    if ( system.qualification.requiresPermission && !game.user.isGM
+        && !tray.some(entry => (entry.kind === "unlock") && named(entry.value)) ) {
+        return refuse("MGT2.Chargen.Term.NeedsPermission");
     }
     return null;
+}
+
+/** Drop each compulsion nothing can answer, a career found nowhere or no forced-entry one, and tell both seats. */
+async function dropLostForces(actor) {
+    for ( const lost of Chargen.read(actor).tray.filter(entry => entry.kind === "careerForce") ) {
+        const answered = lost.value ? await CareerLibrary.find(lost.value, { indexOnly: true })
+            : await CareerLibrary.anyForcedOnly();
+        if ( answered ) continue;
+        await Chargen.spendExact(actor, lost, { whole: true });
+        const line = game.i18n.format(lost.value ? "MGT2.Chargen.Term.ForceMissing" : "MGT2.Chargen.Term.ForceNowhere",
+            { career: lost.value, name: actor.name });
+        ui.notifications.warn(line);
+        await ChatMessage.create({ speaker: ChatMessage.getSpeaker({ actor }),
+            content: `<p>${foundry.utils.escapeHTML(line)}</p>`,
+            whisper: game.users.filter(user => actor.testUserPermission(user, "OWNER")).map(user => user.id) });
+    }
 }
 
 /** Whether a `prohibition` forbids this check for this career; "in the first term" is one-shot, spent here. */
@@ -398,6 +417,9 @@ async function enter(view, assignment, { mode, note }) {
     await record.update({ "system.entryMode": kept, "system.assignment": assignment.name, "system.ladder": ladder,
         ...await bornTrack(system) });
     await logTerm(record, term, { note: game.i18n.format(note, { career: record.name }) });
+    const unlock = system.qualification.requiresPermission && Chargen.read(view.actor).tray.find(entry =>
+        (entry.kind === "unlock") && (MGT2Helper.skillSlug(entry.value) === MGT2Helper.skillSlug(record.name)));
+    if ( unlock ) await Chargen.spendExact(view.actor, unlock);
     if ( system.kind !== "preCareer" ) {
         await Chargen.bindGraduation(view.actor, record, true);
         await Chargen.carryEducation(view.actor, record);
@@ -482,16 +504,15 @@ function automaticEntry({ actor, system }) {
         return { mode: "automatic", note: "MGT2.Chargen.Term.AutomaticEntry" };
     }
     if ( system.alwaysAvailable ) return { mode: "automatic", note: "MGT2.Chargen.Term.AlwaysOpen" };
-    // "Automatic qualification if your SOC is 10 or higher", printed on the same line as that
-    // career's own target.
+    return autoQualifies({ actor, system }) ? { mode: "qualified", note: "MGT2.Chargen.Term.AutoThreshold" } : null;
+}
+
+/** "Automatic qualification if your SOC is 10 or higher" on the career's own line, or the Companion's "if SOC 6-". */
+function autoQualifies({ actor, system }) {
     const auto = system.qualification.autoIf;
     const score = actor.system.characteristics[auto.characteristic]?.value ?? 0;
-    // The Companion's "Automatic if SOC 6-" is the same clause under a ceiling.
-    if ( auto.characteristic && ((auto.min !== null) || (auto.max !== null))
-        && ((auto.min === null) || (score >= auto.min)) && ((auto.max === null) || (score <= auto.max)) ) {
-        return { mode: "qualified", note: "MGT2.Chargen.Term.AutoThreshold" };
-    }
-    return null;
+    return !!auto.characteristic && ((auto.min !== null) || (auto.max !== null))
+        && ((auto.min === null) || (score >= auto.min)) && ((auto.max === null) || (score <= auto.max));
 }
 
 /** A refused qualification: the career was never entered, so the record goes and the ledger keeps the refusal. */
@@ -731,7 +752,7 @@ async function event(view) {
 }
 
 /** One roll on a career's Events or Mishaps table — its own, or a borrowed one's — and everything the row then does. */
-async function rollTable(view, which, { nested = false, asPrinted = false, borrowed = null, depth = 0 } = {}) {
+async function rollTable(view, which, { nested = false, asPrinted = false, borrowed = null, chain = [] } = {}) {
     const system = borrowed?.system ?? view.system;
     const mishap = which === "mishap";
     const rows = mishap ? system.mishapTable : system.eventTable;
@@ -740,16 +761,19 @@ async function rollTable(view, which, { nested = false, asPrinted = false, borro
             ? "MGT2.Chargen.Term.NoMishapTable" : "MGT2.Chargen.Term.NoEventTable"));
         return { advance: true };
     }
+    const career = borrowed?.name ?? view.record?.name ?? "";
+    const link = `${which}:${MGT2Helper.skillSlug(career)}`;
+    if ( await chainStopped(view, chain, link, borrowedLabel(career, which)) ) return { advance: true };
+    const next = [...chain, link];
     const rolled = await roll(view, { step: mishap ? "survival" : "event",
         formula: mishap ? "1d6" : "2d6", target: null,
         title: borrowed ? borrowedLabel(borrowed.name, mishap ? "mishap" : "event") : "" });
     if ( !rolled ) return { advance: false };
 
     const row = rows.find(entry => entry.roll === rolled.total);
-    // The routing is data: a 7 is the shared Life Events table unless the template says this
-    // career owns that row.
+    // The routing is data: a 7 is the shared Life Events table unless the template says this career owns that row.
     if ( !mishap && (rolled.total === 7) && (system.eventRow7 !== "own") ) {
-        return followSubTable(view, row?.subTable ?? "", { fallback: "lifeEvents", depth, injury: row?.injury });
+        return followSubTable(view, row?.subTable ?? "", { fallback: "lifeEvents", chain: next, injury: row?.injury });
     }
     if ( !row ) {
         ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.NoRow", { n: rolled.total }));
@@ -757,20 +781,19 @@ async function rollTable(view, which, { nested = false, asPrinted = false, borro
     }
 
     const outcome = await applyRow(view, row, { mishap, nested, asPrinted, borrowed: borrowed?.name });
-    if ( row.careerMode === "borrow" ) await borrowTables(view, row, outcome, depth);
+    if ( row.careerMode === "borrow" ) await borrowTables(view, row, outcome, next);
     if ( await subTableEarned(row, outcome) ) {
-        await followSubTable(view, row.subTable, { depth, borrowed, nested, mishapEjects: outcome.mishapEjects,
+        await followSubTable(view, row.subTable, { chain: next, borrowed, nested, mishapEjects: outcome.mishapEjects,
             injury: row.injury });
     }
     return { advance: true };
 }
 
 /** A row naming another table: the Mishap table of the career it was rolled on, Core p.49's Injury, a shared one, or a table of its own. */
-async function followSubTable(view, name, { fallback = "", depth = 0, borrowed = null, nested = false,
+async function followSubTable(view, name, { fallback = "", chain = [], borrowed = null, nested = false,
     mishapEjects = false, injury = null } = {}) {
-    if ( depth > 2 ) return { advance: true };
     if ( MGT2Helper.skillSlug(name) === OWN_MISHAP_TABLE ) {
-        return rollTable(view, "mishap", { nested: true, asPrinted: mishapEjects && !nested, borrowed, depth: depth + 1 });
+        return rollTable(view, "mishap", { nested: true, asPrinted: mishapEjects && !nested, borrowed, chain });
     }
     if ( SharedTables.isInjury(name) ) return rollInjury(view, injury);
     // Core p.57's Prison Event is the Prisoner's own: a table no shared role names is found by its name.
@@ -792,6 +815,8 @@ async function followSubTable(view, name, { fallback = "", depth = 0, borrowed =
         if ( view.record ) await noteEvent(view, line);
         return { advance: true };
     }
+    if ( await chainStopped(view, chain, table.uuid, label) ) return { advance: true };
+    const next = [...chain, table.uuid];
     // A table of its own carries no dice: rows that stop at 6 are a 1D table, as every printed one is.
     const dice = role ? MGT2.SharedCreationTables[role].dice
         : ((Math.max(...table.system.eventTable.map(entry => entry.roll ?? 0)) <= 6) ? "1d6" : "2d6");
@@ -806,13 +831,26 @@ async function followSubTable(view, name, { fallback = "", depth = 0, borrowed =
     if ( role === "draft" ) return draftNextTerm(view, row, rolled.total);
     // A row reached from a mishap that does not eject cannot eject either: the row that sent there decided.
     const outcome = await applyRow(view, row, { mishap: false, nested });
-    if ( row.careerMode === "borrow" ) await borrowTables(view, row, outcome, depth + 1);
+    if ( row.careerMode === "borrow" ) await borrowTables(view, row, outcome, next);
     if ( await subTableEarned(row, outcome) ) {
-        await followSubTable(view, row.subTable, { depth: depth + 1, nested, mishapEjects: outcome.mishapEjects,
+        await followSubTable(view, row.subTable, { chain: next, nested, mishapEjects: outcome.mishapEjects,
             injury: row.injury });
     }
     return { advance: true };
 }
+
+/** A chain of tables rolls each table once and none past the tenth, which no printed chain reaches; a stop is said. */
+async function chainStopped(view, chain, link, table) {
+    const key = chain.includes(link) ? "MGT2.Chargen.Term.ChainLoop"
+        : ((chain.length >= CHAIN_DEPTH) ? "MGT2.Chargen.Term.ChainDeep" : "");
+    if ( !key ) return false;
+    const line = game.i18n.format(key, { table });
+    ui.notifications.warn(line);
+    if ( view.record ) await logTerm(view.record, view.term, { note: line });
+    return true;
+}
+
+const CHAIN_DEPTH = 10;
 
 /** Core p.45, Scout 8: "If you fail, roll on the Mishap table" — a sub-table one branch of the throw earns. */
 async function subTableEarned(row, outcome) {
@@ -820,8 +858,7 @@ async function subTableEarned(row, outcome) {
 }
 
 /** Core p.23, Agent event 8: a row rolls another career's tables, each on its own branch; naming none, any other career's. */
-async function borrowTables(view, row, outcome, depth) {
-    if ( depth > 2 ) return;
+async function borrowTables(view, row, outcome, chain) {
     const typed = row.career.split(",").map(name => name.trim()).filter(name => name);
     const tables = [];
     for ( const key of Object.keys(MGT2.BorrowedTables) ) {
@@ -844,7 +881,7 @@ async function borrowTables(view, row, outcome, depth) {
     for ( const key of tables ) {
         if ( key === "skill" ) await borrowSkill(view, borrowed, row.borrow.skillTable);
         else await rollTable(view, key, { nested: true, asPrinted: (key === "mishap") && outcome.mishapEjects,
-            borrowed, depth: depth + 1 });
+            borrowed, chain });
     }
 }
 
@@ -1513,10 +1550,13 @@ async function promote(view) {
     return game.i18n.format("MGT2.Chargen.Term.Advanced", { rank: Chargen.effectiveRank(record) });
 }
 
-/** A demotion: *"Lose 1 rank … but you are not ejected from this career"*. */
+/** A demotion: *"Lose 1 rank … but you are not ejected from this career"*, never below the lowest rung, nor up. */
 async function demote(view) {
     const { actor, record, system, term } = view;
-    const rank = Math.max(0, system.rank - 1);
+    const rungs = (system.rankLadders.find(entry => entry.id === system.ladder)?.rows ?? []).map(row => row.rank)
+        .filter(Number.isInteger);
+    const rank = Math.min(system.rank, Math.max(rungs.length ? Math.min(...rungs) : 0, system.rank - 1));
+    if ( rank === system.rank ) return game.i18n.format("MGT2.Chargen.Term.DemotedFloor", { rank });
     const tracks = foundry.utils.deepClone(Chargen.read(actor).tracks);
     const key = system.ladder && Muster.rankTrackKey(record, system.ladder);
     if ( key ) {
@@ -1748,6 +1788,7 @@ async function decide(view, key) {
         return { advance: true };
     }
     // Core p.45's "you may not re-enlist", and a career compelled elsewhere next term, end this one.
+    await dropLostForces(actor);
     const tray = Chargen.read(actor).tray;
     const here = name => !name || (MGT2Helper.skillSlug(name) === MGT2Helper.skillSlug(record.name));
     const block = tray.find(one => (one.kind === "careerBlock") && here(one.career || one.value));
@@ -1829,7 +1870,8 @@ async function changeAssignment(view, rule) {
         return null;
     }
     if ( rule === "requalifyKeepRank" ) {
-        const rolled = await roll(view, qualificationRoll(view, { open: true }));
+        // The same Qualification line is re-rolled, so a score that waives it on entry waives it here.
+        const rolled = autoQualifies(view) ? { passed: true } : await roll(view, qualificationRoll(view, { open: true }));
         // Succeed and you adopt the new assignment KEEPING your rank; fail and you simply continue
         // in the old one, without penalty (folio 20).
         if ( rolled?.passed ) {
@@ -2425,13 +2467,12 @@ async function pickSkill(actor, grant, { provenance, thrown }) {
     }
 }
 
-/** What an open pick offers: the Traveller's skills, then the world's and every Item compendium's. */
+/** What an open pick offers: the Traveller's skills, then the world's and every Item compendium's but a demo's. */
 async function skillLibrary(actor) {
     const isSkill = entry => (entry.type === "talent") && (entry.system?.subType === "skill");
     const names = [...Grants.skills(actor), ...game.items.filter(isSkill)].map(item => item.name);
-    for ( const pack of game.packs.filter(one => one.documentName === "Item") ) {
-        names.push(...(await pack.getIndex({ fields: ["system.subType"] })).filter(isSkill).map(entry => entry.name));
-    }
+    names.push(...(await CareerLibrary.entries(["system.subType"])).map(({ entry }) => entry).filter(isSkill)
+        .map(entry => entry.name));
     return [...new Map(names.map(name => [MGT2Helper.skillSlug(name), name])).values()]
         .sort((a, b) => a.localeCompare(b, game.i18n.lang));
 }

@@ -85,8 +85,8 @@
     "qualificationOverride": { "kind": "none", "formula": "", "characteristic": "", "exceptCareers": [] },
     "backgroundSkills": [
       { "sex": "", "role": "", "formula": "3 + @characteristics.education.dm",
-        "mandatory": ["Demo — Seafarer"],
-        "choices": ["Demo — Athletics", "Demo — Investigate", "Demo — Mechanic", "Demo — Persuade", "Demo — Vacc Suit"] }
+        "mandatory": ["Seafarer"],
+        "choices": ["Athletics", "Investigate", "Mechanic", "Persuade", "Vacc Suit"] }
     ],
     "psiWithoutTermPenalty": false
   },

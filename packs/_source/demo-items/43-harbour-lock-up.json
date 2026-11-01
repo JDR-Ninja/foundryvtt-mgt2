@@ -1,0 +1,327 @@
+{
+  "_id": "demoCareerLockup",
+  "name": "Demo — Harbour Lock-up",
+  "type": "career",
+  "img": "icons/svg/padlock.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 43,
+        "cliff": "a career nobody chooses is entered by the tray and left only by its own track",
+        "teaches": [
+          "qualification.entry: forcedOnly is never entered by choice, and a player who drops it is refused. It opens to a careerForce on the tray, left by an event row whose careerMode is force or by an anagathics arrest, or to the referee's own hand.",
+          "exitRule.track names one of tracks[], and entering rolls it from its initial onto the record: here the Parole Threshold, 1d6+3, never above its cap of 10.",
+          "While the record holds that track the Traveller is held: the decision offers Continue and a change of assignment, but no Leave. The Advancement roll is the parole hearing, a total above the threshold releases, and a pass still promotes while the trackedAdvancementPromotes rule is on.",
+          "Rows work the threshold through their track fields: value moves it (row 3, mishap 2), condition ties the move to one branch of the row's check (rows 10 and 11), reroll rolls it afresh from its declaration (row 6), and a gate of kind track reads it (row 4).",
+          "The escape is data: row 10's check is optional, its released award is earned on a pass and its track move on a failure, and a Traveller who declines earns neither. Released by escape, by pardon (row 12) or by the board, the record closes as paroled.",
+          "Row 7 is a prohibition on the Advancement roll, which here is a hearing denied. eventRow7: own makes it the career's own row, so the shared Life Events table is never rolled from this career.",
+          "neverEjects holds the Traveller through every mishap: the mishap rows keep the table's ejects, and the career flag overrides them. assignmentChange: free moves between the three assignments with no roll; newCareer or separateCareers would close the record as a voluntary leaving, a way out of the hold.",
+          "Row 8 leaves an unlock naming Demo — Pilots' Guild, the referee's leave that guild asks for, which a player's seat can then spend."
+        ],
+        "trap": "The record's track at the foot stays empty on the template: entering writes it, and a key typed there is never rolled, because a record whose track already has a key keeps it. Its null value then reads as 0, and the first hearing always releases. The qualification line is empty, with difficulty 0 and ageDM.from null, because nothing is rolled to enter. medicalBillsRow is blank on purpose, so the Lock-up pays no share of an injury's care. blocksAnagathics is true: a Traveller sent here comes off them, which rolls ageing at once. The record fields below the tables stay empty, as on every template."
+      }
+    }
+  },
+  "system": {
+    "description": "The old customs hulk moored off the quay, where Bellweather keeps the people it has sentenced: dredging the channels by day, locked below decks by night. Nobody enters it by choice, and the way out is a parole board, a pardon or a skiff in the fog. Invented for this pack, and no book's career.",
+    "subType": "career",
+    "source": { "book": "", "page": "" },
+    "kind": "career",
+    "difficulty": 0,
+    "qualification": {
+      "entry": "forcedOnly",
+      "characteristics": [],
+      "autoIf": { "characteristic": "", "min": null, "max": null },
+      "perPreviousCareer": 0,
+      "conditionalDMs": [],
+      "requiresPermission": false
+    },
+    "ageDM": { "from": null, "dm": 0 },
+    "commission": false,
+    "commissionCheck": { "characteristic": "", "target": null },
+    "pensionable": false,
+    "assignmentChange": "free",
+    "basicFrom": "service",
+    "alwaysAvailable": false,
+    "neverEjects": true,
+    "blocksAnagathics": true,
+    "eventRow7": "own",
+    "exitRule": { "track": "parole", "test": "An Advancement roll above the Parole Threshold ends the sentence as paroled; any other total serves another term." },
+    "medicalBillsRow": "",
+    "restrictedTo": { "species": "", "sex": "" },
+    "rankLadders": [
+      {
+        "id": "hulk",
+        "name": "Hulk",
+        "officer": false,
+        "rows": [
+          { "rank": 0, "title": "Newcomer", "bonus": { "text": "Stealth 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Stealth", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 1, "title": "Bunk Holder", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 2, "title": "Deck Trusty", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 3, "title": "Gang Boss", "bonus": { "text": "Streetwise 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Streetwise", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 4, "title": "Old Hand", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 5, "title": "Wing Boss", "bonus": { "text": "Deception 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Deception", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 6, "title": "Keeper of the Keys", "bonus": { "text": "An Ally among the guards", "mode": "all",
+            "grants": [{ "kind": "contact", "relation": "Allie", "value": 1 }] } }
+        ]
+      }
+    ],
+    "assignments": [
+      {
+        "name": "Dredge Gang",
+        "ladder": "hulk",
+        "officerLadder": "",
+        "survival": { "characteristic": "endurance", "target": 6 },
+        "advancement": { "characteristic": "strength", "target": 8 },
+        "skills": [
+          { "text": "Athletics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Athletics", "mode": "raise", "value": 1 }] },
+          { "text": "Seafarer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Seafarer", "mode": "raise", "value": 1 }] },
+          { "text": "Mechanic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Mechanic", "mode": "raise", "value": 1 }] },
+          { "text": "Melee", "mode": "all", "grants": [{ "kind": "skill", "skill": "Melee", "mode": "raise", "value": 1 }] },
+          { "text": "Survival", "mode": "all", "grants": [{ "kind": "skill", "skill": "Survival", "mode": "raise", "value": 1 }] },
+          { "text": "Recon", "mode": "all", "grants": [{ "kind": "skill", "skill": "Recon", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      {
+        "name": "Galley Crew",
+        "ladder": "hulk",
+        "officerLadder": "",
+        "survival": { "characteristic": "intellect", "target": 6 },
+        "advancement": { "characteristic": "social", "target": 8 },
+        "skills": [
+          { "text": "Streetwise", "mode": "all", "grants": [{ "kind": "skill", "skill": "Streetwise", "mode": "raise", "value": 1 }] },
+          { "text": "Broker", "mode": "all", "grants": [{ "kind": "skill", "skill": "Broker", "mode": "raise", "value": 1 }] },
+          { "text": "Deception", "mode": "all", "grants": [{ "kind": "skill", "skill": "Deception", "mode": "raise", "value": 1 }] },
+          { "text": "Steward", "mode": "all", "grants": [{ "kind": "skill", "skill": "Steward", "mode": "raise", "value": 1 }] },
+          { "text": "Persuade", "mode": "all", "grants": [{ "kind": "skill", "skill": "Persuade", "mode": "raise", "value": 1 }] },
+          { "text": "Gambler", "mode": "all", "grants": [{ "kind": "skill", "skill": "Gambler", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      {
+        "name": "Infirmary",
+        "ladder": "hulk",
+        "officerLadder": "",
+        "survival": { "characteristic": "education", "target": 7 },
+        "advancement": { "characteristic": "intellect", "target": 6 },
+        "skills": [
+          { "text": "Medic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Medic", "mode": "raise", "value": 1 }] },
+          { "text": "Admin", "mode": "all", "grants": [{ "kind": "skill", "skill": "Admin", "mode": "raise", "value": 1 }] },
+          { "text": "Science", "mode": "all", "grants": [{ "kind": "skill", "skill": "Science", "mode": "raise", "value": 1 }] },
+          { "text": "Persuade", "mode": "all", "grants": [{ "kind": "skill", "skill": "Persuade", "mode": "raise", "value": 1 }] },
+          { "text": "Steward", "mode": "all", "grants": [{ "kind": "skill", "skill": "Steward", "mode": "raise", "value": 1 }] },
+          { "text": "Stealth", "mode": "all", "grants": [{ "kind": "skill", "skill": "Stealth", "mode": "raise", "value": 1 }] }
+        ]
+      }
+    ],
+    "tables": {
+      "personalDevelopment": {
+        "present": true,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "STR +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "strength", "mode": "add", "value": 1 }] },
+          { "text": "END +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "endurance", "mode": "add", "value": 1 }] },
+          { "text": "Melee", "mode": "all", "grants": [{ "kind": "skill", "skill": "Melee", "mode": "raise", "value": 1 }] },
+          { "text": "Athletics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Athletics", "mode": "raise", "value": 1 }] },
+          { "text": "Gambler", "mode": "all", "grants": [{ "kind": "skill", "skill": "Gambler", "mode": "raise", "value": 1 }] },
+          { "text": "DEX +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "dexterity", "mode": "add", "value": 1 }] }
+        ]
+      },
+      "service": {
+        "present": true,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "Athletics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Athletics", "mode": "raise", "value": 1 }] },
+          { "text": "Melee", "mode": "all", "grants": [{ "kind": "skill", "skill": "Melee", "mode": "raise", "value": 1 }] },
+          { "text": "Stealth", "mode": "all", "grants": [{ "kind": "skill", "skill": "Stealth", "mode": "raise", "value": 1 }] },
+          { "text": "Streetwise", "mode": "all", "grants": [{ "kind": "skill", "skill": "Streetwise", "mode": "raise", "value": 1 }] },
+          { "text": "Deception", "mode": "all", "grants": [{ "kind": "skill", "skill": "Deception", "mode": "raise", "value": 1 }] },
+          { "text": "Seafarer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Seafarer", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      "advancedEducation": {
+        "present": true,
+        "gate": { "characteristic": "education", "min": 9 },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "Advocate", "mode": "all", "grants": [{ "kind": "skill", "skill": "Advocate", "mode": "raise", "value": 1 }] },
+          { "text": "Medic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Medic", "mode": "raise", "value": 1 }] },
+          { "text": "Broker", "mode": "all", "grants": [{ "kind": "skill", "skill": "Broker", "mode": "raise", "value": 1 }] },
+          { "text": "Admin", "mode": "all", "grants": [{ "kind": "skill", "skill": "Admin", "mode": "raise", "value": 1 }] },
+          { "text": "Mechanic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Mechanic", "mode": "raise", "value": 1 }] },
+          { "text": "Persuade", "mode": "all", "grants": [{ "kind": "skill", "skill": "Persuade", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      "officer": {
+        "present": false,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": true,
+        "rows": []
+      }
+    },
+    "benefits": {
+      "cash": [0, 50, 150, 400, 800, 1500, 3000],
+      "other": [
+        { "text": "A Contact on the inside", "mode": "all", "grants": [{ "kind": "contact", "relation": "Contact", "value": 1 }] },
+        { "text": "Demo — Dock Coveralls", "mode": "all", "grants": [{ "kind": "benefit", "ref": "Demo — Dock Coveralls", "value": 1 }] },
+        { "text": "Streetwise or Deception", "mode": "oneOf", "grants": [
+          { "kind": "skill", "skill": "Streetwise", "mode": "raise", "value": 1 },
+          { "kind": "skill", "skill": "Deception", "mode": "raise", "value": 1 }] },
+        { "text": "An Ally who did time with you", "mode": "all", "grants": [{ "kind": "contact", "relation": "Allie", "value": 1 }] },
+        { "text": "END +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "endurance", "mode": "add", "value": 1 }] },
+        { "text": "Demo — Engineer's Toolkit", "mode": "all", "grants": [{ "kind": "benefit", "ref": "Demo — Engineer's Toolkit", "value": 1 }] },
+        { "text": "STR +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "strength", "mode": "add", "value": 1 }] }
+      ]
+    },
+    "eventTable": [
+      { "roll": 2, "text": "A brawl breaks out in the lower hold with you in the middle of it. Roll on the Mishap table; the hulk keeps you whatever it says.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Mishap", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 3, "text": "The night guard on your deck takes against you. Gain an Enemy, and your Parole Threshold rises by 1.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "parole", "formula": "", "value": 1, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "An Enemy", "mode": "all", "grants": [{ "kind": "contact", "relation": "Enemy", "value": 1 }] }, "tray": [] },
+      { "roll": 4, "text": "The dredge gang wants hands who will be aboard a while. With a Parole Threshold of 8 or more, gain one level of Athletics; below it, you crew the work boats and gain one level of Seafarer.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "gate": { "kind": "track", "characteristic": "", "key": "parole", "min": 8, "max": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Athletics 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Athletics", "mode": "raise", "value": 1 }] },
+        "grantCondition": "gatePassed",
+        "grant2": { "text": "Seafarer 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Seafarer", "mode": "raise", "value": 1 }] },
+        "grant2Condition": "gateFailed", "tray": [] },
+      { "roll": 5, "text": "The hulk's surgeon needs a pair of steady hands. Make an Education check (8+): pass, and gain one level of Medic, and DM+1 is held for your next parole hearing.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "education", "skills": [], "target": 8 },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Medic 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Medic", "mode": "raise", "value": 1 }] },
+        "grantCondition": "checkPassed",
+        "tray": [{ "kind": "dm", "dm": 1, "value": "", "appliesTo": ["advancement"], "scope": "thisCareer", "career": "",
+          "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "checkPassed",
+          "note": "The surgeon's good word: DM+1 held for one Advancement roll, which here is the parole hearing." }] },
+      { "roll": 6, "text": "A new parole board sits, and every file on the hulk is read again. Your Parole Threshold is rolled afresh.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "parole", "formula": "", "value": 0, "reroll": true },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 7, "text": "Lock-down: a guard is hurt, and the whole hulk is shut below decks for the season. No parole hearing this term.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] },
+        "tray": [{ "kind": "prohibition", "dm": 0, "value": "", "appliesTo": ["advancement"], "scope": "thisCareer", "career": "",
+          "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "always",
+          "note": "Lock-down: no Advancement roll this term, so no parole hearing either." }] },
+      { "roll": 8, "text": "A guild pilot doing a short sentence for a grounding shares your bunk, and promises to speak for you at the Guild hall. Gain a Contact, and the referee's leave to join Demo — Pilots' Guild.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "A Contact", "mode": "all", "grants": [{ "kind": "contact", "relation": "Contact", "value": 1 }] },
+        "tray": [{ "kind": "unlock", "dm": 0, "value": "Demo — Pilots' Guild", "appliesTo": ["qualification"], "scope": "namedCareer",
+          "career": "Demo — Pilots' Guild", "duration": "restOfCreation", "uses": 1, "expiresWhen": "", "condition": "always",
+          "note": "A pilot's word at the Guild hall: the leave the guild asks for, spent on entering it." }] },
+      { "roll": 9, "text": "You keep the book on the dredge-gang races. Make a Gambler check (8+): win, and gain an extra Benefit roll.",
+        "ejects": "stays", "benefit": "grant", "benefitCount": 1, "benefitCondition": "checkPassed", "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": ["Gambler"], "target": 8 },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 10, "text": "Fog on the marsh, and a skiff left unchained. If you go, make a Seafarer or Stealth check (9+): succeed, and you are away across the marsh and out of the Lock-up, with the warden for an Enemy; fail, and you are dragged back and your Parole Threshold rises by 3.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": ["Seafarer", "Stealth"], "target": 9, "optional": true },
+        "track": { "key": "parole", "formula": "", "value": 3, "reroll": false, "condition": "checkFailed" },
+        "awards": { "outcomes": ["released"], "mode": "oneOf", "optional": false, "condition": "checkPassed" },
+        "grant": { "text": "The warden, an Enemy", "mode": "all", "grants": [{ "kind": "contact", "relation": "Enemy", "value": 1 }] },
+        "grantCondition": "checkPassed", "tray": [] },
+      { "roll": 11, "text": "An advocate from the quay takes up your case for nothing. Gain an Ally, and make a Social check (8+): pass, and your Parole Threshold falls by 3.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "social", "skills": [], "target": 8 },
+        "track": { "key": "parole", "formula": "", "value": -3, "reroll": false, "condition": "checkPassed" },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "An Ally", "mode": "all", "grants": [{ "kind": "contact", "relation": "Allie", "value": 1 }] }, "tray": [] },
+      { "roll": 12, "text": "The governor's pardon comes down the quay with the spring tide. You are released.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": ["released"], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] }
+    ],
+    "mishapTable": [
+      { "roll": 1, "text": "The dredge chain parts and drags you over the side with it. Roll on the Injury table.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Injury", "injury": { "modes": ["once"], "who": "traveller" },
+        "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 2, "text": "A cellmate's escape is laid at your door. Lose one Benefit roll, and your Parole Threshold rises by 1.",
+        "ejects": "ejects", "benefit": "lose", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "parole", "formula": "", "value": 1, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 3, "text": "Marsh fever goes through the lower hold. Make an Endurance check (8+): fail, and roll on the Injury table.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Injury", "subTableCondition": "checkFailed", "injury": { "modes": ["once"], "who": "traveller" },
+        "check": { "characteristic": "endurance", "skills": [], "target": 8 },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 4, "text": "Your stash under the bunk boards is found and taken. Lose every Benefit roll this career has earned you.",
+        "ejects": "ejects", "benefit": "wipe", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 5, "text": "You are moved to the hard wing after a fight you did not start. Gain an Enemy, and DM-1 on your next Survival roll here.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "An Enemy", "mode": "all", "grants": [{ "kind": "contact", "relation": "Enemy", "value": 1 }] },
+        "tray": [{ "kind": "dm", "dm": -1, "value": "", "appliesTo": ["survival"], "scope": "thisCareer", "career": "",
+          "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "always",
+          "note": "The hard wing: DM-1 on the next Survival roll in the Lock-up." }] },
+      { "roll": 6, "text": "A beating in the yard that nobody saw. Roll on the Injury table twice and take the better result.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Injury", "injury": { "modes": ["higher"], "who": "traveller" },
+        "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] }
+    ],
+    "standingModifiers": [
+      { "dm": 1, "per": 0, "skills": [], "appliesTo": ["survival"], "career": "",
+        "gate": { "characteristic": "social", "min": 10 },
+        "note": "The guards go easy on a name they know: DM+1 to Survival rolls in the Lock-up at SOC 10+." }
+    ],
+    "tracks": [
+      { "key": "parole", "label": "Parole Threshold", "kind": "numeric", "initial": "1d6+3", "cap": 10, "monotone": false, "values": [] }
+    ],
+    "assignment": "",
+    "terms": 0,
+    "rank": 0,
+    "ladder": "",
+    "enlistedRank": 0,
+    "events": [],
+    "entryMode": "qualified",
+    "exitMode": "stillServing",
+    "termLog": [],
+    "track": { "key": "", "value": null, "cap": null, "adjustments": [] }
+  },
+  "effects": []
+}

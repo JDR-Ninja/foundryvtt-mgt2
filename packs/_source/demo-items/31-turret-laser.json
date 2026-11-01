@@ -27,7 +27,7 @@
     "tl": "TL12",
     "legality": 5,
     "container": { "id": "" },
-    "roll": { "characteristic": "dexterity", "skill": "Demo — Gunner", "difficulty": "Average" },
+    "roll": { "characteristic": "dexterity", "skill": "Gunner", "difficulty": "Average" },
     "equipped": false,
     "range": { "isMelee": false, "value": null, "unit": "", "band": "medium" },
     "damage": "2D6",

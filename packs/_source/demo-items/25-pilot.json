@@ -27,9 +27,9 @@
     "colour": "#3f6f9f",
     "show": true,
     "actions": [
-      { "label": "Evade", "kind": "skill", "characteristic": "dexterity", "skill": "Demo — Pilot",
+      { "label": "Evade", "kind": "skill", "characteristic": "dexterity", "skill": "Pilot",
         "difficulty": "Average", "dm": 0, "step": "manoeuvre", "cap": "round" },
-      { "label": "Dock", "kind": "skill", "characteristic": "dexterity", "skill": "Demo — Pilot",
+      { "label": "Dock", "kind": "skill", "characteristic": "dexterity", "skill": "Pilot",
         "difficulty": "Difficult", "dm": 0, "step": "actions", "cap": "none" },
       { "label": "Reverse thrust", "kind": "special", "characteristic": "", "skill": "",
         "difficulty": "", "dm": 0, "step": "reaction", "cap": "round" }

@@ -13,7 +13,7 @@
           "`requireSkill` and `requireSkillLevel` are the pair behind the armour DM: a wearer short of the level takes a penalty on every check.",
           "`processing` on an armour is what lets a suit run software — `null` means it runs none."
         ],
-        "trap": "`requireSkill` matches an owned skill Item by name, so it reads `Demo — Vacc Suit` and not `Vacc Suit`. A name that matches nothing silently penalises everyone who wears it."
+        "trap": "`requireSkill` matches an owned skill Item by name, so it reads the skill's real name, `Vacc Suit`, which is the name on the wearer's skill. A name that matches nothing silently penalises everyone who wears it."
       }
     }
   },
@@ -33,7 +33,7 @@
     "protection": 6,
     "processing": null,
     "specialised": { "software": "", "bonus": 0 },
-    "requireSkill": "Demo — Vacc Suit",
+    "requireSkill": "Vacc Suit",
     "requireSkillLevel": 1,
     "powered": false,
     "breach": "intact",

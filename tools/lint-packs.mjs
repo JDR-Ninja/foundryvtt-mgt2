@@ -88,6 +88,12 @@ const ROBOT_TRAVELLER_KEYS = ["strength", "dexterity", "endurance", "intellect",
 /** `MGT2.TL`'s keys, which no `choices` list defends — see the `index-fields` rule. */
 const TL_KEY = /^(TL\d{2}|NA|Unknow|NotIdentified)$/;
 
+/** The careers of every pack being linted that only a sentence, a draft or the referee opens, by `fold`. */
+let FORCED_ONLY = new Set();
+/** The engine's `MGT2Helper.skillSlug`: core's strict `slugify`, its transliteration read as NFD less the marks. */
+const fold = name => String(name ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase()
+    .replace(/[\s-]+/g, "-").replace(/[^a-z0-9-]/g, "");
+
 /**
  * `1D`, `D3`, `-1D`: the books' own die forms, which `new Roll` refuses with *"Unresolved
  * StringTerm"*. A demo document is invented, so it has no excuse to carry one. The lookahead
@@ -229,6 +235,21 @@ const RULES = [
         }
     },
     {
+        id: "offer-forced-only", cliff: 8, scope: "primary", type: "career",
+        check(subject, report) {
+            const offers = (where, name) => FORCED_ONLY.has(fold(name))
+                && report(`${where} offers "${name}", whose qualification.entry is forcedOnly — an offer never opens it, a force does`);
+            for ( const key of ["eventTable", "mishapTable"] ) {
+                (subject.system?.[key] ?? []).forEach((row, index) => {
+                    if ( row?.career && ((row.careerMode ?? "offer") === "offer") ) offers(`${key}[${index}]`, row.career);
+                    (row?.tray ?? []).forEach((entry, at) => {
+                        if ( entry?.kind === "careerOffer" ) offers(`${key}[${index}].tray[${at}]`, entry.value);
+                    });
+                });
+            }
+        }
+    },
+    {
         id: "robot-manipulators", cliff: 9, scope: "primary", type: "robot",
         check(subject, report) {
             const manipulators = subject.system?.manipulators ?? [];
@@ -299,6 +320,8 @@ const RULES = [
     {
         id: "demo-name", cliff: null, scope: "primary",
         check(subject, report) {
+            // A skill is matched by its name, so a skill Item takes its real one; `flags.mgt2.demo` still marks it.
+            if ( (subject.type === "talent") && (subject.system?.subType === "skill") ) return;
             if ( !String(subject.document.name ?? "").startsWith("Demo — ") ) {
                 report("a demo document is named `Demo — …` so nothing here is ever mistaken for published content");
             }
@@ -414,6 +437,7 @@ let problems = 0;
 if ( argv.includes("--selftest") ) {
     selftest();
 } else if ( source ) {
+    FORCED_ONLY = forcedOnly([path.resolve(source)]);
     lintDirectory(path.resolve(source), path.basename(source));
 } else {
     const selected = (names.length ? names.map(pick) : PACKS).filter(pack => pack.authored);
@@ -422,11 +446,12 @@ if ( argv.includes("--selftest") ) {
         console.log("No pack declares `authored: true`, so this gate has no subject yet.");
         process.exit(0);
     }
-    for ( const pack of selected ) {
-        const dir = path.join(SOURCE_DIR, pack.name);
+    const dirs = selected.map(pack => [pack, path.join(SOURCE_DIR, pack.name)]);
+    for ( const [pack, dir] of dirs ) {
         if ( !fs.existsSync(dir) ) fail(`${pack.name} is authored but packs/_source/${pack.name} does not exist.`);
-        lintDirectory(dir, pack.name);
     }
+    FORCED_ONLY = forcedOnly(dirs.map(([, dir]) => dir));
+    for ( const [pack, dir] of dirs ) lintDirectory(dir, pack.name);
 }
 
 console.log(`${documents} documents, ${RULES.length} rules over ${CLIFFS.length} cliffs, ${problems} problems`);
@@ -441,9 +466,17 @@ function selftest() {
     const broken = path.join(ROOT, "tools", "fixtures", "broken");
     const clean = path.join(ROOT, "tools", "fixtures", "clean");
     const fired = new Set();
+    const unmarked = new Set();
+    const offers = [];
     const problemsBefore = [];
 
-    silence(() => lintDirectory(broken, "broken", rule => fired.add(rule.cliff)));
+    // The forced-only career is a clean document, so the rule fires only if the set reads every directory.
+    FORCED_ONLY = forcedOnly([broken, clean]);
+    silence(() => lintDirectory(broken, "broken", (rule, subject) => {
+        fired.add(rule.cliff);
+        if ( rule.id === "offer-forced-only" ) offers.push(subject.label);
+        if ( rule.id === "demo-name" ) unmarked.add(subject.type);
+    }));
     const brokenProblems = problems;
     const missing = CLIFFS.filter(([n]) => !fired.has(n));
 
@@ -456,6 +489,13 @@ function selftest() {
             ...missing.map(([n, title]) => `  ${n}. ${title}`),
             "Either the fixture no longer carries the defect, or the rule stopped seeing it.");
     }
+    if ( !unmarked.has("talent") ) {
+        fail("demo-name did not fire on the unprefixed psionic talent in tools/fixtures/broken: only a skill is exempt.");
+    }
+    if ( offers.length !== 3 ) {
+        fail(`offer-forced-only fired ${offers.length} times on tools/fixtures/broken, not 3: a row naming the career exactly,`,
+            "one spelling it another way, and a row's own tray entry, all offering the forced-only career in tools/fixtures/clean.");
+    }
     if ( noisy ) fail(`tools/fixtures/clean is correct and drew ${noisy} problems.`, ...problemsBefore);
     console.log(`selftest ok — ${CLIFFS.length} cliffs all fire on the broken fixtures (${brokenProblems} problems), the clean ones draw none`);
     process.exit(0);
@@ -466,6 +506,13 @@ function silence(run) {
     const write = console.error;
     console.error = () => {};
     try { run(); } finally { console.error = write; }
+}
+
+/** The forced-only careers across these directories, by `fold`. */
+function forcedOnly(dirs) {
+    return new Set(dirs.flatMap(dir => readSourceFiles(dir)).flatMap(entry => entry.documents)
+        .filter(document => (document.type === "career") && (document.system?.qualification?.entry === "forcedOnly"))
+        .map(document => fold(document.name)));
 }
 
 function lintDirectory(dir, label, onProblem = () => {}, collect = null) {
@@ -481,7 +528,7 @@ function lintDirectory(dir, label, onProblem = () => {}, collect = null) {
                     if ( !applies(rule, subject) ) continue;
                     rule.check(subject, message => {
                         found.push(`  [${rule.id}${rule.cliff ? `, cliff ${rule.cliff}` : ""}] ${message}`);
-                        onProblem(rule);
+                        onProblem(rule, subject);
                     });
                 }
                 if ( !found.length ) continue;

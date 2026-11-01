@@ -1,0 +1,10 @@
+[
+  {
+    "_id": "demotalentpsi001",
+    "name": "Whisper",
+    "type": "talent",
+    "img": "icons/svg/aura.svg",
+    "flags": { "mgt2": { "demo": { "order": 21, "cliff": "demo name", "teaches": ["Only a skill takes its real name."], "trap": "A psionic talent is not a skill, so it keeps the demo prefix." } } },
+    "system": { "subType": "psionic" }
+  }
+]

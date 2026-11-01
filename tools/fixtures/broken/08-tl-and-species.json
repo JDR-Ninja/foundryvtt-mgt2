@@ -18,7 +18,7 @@
     "items": [
       { "_id": "demospeciesgood1", "name": "Demo — Sophont", "type": "species", "img": "icons/svg/mystery-man.svg",
         "system": { "characteristicRolls": [ { "characteristic": "strength", "formula": "2D6", "replaces": "" } ] } },
-      { "_id": "demoskillgunslug", "name": "Demo — Gun Combat (slug)", "type": "talent", "img": "icons/svg/target.svg",
+      { "_id": "demoskillgunslug", "name": "Gun Combat (slug)", "type": "talent", "img": "icons/svg/target.svg",
         "system": { "subType": "skill", "value": 1 } }
     ]
   }

@@ -1,0 +1,372 @@
+{
+  "_id": "demoCareerReachG",
+  "name": "Demo — Reach Guard",
+  "type": "career",
+  "img": "icons/svg/tower-flag.svg",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 39,
+        "cliff": "a commission moves the record onto the ladder its assignment names",
+        "teaches": [
+          "Three assignments share one enlisted ladder and one officer ladder, each named by id: ladder is the one entered on, officerLadder the one a commission moves to. The officer ladder carries officer: true, or the template reports it.",
+          "commission: true and commissionCheck add the commission step: a pass puts the record at rank 1 of the officer ladder and pays that rung's bonus at once. After the first term the roll needs SOC 9+ and takes DM-1 for each term served.",
+          "tables.officer is requiresCommission: it is offered only to a Traveller on the officer ladder, beside the three tables everyone rolls on.",
+          "Forced out by advancement is not a field: an Advancement total at or under the terms served in this career ends it, and the record closes as forcedOutByAdvancement. Row 4's DM-2 makes that likelier, and a natural 12 is the opposite: the Traveller must stay.",
+          "basicFrom: assignment takes basic training from the assignment's own table rather than Service Skills, so a picket hand and a signaller start with different skills.",
+          "assignmentChange: requalifyKeepRank makes a new assignment a fresh Qualification roll, the age DM included: a pass keeps the rank, a failure keeps the old assignment.",
+          "Row 9's throw is keyed to the assignment: each of the three is offered its own skill and target, and nobody is asked which.",
+          "pensionable pays a pension to a Traveller who leaves after five terms or more, and medicalBillsRow: military pays the largest share of an injury's care.",
+          "Row 3 ejects only a Traveller who refuses its question and row 2 lets the mishap it rolls decide. Mishap 2 ejects but keeps the term's Benefit roll, which a failed Survival roll would otherwise cost; mishap 3 injures an associate rather than the Traveller, and mishap 4 ejects only on a failed check."
+        ],
+        "trap": "The officer ladder starts at rank 1 and has no rank 0, because a commission enters it at rank 1 and pays that rung's bonus. exitRule.track stays blank, and must for a forced exit to happen: a career with a leaving track reads the Advancement total against that track instead. standingModifiers and tracks stay empty because the Guard prints no footnote and no track. The eleven record fields below the tables stay empty, as on every template."
+      }
+    }
+  },
+  "system": {
+    "description": "Bellweather's system-defence service: the picket boats on the Reach, the orbital gun platforms, and the signals watch that ties them to the quay. It commissions officers onto a ladder of their own, pays a pension after a long service, and covers most of an injury's care. Invented for this pack, and no book's career.",
+    "subType": "career",
+    "source": { "book": "", "page": "" },
+    "kind": "career",
+    "difficulty": 7,
+    "qualification": {
+      "entry": "target",
+      "characteristics": ["intellect", "endurance"],
+      "autoIf": { "characteristic": "", "min": null, "max": null },
+      "perPreviousCareer": -1,
+      "conditionalDMs": [
+        { "characteristic": "", "min": null, "afterCareers": ["Demo — Harbour Patrol"], "dm": 1 }
+      ],
+      "requiresPermission": false
+    },
+    "ageDM": { "from": 28, "dm": -1 },
+    "commission": true,
+    "commissionCheck": { "characteristic": "education", "target": 8 },
+    "pensionable": true,
+    "assignmentChange": "requalifyKeepRank",
+    "basicFrom": "assignment",
+    "alwaysAvailable": false,
+    "neverEjects": false,
+    "blocksAnagathics": false,
+    "eventRow7": "lifeEvent",
+    "exitRule": { "track": "", "test": "" },
+    "medicalBillsRow": "military",
+    "restrictedTo": { "species": "", "sex": "" },
+    "rankLadders": [
+      {
+        "id": "ratings",
+        "name": "Ratings",
+        "officer": false,
+        "rows": [
+          { "rank": 0, "title": "Picket Hand", "bonus": { "text": "Vacc Suit 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Vacc Suit", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 1, "title": "Guard", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 2, "title": "Leading Guard", "bonus": { "text": "Athletics 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Athletics", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 3, "title": "Watch Corporal", "bonus": { "text": "Leadership 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Leadership", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 4, "title": "Watch Sergeant", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 5, "title": "Chief of the Watch", "bonus": { "text": "END +1", "mode": "all",
+            "grants": [{ "kind": "characteristic", "characteristic": "endurance", "mode": "add", "value": 1 }] } },
+          { "rank": 6, "title": "Reach Master", "bonus": { "text": "SOC +1", "mode": "all",
+            "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] } }
+        ]
+      },
+      {
+        "id": "wardens",
+        "name": "Wardens",
+        "officer": true,
+        "rows": [
+          { "rank": 1, "title": "Sub-Warden", "bonus": { "text": "Tactics 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Tactics", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 2, "title": "Warden", "bonus": { "text": "", "mode": "all", "grants": [] } },
+          { "rank": 3, "title": "Senior Warden", "bonus": { "text": "Leadership 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Leadership", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 4, "title": "Reach Commander", "bonus": { "text": "Admin 1", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Admin", "mode": "atLeast", "value": 1 }] } },
+          { "rank": 5, "title": "Station Captain", "bonus": { "text": "SOC +1, and at least SOC 9", "mode": "all",
+            "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "floor", "value": 1, "floor": 9 }] } },
+          { "rank": 6, "title": "Lord Warden", "bonus": { "text": "A Patron on the Reach council", "mode": "all",
+            "grants": [{ "kind": "contact", "relation": "Patron", "value": 1 }] } }
+        ]
+      }
+    ],
+    "assignments": [
+      {
+        "name": "Picket Boats",
+        "ladder": "ratings",
+        "officerLadder": "wardens",
+        "survival": { "characteristic": "dexterity", "target": 7 },
+        "advancement": { "characteristic": "intellect", "target": 6 },
+        "skills": [
+          { "text": "Pilot", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Pilot", "mode": "raise", "value": 1 }] },
+          { "text": "Vacc Suit", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Vacc Suit", "mode": "raise", "value": 1 }] },
+          { "text": "Mechanic", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Mechanic", "mode": "raise", "value": 1 }] },
+          { "text": "Recon", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Recon", "mode": "raise", "value": 1 }] },
+          { "text": "Gunner", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Gunner", "mode": "raise", "value": 1 }] },
+          { "text": "Seafarer or Athletics", "mode": "oneOf",
+            "grants": [
+              { "kind": "skill", "skill": "Seafarer", "mode": "raise", "value": 1 },
+              { "kind": "skill", "skill": "Athletics", "mode": "raise", "value": 1 }
+            ] }
+        ]
+      },
+      {
+        "name": "Orbital Gunnery",
+        "ladder": "ratings",
+        "officerLadder": "wardens",
+        "survival": { "characteristic": "endurance", "target": 5 },
+        "advancement": { "characteristic": "education", "target": 8 },
+        "skills": [
+          { "text": "Gunner", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Gunner", "mode": "raise", "value": 1 }] },
+          { "text": "Electronics", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Electronics", "mode": "raise", "value": 1 }] },
+          { "text": "Engineer", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Engineer", "mode": "raise", "value": 1 }] },
+          { "text": "Vacc Suit", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Vacc Suit", "mode": "raise", "value": 1 }] },
+          { "text": "Tactics", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Tactics", "mode": "raise", "value": 1 }] },
+          { "text": "Mechanic or Explosives", "mode": "oneOf",
+            "grants": [
+              { "kind": "skill", "skill": "Mechanic", "mode": "raise", "value": 1 },
+              { "kind": "skill", "skill": "Explosives", "mode": "raise", "value": 1 }
+            ] }
+        ]
+      },
+      {
+        "name": "Signals Watch",
+        "ladder": "ratings",
+        "officerLadder": "wardens",
+        "survival": { "characteristic": "education", "target": 6 },
+        "advancement": { "characteristic": "intellect", "target": 8 },
+        "skills": [
+          { "text": "Electronics", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Electronics", "mode": "raise", "value": 1 }] },
+          { "text": "Investigate", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Investigate", "mode": "raise", "value": 1 }] },
+          { "text": "Recon", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Recon", "mode": "raise", "value": 1 }] },
+          { "text": "Admin", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Admin", "mode": "raise", "value": 1 }] },
+          { "text": "Deception", "mode": "all",
+            "grants": [{ "kind": "skill", "skill": "Deception", "mode": "raise", "value": 1 }] },
+          { "text": "Persuade or Diplomat", "mode": "oneOf",
+            "grants": [
+              { "kind": "skill", "skill": "Persuade", "mode": "raise", "value": 1 },
+              { "kind": "skill", "skill": "Diplomat", "mode": "raise", "value": 1 }
+            ] }
+        ]
+      }
+    ],
+    "tables": {
+      "personalDevelopment": {
+        "present": true,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "DEX +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "dexterity", "mode": "add", "value": 1 }] },
+          { "text": "Athletics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Athletics", "mode": "raise", "value": 1 }] },
+          { "text": "END +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "endurance", "mode": "add", "value": 1 }] },
+          { "text": "Gun Combat", "mode": "all", "grants": [{ "kind": "skill", "skill": "Gun Combat", "mode": "raise", "value": 1 }] },
+          { "text": "Carouse", "mode": "all", "grants": [{ "kind": "skill", "skill": "Carouse", "mode": "raise", "value": 1 }] },
+          { "text": "INT +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "intellect", "mode": "add", "value": 1 }] }
+        ]
+      },
+      "service": {
+        "present": true,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "Electronics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Electronics", "mode": "raise", "value": 1 }] },
+          { "text": "Vacc Suit", "mode": "all", "grants": [{ "kind": "skill", "skill": "Vacc Suit", "mode": "raise", "value": 1 }] },
+          { "text": "Mechanic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Mechanic", "mode": "raise", "value": 1 }] },
+          { "text": "Gunner", "mode": "all", "grants": [{ "kind": "skill", "skill": "Gunner", "mode": "raise", "value": 1 }] },
+          { "text": "Pilot", "mode": "all", "grants": [{ "kind": "skill", "skill": "Pilot", "mode": "raise", "value": 1 }] },
+          { "text": "Recon", "mode": "all", "grants": [{ "kind": "skill", "skill": "Recon", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      "advancedEducation": {
+        "present": true,
+        "gate": { "characteristic": "education", "min": 9 },
+        "requiresCommission": false,
+        "rows": [
+          { "text": "Tactics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Tactics", "mode": "raise", "value": 1 }] },
+          { "text": "Engineer", "mode": "all", "grants": [{ "kind": "skill", "skill": "Engineer", "mode": "raise", "value": 1 }] },
+          { "text": "Astrogation", "mode": "all", "grants": [{ "kind": "skill", "skill": "Astrogation", "mode": "raise", "value": 1 }] },
+          { "text": "Admin", "mode": "all", "grants": [{ "kind": "skill", "skill": "Admin", "mode": "raise", "value": 1 }] },
+          { "text": "Medic", "mode": "all", "grants": [{ "kind": "skill", "skill": "Medic", "mode": "raise", "value": 1 }] },
+          { "text": "Explosives", "mode": "all", "grants": [{ "kind": "skill", "skill": "Explosives", "mode": "raise", "value": 1 }] }
+        ]
+      },
+      "officer": {
+        "present": true,
+        "gate": { "characteristic": "", "min": null },
+        "requiresCommission": true,
+        "rows": [
+          { "text": "Leadership", "mode": "all", "grants": [{ "kind": "skill", "skill": "Leadership", "mode": "raise", "value": 1 }] },
+          { "text": "Diplomat", "mode": "all", "grants": [{ "kind": "skill", "skill": "Diplomat", "mode": "raise", "value": 1 }] },
+          { "text": "Tactics", "mode": "all", "grants": [{ "kind": "skill", "skill": "Tactics", "mode": "raise", "value": 1 }] },
+          { "text": "Advocate", "mode": "all", "grants": [{ "kind": "skill", "skill": "Advocate", "mode": "raise", "value": 1 }] },
+          { "text": "Admin", "mode": "all", "grants": [{ "kind": "skill", "skill": "Admin", "mode": "raise", "value": 1 }] },
+          { "text": "SOC +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "social", "mode": "add", "value": 1 }] }
+        ]
+      }
+    },
+    "benefits": {
+      "cash": [800, 2000, 4500, 8000, 10000, 25000, 45000],
+      "other": [
+        { "text": "INT +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "intellect", "mode": "add", "value": 1 }] },
+        { "text": "Demo — Handcomp", "mode": "all", "grants": [{ "kind": "benefit", "ref": "Demo — Handcomp", "value": 1 }] },
+        { "text": "Weapon", "mode": "all", "grants": [{ "kind": "benefit", "ref": "weapon", "value": 1 }] },
+        { "text": "An Ally", "mode": "all", "grants": [{ "kind": "benefit", "ref": "ally", "value": 1 }] },
+        { "text": "EDU +1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "education", "mode": "add", "value": 1 }] },
+        { "text": "Two Ship Shares", "mode": "all", "grants": [{ "kind": "shipShare", "value": 2 }] },
+        { "text": "Demo — Reflex Wiring", "mode": "all", "grants": [{ "kind": "benefit", "ref": "Demo — Reflex Wiring", "value": 1 }] }
+      ]
+    },
+    "eventTable": [
+      { "roll": 2, "text": "A picket boat breaks up on the outer buoys with you aboard. Take a roll on the Mishap table; that row decides whether you stay.",
+        "ejects": "mishap", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Mishap", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 3, "text": "A board of inquiry sits over a boat lost on your watch. Give evidence against your captain, and gain an Enemy and DM+2 held for your next Advancement roll; refuse, and the Guard lets you go.",
+        "ejects": "ejects", "ejectsCondition": "refused", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "An Enemy", "mode": "all", "grants": [{ "kind": "contact", "relation": "Enemy", "value": 1 }] }, "grantCondition": "accepted",
+        "tray": [{ "kind": "dm", "dm": 2, "value": "", "appliesTo": ["advancement"], "scope": "thisCareer", "career": "",
+          "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "accepted",
+          "note": "Your evidence is noted: DM+2 held for one Advancement roll." }] },
+      { "roll": 4, "text": "A live-fire drill on the outer buoys hits the wrong buoy. Gain one level of Gunner, and carry DM-2 into your next Advancement roll.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Gunner 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Gunner", "mode": "raise", "value": 1 }] },
+        "tray": [{ "kind": "dm", "dm": -2, "value": "", "appliesTo": ["advancement"], "scope": "thisCareer", "career": "",
+          "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "always",
+          "note": "The drill is remembered: DM-2 on one Advancement roll, which brings a total at or under your terms served closer." }] },
+      { "roll": 5, "text": "The Guard sends you up to the orbital yard for a season of courses. Make an EDU check (8+): pass, and gain one level in a skill you already hold.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "education", "skills": [], "target": 8 },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "One level in a skill you hold", "mode": "all", "grants": [{ "kind": "skill", "skill": "", "pick": "held", "mode": "raise", "value": 1 }] }, "grantCondition": "checkPassed", "tray": [] },
+      { "roll": 6, "text": "Your captain mentions you in a dispatch to the Reach council. Gain one level of Tactics or Leadership, and DM+2 held for your next Commission or Advancement roll, whichever comes first.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Tactics or Leadership", "mode": "oneOf", "grants": [
+          { "kind": "skill", "skill": "Tactics", "mode": "raise", "value": 1 },
+          { "kind": "skill", "skill": "Leadership", "mode": "raise", "value": 1 }] },
+        "tray": [{ "kind": "dm", "dm": 2, "value": "", "appliesTo": ["commission", "advancement"], "scope": "thisCareer", "career": "",
+          "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "always",
+          "note": "The dispatch: DM+2 held for one Commission or Advancement roll, spent by the first of them." }] },
+      { "roll": 7, "text": "Life Event: the shared Life Events table answers this one.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Life Event", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 8, "text": "A harbour patrol captain who served beside you on the Reach asks for you by name. Gain a Contact; if you leave, the patrol takes you at your next qualification with no roll.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "Demo — Harbour Patrol", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "A Contact", "mode": "all", "grants": [{ "kind": "contact", "relation": "Contact", "value": 1 }] }, "tray": [] },
+      { "roll": 9, "text": "A freighter drifts into the exclusion zone with its transponder dark. Turn it back with Pilot (8+) on the picket boats, Gunner (9+) on the platforms or Electronics (7+) on the watch: succeed, and gain a Contact and DM+1 held for your next Advancement roll; fail, and its master becomes a Rival.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": ["Pilot"], "target": 8, "assignment": "Picket Boats", "alternatives": [{ "characteristic": "", "skills": ["Gunner"], "target": 9, "assignment": "Orbital Gunnery" }, { "characteristic": "", "skills": ["Electronics"], "target": 7, "assignment": "Signals Watch" }] },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "A Contact", "mode": "all", "grants": [{ "kind": "contact", "relation": "Contact", "value": 1 }] }, "grantCondition": "checkPassed",
+        "grant2": { "text": "A Rival", "mode": "all", "grants": [{ "kind": "contact", "relation": "Rival", "value": 1 }] }, "grant2Condition": "checkFailed",
+        "tray": [{ "kind": "dm", "dm": 1, "value": "", "appliesTo": ["advancement"], "scope": "thisCareer", "career": "",
+          "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "checkPassed",
+          "note": "The freighter turned back: DM+1 held for one Advancement roll." }] },
+      { "roll": 10, "text": "You are seconded to the mainland signals school for a season. Gain one level of Electronics, and one extra roll on a skill table this term.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": ["skillRoll"], "mode": "oneOf", "optional": false },
+        "grant": { "text": "Electronics 1", "mode": "all", "grants": [{ "kind": "skill", "skill": "Electronics", "mode": "raise", "value": 1 }] }, "tray": [] },
+      { "roll": 11, "text": "The Lord Warden reads your file twice. Your next Commission or Advancement roll passes without dice, when you choose to spend it.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] },
+        "tray": [{ "kind": "autoSuccess", "dm": 0, "value": "", "appliesTo": ["commission", "advancement"], "scope": "thisCareer", "career": "",
+          "duration": "oneShot", "uses": 1, "expiresWhen": "", "condition": "always",
+          "note": "The Lord Warden's notice: one Commission or Advancement roll passes without dice, on the holder's word." }] },
+      { "roll": 12, "text": "You hold the gap in the picket line alone through a solar storm. Take a promotion, or a commission if you do not yet hold one.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": ["commissioned", "advanced"], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] }
+    ],
+    "mishapTable": [
+      { "roll": 1, "text": "A turret capacitor lets go beside you. Two throws on the Injury table, the worse one counts, and the Guard discharges you.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Injury", "injury": { "modes": ["lower"], "who": "traveller" }, "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 2, "text": "The signals logs you kept go missing before an audit. Gain an Enemy in Reach command and leave the Guard, though the board lets you keep this term's Benefit roll.",
+        "ejects": "ejects", "benefit": "keep", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "An Enemy", "mode": "all", "grants": [{ "kind": "contact", "relation": "Enemy", "value": 1 }] }, "tray": [] },
+      { "roll": 3, "text": "A misfire on the gunnery range hurts the loader beside you. The loader rolls on the Injury table and holds you to blame as a Rival; you are sent home.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Injury", "injury": { "modes": ["once"], "who": "associate" }, "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "A Rival", "mode": "all", "grants": [{ "kind": "contact", "relation": "Rival", "value": 1 }] }, "tray": [] },
+      { "roll": 4, "text": "The Reach council cuts the picket budget. Make a Leadership or Admin check (8+) to keep a berth on what remains; fail, and you leave.",
+        "ejects": "ejects", "ejectsCondition": "checkFailed", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": ["Leadership", "Admin"], "target": 8 },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] },
+      { "roll": 5, "text": "Eleven weeks adrift in a crippled boat. Lose 1 END and leave the Guard.",
+        "ejects": "ejects", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "", "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "END -1", "mode": "all", "grants": [{ "kind": "characteristic", "characteristic": "endurance", "mode": "add", "value": -1 }] }, "tray": [] },
+      { "roll": 6, "text": "A hull breach on a boarding drill. One throw on the Injury table; the Guard keeps you on.",
+        "ejects": "stays", "benefit": "none", "benefitCount": 1, "benefitFormula": "", "career": "", "careerMode": "offer",
+        "subTable": "Injury", "injury": { "modes": ["once"], "who": "traveller" }, "check": { "characteristic": "", "skills": [], "target": null },
+        "track": { "key": "", "formula": "", "value": 0, "reroll": false },
+        "awards": { "outcomes": [], "mode": "oneOf", "optional": false },
+        "grant": { "text": "", "mode": "all", "grants": [] }, "tray": [] }
+    ],
+    "standingModifiers": [],
+    "tracks": [],
+    "assignment": "",
+    "terms": 0,
+    "rank": 0,
+    "ladder": "",
+    "enlistedRank": 0,
+    "events": [],
+    "entryMode": "qualified",
+    "exitMode": "stillServing",
+    "termLog": [],
+    "track": { "key": "", "value": null, "cap": null, "adjustments": [] }
+  },
+  "effects": []
+}

@@ -27,7 +27,7 @@
     "tl": "TL08",
     "legality": 3,
     "container": { "id": "" },
-    "roll": { "characteristic": "dexterity", "skill": "Demo — Gun Combat", "difficulty": "Average" },
+    "roll": { "characteristic": "dexterity", "skill": "Gun Combat", "difficulty": "Average" },
     "equipped": false,
     "range": { "isMelee": false, "value": 20, "unit": "meter", "band": "short" },
     "damage": "3D6",

@@ -50,7 +50,7 @@
     },
     "armour": {
       "material": "crystaliron",
-      "points": 4,
+      "points": 3,
       "damage": 0,
       "tonsOverride": null
     },
@@ -62,7 +62,7 @@
       "burning": false
     },
     "power": {
-      "plant": 60,
+      "plant": 80,
       "offline": [],
       "drawOverride": null,
       "ionDrain": 0
@@ -91,10 +91,10 @@
       "ionDrain": 0
     },
     "sensors": { "grade": "civilian" },
-    "staterooms": { "standard": 4, "high": 0, "luxury": 0 },
+    "staterooms": { "standard": 5, "high": 0, "luxury": 0 },
     "lowBerths": { "standard": 0, "emergency": 2 },
     "passengers": { "high": 0, "middle": 2, "basic": 0, "low": 0 },
-    "cargo": { "capacity": 12 },
+    "cargo": { "capacity": 15 },
     "role": "commercial",
     "crewSkill": 1,
     "crew": [
@@ -154,9 +154,9 @@
         "colour": "#3f6f9f",
         "show": true,
         "actions": [
-          { "label": "Evade", "kind": "skill", "characteristic": "dexterity", "skill": "Demo — Pilot",
+          { "label": "Evade", "kind": "skill", "characteristic": "dexterity", "skill": "Pilot",
             "difficulty": "Average", "dm": 0, "step": "manoeuvre", "cap": "round" },
-          { "label": "Dock", "kind": "skill", "characteristic": "dexterity", "skill": "Demo — Pilot",
+          { "label": "Dock", "kind": "skill", "characteristic": "dexterity", "skill": "Pilot",
             "difficulty": "Difficult", "dm": 0, "step": "actions", "cap": "none" },
           { "label": "Reverse thrust", "kind": "special", "characteristic": "", "skill": "",
             "difficulty": "", "dm": 0, "step": "reaction", "cap": "round" }
@@ -181,9 +181,9 @@
         "colour": "#9f5a3f",
         "show": true,
         "actions": [
-          { "label": "Fire turret", "kind": "weapon", "characteristic": "dexterity", "skill": "Demo — Gunner",
+          { "label": "Fire turret", "kind": "weapon", "characteristic": "dexterity", "skill": "Gunner",
             "difficulty": "Average", "dm": 0, "step": "attack", "cap": "salvo" },
-          { "label": "Point defence", "kind": "weapon", "characteristic": "dexterity", "skill": "Demo — Gunner",
+          { "label": "Point defence", "kind": "weapon", "characteristic": "dexterity", "skill": "Gunner",
             "difficulty": "Difficult", "dm": -2, "step": "reaction", "cap": "round" }
         ]
       },
@@ -201,7 +201,7 @@
         "source": { "book": "", "page": "" },
         "quantity": 1, "weight": 0, "weightless": true, "cost": 500000, "tl": "TL12", "legality": 5,
         "container": { "id": "" },
-        "roll": { "characteristic": "dexterity", "skill": "Demo — Gunner", "difficulty": "Average" },
+        "roll": { "characteristic": "dexterity", "skill": "Gunner", "difficulty": "Average" },
         "equipped": true,
         "range": { "isMelee": false, "value": null, "unit": "", "band": "medium" },
         "damage": "2D6",
@@ -228,7 +228,7 @@
         "source": { "book": "", "page": "" },
         "quantity": 1, "weight": 0, "weightless": true, "cost": 500000, "tl": "TL12", "legality": 5,
         "container": { "id": "" },
-        "roll": { "characteristic": "dexterity", "skill": "Demo — Gunner", "difficulty": "Average" },
+        "roll": { "characteristic": "dexterity", "skill": "Gunner", "difficulty": "Average" },
         "equipped": true,
         "range": { "isMelee": false, "value": null, "unit": "", "band": "medium" },
         "damage": "2D6",
@@ -324,11 +324,11 @@
       "type": "cargo",
       "img": "icons/svg/chest.svg",
       "flags": { "mgt2": { "demo": { "copyOf": "Demo — Cargo Lot",
-        "trap": "In the hold, and it is the hold that limits it: cargo.capacity is 12 tons and this lot is 12." } } },
+        "trap": "In the hold, and it is the hold that limits it: cargo.capacity is 15 tons and this lot is 15." } } },
       "system": {
         "description": "Sealed drums of marsh-cut fibre, bound out-system. Nobody asks what it is for.",
         "source": { "book": "", "page": "" },
-        "tons": 12,
+        "tons": 15,
         "destination": { "world": null, "name": "Demo — Tallow Reach" },
         "dueDay": 214,
         "farePerTon": 1000,

@@ -159,7 +159,7 @@
           "engine": "core",
           "target": {
             "kind": "skill",
-            "key": "Demo — Seafarer"
+            "key": "Seafarer"
           },
           "log": [
             {
@@ -178,7 +178,7 @@
             }
           ],
           "weeks": 2,
-          "note": "Working toward Demo — Seafarer 3.",
+          "note": "Working toward Seafarer 3.",
           "characteristic": "",
           "teacher": null,
           "closed": false
@@ -510,14 +510,14 @@
             "role": "",
             "formula": "3 + @characteristics.education.dm",
             "mandatory": [
-              "Demo — Seafarer"
+              "Seafarer"
             ],
             "choices": [
-              "Demo — Athletics",
-              "Demo — Investigate",
-              "Demo — Mechanic",
-              "Demo — Persuade",
-              "Demo — Vacc Suit"
+              "Athletics",
+              "Investigate",
+              "Mechanic",
+              "Persuade",
+              "Vacc Suit"
             ]
           }
         ],
@@ -570,8 +570,8 @@
           "requiresPermission": false
         },
         "ageDM": {
-          "from": 30,
-          "dm": -2
+          "from": 32,
+          "dm": -1
         },
         "commission": false,
         "commissionCheck": {
@@ -604,12 +604,12 @@
                 "rank": 0,
                 "title": "Recruit",
                 "bonus": {
-                  "text": "Demo — Seafarer 1",
+                  "text": "Seafarer 1",
                   "mode": "all",
                   "grants": [
                     {
                       "kind": "skill",
-                      "skill": "Demo — Seafarer",
+                      "skill": "Seafarer",
                       "mode": "atLeast",
                       "value": 1
                     }
@@ -629,12 +629,12 @@
                 "rank": 2,
                 "title": "Senior Officer",
                 "bonus": {
-                  "text": "Demo — Investigate 1",
+                  "text": "Investigate 1",
                   "mode": "all",
                   "grants": [
                     {
                       "kind": "skill",
-                      "skill": "Demo — Investigate",
+                      "skill": "Investigate",
                       "mode": "atLeast",
                       "value": 1
                     }
@@ -699,78 +699,78 @@
             },
             "skills": [
               {
-                "text": "Demo — Seafarer",
+                "text": "Seafarer",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Seafarer",
+                    "skill": "Seafarer",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Gun Combat",
+                "text": "Gun Combat",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Gun Combat",
+                    "skill": "Gun Combat",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Athletics",
+                "text": "Athletics",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Athletics",
+                    "skill": "Athletics",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Investigate",
+                "text": "Investigate",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Investigate",
+                    "skill": "Investigate",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Vacc Suit",
+                "text": "Vacc Suit",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Vacc Suit",
+                    "skill": "Vacc Suit",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Mechanic or Demo — Persuade",
+                "text": "Mechanic or Persuade",
                 "mode": "oneOf",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Mechanic",
+                    "skill": "Mechanic",
                     "mode": "raise",
                     "value": 1
                   },
                   {
                     "kind": "skill",
-                    "skill": "Demo — Persuade",
+                    "skill": "Persuade",
                     "mode": "raise",
                     "value": 1
                   }
@@ -825,24 +825,24 @@
                 ]
               },
               {
-                "text": "Demo — Athletics",
+                "text": "Athletics",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Athletics",
+                    "skill": "Athletics",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Persuade",
+                "text": "Persuade",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Persuade",
+                    "skill": "Persuade",
                     "mode": "raise",
                     "value": 1
                   }
@@ -871,72 +871,72 @@
             "requiresCommission": false,
             "rows": [
               {
-                "text": "Demo — Seafarer",
+                "text": "Seafarer",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Seafarer",
+                    "skill": "Seafarer",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Vacc Suit",
+                "text": "Vacc Suit",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Vacc Suit",
+                    "skill": "Vacc Suit",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Mechanic",
+                "text": "Mechanic",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Mechanic",
+                    "skill": "Mechanic",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Investigate",
+                "text": "Investigate",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Investigate",
+                    "skill": "Investigate",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Gun Combat",
+                "text": "Gun Combat",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Gun Combat",
+                    "skill": "Gun Combat",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Athletics",
+                "text": "Athletics",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Athletics",
+                    "skill": "Athletics",
                     "mode": "raise",
                     "value": 1
                   }
@@ -953,36 +953,36 @@
             "requiresCommission": false,
             "rows": [
               {
-                "text": "Demo — Investigate",
+                "text": "Investigate",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Investigate",
+                    "skill": "Investigate",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Persuade",
+                "text": "Persuade",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Persuade",
+                    "skill": "Persuade",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Mechanic",
+                "text": "Mechanic",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Mechanic",
+                    "skill": "Mechanic",
                     "mode": "raise",
                     "value": 1
                   }
@@ -1001,24 +1001,24 @@
                 ]
               },
               {
-                "text": "Demo — Seafarer",
+                "text": "Seafarer",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Seafarer",
+                    "skill": "Seafarer",
                     "mode": "raise",
                     "value": 1
                   }
                 ]
               },
               {
-                "text": "Demo — Vacc Suit",
+                "text": "Vacc Suit",
                 "mode": "all",
                 "grants": [
                   {
                     "kind": "skill",
-                    "skill": "Demo — Vacc Suit",
+                    "skill": "Vacc Suit",
                     "mode": "raise",
                     "value": 1
                   }
@@ -1038,13 +1038,13 @@
         },
         "benefits": {
           "cash": [
-            1000,
-            2000,
-            5000,
-            7500,
-            10000,
-            25000,
-            50000
+            500,
+            1500,
+            3000,
+            6000,
+            9000,
+            15000,
+            30000
           ],
           "other": [
             {
@@ -1201,7 +1201,7 @@
           },
           {
             "roll": 4,
-            "text": "A winter of night watches. Gain one level of Demo — Vacc Suit or Demo — Athletics.",
+            "text": "A winter of night watches. Gain one level of Vacc Suit or Athletics.",
             "ejects": "stays",
             "benefit": "none",
             "benefitCount": 1,
@@ -1226,18 +1226,18 @@
               "optional": false
             },
             "grant": {
-              "text": "Demo — Vacc Suit or Demo — Athletics",
+              "text": "Vacc Suit or Athletics",
               "mode": "oneOf",
               "grants": [
                 {
                   "kind": "skill",
-                  "skill": "Demo — Vacc Suit",
+                  "skill": "Vacc Suit",
                   "mode": "raise",
                   "value": 1
                 },
                 {
                   "kind": "skill",
-                  "skill": "Demo — Athletics",
+                  "skill": "Athletics",
                   "mode": "raise",
                   "value": 1
                 }
@@ -1247,7 +1247,7 @@
           },
           {
             "roll": 5,
-            "text": "You pull a crew off a sinking launch. Make a Demo — Seafarer check (8+); success gains a Contact and a commendation.",
+            "text": "You pull a crew off a sinking launch. Make a Seafarer check (8+); success gains a Contact and a commendation.",
             "ejects": "stays",
             "benefit": "none",
             "benefitCount": 1,
@@ -1257,7 +1257,7 @@
             "subTable": "",
             "check": {
               "characteristic": "endurance",
-              "skills": ["Demo — Seafarer"],
+              "skills": ["Seafarer"],
               "target": 8
             },
             "track": {
@@ -1302,7 +1302,7 @@
           },
           {
             "roll": 6,
-            "text": "The harbour puts you through a course you did not ask for. Gain one level of Demo — Mechanic.",
+            "text": "The harbour puts you through a course you did not ask for. Gain one level of Mechanic.",
             "ejects": "stays",
             "benefit": "none",
             "benefitCount": 1,
@@ -1327,12 +1327,12 @@
               "optional": false
             },
             "grant": {
-              "text": "Demo — Mechanic 1",
+              "text": "Mechanic 1",
               "mode": "all",
               "grants": [
                 {
                   "kind": "skill",
-                  "skill": "Demo — Mechanic",
+                  "skill": "Mechanic",
                   "mode": "raise",
                   "value": 1
                 }
@@ -1375,7 +1375,7 @@
           },
           {
             "roll": 8,
-            "text": "You take an inspection nobody else would sign. Gain one level of Demo — Investigate, and an extra Benefit roll.",
+            "text": "You take an inspection nobody else would sign. Gain one level of Investigate, and an extra Benefit roll.",
             "ejects": "stays",
             "benefit": "grant",
             "benefitCount": 1,
@@ -1400,12 +1400,12 @@
               "optional": false
             },
             "grant": {
-              "text": "Demo — Investigate 1",
+              "text": "Investigate 1",
               "mode": "all",
               "grants": [
                 {
                   "kind": "skill",
-                  "skill": "Demo — Investigate",
+                  "skill": "Investigate",
                   "mode": "raise",
                   "value": 1
                 }
@@ -1470,7 +1470,7 @@
           },
           {
             "roll": 10,
-            "text": "You are moved to the marsh station and given a boat of your own. Gain one level of Demo — Seafarer and SOC +1.",
+            "text": "You are moved to the marsh station and given a boat of your own. Gain one level of Seafarer and SOC +1.",
             "ejects": "stays",
             "benefit": "none",
             "benefitCount": 1,
@@ -1495,12 +1495,12 @@
               "optional": false
             },
             "grant": {
-              "text": "Demo — Seafarer 1 and SOC +1",
+              "text": "Seafarer 1 and SOC +1",
               "mode": "all",
               "grants": [
                 {
                   "kind": "skill",
-                  "skill": "Demo — Seafarer",
+                  "skill": "Seafarer",
                   "mode": "raise",
                   "value": 1
                 },
@@ -1660,7 +1660,7 @@
           },
           {
             "roll": 3,
-            "text": "Dock fever, and a long winter in a bunk. Lose one level of Demo — Athletics and leave the patrol.",
+            "text": "Dock fever, and a long winter in a bunk. Lose one level of Athletics and leave the patrol.",
             "ejects": "ejects",
             "benefit": "none",
             "benefitCount": 1,
@@ -1685,12 +1685,12 @@
               "optional": false
             },
             "grant": {
-              "text": "Demo — Athletics falls by one level",
+              "text": "Athletics falls by one level",
               "mode": "all",
               "grants": [
                 {
                   "kind": "skill",
-                  "skill": "Demo — Athletics",
+                  "skill": "Athletics",
                   "mode": "add",
                   "value": -1
                 }
@@ -1909,7 +1909,7 @@
     },
     {
       "_id": "charSkillSeafarr",
-      "name": "Demo — Seafarer",
+      "name": "Seafarer",
       "type": "talent",
       "img": "icons/svg/book.svg",
       "system": {
@@ -1947,7 +1947,7 @@
     },
     {
       "_id": "charSkillGunSlug",
-      "name": "Demo — Gun Combat (slug)",
+      "name": "Gun Combat (slug)",
       "type": "talent",
       "img": "icons/svg/target.svg",
       "system": {
@@ -1985,7 +1985,7 @@
       "flags": {
         "mgt2": {
           "demo": {
-            "copyOf": "Demo — Gun Combat (slug)",
+            "copyOf": "Gun Combat (slug)",
             "trap": "The same skill Item as the loose one in demo-items, with a level on it. A level belongs to the Traveller, never to the template."
           }
         }
@@ -1993,7 +1993,7 @@
     },
     {
       "_id": "charSkillVaccSut",
-      "name": "Demo — Vacc Suit",
+      "name": "Vacc Suit",
       "type": "talent",
       "img": "icons/svg/book.svg",
       "system": {
@@ -2031,7 +2031,7 @@
     },
     {
       "_id": "charSkillInvestg",
-      "name": "Demo — Investigate",
+      "name": "Investigate",
       "type": "talent",
       "img": "icons/svg/book.svg",
       "system": {
@@ -2069,7 +2069,7 @@
     },
     {
       "_id": "charSkillAthletc",
-      "name": "Demo — Athletics",
+      "name": "Athletics",
       "type": "talent",
       "img": "icons/svg/book.svg",
       "system": {
@@ -2107,7 +2107,7 @@
     },
     {
       "_id": "charSkillMechanc",
-      "name": "Demo — Mechanic",
+      "name": "Mechanic",
       "type": "talent",
       "img": "icons/svg/book.svg",
       "system": {
@@ -2145,7 +2145,7 @@
     },
     {
       "_id": "charSkillPersuad",
-      "name": "Demo — Persuade",
+      "name": "Persuade",
       "type": "talent",
       "img": "icons/svg/book.svg",
       "system": {
@@ -2214,7 +2214,7 @@
           "software": "",
           "bonus": 0
         },
-        "requireSkill": "Demo — Vacc Suit",
+        "requireSkill": "Vacc Suit",
         "requireSkillLevel": 1,
         "powered": false,
         "breach": "intact",
@@ -2232,7 +2232,7 @@
         "mgt2": {
           "demo": {
             "copyOf": "Demo — Deck Vest",
-            "trap": "requireSkill reads Demo — Vacc Suit and this Traveller has it at 1, which is exactly requireSkillLevel — so no armour DM applies. Take the skill Item away and the penalty appears with no message."
+            "trap": "requireSkill reads the real name, Vacc Suit, which is the name this Traveller's skill carries, and at 1 it is exactly requireSkillLevel — so no armour DM applies. Take the skill Item away and the penalty appears with no message."
           }
         }
       }
@@ -2259,7 +2259,7 @@
         },
         "roll": {
           "characteristic": "dexterity",
-          "skill": "Demo — Gun Combat",
+          "skill": "Gun Combat",
           "difficulty": "Average"
         },
         "equipped": true,
@@ -2407,7 +2407,7 @@
             }
           ],
           "skill": {
-            "name": "Demo — Gun Combat",
+            "name": "Gun Combat",
             "value": 1
           },
           "protection": 0
@@ -2423,7 +2423,7 @@
         "mgt2": {
           "demo": {
             "copyOf": "Demo — Reflex Wiring",
-            "trap": "augment.skill.name reads Demo — Gun Combat, which matches the Item named Demo — Gun Combat (slug) by the same prefix rule an armour uses."
+            "trap": "augment.skill.name reads the real name, Gun Combat, which matches this Traveller's Gun Combat (slug) by the same prefix rule an armour uses."
           }
         }
       }

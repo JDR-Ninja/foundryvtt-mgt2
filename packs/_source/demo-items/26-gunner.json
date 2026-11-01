@@ -27,9 +27,9 @@
     "colour": "#9f5a3f",
     "show": true,
     "actions": [
-      { "label": "Fire turret", "kind": "weapon", "characteristic": "dexterity", "skill": "Demo — Gunner",
+      { "label": "Fire turret", "kind": "weapon", "characteristic": "dexterity", "skill": "Gunner",
         "difficulty": "Average", "dm": 0, "step": "attack", "cap": "salvo" },
-      { "label": "Point defence", "kind": "weapon", "characteristic": "dexterity", "skill": "Demo — Gunner",
+      { "label": "Point defence", "kind": "weapon", "characteristic": "dexterity", "skill": "Gunner",
         "difficulty": "Difficult", "dm": -2, "step": "reaction", "cap": "round" }
     ]
   },

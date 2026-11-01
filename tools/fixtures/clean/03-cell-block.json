@@ -1,0 +1,13 @@
+{
+  "_id": "demofixcellblk01",
+  "name": "Demo — Cell Block",
+  "type": "career",
+  "img": "icons/svg/door-closed.svg",
+  "flags": { "mgt2": { "demo": { "order": 90, "cliff": "career", "teaches": ["A forcedOnly career is entered by a sentence alone."], "trap": "An offer naming it opens nothing, so the offers sit in another pack." } } },
+  "system": { "kind": "career", "qualification": { "entry": "forcedOnly" },
+    "rankLadders": [ { "id": "inmates", "name": "Inmates", "rows": [ { "rank": 0 } ] } ],
+    "assignments": [ { "name": "Yard", "ladder": "inmates" } ],
+    "tables": { "service": { "present": true, "rows": [ { "roll": 1, "text": "Athletics" } ] } },
+    "benefits": [ { "roll": 1, "cash": 0 } ],
+    "eventTable": [ { "roll": 2, "text": "A quiet stretch." } ] }
+}

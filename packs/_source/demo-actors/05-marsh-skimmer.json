@@ -111,7 +111,7 @@
         "source": { "book": "", "page": "" },
         "quantity": 1, "weight": 40, "weightless": false, "cost": 12000, "tl": "TL08", "legality": 5,
         "container": { "id": "" },
-        "roll": { "characteristic": "dexterity", "skill": "Demo — Gun Combat", "difficulty": "Average" },
+        "roll": { "characteristic": "dexterity", "skill": "Gun Combat", "difficulty": "Average" },
         "equipped": true,
         "range": { "isMelee": false, "value": 500, "unit": "meter", "band": "long" },
         "damage": "4D6",

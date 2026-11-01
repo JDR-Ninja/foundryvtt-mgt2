@@ -10,7 +10,7 @@
         "order": 7,
         "cliff": "the UWP cells are integers",
         "teaches": [
-          "The seven cells after the starport are NUMBERS. A788899-C is starport A with size 7, atmosphere 8, hydrographics 8, population 8, government 9, law level 9 and tech level 12 — the pseudo-hex is a printing, and this is what is stored.",
+          "The seven cells after the starport are NUMBERS. B9A7A78-C is starport B with size 9, atmosphere 10, hydrographics 7, population 10, government 7, law level 8 and tech level 12 — the pseudo-hex is a printing, and this is what is stored.",
           "bases is a Set of closed strings, not a line of letters, and gasGiants is a count of them in the system.",
           "sector and hex are the two halves of a location and neither is validated: a hex that is not four digits in range simply derives no coordinate.",
           "codeOverrides is where a referee states a trade code the UWP would not have given, or takes one away."

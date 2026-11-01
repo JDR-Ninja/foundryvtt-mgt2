@@ -1,3 +1,4 @@
+import { CareerLibrary } from "./chargen-tables.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { Muster } from "./chargen-muster.js";
@@ -61,29 +62,26 @@ export class BenefitPicker extends MGT2Screen(HandlebarsApplicationMixin(Applica
         if ( !spec ) return { spec, rows: [] };
         const { credits, tl } = Muster.ceilings(row, this.#mode);
         const packs = game.packs.filter(pack => pack.visible && (pack.documentName === spec.doc));
-        await Promise.all(packs.map(pack =>
-            pack.indexed ? null : pack.getIndex().catch(error => console.error(error))));
+        const entries = await CareerLibrary.entries([], packs);
 
         const rows = [];
-        for ( const pack of packs ) {
-            for ( const entry of pack.index ) {
-                if ( spec.types && !spec.types.includes(entry.type) ) continue;
-                if ( spec.subTypes && !spec.subTypes.includes(entry.system?.subType) ) continue;
-                const melee = entry.system?.range?.isMelee;
-                // A field the pack never indexed reads `undefined`, and an absent value is no bound
-                // rather than a mismatch — otherwise one missing column empties the whole list.
-                if ( (spec.melee !== undefined) && (melee !== undefined) && (melee !== spec.melee) ) continue;
-                const cost = entry.system?.cost ?? null;
-                const level = MGT2Helper.tlNumber(entry.system?.tl);
-                if ( (credits !== null) && (cost !== null) && (cost > credits) ) continue;
-                if ( (tl !== null) && (level !== null) && (level > tl) ) continue;
-                rows.push({
-                    uuid: entry.uuid, name: entry.name, img: entry.img ?? null, pack: pack.title,
-                    cost: (cost === null) ? "" : `Cr${MGT2Helper.credits(cost)}`,
-                    tl: entry.system?.tl ?? "",
-                    order: cost ?? -1
-                });
-            }
+        for ( const { pack, entry } of entries ) {
+            if ( spec.types && !spec.types.includes(entry.type) ) continue;
+            if ( spec.subTypes && !spec.subTypes.includes(entry.system?.subType) ) continue;
+            const melee = entry.system?.range?.isMelee;
+            // A field the pack never indexed reads `undefined`, and an absent value is no bound
+            // rather than a mismatch — otherwise one missing column empties the whole list.
+            if ( (spec.melee !== undefined) && (melee !== undefined) && (melee !== spec.melee) ) continue;
+            const cost = entry.system?.cost ?? null;
+            const level = MGT2Helper.tlNumber(entry.system?.tl);
+            if ( (credits !== null) && (cost !== null) && (cost > credits) ) continue;
+            if ( (tl !== null) && (level !== null) && (level > tl) ) continue;
+            rows.push({
+                uuid: entry.uuid, name: entry.name, img: entry.img ?? null, pack: pack.title,
+                cost: (cost === null) ? "" : `Cr${MGT2Helper.credits(cost)}`,
+                tl: entry.system?.tl ?? "",
+                order: cost ?? -1
+            });
         }
         // Dearest first, because the cap has to drop something and a Cr3000 voucher is not spent on
         // the cheapest two hundred rows a library holds.
