@@ -256,6 +256,34 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         return rads;
     }
 
+    /** The Radiation Effects row a number of rads falls in. @returns {object} */
+    static radiationBand(rads) {
+        const total = Math.max(0, Math.trunc(rads) || 0);
+        return MGT2.RadiationEffects.find(row => total >= row.min) ?? MGT2.RadiationEffects.at(-1);
+    }
+
+    /** Core folio 81's permanent END column, for the types that keep `health.radiations`. */
+    prepareRadiationLoss() {
+        // With the rule off nothing is drawn or applied; `health.radiations` is stored and untouched.
+        if ( !Rules.on("radiation") ) return;
+        this.characteristics.endurance.auto += this.constructor.radiationBand(this.health.radiations).endurance;
+    }
+
+    /** Core folio 81: the one sink a dose passes through on a type that keeps `health.radiations`. */
+    async takeDose(rads) {
+        if ( !Rules.on("radiation") ) return null;
+        const dose = Math.max(0, Math.trunc(rads) || 0);
+        if (dose === 0) return null;
+        const band = this.constructor.radiationBand;
+        const before = band(this.health.radiations);
+        const total = this.health.radiations + dose;
+        const immediate = band(dose);
+        // Nausea lasts "until medical treatment received", which no reading of the rads can tell.
+        const states = immediate.state ? { [immediate.state]: true } : {};
+        await this.parent.update({ system: { states, health: { radiations: total } } });
+        return { dose, total, immediate, before, after: band(total) };
+    }
+
     /** Core p.77: a melee attack adds the attacker's own STR DM to its damage. */
     get meleeDamageDM() {
         return this.characteristics.strength?.dm ?? 0;
@@ -498,6 +526,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             ...this.stateCheckModifiers(),
             ...this.armorSkillModifiers(),
             ...this.augmentSkillModifiers(),
+            ...this.skillAccumulatorModifiers(),
             ...this.scopedEffectModifiers(),
             ...extra
         ];
@@ -559,6 +588,20 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             // Hyphenated, never dotted: the prompt names a form control after this key.
             sources.push({ key: `augment-${item.id}`, label: "MGT2.Actor.AugmentSkill", dm,
                 params: { augment: item.name, skill: named }, skills });
+        }
+        return sources;
+    }
+
+    /** A standing DM on one skill, from an effect on `modifiers.skills.<slug>`; it follows the prompt's skill row. */
+    skillAccumulatorModifiers() {
+        const sources = [];
+        for (const [slug, modifier] of Object.entries(this.modifiers.skills)) {
+            const dm = modifier.custom + modifier.auto + modifier.effect;
+            if (dm === 0) continue;
+            const items = this.parent.items.filter(item => (item.type === "talent")
+                && (item.system.subType === "skill") && (MGT2Helper.skillSlug(item.name) === slug));
+            sources.push({ key: `skill-${slug}`, label: "MGT2.Actor.SkillDM", dm,
+                params: { skill: items[0]?.name ?? slug }, skills: items.map(item => item.id) });
         }
         return sources;
     }

@@ -15,23 +15,40 @@ const EVENTS = CONST.REGION_EVENTS;
  * @param {string} [note]    An already-localised fragment placed before the damage
  */
 
-/** A hazard row, rolled and taken through the pipeline. */
-async function applyHazard(actor, formula, label, note = "") {
-    const expression = MGT2Helper.damageFormula(formula);
-    if ( !expression || !Roll.validate(expression) ) return;
-    const roll = await new Roll(expression).roll();
-    if ( roll.total <= 0 ) return;
+const turns = new WeakMap();
 
-    await actor.applyDamage(roll.total, { raw: true });
-    // The card carries the roll itself, so the message says only what the dice cannot.
-    const parts = [note, game.i18n.format("MGT2.Region.Damage", { points: roll.total })];
-    return ChatHelper.postRecovery(actor, label, parts.filter(part => part).join(" · "),
-        roll, "MGT2.Region.Hazard");
+/** ⚠ Foundry runs a Region's behaviours at once, and a write reads the total the last one left. */
+function inTurn(actor, work) {
+    const run = (turns.get(actor) ?? Promise.resolve()).then(work, work);
+    turns.set(actor, run);
+    return run;
 }
 
-/** Whether this actor is one an environmental row can reach at all. */
+/** A hazard row, rolled and taken through the pipeline. */
+function applyHazard(actor, formula, label, note = "") {
+    return inTurn(actor, async () => {
+        const expression = MGT2Helper.damageFormula(formula);
+        if ( !expression || !Roll.validate(expression) ) return;
+        const roll = await new Roll(expression).roll();
+        if ( roll.total <= 0 ) return;
+
+        await actor.applyDamage(roll.total, { raw: true });
+        // The card carries the roll itself, so the message says only what the dice cannot.
+        const parts = [note, game.i18n.format("MGT2.Region.Damage", { points: roll.total })];
+        return ChatHelper.postRecovery(actor, label, parts.filter(part => part).join(" · "),
+            roll, "MGT2.Region.Hazard");
+    });
+}
+
+/** Core p.82 names a Traveller; a hull is what one stands inside, and RH p.34 prints a robot's own rule. */
 function canBeHurt(actor) {
-    return (actor?.isOwner === true) && (typeof actor.system.applyDamage === "function");
+    return (actor?.isOwner === true) && ["character", "npc"].includes(actor.type);
+}
+
+/** RH p.34: a biological robot suffers what its template lifeform suffers, unless its option says otherwise. */
+function vacuumWounds(actor) {
+    return canBeHurt(actor) || ((actor?.isOwner === true) && (actor.type === "robot")
+        && (actor.system.biological === true) && (actor.system.vacuumProtection !== "vacuum"));
 }
 
 /**
@@ -182,19 +199,20 @@ export class VacuumBehaviorData extends RegionBehaviorType {
         this.cumulative = MGT2.VacuumPressures[this.pressure]?.cumulative === true;
     }
 
-    /** The token flag holding the round this exposure began. One segment, so it never needs a path. */
+    /** The token flag holding the fight and round this exposure began. One segment, so it never needs a path. */
     get #counter() {
         return `vacuum-${this.behavior.id}`;
     }
 
     /** Which round of this exposure the token is in. */
-    async #exposureRound(token, round) {
-        const first = token.getFlag("mgt2", this.#counter);
-        if ( first === undefined ) {
-            if ( token.isOwner ) await token.setFlag("mgt2", this.#counter, round);
+    async #exposureRound(token, combat, round) {
+        const begun = token.getFlag("mgt2", this.#counter);
+        // A round number means nothing outside its Combat, so a count from another fight starts over.
+        if ( (begun?.round === undefined) || (begun.combat !== combat?.id) || (round < begun.round) ) {
+            if ( token.isOwner ) await token.setFlag("mgt2", this.#counter, { combat: combat?.id, round });
             return 1;
         }
-        return Math.max(1, round - first + 1);
+        return round - begun.round + 1;
     }
 
     static async #onTokenRoundStart(event) {
@@ -203,18 +221,18 @@ export class VacuumBehaviorData extends RegionBehaviorType {
         // number, so landing on round 5 hits at round 5's severity and not four times over.
         if ( event.data.skipped ) return;
 
-        const { token, round } = event.data;
-        if ( !canBeHurt(token.actor) ) return;
+        const { token, combat, round } = event.data;
+        if ( !vacuumWounds(token.actor) ) return;
         // Read here and never derived: `refreshRuleUI` re-prepares actors, not scenes, so a flip
         // would leave a cached answer on the behaviour until the page reloads.
         return (Rules.get("vacuumRuleset") === "companion")
-            ? this.#companionRound(token, round) : this.#coreRound(token, round);
+            ? this.#companionRound(token, combat, round) : this.#coreRound(token, combat, round);
     }
 
     /** The pressure's own free-text row, escalated where the pressure says to. */
-    async #coreRound(token, round) {
+    async #coreRound(token, combat, round) {
         if ( !this.damage ) return;
-        const exposure = await this.#exposureRound(token, round);
+        const exposure = await this.#exposureRound(token, combat, round);
         // Core p.82: "a cumulative 1D damage every round" — 1D, then 2D, then 3D.
         const formula = this.cumulative ? VacuumBehaviorData.#escalate(this.damage, exposure) : this.damage;
         return applyHazard(token.actor, formula, this.#label(),
@@ -225,14 +243,14 @@ export class VacuumBehaviorData extends RegionBehaviorType {
      * Companion p.67: a flat `[breach][pressure]` cell, where the row is the state of the suit this
      * region names as its protection and no such suit at all is the No Protection row.
      */
-    async #companionRound(token, round) {
+    async #companionRound(token, combat, round) {
         const suit = protectingItem(this.protectedBy, token.actor);
         const breach = suit ? (suit.system.breach ?? "intact") : "none";
         // An unbreached sealed suit is complete protection, which is the whole point of wearing one.
         const row = MGT2.VacuumDamage[breach];
         if ( !row ) return;
 
-        const exposure = await this.#exposureRound(token, round);
+        const exposure = await this.#exposureRound(token, combat, round);
         const note = [game.i18n.format("MGT2.Region.Exposure", { round: exposure }),
             game.i18n.localize(row.label)].join(" · ");
 
@@ -252,15 +270,85 @@ export class VacuumBehaviorData extends RegionBehaviorType {
         return MGT2.VacuumPressures[this.pressure]?.label ?? "MGT2.Region.Hazard";
     }
 
+    /**
+     * RH p.34: a machine without vacuum protection keeps working, at half its endurance and on a
+     * malfunction check an hour, two with hostile protection. The interval is stated, never scheduled.
+     */
+    static async #onTokenEnter(event) {
+        if ( !event.user.isSelf ) return;
+        const { token, movement } = event.data;
+        const actor = token.actor;
+        if ( (actor?.type !== "robot") || !actor.isOwner || actor.system.biological ) return;
+        if ( actor.system.vacuumProtection === "vacuum" ) return;
+        if ( this.#holds(actor) ) return;
+
+        const resumeMovement = movement ? token.pauseMovement() : undefined;
+        try {
+            // ⚠ Read again inside the turn: a Region switched on raises every token's entry at once.
+            await inTurn(actor, async () => {
+                if ( this.#holds(actor) ) return;
+                await actor.createEmbeddedDocuments("ActiveEffect", [{
+                    name: game.i18n.localize(this.#label()), img: "icons/svg/degen.svg", origin: this.behavior.uuid,
+                    flags: { mgt2: { region: { vacuum: true } } } }]);
+                const every = (actor.system.vacuumProtection === "hostile") ? "TwoHours" : "Hour";
+                await ChatHelper.postRecovery(actor, this.#label(), game.i18n.format(`MGT2.Region.RobotVacuum.${every}`,
+                    { hours: actor.system.endurance.hours }), null, "MGT2.Region.Hazard");
+            });
+        }
+        finally {
+            await resumeMovement?.();
+        }
+    }
+
+    #holds(actor) {
+        return actor?.effects.some(effect => effect.origin === this.behavior.uuid) === true;
+    }
+
+    /**
+     * A linked robot is one Actor under every token, so it stays in vacuum while any of them does.
+     * A disabled behaviour leaves `tokens` whole, and the BEHAVIOR_DEACTIVATED after it releases.
+     */
+    #staysInside(token) {
+        return token.actorLink && [...this.region.tokens].some(other => (other !== token)
+            && other.actorLink && (other.actorId === token.actorId));
+    }
+
+    /** ⚠ Read inside the turn: a deleted Region fires TOKEN_EXIT and BEHAVIOR_DEACTIVATED at once. */
+    #release(actor) {
+        return inTurn(actor, async () => {
+            const held = actor.effects.filter(effect => effect.origin === this.behavior.uuid).map(effect => effect.id);
+            if ( held.length ) await actor.deleteEmbeddedDocuments("ActiveEffect", held);
+        });
+    }
+
     /** @param {RegionTokenExitEvent} event @this {VacuumBehaviorData} */
     static async #onTokenExit(event) {
         if ( !event.user.isSelf ) return;
         const { token, movement } = event.data;
-        if ( !token.isOwner || (token.getFlag("mgt2", this.#counter) === undefined) ) return;
+        if ( !token.isOwner ) return;
+        const holds = this.#holds(token.actor);
+        // A linked robot outlives a token deleted in here, and its sheet has no Effects tab to clear this from.
+        if ( !token.parent.tokens.has(token.id) ) {
+            if ( holds && token.actorLink && !this.#staysInside(token) ) await this.#release(token.actor);
+            return;
+        }
+        if ( !holds && (token.getFlag("mgt2", this.#counter) === undefined) ) return;
 
         const resumeMovement = movement ? token.pauseMovement() : undefined;
-        await token.unsetFlag("mgt2", this.#counter);
-        await resumeMovement?.();
+        try {
+            if ( holds && !this.#staysInside(token) ) await this.#release(token.actor);
+            if ( token.getFlag("mgt2", this.#counter) !== undefined ) await token.unsetFlag("mgt2", this.#counter);
+        }
+        finally {
+            await resumeMovement?.();
+        }
+    }
+
+    /** ⚠ `Scene#_onDelete` fires no TOKEN_EXIT, and a linked robot outlives its Scene. */
+    static async #onDeactivated(event) {
+        if ( !event.user.isSelf ) return;
+        await Promise.all(game.actors.filter(actor => actor.isOwner && this.#holds(actor))
+            .map(actor => this.#release(actor)));
     }
 
     /** Multiply every die count in the expression, which is what "cumulative 1D" means. */
@@ -270,9 +358,11 @@ export class VacuumBehaviorData extends RegionBehaviorType {
     }
 
     static events = {
+        [EVENTS.TOKEN_ENTER]: this.#onTokenEnter,
         [EVENTS.TOKEN_ROUND_START]: this.#onTokenRoundStart,
-        // Unlike gravity's, this exit handler resets a counter and removes nothing: the wound stays.
-        [EVENTS.TOKEN_EXIT]: this.#onTokenExit
+        // Unlike gravity's, this exit handler heals nothing: the wound stays and a robot's half endurance goes.
+        [EVENTS.TOKEN_EXIT]: this.#onTokenExit,
+        [EVENTS.BEHAVIOR_DEACTIVATED]: this.#onDeactivated
     };
 }
 
@@ -295,7 +385,7 @@ export class RadiationBehaviorData extends RegionBehaviorType {
         if ( !event.user.isSelf ) return;
         const { token, movement } = event.data;
         const actor = token.actor;
-        if ( !actor?.isOwner || !this.rads ) return;
+        if ( !actor?.isOwner || !this.rads || !Rules.on("radiation") ) return;
         if ( typeof actor.system.applyRadiation !== "function" ) return;
 
         // ⚠ Validated before the token is paused: `pauseMovement` holds the move until its resume
@@ -312,7 +402,7 @@ export class RadiationBehaviorData extends RegionBehaviorType {
             // The region absorbs first; folio 100's armour Rad score comes off inside
             // `resolveExposure`, which is also where the two columns of folio 81 are read.
             const dose = roll.total - this.shielded;
-            if ( dose > 0 ) await ChatHelper.resolveExposure(actor, { dose, roll });
+            if ( dose > 0 ) await inTurn(actor, () => ChatHelper.resolveExposure(actor, { dose, roll }));
             else {
                 await ChatHelper.postRadiation(actor, MGT2Helper.plural("MGT2.Region.Shielded", roll.total,
                     { rads: roll.total, shielded: this.shielded }), roll);

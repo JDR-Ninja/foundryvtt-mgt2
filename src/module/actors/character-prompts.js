@@ -724,7 +724,8 @@ export class CharacterPrompts {
             // with no PSI — is not a casualty and is not restored.
             for ( const field of deltas ) {
                 const now = Number(field.dataset.now);
-                const reduced = (now <= 0) && (Number(field.dataset.base) > 0);
+                const reduced = (now <= 0) && (Number(field.dataset.base) > 0)
+                    && !care.crisisExempt.includes(field.dataset.key);
                 if ( crisis ) field.value = String(reduced ? (care.crisisFloor - now) : 0);
                 field.readOnly = crisis;
                 field.classList.toggle("locked", crisis);
@@ -763,7 +764,7 @@ export class CharacterPrompts {
             // Traveller with no PSI has not suffered an ageing crisis.
             const zeroed = deltas.some(f => {
                 const delta = Number(f.value) || 0;
-                return (delta < 0) && ((Number(f.dataset.now) + delta) <= 0);
+                return (delta < 0) && ((Number(f.dataset.now) + delta) <= 0) && !care.crisisExempt.includes(f.dataset.key);
             });
             // What the chosen source means is a rule, so it hangs off the control as a tooltip; the
             // line below it stays for the one thing that is a state — a score about to reach 0.

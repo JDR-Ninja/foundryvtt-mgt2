@@ -31,12 +31,19 @@ export const Psionics = {
         };
     },
 
+    lost(actor) {
+        const lost = actor.system.states?.psiLost === true;
+        if ( lost ) ui.notifications.warn(game.i18n.localize("MGT2.Loss.PsiLost"));
+        return lost;
+    },
+
     /** Roll PSI and write it. */
     async rollPsi(actor) {
         const test = this.test(actor);
         const roll = await new Roll(test.formula).roll();
         const ceiling = this.ceiling(actor);
         const score = Math.max(0, ceiling === null ? roll.total : Math.min(roll.total, ceiling));
+        await this.dropUntestedAgeing(actor);
         await Grants.assignCharacteristics(actor, { psionic: score });
         // Outside creation there is no ledger to write, and `Chargen.update` would open one.
         if ( Chargen.isInCreation(actor) ) {
@@ -58,6 +65,19 @@ export const Psionics = {
             })
         });
         return { roll, score, ...test };
+    },
+
+    /** The test replaces the score, so an ageing row written against the untested one bears on nothing. */
+    async dropUntestedAgeing(actor) {
+        const log = actor.system.characteristicLog;
+        const aged = row => (row.source === "ageing") && ("psionic" in (row.changes ?? {}));
+        if ( !log.some(aged) ) return;
+        await actor.update({ "system.characteristicLog": log.map(row => {
+            if ( !aged(row) ) return { ...row };
+            const changes = { ...row.changes };
+            delete changes.psionic;
+            return { ...row, changes };
+        }) });
     },
 
     /** Null is no ceiling at all, which is what the rule switched off means. */
@@ -137,7 +157,7 @@ export const Psionics = {
      */
     async learn(actor, key) {
         const talent = MGT2.PsionicTraining.talents.find(row => row.key === key);
-        if ( !talent ) return null;
+        if ( !talent || this.lost(actor) ) return null;
         const row = this.ladder(actor).rows.find(entry => entry.key === key);
         if ( row?.held ) return null;
 

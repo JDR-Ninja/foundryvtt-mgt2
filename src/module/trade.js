@@ -665,7 +665,8 @@ export class SpecTradeDialog extends MGT2Screen(HandlebarsApplicationMixin(Appli
         const rule = search.rule;
         // The world's own contributions ride the prompt as waivable modifiers, the way a station
         // action's do.
-        const modifiers = search.terms.map(term => ({ key: term.key, label: term.label, dm: term.dm }));
+        const modifiers = [...RollPromptHelper.checkModifiers(actor),
+            ...search.terms.map(term => ({ key: term.key, label: term.label, dm: term.dm }))];
         const skill = actor.items.find(item => (item.type === "talent")
             && (item.system.subType === "skill")
             && rule.names.some(name => MGT2Helper.matchesSkill(item.name, name)));

@@ -8,9 +8,9 @@ de Mongoose Publishing — desarrollado especialmente para la edición francesa 
 
 > **Requiere Foundry VTT v14** (14.366 como mínimo).
 >
-> La interfaz está completa en español. El vocabulario Traveller sigue las traducciones comunitarias
-> de Mongoose allí donde nombran un término; los títulos de los libros y los nombres de rasgos se
-> quedan en inglés, a falta de una edición española que los nombre.
+> La interfaz y el diario de reglas están completos en español. El vocabulario Traveller sigue las
+> traducciones comunitarias de Mongoose allí donde nombran un término; los títulos de los libros y
+> los nombres de rasgos se quedan en inglés, a falta de una edición española que los nombre.
 
 ## Qué hace el sistema
 
@@ -36,8 +36,12 @@ de Mongoose Publishing — desarrollado especialmente para la edición francesa 
 * **Una sola paleta, y es del lector** — cuatro ajustes preestablecidos, once colores de acento, claro
   u oscuro, y un par de éxito y fallo apto para daltonismo. Cada color de texto medido a 4,5:1 o
   mejor.
-* **Tres compendios que el sistema escribe él mismo** — qué hace con las reglas, un diario por idioma,
-  y un documento de demostración anotado para cada tipo y subtipo que declara.
+* **Cinco compendios que el sistema escribe él mismo** — qué hace con las reglas, un diario por
+  idioma; una guía del sistema en treinta páginas; y la demostración, con un documento anotado para
+  cada tipo de Actor y de Objeto salvo el contrato de recompensa, cinco Viajeros salidos de la
+  creación y una Escena.
+* **Un `?` en la barra de título** abre la guía por la página de la ventana. Por ahora la guía solo
+  existe en inglés; la traducción francesa está por llegar.
 * **Cuatro idiomas** — francés, inglés, español y portugués (Brasil).
 
 El detalle versión por versión está en el [changelog](CHANGELOG.es.md).

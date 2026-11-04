@@ -2,6 +2,7 @@ import { MGT2 } from "../config.js";
 import { MGT2Helper } from "../helper.js";
 import { ActorBaseData, createCharacteristicField } from "./actor-base-data.js";
 import { createTraitsField } from "../traits.js";
+import { Rules } from "../rules.js";
 
 const fields = foundry.data.fields;
 
@@ -19,6 +20,9 @@ const SOLE_SOURCE_AGILITY = -2;
 
 /** RH p.23: Vehicle Speed Movement quarters the endurance while it is in use. */
 const VEHICLE_SPEED_DIVISOR = 4;
+
+/** RH p.34: an unprotected robot's endurance in vacuum or a trace atmosphere. */
+const VACUUM_ENDURANCE = 0.5;
 
 /** RH p.23: recharging takes eight hours whatever the endurance was. */
 const RECHARGE_HOURS = 8;
@@ -178,6 +182,12 @@ export class RobotData extends ActorBaseData {
                     required: false, nullable: false, integer: true, min: 0, initial: 0 })
             }),
 
+            // RH p.87: a living organism with a robot brain. RH p.34 reads vacuum off this.
+            biological: new fields.BooleanField({ required: false, initial: false }),
+            // A chosen value answers vacuum for typed rows in any language and RH p.83's standard kit; blank reads the rows.
+            vacuumSealing: new fields.StringField({
+                required: false, blank: true, initial: "", choices: MGT2.RobotVacuumSealing }),
+
             // One type with a flag, not a chassis Item and not a second sub-type.
             traveller: new fields.SchemaField({
                 enabled: new fields.BooleanField({ required: false, initial: false }),
@@ -323,8 +333,31 @@ export class RobotData extends ActorBaseData {
             { key: "packs", value: Math.pow(2, this.endurance.powerPacks),
                 on: this.endurance.powerPacks > 0 },
             { key: "steps", value: Math.round((1 - (SPEED_STEP_ENDURANCE * this.speed.tactical)) * 100) / 100,
-                on: this.speed.tactical !== 0 }
+                on: this.speed.tactical !== 0 },
+            { key: "vacuum", value: VACUUM_ENDURANCE, on: this.vacuumHalved }
         ];
+    }
+
+    /** RH p.34: what stands between this robot and vacuum, `vacuum`, `hostile` or null. */
+    get vacuumProtection() {
+        return this.vacuumSealing || this.vacuumRows;
+    }
+
+    /** RH p.32-34, p.41: what the option rows answer to vacuum, by printed English name. */
+    get vacuumRows() {
+        const fitted = pattern => this.options.some(option => pattern.test(option.name));
+        if (fitted(/vacuum environment protection/i)) return "vacuum";
+        return fitted(/(hostile|corrosive|insidious) environment protection/i) ? "hostile" : null;
+    }
+
+    /** Whether a vacuum Region holds this robot, by the effect the Region left on it. */
+    get inVacuum() {
+        return this.parent.effects.some(effect => effect.flags?.mgt2?.region?.vacuum === true);
+    }
+
+    /** RH p.34: vacuum protection stops the halving, even for a robot the Region already holds. */
+    get vacuumHalved() {
+        return this.inVacuum && (this.vacuumProtection !== "vacuum");
     }
 
     /**
@@ -495,7 +528,7 @@ export class RobotData extends ActorBaseData {
 
     #prepareEndurance() {
         const endurance = this.endurance;
-        endurance.hours = this.enduranceHours;
+        endurance.hours = this.enduranceHours * (this.vacuumHalved ? VACUUM_ENDURANCE : 1);
         endurance.chain = this.enduranceChain;
         endurance.recharge = RECHARGE_HOURS;
         // "While in use" and not instead of: a robot with Vehicle Speed Movement still has its own
@@ -622,6 +655,7 @@ export class RobotData extends ActorBaseData {
      * @returns {Promise<{dose: number, total: number, lines: string[]}|null>}
      */
     async applyRadiation(rads) {
+        if ( !Rules.on("radiation") ) return null;
         const reaching = Math.max(0, Math.trunc(rads) || 0);
         const dose = this.hardened ? Math.floor(reaching / 2) : reaching;
         if (dose === 0) return null;

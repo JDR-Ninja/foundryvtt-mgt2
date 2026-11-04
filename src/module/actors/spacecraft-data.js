@@ -810,6 +810,13 @@ export class SpacecraftData extends CraftData {
             + this.modifiers.initiative.dm;
     }
 
+    /** Core folio 154: a drive that is out "may not be used until repaired", as the sentence saying so; null while it runs. */
+    get jumpDriveOut() {
+        const state = this.criticalEffects.jump;
+        return state ? game.i18n.format("MGT2.Voyage.DriveOut",
+            { state: game.i18n.localize(`MGT2.Criticals.States.${state}`) }) : null;
+    }
+
     /** The standing criticals as numbers. */
     #foldCriticals() {
         const totals = {

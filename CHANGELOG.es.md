@@ -8,6 +8,236 @@
 
 ---
 
+## [0.2.9]
+
+**Verificado en Foundry VTT 14.369.**
+
+**Una guía del sistema, una demostración que llega hasta el final de la creación, y las naves, las
+flotas, los vehículos y los robots puestos de acuerdo con sus libros.** Treinta páginas describen el
+sistema, y un `?` en la barra de título las abre por la página de la ventana. Los compendios de
+demostración ganan cinco carreras, cuatro tablas compartidas, cinco Viajeros y una Escena. Jugar
+esos Viajeros sacó a la luz defectos de creación, y escribir la guía los de las naves, las flotas,
+las regiones y las hojas: lo que cambia una partida en curso va primero.
+
+### ⚠ Cambios que rompen
+
+* **Una crisis de envejecimiento también hace fallar un cambio de destino y rechaza una *Carrera
+  ofrecida*** (Core p.20, p.49). En una carrera configurada como *Volver a cualificar, conservando
+  el rango*, el cambio falla sin tirada y sin elección de destino, aunque *Automática si* dispense
+  al Viajero de la tirada. Sigue en su destino, sin penalización, y el registro del periodo dice por
+  qué. *Libre, cada periodo* no pide tirada y sigue permitido. Una *Carrera ofrecida* ya no dispensa
+  de la tirada: la cualificación falla, la oferta sigue pendiente y no se gasta, y una entrada
+  forzada sigue pasando. Dos interpretaciones.
+* **PSI reducida a 0 por el envejecimiento ya no es una crisis, y todas las capacidades psiónicas se
+  pierden para siempre** (Aliens of Charted Space 1 p.275). El Viajero ya no arriesga la muerte ni
+  debe atención médica, y la atención de otra crisis no le sube la PSI. La prueba de PSI, el
+  entrenamiento, el aprendizaje, los poderes y los talentos aprendidos como habilidades se rechazan;
+  los talentos siguen en la hoja, sin efecto. Una concesión que subiría la PSI se rechaza, y el
+  envejecimiento ya no propone una PSI que esté en 0. **El libro lo imprime para los Viajeros
+  zhodani, y el sistema lo aplica a todos los Viajeros**, porque no sabe quién es Zhodani: una
+  interpretación. **Una carrera cuya Cualificación solo lee PSI, como el Psion (Core p.236), queda
+  cerrada**: otra interpretación, porque el libro solo habla de las capacidades. Todo esto se lee en
+  las pérdidas registradas, de modo que un Viajero ya creado cuya PSI envejeció hasta 0 pasa a esta
+  regla desde esta versión, aunque hubiera pagado la atención. Una pérdida escrita antes de la
+  prueba de PSI no bloquea nada, y la prueba la borra.
+* **Una entrada automática ya no escapa a la regla de no retorno** (Core p.18). Una carrera
+  *Automática*, o cuyo umbral *Automática si* cumple el Viajero, no se retoma en el periodo
+  siguiente a haberla dejado. El reclutamiento, una carrera impuesta u ofrecida, una carrera siempre
+  abierta y un cambio de destino siguen escapando a ella.
+* **Una especialidad escrita solo en el nombre de un objeto cuenta como la del campo** (Core p.58),
+  para la concesión y para el tope de habilidades. Una concesión sin especialidad, *Electronics* 1,
+  crea ahora su propia fila junto a *Electronics (Comms)*, en lugar de subirla. Una interpretación.
+  **Un Viajero ya duplicado no se corrige.**
+* **El vacío y la temperatura ya solo hieren a Viajeros y PNJ** (Core p.82), **y el vacío a un robot
+  biológico.** Una región *Vacío* o *Temperatura* hería también al vehículo, la astronave o el robot
+  que estaba en ella. Un robot sigue ahora su propia regla (Robot Handbook p.34, véase *Regiones y
+  peligros*). Una región *Radiación* sigue alcanzando a los robots.
+* **Un Motor de salto inutilizado o destruido rechaza el salto** (Core p.154), tanto en el viaje
+  como en un puesto, y la pantalla de viaje desactiva el botón. **En un puesto rechaza también toda
+  tirada de Ingeniería (motor-S), acción de reparación escrita con esa especialidad incluida**: una
+  interpretación. Una acción de reparación escrita *Engineer* sin especialidad sigue pasando. En un
+  puesto, esa especialidad solo se lee por su nombre inglés o francés, como `Engineer (j-drive)`.
+* **La dispersión de una flota produce ahora sus efectos** (High Guard p.122). Mientras corren sus
+  asaltos, suspende las reparaciones, el inicio de romper el combate, la división, el destacamento y
+  la unión, pero ni el fuego ni la Moral, y su MD llega al *MD ofensivo*. Tras un fallo, un nuevo
+  resultado espera a que hayan pasado los dos asaltos, y la división y el destacamento siguen
+  cerrados hasta una dispersión lograda. Dejar abierta la Moral, retener toda la flota y cerrar la
+  división tras un fallo son tres interpretaciones.
+* **Los MD permanentes de quien tira (estados, armadura, aumentos, Efectos Activos) llegan también a
+  las tiradas de puesto, vehículo, comercio y reanimación.** Un ingeniero fatigado tira más bajo que
+  antes, sin que su hoja haya cambiado.
+
+### Creación
+
+* **Una carrera desbloqueada sigue desbloqueada tras una tirada fallida** (Core p.17, p.46). La
+  entrada *Carrera desbloqueada* se gasta al entrar en la carrera, ya no antes de la tirada de
+  cualificación, y desaparece según su propia duración. Un fallo ya no hace perder el permiso del
+  árbitro.
+* **Una carrera impuesta que no se encuentra ya no bloquea al Viajero.** Una *Carrera impuesta* que
+  ni el mundo ni un compendio contienen, o que no nombra ninguna donde no existe carrera de entrada
+  forzada, se retira, con un aviso y un mensaje al jugador y al árbitro. Hasta ahora todas las
+  carreras rechazaban al Viajero, sin ofrecer el reclutamiento ni una carrera siempre abierta.
+* **Una cadena de subtablas sigue hasta diez tablas**, se detiene en una tabla ya tirada, y lo dice
+  en un aviso y en el registro del periodo. Antes se detenía en silencio tras dos saltos.
+* **Una *Carrera ofrecida* ya no abre una carrera *Solo se entra cuando te envían*** (Core p.52). El
+  jugador es rechazado; una condena, un reclutamiento o el árbitro siguen abriéndola.
+* **Una degradación se detiene en el rango más bajo que imprime el escalafón, y nunca sube un
+  rango.** Un oficial de rango 1 caía a un rango 0 que su escalafón no tiene. Ningún libro prevé el
+  caso: una interpretación.
+* **La fila de envejecimiento anota la edad del final del periodo** (Core p.48): el cuarto periodo
+  envejece a los 34, ya no a los 30. Las filas de lesión, atención y suceso conservan la edad del
+  inicio del periodo.
+* **La creación escribe la edad del Viajero**: *Terminar* rellena el campo *Edad* si está vacío. Una
+  edad escrita a mano se queda, y una edad escrita por la creación se mantiene al día.
+* ***Automática si* también dispensa de la tirada de cambio de destino** en *Volver a cualificar,
+  conservando el rango*, porque esa tirada repite la misma línea de Cualificación. Una
+  interpretación.
+* **Un cambio de destino superado, o libre, escribe su línea en el registro del periodo**, con los
+  dos destinos.
+
+### Regiones y peligros
+
+* **La exposición al vacío se cuenta por combate** (Core p.82). Una ficha que seguía en una región
+  *Vacío* conservaba el asalto de un combate pasado, y el daño acumulativo del combate siguiente se
+  quedaba bloqueado en 1D. La exposición vuelve a 1 en cada combate y sube asalto a asalto.
+* **La regla *Radiación* desactivada corta de verdad la radiación.** Una región ya no la tira, y
+  ninguna carta anuncia que una armadura de 0 ha detenido la dosis. Un robot ignoraba la regla y
+  ahora la sigue.
+* **Dos peligros en el mismo instante ya no se borran.** El segundo escribía sobre el total leído
+  antes del primero, y una herida se perdía: ahora se aplican uno tras otro.
+* **Borrar una ficha expuesta al vacío** ya no produce un error en la consola.
+* **Un robot en el vacío sigue el Robot Handbook p.34.** Una región *Vacío* reduce su autonomía a la
+  mitad y anuncia una tirada de avería cada hora, cada dos horas con protección contra entornos
+  hostiles, y ninguna con protección contra el vacío: la tira el árbitro, el sistema no la programa.
+  La hoja gana *Robot biológico*, para un robot que sufre como el ser vivo en que se basa, y
+  *Sellado al vacío*, que prevalece sobre las líneas de opciones: en blanco, solo se leen los
+  nombres ingleses impresos. Ajustar ese campo a *Vacío* devuelve al instante la autonomía a un
+  robot que ya está en la región, y salir de la región o borrar su Escena también se la devuelve. Un
+  robot que ya esté en la región al actualizar solo se reduce en su próxima entrada. Mantener la
+  mitad de autonomía bajo protección hostil es una interpretación (p.32 y p.34).
+* **Un PNJ recibe ahora su dosis de radiación** (Core p.79, p.81), y su hoja gana sus Rads y el
+  estado de náusea. Una criatura la recibe en sus Impactos, sin END (Core p.84).
+
+### Naves, flotas y viaje
+
+* **Un disparo de iones desde un puesto ya no daña el casco a través de la armadura** (High Guard
+  p.30). Los rasgos del arma siguen ahora al disparo hasta el daño, salva de misiles incluida.
+* **Un crítico de Motor de maniobra pesa sobre las tiradas de pilotaje** (Core p.154, p.170), salvo
+  la Iniciativa. **Un crítico de Motor de salto pesa sobre toda tirada de Ingeniería (motor-S)**
+  (Core p.170, p.171), tanto en el viaje como en un puesto, y la pantalla de viaje lo muestra. En un
+  puesto, estas habilidades solo se leen por su nombre inglés o francés.
+* **La cabecera de una nave cuenta personas, no líneas de tripulación**: una nave completa ya no
+  aparece corta.
+* **Las pantallas de defensa de una nave** (*Amortiguador nuclear*, *Pantalla de mesones*, *Esfera
+  negra*) **se ajustan en la hoja**, en el bloque *Monturas y armas*, en modo de edición.
+* **La herramienta *Fijar la banda de alcance a partir de dos fichas* también coloca una nave
+  entrada arrastrándola.**
+* **La pantalla de flotas gana *Dividir en una flota nueva* y *Unir a otra flota*** (High Guard
+  p.122), y un primer casco puede soltarse en una flota nueva. La división no pide cadena de tareas,
+  apartándose del libro, que exige una.
+* **Unir una flota pide confirmación**, porque el sistema no sabe quién es aliado. **La Moral
+  pregunta qué flota se opone** cuando quedan varias, por ejemplo tras una división. Sin adversario,
+  el *Terreno celeste* vale 0.
+* **Un lote de carga o correo sin plazo** ya no escribe «día de campaña null», y sigue diciendo que
+  el pago se hace a la entrega.
+* **La ayuda emergente de la Zona Roja** dice ahora lo que el sistema aplica: el tráfico se sigue
+  tirando allí, con MD-4 para los pasajeros y MD-6 para las mercancías, y hacer cumplir la
+  prohibición corresponde al árbitro (Core p.239-240, p.260).
+
+### Hojas y tiradas
+
+* **Una criatura tiene un campo para sus Impactos.**
+* **Una armadura en un PNJ o un robot se ve y se lleva**: ambas hojas ganan su línea.
+* **Un MD personalizado escrito aparece en los términos de la tarjeta**, con su operador si lo
+  tiene.
+* **Un Efecto Activo escrito en `system.modifiers.skills.<slug>.effect` llega por fin a la tirada de
+  esa habilidad.**
+* **Vehículos** (Vehicle Handbook 2026). *Borrar todos los críticos* cubre todas las ubicaciones y
+  deja la Estructura, que tiene su propia reparación (p.11). Un crítico de casco de Severidad 5 o 6
+  divide la Estructura, redondeada hacia arriba (p.10), y el contador *Estructura a la mitad* se
+  corrige a mano. El control de tiro de una montura llega a la tirada y da al arma el rasgo *Scope*
+  (p.101, p.104); prevalece sobre el del arma. Un vehículo introducido a mano gana sus campos
+  *Estructura* y *Confort*.
+* **El software y el cerebro de un robot** se abren y se borran desde su hoja.
+* **Una reserva dice que arrastrar copia**: sus textos decían «tomado». Una reserva cerrada ya no
+  dice a un jugador que sus líneas «nunca se envían». El contenedor creado desde el inventario se
+  llama *Nuevo contenedor* en el idioma de la interfaz.
+
+### Guía
+
+* **Llega el compendio *MGT2 — Guía del sistema*** (`mgt2.guide`)**, en treinta páginas**: lo que el
+  sistema es y no es, la preparación de un mundo, un primer Viajero, una primera tirada, un primer
+  combate y una primera nave, y después cada hoja y cada pantalla, las reglas opcionales, los
+  ajustes, las macros y la API, y lo que el sistema no hace a propósito.
+* **La guía solo existe en inglés**, y es el inglés lo que se muestra en los cuatro idiomas. Un
+  lector hispanohablante también lee el inglés; solo está prevista la traducción francesa.
+* **Un `?` en la barra de título abre la guía por la página de la ventana**: en las hojas de
+  Viajero, PNJ, vehículo, astronave, robot, mundo, reserva y objeto, y en la creación, el combate
+  espacial, el viaje, el Docket y la ventana de tirada. Las batallas entre flotas, el comercio y el
+  explorador de compendios no lo llevan: sus páginas se leen en el compendio. El ajuste *Mostrar el
+  botón de la guía*, propio de cada navegador, lo quita.
+
+### Demostración
+
+* **Cinco Viajeros salidos del bucle de creación** en *MGT2 — Actores de demostración, anotados*,
+  cada uno a partir de un Actor en blanco, con sus notas: *Demo — Tamsin Reeve* (la escuela de
+  cadetes con honores, luego la patrulla), *Demo — Corvin Dray* (un rechazo, el reclutamiento, un
+  Percance y la factura del cirujano), *Demo — Mirel Aston* (una creación interrumpida: una vez
+  importada, espera en la pantalla de creación, en su tercer periodo), *Demo — Hesper Lund* (una
+  crisis de envejecimiento pagada, una pensión y una deuda) y *Demo — Joren Pask* (la universidad,
+  un cambio de destino, un contacto, un rival y un aliado).
+* **Una Escena**, *Demo — Bellweather Roads*, en un compendio nuevo, *MGT2 — Escenas de
+  demostración, anotadas* (`mgt2.demo-scenes`): una región *Vacío* y una región *Radiación* que
+  cruzar con una ficha. La segunda actúa al entrar, la primera al inicio de cada asalto de combate:
+  sin combate, no le hace nada a un Viajero.
+* **Cinco carreras y cuatro tablas compartidas** en *MGT2 — Objetos de demostración, anotados*, para
+  que una creación jugada solo con el sistema tenga adónde ir tras un rechazo, una vez importados
+  estos documentos al mundo. Entre todas llevan el reclutamiento, la carrera siempre abierta, la
+  entrada automática, el permiso del árbitro, la entrada forzada y la liberación, la Comisión y el
+  cambio de destino. Las carreras son *Demo — Reach Guard*, *Demo — Fen Holders*, *Demo — Quay
+  Hands*, *Demo — Pilots' Guild* y *Demo — Harbour Lock-up*.
+* **Una habilidad de demostración lleva su nombre real**: *Seafarer* y ya no *Demo — Seafarer*, en
+  el objeto y en cada referencia. Una carrera de demostración sube así la habilidad que el Viajero
+  ya tiene, en lugar de crearle una segunda.
+* **Un documento de demostración dejado en su compendio ya solo responde a su nombre.** Ya no se
+  ofrece por sí mismo tras un rechazo, para una entrada forzada sin nombre, para «otra carrera», en
+  una elección libre de habilidad ni en la lista de un vale. Importado al mundo, responde como
+  cualquier otro documento.
+* **Los valores de la demostración son todos inventados.** *Demo — Harbour Patrol*, *Demo — Harbour
+  Cadet School*, *Demo — Engineer's Toolkit*, *Demo — Cargo Lot* y *Demo — Kestrel-class Courier*
+  cambian de cifras, y el Kestrel tiene por fin una planta de energía a la medida de sus sistemas.
+  Un documento ya importado conserva los suyos.
+
+### Documentación
+
+* **El diario de auditoría de reglas** (`mgt2.docs`) **está ahora entero en español y en portugués
+  (Brasil)**, con las dos listas de cada pantalla. **Ningún lector de estos idiomas lo ha revisado
+  con los libros delante**: los términos vienen de los archivos de idioma y después del vocabulario
+  comunitario de Mongoose, el inglés se queda donde ninguno de los dos nombra el término, y un
+  término todavía puede cambiar.
+* **El mismo diario** sigue esta versión: la crisis de envejecimiento con el cambio de destino, la
+  carrera ofrecida y PSI, la edad que escribe la creación, la dispersión de las flotas y el robot en
+  el vacío.
+
+### Correcciones
+
+* **La hoja ya no muestra claves en bruto.** Una pérdida escrita por la creación daba el nombre
+  interno de su tabla, como `personalDevelopment`: ahora se lee en el idioma de la interfaz, filas
+  ya registradas incluidas, y una nota escrita a mano se queda como está. La nota de un contacto
+  convertido y la de un gasto se escriben traducidas; las ya escritas no cambian.
+* **La ventana de pérdidas de una lesión de creación habla de lesión**, ya no de envejecimiento.
+* **Una concesión encuentra la habilidad que se tiene, con su especialidad en mayúsculas o en
+  minúsculas**: *Electronics (comms)* sube *Electronics (Comms)* en lugar de crear una segunda.
+* **Un arma o un poder cuya habilidad vinculada está escrita por su nombre** abre la ventana de
+  tirada en esa habilidad, ya no en *Sin competencia*.
+* **Una fila de pérdida facturada al Viajero**, atención de una crisis de envejecimiento incluida,
+  **pasa también a sus notas financieras.**
+* **En inglés, la relación *Ally* se escribía *Allie*.**
+* **Para las macros**: `TravellerActorSheet.checkModifiers` pasa a ser
+  `RollPromptHelper.checkModifiers`.
+
+---
+
 ## [0.2.8]
 
 **Verificado en Foundry VTT 14.369.**

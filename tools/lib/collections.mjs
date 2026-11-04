@@ -32,9 +32,9 @@ export const EMBEDDED = Object.freeze({
     Region: { behaviors: "RegionBehavior" },
     RollTable: { results: "TableResult" },
     Scene: {
-        drawings: "Drawing", lights: "AmbientLight", notes: "Note", regions: "Region",
-        sounds: "AmbientSound", templates: "MeasuredTemplate", tiles: "Tile", tokens: "Token",
-        walls: "Wall"
+        drawings: "Drawing", levels: "Level", lights: "AmbientLight", notes: "Note",
+        regions: "Region", sounds: "AmbientSound", templates: "MeasuredTemplate", tiles: "Tile",
+        tokens: "Token", walls: "Wall"
     },
     Token: { delta: "ActorDelta" }
 });

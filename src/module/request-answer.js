@@ -38,6 +38,9 @@ export async function answerRequest(message, lineId, { prompt = false } = {}) {
     }
 
     const asked = lineDemand(request, read);
+    if ( MGT2Helper.psiBarred(actor, actor.items.get(read.skillItem)) ) {
+        return void ui.notifications.warn(game.i18n.localize("MGT2.Loss.PsiLost"));
+    }
     const talent = powerOf(request, read, actor);
     // Core p.229: "A Traveller with no PSI points cannot attempt to activate a power."
     if ( talent && actor.system.isCharacteristicShown("psionic")
@@ -156,7 +159,7 @@ function seedOptions(request, read, actor, imposed, asked, talent) {
         characteristic: (offered.length > 1) ? bestCharacteristic(actor, offered) : (offered[0] ?? ""),
         skills: RollPromptHelper.actorSkills(actor),
         skill: skillKey(asked, read),
-        checkModifiers: TravellerActorSheet.checkModifiers(actor),
+        checkModifiers: RollPromptHelper.checkModifiers(actor),
         difficulty: asked.difficulty,
         blocks: { skill: asked.skillMode !== "none", range: false, traits: false,
             psionic: tracked, attack: false, extended: false },

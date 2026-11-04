@@ -27,8 +27,12 @@ Publishing's Traveller — built specially for the French edition translated by
   them, and a filter shows what your table changed. The defaults are the game as printed.
 * **One palette, and it belongs to the reader** — four presets, eleven accent colours, light or dark,
   and a colour-blind pair for success and failure. Every text colour measured at 4.5:1 or better.
-* **Three compendiums the system writes itself** — what it does with the rules, one journal per
-  language, and an annotated demo document for every type and sub-type it registers.
+* **Five compendiums the system writes itself** — what it does with the rules, one journal per
+  language; a guide to the system in thirty pages; and the demo, with an annotated document for
+  every Actor and Item type except the bounty contract, five Travellers out of the creation loop
+  and a Scene.
+* **A `?` in the title bar** opens the guide at the window's own page. The guide exists in English
+  only for now; the French translation is to come.
 * **Four languages** — French, English, Spanish, Brazilian Portuguese.
 
 Release by release detail is in the [changelog](CHANGELOG.en.md).

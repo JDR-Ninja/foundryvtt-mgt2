@@ -4,6 +4,7 @@ import { SPACE, SpaceCombatData, STEPS } from "./combat.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
 import { SpacecraftActorSheet } from "./actors/spacecraft-sheet.js";
+import { GuideButtonMixin } from "./guide.js";
 import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, DialogV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -20,7 +21,10 @@ const BANDS = Object.freeze(Object.keys(MGT2.ShipRangeBands));
  * The space combat screen: the range strip, the order and the stations.
  * @extends {ApplicationV2}
  */
-export class SpaceCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
+export class SpaceCombatScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplicationMixin(ApplicationV2))) {
+
+    /** @inheritDoc */
+    static GUIDE_TOPIC = "space-combat";
 
     constructor(options) {
         super(options);

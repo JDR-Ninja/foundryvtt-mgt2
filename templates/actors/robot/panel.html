@@ -257,6 +257,8 @@
 			b=robot.bandwidth
 			title=(localize 'MGT2.Actor.robot.Bandwidth')
 			flag=(localize 'MGT2.Actor.robot.Overload')
+			edit="MGT2.Actor.EditSoftware"
+			del="MGT2.Actor.DeleteSoftware"
 			derived="system.brain.bandwidth"}}
 		<dl class="statline grid" data-derived="system.brain">
 			<div class="stat"><dt>{{localize 'MGT2.Actor.robot.Grade'}}</dt><dd class="word">{{localize robot.brain.label}}</dd></div>
@@ -292,7 +294,14 @@
 		{{/if}}
 		{{/if}}
 		{{#if robot.brain.item}}
-		<p class="hint">{{localize 'MGT2.Actor.robot.BrainItem' name=robot.brain.item.name n=robot.brain.item.processing}}</p>
+		<table class="rows">
+			<tbody>
+				<tr data-item-id="{{robot.brain.item._id}}">
+					<td><p class="hint">{{localize 'MGT2.Actor.robot.BrainItem' name=robot.brain.item.name n=robot.brain.item.processing}}</p></td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditComputer" del="MGT2.Actor.DeleteComputer"}}
+				</tr>
+			</tbody>
+		</table>
 		{{else}}
 		<p class="hint">{{localize 'MGT2.Actor.robot.NoBrainItem' n=robot.bandwidth.inherent}}</p>
 		{{/if}}
@@ -397,6 +406,8 @@
 		</table>
 	</div>
 	{{/if}}
+
+	{{> systems/mgt2/templates/actors/parts/armour-rows.html}}
 
 	<div class="block">
 		<div class="sect">

@@ -81,6 +81,11 @@
 			<label data-tooltip="{{localize 'MGT2.Actor.DeadHint'}}">
 				<input type="checkbox" {{checked system.states.dead}} disabled />{{localize 'MGT2.Actor.Dead'}}
 			</label>
+			{{#if (rule 'radiation')}}
+			<label data-tooltip="{{localize 'MGT2.Radiation.NauseaHint'}}">
+				{{formInput systemFields.states.fields.nausea name="system.states.nausea" value=system.states.nausea}}{{localize 'MGT2.Radiation.Nausea'}}
+			</label>
+			{{/if}}
 			{{#if isCreature}}
 			<label data-tooltip="{{localize 'MGT2.Actor.npc.DestroyedHint'}}">
 				<input type="checkbox" {{checked system.states.destroyed}} disabled />{{localize 'MGT2.Actor.npc.Destroyed'}}
@@ -127,6 +132,10 @@
 			<dt>{{localize 'MGT2.DamageTracks.hits'}}</dt>
 			<dd><a class="open" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.Heal'}}">{{system.characteristics.hits.value}}<span class="of">/{{system.characteristics.hits.max}}</span></a></dd>
 		</div>
+		<div class="stat edit-only">
+			<dt>{{localize 'MGT2.DamageTracks.hits'}}</dt>
+			<dd>{{formInput systemFields.characteristics.fields.hits.fields.base name="system.characteristics.hits.base" value=system.characteristics.hits.base classes="f num"}}</dd>
+		</div>
 		<div class="stat"><dt>{{localize 'MGT2.Actor.npc.Speed'}}</dt><dd>{{system.speed.ground}}<i>m</i></dd></div>
 		{{#if system.speed.swim}}
 		<div class="stat"><dt>{{localize 'MGT2.Actor.npc.SpeedSwim'}}</dt><dd>{{system.speed.swim}}<i>m</i></dd></div>
@@ -161,6 +170,15 @@
 			<dt>{{localize 'MGT2.Actor.Armor'}}</dt>
 			<dd>{{system.inventory.armor}}</dd>
 		</div>
+		{{#if (rule 'radiation')}}
+		<div class="stat live{{#unless system.health.radiations}} none{{/unless}}">
+			<dt>{{localize 'MGT2.Actor.Rads'}}</dt>
+			<dd>
+				<a class="val play-only" data-action="radiation" data-tooltip="{{localize 'MGT2.Radiation.ExposeHint'}}">{{system.health.radiations}}</a>
+				<span class="edit-only">{{formInput systemFields.health.fields.radiations name="system.health.radiations" value=system.health.radiations classes="f num"}}</span>
+			</dd>
+		</div>
+		{{/if}}
 		<div class="stat" data-derived="system.initiative">
 			<dt><a class="roll" data-action="roll" data-roll="initiative" tabindex="-1">{{localize 'MGT2.Actor.Initiative'}}</a></dt>
 			<dd>{{showDM initiative}}</dd>

@@ -91,7 +91,7 @@ import { applyPalette, groundWindow, migrateDarkPreset, migrateLegacyTheme, regi
 import { applyGuideButton } from "./guide.js";
 
 function registerHandlebarsHelpers() {
-  Handlebars.registerHelper('showDM', dm => MGT2Helper.signed(dm));
+  Handlebars.registerHelper('showDM', dm => (typeof dm === "string") ? dm : MGT2Helper.signed(dm));
   Handlebars.registerHelper('showFormula', text => MGT2Helper.showFormula(text));
   Handlebars.registerHelper('credits', value => MGT2Helper.credits(value));
   // What an optional rule is set to.

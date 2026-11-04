@@ -417,7 +417,7 @@ export class FleetAttack {
 
         const hits = [];
         const actor = target?.system.ship;
-        if ( roll && count && actor ) {
+        if ( roll && count && actor && this.#gate() ) {
             for ( let i = 0; i < count; i++ ) hits.push(await this.#critical(actor));
         }
         return { superiority, extra, wanted, count, nullified: wanted - count, tons, hits };

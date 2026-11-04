@@ -57,6 +57,14 @@
 				<span class="lbl">{{localize 'MGT2.Actor.robot.Owner'}}</span>
 				{{formInput systemFields.owner name="system.owner" value=system.owner classes="f"}}
 			</label>
+			<label class="check">
+				<span class="lbl">{{localize 'MGT2.Actor.robot.Biological'}}</span>
+				{{formInput systemFields.biological name="system.biological" value=system.biological}}
+			</label>
+			<label data-tooltip="{{localize 'MGT2.Actor.robot.VacuumSealingHint'}}">
+				<span class="lbl">{{localize 'MGT2.Actor.robot.VacuumSealing'}}</span>
+				{{formInput systemFields.vacuumSealing name="system.vacuumSealing" value=system.vacuumSealing blank=robot.vacuumRows localize=true classes="f"}}
+			</label>
 			{{! One type with a flag. Nothing about the schema changes when it is set — the six
 			    canonical characteristics are declared on every robot and this only reveals them. }}
 			<label class="check">

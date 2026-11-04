@@ -61,7 +61,7 @@
 				</span>
 			</div>
 			<div class="st">
-				<button type="button" class="nm" data-action="jumpStep" data-step="jump"{{#unless fuel.enough}} disabled{{/unless}}>{{localize 'MGT2.Voyage.Jump'}}</button>
+				<button type="button" class="nm" data-action="jumpStep" data-step="jump"{{#if jump.jump.out}} disabled{{else}}{{#unless fuel.enough}} disabled{{/unless}}{{/if}}>{{localize 'MGT2.Voyage.Jump'}}</button>
 				<span class="tgt">{{localize 'MGT2.Voyage.JumpTarget'}}</span>
 				<span class="dms">
 					{{#each jump.jump.dms as |dm|}}
@@ -70,11 +70,12 @@
 				</span>
 			</div>
 		</div>
+		{{#if jump.jump.out}}<p class="hint bad" data-jump-out>{{jump.jump.out}}</p>{{/if}}
 		<p class="hint">{{localize 'MGT2.Voyage.DebitWhy'}}</p>
 	</div>
 
 	{{! The two procedures differ in shape, not in numbers, and the precedence rule the books print
-	    only holds if something declares which is in force. Only the Core branch is built. }}
+	    only holds if something declares which is in force. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Voyage.Ruleset'}}</h3>

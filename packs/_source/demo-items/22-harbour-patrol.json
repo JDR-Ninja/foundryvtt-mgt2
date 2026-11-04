@@ -17,7 +17,7 @@
           "medicalBillsRow names the employer's column on the Medical Bills table, which pays part of an injury's care.",
           "standingModifiers[] is the career's own permanent DM, gated on a characteristic and scoped to one step."
         ],
-        "trap": "The eleven fields below the tables — assignment, terms, rank, ladder, enlistedRank, events, entryMode, exitMode, termLog, track — are the record half of this type, and they stay empty on a template. The same Item type is both the career a Traveller may enter and the career a Traveller served; termLog is what tells the two apart."
+        "trap": "The eleven fields below the tables — assignment, terms, rank, ladder, enlistedRank, gained, events, entryMode, exitMode, termLog, track — are the record half of this type, and they stay at their defaults on a template. The same Item type is both the career a Traveller may enter and the career a Traveller served; termLog is what tells the two apart."
       }
     }
   },

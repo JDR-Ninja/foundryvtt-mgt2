@@ -55,7 +55,8 @@
 			</li>
 			{{/each}}
 		</ul>
-		{{#unless fleet.contacts.length}}<p class="hint">{{localize 'MGT2.Fleet.Screen.DropShipHint'}}</p>{{/unless}}
+		{{! An empty list has no height, so the hint is the line's zone until a row gives it one. }}
+		{{#unless fleet.contacts.length}}<p class="hint drop" data-accept="{{../shipTypes}}" data-join="line">{{localize 'MGT2.Fleet.Screen.DropShipHint'}}</p>{{/unless}}
 		{{! Two zones, because a drag cannot carry a number: a hull dropped on the line joins as a
 		    ship, one dropped here joins as a wing of one and p.114's count is edited in the panel. }}
 		<p class="hint drop" data-accept="{{../shipTypes}}" data-join="wing">{{localize 'MGT2.Fleet.Screen.DropWingHint'}}</p>
@@ -144,12 +145,35 @@
 					{{#if fleet.editable}}
 					<input class="f n" type="number" step="1" name="dispersalEffect" value=""
 						placeholder="{{localize 'MGT2.Fleet.Screen.EffectPlaceholder'}}"
-						aria-label="{{localize 'MGT2.Fleet.Screen.Dispersal'}}" />
+						aria-label="{{localize 'MGT2.Fleet.Screen.Dispersal'}}"{{#if fleet.retryHeld}} disabled{{/if}} />
 					{{/if}}
 					<i> {{plural 'MGT2.Fleet.Screen.DispersalState' fleet.dispersal.rounds rounds=fleet.dispersal.rounds dm=fleet.dispersalDM}}</i>
 				</span>
 			</div>
+			{{#if fleet.dispersalRunning}}<span class="why">{{localize 'MGT2.Fleet.Screen.DispersalHolds'}}</span>{{/if}}
+			{{#if fleet.retryHeld}}<span class="why">{{localize 'MGT2.Fleet.Screen.DispersalServing'}}</span>
+			{{else if fleet.dispersal.failed}}<span class="why">{{localize 'MGT2.Fleet.Screen.DispersalFailed'}}</span>{{/if}}
 		</div>
+
+		{{! p.122 divides the ships AFTER the rounds have run, so a tick is what the referee means to
+		    move and the two buttons wait for the count above. }}
+		{{#if canEdit}}
+		<div class="fleet">
+			<span class="why">{{localize 'MGT2.Fleet.Screen.DivideWhy'}}</span>
+			{{#each fleet.dividing.rows as |row|}}
+			<div class="row">
+				<span class="lbl">{{row.name}}</span>
+				<span class="v"><input type="checkbox" name="splitContact" data-contact="{{row.id}}" {{checked row.ticked}} aria-label="{{row.name}}" /></span>
+			</div>
+			{{/each}}
+			<div class="fbtns">
+				<button type="button" class="btn" data-action="disperse"{{#unless fleet.dividing.canSplit}} disabled{{/unless}}>{{localize 'MGT2.Fleet.Screen.Split'}}</button>
+				{{#each fleet.targets as |other|}}
+				<button type="button" class="btn" data-action="reassemble" data-into="{{other.id}}"{{#if ../fleet.dividing.waiting}} disabled{{/if}}>{{localize 'MGT2.Fleet.Screen.FoldInto' name=other.name}}</button>
+				{{/each}}
+			</div>
+		</div>
+		{{/if}}
 
 		{{! p.116 reprints Core p.166 word for word and the only change is that the mover is a fleet.
 		    The cap is what LEAVING the current band costs, and being under it is the problem. }}

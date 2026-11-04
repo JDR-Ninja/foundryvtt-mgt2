@@ -333,6 +333,8 @@ async function entryDecided(view) {
         ui.notifications.warn(game.i18n.format(key, { career: record.name, name: actor.name, ...data }));
         return false;
     };
+    const line = [...system.qualification.characteristics];
+    if ( actor.system.states?.psiLost && line.length && line.every(key => key === "psionic") ) return refuse("MGT2.Loss.PsiLost");
     if ( await prohibits(actor, "qualification", record.name) ) return refuse("MGT2.Chargen.Term.Prohibited");
     // Core p.52's sentence and an event's draft compel that career and no other; one found nowhere is dropped.
     const force = tray.find(entry => (entry.kind === "careerForce")
@@ -357,7 +359,9 @@ async function entryDecided(view) {
         return game.user.isGM ? { mode: "automatic", note: "MGT2.Chargen.Term.ForcedEntry" }
             : refuse("MGT2.Chargen.Term.NotVoluntary");
     }
-    const offer = tray.find(entry => (entry.kind === "careerOffer") && named(entry.value));
+    // Core folio 49: "automatically fails any qualification rolls", and an offer only waives the roll.
+    const offer = actor.system.states?.ageingCrisis ? null
+        : tray.find(entry => (entry.kind === "careerOffer") && named(entry.value));
     if ( offer && await DialogV2.confirm({ window: { title: "MGT2.Chargen.Term.OfferTitle" }, classes: ["mgt2"],
         content: `<p>${game.i18n.format("MGT2.Chargen.Term.OfferAsk", { career: record.name })}</p>`,
         rejectClose: false }) ) {
@@ -948,7 +952,9 @@ async function rollInjury(view, injury = null) {
     for ( const loss of effect.losses ) {
         points.push(Number.isFinite(loss) ? loss : (await new Roll(MGT2Helper.damageFormula(loss)).roll()).total);
     }
-    let changes = await pickLosses(actor, { physical: points, mental: [] }, { physical: effect.keys });
+    const asked = { title: "MGT2.Chargen.Shared.injury", choose: "MGT2.Chargen.Term.InjuryChoose",
+        owed: "MGT2.Chargen.Term.InjuryOwed", physical: effect.keys };
+    let changes = await pickLosses(actor, { physical: points, mental: [] }, asked);
     while ( Rules.on("creationInjuryToZero") ) {
         const zeroed = Object.entries(changes).filter(([key, delta]) =>
             ((actor.system.characteristics[key]?.value ?? 0) + delta) <= 0).map(([key]) => game.i18n.localize(MGT2.Characteristics[key]));
@@ -959,7 +965,7 @@ async function rollInjury(view, injury = null) {
                 price: MGT2.CharacteristicCare.crisisFormula.replace("*", " × Cr") })}</p>`,
             rejectClose: false
         }) ) break;
-        changes = await pickLosses(actor, { physical: points, mental: [] }, { physical: effect.keys });
+        changes = await pickLosses(actor, { physical: points, mental: [] }, asked);
     }
     const line = game.i18n.format("MGT2.Chargen.Term.Injured", { n: total, changes: describeChanges(changes) });
     if ( Object.keys(changes).length ) {
@@ -1702,17 +1708,21 @@ async function ageNow(view, { forced = false } = {}) {
         ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.AgeingNoRow", { n: rolled.total }));
         return { advance: true };
     }
-    const changes = await pickLosses(actor, row);
+    const changes = await pickLosses(actor, row, { title: "MGT2.Chargen.Steps.ageing",
+        choose: "MGT2.Chargen.Term.AgeingChoose", owed: "MGT2.Chargen.Term.AgeingOwed" });
+    const hadPsi = !actor.system.states?.psiLost;
     if ( Object.keys(changes).length ) {
         const log = actor.system.characteristicLog.map(entry => ({ ...entry }));
-        log.push({ source: "ageing", term, age: Chargen.age(actor), roll: rolled.total, changes,
+        log.push({ source: "ageing", term, age: Chargen.age(actor, { open: !forced }), roll: rolled.total, changes,
             cost: 0, note: "" });
         await actor.update({ "system.characteristicLog": log });
     }
+    const lost = (hadPsi && actor.system.states?.psiLost) ? game.i18n.localize("MGT2.Loss.PsiLost") : "";
+    if ( lost ) ui.notifications.warn(lost);
     if ( record ) {
         await logTerm(record, term, { outcomes: forced ? [] : ["aged"],
-            note: game.i18n.format("MGT2.Chargen.Term.Aged",
-                { n: rolled.total, changes: describeChanges(changes) }) });
+            note: [game.i18n.format("MGT2.Chargen.Term.Aged",
+                { n: rolled.total, changes: describeChanges(changes) }), lost].filter(line => line).join(" ") });
     }
     // The crisis is derived from the log the moment it is written, so it is read back rather than
     // decided here: any characteristic at 0 means death unless the care is paid for.
@@ -1731,8 +1741,8 @@ function ageingRow(total) {
 }
 
 /** One select per loss, on distinct characteristics (Core p.49); the roll is made, so the picker insists. */
-async function pickLosses(actor, row, narrowed = {}) {
-    const kinds = { physical: narrowed.physical ?? MGT2.PhysicalCharacteristics, mental: mentalCharacteristics(actor) };
+async function pickLosses(actor, row, { title, choose, owed, physical }) {
+    const kinds = { physical: physical ?? MGT2.PhysicalCharacteristics, mental: mentalCharacteristics(actor) };
     const groups = Object.entries(kinds).flatMap(([kind, keys]) => row[kind].map((points, index) =>
         ({ kind, points, keys, chosen: keys[index] ?? keys[0] }))).filter(group => group.keys.length);
     if ( !groups.length ) return {};
@@ -1744,9 +1754,9 @@ async function pickLosses(actor, row, narrowed = {}) {
                 { n: group.points })}</label><select name="g${index}">${options}</select></div>`;
         }).join("");
         const picked = await DialogV2.prompt({
-            window: { title: "MGT2.Chargen.Steps.ageing" },
+            window: { title },
             classes: ["mgt2"],
-            content: `<p>${game.i18n.localize("MGT2.Chargen.Term.AgeingChoose")}</p>${fields}`,
+            content: `<p>${game.i18n.localize(choose)}</p>${fields}`,
             ok: { label: "MGT2.Chargen.Term.Apply",
                 callback: (event, button) => groups.map((group, index) => button.form.elements[`g${index}`].value) },
             rejectClose: false
@@ -1755,7 +1765,7 @@ async function pickLosses(actor, row, narrowed = {}) {
         const twice = groups.some((group, index) => groups.findIndex(other =>
             (other.kind === group.kind) && (other.chosen === group.chosen)) !== index);
         if ( picked && !twice ) break;
-        ui.notifications.warn(game.i18n.localize(picked ? "MGT2.Chargen.Term.AgeingDistinct" : "MGT2.Chargen.Term.AgeingOwed"));
+        ui.notifications.warn(game.i18n.localize(picked ? "MGT2.Chargen.Term.AgeingDistinct" : owed));
     }
     const changes = {};
     for ( const group of groups ) changes[group.chosen] = (changes[group.chosen] ?? 0) - group.points;
@@ -1766,7 +1776,8 @@ async function pickLosses(actor, row, narrowed = {}) {
 function mentalCharacteristics(actor) {
     return Object.keys(actor.system.characteristics ?? {})
         .filter(key => !MGT2.PhysicalCharacteristics.includes(key)
-            && (actor.system.isCharacteristicShown?.(key) !== false));
+            && (actor.system.isCharacteristicShown?.(key) !== false)
+            && !(MGT2.CharacteristicCare.crisisExempt.includes(key) && (actor.system.characteristics[key].max <= 0)));
 }
 
 function describeChanges(changes) {
@@ -1859,22 +1870,33 @@ async function decide(view, key) {
 
 /** Changing assignment, whose behaviour is a field with four values. @returns {Promise<object|null>} A new career's record */
 async function changeAssignment(view, rule) {
-    const { record, system } = view;
+    const { actor, record, system, term } = view;
+    // Folio 49 fails every qualification roll, and folio 20 makes this one: a waiver does not stand.
+    if ( (rule === "requalifyKeepRank") && actor.system.states?.ageingCrisis ) {
+        const refused = [game.i18n.localize("MGT2.Chargen.Term.CrisisFails"),
+            game.i18n.localize("MGT2.Chargen.Term.AssignmentKept")].join(" ");
+        ui.notifications.warn(refused);
+        await logTerm(record, term, { note: refused });
+        return null;
+    }
     const picked = await pickOne(system.assignments
         .filter(entry => entry.name !== system.assignment).map(entry => [entry.name, entry.name]),
     "MGT2.Chargen.Term.PickAssignment");
     if ( picked === null ) return null;
+    const logChange = () => logTerm(record, term, { note: game.i18n.format("MGT2.Chargen.Term.AssignmentChanged",
+        { from: system.assignment, to: picked }) });
 
     if ( rule === "free" ) {
+        await logChange();
         await record.update({ "system.assignment": picked, "system.ladder": ladderAfter(view, picked) });
         return null;
     }
     if ( rule === "requalifyKeepRank" ) {
         // The same Qualification line is re-rolled, so a score that waives it on entry waives it here.
         const rolled = autoQualifies(view) ? { passed: true } : await roll(view, qualificationRoll(view, { open: true }));
-        // Succeed and you adopt the new assignment KEEPING your rank; fail and you simply continue
-        // in the old one, without penalty (folio 20).
+        // Folio 20: a pass keeps the rank in the new assignment, and a fail continues in the old, without penalty.
         if ( rolled?.passed ) {
+            await logChange();
             await record.update({ "system.assignment": picked, "system.ladder": ladderAfter(view, picked),
                 "system.entryMode": "assignmentChange" });
         }
@@ -2391,7 +2413,7 @@ async function convertAssociate(actor, grant, provenance) {
         "MGT2.Chargen.Term.PickAssociate");
     const turned = picked === null ? null : actor.items.get(picked);
     if ( !turned ) return "";
-    await Grants.convert(turned, relation, provenance.table ?? "");
+    await Grants.convert(turned, relation, MGT2Helper.tableWord(provenance.table ?? ""));
     return `${turned.name} → ${game.i18n.localize(MGT2.ContactRelations[relation])}`;
 }
 
@@ -2403,7 +2425,7 @@ async function grantFinance(actor, grant, provenance = {}) {
     // A negative cash grant is a COST, and creation produces no cash before mustering out: `spend`
     // pays what there is, carries the rest as debt, and refuses outright where the rule says so.
     if ( (grant.kind === "cash") && (amount < 0) ) {
-        const spent = await Muster.spend(actor, -amount, { note: provenance.table ?? "" });
+        const spent = await Muster.spend(actor, -amount, { note: MGT2Helper.tableWord(provenance.table ?? "") });
         if ( spent.refused ) return "";
         return `${game.i18n.localize(MGT2.CreationGrantKinds.cash)} ${MGT2Helper.signed(amount)}`
             + (spent.owed ? ` · ${game.i18n.format("MGT2.Chargen.Muster.Owed",

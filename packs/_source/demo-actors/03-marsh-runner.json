@@ -15,7 +15,7 @@
           "group.count is a pack of them on one sheet: value is how many are left, max how many there were.",
           "speed.fly is a Speed Band index and not a number of metres; speed.ground and speed.swim are metres."
         ],
-        "trap": "A creature needs characteristics.hits.base above 0 AND the string hits in config.damageOrder. Miss either and the four creature damage states go quiet — no error, no warning, and a creature that cannot be hurt. The Armour trait below carries its number in params[].num as well as in value, because nothing recomputes it at load: an Armour (4) with a null num is Protection 0."
+        "trap": "A creature needs characteristics.hits.base above 0 AND the string hits in config.damageOrder. Miss either and the four creature damage states go quiet — no error, no warning, and a creature that cannot be hurt. The Armour trait below carries its number in params[].num as well as in value, because nothing recomputes it at load: an Armour (4) with a null num is Protection 0. The Bite's roll.skill is the id of the Melee embedded below, a graph local to this Actor: copied elsewhere it opens on Not proficient."
       }
     }
   },
@@ -95,7 +95,7 @@
         "tl": "NA",
         "legality": 0,
         "container": { "id": "" },
-        "roll": { "characteristic": "strength", "skill": "", "difficulty": "Average" },
+        "roll": { "characteristic": "strength", "skill": "npcSkillMeleeNt1", "difficulty": "Average" },
         "equipped": true,
         "range": { "isMelee": true, "value": null, "unit": "", "band": "adjacent" },
         "damage": "2D6+2",
@@ -112,6 +112,44 @@
           { "family": "weapon", "key": "ap", "params": [{ "slot": "score", "value": "2", "num": 2 }], "note": "" }
         ],
         "options": []
+      },
+      "effects": []
+    },
+    {
+      "_id": "npcSkillMeleeNt1",
+      "name": "Melee (natural)",
+      "type": "talent",
+      "img": "icons/svg/book.svg",
+      "system": {
+        "description": "Jaws, from under the bank.",
+        "subType": "skill",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "level": 1,
+        "skill": {
+          "speciality": "natural",
+          "reduceEncumbrance": false
+        },
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "strength",
+          "skill": "",
+          "difficulty": ""
+        },
+        "provenance": {
+          "term": 1,
+          "career": "Demo — Harbour Patrol",
+          "table": "Personal development",
+          "note": ""
+        }
       },
       "effects": []
     }

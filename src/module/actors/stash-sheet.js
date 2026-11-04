@@ -19,6 +19,9 @@ const RUNGS = { 0: "none", 1: "limited", 2: "observer", 3: "owner" };
 export class StashActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsApplicationMixin(ActorSheetV2))) {
 
     /** @inheritDoc */
+    static GUIDE_TOPIC = "stash";
+
+    /** @inheritDoc */
     static DEFAULT_OPTIONS = {
         classes: ["mgt2", "actor", "stash", "nopad"],
         position: { width: 820, height: 660 },

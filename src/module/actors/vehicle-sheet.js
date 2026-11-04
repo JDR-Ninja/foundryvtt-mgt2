@@ -18,8 +18,8 @@ const DM_KEYS = ["controlDM", "systemsDM", "sensorDM"];
  */
 export class VehicleActorSheet extends TravellerActorSheet {
 
-  /** Its own page lands with the reference chapter. @inheritDoc */
-  static GUIDE_TOPIC = null;
+  /** @inheritDoc */
+  static GUIDE_TOPIC = "vehicle";
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
@@ -79,6 +79,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
             operatingModes: MGT2.OperatingModes,
             rangeUnits: MGT2.RangeUnits,
             vehicleSkills: MGT2.VehicleSkills,
+            comfort: MGT2.ComfortLevels,
             mountTypes: MGT2.VehicleMounts,
             arcs: MGT2.FireArcs,
             interfaces: MGT2.RemoteInterfaces,
@@ -385,7 +386,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
 
     /** @this {VehicleActorSheet} */
     static async #onCriticalClear() {
-        const criticals = Object.fromEntries(Object.keys(MGT2.VehicleCriticals).map(key => [key, 0]));
+        const criticals = Object.fromEntries(this.actor.system.constructor.CRITICAL_KEYS.map(key => [key, 0]));
         return this.actor.update({ system: { criticals, hullSeverity: 0 } });
     }
 
@@ -463,7 +464,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
 
         // Folio 141: a critical's Control DM stands on control checks, and both actions here are
         // control checks — they roll the chassis skill.
-        const modifiers = [];
+        const modifiers = RollPromptHelper.checkModifiers(driver);
         if (system.criticalEffects.controlDM !== 0) {
             modifiers.push({ key: "criticalControl", label: "MGT2.Actor.vehicle.ControlDM",
                 dm: system.criticalEffects.controlDM });

@@ -185,8 +185,8 @@ export class VehicleData extends CraftData {
             armour: new fields.SchemaField({
                 forward: facing(), aft: facing(), port: facing(), starboard: facing(),
                 dorsal: inferable(), ventral: inferable(),
-                // A second number per face that drops by 1 per hit and is destroyed outright by a
-                // Destructive or spacecraft-scale weapon (VH p.51), so it is mutable in play.
+                // A second number per face that drops by 1 per hit and by 5 for a Destructive or
+                // spacecraft-scale weapon (VH2026 p.77), so it is mutable in play.
                 reactive: new fields.SchemaField({
                     forward: facing(), aft: facing(), port: facing(), starboard: facing(),
                     dorsal: facing(), ventral: facing() })
@@ -205,7 +205,7 @@ export class VehicleData extends CraftData {
             }),
 
             // The mount belongs to the vehicle: it supplies the fire arc and the fire control, and
-            // one mount can hold several weapons (VH p.37-38).
+            // one mount can hold several weapons (VH2026 p.101).
             mounts: new fields.ArrayField(new fields.SchemaField({
                 type: new fields.StringField({
                     required: false, blank: false, initial: "fixed", choices: MGT2.VehicleMounts }),
@@ -318,9 +318,9 @@ export class VehicleData extends CraftData {
         return level ? { key: this.comfort, label: level.label, effect: level.effect } : null;
     }
 
-    /** What the Structure stands at now, halved again per Hull critical that said so. */
+    /** VH2026 p.10: what the Structure stands at now, halved per Hull critical, rounded up. */
     get structure() {
-        return Math.max(0, Math.floor(this.structureBase / (2 ** this.structureHalvings)));
+        return Math.ceil(this.structureBase / (2 ** this.structureHalvings));
     }
 
     /** VH2026 p.11: what putting this vehicle right costs and takes, per standing critical. */
@@ -598,7 +598,12 @@ export class VehicleData extends CraftData {
         const current = this.criticals?.[location];
         if (current === undefined) return null;
         const next = Math.min(MAX_SEVERITY, Math.max(1, Math.trunc(severity) || 0));
-        if (next > current) await this.parent.update({ [`system.criticals.${location}`]: next });
+        // Each hit is read in isolation, so a second Severity 5 halves again though the pip stands.
+        const halves = this.criticalTable[location]?.severities?.[next - 1]?.structureHalved === true;
+        const changes = {};
+        if (next > current) changes[`system.criticals.${location}`] = next;
+        if (halves) changes["system.structureHalvings"] = this.structureHalvings + 1;
+        if (!foundry.utils.isEmpty(changes)) await this.parent.update(changes);
         return { location, severity: Math.max(next, current), overflow: null };
     }
 
@@ -612,6 +617,13 @@ export class VehicleData extends CraftData {
     /** Core p.143: one mounted weapon per ten points of Hull. */
     get weaponCap() {
         return Math.floor(this.characteristics.hull.max / HULL_PER_WEAPON);
+    }
+
+    /** VH2026 p.104: the Attack Roll DM a weapon fires with, the mount's or its own; none in close combat. */
+    fireControlFor(weapon) {
+        if (weapon.system.range?.isMelee) return 0;
+        const mount = this.mounts.find(row => row.weapons.includes(weapon.id));
+        return mount?.fireControl || (weapon.system.fireControl ?? 0);
     }
 
     /** How many weapons the mounts actually carry, against that cap. */

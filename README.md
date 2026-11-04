@@ -124,11 +124,14 @@ steps in the order the book prints them.
   validation among them. Each names the book and page it comes from; those no book settles have a
   page of their own, and a search and a changed-only filter find any of them. The defaults are the
   game as printed.
-* **Four languages** — French, English, Spanish and Brazilian Portuguese, interface and content
-  strings alike.
-* **Three compendiums it writes itself** — what the system does with the rules, one journal per
-  language, and an annotated demo document for every type and sub-type it registers. A worked
-  example, not a starter world: every figure in it is invented.
+* **Four languages** — French, English, Spanish and Brazilian Portuguese, for the interface and the
+  rules journal; the guide and the demo are in English.
+* **Five compendiums it writes itself** — what the system does with the rules, one journal per
+  language; a guide to the system in thirty pages; and the demo, with an annotated document for
+  every Actor and Item type except the bounty contract, five Travellers out of the creation loop
+  and a Scene. A worked example, not a starter world: every figure in it is invented.
+* **A `?` in the title bar** opens the guide at the window's own page. The guide exists in English
+  only for now; the French translation is to come.
 * **One accent recolours everything.** Four palette presets, eleven accents, light, dark or
   follow-the-system — and every text token clears 4.5:1 contrast in all of them.
 

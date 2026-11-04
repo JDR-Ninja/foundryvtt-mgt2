@@ -58,7 +58,7 @@
 		</div>
 		{{/if}}
 		{{! A readout, not a till: the sum of what the contents cost, with no control on this sheet that
-		    writes money. Withheld as its two neighbours are — a locked stash sends no number at all. }}
+		    writes money. Withheld as its two neighbours are — a locked stash draws no number at all. }}
 		<div class="stat{{#unless stash.open}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.stash.Value'}}</dt>
 			<dd>{{#if stash.open}}<i>Cr</i>{{credits stash.value}}{{else}}&mdash;{{/if}}</dd>

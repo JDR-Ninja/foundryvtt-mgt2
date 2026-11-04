@@ -9,7 +9,12 @@ MGT2.TraitFamilies = TRAIT_FAMILIES;
 // What a guide page may answer and a sheet's `GUIDE_TOPIC` may name. A topic joins this list on the
 // day its page is written; the guide's build refuses a page or a sheet naming anything else, and
 // refuses a member here that no page answers.
-MGT2.GuideTopics = Object.freeze(["character", "item"]);
+MGT2.GuideTopics = Object.freeze([
+    "about", "setup", "first-traveller", "first-check", "first-fight", "first-ship", "character",
+    "npc", "vehicle", "robot", "world", "stash", "spacecraft", "item", "roll", "chat", "docket",
+    "chargen", "space-combat", "fleet-battle", "trade", "voyage", "regions", "effects", "content",
+    "explorer", "rules", "settings", "macros", "declined"
+]);
 
 MGT2.MetricRange = Object.freeze({
     meter: "MGT2.MetricRange.meter",
@@ -332,7 +337,10 @@ MGT2.FirstAidSkills = Object.freeze(["medic", "médecine"]);
 // Core p.181, HG p.19-21: the sensor grade covers Electronics (comms) and (sensors); a command bridge, Tactics (naval) DM+1.
 MGT2.ShipCheckSkills = Object.freeze({
     sensors: {skills: ["electronics", "électronique"], specialities: ["sensors", "capteurs", "comms"]},
-    navalTactics: {skills: ["tactics", "tactique"], specialities: ["naval", "navale"]}
+    navalTactics: {skills: ["tactics", "tactique"], specialities: ["naval", "navale"]},
+    // Core folio 170's "checks to control spacecraft" are folio 154's "all Pilot checks".
+    pilot: {skills: ["pilot", "pilote"]},
+    jumpDrive: {skills: ["engineer", "ingénieur"], specialities: ["j-drive", "propulseur-s", "propulseur de saut"]}
 });
 
 // CSC folio 66's exception: Interface runs alongside one other Bandwidth 0 program. A name only.
@@ -1867,6 +1875,11 @@ MGT2.RobotPower = Object.freeze({
 });
 
 // Robot Handbook p.117: SOC is 0 where robots are property and a 2D roll where one is a citizen.
+MGT2.RobotVacuumSealing = Object.freeze({
+    hostile: "MGT2.Actor.robot.VacuumHostile",
+    vacuum: "MGT2.Actor.robot.VacuumFull"
+});
+
 MGT2.RobotSociety = Object.freeze({
     property: "MGT2.RobotSociety.property",
     citizen: "MGT2.RobotSociety.citizen"
@@ -2273,15 +2286,30 @@ MGT2.CharacteristicLossSources = Object.freeze({
     medicalCare: "MGT2.CharacteristicLossSources.medicalCare",
     ageingCrisisCare: "MGT2.CharacteristicLossSources.ageingCrisisCare",
     referee: "MGT2.CharacteristicLossSources.referee",
-    // Compagnon p.40 lets a programme BUY a characteristic; the point goes here as a signed +1.
+    // Companion p.42 lets a programme BUY a characteristic; the point goes here as a signed +1.
     training: "MGT2.CharacteristicLossSources.training"
 });
 
-// Core folio 49's two prices buy different things.
+MGT2.ProvenanceTables = Object.freeze({
+    personalDevelopment: "MGT2.Chargen.Tables.personalDevelopment",
+    service: "MGT2.Chargen.Tables.service",
+    advancedEducation: "MGT2.Chargen.Tables.advancedEducation",
+    officer: "MGT2.Chargen.Tables.officer",
+    assignment: "MGT2.Chargen.Template.AssignmentSkills",
+    mishap: "MGT2.Chargen.TermOutcomes.mishap",
+    rank: "MGT2.Chargen.Template.Rank",
+    muster: "MGT2.Chargen.Muster.Title",
+    education: "MGT2.Chargen.Education.Title",
+    graduation: "MGT2.Chargen.Education.Graduation",
+    grant: "MGT2.Chargen.Template.Grant"
+});
+
+// Core folio 49's two prices buy different things; ACS1 folio 275 says PSI aged to 0 is no crisis.
 MGT2.CharacteristicCare = Object.freeze({
     perPoint: 5000,
     crisisFormula: "1D*10000",
-    crisisFloor: 1
+    crisisFloor: 1,
+    crisisExempt: Object.freeze(["psionic"])
 });
 
 // The Core term, step by step, as the default order and not a law: a species frame declares its own
@@ -2834,7 +2862,7 @@ MGT2.PsionicTraining = Object.freeze({
     course: 100000
 });
 
-/* Post-career training. Core p.55's Study Periods and Compagnon p.39-40's Experience Points are two
+/* Post-career training. Core p.55's Study Periods and Companion p.41-42's Experience Points are two
  * ways of moving one record, so the engine is a property of the programme and not of the world. */
 
 // Core p.55: "A Study Period is equal to eight weeks (or two months) of study and practice."
@@ -2846,7 +2874,7 @@ MGT2.AdvancementEngines = Object.freeze({
     companion: "MGT2.Training.Engine.companion"
 });
 
-// Core trains skills; Compagnon p.40 also buys characteristics.
+// Core trains skills; Companion p.42 also buys characteristics.
 MGT2.TrainingTargets = Object.freeze({
     skill: "MGT2.Training.Target.skill",
     characteristic: "MGT2.Training.Target.characteristic"
@@ -2863,7 +2891,7 @@ MGT2.TrainingLogKinds = Object.freeze({
     grant: "MGT2.Training.LogKind.grant"
 });
 
-// Compagnon p.40's two price tables.
+// Companion p.42's two price tables.
 MGT2.TrainingCosts = Object.freeze({
     skill: Object.freeze([1, 1, 2, 4, 8, 16, 32]),
     mental: Object.freeze(["intellect", "education"]),

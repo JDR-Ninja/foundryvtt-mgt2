@@ -1,5 +1,5 @@
 /**
- * The `?` in a window's title bar, and the guide page it opens. A sheet names a topic, a page
+ * The `?` in a window's title bar, and the guide page it opens. A screen names a topic, a page
  * answers it, and `CONFIG.MGT2.GuideTopics` is the vocabulary both are checked against. Any pack
  * whose manifest entry carries `flags.mgt2.guide` may answer, this system's own first.
  */
@@ -49,17 +49,22 @@ export function applyGuideButton(show = game.settings.get("mgt2", "showGuideButt
     for ( const body of bodies ) body.classList.toggle("mgt2-guide-off", !show);
 }
 
-async function onOpenGuide() {
-    const found = await guidePage(this.constructor.GUIDE_TOPIC);
+async function openGuide(app) {
+    const found = await guidePage(app.constructor.GUIDE_TOPIC);
     if ( !found ) return;
     const journal = await fromUuid(found.uuid);
-    journal?.sheet.render({ force: true, pageId: found.pageId, anchor: this.guideAnchor });
+    journal?.sheet.render({ force: true, pageId: found.pageId, anchor: app.guideAnchor });
+}
+
+/** Not async: `MGT2Screen` holds an async action while another runs, and help must open mid-step. */
+function onOpenGuide() {
+    return openGuide(this);
 }
 
 /**
  * One `?` beside the window's own controls, against core's advice on `_getFrameButtons`: a header
  * control sits inside the `⋮` menu, and this is the control whose job is to be found.
- * @returns {typeof DocumentSheetV2}
+ * @returns {typeof ApplicationV2}
  */
 export const GuideButtonMixin = Base => class extends Base {
 

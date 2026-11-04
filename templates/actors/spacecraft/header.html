@@ -96,10 +96,10 @@
 			<dt>{{localize 'MGT2.Actor.spacecraft.Cargo'}}</dt>
 			<dd>{{#if system.cargo.capacity}}{{system.cargo.capacity}}<i>{{localize 'MGT2.Actor.spacecraft.Tons'}}</i>{{else}}&mdash;{{/if}}</dd>
 		</div>
-		{{! A reaction exists only where someone holds the station, so the count is read every round. }}
+		{{! Bodies against bodies: a station row holds `count` of them, so its rows are no crew figure. }}
 		<div class="stat{{#if ship.crew.short}} hurt{{/if}}">
 			<dt>{{localize 'MGT2.Actor.spacecraft.Crew'}}</dt>
-			<dd>{{ship.crew.totals.stations}}<span class="of">/{{ship.crew.totals.required}}</span><i>{{localize 'MGT2.Actor.spacecraft.PilotN' n=system.pilotSkill}}</i></dd>
+			<dd>{{ship.crew.totals.aboard}}<span class="of">/{{ship.crew.totals.required}}</span><i>{{localize 'MGT2.Actor.spacecraft.PilotN' n=system.pilotSkill}}</i></dd>
 		</div>
 		{{! 2D + the pilot's Pilot skill + CURRENT Thrust, so an M-Drive critical feeds it. }}
 		<div class="stat"><dt>{{localize 'MGT2.Actor.Initiative'}}</dt><dd>{{showDM system.initiative}}</dd></div>

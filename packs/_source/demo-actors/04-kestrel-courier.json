@@ -12,11 +12,11 @@
         "teaches": [
           "crew[].role holds the id of a role Item embedded on THIS ship. The code then finds a station by the derived crewRoleKey — never by the role's name.",
           "mounts[].weapons holds ids of weapon Items embedded on this same ship. A mount is not packaging: it decides the damage multiple.",
-          "computer.running is a Set of ids of the programs that are STARTED. A program aboard but not in that Set spends no bandwidth and does nothing.",
+          "computer.running is a Set of ids of the programs that are STARTED. A program aboard but not in that Set spends no bandwidth, and the computer's budget is all the Set decides: softwareRating, which the fleet rules read, finds a fitted program by name whether it is started or not.",
           "hull.options and power.offline are Sets of closed, non-blank strings, and hull.pointsOverride is how a yard's printed Hull figure is stated without touching the derivation.",
           "fuel.tons is the design tank and ops.fuel the level actually aboard; neither derives from the other."
         ],
-        "trap": "characteristics.hull.base stays 0. Hull points are DERIVED from hull.tons, hull.configuration and hull.options, and a base written here silently ADDS to them — the opposite of a vehicle, where hull.base is the printed figure. Two more to watch: crew[].dutyTarget is matched by the mount's LABEL or its 1-based index rather than by an id, and a spacecraft does NOT override the trait family, so a ship weapon's traits must say shipWeapon in as many words."
+        "trap": "characteristics.hull.base stays 0. Hull points are DERIVED from hull.tons, hull.configuration and hull.options, and a base written here silently ADDS to them — the opposite of a vehicle, where hull.base is the printed figure. Two more to watch: crew[].dutyTarget is matched by the mount's LABEL or its 1-based index rather than by an id, and a spacecraft does NOT override the trait family, so a ship weapon's traits must say shipWeapon in as many words. A ship owns no skill, so its weapons' roll.skill stays blank: roll.skill is an id on the owner, and the gunner rolls from the station with the crewman's own."
       }
     }
   },
@@ -201,7 +201,7 @@
         "source": { "book": "", "page": "" },
         "quantity": 1, "weight": 0, "weightless": true, "cost": 500000, "tl": "TL12", "legality": 5,
         "container": { "id": "" },
-        "roll": { "characteristic": "dexterity", "skill": "Gunner", "difficulty": "Average" },
+        "roll": { "characteristic": "dexterity", "skill": "", "difficulty": "Average" },
         "equipped": true,
         "range": { "isMelee": false, "value": null, "unit": "", "band": "medium" },
         "damage": "2D6",
@@ -228,7 +228,7 @@
         "source": { "book": "", "page": "" },
         "quantity": 1, "weight": 0, "weightless": true, "cost": 500000, "tl": "TL12", "legality": 5,
         "container": { "id": "" },
-        "roll": { "characteristic": "dexterity", "skill": "Gunner", "difficulty": "Average" },
+        "roll": { "characteristic": "dexterity", "skill": "", "difficulty": "Average" },
         "equipped": true,
         "range": { "isMelee": false, "value": null, "unit": "", "band": "medium" },
         "damage": "2D6",

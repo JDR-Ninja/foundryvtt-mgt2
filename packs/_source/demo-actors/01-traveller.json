@@ -12,12 +12,12 @@
         "order": 1,
         "cliff": "skills are Items, and a species feeds .auto",
         "teaches": [
-          "A skill is a talent Item with subType: skill embedded on the Actor. There is no system.skills anywhere in this system, and everything that reads a skill matches it by name.",
+          "A skill is a talent Item with subType: skill embedded on the Actor. There is no system.skills anywhere in this system, and everything that reads a skill matches it by name, but for roll.skill, which holds the id of one.",
           "personal.species holds the id of the species Item embedded below it — the Actor stores a pointer and copies nothing.",
           "A career on a Traveller is the same Item type as the career in the compendium; the record half at the bottom of it is what says which one this is.",
           "The inventory is embedded Items pointing at each other: a round names its weapon, a stack names its bag, an augment names a skill, an armour names the skill it needs."
         ],
-        "trap": "Not one characteristic writes .auto. The species feeds that field, and a value written beside it is ADDED rather than replaced — so it grows every time the derivation runs. base, damage and show are the three a document may write; auto, effect, max and value all derive."
+        "trap": "Not one characteristic writes .auto. The species feeds that field, and a value written beside it is ADDED rather than replaced — so it grows every time the derivation runs. base, damage and show are the three a document may write; auto, effect, max and value all derive. The Sidearm's roll.skill is the id of Gun Combat (slug) on this Actor, a local graph: dropped on another it opens on Not proficient until it is bound again."
       }
     }
   },
@@ -2259,7 +2259,7 @@
         },
         "roll": {
           "characteristic": "dexterity",
-          "skill": "Gun Combat",
+          "skill": "charSkillGunSlug",
           "difficulty": "Average"
         },
         "equipped": true,
@@ -2722,7 +2722,7 @@
       "type": "contact",
       "img": "icons/svg/cowled.svg",
       "system": {
-        "description": "Keeps the harbour ledger, and remembers every hull that ever came in light.",
+        "description": "Keeps the harbour ledger, and remembers every hull that ever came in light. Owes a favour, and would rather not be reminded.",
         "subType": "contact",
         "source": {
           "book": "",
@@ -2734,7 +2734,7 @@
           "characteristic": "education"
         },
         "status": "Alive",
-        "attitude": "Owes a favour, and would rather not be reminded",
+        "attitude": "Complicated",
         "relation": "Contact",
         "title": "Clerk of the Harbour",
         "nickname": "Tallies",

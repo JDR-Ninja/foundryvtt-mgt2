@@ -88,7 +88,7 @@
 					<td>
 						<div class="todo">
 							{{#if row.step}}
-							<button type="button" class="btn" data-action="jumpStep" data-step="{{row.step}}"{{#unless row.statted}} disabled{{/unless}}>
+							<button type="button" class="btn" data-action="jumpStep" data-step="{{row.step}}"{{#if (or (not row.statted) (and (eq row.step 'jump') (or ../jump.jump.out (not ../fuel.enough))))}} disabled{{/if}}>
 								{{#if (eq row.step 'plot')}}{{localize 'MGT2.Voyage.Plot'}}{{else}}{{localize 'MGT2.Voyage.Jump'}}{{/if}}<i>4+</i>
 							</button>
 							{{else}}<span class="need">{{localize 'MGT2.Voyage.NothingHere'}}</span>{{/if}}

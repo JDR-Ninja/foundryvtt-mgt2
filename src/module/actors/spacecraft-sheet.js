@@ -42,8 +42,8 @@ for ( const id of BLOCKS ) {
  */
 export class SpacecraftActorSheet extends TravellerActorSheet {
 
-  /** Its own page lands with the reference chapter. @inheritDoc */
-  static GUIDE_TOPIC = null;
+  /** @inheritDoc */
+  static GUIDE_TOPIC = "spacecraft";
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
@@ -543,6 +543,8 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return {
             rows,
             unmounted: weapons.filter(weapon => !claimed.has(weapon._id)),
+            screens: system.screens.map((screen, index) => ({ ...screen, index,
+                label: MGT2.ShipScreens[screen.type]?.label ?? "" })),
             inertCount: system.inertMountCount,
             spinal: system.mounts.some(mount => mount.type === "spinal"),
             scansUnarmed: system.scansUnarmed,
@@ -592,7 +594,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 ...row, label: MGT2.CrewRoles[row.key]?.label ?? row.key
             })),
             totals: system.crewTotals,
-            short: system.crewTotals.stations < system.crewTotals.required,
+            short: system.crewTotals.aboard < system.crewTotals.required,
             military: system.role === "military",
             hasRoles: this.actor.items.some(item => item.type === "role"),
             // The typed Crew Skill and the average the roster can see.
@@ -967,7 +969,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             return ui.notifications.warn(game.i18n.localize("MGT2.Errors.NoOwnedTokenSelected"));
         }
 
-        const modifiers = payload.modifiers.map(row => ({ ...row }));
+        const modifiers = [...RollPromptHelper.checkModifiers(actor), ...payload.modifiers.map(row => ({ ...row }))];
         const passenger = Array.from(game.user?.targets ?? [])[0]?.actor;
         const endurance = passenger?.system.characteristics?.endurance?.dm;
         if (Number.isFinite(endurance)) {
@@ -1171,6 +1173,10 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         }
 
         const system = ship.system;
+        // Core folio 170: "All checks to use jump drive"; folio 171's Jump in combat is the same check.
+        const jumping = (action.jumpDrive === true) || SpacecraftActorSheet.#shipCheck(action.skill, "jumpDrive");
+        if (jumping && system.jumpDriveOut) return ui.notifications.warn(system.jumpDriveOut);
+
         // A `weapon` action fires the mount the gunner is sitting at — `dutyTarget`, which is what
         // `MGT2.CombatDuties[duty].mount` marks the two gunner duties as needing.
         const mount = (action.kind === "weapon")
@@ -1187,12 +1193,12 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         // The ship's own contributions ride the prompt as waivable modifiers, which is what they
         // are: a referee who rules that a critical has knocked the fire control out says so by
         // unticking it rather than by editing the ship.
-        const shipModifiers = [...extraModifiers];
+        const shipModifiers = [...RollPromptHelper.checkModifiers(actor), ...extraModifiers];
         if (action.dm) {
             shipModifiers.push({ key: "station", label: "MGT2.Actor.spacecraft.StationDM", dm: action.dm });
         }
         // The mount's own accuracy grade, which stands in for a scope on a vehicle or ship weapon
-        // (VH p.45).
+        // (VH2026 p.104).
         const weapon = mount?.weapon ?? null;
         if (weapon?.system.fireControl) {
             shipModifiers.push({ key: "fireControl", label: "MGT2.Items.FireControl",
@@ -1206,6 +1212,14 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         if (SpacecraftActorSheet.#shipCheck(action.skill, "navalTactics") && system.bridge.tacticsDM) {
             shipModifiers.push({ key: "tactics", label: "MGT2.Actor.spacecraft.TacticsDM",
                 dm: system.bridge.tacticsDM });
+        }
+        if (SpacecraftActorSheet.#shipCheck(action.skill, "pilot") && system.criticalEffects.controlDM) {
+            shipModifiers.push({ key: "control", label: "MGT2.Actor.spacecraft.ControlDM",
+                dm: system.criticalEffects.controlDM });
+        }
+        if (jumping && system.criticalEffects.jumpDM) {
+            shipModifiers.push({ key: "jumpCritical", label: "MGT2.Actor.spacecraft.JumpDM",
+                dm: system.criticalEffects.jumpDM });
         }
 
         // The same prompt every other check opens, seeded from the crew member's sheet: Boon and
@@ -1249,7 +1263,6 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         // A fired mount carries the whole damage payload, so the card the defender resolves knows
         // what the mount is worth.
         if (weapon?.system.damage) {
-            const traits = weapon.system.traits;
             flags.mgt2.damage = {
                 formula: mount.linkedBonus
                     ? `${weapon.system.damage} + ${mount.linkedBonus}` : weapon.system.damage,
@@ -1259,11 +1272,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 strengthDM: 0,
                 scale: weapon.system.scale ?? "spacecraft",
                 multiple: mount.multiple,
-                ap: MGT2Helper.traitScore(traits, "ap"),
-                loPen: MGT2Helper.traitScore(traits, "lo-pen"),
-                stun: MGT2Helper.hasTrait(traits, "stun"),
-                destructive: MGT2Helper.hasTrait(traits, "destructive"),
-                blast: MGT2Helper.hasTrait(traits, "blast"),
+                ...MGT2Helper.damageTraits(weapon.system.traits),
                 damageType: Array.from(weapon.system.damageType ?? [])
             };
         }
@@ -1292,7 +1301,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         const row = MGT2.ShipCheckSkills[key];
         const text = String(name ?? "").toLowerCase();
         return row.skills.some(entry => MGT2Helper.matchesSkill(name, entry))
-            && row.specialities.some(entry => text.includes(entry));
+            && (!row.specialities || row.specialities.some(entry => text.includes(entry)));
     }
 
     /**

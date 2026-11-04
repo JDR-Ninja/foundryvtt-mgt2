@@ -1,0 +1,27 @@
+{
+  "_id": "demoSceneClean01",
+  "name": "Demo — Clean Anchorage",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 8,
+        "cliff": "a Region answers an event",
+        "teaches": ["A Region does nothing by being drawn."],
+        "trap": "A Region with no shapes is valid, and no token ever enters it."
+      }
+    }
+  },
+  "_stats": { "coreVersion": "14.366" },
+  "initialLevel": "defaultLevel0000",
+  "levels": [
+    { "_id": "defaultLevel0000", "name": "Anchorage", "background": { "src": "systems/mgt2/assets/scenes/bodes-galaxy-m81.webp" } }
+  ],
+  "regions": [
+    {
+      "_id": "demoRegionClean1",
+      "name": "Open lock",
+      "shapes": [{ "type": "rectangle", "x": 0, "y": 0, "width": 100, "height": 100 }],
+      "behaviors": [{ "_id": "demoBehaveClean1", "type": "vacuum", "system": { "pressure": "partial", "damage": "1D6" } }]
+    }
+  ]
+}

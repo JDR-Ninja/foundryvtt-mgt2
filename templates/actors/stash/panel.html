@@ -53,7 +53,7 @@
 		<p class="hint">{{localize 'MGT2.Actor.stash.EmptyHint'}}</p>
 		{{/if}}
 		{{else}}
-		{{! The sheet stays open and the rows do not arrive — the state a `container` Item has no way
+		{{! The sheet stays open and draws no rows — the state a `container` Item has no way
 		    to produce, and the one an adventure actually wants. }}
 		{{#if (eq stash.access.withheld 'locked')}}
 		<p class="hint shut">{{localize 'MGT2.Actor.stash.WithheldLocked'}}</p>

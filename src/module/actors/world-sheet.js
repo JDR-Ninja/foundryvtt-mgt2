@@ -24,6 +24,9 @@ const UWP_TABLES = Object.freeze({
 export class WorldActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsApplicationMixin(ActorSheetV2))) {
 
     /** @inheritDoc */
+    static GUIDE_TOPIC = "world";
+
+    /** @inheritDoc */
     static DEFAULT_OPTIONS = {
         classes: ["mgt2", "actor", "world", "nopad"],
         position: { width: 940, height: 760 },

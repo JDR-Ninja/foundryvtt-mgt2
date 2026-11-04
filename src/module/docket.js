@@ -4,6 +4,7 @@ import { MGT2Helper } from "./helper.js";
 import { ambushDM, postRequest, SKILL_MODES, UNRESOLVED } from "./request.js";
 import { RollPromptHelper } from "./roll-prompt.js";
 import { TravellerActorSheet } from "./actors/character-sheet.js";
+import { GuideButtonMixin } from "./guide.js";
 import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -28,7 +29,10 @@ const FIELD = "req";
  * The GM's compose window: one Traveller demand, resolved against a named roster BEFORE it is sent.
  * @extends {ApplicationV2}
  */
-export class Docket extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
+export class Docket extends GuideButtonMixin(MGT2Screen(HandlebarsApplicationMixin(ApplicationV2))) {
+
+    /** @inheritDoc */
+    static GUIDE_TOPIC = "docket";
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
@@ -330,6 +334,10 @@ export class Docket extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)
         const named = (demand.skillMode === "named") && Boolean(asked.skill.trim());
         const skill = Docket.#skillFor(actor, asked.skill,
             { named, known: named ? Docket.#knownSkill(asked.skill, actors) : "" });
+        if ( MGT2Helper.psiBarred(actor, actor.items.get(skill.item)) ) {
+            return { ...base, status: "unable", terms: [], total: 0, effect: null,
+                skillItem: skill.item, why: game.i18n.localize("MGT2.Loss.PsiLost") };
+        }
         // Core p.229: "A Traveller with no PSI points cannot attempt to activate a power." The
         // roster is where a refusal at the moment of the click becomes a refusal before the ask.
         if ( skill.psionic && (Docket.#psiReserve(actor) <= 0) ) {

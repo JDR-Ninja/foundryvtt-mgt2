@@ -13,7 +13,7 @@
           "power is the draw the ship's plant has to cover before this will fire.",
           "range.band on a ship weapon is the band the mount reaches, and value stays null because the number is not in metres."
         ],
-        "trap": "family is written as shipWeapon on every trait here, deliberately. A spacecraft does NOT override the trait family — it is left at species — so a ship weapon whose traits are typed by hand under the default family resolves to nothing, silently, and the ship scans as armed."
+        "trap": "family is written as shipWeapon on every trait here, deliberately. A spacecraft does NOT override the trait family — it is left at species — so a ship weapon whose traits are typed by hand under the default family resolves to nothing, silently, and the ship scans as armed. roll.skill stays blank: it is an id on the owner, and a ship owns no skill."
       }
     }
   },
@@ -27,7 +27,7 @@
     "tl": "TL12",
     "legality": 5,
     "container": { "id": "" },
-    "roll": { "characteristic": "dexterity", "skill": "Gunner", "difficulty": "Average" },
+    "roll": { "characteristic": "dexterity", "skill": "", "difficulty": "Average" },
     "equipped": false,
     "range": { "isMelee": false, "value": null, "unit": "", "band": "medium" },
     "damage": "2D6",

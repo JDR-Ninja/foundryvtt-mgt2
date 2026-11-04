@@ -1,9 +1,13 @@
 import { MGT2 } from "./config.js";
-import { SpaceCombatData } from "./combat.js";
+import { MISSILE_SALVO, SpaceCombatData } from "./combat.js";
+import { CREW } from "./combatant.js";
 import { SALVO } from "./fleet.js";
 
 const { DialogV2 } = foundry.applications.api;
 const { TokenRuler } = foundry.canvas.placeables.tokens;
+
+/** What shares a group with a hull and is not one: a token never means a crewman's seat. */
+const NOT_A_HULL = Object.freeze([CREW, SALVO, MISSILE_SALVO]);
 
 /** What makes a scene a space scene. */
 const SPACE_FLAG = "space";
@@ -92,6 +96,16 @@ function refuse(key, data) {
     return null;
 }
 
+/** What a token may stand for: both strips add a ship by its Actor, so no combatant names a token. */
+function contactsOf(combat, token) {
+    const named = combat.getCombatantsByToken(token);
+    const placed = named.find(combatant => combat.groups.has(combatant._source.group));
+    if ( placed ) return [placed];
+    const flying = combat.combatants.filter(combatant => (combatant.actorId === token.actorId)
+        && !NOT_A_HULL.includes(combatant.type) && combat.groups.has(combatant._source.group));
+    return flying.length ? flying : named;
+}
+
 /**
  * The one place the canvas writes to the band map, and it writes in ONE direction: a measurement
  * becomes a band, and a stored band never moves a token.
@@ -118,8 +132,12 @@ export async function setBandFromTokens() {
 
     const groups = [];
     for ( const token of [a, b] ) {
-        const combatant = combat.getCombatantsByToken(token)[0];
+        const contacts = contactsOf(combat, token);
+        const [combatant] = contacts;
         if ( !combatant ) return refuse("MGT2.Canvas.NotInCombat", { name: token.name });
+        if ( new Set(contacts.map(one => one._source.group)).size > 1 ) {
+            return refuse("MGT2.Canvas.ManyContacts", { name: token.name });
+        }
         // HG folio 124 moves a salvo "as if it were a ship" and the band map still refuses it: the
         // map is keyed by two FLEETS, and a flight of missiles is where IT is, not where the fleet
         // that fired it is.

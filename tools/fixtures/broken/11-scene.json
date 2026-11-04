@@ -1,0 +1,26 @@
+[
+  {
+    "_id": "demoSceneBroken1",
+    "name": "Demo — No Level",
+    "flags": { "mgt2": { "demo": { "order": 11, "cliff": "scene", "teaches": ["The background is on a Level."], "trap": "This one has none." } } },
+    "background": { "src": "systems/mgt2/assets/scenes/bodes-galaxy-m81.webp" },
+    "levels": [],
+    "regions": [
+      {
+        "_id": "demoRegionBroke1",
+        "name": "Nowhere",
+        "shapes": [],
+        "behaviors": [{ "_id": "demoBehaveBroke1", "type": "gravityWell", "system": {} }]
+      }
+    ]
+  },
+  {
+    "_id": "demoSceneBroken2",
+    "name": "Demo — Wrong Backdrop",
+    "flags": { "mgt2": { "demo": { "order": 12, "cliff": "scene", "teaches": ["A demo Scene uses the art this system ships."], "trap": "This one does not." } } },
+    "_stats": { "coreVersion": "14.999" },
+    "initialLevel": "someOtherLevel00",
+    "levels": [{ "_id": "defaultLevel0000", "name": "Level", "background": { "src": "systems/mgt2/assets/scenes/no-such-nebula.webp" } }],
+    "regions": []
+  }
+]

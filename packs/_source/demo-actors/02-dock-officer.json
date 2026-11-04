@@ -12,7 +12,7 @@
         "teaches": [
           "subType: person is one half of this Actor type; the other half, a creature, shares the schema and almost none of the configuration.",
           "role, attitude and experience are the three fields a referee sets before the officer says anything.",
-          "combatant is what puts this one into the initiative order rather than into the scene.",
+          "combatant is the other axis of experience: the pair names a row of the Experience ladder, whose suggested skill level shows in that field's tooltip. Nothing else reads it, and the initiative order least of all.",
           "personal.ucp is the person's own profile line, and it exists on npc and on no other type."
         ],
         "trap": "Everything under config, and every characteristics.*.show below, is written by hand because _preCreate does not run for a document that arrives from a pack. It also bails out entirely if config.damageOrder is already present, so a packed npc gets no preset at all: an empty damageOrder means the four damage states go quiet, with no error and no warning."

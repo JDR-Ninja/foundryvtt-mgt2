@@ -1,0 +1,18 @@
+{{! An armour Item on a sheet with no inventory tab: `prepareArmor` counts what is worn, so the row is
+    what lets a referee see it, take it off or delete it. }}
+{{#if armors.length}}
+<div class="block">
+	<div class="sect"><h3>{{localize 'MGT2.Items.Armors'}}</h3><span class="count">{{armors.length}}</span></div>
+	<table class="rows">
+		<tbody>
+			{{#each armors as |armor|}}
+			<tr data-item-id="{{armor._id}}">
+				<td>{{armor.name}}{{#if armor.subInfo}}<span class="sub">{{armor.subInfo}}</span>{{/if}}</td>
+				<td class="c num">{{armor.system.protection}}</td>
+				{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=armor.canEquip toggle=armor.toggleClass edit="MGT2.Actor.EditArmor" del="MGT2.Actor.DeleteArmor"}}
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</div>
+{{/if}}

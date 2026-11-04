@@ -1511,6 +1511,7 @@
         "NoAgeingYet": "El envejecimiento no ha empezado para este Viajero.",
         "AgeingDM": "Periodos servidos ({n})",
         "AgeingChoose": "El envejecimiento pasa factura. Tú eliges qué características.",
+        "InjuryChoose": "La lesión pasa factura. Tú eliges qué características.",
         "LosePoints": "Pierde {n}",
         "AgeingNoRow": "La tabla de Envejecimiento no imprime línea para {n}: decide el árbitro.",
         "Aged": "Tirada de envejecimiento {n}: {changes}",
@@ -1533,6 +1534,7 @@
         "ChangeAssignment": "Cambiar de destino ({rule})",
         "PickAssignment": "¿Qué destino?",
         "AssignmentKept": "El cambio falló: continúas en el destino anterior, sin penalización.",
+        "AssignmentChanged": "Cambio de destino: {from} → {to}.",
         "AssignmentNewCareer": "Esta carrera cuenta un cambio de destino como una carrera nueva: este periodo la cierra, y el siguiente se cualifica para el nuevo destino.",
         "SubRollPassed": "La tirada propia de la línea se superó.",
         "SubRollFailed": "La tirada propia de la línea se falló.",
@@ -1549,6 +1551,7 @@
         "RefusedThisTerm": "Ya se rechazó una cualificación este periodo, así que no se puede entrar en {career}: el periodo es para el reclutamiento o para una carrera que esté siempre abierta.",
         "AgeingDistinct": "Cada pérdida va a una característica distinta.",
         "AgeingOwed": "La tirada de envejecimiento ya está hecha: hay que aplicar sus pérdidas.",
+        "InjuryOwed": "La tirada de Lesiones ya está hecha: hay que aplicar sus pérdidas.",
         "ExcessShares": {
           "one": "{n} punto por encima del máximo se convierte en una Participación de nave",
           "other": "{n} puntos por encima del máximo se convierten en Participaciones de nave"
@@ -1751,7 +1754,8 @@
       "Docs": "MGT2 — Lo que este sistema hace con las reglas",
       "Guide": "MGT2 — Guía del sistema",
       "DemoActors": "MGT2 — Actores de demostración, anotados",
-      "DemoItems": "MGT2 — Objetos de demostración, anotados"
+      "DemoItems": "MGT2 — Objetos de demostración, anotados",
+      "DemoScenes": "MGT2 — Escenas de demostración, anotadas"
     },
     "Guide": {
       "Journal": "Usar este sistema",
@@ -1930,6 +1934,7 @@
       "NewContact": "Nuevo contacto",
       "NewComputer": "Nueva computadora",
       "NewContainer": "Nuevo contenedor",
+      "SkillDM": "Modificador de {skill}",
       "NewDisease": "Nuevas enfermedades",
       "NewEquipment": "Nuevo equipo",
       "NewItem": "Nuevo objeto",
@@ -2388,6 +2393,10 @@
         "MountLabel": "posición",
         "AddMount": "Añadir una montura",
         "DeleteMount": "Quitar esta montura",
+        "AddScreen": "Añadir una pantalla",
+        "DeleteScreen": "Quitar esta pantalla",
+        "Screens": "Pantallas",
+        "ScreenCount": "Cantidad",
         "Ammo": "Munición",
         "Tabs": {
           "Station": "Puesto de combate",
@@ -2780,6 +2789,13 @@
         "FreeSkills": "Habilidades de nivel 0 gratuitas",
         "EducationCap": "Techo de EDU",
         "Hardened": "Cerebro endurecido (/fib)",
+        "Biological": "Robot biológico",
+        "VacuumSealing": "Sellado al vacío",
+        "VacuumSealingHint": "Lo que protege a este robot en el vacío: la protección contra entornos hostiles o contra el vacío. Un valor elegido prevalece sobre las filas de opciones, y responde por una fila en otro idioma o por una protección que el diseño trae de serie.",
+        "VacuumHostile": "Hostil",
+        "VacuumFull": "Vacío",
+        "VacuumNone": "ninguna",
+        "VacuumFromRows": "Filas: {rows}",
         "Rads": "Rads al cerebro",
         "RadiationHint": "La radiación le ha costado a este cerebro INT -{n} y Ancho de banda -{n}, de forma permanente.",
         "BrainDamageDM": "Daño cerebral",
@@ -2828,6 +2844,7 @@
           "tl": "banda de NT",
           "efficiency": "eficiencia",
           "packs": "baterías",
+          "vacuum": "vacío",
           "steps": "pasos de velocidad",
           "hours": "horas",
           "speedBase": "base",
@@ -2890,7 +2907,7 @@
         "Bases": "Bases",
         "Zone": "Zona de viaje",
         "Forbidden": "Este mundo es Zona Roja.",
-        "ForbiddenWhy": "Una Zona Roja está prohibida: aquí no se ofrecen pasajeros, mercancías ni correo.",
+        "ForbiddenWhy": "El Core p.260 prohíbe viajar a una Zona Roja, y hacerlo cumplir es cosa del árbitro. Las tablas de tráfico la siguen leyendo, con MD−4 para pasajeros y MD−6 para mercancías.",
         "Berthing": "Amarre",
         "BerthingCount": "tirado una vez, conservado",
         "BerthingBand": "1D × Cr{amount} por semana",
@@ -3022,10 +3039,10 @@
           "none": "la hoja no se abre",
           "limited": "el nombre, y nada de dentro",
           "observer": "lee el contenido, no mueve nada",
-          "owner": "lee y coge"
+          "owner": "lee y copia"
         },
-        "WithheldNone": "Lees el contenido y, con Propietario, puedes moverlo. Lo que arrastres fuera se lo lleva, no se copia de vuelta.",
-        "WithheldLocked": "La reserva está cerrada, así que su contenido se retiene. La hoja sigue abriéndose y las líneas nunca se envían — ese es el estado que un Objeto contenedor no puede producir.",
+        "WithheldNone": "Lees el contenido y, con Propietario, puedes copiarlo. Lo que arrastres fuera se copia, y su línea sigue aquí hasta que alguien la elimine.",
+        "WithheldLocked": "La reserva está cerrada, así que su contenido se retiene. La hoja sigue abriéndose y no muestra ninguna línea — ese es el estado que un Objeto contenedor no puede producir.",
         "WithheldRung": "Puedes ver que esta reserva existe y nada de lo que hay dentro. Observador es el peldaño que lee un inventario.",
         "Items": "Objetos",
         "Mass": "Masa",
@@ -4593,6 +4610,7 @@
       "ElevationSplit": "Las dos fichas están a elevaciones distintas, que en una escena espacial ordenan los niveles en lugar de medir una altura.",
       "NoCombat": "No se está viendo ningún combate espacial ni batalla de flotas, y la banda de alcance pertenece a uno.",
       "NotInCombat": "{name} no es un contacto del encuentro que se está viendo.",
+      "ManyContacts": "{name} vuela en más de una nave o flota de este encuentro, así que su Actor no dice en cuál.",
       "SalvoPosition": "{name} es una salva en vuelo: está donde está, no donde esté la flota que la disparó.",
       "NoGroup": "{name} no pertenece a ninguna nave ni a ninguna flota, y una banda de alcance se mide entre dos de ellas.",
       "SameGroup": "Las dos fichas pertenecen a {name}, y una banda de alcance se mide entre dos.",
@@ -4739,6 +4757,8 @@
       "TacticsTerm": "Táctica (naval)",
       "Morale": "Moral",
       "PoolEmpty": "A {name} le quedan {left} y {wanted}.",
+      "DispersalBusy": "{name} está en plena dispersión: sus naves no realizan ninguna otra acción hasta que pasen los asaltos (High Guard p.122).",
+      "DispersalOwed": "{name} no ha terminado su dispersión, y sus naves solo se dividen después (High Guard p.122).",
       "DetachLarge": "High Guard devuelve un grupo de {max} naves o menos a las reglas de combate espacial normales; se destacaron {count}.",
       "SplitOf": "{name} (dividida)",
       "Mode": {
@@ -4779,6 +4799,19 @@
         "Arriving": "Llega este asalto",
         "DropShipHint": "Suelta aquí una astronave para añadirla a la línea",
         "DropWingHint": "Suelta aquí una clase de caza para añadir un escuadrón",
+        "DispersalHolds": "Ninguna otra acción hasta que pasen: ni reparaciones ni romper el combate. Sus naves siguen disparando, con este MD.",
+        "DispersalServing": "La dispersión ha fallado, y primero pasan sus asaltos: las naves podrán reintentarlo después (High Guard p.122).",
+        "DispersalFailed": "La dispersión ha fallado. Las naves pueden reintentarlo, y solo se dividen tras un éxito (High Guard p.122).",
+        "DivideWhy": "Marca lo que se va. Las naves se dividen cuando termina la dispersión (High Guard p.122).",
+        "Split": "Dividir en una flota nueva",
+        "FoldInto": "Unir a {name}",
+        "Fold": "Unir a otra flota",
+        "FoldHint": {
+          "one": "¿Unir {name} a {into}? Su {count} nave pasa a esa flota, y {name} deja la batalla con todos los alcances que tenía.",
+          "other": "¿Unir {name} a {into}? Sus {count} naves pasan a esa flota, y {name} deja la batalla con todos los alcances que tenía."
+        },
+        "Opposing": "Flota enemiga",
+        "OpposingHint": "¿Qué flota se opone a {name}? La moral lee sus pérdidas y su nave insignia.",
         "ShipLine": "casco {hull} · blindaje {armour}",
         "WingLine": {
           "one": "{n} de {of} caza",
@@ -5438,6 +5471,7 @@
       "JumpTarget": "Fácil (4+) Ingeniería (motor-S) · EDU",
       "ParsecChip": "{dm} · 1 por parsec, ×{parsecs}",
       "UnrefinedChip": "Combustible no refinado −2",
+      "CriticalChip": "Crítico del motor de salto {dm}",
       "MaintenanceChip": "meses de retraso en el mantenimiento — del árbitro",
       "DiameterChip": "límite de 100 diámetros — del árbitro",
       "ParsecDM": {
@@ -5447,6 +5481,7 @@
       "UnrefinedDM": "Combustible no refinado",
       "DebitWhy": "El salto descuenta del tanque al tirarse. Nada más mueve el combustible, y ninguna tirada mueve la etapa.",
       "NoFuel": "Este salto quema {need} t y el tanque tiene {have}. Sin el combustible el motor no arranca.",
+      "DriveOut": "Motor de salto: {state}. No puede usarse hasta repararlo.",
       "NoStation": "No hay ningún {station} a bordo con hoja enlazada — la tirada no tiene personaje del que leer el nivel de habilidad.",
       "Ruleset": "Reglas",
       "Declared": "declarado, no supuesto",
@@ -5809,6 +5844,7 @@
         "Consignment": "{lot}: {tons} t, Cr{credits} pagados.",
         "Disembark": "{n} × {grade} desembarcados.",
         "FarePaid": "La tarifa se cobró al tomar la plaza (Core p.239).",
+        "PaidOnDelivery": "Se paga a la entrega (Core p.241).",
         "DueDay": "Vence el día de campaña {day}, y se paga a la entrega (Core p.241).",
         "Late": {
           "one": "{days} día de retraso — 1D+4 sacó {roll}, así que se descuenta el {percent}%: Cr{docked} de una tarifa de Cr{credits}.",
@@ -6151,6 +6187,7 @@
       "CrisisWhy": "Una crisis de envejecimiento: una característica está a 0. Core p.49 hace de eso la muerte salvo que 1D × Cr10000 compre atención médica, que devuelve a 1 cada característica reducida.",
       "CrisisPast": "Este Viajero ha sobrevivido a una crisis de envejecimiento.",
       "CrisisPastWhy": "Este Viajero ha sobrevivido a una crisis de envejecimiento. Core p.49 lo hace permanente: falla automáticamente toda tirada de cualificación posterior, digan lo que digan ahora sus puntuaciones.",
+      "PsiLost": "El envejecimiento reduce PSI a 0: todas las capacidades psiónicas se pierden y nunca pueden recuperarse.",
       "CrisisWarning": "Esto lleva una característica a 0.",
       "CrisisWarningWhy": "Esto lleva una característica a 0. Core p.49 hace de una crisis de envejecimiento la muerte salvo que 1D × Cr10000 compre atención médica."
     },
@@ -6159,6 +6196,10 @@
       "Damage": "{points} de daño",
       "Ambient": "{celsius} °C",
       "Exposure": "asalto {round} de exposición",
+      "RobotVacuum": {
+        "Hour": "Autonomía reducida a la mitad, {hours} h, mientras siga aquí, y una tirada de avería cada hora, con MD-2 por encima de 100 °C o por debajo de -100 °C (Robot Handbook p.34). La tira el Árbitro.",
+        "TwoHours": "Autonomía reducida a la mitad, {hours} h, mientras siga aquí, y una tirada de avería cada dos horas, con MD-2 por encima de 100 °C o por debajo de -100 °C (Robot Handbook p.34). La tira el Árbitro."
+      },
       "Interval": "el árbitro aplica {rule}",
       "Shielded": {
         "one": "{rads} rad, absorbido entero por los {shielded} de la región",

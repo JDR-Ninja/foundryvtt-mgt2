@@ -24,10 +24,11 @@ export const CreationPsi = {
      */
     state(actor) {
         const tested = Psionics.tested(actor);
-        const score = actor?.system.characteristics.psionic?.base ?? 0;
+        const lost = actor?.system.states?.psiLost === true;
+        const score = lost ? 0 : (actor?.system.characteristics.psionic?.base ?? 0);
         return {
             tested, score,
-            step: !tested ? "test" : (score > 0 ? "train" : "none"),
+            step: lost ? "none" : (!tested ? "test" : (score > 0 ? "train" : "none")),
             formula: MGT2Helper.showFormula(Psionics.test(actor).formula)
         };
     },
@@ -40,7 +41,7 @@ export const CreationPsi = {
             return null;
         }
         const state = this.state(actor);
-        if ( state.step === "none" ) return null;
+        if ( Psionics.lost(actor) || (state.step === "none") ) return null;
         if ( state.step === "train" ) return PsiTraining.open(actor);
         // A score standing on an untested Traveller was written by hand or by a frame, and the test
         // overwrites it.

@@ -7,7 +7,7 @@
     "mgt2": {
       "demo": {
         "order": 45,
-        "cliff": "a shared table's row may send on to another shared table, two hops at most",
+        "cliff": "a shared table's row may send on to another shared table, ten tables at most",
         "teaches": [
           "Linked as the Unusual Event, it answers every row whose subTable names it, Harbour Life Events row 2 among them: 1d6, and the row applied by the same reader as a career's own Events row.",
           "Row 1 leaves an unlock naming the Pilots' Guild: the referee's leave that a career requiring permission asks for, given by the row and spent at that career's next qualification, so a player's seat may attempt it, roll and all.",
@@ -16,7 +16,7 @@
           "Row 4 reads a gate before anything else, SOC 8+, and gatePassed and gateFailed pick its grant with no throw at all: an Ally, or Cr2500 in cash.",
           "Row 5 raises a characteristic, EDU +1 with mode add; row 6 names the Draft, which is rolled at once and leaves its career compelled at the next qualification, as draftedByEvent."
         ],
-        "trap": "Nothing links this table by itself: unlinked, Harbour Life Events row 2 prints a sentence and stops. A row's sub-table is followed two hops at most, counted from the first shared table rolled: from a career's Events 7, Life Events to this table to the Draft is two hops, and row 6's Draft is rolled; through Demo — Cadet Pre-Career Events row 7, this table is already two hops in, so row 6 prints its sentence and rolls no draft. With no Draft linked, row 6 prints a sentence as well. Row 1's unlock is spent only by a career whose qualification requires permission, and waits on the tray anywhere else. Everything but eventTable is inert on a table, and the eleven record fields below it stay empty, as on every template."
+        "trap": "Nothing links this table by itself: unlinked, Harbour Life Events row 2 prints a sentence and stops. A row's sub-table is followed through ten tables at most, and a chain stops at a table it has already rolled, with a warning and a line in the term log: from a career's Events 7, Life Events to this table to the Draft is rolled, and so is the same chain through Demo — Cadet Pre-Career Events row 7. With no Draft linked, row 6 prints a sentence as well. Row 1's unlock is spent only by a career whose qualification requires permission, and waits on the tray anywhere else. Everything but eventTable is inert on a table, and the eleven record fields below it stay empty, as on every template."
       }
     }
   },

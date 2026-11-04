@@ -8,9 +8,9 @@ Traveller da Mongoose Publishing — desenvolvido especialmente para a edição 
 
 > **Exige o Foundry VTT v14** (14.366 no mínimo).
 >
-> A interface está completa em português. O vocabulário Traveller segue as traduções comunitárias da
-> Mongoose onde elas nomeiam um termo; os títulos dos livros e os nomes de traços permanecem em
-> inglês, à falta de uma edição brasileira que os nomeie.
+> A interface e o diário de regras estão completos em português. O vocabulário Traveller segue as
+> traduções comunitárias da Mongoose onde elas nomeiam um termo; os títulos dos livros e os nomes de
+> traços permanecem em inglês, à falta de uma edição brasileira que os nomeie.
 
 ## O que o sistema faz
 
@@ -34,8 +34,12 @@ Traveller da Mongoose Publishing — desenvolvido especialmente para a edição 
   alterou. Por padrão, vale o jogo tal como está impresso.
 * **Uma só paleta, e ela é do leitor** — quatro predefinições, onze cores de destaque, claro ou
   escuro, e um par de sucesso e falha para daltonismo. Cada cor de texto medida em 4,5:1 ou melhor.
-* **Três compêndios que o próprio sistema escreve** — o que ele faz com as regras, um diário por
-  idioma, e um documento de demonstração anotado para cada tipo e subtipo que ele declara.
+* **Cinco compêndios que o próprio sistema escreve** — o que ele faz com as regras, um diário por
+  idioma; um guia do sistema em trinta páginas; e a demonstração, com um documento anotado para cada
+  tipo de Ator e de Item exceto o contrato de recompensa, cinco Viajantes saídos da criação e uma
+  Cena.
+* **Um `?` na barra de título** abre o guia na página da janela. Por enquanto o guia só existe em
+  inglês; a tradução francesa ainda virá.
 * **Quatro idiomas** — francês, inglês, espanhol e português (Brasil).
 
 O detalhe versão a versão está no [changelog](CHANGELOG.pt-BR.md).

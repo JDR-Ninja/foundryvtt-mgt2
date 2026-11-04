@@ -112,6 +112,21 @@
 			<span class="lbl">{{localize 'MGT2.DamageTracks.hull'}}</span>
 			{{formInput systemFields.characteristics.fields.hull.fields.base name="system.characteristics.hull.base" value=system.characteristics.hull.base classes="f num"}}
 		</label>
+		{{#if vehicle.runs2026}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.Structure'}}</span>
+			{{formInput systemFields.structurePrinted name="system.structurePrinted" value=system.structurePrinted classes="f num" placeholder=system.structureBase}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.vehicle.Comfort'}}</span>
+			<select class="f" name="system.comfort">
+				<option value="">&mdash;</option>
+				{{#each choices.comfort as |level key|}}
+				<option value="{{key}}"{{#if (eq key ../system.comfort)}} selected{{/if}}>{{localize level.label}}</option>
+				{{/each}}
+			</select>
+		</label>
+		{{/if}}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Actor.vehicle.Crew'}}</span>
 			{{formInput systemFields.crew name="system.crew" value=system.crew classes="f num"}}

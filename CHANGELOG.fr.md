@@ -4,6 +4,241 @@
 
 ---
 
+## [0.2.9]
+
+**Vérifié sur Foundry VTT 14.369.**
+
+**Un guide du système, une démonstration qui va jusqu'au bout de la création, et les vaisseaux, les
+flottes, les véhicules et les robots remis d'accord avec leurs livres.** Trente pages décrivent le
+système, et un `?` dans la barre de titre les ouvre à la page de la fenêtre. Les compendiums de
+démonstration gagnent cinq carrières, quatre tables communes, cinq Voyageurs et une Scène. Jouer ces
+Voyageurs a mis au jour des défauts de création, et écrire le guide ceux des vaisseaux, des flottes,
+des régions et des fiches : ce qui change une partie en cours vient en premier.
+
+### ⚠ Ruptures
+
+* **Une crise de vieillissement fait aussi échouer un changement d'affectation et refuse une
+  *Carrière proposée*** (Core p.20, p.49). Dans une carrière réglée sur *Se requalifier, garder son
+  rang*, le changement échoue sans jet et sans choix d'affectation, même si *Automatique si*
+  dispense le Voyageur du jet. Il reste dans son affectation, sans pénalité, et le journal de la
+  période dit pourquoi. *Libre, à chaque période* ne demande aucun jet et reste permis. Une
+  *Carrière proposée* ne dispense plus du jet : la qualification échoue, l'offre reste due et n'est
+  pas dépensée, et une entrée forcée passe toujours. Deux interprétations.
+* **La PSI réduite à 0 par le vieillissement n'est plus une crise, et toutes les capacités
+  psioniques sont perdues pour toujours** (Aliens of Charted Space 1 p.275). Le Voyageur ne risque
+  plus la mort et ne doit aucun soin, et les soins d'une autre crise ne relèvent pas sa PSI. Le test
+  de PSI, la formation, l'apprentissage, les pouvoirs et les talents appris comme compétences sont
+  refusés ; les talents restent sur la fiche, sans effet. Une attribution qui relèverait la PSI est
+  refusée, et le vieillissement ne propose plus une PSI déjà à 0. **Le livre l'imprime pour les
+  Voyageurs zhodani, et le système l'applique à tous les Voyageurs**, parce qu'il ne sait pas qui
+  est Zhodani : une interprétation. **Une carrière dont la Qualification ne lit que la PSI, comme le
+  Psion (Core p.236), est fermée** : une autre interprétation, car le livre ne parle que des
+  capacités. Tout cela se lit sur les pertes enregistrées, si bien qu'un Voyageur déjà créé dont la
+  PSI a vieilli jusqu'à 0 y passe dès cette version, même s'il avait payé les soins. Une perte
+  inscrite avant le test de PSI ne verrouille rien, et le test l'efface.
+* **Une entrée automatique n'échappe plus à la règle du non-retour** (Core p.18). Une carrière
+  *Automatique*, ou dont le Voyageur atteint le seuil *Automatique si*, ne se reprend pas à la
+  période qui suit son départ. La conscription, une carrière imposée ou proposée, une carrière
+  toujours ouverte et un changement d'affectation y échappent toujours.
+* **Une spécialité écrite seulement dans le nom d'un objet compte comme celle du champ** (Core
+  p.58), pour l'attribution et pour le plafond de compétences. Une attribution sans spécialité,
+  *Electronics* 1, crée maintenant sa propre ligne à côté d'*Electronics (Comms)*, au lieu de la
+  relever. Une interprétation. **Un Voyageur déjà doublé n'est pas corrigé.**
+* **Le vide et la température ne blessent plus que les Voyageurs et les PNJ** (Core p.82), **et le
+  vide un robot biologique.** Une région *Vide* ou *Température* blessait aussi le véhicule, le
+  vaisseau ou le robot qui s'y trouvait. Un robot suit maintenant sa propre règle (Robot Handbook
+  p.34, voir *Régions et dangers*). Une région *Radiations* touche toujours les robots.
+* **Un Propulseur-S désactivé ou détruit refuse le saut** (Core p.154), au voyage comme à un poste,
+  et l'écran de voyage grise le bouton. **À un poste, il refuse aussi tout jet d'Ingénieur
+  (propulseur de saut), action de réparation écrite avec cette spécialité comprise** : une
+  interprétation. Une action de réparation écrite *Engineer* sans spécialité passe toujours. À un
+  poste, cette spécialité ne se lit que sous son nom anglais ou français, comme
+  `Engineer (j-drive)`.
+* **La dispersion d'une flotte produit maintenant ses effets** (High Guard p.122). Tant que ses
+  rounds courent, elle suspend les réparations, le début d'une rupture du combat, la séparation, le
+  détachement et la jonction, mais ni le tir ni le Moral, et son MD atteint le *MD offensif*. Après
+  un échec, un nouveau résultat attend que les deux rounds soient passés, et la séparation et le
+  détachement restent fermés jusqu'à une dispersion réussie. Laisser le Moral ouvert, retenir toute
+  la flotte et fermer la séparation après un échec sont trois interprétations.
+* **Les MD permanents de celui qui lance (états, armure, augmentations, Effets Actifs) atteignent
+  aussi les jets de poste, de véhicule, de commerce et de réanimation.** Un ingénieur fatigué lance
+  plus bas qu'avant, sans que sa fiche ait changé.
+
+### Création
+
+* **Une carrière débloquée le reste après un jet raté** (Core p.17, p.46). L'entrée *Carrière
+  débloquée* se dépense en entrant dans la carrière, et non plus avant le jet de qualification, et
+  disparaît selon sa propre durée. Un échec ne fait plus perdre l'accord de l'arbitre.
+* **Une carrière imposée introuvable n'immobilise plus le Voyageur.** Une *Carrière imposée* que ni
+  le monde ni un compendium ne contient, ou qui n'en nomme aucune alors qu'aucune carrière à entrée
+  forcée n'existe, est retirée, avec un avertissement et un message au joueur et à l'arbitre.
+  Jusqu'ici toutes les carrières refusaient le Voyageur, sans proposer la conscription ni une
+  carrière toujours ouverte.
+* **Un enchaînement de sous-tables va jusqu'à dix tables**, s'arrête sur une table déjà tirée, et le
+  dit dans un avertissement et le journal de la période. Il s'arrêtait en silence après deux
+  renvois.
+* **Une *Carrière proposée* n'ouvre plus une carrière *On n'y entre que si l'on y est envoyé***
+  (Core p.52). Le joueur est refusé ; une condamnation, une conscription ou l'arbitre l'ouvrent
+  toujours.
+* **Une rétrogradation s'arrête au rang le plus bas que l'échelle imprime, et ne relève jamais un
+  rang.** Un officier de rang 1 tombait à un rang 0 que son échelle n'a pas. Aucun livre ne prévoit
+  ce cas : une interprétation.
+* **La ligne de vieillissement inscrit l'âge de la fin de la période** (Core p.48) : la quatrième
+  période vieillit à 34 ans, non plus à 30. Les lignes de blessure, de soins et d'événement gardent
+  l'âge du début de la période.
+* **La création écrit l'âge du Voyageur** : *Terminer* remplit le champ *Âge* s'il est vide. Un âge
+  saisi à la main reste, et un âge écrit par la création se met à jour.
+* ***Automatique si* dispense aussi du jet de changement d'affectation** sur *Se requalifier, garder
+  son rang*, puisque ce jet relance la même ligne de Qualification. Une interprétation.
+* **Un changement d'affectation réussi, ou libre, écrit sa ligne au journal de la période**, avec
+  les deux affectations.
+
+### Régions et dangers
+
+* **L'exposition au vide se compte par combat** (Core p.82). Un jeton resté dans une région *Vide*
+  gardait le round d'un combat passé, et les dégâts cumulatifs du combat suivant restaient bloqués à
+  1D. L'exposition repart de 1 à chaque combat et monte de round en round.
+* **La règle *Radiations* désactivée coupe vraiment les radiations.** Une région n'en lance plus, et
+  aucune carte n'annonce qu'une armure de 0 a arrêté la dose. Un robot ignorait la règle et la suit
+  maintenant.
+* **Deux dangers au même instant ne s'effacent plus.** Le second écrivait sur le total lu avant le
+  premier, et une blessure se perdait : ils s'appliquent maintenant l'un après l'autre.
+* **Supprimer un jeton exposé au vide** ne produit plus d'erreur dans la console.
+* **Un robot dans le vide suit le Robot Handbook p.34.** Une région *Vide* réduit son endurance de
+  moitié et annonce un jet de panne toutes les heures, toutes les deux heures avec une protection
+  contre les environnements hostiles, et aucun avec une protection contre le vide : l'arbitre le
+  lance, le système ne le planifie pas. La fiche gagne *Robot biologique*, pour un robot qui souffre
+  comme le vivant dont il suit le modèle, et *Étanchéité au vide*, qui l'emporte sur les lignes
+  d'options : sans ce choix, seuls les noms anglais imprimés sont lus. Régler ce champ sur *Vide*
+  rend aussitôt l'endurance à un robot déjà dans la région, et quitter la région ou supprimer sa
+  Scène la rend aussi. Un robot déjà dans la région lors de la mise à jour n'est réduit qu'à sa
+  prochaine entrée. Conserver la demi-endurance sous protection hostile est une interprétation (p.32
+  et p.34).
+* **Un PNJ prend maintenant sa dose de radiations** (Core p.79, p.81), et sa fiche gagne ses Rads et
+  l'état de nausée. Une créature la prend sur ses Points de vie, sans END (Core p.84).
+
+### Vaisseaux, flottes et voyage
+
+* **Un tir d'ion depuis un poste ne blesse plus la coque à travers l'armure** (High Guard p.30). Les
+  traits de l'arme suivent maintenant le tir jusqu'aux dégâts, salve de missiles comprise.
+* **Un critique de Propulseur-M pèse sur les jets de pilotage** (Core p.154, p.170), l'Initiative
+  exceptée. **Un critique de Propulseur-S pèse sur tout jet d'Ingénieur (propulseur de saut)** (Core
+  p.170, p.171), au voyage comme à un poste, et l'écran de voyage l'affiche. À un poste, ces
+  compétences ne se lisent que sous leur nom anglais ou français.
+* **L'en-tête d'un vaisseau compte les personnes, et non les lignes d'équipage** : un vaisseau
+  complet ne s'affiche plus à court.
+* **Les écrans de défense d'un vaisseau** (*Amortisseur nucléaire*, *Écran à mésons*, *Sphère
+  noire*) **se règlent sur la fiche**, dans le bloc *Montures & armes*, en mode édition.
+* **L'outil *Fixer la zone de portée d’après deux jetons* place aussi un vaisseau entré par
+  glisser-déposer.**
+* **L'écran des flottes gagne *Séparer en une nouvelle flotte* et *Rejoindre une autre flotte***
+  (High Guard p.122), et une première coque peut se déposer sur une flotte neuve. La séparation ne
+  demande aucune chaîne de tâches, à l'écart du livre, qui en exige une.
+* **Faire rejoindre une flotte demande confirmation**, car le système ne sait pas qui est allié.
+  **Le Moral demande quelle flotte s'oppose** dès qu'il en reste plusieurs, après une séparation par
+  exemple. Sans adversaire, le *Terrain céleste* vaut 0.
+* **Le lot de fret ou de courrier sans échéance** n'écrit plus « jour de campagne null », et dit
+  toujours que le paiement se fait à la livraison.
+* **L'infobulle de la Zone Rouge** dit maintenant ce que le système applique : le trafic s'y tire
+  toujours, à MD-4 pour les passagers et MD-6 pour le fret, et faire respecter l'interdiction
+  revient à l'arbitre (Core p.239-240, p.260).
+
+### Fiches et jets
+
+* **Une créature a un champ pour ses Points de vie.**
+* **Une armure sur un PNJ ou un robot se voit et se porte** : les deux fiches gagnent sa ligne.
+* **Un MD personnalisé saisi apparaît dans les termes de la carte**, avec son opérateur s'il en a
+  un.
+* **Un Effet Actif écrit sur `system.modifiers.skills.<slug>.effect` atteint enfin le jet de cette
+  compétence.**
+* **Véhicules** (Vehicle Handbook 2026). *Effacer tous les critiques* couvre tous les emplacements
+  et laisse la Structure, qui a sa propre réparation (p.11). Un critique de coque de Sévérité 5 ou 6
+  divise la Structure, arrondie au supérieur (p.10), et le compteur *Structure réduite de moitié* se
+  corrige à la main. La conduite de tir d'une monture atteint le jet et donne à l'arme le trait
+  *Viseur* (p.101, p.104) ; elle l'emporte sur celle de l'arme. Un véhicule saisi à la main gagne
+  ses champs *Structure* et *Confort*.
+* **Le logiciel et le cerveau d'un robot** s'ouvrent et se suppriment depuis sa fiche.
+* **Une réserve dit qu'un glisser copie** : ses textes disaient « pris ». Une réserve verrouillée ne
+  dit plus à un joueur que ses lignes ne sont « jamais envoyées ». Le conteneur créé depuis
+  l'inventaire s'appelle *Nouveau Conteneur* dans la langue de l'interface.
+
+### Guide
+
+* **Le compendium *MGT2 — Guide du système*** (`mgt2.guide`) **arrive, en trente pages** : ce que le
+  système est et n'est pas, la mise en place d'un monde, un premier Voyageur, un premier jet, un
+  premier combat et un premier vaisseau, puis chaque fiche et chaque écran, les règles optionnelles,
+  les paramètres, les macros et l'API, et ce que le système ne fait pas exprès.
+* **Le guide n'existe qu'en anglais**, et c'est l'anglais qui s'affiche dans les quatre langues. Un
+  lecteur français lit donc l'anglais ; la traduction française est à venir.
+* **Un `?` dans la barre de titre ouvre le guide à la page de la fenêtre** : sur les fiches de
+  Voyageur, de PNJ, de véhicule, de vaisseau, de robot, de monde, de réserve et d'objet, sur la
+  création, le combat spatial, le voyage, le Docket et la fenêtre de jet. Les batailles entre
+  flottes, le commerce et l'explorateur de compendiums n'en portent pas : leurs pages se lisent dans
+  le compendium. Le paramètre *Afficher le bouton du guide*, propre à chaque navigateur, le retire.
+
+### Démonstration
+
+* **Cinq Voyageurs sortis de la boucle de création** dans *MGT2 — Acteurs de démonstration,
+  annotés*, chacun à partir d'un Acteur vierge, avec ses notes : *Demo — Tamsin Reeve* (l'école de
+  cadets avec mention, puis la patrouille), *Demo — Corvin Dray* (un refus, la conscription, un Aléa
+  et la note du chirurgien), *Demo — Mirel Aston* (une création interrompue : une fois importée,
+  elle attend sur l'écran de création, à sa troisième période), *Demo — Hesper Lund* (une crise de
+  vieillissement payée, une pension et une dette) et *Demo — Joren Pask* (l'université, un
+  changement d'affectation, un contact, un rival et un allié).
+* **Une Scène**, *Demo — Bellweather Roads*, dans un nouveau compendium, *MGT2 — Scènes de
+  démonstration, annotées* (`mgt2.demo-scenes`) : une région *Vide* et une région *Radiations* à
+  traverser avec un jeton. La seconde agit à l'entrée, la première au début de chaque round de
+  combat : sans combat, elle ne fait rien à un Voyageur.
+* **Cinq carrières et quatre tables communes** dans *MGT2 — Objets de démonstration, annotés*, pour
+  qu'une création jouée avec le seul système ait où aller après un refus, une fois ces documents
+  importés dans le monde. Elles portent la conscription, la carrière toujours ouverte, l'entrée
+  automatique, l'accord de l'arbitre, l'entrée forcée et la libération, le Commandement et le
+  changement d'affectation. Les carrières sont *Demo — Reach Guard*, *Demo — Fen Holders*, *Demo —
+  Quay Hands*, *Demo — Pilots' Guild* et *Demo — Harbour Lock-up*.
+* **Une compétence de démonstration porte son vrai nom** : *Seafarer* et non plus *Demo — Seafarer*,
+  sur l'objet comme dans chaque référence. Une carrière de démonstration relève ainsi la compétence
+  que le Voyageur détient, au lieu de lui en créer une seconde.
+* **Un document de démonstration laissé dans son compendium ne répond plus qu'à son nom.** Il ne se
+  propose plus de lui-même après un refus, pour une entrée forcée sans nom, pour « une autre
+  carrière », dans un choix libre de compétence ou dans la liste d'un bon. Importé dans le monde, il
+  répond comme n'importe quel document.
+* **Les valeurs de la démonstration sont toutes inventées.** *Demo — Harbour Patrol*, *Demo —
+  Harbour Cadet School*, *Demo — Engineer's Toolkit*, *Demo — Cargo Lot* et *Demo — Kestrel-class
+  Courier* changent de chiffres, et le Kestrel a enfin un générateur à la mesure de ses systèmes. Un
+  document déjà importé garde les siens.
+
+### Documentation
+
+* **Le journal d'audit des règles** (`mgt2.docs`) **est maintenant entier en espagnol et en
+  portugais (Brésil)**, avec les deux listes de chaque écran. **Aucun lecteur de ces langues ne l'a
+  relu livres en main** : les termes viennent des fichiers de langue, puis du vocabulaire
+  communautaire de Mongoose, l'anglais reste là où ni l'un ni l'autre ne nomme le terme, et un terme
+  peut encore changer.
+* **Le même journal** suit cette version : la crise de vieillissement avec le changement
+  d'affectation, la carrière proposée et la PSI, l'âge écrit par la création, la dispersion des
+  flottes et le robot dans le vide.
+
+### Correctifs
+
+* **La fiche n'affiche plus de mots-clés bruts.** Une perte écrite par la création donnait le nom
+  interne de sa table, comme `personalDevelopment` : elle se lit maintenant dans la langue de
+  l'interface, lignes déjà enregistrées comprises, et une note saisie à la main reste telle quelle.
+  La note d'un contact converti et celle d'une dépense s'écrivent traduites ; celles déjà écrites ne
+  changent pas.
+* **La fenêtre des pertes d'une blessure de création parle de blessure**, et non plus de
+  vieillissement.
+* **Une attribution trouve la compétence détenue quelle que soit la casse de sa spécialité** :
+  *Electronics (comms)* relève *Electronics (Comms)* au lieu d'en créer une seconde.
+* **Une arme ou un pouvoir dont la compétence liée est écrite par son nom** ouvre la fenêtre de jet
+  sur cette compétence, et non plus sur *Incompétent*.
+* **Une ligne de perte facturée au Voyageur**, soins d'une crise de vieillissement compris,
+  **s'inscrit aussi dans ses notes financières.**
+* **En anglais, la relation *Ally* s'écrivait *Allie*.**
+* **Pour les macros** : `TravellerActorSheet.checkModifiers` devient
+  `RollPromptHelper.checkModifiers`.
+
+---
+
 ## [0.2.8]
 
 **Vérifié sur Foundry VTT 14.369.**

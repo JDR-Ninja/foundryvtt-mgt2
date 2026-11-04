@@ -13,7 +13,7 @@
           "A change has four parts: the key it writes, the type of write, the value, and the phase.",
           "flags.mgt2.suspended is the referee's pause, kept apart from disabled, because an effect the player switched off and one the table is ignoring for a scene are different things."
         ],
-        "trap": "The two effects below are the whole point of this document. Both add 1. The first writes a STORED accumulator and belongs in the initial phase. The second writes a DERIVED value and has to be final, because prepareDerivedData runs between the two phases and would overwrite an initial write with the number it recomputed. A change aimed at a derived value in the initial phase does not error, does not warn, and looks exactly like a broken effect. Core renders the phase as a hidden input, which is why this system ships its own effect configuration screen."
+        "trap": "The two effects below are the whole point of this document. Both add 1. The first writes a STORED accumulator and belongs in the initial phase. The second writes a DERIVED value and has to be final, because prepareDerivedData runs between the two phases and would overwrite an initial write with the number it recomputed. That final write moves the number shown and nothing else: the DM and life were computed before it, so the sheet shows a higher score with the old DM. To move a score and everything that follows from it, write its .effect in the initial phase instead. A change aimed at a derived value in the initial phase does not error, does not warn, and looks exactly like a broken effect. Core renders the phase as a hidden input, which is why this system ships its own effect configuration screen."
       }
     }
   },

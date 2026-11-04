@@ -60,7 +60,7 @@
 			{{#if panel.editable}}
 			<button type="button" class="btn" data-action="setFlag"{{#unless panel.canFlag}} disabled{{/unless}}>{{#if panel.isFlagShip}}{{localize 'MGT2.Fleet.Screen.StrikeFlag'}}{{else}}{{localize 'MGT2.Fleet.Screen.FlyFlag'}}{{/if}}</button>
 			<button type="button" class="btn" data-action="toggleReserve">{{#if panel.reserve}}{{localize 'MGT2.Fleet.Screen.LeaveReserve'}}{{else}}{{localize 'MGT2.Fleet.Screen.JoinReserve'}}{{/if}}</button>
-			<button type="button" class="btn" data-action="detach" data-tooltip="{{localize 'MGT2.Fleet.Screen.DetachHint'}}">{{localize 'MGT2.Fleet.Screen.Detach'}}</button>
+			<button type="button" class="btn" data-action="detach"{{#if panel.divisionHeld}} disabled{{/if}} data-tooltip="{{localize 'MGT2.Fleet.Screen.DetachHint'}}">{{localize 'MGT2.Fleet.Screen.Detach'}}</button>
 			{{/if}}
 			{{#if panel.uuid}}<a class="need" data-action="openActor" data-uuid="{{panel.uuid}}">{{localize 'MGT2.Fleet.Screen.OpenSheet'}}</a>{{/if}}
 		</div>

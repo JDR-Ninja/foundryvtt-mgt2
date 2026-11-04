@@ -1,0 +1,69 @@
+{
+  "_id": "demoSceneRoads01",
+  "name": "Demo — Bellweather Roads",
+  "flags": {
+    "mgt2": {
+      "demo": {
+        "order": 48,
+        "cliff": "a Region answers an event, and vacuum's event is a combat round",
+        "teaches": [
+          "A Region does nothing by being drawn: each behaviour answers the events it declares, and where a token stands decides which Regions it is in.",
+          "Radiation answers a token entering. The dose is rolled once per entry, the movement waits for it, and walking out heals nothing.",
+          "Vacuum answers the start of a combat round, for every combatant standing in the Region. Walking in with no combat running does nothing yet.",
+          "`protectedBy` names a worn item, so the Companion's table can read that suit's `breach`. Core's table never looks at it.",
+          "`shielded` is what the Region itself absorbs, before the Traveller's own armour takes its share of the dose."
+        ],
+        "trap": "A v14 Scene keeps its background on a Level, at `levels[].background.src`, and the server's own migration replaces `levels` at world launch unless `_stats.coreVersion` says the document is already v14. A Region with `shapes: []` is valid too, and no token ever enters it."
+      }
+    }
+  },
+  "_stats": { "coreVersion": "14.366" },
+  "width": 4000,
+  "height": 4000,
+  "padding": 0.1,
+  "grid": { "type": 1, "size": 100, "distance": 1.5, "units": "m" },
+  "tokenVision": false,
+  "initialLevel": "defaultLevel0000",
+  "levels": [
+    {
+      "_id": "defaultLevel0000",
+      "name": "Bellweather Roads",
+      "elevation": { "bottom": 0, "top": 20 },
+      "background": { "src": "systems/mgt2/assets/scenes/wizard-nebula-ngc7380.webp", "color": "#000000" }
+    }
+  ],
+  "regions": [
+    {
+      "_id": "demoRegionVacuum",
+      "name": "Open gantry",
+      "color": "#3f7fbf",
+      "visibility": 2,
+      "elevation": { "bottom": null, "top": null, "topInclusive": false },
+      "shapes": [{ "type": "rectangle", "x": 1000, "y": 1000, "width": 1200, "height": 2000 }],
+      "behaviors": [
+        {
+          "_id": "demoBehaveVacuum",
+          "name": "Hard vacuum",
+          "type": "vacuum",
+          "system": { "pressure": "hard", "damage": "1D6", "protectedBy": ["Demo — Deck Vest"] }
+        }
+      ]
+    },
+    {
+      "_id": "demoRegionFlare0",
+      "name": "Reactor wash",
+      "color": "#bf5f3f",
+      "visibility": 2,
+      "elevation": { "bottom": null, "top": null, "topInclusive": false },
+      "shapes": [{ "type": "rectangle", "x": 2600, "y": 1000, "width": 800, "height": 2000 }],
+      "behaviors": [
+        {
+          "_id": "demoBehaveFlare0",
+          "name": "Unshielded drive output",
+          "type": "radiation",
+          "system": { "rads": "3D6×10", "shielded": 30 }
+        }
+      ]
+    }
+  ]
+}

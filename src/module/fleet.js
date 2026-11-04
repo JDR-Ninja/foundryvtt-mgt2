@@ -323,6 +323,7 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
         const ships = [...new Set(combatants ?? [])].filter(one =>
             (one?.type === FLEET_SHIP) && (one.parent === this.parent) && one.actor);
         if ( !ships.length ) return null;
+        if ( ships.some(one => one.system.fleetGroup?.system.refuseDivision()) ) return null;
         if ( ships.length > SMALL_GROUP ) {
             ui.notifications.warn(game.i18n.format("MGT2.Fleet.DetachLarge",
                 { count: ships.length, max: SMALL_GROUP }));
@@ -344,7 +345,7 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
      */
     async disperse(group, combatants, { name } = {}) {
         if ( !this.#gate() ) return null;
-        if ( group?.type !== FLEET ) return null;
+        if ( (group?.type !== FLEET) || group.system.refuseDivision() ) return null;
         const moving = (combatants ?? []).filter(one =>
             FLEET_CONTACTS.includes(one?.type) && (one._source.group === group.id));
         if ( !moving.length ) return null;
@@ -373,7 +374,9 @@ export class FleetCombatData extends foundry.abstract.TypeDataModel {
      * @param {CombatantGroup} group   The fleet being folded away
      */
     async reassemble(group, into) {
+        if ( !this.#gate() ) return null;
         if ( (group?.type !== FLEET) || (into?.type !== FLEET) || (group.id === into.id) ) return null;
+        if ( group.system.refuseDivision(group.system.dispersal.rounds > 0) ) return null;
         const moving = group.system.combatants;
         if ( moving.length ) {
             await this.parent.updateEmbeddedDocuments("Combatant",
@@ -630,6 +633,10 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
      * the chapter's own task chain — Average (8+) Leadership, then Difficult (10+) Tactics (naval).
      */
     async applyDispersal(effect) {
+        if ( this.retryHeld ) {
+            ui.notifications.warn(game.i18n.localize("MGT2.Fleet.Screen.DispersalServing"));
+            return null;
+        }
         const score = Math.trunc(Number(effect) || 0);
         const row = MGT2.FleetDispersal.find(entry => (entry.min === null) || (score >= entry.min));
         return this.parent.update({ system: { dispersal: {
@@ -641,9 +648,39 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
         return this.dispersal.rounds > 0 ? this.dispersal.dm : 0;
     }
 
-    /** Folio 122: "other actions cannot be taken by ships participating in a dispersal". */
+    /** Folio 122's "other actions cannot be taken" holds the Actions Step; its Morale "must be made each round" stays open. */
     get dispersalRunning() {
         return (this.dispersal.rounds > 0) && !this.dispersal.failed;
+    }
+
+    /** Folio 122: a failure's DM runs "for 2 rounds, after which they may reattempt". */
+    get retryHeld() {
+        return (this.dispersal.rounds > 0) && this.dispersal.failed;
+    }
+
+    /** That sentence's refusal, spoken. @returns {boolean}   True where the action is shut */
+    refuseAction() {
+        if ( !this.dispersalRunning ) return false;
+        ui.notifications.warn(game.i18n.format("MGT2.Fleet.DispersalBusy", { name: this.parent.name }));
+        return true;
+    }
+
+    /** Folio 122: "After a dispersal, the ships are divided", and a failed one has divided nothing. */
+    get divisionHeld() {
+        return (this.dispersal.rounds > 0) || this.dispersal.failed;
+    }
+
+    /** That hold, spoken. @param {boolean} [held]   A fold waits on the rounds alone */
+    refuseDivision(held = this.divisionHeld) {
+        if ( !held ) return false;
+        ui.notifications.warn(game.i18n.format("MGT2.Fleet.DispersalOwed", { name: this.parent.name }));
+        return true;
+    }
+
+    /** Folio 122's breaking off is an action, so a dispersal holds the start of one and not its end. */
+    async setBreakingOff(on) {
+        if ( on && this.refuseAction() ) return this.parent;
+        return this.parent.update({ system: { breakingOff: on === true } });
     }
 
     /**
@@ -653,7 +690,7 @@ export class FleetGroupData extends foundry.abstract.TypeDataModel {
     terrainDM(against = null) {
         if ( !this.terrain ) return 0;
         const enemy = against ?? this.opposing;
-        return Math.max(0, this.thrust - (enemy?.system.thrust ?? 0));
+        return enemy ? Math.max(0, this.thrust - enemy.system.thrust) : 0;
     }
 
     /** Folio 122: breaking off costs the fleet's Defensive DM 1 and locks its spinal mounts. */
@@ -922,10 +959,12 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
     get offensive() {
         const stats = this.stats;
         if ( !stats ) return { standard: 0, missile: 0 };
+        // Folio 122's table charges the Offensive DM as well as the Defensive one.
+        const dispersal = this.fleetGroup?.system.dispersalDM ?? 0;
         return {
-            standard: Math.ceil(this.crewSkill / 2) + stats.fireControl + stats.tl,
-            // Folio 110 gives the missile DM no Crew Skill term at all, so nothing moves it.
-            missile: stats.launchSolution + stats.tl
+            standard: Math.ceil(this.crewSkill / 2) + stats.fireControl + stats.tl + dispersal,
+            // Folio 110 gives the missile DM no Crew Skill term at all, so Crew Skill cannot move it.
+            missile: stats.launchSolution + stats.tl + dispersal
         };
     }
 
@@ -1047,6 +1086,8 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
      */
     async spend(key, points, against = null) {
         if ( !POOLS.includes(key) ) return this.parent;
+        // Folio 121 puts Repair in the Actions Step; the pools a ship defends itself with are not.
+        if ( (key === "repair") && this.fleetGroup?.system.refuseAction() ) return this.parent;
         const wanted = Math.max(0, Math.trunc(Number(points) || 0));
         const pool = (key === "sand") ? this.sandcasterAgainst(against) : this.pools[key];
         if ( wanted > pool.left ) {
@@ -1153,11 +1194,12 @@ export class SquadronData extends foundry.abstract.TypeDataModel {
     get offensive() {
         const stats = this.stats;
         if ( !stats ) return { standard: 0, missile: 0 };
+        const dispersal = this.fleetGroup?.system.dispersalDM ?? 0;
         return {
-            standard: this.crewSkill + stats.fireControl + stats.tl,
+            standard: this.crewSkill + stats.fireControl + stats.tl + dispersal,
             // Folio 114 prints no missile DM for a squadron and folio 107's sample squadron carries
             // missile racks.
-            missile: stats.launchSolution + stats.tl
+            missile: stats.launchSolution + stats.tl + dispersal
         };
     }
 

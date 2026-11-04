@@ -1232,13 +1232,17 @@ export class WeaponData extends PhysicalItemData {
     /** The weapon's own values with the round's overrides laid over them. */
     #effective() {
         const round = this.round?.system;
+        // VH2026 p.104: every fire control system grants Scope to the weapon it serves.
+        const granted = (!this.traitMap.scope && this.parent?.actor?.system?.fireControlFor?.(this.parent))
+            ? [{ key: "scope" }] : [];
         if (!round) {
+            const traits = [...this.traits, ...granted];
             return { damage: this.damage, magazine: this.magazine, magazineCost: this.magazineCost,
-                traits: this.traits, traitMap: this.traitMap, rules: [] };
+                traits, traitMap: granted.length ? buildTraitMap(traits) : this.traitMap, rules: [] };
         }
         // CSC p.179-182: a few rounds REPLACE the weapon's trait list, and no list could ever say which.
-        const traits = round.replaceTraits
-            ? [...(round.traits ?? [])] : [...this.traits, ...(round.traits ?? [])];
+        const traits = [...(round.replaceTraits
+            ? (round.traits ?? []) : [...this.traits, ...(round.traits ?? [])]), ...granted];
         return {
             damage: round.damage || this.damage,
             magazine: round.magazine ?? this.magazine,
@@ -1282,7 +1286,7 @@ export class WeaponData extends PhysicalItemData {
         // has, instead of a vehicleWeapon type duplicating the whole roll path.
         schema.scale = new fields.StringField({
             required: false, blank: false, initial: "ground", choices: MGT2.WeaponScales });
-        // The vehicle and spacecraft accuracy grade, which stands in for a scope (VH p.45).
+        // The vehicle and spacecraft accuracy grade, which stands in for a scope (VH2026 p.104).
         schema.fireControl = new fields.NumberField({ required: false, initial: 0, min: 0, max: 4, integer: true });
         // A spacecraft weapon draws against the ship's power budget (HG p.26).
         schema.power = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });

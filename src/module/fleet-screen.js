@@ -70,6 +70,8 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
             applyDamage: FleetCombatScreen.#onApplyDamage,
             clearAttack: FleetCombatScreen.#onClearAttack,
             detach: FleetCombatScreen.#onDetach,
+            disperse: FleetCombatScreen.#onDisperse,
+            reassemble: FleetCombatScreen.#onReassemble,
             openChart: FleetCombatScreen.#onOpenChart,
             openActor: FleetCombatScreen.#onOpenActor
         }
@@ -114,6 +116,9 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
     /** How many of each battery the referee has declared this round (folio 117). */
     #firing = new Map();
 
+    /** What the referee has ticked to leave the selected fleet. @type {Set<string>} */
+    #splitting = new Set();
+
     /** Folio 118's three riders that name a weapon by the words on its page. */
     #options = { ignoresArmour: false, armourPiercing: false, customised: false, effectiveness: false };
 
@@ -125,6 +130,9 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
 
     /** @type {{pool: string, points: number}} */
     #mitigate = { pool: "", points: 0 };
+
+    /** Which fleet the referee last named as opposing each fleet: fleet id to fleet id. */
+    #opposition = new Map();
 
     get canEdit() {
         return this.#combat.canUserModify(game.user, "update", { system: {} });
@@ -163,6 +171,11 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
     _onClose(options) {
         super._onClose(options);
         delete this.#combat.apps[this.id];
+    }
+
+    /** The fleet named as this one's opponent, which outlives neither the screen nor that fleet. */
+    #opposedBy(fleet) {
+        return this.#combat.groups.get(this.#opposition.get(fleet?.id)) ?? null;
     }
 
     /** Every fleet, highest Initiative first — folio 115 resolves all three steps in that order. */
@@ -296,10 +309,13 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
             scattered: system.scattered,
             mustDisperse: system.mustDisperse,
             terrain: system.terrain,
-            terrainDM: system.terrainDM(),
+            terrainDM: system.terrainDM(this.#opposedBy(group)),
             breakingOff: system.breakingOff,
             dispersal: system.dispersal,
             dispersalDM: system.dispersalDM,
+            dispersalRunning: system.dispersalRunning,
+            retryHeld: system.retryHeld,
+            dividing: this.#dividing(group),
             flagship: system.flagShip
                 ? { id: system.flagShip.id, name: system.flagShip.name } : null,
             flagShipDM: system.flagShipDM,
@@ -326,6 +342,15 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
             })),
             contacts: system.combatants.map(one => this.#contactRow(one))
         };
+    }
+
+    /** Folio 122's division: the hulls and wings that could leave, and whether it can happen yet. */
+    #dividing(group) {
+        const system = group.system;
+        const rows = system.combatants.filter(one => one.type !== SALVO)
+            .map(one => ({ id: one.id, name: one.name, ticked: this.#splitting.has(one.id) }));
+        return { rows, waiting: system.dispersal.rounds > 0,
+            canSplit: !system.divisionHeld && rows.some(row => row.ticked) };
     }
 
     /** The budget block's own shape: a total against a cap, with the bar computed and never authored. */
@@ -366,7 +391,7 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
     /** Folio 122's Morale check, read off the battle rather than typed. */
     #morale(fleet) {
         if ( !fleet ) return null;
-        const rows = fleet.system.moraleRows();
+        const rows = fleet.system.moraleRows(this.#opposedBy(fleet));
         return {
             rows: rows.map(([label, dm]) => ({ label, dm: MGT2Helper.signed(dm), zero: dm === 0 })),
             total: MGT2Helper.signed(rows.reduce((sum, [, dm]) => sum + dm, 0)),
@@ -405,6 +430,7 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
             tons: ship?.system.hull.tons ?? 0,
             gated: !stats,
             reserve: system.reserve,
+            divisionHeld: system.fleetGroup?.system.divisionHeld === true,
             isFlagShip: system.isFlagShip,
             canFlag: system.canFlag,
             spinalLocked: system.spinalLocked,
@@ -419,7 +445,7 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
             },
             defensive: MGT2Helper.signed(system.defensive),
             defensiveAgainst: MGT2Helper.signed(
-                system.defensiveAgainst(this.target?.system.fleetGroup ?? null)),
+                system.defensiveAgainst(this.target?.system.fleetGroup ?? this.#opposedBy(system.fleetGroup))),
             armour: system.armour,
             autoRepair: system.autoRepair,
             thrust: system.thrust,
@@ -458,7 +484,7 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
             },
             defensive: MGT2Helper.signed(system.defensive),
             defensiveAgainst: MGT2Helper.signed(
-                system.defensiveAgainst(this.target?.system.fleetGroup ?? null)),
+                system.defensiveAgainst(this.target?.system.fleetGroup ?? this.#opposedBy(system.fleetGroup))),
             armour: system.armour,
             thrust: system.thrust,
             hull: system.hull,
@@ -573,6 +599,10 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
             case "mitigatePoints":
                 this.#mitigate.points = Math.max(0, number());
                 return this.render();
+            case "splitContact":
+                if ( input.checked ) this.#splitting.add(input.dataset.contact);
+                else this.#splitting.delete(input.dataset.contact);
+                return this.render();
         }
         if ( !this.canEdit && !this.#fleetOf(input)?.isOwner ) return;
 
@@ -594,7 +624,9 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
             case "banked":
                 return fleet?.update({ system: { movement: { banked: Math.max(0, number()) } } });
             case "terrain": return fleet?.update({ system: { terrain: input.checked } });
-            case "breakingOff": return fleet?.update({ system: { breakingOff: input.checked } });
+            case "breakingOff":
+                await fleet?.system.setBreakingOff(input.checked);
+                return this.render();
             case "dispersalEffect": return fleet?.system.applyDispersal(number());
             case "squadronCount":
                 return contact?.update({ system: { count: Math.max(1, number()) } });
@@ -761,9 +793,29 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
         return fleet.system.setFlagShip(contact.system.isFlagShip ? null : contact);
     }
 
-    /** @this {FleetCombatScreen} */
+    /** Folio 122's opposing rows need one fleet, so more than one candidate is a question. */
     static async #onMoraleCheck(event, target) {
-        return this.#fleetOf(target)?.system.moraleCheck();
+        const fleet = this.#fleetOf(target);
+        if ( !fleet ) return;
+        const others = this.fleets.filter(one => one.id !== fleet.id);
+        if ( others.length < 2 ) return fleet.system.moraleCheck();
+
+        const chosen = this.#opposedBy(fleet)?.id;
+        const options = others.map(one => `<option value="${one.id}"${(one.id === chosen) ? " selected" : ""}>`
+            + `${foundry.utils.escapeHTML(one.name)}</option>`).join("");
+        const label = game.i18n.format("MGT2.Fleet.Screen.OpposingHint", {
+            name: foundry.utils.escapeHTML(fleet.name) });
+        const answer = await DialogV2.input({
+            window: { title: "MGT2.Fleet.Screen.Opposing" },
+            classes: ["mgt2"],
+            content: `<p>${label}</p><select name="opposing" aria-label="${label}">${options}</select>`,
+            rejectClose: false
+        });
+        const against = this.#combat.groups.get(answer?.opposing);
+        if ( !against ) return;
+        this.#opposition.set(fleet.id, against.id);
+        await fleet.system.moraleCheck(against);
+        return this.render();
     }
 
     /** Folio 117: the reserve is part of the fleet and not part of the line. */
@@ -950,6 +1002,37 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
     static #onClearAttack() {
         this.#attack = null;
         this.#mitigate = { pool: "", points: 0 };
+        return this.render();
+    }
+
+    /** Folio 122: the ticked hulls and wings become a fleet of their own, in this same battle. */
+    static async #onDisperse(event, target) {
+        const fleet = this.#fleetOf(target);
+        if ( !fleet || !this.canEdit ) return;
+        const moving = fleet.system.combatants.filter(one => this.#splitting.has(one.id));
+        const split = await this.#combat.system.disperse(fleet, moving);
+        if ( !split ) return this.render();
+        this.#splitting.clear();
+        this.#fleetId = split.id;
+        return this.render();
+    }
+
+    /** Folio 122's reassembly: this fleet's contacts join the one named, and this fleet leaves. */
+    static async #onReassemble(event, target) {
+        const fleet = this.#fleetOf(target);
+        const into = this.#combat.groups.get(target.dataset.into);
+        if ( !fleet || !into || !this.canEdit ) return;
+        const count = fleet.system.strength.total;
+        const confirmed = await DialogV2.confirm({
+            window: { title: "MGT2.Fleet.Screen.Fold" },
+            classes: ["mgt2"],
+            content: `<p>${MGT2Helper.plural("MGT2.Fleet.Screen.FoldHint", count, {
+                name: foundry.utils.escapeHTML(fleet.name), into: foundry.utils.escapeHTML(into.name), count })}</p>`
+        });
+        if ( !confirmed ) return;
+        if ( !await this.#combat.system.reassemble(fleet, into) ) return this.render();
+        this.#fleetId = into.id;
+        this.#contactId = null;
         return this.render();
     }
 

@@ -90,7 +90,7 @@ export class CharacterData extends ActorBaseData {
                     // stored.
                     characteristic: new fields.StringField({ required: false, blank: true, trim: true,
                         choices: MGT2.Characteristics, initial: "" }),
-                    // Companion p.39's comrade: their level caps what may be learned, so it is read
+                    // Companion p.41's comrade: their level caps what may be learned, so it is read
                     // at the roll and never copied here.
                     teacher: new fields.DocumentUUIDField({ required: false, nullable: true, initial: null,
                         type: "Actor" }),
@@ -130,7 +130,8 @@ export class CharacterData extends ActorBaseData {
                     { initial: {}, validateKey: key => key in MGT2.Characteristics }),
                 // Cr paid where a source has a price; what the Traveller could not pay becomes debt.
                 cost: new fields.NumberField({ required: false, nullable: false, min: 0, integer: true, initial: 0 }),
-                note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
+                note: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+                byHand: new fields.BooleanField({ required: false, initial: false })
             }), { initial: [] }),
 
             // Other Benefits are RIGHTS WITH LIMITS and not objects — "any armour up to Cr10000 and
@@ -272,9 +273,7 @@ export class CharacterData extends ActorBaseData {
      */
     prepareBaseData() {
         super.prepareBaseData();
-        // With the rule off nothing is drawn or applied; `health.radiations` is stored and untouched.
-        if ( !Rules.on("radiation") ) return;
-        this.characteristics.endurance.auto += CharacterData.radiationBand(this.health.radiations).endurance;
+        this.prepareRadiationLoss();
     }
 
     /**
@@ -346,25 +345,30 @@ export class CharacterData extends ActorBaseData {
     }
 
     /**
-     * Folio 49: a characteristic reduced to 0 by ageing is a crisis for life; one reduced to 0 by a
-     * creation injury, where the rule is on, lasts only until care brings it back above 0.
+     * Folio 49: a characteristic reduced to 0 by ageing is a crisis for life, and one a creation injury took
+     * there, where the rule is on, lasts until care lifts it. ACS1 folio 275: PSI aged to 0 is the loss of its abilities.
      */
     #prepareLossLog() {
         const running = {};
         const injury = Rules.on("creationInjuryToZero");
         let aged = false;
+        let lost = false;
         const hurt = new Set();
         for ( const entry of this.characteristicLog ) {
             for ( const [key, delta] of Object.entries(entry.changes ?? {}) ) {
                 const c = this.characteristics[key];
                 if ( !c ) continue;
                 running[key] = (running[key] ?? c.base) + delta;
-                if ( running[key] > 0 ) hurt.delete(key);
+                if ( MGT2.CharacteristicCare.crisisExempt.includes(key) ) {
+                    lost ||= (entry.source === "ageing") && (running[key] <= 0) && ((running[key] - delta) > 0);
+                }
+                else if ( running[key] > 0 ) hurt.delete(key);
                 else if ( entry.source === "ageing" ) aged = true;
                 else if ( injury && (entry.source === "injury") ) hurt.add(key);
             }
         }
         this.states.ageingCrisis = aged || (hurt.size > 0);
+        this.states.psiLost = lost;
     }
 
     /**
@@ -392,7 +396,7 @@ export class CharacterData extends ActorBaseData {
     }
 
     /**
-     * Core p.55's Study Periods and Compagnon p.39-40's Experience Points move the same record, so
+     * Core p.55's Study Periods and Companion p.41-42's Experience Points move the same record, so
      * one pass derives both.
      */
     #prepareTraining() {
@@ -408,7 +412,7 @@ export class CharacterData extends ActorBaseData {
                 ? (this.characteristics[target.key]?.max ?? null) : this.skillLevel(target.key);
             programme.next = (programme.held === null) ? 0 : programme.held + 1;
             programme.cost = CharacterData.trainingCost(target, programme.next);
-            // Compagnon p.39's teaching check is INT whatever the programme buys; the stored
+            // Companion p.41's teaching check is INT whatever the programme buys; the stored
             // override is Core's Athletics device.
             programme.checkCharacteristic = companion ? "intellect"
                 : (programme.characteristic || CharacterData.trainingCharacteristic(target));
@@ -445,7 +449,7 @@ export class CharacterData extends ActorBaseData {
     }
 
     /**
-     * Compagnon p.40's two price tables: a skill costs by the level being bought and doubles per
+     * Companion p.42's two price tables: a skill costs by the level being bought and doubles per
      * level past the sixth; a characteristic costs its new value, and a mental one twice that.
      */
     static trainingCost(target, next) {
@@ -468,7 +472,7 @@ export class CharacterData extends ActorBaseData {
 
     /**
      * What neither book lets a programme reach: Jack-of-all-Trades "may never be learned or
-     * improved" (Core p.55), and Compagnon p.40's table names five characteristics — so SOC, PSI
+     * improved" (Core p.55), and Companion p.42's table names five characteristics — so SOC, PSI
      * and the six the Core Rulebook never defines are not buyable either.
      */
     static trainingBarred(target) {
@@ -543,26 +547,9 @@ export class CharacterData extends ActorBaseData {
         return 3 + this.enduranceDM + (Math.trunc(medic) || 0);
     }
 
-    /** The Radiation Effects row a number of rads falls in. @returns {object} */
-    static radiationBand(rads) {
-        const total = Math.max(0, Math.trunc(rads) || 0);
-        return MGT2.RadiationEffects.find(row => total >= row.min) ?? MGT2.RadiationEffects.at(-1);
-    }
-
     /** Take a dose. */
-    async applyRadiation(rads) {
-        // The one sink every dose passes through — the exposure control, a Radiation-trait weapon
-        // (`chatHelper.js`) and a radiation region (`region-behaviors.js`) all end here.
-        if ( !Rules.on("radiation") ) return null;
-        const dose = Math.max(0, Math.trunc(rads) || 0);
-        if (dose === 0) return null;
-        const before = CharacterData.radiationBand(this.health.radiations);
-        const total = this.health.radiations + dose;
-        const immediate = CharacterData.radiationBand(dose);
-        // Nausea lasts "until medical treatment received", which no reading of the rads can tell.
-        const states = immediate.state ? { [immediate.state]: true } : {};
-        await this.parent.update({ system: { states, health: { radiations: total } } });
-        return { dose, total, immediate, before, after: CharacterData.radiationBand(total) };
+    applyRadiation(rads) {
+        return this.takeDose(rads);
     }
 
     /**

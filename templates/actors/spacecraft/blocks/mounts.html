@@ -5,6 +5,7 @@
 		<h3>{{localize 'MGT2.Actor.spacecraft.Mounts'}}</h3>
 		<span class="count">{{ship.mounts.rows.length}}</span>
 		<a class="add edit-only" data-action="rowCreate" data-rows="mounts" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddMount'}}"><i class="fa-solid fa-plus"></i></a>
+		<a class="add edit-only" data-action="rowCreate" data-rows="screens" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddScreen'}}"><i class="fa-solid fa-shield-halved"></i></a>
 		<a class="add edit-only" data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-crosshairs"></i></a>
 	</div>
 	{{#if ship.mounts.rows.length}}
@@ -106,6 +107,43 @@
 				<td><button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button><span class="sub">{{localize 'MGT2.Actor.spacecraft.Unmounted'}}</span></td>
 				<td class="c num">{{weapon.system.damage}}</td>
 				{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+	{{! HG p.113's screens are defences with no mount: tonnage and Power here, a pool in a fleet battle. }}
+	{{#if ship.mounts.screens.length}}
+	<table class="rows">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Actor.spacecraft.Screens'}}</th>
+				<th class="c">{{localize 'MGT2.Actor.spacecraft.ScreenCount'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each ship.mounts.screens as |screen|}}
+			<tr data-row-index="{{screen.index}}" data-screen-row="{{screen.index}}">
+				<td class="mt">
+					<span class="play-only"><b>{{localize screen.label}}</b></span>
+					<span class="edit-only">
+						<select class="f" name="system.screens.{{screen.index}}.type" aria-label="{{localize 'MGT2.Actor.spacecraft.Screens'}}">
+							{{#each ../choices.screens as |entry key|}}
+							<option value="{{key}}"{{#if (eq key screen.type)}} selected{{/if}}>{{localize entry.label}}</option>
+							{{/each}}
+						</select>
+					</span>
+				</td>
+				<td class="c">
+					<span class="play-only"><span class="num">{{screen.count}}</span></span>
+					<input class="f num edit-only" type="number" min="1" step="1" name="system.screens.{{screen.index}}.count" value="{{screen.count}}" data-dtype="Number" aria-label="{{localize 'MGT2.Actor.spacecraft.ScreenCount'}}" />
+				</td>
+				<td class="r">
+					<div class="acts edit-only">
+						<a data-action="rowDelete" data-rows="screens" data-tooltip="{{localize 'MGT2.Actor.spacecraft.DeleteScreen'}}"><i class="fas fa-trash"></i></a>
+					</div>
+				</td>
 			</tr>
 			{{/each}}
 		</tbody>

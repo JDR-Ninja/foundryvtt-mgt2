@@ -11,14 +11,14 @@
         "teaches": [
           "Entry reads three fields in a fixed order: requiresPermission can only refuse, autoIf can only admit, and the qualification roll decides the rest.",
           "requiresPermission refuses a player unless the tray holds an unlock naming the guild; the referee's own hand needs none. A player refused for want of leave rolls nothing and records no refusal, so no draft is offered and the dropped career waits.",
-          "autoIf admits a Traveller with EDU 9 or more with no roll, logged as qualified. It reads its own characteristic rather than the DEX the roll uses, and an entry it grants is not barred by the rule against returning to the career just left.",
+          "autoIf admits a Traveller with EDU 9 or more with no roll, logged as qualified. It reads its own characteristic rather than the DEX the roll uses, and an entry it grants still meets the rule against returning to the career just left.",
           "Everyone else rolls DEX 7+, with DM-1 for each previous career, DM+1 straight after Demo — Harbour Patrol and DM-1 from age 38.",
-          "assignmentChange: requalifyKeepRank rolls that same line for a new assignment and asks neither autoIf nor the leave again. basicFrom: assignment trains a first career from its own assignment's table, so each assignment starts a pilot differently.",
+          "assignmentChange: requalifyKeepRank rolls that same line for a new assignment, a score that meets autoIf waiving the roll as it does on entry, and does not ask the leave again. basicFrom: assignment trains a first career from its own assignment's table, so each assignment starts a pilot differently.",
           "Row 5's throw is keyed to the assignment: check.assignment and each alternative's give every assignment its own skill and target. Row 11 reads a DEX gate, and grant and grant2 are its two branches.",
           "Row 2 sends to the Mishap table with ejects: mishap, so the mishap rolled decides whether the pilot leaves. Mishap 3 leaves it to the player, mishap 4 keeps the term's Benefit roll on a pass, and mishap 5 ejects only on a failed check.",
           "Row 9 offers Demo — Harbour Patrol with its qualification waived, and the Guild Membership benefit is a definition the system knows rather than a voucher."
         ],
-        "trap": "An unlock is spent when the leave is read, before any roll, so a failed DEX roll still uses it up. Demo — Harbour Lock-up's row 8 leaves one; with none, a player is refused and the referee enters the Traveller or adds an unlock on the tray panel. The guild grants no commission: commissionCheck stays blank and tables.officer is not present. The record fields below the tables stay empty, as on every template."
+        "trap": "An unlock is spent on entry, so a failed DEX roll leaves it standing until its own duration lapses. Demo — Harbour Lock-up's row 8 leaves one; with none, a player is refused and the referee enters the Traveller or adds an unlock on the tray panel. The guild grants no commission: commissionCheck stays blank and tables.officer is not present. The record fields below the tables stay empty, as on every template."
       }
     }
   },

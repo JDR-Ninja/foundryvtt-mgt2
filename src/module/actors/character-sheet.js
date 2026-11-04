@@ -11,13 +11,12 @@ import { MGT2 } from "../config.js";
 import { CreditSplit } from "../credit-split.js";
 import { EFFECT_ACTIONS, prepareEffects } from "../effects.js";
 import { MGT2Helper } from "../helper.js";
-import { MGT2Combatant } from "../combatant.js";
 import { copyItemWithContents } from "../item.js";
 import { RollPromptHelper } from "../roll-prompt.js";
 import { GuideButtonMixin } from "../guide.js";
 import { Rules } from "../rules.js";
 import { SheetModeMixin } from "../sheet-mode.js";
-import { appendTraitText, bindTraitInput, formatTrait, hazardTraits, prepareTraitBlock, refreshTraitNumbers } from "../traits.js";
+import { appendTraitText, bindTraitInput, formatTrait, prepareTraitBlock, refreshTraitNumbers } from "../traits.js";
 import { CharacterPrompts } from "./character-prompts.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -1100,7 +1099,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       term: MGT2Helper.hasValue(result, "term") ? MGT2Helper.getIntegerFromInput(result.term) : null,
       age: MGT2Helper.hasValue(result, "age") ? MGT2Helper.getIntegerFromInput(result.age) : null,
       roll: MGT2Helper.hasValue(result, "roll") ? MGT2Helper.getIntegerFromInput(result.roll) : null,
-      changes, cost, note: String(result.note ?? "").trim()
+      changes, cost, note: String(result.note ?? "").trim(), byHand: true
     });
 
     const update = { "system.characteristicLog": log };
@@ -1109,6 +1108,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       const paid = Math.min(live.finance.credits, cost);
       update["system.finance.credits"] = live.finance.credits - paid;
       update["system.finance.debt"] = live.finance.debt + (cost - paid);
+      update["system.finance.notes"] = [live.finance.notes, game.i18n.localize(MGT2.CharacteristicLossSources[result.source])]
+        .filter(part => part).join(" · ");
     }
     return this.actor.update(update);
   }
@@ -1144,7 +1145,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       ].filter(part => part).join(" · "),
       roll: entry.roll,
       cost: entry.cost,
-      note: entry.note,
+      note: ((entry.source === "event") && !entry.byHand) ? MGT2Helper.tableWord(entry.note) : entry.note,
       changes: Object.entries(entry.changes ?? {})
         .filter(([key]) => key in system.characteristics)
         .map(([key, delta]) => ({
@@ -1163,8 +1164,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       rows,
       // Two different facts, and the log distinguishes them where a single flag cannot.
       crisis: system.states.ageingCrisis,
-      zeroed: Object.keys(running).some(key =>
-        (system.characteristics[key].max <= 0) && (system.characteristics[key].base > 0)),
+      zeroed: Object.keys(running).some(key => !MGT2.CharacteristicCare.crisisExempt.includes(key)
+        && (system.characteristics[key].max <= 0) && (system.characteristics[key].base > 0)),
       paid: log.reduce((sum, entry) => sum + (entry.cost ?? 0), 0),
       moved: Object.keys(running).map(key => ({
         label: game.i18n.localize(MGT2.Characteristics[key]),
@@ -1249,7 +1250,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
 
   /**
    * Why neither book lets this programme reach anything: Core p.55 bars Jack-of-all-Trades
-   * outright, and Compagnon p.40's table names five characteristics — SOC by name, PSI because
+   * outright, and Companion p.42's table names five characteristics — SOC by name, PSI because
    * psionic strength has training rules of its own.
    */
   static #barredReason(target) {
@@ -1306,7 +1307,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     if ( !programme?.checkDue || programme.barred || programme.closed ) return;
 
     const companion = programme.engine === "companion";
-    // Compagnon p.39: the teacher's own level caps what can be learned, and the check is taken at
+    // Companion p.41: the teacher's own level caps what can be learned, and the check is taken at
     // DM−the level being reached.
     const modifiers = companion
       ? [{ key: "training", label: "MGT2.Training.TeachingDM", dm: -programme.next }] : [];
@@ -1361,23 +1362,6 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         "MGT2 | game.mgt2.trainingScreen is not registered, so the training strip has no window to open.");
     }
     return open(this.actor, { programme: TravellerActorSheet.#programmeId(target) });
-  }
-
-  /**
-   * Everything standing against `modifiers.check`, each entry still named.
-   * @returns {{key: string, label: string, dm: number, params?: object}[]}
-   */
-  static checkModifiers(actor, token = null) {
-    const check = actor.system.modifiers.check;
-    const sources = [...(check.sources ?? [])];
-    const standing = check.custom + check.effect;
-    if (standing !== 0) sources.push({ key: "actor", label: "MGT2.RollPrompt.ActorDM", dm: standing });
-    // Core p.76: every Reaction taken costs DM-1 on the next set of actions.
-    const reactions = MGT2Combatant.reactionDM(actor, token);
-    if (reactions !== 0) {
-      sources.push({ key: "reactions", label: "MGT2.RollPrompt.ReactionDM", dm: reactions });
-    }
-    return sources;
   }
 
   /**
@@ -1507,7 +1491,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       skill: "",
       // A caller's own sources join the actor's BEFORE the prompt is built, which is what leaves
       // them un-tickable beside it rather than pushed in past the checkbox filter.
-      checkModifiers: [...TravellerActorSheet.checkModifiers(actor, token), ...modifiers],
+      checkModifiers: [...RollPromptHelper.checkModifiers(actor, token), ...modifiers],
       difficulty,
       damageFormula: null,
       // The prompt renders its blocks from what is being rolled, so a bare characteristic check is
@@ -1546,6 +1530,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       if (roll === "skill") {
         rollOptions.skill = skill;
         itemObj = actor.getEmbeddedDocument("Item", rollOptions.skill);
+        if (MGT2Helper.psiBarred(actor, itemObj)) return ui.notifications.warn(game.i18n.localize("MGT2.Loss.PsiLost"));
         rollOptions.rollTypeName = game.i18n.localize("MGT2.RollPrompt.SkillRoll");
         rollOptions.rollObjectName = itemObj.name;
       } else {
@@ -1566,14 +1551,14 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       }
 
       if (itemObj && roll === "psionic") {
+        if (MGT2Helper.psiBarred(actor, itemObj)) return ui.notifications.warn(game.i18n.localize("MGT2.Loss.PsiLost"));
         // Core folio 229: "A Traveller with no PSI points cannot attempt to activate a power." The
         // refusal is what makes the folio's next clause reachable at all — the excess a spend
         // pushes past zero can only exist when there was a reserve to start from.
         const reserve = actor.system.characteristics.psionic;
         const tracked = actor.system.isCharacteristicShown("psionic");
         if (tracked && (reserve.value <= 0)) {
-          return ui.notifications.warn(
-            game.i18n.format("MGT2.Errors.NoPsiPoints", { name: actor.name }));
+          return ui.notifications.warn(game.i18n.format("MGT2.Errors.NoPsiPoints", { name: actor.name }));
         }
 
         rollOptions.rollObjectName = itemObj.name;
@@ -1621,7 +1606,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         }
 
         if (MGT2Helper.hasValue(itemObj.system.roll, "skill")) {
-          rollOptions.skill = itemObj.system.roll.skill;
+          const bound = itemObj.system.roll.skill;
+          rollOptions.skill = RollPromptHelper.boundSkill(rollOptions.skills, bound) ?? rollOptions.talent?.id ?? bound;
         }
 
         if (MGT2Helper.hasValue(itemObj.system.roll, "difficulty")) {
@@ -1662,6 +1648,11 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         // Core folio 78's pair is one-handed weapons of either kind, so this outlives the range
         // block: a melee attack is offered the second weapon as readily as a pistol is.
         rollOptions.blocks.attack = true;
+        const fireControl = actor.system.fireControlFor?.(itemObj) ?? 0;
+        if (fireControl) {
+          rollOptions.checkModifiers = [...rollOptions.checkModifiers,
+            { key: "fireControl", label: "MGT2.Items.FireControl", dm: fireControl }];
+        }
         // Core folio 81: in zero gravity every close combat weapon and every ranged weapon without
         // the Zero-G trait owes an Athletics (dexterity) check. Stated, and rolled by nobody.
         if (actor.system.gravityBand === MGT2.Microgravity.band) {
@@ -1821,19 +1812,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
           // The rest of the pipeline's inputs, carried so that stages 2 to 6 can run later on
           // whichever actor was hit.
           scale: itemObj?.system.scale ?? actor.system.scale,
-          ap: MGT2Helper.traitScore(traits, "ap"),
-          loPen: MGT2Helper.traitScore(traits, "lo-pen"),
-          stun: MGT2Helper.hasTrait(traits, "stun"),
-          // Core folio 79: a Radiation weapon doses whoever it hits, which only the apply path knows.
-          radiation: MGT2Helper.hasTrait(traits, "radiation"),
-          // RH folio 106: an ion weapon meets no armour and shuts a robot's brain down.
-          ion: MGT2Helper.hasTrait(traits, "ion"),
-          // Core p.78: most Destructive weapons say so in the score itself, which the card reads.
-          destructive: MGT2Helper.hasTrait(traits, "destructive"),
-          blast: MGT2Helper.hasTrait(traits, "blast"),
-          // Poison and Diseased become an Item the DEFENDER owns, so the parameters travel
-          // with the rest of the pipeline's inputs and are built on the apply path.
-          hazards: hazardTraits(traits),
+          ...MGT2Helper.damageTraits(traits),
           damageType: carriesEffect ? Array.from(itemObj.system.damageType ?? []) : []
         };
       }
@@ -2037,7 +2016,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
 
   /** @this {TravellerActorSheet} */
   static #onContainerCreate() {
-    return getDocumentClass("Item").create({ name: "New container", type: "container" }, { parent: this.actor });
+    return getDocumentClass("Item").create({ name: game.i18n.localize("MGT2.Actor.NewContainer"), type: "container" },
+      { parent: this.actor });
   }
 
   /** @this {TravellerActorSheet} */
@@ -2083,7 +2063,9 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       // A move, not a copy: `stripIds` would leave the duplicate unrecognisable downstream.
       if (this.actor.items.has(sourceItemData.id)) return false;
       if ((sourceItemData.type === "career") && !(await Chargen.acceptsCareer(this.actor, sourceItemData))) return false;
-      await this.actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(sourceItemData)]);
+      const data = MGT2Helper.stripIds(sourceItemData);
+      if (sourceItemData.pack) foundry.utils.setProperty(data, "_stats.compendiumSource", sourceItemData.uuid);
+      await this.actor.createEmbeddedDocuments("Item", [data]);
       return true;
     }
 
@@ -2166,8 +2148,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
  */
 export class NpcActorSheet extends TravellerActorSheet {
 
-  /** Its own page lands with the reference chapter. @inheritDoc */
-  static GUIDE_TOPIC = null;
+  /** @inheritDoc */
+  static GUIDE_TOPIC = "npc";
 
   /** @inheritDoc */
   static DEFAULT_OPTIONS = {
@@ -2185,7 +2167,8 @@ export class NpcActorSheet extends TravellerActorSheet {
     },
     panel: {
       template: `${PARTS_PATH}/npc/panel.html`,
-      templates: [`${PARTS_PATH}/parts/row-controls.html`, `${PARTS_PATH}/parts/species.html`,
+      templates: [`${PARTS_PATH}/parts/row-controls.html`, `${PARTS_PATH}/parts/armour-rows.html`,
+        `${PARTS_PATH}/parts/species.html`,
         "systems/mgt2/templates/items/blocks/traits.html"],
       scrollable: [""]
     }

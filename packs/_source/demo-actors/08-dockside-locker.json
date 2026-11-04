@@ -48,7 +48,7 @@
       "effects": []
     },
     {
-      "_id": "stashAmmoMagnum",
+      "_id": "stashAmmoMagnum1",
       "name": "Demo — Magnum Rounds",
       "type": "ammunition",
       "img": "icons/svg/explosion.svg",

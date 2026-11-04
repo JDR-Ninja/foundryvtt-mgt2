@@ -74,7 +74,7 @@
 	</div>
 
 	{{! The mount belongs to the vehicle, not the weapon: it supplies the fire arc and the fire
-	    control, and one mount can hold several weapons (VH p.37-38). The weapons themselves are
+	    control, and one mount can hold several weapons (VH2026 p.101). The weapons themselves are
 	    ordinary embedded Items and roll through the same path a Traveller's do. }}
 	<div class="block">
 		<div class="sect">
@@ -203,6 +203,14 @@
 				<input class="f num" type="number" min="0" max="6" step="1"
 					name="system.hullSeverity" value="{{system.hullSeverity}}" data-dtype="Number" />
 			</label>
+			{{#if vehicle.criticals.runs2026}}
+			{{! VH2026 p.11: Structure comes back by a repair of its own, so the eraser leaves this. }}
+			<label>
+				<span class="lbl">{{localize 'MGT2.Criticals.StructureHalved'}}</span>
+				<input class="f num" type="number" min="0" step="1"
+					name="system.structureHalvings" value="{{system.structureHalvings}}" data-dtype="Number" />
+			</label>
+			{{/if}}
 		</div>
 		<dl class="statline">
 			{{#unless vehicle.criticals.runs2026}}

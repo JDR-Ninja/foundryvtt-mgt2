@@ -1,11 +1,20 @@
 import { checkOf } from "./chat-message.js";
 import { Checks } from "./checks.js";
+import { MGT2Combatant } from "./combatant.js";
 import { MGT2 } from "./config.js";
+import { GuideButtonMixin } from "./guide.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
 
 const { DialogV2 } = foundry.applications.api;
 const { FormDataExtended } = foundry.applications.ux;
+
+/** `DialogV2.wait` builds `new this`, so the prompt's window can carry the `?`. */
+class RollPromptDialog extends GuideButtonMixin(DialogV2) {
+
+    /** @inheritDoc */
+    static GUIDE_TOPIC = "roll";
+}
 
 /** The average of 2D, and the roll the Effect ladder reads. */
 const AVERAGE_2D = 7;
@@ -130,7 +139,7 @@ export class RollPromptHelper {
             return data;
         };
 
-        const result = await DialogV2.wait({
+        const result = await RollPromptDialog.wait({
             // What is being rolled, not what kind of thing it is: the gutter form has no block
             // caption to carry the weapon's name, and "Weapon" never identified which one anyway.
             window: {
@@ -287,11 +296,18 @@ export class RollPromptHelper {
      * counting it twice, once as the reduction and once as a bonus. Matched through
      * `MGT2.Untrained.skills`, the same list `untrained()` reads, so the two can never disagree.
      */
+    /** A bound skill is the owner's Item id, or on a packed power the name it prints. @returns {string|null} */
+    static boundSkill(skills, bound) {
+        return (skills.find(row => row._id === bound)
+            ?? skills.find(row => MGT2Helper.matchesSkill(row.term, bound)))?._id ?? null;
+    }
+
     static actorSkills(actor) {
         const reducers = MGT2.Untrained.skills;
         const skills = actor.items
             .filter(item => (item.type === "talent") && (item.system.subType === "skill")
-                && !reducers.some(name => MGT2Helper.matchesSkill(item.name, name)))
+                && !reducers.some(name => MGT2Helper.matchesSkill(item.name, name))
+                && !MGT2Helper.psiBarred(actor, item))
             // The prompt prints every row's DM in its own cell, so the option names the skill only.
             .map(item => ({ _id: item.id, name: item.getRollDisplay(false), term: item.name,
                 dm: item.system.level }))
@@ -417,13 +433,31 @@ export class RollPromptHelper {
         parts.push(...reduced.parts);
         modifiers.push(...reduced.terms);
 
-        if ( Object.hasOwn(data, "customDM") && (data.customDM !== "") ) {
-            const typed = String(data.customDM).trim();
-            if ( /^[0-9]/.test(typed) ) parts.push("+");
-            parts.push(typed);
+        const typed = String(data.customDM ?? "").trim();
+        if ( typed !== "" ) {
+            const signed = /^[-+*/%]/.test(typed) ? typed : `+${typed}`;
+            parts.push(signed);
+            // A formula has no number to print, so the card's term carries the text as typed.
+            modifiers.push({ name: game.i18n.localize("MGT2.RollPrompt.CustomDM"),
+                dm: /^[+-]?\d+$/.test(signed) ? Number(signed) : signed });
         }
 
         return { formula: parts.join(""), modifiers, chainSources, stance };
+    }
+
+    /** Everything standing against `modifiers.check`, each entry still named, for the actor whose skill rolls. */
+    static checkModifiers(actor, token = null) {
+        const check = actor.system.modifiers?.check;
+        if ( !check ) return [];
+        const sources = [...(check.sources ?? [])];
+        const standing = check.custom + check.effect;
+        if ( standing !== 0 ) sources.push({ key: "actor", label: "MGT2.RollPrompt.ActorDM", dm: standing });
+        // Core p.76: every Reaction taken costs DM-1 on the next set of actions.
+        const reactions = MGT2Combatant.reactionDM(actor, token);
+        if ( reactions !== 0 ) {
+            sources.push({ key: "reactions", label: "MGT2.RollPrompt.ReactionDM", dm: reactions });
+        }
+        return sources;
     }
 
     /** Checks this one can be measured against: chained from (Core p.63) or opposed (Core p.62). */

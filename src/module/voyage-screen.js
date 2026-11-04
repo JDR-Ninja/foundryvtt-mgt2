@@ -5,6 +5,7 @@ import { Rules } from "./rules.js";
 import { distance } from "./space.js";
 import { checkOf } from "./chat-message.js";
 import { SpacecraftActorSheet } from "./actors/spacecraft-sheet.js";
+import { GuideButtonMixin } from "./guide.js";
 import { MGT2Screen } from "./screens.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -24,14 +25,17 @@ const JUMP_STEPS = Object.freeze({
     plot: Object.freeze({ kind: "skill", skill: "astrogation", characteristic: "education",
         difficulty: "Easy", label: "MGT2.Voyage.Plot", role: "astrogator" }),
     jump: Object.freeze({ kind: "skill", skill: "engineer", characteristic: "education",
-        difficulty: "Easy", label: "MGT2.Voyage.Jump", role: "engineer" })
+        difficulty: "Easy", label: "MGT2.Voyage.Jump", role: "engineer", jumpDrive: true })
 });
 
 /**
  * The voyage screen: one leg, the stop it lands on, and the two checks that fly it.
  * @extends {ApplicationV2}
  */
-export class VoyageScreen extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
+export class VoyageScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplicationMixin(ApplicationV2))) {
+
+    /** @inheritDoc */
+    static GUIDE_TOPIC = "voyage";
 
     constructor(options) {
         super(options);
@@ -258,6 +262,8 @@ export class VoyageScreen extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         const chip = (key, data) => game.i18n.format(`MGT2.Voyage.${key}`, data);
         const jump = [];
         if ( !system.fuel.refined ) jump.push({ label: chip("UnrefinedChip"), negative: true });
+        const { jumpDM } = system.criticalEffects;
+        if ( jumpDM ) jump.push({ label: chip("CriticalChip", { dm: MGT2Helper.signed(jumpDM) }), negative: true });
         // Core p.157 prints two more and neither is applied: the 100-diameter limit is a position
         // nothing on this screen tracks, and the DM per month behind maintenance is the referee's.
         jump.push({ label: chip("MaintenanceChip"), inert: true },
@@ -265,7 +271,7 @@ export class VoyageScreen extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         return {
             plot: { dms: [{ negative: true,
                 label: chip("ParsecChip", { dm: MGT2Helper.signed(-parsecs), parsecs }) }] },
-            jump: { dms: jump },
+            jump: { dms: jump, out: system.jumpDriveOut },
             ruleset: system.voyage.ruleset
         };
     }
@@ -600,6 +606,9 @@ export class VoyageScreen extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         const parsecs = Math.max(1, ship.system.voyage.next.parsecs);
         const burn = ship.system.jumpFuel(parsecs);
 
+        const out = ship.system.jumpDriveOut;
+        if ( (step === "jump") && out ) return ui.notifications.warn(out);
+
         // Core p.157 leaves no room here: without the fuel the drive does not fire.
         if ( (step === "jump") && (ship.system.ops.fuel < burn) ) {
             return ui.notifications.warn(game.i18n.format("MGT2.Voyage.NoFuel",
@@ -680,8 +689,7 @@ export class VoyageScreen extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         }
         // Core p.157. The other two printed modifiers are the referee's: the 100-diameter limit is
         // a position nothing here tracks, and the DM per month behind maintenance is not derived.
-        return system.fuel.refined ? []
-            : [{ key: "unrefined", label: "MGT2.Voyage.UnrefinedDM", dm: -2 }];
+        return system.fuel.refined ? [] : [{ key: "unrefined", label: "MGT2.Voyage.UnrefinedDM", dm: -2 }];
     }
 
     /** Whoever is at the station the step belongs to. */

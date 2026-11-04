@@ -13,7 +13,7 @@
           "onHand is the difference between a bag being carried and a bag being in the hold — it is what decides whether the contents count against encumbrance.",
           "locked and lockedDescription hide the contents from a player without hiding the bag."
         ],
-        "trap": "weightless on a container removes the BAG from the total and never its contents. A grav harness that carries its own load is weightless with contents that still weigh; a bag of holding is not a thing this schema can express."
+        "trap": "weightless on a container takes the bag out of the total with everything in it: getTotalWeight returns 0 before it reaches the contents. A bag of holding is exactly this flag, and a bag that weighs nothing around contents that still weigh cannot be expressed, because a container has no mass of its own to remove. The weight on the bag's own line reads the contents and ignores the flag, so that line can show a load the encumbrance total does not count."
       }
     }
   },

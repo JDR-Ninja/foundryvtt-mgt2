@@ -1,5 +1,5 @@
 import { MGT2 } from "./config.js";
-import { traitLabel, traitNumber, WEAPON_ROLL } from "./traits.js";
+import { hazardTraits, traitLabel, traitNumber, WEAPON_ROLL } from "./traits.js";
 
 // What the block says about a row.
 const TRAIT_STATUS = {
@@ -242,6 +242,24 @@ export class MGT2Helper {
         const pattern = new RegExp(`^\\s*${key}\\b`, "i");
         return (traits ?? []).some(trait =>
             (trait.key === key) || ((trait.key === "custom") && pattern.test(trait.note ?? "")));
+    }
+
+    /** What a weapon's traits tell the apply path, for every site that posts a damage payload. */
+    static damageTraits(traits) {
+        return {
+            ap: this.traitScore(traits, "ap"),
+            loPen: this.traitScore(traits, "lo-pen"),
+            stun: this.hasTrait(traits, "stun"),
+            // Core folio 79: a Radiation weapon doses whoever it hits, which only the apply path knows.
+            radiation: this.hasTrait(traits, "radiation"),
+            // RH folio 106 and HG folio 30: an ion hit meets no armour, on a robot or on a ship.
+            ion: this.hasTrait(traits, "ion"),
+            // Core p.78: most Destructive weapons say so in the score itself, which the card reads.
+            destructive: this.hasTrait(traits, "destructive"),
+            blast: this.hasTrait(traits, "blast"),
+            // Poison and Diseased become an Item the DEFENDER owns, built on the apply path.
+            hazards: hazardTraits(traits)
+        };
     }
 
     /** The key a skill modifier is filed under, derived from the free-text Item name. */
@@ -596,6 +614,27 @@ export class MGT2Helper {
             item = await pack?.getDocument(item._id);
         }
         return foundry.utils.deepClone(item);
+    }
+
+    static skillSpeciality(item) {
+        const named = /\(([^)]+)\)$/.exec(String(item?.name ?? "").trim())?.[1].trim() ?? "";
+        return item?.system?.skill?.speciality || ((named.toLowerCase() === "any") ? "" : named);
+    }
+
+    static isPsionicTalent(name) {
+        return MGT2.PsionicTraining.talents.some(talent => talent.skills.some(skill => this.matchesSkill(name, skill)));
+    }
+
+    /** ACS1 folio 275: PSI aged to 0 ends every psionic ability, held as a power or as a skill. */
+    static psiBarred(actor, item) {
+        return !!item && (actor?.system.states?.psiLost === true)
+            && ((item.system?.subType === "psionic") || this.isPsionicTalent(item.name));
+    }
+
+    static tableWord(table) {
+        const stem = table.replace(/^assignment\.\d+$/, "assignment");
+        const key = MGT2.ProvenanceTables[stem] ?? MGT2.CreationSteps[stem];
+        return (typeof key === "string") ? game.i18n.localize(key) : table;
     }
 
     /**

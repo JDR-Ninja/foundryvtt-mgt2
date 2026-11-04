@@ -1,0 +1,25 @@
+{
+  "_id": "demolockerbadid1",
+  "name": "Demo — Locker With A Short Id",
+  "type": "stash",
+  "img": "icons/svg/chest.svg",
+  "prototypeToken": { "actorLink": true },
+  "flags": { "mgt2": { "demo": { "order": 90, "cliff": null, "teaches": ["An embedded document keeps a 16-character id."], "trap": "A short id is stored under its own key, and the server adds a second copy." } } },
+  "system": {},
+  "items": [{
+    "_id": "stashShortIdItem",
+    "name": "Demo — Short Id Dose",
+    "type": "equipment",
+    "img": "icons/svg/item-bag.svg",
+    "flags": { "mgt2": { "demo": { "copyOf": "Demo — Short Id Dose", "trap": "Its effect's id is one short." } } },
+    "system": { "tl": 8, "subType": "equipment" },
+    "effects": [{ "_id": "shortEffectId15", "name": "Demo — Short Effect" }]
+  }, {
+    "_id": "shortItemId0015",
+    "name": "Demo — Short Id Rounds",
+    "type": "equipment",
+    "img": "icons/svg/item-bag.svg",
+    "flags": { "mgt2": { "demo": { "copyOf": "Demo — Short Id Rounds", "trap": "One character short." } } },
+    "system": { "tl": 8, "subType": "equipment" }
+  }]
+}

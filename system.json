@@ -1,13 +1,13 @@
 {
 	"id": "mgt2",
-	"version": "0.2.8",
+	"version": "0.2.9",
 	"title": "MGT2 - Mongoose Traveller (Unofficial)",
 	"description": "An unofficial implementation of Mongoose Publishing Traveller (VO/VF). Traveller is the property of Mongoose Publishing, and can be purchased at https://www.mongoosepublishing.com",
 	"background": "systems/mgt2/assets/screens/rosette-nebula-ngc2239-hoo.webp",
 	"url": "https://github.com/JDR-Ninja/foundryvtt-mgt2",
 	"manifest": "https://github.com/JDR-Ninja/foundryvtt-mgt2/releases/latest/download/system.json",
 	"readme": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/README.md",
-	"download": "https://github.com/JDR-Ninja/foundryvtt-mgt2/releases/download/v0.2.8/mgt2.zip",
+	"download": "https://github.com/JDR-Ninja/foundryvtt-mgt2/releases/download/v0.2.9/mgt2.zip",
 	"changelog": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/CHANGELOG.md",
 	"license": "https://raw.githubusercontent.com/JDR-Ninja/foundryvtt-mgt2/main/LICENSE",
 	"bugs": "https://github.com/JDR-Ninja/foundryvtt-mgt2/issues",
@@ -76,6 +76,22 @@
 			}
 		},
 		{
+			"name": "guide",
+			"label": "MGT2.Compendium.Guide",
+			"path": "packs/guide",
+			"type": "JournalEntry",
+			"system": "mgt2",
+			"ownership": {
+				"PLAYER": "OBSERVER",
+				"ASSISTANT": "OWNER"
+			},
+			"flags": {
+				"mgt2": {
+					"guide": true
+				}
+			}
+		},
+		{
 			"name": "demo-actors",
 			"label": "MGT2.Compendium.DemoActors",
 			"path": "packs/demo-actors",
@@ -96,6 +112,17 @@
 				"PLAYER": "OBSERVER",
 				"ASSISTANT": "OWNER"
 			}
+		},
+		{
+			"name": "demo-scenes",
+			"label": "MGT2.Compendium.DemoScenes",
+			"path": "packs/demo-scenes",
+			"type": "Scene",
+			"system": "mgt2",
+			"ownership": {
+				"PLAYER": "OBSERVER",
+				"ASSISTANT": "OWNER"
+			}
 		}
 	],
 	"packFolders": [
@@ -104,8 +131,10 @@
 			"sorting": "m",
 			"packs": [
 				"docs",
+				"guide",
 				"demo-actors",
-				"demo-items"
+				"demo-items",
+				"demo-scenes"
 			]
 		}
 	],

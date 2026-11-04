@@ -107,7 +107,7 @@
 	{{! Advisory, and it stays advisory: the Core Rulebook's own Patrol Corvette does not satisfy
 	    its own table, and under-crewing is a legitimate campaign state. }}
 	<details class="fold" data-fold="crewreq"{{#if ship.crew.short}} open{{/if}}>
-		<summary class="{{#if ship.crew.short}}bad{{/if}}">{{localize 'MGT2.Actor.spacecraft.CrewRequired'}} <b>{{ship.crew.totals.stations}} / {{ship.crew.totals.required}}</b></summary>
+		<summary class="{{#if ship.crew.short}}bad{{/if}}">{{localize 'MGT2.Actor.spacecraft.CrewRequired'}} <b>{{ship.crew.totals.aboard}} / {{ship.crew.totals.required}}</b></summary>
 		<section class="budget check" data-over="soft">
 			<header>
 				<span class="lbl">{{localize 'MGT2.Actor.spacecraft.CrewRequired'}}</span>

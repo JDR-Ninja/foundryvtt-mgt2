@@ -4,7 +4,6 @@ import { Checks, renderRollCard } from "./checks.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { RollPromptHelper } from "./roll-prompt.js";
-import { TravellerActorSheet } from "./actors/character-sheet.js";
 
 const fields = foundry.data.fields;
 
@@ -461,7 +460,7 @@ function lineChit(request, read, actor, chain) {
     if ( timeframe ) rows.push([game.i18n.localize(MGT2.Timeframes[request.timeframe]), timeframe]);
     // Core p.63-64: the resolver's chit grows as each contributor lands.
     if ( read.resolver && chain ) rows.push([game.i18n.localize("MGT2.RollPrompt.Chain"), chain]);
-    const standing = actor?.system?.characteristics ? TravellerActorSheet.checkModifiers(actor) : [];
+    const standing = actor?.system?.characteristics ? RollPromptHelper.checkModifiers(actor) : [];
     for ( const source of standing ) {
         const scoped = source.characteristics ? source.characteristics.includes(key)
             : (source.skills ? source.skills.includes(skill) : true);

@@ -1,0 +1,3347 @@
+{
+  "name": "Demo — Mirel Aston",
+  "type": "character",
+  "system": {
+    "characteristics": {
+      "strength": {
+        "base": 6,
+        "damage": 0,
+        "show": true
+      },
+      "dexterity": {
+        "base": 8,
+        "damage": 0,
+        "show": true
+      },
+      "endurance": {
+        "base": 7,
+        "damage": 0,
+        "show": true
+      },
+      "intellect": {
+        "base": 9,
+        "damage": 0,
+        "show": true
+      },
+      "education": {
+        "base": 8,
+        "damage": 0,
+        "show": true
+      },
+      "social": {
+        "base": 6,
+        "damage": 0,
+        "show": true
+      },
+      "morale": {
+        "base": 0,
+        "damage": 0,
+        "show": false
+      },
+      "luck": {
+        "base": 0,
+        "damage": 0,
+        "show": false
+      },
+      "sanity": {
+        "base": 0,
+        "damage": 0,
+        "show": false
+      },
+      "charm": {
+        "base": 0,
+        "damage": 0,
+        "show": false
+      },
+      "psionic": {
+        "base": 0,
+        "damage": 0,
+        "show": true
+      },
+      "other": {
+        "base": 0,
+        "damage": 0,
+        "show": false
+      },
+      "reputation": {
+        "base": 0,
+        "damage": 0,
+        "show": false
+      }
+    },
+    "life": {
+      "value": 0,
+      "max": 0,
+      "damage": 0
+    },
+    "stun": 0,
+    "notes": "<p>Creation is not over: open the creation screen and roll this term's event.</p>",
+    "traits": [],
+    "modifiers": {
+      "check": {
+        "custom": 0,
+        "auto": 0,
+        "effect": 0,
+        "dm": 0
+      },
+      "initiative": {
+        "custom": 0,
+        "auto": 0,
+        "effect": 0,
+        "dm": 0
+      },
+      "skills": {}
+    },
+    "config": {
+      "damageOrder": [
+        "endurance",
+        "strength",
+        "dexterity"
+      ],
+      "initiative": {
+        "characteristic": "dexterity",
+        "flat": 0
+      },
+      "psionic": true
+    },
+    "personal": {
+      "title": "Patrol Officer",
+      "species": "",
+      "age": "",
+      "gender": "non-binary",
+      "sex": "",
+      "pronouns": "they/them",
+      "homeworld": "Demo — Bellweather"
+    },
+    "biography": "<p>Signed on with the Bellweather harbour patrol at eighteen and made Patrol Officer in the first year, then a whole term without another stripe. The Harbourmaster took a liking to Mirel all the same, and that word has not been used yet.</p>",
+    "health": {
+      "radiations": 0
+    },
+    "training": {
+      "programmes": {}
+    },
+    "finance": {
+      "pension": 0,
+      "credits": 0,
+      "debt": 0,
+      "livingCost": 0,
+      "monthlyShipPayments": 0,
+      "shipShares": 0,
+      "shipSharesCommitted": 0,
+      "notes": ""
+    },
+    "characteristicLog": [
+      {
+        "source": "event",
+        "term": 1,
+        "age": 18,
+        "roll": null,
+        "changes": {
+          "education": 1
+        },
+        "cost": 0,
+        "note": "advancedEducation"
+      }
+    ],
+    "entitlements": [],
+    "drugCounters": [],
+    "states": {
+      "fatigue": false,
+      "nausea": false,
+      "starving": false,
+      "unconscious": false,
+      "knockedOut": false,
+      "surgeryRequired": false,
+      "firstAidUsed": false,
+      "reviveFailures": 0,
+      "consciousWound": -1
+    }
+  },
+  "_id": "demoCharMirelAst",
+  "img": "icons/svg/mystery-man.svg",
+  "prototypeToken": {
+    "name": "Demo — Mirel Aston",
+    "displayName": 0,
+    "actorLink": true,
+    "width": 1,
+    "height": 1,
+    "depth": 1,
+    "texture": {
+      "src": "icons/svg/mystery-man.svg",
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "fit": "contain",
+      "scaleX": 1,
+      "scaleY": 1,
+      "tint": "#ffffff",
+      "alphaThreshold": 0.75
+    },
+    "lockRotation": false,
+    "rotation": 0,
+    "alpha": 1,
+    "disposition": -1,
+    "displayBars": 0,
+    "bar1": {
+      "attribute": "life"
+    },
+    "bar2": {
+      "attribute": null
+    },
+    "light": {
+      "negative": false,
+      "priority": 0,
+      "alpha": 0.5,
+      "angle": 360,
+      "bright": 0,
+      "color": null,
+      "coloration": 1,
+      "dim": 0,
+      "attenuation": 0.5,
+      "luminosity": 0.5,
+      "saturation": 0,
+      "contrast": 0,
+      "shadows": 0,
+      "animation": {
+        "type": null,
+        "speed": 5,
+        "intensity": 5,
+        "reverse": false
+      },
+      "darkness": {
+        "min": 0,
+        "max": 1
+      }
+    },
+    "sight": {
+      "enabled": false,
+      "range": 0,
+      "angle": 360,
+      "visionMode": "basic",
+      "color": null,
+      "attenuation": 0.1,
+      "brightness": 0,
+      "saturation": 0,
+      "contrast": 0
+    },
+    "detectionModes": {},
+    "occludable": {
+      "radius": 0
+    },
+    "ring": {
+      "enabled": false,
+      "colors": {
+        "ring": null,
+        "background": null
+      },
+      "effects": 1,
+      "subject": {
+        "scale": 1,
+        "texture": null
+      }
+    },
+    "turnMarker": {
+      "mode": 1,
+      "animation": null,
+      "src": null,
+      "disposition": false
+    },
+    "movementAction": null,
+    "flags": {},
+    "randomImg": false,
+    "appendNumber": false,
+    "prependAdjective": false
+  },
+  "items": [
+    {
+      "name": "Seafarer",
+      "type": "talent",
+      "system": {
+        "subType": "skill",
+        "level": 1,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "provenance": {
+          "term": 0,
+          "table": "background",
+          "career": "",
+          "note": ""
+        },
+        "description": "",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        }
+      },
+      "_id": "sOBYYMUykMlU4iWu",
+      "img": "icons/svg/item-bag.svg",
+      "effects": [],
+      "sort": 0,
+      "flags": {}
+    },
+    {
+      "name": "Recon",
+      "type": "talent",
+      "system": {
+        "subType": "skill",
+        "level": 0,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "provenance": {
+          "term": 0,
+          "table": "background",
+          "career": "",
+          "note": ""
+        },
+        "description": "",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        }
+      },
+      "_id": "hqGa7VkQSpfn3zqK",
+      "img": "icons/svg/item-bag.svg",
+      "effects": [],
+      "sort": 0,
+      "flags": {}
+    },
+    {
+      "name": "Medic",
+      "type": "talent",
+      "system": {
+        "subType": "skill",
+        "level": 0,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "provenance": {
+          "term": 0,
+          "table": "background",
+          "career": "",
+          "note": ""
+        },
+        "description": "",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        }
+      },
+      "_id": "ZLaO4PZcDqg1ENXr",
+      "img": "icons/svg/item-bag.svg",
+      "effects": [],
+      "sort": 0,
+      "flags": {}
+    },
+    {
+      "name": "Demo — Harbour Patrol",
+      "type": "career",
+      "img": "icons/svg/anchor.svg",
+      "flags": {
+        "mgt2": {
+          "demo": {
+            "order": 22,
+            "cliff": "chargen has nothing to run against without one",
+            "teaches": [
+              "One career Item carries the whole of a career: qualification, one rank ladder, one assignment with its survival and advancement checks, three skill tables, a benefit table, an event table and a mishap table.",
+              "Every row is a {text, mode, grants[]} triple — text is what the player reads, grants[] is what the screen applies, and mode: oneOf is what makes the player choose.",
+              "A tray entry on an event row is put aside for later: row 9's DM waits for the next qualification roll and row 11's automatic success for the next promotion roll, where row 12 awards the promotion outright.",
+              "An event row can throw its own check and make its effects wait on it: row 3's check is optional and its branches hold a DM or cost a Benefit roll, and row 8's is made on the better of two skills and raises the one used.",
+              "Row 6 stakes a Benefit roll on its check, and grantFirst gives the row's skill before the throw, so the throw is made with it.",
+              "medicalBillsRow names the employer's column on the Medical Bills table, which pays part of an injury's care.",
+              "standingModifiers[] is the career's own permanent DM, gated on a characteristic and scoped to one step."
+            ],
+            "trap": "The eleven fields below the tables — assignment, terms, rank, ladder, enlistedRank, gained, events, entryMode, exitMode, termLog, track — are the record half of this type, and they stay at their defaults on a template. The same Item type is both the career a Traveller may enter and the career a Traveller served; termLog is what tells the two apart."
+          }
+        }
+      },
+      "system": {
+        "description": "Bellweather's harbour patrol: tide watch, boat inspection, and whatever comes out of the marsh. Invented for this pack, and no book's career.",
+        "subType": "career",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "kind": "career",
+        "difficulty": 6,
+        "qualification": {
+          "entry": "target",
+          "characteristics": [
+            "endurance"
+          ],
+          "autoIf": {
+            "characteristic": "",
+            "min": null,
+            "max": null
+          },
+          "perPreviousCareer": -1,
+          "conditionalDMs": [
+            {
+              "characteristic": "",
+              "min": null,
+              "afterCareers": [
+                "Demo — Harbour Patrol"
+              ],
+              "dm": 2
+            }
+          ],
+          "requiresPermission": false
+        },
+        "ageDM": {
+          "from": 32,
+          "dm": -1
+        },
+        "commission": false,
+        "commissionCheck": {
+          "characteristic": "",
+          "target": null
+        },
+        "pensionable": true,
+        "assignmentChange": "",
+        "basicFrom": "service",
+        "alwaysAvailable": false,
+        "neverEjects": false,
+        "blocksAnagathics": false,
+        "eventRow7": "lifeEvent",
+        "exitRule": {
+          "track": "",
+          "test": ""
+        },
+        "medicalBillsRow": "civilian",
+        "restrictedTo": {
+          "species": "",
+          "sex": ""
+        },
+        "rankLadders": [
+          {
+            "id": "patrol",
+            "name": "Patrol",
+            "officer": false,
+            "rows": [
+              {
+                "rank": 0,
+                "title": "Recruit",
+                "bonus": {
+                  "text": "Seafarer 1",
+                  "mode": "all",
+                  "grants": [
+                    {
+                      "kind": "skill",
+                      "skill": "Seafarer",
+                      "mode": "atLeast",
+                      "value": 1,
+                      "speciality": "",
+                      "specialities": [],
+                      "family": false,
+                      "characteristic": "",
+                      "formula": "",
+                      "floor": null,
+                      "ref": "",
+                      "relation": "",
+                      "pick": "",
+                      "except": []
+                    }
+                  ]
+                }
+              },
+              {
+                "rank": 1,
+                "title": "Patrol Officer",
+                "bonus": {
+                  "text": "",
+                  "mode": "all",
+                  "grants": []
+                }
+              },
+              {
+                "rank": 2,
+                "title": "Senior Officer",
+                "bonus": {
+                  "text": "Investigate 1",
+                  "mode": "all",
+                  "grants": [
+                    {
+                      "kind": "skill",
+                      "skill": "Investigate",
+                      "mode": "atLeast",
+                      "value": 1,
+                      "speciality": "",
+                      "specialities": [],
+                      "family": false,
+                      "characteristic": "",
+                      "formula": "",
+                      "floor": null,
+                      "ref": "",
+                      "relation": "",
+                      "pick": "",
+                      "except": []
+                    }
+                  ]
+                }
+              },
+              {
+                "rank": 3,
+                "title": "Watch Leader",
+                "bonus": {
+                  "text": "",
+                  "mode": "all",
+                  "grants": []
+                }
+              },
+              {
+                "rank": 4,
+                "title": "Deputy Harbourmaster",
+                "bonus": {
+                  "text": "SOC +1",
+                  "mode": "all",
+                  "grants": [
+                    {
+                      "kind": "characteristic",
+                      "characteristic": "social",
+                      "mode": "add",
+                      "value": 1,
+                      "skill": "",
+                      "speciality": "",
+                      "specialities": [],
+                      "family": false,
+                      "formula": "",
+                      "floor": null,
+                      "ref": "",
+                      "relation": "",
+                      "pick": "",
+                      "except": []
+                    }
+                  ]
+                }
+              },
+              {
+                "rank": 5,
+                "title": "Harbourmaster",
+                "bonus": {
+                  "text": "A Contact on every quay",
+                  "mode": "all",
+                  "grants": [
+                    {
+                      "kind": "contact",
+                      "relation": "Contact",
+                      "value": 1,
+                      "skill": "",
+                      "speciality": "",
+                      "specialities": [],
+                      "family": false,
+                      "characteristic": "",
+                      "formula": "",
+                      "mode": "raise",
+                      "floor": null,
+                      "ref": "",
+                      "pick": "",
+                      "except": []
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "assignments": [
+          {
+            "name": "Harbour Watch",
+            "ladder": "patrol",
+            "officerLadder": "",
+            "survival": {
+              "characteristic": "endurance",
+              "target": 6
+            },
+            "advancement": {
+              "characteristic": "intellect",
+              "target": 7
+            },
+            "skills": [
+              {
+                "text": "Seafarer",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Seafarer",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Gun Combat",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Gun Combat",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Athletics",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Athletics",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Investigate",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Investigate",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Vacc Suit",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Vacc Suit",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Mechanic or Persuade",
+                "mode": "oneOf",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Mechanic",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  },
+                  {
+                    "kind": "skill",
+                    "skill": "Persuade",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "tables": {
+          "personalDevelopment": {
+            "present": true,
+            "gate": {
+              "characteristic": "",
+              "min": null
+            },
+            "requiresCommission": false,
+            "rows": [
+              {
+                "text": "STR +1",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "characteristic",
+                    "characteristic": "strength",
+                    "mode": "add",
+                    "value": 1,
+                    "skill": "",
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "END +1",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "characteristic",
+                    "characteristic": "endurance",
+                    "mode": "add",
+                    "value": 1,
+                    "skill": "",
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "INT +1",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "characteristic",
+                    "characteristic": "intellect",
+                    "mode": "add",
+                    "value": 1,
+                    "skill": "",
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Athletics",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Athletics",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Persuade",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Persuade",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "SOC +1",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "characteristic",
+                    "characteristic": "social",
+                    "mode": "add",
+                    "value": 1,
+                    "skill": "",
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              }
+            ]
+          },
+          "service": {
+            "present": true,
+            "gate": {
+              "characteristic": "",
+              "min": null
+            },
+            "requiresCommission": false,
+            "rows": [
+              {
+                "text": "Seafarer",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Seafarer",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Vacc Suit",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Vacc Suit",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Mechanic",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Mechanic",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Investigate",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Investigate",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Gun Combat",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Gun Combat",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Athletics",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Athletics",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              }
+            ]
+          },
+          "advancedEducation": {
+            "present": true,
+            "gate": {
+              "characteristic": "education",
+              "min": 8
+            },
+            "requiresCommission": false,
+            "rows": [
+              {
+                "text": "Investigate",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Investigate",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Persuade",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Persuade",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Mechanic",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Mechanic",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "EDU +1",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "characteristic",
+                    "characteristic": "education",
+                    "mode": "add",
+                    "value": 1,
+                    "skill": "",
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Seafarer",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Seafarer",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              },
+              {
+                "text": "Vacc Suit",
+                "mode": "all",
+                "grants": [
+                  {
+                    "kind": "skill",
+                    "skill": "Vacc Suit",
+                    "mode": "raise",
+                    "value": 1,
+                    "speciality": "",
+                    "specialities": [],
+                    "family": false,
+                    "characteristic": "",
+                    "formula": "",
+                    "floor": null,
+                    "ref": "",
+                    "relation": "",
+                    "pick": "",
+                    "except": []
+                  }
+                ]
+              }
+            ]
+          },
+          "officer": {
+            "present": false,
+            "gate": {
+              "characteristic": "",
+              "min": null
+            },
+            "requiresCommission": true,
+            "rows": []
+          }
+        },
+        "benefits": {
+          "cash": [
+            500,
+            1500,
+            3000,
+            6000,
+            9000,
+            15000,
+            30000
+          ],
+          "other": [
+            {
+              "text": "A Contact on the quay",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "contact",
+                  "relation": "Contact",
+                  "value": 1,
+                  "skill": "",
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "mode": "raise",
+                  "floor": null,
+                  "ref": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            {
+              "text": "Demo — Deck Vest",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "benefit",
+                  "ref": "Demo — Deck Vest",
+                  "value": 1,
+                  "skill": "",
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "mode": "raise",
+                  "floor": null,
+                  "relation": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            {
+              "text": "END +1",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "characteristic",
+                  "characteristic": "endurance",
+                  "mode": "add",
+                  "value": 1,
+                  "skill": "",
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "formula": "",
+                  "floor": null,
+                  "ref": "",
+                  "relation": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            {
+              "text": "Demo — Sidearm",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "benefit",
+                  "ref": "Demo — Sidearm",
+                  "value": 1,
+                  "skill": "",
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "mode": "raise",
+                  "floor": null,
+                  "relation": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            {
+              "text": "One Ship Share",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "shipShare",
+                  "value": 1,
+                  "skill": "",
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "mode": "raise",
+                  "floor": null,
+                  "ref": "",
+                  "relation": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            {
+              "text": "SOC +1",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "characteristic",
+                  "characteristic": "social",
+                  "mode": "add",
+                  "value": 1,
+                  "skill": "",
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "formula": "",
+                  "floor": null,
+                  "ref": "",
+                  "relation": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            {
+              "text": "Two Ship Shares",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "shipShare",
+                  "value": 2,
+                  "skill": "",
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "mode": "raise",
+                  "floor": null,
+                  "ref": "",
+                  "relation": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            }
+          ]
+        },
+        "eventTable": [
+          {
+            "roll": 2,
+            "text": "A hull comes apart in the channel. Roll on the Mishap table, but you are not ejected from this career.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "Mishap",
+            "check": {
+              "characteristic": "",
+              "skills": [],
+              "target": null,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": [],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 3,
+            "text": "A cargo you waved through was not what the manifest said. Gain a Rival on the quay. If you report it, make a Investigate check (8+): succeed, and DM+1 is held for your next Advancement roll; fail, and the report costs you one Benefit roll.",
+            "ejects": "stays",
+            "benefit": "lose",
+            "benefitCount": 1,
+            "benefitCondition": "checkFailed",
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skills": [
+                "Investigate"
+              ],
+              "target": 8,
+              "optional": true,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "A Rival",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "contact",
+                  "relation": "Rival",
+                  "value": 1,
+                  "skill": "",
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "mode": "raise",
+                  "floor": null,
+                  "ref": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            "tray": [
+              {
+                "kind": "dm",
+                "dm": 1,
+                "value": "",
+                "appliesTo": [
+                  "advancement"
+                ],
+                "scope": "thisCareer",
+                "career": "",
+                "duration": "oneShot",
+                "uses": 1,
+                "expiresWhen": "",
+                "condition": "checkPassed",
+                "note": "The report pays off: DM+1 held for one Advancement roll.",
+                "entryMode": "",
+                "assignment": ""
+              }
+            ],
+            "ejectsCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 4,
+            "text": "A winter of night watches. Gain one level of Vacc Suit or Athletics.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skills": [],
+              "target": null,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "Vacc Suit or Athletics",
+              "mode": "oneOf",
+              "grants": [
+                {
+                  "kind": "skill",
+                  "skill": "Vacc Suit",
+                  "mode": "raise",
+                  "value": 1,
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "floor": null,
+                  "ref": "",
+                  "relation": "",
+                  "pick": "",
+                  "except": []
+                },
+                {
+                  "kind": "skill",
+                  "skill": "Athletics",
+                  "mode": "raise",
+                  "value": 1,
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "floor": null,
+                  "ref": "",
+                  "relation": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            "tray": [],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 5,
+            "text": "You pull a crew off a sinking launch. Make a Seafarer check (8+); success gains a Contact and a commendation.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "endurance",
+              "skills": [
+                "Seafarer"
+              ],
+              "target": 8,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "A Contact",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "contact",
+                  "relation": "Contact",
+                  "value": 1,
+                  "skill": "",
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "mode": "raise",
+                  "floor": null,
+                  "ref": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            "tray": [
+              {
+                "kind": "dm",
+                "dm": 2,
+                "value": "",
+                "appliesTo": [
+                  "advancement"
+                ],
+                "scope": "thisCareer",
+                "career": "",
+                "duration": "oneShot",
+                "uses": 1,
+                "expiresWhen": "",
+                "condition": "checkPassed",
+                "note": "The commendation is a +2 held back for one Advancement roll.",
+                "entryMode": "",
+                "assignment": ""
+              }
+            ],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 6,
+            "text": "The harbour puts you through a course you did not ask for: gain one level of Mechanic. The instructors run a book on the final engine test; if you wish, stake one Benefit roll on a Mechanic check (8+): win, and gain one more; lose, and it is gone.",
+            "ejects": "stays",
+            "benefit": "wager",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skills": [
+                "Mechanic"
+              ],
+              "target": 8,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "Mechanic 1",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "skill",
+                  "skill": "Mechanic",
+                  "mode": "raise",
+                  "value": 1,
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "floor": null,
+                  "ref": "",
+                  "relation": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            "grantFirst": true,
+            "tray": [],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 7,
+            "text": "Life Event. Roll on the Life Events table.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "Life Event",
+            "check": {
+              "characteristic": "",
+              "skills": [],
+              "target": null,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": [],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 8,
+            "text": "You take an inspection nobody else would sign. Make a Investigate or Persuade check (8+): pass, and gain an extra Benefit roll. Either way, the skill you used gains a level.",
+            "ejects": "stays",
+            "benefit": "grant",
+            "benefitCount": 1,
+            "benefitCondition": "checkPassed",
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skills": [
+                "Investigate",
+                "Persuade"
+              ],
+              "target": 8,
+              "raisesSkill": true,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": [],
+            "ejectsCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 9,
+            "text": "A quiet word from the Harbourmaster. Gain an Ally, and a DM+1 held for your next Qualification roll.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skills": [],
+              "target": null,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "An Ally",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "contact",
+                  "relation": "Allie",
+                  "value": 1,
+                  "skill": "",
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "mode": "raise",
+                  "floor": null,
+                  "ref": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            "tray": [
+              {
+                "kind": "dm",
+                "dm": 1,
+                "value": "",
+                "appliesTo": [
+                  "qualification"
+                ],
+                "scope": "nextCareer",
+                "career": "",
+                "duration": "oneShot",
+                "uses": 1,
+                "expiresWhen": "",
+                "condition": "always",
+                "note": "A tray entry outlives the term it was won in: this one waits for the next Qualification roll.",
+                "entryMode": "",
+                "assignment": ""
+              }
+            ],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 10,
+            "text": "You are moved to the marsh station and given a boat of your own. Gain one level of Seafarer and SOC +1.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skills": [],
+              "target": null,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "Seafarer 1 and SOC +1",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "skill",
+                  "skill": "Seafarer",
+                  "mode": "raise",
+                  "value": 1,
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "floor": null,
+                  "ref": "",
+                  "relation": "",
+                  "pick": "",
+                  "except": []
+                },
+                {
+                  "kind": "characteristic",
+                  "characteristic": "social",
+                  "mode": "add",
+                  "value": 1,
+                  "skill": "",
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "formula": "",
+                  "floor": null,
+                  "ref": "",
+                  "relation": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            "tray": [],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 11,
+            "text": "A season with nothing to show for it, and a promotion board that noticed anyway: your next promotion roll passes without dice.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skills": [],
+              "target": null,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": [
+              {
+                "kind": "autoSuccess",
+                "dm": 0,
+                "value": "",
+                "appliesTo": [
+                  "advancement"
+                ],
+                "scope": "thisCareer",
+                "career": "",
+                "duration": "oneShot",
+                "uses": 1,
+                "expiresWhen": "",
+                "condition": "always",
+                "note": "The board's goodwill waits for one promotion roll, and passes it without dice.",
+                "entryMode": "",
+                "assignment": ""
+              }
+            ],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 12,
+            "text": "You bring in a smuggler half the sector wanted. Gain an automatic promotion.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skills": [],
+              "target": null,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [
+                "advanced"
+              ],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": [],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          }
+        ],
+        "mishapTable": [
+          {
+            "roll": 1,
+            "text": "A boat goes over on you. Roll on the Injury table and leave the patrol.",
+            "ejects": "ejects",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "Injury",
+            "check": {
+              "characteristic": "",
+              "skills": [],
+              "target": null,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": [],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 2,
+            "text": "You are blamed for a sinking that was nobody's fault. Gain an Enemy and leave the patrol.",
+            "ejects": "ejects",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skills": [],
+              "target": null,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "An Enemy",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "contact",
+                  "relation": "Enemy",
+                  "value": 1,
+                  "skill": "",
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "mode": "raise",
+                  "floor": null,
+                  "ref": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            "tray": [],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 3,
+            "text": "Dock fever, and a long winter in a bunk. Lose one level of Athletics and leave the patrol.",
+            "ejects": "ejects",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skills": [],
+              "target": null,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "Athletics falls by one level",
+              "mode": "all",
+              "grants": [
+                {
+                  "kind": "skill",
+                  "skill": "Athletics",
+                  "mode": "add",
+                  "value": -1,
+                  "speciality": "",
+                  "specialities": [],
+                  "family": false,
+                  "characteristic": "",
+                  "formula": "",
+                  "floor": null,
+                  "ref": "",
+                  "relation": "",
+                  "pick": "",
+                  "except": []
+                }
+              ]
+            },
+            "tray": [],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 4,
+            "text": "A bribe you did not take is reported as one you did. You keep your rank and lose the job.",
+            "ejects": "ejects",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "",
+              "skills": [],
+              "target": null,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": [],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 5,
+            "text": "The marsh station is closed and you with it. A Social check (8+) keeps you on the payroll.",
+            "ejects": "choice",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "",
+            "check": {
+              "characteristic": "social",
+              "skills": [],
+              "target": 8,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": [],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          },
+          {
+            "roll": 6,
+            "text": "You are injured pulling someone else out. Roll on the Injury table; you may stay on.",
+            "ejects": "stays",
+            "benefit": "none",
+            "benefitCount": 1,
+            "benefitFormula": "",
+            "career": "",
+            "careerMode": "offer",
+            "subTable": "Injury",
+            "check": {
+              "characteristic": "",
+              "skills": [],
+              "target": null,
+              "assignment": "",
+              "skillFrom": "",
+              "alternatives": [],
+              "optional": false,
+              "raisesSkill": false
+            },
+            "track": {
+              "key": "",
+              "formula": "",
+              "value": 0,
+              "reroll": false,
+              "condition": "always"
+            },
+            "awards": {
+              "outcomes": [],
+              "mode": "oneOf",
+              "optional": false,
+              "condition": "always"
+            },
+            "grant": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "tray": [],
+            "ejectsCondition": "always",
+            "benefitCondition": "always",
+            "careerCondition": "always",
+            "careerAssignment": "",
+            "borrow": {
+              "event": "always",
+              "skill": "",
+              "skillTable": "assignment",
+              "mishap": ""
+            },
+            "subTableCondition": "always",
+            "injury": {
+              "modes": [],
+              "who": "traveller"
+            },
+            "gate": {
+              "kind": "",
+              "characteristic": "",
+              "key": "",
+              "min": null,
+              "max": null
+            },
+            "grantCondition": "always",
+            "grantFirst": false,
+            "grant2": {
+              "text": "",
+              "mode": "all",
+              "grants": []
+            },
+            "grant2Condition": "always"
+          }
+        ],
+        "standingModifiers": [
+          {
+            "dm": 1,
+            "per": 0,
+            "skills": [],
+            "appliesTo": [
+              "benefit"
+            ],
+            "career": "",
+            "gate": {
+              "characteristic": "social",
+              "min": 9
+            },
+            "note": "A patroller known on the quay adds DM+1 to Benefit rolls from this career."
+          }
+        ],
+        "tracks": [],
+        "assignment": "Harbour Watch",
+        "terms": 2,
+        "rank": 1,
+        "ladder": "patrol",
+        "enlistedRank": 0,
+        "events": [
+          {
+            "age": 18,
+            "description": "A winter of night watches. Gain one level of Vacc Suit or Athletics. · Athletics 1"
+          },
+          {
+            "age": 22,
+            "description": "A quiet word from the Harbourmaster. Gain an Ally, and a DM+1 held for your next Qualification roll. · Ally ×1 · Pending: DM."
+          }
+        ],
+        "entryMode": "qualified",
+        "exitMode": "stillServing",
+        "termLog": [
+          {
+            "term": 1,
+            "years": null,
+            "ages": true,
+            "survived": true,
+            "ejected": false,
+            "closed": true,
+            "kind": "",
+            "outcomes": [
+              "basicTraining",
+              "advanced",
+              "skillRoll"
+            ],
+            "steps": [
+              "elect",
+              "qualify",
+              "basic",
+              "survival",
+              "event",
+              "commission",
+              "advance",
+              "skill",
+              "ageing",
+              "decide"
+            ],
+            "note": "Qualified. · Basic training — every listed skill at level 0, instead of this term's skill roll: Seafarer 1, Vacc Suit 0, Mechanic 0, Investigate 0, Gun Combat 0, Athletics 0 · Survived. · A winter of night watches. Gain one level of Vacc Suit or Athletics. · Athletics 1 · Advanced to rank 1, and one extra skill roll. · Skill roll: Education +1"
+          },
+          {
+            "term": 2,
+            "years": null,
+            "ages": true,
+            "survived": true,
+            "ejected": false,
+            "closed": true,
+            "kind": "",
+            "outcomes": [
+              "skillRoll"
+            ],
+            "steps": [
+              "elect",
+              "qualify",
+              "basic",
+              "survival",
+              "event",
+              "commission",
+              "advance",
+              "skill",
+              "ageing",
+              "decide"
+            ],
+            "note": "Survived. · A quiet word from the Harbourmaster. Gain an Ally, and a DM+1 held for your next Qualification roll. · Ally ×1 · Pending: DM. · Skill roll: Vacc Suit 1"
+          },
+          {
+            "term": 3,
+            "years": null,
+            "ages": true,
+            "survived": true,
+            "ejected": false,
+            "closed": false,
+            "kind": "",
+            "outcomes": [],
+            "steps": [
+              "elect",
+              "qualify",
+              "basic",
+              "survival"
+            ],
+            "note": "Survived."
+          }
+        ],
+        "track": {
+          "key": "",
+          "value": null,
+          "cap": null,
+          "adjustments": []
+        },
+        "preCareer": {
+          "lastTerm": 3,
+          "termDMs": [],
+          "tied": "",
+          "years": "",
+          "picks": [],
+          "grant": {
+            "text": "",
+            "mode": "all",
+            "grants": []
+          },
+          "graduation": {
+            "characteristic": "",
+            "target": null,
+            "honoursAt": null,
+            "failFloor": null,
+            "conditionalDMs": [],
+            "pass": {
+              "grant": {
+                "text": "",
+                "mode": "all",
+                "grants": []
+              },
+              "picks": [],
+              "raise": {
+                "count": 0,
+                "by": 0,
+                "below": null
+              },
+              "tray": []
+            },
+            "honours": {
+              "grant": {
+                "text": "",
+                "mode": "all",
+                "grants": []
+              },
+              "picks": [],
+              "raise": {
+                "count": 0,
+                "by": 0,
+                "below": null
+              },
+              "tray": []
+            },
+            "fail": {
+              "grant": {
+                "text": "",
+                "mode": "all",
+                "grants": []
+              },
+              "picks": [],
+              "raise": {
+                "count": 0,
+                "by": 0,
+                "below": null
+              },
+              "tray": []
+            }
+          }
+        },
+        "gained": []
+      },
+      "effects": [],
+      "sort": 0,
+      "_id": "dwmamMBg2TZkALYi"
+    },
+    {
+      "name": "Vacc Suit",
+      "type": "talent",
+      "system": {
+        "subType": "skill",
+        "level": 1,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "provenance": {
+          "term": 1,
+          "career": "dwmamMBg2TZkALYi",
+          "table": "basic",
+          "note": ""
+        },
+        "description": "",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        }
+      },
+      "_id": "hj78NvaqtVRRwhDn",
+      "img": "icons/svg/item-bag.svg",
+      "effects": [],
+      "sort": 0,
+      "flags": {}
+    },
+    {
+      "name": "Mechanic",
+      "type": "talent",
+      "system": {
+        "subType": "skill",
+        "level": 0,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "provenance": {
+          "term": 1,
+          "career": "dwmamMBg2TZkALYi",
+          "table": "basic",
+          "note": ""
+        },
+        "description": "",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        }
+      },
+      "_id": "2stBt1UL4yFcnpWj",
+      "img": "icons/svg/item-bag.svg",
+      "effects": [],
+      "sort": 0,
+      "flags": {}
+    },
+    {
+      "name": "Investigate",
+      "type": "talent",
+      "system": {
+        "subType": "skill",
+        "level": 0,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "provenance": {
+          "term": 1,
+          "career": "dwmamMBg2TZkALYi",
+          "table": "basic",
+          "note": ""
+        },
+        "description": "",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        }
+      },
+      "_id": "AEOwDEQYfxPyvyDm",
+      "img": "icons/svg/item-bag.svg",
+      "effects": [],
+      "sort": 0,
+      "flags": {}
+    },
+    {
+      "name": "Gun Combat",
+      "type": "talent",
+      "system": {
+        "subType": "skill",
+        "level": 0,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "provenance": {
+          "term": 1,
+          "career": "dwmamMBg2TZkALYi",
+          "table": "basic",
+          "note": ""
+        },
+        "description": "",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        }
+      },
+      "_id": "g1pNX2i8AWFBaBzt",
+      "img": "icons/svg/item-bag.svg",
+      "effects": [],
+      "sort": 0,
+      "flags": {}
+    },
+    {
+      "name": "Athletics",
+      "type": "talent",
+      "system": {
+        "subType": "skill",
+        "level": 1,
+        "skill": {
+          "speciality": "",
+          "reduceEncumbrance": false
+        },
+        "provenance": {
+          "term": 1,
+          "career": "dwmamMBg2TZkALYi",
+          "table": "basic",
+          "note": ""
+        },
+        "description": "",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 0,
+        "psionic": {
+          "reach": "",
+          "cost": 1,
+          "duration": "",
+          "durationUnit": ""
+        },
+        "roll": {
+          "characteristic": "",
+          "skill": "",
+          "difficulty": ""
+        }
+      },
+      "_id": "KEc0kuGCPRidga6u",
+      "img": "icons/svg/item-bag.svg",
+      "effects": [],
+      "sort": 0,
+      "flags": {}
+    },
+    {
+      "name": "New Contact",
+      "type": "contact",
+      "system": {
+        "relation": "Allie",
+        "actor": null,
+        "provenance": {
+          "term": 2,
+          "career": "dwmamMBg2TZkALYi",
+          "table": "event",
+          "note": ""
+        },
+        "description": "",
+        "subType": "contact",
+        "source": {
+          "book": "",
+          "page": ""
+        },
+        "cost": 1,
+        "skill": {
+          "speciality": "",
+          "characteristic": ""
+        },
+        "status": "Alive",
+        "attitude": "Unknow",
+        "title": "",
+        "nickname": "",
+        "species": "",
+        "gender": "",
+        "pronouns": "",
+        "homeworld": "",
+        "location": "",
+        "occupation": "",
+        "notes": ""
+      },
+      "_id": "NjynCulgAFbFUJ0g",
+      "img": "icons/svg/item-bag.svg",
+      "effects": [],
+      "sort": 0,
+      "flags": {}
+    }
+  ],
+  "effects": [],
+  "flags": {
+    "mgt2": {
+      "chargen": {
+        "term": 3,
+        "step": "event",
+        "tray": [
+          {
+            "kind": "dm",
+            "dm": 1,
+            "value": "",
+            "appliesTo": [
+              "qualification"
+            ],
+            "scope": "nextCareer",
+            "career": "Demo — Harbour Patrol",
+            "duration": "oneShot",
+            "uses": 1,
+            "expiresWhen": "",
+            "condition": "always",
+            "entryMode": "",
+            "assignment": "",
+            "note": "A tray entry outlives the term it was won in: this one waits for the next Qualification roll.",
+            "term": 2
+          }
+        ],
+        "benefitRolls": [
+          {
+            "value": 1,
+            "career": "dwmamMBg2TZkALYi",
+            "term": 1,
+            "note": "One per full term served"
+          },
+          {
+            "value": 1,
+            "career": "dwmamMBg2TZkALYi",
+            "term": 2,
+            "note": "One per full term served"
+          }
+        ],
+        "skillRolls": [
+          {
+            "value": 1,
+            "career": "dwmamMBg2TZkALYi",
+            "term": 1,
+            "note": "The advancement's extra skill roll"
+          },
+          {
+            "value": -1,
+            "career": "dwmamMBg2TZkALYi",
+            "term": 1,
+            "note": "Spent on a skill table"
+          },
+          {
+            "value": 1,
+            "career": "dwmamMBg2TZkALYi",
+            "term": 2,
+            "note": "The term's own skill roll"
+          },
+          {
+            "value": -1,
+            "career": "dwmamMBg2TZkALYi",
+            "term": 2,
+            "note": "Spent on a skill table"
+          }
+        ],
+        "tracks": {},
+        "connections": [],
+        "refusals": [],
+        "loose": {
+          "term": null,
+          "steps": []
+        },
+        "packagePicks": []
+      },
+      "demo": {
+        "order": 11,
+        "cliff": "creation's whole state lives in flags.mgt2.chargen, and an Actor that carries it is on the roster",
+        "teaches": [
+          "This Traveller still carries flags.mgt2.chargen, and that flag is the roster: imported, Mirel is on the creation screen with term 3 open and the cursor on an event nobody has rolled.",
+          "The DM+1 from term 2 waits on the tray: a nextCareer entry cannot be spent while the patrol is served, so it rides out the term and lands on the next career's Qualification roll."
+        ],
+        "trap": "The flag names career records by embedded id, which an import keeps. Nothing after this survival roll exists yet: exitMode is stillServing, there are no entitlements, and personal.age is blank because only the finish writes it.",
+        "run": {
+          "format": 1,
+          "name": "Demo — Mirel Aston",
+          "settings": [
+            [
+              "creationTable.background",
+              "Compendium.mgt2.demo-items.Item.demoTableBackSkl"
+            ]
+          ],
+          "imports": [],
+          "steps": [
+            {"type":{"system":{"biography":"<p>Signed on with the Bellweather harbour patrol at eighteen and made Patrol Officer in the first year, then a whole term without another stripe. The Harbourmaster took a liking to Mirel all the same, and that word has not been used yet.</p>","notes":"<p>Creation is not over: open the creation screen and roll this term's event.</p>","personal":{"title":"Patrol Officer","gender":"non-binary","pronouns":"they/them","homeworld":"Demo — Bellweather"}}}},
+            {"open":"creation"},
+            {"press":"rollCharacteristics","faces":[2,4,3,5,4,3,6,3,5,3,1,5],"answers":[{"title":"Characteristics","press":"ok"}]},
+            {"press":"takeBackground","answers":[{"title":"Background skills","set":{"s0":"Seafarer","s1":"Recon","s2":"Medic"},"press":"ok"}]},
+            {"drop":"Compendium.mgt2.demo-items.Item.demoCareerHarbor"},
+            {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
+            {"step":"qualify","faces":[3,4]},
+            {"step":"basic"},
+            {"step":"survival","faces":[3,4]},
+            {"step":"event","faces":[1,3],"answers":[{"pick":"Athletics","press":"ok"}]},
+            {"step":"commission"},
+            {"step":"advance","faces":[3,4]},
+            {"step":"skill","faces":[4],"answers":[{"title":"Pick a skill table (1 left)","pick":"advancedEducation","press":"ok"}]},
+            {"step":"ageing"},
+            {"step":"decide","answers":[{"title":"Continue or leave","press":"stay"}]},
+            {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
+            {"step":"qualify"},
+            {"step":"basic"},
+            {"step":"survival","faces":[4,4]},
+            {"step":"event","faces":[4,5]},
+            {"step":"commission"},
+            {"step":"advance","faces":[1,3]},
+            {"step":"skill","faces":[2],"answers":[{"title":"Pick a skill table (1 left)","pick":"service","press":"ok"}]},
+            {"step":"ageing"},
+            {"step":"decide","answers":[{"title":"Continue or leave","press":"stay"}]},
+            {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
+            {"step":"qualify"},
+            {"step":"basic"},
+            {"step":"survival","faces":[4,4]}
+          ]
+        }
+      }
+    }
+  }
+}

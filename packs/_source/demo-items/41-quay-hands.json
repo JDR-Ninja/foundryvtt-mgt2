@@ -9,7 +9,7 @@
         "order": 41,
         "cliff": "a refused Traveller has nowhere to go without a career that is always open",
         "teaches": [
-          "alwaysAvailable opens the career to a Traveller refused elsewhere this term, who enters as fallbackCareer: the refusal's always-open choice finds it by that field, in the world and in every Item pack.",
+          "alwaysAvailable opens the career to a Traveller refused elsewhere this term, who enters as fallbackCareer: the refusal's always-open choice finds it by that field, in the world and in every Item pack but a demo one, so this template answers only once it is imported into the world.",
           "qualification.entry: automatic and difficulty 0 mean nobody rolls to join, so the line names no characteristic and no DM; alwaysAvailable also lifts the one-term bar on returning to a career just left.",
           "neverEjects overrides every row: each mishap keeps the ejects a Mishap table prints, and the term log reads that this career cannot eject.",
           "A failed Survival roll still rolls a mishap and still costs the term's Benefit roll, but the term goes on to its Event and Advancement; mishap 6's benefit: keep gives that roll back.",

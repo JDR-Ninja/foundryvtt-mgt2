@@ -118,7 +118,7 @@ export class Checks {
  * The context `templates/chat/roll.html` reads. @returns {Promise<object>}
  * @param {Roll} [options.roll]           The dice, where any were rolled
  * @param {object} [options.outcome]      What `Checks.resolve` returned
- * @param {{name: string, dm: number}[]} [options.modifiers]  The named terms, in formula order
+ * @param {{name: string, dm: number|string}[]} [options.modifiers]  The named terms, in formula order
  * @param {string[]} [options.lines]      Sentences appended to the opposed verdict
  */
 export async function buildRollCardContext({

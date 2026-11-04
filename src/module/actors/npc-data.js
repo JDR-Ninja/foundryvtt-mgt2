@@ -112,8 +112,13 @@ export class NpcData extends ActorBaseData {
                 })
             }),
 
+            health: new fields.SchemaField({
+                radiations: new fields.NumberField({ required: false, initial: 0, min: 0, integer: true })
+            }),
+
             states: new fields.SchemaField({
-                fatigue: new fields.BooleanField({ required: false, initial: false })
+                fatigue: new fields.BooleanField({ required: false, initial: false }),
+                nausea: new fields.BooleanField({ required: false, initial: false })
             })
         });
 
@@ -123,6 +128,19 @@ export class NpcData extends ActorBaseData {
             ucp: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
         });
         return schema;
+    }
+
+    /** @inheritDoc */
+    prepareBaseData() {
+        super.prepareBaseData();
+        this.prepareRadiationLoss();
+    }
+
+    /** Core folio 79 doses "the target"; a creature has no END for the permanent column to reach (Core p.84). */
+    async applyRadiation(rads) {
+        const creature = this.subType === "creature";
+        const applied = await this.takeDose(rads);
+        return (applied && creature) ? { ...applied, before: null, after: null } : applied;
     }
 
     /** @inheritDoc */

@@ -60,7 +60,8 @@ const CLIFFS = [
     [11, "A world's UWP"],
     [12, "Hull points are derived"],
     [13, "Two fuel fields"],
-    [14, "A ship's started software"]
+    [14, "A ship's started software"],
+    [15, "A Scene's Level and its Regions"]
 ];
 
 /**
@@ -100,6 +101,11 @@ const fold = name => String(name ?? "").normalize("NFD").replace(/[\u0300-\u036f
  * keeps ordinary prose out — `Demo — Deck Vest` has a `D` that no digit follows.
  */
 const BOOK_DIE = /(?:^|[\s+\-*/(,])[+-]?\d*[dD](?!6)(?=\d|$|[\s+\-*/),])/;
+const DOCUMENT_ID = /^[A-Za-z0-9]{16}$/;
+/** The one directory a packed Scene may take its background from. */
+const SCENE_ASSETS = "systems/mgt2/assets/scenes/";
+/** The last server migration a hand-written Scene cannot survive, `migrateTopInclusive`. */
+const SCENE_STAMP_FLOOR = "14.361";
 
 /* -------------------------------------------- */
 /*  The rules                                   */
@@ -314,9 +320,59 @@ const RULES = [
             if ( typeof read(subject.document, "system.ops.fuel") !== "number" ) report("ops.fuel is unset — the real level, which nothing derives from the tank");
         }
     },
+    {
+        id: "scene-level", cliff: 15, scope: "primary", kind: "Scene",
+        check(subject, report) {
+            const { document } = subject;
+            // ⚠ The server migrates every pack at world launch and reads a missing stamp as oldest:
+            // `migrateLevels` then replaces `levels` outright, and the background goes with no message.
+            const stamp = document._stats?.coreVersion;
+            const newest = readManifest().compatibility?.minimum;
+            if ( !stamp ) report("_stats.coreVersion is unset — the server's migration then replaces `levels` at world launch, and the background is gone");
+            else if ( olderThan(stamp, SCENE_STAMP_FLOOR) ) report(`_stats.coreVersion ${stamp} is older than ${SCENE_STAMP_FLOOR} — a server migration still runs over this hand-written document`);
+            else if ( olderThan(newest, stamp) ) report(`_stats.coreVersion ${stamp} is newer than compatibility.minimum ${newest} — a build the system supports refuses to migrate it`);
+            if ( "background" in document ) report("background is the pre-v14 place — it is levels[].background now, and `_preCreate` never moves it for a packed document");
+            const levels = document.levels ?? [];
+            if ( !levels.length ) return report("levels is empty — a v14 Scene draws its background from a Level, and `_preCreate` writes the default one only for a Scene created in a world");
+            if ( !levels.some(level => level._id === document.initialLevel) ) report(`initialLevel "${document.initialLevel}" is not the _id of a Level on this Scene`);
+            levels.forEach((level, index) => {
+                if ( !DOCUMENT_ID.test(level._id ?? "") ) report(`levels[${index}]._id "${level._id}" is not a document id — a pack keys an embedded document by it`);
+                const src = String(level.background?.src ?? "");
+                if ( !src.startsWith(SCENE_ASSETS) ) report(`levels[${index}].background.src "${src}" — a demo Scene uses one of the system's own backgrounds`);
+                else if ( !fs.existsSync(path.join(ROOT, "assets", "scenes", src.slice(SCENE_ASSETS.length))) ) report(`levels[${index}].background.src "${src}" names no file under assets/scenes`);
+            });
+        }
+    },
+    {
+        id: "region-answers", cliff: 15, scope: "primary", kind: "Scene",
+        check(subject, report) {
+            const regions = subject.document.regions ?? [];
+            if ( !regions.length ) report("regions is empty — the Regions are what a demo Scene exists to show");
+            regions.forEach((region, index) => {
+                const where = `regions[${index}] (${region.name})`;
+                if ( !DOCUMENT_ID.test(region._id ?? "") ) report(`${where} _id "${region._id}" is not a document id — a pack keys an embedded document by it`);
+                if ( !size(region.shapes) ) report(`${where} has no shapes — valid, and no token ever enters it`);
+                if ( !size(region.behaviors) ) report(`${where} has no behaviours — it is drawn and answers nothing`);
+                (region.behaviors ?? []).forEach((behavior, at) => {
+                    if ( !DOCUMENT_ID.test(behavior._id ?? "") ) report(`${where} behaviors[${at}]._id "${behavior._id}" is not a document id`);
+                    if ( !BEHAVIOR_TYPES.has(behavior.type) ) report(`${where} behaviors[${at}].type "${behavior.type}" is not a RegionBehavior type this system declares`);
+                });
+            });
+        }
+    },
 
     /* ---- the pack's own hygiene: marking, presets and the two indexed fields ---- */
 
+    {
+        id: "document-id", cliff: null, scope: "any",
+        check(subject, report) {
+            const { document } = subject;
+            if ( !DOCUMENT_ID.test(document._id ?? "") ) report(`_id "${document._id}" is not a document id — the server re-keys it and leaves the old key behind`);
+            (document.effects ?? []).forEach((effect, index) => {
+                if ( !DOCUMENT_ID.test(effect._id ?? "") ) report(`effects[${index}]._id "${effect._id}" is not a document id — the server re-keys it and leaves the old key behind`);
+            });
+        }
+    },
     {
         id: "demo-name", cliff: null, scope: "primary",
         check(subject, report) {
@@ -384,7 +440,7 @@ const RULES = [
         id: "die-form", cliff: null, scope: "any",
         check(subject, report) {
             for ( const [pointer, value] of strings(subject.document) ) {
-                if ( BOOK_DIE.test(value) ) report(`${pointer} reads "${value}" — the books' die form. new Roll throws "Unresolved StringTerm" on 1D, D3 and -1D`);
+                if ( !DOCUMENT_ID.test(value) && BOOK_DIE.test(value) ) report(`${pointer} reads "${value}" — the books' die form. new Roll throws "Unresolved StringTerm" on 1D, D3 and -1D`);
             }
         }
     },
@@ -431,6 +487,7 @@ const source = readOption("--source");
 const names = argv.filter(argument => !argument.startsWith("--") && argument !== source);
 
 const TYPE_CLASS = readTypeClasses();
+const BEHAVIOR_TYPES = readBehaviorTypes();
 let documents = 0;
 let problems = 0;
 
@@ -468,6 +525,8 @@ function selftest() {
     const fired = new Set();
     const unmarked = new Set();
     const offers = [];
+    const sceneRules = new Set();
+    const badIds = [];
     const problemsBefore = [];
 
     // The forced-only career is a clean document, so the rule fires only if the set reads every directory.
@@ -476,6 +535,8 @@ function selftest() {
         fired.add(rule.cliff);
         if ( rule.id === "offer-forced-only" ) offers.push(subject.label);
         if ( rule.id === "demo-name" ) unmarked.add(subject.type);
+        if ( rule.kind === "Scene" ) sceneRules.add(rule.id);
+        if ( rule.id === "document-id" ) badIds.push(subject.label);
     }));
     const brokenProblems = problems;
     const missing = CLIFFS.filter(([n]) => !fired.has(n));
@@ -495,6 +556,12 @@ function selftest() {
     if ( offers.length !== 3 ) {
         fail(`offer-forced-only fired ${offers.length} times on tools/fixtures/broken, not 3: a row naming the career exactly,`,
             "one spelling it another way, and a row's own tray entry, all offering the forced-only career in tools/fixtures/clean.");
+    }
+    if ( sceneRules.size !== 2 ) {
+        fail(`${sceneRules.size} of the 2 Scene rules fired on tools/fixtures/broken: they share a cliff, so \`fired\` cannot tell them apart.`);
+    }
+    if ( !["Short Id Dose", "Short Id Rounds"].every(name => badIds.some(label => label.includes(name))) ) {
+        fail("document-id missed tools/fixtures/broken/12-embedded-id.json: an embedded Item's _id and an embedded effect's are both one short.");
     }
     if ( noisy ) fail(`tools/fixtures/clean is correct and drew ${noisy} problems.`, ...problemsBefore);
     console.log(`selftest ok — ${CLIFFS.length} cliffs all fire on the broken fixtures (${brokenProblems} problems), the clean ones draw none`);
@@ -549,19 +616,26 @@ function where(file) {
 
 /** The packed document, then every Item embedded on it — one subject each. */
 function subjectsOf(document, pack) {
-    const kind = TYPE_CLASS[document.type];
+    const kind = kindOf(document);
     if ( !kind ) fail(`${pack}: document "${document.name}" has type "${document.type}", which system.json declares for no document class.`);
     const items = (kind === "Actor") ? (document.items ?? []) : [];
+    const type = document.type ?? kind.toLowerCase();
     const primary = {
-        document, pack, kind, type: document.type, system: document.system ?? {},
+        document, pack, kind, type, system: document.system ?? {},
         items, embedded: new Map(items.map(item => [item._id, item])),
-        parent: null, scope: "primary", label: `${document.name} (${document.type})`
+        parent: null, scope: "primary", label: `${document.name} (${type})`
     };
     return [primary, ...items.map(item => ({
         document: item, pack, kind: "Item", type: item.type, system: item.system ?? {},
         items: [], embedded: new Map(), parent: primary, scope: "embedded",
         label: `${document.name} › ${item.name} (${item.type})`
     }))];
+}
+
+/** A Scene is the one packed class with no `type`, so its own embedded fields name it. */
+function kindOf(document) {
+    if ( document.type ) return TYPE_CLASS[document.type];
+    return (("levels" in document) || ("regions" in document)) ? "Scene" : undefined;
 }
 
 function applies(rule, subject) {
@@ -583,6 +657,21 @@ function readTypeClasses() {
         for ( const type of Object.keys(types) ) map[type] ??= documentName;
     }
     return map;
+}
+
+/** The RegionBehavior sub-types the manifest declares. */
+function readBehaviorTypes() {
+    return new Set(Object.keys(readManifest().documentTypes?.RegionBehavior ?? {}));
+}
+
+function readManifest() {
+    return JSON.parse(fs.readFileSync(path.join(ROOT, "system.json"), "utf8"));
+}
+
+/** Foundry's `generation.build` versions, compared part by part: 14.37 is older than 14.366. */
+function olderThan(version, other) {
+    const [a, b] = [version, other].map(text => String(text).split(".").map(Number));
+    return (a[0] < b[0]) || ((a[0] === b[0]) && (a[1] < b[1]));
 }
 
 /**

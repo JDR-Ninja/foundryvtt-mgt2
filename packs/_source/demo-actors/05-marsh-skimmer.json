@@ -15,7 +15,7 @@
           "mounts[].arc is which way the mount points, and mounts[].weapons holds ids of weapon Items embedded on this same vehicle.",
           "skill[] is what it takes to operate: a skill and a speciality, both from closed lists."
         ],
-        "trap": "Six fields below are deliberately empty and each one carries a rule. armour.dorsal and armour.ventral are null, which means half the port and half the aft — a 0 there destroys the fallback and states a roof of nothing. systems.camouflage and systems.stealth are null because they are negative DMs on the observer and a positive value is silently clamped to 0, which is indistinguishable from none. submersible and remote are null because an empty object in either place means yes, at depth 0, with a primitive interface."
+        "trap": "Six fields below are deliberately empty and each one carries a rule. armour.dorsal and armour.ventral are null, which means half the port and half the aft — a 0 there destroys the fallback and states a roof of nothing. systems.camouflage and systems.stealth are null because they are negative DMs on the observer and a positive value is silently clamped to 0, which is indistinguishable from none. submersible and remote are null because an empty object in either place means yes, at depth 0, with a primitive interface. roll.skill on the gun stays blank: it is the id of a skill on the owner, and a vehicle owns none, so its button opens on Not proficient and the referee picks."
       }
     }
   },
@@ -111,7 +111,7 @@
         "source": { "book": "", "page": "" },
         "quantity": 1, "weight": 40, "weightless": false, "cost": 12000, "tl": "TL08", "legality": 5,
         "container": { "id": "" },
-        "roll": { "characteristic": "dexterity", "skill": "Gun Combat", "difficulty": "Average" },
+        "roll": { "characteristic": "dexterity", "skill": "", "difficulty": "Average" },
         "equipped": true,
         "range": { "isMelee": false, "value": 500, "unit": "meter", "band": "long" },
         "damage": "4D6",

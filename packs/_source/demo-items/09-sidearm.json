@@ -13,7 +13,7 @@
           "`range.band` and `range.value` are two readings of one distance and both are stored.",
           "`damageType` is what an armour or a creature answers with — it selects the damage-response reading."
         ],
-        "trap": "`params[].num` is filled in here because `refreshTraitNumbers()` runs on sheet submit only. An `AP (3)` left at `num: null` scores 0 and nothing says so."
+        "trap": "`params[].num` is filled in here because `refreshTraitNumbers()` runs on sheet submit only. An `AP (3)` left at `num: null` scores 0 and nothing says so. roll.skill stays blank: it is the id of a skill on the owner, a local graph no compendium document can hold."
       }
     }
   },
@@ -27,7 +27,7 @@
     "tl": "TL08",
     "legality": 3,
     "container": { "id": "" },
-    "roll": { "characteristic": "dexterity", "skill": "Gun Combat", "difficulty": "Average" },
+    "roll": { "characteristic": "dexterity", "skill": "", "difficulty": "Average" },
     "equipped": false,
     "range": { "isMelee": false, "value": 20, "unit": "meter", "band": "short" },
     "damage": "3D6",

@@ -672,8 +672,10 @@ export class StopTrafficDialog extends MGT2Screen(HandlebarsApplicationMixin(App
             type: "cargo",
             system: { tons, farePerTon, destination: booking.destination, dueDay: booking.dueDay }
         }]);
-        await this.#postBooking({ title, line,
-            note: game.i18n.format("MGT2.Trade.Card.DueDay", { day: booking.dueDay }) });
+        // Blank is no deadline agreed, so the card has no day to state; Core p.241 still pays on delivery.
+        const note = (booking.dueDay === null) ? game.i18n.localize("MGT2.Trade.Card.PaidOnDelivery")
+            : game.i18n.format("MGT2.Trade.Card.DueDay", { day: booking.dueDay });
+        await this.#postBooking({ title, line, note });
         return true;
     }
 

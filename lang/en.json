@@ -1511,6 +1511,7 @@
         "NoAgeingYet": "Ageing has not begun for this Traveller.",
         "AgeingDM": "Terms served ({n})",
         "AgeingChoose": "Ageing takes its toll. You choose which characteristics.",
+        "InjuryChoose": "The injury takes its toll. You choose which characteristics.",
         "LosePoints": "Lose {n}",
         "AgeingNoRow": "The Ageing table prints no row for {n}: the referee decides.",
         "Aged": "Ageing roll {n}: {changes}",
@@ -1533,6 +1534,7 @@
         "ChangeAssignment": "Change assignment ({rule})",
         "PickAssignment": "Which assignment?",
         "AssignmentKept": "The change failed: you continue in the old assignment, without penalty.",
+        "AssignmentChanged": "Assignment changed: {from} → {to}.",
         "AssignmentNewCareer": "This career counts an assignment change as a new career: this term closes it, and the next term qualifies for the new assignment.",
         "SubRollPassed": "The row's own check passed.",
         "SubRollFailed": "The row's own check failed.",
@@ -1549,6 +1551,7 @@
         "RefusedThisTerm": "A qualification was already refused this term, so {career} cannot be entered: the term goes to the draft or to a career that is always open.",
         "AgeingDistinct": "Each loss goes to a different characteristic.",
         "AgeingOwed": "The ageing roll is made: its losses have to be applied.",
+        "InjuryOwed": "The Injury roll is made: its losses have to be applied.",
         "ExcessShares": {
           "one": "{n} point over the maximum becomes a Ship Share",
           "other": "{n} points over the maximum become Ship Shares"
@@ -1751,7 +1754,8 @@
       "Docs": "MGT2 — What this system does with the rules",
       "Guide": "MGT2 — Guide to the system",
       "DemoActors": "MGT2 — Demo actors, annotated",
-      "DemoItems": "MGT2 — Demo items, annotated"
+      "DemoItems": "MGT2 — Demo items, annotated",
+      "DemoScenes": "MGT2 — Demo scenes, annotated"
     },
     "Guide": {
       "Journal": "Using this system",
@@ -1930,6 +1934,7 @@
       "NewContact": "New Contact",
       "NewComputer": "New Computer",
       "NewContainer": "New Container",
+      "SkillDM": "{skill} modifier",
       "NewDisease": "New Diseases",
       "NewEquipment": "New Equipment",
       "NewItem": "New Item",
@@ -2388,6 +2393,10 @@
         "MountLabel": "position",
         "AddMount": "Add a mount",
         "DeleteMount": "Remove this mount",
+        "AddScreen": "Add a screen",
+        "DeleteScreen": "Remove this screen",
+        "Screens": "Screens",
+        "ScreenCount": "Count",
         "Ammo": "Ammo",
         "Tabs": {
           "Station": "Combat station",
@@ -2780,6 +2789,13 @@
         "FreeSkills": "Free level-0 skills",
         "EducationCap": "EDU ceiling",
         "Hardened": "Hardened brain (/fib)",
+        "Biological": "Biological robot",
+        "VacuumSealing": "Vacuum sealing",
+        "VacuumSealingHint": "What protects this robot in vacuum: hostile or vacuum environment protection. A chosen value wins over the option rows, and it answers for a row in another language or for protection the design has as standard.",
+        "VacuumHostile": "Hostile",
+        "VacuumFull": "Vacuum",
+        "VacuumNone": "none",
+        "VacuumFromRows": "Rows: {rows}",
         "Rads": "Rads to the brain",
         "RadiationHint": "Radiation has cost this brain INT -{n} and Bandwidth -{n}, permanently.",
         "BrainDamageDM": "Brain damage",
@@ -2828,6 +2844,7 @@
           "tl": "TL band",
           "efficiency": "efficiency",
           "packs": "power packs",
+          "vacuum": "vacuum",
           "steps": "speed steps",
           "hours": "hours",
           "speedBase": "base",
@@ -2890,7 +2907,7 @@
         "Bases": "Bases",
         "Zone": "Travel zone",
         "Forbidden": "This world is a Red Zone.",
-        "ForbiddenWhy": "A Red Zone is forbidden: nothing here offers passengers, freight or mail.",
+        "ForbiddenWhy": "Core p.260 forbids travel to a Red Zone, and enforcing that is the referee's. The traffic tables still read it, at DM−4 for passengers and DM−6 for freight.",
         "Berthing": "Berthing",
         "BerthingCount": "rolled once, kept",
         "BerthingBand": "1D × Cr{amount} per week",
@@ -3022,10 +3039,10 @@
           "none": "the sheet does not open",
           "limited": "the name, and nothing inside",
           "observer": "reads the contents, moves nothing",
-          "owner": "reads and takes"
+          "owner": "reads and copies"
         },
-        "WithheldNone": "You read the contents and, at Owner, may move them. Anything you drag out is taken, not copied back.",
-        "WithheldLocked": "The stash is locked, so its contents are withheld. The sheet stays open and the rows are never sent — that is the state a container Item cannot produce.",
+        "WithheldNone": "You read the contents and, at Owner, may copy them. Anything you drag out is copied, and its row stays here until someone deletes it.",
+        "WithheldLocked": "The stash is locked, so its contents are withheld. The sheet stays open and lists no rows — that is the state a container Item cannot produce.",
         "WithheldRung": "You may see that this stash exists and nothing that is in it. Observer is the rung that reads an inventory.",
         "Items": "Items",
         "Mass": "Mass",
@@ -3407,7 +3424,7 @@
         "Complicated": "Complicated"
       },
       "Relation": {
-        "Allie": "Allie",
+        "Allie": "Ally",
         "Contact": "Contact",
         "Rival": "Rival",
         "Enemy": "Enemy",
@@ -4593,6 +4610,7 @@
       "ElevationSplit": "The two tokens are at different elevations, which on a space scene orders the levels rather than measuring a height.",
       "NoCombat": "No space combat or fleet battle is being viewed, and the range band belongs to one.",
       "NotInCombat": "{name} is not a contact of the encounter being viewed.",
+      "ManyContacts": "{name} flies in more than one ship or fleet of this encounter, so its Actor cannot say which.",
       "SalvoPosition": "{name} is a salvo in flight: it is where it is, not where the fleet that fired it is.",
       "NoGroup": "{name} belongs to no ship and no fleet, and a range band is measured between two of those.",
       "SameGroup": "Both tokens belong to {name}, and a range band is measured between two.",
@@ -4739,6 +4757,8 @@
       "TacticsTerm": "Tactics (naval)",
       "Morale": "Morale",
       "PoolEmpty": "{name} has {left} and {wanted}.",
+      "DispersalBusy": "{name} is in a dispersal: its ships take no other action until the rounds have run (High Guard p.122).",
+      "DispersalOwed": "{name} has not finished its dispersal, and its ships divide only after it (High Guard p.122).",
       "DetachLarge": "High Guard sends a group of {max} ships or fewer back to the standard space combat rules; {count} were detached.",
       "SplitOf": "{name} (split)",
       "Mode": {
@@ -4779,6 +4799,19 @@
         "Arriving": "Arriving this round",
         "DropShipHint": "Drop a spacecraft here to add it to the line",
         "DropWingHint": "Drop a fighter class here to add a squadron",
+        "DispersalHolds": "No other action until these have run: no repairs and no breaking off. Its ships still fire, at the DM.",
+        "DispersalServing": "The dispersal failed, and its rounds come first: the ships may reattempt after them (High Guard p.122).",
+        "DispersalFailed": "The dispersal failed. The ships may try again, and they divide only after one succeeds (High Guard p.122).",
+        "DivideWhy": "Tick what leaves. The ships divide once the dispersal has run (High Guard p.122).",
+        "Split": "Split into a new fleet",
+        "FoldInto": "Fold into {name}",
+        "Fold": "Fold one fleet into another",
+        "FoldHint": {
+          "one": "Fold {name} into {into}? Its {count} hull joins that fleet, and {name} leaves the battle with every range it held.",
+          "other": "Fold {name} into {into}? Its {count} hulls join that fleet, and {name} leaves the battle with every range it held."
+        },
+        "Opposing": "Opposing fleet",
+        "OpposingHint": "Which fleet opposes {name}? Morale reads its losses and its flag ship.",
         "ShipLine": "hull {hull} · armour {armour}",
         "WingLine": {
           "one": "{n} of {of} fighter",
@@ -5438,6 +5471,7 @@
       "JumpTarget": "Easy (4+) Engineer (j-drive) · EDU",
       "ParsecChip": "{dm} · 1 per parsec, ×{parsecs}",
       "UnrefinedChip": "Unrefined fuel −2",
+      "CriticalChip": "J-Drive critical {dm}",
       "MaintenanceChip": "months behind maintenance — the referee's",
       "DiameterChip": "100-diameter limit — the referee's",
       "ParsecDM": {
@@ -5447,6 +5481,7 @@
       "UnrefinedDM": "Unrefined fuel",
       "DebitWhy": "The jump debits the tank as it rolls. Nothing else moves the fuel, and no roll moves the leg.",
       "NoFuel": "This jump burns {need} t and the tank holds {have}. Without the fuel the drive does not fire.",
+      "DriveOut": "Jump drive: {state}. It may not be used until repaired.",
       "NoStation": "No {station} aboard with a linked sheet — the check has no character to read the skill level off.",
       "Ruleset": "Ruleset",
       "Declared": "declared, not assumed",
@@ -5809,6 +5844,7 @@
         "Consignment": "{lot}: {tons} t, Cr{credits} paid.",
         "Disembark": "{n} × {grade} put ashore.",
         "FarePaid": "The fare was collected when the berth was taken (Core p.239).",
+        "PaidOnDelivery": "Paid on delivery (Core p.241).",
         "DueDay": "Due on campaign day {day}, and paid on delivery (Core p.241).",
         "Late": {
           "one": "{days} day late — 1D+4 rolled {roll}, so {percent}% is docked: Cr{docked} off a Cr{credits} fare.",
@@ -6151,6 +6187,7 @@
       "CrisisWhy": "An ageing crisis: a characteristic stands at 0. Core p.49 makes that death unless 1D × Cr10000 buys medical care, which brings every reduced characteristic back to 1.",
       "CrisisPast": "This Traveller has survived an ageing crisis.",
       "CrisisPastWhy": "This Traveller has survived an ageing crisis. Core p.49 makes that permanent: they automatically fail every later qualification roll, whatever their scores now say.",
+      "PsiLost": "Ageing reduces PSI to 0: all psionic abilities are lost and can never be regained.",
       "CrisisWarning": "This takes a characteristic to 0.",
       "CrisisWarningWhy": "This takes a characteristic to 0. Core p.49 makes an ageing crisis death unless 1D × Cr10000 buys medical care."
     },
@@ -6159,6 +6196,10 @@
       "Damage": "{points} damage",
       "Ambient": "{celsius} °C",
       "Exposure": "round {round} of exposure",
+      "RobotVacuum": {
+        "Hour": "Endurance halved to {hours} h while here, and a malfunction check every hour, at DM-2 above 100 °C or below -100 °C (Robot Handbook p.34). The referee rolls it.",
+        "TwoHours": "Endurance halved to {hours} h while here, and a malfunction check every two hours, at DM-2 above 100 °C or below -100 °C (Robot Handbook p.34). The referee rolls it."
+      },
       "Interval": "the referee applies {rule}",
       "Shielded": {
         "one": "{rads} rad, all of it absorbed by the region's {shielded}",

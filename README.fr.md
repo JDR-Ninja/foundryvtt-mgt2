@@ -31,8 +31,12 @@ Traveller de Mongoose Publishing — et développé spécialement pour la versio
 * **Une seule palette, et elle appartient au lecteur** — quatre préréglages, onze couleurs d'accent,
   clair ou sombre, et une paire réussite/échec adaptée au daltonisme. Chaque couleur de texte mesurée
   à 4,5:1 ou mieux.
-* **Trois compendiums que le système écrit lui-même** — ce qu'il fait des règles, un journal par
-  langue, et un document de démonstration annoté pour chaque type et sous-type qu'il déclare.
+* **Cinq compendiums que le système écrit lui-même** — ce qu'il fait des règles, un journal par
+  langue ; un guide du système en trente pages ; et la démonstration, avec un document annoté pour
+  chaque type d'Acteur et d'Objet sauf le contrat de prime, cinq Voyageurs sortis de la création et
+  une Scène.
+* **Un `?` dans la barre de titre** ouvre le guide à la page de la fenêtre. Le guide n'existe qu'en
+  anglais pour l'instant ; la traduction française est à venir.
 * **Quatre langues** — français, anglais, espagnol, portugais (Brésil).
 
 Le détail version par version est dans le [changelog](CHANGELOG.fr.md).

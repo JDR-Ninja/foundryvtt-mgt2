@@ -19,13 +19,13 @@
     }
   },
   "system": {
-    "description": "Keeps the harbour ledger, and remembers every hull that ever came in light.",
+    "description": "Keeps the harbour ledger, and remembers every hull that ever came in light. Owes a favour, and would rather not be reminded.",
     "subType": "contact",
     "source": { "book": "", "page": "" },
     "cost": 1,
     "skill": { "speciality": "Bureaucracy", "characteristic": "education" },
     "status": "Alive",
-    "attitude": "Owes a favour, and would rather not be reminded",
+    "attitude": "Complicated",
     "relation": "Contact",
     "title": "Clerk of the Harbour",
     "nickname": "Tallies",

@@ -16,12 +16,15 @@
 	<table class="rows brows" data-derived="{{derived}}">
 		<tbody>
 			{{#each b.rows}}
-			<tr>
+			<tr{{#if item}} data-item-id="{{key}}"{{/if}}>
 				<td>
 					{{#if label}}{{label}}{{else}}&mdash;{{/if}}
 					{{#if why}}<span class="why">{{why}}</span>{{/if}}
 				</td>
 				<td class="num">{{value}}</td>
+				{{#if item}}
+				{{> systems/mgt2/templates/actors/parts/row-controls.html edit=../edit del=../del}}
+				{{/if}}
 			</tr>
 			{{/each}}
 		</tbody>

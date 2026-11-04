@@ -4,6 +4,220 @@
 
 ---
 
+## [0.2.9]
+
+**Verified on Foundry VTT 14.369.**
+
+**A guide to the system, a demo that goes all the way through creation, and ships, fleets, vehicles
+and robots brought back into line with their books.** Thirty pages describe the system, and a `?` in
+the title bar opens them at the window's own page. The demo compendiums gain five careers, four
+shared tables, five Travellers and a Scene. Playing those Travellers brought creation defects to
+light, and writing the guide those of ships, fleets, regions and sheets: what changes a game in
+progress comes first.
+
+### ⚠ Breaking changes
+
+* **An ageing crisis also fails a change of assignment and refuses a *Career offered*** (Core p.20,
+  p.49). In a career set to *Re-qualify, keep rank*, the change fails with no roll and no pick of
+  assignment, even where *Automatic if* would spare the Traveller the roll. They stay in their
+  assignment, without penalty, and the term log says why. *Free, every term* takes no roll and stays
+  allowed. A *Career offered* no longer waives the roll: the Qualification fails, the offer stays
+  owed and is not spent, and a forced entry still goes through. Two rulings.
+* **PSI aged to 0 is no longer a crisis, and every psionic ability is lost for good** (Aliens of
+  Charted Space 1 p.275). The Traveller no longer risks death and owes no care, and the care for
+  another crisis does not lift their PSI. The PSI test, training, learning, powers and talents
+  learned as skills are refused; the talents stay on the sheet, with no effect. A grant that would
+  raise PSI is refused, and ageing no longer offers a PSI already at 0. **The book prints this for
+  Zhodani Travellers, and the system applies it to every Traveller**, because it does not know who
+  is Zhodani: a ruling. **A career whose Qualification reads PSI alone, such as the Psion (Core
+  p.236), is shut**: another ruling, since the book speaks only of abilities. All of it is read off
+  the recorded losses, so a Traveller already created whose PSI aged to 0 comes under it from this
+  release on, even if the care was paid. A loss written before the PSI test locks nothing, and the
+  test erases it.
+* **An automatic entry no longer escapes the no-return rule** (Core p.18). A career set to
+  *Automatic*, or whose *Automatic if* threshold the Traveller meets, cannot be taken up again in
+  the term after leaving it. The draft, a career compelled or offered, a career always open and a
+  change of assignment still escape it.
+* **A speciality written only in an Item's name counts as the one in the field** (Core p.58), for
+  grants and for the skill cap. A grant with no speciality, *Electronics* 1, now creates its own row
+  beside *Electronics (Comms)*, instead of raising it. A ruling. **A Traveller already doubled is
+  not corrected.**
+* **Vacuum and temperature now wound only Travellers and NPCs** (Core p.82), **and vacuum a
+  biological robot.** A *Vacuum* or *Temperature* region also wounded the vehicle, spacecraft or
+  robot standing in it. A robot now follows its own rule (Robot Handbook p.34, see *Regions and
+  hazards*). A *Radiation* region still reaches robots.
+* **A disabled or destroyed Jump Drive refuses the jump** (Core p.154), on the voyage and at a
+  station alike, and the voyage screen greys the button. **At a station it also refuses every
+  Engineer (j-drive) check, a repair action typed with that speciality included**: a ruling. A
+  repair action typed *Engineer* with no speciality still goes through. At a station, that
+  speciality is read only under its English or French name, such as `Engineer (j-drive)`.
+* **A fleet's dispersal now has its effects** (High Guard p.122). While its rounds run, it holds
+  repairs, the start of a break-off, Split, Detach and Fold, but neither fire nor Morale, and its DM
+  reaches the *Offensive DM*. After a failure, a new result waits until the two rounds have passed,
+  and Split and Detach stay shut until a dispersal succeeds. Leaving Morale open, holding the whole
+  fleet and shutting Split after a failure are three rulings.
+* **The standing DMs of whoever rolls (states, armour, augments, Active Effects) now also reach
+  station, vehicle, trade and revival rolls.** A fatigued engineer rolls lower than before, with
+  nothing changed on the sheet.
+
+### Creation
+
+* **A career unlocked stays unlocked after a failed roll** (Core p.17, p.46). The *Career unlocked*
+  entry is spent on entering the career, no longer before the Qualification roll, and lapses by its
+  own duration. A failure no longer costs the referee's leave.
+* **A compelled career that cannot be found no longer strands the Traveller.** A *Career compelled*
+  that neither the world nor a compendium holds, or that names none where no forced-entry career
+  exists, is dropped, with a warning and a message to the player and the referee. Until now every
+  career refused the Traveller, with neither the draft nor a career always open on offer.
+* **A chain of sub-tables follows up to ten tables**, stops at a table already rolled, and says so
+  in a warning and the term log. It used to stop silently after two hops.
+* **A *Career offered* no longer opens a career set to *Entered only when sent*** (Core p.52). The
+  player is refused; a sentence, a draft or the referee still opens it.
+* **A demotion stops at the lowest rank the ladder prints, and never raises a rank.** An officer at
+  rank 1 fell to a rank 0 their ladder does not have. No book covers the case: a ruling.
+* **The ageing row records the age at the end of the term** (Core p.48): the fourth term ages at 34,
+  no longer at 30. Injury, care and event rows keep the age the term began.
+* **Creation writes the Traveller's age**: *Finish* fills the *Age* field when it is blank. An age
+  typed by hand stays, and an age creation wrote is kept up to date.
+* ***Automatic if* also waives the roll for a change of assignment** under *Re-qualify, keep rank*,
+  since that roll repeats the same Qualification line. A ruling.
+* **A change of assignment that passes, or a free one, writes its line in the term log**, naming
+  both assignments.
+
+### Regions and hazards
+
+* **Exposure to vacuum is counted per combat** (Core p.82). A token left in a *Vacuum* region kept a
+  past combat's round, and the next combat's cumulative damage stayed stuck at 1D. Exposure starts
+  over at 1 in each combat and climbs round by round.
+* **The *Radiation* rule switched off really does switch radiation off.** A region no longer rolls
+  any, and no card announces that 0 of armour stopped the dose. A robot ignored the rule and now
+  follows it.
+* **Two hazards at the same moment no longer erase each other.** The second wrote over the total
+  read before the first, and a wound was lost: they now apply one after the other.
+* **Deleting a token exposed to vacuum** no longer throws an error in the console.
+* **A robot in vacuum follows Robot Handbook p.34.** A *Vacuum* region halves its endurance and
+  announces a malfunction check every hour, every two hours with hostile environment protection, and
+  none with vacuum environment protection: the referee rolls it, the system does not schedule it.
+  The sheet gains *Biological robot*, for a robot that suffers as the lifeform it is modelled on,
+  and *Vacuum sealing*, which outranks the option rows: left blank, only the printed English names
+  are read. Setting that field to *Vacuum* gives a robot already in the region its endurance back at
+  once, and leaving the region or deleting its Scene gives it back too. A robot already in the
+  region when the system is updated is halved only at its next entry. Keeping half endurance under
+  hostile protection is a ruling (p.32 and p.34).
+* **An NPC now takes a radiation dose** (Core p.79, p.81), and its sheet gains its Rads and the
+  nausea state. A creature takes it on Hits, with no END (Core p.84).
+
+### Ships, fleets and voyage
+
+* **An ion shot from a station no longer hurts the hull through armour** (High Guard p.30). The
+  weapon's traits now follow the shot to the damage, a missile salvo included.
+* **A Manoeuvre Drive critical weighs on piloting checks** (Core p.154, p.170), Initiative excepted.
+  **A Jump Drive critical weighs on every Engineer (j-drive) check** (Core p.170, p.171), on the
+  voyage and at a station alike, and the voyage screen shows it. At a station, these skills are read
+  only under their English or French name.
+* **A ship's header counts people, not crew rows**: a full ship no longer reads short.
+* **A ship's defence screens** (*Nuclear damper*, *Meson screen*, *Black globe*) **are set on the
+  sheet**, in the *Mounts & weapons* block, in edit mode.
+* **The *Set the range band from two tokens* tool also places a ship that joined by drag and drop.**
+* **The fleet screen gains *Split into a new fleet* and *Fold one fleet into another*** (High Guard
+  p.122), and a first hull can be dropped on a new fleet. Split asks for no task chain, a departure
+  from the book, which requires one.
+* **Fold asks for confirmation**, because the system does not know who is an ally. **Morale asks
+  which fleet opposes** once several remain, after a Split for instance. With no opponent,
+  *Celestial terrain* is 0.
+* **A freight or mail lot with no deadline** no longer writes "campaign day null", and still says
+  payment falls on delivery.
+* **The Red Zone tooltip** now says what the system applies: traffic is still rolled there, at DM-4
+  for passengers and DM-6 for freight, and enforcing the ban falls to the referee (Core p.239-240,
+  p.260).
+
+### Sheets and rolls
+
+* **A creature has a field for its Hits.**
+* **Armour on an NPC or a robot can be seen and worn**: both sheets gain its row.
+* **A typed Custom DM shows in the card's terms**, with its operator if it has one.
+* **An Active Effect written to `system.modifiers.skills.<slug>.effect` at last reaches that skill's
+  roll.**
+* **Vehicles** (Vehicle Handbook 2026). *Clear every critical* covers every location and leaves
+  Structure, which has its own repair (p.11). A Hull critical of Severity 5 or 6 halves Structure,
+  rounded up (p.10), and the *Structure halved* counter is corrected by hand. A mount's fire control
+  reaches the roll and gives the weapon the *Scope* trait (p.101, p.104); it outranks the weapon's
+  own. A vehicle entered by hand gains its *Structure* and *Comfort* fields.
+* **A robot's software and brain** open and delete from its sheet.
+* **A stash says a drag copies**: its strings said "taken". A locked stash no longer tells a player
+  its rows are "never sent". The container created from the inventory is called *New Container* in
+  the interface's language.
+
+### Guide
+
+* **The compendium *MGT2 — Guide to the system*** (`mgt2.guide`) **arrives, in thirty pages**: what
+  the system is and is not, setting up a world, a first Traveller, a first check, a first fight and
+  a first ship, then every sheet and screen, the optional rules, the settings, macros and the API,
+  and what the system deliberately does not do.
+* **The guide exists in English only**, and English is what shows in all four languages. A French
+  reader therefore reads the English; the French translation is to come.
+* **A `?` in the title bar opens the guide at the window's own page**: on the Traveller, NPC,
+  vehicle, spacecraft, robot, world, stash and item sheets, and on creation, space combat, the
+  voyage, the Docket and the roll prompt. Fleet battles, trade and the compendium explorer carry
+  none: their pages are read in the compendium. The *Show the guide button* setting, which belongs
+  to each browser, removes it.
+
+### Demo
+
+* **Five Travellers out of the creation loop** in *MGT2 — Demo actors, annotated*, each from a blank
+  Actor, with its notes: *Demo — Tamsin Reeve* (the cadet school with honours, then the patrol),
+  *Demo — Corvin Dray* (a refusal, the draft, a Mishap and the surgeon's bill), *Demo — Mirel Aston*
+  (a creation left open: once imported, she waits on the creation screen in her third term), *Demo —
+  Hesper Lund* (an ageing crisis paid for, a pension and a debt) and *Demo — Joren Pask* (the
+  university, a change of assignment, a contact, a rival and an ally).
+* **A Scene**, *Demo — Bellweather Roads*, in a new compendium, *MGT2 — Demo scenes, annotated*
+  (`mgt2.demo-scenes`): a *Vacuum* region and a *Radiation* region to cross with a token. The second
+  acts on entry, the first at the start of each combat round: with no combat, it does nothing to a
+  Traveller.
+* **Five careers and four shared tables** in *MGT2 — Demo items, annotated*, so that a creation
+  played on the system alone has somewhere to go after a refusal, once these documents are imported
+  into the world. Between them they carry the draft, the career always open, automatic entry, the
+  referee's leave, forced entry and release, a commission and a change of assignment. The careers
+  are *Demo — Reach Guard*, *Demo — Fen Holders*, *Demo — Quay Hands*, *Demo — Pilots' Guild* and
+  *Demo — Harbour Lock-up*.
+* **A demo skill carries its real name**: *Seafarer* and no longer *Demo — Seafarer*, on the Item
+  and in every reference to it. A demo career thus raises the skill the Traveller holds, instead of
+  creating a second one.
+* **A demo document left in its compendium now answers only to its name.** It no longer puts itself
+  forward after a refusal, for a forced entry naming no career, for "any other career", in an open
+  skill pick or in a voucher's list. Imported into the world, it answers like any other document.
+* **The demo's values are all invented.** *Demo — Harbour Patrol*, *Demo — Harbour Cadet School*,
+  *Demo — Engineer's Toolkit*, *Demo — Cargo Lot* and *Demo — Kestrel-class Courier* change their
+  figures, and the Kestrel at last has a power plant sized to its systems. A document already
+  imported keeps its own.
+
+### Documentation
+
+* **The rules audit journal** (`mgt2.docs`) **is now whole in Spanish and Brazilian Portuguese**,
+  the two lists of each screen included. **No reader of those languages has gone through it with the
+  books open**: its terms come from the language files, then from Mongoose's community vocabulary,
+  English stands where neither names the term, and a term may yet change.
+* **The same journal** follows this release: the ageing crisis with the change of assignment, the
+  career offered and PSI, the age creation writes, fleet dispersal and the robot in vacuum.
+
+### Fixes
+
+* **The sheet no longer shows raw keys.** A loss written by creation gave the internal name of its
+  table, such as `personalDevelopment`: it now reads in the interface's language, rows already
+  recorded included, and a note typed by hand stays as it is. A converted contact's note and a
+  spending note are written translated; those already written do not change.
+* **The loss window of a creation injury talks about injury**, no longer about ageing.
+* **A grant finds the skill held whatever the case of its speciality**: *Electronics (comms)* raises
+  *Electronics (Comms)* instead of creating a second one.
+* **A weapon or power whose bound skill is written by name** opens the roll prompt on that skill, no
+  longer on *Not proficient*.
+* **A loss row billed to the Traveller**, ageing crisis care included, **also goes into their
+  finance notes.**
+* **In English, the *Ally* relation was spelled *Allie*.**
+* **For macros**: `TravellerActorSheet.checkModifiers` becomes `RollPromptHelper.checkModifiers`.
+
+---
+
 ## [0.2.8]
 
 **Verified on Foundry VTT 14.369.**

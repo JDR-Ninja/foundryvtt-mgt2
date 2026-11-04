@@ -331,6 +331,7 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         const rolled = await Muster.roll(actor, asked);
         if ( !rolled ) return;
         const provenance = { career: asked.career, table: MUSTER_TABLE,
+            term: actor.items.get(asked.career).system.termLog.at(-1)?.term ?? Chargen.read(actor).term,
             note: game.i18n.localize(`MGT2.Chargen.Muster.Column.${asked.column}`) };
         const printed = Muster.rowFor(actor.items.get(asked.career), asked.column, rolled.roll.total);
 
@@ -544,6 +545,11 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         if ( Math.min(credits, debt) > 0 ) {
             const paid = Math.min(credits, debt);
             await actor.update({ "system.finance.credits": credits - paid, "system.finance.debt": debt - paid });
+        }
+        const age = actor.system.personal.age;
+        if ( !age || (age === actor.getFlag("mgt2", "writtenAge")) ) {
+            const written = String(Chargen.age(actor));
+            await actor.update({ "system.personal.age": written, "flags.mgt2.writtenAge": written });
         }
         return Chargen.finish(actor);
     }

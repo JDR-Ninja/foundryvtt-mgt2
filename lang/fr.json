@@ -1511,6 +1511,7 @@
         "NoAgeingYet": "Le vieillissement n'a pas encore commencé pour ce Voyageur.",
         "AgeingDM": "Périodes servies ({n})",
         "AgeingChoose": "Le vieillissement prélève son dû. Vous choisissez quelles caractéristiques.",
+        "InjuryChoose": "La blessure prélève son dû. Vous choisissez quelles caractéristiques.",
         "LosePoints": "Perdre {n}",
         "AgeingNoRow": "La table de Vieillissement n'imprime aucune ligne pour {n} : le référent tranche.",
         "Aged": "Jet de Vieillissement {n} : {changes}",
@@ -1533,6 +1534,7 @@
         "ChangeAssignment": "Changer d'affectation ({rule})",
         "PickAssignment": "Quelle affectation ?",
         "AssignmentKept": "Le changement a échoué : vous continuez dans l'ancienne affectation, sans pénalité.",
+        "AssignmentChanged": "Changement d'affectation : {from} → {to}.",
         "AssignmentNewCareer": "Pour cette carrière, un changement d'affectation compte comme une nouvelle carrière : cette période la clôt, et la suivante se qualifie pour la nouvelle affectation.",
         "SubRollPassed": "Le jet propre à cette ligne est réussi.",
         "SubRollFailed": "Le jet propre à cette ligne a échoué.",
@@ -1549,6 +1551,7 @@
         "RefusedThisTerm": "Une qualification a déjà été refusée cette période, on ne peut donc pas entrer dans {career} : la période revient à la conscription ou à une carrière toujours ouverte.",
         "AgeingDistinct": "Chaque perte porte sur une caractéristique différente.",
         "AgeingOwed": "Le jet de vieillissement est fait : ses pertes doivent être appliquées.",
+        "InjuryOwed": "Le jet sur la table des Blessures est fait : ses pertes doivent être appliquées.",
         "ExcessShares": {
           "one": "{n} point au-delà du maximum devient une Part de vaisseau",
           "other": "{n} points au-delà du maximum deviennent des Parts de vaisseau"
@@ -1751,7 +1754,8 @@
       "Docs": "MGT2 — Ce que ce système fait des règles",
       "Guide": "MGT2 — Guide du système",
       "DemoActors": "MGT2 — Acteurs de démonstration, annotés",
-      "DemoItems": "MGT2 — Objets de démonstration, annotés"
+      "DemoItems": "MGT2 — Objets de démonstration, annotés",
+      "DemoScenes": "MGT2 — Scènes de démonstration, annotées"
     },
     "Guide": {
       "Journal": "Utiliser ce système",
@@ -1929,6 +1933,7 @@
       "NewAugment": "Nouvelle Augmentation",
       "NewContact": "Nouveau Contact",
       "NewContainer": "Nouveau Conteneur",
+      "SkillDM": "Modificateur de {skill}",
       "NewComputer": "Nouvel Ordinateur",
       "NewDisease": "Nouvelle Maladie",
       "NewEquipment": "Nouvel Équipement",
@@ -2388,6 +2393,10 @@
         "MountLabel": "position",
         "AddMount": "Ajouter une monture",
         "DeleteMount": "Retirer cette monture",
+        "AddScreen": "Ajouter un écran",
+        "DeleteScreen": "Retirer cet écran",
+        "Screens": "Écrans",
+        "ScreenCount": "Nombre",
         "Ammo": "Munitions",
         "Tabs": {
           "Station": "Poste de combat",
@@ -2779,6 +2788,13 @@
         "FreeSkills": "Compétences de niveau 0 gratuites",
         "EducationCap": "Plafond d'ÉDU",
         "Hardened": "Cerveau durci (/fib)",
+        "Biological": "Robot biologique",
+        "VacuumSealing": "Étanchéité au vide",
+        "VacuumSealingHint": "Ce qui protège ce robot dans le vide : la protection contre les environnements hostiles ou contre le vide. Une valeur choisie l’emporte sur les lignes d’options, et répond pour une ligne écrite dans une autre langue ou pour une protection que le modèle possède d’origine.",
+        "VacuumHostile": "Hostile",
+        "VacuumFull": "Vide",
+        "VacuumNone": "aucune",
+        "VacuumFromRows": "Lignes : {rows}",
         "Rads": "Rads reçus par le cerveau",
         "RadiationHint": "Les radiations ont coûté à ce cerveau INT -{n} et Bande passante -{n}, définitivement.",
         "BrainDamageDM": "Cerveau endommagé",
@@ -2827,6 +2843,7 @@
           "tl": "palier de NT",
           "efficiency": "efficacité",
           "packs": "blocs d'énergie",
+          "vacuum": "vide",
           "steps": "paliers de vitesse",
           "hours": "heures",
           "speedBase": "base",
@@ -2890,7 +2907,7 @@
         "Bases": "Bases",
         "Zone": "Zone de voyage",
         "Forbidden": "Ce monde est une Zone Rouge.",
-        "ForbiddenWhy": "Une Zone Rouge est interdite : on n'y propose ni passagers, ni fret, ni courrier.",
+        "ForbiddenWhy": "Core p.260 interdit de se rendre en Zone Rouge, et le faire respecter revient à l'arbitre. Les tables de trafic en tiennent toujours compte, à MD−4 pour les passagers et MD−6 pour le fret.",
         "Berthing": "Amarrage",
         "BerthingCount": "lancé une fois, conservé",
         "BerthingBand": "1D × Cr{amount} par semaine",
@@ -3022,10 +3039,10 @@
           "none": "la fiche ne s'ouvre pas",
           "limited": "le nom, et rien de ce qu'elle contient",
           "observer": "lit le contenu, ne déplace rien",
-          "owner": "lit et prend"
+          "owner": "lit et copie"
         },
-        "WithheldNone": "Vous lisez le contenu et, en Propriétaire, vous pouvez le déplacer. Ce que vous faites glisser hors de la fiche est pris, pas copié.",
-        "WithheldLocked": "La réserve est verrouillée : son contenu est retenu. La fiche reste ouverte et les lignes ne sont jamais envoyées — c'est l'état qu'un objet conteneur ne sait pas produire.",
+        "WithheldNone": "Vous lisez le contenu et, en Propriétaire, vous pouvez le copier. Ce que vous faites glisser hors de la fiche est copié, et sa ligne reste ici jusqu'à ce qu'on la supprime.",
+        "WithheldLocked": "La réserve est verrouillée : son contenu est retenu. La fiche reste ouverte et n'affiche aucune ligne — c'est l'état qu'un objet conteneur ne sait pas produire.",
         "WithheldRung": "Vous voyez que cette réserve existe, et rien de ce qu'elle contient. Observateur est le niveau qui lit un inventaire.",
         "Items": "Objets",
         "Mass": "Masse",
@@ -3555,6 +3572,7 @@
       "ElevationSplit": "Les deux jetons sont à des altitudes différentes, or l’altitude ordonne les niveaux d’une scène spatiale au lieu d’y mesurer une hauteur.",
       "NoCombat": "Aucun combat spatial ni bataille entre flottes n’est affiché, or la zone de portée appartient à l’un d’eux.",
       "NotInCombat": "{name} n’est pas un contact de la rencontre affichée.",
+      "ManyContacts": "{name} vole dans plusieurs vaisseaux ou flottes de cette rencontre : son acteur ne dit pas lequel.",
       "SalvoPosition": "{name} est une salve en vol : elle est là où elle est, pas là où est la flotte qui l’a tirée.",
       "NoGroup": "{name} n’appartient à aucun vaisseau ni à aucune flotte, or une zone de portée se mesure entre deux d’entre eux.",
       "SameGroup": "Les deux jetons appartiennent à {name}, or une zone de portée se mesure entre deux.",
@@ -3701,6 +3719,8 @@
       "TacticsTerm": "Tactique (navale)",
       "Morale": "Moral",
       "PoolEmpty": "{name} n’a plus que {left} et {wanted}.",
+      "DispersalBusy": "{name} est en pleine dispersion : ses vaisseaux n’entreprennent aucune autre action avant la fin des rounds (Garde Haute p.120).",
+      "DispersalOwed": "{name} n’a pas achevé sa dispersion, et ses vaisseaux ne se séparent qu’ensuite (Garde Haute p.120).",
       "DetachLarge": "Garde Haute renvoie un groupe de {max} vaisseaux ou moins aux règles de combat spatial standard ; {count} ont été détachés.",
       "SplitOf": "{name} (détachement)",
       "Mode": {
@@ -3741,6 +3761,19 @@
         "Arriving": "Arrive ce round",
         "DropShipHint": "Déposez un vaisseau spatial ici pour l’ajouter à la ligne",
         "DropWingHint": "Déposez une classe de chasseur ici pour ajouter un escadron",
+        "DispersalHolds": "Aucune autre action avant leur fin : ni réparation, ni rompre le combat. Ses vaisseaux tirent encore, avec ce MD.",
+        "DispersalServing": "La dispersion a échoué, et ses rounds passent d’abord : les vaisseaux pourront retenter la manœuvre ensuite (Garde Haute p.120).",
+        "DispersalFailed": "La dispersion a échoué. Les vaisseaux peuvent retenter la manœuvre, et ne se séparent qu’après une réussite (Garde Haute p.120).",
+        "DivideWhy": "Cochez ce qui part. Les vaisseaux se séparent une fois la dispersion achevée (Garde Haute p.120).",
+        "Split": "Séparer en une nouvelle flotte",
+        "FoldInto": "Rejoindre {name}",
+        "Fold": "Rejoindre une autre flotte",
+        "FoldHint": {
+          "one": "Faire rejoindre {into} à {name} ? Son {count} vaisseau rallie cette flotte, et {name} quitte la bataille avec toutes ses portées.",
+          "other": "Faire rejoindre {into} à {name} ? Ses {count} vaisseaux rallient cette flotte, et {name} quitte la bataille avec toutes ses portées."
+        },
+        "Opposing": "Flotte adverse",
+        "OpposingHint": "Quelle flotte s’oppose à {name} ? Le Moral lit ses pertes et son vaisseau amiral.",
         "ShipLine": "coque {hull} · blindage {armour}",
         "WingLine": {
           "one": "{n} sur {of} chasseur",
@@ -3760,7 +3793,7 @@
         "JoinReserve": "Mettre en réserve",
         "LeaveReserve": "Remettre en ligne",
         "Detach": "Détacher",
-        "DetachHint": "Envoyer ce vaisseau dans un combat spatial standard, comme Garde Haute p.122 le recommande pour un à trois vaisseaux",
+        "DetachHint": "Envoyer ce vaisseau dans un combat spatial standard, comme Garde Haute p.120 le recommande pour un à trois vaisseaux",
         "OpenSheet": "Ouvrir la fiche",
         "Formation": "Formation",
         "FormationWhy": "espacement interne de la flotte — MD défensif +{dm}",
@@ -4121,6 +4154,7 @@
       "JumpTarget": "Facile (4+) Ingénieur (propulseur de saut) · EDU",
       "ParsecChip": "{dm} · 1 par parsec, ×{parsecs}",
       "UnrefinedChip": "Carburant non raffiné −2",
+      "CriticalChip": "Critique du propulseur-S {dm}",
       "MaintenanceChip": "mois de retard de maintenance — à l'arbitre",
       "DiameterChip": "limite des 100 diamètres — à l'arbitre",
       "ParsecDM": {
@@ -4130,6 +4164,7 @@
       "UnrefinedDM": "Carburant non raffiné",
       "DebitWhy": "Le saut débite le réservoir au moment du jet. Rien d'autre ne touche au carburant, et aucun jet ne fait avancer l'étape.",
       "NoFuel": "Ce saut consomme {need} t et le réservoir en contient {have}. Sans le carburant, le propulseur ne s'allume pas.",
+      "DriveOut": "Propulseur-S : {state}. Il ne peut pas servir avant d’être réparé.",
       "NoStation": "Aucun {station} à bord avec une fiche liée — le test n'a aucun personnage où lire le niveau de compétence.",
       "Ruleset": "Corpus de règles",
       "Declared": "déclaré, jamais supposé",
@@ -4492,6 +4527,7 @@
         "Consignment": "{lot} : {tons} t, {credits} Cr payés.",
         "Disembark": "{n} × {grade} débarqués.",
         "FarePaid": "Le prix a été encaissé au moment de la réservation (Livre de règles de Traveller p.239).",
+        "PaidOnDelivery": "Payé à la livraison (Livre de règles de Traveller p.241).",
         "DueDay": "Échéance au jour de campagne {day}, payé à la livraison (Livre de règles de Traveller p.241).",
         "Late": {
           "one": "{days} jour de retard — 1D+4 donne {roll}, soit {percent} % retenus : {docked} Cr sur un fret de {credits} Cr.",
@@ -4834,6 +4870,7 @@
       "CrisisWhy": "Crise de vieillissement : une caractéristique est à 0. Le Livre de règles de Traveller p.49 en fait une mort à moins que 1D × Cr10000 n'achète des soins, qui ramènent à 1 chaque caractéristique réduite.",
       "CrisisPast": "Ce voyageur a survécu à une crise de vieillissement.",
       "CrisisPastWhy": "Ce voyageur a survécu à une crise de vieillissement. Le Livre de règles de Traveller p.49 la rend définitive : il rate automatiquement tous ses jets de qualification suivants, quels que soient ses scores actuels.",
+      "PsiLost": "Le vieillissement réduit la PSI à 0 : toutes les capacités psioniques sont perdues et ne peuvent jamais être récupérées.",
       "CrisisWarning": "Ceci amène une caractéristique à 0.",
       "CrisisWarningWhy": "Ceci amène une caractéristique à 0. Le Livre de règles de Traveller p.49 fait de la crise de vieillissement une mort à moins que 1D × Cr10000 n'achète des soins."
     },
@@ -4842,6 +4879,10 @@
       "Damage": "{points} dégâts",
       "Ambient": "{celsius} °C",
       "Exposure": "round {round} d'exposition",
+      "RobotVacuum": {
+        "Hour": "Endurance réduite de moitié à {hours} h tant qu'il reste ici, et un jet de panne toutes les heures, à MD-2 au-dessus de 100 °C ou en dessous de -100 °C (Robot Handbook p.34). L'Arbitre le lance.",
+        "TwoHours": "Endurance réduite de moitié à {hours} h tant qu'il reste ici, et un jet de panne toutes les deux heures, à MD-2 au-dessus de 100 °C ou en dessous de -100 °C (Robot Handbook p.34). L'Arbitre le lance."
+      },
       "Interval": "l'arbitre applique {rule}",
       "Shielded": {
         "one": "{rads} rad, entièrement absorbé par les {shielded} de la région",

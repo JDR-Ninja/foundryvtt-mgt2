@@ -8,6 +8,7 @@ import { Grants } from "./chargen-grants.js";
 import { CreationPsi } from "./chargen-psi.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
+import { GuideButtonMixin } from "./guide.js";
 import { MGT2Screen } from "./screens.js";
 import { Rules } from "./rules.js";
 
@@ -26,7 +27,10 @@ const FRAME_TYPES = "Item.species";
  * The creation screen: a grid of Travellers × terms, and no session document behind it.
  * @extends {ApplicationV2}
  */
-export class ChargenScreen extends MGT2Screen(HandlebarsApplicationMixin(ApplicationV2)) {
+export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplicationMixin(ApplicationV2))) {
+
+    /** @inheritDoc */
+    static GUIDE_TOPIC = "chargen";
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {

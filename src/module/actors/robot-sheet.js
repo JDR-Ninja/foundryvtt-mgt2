@@ -14,8 +14,8 @@ const ROW_ARRAYS = new Set(["options", "locomotion", "manipulators"]);
 /** The robot sheet. @extends {TravellerActorSheet} */
 export class RobotActorSheet extends TravellerActorSheet {
 
-  /** Its own page lands with the reference chapter. @inheritDoc */
-  static GUIDE_TOPIC = null;
+  /** @inheritDoc */
+  static GUIDE_TOPIC = "robot";
 
     /** @inheritDoc */
     static DEFAULT_OPTIONS = {
@@ -41,6 +41,7 @@ export class RobotActorSheet extends TravellerActorSheet {
             templates: [`${PARTS_PATH}/robot/budget.html`,
                 `${PARTS_PATH}/parts/characteristic.html`,
                 `${PARTS_PATH}/parts/row-controls.html`,
+                `${PARTS_PATH}/parts/armour-rows.html`,
                 "systems/mgt2/templates/items/blocks/traits.html"],
             scrollable: [""]
         }
@@ -85,6 +86,8 @@ export class RobotActorSheet extends TravellerActorSheet {
             locomotion: RobotActorSheet.#locomotion(system),
             manipulators: RobotActorSheet.#manipulators(system),
             brain: RobotActorSheet.#brain(system),
+            vacuumRows: game.i18n.format("MGT2.Actor.robot.VacuumFromRows", { rows: game.i18n.localize(
+                MGT2.RobotVacuumSealing[system.vacuumRows] ?? "MGT2.Actor.robot.VacuumNone") }),
             statblock: RobotActorSheet.#statblock(system),
             // The Size table as options: `eq` is strict, and an object's `{{#each}}` key is a
             // string where `system.size` is a number, so the match is made here instead.
@@ -175,7 +178,7 @@ export class RobotActorSheet extends TravellerActorSheet {
     static #bandwidth(system) {
         const brain = system.brain;
         const rows = brain.packages.map(entry => ({
-            key: entry._id, label: entry.name, value: entry.bandwidth
+            key: entry._id, label: entry.name, value: entry.bandwidth, item: true
         }));
         // RH p.73's surcharge is a cost like any other and rides `used`, so it gets a row of its
         // own — folded into the INT figure below it would read as an upgrade nobody bought.

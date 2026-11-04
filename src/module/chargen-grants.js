@@ -53,7 +53,7 @@ export const Grants = {
         const specialities = Rules.on("specialitiesCountToCap");
         let held = 0;
         for ( const skill of this.skills(actor) ) {
-            if ( !specialities && skill.system.skill?.speciality ) continue;
+            if ( !specialities && MGT2Helper.skillSpeciality(skill) ) continue;
             held += skill.system.level ?? 0;
         }
         const characteristics = actor?.system.characteristics ?? {};
@@ -88,8 +88,7 @@ export const Grants = {
         const key = String(speciality ?? "").toLowerCase();
 
         const existing = this.skills(actor).find(skill => MGT2Helper.matchesSkill(skill.name, wanted)
-            && ((String(skill.system.skill?.speciality ?? "").toLowerCase() === key)
-                || (!skill.system.skill?.speciality && MGT2Helper.nameStatesSpeciality(skill.name, speciality))));
+            && (MGT2Helper.skillSpeciality(skill).toLowerCase() === key));
         const from = existing?.system.level ?? 0;
         let to = { raise: from + level, add: from + level, atLeast: Math.max(from, level),
             floor: Math.max(from + 1, floor ?? level), set: level }[mode] ?? (from + level);
@@ -119,6 +118,9 @@ export const Grants = {
     /** A characteristic change is a signed row in the log and never a write to `base`. */
     async grantCharacteristic(actor, grant, provenance = {}) {
         if ( !grant.characteristic ) return "";
+        if ( (grant.characteristic === "psionic") && (grant.value > 0) && actor.system.states?.psiLost ) {
+            return game.i18n.localize("MGT2.Loss.PsiLost");
+        }
         const held = actor.system.characteristics[grant.characteristic];
         const current = (held?.base ?? 0) + (held?.auto ?? 0);
         // The one form that lives on rank rows: `SOC 10 or SOC +1, whichever is higher` is max(current

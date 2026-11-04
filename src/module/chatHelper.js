@@ -500,7 +500,7 @@ export class ChatHelper {
      * @param {object} exposure   `{dose, roll}` — the dose before the armour deduction
      */
     static async resolveExposure(actor, { dose, roll = null }) {
-        if ((dose <= 0) || (typeof actor.system.applyRadiation !== "function")) return;
+        if ((dose <= 0) || !Rules.on("radiation") || (typeof actor.system.applyRadiation !== "function")) return;
         const protection = actor.system.radiationProtection;
         const applied = await actor.system.applyRadiation(dose - protection);
         if (!applied) {

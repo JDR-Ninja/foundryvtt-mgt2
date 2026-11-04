@@ -3187,6 +3187,9 @@ li.chat-message {
 .mgt2 .statline .stat:first-child {
   padding-left: 0;
 }
+.mgt2 .statline .stat input.f.num {
+  width: 4em;
+}
 .mgt2 .statline dt {
   font-family: var(--cond);
   font-size: 10px;
@@ -3350,6 +3353,9 @@ li.chat-message {
 .mgt2 .budget .brows td.num {
   width: 5.5rem;
   text-align: right;
+}
+.mgt2 .budget .brows td.r {
+  width: 3.5rem;
 }
 .mgt2 .budget .why {
   margin-left: 8px;
