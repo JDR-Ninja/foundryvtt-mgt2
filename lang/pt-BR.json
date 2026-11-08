@@ -2018,6 +2018,8 @@
         "ExperienceHint": "Este nível de experiência sugere perícias em torno do nível {level}. Uma dica ao lado do campo, nunca um gerador.",
         "DamageResponse": "Resposta ao dano",
         "ArmourConditional": "Armadura condicional",
+        "ArmourConditionalApplied": "Soma-se à Proteção contra {types} ao aplicar o dano.",
+        "ArmourConditionalUnapplied": "Não nomeia nenhum tipo de dano: nada a soma ao aplicar o dano.",
         "Scale": "Escala",
         "DrivenOff": "Afugentado",
         "DrivenOffHint": "Perdeu metade dos PV iniciais. É informado a critério do árbitro; nada age sobre isso.",
@@ -3847,7 +3849,9 @@
       "Powered": "Mecanizada",
       "Power": "Energia",
       "Processing": "Processamento",
+      "ConditionalProtection": "Proteção condicional",
       "Protection": "Proteção",
+      "ProtectionVs": "{protection} contra {types}",
       "PsionicSkill": "Perícia psiônica",
       "Qty": "Qtd.",
       "Radiations": "Radiações",
@@ -4278,7 +4282,9 @@
       "crushing": "Esmagamento",
       "impaling": "Empalamento",
       "projectile": "Projétil",
-      "laser": "Laser"
+      "laser": "Laser",
+      "plasma": "Plasma",
+      "energy": "Energia"
     },
     "DamageTransforms": {
       "full": "Completo",

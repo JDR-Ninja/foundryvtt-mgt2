@@ -35,9 +35,14 @@ export class MGT2ActiveEffect extends foundry.documents.ActiveEffect {
    * @inheritDoc
    */
   get isSuppressed() {
+    const item = this.item;
     // A drug's own effects are the TEMPLATE a dose copies onto the Traveller, so carrying the box
     // changes nothing: the trigger is consumption, not equipment.
-    if ( this.parent?.type === "drug" ) return true;
+    if ( item?.type === "drug" ) return true;
+    // Gear with an `equipped` field transfers only while equipped; a loose Item has no wearer.
+    if ( this.transfer && item?.actor && item.system?.schema?.has("equipped") && !item.system.equipped ) {
+      return true;
+    }
     return (this.flags?.mgt2?.suspended === true) || super.isSuppressed;
   }
 

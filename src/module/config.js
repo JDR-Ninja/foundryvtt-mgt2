@@ -294,7 +294,7 @@ MGT2.CombatMishaps = Object.freeze([
     { max: null, label: "MGT2.CombatMishaps.none" }
 ]);
 
-// Companion p.93-94. Not a partition: the types overlap and an empty set is the normal case.
+// Companion p.93-94 and CSC folio 18. Not a partition: the types overlap and an empty set is the normal case.
 MGT2.DamageTypes = Object.freeze({
     blades: "MGT2.DamageTypes.blades",
     fire: "MGT2.DamageTypes.fire",
@@ -302,7 +302,9 @@ MGT2.DamageTypes = Object.freeze({
     crushing: "MGT2.DamageTypes.crushing",
     impaling: "MGT2.DamageTypes.impaling",
     projectile: "MGT2.DamageTypes.projectile",
-    laser: "MGT2.DamageTypes.laser"
+    laser: "MGT2.DamageTypes.laser",
+    plasma: "MGT2.DamageTypes.plasma",
+    energy: "MGT2.DamageTypes.energy"
 });
 
 // Core folio 167's Damage Scale table, to-hit column.

@@ -166,7 +166,7 @@
 				{{/if}}
 			</dd>
 		</div>
-		<div class="stat{{#unless system.inventory.armor}} none{{/unless}}" data-derived="system.inventory.armor">
+		<div class="stat{{#unless system.inventory.armor}} none{{/unless}}" data-derived="system.inventory.armor"{{#if protectionVs}} data-tooltip="{{protectionVs}}"{{/if}}>
 			<dt>{{localize 'MGT2.Actor.Armor'}}</dt>
 			<dd>{{system.inventory.armor}}</dd>
 		</div>

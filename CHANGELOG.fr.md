@@ -4,6 +4,57 @@
 
 ---
 
+## [0.2.10]
+
+**Vérifié sur Foundry VTT 14.370.**
+
+**Une armure qui protège davantage contre un type de dégâts, et un équipement qui n'agit que porté**
+([#8](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/8)). La seconde Protection qu'imprime le
+Central Supply Catalogue, `+1 (+6 vs. lasers)`, s'applique maintenant aux dégâts, et celle des
+robots aussi.
+
+### ⚠ Ruptures
+
+* **Un objet non équipé n'applique plus ses Effets Actifs.** Une armure, une arme ou un équipement
+  ne transmet ses effets au Voyageur que s'il est équipé, et une augmentation que si elle est
+  posée : un rembourrage rangé dans le sac ne coûte plus de MD de DEX. Un objet glissé sur une fiche
+  arrive non équipé, comme avant, et ses effets attendent qu'on l'équipe. Les effets d'un talent,
+  d'une espèce, d'une carrière ou d'une maladie ne changent pas, et un objet du monde qui
+  n'appartient à aucun acteur montre toujours ses effets actifs sur sa propre fiche.
+* **La seconde valeur d'un trait Armour s'ajoute contre son type de dégâts** (Robot Handbook p.32).
+  `Armour (+7, +10 vs. lasers)` protège de 17 contre un laser et de 7 contre le reste, comme le
+  Reflec d'un robot, qui s'ajoute à son armure. Le trait n'était qu'affiché : les robots imprimés
+  qui le portent encaissent maintenant 10 de moins d'un laser. Sur un PNJ créature, le panneau dit
+  si la seconde valeur s'applique ; une condition qui ne nomme aucun type, comme `vs. psionics`, ne
+  s'applique pas.
+
+### Armure et dégâts
+
+* **Une armure peut avoir une Protection conditionnelle** (CSC p.18). En mode édition, sa fiche
+  prend une seconde valeur et les types de dégâts qu'elle couvre. Contre une attaque d'un de ces
+  types, cette valeur **remplace** la Protection de l'armure : l'Ablat, `+1 (+6 vs. lasers)`, arrête
+  6 contre un laser et 1 contre le reste, et un Reflec porté sur une autre armure ajoute ses 10
+  contre les lasers seulement. Une valeur de 0 compte : le bouclier d'énergie personnel,
+  `+12 (+0 vs. lasers)`, laisse passer les lasers (CSC p.13). Remplacer plutôt qu'ajouter est une
+  interprétation. Il faut que l'arme porte son type de dégâts. L'usure de l'Ablat, −1 par tir de
+  laser, reste à l'arbitre.
+* **Deux types de dégâts de plus, Plasma et Énergie**, pour les armes et les armures (CSC p.18). Il
+  n'y a pas de type psionique : la protection du Neural Sheath contre les psioniques ne s'applique
+  pas.
+* **La fiche montre la Protection conditionnelle** sous la Protection de la ligne d'armure,
+  « 6 vs. Laser », et dans une infobulle sur l'Armure de l'en-tête du Voyageur, du PNJ et du robot,
+  qui donne la Protection contre chaque type.
+
+### Correctifs
+
+* **Entreposer un objet avec le bouton de la fiche le déséquipe.** Il restait équipé dans le sac, sa
+  Protection et ses effets toujours comptés. La liste de rangement de la fiche d'objet et le
+  glisser-déposer dans un conteneur le déséquipaient déjà.
+* **L'onglet Effets se met à jour quand on équipe ou déséquipe un objet**, sans attendre que toute
+  la fiche soit redessinée.
+
+---
+
 ## [0.2.9]
 
 **Vérifié sur Foundry VTT 14.369.**

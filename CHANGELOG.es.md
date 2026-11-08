@@ -8,6 +8,54 @@
 
 ---
 
+## [0.2.10]
+
+**Verificado en Foundry VTT 14.370.**
+
+**Una armadura que protege más contra un tipo de daño, y un equipo que solo actúa equipado**
+([#8](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/8)). La segunda Protección que imprime el
+Central Supply Catalogue, `+1 (+6 vs. lasers)`, se aplica ahora al daño, y la de los robots también.
+
+### ⚠ Cambios que rompen
+
+* **Un objeto no equipado ya no aplica sus Efectos Activos.** Una armadura, un arma o un equipo solo
+  transmite sus efectos al Viajero si está equipado, y un aumento solo si está instalado: un
+  acolchado guardado en la mochila ya no cuesta MD de DES. Un objeto arrastrado a una hoja llega sin
+  equipar, como antes, y sus efectos esperan a que se equipe. Los efectos de un talento, una
+  especie, una carrera o una enfermedad no cambian, y un objeto del mundo que no pertenece a ningún
+  Actor sigue mostrando sus Efectos Activos en su propia hoja.
+* **El segundo valor de un rasgo Armour se suma contra su tipo de daño** (Robot Handbook p.32).
+  `Armour (+7, +10 vs. lasers)` protege 17 contra un láser y 7 contra el resto, como el Reflec de un
+  robot, que se suma a su armadura. El rasgo solo se mostraba: los robots impresos que lo llevan
+  reciben ahora 10 puntos menos de un láser. En un PNJ criatura, el panel dice si el segundo valor
+  se aplica; una condición que no nombra ningún tipo, como `vs. psionics`, no se aplica.
+
+### Armadura y daño
+
+* **Una armadura puede tener una Protección condicional** (CSC p.18). En modo de edición, su hoja
+  gana un segundo valor y los tipos de daño que cubre. Contra un ataque de uno de esos tipos, ese
+  valor **sustituye** a la Protección de la armadura: el Ablat, `+1 (+6 vs. lasers)`, detiene 6
+  contra un láser y 1 contra el resto, y un Reflec llevado sobre otra armadura suma sus 10 solo
+  contra los láseres. Un valor de 0 cuenta: el escudo de energía personal, `+12 (+0 vs. lasers)`,
+  deja pasar los láseres (CSC p.13). Sustituir en lugar de sumar es una interpretación. El arma
+  tiene que llevar su tipo de daño. El desgaste del Ablat, −1 por disparo láser, corresponde al
+  árbitro.
+* **Dos tipos de daño más, Plasma y Energía**, para las armas y las armaduras (CSC p.18). No hay
+  tipo psiónico: la protección de la Neural Sheath contra lo psiónico no se aplica.
+* **La hoja muestra la Protección condicional** bajo la Protección de la línea de armadura, «6
+  contra Láser», y en una ayuda emergente sobre la Armadura de la cabecera del Viajero, del PNJ y
+  del robot, que da la Protección contra cada tipo.
+
+### Correcciones
+
+* **Guardar un objeto con el botón de la hoja lo desequipa.** Seguía equipado en la mochila, con su
+  Protección y sus efectos todavía contados. La lista de almacenaje de la hoja de objeto y soltarlo
+  en un contenedor ya lo desequipaban.
+* **La pestaña Efectos se actualiza al equipar o desequipar un objeto**, sin esperar a que se
+  redibuje toda la hoja.
+
+---
+
 ## [0.2.9]
 
 **Verificado en Foundry VTT 14.369.**

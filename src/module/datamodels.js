@@ -1317,11 +1317,26 @@ export class ArmorData extends PhysicalItemData {
         this.processingCap = this.processing ?? 0;
     }
 
+    /** CSC folio 18: "+1 (+6 vs. lasers)" — the second score replaces the first against those types. */
+    protectionAgainst(damageType = []) {
+        const base = +this.protection || 0;
+        const { protection, damageType: types } = this.conditional ?? {};
+        if ( !Number.isFinite(protection) || !types?.size ) return base;
+        return Array.from(damageType ?? []).some(type => types.has(type)) ? protection : base;
+    }
+
     static defineSchema() {
         const schema = super.defineSchema();
         schema.equipped = new fields.BooleanField({ required: false, initial: false });
         schema.radiations = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
         schema.protection = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
+        // A null score or an empty set is no conditional Protection; 0 is one (CSC folio 13's energy shield).
+        schema.conditional = new fields.SchemaField({
+            protection: new fields.NumberField({ required: false, nullable: true, initial: null, min: 0, integer: true }),
+            damageType: new fields.SetField(
+                new fields.StringField({ required: true, blank: false, choices: MGT2.DamageTypes }),
+                { required: false, initial: () => [] })
+        });
         // Core p.102's battle dress carries a Computer/2 and p.104's Computer Weave adds a
         // Computer/0: `null` is no computer system, `0` is Computer/0, and the two are a rung apart.
         schema.processing = new fields.NumberField({

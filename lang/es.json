@@ -2018,6 +2018,8 @@
         "ExperienceHint": "Este nivel de experiencia sugiere habilidades en torno al nivel {level}. Una pista junto al campo, nunca un generador.",
         "DamageResponse": "Respuesta al daño",
         "ArmourConditional": "Armadura condicional",
+        "ArmourConditionalApplied": "Se suma a la Protección contra {types} al aplicar el daño.",
+        "ArmourConditionalUnapplied": "No nombra ningún tipo de daño: nada la suma al aplicar el daño.",
         "Scale": "Escala",
         "DrivenOff": "Ahuyentado",
         "DrivenOffHint": "Ha perdido la mitad de los Impactos iniciales. Se informa a criterio del árbitro; nada actúa sobre ello.",
@@ -3847,7 +3849,9 @@
       "Powered": "Motorizada",
       "Power": "Potencia",
       "Processing": "Procesamiento",
+      "ConditionalProtection": "Protección condicional",
       "Protection": "Protección",
+      "ProtectionVs": "{protection} contra {types}",
       "PsionicSkill": "Habilidad psiónica",
       "Qty": "Cant.",
       "Radiations": "Radiaciones",
@@ -4278,7 +4282,9 @@
       "crushing": "Contundente",
       "impaling": "Empalamiento",
       "projectile": "Proyectil",
-      "laser": "Láser"
+      "laser": "Láser",
+      "plasma": "Plasma",
+      "energy": "Energía"
     },
     "DamageTransforms": {
       "full": "Completo",

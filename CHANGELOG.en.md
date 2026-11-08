@@ -4,6 +4,53 @@
 
 ---
 
+## [0.2.10]
+
+**Verified on Foundry VTT 14.370.**
+
+**Armour that protects more against one damage type, and gear that acts only when worn**
+([#8](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/8)). The second Protection the Central
+Supply Catalogue prints, `+1 (+6 vs. lasers)`, now applies to damage, and so does a robot's.
+
+### ⚠ Breaking changes
+
+* **An unequipped item no longer applies its Active Effects.** Armour, a weapon or a piece of
+  equipment passes its effects to the Traveller only when it is equipped, and an augment only when
+  it is fitted: padding stowed in the pack no longer costs a DEX DM. An item dragged onto a sheet
+  arrives unequipped, as before, and its effects wait until it is equipped. The effects of a talent,
+  a species, a career or a disease do not change, and a world item that belongs to no Actor still
+  shows its Active Effects on its own sheet.
+* **The second value of an Armour trait adds against its damage type** (Robot Handbook p.32).
+  `Armour (+7, +10 vs. lasers)` stops 17 against a laser and 7 against the rest, like a robot's
+  Reflec, which adds to its armour. The trait was only displayed: the printed robots that carry it
+  now take 10 less from a laser. On a creature NPC, the panel says whether the second value applies;
+  a condition that names no type, such as `vs. psionics`, does not apply.
+
+### Armour and damage
+
+* **Armour can have a Conditional Protection** (CSC p.18). In edit mode, its sheet takes a second
+  value and the damage types it covers. Against an attack of one of those types, that value
+  **replaces** the armour's Protection: Ablat, `+1 (+6 vs. lasers)`, stops 6 against a laser and 1
+  against the rest, and Reflec worn over other armour adds its 10 against lasers only. A value of 0
+  counts: the Personal Energy Shield, `+12 (+0 vs. lasers)`, lets lasers through (CSC p.13).
+  Replacing rather than adding is a ruling. The weapon must have its *Damage Type* set. Ablat's
+  wear, −1 per laser shot, is left to the referee.
+* **Two more damage types, Plasma and Energy**, for weapons and armour (CSC p.18). There is no
+  psionic type: the Neural Sheath's protection against psionics does not apply.
+* **The sheet shows the Conditional Protection** under the armour row's Protection, "6 vs. Laser",
+  and in a tooltip on *Armor* in the Traveller, NPC and robot headers, which gives the Protection
+  against each type.
+
+### Fixes
+
+* **The sheet's *Store Item* button unequips the item it stores.** It stayed equipped in the pack,
+  its Protection and its effects still counted. The item sheet's storage list and a drag and drop
+  into a container already unequipped it.
+* **The Effects tab updates when an item is equipped or unequipped**, without waiting for the whole
+  sheet to be redrawn.
+
+---
+
 ## [0.2.9]
 
 **Verified on Foundry VTT 14.369.**

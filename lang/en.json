@@ -2018,6 +2018,8 @@
         "ExperienceHint": "This experience level suggests skills around level {level}. A hint beside the field, never a generator.",
         "DamageResponse": "Damage response",
         "ArmourConditional": "Conditional armour",
+        "ArmourConditionalApplied": "Added to Protection against {types} when the damage is applied.",
+        "ArmourConditionalUnapplied": "Names no damage type, so nothing adds it when the damage is applied.",
         "Scale": "Scale",
         "DrivenOff": "Driven off",
         "DrivenOffHint": "Half the starting Hits are gone. Reported at the referee's option; nothing acts on it.",
@@ -3847,7 +3849,9 @@
       "Powered": "Powered",
       "Power": "Power",
       "Processing": "Processing",
+      "ConditionalProtection": "Conditional Protection",
       "Protection": "Protection",
+      "ProtectionVs": "{protection} vs. {types}",
       "PsionicSkill": "Psionic Skill",
       "Qty": "Qty",
       "Radiations": "Radiations",
@@ -4278,7 +4282,9 @@
       "crushing": "Crushing",
       "impaling": "Impaling",
       "projectile": "Projectile",
-      "laser": "Laser"
+      "laser": "Laser",
+      "plasma": "Plasma",
+      "energy": "Energy"
     },
     "DamageTransforms": {
       "full": "Full",

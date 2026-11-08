@@ -61,6 +61,13 @@ export class MGT2Helper {
         return value > 0 ? `+${value}` : `−${-value}`;
     }
 
+    /** An armour's `conditional` as CSC folio 18 prints it ("6 vs. Laser"), or "" when it has none. */
+    static protectionVs({ protection, damageType } = {}) {
+        const types = Array.from(damageType ?? [], type => game.i18n.localize(MGT2.DamageTypes[type] ?? type));
+        if (!Number.isFinite(protection) || !types.length) return "";
+        return game.i18n.format("MGT2.Items.ProtectionVs", { protection, types: types.join(", ") });
+    }
+
     /** A formula as the books print it rather than as the parser reads it. */
     static showFormula(formula) {
         const say = key => game?.i18n?.localize?.(key) ?? key;

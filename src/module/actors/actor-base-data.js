@@ -2,7 +2,8 @@ import { MGT2 } from "../config.js";
 import { LocalDocumentField } from "../datamodels.js";
 import { MGT2Helper } from "../helper.js";
 import { Rules } from "../rules.js";
-import { buildHazardItem, buildTraitMap, createTraitsField, hazardTraits, resolveDamageResponse } from "../traits.js";
+import { buildHazardItem, buildTraitMap, createTraitsField, hazardTraits, resolveDamageResponse, traitConditional }
+    from "../traits.js";
 
 const fields = foundry.data.fields;
 
@@ -232,7 +233,18 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
      * (Core p.140), none at all for a critical.
      */
     protectionAgainst(options = {}) {
-        return options.ignoreArmour ? 0 : this.protection;
+        if (options.ignoreArmour) return 0;
+        // CSC folio 18: worn armour meets a type it names with its second score instead of its first.
+        let swap = 0;
+        for (const item of this.parent.items) {
+            if ((item.type === "armor") && (item.system.equipped === true)) {
+                swap += item.system.protectionAgainst(options.damageType) - (+item.system.protection || 0);
+            }
+        }
+        // RH folio 32: a printed Armour trait's second score adds to its first.
+        const printed = traitConditional(this.traitMap?.armour);
+        const reflec = Array.from(options.damageType ?? []).some(type => printed?.types.includes(type));
+        return this.protection + swap + (reflec ? printed.score : 0);
     }
 
     /** The hardest difficulty this actor may attempt. */

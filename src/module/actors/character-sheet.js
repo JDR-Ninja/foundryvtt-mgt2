@@ -16,7 +16,8 @@ import { RollPromptHelper } from "../roll-prompt.js";
 import { GuideButtonMixin } from "../guide.js";
 import { Rules } from "../rules.js";
 import { SheetModeMixin } from "../sheet-mode.js";
-import { appendTraitText, bindTraitInput, formatTrait, prepareTraitBlock, refreshTraitNumbers } from "../traits.js";
+import { appendTraitText, bindTraitInput, formatTrait, prepareTraitBlock, refreshTraitNumbers, traitConditional }
+  from "../traits.js";
 import { CharacterPrompts } from "./character-prompts.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -263,9 +264,10 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
    * @returns {Set<string>|null}   The parts to render, or null to render all of them
    */
   static #affectedParts(options) {
-    // Any item change can move a weight, the armour total or one of the lists.
+    // Any item change can move a weight, the armour total, one of the lists or an effect's gate.
     if ( /^(create|update|delete)items$/.test(options.renderContext) ) {
-      return new Set(["header", "characteristics", "health", "skills", "inventory", "relations", "footer"]);
+      return new Set(["header", "characteristics", "health", "skills", "inventory", "relations", "effects",
+        "footer"]);
     }
     if ( options.renderContext !== "updateActor" ) return null;
 
@@ -303,6 +305,19 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     // — composing one from the speciality would state it twice on a pack Item already named for it.
     if ( item.type === "talent" ) view.rollName = item.getRollDisplay(false);
     return view;
+  }
+
+  /** The header's reading of worn conditional armour: each Protection a single damage type meets. */
+  #protectionVs() {
+    const system = this.actor.system;
+    const plain = system.protectionAgainst();
+    const byScore = new Map();
+    for ( const type of Object.keys(MGT2.DamageTypes) ) {
+      const score = system.protectionAgainst({ damageType: [type] });
+      if ( score !== plain ) byScore.set(score, [...(byScore.get(score) ?? []), type]);
+    }
+    return Array.from(byScore, ([protection, damageType]) => MGT2Helper.protectionVs({ protection, damageType }))
+      .join(" · ");
   }
 
   /**
@@ -504,6 +519,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         case "armor":
           armors.push(v);
           if (sys.options?.length > 0) v.subInfo = sys.options.map(formatTrait).join(", ");
+          v.conditional = MGT2Helper.protectionVs(sys.conditional);
           break;
 
         case "computer":
@@ -614,6 +630,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       : 0;
     // The cap tick sits where the fill stops, so an overrun reads as an overrun.
     model.encumbranceTick = model.encumbranceOver ? 100 : model.encumbrancePercent;
+    model.protectionVs = (armors.some(view => view.conditional && (view.system.equipped === true))
+      || traitConditional(actor.system.traitMap?.armour)) ? this.#protectionVs() : "";
 
     // Core p.107 allows one skill augmentation. Advisory: the extras stay fitted and stay listed.
     const duplicates = actor.system.augmentIssues.skillDuplicates;
@@ -1976,6 +1994,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       const container = await this.#dropInContainer();
       if (!container) return;
       item.system.container.id = container._id;
+      if ("equipped" in item.system) item.system.equipped = false;
     }
     return this.actor.updateEmbeddedDocuments("Item", [item]);
   }
@@ -2250,12 +2269,16 @@ export class NpcActorSheet extends TravellerActorSheet {
     };
   }
 
-  /** `Armour (+7, +10 vs. lasers)`: the second score is a conditional and is surfaced, not applied. */
+  /** `Armour (+7, +10 vs. lasers)`: the second score, and the damage types it is added against. */
   static #armourConditional(system) {
     const trait = system.traitMap.armour;
-    const params = trait?.params ?? [];
-    if ( params.length < 2 ) return null;
-    return { score: params[1].value, condition: params[2]?.value ?? "" };
+    const slot = name => trait?.params.find(p => p.slot === name)?.value ?? "";
+    if ( slot("conditionalScore") === "" ) return null;
+    const types = traitConditional(trait)?.types ?? [];
+    return {
+      score: slot("conditionalScore"), condition: slot("condition"), applied: types.length > 0,
+      types: types.map(type => game.i18n.localize(MGT2.DamageTypes[type])).join(", ")
+    };
   }
 
   static #speedBandLabel(band) {

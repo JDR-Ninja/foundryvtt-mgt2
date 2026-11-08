@@ -175,7 +175,7 @@
 			<dd class="word">{{localize (concat 'MGT2.DamageTransforms.' system.damageResponse.transform)}}</dd>
 		</div>
 		<div class="stat"><dt>{{localize 'MGT2.Actor.npc.Scale'}}</dt><dd class="word">{{localize (concat 'MGT2.Scales.' system.scale)}}</dd></div>
-		<div class="stat{{#unless npc.armourConditional}} none{{/unless}}">
+		<div class="stat{{#unless npc.armourConditional}} none{{/unless}}"{{#if npc.armourConditional}} data-tooltip="{{#if npc.armourConditional.applied}}{{localize 'MGT2.Actor.npc.ArmourConditionalApplied' types=npc.armourConditional.types}}{{else}}{{localize 'MGT2.Actor.npc.ArmourConditionalUnapplied'}}{{/if}}"{{/if}}>
 			<dt>{{localize 'MGT2.Actor.npc.ArmourConditional'}}</dt>
 			<dd class="word">{{#if npc.armourConditional}}{{npc.armourConditional.score}} {{npc.armourConditional.condition}}{{else}}&mdash;{{/if}}</dd>
 		</div>

@@ -2018,6 +2018,8 @@
         "ExperienceHint": "Ce niveau d'expérience suggère des compétences autour du niveau {level}. Une indication à côté du champ, jamais un générateur.",
         "DamageResponse": "Réponse aux dégâts",
         "ArmourConditional": "Armure conditionnelle",
+        "ArmourConditionalApplied": "S'ajoute à la Protection contre {types} à l'application des dégâts.",
+        "ArmourConditionalUnapplied": "Ne nomme aucun type de dégâts : rien ne l'ajoute à l'application des dégâts.",
         "Scale": "Échelle",
         "DrivenOff": "Mis en fuite",
         "DrivenOffHint": "La moitié des PdV de départ est partie. Signalé au choix de l'arbitre ; rien n'agit dessus.",
@@ -5328,7 +5330,9 @@
       "Powered": "Alimenté",
       "Power": "Énergie",
       "Processing": "Processeur",
+      "ConditionalProtection": "Protection conditionnelle",
       "Protection": "Protection",
+      "ProtectionVs": "{protection} vs. {types}",
       "PsionicSkill": "Compétence Psionique",
       "Qty": "Qté",
       "Radiations": "Radiations",
@@ -5748,7 +5752,9 @@
       "crushing": "Écrasement",
       "impaling": "Empalement",
       "projectile": "Projectile",
-      "laser": "Laser"
+      "laser": "Laser",
+      "plasma": "Plasma",
+      "energy": "Énergie"
     },
     "DamageTransforms": {
       "full": "Complets",

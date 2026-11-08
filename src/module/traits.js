@@ -296,6 +296,25 @@ export function traitNumber(entry) {
     return 0;
 }
 
+/** Folded words, a plural's `s` dropped: `vs. Lasers` reads `vs`, `laser`. */
+function conditionWords(text) {
+    return (fold(text).match(/\p{L}+/gu) ?? []).map(word => word.replace(/s$/, ""));
+}
+
+/** `{score, types}`: a trait's second score and the `MGT2.DamageTypes` its condition names, or null. */
+export function traitConditional(entry) {
+    const params = entry?.params ?? [];
+    const score = params.find(p => p.slot === "conditionalScore")?.num;
+    if (!Number.isFinite(score)) return null;
+    const words = new Set(conditionWords(params.find(p => p.slot === "condition")?.value));
+    const types = Object.entries(CONFIG.MGT2?.DamageTypes ?? {}).filter(([key, label]) =>
+        [key, game.i18n.localize(label)].some(name => {
+            const named = conditionWords(name);
+            return (named.length > 0) && named.every(word => words.has(word));
+        })).map(([key]) => key);
+    return types.length ? { score: Math.abs(score), types } : null;
+}
+
 /** How each weapon trait meets an attack roll — Core p.79, CSC p.131 and FC p.6-8 between them. */
 export const WEAPON_ROLL = Object.freeze({
     // Core p.79: "a negative DM equal to the difference between their STR DM and +1" — +2 for Very

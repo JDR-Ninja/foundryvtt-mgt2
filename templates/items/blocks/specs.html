@@ -95,6 +95,9 @@
 
 		{{#if (eq item.type "armor")}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Protection'}}</span><b>{{system.protection}}</b></li>
+		{{#if conditional}}
+		<li><span class="lbl">{{localize 'MGT2.Items.ConditionalProtection'}}</span><b class="word">{{conditional}}</b></li>
+		{{/if}}
 		<li{{#unless system.radiations}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Radiations'}}</span><b>{{system.radiations}}</b></li>
 		{{#if system.requireSkill}}
 		<li><span class="lbl">{{localize 'MGT2.Items.RequiredSkill'}}</span><b class="word">{{system.requireSkill}} {{system.requireSkillLevel}}</b></li>
@@ -334,6 +337,15 @@
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Protection'}}</span>
 			{{formInput systemFields.protection name="system.protection" value=system.protection classes="f num"}}
+		</label>
+		{{! CSC folio 18: a second score, worn instead of the first against any damage type named. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.ConditionalProtection'}}</span>
+			{{formInput systemFields.conditional.fields.protection name="system.conditional.protection" value=system.conditional.protection classes="f num"}}
+		</label>
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.DamageType'}}</span>
+			{{formInput systemFields.conditional.fields.damageType name="system.conditional.damageType" value=system.conditional.damageType localize=true}}
 		</label>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Radiations'}}</span>

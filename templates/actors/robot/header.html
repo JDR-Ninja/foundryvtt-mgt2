@@ -124,7 +124,7 @@
 			<dt>{{localize 'MGT2.Actor.robot.Endurance'}}</dt>
 			<dd>{{robot.statblock.endurance}}<i>{{localize 'MGT2.Actor.robot.Hours'}}</i></dd>
 		</div>
-		<div class="stat"><dt>{{localize 'MGT2.Actor.robot.Armour'}}</dt><dd>{{showDM system.inventory.armor}}</dd></div>
+		<div class="stat"{{#if protectionVs}} data-tooltip="{{protectionVs}}"{{/if}}><dt>{{localize 'MGT2.Actor.robot.Armour'}}</dt><dd>{{showDM system.inventory.armor}}</dd></div>
 		<div class="stat{{#if robot.slots.over}} hurt{{/if}}">
 			<dt>{{localize 'MGT2.Actor.robot.Slots'}}</dt>
 			<dd>{{robot.slots.total}}<span class="of">/{{robot.slots.cap}}</span></dd>

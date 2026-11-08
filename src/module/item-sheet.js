@@ -342,6 +342,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       },
       // Only the Companion's vacuum table reads a suit's breach, so only it puts the control up.
       showSuitBreach: (item.type === "armor") && (Rules.get("vacuumRuleset") === "companion"),
+      conditional: (item.type === "armor") ? MGT2Helper.protectionVs(item.system.conditional) : "",
       binding: slots.masthead?.[0] ?? null,
       supply,
       spine: this.#spine(),
