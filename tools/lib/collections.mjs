@@ -3,8 +3,8 @@
  * `common/documents/*.mjs`: a primary document lives at `!<collection>!<id>` and an embedded one at
  * `!<collection>.<embedded>!<parentId>.<childId>`, with the parent storing only the child ids.
  *
- * A copy of `mgt2-data/tools/lib/collections.mjs` rather than an import of it: that module is a
- * sibling package, and the system has to build from a bare clone of its own repository.
+ * Written out here rather than imported from a package: the system has to build from a bare clone
+ * of its own repository.
  */
 
 /** Document name → the sublevel a primary document of that type is keyed under. */

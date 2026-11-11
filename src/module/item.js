@@ -132,7 +132,7 @@ export class TravellerItem extends Item {
     let weight = (!isNaN(qty) && qty > 0) ? this.system.weight * qty : 0;
 
     if (this.type === "armor" && this.system.equipped === true) {
-      weight = this.system.powered === true ? 0 : weight * 0.25;
+      weight = ((this.system.powered === true) && this.system.running) ? 0 : weight * 0.25;
     }
     return weight;
   }

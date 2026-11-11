@@ -5,8 +5,7 @@ import { createHash } from "node:crypto";
  *
  * **The order of this alphabet is part of the contract.** Reordering it, or changing the hashed
  * string below, moves every id the packs have already published — a world linking into `mgt2.docs`
- * would find nothing, and the failure is silent. `mgt2-data` derives its ids the same way from its
- * own alphabet; the two are deliberately not shared.
+ * would find nothing, and the failure is silent.
  */
 const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const ID_LENGTH = 16;

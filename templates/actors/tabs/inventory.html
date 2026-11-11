@@ -62,13 +62,14 @@
 					<tr class="drag-item-list{{#if armor.hostsSoftware}} drop-item-list{{/if}}" data-item-id="{{armor._id}}">
 						<td>
 							<button type="button" class="roll" data-action="roll" data-roll="item" data-item-id="{{armor._id}}">{{armor.name}}</button>
+							{{#if armor.boosts}}<span class="sub">{{armor.boosts}}</span>{{/if}}
 							{{#if armor.subInfo}}<span class="sub">{{armor.subInfo}}</span>{{/if}}
 							{{> systems/mgt2/templates/actors/parts/host-badge.html host=armor}}
 						</td>
 						{{#if (rule 'radiation')}}<td class="c num">{{armor.system.radiations}}</td>{{/if}}
-						<td class="c num">{{armor.system.protection}}{{#if armor.conditional}}<span class="sub">{{armor.conditional}}</span>{{/if}}</td>
+						<td class="c num">{{armor.system.protection}}{{#if armor.psionic}}<span class="sub">{{armor.psionic}}</span>{{/if}}{{#if armor.conditional}}<span class="sub">{{armor.conditional}}</span>{{/if}}</td>
 						<td class="r num">{{armor.weight}}</td>
-						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=armor.canEquip toggle=armor.toggleClass store=true edit="MGT2.Actor.EditArmor" del="MGT2.Actor.DeleteArmor"}}
+						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=armor.canEquip toggle=armor.toggleClass canPower=armor.canPower powerOn=armor.system.active store=true edit="MGT2.Actor.EditArmor" del="MGT2.Actor.DeleteArmor"}}
 					</tr>
 					{{#each armor.subItems as |subItem|}}
 					{{#if (rule 'radiation')}}

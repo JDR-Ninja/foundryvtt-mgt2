@@ -124,6 +124,7 @@ function imposedOf(request, read, asked) {
         // choosing untrained — so `skillMode` is read FIRST, which is the card's rule too.
         skillItem: ((asked.skillMode === "named") && (read.skillItem !== UNRESOLVED))
             ? read.skillItem : undefined,
+        skillName: (asked.skillMode === "named") ? asked.skill : "",
         stance: request.stance,
         timeframe: request.timeframe,
         dm: { label: request.dm.label, value: request.dm.value },
@@ -240,7 +241,8 @@ function directAnswer(request, read, actor, rollOptions, chain, asked) {
     // that decides them, exactly as `#scoped` does on the form.
     for ( const source of rollOptions.checkModifiers ) {
         const scoped = source.characteristics ? source.characteristics.includes(characteristic)
-            : (source.skills ? source.skills.includes(skill) : true);
+            : (source.skills
+                ? RollPromptHelper.skillScope(source, rollOptions.imposed.skillName).includes(skill) : true);
         data[`check-${source.key}`] = scoped;
     }
     return data;

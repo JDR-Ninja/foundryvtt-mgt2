@@ -89,18 +89,22 @@ export class RollPromptHelper {
                     display: MGT2Helper.signed(MGT2Helper.getTimeframeDM(key))
                 })).sort((a, b) => a.dm - b.dm),
                 timeframeTerm: game.i18n.localize("MGT2.RollPrompt.Timeframes"),
-                checkModifiers: (options.checkModifiers ?? []).map(source => ({
-                    key: source.key,
-                    label: MGT2Helper.modifierLabel(source),
-                    dm: source.dm,
-                    negative: source.dm < 0,
-                    display: MGT2Helper.signed(source.dm),
-                    // A source whose rule names the checks it reaches follows the select that
-                    // decides them instead of standing on every roll: the characteristic for Core
-                    // folio 98's encumbrance, the skill for folio 107's augment.
-                    scope: source.characteristics?.join(" ") ?? "",
-                    skillScope: source.skills?.join(" ") ?? ""
-                })),
+                checkModifiers: (options.checkModifiers ?? []).map(source => {
+                    const skills = source.skills ? this.skillScope(source, options.imposed?.skillName) : null;
+                    return {
+                        key: source.key,
+                        label: MGT2Helper.modifierLabel(source),
+                        dm: source.dm,
+                        negative: source.dm < 0,
+                        display: MGT2Helper.signed(source.dm),
+                        // A source whose rule names the checks it reaches follows the select deciding them:
+                        // the characteristic for Core folio 98's encumbrance, the skill for folio 107's augment.
+                        scope: source.characteristics?.join(" ") ?? "",
+                        // `|`, never a space: an other-speciality key is `P0:` and the skill's words.
+                        skillScope: skills?.join("|") ?? "",
+                        idle: skills?.length === 0
+                    };
+                }),
                 difficulty: options.difficulty,
                 // The rungs that have a target number; "not applicable" is the strip's empty cell.
                 difficulties: Object.entries(CONFIG.MGT2.DifficultyTargets).map(([key, target]) => ({
@@ -445,6 +449,12 @@ export class RollPromptHelper {
         return { formula: parts.join(""), modifiers, chainSources, stance };
     }
 
+    /** Core folio 59: an untrained check is still a check of the skill, so `NP` follows a skill a request named. */
+    static skillScope(source, named = "") {
+        return (named && MGT2Helper.isSkillOrSpecialityOf(named, source.skillSlug))
+            ? [...source.skills, "NP"] : source.skills;
+    }
+
     /** Everything standing against `modifiers.check`, each entry still named, for the actor whose skill rolls. */
     static checkModifiers(actor, token = null) {
         const check = actor.system.modifiers?.check;
@@ -710,13 +720,13 @@ export class RollPromptHelper {
     /** A modifier whose rule reaches only some checks follows the select that decides them. */
     static #scoped(form) {
         const chosen = {
-            scope: form.elements.characteristic?.value ?? "",
-            skillScope: form.elements.skill?.value ?? ""
+            scope: [form.elements.characteristic?.value ?? "", " "],
+            skillScope: [form.elements.skill?.value ?? "", "|"]
         };
         for ( const box of form.querySelectorAll("input[data-auto='true']") ) {
-            for ( const [attr, value] of Object.entries(chosen) ) {
+            for ( const [attr, [value, separator]] of Object.entries(chosen) ) {
                 if ( box.dataset[attr] === undefined ) continue;
-                box.checked = box.dataset[attr].split(" ").includes(value);
+                box.checked = box.dataset[attr].split(separator).includes(value);
             }
         }
     }

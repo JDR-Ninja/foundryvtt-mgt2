@@ -4,6 +4,60 @@
 
 ---
 
+## [0.2.11]
+
+**Verified on Foundry VTT 14.370.**
+
+**Powered armour that makes its wearer stronger without making them tougher, and Active Effects
+that reach further** ([#8](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/8)). Battle dress
+raises STR and DEX for checks, melee damage, Initiative and carrying, while damage is still taken
+off the wearer's own scores (Core p.102).
+
+### Powered armour
+
+* **Armour can raise STR and DEX** (Core p.102, CSC p.35–39). In edit mode, the armour sheet takes
+  a bonus and a minimum for each. While the armour is worn, the raised score is the one used for
+  checks, melee damage, Initiative and carrying; damage and healing still use the wearer's own.
+  The characteristic keeps the wearer's value and gauge, and shows the raised score beside it, with
+  a tooltip naming the armour. The bonuses of several worn armours add up.
+* **A minimum only ever raises a score**: the exoskeleton's STR+1 *to a minimum of six* (CSC p.36)
+  takes STR 4 to 6, and STR 8 to 9.
+* **A carrying multiplier**, *Encumbrance ×*: the exoskeleton triples the encumbrance limits and its
+  improved version quadruples them (CSC p.36), Logistics battle dress takes ×6 (CSC p.40). The limit
+  is worked out on the raised STR, and two frames worn together do not multiply each other: the
+  highest applies.
+* **A powered suit can be switched off.** On the Traveller, NPC and robot sheets, a bolt beside the
+  shield of a worn suit ticked *Powered* makes it *Inactive* (CSC p.35): it weighs a quarter of its
+  mass, as worn armour does, loses every bonus, minimum and multiplier, and doubles every penalty.
+  Running, it weighs nothing, as before. Losing the DEX bonus as well as STR's, and the quarter of
+  its mass, are two rulings: the book names only STR's bonus, and says only that the mass impairs
+  the wearer.
+* **Armour can add half the wearer's PSI to its Protection**, rounded down or up as the suit says
+  (CSC p.33, p.40). It reads the PSI points left, so the protection thins with each power used: a
+  ruling.
+* **If you followed the workaround given on #8**, a Final change on
+  `system.characteristics.strength.dm` or `dexterity.dm` standing in for a suit's bonus, delete it
+  once the armour carries its own bonus, or the two add up.
+
+### Active Effects
+
+* **A skill DM reaches a Traveller without the skill.** An effect on
+  `system.modifiers.skills.<skill>.effect`, such as Reflec's DM−2 to `stealth` (CSC p.18), was
+  dropped when the Traveller did not have the skill. A roll request naming that skill now applies
+  it to the untrained roll. Any other roll shows it unticked, for the roller to tick, since the
+  prompt cannot tell which skill an untrained roll is for.
+* **A skill DM also reaches the skill's specialities**: an effect on `gun-combat` applies to every
+  Gun Combat speciality, and one on `gun-combat-energy` to that speciality alone.
+
+### Fixes
+
+* **The effect controls work on a sheet opened from a compendium.** Edit, delete, enable, suspend
+  and end a dose did nothing on an item inside a compendium; creating an effect already worked.
+* **A DM on a two-word skill ticks itself on *another speciality*.** A Gun Combat augment or effect
+  stayed unticked when the roller chose *Gun Combat, another speciality*.
+
+---
+
 ## [0.2.10]
 
 **Verified on Foundry VTT 14.370.**

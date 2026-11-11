@@ -2,11 +2,11 @@ import { Checks } from "./checks.js";
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 
-/** The `mgt2-data` pack holding Mongoose's printed rows; the system ships none of them. */
+/** The compendium the rows are read from; the system ships none of them. */
 const TABLES_PACK = "mgt2-data.tables";
 
 /**
- * Bounty Hunter p.22-27. The system holds the order, the target field and the address; the module
+ * Bounty Hunter p.22-27. The system holds the order, the target field and the address; the pack
  * holds every row, and the dice stay the RollTable's — the four contract tables print two different
  * formulas, so one stored here would be a second truth. `after` names the step whose result carries
  * this one's table. A stamped key would address a packed table better than its name does.
@@ -208,7 +208,7 @@ export class Contract {
             actor.system.characteristics.reputation.dm];
     }
 
-    /** Whether the module holding the printed rows is installed. */
+    /** Whether the pack holding the rows is present. */
     static get hasTables() {
         return game.packs.get(TABLES_PACK)?.documentName === "RollTable";
     }

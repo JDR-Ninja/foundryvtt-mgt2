@@ -463,7 +463,7 @@ function lineChit(request, read, actor, chain) {
     const standing = actor?.system?.characteristics ? RollPromptHelper.checkModifiers(actor) : [];
     for ( const source of standing ) {
         const scoped = source.characteristics ? source.characteristics.includes(key)
-            : (source.skills ? source.skills.includes(skill) : true);
+            : (source.skills ? RollPromptHelper.skillScope(source, asked.skill).includes(skill) : true);
         if ( scoped ) rows.push([MGT2Helper.modifierLabel(source), source.dm]);
     }
     return MGT2Helper.signed(Checks.modifiers(rows).total, "+0");

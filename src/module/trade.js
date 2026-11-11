@@ -15,8 +15,8 @@ const WORLD_TYPE = "Actor.world";
 const SHIP_TYPE = "Actor.spacecraft";
 
 /**
- * The `mgt2-data` module ships the same thirty-six rows as `cargo` Items, keyed by their D66 and
- * carrying an icon and the printed blurb.
+ * A compendium that may hold the same thirty-six rows as `cargo` Items, keyed by their D66 and
+ * carrying an icon and a description. Absent, a bought lot is created without them.
  */
 const GOODS_PACK = "mgt2-data.items";
 const GOODS_KEY = "flags.mgt2-data.d66";
@@ -882,7 +882,7 @@ export class SpecTradeDialog extends MGT2Screen(HandlebarsApplicationMixin(Appli
     }
 
     /**
-     * The same row as an Item, where the module is installed.
+     * The same row as an Item, where the pack is present.
      * @returns {Promise<object|null>}   The Item's source data, or null wherever the lookup fails
      */
     static async #goodsDocument(d66) {

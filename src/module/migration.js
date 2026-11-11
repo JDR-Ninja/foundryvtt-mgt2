@@ -194,8 +194,8 @@ function collectActorUpdate(actor) {
       dirty = true;
     }
   }
-  // A world imported from the `mgt2-data` module carried its geometry in that module's flag
-  // namespace, where the system could not read it; the two typed halves are in the schema now.
+  // An imported world could carry its geometry in a module's own flag namespace, where the system
+  // could not read it; the two typed halves are in the schema now.
   if ( actor.type === "world" ) {
     const flags = actor._source.flags?.["mgt2-data"] ?? {};
     for ( const key of ["sector", "hex"] ) {

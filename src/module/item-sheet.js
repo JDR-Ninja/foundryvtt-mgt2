@@ -343,6 +343,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       // Only the Companion's vacuum table reads a suit's breach, so only it puts the control up.
       showSuitBreach: (item.type === "armor") && (Rules.get("vacuumRuleset") === "companion"),
       conditional: (item.type === "armor") ? MGT2Helper.protectionVs(item.system.conditional) : "",
+      armourBoosts: (item.type === "armor") ? TravellerItemSheet.#armourBoosts(item.system) : null,
       binding: slots.masthead?.[0] ?? null,
       supply,
       spine: this.#spine(),
@@ -525,6 +526,18 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       startAge: at(system.frame.startAge),
       ageing: at(system.ageing),
       backgroundSkills: at(system.backgroundSkills)
+    };
+  }
+
+  /** The STR and DEX controls, and the line the play view prints. */
+  static #armourBoosts(system) {
+    const fields = system.schema.fields.characteristics.fields;
+    return {
+      rows: MGT2.ArmourCharacteristics.map(key => ({
+        key, fields: fields[key].fields, ...system.characteristics[key],
+        short: game.i18n.localize(`MGT2.Characteristics.${key}.short`)
+      })),
+      line: MGT2Helper.armourBoostLine(system.characteristics)
     };
   }
 

@@ -151,10 +151,16 @@ export function prepareEffects(doc) {
   return rows;
 }
 
-/** The effect a clicked control belongs to, resolved by uuid because it may live on an owned Item. */
-function effectOf(target) {
+/** The clicked row's effect: fromUuidSync throws on a compendium's embedded uuid, so walk from the sheet. */
+function effectOf(sheet, target) {
   const uuid = target.closest("[data-effect-uuid]")?.dataset.effectUuid;
-  return uuid ? foundry.utils.fromUuidSync(uuid) : null;
+  if ( !uuid ) return null;
+  const prefix = `${sheet.document.uuid}.`;
+  if ( !uuid.startsWith(prefix) ) return foundry.utils.fromUuidSync(uuid, { strict: false });
+  const parts = uuid.slice(prefix.length).split(".");
+  let doc = sheet.document;
+  while ( doc && (parts.length > 1) ) doc = doc.getEmbeddedDocument(...parts.splice(0, 2));
+  return doc ?? null;
 }
 
 // The five handlers below are action callbacks: ApplicationV2 binds `this` to the sheet, so the
@@ -169,27 +175,27 @@ async function onEffectCreate() {
 }
 
 async function onEffectEdit(event, target) {
-  return effectOf(target)?.sheet.render({ force: true });
+  return effectOf(this, target)?.sheet.render({ force: true });
 }
 
 async function onEffectDelete(event, target) {
-  return effectOf(target)?.deleteDialog();
+  return effectOf(this, target)?.deleteDialog();
 }
 
 async function onEffectToggle(event, target) {
-  const effect = effectOf(target);
+  const effect = effectOf(this, target);
   return effect?.update({ disabled: !effect.disabled });
 }
 
 async function onEffectSuspend(event, target) {
-  const effect = effectOf(target);
+  const effect = effectOf(this, target);
   if ( !effect ) return;
   return effect.setFlag("mgt2", "suspended", effect.flags?.mgt2?.suspended !== true);
 }
 
 /** A dose does not merely stop: CSC p.93-97 lets it end in a condition or in damage. */
 async function onDoseEnd(event, target) {
-  return Doses.end(effectOf(target));
+  return Doses.end(effectOf(this, target));
 }
 
 

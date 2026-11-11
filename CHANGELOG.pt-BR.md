@@ -8,6 +8,64 @@
 
 ---
 
+## [0.2.11]
+
+**Verificado no Foundry VTT 14.370.**
+
+**Uma armadura mecanizada que deixa quem a veste mais forte sem deixá-lo mais resistente, e Efeitos
+Ativos que vão mais longe** ([#8](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/8)). A battle
+dress aumenta a FOR e a DES para os testes, o dano corpo a corpo, a Iniciativa e a carga, enquanto o
+dano continua sendo aplicado sobre as características próprias de quem a veste (Core p.102).
+
+### Armadura mecanizada
+
+* **Uma armadura pode aumentar a FOR e a DES** (Core p.102, CSC p.35–39). No modo de edição, a sua
+  ficha recebe um bônus e um mínimo para cada uma. Enquanto a armadura está equipada, o valor
+  aumentado é o usado nos testes, no dano corpo a corpo, na Iniciativa e na carga; o dano e a cura
+  continuam usando o de quem a veste. A característica mantém o valor e o medidor de quem a veste, e
+  mostra ao lado o valor aumentado, com uma dica que nomeia a armadura. Os bônus de várias armaduras
+  equipadas se somam.
+* **Um mínimo só pode subir um valor**: o FOR+1 *até um mínimo de seis* do exoesqueleto (CSC p.36)
+  leva uma FOR de 4 a 6, e uma FOR de 8 a 9.
+* **Um multiplicador de carga**, *Carga ×*: o exoesqueleto triplica os limites de carga e a sua
+  versão melhorada os quadruplica (CSC p.36), a battle dress Logistics os multiplica por 6 (CSC
+  p.40). O limite é calculado sobre a FOR aumentada, e duas estruturas equipadas juntas não se
+  multiplicam: vale a maior.
+* **Uma armadura mecanizada pode ser desligada.** Nas fichas do Viajante, do NPC e do robô, um raio
+  ao lado do escudo de uma armadura equipada marcada *Mecanizada* a deixa *Inativa* (CSC p.35): ela
+  pesa um quarto da sua massa, como uma armadura equipada, perde todo bônus, mínimo e multiplicador,
+  e dobra cada penalidade. Ligada, ela não pesa nada, como antes. Perder o bônus de DES além do de
+  FOR, e o quarto da massa, são duas interpretações: o livro só nomeia o bônus de FOR, e só diz que a
+  massa atrapalha quem a veste.
+* **Uma armadura pode somar metade da PSI de quem a veste à sua Proteção**, arredondada para baixo
+  ou para cima conforme a armadura (CSC p.33, p.40). Ela lê os pontos de PSI restantes, então a
+  proteção diminui a cada poder usado: uma interpretação.
+* **Se você seguiu a solução provisória dada em #8**, uma mudança Final em
+  `system.characteristics.strength.dm` ou `dexterity.dm` que fazia as vezes do bônus da armadura,
+  apague-a assim que a armadura tiver o seu próprio bônus, ou os dois se somarão.
+
+### Efeitos Ativos
+
+* **Um MD de perícia chega a um Viajante que não tem a perícia.** Um efeito em
+  `system.modifiers.skills.<perícia>.effect`, como o MD−2 do Reflec em Furtividade, `stealth` (CSC
+  p.18), era descartado quando o Viajante não tinha a perícia. Um pedido de rolagem que nomeia essa
+  perícia agora o aplica à rolagem sem a perícia. Qualquer outra rolagem o mostra desmarcado, para
+  quem rola marcar, porque a janela de rolagem não tem como saber a que perícia serve uma rolagem
+  sem a perícia.
+* **Um MD de perícia chega também às suas especialidades**: um efeito em `gun-combat` se aplica a
+  todas as especialidades de Gun Combat, e um em `gun-combat-energy` só a essa especialidade.
+
+### Correções
+
+* **Os controles de efeito funcionam numa ficha aberta a partir de um compêndio.** Editar, apagar,
+  ativar, suspender e encerrar uma dose não faziam nada num item de um compêndio; criar um efeito já
+  funcionava.
+* **Um MD numa perícia de duas palavras se marca em *outra especialidade*.** Um aprimoramento ou um
+  efeito de Gun Combat ficava desmarcado quando quem rola escolhia *Gun Combat, outra
+  especialidade*.
+
+---
+
 ## [0.2.10]
 
 **Verificado no Foundry VTT 14.370.**

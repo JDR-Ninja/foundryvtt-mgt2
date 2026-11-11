@@ -57,6 +57,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       itemEdit: TravellerActorSheet.#onItemEdit,
       itemDelete: TravellerActorSheet.#onItemDelete,
       itemEquip: TravellerActorSheet.#onItemEquip,
+      itemPower: TravellerActorSheet.#onItemPower,
       itemStorageIn: TravellerActorSheet.#onItemStorageIn,
       itemStorageOut: TravellerActorSheet.#onItemStorageOut,
       softwareEject: TravellerActorSheet.#onSoftwareEject,
@@ -360,10 +361,19 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         percent: c.max > 0 ? Math.round((c.value / c.max) * 100) : 0,
         hurt: c.damage > 0,
         depleted: c.max > 0 && c.value <= 0,
+        ...this.#enhancedView(key, c),
         // The roll target is the DM itself, so its tooltip states what clicking it will roll.
         formula: MGT2Helper.showFormula(`2D${MGT2Helper.signed(c.dm, "")}`)
       };
     });
+  }
+
+  /** Core p.102: the armour's score, printed beside the wearer's own that damage still reads. */
+  #enhancedView(key, c) {
+    if ( !Number.isFinite(c.enhanced) || (c.enhanced === c.value) ) return { enhanced: null };
+    const armour = this.actor.system.armourBoosts?.[key]?.armour ?? [];
+    return { enhanced: c.enhanced, enhancedTip: game.i18n.format("MGT2.Actor.EnhancedBy",
+      { score: c.enhanced, armour: armour.join(", "), own: c.value }) };
   }
 
   /**
@@ -520,6 +530,10 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
           armors.push(v);
           if (sys.options?.length > 0) v.subInfo = sys.options.map(formatTrait).join(", ");
           v.conditional = MGT2Helper.protectionVs(sys.conditional);
+          v.boosts = MGT2Helper.armourBoostLine(sys.characteristics);
+          v.canPower = sys.powered === true;
+          v.psionic = sys.psionic ? game.i18n.format("MGT2.Items.ArmourPsionicAdded",
+            { value: sys.psionicProtection(actor.system.characteristics.psionic?.value) }) : "";
           break;
 
         case "computer":
@@ -1983,6 +1997,12 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     const item = foundry.utils.duplicate(this.actor.getEmbeddedDocument("Item", TravellerActorSheet.#itemId(target)));
     item.system.equipped = !item.system.equipped;
     return this.actor.updateEmbeddedDocuments("Item", [item]);
+  }
+
+  /** @this {TravellerActorSheet} */
+  static #onItemPower(event, target) {
+    const item = this.actor.items.get(TravellerActorSheet.#itemId(target));
+    return item?.update({ "system.active": !item.system.active });
   }
 
   /** @this {TravellerActorSheet} */

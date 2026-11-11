@@ -4,6 +4,64 @@
 
 ---
 
+## [0.2.11]
+
+**Vérifié sur Foundry VTT 14.370.**
+
+**Une armure motorisée qui rend son porteur plus fort sans le rendre plus résistant, et des Effets
+Actifs qui vont plus loin** ([#8](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/8)). L'armure
+de combat motorisée augmente la FOR et la DEX pour les tests, les dégâts de mêlée, l'Initiative et
+l'encombrement, tandis que les dégâts se calculent toujours sur les caractéristiques propres du
+porteur (Core p.102).
+
+### Armure motorisée
+
+* **Une armure peut augmenter la FOR et la DEX** (Core p.102, CSC p.35–39). En mode édition, sa
+  fiche prend un bonus et un minimum pour chacune. Tant que l'armure est portée, la valeur augmentée
+  sert aux tests, aux dégâts de mêlée, à l'Initiative et à l'encombrement ; les dégâts et les soins
+  se calculent toujours sur celle du porteur. La caractéristique garde la valeur et la jauge du
+  porteur, et montre à côté la valeur augmentée, avec une infobulle qui nomme l'armure. Les bonus de
+  plusieurs armures portées s'additionnent.
+* **Un minimum ne fait qu'augmenter une valeur** : le FOR+1 *jusqu'à un minimum de six* de
+  l'exosquelette (CSC p.36) porte une FOR de 4 à 6, et une FOR de 8 à 9.
+* **Un multiplicateur d'encombrement**, *Encombrement ×* : l'exosquelette triple les limites
+  d'encombrement et sa version améliorée les quadruple (CSC p.36), l'armure de combat motorisée
+  Logistics les multiplie par 6 (CSC p.40). La limite se calcule sur la FOR augmentée, et deux
+  armatures portées ensemble ne se multiplient pas : la plus forte s'applique.
+* **Une armure motorisée peut être coupée.** Sur les fiches du Voyageur, du PNJ et du robot, un
+  éclair à côté du bouclier d'une armure portée cochée *Alimenté* la rend *Inactive* (CSC p.35) :
+  elle pèse le quart de sa masse, comme une armure portée, perd tout bonus, minimum et
+  multiplicateur, et double chaque malus. En marche, elle ne pèse rien, comme avant. Perdre le bonus
+  de DEX en plus de celui de FOR, et le quart de la masse, sont deux interprétations : le livre ne
+  nomme que le bonus de FOR, et dit seulement que la masse gêne le porteur.
+* **Une armure peut ajouter la moitié du PSI du porteur à sa Protection**, arrondie à l'inférieur ou
+  au supérieur selon l'armure (CSC p.33, p.40). Elle lit les points de PSI restants, si bien que la
+  protection s'amincit à chaque pouvoir utilisé : une interprétation.
+* **Si vous avez suivi le contournement donné sur #8**, un changement Final sur
+  `system.characteristics.strength.dm` ou `dexterity.dm` qui tenait lieu du bonus de l'armure,
+  supprimez-le dès que l'armure porte son propre bonus, sinon les deux s'additionnent.
+
+### Effets Actifs
+
+* **Un MD de compétence atteint un Voyageur qui n'a pas la compétence.** Un effet sur
+  `system.modifiers.skills.<compétence>.effect`, comme le MD−2 du Reflec en Discrétion, `stealth`
+  (CSC p.18), était ignoré quand le Voyageur n'avait pas la compétence. Une demande de jet qui nomme
+  cette compétence l'applique maintenant au jet sans la compétence. Tout autre jet le montre décoché,
+  à cocher par le lanceur, car la fenêtre de jet ne peut pas savoir à quelle compétence sert un jet
+  sans la compétence.
+* **Un MD de compétence atteint aussi ses spécialités** : un effet sur `gun-combat` s'applique à
+  toutes les spécialités de Gun Combat, et un effet sur `gun-combat-energy` à cette seule spécialité.
+
+### Correctifs
+
+* **Les contrôles d'effet fonctionnent sur une fiche ouverte depuis un compendium.** Modifier,
+  supprimer, activer, suspendre et terminer une dose ne faisaient rien sur un objet d'un compendium ;
+  créer un effet fonctionnait déjà.
+* **Un MD sur une compétence en deux mots se coche sur *autre spécialité*.** Une augmentation ou un
+  effet de Gun Combat restait décoché quand le lanceur choisissait *Gun Combat, autre spécialité*.
+
+---
+
 ## [0.2.10]
 
 **Vérifié sur Foundry VTT 14.370.**

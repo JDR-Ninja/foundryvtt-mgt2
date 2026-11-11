@@ -291,7 +291,7 @@
 			{{#each checkModifiers as |m|}}
 			<label class="tog {{#if m.negative}}neg{{else}}pos{{/if}}"{{#if m.scope}} title="{{ localize 'MGT2.RollPrompt.PhysicalOnly' }}"{{else if m.skillScope}} title="{{ localize 'MGT2.RollPrompt.SkillOnly' }}"{{/if}}>
 				<input type="checkbox" name="check-{{m.key}}" data-dtype="Boolean" data-dm="{{m.dm}}"
-					data-term="{{m.label}}"{{#if m.scope}} data-scope="{{m.scope}}" data-auto="true"{{/if}}{{#if m.skillScope}} data-skill-scope="{{m.skillScope}}" data-auto="true"{{/if}} checked />
+					data-term="{{m.label}}"{{#if m.scope}} data-scope="{{m.scope}}" data-auto="true"{{/if}}{{#if m.skillScope}} data-skill-scope="{{m.skillScope}}" data-auto="true"{{/if}}{{#unless m.idle}} checked{{/unless}} />
 				<span>{{m.label}}</span><span class="v">{{m.display}}</span>
 			</label>
 			{{/each}}

@@ -7,6 +7,8 @@
 		{{! Only a pool has a current value distinct from its max; a constant reads as one number,
 		    until a wound makes the two differ. }}
 		<span class="play-only" data-derived="system.characteristics.{{key}}.value"><span class="cur">{{value}}</span>{{#if (or pool damage)}}<span class="sl">/</span><span class="mx">{{max}}</span>{{/if}}</span>
+		{{! Worn armour's score, which the DM below reads; the gauge keeps the wearer's own. }}
+		{{#if enhancedTip}}<span class="enh play-only" data-derived="system.characteristics.{{key}}.enhanced" data-tooltip="{{enhancedTip}}">{{enhanced}}</span>{{/if}}
 		{{! Exactly one bound input, to `base`; the derivation to `max` sits beside it. }}
 		<span class="edit-only">
 			{{! `f` only: the kit's numeric modifier is also `.n`, which inside a `.char` collides

@@ -8,6 +8,65 @@
 
 ---
 
+## [0.2.11]
+
+**Verificado en Foundry VTT 14.370.**
+
+**Una armadura motorizada que hace a su portador más fuerte sin hacerlo más resistente, y Efectos
+Activos que llegan más lejos** ([#8](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/8)). La
+battle dress aumenta la FUE y la DES para las tiradas, el daño cuerpo a cuerpo, la Iniciativa y la
+carga, mientras el daño se sigue aplicando sobre las características propias del portador (Core
+p.102).
+
+### Armadura motorizada
+
+* **Una armadura puede aumentar la FUE y la DES** (Core p.102, CSC p.35–39). En modo edición, su
+  hoja recibe una bonificación y un mínimo para cada una. Mientras la armadura está equipada, el
+  valor aumentado es el que sirve para las tiradas, el daño cuerpo a cuerpo, la Iniciativa y la
+  carga; el daño y la curación siguen usando el del portador. La característica conserva el valor y
+  el indicador del portador, y muestra al lado el valor aumentado, con una ayuda emergente que nombra
+  la armadura. Las bonificaciones de varias armaduras equipadas se suman.
+* **Un mínimo solo puede subir un valor**: el FUE+1 *hasta un mínimo de seis* del exoesqueleto
+  (CSC p.36) lleva una FUE de 4 a 6, y una FUE de 8 a 9.
+* **Un multiplicador de carga**, *Carga ×*: el exoesqueleto triplica los límites de carga y su
+  versión mejorada los cuadruplica (CSC p.36), la battle dress Logistics los multiplica por 6 (CSC
+  p.40). El límite se calcula sobre la FUE aumentada, y dos armazones equipados a la vez no se
+  multiplican entre sí: se aplica el mayor.
+* **Una armadura motorizada se puede apagar.** En las hojas del Viajero, del PNJ y del robot, un
+  rayo junto al escudo de una armadura equipada marcada *Motorizada* la deja *Inactiva* (CSC p.35):
+  pesa la cuarta parte de su masa, como una armadura equipada, pierde toda bonificación, mínimo y
+  multiplicador, y dobla cada penalización. En marcha, no pesa nada, como antes. Perder la
+  bonificación de DES además de la de FUE, y la cuarta parte de la masa, son dos interpretaciones:
+  el libro solo nombra la bonificación de FUE, y solo dice que la masa estorba al portador.
+* **Una armadura puede sumar la mitad de la PSI del portador a su Protección**, redondeada hacia
+  abajo o hacia arriba según la armadura (CSC p.33, p.40). Lee los puntos de PSI que quedan, así que
+  la protección mengua con cada poder usado: una interpretación.
+* **Si seguiste el apaño propuesto en #8**, un cambio Final sobre
+  `system.characteristics.strength.dm` o `dexterity.dm` que hacía las veces de la bonificación de la
+  armadura, bórralo en cuanto la armadura lleve su propia bonificación, o las dos se sumarán.
+
+### Efectos Activos
+
+* **Un MD de habilidad llega a un Viajero que no tiene la habilidad.** Un efecto sobre
+  `system.modifiers.skills.<habilidad>.effect`, como el MD−2 del Reflec a Sigilo, `stealth` (CSC
+  p.18), se descartaba cuando el Viajero no tenía la habilidad. Una petición de tirada que nombra
+  esa habilidad lo aplica ahora a la tirada sin la habilidad. Cualquier otra tirada lo muestra sin
+  marcar, para que quien tira lo marque, porque la ventana de tirada no puede saber a qué habilidad
+  corresponde una tirada sin la habilidad.
+* **Un MD de habilidad llega también a sus especialidades**: un efecto sobre `gun-combat` se aplica a
+  todas las especialidades de Gun Combat, y uno sobre `gun-combat-energy` solo a esa especialidad.
+
+### Correcciones
+
+* **Los controles de efecto funcionan en una hoja abierta desde un compendio.** Editar, borrar,
+  activar, suspender y terminar una dosis no hacían nada en un objeto de un compendio; crear un
+  efecto ya funcionaba.
+* **Un MD sobre una habilidad de dos palabras se marca en *otra especialidad*.** Un aumento o un
+  efecto de Gun Combat se quedaba sin marcar cuando quien tira elegía *Gun Combat, otra
+  especialidad*.
+
+---
+
 ## [0.2.10]
 
 **Verificado en Foundry VTT 14.370.**

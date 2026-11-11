@@ -26,6 +26,9 @@
 		<div class="stat"><dt>{{ localize 'MGT2.Actor.CharacteristicEffect' }}</dt><dd>{{showDM characteristic.effect}}</dd></div>
 		<div class="stat"><dt>{{ localize 'MGT2.Actor.CharacteristicMax' }}</dt><dd>{{characteristic.max}}</dd></div>
 		<div class="stat{{#if characteristic.damage}} hurt{{/if}}"><dt>{{ localize 'MGT2.Actor.CharacteristicValue' }}</dt><dd>{{characteristic.value}}</dd></div>
+		{{#unless (eq characteristic.enhanced characteristic.value)}}
+		<div class="stat enh"><dt>{{ localize 'MGT2.Actor.CharacteristicEnhanced' }}</dt><dd>{{characteristic.enhanced}}</dd></div>
+		{{/unless}}
 	</dl>
 	<div class="dstates">
 		<label><input type="checkbox" name="show" data-dtype="Boolean" {{checked characteristic.show}} /><span>{{ localize 'MGT2.Actor.Show' }}</span></label>

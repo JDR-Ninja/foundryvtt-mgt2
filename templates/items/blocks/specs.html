@@ -103,7 +103,16 @@
 		<li><span class="lbl">{{localize 'MGT2.Items.RequiredSkill'}}</span><b class="word">{{system.requireSkill}} {{system.requireSkillLevel}}</b></li>
 		{{/if}}
 		{{#if system.powered}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Powered'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
+		<li><span class="lbl">{{localize 'MGT2.Items.Powered'}}</span><b class="word">{{#if system.active}}<i class="fa-solid fa-check"></i>{{else}}{{localize 'MGT2.Items.PowerInactive'}}{{/if}}</b></li>
+		{{/if}}
+		{{#if armourBoosts.line}}
+		<li{{#unless system.running}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.ArmourCharacteristics'}}</span><b class="word">{{armourBoosts.line}}</b></li>
+		{{/if}}
+		{{#if (gt system.encumbrance 1)}}
+		<li{{#unless system.running}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.EncumbranceMultiplier'}}</span><b>{{system.encumbrance}}</b></li>
+		{{/if}}
+		{{#if system.psionic}}
+		<li><span class="lbl">{{localize 'MGT2.Items.ArmourPsionic.label'}}</span><b class="word">{{localize (lookup config.ArmourPsionic system.psionic)}}</b></li>
 		{{/if}}
 		{{! Only the Companion's vacuum table reads it, so only that reading prints the row. }}
 		{{#if showSuitBreach}}
@@ -362,6 +371,29 @@
 		<label class="check">
 			{{formInput systemFields.powered name="system.powered" value=system.powered}}
 			<span>{{localize 'MGT2.Items.Powered'}}</span>
+		</label>
+		<label class="check{{#unless system.powered}} off{{/unless}}">
+			{{formInput systemFields.active name="system.active" value=system.active disabled=(not system.powered)}}
+			<span>{{localize 'MGT2.Items.PowerActive'}}</span>
+		</label>
+		{{! Core p.102: the wearer's score for everything but damage; CSC folio 36's floor beside it. }}
+		{{#each armourBoosts.rows as |row|}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.ArmourBonus' characteristic=row.short}}</span>
+			{{formInput row.fields.bonus name=(concat "system.characteristics." row.key ".bonus") value=row.bonus classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.ArmourMinimum' characteristic=row.short}}</span>
+			{{formInput row.fields.minimum name=(concat "system.characteristics." row.key ".minimum") value=row.minimum classes="f num"}}
+		</label>
+		{{/each}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.EncumbranceMultiplier'}}</span>
+			{{formInput systemFields.encumbrance name="system.encumbrance" value=system.encumbrance classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.ArmourPsionic.label'}}</span>
+			<select class="f" name="system.psionic">{{selectOptions config.ArmourPsionic selected=system.psionic localize=true blank=(localize 'MGT2.Items.ArmourPsionic.none')}}</select>
 		</label>
 		{{! Companion p.68: which row of the vacuum table this suit puts its wearer on. }}
 		{{#if showSuitBreach}}

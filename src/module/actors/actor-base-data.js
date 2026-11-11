@@ -15,6 +15,7 @@ const PSI_RECOVERY_DELAY = 3;
 
 // The only Active-Effect sink for a standing check DM; `region-behaviors.js` is what writes it.
 const CHECK_EFFECT_PATH = "system.modifiers.check.effect";
+const SKILL_EFFECT_PATH = /^system\.modifiers\.skills\.([^.]+)\./;
 
 // One warning per sub-type and key: the chain is walked on every prepare.
 const warnedLinks = new Set();
@@ -384,11 +385,20 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             ? [...this.ownTraits, ...this.speciesTraits] : this.ownTraits;
     }
 
-    /** One accumulator per skill the actor carries. */
+    /** ⚠ Per skill carried and per skill an effect names: an add onto an undeclared key is dropped. */
     #declareSkillModifiers() {
+        const slugs = [];
         for (const item of this.parent?.items ?? []) {
             if ((item.type !== "talent") || (item.system.subType !== "skill")) continue;
-            const slug = MGT2Helper.skillSlug(item.name);
+            slugs.push(MGT2Helper.skillSlug(item.name));
+        }
+        for (const effect of this.parent?.allApplicableEffects() ?? []) {
+            for (const change of effect.system?.changes ?? []) {
+                const slug = SKILL_EFFECT_PATH.exec(change.key ?? "")?.[1];
+                if (slug && MGT2Helper.isSkillSlug(slug)) slugs.push(slug);
+            }
+        }
+        for (const slug of slugs) {
             if (!slug || (slug in this.modifiers.skills)) continue;
             this.modifiers.skills[slug] = { custom: 0, auto: 0, effect: 0, dm: 0 };
         }
@@ -407,11 +417,15 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     /** @inheritDoc */
     prepareDerivedData() {
         this.prepareCharacteristicAuto();
-        for (const c of Object.values(this.characteristics)) {
+        this.#prepareWornBoosts();
+        for (const [key, c] of Object.entries(this.characteristics)) {
             c.max = Math.max(0, c.base + c.auto + c.effect);
             c.value = Math.max(0, c.max - c.damage);
+            // Core p.102: damage reads `value`, every other purpose the armour-enhanced score.
+            const boost = this.armourBoosts[key];
+            c.enhanced = boost ? Math.max(0, c.value + boost.bonus, boost.minimum ?? 0) : c.value;
             // Meaningless on a pure damage track, but one array lookup is cheaper than a branch here.
-            c.dm = ActorBaseData.getModifier(c.value);
+            c.dm = ActorBaseData.getModifier(c.enhanced);
         }
 
         const life = { value: 0, max: 0, damage: 0 };
@@ -456,12 +470,32 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         this.traitMap = buildTraitMap(this.traits);
     }
 
+    /** Worn armour's STR and DEX, summed per key with its highest minimum, and the carrying multiplier. */
+    #prepareWornBoosts() {
+        const boosts = {};
+        let carrying = 1;
+        for (const item of this.parent?.items ?? []) {
+            if ((item.type !== "armor") || (item.system.equipped !== true)) continue;
+            carrying = Math.max(carrying, item.system.carrying);
+            for (const [key, { bonus, minimum }] of Object.entries(item.system.boosts)) {
+                if (!bonus && (minimum === null)) continue;
+                const boost = boosts[key] ??= { bonus: 0, minimum: null, armour: [] };
+                boost.bonus += bonus;
+                if (minimum !== null) boost.minimum = Math.max(boost.minimum ?? 0, minimum);
+                boost.armour.push(item.name);
+            }
+        }
+        this.armourBoosts = boosts;
+        this.encumbranceMultiplier = carrying;
+    }
+
     /** Protection: what is worn, plus what a trait grants. */
     prepareArmor() {
         let armor = MGT2Helper.traitScore(this.traits, "armour");
+        const psi = this.characteristics.psionic?.value ?? 0;
         for (const item of this.parent.items) {
             if ((item.type === "armor") && (item.system.equipped === true) && !isNaN(item.system.protection)) {
-                armor += (+item.system.protection || 0);
+                armor += (+item.system.protection || 0) + item.system.psionicProtection(psi);
             }
             // Core p.107: subdermal armour stacks with other protection, and `equipped` is the
             // fitted gate rather than a worn one.
@@ -499,8 +533,9 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             this.states.encumbrance = false;
             return;
         }
-        const normal = links
-            .reduce((sum, key) => sum + (this.characteristics[key]?.value ?? 0), this.encumbranceSkillBonus);
+        // CSC folio 38 carries on the enhanced scores; folios 36 and 40 multiply the whole limit.
+        const normal = (this.encumbranceMultiplier ?? 1) * links
+            .reduce((sum, key) => sum + (this.characteristics[key]?.enhanced ?? 0), this.encumbranceSkillBonus);
         this.inventory.encumbrance = { normal, heavy: normal * 2 };
         // Gating the flag is what keeps the DM-2 below, the header tick and the token icon together.
         this.states.encumbrance = Rules.on("encumbrance") && (this.inventory.weight > normal);
@@ -529,8 +564,8 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     ]);
 
     /**
-     * The standing DMs a check carries before anything situational, each named beside the
-     * accumulator it feeds so the roll prompt can print and waive them.
+     * The standing DMs a check carries before anything situational, each named beside the accumulator
+     * it feeds so the roll prompt can print and waive them; a skill row no Item answers is never summed.
      * @param {object[]} [extra]   The sub-type's own sources, appended after the shared ones
      */
     prepareCheckModifiers(extra = []) {
@@ -542,7 +577,8 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             ...this.scopedEffectModifiers(),
             ...extra
         ];
-        this.modifiers.check.auto = sources.reduce((sum, source) => sum + source.dm, 0);
+        this.modifiers.check.auto = sources.reduce((sum, source) =>
+            ((source.skills?.length === 0) ? sum : sum + source.dm), 0);
         this.modifiers.check.sources = sources;
         this.sumModifiers();
     }
@@ -604,16 +640,22 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         return sources;
     }
 
-    /** A standing DM on one skill, from an effect on `modifiers.skills.<slug>`; it follows the prompt's skill row. */
+    /** A standing DM on a skill and its specialities, from `modifiers.skills.<slug>`; it follows the skill row. */
     skillAccumulatorModifiers() {
         const sources = [];
+        const held = this.parent.items
+            .filter(item => (item.type === "talent") && (item.system.subType === "skill"));
         for (const [slug, modifier] of Object.entries(this.modifiers.skills)) {
             const dm = modifier.custom + modifier.auto + modifier.effect;
-            if (dm === 0) continue;
-            const items = this.parent.items.filter(item => (item.type === "talent")
-                && (item.system.subType === "skill") && (MGT2Helper.skillSlug(item.name) === slug));
-            sources.push({ key: `skill-${slug}`, label: "MGT2.Actor.SkillDM", dm,
-                params: { skill: items[0]?.name ?? slug }, skills: items.map(item => item.id) });
+            if (!Number.isFinite(dm) || (dm === 0)) continue;
+            const items = held.filter(item => MGT2Helper.isSkillOrSpecialityOf(item.name, slug));
+            const others = MGT2Helper.otherSpecialities(held)
+                .filter(entry => MGT2Helper.isSkillOrSpecialityOf(entry.term, slug));
+            const name = items.find(item => MGT2Helper.skillSlug(item.name) === slug)?.name
+                ?? slug.replaceAll("-", " ").titleCase();
+            sources.push({ key: `skill-${slug}`, label: "MGT2.Actor.SkillDM", dm, skillSlug: slug,
+                params: { skill: name },
+                skills: [...items.map(item => item.id), ...others.map(entry => entry._id)] });
         }
         return sources;
     }

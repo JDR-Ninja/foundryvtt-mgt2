@@ -1325,6 +1325,32 @@ export class ArmorData extends PhysicalItemData {
         return Array.from(damageType ?? []).some(type => types.has(type)) ? protection : base;
     }
 
+    /** CSC folio 35: a powered suit counts as powered only while charged. */
+    get running() {
+        return !this.powered || (this.active !== false);
+    }
+
+    /** `{key: {bonus, minimum}}`; a dead suit loses each bonus and doubles each penalty (CSC folio 35). */
+    get boosts() {
+        const running = this.running;
+        return Object.fromEntries(MGT2.ArmourCharacteristics.map(key => {
+            const { bonus, minimum } = this.characteristics?.[key] ?? {};
+            return [key, running ? { bonus: bonus || 0, minimum: minimum ?? null }
+                : { bonus: Math.min(0, bonus || 0) * 2, minimum: null }];
+        }));
+    }
+
+    /** The multiplier on the wearer's encumbrance limits (CSC folios 36, 40). */
+    get carrying() {
+        return this.running ? Math.max(1, this.encumbrance || 1) : 1;
+    }
+
+    /** CSC folios 33 and 40: half the wearer's PSI, rounded as the suit says. */
+    psionicProtection(psi) {
+        const round = { down: Math.floor, up: Math.ceil }[this.psionic];
+        return round ? round(Math.max(0, psi || 0) / 2) : 0;
+    }
+
     static defineSchema() {
         const schema = super.defineSchema();
         schema.equipped = new fields.BooleanField({ required: false, initial: false });
@@ -1352,14 +1378,23 @@ export class ArmorData extends PhysicalItemData {
 
         // Powered battle dress supports its own weight and is effectively weightless while active.
         schema.powered = new fields.BooleanField({ required: false, initial: false });
+        schema.active = new fields.BooleanField({ required: false, initial: true });
+        // Core p.102: the wearer's STR and DEX count raised for everything but damage.
+        schema.characteristics = new fields.SchemaField(Object.fromEntries(MGT2.ArmourCharacteristics.map(key =>
+            [key, new fields.SchemaField({
+                bonus: new fields.NumberField({ required: false, nullable: false, initial: 0, integer: true }),
+                minimum: new fields.NumberField({
+                    required: false, nullable: true, initial: null, min: 0, integer: true })
+            })])));
+        schema.encumbrance = new fields.NumberField({
+            required: false, nullable: false, initial: 1, min: 1, integer: true });
+        schema.psionic = new fields.StringField({
+            required: false, blank: true, initial: "", choices: MGT2.ArmourPsionic });
         // Companion p.68: a breached sealed suit still protects, by less. Read only where a vacuum
         // region names this suit as its protection, and only under the Companion reading.
         schema.breach = new fields.StringField({
             required: false, blank: false, initial: "intact", choices: MGT2.SuitBreaches });
         schema.options = createTraitsField("custom");
-
-        // Characteristics Modifiers (Pirate of Drinax - ASLAN BATTLE DRESS STR/DEX, Slot)
-
         return schema;
     }
 }

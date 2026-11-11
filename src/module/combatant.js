@@ -192,7 +192,7 @@ export class MGT2Combatant extends Combatant {
         const tactics = this.system?.sideTactics ?? 0;
         if ( tactics ) parts.push(MGT2Helper.term(tactics, game.i18n.localize("MGT2.Combatant.Tactics")));
 
-        const dex = actor.system.characteristics?.dexterity?.value ?? 0;
+        const dex = actor.system.characteristics?.dexterity?.enhanced ?? 0;
         if ( dex > 0 ) parts.push(`+ ${(dex / 100).toFixed(2)}`);
 
         return parts.join(" ");

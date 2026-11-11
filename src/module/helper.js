@@ -61,6 +61,17 @@ export class MGT2Helper {
         return value > 0 ? `+${value}` : `−${-value}`;
     }
 
+    /** An armour's STR and DEX as the CSC prints them ("STR +1 (min. 6) · DEX −1"), or "" when it moves neither. */
+    static armourBoostLine(characteristics = {}) {
+        return MGT2.ArmourCharacteristics.flatMap(key => {
+            const { bonus, minimum } = characteristics[key] ?? {};
+            if (!bonus && !Number.isFinite(minimum)) return [];
+            const value = `${game.i18n.localize(`MGT2.Characteristics.${key}.short`)} ${MGT2Helper.signed(bonus || 0)}`;
+            return [Number.isFinite(minimum)
+                ? game.i18n.format("MGT2.Items.ArmourBonusMinimum", { value, minimum }) : value];
+        }).join(" · ");
+    }
+
     /** An armour's `conditional` as CSC folio 18 prints it ("6 vs. Laser"), or "" when it has none. */
     static protectionVs({ protection, damageType } = {}) {
         const types = Array.from(damageType ?? [], type => game.i18n.localize(MGT2.DamageTypes[type] ?? type));
@@ -276,6 +287,10 @@ export class MGT2Helper {
 
     static isSkillSlug(key) {
         return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(key);
+    }
+
+    static isSkillOrSpecialityOf(name, slug) {
+        return !!slug && [name, this.skillParent(name)].some(one => !!one && (this.skillSlug(one) === slug));
     }
 
     /**

@@ -2974,6 +2974,15 @@ MGT2.SuitBreaches = Object.freeze({
     major: "MGT2.SuitBreaches.major"
 });
 
+// CSC folio 38: armour enhances "usually STR and DEX", and no book prints a third.
+MGT2.ArmourCharacteristics = Object.freeze(["strength", "dexterity"]);
+
+// CSC folio 33 halves the wearer's PSI rounding down, folio 40 rounding up.
+MGT2.ArmourPsionic = Object.freeze({
+    down: "MGT2.Items.ArmourPsionic.down",
+    up: "MGT2.Items.ArmourPsionic.up"
+});
+
 // Companion p.67's Vacuum Damage table, in its printed row order and read on `[row][pressure]`.
 // `none` is its No Protection row; `interval` is the minimal column, printed and never rolled.
 MGT2.VacuumDamage = Object.freeze({
