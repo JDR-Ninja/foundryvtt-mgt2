@@ -194,10 +194,11 @@ export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplica
         // Each step appends to one note field, joined on " · "; the cell is a list of them.
         const notes = row.note ? row.note.split(" · ").filter(part => part.trim()) : [];
         for ( const part of notes ) lines.push({ tone: "", mark: "·", text: part });
-        // An event writes its description into the note as it fires, so the row's own copy of it
-        // would print the sentence twice.
+        // An event writes its lines into the note as it fires, joined the same way, so a copy whose
+        // every line is already printed would print them twice.
         for ( const event of row.events ) {
-            if ( !notes.includes(event.description) ) {
+            const parts = event.description.split(" · ").filter(part => part.trim());
+            if ( !parts.every(part => notes.includes(part)) ) {
                 lines.push({ tone: "", mark: "·", text: event.description });
             }
         }
@@ -259,6 +260,8 @@ export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplica
         // The step the loop is on.
         const cursor = ChargenTerm.current(column.actor);
         const taken = ChargenTerm.taken(column.actor);
+        const resettable = ChargenTerm.resettable(column.actor);
+        const idle = ChargenTerm.idle(column.actor);
         const rolled = CreationCharacteristics.isSet(column.actor);
         return {
             id: column.id,
@@ -272,6 +275,7 @@ export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplica
             background: ChargenScreen.#background(column),
             steps: sequence.map((key, index) => ({
                 key, order: index + 1, own: own.has(key), now: key === cursor, done: taken.has(key),
+                idle: idle.get(key) ?? "", resettable: resettable.has(key),
                 label: ChargenScreen.#label(MGT2.CreationSteps, key)
             })),
             cut: [...cut].map(key => ({ key, label: ChargenScreen.#label(MGT2.CreationSteps, key) })),

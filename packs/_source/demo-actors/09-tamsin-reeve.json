@@ -4590,7 +4590,7 @@
               "ageing",
               "decide"
             ],
-            "note": "Entered: Demo — Harbour Patrol was offered, with no qualification roll. · Basic training — every listed skill at level 0, instead of this term's skill roll: Seafarer 1, Vacc Suit 1, Mechanic 0, Investigate 0, Gun Combat 1, Athletics 1 · Survived. · You are moved to the marsh station and given a boat of your own. Gain one level of Seafarer and SOC +1. · Seafarer 2, Social +1 · Advanced to rank 1, and one extra skill roll. · Skill roll: Seafarer 3"
+            "note": "Entered: Demo — Harbour Patrol was offered, with no qualification roll. · Basic training — every listed skill at level 0, instead of this term's skill roll: Seafarer 1, Vacc Suit 1, Mechanic 0, Investigate 0, Gun Combat 1, Athletics 1 · You are moved to the marsh station and given a boat of your own. Gain one level of Seafarer and SOC +1. · Seafarer 2, Social +1 · Advanced to rank 1, and one extra skill roll. · Skill roll: Seafarer 3"
           },
           {
             "term": 3,
@@ -4616,7 +4616,7 @@
               "ageing",
               "decide"
             ],
-            "note": "Survived. · You pull a crew off a sinking launch. Make a Seafarer check (8+); success gains a Contact and a commendation. · The row's own check passed. · Contact ×1 · Pending: DM. · Advanced to rank 2, and one extra skill roll. · Skill roll: Intellect +1 · Skill roll: Vacc Suit 2"
+            "note": "You pull a crew off a sinking launch. Make a Seafarer check (8+); success gains a Contact and a commendation. · The row's own check passed. · Contact ×1 · Pending: DM. · Advanced to rank 2, and one extra skill roll. · Skill roll: Intellect +1 · Skill roll: Vacc Suit 2"
           },
           {
             "term": 4,
@@ -4643,7 +4643,7 @@
               "ageing",
               "decide"
             ],
-            "note": "Survived. · You take an inspection nobody else would sign. Make a Investigate or Persuade check (8+): pass, and gain an extra Benefit roll. Either way, the skill you used gains a level. · The row's own check passed. · Investigate 2 · Advanced to rank 3, and one extra skill roll. · Skill roll: Persuade 1 · Skill roll: Vacc Suit 3 · Ageing roll 3: —"
+            "note": "You take an inspection nobody else would sign. Make a Investigate or Persuade check (8+): pass, and gain an extra Benefit roll. Either way, the skill you used gains a level. · The row's own check passed. · Investigate 2 · Advanced to rank 3, and one extra skill roll. · Skill roll: Persuade 1 · Skill roll: Vacc Suit 3 · Ageing roll 3: —"
           },
           {
             "term": 5,
@@ -4669,7 +4669,7 @@
               "ageing",
               "decide"
             ],
-            "note": "Survived. · You fall in with the ferry crews on the night crossing. Gain a Contact. · Contact ×1 · Skill roll: Investigate 3 · Ageing roll 3: —"
+            "note": "You fall in with the ferry crews on the night crossing. Gain a Contact. · Contact ×1 · Skill roll: Investigate 3 · Ageing roll 3: —"
           }
         ],
         "track": {

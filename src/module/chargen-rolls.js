@@ -122,7 +122,7 @@ export const CreationRoll = {
      *     one — no rung expresses 5+, 7+ or 9+
      * @returns {Promise<{outcome: object, passed: boolean|null, message: ChatMessage}|null>}
      */
-    async post(actor, composed, { label = "", difficulty = null, target = null, lines = [] } = {}) {
+    async post(actor, composed, { label = "", difficulty = null, target = null, lines = [], describe = null } = {}) {
         // The number the BOOK printed, measured against directly: `Checks.resolve` takes a bare
         // target beside its difficulty rung precisely so a creation check scores its Effect against
         // its own line rather than against an assumed Average.
@@ -130,7 +130,7 @@ export const CreationRoll = {
             : (Number.isFinite(composed.target) ? composed.target : null);
         // **A table roll is not a task check**: an Events or Mishap roll indexes a row and has no
         // target, no verdict and no Effect.
-        if ( (printed === null) && !difficulty ) return this.index(actor, composed, { label, lines });
+        if ( (printed === null) && !difficulty ) return this.index(actor, composed, { label, lines, describe });
         const outcome = await Checks.resolve({
             formula: composed.formula, rollData: actor?.getRollData() ?? {}, difficulty,
             target: printed });
@@ -143,14 +143,14 @@ export const CreationRoll = {
             rollDifficultyLabel: (printed === null)
                 ? "" : game.i18n.format("MGT2.Chargen.Term.Target", { n: printed }),
             modifiers: composed.terms,
-            lines
+            lines: [...lines, describe?.(outcome.roll.total)]
         });
         const passed = (printed === null) ? null : (outcome.roll.total >= printed);
         return { outcome, passed, message };
     },
 
-    /** A table index, posted as dice and nothing else — same card shape as a Benefit roll. */
-    async index(actor, composed, { label = "", lines = [] } = {}) {
+    /** A table index, posted as dice and the row they landed on — same card shape as a Benefit roll. */
+    async index(actor, composed, { label = "", lines = [], describe = null } = {}) {
         const roll = await new Roll(composed.formula, actor?.getRollData() ?? {}).roll();
         const message = await ChatMessage.create({
             author: game.user.id,
@@ -161,7 +161,7 @@ export const CreationRoll = {
                 rollTypeName: game.i18n.localize("MGT2.Chargen.Roll.Title"),
                 rollObjectName: label,
                 modifiers: composed.terms,
-                lines
+                lines: [...lines, describe?.(roll.total)]
             })
         });
         return { outcome: { roll, effect: null, target: null, assumed: false }, passed: null, message };

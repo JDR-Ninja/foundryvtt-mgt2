@@ -346,6 +346,11 @@
 	li.cut
 		text-decoration: line-through
 		color: var(--faint)
+	// Nothing to do this term: the cursor passes over it, and the tooltip says why.
+	li.idle
+		color: var(--faint)
+		border-style: dashed
+		cursor: help
 	// Taken this term: the loop refuses it again, and only the referee's reset reopens it.
 	li.done
 		border-color: var(--good)

@@ -10971,6 +10971,11 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   text-decoration: line-through;
   color: var(--faint);
 }
+.mgt2.chargen .steps li.idle {
+  color: var(--faint);
+  border-style: dashed;
+  cursor: help;
+}
 .mgt2.chargen .steps li.done {
   border-color: var(--good);
   color: var(--good);

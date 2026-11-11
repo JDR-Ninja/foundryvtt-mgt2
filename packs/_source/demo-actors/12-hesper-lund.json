@@ -3807,7 +3807,7 @@
               "ageing",
               "decide"
             ],
-            "note": "Qualified. · Basic training — every listed skill at level 0, instead of this term's skill roll: Electronics 0, Investigate 0, Recon 0, Admin 0, Deception 0, Diplomat 0 · Survived. · Your captain mentions you in a dispatch to the Reach council. Gain one level of Tactics or Leadership, and DM+2 held for your next Commission or Advancement roll, whichever comes first. · Leadership 1 · Pending: DM. · Commissioned — rank 1 on the officer ladder."
+            "note": "Qualified. · Basic training — every listed skill at level 0, instead of this term's skill roll: Electronics 0, Investigate 0, Recon 0, Admin 0, Deception 0, Diplomat 0 · Your captain mentions you in a dispatch to the Reach council. Gain one level of Tactics or Leadership, and DM+2 held for your next Commission or Advancement roll, whichever comes first. · Leadership 1 · Pending: DM. · Commissioned — rank 1 on the officer ladder."
           },
           {
             "term": 2,
@@ -3833,7 +3833,7 @@
               "ageing",
               "decide"
             ],
-            "note": "Survived. · You are seconded to the mainland signals school for a season. Gain one level of Electronics, and one extra roll on a skill table this term. · Electronics 1 · Skill roll · Advanced to rank 2, and one extra skill roll. · Skill roll: Electronics 2 · Skill roll: Advocate 1 · Skill roll: Carouse 1"
+            "note": "You are seconded to the mainland signals school for a season. Gain one level of Electronics, and one extra roll on a skill table this term. · Electronics 1 · Skill roll · Advanced to rank 2, and one extra skill roll. · Skill roll: Electronics 2 · Skill roll: Advocate 1 · Skill roll: Carouse 1"
           },
           {
             "term": 3,
@@ -3859,7 +3859,7 @@
               "ageing",
               "decide"
             ],
-            "note": "Survived. · A freighter drifts into the exclusion zone with its transponder dark. Turn it back with Pilot (8+) on the picket boats, Gunner (9+) on the platforms or Electronics (7+) on the watch: succeed, and gain a Contact and DM+1 held for your next Advancement roll; fail, and its master becomes a Rival. · The row's own check passed. · Contact ×1 · Pending: DM. · Advanced to rank 3, and one extra skill roll. · Skill roll: Investigate 1 · Skill roll: Admin 1"
+            "note": "A freighter drifts into the exclusion zone with its transponder dark. Turn it back with Pilot (8+) on the picket boats, Gunner (9+) on the platforms or Electronics (7+) on the watch: succeed, and gain a Contact and DM+1 held for your next Advancement roll; fail, and its master becomes a Rival. · The row's own check passed. · Contact ×1 · Pending: DM. · Advanced to rank 3, and one extra skill roll. · Skill roll: Investigate 1 · Skill roll: Admin 1"
           },
           {
             "term": 4,
@@ -3886,7 +3886,7 @@
               "ageing",
               "decide"
             ],
-            "note": "Survived. · The Lord Warden reads your file twice. Your next Commission or Advancement roll passes without dice, when you choose to spend it. · Pending: Automatic success. · Advanced to rank 4, and one extra skill roll. · Skill roll: Leadership 2 · Skill roll: Admin 2 · Ageing roll 0: Strength −1"
+            "note": "The Lord Warden reads your file twice. Your next Commission or Advancement roll passes without dice, when you choose to spend it. · Pending: Automatic success. · Advanced to rank 4, and one extra skill roll. · Skill roll: Leadership 2 · Skill roll: Admin 2 · Ageing roll 0: Strength −1"
           },
           {
             "term": 5,
@@ -3913,7 +3913,7 @@
               "ageing",
               "decide"
             ],
-            "note": "Survived. · A board of inquiry sits over a boat lost on your watch. Give evidence against your captain, and gain an Enemy and DM+2 held for your next Advancement roll; refuse, and the Guard lets you go. · Enemy ×1 · Pending: DM. · Advanced to rank 5, and one extra skill roll. · Skill roll: Tactics 2 · Skill roll: Endurance +1 · Ageing roll 0: Strength −1"
+            "note": "A board of inquiry sits over a boat lost on your watch. Give evidence against your captain, and gain an Enemy and DM+2 held for your next Advancement roll; refuse, and the Guard lets you go. · Enemy ×1 · Pending: DM. · Advanced to rank 5, and one extra skill roll. · Skill roll: Tactics 2 · Skill roll: Endurance +1 · Ageing roll 0: Strength −1"
           },
           {
             "term": 6,
@@ -3941,7 +3941,7 @@
               "ageing",
               "decide"
             ],
-            "note": "Anagathics: Cr75,000 · Anagathics started. · Survived. · The Guard sends you up to the orbital yard for a season of courses. Make an EDU check (8+): pass, and gain one level in a skill you already hold. · The row's own check passed. · Electronics 3 · Advanced to rank 6, and one extra skill roll. · Skill roll: Recon 1 · Skill roll: Medic 1 · Ageing roll 3: —"
+            "note": "Anagathics: Cr75,000 · Anagathics started. · The Guard sends you up to the orbital yard for a season of courses. Make an EDU check (8+): pass, and gain one level in a skill you already hold. · The row's own check passed. · Electronics 3 · Advanced to rank 6, and one extra skill roll. · Skill roll: Recon 1 · Skill roll: Medic 1 · Ageing roll 3: —"
           }
         ],
         "track": {

@@ -6,6 +6,7 @@ import { CompendiumExplorer } from "../compendium-explorer.js";
 import { Chargen } from "../chargen.js";
 import { CreationCharacteristics } from "../chargen-characteristics.js";
 import { ChargenScreen } from "../chargen-screen.js";
+import { ChargenTerm } from "../chargen-term.js";
 import { Muster } from "../chargen-muster.js";
 import { MGT2 } from "../config.js";
 import { CreditSplit } from "../credit-split.js";
@@ -332,7 +333,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     return {
       resume: true,
       term: game.i18n.format("MGT2.Chargen.Screen.Term", { n: state.term }),
-      step: state.step ? game.i18n.localize(MGT2.CreationSteps[state.step]) : ""
+      step: state.step ? game.i18n.localize(MGT2.CreationSteps[ChargenTerm.current(this.actor)]) : ""
     };
   }
 

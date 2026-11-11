@@ -25,6 +25,12 @@ export const SharedTables = {
         return (found?.type === "career") ? found : null;
     },
 
+    /** Whether a uuid names what a row links: a `career` Item of kind `table`, never a RollTable. */
+    async accepts(uuid) {
+        const found = uuid ? await fromUuid(uuid).catch(() => null) : null;
+        return (found?.documentName === "Item") && (found.type === "career") && (found.system.kind === "table");
+    },
+
     /** The shared role a row's sub-table names — by the printed names, the label, or the linked table's own name. */
     role(name) {
         const key = MGT2Helper.skillSlug(name);
@@ -61,8 +67,10 @@ export const CareerLibrary = {
     async find(name, { kinds = ["career", "preCareer"], indexOnly = false } = {}) {
         const key = MGT2Helper.skillSlug(name);
         if ( !key ) return null;
-        const named = entry => (entry.type === "career") && (MGT2Helper.skillSlug(entry.name) === key)
-            && kinds.includes(entry.system?.kind ?? "career");
+        // A translated compendium renames its documents and keeps the stored name, which is what a row names.
+        const named = entry => (entry.type === "career") && kinds.includes(entry.system?.kind ?? "career")
+            && [entry.name, entry.originalName, entry.flags?.babele?.originalName]
+                .some(one => one && (MGT2Helper.skillSlug(one) === key));
         const world = game.items.find(named);
         if ( world ) return world;
         for ( const pack of game.packs.filter(one => one.documentName === "Item") ) {
@@ -140,13 +148,21 @@ export class CreationTablesMenu extends DialogV2 {
     async _onRender(context, options) {
         await super._onRender(context, options);
         for ( const input of this.element.querySelectorAll("input[data-role]") ) {
-            input.addEventListener("drop", event => {
+            input.addEventListener("drop", async event => {
                 const data = MGT2Helper.getDataFromDropEvent(event);
                 if ( !data?.uuid ) return;
                 event.preventDefault();
+                if ( !(await SharedTables.accepts(data.uuid)) ) {
+                    ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Shared.Refused"));
+                    return;
+                }
                 input.value = data.uuid;
                 input.nextElementSibling.textContent = foundry.utils.fromUuidSync(data.uuid)?.name ?? "";
             });
+            if ( input.value && !(await SharedTables.accepts(input.value)) ) {
+                input.nextElementSibling.textContent = game.i18n.format("MGT2.Chargen.Shared.Ignored",
+                    { name: input.nextElementSibling.textContent });
+            }
         }
     }
 
@@ -169,7 +185,12 @@ export class CreationTablesMenu extends DialogV2 {
     static async #save(form) {
         for ( const role of Object.keys(MGT2.SharedCreationTables) ) {
             const value = form.elements[role]?.value.trim() ?? "";
-            if ( value !== SharedTables.uuid(role) ) await game.settings.set("mgt2", SharedTables.setting(role), value);
+            if ( value === SharedTables.uuid(role) ) continue;
+            if ( value && !(await SharedTables.accepts(value)) ) {
+                ui.notifications.warn(game.i18n.localize("MGT2.Chargen.Shared.Refused"));
+                continue;
+            }
+            await game.settings.set("mgt2", SharedTables.setting(role), value);
         }
         return true;
     }

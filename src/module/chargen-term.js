@@ -18,11 +18,12 @@ export class ChargenTerm {
         return Chargen.steps(actor).sequence;
     }
 
-    /** Where the loop is. @returns {string} */
+    /** Where the loop is: the stored step, or the first after it with something to do. @returns {string} */
     static current(actor) {
         const sequence = this.sequence(actor);
-        const stored = Chargen.read(actor).step;
-        return sequence.includes(stored) ? stored : (sequence[0] ?? "");
+        const at = Math.max(sequence.indexOf(Chargen.read(actor).step), 0);
+        const idle = this.idle(actor);
+        return sequence.slice(at).find(key => !idle.has(key)) ?? sequence[at] ?? "";
     }
 
     /** Move the cursor, which is the only thing about the loop that is stored. */
@@ -76,6 +77,28 @@ export class ChargenTerm {
     static taken(actor) {
         const view = reading(actor);
         return new Set([...logEntry(view.record, view.term).steps, ...Chargen.looseSteps(actor, view.term)]);
+    }
+
+    /** The steps not taken that have nothing to do this term, each with its reason. @returns {Map<string, string>} */
+    static idle(actor) {
+        const view = reading(actor);
+        const taken = this.taken(actor);
+        const idle = new Map();
+        let settled = true;
+        for ( const key of this.sequence(actor) ) {
+            const reason = taken.has(key) ? "" : idleReason(view, key, settled);
+            if ( reason ) idle.set(key, reason);
+            settled &&= taken.has(key) || !!reason;
+        }
+        return idle;
+    }
+
+    /** What the referee may reopen: the steps taken, and `qualify` while a refusal stands. @returns {Set<string>} */
+    static resettable(actor) {
+        const { refusals, term } = Chargen.read(actor);
+        const steps = this.taken(actor);
+        if ( refusals.some(entry => entry.term === term) ) steps.add("qualify");
+        return steps;
     }
 
     /** The referee's correction: a step rolled again, keeping what it wrote but the verdict a re-roll replaces. */
@@ -717,9 +740,7 @@ async function survival(view) {
         naturalTwo ||= rolled.natural === 2;
         survived &&= rolled.passed && (rolled.natural !== 2);
     }
-    await logTerm(record, term, { survived,
-        note: game.i18n.localize(survived ? "MGT2.Chargen.Term.Survived"
-            : (naturalTwo ? "MGT2.Chargen.Term.NaturalTwo" : "MGT2.Chargen.Term.SurvivalFailed")) });
+    await logTerm(record, term, { survived, note: naturalTwo ? game.i18n.localize("MGT2.Chargen.Term.NaturalTwo") : "" });
     if ( survived ) return { advance: true };
 
     // Iron Man: a failed Survival **kills** the Traveller rather than causing a Mishap, so
@@ -769,12 +790,13 @@ async function rollTable(view, which, { nested = false, asPrinted = false, borro
     const link = `${which}:${MGT2Helper.skillSlug(career)}`;
     if ( await chainStopped(view, chain, link, borrowedLabel(career, which)) ) return { advance: true };
     const next = [...chain, link];
+    const rowAt = total => rows.find(entry => entry.roll === total);
     const rolled = await roll(view, { step: mishap ? "survival" : "event",
-        formula: mishap ? "1d6" : "2d6", target: null,
+        formula: mishap ? "1d6" : "2d6", target: null, describe: total => rowAt(total)?.text,
         title: borrowed ? borrowedLabel(borrowed.name, mishap ? "mishap" : "event") : "" });
     if ( !rolled ) return { advance: false };
 
-    const row = rows.find(entry => entry.roll === rolled.total);
+    const row = rowAt(rolled.total);
     // The routing is data: a 7 is the shared Life Events table unless the template says this career owns that row.
     if ( !mishap && (rolled.total === 7) && (system.eventRow7 !== "own") ) {
         return followSubTable(view, row?.subTable ?? "", { fallback: "lifeEvents", chain: next, injury: row?.injury });
@@ -824,9 +846,11 @@ async function followSubTable(view, name, { fallback = "", chain = [], borrowed 
     // A table of its own carries no dice: rows that stop at 6 are a 1D table, as every printed one is.
     const dice = role ? MGT2.SharedCreationTables[role].dice
         : ((Math.max(...table.system.eventTable.map(entry => entry.roll ?? 0)) <= 6) ? "1d6" : "2d6");
-    const rolled = await roll(view, { step: "event", title: label, formula: dice || "2d6", target: null });
+    const rowAt = total => table.system.eventTable.find(entry => entry.roll === total);
+    const rolled = await roll(view, { step: "event", title: label, formula: dice || "2d6", target: null,
+        describe: total => rowAt(total)?.text });
     if ( !rolled ) return { advance: false };
-    const row = table.system.eventTable.find(entry => entry.roll === rolled.total);
+    const row = rowAt(rolled.total);
     if ( !row ) {
         ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.NoRow", { n: rolled.total }));
         return { advance: true };
@@ -872,7 +896,8 @@ async function borrowTables(view, row, outcome, chain) {
     }
     if ( !tables.length ) return;
     const names = typed.length ? typed : await CareerLibrary.names({ except: view.record.name });
-    const picked = names.length ? await insist(names.map(name => [name, name]), "MGT2.Chargen.Term.PickBorrowed") : null;
+    const picked = names.length ? await insist(names.map(name => [name, name]), "MGT2.Chargen.Term.PickBorrowed", row.text)
+        : null;
     const template = picked && await CareerLibrary.find(picked, { kinds: ["career"] });
     if ( !template ) {
         if ( picked ) ui.notifications.warn(game.i18n.format("MGT2.Chargen.Term.BorrowedMissing", { career: picked }));
@@ -1038,7 +1063,7 @@ async function applyRow(view, row, { mishap, nested = false, asPrinted = false, 
     const give = async (cell, condition) => {
         if ( !(cell?.grants?.length || cell?.text) ) return;
         if ( !await earned({ condition, kind: cellLabel(cell) }, row, branch) ) return;
-        const granted = await applyCell(actor, cell, { provenance, granted: gained, thrown });
+        const granted = await applyCell(actor, cell, { provenance, granted: gained, thrown, context: row.text });
         if ( granted.length ) lines.push(granted.join(", "));
     };
     // A grant printed before its throw cannot wait on that throw's branch, so a branch-bound one follows it.
@@ -1048,8 +1073,8 @@ async function applyRow(view, row, { mishap, nested = false, asPrinted = false, 
     const stake = ((row.benefit === "wager") && !branch.declined) ? await wagerStake(view, row) : null;
     // The row's own sub-roll (folio 11), which is no Survival or Advancement roll and takes neither's DMs.
     if ( (row.check.target !== null) && (stake !== 0) && !branch.declined ) {
-        let check = await pickThrow(row.check, view.assignment?.name ?? "");
-        const named = (check === row.check) ? await throwSkills(view, row.check, gained) : check?.skills;
+        let check = await pickThrow(row.check, view.assignment?.name ?? "", row.text);
+        const named = (check === row.check) ? await throwSkills(view, row.check, gained, row.text) : check?.skills;
         if ( check && !named ) lines.push(game.i18n.localize("MGT2.Chargen.Term.NoSkillPicked"));
         if ( !named ) check = null;
         const skill = check ? bestSkill(actor, named) : "";
@@ -1114,7 +1139,7 @@ async function applyRow(view, row, { mishap, nested = false, asPrinted = false, 
     }
     if ( row.awards.outcomes.size && await earned({ condition: row.awards.condition,
         kind: [...row.awards.outcomes].map(key => game.i18n.localize(MGT2.TermOutcomes[key])).join(", ") },
-    row, branch) ) lines.push(...await applyAwards(view, row.awards));
+    row, branch) ) lines.push(...await applyAwards(view, row.awards, row.text));
 
     const note = lines.filter(line => line).join(" · ");
     await logTerm(record, term, {
@@ -1213,7 +1238,7 @@ async function wagerStake({ actor, record, term }, row) {
     // The term in progress still earns its own roll unless its Survival failed.
     const owed = Chargen.benefitRolls(actor, record.id) + ((logEntry(record, term).survived === false) ? 0 : 1);
     const picked = await pickOne(Array.fromRange(Math.max(0, owed) + 1).map(n => [String(n), String(n)]),
-        "MGT2.Chargen.Term.WagerAsk");
+        "MGT2.Chargen.Term.WagerAsk", row.text);
     return Number(picked ?? 0);
 }
 
@@ -1256,7 +1281,7 @@ async function earned(entry, row, { subPassed = null, declined = false, natural 
 }
 
 /** What a row awards OUTRIGHT, with no roll — row 12 on six careers promotes or commissions. */
-async function applyAwards(view, awards) {
+async function applyAwards(view, awards, context = "") {
     // The vocabulary's own order, so a commission is granted before the promotion that follows it,
     // which is the order the term's own steps run in.
     let keys = Object.keys(MGT2.TermOutcomes).filter(key => awards.outcomes.has(key));
@@ -1268,14 +1293,14 @@ async function applyAwards(view, awards) {
     if ( (awards.mode === "oneOf") && (keys.length > 1) ) {
         const offered = keys.map(key => [key, game.i18n.localize(MGT2.TermOutcomes[key])]);
         if ( awards.optional ) offered.push(["", game.i18n.localize("MGT2.Chargen.Term.DeclineAward")]);
-        const picked = await pickOne(offered, "MGT2.Chargen.Term.PickAward");
+        const picked = await pickOne(offered, "MGT2.Chargen.Term.PickAward", context);
         keys = picked ? [picked] : [];
     }
     else if ( awards.optional && keys.length ) {
         const take = await DialogV2.confirm({
             window: { title: "MGT2.Chargen.Term.PickAward" },
             classes: ["mgt2"],
-            content: `<p>${game.i18n.format("MGT2.Chargen.Term.OptionalAwardAsk",
+            content: `${rowText(context)}<p>${game.i18n.format("MGT2.Chargen.Term.OptionalAwardAsk",
                 { what: keys.map(key => game.i18n.localize(MGT2.TermOutcomes[key])).join(", ") })}</p>`,
             rejectClose: false
         });
@@ -1582,6 +1607,57 @@ function commissionAvailable({ system, assignment }) {
         || (assignment?.officerLadder && (system.ladder === assignment.officerLadder)));
 }
 
+/**
+ * Why a step's handler would pass over it by rule this term, or "". Missing career data is never idle: the step warns.
+ * @param {boolean} settled   Every earlier step is taken or idle, so nothing left this term can credit a skill roll
+ */
+function idleReason(view, key, settled) {
+    const { actor, record, system, term } = view;
+    if ( !record ) return "";
+    const say = (label, data) => game.i18n.format(label, data ?? {});
+    if ( system.kind === "preCareer" ) {
+        if ( EDUCATION[key] === noEducationStep ) return say("MGT2.Chargen.Education.NoStep");
+        if ( EDUCATION[key] ) return "";
+    }
+    const entry = logEntry(record, term);
+    const kind = termKind(view);
+    switch ( key ) {
+        case "elect":
+            return (system.blocksAnagathics && (anagathicsSince(actor) === null)) ? say("MGT2.Chargen.Term.AnagathicsBlocked") : "";
+        case "qualify":
+            return system.termLog.some(one => one.closed) ? say("MGT2.Chargen.Term.Continuing", { career: record.name }) : "";
+        case "basic":
+            if ( system.termLog.some(one => one.outcomes.has("basicTraining")) ) return say("MGT2.Chargen.Term.IdleBasicDone");
+            return system.basicFrom ? "" : say("MGT2.Chargen.Term.NoBasicTraining");
+        case "commission": {
+            if ( !system.commission ) return say("MGT2.Chargen.Term.IdleNoCommission", { career: record.name });
+            if ( entry.ejected ) return say("MGT2.Chargen.Term.IdleEjected");
+            if ( entry.outcomes.has("commissioned") || !commissionAvailable(view) ) return say("MGT2.Chargen.Term.IdleOfficer");
+            if ( system.commissionCheck.target === null ) return "";
+            const gate = MGT2.CommissionGate;
+            const served = system.termLog.filter(one => one.term < term).length;
+            if ( !served || ((actor.system.characteristics[gate.characteristic]?.value ?? 0) >= gate.min) ) return "";
+            return say("MGT2.Chargen.Term.CommissionFirstTerm",
+                { characteristic: game.i18n.localize(MGT2.Characteristics[gate.characteristic]), n: gate.min });
+        }
+        case "advance":
+            if ( entry.ejected ) return say("MGT2.Chargen.Term.IdleEjected");
+            if ( entry.outcomes.has("commissioned") ) return say("MGT2.Chargen.Term.NoAdvanceAfterCommission");
+            return (kind && !kind.yieldsAdvancement) ? say("MGT2.Chargen.Term.NoAdvancement") : "";
+        case "skill":
+            if ( kind && !kind.yieldsSkills ) return say("MGT2.Chargen.Term.IdleKind");
+            if ( entry.ejected && !Rules.on("ejectedTermSkillRoll") ) return say("MGT2.Chargen.Term.IdleEjected");
+            // The term's own roll is credited by the step itself unless basic training took its place.
+            return (settled && entry.outcomes.has("basicTraining") && (Chargen.skillRolls(actor) <= 0))
+                ? say("MGT2.Chargen.Term.NoSkillRolls") : "";
+        case "ageing":
+            if ( kind && !kind.ages ) return say("MGT2.Chargen.Term.IdleKind");
+            if ( entry.outcomes.has("aged") ) return say("MGT2.Chargen.Term.IdleAged");
+            return Chargen.ageingDue(actor) ? "" : say("MGT2.Chargen.Term.NoAgeingYet");
+    }
+    return "";
+}
+
 /** A ladder row's bonus, paid the moment its rank is reached. */
 async function applyRankBonus(view, ladder, rank) {
     const { actor, record, system, term } = view;
@@ -1838,8 +1914,9 @@ async function decide(view, key) {
     // The strip runs any step at any moment, so a term can arrive here with steps unresolved. Say
     // which, because closing the term buys its four years and its Benefit roll either way.
     const sequence = ChargenTerm.sequence(actor);
+    const idle = ChargenTerm.idle(actor);
     const missed = sequence.slice(0, sequence.indexOf(key))
-        .filter(step => !entry.steps.has(step))
+        .filter(step => !entry.steps.has(step) && !idle.has(step))
         .map(step => game.i18n.localize(MGT2.CreationSteps[step] ?? step));
     const warning = missed.length
         ? `<p class="skipped">${game.i18n.format("MGT2.Chargen.Term.DecideSkipped",
@@ -1995,7 +2072,7 @@ function stepTarget(view, check) {
 }
 
 /** The row's own throw, or one printed beside it with its own target; null is the player forfeiting both. */
-async function pickThrow(check, assignment = "") {
+async function pickThrow(check, assignment = "", context = "") {
     const all = [check, ...check.alternatives.filter(one => (one.target !== null)
         && (one.characteristic || one.skills.length))];
     // A throw keyed to the Traveller's assignment is theirs with no question; one keyed to another is not offered.
@@ -2005,7 +2082,7 @@ async function pickThrow(check, assignment = "") {
     const throws = mine.length ? mine : (open.length ? open : all);
     if ( throws.length < 2 ) return throws[0];
     const picked = await insist(throws.map((one, index) => [String(index), throwLabel(one)]),
-        "MGT2.Chargen.Term.PickThrow");
+        "MGT2.Chargen.Term.PickThrow", context);
     return (picked === null) ? null : throws[Number(picked)];
 }
 
@@ -2018,11 +2095,11 @@ function throwLabel({ characteristic, skills, target, assignment }) {
 }
 
 /** The skills a row's own throw is made on: as typed, the one its grant just gave, or one gained this term. */
-async function throwSkills({ actor, record, term }, check, gained) {
+async function throwSkills({ actor, record, term }, check, gained, context = "") {
     if ( check.skillFrom === "granted" ) return gained.length ? [...gained] : check.skills;
     if ( check.skillFrom !== "term" ) return check.skills;
     const picked = await pickOne(termSkills(actor, record, term).map(name => [name, name]),
-        "MGT2.Chargen.Education.PickSkill");
+        "MGT2.Chargen.Education.PickSkill", context);
     return picked ? [picked] : null;
 }
 
@@ -2303,7 +2380,7 @@ const DRAFTED = Object.freeze(["drafted", "draftedByEvent"]);
  * @returns {Promise<{total: number, natural: number, passed: boolean}|null>}
  */
 async function roll(view, { check = "", step, target = null, characteristic = "", skill: named = "",
-    rows = [], formula = "", title = "" } = {}) {
+    rows = [], formula = "", title = "", describe = null } = {}) {
     const { actor, record } = view;
     const composed = CreationRoll.compose(actor, {
         characteristic, skill: named, check, career: record?.name, target, rows });
@@ -2312,7 +2389,7 @@ async function roll(view, { check = "", step, target = null, characteristic = ""
 
     const label = title || game.i18n.localize(MGT2.CreationSteps[step] ?? step);
     const posted = await CreationRoll.post(actor, composed, {
-        label: record ? `${label} · ${record.name}` : label, target });
+        label: record ? `${label} · ${record.name}` : label, target, describe });
     if ( !posted ) return null;
 
     const total = posted.outcome.roll.total;
@@ -2331,27 +2408,28 @@ async function roll(view, { check = "", step, target = null, characteristic = ""
  * @returns {Promise<string[]>}   What was granted, already localised, for the term log
  */
 export async function applyCell(actor, cell, { level = null, provenance = {}, rolled = false, granted = null,
-    thrown = "" } = {}) {
+    thrown = "", context = "" } = {}) {
     if ( !cell ) return [];
     let grants = cell.grants ?? [];
     if ( !grants.length ) return cell.text ? [cell.text] : [];
     if ( (cell.mode === "oneOf") && (grants.length > 1) ) {
         const picked = await insist(grants.map((grant, index) => [String(index), grantLabel(grant)]),
-            "MGT2.Chargen.Term.PickGrant");
+            "MGT2.Chargen.Term.PickGrant", context);
         if ( picked === null ) return [game.i18n.localize("MGT2.Chargen.Term.AwardForfeited")];
         grants = [grants[Number(picked)]];
     }
     const applied = [];
     for ( const grant of grants ) {
-        const line = await applyGrant(actor, grant, { level, provenance, rolled, granted, thrown });
+        const line = await applyGrant(actor, grant, { level, provenance, rolled, granted, thrown, context });
         if ( line ) applied.push(line);
     }
     return applied;
 }
 
-async function applyGrant(actor, grant, { level, provenance, rolled, granted = null, thrown = "" }) {
+async function applyGrant(actor, grant, { level, provenance, rolled, granted = null, thrown = "", context = "" }) {
     if ( grant.kind === "skill" ) {
-        const named = grant.pick ? await pickSkill(actor, grant, { provenance, thrown }) : await resolveSkill(grant);
+        const named = grant.pick ? await pickSkill(actor, grant, { provenance, thrown, context })
+            : await resolveSkill(grant, context);
         if ( !named ) return "";
         // Core p.229: a talent a Psion does not yet hold, rolled on a skill table, is a roll to learn it.
         const talent = rolled ? Psionics.talentFor(named.name) : null;
@@ -2386,7 +2464,7 @@ async function applyGrant(actor, grant, { level, provenance, rolled, granted = n
         for ( let i = 0; i < count; i++ ) await Grants.contact(actor, { relation, provenance });
         return `${game.i18n.localize(MGT2.ContactRelations[relation])} ×${count}`;
     }
-    if ( grant.kind === "convert" ) return convertAssociate(actor, grant, provenance);
+    if ( grant.kind === "convert" ) return convertAssociate(actor, grant, provenance, context);
     if ( grant.kind === "benefit" ) {
         const row = await Muster.take(actor, Muster.fromRef(grant.ref, { provenance }), { spend: false });
         return Muster.label(row);
@@ -2400,7 +2478,7 @@ async function applyGrant(actor, grant, { level, provenance, rolled, granted = n
  * Enemy. If you have no Contacts or Allies, then you are betrayed by someone you never saw coming
  * and still gain a Rival or Enemy."* The fallback is printed, so an empty list is not a refusal.
  */
-async function convertAssociate(actor, grant, provenance) {
+async function convertAssociate(actor, grant, provenance, context = "") {
     const relation = grant.relation || "Rival";
     const friends = actor.items.filter(item => (item.type === "contact")
         && MGT2.CreationLimits.convertibleRelations.includes(item.system.relation));
@@ -2410,7 +2488,7 @@ async function convertAssociate(actor, grant, provenance) {
         return made ? `${game.i18n.localize(MGT2.ContactRelations[relation])} · ${made.name}` : "";
     }
     const picked = await pickOne(friends.map(item => [item.id, item.name]),
-        "MGT2.Chargen.Term.PickAssociate");
+        "MGT2.Chargen.Term.PickAssociate", context);
     const turned = picked === null ? null : actor.items.get(picked);
     if ( !turned ) return "";
     await Grants.convert(turned, relation, MGT2Helper.tableWord(provenance.table ?? ""));
@@ -2441,21 +2519,21 @@ async function grantFinance(actor, grant, provenance = {}) {
  * book's own way of writing a choice rather than a value.
  * @returns {Promise<{name: string, speciality: string}|null>}
  */
-async function resolveSkill(grant) {
+async function resolveSkill(grant, context = "") {
     const base = grant.skill?.trim();
     if ( !base ) return null;
     const open = grant.family || (grant.speciality === "choose") || (grant.specialities.length > 1);
     if ( !open ) return { name: base, speciality: (grant.speciality === "choose") ? "" : grant.speciality };
     if ( grant.specialities.length ) {
         const picked = await pickOne(grant.specialities.map(name => [name, `${base} (${name})`]),
-            "MGT2.Chargen.Term.PickSpeciality");
+            "MGT2.Chargen.Term.PickSpeciality", context);
         return picked === null ? null : { name: base, speciality: picked };
     }
     // A family wildcard names no shortlist at all, so the player types the member.
     const typed = await DialogV2.prompt({
         window: { title: "MGT2.Chargen.Term.PickSpeciality" },
         classes: ["mgt2"],
-        content: `<div class="form-group"><label>${foundry.utils.escapeHTML(base)}</label>
+        content: `${rowText(context)}<div class="form-group"><label>${foundry.utils.escapeHTML(base)}</label>
             <input type="text" name="name" value=""></div>`,
         ok: { label: "MGT2.Chargen.Term.Apply",
             callback: (event, button) => button.form.elements.name.value.trim() },
@@ -2465,18 +2543,18 @@ async function resolveSkill(grant) {
 }
 
 /** A skill the player picks from the pool the grant names, never one it excepts; *"the skill you rolled on"* asks nothing. */
-async function pickSkill(actor, grant, { provenance, thrown }) {
+async function pickSkill(actor, grant, { provenance, thrown, context = "" }) {
     const allowed = name => !(grant.except ?? []).some(one => MGT2Helper.matchesSkill(name, one));
     if ( grant.pick === "thrown" ) return thrown ? { name: thrown, speciality: "" } : null;
     if ( grant.pick !== "any" ) {
         const pool = (grant.pick === "held") ? Grants.skills(actor).map(item => item.name)
             : termSkills(actor, actor.items.get(provenance.career), provenance.term);
         const picked = await pickOne(pool.filter(allowed).map(name => [name, name]),
-            (grant.pick === "held") ? "MGT2.Chargen.Education.PickRaise" : "MGT2.Chargen.Education.PickSkill");
+            (grant.pick === "held") ? "MGT2.Chargen.Education.PickRaise" : "MGT2.Chargen.Education.PickSkill", context);
         return picked ? { name: picked, speciality: "" } : null;
     }
     const content = document.createElement("div");
-    content.innerHTML = `<div class="form-group"><input type="text" name="name" list="mgt2-any-skill" value="">
+    content.innerHTML = `${rowText(context)}<div class="form-group"><input type="text" name="name" list="mgt2-any-skill" value="">
         <datalist id="mgt2-any-skill">${(await skillLibrary(actor)).filter(allowed).map(name =>
         `<option value="${foundry.utils.escapeHTML(name)}"></option>`).join("")}</datalist></div>`;
     for ( ;; ) {
@@ -2614,9 +2692,9 @@ function namesThisCareer(record, ids) {
  * step: a forfeit is confirmed out loud and goes to the term log.
  * @returns {Promise<string|null>}   Null only where the player confirmed the forfeit
  */
-async function insist(options, title) {
+async function insist(options, title, context = "") {
     for ( ;; ) {
-        const picked = await pickOne(options, title);
+        const picked = await pickOne(options, title, context);
         if ( picked !== null ) return picked;
         const forfeit = await DialogV2.confirm({
             window: { title },
@@ -2628,8 +2706,8 @@ async function insist(options, title) {
     }
 }
 
-/** One select, one answer. Null is the player closing the dialog rather than choosing. */
-async function pickOne(options, title) {
+/** One select, one answer, under the row text that asks it. Null is the player closing the dialog rather than choosing. */
+async function pickOne(options, title, context = "") {
     if ( !options.length ) return null;
     if ( options.length === 1 ) return options[0][0];
     const markup = options.map(([value, label]) =>
@@ -2638,10 +2716,15 @@ async function pickOne(options, title) {
     const picked = await DialogV2.prompt({
         window: { title },
         classes: ["mgt2"],
-        content: `<div class="form-group"><select name="pick">${markup}</select></div>`,
+        content: `${rowText(context)}<div class="form-group"><select name="pick">${markup}</select></div>`,
         ok: { label: "MGT2.Chargen.Term.Apply",
             callback: (event, button) => button.form.elements.pick.value },
         rejectClose: false
     });
     return picked ?? null;
+}
+
+/** The printed sentence a choice answers, as a dialog's first paragraph. */
+function rowText(text) {
+    return text ? `<p>${foundry.utils.escapeHTML(text)}</p>` : "";
 }
