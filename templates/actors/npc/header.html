@@ -15,8 +15,8 @@
 			{{else}}
 			{{#if system.role}}<span>{{system.role}}</span>{{/if}}
 			{{#if system.personal.species}}<span>{{system.personal.species}}</span>{{/if}}
-			{{#if system.attitude}}<span>{{localize (lookup choices.attitudes system.attitude)}}</span>{{/if}}
-			{{#if npc.experience}}<span>{{localize npc.experience.label}}</span>{{/if}}
+			{{#if system.attitude}}<span class="att {{npc.attitudeTone}}">{{localize (lookup choices.attitudes system.attitude)}}</span>{{/if}}
+			{{#if npc.experience}}<span class="att">{{localize npc.experience.label}}</span>{{/if}}
 			{{/if}}
 		</div>
 
@@ -71,7 +71,7 @@
 				<input type="checkbox" {{checked system.states.incapacitated}} disabled />{{localize 'MGT2.Actor.npc.Incapacitated'}}
 			</label>
 			{{else}}
-			<label data-tooltip="{{localize 'MGT2.Actor.FatigueHint'}}">
+			<label class="warn" data-tooltip="{{localize 'MGT2.Actor.FatigueHint'}}">
 				{{formInput systemFields.states.fields.fatigue name="system.states.fatigue" value=system.states.fatigue}}{{localize 'MGT2.Actor.Fatigue'}}
 			</label>
 			{{/if}}
@@ -82,7 +82,7 @@
 				<input type="checkbox" {{checked system.states.dead}} disabled />{{localize 'MGT2.Actor.Dead'}}
 			</label>
 			{{#if (rule 'radiation')}}
-			<label data-tooltip="{{localize 'MGT2.Radiation.NauseaHint'}}">
+			<label class="warn" data-tooltip="{{localize 'MGT2.Radiation.NauseaHint'}}">
 				{{formInput systemFields.states.fields.nausea name="system.states.nausea" value=system.states.nausea}}{{localize 'MGT2.Radiation.Nausea'}}
 			</label>
 			{{/if}}
@@ -195,12 +195,15 @@
 	{{! The pool runs to TWICE the maximum, because `damage` is stored and can exceed it — that
 	    overrun is the Destroyed state, and the four printed thresholds are four marks on it. }}
 	{{#if npc.track}}
-	<div class="trackwrap open" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.Heal'}}">
-		<div class="track{{#if system.life.damage}} hurt{{/if}}" data-derived="system.life.damage">
+	<div class="trackwrap open below" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.Heal'}}">
+		<div class="track over{{#if system.life.damage}} hurt{{/if}}" data-derived="system.life.damage">
 			<div class="fill" style="--g: {{npc.track.wound}}%"></div>
 			{{#if system.stun}}<div class="stun" data-tooltip="{{localize 'MGT2.Actor.StunHint'}}" style="--s0: {{npc.track.stunFrom}}%; --s: {{npc.track.stun}}%"></div>{{/if}}
 			{{#each npc.track.marks}}
-			<div class="mk"{{#if (eq at 100)}} data-anchor="end"{{else if (eq at 0)}} data-anchor="start"{{/if}}{{#if hit}} data-hit="1"{{/if}} style="--x: {{at}}%"><span>{{localize label}}</span></div>
+			<div class="mk"{{#if hit}} data-hit="1"{{/if}} style="--x: {{at}}%"></div>
+			{{/each}}
+			{{#each npc.track.labels}}
+			<span class="ml"{{#if anchor}} data-anchor="{{anchor}}"{{/if}}{{#if hit}} data-hit="1"{{/if}} style="--x: {{at}}%">{{text}}</span>
 			{{/each}}
 		</div>
 	</div>

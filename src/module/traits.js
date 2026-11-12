@@ -148,7 +148,7 @@ const REGISTRY = {
         "corrosive": {label: "Corrosive"},
         "dangerous": {label: "Dangerous", conflict: ["very-dangerous"]},
         "destructive": {label: "Destructive"},
-        "emissions-signature": {label: "Emissions Signature", params: [{slot: "level", type: "level"}], levels: ["minimal", "low", "normal", "high", "very high", "extreme"]},
+        "emissions-signature": {label: "Emissions Signature", params: [{slot: "level", type: "level"}], levels: ["minimal", "small", "low", "normal", "high", "very high", "extreme"]},
         "fire": {label: "Fire"},
         "hazardous": {label: "Hazardous", params: [{slot: "score", type: "negative"}]},
         "inaccurate": {label: "Inaccurate", params: [{slot: "score", type: "negative", optional: true}]},
@@ -156,12 +156,12 @@ const REGISTRY = {
         "ion": {label: "Ion"},
         "lo-pen": {label: "Lo-Pen", params: [{slot: "multiplier", type: "int"}], conflict: ["ap"]},
         "one-use": {label: "One Use"},
-        "physical-signature": {label: "Physical Signature", params: [{slot: "level", type: "level"}], levels: ["minimal", "low", "normal", "high", "very high", "extreme"]},
+        "physical-signature": {label: "Physical Signature", params: [{slot: "level", type: "level"}], levels: ["minimal", "small", "low", "normal", "high", "very high", "extreme"]},
         "radiation": {label: "Radiation"},
         "ramshackle": {label: "Ramshackle", params: [{slot: "score", type: "negative"}]},
         "scope": {label: "Scope"},
         "silent": {label: "Silent"},
-        "slow-loader": {label: "Slow Loader", params: [{slot: "rounds", type: "int"}]},
+        "slow-loader": {label: "Slow Loader", params: [{slot: "actions", type: "int"}]},
         "smart": {label: "Smart"},
         "smasher": {label: "Smasher"},
         "sonic": {label: "Sonic", params: [{slot: "score", type: "negative"}]},
@@ -479,6 +479,43 @@ export function slotLabel(slot) {
     return game.i18n.has(key) ? game.i18n.localize(key) : (slot ?? "");
 }
 
+function levelSlug(text) {
+    return foldName(text).trim().replace(/\s+/g, "-");
+}
+
+/** A slot's value as a gloss prints it: a registry level in words, signed where its type is, else the number. */
+function glossValue(type, param, levels = []) {
+    const value = String(param.value ?? "").trim();
+    const key = `MGT2.TraitLevel.${levelSlug(value)}`;
+    if ((type === "level") && levels.some(l => levelSlug(l) === levelSlug(value)) && game.i18n.has(key)) {
+        return game.i18n.localize(key);
+    }
+    const num = param.num;
+    if (!NUMERIC_TYPES.has(type) || !Number.isFinite(num)) return value;
+    const text = Math.abs(num).toLocaleString(game.i18n.lang);
+    if (type === "positive") return `+${text}`;
+    if (type === "negative") return `-${text}`;
+    return num < 0 ? `-${text}` : text;
+}
+
+/** A stored trait's one-line rule gloss with its slots filled in; "" for a custom trait. */
+export function traitGloss(entry) {
+    if (!entry?.key || (entry.key === CUSTOM_KEY)) return "";
+    const key = `MGT2.TraitGloss.${entry.family}.${entry.key}`;
+    const rule = game.i18n.pluralRules.select(Math.abs(traitNumber(entry)));
+    const id = [key, `${key}.${rule}`, `${key}.other`].find(id => game.i18n.has(id));
+    if (!id) return "";
+    const trait = getTrait(entry.family, entry.key);
+    const slots = trait?.params ?? [];
+    const data = {};
+    for (const [index, param] of (entry.params ?? []).entries()) {
+        const slot = slots.find(s => s.slot === param.slot) ?? slots[index];
+        if (slot && (String(param.value ?? "").trim() !== "")) data[slot.slot] = glossValue(slot.type, param, trait.levels);
+    }
+    // A slot left blank prints as the books' own X: `AP (X)`.
+    return game.i18n.localize(id).replace(/\{(\w+)\}/g, (token, name) => data[name] ?? "X");
+}
+
 /** `Armour (+7, +10, vs. lasers)` — the chip's own text, for a tooltip or a one-line summary. */
 export function formatTrait(entry) {
     const label = traitLabel(entry);
@@ -626,10 +663,24 @@ function migrateTraitEntry(entry, family) {
         : [entry.name.trim(), description].filter(t => t !== "").join(" — ");
 }
 
-/** The same over a whole legacy array. Safe on an array that is already in the new shape. */
+const RENAMED_SLOTS = Object.freeze({ "weapon.slow-loader": Object.freeze({ rounds: "actions", "": "actions" }) });
+
+function renameSlots(entry) {
+    const renamed = RENAMED_SLOTS[`${entry?.family}.${entry?.key}`];
+    if (!renamed) return;
+    for (const param of Object.values(entry.params ?? {})) {
+        const slot = param?.slot ?? "";
+        if (param && Object.hasOwn(renamed, slot)) param.slot = renamed[slot];
+    }
+}
+
+/** The same over a whole array, old slot names renamed (FC p.8: Slow Loader counts minor actions); safe twice. */
 export function migrateTraitArray(entries, family) {
     if (!Array.isArray(entries)) return;
-    for (const entry of entries) migrateTraitEntry(entry, family);
+    for (const entry of entries) {
+        migrateTraitEntry(entry, family);
+        renameSlots(entry);
+    }
 }
 
 /**
@@ -682,10 +733,13 @@ export function bindTraitInput(root, add) {
  * @param {string} property    Its path under `system`, which names the form controls
  * @param {string} family      The vocabulary this site speaks
  * @param {string} label       The i18n key of the block's heading
+ * @param {boolean} [glossed]  Whether play mode lists each chip with its rule gloss
  */
-export function prepareTraitBlock(entries, property, family, label) {
+export function prepareTraitBlock(entries, property, family, label, glossed = false) {
+    const rows = Object.values(entries ?? []);
     return {
         property, family, label,
+        glossed: glossed && rows.some(entry => entry?.key && (entry.key !== CUSTOM_KEY)),
         familyLabel: TRAIT_FAMILIES[family],
         // One list per family, shared by every chip row on the sheet that speaks it.
         listId: `mgt2-traits-${family}`,
@@ -695,12 +749,13 @@ export function prepareTraitBlock(entries, property, family, label) {
             // without, since Explosive and Toxic print the same two concepts the other way round.
             hint: entry.params.length > 0 ? `(${entry.params.map(p => slotLabel(p.slot)).join(", ")})` : ""
         })),
-        entries: Object.values(entries ?? []).map(entry => ({
+        entries: rows.map(entry => ({
             family: entry.family,
             key: entry.key,
             note: entry.note ?? "",
             custom: entry.key === CUSTOM_KEY,
             label: traitLabel(entry),
+            gloss: glossed ? traitGloss(entry) : "",
             params: (entry.params ?? []).map(p => ({ ...p, slotLabel: slotLabel(p.slot) }))
         }))
     };

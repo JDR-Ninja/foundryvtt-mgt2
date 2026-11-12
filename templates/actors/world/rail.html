@@ -12,9 +12,9 @@
 				<dt>{{localize 'MGT2.Actor.world.Fuel'}}</dt>
 				<dd class="word">{{localize (concat 'MGT2.Actor.world.FuelGrade.' system.starport.fuel)}}</dd>
 			</div>
-			<div class="stat{{#unless system.starport.fuelPrice}} none{{/unless}}">
+			<div class="stat{{#unless system.starport.fuelPrices.length}} none{{/unless}}">
 				<dt>{{localize 'MGT2.Actor.world.FuelPrice'}}</dt>
-				<dd>{{#if system.starport.fuelPrice}}<i>Cr</i>{{credits system.starport.fuelPrice}}{{else}}&mdash;{{/if}}</dd>
+				<dd>{{#each system.starport.fuelPrices as |price|}}{{#unless @first}} &middot; {{/unless}}<i>Cr</i>{{credits price}}{{else}}&mdash;{{/each}}</dd>
 			</div>
 			<div class="stat{{#unless world.berthing.rollable}} none{{/unless}}">
 				<dt>{{localize 'MGT2.Actor.world.PerDie'}}</dt>

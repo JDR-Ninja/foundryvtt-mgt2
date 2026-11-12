@@ -7,7 +7,7 @@ import { buildHazardItem, buildTraitMap, createTraitsField, hazardTraits, resolv
 
 const fields = foundry.data.fields;
 
-// DM ladder indexed by characteristic value; 15+ is off the end of the table.
+// Core p.9's ladder by score. From 15 it is +3, and +1 per 3 more under `highCharacteristics` (Companion p.4).
 const DM_LADDER = [-3, -2, -2, -1, -1, -1, 0, 0, 0, 1, 1, 1, 2, 2, 2];
 
 // Core folio 228: the reserve stands still for three hours, then returns a point an hour.
@@ -804,6 +804,15 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         return Math.max((options.effect ?? 0) >= 6 ? 1 : 0, wound);
     }
 
+    /** What `applyDamage` would make of an attack, written nowhere: `{kind, value, rounds}`. */
+    previewDamage(amount, options = {}) {
+        if (this.damageTransform(options.damageType) === "immune") return { kind: "immune", value: 0 };
+        const wound = this.reduceDamage(amount, options);
+        if (!options.stun) return { kind: "wound", value: wound };
+        const taken = Math.min(wound, this.characteristics[this.stunLink]?.value ?? 0);
+        return { kind: "stun", value: taken, rounds: wound - taken };
+    }
+
     /**
      * Core folio 229: activating a power spends PSI, and any excess below zero "are applied as
      * damage".
@@ -968,6 +977,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
 
     static getModifier(value) {
         if (isNaN(value) || value <= 0) return DM_LADDER[0];
-        return DM_LADDER[value] ?? 3;
+        if (value < DM_LADDER.length) return DM_LADDER[Math.floor(value)];
+        return 3 + (Rules.on("highCharacteristics") ? Math.floor((value - DM_LADDER.length) / 3) : 0);
     }
 }

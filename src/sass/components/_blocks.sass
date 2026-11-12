@@ -37,12 +37,13 @@ li.chat-message
 		text-transform: uppercase
 		color: var(--mute)
 
+	// A section heading is structure, so it stays neutral: the accent is kept for where the user acts.
 	.sect
 		display: flex
-		align-items: baseline
-		gap: 10px
-		padding-bottom: 3px
-		border-bottom: 2px solid var(--accent-text)
+		align-items: center
+		gap: 8px
+		padding-bottom: 4px
+		border-bottom: 1px solid var(--rule)
 		h3
 			margin: 0
 			font-family: var(--cond)
@@ -53,15 +54,29 @@ li.chat-message
 			text-transform: uppercase
 			border: none
 		.count
+			padding: 0 6px
 			font-family: var(--mono)
-			font-size: 10.5px
-			color: var(--faint)
+			font-size: 10px
+			line-height: 1.5
+			color: var(--mute)
+			background: var(--hover)
+			border-radius: 999px
+			&:empty
+				display: none
 		.add
 			margin-left: auto
 			display: inline-flex
+			align-items: center
+			justify-content: center
+			width: 20px
+			height: 20px
 			font-size: 12px
-			color: var(--accent-text)
+			color: var(--faint)
+			border-radius: 4px
 			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
+				background: var(--accent-soft)
 			svg
 				width: 13px
 				height: 13px
@@ -692,8 +707,8 @@ li.chat-message
 //  BLOCK 4 — CODES. Short parameterised tokens, legible at eight per line.
 // --------------------------------------------
 // Contract: a token is the registry shape {family, key, params[], note} and renders as
-// NAME(param, param). It carries no definition text — the registry ships names, parameter shapes,
-// families and citations only. `note` is the owner's own text and hangs off a dagger.
+// NAME(param, param). In `.glossed` play mode a sibling `.gloss` item holds its one-line rule gloss,
+// the system's own wording from the language files. `note` is the owner's own text, on a dagger.
 // Tones: (default) a fact · .hot applied to the current roll · .inert a reminder the system
 // deliberately cannot resolve · .off switched off.
 
@@ -790,6 +805,21 @@ li.chat-message
 				border-color: var(--accent-text)
 				border-style: solid
 
+// A trait row reads one code per line in play mode, each chip beside its gloss.
+.mgt2[data-mode="play"] .codes.glossed
+	display: grid
+	grid-template-columns: max-content minmax(0, 1fr)
+	align-items: baseline
+	gap: 5px 12px
+
+	.code
+		justify-self: start
+	.gloss
+		font-family: var(--body)
+		font-size: 12px
+		line-height: 1.35
+		color: var(--mute)
+
 // --------------------------------------------
 //  DAMAGE TRACK — the pool, drawn so a stored wound is visible.
 // --------------------------------------------
@@ -849,6 +879,29 @@ li.chat-message
 		width: 2px
 		background: var(--danger)
 		span
+			color: var(--danger)
+
+	// The overrun past the maximum, hatched: the half of a creature's track the Destroyed state is in.
+	&.over
+		background: linear-gradient(90deg, var(--track) 0 50%, transparent 50%), repeating-linear-gradient(135deg, var(--track) 0 3px, transparent 3px 6px)
+	// One caption under the track per group of marks, so two thresholds side by side never collide.
+	.ml
+		position: absolute
+		top: calc(100% + 5px)
+		left: var(--x)
+		transform: translateX(-50%)
+		font-family: var(--cond)
+		font-size: 9.5px
+		font-weight: 600
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		white-space: nowrap
+		color: var(--mute)
+		&[data-anchor="start"]
+			transform: none
+		&[data-anchor="end"]
+			transform: translateX(-100%)
+		&[data-hit]
 			color: var(--danger)
 
 .mgt2 .trackwrap
@@ -1099,23 +1152,26 @@ li.chat-message
 		font-family: var(--mono)
 		font-size: 12px
 		font-variant-numeric: tabular-nums
-		color: var(--accent-text)
-		// You click the number that goes into the roll: 2D + DM, and the DM is already the row's one
-		// accent cell, so the affordance costs no pixel the row did not already spend.
+		color: var(--ink)
+		// You click the number that goes into the roll: 2D + DM. Its pill is the affordance, so it stays
+		// neutral at rest and takes the accent under the pointer; a DM of 0 adds nothing and recedes.
 		a.dm
 			display: inline-flex
 			align-items: center
-			justify-content: flex-end
+			justify-content: center
 			min-width: 100%
-			margin: 0 -4px
-			padding: 2px 4px
-			border-radius: 2px
-			color: var(--accent-text)
+			padding: 1px 5px
+			border: 1px solid var(--edge)
+			border-radius: 999px
+			color: var(--ink)
 			cursor: var(--cursor-pointer)
+			&.zero
+				color: var(--faint)
+				border-color: var(--rule)
 			&:hover
 				color: var(--accent-hot)
-				background: var(--hover)
-				box-shadow: inset 0 0 0 1px var(--accent-line)
+				border-color: var(--accent-line)
+				background: var(--accent-soft)
 		a.cfg
 			display: inline-flex
 			color: var(--faint)
@@ -1126,27 +1182,27 @@ li.chat-message
 				width: 12px
 				height: 12px
 
+	// What is left of the pool fills the bar; a wound shows as the red stretch it took off the end.
 	.g
 		grid-area: g
-		height: 3px
+		height: 5px
 		align-self: center
-		background: color-mix(in oklab, var(--ink) 9%, transparent)
-		-webkit-mask-image: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 4px)
-		mask-image: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 4px)
+		overflow: hidden
+		border-radius: 3px
+		background: var(--track)
 		i
 			display: block
 			height: 100%
 			width: var(--g, 0%)
 			background: var(--fill)
-	&.hurt .g i
-		background: color-mix(in oklab, var(--danger) 75%, var(--paper))
+	&.hurt .g
+		background: color-mix(in oklab, var(--danger) 60%, transparent)
 
-	// A spent reserve is a level, not an alarm — and on the red theme an accent fill and the injury
-	// fill are indistinguishable. PSI keeps the neutral one.
+	// A spent reserve is a level, not an alarm, so PSI keeps the neutral track.
 	&.spent .v .cur
 		color: inherit
-	&.spent .g i
-		background: var(--fill)
+	&.spent .g
+		background: var(--track)
 
 // In play the reading is fixed-width, so the readings line up down the column and nothing to their
 // left drifts; the gauge then takes the slack a three-letter name leaves, which turns a dead middle

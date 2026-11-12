@@ -4601,22 +4601,22 @@
             "closed": true,
             "kind": "",
             "outcomes": [
-              "advanced",
-              "skillRoll"
+              "skillRoll",
+              "advanced"
             ],
             "steps": [
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "You pull a crew off a sinking launch. Make a Seafarer check (8+); success gains a Contact and a commendation. · The row's own check passed. · Contact ×1 · Pending: DM. · Advanced to rank 2, and one extra skill roll. · Skill roll: Intellect +1 · Skill roll: Vacc Suit 2"
+            "note": "Skill roll: Intellect +1 · You pull a crew off a sinking launch. Make a Seafarer check (8+); success gains a Contact and a commendation. · The row's own check passed. · Contact ×1 · Pending: DM. · Advanced to rank 2, and one extra skill roll. · Skill roll: Vacc Suit 2"
           },
           {
             "term": 4,
@@ -4627,23 +4627,23 @@
             "closed": true,
             "kind": "",
             "outcomes": [
-              "advanced",
               "skillRoll",
+              "advanced",
               "aged"
             ],
             "steps": [
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "You take an inspection nobody else would sign. Make a Investigate or Persuade check (8+): pass, and gain an extra Benefit roll. Either way, the skill you used gains a level. · The row's own check passed. · Investigate 2 · Advanced to rank 3, and one extra skill roll. · Skill roll: Persuade 1 · Skill roll: Vacc Suit 3 · Ageing roll 3: —"
+            "note": "Skill roll: Persuade 1 · You take an inspection nobody else would sign. Make a Investigate or Persuade check (8+): pass, and gain an extra Benefit roll. Either way, the skill you used gains a level. · The row's own check passed. · Investigate 2 · Advanced to rank 3, and one extra skill roll. · Skill roll: Vacc Suit 3 · Ageing roll 3: —"
           },
           {
             "term": 5,
@@ -4661,15 +4661,15 @@
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "You fall in with the ferry crews on the night crossing. Gain a Contact. · Contact ×1 · Skill roll: Investigate 3 · Ageing roll 3: —"
+            "note": "Skill roll: Investigate 3 · You fall in with the ferry crews on the night crossing. Gain a Contact. · Contact ×1 · Ageing roll 3: —"
           }
         ],
         "track": {
@@ -4968,33 +4968,33 @@
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify"},
             {"step":"basic"},
+            {"step":"skill","faces":[3],"answers":[{"title":"Pick a skill table (1 left)","pick":"personalDevelopment","press":"ok"}]},
             {"step":"survival","faces":[5,2]},
             {"step":"event","faces":[2,3,4,4]},
             {"step":"commission"},
             {"step":"advance","faces":[2,3]},
-            {"step":"skill","faces":[3],"answers":[{"title":"Pick a skill table (2 left)","pick":"personalDevelopment","press":"ok"}]},
-            {"step":"skill","offCursor":true,"faces":[2],"answers":[{"title":"Pick a skill table (1 left)","pick":"service","press":"ok"}]},
+            {"step":"skill","faces":[2],"answers":[{"title":"Pick a skill table (1 left)","pick":"service","press":"ok"}]},
             {"step":"ageing"},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"stay"}]},
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify"},
             {"step":"basic"},
+            {"step":"skill","faces":[2],"answers":[{"title":"Pick a skill table (1 left)","pick":"advancedEducation","press":"ok"}]},
             {"step":"survival","faces":[3,5]},
             {"step":"event","faces":[3,5,5,4]},
             {"step":"commission"},
             {"step":"advance","faces":[4,4]},
-            {"step":"skill","faces":[2],"answers":[{"title":"Pick a skill table (2 left)","pick":"advancedEducation","press":"ok"}]},
-            {"step":"skill","offCursor":true,"faces":[5],"answers":[{"title":"Pick a skill table (1 left)","pick":"assignment","press":"ok"}]},
+            {"step":"skill","faces":[5],"answers":[{"title":"Pick a skill table (1 left)","pick":"assignment","press":"ok"}]},
             {"step":"ageing","faces":[3,4]},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"stay"}]},
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify"},
             {"step":"basic"},
+            {"step":"skill","faces":[4],"answers":[{"title":"Pick a skill table (1 left)","pick":"service","press":"ok"}]},
             {"step":"survival","faces":[6,2]},
             {"step":"event","faces":[3,4,3,3]},
             {"step":"commission"},
             {"step":"advance","faces":[2,3]},
-            {"step":"skill","faces":[4],"answers":[{"title":"Pick a skill table (1 left)","pick":"service","press":"ok"}]},
             {"step":"ageing","faces":[4,4]},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"leave"}]},
             {"press":"openClose"},

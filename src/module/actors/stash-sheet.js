@@ -75,6 +75,7 @@ export class StashActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsA
             stash.value = system.value;
         }
         context.stash = stash;
+        context.enriched = await MGT2Helper.enrichFields(actor, ["description", "notes"]);
         return context;
     }
 

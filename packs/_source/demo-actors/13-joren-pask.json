@@ -5038,22 +5038,22 @@
             "closed": true,
             "kind": "",
             "outcomes": [
-              "advanced",
-              "skillRoll"
+              "skillRoll",
+              "advanced"
             ],
             "steps": [
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "A neighbour's barn burns, and you raise a new one with them before the rains. Gain an Ally among the holders. · Ally ×1 · Advanced to rank 2, and one extra skill roll. · Skill roll: Mechanic 2 · Skill roll: Leadership 1"
+            "note": "Skill roll: Mechanic 2 · A neighbour's barn burns, and you raise a new one with them before the rains. Gain an Ally among the holders. · Ally ×1 · Advanced to rank 2, and one extra skill roll. · Skill roll: Leadership 1"
           }
         ],
         "track": {
@@ -7836,23 +7836,23 @@
             "kind": "",
             "outcomes": [
               "basicTraining",
-              "advanced",
               "skillRoll",
+              "advanced",
               "aged"
             ],
             "steps": [
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "Qualified. · Basic training — one skill at level 0: Gun Combat 0 · You are moved to the marsh station and given a boat of your own. Gain one level of Seafarer and SOC +1. · Seafarer 2, Social +1 · Advanced to rank 1, and one extra skill roll. · Skill roll: Vacc Suit 1 · Skill roll: Athletics 1 · Ageing roll 4: —"
+            "note": "Qualified. · Basic training — one skill at level 0: Gun Combat 0 · Skill roll: Vacc Suit 1 · You are moved to the marsh station and given a boat of your own. Gain one level of Seafarer and SOC +1. · Seafarer 2, Social +1 · Advanced to rank 1, and one extra skill roll. · Skill roll: Athletics 1 · Ageing roll 4: —"
           }
         ],
         "track": {
@@ -8102,24 +8102,24 @@
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify"},
             {"step":"basic"},
+            {"step":"skill","faces":[1],"answers":[{"title":"Pick a skill table (1 left)","pick":"assignment","press":"ok"}]},
             {"step":"survival","faces":[3,4]},
             {"step":"event","faces":[4,4]},
             {"step":"commission"},
             {"step":"advance","faces":[3,4]},
-            {"step":"skill","faces":[1],"answers":[{"title":"Pick a skill table (2 left)","pick":"assignment","press":"ok"}]},
-            {"step":"skill","offCursor":true,"faces":[3],"answers":[{"title":"Pick a skill table (1 left)","pick":"assignment","press":"ok"}]},
+            {"step":"skill","faces":[3],"answers":[{"title":"Pick a skill table (1 left)","pick":"assignment","press":"ok"}]},
             {"step":"ageing"},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"leave"}]},
             {"drop":"Compendium.mgt2.demo-items.Item.demoCareerHarbor"},
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify","faces":[3,4]},
             {"step":"basic","answers":[{"title":"Pick one skill at level 0","pick":"Gun Combat","press":"ok"}]},
+            {"step":"skill","faces":[2],"answers":[{"title":"Pick a skill table (1 left)","pick":"service","press":"ok"}]},
             {"step":"survival","faces":[3,4]},
             {"step":"event","faces":[5,5]},
             {"step":"commission"},
             {"step":"advance","faces":[4,4]},
-            {"step":"skill","faces":[2],"answers":[{"title":"Pick a skill table (2 left)","pick":"service","press":"ok"}]},
-            {"step":"skill","offCursor":true,"faces":[4],"answers":[{"title":"Pick a skill table (1 left)","pick":"personalDevelopment","press":"ok"}]},
+            {"step":"skill","faces":[4],"answers":[{"title":"Pick a skill table (1 left)","pick":"personalDevelopment","press":"ok"}]},
             {"step":"ageing","faces":[4,4]},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"leave"}]},
             {"press":"openClose"},

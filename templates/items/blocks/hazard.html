@@ -3,24 +3,28 @@
     Effect is the number the Resist roll produces on its chat card. }}
 <div class="block">
 	<div class="rollbar">
-		<p class="rollline play-only">
-			<span class="op">{{localize 'MGT2.Items.Versus'}}</span>
-			{{#if roll.difficulty}}<span>{{roll.difficulty}}</span>
-			{{else}}<span class="none">{{localize 'MGT2.Items.RefereeDifficulty'}}</span>{{/if}}
-			{{#if (or system.damage system.effect)}}
-			<span class="op">·</span><span class="op">{{localize 'MGT2.Items.OnFail'}} &rarr;</span>
-			{{#if system.damage}}<span>{{system.damage}}</span>{{/if}}
-			{{#if system.effect}}{{#if system.damage}}<span class="op">·</span>{{/if}}<span>{{system.effect}}</span>{{/if}}
+		{{! The cycle: resist, what a failure costs, and how often it comes round. Only the damage is red. }}
+		<div class="cycle play-only">
+			<div class="plate"><span class="lbl">{{localize 'MGT2.Items.Resist'}}</span>
+				{{#if roll.difficulty}}<b>{{roll.difficulty}}</b>
+				{{else}}<b class="none">{{localize 'MGT2.Items.RefereeDifficulty'}}</b>{{/if}}</div>
+			{{#if system.damage}}
+			<i class="fa-solid fa-arrow-right-long"></i>
+			<div class="plate harm"><span class="lbl">{{localize 'MGT2.Items.OnFail'}}</span><b>{{system.damage}}</b></div>
 			{{/if}}
 			{{#if system.interval}}
-			<span class="op">{{localize 'MGT2.Items.Every'}}</span><span>{{system.interval}}</span>
+			<i class="fa-solid fa-rotate-right"></i>
+			<div class="plate"><span class="lbl">{{localize 'MGT2.Items.Every'}}</span><b>{{system.interval}}</b></div>
 			{{/if}}
-		</p>
+		</div>
 		<button type="button" class="btn-roll" data-action="itemRoll" data-roll="{{roll.dispatch}}"
 			data-item-id="{{item.id}}"
 			{{#if roll.disabled}}disabled data-tooltip="MGT2.Items.RollNeedsOwner"{{/if}}>
 			<i class="fa-solid fa-dice"></i>{{localize roll.label}}
 		</button>
+		{{#if system.effect}}
+		<p class="ailment play-only"><span class="lbl">{{localize 'MGT2.Items.Condition'}}</span>{{system.effect}}</p>
+		{{/if}}
 
 		<div class="grid edit-only">
 			<label>

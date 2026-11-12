@@ -18,8 +18,8 @@
 		</span>
 	</div>
 	<div class="d">
-		{{! You click the number that goes into the roll — it is already the row's one accent cell. }}
-		<a class="dm play-only" data-action="roll" data-roll="characteristic" data-roll-characteristic="{{key}}" data-derived="system.characteristics.{{key}}.dm" data-tooltip="{{localize 'MGT2.Actor.RollFormula' formula=formula label=(localize label)}}">{{showDM dm}}</a>
+		{{! You click the number that goes into the roll; its pill says so, and a DM of 0 recedes. }}
+		<a class="dm play-only{{#unless dm}} zero{{/unless}}" data-action="roll" data-roll="characteristic" data-roll-characteristic="{{key}}" data-derived="system.characteristics.{{key}}.dm" data-tooltip="{{localize 'MGT2.Actor.RollFormula' formula=formula label=(localize label)}}">{{showDM dm}}</a>
 		<a class="cfg edit-only" data-action="openCharacteristic" data-cfg-characteristic="{{key}}" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
 	</div>
 	{{#if pool}}<div class="g"><i style="--g: {{percent}}%"></i></div>{{/if}}

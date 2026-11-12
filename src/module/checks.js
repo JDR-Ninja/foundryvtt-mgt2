@@ -1,4 +1,5 @@
 import { CHECK, checkOf } from "./chat-message.js";
+import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 
 /** The one card a check posts, and the one a roll that scores no Effect posts too. */
@@ -100,7 +101,8 @@ export class Checks {
                 previous: (card.chainSources ?? []).map(source => source.id),
                 opposed: outcome.opposed
             },
-            content: await renderRollCard({ roll: outcome.roll, outcome, ...card })
+            content: await renderRollCard({ roll: outcome.roll, outcome,
+                damage: flags?.mgt2?.damage ?? null, targets: flags?.mgt2?.targets ?? [], ...card })
         };
         if ( flags ) message.flags = flags;
 
@@ -120,18 +122,19 @@ export class Checks {
  * @param {object} [options.outcome]      What `Checks.resolve` returned
  * @param {{name: string, dm: number|string}[]} [options.modifiers]  The named terms, in formula order
  * @param {string[]} [options.lines]      Sentences appended to the opposed verdict
+ * @param {object} [options.damage]       The weapon's offer, which names the damage button
+ * @param {object[]} [options.targets]    `{name, img, distance}` per token targeted as it was rolled
+ * @param {object} [options.ammo]         `{left, magazine, spent}` after the shot
  */
 export async function buildRollCardContext({
     roll = null, outcome = null, difficulty = null,
     rollTypeName = "", rollObjectName = "",
-    modifiers = [], chainSources = [], lines = [], ...card
+    modifiers = [], chainSources = [], lines = [], damage = null, targets = [], ammo = null, ...card
 } = {}) {
     const context = {
-        rollTypeName,
-        rollObjectName,
+        kicker: rollObjectName ? rollTypeName : "",
+        title: rollObjectName || rollTypeName,
         rollModifiers: modifiers,
-        rollDifficulty: difficulty,
-        rollDifficultyLabel: MGT2Helper.getDifficultyDisplay(difficulty),
         // The lineage the card can be clicked back through: the chain names each source rather than
         // storing only its id, because the strip links back to it.
         chainedFrom: chainSources,
@@ -143,6 +146,15 @@ export async function buildRollCardContext({
         context.formula = roll.formula;
         context.tooltip = await roll.getTooltip();
         context.total = Math.round(roll.total * 100) / 100;
+        const results = roll.dice.flatMap(die => die.results);
+        context.dice = results.map(result => ({ value: result.result, dropped: !result.active }));
+        const kept = results.filter(result => result.active).reduce((sum, result) => sum + result.result, 0);
+        context.diceDM = MGT2Helper.signed(Math.round((roll.total - kept) * 100) / 100, "+0");
+        // Core p.61: Boon rolls 3D and drops the lowest, Bane drops the highest.
+        const first = roll.dice[0];
+        const drop = (first?.number === 3) ? first.modifiers.find(m => /^d[lh]/i.test(m)) : null;
+        context.stance = drop ? (/^dl/i.test(drop) ? "boon" : "bane") : null;
+        context.stanceLabel = drop ? `MGT2.RollPrompt.${(context.stance === "boon") ? "Boon" : "Bane"}` : null;
     }
 
     if ( outcome ) {
@@ -153,6 +165,24 @@ export async function buildRollCardContext({
         context.effectBand = outcome.band.label;
         // The tone stays the roll's OWN band.
         context.effectTone = outcome.band.tone;
+        context.ladder = Object.values(MGT2.EffectBands).map(band => ({ tone: band.tone, on: band === outcome.band }));
+        const rung = MGT2.DifficultyTargets[difficulty] ? difficulty : (outcome.assumed ? "Average" : null);
+        context.rung = { word: rung ? game.i18n.localize(`MGT2.DifficultyName.${rung}`) : "",
+            target: outcome.target, assumed: outcome.assumed };
+    }
+
+    if ( ammo?.magazine > 0 ) {
+        context.ammo = { ...ammo, leftPct: Math.round(ammo.left * 1000 / ammo.magazine) / 10,
+            spentPct: Math.round(ammo.spent * 1000 / ammo.magazine) / 10 };
+    }
+    const units = canvas?.scene?.grid.units ?? "";
+    context.targets = targets.map(target => ({ name: target.name, img: target.img,
+        distance: Number.isFinite(target.distance) ? `${target.distance} ${units}`.trim() : "" }));
+    if ( damage?.formula ) {
+        const flat = (damage.effect ?? 0) + (damage.strengthDM ?? 0) + (damage.burst ?? 0);
+        context.damageLabel = game.i18n.format("MGT2.Chat.Roll.DamageFormula", { formula: [
+            MGT2Helper.showFormula(MGT2Helper.damageFormula(damage.formula)),
+            flat ? MGT2Helper.signed(flat) : ""].join(" ").trim() });
     }
 
     const opposed = outcome?.opposed ?? null;

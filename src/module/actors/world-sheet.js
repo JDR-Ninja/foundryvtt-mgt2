@@ -1,5 +1,6 @@
 import { MGT2 } from "../config.js";
 import { GuideButtonMixin } from "../guide.js";
+import { MGT2Helper } from "../helper.js";
 import { SheetModeMixin } from "../sheet-mode.js";
 import { SpecTradeDialog } from "../trade.js";
 import { WorldData } from "./world-data.js";
@@ -80,6 +81,7 @@ export class WorldActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsA
             forbidden: system.travel.forbidden,
             day
         };
+        context.enriched = await MGT2Helper.enrichFields(this.actor, ["description", "notes"]);
         return context;
     }
 

@@ -37,12 +37,15 @@
 		<tbody>
 			{{#each rows as |row|}}
 			<tr>
-				<td class="tno">{{row.n}}</td>
+				<td class="tno{{#if row.now}} now{{/if}}">{{row.n}}</td>
 				{{#each row.cells as |cell|}}
-				<td class="cell {{cell.state}}" data-actor-id="{{cell.id}}"
+				<td class="cell {{cell.state}}{{#if cell.sel}} sel{{/if}}" data-actor-id="{{cell.id}}"
 					data-accept="{{../../frameTypes}}" data-action="selectColumn">
+					{{! The term in progress names the step the loop is on, and how far through the term it is. }}
+					{{#if cell.step}}<span class="stepnow"><i></i>{{cell.step.label}} <b>{{cell.step.position}}</b></span>
+					<span class="prog"><span style="width: {{cell.step.progress}}%"></span></span>{{/if}}
 					{{#if cell.gone}}{{else if cell.live}}
-					<span class="asg">{{localize 'MGT2.Chargen.Screen.InProgress'}}</span>
+					{{#unless cell.step}}<span class="asg">{{localize 'MGT2.Chargen.Screen.InProgress'}}</span>{{/unless}}
 					{{else if cell.career}}
 					<span class="car">{{cell.career}}</span>
 					<span class="asg">{{cell.assignment}}</span>
@@ -51,7 +54,7 @@
 					{{/if}}
 					<ul>
 						{{#each cell.lines as |line|}}
-						<li class="{{line.tone}}"><i>{{line.mark}}</i>{{line.text}}</li>
+						<li class="{{line.tone}}"><i>{{#if (eq line.tone "good")}}<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.5"/><path d="M3.6 6.2l1.6 1.6 3.2-3.5"/></svg>{{else if (eq line.tone "bad")}}<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.5"/><path d="M4.3 4.3l3.4 3.4M7.7 4.3l-3.4 3.4"/></svg>{{else}}{{line.mark}}{{/if}}</i>{{line.text}}</li>
 						{{/each}}
 					</ul>
 					{{/if}}

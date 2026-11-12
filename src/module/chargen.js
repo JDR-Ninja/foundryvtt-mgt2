@@ -211,6 +211,14 @@ export const Chargen = {
         return (actor?.items ?? []).filter(item => item.type === "career");
     },
 
+    /** A career name's key: a held career translated by Babele answers to its stored name, as data names it. */
+    careerKey(actor, name) {
+        const key = MGT2Helper.skillSlug(name);
+        const held = key && this.careers(actor).find(item => [item.name, item.flags?.babele?.originalName]
+            .some(one => one && (MGT2Helper.skillSlug(one) === key)));
+        return held ? MGT2Helper.skillSlug(held.flags?.babele?.originalName || held.name) : key;
+    },
+
     /** The drafts the records show, event drafts apart. @returns {{drafted: number, byEvent: number}} */
     draftsTaken(actor) {
         let drafted = 0;
@@ -376,7 +384,7 @@ export const Chargen = {
      * @param {string} [career]   The career being played, matched against a scoped entry.
      */
     pending(actor, check, career) {
-        return this.read(actor).tray.filter(entry => bears(entry, check, career));
+        return this.read(actor).tray.filter(entry => bears(entry, check, career, name => this.careerKey(actor, name)));
     },
 
     /** Spend what a roll on this check consumed: its DMs, since every other kind is spent by its own reader. */
@@ -386,7 +394,8 @@ export const Chargen = {
         const tray = [];
         let spent = false;
         for ( const entry of state.tray ) {
-            if ( !bears(entry, check, career) || (entry.kind !== "dm") || (entry.duration !== "oneShot")
+            if ( !bears(entry, check, career, name => this.careerKey(actor, name)) || (entry.kind !== "dm")
+                || (entry.duration !== "oneShot")
                 || (entry.uses === null) ) {
                 tray.push(plain(entry));
                 continue;
@@ -405,14 +414,14 @@ export const Chargen = {
     async expirePending(actor, career, exitMode, { education = false } = {}) {
         if ( !exitMode ) return actor;
         const state = this.read(actor);
-        const key = MGT2Helper.skillSlug(career);
+        const key = this.careerKey(actor, career);
         const tray = state.tray.filter(entry => {
             if ( entry.expiresWhen === exitMode ) return false;
             // An entry waiting for the first career after graduation belongs to no career yet, nor does an
             // education's Benefit-roll entry, which `carryEducation` hands to that career.
             if ( education && entry.appliesTo.has("benefit") ) return true;
             return (entry.scope === "firstAfterGraduation") || !((entry.duration === "thisCareer")
-                && (!entry.career || (MGT2Helper.skillSlug(entry.career) === key)));
+                && (!entry.career || (this.careerKey(actor, entry.career) === key)));
         }).map(plain);
         return (tray.length === state.tray.length) ? actor : this.update(actor, { tray });
     },
@@ -505,7 +514,7 @@ export const Chargen = {
         }
         const barred = ((data?.system?.kind ?? "career") === "career") ? this.changeBarred(actor) : null;
         const named = this.read(actor).tray.some(entry => ["careerOffer", "careerForce"].includes(entry.kind)
-            && (fold(entry.value) === fold(data?.name)));
+            && [data?.name, data?.flags?.babele?.originalName].some(name => name && (fold(entry.value) === fold(name))));
         if ( !barred || named ) return "";
         return MGT2Helper.plural("MGT2.Chargen.Term.MinimumTermsRefused", barred.minimum,
             { species: species.name, career: barred.career });
@@ -597,14 +606,14 @@ export const Chargen = {
 
 /** Whether one tray entry bears on this check for this career — the predicate `pending` and
  *  `spendPending` must not disagree about. */
-function bears(entry, check, career) {
+function bears(entry, check, career, keyOf = MGT2Helper.skillSlug) {
     if ( check && entry.appliesTo.size && !entry.appliesTo.has(check) ) return false;
     if ( !career || (entry.scope === "anyCareer") ) return true;
-    const key = MGT2Helper.skillSlug(career);
+    const key = keyOf(career);
     // "The qualification roll for your NEXT career": every career but the one that granted it,
     // which is the whole difference from `anyCareer` and the reason the value exists.
-    if ( entry.scope === "nextCareer" ) return !entry.career || (MGT2Helper.skillSlug(entry.career) !== key);
-    return !entry.career || (MGT2Helper.skillSlug(entry.career) === key);
+    if ( entry.scope === "nextCareer" ) return !entry.career || (keyOf(entry.career) !== key);
+    return !entry.career || (keyOf(entry.career) === key);
 }
 
 const fold = value => (value ?? "").trim().toLowerCase();

@@ -3,49 +3,50 @@
     year instead, per ship rolled. Electing an owner is also declaring the rest paid off, so it is one
     gesture that writes every holder. }}
 <div class="election">
-	{{#if solo}}
-	<span class="lbl">{{localize 'MGT2.Chargen.Close.ShipTitle'}}</span>
-	<p class="none">{{localize 'MGT2.Chargen.Close.SoloOff'}}</p>
-	{{else}}
-	<span class="lbl">{{localize 'MGT2.Chargen.Close.ShipTitle'}}</span>
-	{{#if ship.holders.length}}
-	<p class="why">{{localize 'MGT2.Chargen.Close.ShipHint' credits=ship.perYear share=ship.shareYear}}</p>
-	<ul>
-		{{#each ship.holders as |holder|}}
-		<li class="{{#if holder.keeps}}keeps{{/if}}" data-actor-id="{{holder.id}}">
-			<b>{{holder.name}}</b>
-			<span class="n">{{localize 'MGT2.Chargen.Close.ShipsRolled' n=holder.ships.held}}</span>
-			{{#if holder.ships.givenUp}}
-			<span class="up">{{localize 'MGT2.Chargen.Close.ShipsGivenUp' n=holder.ships.givenUp}}</span>
-			{{/if}}
-			{{#if holder.canEdit}}
-			<button type="button" data-action="keepShip">{{localize 'MGT2.Chargen.Close.KeepShip'}}</button>
-			{{/if}}
-		</li>
-		{{/each}}
-	</ul>
-	{{#if ship.keeperName}}
-	<p class="settled">{{localize 'MGT2.Chargen.Close.ShipSettled' name=ship.keeperName}}</p>
-	{{#if ship.sharers.length}}
-	<p class="why">{{localize 'MGT2.Chargen.Close.SharesHint' name=ship.keeperName share=ship.shareYear}}</p>
-	<ul class="shares">
-		{{#each ship.sharers as |sharer|}}
-		<li data-actor-id="{{sharer.id}}">
-			<b>{{sharer.name}}</b>
-			<span class="n">{{plural 'MGT2.Chargen.Close.SharesHeld' sharer.shares}}</span>
-			{{#if sharer.canEdit}}
-			<input type="number" name="committed" value="{{sharer.committed}}" min="0" max="{{sharer.shares}}" step="1" />
-			<button type="button" data-action="commitShares">{{localize 'MGT2.Chargen.Close.CommitShares'}}</button>
-			{{else}}
-			<span class="n">{{plural 'MGT2.Chargen.Close.SharesCommitted' sharer.committed}}</span>
-			{{/if}}
-		</li>
-		{{/each}}
-	</ul>
-	{{/if}}
-	{{/if}}
-	{{else}}
-	<p class="none">{{localize 'MGT2.Chargen.Close.NoShips'}}</p>
-	{{/if}}
-	{{/if}}
+	<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15l2 4h14l2-4z"/><path d="M12 3v12"/><path d="M12 4l6 9h-6"/><path d="M12 6l-5 7h5"/></svg>
+	<div class="body">
+		<span class="lbl">{{localize 'MGT2.Chargen.Close.ShipTitle'}}</span>
+		{{#if solo}}
+		<p class="none">{{localize 'MGT2.Chargen.Close.SoloOff'}}</p>
+		{{else if ship.holders.length}}
+		<p class="why">{{localize 'MGT2.Chargen.Close.ShipHint' credits=ship.perYear share=ship.shareYear}}</p>
+		<ul>
+			{{#each ship.holders as |holder|}}
+			<li class="{{#if holder.keeps}}keeps{{/if}}" data-actor-id="{{holder.id}}">
+				{{#if holder.keeps}}<svg class="mk" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.5"/><path d="M3.6 6.2l1.6 1.6 3.2-3.5"/></svg>{{/if}}
+				<b>{{holder.name}}</b>
+				<span class="n">{{localize 'MGT2.Chargen.Close.ShipsRolled' n=holder.ships.held}}</span>
+				{{#if holder.ships.givenUp}}
+				<span class="up">{{localize 'MGT2.Chargen.Close.ShipsGivenUp' n=holder.ships.givenUp}}</span>
+				{{/if}}
+				{{#if holder.canEdit}}
+				<button type="button" data-action="keepShip">{{localize 'MGT2.Chargen.Close.KeepShip'}}</button>
+				{{/if}}
+			</li>
+			{{/each}}
+		</ul>
+		{{#if ship.keeperName}}
+		<p class="settled">{{localize 'MGT2.Chargen.Close.ShipSettled' name=ship.keeperName}}</p>
+		{{#if ship.sharers.length}}
+		<p class="why">{{localize 'MGT2.Chargen.Close.SharesHint' name=ship.keeperName share=ship.shareYear}}</p>
+		<ul class="shares">
+			{{#each ship.sharers as |sharer|}}
+			<li data-actor-id="{{sharer.id}}">
+				<b>{{sharer.name}}</b>
+				<span class="n">{{plural 'MGT2.Chargen.Close.SharesHeld' sharer.shares}}</span>
+				{{#if sharer.canEdit}}
+				<input type="number" name="committed" value="{{sharer.committed}}" min="0" max="{{sharer.shares}}" step="1" />
+				<button type="button" data-action="commitShares">{{localize 'MGT2.Chargen.Close.CommitShares'}}</button>
+				{{else}}
+				<span class="n">{{plural 'MGT2.Chargen.Close.SharesCommitted' sharer.committed}}</span>
+				{{/if}}
+			</li>
+			{{/each}}
+		</ul>
+		{{/if}}
+		{{/if}}
+		{{else}}
+		<p class="none">{{localize 'MGT2.Chargen.Close.NoShips'}}</p>
+		{{/if}}
+	</div>
 </div>

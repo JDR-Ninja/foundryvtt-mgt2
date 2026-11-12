@@ -644,6 +644,16 @@ export class RobotData extends ActorBaseData {
             { ...options, stun: false, raw: true });
     }
 
+    /** An ion hit shuts the brain down and Stun wounds the chain, as `applyDamage` has them. @inheritDoc */
+    previewDamage(amount, options = {}) {
+        if (options.ion) {
+            return this.hardened ? { kind: "immune", value: 0 }
+                : { kind: "shutdown", value: this.reduceDamage(amount, options) };
+        }
+        if (options.stun) return { kind: "wound", value: this.reduceDamage(amount, options) };
+        return super.previewDamage(amount, options);
+    }
+
     /**
      * "Radiation weapons cause permanent damage to a robot's brain … A hardened brain halves the
      * effective radiation dose that penetrates this shielding … Every 1,000 rads affecting the

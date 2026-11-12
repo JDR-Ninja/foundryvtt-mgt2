@@ -1,9 +1,9 @@
 // The chat log: the frame every message takes, the band, and the bodies each message type fills
 // them with. The frame is not the system's cards alone — core dresses what it draws in parchment,
 // and one line of talk in it beside a card was two languages in one column.
-// ONE GROUND ONLY: Foundry hard-codes `themed theme-light` on ol.chat-log, so a card never renders
-// on the dark ground whatever the viewer's colour scheme says. The card element carries
-// `theme-light` itself, which the `:not(.theme-light)` guard in _colors.sass then honours.
+// TWO GROUNDS, the log's: Foundry hard-codes `themed theme-light` on ol.chat-log, and the
+// paletteGround setting may force it dark (`applyChatGround`). A card follows its message whatever
+// class its stored HTML carries, so a card posted while the log was light-only follows it too.
 // Status colours never use the accent — on the black-and-red theme a success band would read as
 // its opposite.
 
@@ -46,6 +46,10 @@ li.chat-message
 	// Core collapses a message it is removing to nothing, and the trait would hold it open.
 	&.deleting
 		padding: 0
+
+	// On the dark ground the frame is the chrome the band already is, and the body stands out of it.
+	body.mgt2-ground-dark &
+		background: var(--chrome)
 
 	> .message-header
 		display: flex
@@ -775,6 +779,659 @@ li.chat-message
 				box-shadow: inset 0 0 0 1px var(--accent-text)
 			i
 				font-size: 11px
+
+// --------------------------------------------
+//  THE RESULT GRAMMAR — a head with the rung, a result row, the terms, and trays
+// --------------------------------------------
+// Old messages keep their stored HTML, so `.chd`, `.cdice`, `.eff`, `.cmods` and `.pipe` above stay.
+.mgt2.card
+	.xh
+		display: grid
+		grid-template-columns: minmax(0, 1fr) auto
+		align-items: baseline
+		column-gap: 10px
+		padding: 7px 11px
+		border-bottom: 1px solid var(--rule)
+		.xk
+			grid-column: 1
+			font-family: var(--cond)
+			font-size: 10.5px
+			font-weight: 600
+			letter-spacing: 0.18em
+			text-transform: uppercase
+			color: var(--mute)
+			overflow: hidden
+			text-overflow: ellipsis
+			white-space: nowrap
+		h4
+			grid-column: 1
+			margin: 1px 0 0
+			font-family: var(--cond)
+			font-size: 19px
+			font-weight: 700
+			line-height: 1.1
+			border: none
+		&[data-fold-toggle]
+			cursor: var(--cursor-pointer)
+	// The difficulty word over the number it sets: the rung is the information.
+	.rung,
+	.pill
+		grid-column: 2
+		grid-row: 1 / span 2
+		align-self: center
+		text-align: right
+		line-height: 1
+	.rung
+		small
+			display: block
+			margin-bottom: 2px
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 600
+			letter-spacing: 0.16em
+			text-transform: uppercase
+			white-space: nowrap
+			color: var(--mute)
+		b
+			font-family: var(--cond)
+			font-size: 22px
+			font-weight: 700
+			font-variant-numeric: tabular-nums
+			white-space: nowrap
+		&.assumed b
+			color: var(--mute)
+	.pill
+		display: none
+		padding: 2px 7px
+		font-family: var(--cond)
+		font-size: 14px
+		font-weight: 700
+		white-space: nowrap
+		color: var(--ink)
+		background: var(--hover)
+		border-radius: 2px
+
+	// Folding is grid rows from 0fr to 1fr, so the height animates without a measured one.
+	.fold
+		display: grid
+		grid-template-rows: 1fr
+		transition: grid-template-rows 250ms ease
+		> div
+			min-height: 0
+			overflow: hidden
+	&.folded
+		.fold
+			grid-template-rows: 0fr
+		.xh
+			border-bottom: 0
+		.rung
+			display: none
+		.pill
+			display: block
+
+	// Core folio 77's magazine, after the shot: what is left, and what this pull of the trigger took.
+	.meter
+		display: flex
+		align-items: center
+		gap: 7px
+		padding: 7px 11px
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+		border-bottom: 1px solid var(--rule-soft)
+		.bar
+			flex: 1
+			display: flex
+			height: 6px
+			background: var(--track)
+			i
+				background: var(--mute)
+			i.now
+				background: var(--accent-line)
+		b
+			font-variant-numeric: tabular-nums
+			color: var(--ink)
+
+	.xres
+		display: grid
+		grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr)
+		border-bottom: 1px solid var(--rule-soft)
+		&.solo
+			grid-template-columns: minmax(0, 1fr)
+	.xtot
+		padding: 8px 11px 7px
+		cursor: var(--cursor-pointer)
+		&:hover
+			background: var(--hover)
+		&:focus-visible
+			outline: 2px solid var(--accent-text)
+			outline-offset: -2px
+		.row
+			display: flex
+			align-items: center
+			gap: 8px
+		> .row > b
+			font-family: var(--cond)
+			font-size: 30px
+			font-weight: 700
+			line-height: 1
+			font-variant-numeric: tabular-nums
+		.vs
+			display: block
+			margin-top: 6px
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 600
+			letter-spacing: 0.16em
+			text-transform: uppercase
+			color: var(--mute)
+			b
+				font-family: var(--mono)
+				font-size: 11px
+				letter-spacing: 0
+				color: var(--ink)
+	// A dropped die is the Boon or the Bane, struck through rather than hidden.
+	.dice
+		display: flex
+		flex-wrap: wrap
+		gap: 3px
+		i
+			display: grid
+			place-items: center
+			min-width: 17px
+			height: 17px
+			padding: 0 2px
+			font-family: var(--mono)
+			font-size: 11px
+			font-style: normal
+			font-weight: 600
+			color: var(--ink)
+			background: var(--sunk)
+			border: 1px solid var(--rule)
+			border-radius: 3px
+			&.drop
+				color: var(--faint)
+				background: none
+				border-style: dashed
+				text-decoration: line-through
+	.xeff
+		display: grid
+		grid-template-columns: auto 1fr
+		align-items: baseline
+		column-gap: 7px
+		padding: 8px 11px 7px
+		border-left: 1px solid var(--rule-soft)
+		.lbl
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 600
+			letter-spacing: 0.16em
+			text-transform: uppercase
+			color: var(--mute)
+		b
+			justify-self: end
+			font-family: var(--cond)
+			font-size: 30px
+			font-weight: 700
+			line-height: 1
+			font-variant-numeric: tabular-nums
+		.band
+			grid-column: 1 / -1
+			margin-top: 3px
+			font-family: var(--cond)
+			font-size: 11px
+			font-weight: 700
+			letter-spacing: 0.1em
+			text-transform: uppercase
+	// Core p.61's six bands. The two outer pairs carry their tone faintly; the landed one is lit.
+	.lad
+		grid-column: 1 / -1
+		display: grid
+		grid-template-columns: repeat(6, 1fr)
+		gap: 2px
+		margin-top: 5px
+		i
+			height: 5px
+			background: var(--track)
+			&.bad
+				background: color-mix(in oklab, var(--danger) 30%, transparent)
+			&.ok
+				background: color-mix(in oklab, var(--good) 30%, transparent)
+			&.on
+				outline: 1.5px solid var(--ink)
+				outline-offset: 1px
+	&.ok
+		.xeff,
+		.pill
+			background: color-mix(in oklab, var(--good) 9%, transparent)
+		.xeff b,
+		.xeff .band,
+		.pill
+			color: var(--good)
+		.lad i.on
+			background: var(--good)
+	&.bad
+		.xeff,
+		.pill
+			background: color-mix(in oklab, var(--danger) 9%, transparent)
+		.xeff b,
+		.xeff .band,
+		.pill
+			color: var(--danger)
+		.lad i.on
+			background: var(--danger)
+	&.edge
+		.xeff
+			background: var(--hover)
+		.xeff b,
+		.xeff .band,
+		.pill
+			color: var(--mute)
+		.lad i.on
+			background: var(--mute)
+
+	// The dice behind the result, in the top layer: opening it moves nothing in the log.
+	.xpop:not(:popover-open)
+		display: none
+	.xpop
+		position: fixed
+		inset: auto
+		width: 260px
+		margin: 0
+		padding: 8px 10px 9px
+		color: var(--ink)
+		background: var(--paper)
+		border: 1px solid var(--edge)
+		box-shadow: 0 6px 18px rgb(0 0 0 / 0.35)
+
+	// The terms the roll was made at, always on show: the Boon or Bane first, then each named DM.
+	.xro
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 3px 9px
+		padding: 6px 11px 7px
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+		border-bottom: 1px solid var(--rule-soft)
+		b
+			font-weight: 700
+			color: var(--mute)
+		.neg,
+		.neg b
+			color: var(--danger)
+		.pc
+			font-size: 14px
+			font-weight: 700
+			letter-spacing: 0
+			font-variant-numeric: tabular-nums
+			color: var(--ink)
+	// Boon and Bane are a badge; the glyph is the stylesheet's, the word is the prompt's own key.
+	.tag
+		padding: 0 5px
+		font-size: 9.5px
+		line-height: 15px
+		border: 1px solid currentColor
+		border-radius: 2px
+		&.boon
+			color: var(--good)
+		&.bane
+			color: var(--danger)
+	.tag.boon::before,
+	.chip.boon::before
+		content: "\25B2\00A0"
+	.tag.bane::before,
+	.chip.bane::before
+		content: "\25BC\00A0"
+
+	.chips
+		display: flex
+		flex-wrap: wrap
+		gap: 4px
+		padding: 7px 11px
+		border-top: 1px solid var(--rule-soft)
+	.chip
+		padding: 1px 6px
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		line-height: 16px
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--mute)
+		border: 1px solid var(--rule)
+		border-radius: 2px
+		&.neg
+			color: var(--danger)
+			border-color: color-mix(in oklab, var(--danger) 45%, transparent)
+		&.boon
+			color: var(--good)
+			border-color: color-mix(in oklab, var(--good) 45%, transparent)
+
+	// A tray folds the way a card does, and keeps its state per message across re-renders.
+	.tray
+		border-top: 1px solid var(--rule)
+		&.applied .tlab
+			color: var(--good)
+		&.shut
+			.tbody
+				grid-template-rows: 0fr
+			.car
+				transform: rotate(-90deg)
+	.tlab
+		display: flex
+		align-items: center
+		gap: 6px
+		padding: 6px 11px 5px
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.16em
+		text-transform: uppercase
+		color: var(--mute)
+		cursor: var(--cursor-pointer)
+		user-select: none
+		> span:not(.seg)
+			flex: 1 1 auto
+		.car
+			font-size: 11px
+			transition: transform 200ms ease
+	.seg
+		display: inline-flex
+		border: 1px solid var(--edge)
+		border-radius: 2px
+		button
+			height: auto
+			min-height: 0
+			margin: 0
+			padding: 0 6px
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 600
+			line-height: 16px
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--faint)
+			background: none
+			border: 0
+			border-radius: 0
+			box-shadow: none
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--ink)
+			&[aria-pressed="true"]
+				color: var(--accent-text)
+				background: var(--accent-soft)
+	.tbody
+		display: grid
+		grid-template-rows: 1fr
+		transition: grid-template-rows 250ms ease
+		> div
+			min-height: 0
+			overflow: hidden
+	.tnone
+		padding: 5px 11px 7px
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+		border-top: 1px solid var(--rule-soft)
+
+	// A token row: a small portrait, the name, how the attack meets it, and what it would take.
+	.trow
+		display: grid
+		grid-template-columns: auto minmax(0, 1fr) auto auto
+		align-items: center
+		gap: 0 8px
+		padding: 5px 11px
+		border-top: 1px solid var(--rule-soft)
+		.n
+			grid-column: 2
+			font-family: var(--cond)
+			font-size: 14px
+			font-weight: 600
+			line-height: 1.15
+			overflow: hidden
+			text-overflow: ellipsis
+			white-space: nowrap
+		.w
+			grid-column: 2
+			display: flex
+			align-items: center
+			gap: 0 4px
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 600
+			letter-spacing: 0.1em
+			text-transform: uppercase
+			color: var(--faint)
+			overflow: hidden
+			text-overflow: ellipsis
+			white-space: nowrap
+			em
+				font-style: normal
+				color: var(--accent-text)
+		select.face
+			flex: none
+			width: auto
+			height: 16px
+			min-height: 0
+			margin: 0 4px 0 0
+			padding: 0 2px
+			font-family: var(--cond)
+			font-size: 9.5px
+			text-transform: uppercase
+			color: var(--ink)
+			background: var(--hover)
+			border: 1px solid var(--edge)
+			border-radius: 2px
+		.v
+			grid-column: 3
+			grid-row: 1 / span 2
+			font-family: var(--cond)
+			font-size: 21px
+			font-weight: 700
+			line-height: 1
+			font-variant-numeric: tabular-nums
+		.go
+			grid-column: 4
+			grid-row: 1 / span 2
+			display: grid
+			place-items: center
+			width: 26px
+			height: 24px
+			min-height: 0
+			margin: 0
+			padding: 0
+			font-size: 12px
+			color: var(--accent-text)
+			background: none
+			border: 0
+			border-radius: 2px
+			box-shadow: inset 0 0 0 1px var(--accent-line)
+			cursor: var(--cursor-pointer)
+			&:hover,
+			&:focus-visible
+				background: var(--accent-soft)
+				box-shadow: inset 0 0 0 1px var(--accent-text)
+		.stamp
+			grid-column: 4
+			grid-row: 1 / span 2
+			padding: 1px 5px
+			font-family: var(--cond)
+			font-size: 9px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--good)
+			border: 1px solid color-mix(in oklab, var(--good) 45%, transparent)
+			border-radius: 2px
+		&.done .v
+			color: var(--good)
+		&.void .v
+			color: var(--faint)
+			text-decoration: line-through
+	.trow .pf,
+	.dline .pf
+		grid-row: 1 / span 2
+		width: 22px
+		height: 22px
+		object-fit: cover
+		background: var(--sunk)
+		border: 0
+		clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 0 100%)
+
+	// The new damage card's readings sit straight under its head.
+	&.dmg .dmgpick
+		border-top: 0
+
+	// Core p.242's lot at a glance: three numbers, then the roll that set the price.
+	.stat
+		display: grid
+		grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr) minmax(0, 1.3fr)
+		border-bottom: 1px solid var(--rule-soft)
+		> div
+			padding: 7px 11px 6px
+			border-right: 1px solid var(--rule-soft)
+			&:last-child
+				border-right: 0
+		small
+			display: block
+			font-family: var(--cond)
+			font-size: 9.5px
+			font-weight: 600
+			letter-spacing: 0.16em
+			text-transform: uppercase
+			color: var(--mute)
+		b
+			font-family: var(--cond)
+			font-size: 18px
+			font-weight: 700
+			line-height: 1.15
+			font-variant-numeric: tabular-nums
+			white-space: nowrap
+
+	// The hold a lot went into or left: what was aboard, then this lot; an overrun in the danger hue.
+	.hold
+		padding: 7px 11px
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+		border-top: 1px solid var(--rule-soft)
+		.line
+			display: flex
+			flex-wrap: wrap
+			gap: 2px 10px
+			.hot
+				margin-left: auto
+				color: var(--danger)
+		.bar
+			position: relative
+			display: flex
+			height: 6px
+			margin-top: 5px
+			background: var(--track)
+			i
+				background: var(--mute)
+			i.now
+				background: var(--accent-line)
+			i.cap
+				position: absolute
+				top: -2px
+				bottom: -2px
+				width: 2px
+				margin-left: -1px
+				background: var(--ink)
+		&.over .bar i.now
+			background: var(--danger)
+
+	// The Docket's card: the referee's reason as a quote, and how many have answered.
+	q.quote
+		display: block
+		padding: 7px 11px 0
+		font-size: 13px
+		font-style: italic
+		color: var(--mute)
+	.prog
+		display: flex
+		align-items: center
+		gap: 8px
+		padding: 7px 11px
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--faint)
+		&.sub
+			padding-top: 0
+		.bar
+			flex: 1 1 40%
+			display: grid
+			grid-auto-flow: column
+			grid-auto-columns: 1fr
+			gap: 2px
+			i
+				height: 4px
+				background: var(--track)
+				&.ok
+					background: var(--good)
+				&.bad
+					background: var(--danger)
+				&.edge
+					background: var(--mute)
+				&.off
+					background: none
+					box-shadow: inset 0 0 0 1px var(--rule)
+	.dline.pic
+		grid-template-columns: auto minmax(0, 1fr) auto
+		.n,
+		.w
+			grid-column: 2
+		.v,
+		.s,
+		a.dm
+			grid-column: 3
+		.you
+			margin-left: 5px
+			font-size: 9px
+			letter-spacing: 0.14em
+			text-transform: uppercase
+			color: var(--accent-text)
+		.s.wait
+			display: inline-flex
+			align-items: center
+			gap: 5px
+			&::before
+				content: ""
+				width: 6px
+				height: 6px
+				border-radius: 50%
+				background: var(--faint)
+		a.dm small
+			font-size: 9.5px
+			font-weight: 600
+			letter-spacing: 0.14em
+			text-transform: uppercase
+
+// Motion is the grid rows and the caret; a reader who asked for less gets the end state at once.
+@media (prefers-reduced-motion: reduce)
+	.mgt2.card .fold,
+	.mgt2.card .tbody,
+	.mgt2.card .tlab .car
+		transition: none
 
 // A dose card: three moments on one line, and what it left behind on another. No block wrapper —
 // the card head already says which drug, so the body is a sentence.

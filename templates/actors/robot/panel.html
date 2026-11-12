@@ -431,7 +431,7 @@
 		{{/if}}
 	</div>
 
-	{{! The shared code row: NAME(param, param) and no definition text. }}
+	{{! The shared code row: NAME(param, param), each beside its rule gloss in play mode. }}
 	{{> systems/mgt2/templates/items/blocks/traits.html}}
 	{{#if robot.statblock.traits.length}}
 	<p class="hint">{{localize 'MGT2.Actor.robot.LocomotionTraits'}} {{#each robot.statblock.traits}}{{#unless @first}}, {{/unless}}{{this}}{{/each}}</p>
@@ -439,11 +439,11 @@
 
 	<div class="block">
 		<div class="sect"><h3>{{localize 'MGT2.Actor.robot.Description'}}</h3></div>
-		<prose-mirror name="system.description" value="{{system.description}}" toggled></prose-mirror>
+		<prose-mirror name="system.description" value="{{system.description}}" toggled>{{{enriched.description}}}</prose-mirror>
 	</div>
 
 	<div class="block">
 		<div class="sect"><h3>{{localize 'MGT2.Actor.Notes'}}</h3></div>
-		<prose-mirror name="system.notes" value="{{system.notes}}" toggled></prose-mirror>
+		<prose-mirror name="system.notes" value="{{system.notes}}" toggled>{{{enriched.notes}}}</prose-mirror>
 	</div>
 </section>

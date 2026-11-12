@@ -1,23 +1,26 @@
-{{! Pinned light like every other card: Foundry hard-codes `themed theme-light` on ol.chat-log.
-
-    The transfer is NOT here. `credit-split.html` posted it a moment earlier and named every share,
-    every shortfall and every purse; this card carries the lot, and repeats none of that — the
-    tonnage, the percentage of base it went at, and the hold it arrived in or left. }}
-<div class="mgt2 theme-light card spectrade">
-	<div class="chd">
-		<div class="what">
-			<h4>{{localize title}}</h4>
-			<span class="tgt">{{where}}</span>
-		</div>
+{{! The ground is the log's. The transfer is NOT here: `credit-split.html` posted it a moment
+    earlier and named every share, every shortfall and every purse. This card carries the lot — the
+    tonnage, the price roll that set its percentage of base, and the hold it arrived in or left. }}
+<div class="mgt2 card spectrade">
+	<div class="xh">
+		<div class="xk">{{localize title}} · {{world}}</div>
+		<h4>{{goods}}</h4>
+		<div class="rung"><small>{{localize 'MGT2.Trade.Card.Price'}}</small><b>{{localize 'MGT2.Trade.Card.Percent' percent=percent}}</b></div>
 	</div>
-	<p class="bare">{{localize 'MGT2.Trade.Card.Lot' tons=tons goods=goods percent=percent base=base credits=credits}}</p>
+	<div class="stat">
+		<div><small>{{localize 'MGT2.Trade.Tons'}}</small><b>{{tons}}</b></div>
+		<div><small>{{localize 'MGT2.Trade.BasePrice'}}</small><b>{{base}}</b></div>
+		<div><small>{{localize 'MGT2.Trade.TotalPrice'}}</small><b>{{totalCredits}}</b></div>
+	</div>
+	{{#if reading}}
+	<div class="xro">
+		{{#if reading.faces.length}}<span class="dice">{{#each reading.faces}}<i>{{this}}</i>{{/each}}</span>{{/if}}
+		<span class="pc">{{localize 'MGT2.Trade.Card.Reading' dm=reading.dm total=reading.total percent=percent}}</span>
+		{{#each reading.terms}}<span{{#if neg}} class="neg"{{/if}}>{{label}} <b>{{dm}}</b></span>{{/each}}
+	</div>
+	{{/if}}
 	{{! Core p.242's broker cut, which the split screen's card cannot explain: it posted the sum that
 	    moved, and this is why that sum is not the price above. }}
 	{{#if fee}}<p class="bare">{{#if sold}}{{localize 'MGT2.Trade.Card.FeeTaken' rate=rate fee=fee credits=settled}}{{else}}{{localize 'MGT2.Trade.Card.FeeAdded' rate=rate fee=fee credits=settled}}{{/if}}</p>{{/if}}
-	{{! Core p.241: a lot cannot be broken up, so an overfull hold is a fact the table has to solve
-	    rather than something the purchase could have refused. }}
-	<div class="pipe">
-		<span>{{localize 'MGT2.Trade.Card.Hold' ship=ship used=used capacity=capacity}}</span>
-		{{#if over}}<span class="hot">{{localize 'MGT2.Trade.Card.Over'}}</span>{{/if}}
-	</div>
+	{{> "systems/mgt2/templates/chat/parts/hold.html"}}
 </div>

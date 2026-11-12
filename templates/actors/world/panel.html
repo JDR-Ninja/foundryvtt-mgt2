@@ -72,7 +72,7 @@
 
 	<div class="block">
 		<div class="sect"><h3>{{systemFields.description.label}}</h3></div>
-		<prose-mirror name="system.description" value="{{system.description}}" toggled></prose-mirror>
+		<prose-mirror name="system.description" value="{{system.description}}" toggled>{{{enriched.description}}}</prose-mirror>
 	</div>
 
 	{{! Core p.238 hands the trade chapter to the players, so the profile is player-readable and this
@@ -83,7 +83,7 @@
 			<h3>{{systemFields.notes.label}}</h3>
 			<span class="gm">{{localize 'MGT2.Actor.world.GM'}}</span>
 		</div>
-		<prose-mirror name="system.notes" value="{{system.notes}}" toggled></prose-mirror>
+		<prose-mirror name="system.notes" value="{{system.notes}}" toggled>{{{enriched.notes}}}</prose-mirror>
 	</div>
 	{{/if}}
 </section>

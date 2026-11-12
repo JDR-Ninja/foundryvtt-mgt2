@@ -14,8 +14,11 @@
 				<span class="play-only">{{item.name}}</span>
 				<input class="f edit-only" name="name" type="text" value="{{item.name}}" />
 			</div>
-			{{#if tags}}
-			<div class="isub play-only">{{#each tags}}<span>{{this}}</span>{{/each}}</div>
+			{{#if (or tags level)}}
+			<div class="isub play-only">
+				{{#if level}}<span class="lvl{{#if level.zero}} zero{{/if}}" data-tooltip="{{level.label}}" aria-label="{{level.label}}"><span class="pips">{{#each level.pips}}<i{{#if this}} class="on"{{/if}}></i>{{/each}}</span></span>{{/if}}
+				{{#each tags}}<span>{{this}}</span>{{/each}}
+			</div>
 			{{/if}}
 			{{#if subTypes}}
 			<div class="isub edit-only">
@@ -77,9 +80,10 @@
 			{{#if (or systemFields.equipped hadContainer)}}
 			<div class="srow">
 				{{#if systemFields.equipped}}
-				<label class="eq" data-tooltip="{{localize 'MGT2.Items.Equipped'}}" aria-label="{{localize 'MGT2.Items.Equipped'}}">
+				<label class="eq">
 					{{formInput systemFields.equipped name="system.equipped" value=system.equipped}}
-					<i class="fa-solid fa-shield-halved"></i>
+					<i class="fa-regular fa-circle"></i><i class="fa-solid fa-circle-check"></i>
+					<span>{{localize 'MGT2.Items.Equipped'}}</span>
 				</label>
 				{{/if}}
 				{{#if hadContainer}}

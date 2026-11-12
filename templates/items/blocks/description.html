@@ -3,7 +3,7 @@
 	    as an empty rule under a nav entry that already says Description. }}
 	{{#unless bare}}<div class="sect"><h3>{{localize 'MGT2.Items.Description'}}</h3></div>{{/unless}}
 	{{#if (eq item.type "contact")}}
-	<prose-mirror name="system.description" value="{{system.description}}" toggled></prose-mirror>
+	<prose-mirror name="system.description" value="{{system.description}}" toggled>{{{enriched.description}}}</prose-mirror>
 	{{else}}
 	{{! Guarded, because an empty flex child still spends the block's gap: a compendium item whose
 	    whole description was the citation now has none, and it must read as absent rather than as a

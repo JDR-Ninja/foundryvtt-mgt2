@@ -1309,6 +1309,13 @@ export class SpacecraftData extends CraftData {
         return { wound: 0, rounds: 0, ion: drain };
     }
 
+    /** HG p.30's ion drain, as `applyDamage` takes it. @inheritDoc */
+    previewDamage(amount, options = {}) {
+        if (!options.ion) return super.previewDamage(amount, options);
+        if (this.hardened) return { kind: "immune", value: 0 };
+        return { kind: "ion", value: this.reduceDamage(amount, { ...options, ignoreArmour: true }) };
+    }
+
     /** HG p.20 scopes /bis to "Jump Control programs only", and a program is a free-text name. */
     static #isJumpControl(name) {
         const plain = SpacecraftData.#plainName(name);

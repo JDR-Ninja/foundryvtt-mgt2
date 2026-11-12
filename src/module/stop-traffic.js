@@ -675,7 +675,7 @@ export class StopTrafficDialog extends MGT2Screen(HandlebarsApplicationMixin(App
         // Blank is no deadline agreed, so the card has no day to state; Core p.241 still pays on delivery.
         const note = (booking.dueDay === null) ? game.i18n.localize("MGT2.Trade.Card.PaidOnDelivery")
             : game.i18n.format("MGT2.Trade.Card.DueDay", { day: booking.dueDay });
-        await this.#postBooking({ title, line, note });
+        await this.#postBooking({ title, line, note, tons });
         return true;
     }
 
@@ -757,9 +757,8 @@ export class StopTrafficDialog extends MGT2Screen(HandlebarsApplicationMixin(App
         return this.#worlds[end]?.name || StopTraffic.parseLine(this.#input[end]).profile;
     }
 
-    /** ONE card, and it is about the BOOKING. */
-    async #postBooking({ title, line, note }) {
-        const hold = this.#ship.system.cargo;
+    /** ONE card, and it is about the BOOKING; `tons` is what it put in the hold. */
+    async #postBooking({ title, line, note, tons = 0 }) {
         // Swallowed on purpose: the consignment is already aboard, and a card that failed to render
         // must not report the booking as one that never happened.
         try {
@@ -770,8 +769,7 @@ export class StopTrafficDialog extends MGT2Screen(HandlebarsApplicationMixin(App
                         next: this.#endName("next"), parsecs: this.reading.parsecs }),
                     line,
                     note,
-                    ship: this.#ship.name,
-                    used: hold.used, capacity: hold.capacity, over: hold.over === true
+                    hold: MGT2Helper.holdMeter(this.#ship, this.#ship.system.cargo, tons)
                 });
             return await getDocumentClass("ChatMessage").create({
                 author: game.user.id,
@@ -801,7 +799,7 @@ export class StopTrafficDialog extends MGT2Screen(HandlebarsApplicationMixin(App
             // v14 appends no display of its own once `content` is set, so this costs the card
             // nothing and buys Dice So Nice and an auditable record.
             rolls: this.#rolls,
-            content: `<div class="mgt2 theme-light card stoptraffic">
+            content: `<div class="mgt2 card stoptraffic">
                 <div class="chd"><div class="what"><h4>${
                     foundry.utils.escapeHTML(game.i18n.localize("MGT2.Trade.StopTraffic"))
                 }</h4><span class="tgt">${route}</span></div></div>${body}</div>`

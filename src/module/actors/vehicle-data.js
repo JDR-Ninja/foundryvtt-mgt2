@@ -801,6 +801,11 @@ export class VehicleData extends CraftData {
         return ((dice > 0) && (dice < LIGHT_WEAPON_DICE)) ? this.armour.vsLight : 0;
     }
 
+    /** CSC p.151, as `applyDamage` takes it. @inheritDoc */
+    previewDamage(amount, options = {}) {
+        return options.ion ? { kind: "disrupted", value: 0 } : super.previewDamage(amount, options);
+    }
+
     /** CSC p.151: an ion weapon disrupts a vehicle's electronics; no book wounds its hull. @inheritDoc */
     async applyDamage(amount, options = {}) {
         if (options.ion && !options.raw && (amount > 0)) {

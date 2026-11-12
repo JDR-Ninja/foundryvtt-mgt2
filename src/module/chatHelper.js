@@ -1,4 +1,5 @@
 import { CharacterPrompts } from "./actors/character-prompts.js";
+import { setTray } from "./chat-cards.js";
 import { checkOf, jumpToMessage } from "./chat-message.js";
 import { renderRollCard } from "./checks.js";
 import { Rules } from "./rules.js";
@@ -7,10 +8,7 @@ import { MGT2Helper } from "./helper.js";
 import { injectAskTheSame, REQUEST, setupRequestCard } from "./request.js";
 import { injectAskedStrip } from "./request-answer.js";
 import { armChain } from "./roll-prompt.js";
-
-/** Core folio 140: the facings a vehicle answers an attack with; `left` and `right` are synonyms. */
-const FACINGS = ["front", "rear", "sides", "top", "bottom"];
-const FACINGS_2026 = ["forward", "aft", "port", "starboard", "dorsal", "ventral"];
+import { damageOptions, wireDamageTray } from "./damage-tray.js";
 
 /** The check card's own chain control, offered only where the referee turns it on. */
 export const CHAIN_INTO_SETTING = "check.chainInto";
@@ -86,9 +84,12 @@ export class ChatHelper {
             });
         }
 
+        // A card with the application tray reads each target itself; one without it predates the tray.
+        const tray = wireDamageTray(message, html);
+
         // Which reading applies is the defender's call, and each viewer makes it for themselves —
         // so the pick lives in the DOM and never touches the message.
-        for (const option of html.querySelectorAll(".dmgpick > [data-transform]")) {
+        for (const option of tray ? [] : html.querySelectorAll(".dmgpick > [data-transform]")) {
             option.addEventListener("click", () => this._pickTransform(message, option, true));
         }
         for (const option of html.querySelectorAll(".dmgface > [data-facing]")) {
@@ -98,7 +99,7 @@ export class ChatHelper {
         // The defender's traits answer which reading is right, and the defender is whichever token
         // the referee has selected — a question asked here and never at attack time, so the mark is
         // recomputed as the card is approached rather than baked into the message.
-        if (html.querySelector(".dmgpick")) {
+        if (!tray && html.querySelector(".dmgpick")) {
             const mark = () => {
                 this.#markTransform(message, html);
                 this.#markFacing(html);
@@ -173,6 +174,7 @@ export class ChatHelper {
         event.stopPropagation();
         const damage = message.flags?.mgt2?.damage;
         if (!damage?.formula) return;
+        const targetsTray = event.currentTarget.closest(".mgt2.card")?.querySelector('[data-tray="targets"]');
 
         // Core p.77: damage is rolled with the attack's Effect added to the total, and a melee
         // attack adds the attacker's STR DM on top.
@@ -228,50 +230,61 @@ export class ChatHelper {
             sourceName: damage.rollObjectName ?? ""
         };
 
-        // What the card spells out under each reading: the dice alone, then the attack's own
-        // additions, so that "the Effect survives the transform" is visible rather than asserted.
-        const added = [];
-        if (damage.effect) {
-            added.push(game.i18n.localize("MGT2.Chat.Roll.Effect") + " " + MGT2Helper.signed(damage.effect));
-        }
-        if (damage.strengthDM) {
-            added.push(game.i18n.localize("MGT2.Characteristics.strength.name") + " "
-                + MGT2Helper.signed(damage.strengthDM));
-        }
-        if (damage.burst) {
-            added.push(game.i18n.localize("MGT2.FireModes.burst") + " "
-                + MGT2Helper.signed(damage.burst));
-        }
-        if (payload.destructive) added.push(game.i18n.localize("MGT2.Chat.Damage.Destructive"));
-
-        const context = Object.assign({
-            who: [message.speaker?.alias, damage.rollObjectName].filter(x => x).join(" · "),
-            effectDisplay: MGT2Helper.signed(payload.effect, "+0"),
-            // MGT2.Scales is the damage-ratio table and carries only the two scales that have a
-            // ratio, so a vehicle weapon has to name itself out of the weapon vocabulary instead.
-            scaleLabel: (MGT2.Scales[payload.scale] ?? MGT2.WeaponScales[payload.scale])?.label ?? payload.scale,
-            typeLabels: payload.damageType.map(type => MGT2.DamageTypes[type] ?? type),
-            floor: payload.effect >= 6,
-            facings: (Rules.get("vehicleCombat") === "vehicle2026") ? FACINGS_2026 : FACINGS,
+        const context = {
+            source: damage.rollObjectName ?? "",
+            formula: [MGT2Helper.showFormula(formula), flat ? MGT2Helper.signed(flat) : ""].join(" ").trim(),
+            chips: ChatHelper.#payloadChips(payload, damage),
             options: ChatHelper.#transformOptions(formula,
-                { full: full.total, reduced: reduced.total, minimum }, boost, flat, added)
-        }, payload);
-        context.applyLabel = ChatHelper.#applyLabel(context.options[0]);
+                { full: full.total, reduced: reduced.total, minimum }, boost, flat)
+        };
+
+        const targets = message.flags?.mgt2?.targets ?? [];
+        setTray(message.id, "targets", false, targetsTray);
 
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,
             speaker: message.speaker,
             rolls: [full, reduced],
             sound: CONFIG.sounds.dice,
-            flags: { mgt2: { apply: payload } },
+            flags: { mgt2: { apply: payload, targets } },
             content: await foundry.applications.handlebars.renderTemplate(
                 "systems/mgt2/templates/chat/damage.html", context)
         });
     }
 
+    /** The rest of the payload as chips; `hot` is what meets the target and is not resolved here. */
+    static #payloadChips(payload, damage) {
+        const chip = (label, hot = false) => ({ label, hot });
+        const chips = [
+            // MGT2.Scales is the damage-ratio table and carries only the two scales that have a
+            // ratio, so a vehicle weapon has to name itself out of the weapon vocabulary instead.
+            chip(game.i18n.localize((MGT2.Scales[payload.scale] ?? MGT2.WeaponScales[payload.scale])?.label
+                ?? payload.scale)),
+            ...payload.damageType.map(type => chip(game.i18n.localize(MGT2.DamageTypes[type] ?? type)))
+        ];
+        if (damage.effect) {
+            chips.push(chip(`${game.i18n.localize("MGT2.Chat.Roll.Effect")} ${MGT2Helper.signed(damage.effect)}`));
+        }
+        if (damage.strengthDM) {
+            chips.push(chip(`${game.i18n.localize("MGT2.Characteristics.strength.name")} ${
+                MGT2Helper.signed(damage.strengthDM)}`));
+        }
+        if (damage.burst) {
+            chips.push(chip(`${game.i18n.localize("MGT2.FireModes.burst")} ${MGT2Helper.signed(damage.burst)}`));
+        }
+        // Both meet the target's Protection when the card is applied: AP subtracts from it (Core p.79)
+        // and Lo-Pen multiplies it (FC p.7).
+        if (payload.ap) chips.push(chip(game.i18n.format("MGT2.Chat.Damage.AP", { score: payload.ap }), true));
+        if (payload.loPen) chips.push(chip(game.i18n.format("MGT2.Chat.Damage.LoPen", { score: payload.loPen }), true));
+        if (payload.destructive) chips.push(chip(game.i18n.localize("MGT2.Chat.Damage.Destructive"), true));
+        if (payload.stun) chips.push(chip(game.i18n.localize("MGT2.Chat.Damage.Stun"), true));
+        if (payload.effect >= 6) chips.push(chip(game.i18n.localize("MGT2.Chat.Damage.Floor"), true));
+        return chips;
+    }
+
     /** The three readings, in the order the card offers them; the first is the one preselected. */
-    static #transformOptions(formula, raw, boost, flat, added) {
-        const detail = (expression, dice) => [`${expression} = ${dice}`, ...added].join(" · ");
+    static #transformOptions(formula, raw, boost, flat) {
+        const detail = (expression, dice) => `${MGT2Helper.showFormula(expression)} = ${dice}`;
         return [
             { key: "full", label: MGT2.DamageTransforms.full, total: raw.full * boost,
                 detail: detail(formula, raw.full - flat) },
@@ -370,51 +383,42 @@ export class ChatHelper {
         const picked = card?.querySelector(".dmgpick > [data-transform].on")?.dataset.transform ?? "full";
         const amount = { full: payload.total, reduced: payload.reduced?.total, minimum: payload.minimum }[picked];
         const facing = card?.querySelector(".dmgface > [data-facing].on")?.dataset.facing ?? "front";
+        for (const token of targets) await ChatHelper.applyToActor(token.actor, payload, amount, facing);
+    }
 
-        for (const token of targets) {
-            const result = await token.actor.applyDamage(amount, {
-                scale: payload.scale, ap: payload.ap, loPen: payload.loPen,
-                effect: payload.effect, stun: payload.stun, formula: payload.formula,
-                destructive: payload.destructive, blast: payload.blast,
-                multiple: payload.multiple, damageType: payload.damageType, ion: payload.ion,
-                ignoreArmour: payload.ignoreArmour, facing
-            });
-            // Core p.79: what a Stun weapon deals past END is rounds of incapacitation, not injury.
-            if (result?.rounds > 0) {
-                ui.notifications.info(MGT2Helper.plural("MGT2.Actor.StunIncapacitated", result.rounds,
-                    { name: token.actor.name, rounds: result.rounds }));
-            }
-            // RH folio 106: an ion hit shuts a robot's brain down for as many rounds as it
-            // inflicted and a hardened one shrugs it off — the same kind of fact as the Stun rounds
-            // above, and reported the same way, because neither is a wound anything on the sheet
-            // can hold.
-            if (result?.shutdown > 0) {
-                ui.notifications.info(MGT2Helper.plural("MGT2.Actor.robot.IonShutdown", result.shutdown,
-                    { name: token.actor.name, rounds: result.shutdown }));
-            } else if (result?.immune) {
-                ui.notifications.info(game.i18n.format("MGT2.Actor.robot.IonImmune",
-                    { name: token.actor.name }));
-            }
-            // HG folio 30, one scale up: the hit moves no hull damage at all — it comes off Power
-            // and off the computer bandwidth, both of which the ship's own sheet then prints.
-            if (result?.disrupted) {
-                ui.notifications.info(game.i18n.format("MGT2.Actor.vehicle.IonDisrupted",
-                    { name: token.actor.name, armour: result.armour }));
-            }
-            if (result?.hardened) {
-                ui.notifications.info(game.i18n.format("MGT2.Actor.spacecraft.IonImmune",
-                    { name: token.actor.name }));
-            } else if (result?.ion > 0) {
-                const lasting = (payload.effect ?? 0) >= 6;
-                ui.notifications.info(game.i18n.format(
-                    lasting ? "MGT2.Actor.spacecraft.IonDrainRounds" : "MGT2.Actor.spacecraft.IonDrain",
-                    { name: token.actor.name, n: result.ion }));
-            }
-            if (payload.radiation) await ChatHelper.#applyRadiation(token.actor, payload.scale);
-            if (payload.hazards?.length) {
-                await token.actor.system.applyHazards(payload.hazards, payload.sourceName);
-            }
+    /** One attack on one actor: the wound, then whatever the attack carried beyond it. */
+    static async applyToActor(actor, payload, amount, facing) {
+        const result = await actor.applyDamage(amount, damageOptions(payload, facing));
+        // Core p.79: what a Stun weapon deals past END is rounds of incapacitation, not injury.
+        if (result?.rounds > 0) {
+            ui.notifications.info(MGT2Helper.plural("MGT2.Actor.StunIncapacitated", result.rounds,
+                { name: actor.name, rounds: result.rounds }));
         }
+        // RH folio 106: an ion hit shuts a robot's brain down for as many rounds as it inflicted
+        // and a hardened one shrugs it off — no wound anything on the sheet can hold.
+        if (result?.shutdown > 0) {
+            ui.notifications.info(MGT2Helper.plural("MGT2.Actor.robot.IonShutdown", result.shutdown,
+                { name: actor.name, rounds: result.shutdown }));
+        } else if (result?.immune) {
+            ui.notifications.info(game.i18n.format("MGT2.Actor.robot.IonImmune", { name: actor.name }));
+        }
+        // HG folio 30, one scale up: the hit moves no hull damage at all — it comes off Power
+        // and off the computer bandwidth, both of which the ship's own sheet then prints.
+        if (result?.disrupted) {
+            ui.notifications.info(game.i18n.format("MGT2.Actor.vehicle.IonDisrupted",
+                { name: actor.name, armour: result.armour }));
+        }
+        if (result?.hardened) {
+            ui.notifications.info(game.i18n.format("MGT2.Actor.spacecraft.IonImmune", { name: actor.name }));
+        } else if (result?.ion > 0) {
+            const lasting = (payload.effect ?? 0) >= 6;
+            ui.notifications.info(game.i18n.format(
+                lasting ? "MGT2.Actor.spacecraft.IonDrainRounds" : "MGT2.Actor.spacecraft.IonDrain",
+                { name: actor.name, n: result.ion }));
+        }
+        if (payload.radiation) await ChatHelper.#applyRadiation(actor, payload.scale);
+        if (payload.hazards?.length) await actor.system.applyHazards(payload.hazards, payload.sourceName);
+        return result;
     }
 
     /** The winner's menu. */

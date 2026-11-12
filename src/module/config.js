@@ -1894,11 +1894,11 @@ MGT2.Calendar = Object.freeze({
 });
 
 // Core p.257-258. The letter drives the fuel grade, the berthing rate and both traffic tables'
-// Starport DM.
+// Starport DM. `companionFuel` is Companion p.133's grade, sold under `classCRefinedFuel`.
 MGT2.Starports = Object.freeze({
     A: {label: "MGT2.Starports.A", fuel: "refined", berthingPerDie: 1000, trafficDM: 2, searchDM: 6},
     B: {label: "MGT2.Starports.B", fuel: "refined", berthingPerDie: 500, trafficDM: 1, searchDM: 4},
-    C: {label: "MGT2.Starports.C", fuel: "unrefined", berthingPerDie: 100, trafficDM: 0, searchDM: 2},
+    C: {label: "MGT2.Starports.C", fuel: "unrefined", companionFuel: "both", berthingPerDie: 100, trafficDM: 0, searchDM: 2},
     D: {label: "MGT2.Starports.D", fuel: "unrefined", berthingPerDie: 10, trafficDM: 0, searchDM: 0},
     E: {label: "MGT2.Starports.E", fuel: "none", berthingPerDie: 0, trafficDM: -1, searchDM: 0},
     X: {label: "MGT2.Starports.X", fuel: "none", berthingPerDie: null, trafficDM: -3, searchDM: 0}
@@ -2320,11 +2320,11 @@ MGT2.CreationSteps = Object.freeze({
     elect: "MGT2.Chargen.Steps.elect",
     qualify: "MGT2.Chargen.Steps.qualify",
     basic: "MGT2.Chargen.Steps.basic",
+    skill: "MGT2.Chargen.Steps.skill",
     survival: "MGT2.Chargen.Steps.survival",
     event: "MGT2.Chargen.Steps.event",
     commission: "MGT2.Chargen.Steps.commission",
     advance: "MGT2.Chargen.Steps.advance",
-    skill: "MGT2.Chargen.Steps.skill",
     ageing: "MGT2.Chargen.Steps.ageing",
     decide: "MGT2.Chargen.Steps.decide",
     nest: "MGT2.Chargen.Steps.nest",
@@ -2354,10 +2354,10 @@ MGT2.StepCheckTriggers = Object.freeze({
     afterMishap: "MGT2.Chargen.StepCheckTriggers.afterMishap"
 });
 
-// The default frame's sequence, reconstructed from folio 8's section headings — the book prints no
-// ordered list of a term's steps anywhere.
-MGT2.CoreTermSequence = Object.freeze(["elect", "qualify", "basic", "survival", "event",
-    "commission", "advance", "skill", "ageing", "decide"]);
+// The default frame's sequence, in folio 18's section order: the skill roll, or basic training in its
+// place, comes before Survival.
+MGT2.CoreTermSequence = Object.freeze(["elect", "qualify", "basic", "skill", "survival", "event",
+    "commission", "advance", "ageing", "decide"]);
 
 // Folio 8's printed defaults, which a frame replaces.
 MGT2.CreationDefaults = Object.freeze({ startAge: 18, termYears: 4, racialMaximum: 15,

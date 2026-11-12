@@ -359,6 +359,14 @@ export const Muster = {
         return row;
     },
 
+    /** A printed cell's grant, already applied, kept as a taken row; a note is left open, as `fromRef` leaves an unknown ref. */
+    async record(actor, grant, line, provenance = {}) {
+        const kind = ((grant.kind !== "cash") && (grant.kind in MGT2.BenefitKinds)) ? grant.kind : "voucher";
+        const row = { kind, category: line, count: 1, redeemed: grant.kind !== "note",
+            provenance: { term: Chargen.read(actor).term, ...provenance } };
+        return actor.update({ "system.entitlements": [...(actor.system.entitlements ?? []), row] });
+    },
+
     /** Spend one Benefit roll, and with it the one-shots that were riding on it. */
     forget(actor) {
         RIDING.delete(actor.id);

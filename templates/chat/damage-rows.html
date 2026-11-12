@@ -1,0 +1,15 @@
+{{#each rows}}
+<div class="trow{{#if applied}} done{{/if}}{{#if void}} void{{/if}}" data-row="{{@index}}">
+	<img class="pf" src="{{img}}" alt="">
+	<span class="n">{{name}}</span>
+	<span class="w">{{#if facings}}<select class="face" aria-label="{{@root.facingLabel}}">{{#each facings}}<option value="{{key}}"{{#if selected}} selected{{/if}}>{{label}}</option>{{/each}}</select>{{/if}}{{#if numbers}}{{#if byTraits}}<em>&#9670; {{reading}}</em>{{else}}{{reading}}{{/if}}{{#if met}} · {{met}}{{/if}}{{#if note}} · {{note}}{{/if}}{{/if}}</span>
+	<span class="v">{{#if numbers}}{{value}}{{else}}&mdash;{{/if}}</span>
+	{{#if canApply}}
+	<button type="button" class="go" data-tooltip aria-label="{{applyLabel}}"><i class="fa-solid fa-check"></i></button>
+	{{else if applied}}
+	<span class="stamp">{{@root.appliedLabel}}</span>
+	{{/if}}
+</div>
+{{else}}
+<div class="tnone">{{empty}}</div>
+{{/each}}

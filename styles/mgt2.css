@@ -47,8 +47,8 @@
   --mgt2-bgcolor-software: var(--chrome);
 }
 
-body.theme-dark:not(.mgt2-ground-light) .mgt2:not(.theme-light),
-body.mgt2-ground-dark .mgt2:not(.theme-light),
+body.theme-dark:not(.mgt2-ground-light) .mgt2:not(.theme-light, li.chat-message *),
+body.mgt2-ground-dark .mgt2:not(.theme-light, li.chat-message *),
 .mgt2.theme-dark {
   --paper: var(--i-paper-d);
   --ink: var(--i-ink-d);
@@ -134,6 +134,20 @@ li.chat-message {
   --accent-hot: oklch(from var(--accent) var(--lgt-hot) c h);
   --accent-line: color-mix(in oklab, var(--accent-text) 45%, transparent);
   --accent-soft: color-mix(in oklab, var(--accent-text) 13%, transparent);
+}
+
+body.mgt2-ground-dark li.chat-message {
+  --paper: color-mix(in oklab, var(--i-ink-d) var(--i-plinth-d), var(--i-paper-d));
+  --ink: var(--i-ink-d);
+  --lgt: var(--i-lgt-d);
+  --lgt-hot: var(--i-lgt-hot-d);
+}
+
+li.chat-message .mgt2 {
+  --paper: inherit;
+  --ink: inherit;
+  --lgt: inherit;
+  --lgt-hot: inherit;
 }
 
 li.chat-message > .message-header {
@@ -1108,7 +1122,7 @@ body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
   display: inline-flex;
   align-items: baseline;
   gap: 5px;
-  padding: 1px 6px 2px;
+  padding: 1px 9px 2px;
   font-family: var(--cond);
   font-size: 10.5px;
   font-weight: 600;
@@ -1116,7 +1130,7 @@ body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
   text-transform: uppercase;
   color: var(--mute);
   border: 1px solid var(--rule);
-  border-radius: 2px;
+  border-radius: 999px;
   cursor: var(--cursor-pointer);
   user-select: none;
 }
@@ -1141,22 +1155,23 @@ body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
   outline-offset: 1px;
 }
 .mgt2 .tog:has(input:checked) {
-  color: var(--accent-text);
-  background: var(--accent-soft);
-  border-color: var(--accent-line);
+  color: var(--ink);
+  background: var(--hover);
+  border-color: var(--edge);
+}
+.mgt2 .tog:has(input:checked)::before {
+  content: "✓";
+  font-family: var(--mono);
+  letter-spacing: 0;
 }
 .mgt2 .tog:has(input:checked) .v {
-  color: inherit;
+  color: var(--ink);
 }
-.mgt2 .tog.pos:has(input:checked) {
+.mgt2 .tog.pos:has(input:checked) .v {
   color: var(--good);
-  background: color-mix(in oklab, var(--good) 10%, transparent);
-  border-color: color-mix(in oklab, var(--good) 45%, transparent);
 }
-.mgt2 .tog.neg:has(input:checked) {
+.mgt2 .tog.neg:has(input:checked) .v {
   color: var(--danger);
-  background: color-mix(in oklab, var(--danger) 10%, transparent);
-  border-color: color-mix(in oklab, var(--danger) 45%, transparent);
 }
 .mgt2 .tog.disabled {
   color: var(--faint);
@@ -1246,8 +1261,9 @@ body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
   background: var(--hover);
 }
 .mgt2 .seg label:has(input:checked) {
-  color: var(--accent-text);
-  background: var(--accent-soft);
+  color: var(--ink);
+  background: var(--hover);
+  box-shadow: inset 0 -2px 0 var(--mute);
 }
 .mgt2 .seg label:has(input:focus-visible) {
   outline: 2px solid var(--accent-text);
@@ -1284,6 +1300,12 @@ body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
   border-right: 1px solid var(--rule);
 }
 
+.mgt2 .seg.icons label {
+  align-items: center;
+  min-width: 2rem;
+  font-size: 11px;
+}
+
 .mgt2 .seg.num label {
   min-width: 1.6rem;
   padding: 1px 5px 2px;
@@ -1300,7 +1322,7 @@ body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--accent-text);
+  color: var(--ink);
 }
 
 .mgt2 .segname.peek {
@@ -1374,6 +1396,39 @@ body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
 .mgt2 .readout .vs.assumed b {
   color: var(--mute);
 }
+.mgt2 .readout .odds {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: center;
+}
+.mgt2 .readout .odds svg {
+  width: 30px;
+  height: 30px;
+  transform: rotate(-90deg);
+}
+.mgt2 .readout .odds svg circle {
+  fill: none;
+  stroke-width: 5;
+}
+.mgt2 .readout .odds svg .trk {
+  stroke: var(--track);
+}
+.mgt2 .readout .odds svg .arc {
+  stroke: var(--good);
+  stroke-linecap: round;
+  stroke-dasharray: calc(var(--p, 0) * 1px) 100px;
+}
+.mgt2 .readout .odds b {
+  font-family: var(--cond);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.mgt2 .readout .odds.assumed {
+  opacity: 0.6;
+}
 .mgt2 .readout .terms {
   display: flex;
   flex-wrap: wrap;
@@ -1391,38 +1446,19 @@ body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
 }
 
 .mgt2 .eladder {
-  margin-top: 7px;
+  margin-top: 8px;
 }
-.mgt2 .eladder .strip {
+.mgt2 .eladder .pbar {
   display: flex;
-  height: 17px;
+  justify-content: flex-end;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--track);
 }
-.mgt2 .eladder .strip span {
-  flex: 1 1 0;
-  display: grid;
-  place-items: center;
-  font-family: var(--mono);
-  font-size: 9.5px;
-  color: var(--faint);
-  border: 1px solid var(--rule-soft);
-  border-right: 0;
-}
-.mgt2 .eladder .strip span:last-child {
-  border-right: 1px solid var(--rule-soft);
-}
-.mgt2 .eladder .strip span.f {
-  color: var(--danger);
-  background: color-mix(in oklab, var(--danger) 10%, transparent);
-}
-.mgt2 .eladder .strip span.s {
-  color: var(--good);
-  background: color-mix(in oklab, var(--good) 10%, transparent);
-}
-.mgt2 .eladder .strip span.here {
-  font-weight: 600;
-  color: var(--accent-text);
-  outline: 2px solid var(--accent-text);
-  outline-offset: -2px;
+.mgt2 .eladder .pbar .pass {
+  width: var(--p, 0%);
+  background: color-mix(in oklab, var(--good) 70%, transparent);
 }
 .mgt2 .eladder .cap {
   display: flex;
@@ -1442,7 +1478,14 @@ body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
   color: var(--ink);
 }
 .mgt2 .eladder .cap .band {
-  margin-left: auto;
+  margin-right: auto;
+}
+.mgt2 .eladder .cap .alt {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--faint);
 }
 
 .mgt2 .form-footer button {
@@ -1489,12 +1532,18 @@ body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
 }
 .mgt2-prompt .form-footer button[data-action=submit] {
   flex: 1.6 1 0;
-  color: var(--accent-text);
-  border-color: var(--accent-line);
+  color: var(--paper);
+  background: var(--accent-text);
+  border-color: var(--accent-text);
+}
+.mgt2-prompt .form-footer button[data-action=submit] .d {
+  color: inherit;
+  opacity: 0.8;
 }
 .mgt2-prompt .form-footer button[data-action=submit]:hover {
-  background: var(--accent-soft);
-  border-color: var(--accent-text);
+  color: var(--paper);
+  background: var(--accent-hot);
+  border-color: var(--accent-hot);
 }
 
 .mgt2.stoptraffic .window-content,
@@ -2870,10 +2919,10 @@ li.chat-message {
 }
 .mgt2 .sect {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding-bottom: 3px;
-  border-bottom: 2px solid var(--accent-text);
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--rule);
 }
 .mgt2 .sect h3 {
   margin: 0;
@@ -2886,16 +2935,32 @@ li.chat-message {
   border: none;
 }
 .mgt2 .sect .count {
+  padding: 0 6px;
   font-family: var(--mono);
-  font-size: 10.5px;
-  color: var(--faint);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--mute);
+  background: var(--hover);
+  border-radius: 999px;
+}
+.mgt2 .sect .count:empty {
+  display: none;
 }
 .mgt2 .sect .add {
   margin-left: auto;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
   font-size: 12px;
-  color: var(--accent-text);
+  color: var(--faint);
+  border-radius: 4px;
   cursor: var(--cursor-pointer);
+}
+.mgt2 .sect .add:hover {
+  color: var(--accent-text);
+  background: var(--accent-soft);
 }
 .mgt2 .sect .add svg {
   width: 13px;
@@ -3652,6 +3717,22 @@ li.chat-message {
   border-style: solid;
 }
 
+.mgt2[data-mode=play] .codes.glossed {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  gap: 5px 12px;
+}
+.mgt2[data-mode=play] .codes.glossed .code {
+  justify-self: start;
+}
+.mgt2[data-mode=play] .codes.glossed .gloss {
+  font-family: var(--body);
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--mute);
+}
+
 .mgt2 .track {
   position: relative;
   height: 9px;
@@ -3707,6 +3788,31 @@ li.chat-message {
   background: var(--danger);
 }
 .mgt2 .track .mk[data-hit] span {
+  color: var(--danger);
+}
+.mgt2 .track.over {
+  background: linear-gradient(90deg, var(--track) 0 50%, transparent 50%), repeating-linear-gradient(135deg, var(--track) 0 3px, transparent 3px 6px);
+}
+.mgt2 .track .ml {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: var(--x);
+  transform: translateX(-50%);
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--mute);
+}
+.mgt2 .track .ml[data-anchor=start] {
+  transform: none;
+}
+.mgt2 .track .ml[data-anchor=end] {
+  transform: translateX(-100%);
+}
+.mgt2 .track .ml[data-hit] {
   color: var(--danger);
 }
 
@@ -3956,23 +4062,27 @@ li.chat-message {
   font-family: var(--mono);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  color: var(--accent-text);
+  color: var(--ink);
 }
 .mgt2 .char .d a.dm {
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   min-width: 100%;
-  margin: 0 -4px;
-  padding: 2px 4px;
-  border-radius: 2px;
-  color: var(--accent-text);
+  padding: 1px 5px;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  color: var(--ink);
   cursor: var(--cursor-pointer);
+}
+.mgt2 .char .d a.dm.zero {
+  color: var(--faint);
+  border-color: var(--rule);
 }
 .mgt2 .char .d a.dm:hover {
   color: var(--accent-hot);
-  background: var(--hover);
-  box-shadow: inset 0 0 0 1px var(--accent-line);
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
 }
 .mgt2 .char .d a.cfg {
   display: inline-flex;
@@ -3988,11 +4098,11 @@ li.chat-message {
 }
 .mgt2 .char .g {
   grid-area: g;
-  height: 3px;
+  height: 5px;
   align-self: center;
-  background: color-mix(in oklab, var(--ink) 9%, transparent);
-  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 4px);
-  mask-image: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 4px);
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--track);
 }
 .mgt2 .char .g i {
   display: block;
@@ -4000,14 +4110,14 @@ li.chat-message {
   width: var(--g, 0%);
   background: var(--fill);
 }
-.mgt2 .char.hurt .g i {
-  background: color-mix(in oklab, var(--danger) 75%, var(--paper));
+.mgt2 .char.hurt .g {
+  background: color-mix(in oklab, var(--danger) 60%, transparent);
 }
 .mgt2 .char.spent .v .cur {
   color: inherit;
 }
-.mgt2 .char.spent .g i {
-  background: var(--fill);
+.mgt2 .char.spent .g {
+  background: var(--track);
 }
 
 .mgt2[data-mode=play] .char {
@@ -4325,6 +4435,9 @@ li.chat-message {
   grid-column: 1/-1;
   padding-top: 10px;
 }
+.mgt2 .mgt2-header .trackwrap.below {
+  padding: 8px 0 18px;
+}
 .mgt2 .mgt2-header .stat a.open {
   margin: 0 -5px;
   padding: 0 5px;
@@ -4443,33 +4556,55 @@ li.chat-message {
 .mgt2 .states {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 16px;
+  gap: 4px 6px;
   padding-bottom: 10px;
 }
 .mgt2 .states label {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  padding: 1px 9px 2px 7px;
   font-family: var(--cond);
   font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--faint);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
 }
 .mgt2 .states label::before {
   content: "";
-  width: 9px;
-  height: 9px;
-  border: 1px solid currentColor;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+.mgt2 .states label:has(input:disabled) {
+  border-style: dashed;
+}
+.mgt2 .states label:has(input:not(:disabled)):hover {
+  color: var(--mute);
+  border-color: var(--edge);
+}
+.mgt2 .states label:has(input:focus-visible) {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 1px;
 }
 .mgt2 .states label:has(input:checked) {
   color: var(--danger);
+  border-style: solid;
+  border-color: currentColor;
+  background: color-mix(in oklab, var(--danger) 12%, transparent);
 }
 .mgt2 .states label:has(input:checked)::before {
-  background: currentColor;
-  box-shadow: inset 0 0 0 2px var(--paper);
+  opacity: 1;
+}
+.mgt2 .states label.warn:has(input:checked) {
+  color: var(--warn);
+  background: color-mix(in oklab, var(--warn) 14%, transparent);
 }
 .mgt2 .states input {
   position: absolute;
@@ -4871,6 +5006,173 @@ li.chat-message {
   border-top: 0;
   border-bottom: 0;
   padding: 0;
+}
+.mgt2 .reaction > .btn {
+  margin-left: auto;
+}
+
+.mgt2 .mgt2-npc-panel .gates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .mgt2-npc-panel .gates li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 9px 3px;
+  font-size: 12px;
+  color: var(--mute);
+  background: var(--hover);
+  border-radius: 6px;
+}
+.mgt2 .mgt2-npc-panel .gates li i {
+  font-size: 11px;
+  color: var(--faint);
+}
+
+.mgt2 .mgt2-npc-panel .attacks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .mgt2-npc-panel .attacks .atk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 6px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+.mgt2 .mgt2-npc-panel .attacks .atk:hover {
+  border-color: var(--edge);
+}
+.mgt2 .mgt2-npc-panel .attacks button.roll {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .mgt2-npc-panel .attacks button.roll:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.mgt2 .mgt2-npc-panel .attacks button.roll:hover span {
+  color: var(--accent-text);
+}
+.mgt2 .mgt2-npc-panel .attacks button.roll i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  color: var(--mute);
+  background: var(--hover);
+  border-radius: 5px;
+}
+.mgt2 .mgt2-npc-panel .attacks button.roll:hover i {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+.mgt2 .mgt2-npc-panel .attacks .pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.mgt2 .mgt2-npc-panel .attacks .pills span {
+  padding: 0 7px;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--mute);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .mgt2-npc-panel .attacks .dmg {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.mgt2 .mgt2-npc-panel .attacks .acts {
+  display: inline-flex;
+  gap: 6px;
+}
+.mgt2 .mgt2-npc-panel .attacks .acts a {
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .mgt2-npc-panel .attacks .acts a:hover {
+  color: var(--accent-text);
+}
+
+.mgt2 .mgt2-npc-panel .vacant {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 4px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule-soft);
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .mgt2-npc-panel .vacant b {
+  font-family: var(--mono);
+  font-weight: 400;
+}
+.mgt2 .mgt2-npc-panel .vacant a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .mgt2-npc-panel .vacant a:hover {
+  color: var(--accent-text);
+}
+
+.mgt2 .mgt2-header .meta span.att {
+  padding: 0 8px;
+  font-size: 11.5px;
+  line-height: 1.6;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .mgt2-header .meta span.att::after {
+  content: none;
+}
+.mgt2 .mgt2-header .meta span.att.bad {
+  color: var(--danger);
+  border-color: currentColor;
+  background: color-mix(in oklab, var(--danger) 12%, transparent);
+}
+.mgt2 .mgt2-header .meta span.att.warn {
+  color: var(--warn);
+  border-color: currentColor;
+  background: color-mix(in oklab, var(--warn) 14%, transparent);
+}
+.mgt2 .mgt2-header .meta span.att.good {
+  color: var(--good);
+  border-color: currentColor;
+  background: color-mix(in oklab, var(--good) 12%, transparent);
 }
 
 .mgt2 .upp .code .grp {
@@ -5505,6 +5807,29 @@ ul.softwares li:hover a {
     padding: 14px 22px 20px;
   }
 }
+.mgt2 table.rows .lvl {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.mgt2 table.rows .lvl .pips {
+  display: inline-flex;
+  gap: 3px;
+}
+.mgt2 table.rows .lvl .pips i {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--faint);
+  border-radius: 50%;
+}
+.mgt2 table.rows .lvl .pips i.on {
+  border-color: var(--mute);
+  background: var(--mute);
+}
+.mgt2 table.rows .lvl.zero {
+  color: var(--faint);
+}
+
 .mgt2.application.world {
   container-type: inline-size;
   container-name: sheet;
@@ -6002,7 +6327,7 @@ ul.softwares li:hover a {
 .mgt2 .window-content.itemsheet {
   display: grid;
   grid-template-columns: 2.1rem minmax(0, 1fr);
-  align-content: start;
+  align-content: stretch;
   --item-chrome: 250px;
 }
 
@@ -6081,6 +6406,28 @@ ul.softwares li:hover a {
   margin-left: 8px;
   color: var(--faint);
 }
+.mgt2 .mast .isub .lvl {
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+}
+.mgt2 .mast .isub .pips {
+  display: inline-flex;
+  gap: 3px;
+}
+.mgt2 .mast .isub .pips i {
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--faint);
+  border-radius: 50%;
+}
+.mgt2 .mast .isub .pips i.on {
+  border-color: var(--accent-text);
+  background: var(--accent-text);
+}
+.mgt2 .mast .isub .lvl.zero .pips i {
+  border-color: var(--rule);
+}
 .mgt2 .mast .isub.edit-only {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
@@ -6147,13 +6494,19 @@ ul.softwares li:hover a {
 .mgt2 .mast .supply .eq {
   position: relative;
   flex: none;
-  display: grid;
-  place-items: center;
-  width: 27px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   height: 24px;
+  padding: 0 10px 0 7px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--faint);
   border: 1px solid var(--rule);
-  border-radius: 2px;
+  border-radius: 999px;
   cursor: var(--cursor-pointer);
 }
 .mgt2 .mast .supply .eq input {
@@ -6164,10 +6517,19 @@ ul.softwares li:hover a {
   opacity: 0;
   pointer-events: none;
 }
+.mgt2 .mast .supply .eq .fa-circle-check {
+  display: none;
+}
 .mgt2 .mast .supply .eq:has(:checked) {
   color: var(--accent-text);
   background: var(--accent-soft);
   border-color: var(--accent-line);
+}
+.mgt2 .mast .supply .eq:has(:checked) .fa-circle {
+  display: none;
+}
+.mgt2 .mast .supply .eq:has(:checked) .fa-circle-check {
+  display: inline;
 }
 .mgt2 .mast .supply .eq:focus-within {
   border-color: var(--accent-text);
@@ -6182,6 +6544,20 @@ ul.softwares li:hover a {
 .mgt2 .imain > nav.horizontal-tabs {
   margin-left: -16px;
   margin-right: -16px;
+}
+.mgt2 .imain > nav.horizontal-tabs a.item .badge {
+  margin-left: 5px;
+  padding: 0 5px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--mute);
+  background: var(--hover);
+  border-radius: 999px;
+}
+.mgt2 .imain > nav.horizontal-tabs a.item.empty:not(.active) {
+  opacity: 0.5;
 }
 
 .mgt2 .tab[data-group=item].active {
@@ -6333,12 +6709,309 @@ ul.softwares li:hover a {
   color: var(--faint);
 }
 
-.mgt2.hazard .specs b,
-.mgt2.hazard .rollline {
-  color: var(--danger);
-}
 .mgt2.hazard .itemsheet-header span {
   color: var(--danger);
+}
+
+.mgt2 .plates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: 8px;
+}
+
+.mgt2 .plate {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 6px 10px 8px;
+  background: var(--hover);
+  border: 1px solid var(--rule-soft);
+  border-radius: 3px;
+}
+.mgt2 .plate b {
+  font-family: var(--cond);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.mgt2 .plate b .u {
+  margin-left: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mute);
+}
+.mgt2 .plate b.none {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--faint);
+}
+.mgt2 .plate.off b {
+  color: var(--faint);
+}
+.mgt2 .plate.spent b {
+  color: var(--danger);
+}
+.mgt2 .plate.harm {
+  border-color: color-mix(in oklab, var(--danger) 45%, transparent);
+}
+.mgt2 .plate.harm b {
+  color: var(--danger);
+}
+.mgt2 .plate .pips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 2px;
+}
+.mgt2 .plate .pips i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--track);
+}
+.mgt2 .plate .pips i.on {
+  background: var(--accent-text);
+}
+
+.mgt2 .plate .bar,
+.mgt2 .gauge .bar {
+  display: block;
+  height: 6px;
+  margin-top: 2px;
+  background: var(--track);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.mgt2 .plate .bar i,
+.mgt2 .gauge .bar i {
+  display: block;
+  height: 100%;
+  background: var(--accent-text);
+}
+
+.mgt2 .guard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.mgt2 .guard .shield {
+  position: relative;
+  flex: none;
+  width: 54px;
+  height: 62px;
+}
+.mgt2 .guard .shield svg {
+  width: 100%;
+  height: 100%;
+}
+.mgt2 .guard .shield path {
+  fill: var(--accent-soft);
+  stroke: var(--accent-text);
+  stroke-width: 2;
+}
+.mgt2 .guard .shield b {
+  position: absolute;
+  inset: 0 0 6px;
+  display: grid;
+  place-items: center;
+  font-family: var(--cond);
+  font-size: 24px;
+  font-weight: 700;
+}
+.mgt2 .guard .gside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.mgt2 .gauge {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+.mgt2 .gauge > b {
+  justify-self: end;
+  font-family: var(--cond);
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .gauge > b .u {
+  margin-left: 2px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--mute);
+}
+.mgt2 .gauge .cells,
+.mgt2 .gauge .bar {
+  grid-column: 1/-1;
+}
+.mgt2 .gauge .bar {
+  width: 12rem;
+}
+.mgt2 .gauge .cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.mgt2 .gauge .cells i {
+  flex: 0 0 24px;
+  height: 8px;
+  background: var(--track);
+  border-radius: 2px;
+}
+.mgt2 .gauge .cells i.on {
+  background: var(--accent-text);
+}
+.mgt2 .gauge.over > b,
+.mgt2 .gauge.over > b .u {
+  color: var(--danger);
+}
+.mgt2 .gauge.over .cells i.on,
+.mgt2 .gauge.over .bar i {
+  background: var(--danger);
+}
+
+.mgt2 .cycle {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.mgt2 .cycle > i {
+  font-size: 13px;
+  color: var(--faint);
+}
+.mgt2 .cycle .plate {
+  min-width: 6rem;
+}
+.mgt2 .cycle .plate b {
+  font-size: 17px;
+}
+
+.mgt2 .ailment {
+  flex: 1 0 100%;
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 13px;
+  background: color-mix(in oklab, var(--warn) 8%, transparent);
+  border-left: 2px solid var(--warn);
+}
+.mgt2 .ailment .lbl {
+  margin-right: 8px;
+}
+
+.mgt2 .imain .pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.mgt2 .imain .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 10px;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .imain .pill.accent {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+.mgt2 .imain .pill.good {
+  color: var(--good);
+  border-color: color-mix(in oklab, var(--good) 45%, transparent);
+}
+.mgt2 .imain .pill.warn {
+  color: var(--warn);
+  border-color: color-mix(in oklab, var(--warn) 45%, transparent);
+}
+.mgt2 .imain .pill.danger {
+  color: var(--danger);
+  border-color: color-mix(in oklab, var(--danger) 45%, transparent);
+}
+.mgt2 .imain .pill.faint {
+  color: var(--faint);
+}
+
+.mgt2 .facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  gap: 5px 14px;
+  margin: 0;
+}
+.mgt2 .facts dd {
+  margin: 0;
+  font-size: 13.5px;
+}
+
+.mgt2 .tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.4rem, 1fr));
+  gap: 6px;
+}
+.mgt2 .tiles .tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 4px 5px;
+  background: var(--hover);
+  border: 1px solid var(--rule-soft);
+  border-radius: 3px;
+  cursor: help;
+}
+.mgt2 .tiles .tile.sexed {
+  border-style: dashed;
+}
+.mgt2 .tiles .tile.up {
+  border-color: color-mix(in oklab, var(--good) 50%, transparent);
+}
+.mgt2 .tiles .tile.up .dm {
+  color: var(--good);
+}
+.mgt2 .tiles .tile.down {
+  border-color: color-mix(in oklab, var(--danger) 50%, transparent);
+}
+.mgt2 .tiles .tile.down .dm {
+  color: var(--danger);
+}
+.mgt2 .tiles .k {
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--mute);
+}
+.mgt2 .tiles .k sup {
+  margin-left: 2px;
+  color: var(--accent-text);
+}
+.mgt2 .tiles b {
+  font-family: var(--cond);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.mgt2 .tiles .dm {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--faint);
 }
 
 .mgt2 .carried {
@@ -6402,6 +7075,39 @@ ul.softwares li:hover a {
 .mgt2 .imain label.off input.f,
 .mgt2 .imain label.off select.f {
   color: var(--faint);
+}
+.mgt2 .imain .grid .gsub {
+  grid-column: 1/-1;
+  margin: 6px 0 -3px;
+  padding: 0 0 3px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: none;
+  border-bottom: 1px dashed var(--rule-soft);
+}
+.mgt2 .imain .grid .gsub:first-child {
+  margin-top: 0;
+}
+.mgt2 .imain .grid label.check {
+  justify-self: start;
+  padding: 3px 11px 3px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .imain .grid label.check:has(input:checked) {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+.mgt2 .imain .grid label.check:has(input:checked) span {
+  color: var(--accent-text);
+}
+.mgt2 .imain .grid label.check.off {
+  opacity: 0.55;
 }
 
 .mgt2 .codes .code input {
@@ -6825,6 +7531,9 @@ li.chat-message {
 }
 li.chat-message.deleting {
   padding: 0;
+}
+body.mgt2-ground-dark li.chat-message {
+  background: var(--chrome);
 }
 li.chat-message > .message-header {
   display: flex;
@@ -7583,6 +8292,742 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   font-size: 11px;
 }
 
+.mgt2.card .xh {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 10px;
+  padding: 7px 11px;
+  border-bottom: 1px solid var(--rule);
+}
+.mgt2.card .xh .xk {
+  grid-column: 1;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mute);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mgt2.card .xh h4 {
+  grid-column: 1;
+  margin: 1px 0 0;
+  font-family: var(--cond);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.1;
+  border: none;
+}
+.mgt2.card .xh[data-fold-toggle] {
+  cursor: var(--cursor-pointer);
+}
+.mgt2.card .rung,
+.mgt2.card .pill {
+  grid-column: 2;
+  grid-row: 1/span 2;
+  align-self: center;
+  text-align: right;
+  line-height: 1;
+}
+.mgt2.card .rung small {
+  display: block;
+  margin-bottom: 2px;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--mute);
+}
+.mgt2.card .rung b {
+  font-family: var(--cond);
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mgt2.card .rung.assumed b {
+  color: var(--mute);
+}
+.mgt2.card .pill {
+  display: none;
+  padding: 2px 7px;
+  font-family: var(--cond);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--ink);
+  background: var(--hover);
+  border-radius: 2px;
+}
+.mgt2.card .fold {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 250ms ease;
+}
+.mgt2.card .fold > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.mgt2.card.folded .fold {
+  grid-template-rows: 0fr;
+}
+.mgt2.card.folded .xh {
+  border-bottom: 0;
+}
+.mgt2.card.folded .rung {
+  display: none;
+}
+.mgt2.card.folded .pill {
+  display: block;
+}
+.mgt2.card .meter {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2.card .meter .bar {
+  flex: 1;
+  display: flex;
+  height: 6px;
+  background: var(--track);
+}
+.mgt2.card .meter .bar i {
+  background: var(--mute);
+}
+.mgt2.card .meter .bar i.now {
+  background: var(--accent-line);
+}
+.mgt2.card .meter b {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.mgt2.card .xres {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2.card .xres.solo {
+  grid-template-columns: minmax(0, 1fr);
+}
+.mgt2.card .xtot {
+  padding: 8px 11px 7px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2.card .xtot:hover {
+  background: var(--hover);
+}
+.mgt2.card .xtot:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: -2px;
+}
+.mgt2.card .xtot .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mgt2.card .xtot > .row > b {
+  font-family: var(--cond);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2.card .xtot .vs {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2.card .xtot .vs b {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.mgt2.card .dice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.mgt2.card .dice i {
+  display: grid;
+  place-items: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 2px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--sunk);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+.mgt2.card .dice i.drop {
+  color: var(--faint);
+  background: none;
+  border-style: dashed;
+  text-decoration: line-through;
+}
+.mgt2.card .xeff {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  column-gap: 7px;
+  padding: 8px 11px 7px;
+  border-left: 1px solid var(--rule-soft);
+}
+.mgt2.card .xeff .lbl {
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2.card .xeff b {
+  justify-self: end;
+  font-family: var(--cond);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2.card .xeff .band {
+  grid-column: 1/-1;
+  margin-top: 3px;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.mgt2.card .lad {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  margin-top: 5px;
+}
+.mgt2.card .lad i {
+  height: 5px;
+  background: var(--track);
+}
+.mgt2.card .lad i.bad {
+  background: color-mix(in oklab, var(--danger) 30%, transparent);
+}
+.mgt2.card .lad i.ok {
+  background: color-mix(in oklab, var(--good) 30%, transparent);
+}
+.mgt2.card .lad i.on {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 1px;
+}
+.mgt2.card.ok .xeff,
+.mgt2.card.ok .pill {
+  background: color-mix(in oklab, var(--good) 9%, transparent);
+}
+.mgt2.card.ok .xeff b,
+.mgt2.card.ok .xeff .band,
+.mgt2.card.ok .pill {
+  color: var(--good);
+}
+.mgt2.card.ok .lad i.on {
+  background: var(--good);
+}
+.mgt2.card.bad .xeff,
+.mgt2.card.bad .pill {
+  background: color-mix(in oklab, var(--danger) 9%, transparent);
+}
+.mgt2.card.bad .xeff b,
+.mgt2.card.bad .xeff .band,
+.mgt2.card.bad .pill {
+  color: var(--danger);
+}
+.mgt2.card.bad .lad i.on {
+  background: var(--danger);
+}
+.mgt2.card.edge .xeff {
+  background: var(--hover);
+}
+.mgt2.card.edge .xeff b,
+.mgt2.card.edge .xeff .band,
+.mgt2.card.edge .pill {
+  color: var(--mute);
+}
+.mgt2.card.edge .lad i.on {
+  background: var(--mute);
+}
+.mgt2.card .xpop:not(:popover-open) {
+  display: none;
+}
+.mgt2.card .xpop {
+  position: fixed;
+  inset: auto;
+  width: 260px;
+  margin: 0;
+  padding: 8px 10px 9px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--edge);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+.mgt2.card .xro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px 9px;
+  padding: 6px 11px 7px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2.card .xro b {
+  font-weight: 700;
+  color: var(--mute);
+}
+.mgt2.card .xro .neg,
+.mgt2.card .xro .neg b {
+  color: var(--danger);
+}
+.mgt2.card .xro .pc {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.mgt2.card .tag {
+  padding: 0 5px;
+  font-size: 9.5px;
+  line-height: 15px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+.mgt2.card .tag.boon {
+  color: var(--good);
+}
+.mgt2.card .tag.bane {
+  color: var(--danger);
+}
+.mgt2.card .tag.boon::before,
+.mgt2.card .chip.boon::before {
+  content: "▲ ";
+}
+.mgt2.card .tag.bane::before,
+.mgt2.card .chip.bane::before {
+  content: "▼ ";
+}
+.mgt2.card .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 7px 11px;
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.card .chip {
+  padding: 1px 6px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+.mgt2.card .chip.neg {
+  color: var(--danger);
+  border-color: color-mix(in oklab, var(--danger) 45%, transparent);
+}
+.mgt2.card .chip.boon {
+  color: var(--good);
+  border-color: color-mix(in oklab, var(--good) 45%, transparent);
+}
+.mgt2.card .tray {
+  border-top: 1px solid var(--rule);
+}
+.mgt2.card .tray.applied .tlab {
+  color: var(--good);
+}
+.mgt2.card .tray.shut .tbody {
+  grid-template-rows: 0fr;
+}
+.mgt2.card .tray.shut .car {
+  transform: rotate(-90deg);
+}
+.mgt2.card .tlab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px 5px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+  cursor: var(--cursor-pointer);
+  user-select: none;
+}
+.mgt2.card .tlab > span:not(.seg) {
+  flex: 1 1 auto;
+}
+.mgt2.card .tlab .car {
+  font-size: 11px;
+  transition: transform 200ms ease;
+}
+.mgt2.card .seg {
+  display: inline-flex;
+  border: 1px solid var(--edge);
+  border-radius: 2px;
+}
+.mgt2.card .seg button {
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0 6px;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: var(--cursor-pointer);
+}
+.mgt2.card .seg button:hover {
+  color: var(--ink);
+}
+.mgt2.card .seg button[aria-pressed=true] {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+.mgt2.card .tbody {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 250ms ease;
+}
+.mgt2.card .tbody > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.mgt2.card .tnone {
+  padding: 5px 11px 7px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.card .trow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0 8px;
+  padding: 5px 11px;
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.card .trow .n {
+  grid-column: 2;
+  font-family: var(--cond);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mgt2.card .trow .w {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 0 4px;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mgt2.card .trow .w em {
+  font-style: normal;
+  color: var(--accent-text);
+}
+.mgt2.card .trow select.face {
+  flex: none;
+  width: auto;
+  height: 16px;
+  min-height: 0;
+  margin: 0 4px 0 0;
+  padding: 0 2px;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--hover);
+  border: 1px solid var(--edge);
+  border-radius: 2px;
+}
+.mgt2.card .trow .v {
+  grid-column: 3;
+  grid-row: 1/span 2;
+  font-family: var(--cond);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2.card .trow .go {
+  grid-column: 4;
+  grid-row: 1/span 2;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 24px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  color: var(--accent-text);
+  background: none;
+  border: 0;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px var(--accent-line);
+  cursor: var(--cursor-pointer);
+}
+.mgt2.card .trow .go:hover, .mgt2.card .trow .go:focus-visible {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent-text);
+}
+.mgt2.card .trow .stamp {
+  grid-column: 4;
+  grid-row: 1/span 2;
+  padding: 1px 5px;
+  font-family: var(--cond);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--good);
+  border: 1px solid color-mix(in oklab, var(--good) 45%, transparent);
+  border-radius: 2px;
+}
+.mgt2.card .trow.done .v {
+  color: var(--good);
+}
+.mgt2.card .trow.void .v {
+  color: var(--faint);
+  text-decoration: line-through;
+}
+.mgt2.card .trow .pf,
+.mgt2.card .dline .pf {
+  grid-row: 1/span 2;
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+  background: var(--sunk);
+  border: 0;
+  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 0 100%);
+}
+.mgt2.card.dmg .dmgpick {
+  border-top: 0;
+}
+.mgt2.card .stat {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr) minmax(0, 1.3fr);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2.card .stat > div {
+  padding: 7px 11px 6px;
+  border-right: 1px solid var(--rule-soft);
+}
+.mgt2.card .stat > div:last-child {
+  border-right: 0;
+}
+.mgt2.card .stat small {
+  display: block;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2.card .stat b {
+  font-family: var(--cond);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mgt2.card .hold {
+  padding: 7px 11px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.card .hold .line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+.mgt2.card .hold .line .hot {
+  margin-left: auto;
+  color: var(--danger);
+}
+.mgt2.card .hold .bar {
+  position: relative;
+  display: flex;
+  height: 6px;
+  margin-top: 5px;
+  background: var(--track);
+}
+.mgt2.card .hold .bar i {
+  background: var(--mute);
+}
+.mgt2.card .hold .bar i.now {
+  background: var(--accent-line);
+}
+.mgt2.card .hold .bar i.cap {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--ink);
+}
+.mgt2.card .hold.over .bar i.now {
+  background: var(--danger);
+}
+.mgt2.card q.quote {
+  display: block;
+  padding: 7px 11px 0;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--mute);
+}
+.mgt2.card .prog {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2.card .prog.sub {
+  padding-top: 0;
+}
+.mgt2.card .prog .bar {
+  flex: 1 1 40%;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 2px;
+}
+.mgt2.card .prog .bar i {
+  height: 4px;
+  background: var(--track);
+}
+.mgt2.card .prog .bar i.ok {
+  background: var(--good);
+}
+.mgt2.card .prog .bar i.bad {
+  background: var(--danger);
+}
+.mgt2.card .prog .bar i.edge {
+  background: var(--mute);
+}
+.mgt2.card .prog .bar i.off {
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+.mgt2.card .dline.pic {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.mgt2.card .dline.pic .n,
+.mgt2.card .dline.pic .w {
+  grid-column: 2;
+}
+.mgt2.card .dline.pic .v,
+.mgt2.card .dline.pic .s,
+.mgt2.card .dline.pic a.dm {
+  grid-column: 3;
+}
+.mgt2.card .dline.pic .you {
+  margin-left: 5px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.mgt2.card .dline.pic .s.wait {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.mgt2.card .dline.pic .s.wait::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+.mgt2.card .dline.pic a.dm small {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mgt2.card .fold,
+  .mgt2.card .tbody,
+  .mgt2.card .tlab .car {
+    transition: none;
+  }
+}
 .mgt2.card.dose .dose-line {
   margin: 0;
   padding: 8px 11px 9px;
@@ -10659,6 +12104,17 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   flex: none;
 }
 
+.mgt2.application.chargen-close > .window-content {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  column-gap: 12px;
+}
+.mgt2.application.chargen-close > .window-content > [data-application-part=masthead],
+.mgt2.application.chargen-close > .window-content > [data-application-part=roster] {
+  grid-column: 1/-1;
+}
+
 .mgt2 .mgt2-chargen-head {
   display: flex;
   flex-wrap: wrap;
@@ -10685,6 +12141,19 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   font-family: var(--mono);
   font-size: 10.5px;
   color: var(--faint);
+}
+.mgt2 .mgt2-chargen-head .stand {
+  padding: 1px 9px 2px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--mute);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .mgt2-chargen-head .stand.owed {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
 }
 .mgt2 .mgt2-chargen-head .closing,
 .mgt2 .mgt2-chargen-head .finishall {
@@ -10729,7 +12198,10 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   width: 4.2rem;
 }
 .mgt2 table.termgrid thead th.sel {
-  background: var(--accent-soft);
+  box-shadow: inset 0 -2px 0 var(--accent-text);
+}
+.mgt2 table.termgrid thead th.sel .who b {
+  color: var(--accent-text);
 }
 .mgt2 table.termgrid .who {
   position: relative;
@@ -10805,6 +12277,10 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   border-bottom: 1px solid var(--rule-soft);
   white-space: nowrap;
 }
+.mgt2 table.termgrid td.tno.now {
+  font-weight: 600;
+  color: var(--accent-text);
+}
 .mgt2 table.termgrid td.cell {
   padding: 6px 9px 7px;
   border-bottom: 1px solid var(--rule-soft);
@@ -10873,6 +12349,22 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   font-style: normal;
   color: var(--faint);
 }
+.mgt2 .termgrid .cell li svg {
+  display: block;
+  width: 11px;
+  height: 11px;
+  margin-top: 0.2em;
+}
+.mgt2 .termgrid .cell li svg circle {
+  fill: currentColor;
+}
+.mgt2 .termgrid .cell li svg path {
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .mgt2 .termgrid .cell li.good i {
   color: var(--good);
 }
@@ -10885,9 +12377,71 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   cursor: default;
 }
 
+.mgt2 .termgrid td.cell.sel {
+  background-color: var(--hover);
+}
+
 .mgt2 .termgrid td.cell.now {
-  box-shadow: inset 0 0 0 1px var(--accent-text);
+  --live: var(--mute);
+  box-shadow: inset 3px 0 0 var(--live);
+}
+.mgt2 .termgrid td.cell.now.sel {
+  --live: var(--accent-text);
+}
+.mgt2 .termgrid td.cell.now .stepnow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin: 0 0 4px;
+  padding: 1px 8px 1px 6px;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--live);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .termgrid td.cell.now .stepnow i {
+  position: relative;
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.mgt2 .termgrid td.cell.now .stepnow i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+}
+.mgt2 .termgrid td.cell.now .stepnow b {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 400;
+  color: var(--faint);
+}
+.mgt2 .termgrid td.cell.now.sel .stepnow {
   background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+.mgt2 .termgrid td.cell.now .prog {
+  display: block;
+  max-width: 10rem;
+  height: 2px;
+  margin: 0 0 6px;
+  border-radius: 1px;
+  background: var(--track);
+}
+.mgt2 .termgrid td.cell.now .prog > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--live);
 }
 
 .mgt2 .termgrid th.over,
@@ -10923,7 +12477,14 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   border-top: 1px solid var(--rule);
   padding: 9px 14px 11px;
 }
+.mgt2.chargen .steps .head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+}
 .mgt2.chargen .steps .lbl {
+  flex: 1 1 14rem;
   font-family: var(--cond);
   font-size: 9px;
   font-weight: 700;
@@ -10931,22 +12492,11 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   text-transform: uppercase;
   color: var(--faint);
 }
-.mgt2.chargen .steps ol,
-.mgt2.chargen .steps ul.pre {
-  margin: 5px 0 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.mgt2.chargen .steps li {
-  padding: 2px 7px 3px;
+.mgt2.chargen .steps .at {
+  flex: none;
   font-family: var(--mono);
   font-size: 10px;
-  color: var(--mute);
-  border: 1px solid var(--rule);
-  border-radius: 2px;
+  color: var(--accent-text);
 }
 .mgt2.chargen .steps li button {
   all: unset;
@@ -10954,65 +12504,251 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   font: inherit;
   color: inherit;
 }
-.mgt2.chargen .steps li button:hover {
-  color: var(--accent-text);
-}
-.mgt2.chargen .steps li.own {
-  border-color: var(--accent-text);
-  color: var(--accent-text);
-}
-.mgt2.chargen .steps li.now {
-  background: var(--accent-soft);
-  border-color: var(--accent-text);
-  color: var(--accent-text);
-  font-weight: 600;
-}
-.mgt2.chargen .steps li.cut {
-  text-decoration: line-through;
-  color: var(--faint);
-}
-.mgt2.chargen .steps li.idle {
-  color: var(--faint);
-  border-style: dashed;
-  cursor: help;
-}
-.mgt2.chargen .steps li.done {
-  border-color: var(--good);
-  color: var(--good);
-}
-.mgt2.chargen .steps li.done a.reset {
-  margin-left: 5px;
-  cursor: pointer;
-  color: var(--faint);
-}
-.mgt2.chargen .steps li.done a.reset:hover {
-  color: var(--accent-text);
+.mgt2.chargen .steps ul.pre {
+  display: flex;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--hover);
+  border-radius: 4px;
 }
 .mgt2.chargen .steps li.once {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 6px;
-  border-style: dashed;
+  padding: 4px 10px;
+  font-family: var(--body);
+  font-size: 11.5px;
+  color: var(--mute);
 }
-.mgt2.chargen .steps li.once.set {
-  border-style: solid;
-  border-color: var(--good);
-  color: var(--good);
+.mgt2.chargen .steps li.once + li.once {
+  border-left: 1px solid var(--rule-soft);
 }
-.mgt2.chargen .steps li.once.set b {
-  font-weight: 600;
-  letter-spacing: 0.08em;
-}
-.mgt2.chargen .steps li.once.bg b {
+.mgt2.chargen .steps li.once b {
   font-family: var(--mono);
+  font-size: 10.5px;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ink);
 }
-.mgt2.chargen .steps li.once.set.nil {
-  border-color: var(--rule);
-  color: var(--faint);
+.mgt2.chargen .steps li.once button:hover {
+  color: var(--accent-text);
 }
 .mgt2.chargen .steps li.once span[data-tooltip] {
   cursor: help;
+}
+.mgt2.chargen .steps .mark {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.mgt2.chargen .steps .mark circle {
+  fill: none;
+  stroke: var(--faint);
+  stroke-width: 1.2;
+  stroke-dasharray: 2.5 2;
+}
+.mgt2.chargen .steps .mark path {
+  display: none;
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mgt2.chargen .steps li.once.set .mark circle {
+  fill: var(--accent-text);
+  stroke: none;
+}
+.mgt2.chargen .steps li.once.set .mark path {
+  display: inline;
+}
+.mgt2.chargen .steps li.once.set.nil b {
+  color: var(--faint);
+}
+.mgt2.chargen .steps li.once.set.nil .mark circle {
+  fill: none;
+  stroke: var(--faint);
+  stroke-dasharray: none;
+}
+.mgt2.chargen .steps li.once.set.nil .mark path {
+  display: none;
+}
+.mgt2.chargen .steps ol.loop {
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  margin: 9px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2.chargen .steps ol.loop > li {
+  position: relative;
+  text-align: center;
+}
+.mgt2.chargen .steps ol.loop > li::before, .mgt2.chargen .steps ol.loop > li::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  height: 2px;
+  background: var(--rule);
+  pointer-events: none;
+}
+.mgt2.chargen .steps ol.loop > li::before {
+  left: 0;
+  right: 50%;
+}
+.mgt2.chargen .steps ol.loop > li::after {
+  left: 50%;
+  right: 0;
+}
+.mgt2.chargen .steps ol.loop > li:first-child::before, .mgt2.chargen .steps ol.loop > li:last-child::after {
+  display: none;
+}
+.mgt2.chargen .steps ol.loop > li.past::before, .mgt2.chargen .steps ol.loop > li.past::after, .mgt2.chargen .steps ol.loop > li.now::before {
+  background: var(--accent-text);
+}
+.mgt2.chargen .steps ol.loop > li > button,
+.mgt2.chargen .steps ol.loop > li > span {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 3px 4px 0;
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: var(--mute);
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.mgt2.chargen .steps ol.loop > li > button::after,
+.mgt2.chargen .steps ol.loop > li > span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.mgt2.chargen .steps ol.loop > li:has(> button:hover) > button {
+  color: var(--accent-text);
+}
+.mgt2.chargen .steps ol.loop > li:has(> button:hover) .disc {
+  stroke: var(--accent-text);
+}
+.mgt2.chargen .steps ol.loop > li:has(> button:focus-visible) {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+.mgt2.chargen .steps .node {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 30px;
+  height: 30px;
+  margin: 0 auto;
+  overflow: visible;
+  pointer-events: none;
+}
+.mgt2.chargen .steps .node .halo,
+.mgt2.chargen .steps .node .tick,
+.mgt2.chargen .steps .node .dot,
+.mgt2.chargen .steps .node .dash {
+  display: none;
+}
+.mgt2.chargen .steps .node .disc {
+  fill: var(--paper);
+  stroke: var(--edge);
+  stroke-width: 1.3;
+}
+.mgt2.chargen .steps .node .num {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-anchor: middle;
+  fill: var(--faint);
+}
+.mgt2.chargen .steps .node .tick {
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mgt2.chargen .steps .node .dot,
+.mgt2.chargen .steps .node .add {
+  fill: var(--accent-text);
+}
+.mgt2.chargen .steps .node .dash {
+  stroke: var(--faint);
+  stroke-width: 1.3;
+}
+.mgt2.chargen .steps .node .halo {
+  fill: var(--accent-soft);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.mgt2.chargen .steps .loop > li.done .node .disc {
+  fill: var(--accent-text);
+  stroke: none;
+}
+.mgt2.chargen .steps .loop > li.done .node .tick {
+  display: inline;
+}
+.mgt2.chargen .steps .loop > li.done .node .num {
+  display: none;
+}
+.mgt2.chargen .steps .loop > li.now > button,
+.mgt2.chargen .steps .loop > li.now > span {
+  font-weight: 600;
+  color: var(--ink);
+}
+.mgt2.chargen .steps .loop > li.now .node .disc {
+  stroke: var(--accent-text);
+  stroke-width: 2.2;
+}
+.mgt2.chargen .steps .loop > li.now .node .dot,
+.mgt2.chargen .steps .loop > li.now .node .halo {
+  display: inline;
+}
+.mgt2.chargen .steps .loop > li.now .node .num {
+  display: none;
+}
+.mgt2.chargen .steps .loop > li.idle > span {
+  font-style: italic;
+  color: var(--faint);
+  cursor: help;
+}
+.mgt2.chargen .steps .loop > li.idle .node .disc {
+  stroke: var(--faint);
+  stroke-dasharray: 3 2.4;
+}
+.mgt2.chargen .steps .loop > li.idle .node .dash {
+  display: inline;
+}
+.mgt2.chargen .steps .loop > li.idle .node .num {
+  display: none;
+}
+.mgt2.chargen .steps .loop > li a.reset {
+  position: absolute;
+  z-index: 2;
+  top: -4px;
+  right: calc(50% + 11px);
+  font-size: 10px;
+  color: var(--faint);
+  opacity: 0;
+  cursor: pointer;
+}
+.mgt2.chargen .steps .loop > li a.reset:hover {
+  color: var(--accent-text);
+}
+.mgt2.chargen .steps .loop > li:hover a.reset {
+  opacity: 1;
+}
+.mgt2.chargen .steps .cuts {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--faint);
 }
 .mgt2.chargen .steps .why {
   margin: 6px 0 0;
@@ -11027,6 +12763,22 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   color: var(--faint);
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .mgt2.chargen .steps .loop > li.now .halo,
+  .mgt2 .termgrid td.cell.now.sel .stepnow i::after {
+    animation: mgt2-step-pulse 2.4s ease-out infinite;
+  }
+}
+@keyframes mgt2-step-pulse {
+  from {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
 .mgt2.chargen .tray2 {
   border-top: 1px solid var(--rule);
   padding: 9px 14px 11px;
@@ -11099,7 +12851,7 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 }
 .mgt2 .mustergrid table {
   width: 100%;
-  min-width: 58rem;
+  min-width: 54rem;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -11123,8 +12875,17 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 .mgt2 .mustergrid td.n {
   text-align: right;
 }
+.mgt2 .mustergrid th:first-child {
+  width: 9rem;
+}
+.mgt2 .mustergrid th.n {
+  width: 8.5rem;
+}
+.mgt2 .mustergrid th.n + th.n {
+  width: 6.5rem;
+}
 .mgt2 .mustergrid th.a {
-  width: 7.4rem;
+  width: 9.5rem;
 }
 .mgt2 .mustergrid td {
   vertical-align: top;
@@ -11135,10 +12896,8 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   color: var(--mute);
   overflow-wrap: break-word;
 }
-.mgt2 .mustergrid td.big {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--accent-text);
+.mgt2 .mustergrid td.nil {
+  color: var(--faint);
 }
 .mgt2 .mustergrid tbody tr:last-child td {
   border-bottom: 0;
@@ -11185,16 +12944,50 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 .mgt2 .mustergrid .careers li .pen {
   color: var(--accent-text);
 }
-.mgt2 .mustergrid .sh, .mgt2 .mustergrid .pre {
+.mgt2 .mustergrid .sh, .mgt2 .mustergrid .pre, .mgt2 .mustergrid .cap {
   display: block;
   font-size: 9.5px;
   color: var(--faint);
 }
+.mgt2 .mustergrid .meter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 3px;
+  margin: 4px 0 3px;
+}
+.mgt2 .mustergrid .meter i {
+  width: 14px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--track);
+}
+.mgt2 .mustergrid .meter i.used {
+  background: var(--mute);
+}
+.mgt2 .mustergrid .meter.full i.used {
+  background: var(--faint);
+}
 .mgt2 .mustergrid .vouchers li {
   display: flex;
-  gap: 5px;
-  align-items: baseline;
-  margin-bottom: 2px;
+  flex-wrap: wrap;
+  gap: 0 6px;
+  align-items: center;
+  margin-bottom: 3px;
+}
+.mgt2 .mustergrid .vouchers li .mk {
+  flex: none;
+  width: 12px;
+  height: 12px;
+}
+.mgt2 .mustergrid .vouchers li .mk circle {
+  fill: var(--good);
+}
+.mgt2 .mustergrid .vouchers li .mk path {
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .mgt2 .mustergrid .vouchers li i {
   flex: 0 0 auto;
@@ -11207,19 +13000,52 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   color: var(--faint);
 }
 .mgt2 .mustergrid .vouchers li a {
+  flex: none;
   cursor: pointer;
   color: var(--faint);
+}
+.mgt2 .mustergrid .vouchers li a svg {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+.mgt2 .mustergrid .vouchers li a svg circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+}
+.mgt2 .mustergrid .vouchers li a svg path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .mgt2 .mustergrid .vouchers li a:hover {
   color: var(--good);
 }
+.mgt2 .mustergrid .vouchers li a:hover circle {
+  fill: currentColor;
+}
+.mgt2 .mustergrid .vouchers li a:hover path {
+  stroke: var(--paper);
+}
 .mgt2 .mustergrid .vouchers li .up {
+  flex: none;
   font-size: 9px;
   color: var(--danger);
 }
-.mgt2 .mustergrid .vouchers li.spent {
+.mgt2 .mustergrid .vouchers li.given {
   color: var(--faint);
+}
+.mgt2 .mustergrid .vouchers li.given .lab {
   text-decoration: line-through;
+}
+.mgt2 .mustergrid .vouchers li.given .mk circle {
+  fill: none;
+  stroke: var(--faint);
+  stroke-width: 1.2;
+  stroke-dasharray: 2.4 1.8;
 }
 .mgt2 .mustergrid .none {
   font-size: 10px;
@@ -11237,11 +13063,79 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   text-transform: uppercase;
   line-height: 1.6;
 }
+.mgt2 .mustergrid td.a button.roll {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+.mgt2 .mustergrid td.a button.roll b {
+  min-width: 1.2rem;
+  padding: 0 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.5;
+  color: var(--paper);
+  background: var(--accent-text);
+  border-radius: 999px;
+}
+.mgt2 .mustergrid td.a button.roll:disabled {
+  color: var(--faint);
+  border-color: var(--rule);
+  background: none;
+}
+.mgt2 .mustergrid td.a button.roll:disabled b {
+  background: var(--faint);
+}
+.mgt2 .mustergrid td.a button.fin {
+  border-color: transparent;
+  background: none;
+  color: var(--mute);
+}
+.mgt2 .mustergrid td.a button.fin:hover {
+  color: var(--ink);
+}
+.mgt2 .mustergrid td.a .owed {
+  display: inline-block;
+  padding: 1px 8px 2px;
+  font-size: 10px;
+  color: var(--accent-text);
+  border: 1px solid var(--accent-line);
+  border-radius: 999px;
+}
 
 .mgt2.chargen-close .election,
 .mgt2.chargen-close .packagedraft {
-  border-top: 1px solid var(--rule);
-  padding: 9px 14px 11px;
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin: 12px 0 14px;
+  padding: 10px 12px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+.mgt2.chargen-close .election .ico,
+.mgt2.chargen-close .packagedraft .ico {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  fill: none;
+  stroke: var(--faint);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mgt2.chargen-close .election .body,
+.mgt2.chargen-close .packagedraft .body {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .mgt2.chargen-close .election .lbl,
 .mgt2.chargen-close .packagedraft .lbl {
@@ -11259,15 +13153,22 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 }
 .mgt2.chargen-close .election .edit,
 .mgt2.chargen-close .packagedraft .edit {
-  margin-left: 10px;
+  display: inline-block;
+  margin-top: 7px;
+  padding: 1px 8px 2px;
   cursor: pointer;
-  font-family: var(--mono);
+  font-family: var(--cond);
   font-size: 10px;
-  color: var(--faint);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  border: 1px solid var(--accent-line);
+  border-radius: 4px;
 }
 .mgt2.chargen-close .election .edit:hover,
 .mgt2.chargen-close .packagedraft .edit:hover {
-  color: var(--accent-text);
+  background: var(--accent-soft);
 }
 .mgt2.chargen-close .election .why,
 .mgt2.chargen-close .election .none,
@@ -11350,11 +13251,33 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 }
 
 .mgt2.chargen-close .election li.keeps {
-  border-color: var(--accent-text);
-  background: var(--accent-soft);
+  align-items: center;
 }
 .mgt2.chargen-close .election li.keeps b {
-  color: var(--accent-text);
+  color: var(--ink);
+}
+.mgt2.chargen-close .election li.keeps .mk {
+  flex: none;
+  width: 12px;
+  height: 12px;
+}
+.mgt2.chargen-close .election li.keeps .mk circle {
+  fill: var(--good);
+}
+.mgt2.chargen-close .election li.keeps .mk path {
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mgt2.chargen-close .election {
+  margin-left: 14px;
+}
+
+.mgt2.chargen-close .packagedraft {
+  margin-right: 14px;
 }
 
 .mgt2.chargen-close .packagedraft li {
@@ -11527,6 +13450,117 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--accent-text);
+}
+
+.mgt2 .dlg.sktables table.sk {
+  table-layout: fixed;
+}
+.mgt2 .dlg.sktables table.sk th,
+.mgt2 .dlg.sktables table.sk td {
+  position: relative;
+  padding: 4px 6px;
+}
+.mgt2 .dlg.sktables table.sk th {
+  vertical-align: bottom;
+}
+.mgt2 .dlg.sktables table.sk td {
+  font-size: 12.5px;
+}
+.mgt2 .dlg.sktables table.sk .die {
+  width: 2rem;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0;
+  text-align: center;
+  color: var(--faint);
+}
+.mgt2 .dlg.sktables table.sk .pick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .dlg.sktables table.sk .pick input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+.mgt2 .dlg.sktables table.sk .why {
+  flex-basis: 100%;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.mgt2 .dlg.sktables table.sk .lvl {
+  position: relative;
+  z-index: 1;
+  margin-left: auto;
+  padding: 0 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--accent-text);
+  border: 1px solid var(--accent-line);
+  border-radius: 2px;
+}
+.mgt2 .dlg.sktables table.sk .locked {
+  color: var(--faint);
+}
+.mgt2 .dlg.sktables table.sk .locked .pick {
+  cursor: var(--cursor-default);
+}
+.mgt2 .dlg.sktables table.sk th:has(input:focus-visible),
+.mgt2 .dlg.sktables table.sk td:has(input:focus-visible) {
+  outline: 2px solid var(--accent-text);
+  outline-offset: -2px;
+}
+.mgt2 .dlg.sktables table.sk.cells td:has(input:checked) {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.mgt2 .dlg.sktables table.sk:not(.cells):has(tr > :nth-child(2) input:checked) tr > :nth-child(2) {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.mgt2 .dlg.sktables table.sk:not(.cells):has(tr > :nth-child(3) input:checked) tr > :nth-child(3) {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.mgt2 .dlg.sktables table.sk:not(.cells):has(tr > :nth-child(4) input:checked) tr > :nth-child(4) {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.mgt2 .dlg.sktables table.sk:not(.cells):has(tr > :nth-child(5) input:checked) tr > :nth-child(5) {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.mgt2 .dlg.sktables table.sk:not(.cells):has(tr > :nth-child(6) input:checked) tr > :nth-child(6) {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.mgt2 .dlg.sktables table.sk:not(.cells):has(tr > :nth-child(7) input:checked) tr > :nth-child(7) {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.mgt2 .dlg.sktables table.sk:not(.cells):has(tr > :nth-child(8) input:checked) tr > :nth-child(8) {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.mgt2 .dlg.sktables table.sk:not(.cells):has(tr > :nth-child(9) input:checked) tr > :nth-child(9) {
+  color: var(--accent-text);
+  background: var(--accent-soft);
 }
 
 .mgt2 .careerblk .pfields, .mgt2 .careertbl .pfields, .mgt2 .speciesblk .pfields, .mgt2 .speciesfrm .pfields {

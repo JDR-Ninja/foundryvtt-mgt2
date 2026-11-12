@@ -3634,13 +3634,13 @@
               "basic",
               "survival",
               "event",
+              "skill",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "Entered: drafted into Demo — Reach Guard, with no qualification roll. · Basic training — every listed skill at level 0, instead of this term's skill roll: Pilot 0, Vacc Suit 1, Mechanic 0, Recon 0, Gunner 0, Athletics 0 · You are seconded to the mainland signals school for a season. Gain one level of Electronics, and one extra roll on a skill table this term. · Electronics 1 · Skill roll · Advanced to rank 1, and one extra skill roll. · Skill roll: Mechanic 1 · Skill roll: Athletics 1"
+            "note": "Entered: drafted into Demo — Reach Guard, with no qualification roll. · Basic training — every listed skill at level 0, instead of this term's skill roll: Pilot 0, Vacc Suit 1, Mechanic 0, Recon 0, Gunner 0, Athletics 0 · You are seconded to the mainland signals school for a season. Gain one level of Electronics, and one extra roll on a skill table this term. · Electronics 1 · Skill roll · Skill roll: Mechanic 1 · Advanced to rank 1, and one extra skill roll. · Skill roll: Athletics 1"
           },
           {
             "term": 2,
@@ -3651,22 +3651,22 @@
             "closed": true,
             "kind": "",
             "outcomes": [
-              "mishap",
-              "skillRoll"
+              "skillRoll",
+              "mishap"
             ],
             "steps": [
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "A turret capacitor lets go beside you. Two throws on the Injury table, the worse one counts, and the Guard discharges you. · Injury 4: Endurance −2 · Medical care: Cr2,500 for the Traveller (75% covered). · The term's skill roll is still taken (a world rule). · Skill roll: Gunner 1"
+            "note": "Skill roll: Gunner 1 · A turret capacitor lets go beside you. Two throws on the Injury table, the worse one counts, and the Guard discharges you. · Injury 4: Endurance −2 · Medical care: Cr2,500 for the Traveller (75% covered)."
           }
         ],
         "track": {
@@ -6796,22 +6796,22 @@
             "kind": "",
             "outcomes": [
               "basicTraining",
-              "advanced",
-              "skillRoll"
+              "skillRoll",
+              "advanced"
             ],
             "steps": [
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "Entered: qualification is automatic for this career. · Basic training — one skill at level 0: Drive 0 · A ship's purser comes to trust your tallies. Gain a Contact aboard, and DM+1 held for one Benefit roll from this career. · Contact ×1 · Pending: DM. · Advanced to rank 1, and one extra skill roll. · Skill roll: Streetwise 1 · Skill roll: Melee 1"
+            "note": "Entered: qualification is automatic for this career. · Basic training — one skill at level 0: Drive 0 · Skill roll: Streetwise 1 · A ship's purser comes to trust your tallies. Gain a Contact aboard, and DM+1 held for one Benefit roll from this career. · Contact ×1 · Pending: DM. · Advanced to rank 1, and one extra skill roll. · Skill roll: Melee 1"
           }
         ],
         "track": {
@@ -7087,29 +7087,29 @@
             {"step":"basic","answers":[{"title":"Pick one","pick":"Athletics","press":"ok"}]},
             {"step":"survival","faces":[4,4]},
             {"step":"event","faces":[5,5]},
+            {"step":"skill","answers":[{"title":"Pick a skill table (1 left)","press":"ok","pick":"service"}],"faces":[3]},
             {"step":"commission","answers":[{"title":"Commission","press":"no"}]},
             {"step":"advance","faces":[2,4]},
-            {"step":"skill","faces":[3],"answers":[{"title":"Pick a skill table (2 left)","pick":"service","press":"ok"}]},
-            {"step":"skill","offCursor":true,"faces":[2],"answers":[{"title":"Pick a skill table (1 left)","pick":"personalDevelopment","press":"ok"}]},
+            {"step":"skill","faces":[2],"answers":[{"title":"Pick a skill table (1 left)","pick":"personalDevelopment","press":"ok"}]},
             {"step":"ageing"},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"stay"}]},
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify"},
             {"step":"basic"},
-            {"step":"survival","faces":[3,2,1,5,4,3,2],"answers":[{"title":"Injury","set":{"g0":"endurance"},"press":"ok"},{"title":"Medical care","press":"yes"}]},
-            {"step":"skill","faces":[5],"answers":[{"title":"Pick a skill table (1 left)","pick":"assignment","press":"ok"}]},
+            {"step":"skill","faces":[5],"answers":[{"title":"Pick a skill table (1 left)","press":"ok","pick":"assignment"}]},
+            {"step":"survival","faces":[3,2,1,5,4,3,2],"answers":[{"title":"Injury","press":"ok","set":{"g0":"endurance"}},{"title":"Medical care","press":"yes"}]},
             {"step":"ageing"},
             {"step":"decide"},
             {"drop":"Compendium.mgt2.demo-items.Item.demoCareerQuayHd"},
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify","answers":[{"title":"Which assignment?","pick":"Stevedore","press":"ok"}]},
             {"step":"basic","answers":[{"title":"Pick one skill at level 0","pick":"Drive","press":"ok"}]},
+            {"step":"skill","faces":[3],"answers":[{"title":"Pick a skill table (1 left)","pick":"service","press":"ok"}]},
             {"step":"survival","faces":[4,4]},
             {"step":"event","faces":[4,4]},
             {"step":"commission"},
             {"step":"advance","faces":[4,4]},
-            {"step":"skill","faces":[3],"answers":[{"title":"Pick a skill table (2 left)","pick":"service","press":"ok"}]},
-            {"step":"skill","offCursor":true,"faces":[5],"answers":[{"title":"Pick a skill table (1 left)","pick":"personalDevelopment","press":"ok"}]},
+            {"step":"skill","faces":[5],"answers":[{"title":"Pick a skill table (1 left)","pick":"personalDevelopment","press":"ok"}]},
             {"step":"ageing"},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"leave"}]},
             {"press":"openClose"},

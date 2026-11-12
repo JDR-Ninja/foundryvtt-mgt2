@@ -932,7 +932,6 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     /** The far end, on the log — the settlement, and whatever the referee still owes it. */
     async #postSettlement({ title, where, line, roll, late, days, percent, docked, credits,
         revival, count }) {
-        const hold = this.actor.system.cargo;
         const nonHuman = MGT2Helper.signed(MGT2.LowBerthRevival.nonHumanDM);
         const content = await foundry.applications.handlebars.renderTemplate(
             "systems/mgt2/templates/chat/traffic-delivery.html", {
@@ -940,8 +939,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 where: game.i18n.format("MGT2.Trade.Arriving", { world: where }),
                 percent,
                 roll: roll?.total ?? 0,
-                ship: this.actor.name,
-                used: hold.used, capacity: hold.capacity
+                hold: MGT2Helper.holdMeter(this.actor, this.actor.system.cargo)
             });
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,

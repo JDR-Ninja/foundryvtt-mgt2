@@ -84,10 +84,12 @@ import { WorldActorSheet } from "./actors/world-sheet.js";
 import { StashActorSheet } from "./actors/stash-sheet.js";
 import { preloadHandlebarsTemplates } from "./templates.js";
 import {ChatHelper} from "./chatHelper.js";
+import { registerPopout, wireCard } from "./chat-cards.js";
+import { registerDamageTrayHooks } from "./damage-tray.js";
 import { migrateWorld } from "./migration.js";
 
-import { applyPalette, groundWindow, migrateDarkPreset, migrateLegacyTheme, registerSettings,
-  wirePalettePickers } from "./settings.js";
+import { applyChatGround, applyPalette, groundWindow, migrateDarkPreset, migrateLegacyTheme,
+  registerSettings, wirePalettePickers } from "./settings.js";
 import { applyGuideButton } from "./guide.js";
 
 function registerHandlebarsHelpers() {
@@ -406,6 +408,8 @@ Hooks.once("init", async function () {
   // The request card is a LIVE reading of the chat log, so it re-renders when a different message
   // arrives — which nothing in core does.
   registerRequestHooks();
+  registerDamageTrayHooks();
+  registerPopout();
   registerRequestControls();
   // The fourth door, and the only one that is not a control: `@Request[…]` inside an adventure's
   // text, as a link the reader may roll and a bubble a referee sends.
@@ -494,7 +498,12 @@ Hooks.once("init", async function () {
   Hooks.on("renderSettingsConfig", wirePalettePickers);
   Hooks.on("renderApplicationV2", (app, element) => groundWindow(element));
 
+  // Core re-pins the log light whenever it draws it, so the ground goes back on after every render.
+  Hooks.on("renderChatLog", () => applyChatGround());
+  Hooks.on("renderChatPopout", () => applyChatGround());
+
   Hooks.on("renderChatMessageHTML", (message, html, messageData) => {
+    wireCard(message, html);
     ChatHelper.setupCardListeners(message, html, messageData);
     // Core p.158's revival check is the ship's card, so the ship's sheet resolves it.
     html.querySelector('button[data-action="revival"]')

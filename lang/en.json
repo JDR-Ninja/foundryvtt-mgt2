@@ -304,7 +304,7 @@
       },
       "paletteGround": {
         "name": "Light or dark",
-        "hint": "Which of the palette's two faces the sheets and dialogs take. Foundry's own colour scheme decides by default; the other two values overrule it for this system alone."
+        "hint": "Which of the palette's two faces the sheets, dialogs and chat cards take. By default Foundry's own colour scheme decides, and the chat stays light as Foundry draws it; the other two values overrule both for this system alone."
       },
       "paletteChrome": {
         "name": "Dark window bar",
@@ -342,6 +342,13 @@
         "name": "World compendium packs",
         "hint": "Create the empty compendium packs your library will live in. They are created empty and stay yours to fill.",
         "label": "Create packs"
+      },
+      "chatCollapse": {
+        "name": "Fold older chat cards",
+        "hint": "A folded card keeps its head and its Effect; click the head to open or fold it again. With the middle choice a card folds once it is five minutes old.",
+        "never": "Never",
+        "older": "After five minutes",
+        "always": "Always"
       }
     },
     "Books": {
@@ -513,6 +520,10 @@
         "name": "Mortgage billed every four weeks",
         "hint": "The mortgage is a payment of the price ÷ 240 over forty years, and the book never says how many payments that is. The maintenance rule divides the year by twelve, so the system reads the term as 480 periods — a mortgage repays exactly twice the price. Switch this on to read the four-week maintenance period literally instead: thirteen a year, 520 payments, and 2.17 times the price."
       },
+      "classCRefinedFuel": {
+        "name": "Refined fuel at a Class C starport",
+        "hint": "A Class C starport usually sells refined fuel at Cr500 a ton as well as unrefined at Cr100, and the voyage screen lets the ship take either. Switch it off to keep the Core Rulebook's table, where Class C sells unrefined fuel only."
+      },
       "fleetBattles": {
         "name": "Fleet battles",
         "hint": "An alternative way to resolve a battle between fleets, where ships move as a unit and attacks are not rolled. Switching it on adds the fleet ship sheet to every spacecraft — the evaluation the chapter asks for before a battle. The crew skill it reads is stored on the ship and stays there either way."
@@ -545,6 +556,10 @@
       "wealth": {
         "name": "Abstract Wealth (WLT)",
         "hint": "Prints a WLT score and its DM beside the Traveller's cash, read off Credits through the Companion's own table. Credits stay tracked: the ladder reads them, it does not replace them."
+      },
+      "highCharacteristics": {
+        "name": "Characteristic DMs past 15",
+        "hint": "A score past 15 keeps climbing the DM ladder: +4 at 18–20, +5 at 21–23, and +1 more for every 3 after that. Switch it off to keep the Core Rulebook's table, where every score of 15 and up is DM+3."
       },
       "combatMishaps": {
         "name": "Combat mishaps",
@@ -1210,15 +1225,18 @@
         "Title": "Mustering out",
         "Heading": "Mustering out",
         "Ready": "{name} has left their last career and is ready to muster out.",
-        "Standing": {
-          "one": "{serving} of {total} still serving · {owed} Benefit roll owed",
-          "other": "{serving} of {total} still serving · {owed} Benefit rolls owed"
+        "ServingCount": {
+          "one": "{serving} of {total} is still serving",
+          "other": "{serving} of {total} are still serving"
+        },
+        "OwedCount": {
+          "one": "{n} Benefit roll owed",
+          "other": "{n} Benefit rolls owed"
         },
         "NobodyYet": "nobody on the roster",
         "NobodyHint": "Nobody is in creation. Put a Traveller on the roster from the creation screen first.",
         "Traveller": "Traveller",
         "Service": "Service",
-        "Rolls": "Rolls",
         "Cash": "Cash",
         "Pension": "Pension",
         "Taken": "Taken",
@@ -1233,6 +1251,7 @@
         },
         "PensionOf": "pension Cr{credits}/yr",
         "CashOf": "{taken} / {limit}",
+        "CashCap": "cap reached",
         "PerYear": "Cr{credits}/yr",
         "Shares": {
           "one": "{n} Ship Share",
@@ -1452,6 +1471,10 @@
         "ChainDeep": "{table} is not rolled: the chain of tables leading to it runs deeper than any printed one.",
         "DemotedFloor": "Not demoted: this ladder prints no rung below rank {rank}.",
         "SkillExcepted": "{skill} cannot be chosen here.",
+        "SkillNoGain": "{skill} is already held at level {level} or higher: taking it would gain nothing.",
+        "NothingToGain": "The Traveller already holds every skill offered here at that level or higher: there is nothing to take.",
+        "TableGate": "Needs {characteristic} {min}+",
+        "HeldLevels": "Current level: {skills}",
         "NoSkillPicked": "No skill was picked, so the row's throw is not made.",
         "PickBorrowed": "On which career's tables?",
         "PickBorrowedTable": "Pick a skill table",
@@ -1493,7 +1516,6 @@
         "NoSkillRolls": "No skill roll left to spend this term.",
         "NoSkillTables": "No skill table on this career is open to this Traveller.",
         "PickTable": "Pick a skill table ({n} left)",
-        "PickSkillRow": "Pick a row from the table",
         "IronMan": "{name} did not survive. Nothing has been deleted — the whole history is on the Traveller, and what happens to that document is the referee's decision.",
         "MaximumTerms": {
           "one": "The table's maximum of {n} term has been reached, so this career cannot be continued.",
@@ -1829,7 +1851,7 @@
         "module": "Modules"
       }
     },
-    "Specie": "Specie",
+    "Specie": "Species",
     "Species": "Species",
     "Gender": "Gender",
     "Sex": "Sex",
@@ -2912,6 +2934,7 @@
         "FuelGrade": {
           "refined": "Refined",
           "unrefined": "Unrefined",
+          "both": "Refined and unrefined",
           "none": "None"
         },
         "FuelPrice": "Per ton",
@@ -3513,6 +3536,7 @@
       "Target": "Target",
       "Visibility": "Visibility",
       "EffectOnAverage": "Effect on an average roll",
+      "Chance": "Chance of success with these dice",
       "NoModifiers": "no modifiers",
       "ActorDM": "Actor modifier",
       "ReactionDM": "Reactions",
@@ -3715,10 +3739,7 @@
         "ChainInto": "Chain into…",
         "ChainedFrom": "Chained from",
         "Damages": "Roll damages",
-        "DamagesWithEffect": "Roll damage — carries Effect {effect}",
         "Effect": "Effect",
-        "EffectVs": "Effect vs {target}",
-        "Ammo": "Magazine {left}/{magazine} · rounds spent {spent}",
         "FireModeBurst": {
           "one": "Burst — {score} to damage · {rounds} round",
           "other": "Burst — {score} to damage · {rounds} rounds"
@@ -3728,7 +3749,6 @@
           "other": "Full auto — attack {attack} of {attacks} · {rounds} rounds"
         },
         "FireModeFullAutoNext": "Full auto — attack {attack} of {attacks}",
-        "NoDifficulty": "no difficulty set",
         "PsiSpent": "PSI spent {points} · {left} left",
         "PsiSpentDamage": "PSI spent {points} · the reserve is empty and {damage} came off the damage chain",
         "OpposedLine": "Opposed — {source} {effect} · {outcome}",
@@ -3747,24 +3767,60 @@
         "ExtendedLost": "Extended action — the check failed; this round's work does not count towards the task.",
         "ExtendedRuined": "Extended action — the task is ruined and has to be started again from scratch.",
         "Success": "Success",
-        "Failure": "Failure"
+        "Failure": "Failure",
+        "Against": "vs {target}+",
+        "DiceDetail": "Dice detail",
+        "DamageFormula": "Damage {formula}",
+        "Targets": {
+          "one": "Target · {n}",
+          "other": "Targets · {n}"
+        }
       },
       "Damage": {
         "AP": "AP {score}",
         "Apply": "Apply {amount} — {transform}",
         "Facing": "Struck facing",
-        "ApplyToWhoever": "apply to whoever was hit",
         "Destructive": "Destructive ×10",
         "Floor": "Floor 1 point",
-        "Immune": "The selected target takes none of these",
         "LoPen": "Lo-Pen {score}",
         "PerDie": "1 per die",
-        "Scale": "Scale",
         "Stun": "Stun — END only",
-        "Type": "Type"
+        "Formula": "Formula",
+        "Application": "Application",
+        "Source": "Apply to",
+        "Targeted": "Targeted",
+        "Selected": "Selected",
+        "ApplyAll": {
+          "one": "Apply to {n}",
+          "other": "Apply to all {n}"
+        },
+        "ApplyTo": "Apply {amount} to {name}",
+        "Applied": "Applied",
+        "Met": "Prot {protection}",
+        "Group": "{n}× {name}",
+        "NoTargets": "No token targeted.",
+        "NoSelection": "No token selected.",
+        "Incapacitated": {
+          "one": "incapacitated {n} round",
+          "other": "incapacitated {n} rounds"
+        },
+        "Shutdown": {
+          "one": "ion — brain off {n} round",
+          "other": "ion — brain off {n} rounds"
+        },
+        "IonDrain": "ion — Power and Bandwidth −{n}",
+        "Disrupted": "ion — electronics disrupted"
       }
     },
     "Items": {
+      "Group": {
+        "Attack": "Attack",
+        "Ammunition": "Ammunition",
+        "Protection": "Protection",
+        "Wearing": "Wearing",
+        "Computer": "Computer",
+        "General": "General"
+      },
       "SelectAll": "(all)",
       "AddEntry": "Add Entry",
       "AddEvent": "Add Event",
@@ -4128,7 +4184,9 @@
         "AskTheSame": "Ask the same",
         "AskInitiative": "Ask for Initiative",
         "ResolverHint": "Working together (Core p.63): everyone else's Effect is chained into this Traveller's check. Click to move it, click again to clear it.",
-        "FootOpposed": "Opposed · {settled} settled · {standstill} standstill"
+        "FootOpposed": "Opposed · {settled} settled · {standstill} standstill",
+        "You": "You",
+        "Roll": "Roll"
       },
       "Prompt": {
         "Asked": "Asked by the referee",
@@ -5120,8 +5178,187 @@
     "Hazard": {
       "Name": "{trait} ({source})"
     },
+    "TraitGloss": {
+      "animal": {
+        "alarm": "when threatened, warns its kind: nearby kin flee, or 2D more join the fight",
+        "amphibious": "at home on land and in water; never drowns, moves freely when submerged",
+        "aquatic": "water-bound: moves freely underwater, but on land has Speed 0 and suffocates",
+        "armour": "hide, plates or fat give Protection {score}",
+        "bioelectricity": "every successful attack adds {damage} Stun damage",
+        "camouflaged": "blends into its surroundings: DM+2 on Stealth checks",
+        "clever": "learns simple controls like door panels: 10+ on 2D each time it watches",
+        "composite": "main + detachable parts (¼ of the Hits each); hurting a part spares the body",
+        "diseased": "infects on contact: {difficulty} END check, again every {interval} until passed",
+        "dispersed": "takes Reduced Damage (D3 dice) except from blades and fire",
+        "echolocation": "sonar sense works in total darkness but misses flat detail like writing",
+        "energy": "a being of pure energy; immune to conventional weapons",
+        "explosive": "burns or explodes in open air: {damage} to everything within {radius} m",
+        "fast-metabolism": "quick reactions: DM{dm} to Initiative",
+        "floater": "drifts on air currents; own movement only 1 m per round",
+        "flyer": "can fly, with a top Speed Band of {band}",
+        "gigantic": "deals and takes damage at Spacecraft scale; whale-sized or larger",
+        "gossamer": "almost structureless: Minimum Damage (one point per die) from most weapons",
+        "heightened-senses": "keen hearing and smell: DM+1 on Recon and Survival checks",
+        "ir-uv-vision": "sees in darkness; may notice emissions from Traveller equipment",
+        "large": "a huge target: ranged attacks against it get DM{dm}",
+        "mesmerise": "victim rolls INT at {difficulty} or stares, helpless, 1D rounds or until hurt",
+        "ornery": "attacks Travellers unpredictably on 8+ (2D), or 10+ if heavily outnumbered",
+        "particulate": "a swarm-like body: Minimum Damage (one point per die) except from fire",
+        "poison": "poisoned attacks: {difficulty} END check, again every {interval} until passed",
+        "psionic": "has PSI {score}; the referee picks its talents",
+        "rage": "driven to reckless, suicidal aggression; effects left to the referee",
+        "slow-metabolism": "sluggish reactions: DM{dm} to Initiative",
+        "small": "a hard target: ranged attacks against it get DM{dm}",
+        "strange": "unsettling: Difficult (10+) END check or roll on the Strange Animal table",
+        "tough": "takes Reduced Damage (D3 dice); once downed, may rally on 8+ (2D)",
+        "toxic": "noxious tissues: may spit, bleed or leave a hazardous carcass ({damage})",
+        "vacuum": "operates in hard vacuum, though it may not survive there indefinitely"
+      },
+      "biotech": {
+        "ectothermic": "cold-blooded: Range +25%, one Speed Band slower",
+        "endothermic": "warm-blooded: IR sensors gain DM+1 to detect it",
+        "fast-regenerator": "heals Structure and criticals every {interval} instead of daily",
+        "invertebrate": "no skeleton: Cost per Space -25%, Hull -10%",
+        "vertebrate": "internal skeleton; no special rules"
+      },
+      "robot": {
+        "acv": "rides an air cushion over land or water; needs a thin+ atmosphere",
+        "alarm": "raises an alert by sound, message or display, possibly to command",
+        "amphibious": "works on land and in water; submersion causes no water damage",
+        "armour": "built-in armour: Protection {score}",
+        "atv": "rough-terrain checks at DM+2; walkers pick through obstacles",
+        "flyer": "flies, up to the {band} Speed Band",
+        "hardened": "brain immune to ion weapons; radiation damage halved",
+        "heightened-senses": "keen hearing and sight: Recon and Survival checks at DM+1",
+        "invisible": "active camouflage across the spectrum: spotting it is at DM-4",
+        "ir-uv-vision": "sees in darkness across a wide spectrum; may spot gear emissions",
+        "ir-vision": "sees heat sources in the dark; blind to objects at ambient temperature",
+        "large": "big target: ranged attacks on it gain DM{dm}",
+        "seafarer": "operates on liquid surfaces; diving needs extra options",
+        "small": "small target: ranged attacks on it suffer DM{dm}",
+        "stealth": "evades radar and lidar with DM{score}; sensors also suffer the TL difference",
+        "thruster": "thrusters provide {acceleration} G of acceleration"
+      },
+      "shipWeapon": {
+        "ap": "ignores {score} of the target's Armour, before any damage multiple",
+        "auto": "fires in rapid bursts; ship-scale effect is left to the Referee",
+        "chain-reaction": "damage recurs each round at half (round down) until zero; no stacking",
+        "ion": "ignores Armour; drains Power and bandwidth, not Hull; /fib computers immune",
+        "orbital-bombardment": "Gunnery (ortillery); DM-12 vs manoeuvring ships; Blast 100 vs ground",
+        "orbital-strike": "Gunnery (ortillery); DM-8 vs manoeuvring ships; precise, no Blast",
+        "radiation": "2D×60 rads within 10 m of the hit; ship DM-1 per 10% Hull lost (40% shielded)",
+        "reductor": "each damage die cuts the target's Armour by 1 before damage lands",
+        "smart": "guided: DM+1 to +6 by TL over target; lost at Adjacent or Close range",
+        "weak": "the target's Armour counts double against its damage"
+      },
+      "species": {
+        "arm-antlers": "males only: seasonal arm antlers, Melee (natural) 1D+2 unless trimmed",
+        "armour": "tough body or scales give natural Protection {score}",
+        "big-and-tough": "END loss from damage or exertion halved; END doubled for exertion time",
+        "bite": "biting attack with Melee (natural), 1D+1 or 1D+2 by species",
+        "brachiator": "DM+2 to climb or swing, and to keep footing where handholds exist",
+        "burrowing": "digs through earth at 3 m and stone at 1 m, but not through metal ores",
+        "chameleon": "camouflage skin: DM+2 to Stealth; DM-2 to Deception when lying to kin",
+        "claustrophobic": "Difficult (10+) END check to enter enclosed spaces (DM-2 small, DM-4 cramped)",
+        "claws": "clawed hands: 3D damage; DM-2 with devices not built for them",
+        "close-combat-aversion": "+1 damage per die from impact weapons; DM-2 when fighting unarmed",
+        "cold-resistance": "resists cold (DM+4, or 1D less damage, by species); some take more from heat",
+        "coward": "threat within 50 m: BOL check (8+); fail, retreat or hide; pass, DM-2",
+        "deep-diver": "dives to {depth} m without risk and holds its breath for 10–15 minutes",
+        "dewclaw": "retractable dewclaw: Melee (natural) attack for 1D+2 damage",
+        "droyne-claws": "last-resort Melee (natural) 1D+2; DM+1 to anchor or keep a grip",
+        "echolocation": "senses by echo in darkness, water or soil out to {range} m",
+        "enhanced-senses": "DM+2 Recon by hearing or vibration; infrared 360° sight, DM-4 to sneak up on it",
+        "extra-limbs": "middle limbs work as arms or legs; used as legs, movement becomes 8 m",
+        "fast-metabolism": "quick reactions: DM{dm} to Initiative",
+        "gregarious": "needs company of its kind; alone, END 8+ to cope, then END 10+ each day",
+        "heightened-senses": "keener senses, usually DM+1 to Recon and Survival; details vary by species",
+        "hiver-physiology": "DM+2 vs disease and toxins, Protection +2, regrows small parts, dormant before death",
+        "hyper-acclimatisation": "adapts to new gravity in D3 weeks, or at once with the matching Athletics",
+        "large": "big target: ranged attacks against it gain DM{dm}",
+        "manual-dexterity": "fine motor control: DM+2 to checks that need delicate handwork",
+        "natural-weapons": "teeth, claws or the like: Melee (natural) attacks, damage by species",
+        "ozone-immunity": "breathes ozone safely and is immune to ozone poisoning",
+        "physical-coward": "threat within 25 m: RES check (8+); fail, cower or take cover; pass, DM-2",
+        "poor-senses": "one weaker sense: DM-1 to checks relying on it in some conditions",
+        "radiation-resistance": "the first 50 rads of every exposure are ignored",
+        "regeneration": "regrows a lost limb or tail in 6 months, hands or feet in 3, digits in 6 weeks",
+        "sense-of-smell-no-sense-of-smell": "most cannot smell; on 2D 9+ at maturity, smell exists but at DM-2",
+        "social-norms": "DM-1 to Deception, Gambler, Persuade and Streetwise checks",
+        "speed-of-hoof": "three minor actions all spent moving grant a fourth, also for movement",
+        "stability": "DM+2 to stay steady or move in hard conditions, and to climb with holds",
+        "structured-mind": "permanent Boon to Admin and Science checks; Bane if tested for psionics",
+        "succour-syndrome": "a cetacean's distress call: fail a 12+ check, INT and EDU fall to 0, it rushes to help",
+        "swimmer": "swims at a speed of {speed} m",
+        "temperature-resistance": "takes 1 less damage from environmental heat and cold",
+        "wings": "1D at casting: 1–3 vestigial, 4–5 small, 6 large; small or large give Flight 0"
+      },
+      "vehicle": {
+        "afv": "combat build: armour cap ×3, Hull +50%, one Speed Band slower",
+        "atv": "Off-Road terrain without penalty; Rough terrain at only -1",
+        "off-roader": "Off-Road terrain without penalty; Rough terrain at -2",
+        "open-topped": "no roof armour, sides give riders half cover; fire in any direction",
+        "open-vehicle": "riders sit exposed: the vehicle gives no cover, but they fire any way",
+        "responsive": "gains or sheds Speed Bands at double the usual rate",
+        "tracked": "crosses Off-Road and Rough terrain without penalty",
+        "unresponsive": "gains or sheds Speed Bands at half the usual rate",
+        "vtol": "vertical take-off and landing: needs only a pad or clearing, no runway"
+      },
+      "weapon": {
+        "accurate": "DM+2 to attack rolls inside its Range, DM+1 at Long or Extreme Range",
+        "ap": "ignores {score} of the target's Protection (not vs. Spacecraft scale)",
+        "artillery": "can fire indirectly at unseen targets at DM-2; scatters if not located",
+        "auto": "burst adds {score} to damage, full auto makes that many attacks; no aiming",
+        "blast": "a hit damages all within {radius} m; no Dodge, but cover and diving help",
+        "bulky": "below STR 9, attack rolls take a DM of STR DM minus 1",
+        "burn": "keeps dealing half its initial damage each round for its Burn duration",
+        "corrosion-resistant": "cuts the Protection a Corrosive attack strips each round by its score",
+        "corrosive": "damage repeats each round at 1D less; armour loses 1 Protection per die",
+        "dangerous": "explodes on attack Effect -5 or worse, hurting the firer; weapon ruined",
+        "destructive": "rolled damage is multiplied by 10; printed as DD in the Damage score",
+        "emissions-signature": "sensor checks to detect or locate it use the {level} signature DM",
+        "fire": "sets the target alight: damage every round until it goes out on 2D 8+",
+        "hazardous": "DM{score} on the Malfunction table if it malfunctions or is penetrated",
+        "inaccurate": "attack rolls take a negative DM against distant targets",
+        "incendiary": "can ignite materials it hits; its Incendiary score adds to the check",
+        "ion": "robots: brain off for rounds equal to damage, armour no help; Hardened immune",
+        "lo-pen": "the target's armour Protection counts ×{multiplier}",
+        "one-use": "spent after a single use, then useless",
+        "physical-signature": "locating it by noise and flash uses the {level} signature DM",
+        "radiation": "2D×20 rads to the target; if Destructive, to all within 10 m as well",
+        "ramshackle": "attack rolls and Malfunction table results take DM{score}",
+        "scope": "after aiming, shots past 100 m are no longer forced to Extreme Range",
+        "silent": "DM-6 to attempts to locate it by sound",
+        "slow-loader": {
+          "one": "reloading takes {actions} minor action",
+          "other": "reloading takes {actions} minor actions; a Gun Combat (8+) Effect cuts this"
+        },
+        "smart": "attack DM is its TL minus the target's TL, from +1 up to +6",
+        "smasher": "its attacks cannot be parried",
+        "sonic": "END check DM{score} when hit; failure's Effect is a DM for 1D rounds",
+        "spread": "within its base range, an attack roll may add DM+{score}",
+        "stun": "damage to END only; END 0 incapacitates; an hour's rest heals it all",
+        "unreliable": "roll an extra 1D with each use: {threshold} or less is a malfunction",
+        "very-bulky": "below STR 12, attack rolls take a DM of STR DM minus 2",
+        "very-dangerous": "explodes on attack Effect -3 or worse, hurting the firer; weapon ruined",
+        "zero-g": "fires in low or zero gravity with no Athletics (dexterity) check"
+      }
+    },
+    "TraitLevel": {
+      "minimal": "minimal",
+      "small": "small",
+      "low": "low",
+      "normal": "normal",
+      "high": "high",
+      "very-high": "very high",
+      "extreme": "extreme",
+      "12-hours": "12 hours",
+      "6-hours": "6 hours",
+      "3-hours": "3 hours"
+    },
     "TraitSlot": {
       "acceleration": "Acceleration",
+      "actions": "Actions",
       "band": "Speed Band",
       "condition": "Condition",
       "conditionalScore": "Conditional Score",
@@ -5492,6 +5729,7 @@
       "Aboard": "Aboard",
       "OverTank": "Over tank",
       "InTheTank": "In the tank",
+      "GradeTaken": "Grade taken on",
       "BurnsLeaving": "Burns {burn} t, leaving {after}.",
       "ShortBy": "Needs {burn} t and holds {have} — {short} t short.",
       "Jump": "Jump",
@@ -5862,7 +6100,6 @@
         "Consigned": "Consignment taken",
         "Delivered": "Consignment delivered",
         "Ashore": "Passengers ashore",
-        "Lot": "{tons} t of {goods} at {percent}% of a Cr{base} base — Cr{credits}.",
         "FeeAdded": "A local broker's {rate}% added Cr{fee} — Cr{credits} paid in all.",
         "FeeTaken": "A local broker's {rate}% took Cr{fee} — Cr{credits} received.",
         "Passengers": "{n} × {grade} — Cr{credits} collected.",
@@ -5887,7 +6124,10 @@
         "Hold": "{ship} · hold {used} / {capacity} t",
         "Over": "over capacity — a lot cannot be broken up",
         "RevivalCheck": "Revival check",
-        "RevivalNonHuman": "A non-human passenger takes DM{dm} on it."
+        "RevivalNonHuman": "A non-human passenger takes DM{dm} on it.",
+        "Price": "Price",
+        "Percent": "{percent}%",
+        "Reading": "{dm} = {total} → {percent}%"
       },
       "Errors": {
         "LotFailed": "{goods} could not be stowed aboard: the crew has already paid, so add the lot to the hold by hand.",
@@ -5961,7 +6201,8 @@
       "BerthLineLow": {
         "one": "{low} of {n} low berth",
         "other": "{low} of {n} low berths"
-      }
+      },
+      "TotalPrice": "Total Cr"
     },
     "WorldBases": {
       "naval": "Naval base",
@@ -6397,6 +6638,16 @@
       "improved": "Improved",
       "enhanced": "Enhanced",
       "advanced": "Advanced"
+    },
+    "DifficultyName": {
+      "Simple": "Simple",
+      "Easy": "Easy",
+      "Routine": "Routine",
+      "Average": "Average",
+      "Difficult": "Difficult",
+      "VeryDifficult": "Very Difficult",
+      "Formidable": "Formidable",
+      "Impossible": "Impossible"
     }
   },
   "TYPES.Combatant.missileSalvo": "Missile salvo",

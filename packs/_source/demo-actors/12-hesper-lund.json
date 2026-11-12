@@ -3761,7 +3761,7 @@
           },
           {
             "age": 22,
-            "description": "You are seconded to the mainland signals school for a season. Gain one level of Electronics, and one extra roll on a skill table this term. · Electronics 1 · Skill roll"
+            "description": "You are seconded to the mainland signals school for a season. Gain one level of Electronics, and one extra roll on a skill table this term. · Electronics 2 · Skill roll"
           },
           {
             "age": 26,
@@ -3825,15 +3825,15 @@
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "You are seconded to the mainland signals school for a season. Gain one level of Electronics, and one extra roll on a skill table this term. · Electronics 1 · Skill roll · Advanced to rank 2, and one extra skill roll. · Skill roll: Electronics 2 · Skill roll: Advocate 1 · Skill roll: Carouse 1"
+            "note": "Skill roll: Electronics 1 · You are seconded to the mainland signals school for a season. Gain one level of Electronics, and one extra roll on a skill table this term. · Electronics 2 · Skill roll · Skill roll: Advocate 1 · Advanced to rank 2, and one extra skill roll. · Skill roll: Carouse 1"
           },
           {
             "term": 3,
@@ -3844,22 +3844,22 @@
             "closed": true,
             "kind": "",
             "outcomes": [
-              "advanced",
-              "skillRoll"
+              "skillRoll",
+              "advanced"
             ],
             "steps": [
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "A freighter drifts into the exclusion zone with its transponder dark. Turn it back with Pilot (8+) on the picket boats, Gunner (9+) on the platforms or Electronics (7+) on the watch: succeed, and gain a Contact and DM+1 held for your next Advancement roll; fail, and its master becomes a Rival. · The row's own check passed. · Contact ×1 · Pending: DM. · Advanced to rank 3, and one extra skill roll. · Skill roll: Investigate 1 · Skill roll: Admin 1"
+            "note": "Skill roll: Investigate 1 · A freighter drifts into the exclusion zone with its transponder dark. Turn it back with Pilot (8+) on the picket boats, Gunner (9+) on the platforms or Electronics (7+) on the watch: succeed, and gain a Contact and DM+1 held for your next Advancement roll; fail, and its master becomes a Rival. · The row's own check passed. · Contact ×1 · Pending: DM. · Advanced to rank 3, and one extra skill roll. · Skill roll: Admin 1"
           },
           {
             "term": 4,
@@ -3870,23 +3870,23 @@
             "closed": true,
             "kind": "",
             "outcomes": [
-              "advanced",
               "skillRoll",
+              "advanced",
               "aged"
             ],
             "steps": [
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "The Lord Warden reads your file twice. Your next Commission or Advancement roll passes without dice, when you choose to spend it. · Pending: Automatic success. · Advanced to rank 4, and one extra skill roll. · Skill roll: Leadership 2 · Skill roll: Admin 2 · Ageing roll 0: Strength −1"
+            "note": "Skill roll: Leadership 2 · The Lord Warden reads your file twice. Your next Commission or Advancement roll passes without dice, when you choose to spend it. · Pending: Automatic success. · Advanced to rank 4, and one extra skill roll. · Skill roll: Admin 2 · Ageing roll 0: Strength −1"
           },
           {
             "term": 5,
@@ -3897,23 +3897,23 @@
             "closed": true,
             "kind": "",
             "outcomes": [
-              "advanced",
               "skillRoll",
+              "advanced",
               "aged"
             ],
             "steps": [
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "A board of inquiry sits over a boat lost on your watch. Give evidence against your captain, and gain an Enemy and DM+2 held for your next Advancement roll; refuse, and the Guard lets you go. · Enemy ×1 · Pending: DM. · Advanced to rank 5, and one extra skill roll. · Skill roll: Tactics 2 · Skill roll: Endurance +1 · Ageing roll 0: Strength −1"
+            "note": "Skill roll: Tactics 2 · A board of inquiry sits over a boat lost on your watch. Give evidence against your captain, and gain an Enemy and DM+2 held for your next Advancement roll; refuse, and the Guard lets you go. · Enemy ×1 · Pending: DM. · Advanced to rank 5, and one extra skill roll. · Skill roll: Endurance +1 · Ageing roll 0: Strength −1"
           },
           {
             "term": 6,
@@ -3925,23 +3925,23 @@
             "kind": "",
             "outcomes": [
               "elected",
-              "advanced",
               "skillRoll",
+              "advanced",
               "aged"
             ],
             "steps": [
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "Anagathics: Cr75,000 · Anagathics started. · The Guard sends you up to the orbital yard for a season of courses. Make an EDU check (8+): pass, and gain one level in a skill you already hold. · The row's own check passed. · Electronics 3 · Advanced to rank 6, and one extra skill roll. · Skill roll: Recon 1 · Skill roll: Medic 1 · Ageing roll 3: —"
+            "note": "Anagathics: Cr75,000 · Anagathics started. · Skill roll: Recon 1 · The Guard sends you up to the orbital yard for a season of courses. Make an EDU check (8+): pass, and gain one level in a skill you already hold. · The row's own check passed. · Electronics 3 · Advanced to rank 6, and one extra skill roll. · Skill roll: Medic 1 · Ageing roll 3: —"
           }
         ],
         "track": {
@@ -4745,58 +4745,58 @@
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify"},
             {"step":"basic"},
+            {"step":"skill","faces":[1],"answers":[{"title":"Pick a skill table (1 left)","pick":"assignment","press":"ok"}]},
             {"step":"survival","faces":[4,4]},
             {"step":"event","faces":[5,5]},
             {"step":"commission"},
+            {"step":"skill","faces":[4],"answers":[{"title":"Pick a skill table (1 left)","pick":"officer","press":"ok"}]},
             {"step":"advance","faces":[4,4]},
-            {"step":"skill","faces":[1],"answers":[{"title":"Pick a skill table (3 left)","pick":"assignment","press":"ok"}]},
-            {"step":"skill","offCursor":true,"faces":[4],"answers":[{"title":"Pick a skill table (2 left)","pick":"officer","press":"ok"}]},
-            {"step":"skill","offCursor":true,"faces":[5],"answers":[{"title":"Pick a skill table (1 left)","pick":"personalDevelopment","press":"ok"}]},
+            {"step":"skill","faces":[5],"answers":[{"title":"Pick a skill table (1 left)","pick":"personalDevelopment","press":"ok"}]},
             {"step":"ageing"},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"stay"}]},
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify"},
             {"step":"basic"},
+            {"step":"skill","faces":[2],"answers":[{"title":"Pick a skill table (1 left)","pick":"assignment","press":"ok"}]},
             {"step":"survival","faces":[3,5]},
             {"step":"event","faces":[4,5,4,4]},
             {"step":"commission"},
             {"step":"advance","faces":[3,4]},
-            {"step":"skill","faces":[2],"answers":[{"title":"Pick a skill table (2 left)","pick":"assignment","press":"ok"}]},
-            {"step":"skill","offCursor":true,"faces":[4],"answers":[{"title":"Pick a skill table (1 left)","pick":"advancedEducation","press":"ok"}]},
+            {"step":"skill","faces":[4],"answers":[{"title":"Pick a skill table (1 left)","pick":"advancedEducation","press":"ok"}]},
             {"step":"ageing"},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"stay"}]},
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify"},
             {"step":"basic"},
+            {"step":"skill","faces":[1],"answers":[{"title":"Pick a skill table (1 left)","pick":"officer","press":"ok"}]},
             {"step":"survival","faces":[5,2]},
             {"step":"event","faces":[5,6]},
             {"step":"commission"},
             {"step":"advance","answers":[{"press":"yes"}]},
-            {"step":"skill","faces":[1],"answers":[{"title":"Pick a skill table (2 left)","pick":"officer","press":"ok"}]},
-            {"step":"skill","offCursor":true,"faces":[4],"answers":[{"title":"Pick a skill table (1 left)","pick":"assignment","press":"ok"}]},
+            {"step":"skill","faces":[4],"answers":[{"title":"Pick a skill table (1 left)","pick":"assignment","press":"ok"}]},
             {"step":"ageing","faces":[2,2],"answers":[{"title":"Ageing","set":{"g0":"strength"},"press":"ok"}]},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"stay"}]},
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify"},
             {"step":"basic"},
+            {"step":"skill","faces":[3],"answers":[{"title":"Pick a skill table (1 left)","pick":"officer","press":"ok"}]},
             {"step":"survival","faces":[4,3]},
             {"step":"event","faces":[1,2],"answers":[{"press":"yes"}]},
             {"step":"commission"},
             {"step":"advance","faces":[3,3]},
-            {"step":"skill","faces":[3],"answers":[{"title":"Pick a skill table (2 left)","pick":"officer","press":"ok"}]},
-            {"step":"skill","offCursor":true,"faces":[3],"answers":[{"title":"Pick a skill table (1 left)","pick":"personalDevelopment","press":"ok"}]},
+            {"step":"skill","faces":[3],"answers":[{"title":"Pick a skill table (1 left)","pick":"personalDevelopment","press":"ok"}]},
             {"step":"ageing","faces":[2,3],"answers":[{"title":"Ageing","set":{"g0":"strength"},"press":"ok"}]},
             {"press":"lossAdd","on":"sheet","faces":[4],"answers":[{"title":"Record a permanent change","set":{"source":"ageingCrisisCare","term":5,"age":38,"billed":true,"note":"The council's surgeons, called to the watch floor."},"press":"ok"}]},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"stay"}]},
             {"step":"elect","faces":[5,5,3],"answers":[{"title":"Start-of-term elections","press":"yes"}]},
             {"step":"qualify"},
             {"step":"basic"},
+            {"step":"skill","faces":[3],"answers":[{"title":"Pick a skill table (1 left)","pick":"assignment","press":"ok"}]},
             {"step":"survival","faces":[4,4,3,4]},
             {"step":"event","faces":[2,3,5,4],"answers":[{"pick":"Electronics","press":"ok"}]},
             {"step":"commission"},
             {"step":"advance","faces":[4,4]},
-            {"step":"skill","faces":[3],"answers":[{"title":"Pick a skill table (2 left)","pick":"assignment","press":"ok"}]},
-            {"step":"skill","offCursor":true,"faces":[5],"answers":[{"title":"Pick a skill table (1 left)","pick":"advancedEducation","press":"ok"}]},
+            {"step":"skill","faces":[5],"answers":[{"title":"Pick a skill table (1 left)","pick":"advancedEducation","press":"ok"}]},
             {"step":"ageing","faces":[4,4]},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"leave"}]},
             {"press":"openClose"},

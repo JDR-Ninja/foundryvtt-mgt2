@@ -1,4 +1,17 @@
 <section class="mgt2-panel active mgt2-npc-panel">
+{{! One attack: the card is the roll, the damage its figure, the range and traits its pills. }}
+{{#*inline "attackCard"}}
+<li class="atk" data-item-id="{{weapon._id}}">
+	<button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice" aria-hidden="true"></i><span>{{weapon.name}}</span></button>
+	<span class="pills"><span data-tooltip="{{localize 'MGT2.Items.Range'}}">{{weapon.range}}</span>{{#each weapon.traitList as |trait|}}<span>{{trait}}</span>{{/each}}</span>
+	<span class="dmg" data-tooltip="{{localize 'MGT2.Items.Damage'}}">{{weapon.system.damage}}</span>
+	<span class="acts">
+		<a class="play-only" data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.View'}}"><i class="fas fa-eye"></i></a>
+		<a class="edit-only" data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.EditWeapon'}}"><i class="fas fa-edit"></i></a>
+		<a data-action="itemDelete" data-tooltip="{{localize 'MGT2.Actor.DeleteWeapon'}}"><i class="fas fa-trash"></i></a>
+	</span>
+</li>
+{{/inline}}
 
 	{{#if isCreature}}
 	{{! Fight or Flight (Core p.90). The lookup keys on the pattern ALONE: the published statblocks
@@ -10,6 +23,7 @@
 		</div>
 		{{#if npc.reaction}}
 		<div class="reaction">
+			{{#if npc.reaction.thresholds}}
 			<dl class="statline" data-derived="system.reaction">
 				<div class="stat{{#unless npc.reaction.flee}} none{{/unless}}">
 					<dt>{{localize 'MGT2.Actor.npc.Flee'}}</dt>
@@ -26,16 +40,22 @@
 				</div>
 				{{/if}}
 			</dl>
+			{{/if}}
 			<button type="button" class="btn hot" data-action="reactionRoll">{{localize 'MGT2.Actor.npc.ReactionRoll'}}</button>
 		</div>
-		{{#if npc.reaction.fleeGate}}<p class="hint">{{localize npc.reaction.fleeGate}}</p>{{/if}}
-		{{#if npc.reaction.gate}}<p class="hint">{{localize npc.reaction.gate}}</p>{{/if}}
+		{{#if (or npc.reaction.fleeGate npc.reaction.gate)}}
+		<ul class="gates">
+			{{#if npc.reaction.fleeGate}}<li><i class="fa-solid fa-person-running" aria-hidden="true"></i>{{localize npc.reaction.fleeGate}}</li>{{/if}}
+			{{#if npc.reaction.gate}}<li><i class="fa-solid fa-crosshairs" aria-hidden="true"></i>{{localize npc.reaction.gate}}</li>{{/if}}
+		</ul>
+		{{/if}}
 		{{else}}
 		<p class="hint">{{localize 'MGT2.Actor.npc.NoPattern'}}</p>
 		{{/if}}
 	</div>
 
-	<div class="block">
+	{{! In play the header's stat line carries ground, swim and fly, and its meta line the note. }}
+	<div class="block edit-only">
 		<div class="sect"><h3>{{localize 'MGT2.Actor.npc.Speed'}}</h3></div>
 		<dl class="statline grid play-only" data-derived="system.speed">
 			<div class="stat"><dt>{{localize 'MGT2.Actor.npc.SpeedGround'}}</dt><dd>{{system.speed.ground}}<i>m</i></dd></div>
@@ -81,7 +101,7 @@
 
 	{{! Attacks are `weapon` Items flagged `natural`, never an array: an array would fork the roll
 	    path, the chat card and the damage application, all of which already work. }}
-	<div class="block">
+	<div class="block{{#if npc.vacant.attacks}} edit-only{{/if}}">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.npc.Attacks'}}</h3>
 			<span class="count">{{naturals.length}}</span>
@@ -89,26 +109,9 @@
 			<a class="add edit-only" data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{#if naturals.length}}
-		<table class="rows">
-			<thead>
-				<tr>
-					<th>{{localize 'MGT2.Items.Name'}}</th>
-					<th class="c">{{localize 'MGT2.Items.Damage'}}</th>
-					<th class="c">{{localize 'MGT2.Items.Range'}}</th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody>
-				{{#each naturals as |weapon|}}
-				<tr data-item-id="{{weapon._id}}">
-					<td><button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button>{{#if weapon.subInfo}}<span class="sub">{{weapon.subInfo}}</span>{{/if}}</td>
-					<td class="c num">{{weapon.system.damage}}</td>
-					<td class="c num">{{weapon.range}}</td>
-					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
-				</tr>
-				{{/each}}
-			</tbody>
-		</table>
+		<ul class="attacks">
+			{{#each naturals as |weapon|}}{{> attackCard weapon=weapon}}{{/each}}
+		</ul>
 		{{/if}}
 	</div>
 
@@ -118,18 +121,9 @@
 			<h3>{{localize 'MGT2.Items.Weapons'}}</h3>
 			<span class="count">{{carried.length}}</span>
 		</div>
-		<table class="rows">
-			<tbody>
-				{{#each carried as |weapon|}}
-				<tr data-item-id="{{weapon._id}}">
-					<td><button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button></td>
-					<td class="c num">{{weapon.system.damage}}</td>
-					<td class="c num">{{weapon.range}}</td>
-					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
-				</tr>
-				{{/each}}
-			</tbody>
-		</table>
+		<ul class="attacks">
+			{{#each carried as |weapon|}}{{> attackCard weapon=weapon}}{{/each}}
+		</ul>
 	</div>
 	{{/if}}
 
@@ -148,7 +142,7 @@
 				{{#each skills as |skill|}}
 				<tr class="drag-item-list" data-item-id="{{skill._id}}">
 					<td><button type="button" class="roll" data-action="roll" data-roll="skill" data-roll-skill="{{skill._id}}">{{skill.rollName}}</button></td>
-					<td class="r num">{{skill.system.level}}</td>
+					<td class="r num"><span class="lvl{{#unless skill.system.level}} zero{{/unless}}"><span class="pips" aria-hidden="true">{{#each skill.pips as |on|}}<i class="{{#if on}}on{{/if}}"></i>{{/each}}</span>{{skill.system.level}}</span></td>
 					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditSkill" del="MGT2.Actor.DeleteSkill"}}
 				</tr>
 				{{/each}}
@@ -157,7 +151,7 @@
 		{{/if}}
 	</div>
 
-	{{! The shared code row: NAME(param, param) and no definition text. }}
+	{{! The shared code row: NAME(param, param), each beside its rule gloss in play mode. }}
 	{{> systems/mgt2/templates/items/blocks/traits.html}}
 
 	{{! A creature is not somebody, so it names no species. }}
@@ -186,13 +180,22 @@
 	</dl>
 	{{/if}}
 
-	<div class="block">
+	<div class="block{{#if npc.vacant.biography}} edit-only{{/if}}">
 		<div class="sect"><h3>{{localize 'MGT2.Actor.Biography'}}</h3></div>
-		<prose-mirror name="system.biography" value="{{system.biography}}" toggled></prose-mirror>
+		<prose-mirror name="system.biography" value="{{system.biography}}" toggled>{{{enriched.biography}}}</prose-mirror>
 	</div>
 
-	<div class="block">
+	<div class="block{{#if npc.vacant.notes}} edit-only{{/if}}">
 		<div class="sect"><h3>{{localize 'MGT2.Actor.Notes'}}</h3></div>
-		<prose-mirror name="system.notes" value="{{system.notes}}" toggled></prose-mirror>
+		<prose-mirror name="system.notes" value="{{system.notes}}" toggled>{{{enriched.notes}}}</prose-mirror>
 	</div>
+
+	{{! What play mode folded, in one line: an empty block is a heading and nothing else. }}
+	{{#if (or npc.vacant.attacks npc.vacant.biography npc.vacant.notes)}}
+	<p class="vacant play-only">
+		{{#if npc.vacant.attacks}}<span>{{localize 'MGT2.Actor.npc.Attacks'}} <b>0</b></span>{{/if}}
+		{{#if npc.vacant.biography}}<a data-action="toggleSheetMode"><i class="fa-solid fa-plus" aria-hidden="true"></i>{{localize 'MGT2.Actor.Biography'}}</a>{{/if}}
+		{{#if npc.vacant.notes}}<a data-action="toggleSheetMode"><i class="fa-solid fa-plus" aria-hidden="true"></i>{{localize 'MGT2.Actor.Notes'}}</a>{{/if}}
+	</p>
+	{{/if}}
 </section>

@@ -304,7 +304,7 @@
       },
       "paletteGround": {
         "name": "Claro u oscuro",
-        "hint": "Cuál de las dos caras de la paleta toman las hojas y las ventanas. Por defecto lo decide el esquema de color de Foundry; los otros dos valores lo anulan solo para este sistema."
+        "hint": "Cuál de las dos caras de la paleta toman las hojas, los diálogos y las cartas del chat. Por defecto decide el esquema de colores de Foundry, y el chat queda claro como lo dibuja Foundry; los otros dos valores anulan ambos solo para este sistema."
       },
       "paletteChrome": {
         "name": "Barra de ventana oscura",
@@ -342,6 +342,13 @@
         "name": "Compendios del mundo",
         "hint": "Crea los compendios vacíos donde vivirá tu biblioteca.",
         "label": "Crear compendios"
+      },
+      "chatCollapse": {
+        "name": "Plegar las cartas antiguas",
+        "hint": "Una carta plegada conserva su cabecera y su Efecto; haz clic en la cabecera para abrirla o volver a plegarla. Con la opción del medio, una carta se pliega a los cinco minutos.",
+        "never": "Nunca",
+        "older": "Pasados cinco minutos",
+        "always": "Siempre"
       }
     },
     "Books": {
@@ -513,6 +520,10 @@
         "name": "Hipoteca facturada cada cuatro semanas",
         "hint": "La hipoteca es un pago del precio ÷ 240 a lo largo de cuarenta años, y el libro nunca dice cuántos pagos son. La regla de mantenimiento divide el año entre doce, así que el sistema lee el plazo como 480 periodos — una hipoteca devuelve exactamente el doble del precio. Enciéndela para leer literalmente el periodo de mantenimiento de cuatro semanas: trece al año, 520 pagos y 2,17 veces el precio."
       },
+      "classCRefinedFuel": {
+        "name": "Combustible refinado en un astropuerto de clase C",
+        "hint": "Un astropuerto de clase C suele vender combustible refinado a Cr500 por tonelada además del sin refinar a Cr100, y la pantalla de viaje deja que la nave cargue cualquiera de los dos. Apágala para mantener la tabla del Core Rulebook, donde la clase C solo vende combustible sin refinar."
+      },
       "fleetBattles": {
         "name": "Batallas entre flotas",
         "hint": "Una forma alternativa de resolver una batalla entre flotas, donde las naves se mueven como una unidad y los ataques no se tiran. Encenderla añade la hoja de nave de flota a cada astronave — la evaluación que el capítulo pide antes de una batalla. La habilidad de tripulación que lee se guarda en la nave y ahí se queda en cualquier caso."
@@ -545,6 +556,10 @@
       "wealth": {
         "name": "Riqueza abstracta (RIQ)",
         "hint": "Imprime una puntuación de RIQ y su MD junto al efectivo del Viajero, leída de los Créditos con la tabla del propio Companion. Los Créditos se siguen llevando: la escala los lee, no los sustituye."
+      },
+      "highCharacteristics": {
+        "name": "MD de característica por encima de 15",
+        "hint": "Una puntuación por encima de 15 sigue subiendo en la escala de MD: +4 de 18 a 20, +5 de 21 a 23 y +1 más por cada 3 adicionales. Apágala para mantener la tabla del Core Rulebook, donde toda puntuación de 15 o más es MD+3."
       },
       "combatMishaps": {
         "name": "Percances de combate",
@@ -1210,15 +1225,18 @@
         "Title": "Licenciamiento",
         "Heading": "Licenciamiento",
         "Ready": "{name} ha dejado su última carrera y está listo para licenciarse.",
-        "Standing": {
-          "one": "{serving} de {total} siguen sirviendo · {owed} tirada de Beneficio pendiente",
-          "other": "{serving} de {total} siguen sirviendo · {owed} tiradas de Beneficio pendientes"
+        "ServingCount": {
+          "one": "{serving} de {total} sigue sirviendo",
+          "other": "{serving} de {total} siguen sirviendo"
+        },
+        "OwedCount": {
+          "one": "{n} tirada de Beneficio pendiente",
+          "other": "{n} tiradas de Beneficio pendientes"
         },
         "NobodyYet": "nadie en la lista",
         "NobodyHint": "No hay nadie en creación. Pon primero a un Viajero en la lista desde la pantalla de creación.",
         "Traveller": "Viajero",
         "Service": "Servicio",
-        "Rolls": "Tiradas",
         "Cash": "Efectivo",
         "Pension": "Pensión",
         "Taken": "Tomado",
@@ -1233,6 +1251,7 @@
         },
         "PensionOf": "pensión Cr{credits}/año",
         "CashOf": "{taken} / {limit}",
+        "CashCap": "límite alcanzado",
         "PerYear": "Cr{credits}/año",
         "Shares": {
           "one": "{n} Participación de nave",
@@ -1452,6 +1471,10 @@
         "ChainDeep": "{table} no se tira: la cadena de tablas que lleva a ella es más larga que cualquiera impresa.",
         "DemotedFloor": "Sin degradación: este escalafón no imprime ningún rango por debajo del rango {rank}.",
         "SkillExcepted": "{skill} no puede elegirse aquí.",
+        "SkillNoGain": "{skill} ya está adquirida a nivel {level} o superior: tomarla no aportaría nada.",
+        "NothingToGain": "El Viajero ya posee cada habilidad ofrecida aquí a ese nivel o superior: no hay nada que tomar.",
+        "TableGate": "Requiere {characteristic} {min}+",
+        "HeldLevels": "Nivel actual: {skills}",
         "NoSkillPicked": "No se eligió ninguna habilidad, así que la tirada de la línea no se hace.",
         "PickBorrowed": "¿En las tablas de qué carrera?",
         "PickBorrowedTable": "Elige una tabla de habilidades",
@@ -1493,7 +1516,6 @@
         "NoSkillRolls": "No queda ninguna tirada de habilidad que gastar este periodo.",
         "NoSkillTables": "Ninguna tabla de habilidades de esta carrera está abierta a este Viajero.",
         "PickTable": "Elige una tabla de habilidades (quedan {n})",
-        "PickSkillRow": "Elige una línea de la tabla",
         "IronMan": "{name} no sobrevivió. No se ha borrado nada — toda la historia está en el Viajero, y lo que le ocurra a ese documento es decisión del árbitro.",
         "MaximumTerms": {
           "one": "Se ha alcanzado el máximo de {n} periodo de la mesa, así que esta carrera no puede continuar.",
@@ -2912,6 +2934,7 @@
         "FuelGrade": {
           "refined": "Refinado",
           "unrefined": "Sin refinar",
+          "both": "Refinado y sin refinar",
           "none": "Ninguno"
         },
         "FuelPrice": "Por tonelada",
@@ -3513,6 +3536,7 @@
       "Target": "Objetivo",
       "Visibility": "Visibilidad",
       "EffectOnAverage": "Efecto en una tirada media",
+      "Chance": "Probabilidad de éxito con estos dados",
       "NoModifiers": "sin modificadores",
       "ActorDM": "Modificador del actor",
       "ReactionDM": "Reacciones",
@@ -3715,10 +3739,7 @@
         "ChainInto": "Encadenar con…",
         "ChainedFrom": "Encadenada desde",
         "Damages": "Tirar el daño",
-        "DamagesWithEffect": "Tirar el daño — lleva Efecto {effect}",
         "Effect": "Efecto",
-        "EffectVs": "Efecto contra {target}",
-        "Ammo": "Cargador {left}/{magazine} · cartuchos gastados {spent}",
         "FireModeBurst": {
           "one": "Ráfaga — {score} al daño · {rounds} cartucho",
           "other": "Ráfaga — {score} al daño · {rounds} cartuchos"
@@ -3728,7 +3749,6 @@
           "other": "Automático — ataque {attack} de {attacks} · {rounds} cartuchos"
         },
         "FireModeFullAutoNext": "Automático — ataque {attack} de {attacks}",
-        "NoDifficulty": "sin dificultad fijada",
         "PsiSpent": "PSI gastados {points} · quedan {left}",
         "PsiSpentDamage": "PSI gastados {points} · la reserva está vacía y {damage} salieron de la cadena de daño",
         "OpposedLine": "Opuesta — {source} {effect} · {outcome}",
@@ -3747,24 +3767,60 @@
         "ExtendedLost": "Acción prolongada — la tirada falló; el trabajo de este asalto no cuenta para la tarea.",
         "ExtendedRuined": "Acción prolongada — la tarea se ha echado a perder y hay que empezarla de cero.",
         "Success": "Éxito",
-        "Failure": "Fallo"
+        "Failure": "Fallo",
+        "Against": "contra {target}+",
+        "DiceDetail": "Detalle de los dados",
+        "DamageFormula": "Daño {formula}",
+        "Targets": {
+          "one": "Objetivo · {n}",
+          "other": "Objetivos · {n}"
+        }
       },
       "Damage": {
         "AP": "AP {score}",
         "Apply": "Aplicar {amount} — {transform}",
         "Facing": "Cara golpeada",
-        "ApplyToWhoever": "aplicar a quien haya sido golpeado",
         "Destructive": "Destructivo ×10",
         "Floor": "Suelo de 1 punto",
-        "Immune": "El objetivo seleccionado no recibe nada de esto",
         "LoPen": "Lo-Pen {score}",
         "PerDie": "1 por dado",
-        "Scale": "Escala",
         "Stun": "Aturdimiento — solo RES",
-        "Type": "Tipo"
+        "Formula": "Fórmula",
+        "Application": "Aplicación",
+        "Source": "Aplicar a",
+        "Targeted": "Objetivos",
+        "Selected": "Seleccionados",
+        "ApplyAll": {
+          "one": "Aplicar a {n}",
+          "other": "Aplicar a los {n}"
+        },
+        "ApplyTo": "Aplicar {amount} a {name}",
+        "Applied": "Aplicado",
+        "Met": "Prot {protection}",
+        "Group": "{n}× {name}",
+        "NoTargets": "Ninguna ficha como objetivo.",
+        "NoSelection": "Ninguna ficha seleccionada.",
+        "Incapacitated": {
+          "one": "incapacitado {n} asalto",
+          "other": "incapacitado {n} asaltos"
+        },
+        "Shutdown": {
+          "one": "iónico — cerebro apagado {n} asalto",
+          "other": "iónico — cerebro apagado {n} asaltos"
+        },
+        "IonDrain": "iónico — Potencia y Ancho de banda −{n}",
+        "Disrupted": "iónico — electrónica perturbada"
       }
     },
     "Items": {
+      "Group": {
+        "Attack": "Ataque",
+        "Ammunition": "Munición",
+        "Protection": "Protección",
+        "Wearing": "Uso",
+        "Computer": "Ordenador",
+        "General": "General"
+      },
       "SelectAll": "(todos)",
       "AddEntry": "Añadir entrada",
       "AddEvent": "Añadir suceso",
@@ -4128,7 +4184,9 @@
         "AskTheSame": "Pedir lo mismo",
         "AskInitiative": "Pedir Iniciativa",
         "ResolverHint": "Trabajando juntos (Core p.63): el Efecto de todos los demás se encadena a la tirada de este Viajero. Pulsa para moverlo, pulsa otra vez para quitarlo.",
-        "FootOpposed": "Opuestas · {settled} resueltas · {standstill} en tablas"
+        "FootOpposed": "Opuestas · {settled} resueltas · {standstill} en tablas",
+        "You": "Tú",
+        "Roll": "Tirar"
       },
       "Prompt": {
         "Asked": "Pedida por el árbitro",
@@ -5120,8 +5178,187 @@
     "Hazard": {
       "Name": "{trait} ({source})"
     },
+    "TraitGloss": {
+      "animal": {
+        "alarm": "si se ve amenazado, alerta a los suyos: los cercanos huyen, o 2D más se unen a la lucha",
+        "amphibious": "a gusto en tierra y en el agua; nunca se ahoga y se mueve libremente sumergido",
+        "aquatic": "ligado al agua: se mueve libre sumergido, pero en tierra tiene Velocidad 0 y se asfixia",
+        "armour": "piel, placas o grasa le dan Protección {score}",
+        "bioelectricity": "cada ataque con éxito añade {damage} de daño por aturdimiento",
+        "camouflaged": "se confunde con su entorno: MD+2 en las tiradas de Sigilo",
+        "clever": "aprende controles simples como paneles de puertas: 10+ en 2D cada vez que observa",
+        "composite": "principal + partes separables (¼ de los Impactos cada una); dañar una no afecta al cuerpo",
+        "diseased": "contagia por contacto: tirada de RES {difficulty}, otra cada {interval} hasta superarla",
+        "dispersed": "sufre Daño Reducido (dados D3) salvo de armas de filo y del fuego",
+        "echolocation": "su sonar funciona en total oscuridad, pero no capta detalles planos como la escritura",
+        "energy": "un ser de energía pura; inmune a las armas convencionales",
+        "explosive": "arde o estalla al aire libre: {damage} a todo en un radio de {radius} m",
+        "fast-metabolism": "reacciones rápidas: MD{dm} a la Iniciativa",
+        "floater": "deriva con las corrientes de aire; por sí mismo solo se mueve 1 m por asalto",
+        "flyer": "puede volar, con una Banda de Velocidad máxima de {band}",
+        "gigantic": "inflige y recibe daño a escala de Astronave; del tamaño de una ballena o mayor",
+        "gossamer": "casi sin estructura: Daño Mínimo (un punto por dado) de la mayoría de las armas",
+        "heightened-senses": "oído y olfato agudos: MD+1 en tiradas de Reconocimiento y Supervivencia",
+        "ir-uv-vision": "ve en la oscuridad; puede notar las emisiones del equipo de los Viajeros",
+        "large": "un objetivo enorme: los ataques a distancia contra él reciben MD{dm}",
+        "mesmerise": "víctima: tirada de INT {difficulty} o queda absorta e indefensa 1D asaltos o hasta ser herida",
+        "ornery": "ataca a los Viajeros sin previo aviso con 8+ (2D), o 10+ si está en clara inferioridad",
+        "particulate": "cuerpo como un enjambre: Daño Mínimo (un punto por dado) salvo del fuego",
+        "poison": "ataques envenenados: tirada de RES {difficulty}, otra cada {interval} hasta superarla",
+        "psionic": "tiene PSI {score}; el árbitro elige sus talentos",
+        "rage": "impulsado a una agresividad temeraria y suicida; efectos a criterio del árbitro",
+        "slow-metabolism": "reacciones lentas: MD{dm} a la Iniciativa",
+        "small": "un objetivo difícil: los ataques a distancia contra él reciben MD{dm}",
+        "strange": "perturbador: tirada de RES Difícil (10+) o tirar en la tabla Strange Animal",
+        "tough": "sufre Daño Reducido (dados D3); una vez abatido, puede rehacerse con 8+ (2D)",
+        "toxic": "tejidos nocivos: puede escupir, sangrar o dejar un cadáver peligroso ({damage})",
+        "vacuum": "funciona en el vacío absoluto, aunque quizá no sobreviva allí indefinidamente"
+      },
+      "biotech": {
+        "ectothermic": "de sangre fría: Autonomía +25%, una Banda de Velocidad menos",
+        "endothermic": "de sangre caliente: los sensores IR ganan MD+1 para detectarlo",
+        "fast-regenerator": "cura Estructura y críticos cada {interval} en lugar de a diario",
+        "invertebrate": "sin esqueleto: Coste por Espacio -25%, Casco -10%",
+        "vertebrate": "esqueleto interno; sin reglas especiales"
+      },
+      "robot": {
+        "acv": "avanza sobre colchón de aire en tierra o agua; requiere atmósfera Tenue o más densa",
+        "alarm": "da la alarma con sonido, mensaje o pantalla, quizá también al mando",
+        "amphibious": "funciona en tierra y en el agua; sumergirse no le causa daños por agua",
+        "armour": "armadura integrada: Protección {score}",
+        "atv": "tiradas de terreno accidentado con MD+2; los andadores sortean los obstáculos",
+        "flyer": "vuela, hasta la Banda de Velocidad {band}",
+        "hardened": "cerebro inmune a las armas iónicas; daño por radiación a la mitad",
+        "heightened-senses": "oído y vista agudos: tiradas de Reconocimiento y Supervivencia con MD+1",
+        "invisible": "camuflaje activo en todo el espectro: detectarlo tiene MD-4",
+        "ir-uv-vision": "ve en la oscuridad en un amplio espectro; puede detectar emisiones de equipos",
+        "ir-vision": "ve fuentes de calor en la oscuridad; ciego a objetos a temperatura ambiente",
+        "large": "objetivo grande: los ataques a distancia contra él ganan MD{dm}",
+        "seafarer": "opera sobre superficies líquidas; sumergirse requiere opciones adicionales",
+        "small": "objetivo pequeño: los ataques a distancia contra él sufren MD{dm}",
+        "stealth": "elude radar y lidar con MD{score}; los sensores también sufren la diferencia de NT",
+        "thruster": "los propulsores dan {acceleration} G de aceleración"
+      },
+      "shipWeapon": {
+        "ap": "ignora {score} del Blindaje del objetivo, antes de cualquier multiplicador de daño",
+        "auto": "dispara ráfagas rápidas; su efecto a escala de Astronave lo decide el árbitro",
+        "chain-reaction": "el daño se repite cada asalto a la mitad (redondeando abajo) hasta cero; no se acumula",
+        "ion": "ignora Blindaje; agota Potencia y ancho de banda, no Casco; computadoras /fib inmunes",
+        "orbital-bombardment": "Artillería (ortillería); MD-12 contra naves en maniobra; Blast 100 contra tierra",
+        "orbital-strike": "Artillería (ortillería); MD-8 contra naves en maniobra; preciso, sin Blast",
+        "radiation": "2D×60 rads hasta 10 m del impacto; nave: MD-1 por 10% de Casco perdido (40% si blindada)",
+        "reductor": "cada dado de daño reduce en 1 el Blindaje del objetivo antes de aplicar el daño",
+        "smart": "guiado: MD+1 a +6 según su NT sobre el del objetivo; se pierde en Adyacente o Cercana",
+        "weak": "el Blindaje del objetivo cuenta doble contra su daño"
+      },
+      "species": {
+        "arm-antlers": "solo machos: astas de brazo estacionales, Combate CaC (naturales) 1D+2 si no se recortan",
+        "armour": "cuerpo duro o escamas dan Protección natural {score}",
+        "big-and-tough": "pérdida de RES por daño o esfuerzo a la mitad; RES doble para la duración del esfuerzo",
+        "bite": "ataque de mordisco con Combate CaC (naturales), 1D+1 o 1D+2 según la especie",
+        "brachiator": "MD+2 para trepar o balancearse, y para no perder pie donde haya asideros",
+        "burrowing": "excava la tierra a 3 m y la piedra a 1 m, pero no las menas metálicas",
+        "chameleon": "piel de camuflaje: MD+2 a Sigilo; MD-2 a Subterfugio al mentir a los suyos",
+        "claustrophobic": "tirada de RES Difícil (10+) para entrar en espacios cerrados (MD-2 pequeños, MD-4 angostos)",
+        "claws": "manos con garras: 3D de daño; MD-2 con aparatos no diseñados para ellas",
+        "close-combat-aversion": "recibe +1 de daño por dado de armas de impacto; MD-2 al luchar desarmado",
+        "cold-resistance": "MD+4 contra el frío o 1D menos de daño por frío según especie; algunas sufren más calor",
+        "coward": "amenaza a 50 m o menos: tirada de BOL (8+); fallo, retirarse o esconderse; éxito, MD-2",
+        "deep-diver": "se sumerge hasta {depth} m sin riesgo y aguanta la respiración 10–15 minutos",
+        "dewclaw": "garra retráctil: ataque de Combate CaC (naturales) que causa 1D+2 de daño",
+        "droyne-claws": "Combate CaC (naturales) 1D+2 como último recurso; MD+1 para anclarse o no soltarse",
+        "echolocation": "percibe por eco en la oscuridad, el agua o el suelo hasta {range} m",
+        "enhanced-senses": "MD+2 a Reconocimiento por oído o vibración; visión infrarroja 360°, MD-4 para sorprenderlo",
+        "extra-limbs": "los miembros medios sirven de brazos o piernas; como piernas, el movimiento pasa a 8 m",
+        "fast-metabolism": "reacciones rápidas: MD{dm} a las tiradas de Iniciativa",
+        "gregarious": "necesita compañía de los suyos; a solas, RES 8+ para aguantar, luego RES 10+ cada día",
+        "heightened-senses": "suele dar MD+1 a Reconocimiento y Supervivencia; algunos ven mal a oscuras o con brillo",
+        "hiver-physiology": "MD+2 ante enfermedad y toxinas; Protección +2; regenera partes menores; letargo antes de morir",
+        "hyper-acclimatisation": "se adapta a una nueva gravedad en D3 semanas, o de inmediato con el Atletismo adecuado",
+        "large": "objetivo grande: los ataques a distancia contra él ganan MD{dm}",
+        "manual-dexterity": "control motor fino: MD+2 a las tiradas que requieren trabajo manual delicado",
+        "natural-weapons": "dientes, garras o similares, con Combate CaC (naturales); daño según la especie",
+        "ozone-immunity": "respira ozono sin peligro y es inmune al envenenamiento por ozono",
+        "physical-coward": "amenaza a 25 m o menos: tirada de RSL (8+); fallo, encogerse o cubrirse; éxito, MD-2",
+        "poor-senses": "un sentido más débil: MD-1 a las tiradas que dependen de él en ciertas condiciones",
+        "radiation-resistance": "se ignoran los primeros 50 rads de cada exposición",
+        "regeneration": "regenera un miembro o cola perdidos en 6 meses, manos o pies en 3, dedos en 6 semanas",
+        "sense-of-smell-no-sense-of-smell": "la mayoría carece de olfato; con 9+ en 2D al madurar, lo tiene pero con MD-2",
+        "social-norms": "MD-1 a las tiradas de Subterfugio, Apostar, Persuadir y Callejear",
+        "speed-of-hoof": "tres Acciones Menores dedicadas a moverse dan una cuarta, también para movimiento",
+        "stability": "MD+2 para mantenerse firme o moverse en condiciones duras, y para trepar con asideros",
+        "structured-mind": "Ventaja permanente en Administración y Ciencia; Desventaja en la prueba psiónica",
+        "succour-syndrome": "ante un cetáceo que pide auxilio, si falla 12+, INT y EDU caen a 0 y acude nadando",
+        "swimmer": "nada a una velocidad de {speed} m",
+        "temperature-resistance": "sufre 1 punto menos de daño por calor y frío ambientales",
+        "wings": "1D al asignar casta: 1–3 vestigiales, 4–5 pequeñas, 6 grandes; las no vestigiales dan Flight 0"
+      },
+      "vehicle": {
+        "afv": "diseño de combate: tope de blindaje ×3, Casco +50%, una Banda de Velocidad menos",
+        "atv": "terreno Fuera de carretera sin penalización; terreno Accidentado con solo -1",
+        "off-roader": "terreno Fuera de carretera sin penalización; terreno Accidentado con -2",
+        "open-topped": "sin blindaje de techo, los costados dan media cobertura; disparo en todas direcciones",
+        "open-vehicle": "ocupantes expuestos: el vehículo no da cobertura, pero disparan en cualquier dirección",
+        "responsive": "gana o pierde Bandas de Velocidad al doble del ritmo habitual",
+        "tracked": "cruza terreno Fuera de carretera y Accidentado sin penalización",
+        "unresponsive": "gana o pierde Bandas de Velocidad a la mitad del ritmo habitual",
+        "vtol": "despegue y aterrizaje vertical: solo necesita una plataforma o un claro, no una pista"
+      },
+      "weapon": {
+        "accurate": "MD+2 a las tiradas de ataque dentro de su Alcance, MD+1 a Alcance largo o extremo",
+        "ap": "ignora {score} de la Protección del objetivo (no contra escala de Astronave)",
+        "artillery": "fuego indirecto a objetivos no visibles con MD-2; se desvía si no están localizados",
+        "auto": "la ráfaga suma {score} al daño, el automático hace tantos ataques; sin apuntar",
+        "blast": "un impacto daña a todos hasta {radius} m; sin Esquivar, pero ayudan la cobertura y Cubrirse",
+        "bulky": "con FUE inferior a 9, las tiradas de ataque reciben un MD igual al MD de FUE menos 1",
+        "burn": "sigue causando la mitad de su daño inicial cada asalto durante su duración de Burn",
+        "corrosion-resistant": "resta su puntuación a la Protección que un ataque Corrosive quita cada asalto",
+        "corrosive": "el daño se repite cada asalto con 1D menos; la armadura pierde 1 de Protección por dado",
+        "dangerous": "estalla con un Efecto de ataque de -5 o peor, hiriendo al tirador; arma inutilizada",
+        "destructive": "el daño tirado se multiplica por 10; se indica como DD en el Daño",
+        "emissions-signature": "las tiradas de sensores para detectarla o localizarla usan el MD de firma {level}",
+        "fire": "prende fuego al objetivo: daño cada asalto hasta que se apague con 8+ en 2D",
+        "hazardous": "MD{score} en la tabla de Averías si sufre una avería o es penetrada",
+        "inaccurate": "las tiradas de ataque reciben un MD negativo contra objetivos lejanos",
+        "incendiary": "puede incendiar materiales que alcanza; su puntuación de Incendiary suma a la tirada",
+        "ion": "robots: cerebro apagado tantos asaltos como daño; armadura inútil; Hardened, inmune",
+        "lo-pen": "la Protección de la armadura del objetivo cuenta ×{multiplier}",
+        "one-use": "se agota tras un solo uso y queda inservible",
+        "physical-signature": "localizarla por el ruido y el fogonazo usa el MD de firma {level}",
+        "radiation": "2D×20 rads al objetivo; si es Destructive, también a todos a 10 m o menos",
+        "ramshackle": "MD{score} a las tiradas de ataque y a los resultados de la tabla de Averías",
+        "scope": "tras apuntar, los disparos más allá de 100 m ya no pasan a Alcance extremo",
+        "silent": "MD-6 a los intentos de localizarla por el sonido",
+        "slow-loader": {
+          "one": "recargar lleva {actions} Acción Menor",
+          "other": "recargar lleva {actions} Acciones Menores; el Efecto de Armas de Fuego (8+) las reduce"
+        },
+        "smart": "el MD de ataque es su NT menos el NT del objetivo, de +1 a +6",
+        "smasher": "sus ataques no pueden pararse",
+        "sonic": "al ser alcanzado, tirada de RES con MD{score}; si falla, el Efecto es MD por 1D asaltos",
+        "spread": "puede sumar MD+{score} a las tiradas de ataque dentro del alcance base",
+        "stun": "daño solo a RES; RES 0 incapacita; una hora de descanso lo cura todo",
+        "unreliable": "tira 1D adicional en cada uso: {threshold} o menos es una avería",
+        "very-bulky": "con FUE inferior a 12, las tiradas de ataque reciben un MD igual al MD de FUE menos 2",
+        "very-dangerous": "estalla con un Efecto de ataque de -3 o peor, hiriendo al tirador; arma inutilizada",
+        "zero-g": "dispara en gravedad baja o nula sin tirada de Atletismo (destreza)"
+      }
+    },
+    "TraitLevel": {
+      "minimal": "mínima",
+      "small": "pequeña",
+      "low": "baja",
+      "normal": "normal",
+      "high": "alta",
+      "very-high": "muy alta",
+      "extreme": "extrema",
+      "12-hours": "12 horas",
+      "6-hours": "6 horas",
+      "3-hours": "3 horas"
+    },
     "TraitSlot": {
       "acceleration": "Aceleración",
+      "actions": "Acciones",
       "band": "Banda de Velocidad",
       "condition": "Condición",
       "conditionalScore": "Puntuación condicional",
@@ -5492,6 +5729,7 @@
       "Aboard": "A bordo",
       "OverTank": "Por encima del tanque",
       "InTheTank": "En el tanque",
+      "GradeTaken": "Combustible cargado",
       "BurnsLeaving": "Quema {burn} t y deja {after}.",
       "ShortBy": "Necesita {burn} t y tiene {have} — faltan {short} t.",
       "Jump": "Salto",
@@ -5862,7 +6100,6 @@
         "Consigned": "Consignación tomada",
         "Delivered": "Consignación entregada",
         "Ashore": "Pasajeros desembarcados",
-        "Lot": "{tons} t de {goods} al {percent}% de una base de Cr{base} — Cr{credits}.",
         "FeeAdded": "El {rate}% de un bróker local añadió Cr{fee} — Cr{credits} pagados en total.",
         "FeeTaken": "El {rate}% de un bróker local se llevó Cr{fee} — Cr{credits} recibidos.",
         "Passengers": "{n} × {grade} — Cr{credits} cobrados.",
@@ -5887,7 +6124,10 @@
         "Hold": "{ship} · bodega {used} / {capacity} t",
         "Over": "por encima de la capacidad — un lote no se puede dividir",
         "RevivalCheck": "Tirada de reanimación",
-        "RevivalNonHuman": "Un pasajero no humano recibe MD{dm} en ella."
+        "RevivalNonHuman": "Un pasajero no humano recibe MD{dm} en ella.",
+        "Price": "Precio",
+        "Percent": "{percent}%",
+        "Reading": "{dm} = {total} → {percent}%"
       },
       "Errors": {
         "LotFailed": "{goods} no se pudieron estibar a bordo: la tripulación ya ha pagado, así que añade el lote a la bodega a mano.",
@@ -5961,7 +6201,8 @@
       "BerthLineLow": {
         "one": "{low} de {n} litera criogénica",
         "other": "{low} de {n} literas criogénicas"
-      }
+      },
+      "TotalPrice": "Cr total"
     },
     "WorldBases": {
       "naval": "Base naval",
@@ -6397,6 +6638,16 @@
       "improved": "Mejorado",
       "enhanced": "Avanzado",
       "advanced": "Superior"
+    },
+    "DifficultyName": {
+      "Simple": "Sencillo",
+      "Easy": "Fácil",
+      "Routine": "Rutinario",
+      "Average": "Normal",
+      "Difficult": "Difícil",
+      "VeryDifficult": "Muy Difícil",
+      "Formidable": "Formidable",
+      "Impossible": "Imposible"
     }
   },
   "TYPES.Combatant.missileSalvo": "Salva de misiles",

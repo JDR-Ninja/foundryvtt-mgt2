@@ -564,14 +564,20 @@ function cardContext(request) {
     const stateLabel = (request.state === "open") ? (request.parent.author?.name ?? "")
         : game.i18n.localize(`MGT2.Request.State.${request.state}`);
 
+    const rung = (showTarget && MGT2.DifficultyTargets[request.difficulty]) ? {
+        word: game.i18n.localize(`MGT2.DifficultyName.${request.difficulty}`),
+        target: MGT2.DifficultyTargets[request.difficulty] } : null;
     const context = {
         who: [game.i18n.localize("MGT2.Request.Card"), stateLabel].filter(part => part).join(" · "),
         demand: (request.skillMode === "none") ? game.i18n.localize("MGT2.Request.SkillMode.none")
             : (((request.skillMode === "open") || !request.skill)
                 ? game.i18n.localize("MGT2.Request.Chat.AnySkill") : request.skill),
-        target: showTarget ? MGT2Helper.getDifficultyDisplay(request.difficulty) : null,
+        rung,
         reason: withdrawn ? game.i18n.localize("MGT2.Request.Chat.Withdrawn") : request.flavor,
+        quote: !withdrawn,
         lateLabel: game.i18n.localize("MGT2.Request.Chat.Late"),
+        youLabel: game.i18n.localize("MGT2.Request.Chat.You"),
+        rollLabel: game.i18n.localize("MGT2.Request.Chat.Roll"),
         resolverHint: game.i18n.localize("MGT2.Request.Chat.ResolverHint"),
         terms: [],
         lines: [],
@@ -580,7 +586,7 @@ function cardContext(request) {
 
     if ( withdrawn ) {
         if ( again ) {
-            context.buttons.push({ action: "requestAskAgain",
+            context.buttons.push({ action: "requestAskAgain", icon: "fa-solid fa-rotate-right",
                 label: game.i18n.localize("MGT2.Request.Chat.AskAgain") });
         }
         return context;
@@ -589,7 +595,7 @@ function cardContext(request) {
     context.terms.push({ label: charsLabel(request.chars) });
     if ( request.stance !== "none" ) {
         context.terms.push({ label: game.i18n.localize(MGT2.Stance[request.stance]),
-            negative: request.stance === "bane" });
+            negative: request.stance === "bane", badge: request.stance });
     }
     if ( request.timeframe !== "Normal" ) {
         const dm = MGT2Helper.getTimeframeDM(request.timeframe);
@@ -647,6 +653,9 @@ function cardContext(request) {
         const line = {
             id: read.id,
             name: read.name,
+            img: actor?.img ?? null,
+            you: read.user === game.user.id,
+            status: read.status,
             detail: lineDetail(request, read, actor, showTarget,
                 verdicts.get(read.id) ?? pairingOf(request, reading, read)),
             mine,
@@ -669,6 +678,9 @@ function cardContext(request) {
     context.lines.sort((a, b) => Number(a.resolver) - Number(b.resolver));
 
     context.foot = footOf(request, reading, answered, chain);
+    // One segment per row in the order the card lists them, each answer in its own band's tone.
+    context.progress = context.lines.map(line => line.value ? (line.tone ?? "edge")
+        : ((line.status === "declined") ? "off" : ""));
     // Core p.62 is resolved per answer and always has been; what the card adds is the count, and
     // only once an answer has actually carried one — there is no control and no mode.
     if ( verdicts.size ) {
@@ -681,23 +693,23 @@ function cardContext(request) {
         // Nothing auto-concludes: -1 and 0 are referee decisions (p.61), so the last die is where
         // the referee's job starts.
         if ( request.state === "open" ) {
-            context.buttons.push({ action: "requestConclude",
+            context.buttons.push({ action: "requestConclude", icon: "fa-solid fa-flag-checkered",
                 label: game.i18n.localize("MGT2.Request.Chat.Conclude"),
                 hot: reading.every(read => read.status !== "waiting") });
         }
         if ( again ) {
-            context.buttons.push({ action: "requestAskAgain",
+            context.buttons.push({ action: "requestAskAgain", icon: "fa-solid fa-rotate-right",
                 label: game.i18n.localize("MGT2.Request.Chat.AskAgain") });
         }
         if ( request.state === "open" ) {
-            context.buttons.push({ action: "requestWithdraw",
+            context.buttons.push({ action: "requestWithdraw", icon: "fa-solid fa-ban",
                 label: game.i18n.localize("MGT2.Request.Chat.Withdraw") });
         }
     }
     // Declining is not an error and costs no permission: it posts a message of its own.
     else if ( (request.state === "open")
         && reading.some(read => (read.user === game.user.id) && (read.status === "waiting")) ) {
-        context.buttons.push({ action: "requestDecline",
+        context.buttons.push({ action: "requestDecline", icon: "fa-solid fa-hand",
             label: game.i18n.localize("MGT2.Request.Chat.Decline") });
     }
     return context;
@@ -917,7 +929,7 @@ export async function postRequest(system, { whisper = [], content } = {}) {
         author: game.user.id,
         type: REQUEST,
         whisper,
-        content: content ?? `<div class="mgt2 theme-light card"><p class="bare">${
+        content: content ?? `<div class="mgt2 card"><p class="bare">${
             Handlebars.Utils.escapeExpression(recentLabel(system))}</p></div>`,
         system
     });
@@ -1017,7 +1029,9 @@ export function injectAskTheSame(message, html) {
     }
     const button = document.createElement("button");
     button.dataset.action = "askTheSame";
-    button.textContent = game.i18n.localize("MGT2.Request.Chat.AskTheSame");
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-clone";
+    button.append(icon, game.i18n.localize("MGT2.Request.Chat.AskTheSame"));
     button.addEventListener("click", event => {
         event.preventDefault();
         // Core p.61 records the assumed Average on the ANSWER, so a check that assumed one seeds no

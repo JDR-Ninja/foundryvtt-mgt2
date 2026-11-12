@@ -1,14 +1,10 @@
-{{! Pinned light like every other card: Foundry hard-codes `themed theme-light` on ol.chat-log.
-
-    The far end of a route. `credit-split.html` posted the payment a moment earlier and named every
-    share, so what this adds is the settlement — the fare owed, what a late arrival cost, and the
-    check a low passenger still owes the referee. }}
-<div class="mgt2 theme-light card stoptraffic">
-	<div class="chd">
-		<div class="what">
-			<h4>{{localize title}}</h4>
-			<span class="tgt">{{where}}</span>
-		</div>
+{{! The ground is the log's. The far end of a route: `credit-split.html` posted the payment a moment
+    earlier and named every share, so what this adds is the settlement — the fare owed, what a late
+    arrival cost, and the check a low passenger still owes the referee. }}
+<div class="mgt2 card stoptraffic">
+	<div class="xh">
+		<div class="xk">{{where}}</div>
+		<h4>{{localize title}}</h4>
 	</div>
 	<p class="bare">{{line}}</p>
 	{{! Core p.241: "Failing to deliver cargo on time reduces the amount paid by 1D+4 x 10%" —
@@ -20,9 +16,7 @@
 	{{#if revival}}
 	<p class="bare hot">{{plural 'MGT2.Trade.Card.Revival' count}}</p>
 	<p class="bare">{{localize 'MGT2.Trade.Card.RevivalNonHuman' dm=nonHuman}}</p>
-	<div class="cbtns"><button data-action="revival">{{localize 'MGT2.Trade.Card.RevivalCheck'}}</button></div>
 	{{/if}}
-	<div class="pipe">
-		<span>{{localize 'MGT2.Trade.Card.Hold' ship=ship used=used capacity=capacity}}</span>
-	</div>
+	{{> "systems/mgt2/templates/chat/parts/hold.html"}}
+	{{#if revival}}<div class="cbtns"><button data-action="revival"><i class="fa-solid fa-heart-pulse"></i>{{localize 'MGT2.Trade.Card.RevivalCheck'}}</button></div>{{/if}}
 </div>

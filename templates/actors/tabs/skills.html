@@ -1,8 +1,8 @@
 <section class="tab mgt2-panel{{#if tabs.sidebar.skills.active}} active{{/if}}" data-group="sidebar" data-tab="skills">
 	{{> systems/mgt2/templates/actors/parts/species.html}}
 
-	{{! The same code row the item sheets use — one shared field, one component. No definition text:
-	    the registry ships names, parameter shapes, families and citations only. }}
+	{{! The same code row the item sheets use — one shared field, one component, and in play mode
+	    each chip beside its rule gloss from the language files. }}
 	{{> systems/mgt2/templates/items/blocks/traits.html}}
 
 	<div class="block">
@@ -111,7 +111,8 @@
 				{{#each skills as |skill|}}
 				<tr class="drag-item-list" data-item-id="{{skill._id}}">
 					<td><button type="button" class="roll" data-action="roll" data-roll="skill" data-roll-skill="{{skill._id}}">{{skill.rollName}}</button></td>
-					<td class="c num">{{skill.system.level}}</td>
+					{{! Four pips beside the level, filled up to it; past four the number alone carries it. }}
+					<td class="c num"><span class="lvl{{#unless skill.system.level}} zero{{/unless}}"><span class="pips" aria-hidden="true">{{#each skill.pips as |on|}}<i class="{{#if on}}on{{/if}}"></i>{{/each}}</span>{{skill.system.level}}</span></td>
 					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditSkill" del="MGT2.Actor.DeleteSkill"}}
 				</tr>
 				{{/each}}

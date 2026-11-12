@@ -174,8 +174,18 @@ export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplica
             // The manner of leaving, which four separate rules read rather than the fact.
             exitMode: done ? ChargenScreen.#label(MGT2.CareerExitModes, timeline.at(-1)?.career.system.exitMode) : "",
             cells: new Map(timeline.map(row => [row.index, ChargenScreen.#cell(row, frame)])),
+            step: done ? null : ChargenScreen.#step(actor),
             selected: false
         };
+    }
+
+    /** Where the term loop stands: its step, that step's place in the sequence, and the share already behind it. */
+    static #step(actor) {
+        const sequence = ChargenTerm.sequence(actor);
+        const at = sequence.indexOf(ChargenTerm.current(actor));
+        if ( at < 0 ) return null;
+        return { label: ChargenScreen.#label(MGT2.CreationSteps, sequence[at]),
+            position: `${at + 1}/${sequence.length}`, progress: Math.round((100 * at) / sequence.length) };
     }
 
     /** One cell: the career, the assignment and the term's own typed facts. */
@@ -217,14 +227,18 @@ export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplica
     static #rows(columns) {
         const last = columns.reduce((furthest, column) =>
             Math.max(furthest, column.lastTerm, column.done ? 0 : column.cursor), 0);
+        const chosen = columns.find(column => column.selected);
         return Array.fromRange(last, 1).map(n => ({
             n,
+            now: !!chosen && !chosen.done && (n === chosen.cursor),
             cells: columns.map(column => {
+                const at = { id: column.id, sel: column.selected };
                 const cell = column.cells.get(n);
-                if ( cell ) return { ...cell, id: column.id, state: (n === column.cursor) && !column.done ? "now" : "" };
-                if ( !column.done && (n === column.cursor) ) return { id: column.id, state: "now", live: true };
-                if ( column.done && (n > column.lastTerm) ) return { id: column.id, state: "gone", gone: true };
-                return { id: column.id, state: "" };
+                const now = !column.done && (n === column.cursor);
+                if ( cell ) return { ...cell, ...at, state: now ? "now" : "", step: now ? column.step : null };
+                if ( now ) return { ...at, state: "now", live: true, step: column.step };
+                if ( column.done && (n > column.lastTerm) ) return { ...at, state: "gone", gone: true };
+                return { ...at, state: "" };
             })
         }));
     }
@@ -263,9 +277,12 @@ export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplica
         const resettable = ChargenTerm.resettable(column.actor);
         const idle = ChargenTerm.idle(column.actor);
         const rolled = CreationCharacteristics.isSet(column.actor);
+        const at = sequence.indexOf(cursor);
         return {
             id: column.id,
             name: column.name,
+            term: column.cursor,
+            position: (at < 0) ? "" : `${at + 1}/${sequence.length}`,
             canRun: column.canEdit && !Chargen.isDead(column.actor),
             canReset: game.user.isGM,
             // Core p.9's first step, and it stands outside the numbered list because it runs once
@@ -274,7 +291,7 @@ export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplica
             psi: ChargenScreen.#psi(column),
             background: ChargenScreen.#background(column),
             steps: sequence.map((key, index) => ({
-                key, order: index + 1, own: own.has(key), now: key === cursor, done: taken.has(key),
+                key, order: index + 1, own: own.has(key), now: key === cursor, done: taken.has(key), past: index < at,
                 idle: idle.get(key) ?? "", resettable: resettable.has(key),
                 label: ChargenScreen.#label(MGT2.CreationSteps, key)
             })),

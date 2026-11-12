@@ -1,6 +1,5 @@
-{{! Pinned light: Foundry hard-codes `themed theme-light` on ol.chat-log, so a card never renders
-    on the dark ground whatever the viewer's colour scheme says. }}
-<div class="mgt2 theme-light card {{effectTone}}">
+{{! The ground is the log's: core pins it light and the paletteGround setting may force it dark. }}
+<div class="mgt2 card {{effectTone}}"{{#if effectBand}} data-fold{{/if}}>
 	{{! The handoff strip: the whole visual cost of a chain on the receiving side. It renders from the
 	    stored ids — click one and the log scrolls to that message, which is what makes a chain
 	    auditable without storing a chain anywhere. }}
@@ -12,98 +11,98 @@
 		<span class="dm">{{chainTotal}}</span>
 	</div>
 	{{/if}}
-	<div class="chd">
+	<div class="xh"{{#if effectBand}} data-fold-toggle{{/if}}>
 		{{! An initiative roll names no object, so the type takes the headline rather than leaving it blank. }}
-		{{#if rollObjectName}}{{#if rollTypeName}}<div class="who">{{rollTypeName}}</div>{{/if}}{{/if}}
-		<div class="what">
-			<h4>{{#if rollObjectName}}{{rollObjectName}}{{else}}{{rollTypeName}}{{/if}}</h4>
-			{{#if effectBand}}<span class="tgt">{{#if rollDifficultyLabel}}{{rollDifficultyLabel}}{{else}}{{ localize 'MGT2.Chat.Roll.NoDifficulty' }}{{/if}}</span>{{/if}}
-		</div>
+		{{#if kicker}}<div class="xk">{{kicker}}</div>{{/if}}
+		<h4>{{title}}</h4>
+		{{#if rung}}<div class="rung{{#if rung.assumed}} assumed{{/if}}">{{#if rung.word}}<small>{{rung.word}}</small>{{/if}}<b>{{rung.target}}+</b></div>{{/if}}
+		{{#if effectBand}}<span class="pill">{{effectDisplay}} {{localize effectBand}}</span>{{/if}}
 	</div>
-	{{! Core folio 79: which of the three modes was fired, and what it cost. Its own line rather than
-	    a modifier — a fire mode changes what the attack does, not the DM it is rolled at. }}
-	{{#if fireModeLine}}
-	<div class="cmsg">{{fireModeLine}}</div>
-	{{/if}}
-	{{! Core folio 77: the rounds this pull of the trigger took out of the magazine, already spent. }}
-	{{#if ammoLine}}
-	<div class="cmsg">{{ammoLine}}</div>
-	{{/if}}
-	{{! Core folio 229: what the power cost the reserve, and what it cost the body when the reserve
-	    could not pay. Already spent by the time the card lands. }}
-	{{#if psiLine}}
-	<div class="cmsg">{{psiLine}}</div>
-	{{/if}}
-	{{! Core folio 75: what the interrupted Extended Action check cost the work. Beside the opposed
-	    verdict rather than under the Effect, because both are the same thing — a sentence the Effect
-	    resolves to, which the referee applies and the system never writes anywhere. }}
-	{{#if extendedLine}}
-	<div class="cmsg">{{extendedLine}}</div>
-	{{/if}}
-	{{! Companion folio 53: the row a double 1 that also failed landed on, which the referee applies. }}
-	{{#if mishapLine}}
-	<div class="cmsg">{{mishapLine}}</div>
-	{{/if}}
-	{{#if rollMessage}}
-	<div class="cmsg{{#if opposedMessage}} jump{{/if}}"{{#if opposedMessage}} data-action="chainSource" data-message-id="{{opposedMessage}}"{{/if}}>{{rollMessage}}</div>
-	{{/if}}
-	{{! A recovery card that placed points rolled no dice, so it has no expand to name its terms in. }}
-	{{#if formula}}
-	<div class="cdice dice-roll" data-action="expandRoll">
-		<div class="line"><span class="f">{{showFormula formula}}</span><span class="t">{{total}}</span></div>
-		{{{tooltip}}}
-		{{#if (or rollModifiers.length rollTargetAssumed)}}
-		<div class="cmods">
-			<div class="wrap">
-				{{#each rollModifiers as |rollModifier|}}<span class="k">{{rollModifier.name}}</span><span class="v{{#if (lt rollModifier.dm 0)}} neg{{/if}}">{{showDM rollModifier.dm}}</span>{{/each}}
-				{{#if rollTargetAssumed}}<span class="k">{{ localize 'MGT2.Chat.Roll.AssumedAverage' }}</span><span class="v"></span>{{/if}}
+	<div class="fold"><div>
+		{{! Core folio 79: which of the three modes was fired, and what it cost. Its own line rather
+		    than a modifier — a fire mode changes what the attack does, not the DM it is rolled at. }}
+		{{#if fireModeLine}}<div class="cmsg">{{fireModeLine}}</div>{{/if}}
+		{{! Core folio 77: the rounds this pull of the trigger took out of the magazine, already spent. }}
+		{{#if ammo}}
+		<div class="meter">
+			<span>{{localize 'MGT2.Items.Magazine'}}</span>
+			<span class="bar"><i style="width: {{ammo.leftPct}}%"></i><i class="now" style="width: {{ammo.spentPct}}%"></i></span>
+			<b>{{ammo.left}}/{{ammo.magazine}}</b>
+		</div>
+		{{/if}}
+		{{! Core folio 229: what the power cost the reserve, already spent by the time the card lands. }}
+		{{#if psiLine}}<div class="cmsg">{{psiLine}}</div>{{/if}}
+		{{! Core folio 75: what the interrupted Extended Action check cost the work, which the referee
+		    applies and the system never writes anywhere. }}
+		{{#if extendedLine}}<div class="cmsg">{{extendedLine}}</div>{{/if}}
+		{{! Companion folio 53: the row a double 1 that also failed landed on, which the referee applies. }}
+		{{#if mishapLine}}<div class="cmsg">{{mishapLine}}</div>{{/if}}
+		{{#if rollMessage}}
+		<div class="cmsg{{#if opposedMessage}} jump{{/if}}"{{#if opposedMessage}} data-action="chainSource" data-message-id="{{opposedMessage}}"{{/if}}>{{rollMessage}}</div>
+		{{/if}}
+		{{! A recovery card that placed points rolled no dice. }}
+		{{#if formula}}
+		<div class="xres{{#unless effectBand}} solo{{/unless}}">
+			<div class="xtot" data-dice tabindex="0" role="button" aria-label="{{localize 'MGT2.Chat.Roll.DiceDetail'}}">
+				<div class="row"><b>{{total}}</b>{{#if dice.length}}<span class="dice">{{#each dice}}<i{{#if dropped}} class="drop"{{/if}}>{{value}}</i>{{/each}}</span>{{/if}}</div>
+				{{#if effectBand}}<span class="vs"><b>{{diceDM}}</b> · {{#if rollTargetAssumed}}{{localize 'MGT2.Chat.Roll.AssumedAverage'}}{{else}}{{localize 'MGT2.Chat.Roll.Against' target=rollTarget}}{{/if}}</span>{{/if}}
 			</div>
+			{{#if effectBand}}
+			<div class="xeff">
+				<span class="lbl">{{localize 'MGT2.Chat.Roll.Effect'}}</span>
+				<b>{{effectDisplay}}</b>
+				<span class="band">{{localize effectBand}}</span>
+				{{! Core p.61's six bands in the book's order, the one this roll landed in lit. }}
+				<span class="lad" aria-hidden="true">{{#each ladder}}<i class="{{tone}}{{#if on}} on{{/if}}"></i>{{/each}}</span>
+			</div>
+			{{/if}}
+		</div>
+		<div class="xpop" popover="auto">{{{tooltip}}}</div>
+		{{/if}}
+		{{#if (or stance rollModifiers.length)}}
+		<div class="xro">
+			{{#if stance}}<span class="tag {{stance}}">{{localize stanceLabel}}</span>{{/if}}
+			{{#each rollModifiers as |rollModifier|}}<span{{#if (lt rollModifier.dm 0)}} class="neg"{{/if}}>{{rollModifier.name}} <b>{{showDM rollModifier.dm}}</b></span>{{/each}}
 		</div>
 		{{/if}}
-	</div>
-	{{else}}
-	{{#if rollModifiers.length}}
-	<div class="cmods">
-		<div class="wrap">{{#each rollModifiers as |rollModifier|}}<span class="k">{{rollModifier.name}}</span><span class="v{{#if (lt rollModifier.dm 0)}} neg{{/if}}">{{showDM rollModifier.dm}}</span>{{/each}}</div>
-	</div>
-	{{/if}}
-	{{/if}}
-	{{#if effectBand}}
-	<div class="eff">
-		<span class="band">{{localize effectBand}}</span>
-		<span class="n">
-			<span class="lbl">{{#if rollTargetAssumed}}{{localize 'MGT2.Chat.Roll.EffectVs' target=rollTarget}}{{else}}{{localize 'MGT2.Chat.Roll.Effect'}}{{/if}}</span>
-			<b>{{effectDisplay}}</b>
-		</span>
-	</div>
-	{{/if}}
-	{{#if showButtons}}
-	<div class="cbtns">
-		{{! The offering side of the chain. Same gate as the Effect block: a card with no Effect has
-		    nothing to carry. }}
-		{{#if effectBand}}
-		<button data-action="chainInto"><i class="fa-solid fa-link"></i>{{localize 'MGT2.Chat.Roll.ChainInto'}}</button>
+		{{#if targets.length}}
+		<div class="tray" data-tray="targets">
+			<div class="tlab"><i class="fa-solid fa-crosshairs"></i><span>{{plural 'MGT2.Chat.Roll.Targets' targets.length n=targets.length}}</span><i class="fa-solid fa-chevron-down car"></i></div>
+			<div class="tbody"><div>
+				{{#each targets}}
+				<div class="trow"><img class="pf" src="{{img}}" alt=""><span class="n">{{name}}</span>{{#if distance}}<span class="w">{{distance}}</span>{{/if}}</div>
+				{{/each}}
+			</div></div>
+		</div>
 		{{/if}}
-		{{! Core p.82 turns the Effect of a Medic check into the points first aid restores; who is
-		    treated is picked the way the damage card picks a target. }}
-		{{#if firstAidPoints}}
-		<button data-action="firstAid"><i class="fa-regular fa-heart-circle-plus"></i>{{plural 'MGT2.Recovery.ApplyFirstAid' firstAidPoints points=firstAidPoints}}</button>
+		{{#if showButtons}}
+		<div class="cbtns">
+			{{! The offering side of the chain. Same gate as the Effect block: a card with no Effect has
+			    nothing to carry. }}
+			{{#if effectBand}}
+			<button data-action="chainInto"><i class="fa-solid fa-link"></i>{{localize 'MGT2.Chat.Roll.ChainInto'}}</button>
+			{{/if}}
+			{{! Core p.82 turns the Effect of a Medic check into the points first aid restores; who is
+			    treated is picked the way the damage card picks a target. }}
+			{{#if firstAidPoints}}
+			<button data-action="firstAid"><i class="fa-regular fa-heart-circle-plus"></i>{{plural 'MGT2.Recovery.ApplyFirstAid' firstAidPoints points=firstAidPoints}}</button>
+			{{/if}}
+			{{#if showRollDamage}}
+			<button data-action="rollDamage" class="hot"><i class="fa-solid fa-burst"></i>{{#if damageLabel}}{{damageLabel}}{{else}}{{localize 'MGT2.Chat.Roll.Damages'}}{{/if}}</button>
+			{{/if}}
+			{{! Core folio 78: the opposed Melee check is the grapple, so the card that scored it is where
+			    the winner picks what it did. The outcome that wounds posts the wound as an ordinary
+			    damage offer, applied to whoever the referee selects. }}
+			{{#if grapple}}
+			<button data-action="grapple"><i class="fa-solid fa-hands-bound"></i>{{localize 'MGT2.Grapple.Resolve'}}</button>
+			{{/if}}
+			{{#if applyLabel}}
+			<button data-action="damage"><i class="fa-regular fa-heart-circle-minus"></i><span>{{applyLabel}}</span></button>
+			{{/if}}
+			{{#each cardButtons as |cardButton i|}}
+			<button data-index="{{i}}"><i class="fa-solid fa-dice"></i>{{cardButton.label}}</button>
+			{{/each}}
+		</div>
 		{{/if}}
-		{{#if showRollDamage}}
-		<button data-action="rollDamage">{{#if damageCarriesEffect}}{{localize 'MGT2.Chat.Roll.DamagesWithEffect' effect=effectDisplay}}{{else}}{{ localize 'MGT2.Chat.Roll.Damages' }}{{/if}}</button>
-		{{/if}}
-		{{! Core folio 78: the opposed Melee check is the grapple, so the card that scored it is where
-		    the winner picks what it did. Nothing here names the loser — the outcome that wounds posts
-		    the wound as an ordinary damage offer, applied to whoever the referee selects. }}
-		{{#if grapple}}
-		<button data-action="grapple"><i class="fa-solid fa-hands-bound"></i>{{localize 'MGT2.Grapple.Resolve'}}</button>
-		{{/if}}
-		{{#if applyLabel}}
-		<button data-action="damage"><i class="fa-regular fa-heart-circle-minus"></i><span>{{applyLabel}}</span></button>
-		{{/if}}
-		{{#each cardButtons as |cardButton i|}}
-		<button data-index="{{i}}">{{cardButton.label}}</button>
-		{{/each}}
-	</div>
-	{{/if}}
+	</div></div>
 </div>

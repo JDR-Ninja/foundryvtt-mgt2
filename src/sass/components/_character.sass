@@ -140,6 +140,8 @@
 	.trackwrap
 		grid-column: 1 / -1
 		padding-top: 10px
+		&.below
+			padding: 8px 0 18px
 
 	// A number you can change is the control that changes it — already the rule for the
 	// characteristic DM, and now for the pool. The wound track is the same door, wider.
@@ -257,35 +259,53 @@
 		&:hover
 			color: var(--accent-text)
 
-// States: text switches, not pills. A dossier ticks boxes, it does not wear badges. They stay live
-// in both modes — they are the session loop, not structure.
+// States are pills that colour only while they hold, a mild one amber and a grave one red; a state the
+// system derives is dashed, since nobody ticks it. They stay live in both modes — the session loop.
 .mgt2 .states
 	display: flex
 	flex-wrap: wrap
-	gap: 4px 16px
+	gap: 4px 6px
 	padding-bottom: 10px
 
 	label
 		position: relative
 		display: inline-flex
 		align-items: center
-		gap: 6px
+		gap: 5px
+		padding: 1px 9px 2px 7px
 		font-family: var(--cond)
 		font-size: 10.5px
 		font-weight: 600
-		letter-spacing: 0.16em
+		letter-spacing: 0.12em
 		text-transform: uppercase
 		color: var(--faint)
+		border: 1px solid var(--rule)
+		border-radius: 999px
 		&::before
 			content: ""
-			width: 9px
-			height: 9px
-			border: 1px solid currentColor
+			width: 6px
+			height: 6px
+			border-radius: 50%
+			background: currentColor
+			opacity: 0.5
+		&:has(input:disabled)
+			border-style: dashed
+		&:has(input:not(:disabled)):hover
+			color: var(--mute)
+			border-color: var(--edge)
+		&:has(input:focus-visible)
+			outline: 2px solid var(--accent-text)
+			outline-offset: 1px
 		&:has(input:checked)
 			color: var(--danger)
+			border-style: solid
+			border-color: currentColor
+			background: color-mix(in oklab, var(--danger) 12%, transparent)
 			&::before
-				background: currentColor
-				box-shadow: inset 0 0 0 2px var(--paper)
+				opacity: 1
+		&.warn:has(input:checked)
+			color: var(--warn)
+			background: color-mix(in oklab, var(--warn) 14%, transparent)
 
 	// The tick above is the control; the real checkbox covers the label invisibly so that the
 	// pointer and the keyboard both still reach it.
@@ -694,6 +714,150 @@
 		border-top: 0
 		border-bottom: 0
 		padding: 0
+	> .btn
+		margin-left: auto
+
+// The pattern's own conditions, as phrases rather than as hints under the roll.
+.mgt2 .mgt2-npc-panel .gates
+	display: flex
+	flex-wrap: wrap
+	gap: 6px
+	margin: 0
+	padding: 0
+	list-style: none
+	li
+		display: inline-flex
+		align-items: center
+		gap: 7px
+		padding: 2px 9px 3px
+		font-size: 12px
+		color: var(--mute)
+		background: var(--hover)
+		border-radius: 6px
+		i
+			font-size: 11px
+			color: var(--faint)
+
+// An attack is a card: the card rolls, the damage is its figure, range and traits are its pills.
+.mgt2 .mgt2-npc-panel .attacks
+	display: flex
+	flex-direction: column
+	gap: 6px
+	margin: 0
+	padding: 0
+	list-style: none
+	.atk
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 4px 10px
+		padding: 6px 10px
+		border: 1px solid var(--rule)
+		border-radius: 6px
+		&:hover
+			border-color: var(--edge)
+	button.roll
+		all: unset
+		display: inline-flex
+		align-items: center
+		gap: 8px
+		font-family: var(--body)
+		font-size: 13px
+		font-weight: 600
+		color: var(--ink)
+		cursor: var(--cursor-pointer)
+		&:focus-visible
+			outline: 2px solid var(--accent-text)
+			outline-offset: 2px
+			border-radius: 4px
+		&:hover span
+			color: var(--accent-text)
+		i
+			display: inline-flex
+			align-items: center
+			justify-content: center
+			width: 24px
+			height: 24px
+			font-size: 12px
+			color: var(--mute)
+			background: var(--hover)
+			border-radius: 5px
+		&:hover i
+			color: var(--accent-text)
+			background: var(--accent-soft)
+	.pills
+		display: flex
+		flex-wrap: wrap
+		gap: 4px
+		span
+			padding: 0 7px
+			font-family: var(--mono)
+			font-size: 10px
+			line-height: 1.6
+			color: var(--mute)
+			border: 1px solid var(--rule)
+			border-radius: 999px
+	.dmg
+		margin-left: auto
+		font-family: var(--mono)
+		font-size: 15px
+		font-weight: 600
+		color: var(--ink)
+	.acts
+		display: inline-flex
+		gap: 6px
+		a
+			color: var(--faint)
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
+
+// What play mode folded: the empty blocks as one line, the writable ones a door into edit mode.
+.mgt2 .mgt2-npc-panel .vacant
+	display: flex
+	flex-wrap: wrap
+	gap: 6px 18px
+	margin: 4px 0 0
+	padding-top: 8px
+	border-top: 1px solid var(--rule-soft)
+	font-family: var(--cond)
+	font-size: 10.5px
+	font-weight: 600
+	letter-spacing: 0.12em
+	text-transform: uppercase
+	color: var(--faint)
+	b
+		font-family: var(--mono)
+		font-weight: 400
+	a
+		display: inline-flex
+		align-items: center
+		gap: 5px
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--accent-text)
+
+// An NPC's attitude and experience as pills in the meta line, the attitude coloured by how it leans.
+.mgt2 .mgt2-header .meta span.att
+	padding: 0 8px
+	font-size: 11.5px
+	line-height: 1.6
+	border: 1px solid var(--rule)
+	border-radius: 999px
+	&::after
+		content: none
+	&.bad
+		color: var(--danger)
+		border-color: currentColor
+		background: color-mix(in oklab, var(--danger) 12%, transparent)
+	&.warn
+		color: var(--warn)
+		border-color: currentColor
+		background: color-mix(in oklab, var(--warn) 14%, transparent)
+	&.good
+		color: var(--good)
+		border-color: currentColor
+		background: color-mix(in oklab, var(--good) 12%, transparent)
 
 // The group count takes the UPP's slot on the creature preset, so its two inputs share the row.
 .mgt2 .upp .code .grp
@@ -1315,3 +1479,22 @@ ul.softwares
 
 	.mgt2 .mgt2-panel
 		padding: 14px 22px 20px
+
+// A skill's level beside four pips filled up to it; a level 0 is held but adds nothing, so it recedes.
+.mgt2 table.rows .lvl
+	display: inline-flex
+	align-items: center
+	gap: 7px
+	.pips
+		display: inline-flex
+		gap: 3px
+		i
+			width: 7px
+			height: 7px
+			border: 1px solid var(--faint)
+			border-radius: 50%
+		i.on
+			border-color: var(--mute)
+			background: var(--mute)
+	&.zero
+		color: var(--faint)

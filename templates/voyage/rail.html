@@ -34,6 +34,16 @@
 			<input class="f n" type="number" min="0" step="0.1" name="fuel" value="{{fuel.level}}"
 				aria-label="{{localize 'MGT2.Voyage.InTheTank'}}" />
 		</div>
+		{{#if fuel.grades}}
+		<div class="tank">
+			<span class="lbl">{{localize 'MGT2.Voyage.GradeTaken'}}</span>
+			<span class="seg" role="radiogroup" aria-label="{{localize 'MGT2.Voyage.GradeTaken'}}">
+				{{#each fuel.grades as |grade|}}
+				<label><input type="radio" name="fuelGrade" value="{{grade.key}}"{{#if grade.active}} checked{{/if}} /><span>{{localize grade.label}}</span><span class="v">Cr{{grade.price}}</span></label>
+				{{/each}}
+			</span>
+		</div>
+		{{/if}}
 		{{/if}}
 		<p class="hint{{#unless fuel.enough}} bad{{/unless}}">
 			{{#if fuel.enough}}{{localize 'MGT2.Voyage.BurnsLeaving' burn=fuel.burn after=fuel.after}}

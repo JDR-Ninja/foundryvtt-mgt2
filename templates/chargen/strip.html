@@ -1,58 +1,65 @@
-{{! THE STEP STRIP, and the term loop's only control. Every chip is read off the selected Traveller's
-    FRAME, which is their species Item; the struck-through ones are DERIVED against the Core sequence,
-    so a frame that drops ranks drops the commission step with it. No step name appears in any logic. }}
+{{! THE STEP STRIP, and the term loop's only control. Every node is read off the selected Traveller's
+    FRAME, which is their species Item; the cut steps are DERIVED against the Core sequence. }}
 <div class="steps" data-actor-id="{{strip.id}}">
 	{{#if strip}}
-	<span class="lbl">{{localize 'MGT2.Chargen.Screen.StepsFor' name=strip.name frame=strip.frameName}}</span>
-	{{! Core p.9's first step, outside the numbered list because it runs once and not once a term.
-	    The chip is its own readout: the code it produced is the whole state it has. }}
-	<ul class="pre">
-		<li class="once{{#if strip.characteristics.set}} set{{/if}}">
-			{{#if strip.canRun}}
-			<button type="button" data-action="rollCharacteristics"
-				data-tooltip="{{localize 'MGT2.Chargen.Characteristics.Hint'}}">{{localize 'MGT2.Chargen.Characteristics.Title'}}</button>
-			{{else}}{{localize 'MGT2.Chargen.Characteristics.Title'}}{{/if}}
-			{{#if strip.characteristics.upp}}<b>{{strip.characteristics.upp}}</b>{{/if}}
-		</li>
-		{{! Core p.9's second step. EDU DM + 3, read at this moment and spent once, so it stands
-		    beside the roll that produced the EDU rather than inside the term loop. }}
-		<li class="once bg{{#if strip.background.set}} set{{/if}}">
-			{{#if strip.canRun}}
-			<button type="button" data-action="takeBackground"
-				data-tooltip="{{strip.background.hint}}">{{localize 'MGT2.Chargen.Background.Title'}}</button>
-			{{else}}{{localize 'MGT2.Chargen.Background.Title'}}{{/if}}
-			<b>{{strip.background.count}}</b>
-		</li>
-		{{! Core p.228's own step, and it is on the strip only where the table adopted PSI at all —
-		    which is the referee's permission the folio requires. }}
-		{{#if strip.psi}}
-		<li class="once psi{{#unless strip.psi.untested}} set{{/unless}}{{#if strip.psi.none}} nil{{/if}}">
-			{{#if strip.psi.canRun}}
-			<button type="button" data-action="rollPsi"
-				data-tooltip="{{strip.psi.hint}}">{{localize 'MGT2.Chargen.Psi.Title'}}</button>
-			{{else}}<span data-tooltip="{{strip.psi.hint}}">{{localize 'MGT2.Chargen.Psi.Title'}}</span>{{/if}}
-			{{#unless strip.psi.untested}}<b>{{strip.psi.score}}</b>{{/unless}}
-		</li>
-		{{/if}}
-	</ul>
-	<ol>
+	<div class="head">
+		<span class="lbl">{{localize 'MGT2.Chargen.Screen.StepsFor' name=strip.name frame=strip.frameName}}</span>
+		{{! Core p.9's two first steps and Core p.228's PSI test run once and not once a term. PSI shows
+		    only where the table adopted it, which is the referee's permission the folio requires. }}
+		<ul class="pre">
+			<li class="once{{#if strip.characteristics.set}} set{{/if}}">
+				<svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M5 8.2l2 2 4-4.4"/></svg>
+				{{#if strip.canRun}}
+				<button type="button" data-action="rollCharacteristics"
+					data-tooltip="{{localize 'MGT2.Chargen.Characteristics.Hint'}}">{{localize 'MGT2.Chargen.Characteristics.Title'}}</button>
+				{{else}}<span>{{localize 'MGT2.Chargen.Characteristics.Title'}}</span>{{/if}}
+				{{#if strip.characteristics.upp}}<b>{{strip.characteristics.upp}}</b>{{/if}}
+			</li>
+			<li class="once bg{{#if strip.background.set}} set{{/if}}">
+				<svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M5 8.2l2 2 4-4.4"/></svg>
+				{{#if strip.canRun}}
+				<button type="button" data-action="takeBackground"
+					data-tooltip="{{strip.background.hint}}">{{localize 'MGT2.Chargen.Background.Title'}}</button>
+				{{else}}<span>{{localize 'MGT2.Chargen.Background.Title'}}</span>{{/if}}
+				<b>{{strip.background.count}}</b>
+			</li>
+			{{#if strip.psi}}
+			<li class="once psi{{#unless strip.psi.untested}} set{{/unless}}{{#if strip.psi.none}} nil{{/if}}">
+				<svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M5 8.2l2 2 4-4.4"/></svg>
+				{{#if strip.psi.canRun}}
+				<button type="button" data-action="rollPsi"
+					data-tooltip="{{strip.psi.hint}}">{{localize 'MGT2.Chargen.Psi.Title'}}</button>
+				{{else}}<span data-tooltip="{{strip.psi.hint}}">{{localize 'MGT2.Chargen.Psi.Title'}}</span>{{/if}}
+				{{#unless strip.psi.untested}}<b>{{strip.psi.score}}</b>{{/unless}}
+			</li>
+			{{/if}}
+		</ul>
+		{{#if strip.term}}<span class="at">{{localize 'MGT2.Chargen.Screen.Term' n=strip.term}} · {{strip.position}}</span>{{/if}}
+	</div>
+	<ol class="loop" style="--n: {{strip.steps.length}}">
 		{{#each strip.steps as |step|}}
-		<li class="{{#if step.own}}own{{/if}} {{#if step.now}}now{{/if}} {{#if step.done}}done{{/if}} {{#if step.idle}}idle{{/if}}">
+		<li class="{{#if step.own}}added{{/if}} {{#if step.past}}past{{/if}} {{#if step.now}}now{{/if}} {{#if step.done}}done{{/if}} {{#if step.idle}}idle{{/if}}">
+			<svg class="node" viewBox="0 0 30 30" aria-hidden="true">
+				<circle class="halo" cx="15" cy="15" r="10"/><circle class="disc" cx="15" cy="15" r="9"/>
+				<path class="tick" d="M11.2 15.2l2.6 2.6 5-5.6"/><circle class="dot" cx="15" cy="15" r="4"/>
+				<path class="dash" d="M11.5 15h7"/><text class="num" x="15" y="18.6">{{step.order}}</text>
+				{{#if step.own}}<path class="add" d="M26 1.5l3.5 3.5-3.5 3.5-3.5-3.5z"/>{{/if}}
+			</svg>
 			{{#if step.idle}}
-			<span data-tooltip="{{step.idle}}">{{step.order}}. {{step.label}}</span>
+			<span data-tooltip="{{step.idle}}">{{step.label}}</span>
 			{{else if ../strip.canRun}}
-			<button type="button" data-action="runStep" data-step="{{step.key}}">{{step.order}}. {{step.label}}</button>
-			{{else}}{{step.order}}. {{step.label}}{{/if}}
+			<button type="button" data-action="runStep" data-step="{{step.key}}">{{step.label}}</button>
+			{{else}}<span>{{step.label}}</span>{{/if}}
 			{{#if (and step.resettable ../strip.canReset)}}
 			<a class="reset" data-action="resetStep" data-step="{{step.key}}"
 				data-tooltip="{{localize 'MGT2.Chargen.Screen.ResetStep'}}"><i class="fa-solid fa-rotate-left"></i></a>
 			{{/if}}
 		</li>
 		{{/each}}
-		{{#each strip.cut as |step|}}
-		<li class="cut">{{step.label}}</li>
-		{{/each}}
 	</ol>
+	{{#if strip.cut.length}}
+	<p class="cuts">{{localize 'MGT2.Chargen.Frame.Cuts'}} {{#each strip.cut as |step|}}<s>{{step.label}}</s>{{#unless @last}}, {{/unless}}{{/each}}</p>
+	{{/if}}
 	{{#if strip.why}}<p class="why">{{strip.why}}</p>{{/if}}
 	{{#if strip.source}}<p class="src">{{strip.source}}</p>{{/if}}
 	{{else}}

@@ -15,6 +15,21 @@ const skillWords = name => String(name ?? "").toLowerCase().replaceAll("\u00ad",
 
 export class MGT2Helper {
 
+    /** A document's rich-text fields, enriched for the toggled editors that display them. */
+    // ⚠ A toggled `<prose-mirror>` shows only the HTML inside it while closed — nothing at all when
+    // that is empty, whatever its `value` holds, which is read only once the editor opens.
+    static async enrichFields(document, keys) {
+        const TextEditor = foundry.applications.ux.TextEditor.implementation;
+        const out = {};
+        for ( const key of keys ) {
+            const html = foundry.utils.getProperty(document.system, key);
+            if ( typeof html !== "string" ) continue;
+            out[key] = await TextEditor.enrichHTML(html, { secrets: document.isOwner,
+                rollData: document.getRollData?.() ?? {}, relativeTo: document });
+        }
+        return out;
+    }
+
     /** Substitute `{0}`, `{1}`… placeholders. The indexed form is persisted in chat message flags. */
     static format(template, ...values) {
         return values.reduce((text, value, i) => text.replaceAll(`{${i}}`, String(value)), template);
@@ -77,6 +92,21 @@ export class MGT2Helper {
         const types = Array.from(damageType ?? [], type => game.i18n.localize(MGT2.DamageTypes[type] ?? type));
         if (!Number.isFinite(protection) || !types.length) return "";
         return game.i18n.format("MGT2.Items.ProtectionVs", { protection, types: types.join(", ") });
+    }
+
+    /** A hold as the chat cards draw it; `lot` is the tons this card put aboard, 0 where it took them off. */
+    static holdMeter(ship, cargo, lot = 0) {
+        const scale = Math.max(cargo.capacity, cargo.used, 1);
+        const pct = tons => Math.round(Math.max(0, tons) * 1000 / scale) / 10;
+        const over = (cargo.over === true) || (cargo.used > cargo.capacity);
+        return { ship: ship.name, used: cargo.used, capacity: cargo.capacity, over,
+            aboard: pct(cargo.used - lot), lot: pct(lot), cap: over ? pct(cargo.capacity) : null };
+    }
+
+    /** A small portrait for a token: its own art unless that moves, else its actor's. */
+    static tokenPortrait(token) {
+        const src = token?.texture?.src ?? "";
+        return (!src || foundry.helpers.media.VideoHelper.hasVideoExtension(src)) ? (token?.actor?.img ?? "") : src;
     }
 
     /** A formula as the books print it rather than as the parser reads it. */

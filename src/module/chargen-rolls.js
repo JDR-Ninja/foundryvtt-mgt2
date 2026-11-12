@@ -75,9 +75,9 @@ export const CreationRoll = {
      */
     standing(actor, check, career) {
         const frame = Chargen.frame(actor);
-        const key = MGT2Helper.skillSlug(career);
+        const key = Chargen.careerKey(actor, career);
         const record = key
-            ? Chargen.careers(actor).find(item => MGT2Helper.skillSlug(item.name) === key) : null;
+            ? Chargen.careers(actor).find(item => Chargen.careerKey(actor, item.name) === key) : null;
         const rows = [];
         const sources = [[frame, frame?.system.frame.standingModifiers],
             [record, record?.system.standingModifiers]];
@@ -85,7 +85,7 @@ export const CreationRoll = {
             for ( const entry of entries ?? [] ) {
                 // No `check &&`: a check this call cannot name is not one a scoped entry reaches.
                 if ( entry.appliesTo.size && !entry.appliesTo.has(check) ) continue;
-                if ( entry.career && key && (MGT2Helper.skillSlug(entry.career) !== key) ) continue;
+                if ( entry.career && key && (Chargen.careerKey(actor, entry.career) !== key) ) continue;
                 if ( !CreationRoll.gated(actor, entry.gate) ) continue;
                 const dm = entry.dm + (entry.per * CreationRoll.highestLevel(actor, entry.skills));
                 if ( !dm ) continue;
@@ -140,8 +140,6 @@ export const CreationRoll = {
             rollTypeName: game.i18n.localize("MGT2.Chargen.Roll.Title"),
             rollObjectName: label,
             difficulty,
-            rollDifficultyLabel: (printed === null)
-                ? "" : game.i18n.format("MGT2.Chargen.Term.Target", { n: printed }),
             modifiers: composed.terms,
             lines: [...lines, describe?.(outcome.roll.total)]
         });

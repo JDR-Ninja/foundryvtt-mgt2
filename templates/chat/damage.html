@@ -1,51 +1,40 @@
-{{! Pinned light for the same reason as roll.html: Foundry hard-codes `themed theme-light` on
-    ol.chat-log. Nothing on this card names a target — no portrait, no "vs.", no armour figure.
-    Stages 2 to 6 of the pipeline run in applyDamage on whoever a player applies it to. }}
-<div class="mgt2 theme-light card">
-	<div class="chd">
-		{{#if who}}<div class="who">{{who}}</div>{{/if}}
-		<div class="what">
-			<h4>{{localize 'MGT2.Actor.Damage'}}</h4>
-			<span class="tgt">{{localize 'MGT2.Chat.Damage.ApplyToWhoever'}}</span>
+{{! The ground is the log's. Each target is read in the Application tray as the card is drawn: its
+    reading, the Protection it meets and the wound, through the same pipeline applyDamage runs. }}
+<div class="mgt2 card dmg" data-fold>
+	<div class="xh" data-fold-toggle>
+		{{#if source}}<div class="xk">{{source}}</div>{{/if}}
+		<h4>{{localize 'MGT2.Actor.Damage'}}</h4>
+		<div class="rung"><small>{{localize 'MGT2.Chat.Damage.Formula'}}</small><b>{{formula}}</b></div>
+		<span class="pill">{{options.0.total}}</span>
+	</div>
+	<div class="fold"><div>
+		{{! Three readings of one attack. Reduced is a different roll, so it was rolled with the full
+		    one; Minimum is one point per die. Every reading carries the Effect. }}
+		<div class="dmgpick">
+			{{#each options}}
+			<div class="{{#if @first}}on{{/if}}" data-transform="{{key}}" data-total="{{total}}">
+				<span class="k">{{localize label}}</span>
+				<span class="n">{{total}}</span>
+				<span class="fx">{{detail}}</span>
+			</div>
+			{{/each}}
 		</div>
-	</div>
-	{{! Three readings of one attack. Reduced is a different roll, so it was rolled with the full
-	    one; Minimum is one point per die. Every reading carries the Effect. }}
-	<div class="dmgpick">
-		{{#each options}}
-		<div class="{{#if @first}}on{{/if}}" data-transform="{{key}}" data-total="{{total}}">
-			<span class="k">{{localize label}}</span>
-			<span class="n">{{total}}</span>
-			<span class="fx">{{detail}}</span>
+		<div class="chips">
+			{{#each chips}}<span class="chip{{#if hot}} neg{{/if}}">{{label}}</span>{{/each}}
 		</div>
-		{{/each}}
-	</div>
-	{{! Core folio 140: the armour a vehicle meets an attack with is the facing the attack was made
-	    from, and nothing on the canvas can be read for it. Shown while a vehicle is selected. }}
-	<div class="dmgface" hidden>
-		<span class="k">{{localize 'MGT2.Chat.Damage.Facing'}}</span>
-		{{#each facings}}
-		<span class="f{{#if @first}} on{{/if}}" data-facing="{{this}}">{{localize (concat 'MGT2.Actor.vehicle.Facing.' this)}}</span>
-		{{/each}}
-	</div>
-	{{! Filled in against whichever token the referee has selected, and only then — nothing on this
-	    card resolved against a target when the attack was rolled. }}
-	<div class="dmgvoid">{{localize 'MGT2.Chat.Damage.Immune'}}</div>
-	<div class="pipe">
-		<span>{{localize 'MGT2.Chat.Damage.Scale'}} <b>{{localize scaleLabel}}</b></span>
-		{{#if typeLabels.length}}
-		<span>{{localize 'MGT2.Chat.Damage.Type'}} <b>{{#each typeLabels}}{{#unless @first}} · {{/unless}}{{localize this}}{{/each}}</b></span>
-		{{/if}}
-		{{! Both meet the target's Protection when the card is applied, never here: AP subtracts from
-		    it (Core p.79) and Lo-Pen multiplies it (FC p.7). }}
-		{{#if ap}}<span class="hot">{{localize 'MGT2.Chat.Damage.AP' score=ap}}</span>{{/if}}
-		{{#if loPen}}<span class="hot">{{localize 'MGT2.Chat.Damage.LoPen' score=loPen}}</span>{{/if}}
-		{{#if destructive}}<span class="hot">{{localize 'MGT2.Chat.Damage.Destructive'}}</span>{{/if}}
-		{{#if stun}}<span class="hot">{{localize 'MGT2.Chat.Damage.Stun'}}</span>{{/if}}
-		<span>{{localize 'MGT2.Chat.Roll.Effect'}} <b>{{effectDisplay}}</b></span>
-		{{#if floor}}<span class="hot">{{localize 'MGT2.Chat.Damage.Floor'}}</span>{{/if}}
-	</div>
-	<div class="cbtns">
-		<button data-action="damage"><i class="fa-regular fa-heart-circle-minus"></i><span>{{applyLabel}}</span></button>
-	</div>
+		<div class="tray" data-tray="apply">
+			<div class="tlab">
+				<i class="fa-solid fa-heart-crack"></i><span>{{localize 'MGT2.Chat.Damage.Application'}}</span>
+				<span class="seg" role="group" aria-label="{{localize 'MGT2.Chat.Damage.Source'}}">
+					<button type="button" data-source="targeted">{{localize 'MGT2.Chat.Damage.Targeted'}}</button>
+					<button type="button" data-source="selected">{{localize 'MGT2.Chat.Damage.Selected'}}</button>
+				</span>
+				<i class="fa-solid fa-chevron-down car"></i>
+			</div>
+			<div class="tbody"><div data-rows></div></div>
+		</div>
+		<div class="cbtns">
+			<button data-action="applyAll" class="hot"><i class="fa-solid fa-heart-crack"></i><span></span></button>
+		</div>
+	</div></div>
 </div>

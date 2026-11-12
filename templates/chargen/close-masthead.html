@@ -2,10 +2,11 @@
     actors still carrying `flags.mgt2.chargen`, and the two counts are read off them. }}
 <div class="mgt2-chargen-head">
 	<h2>{{localize 'MGT2.Chargen.Close.Heading'}}</h2>
-	<span class="count">
-		{{#if empty}}{{localize 'MGT2.Chargen.Close.NobodyYet'}}
-		{{else}}{{plural 'MGT2.Chargen.Close.Standing' owed serving=serving total=columns.length owed=owed}}{{/if}}
-	</span>
+	{{#if empty}}<span class="count">{{localize 'MGT2.Chargen.Close.NobodyYet'}}</span>
+	{{else}}
+	<span class="stand">{{plural 'MGT2.Chargen.Close.ServingCount' serving serving=serving total=columns.length}}</span>
+	<span class="stand{{#if owed}} owed{{/if}}">{{plural 'MGT2.Chargen.Close.OwedCount' owed}}</span>
+	{{/if}}
 	{{#if canFinishAll}}
 	<button type="button" class="finishall" data-action="finishAll">
 		<i class="fa-solid fa-flag-checkered" inert></i>

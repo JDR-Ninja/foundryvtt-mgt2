@@ -49,6 +49,11 @@ export const RULES = Object.freeze({
         group: "travellers", book: "companion", page: "4",
         default: false
     },
+    // Companion p.4 carries Core p.9's ladder on past +3, one more per 3 over 15; off keeps the Core's cap.
+    highCharacteristics: {
+        group: "travellers", book: "companion", page: "4",
+        default: true, seed: false
+    },
 
     // "Instead of rolling" binds only the first-career sentence, and 1st edition allowed both.
     secondCareerBasicTraining: {
@@ -282,6 +287,11 @@ export const RULES = Object.freeze({
     mortgageFourWeekPeriods: {
         group: "space", book: "core", page: "149, 154",
         default: false
+    },
+    // Companion p.133 sells both grades at Class C, where Core p.257 sells unrefined; off keeps the Core's.
+    classCRefinedFuel: {
+        group: "space", book: "companion", page: "133",
+        default: true, seed: false
     },
     // An ALTERNATIVE resolution system for the same fiction rather than a variant of one rule,
     // which is the strongest form of bucket A there is: HG p.105 offers the chapter in place of the

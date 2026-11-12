@@ -80,15 +80,10 @@ export const Grants = {
         provenance = {} } = {}) {
         const typed = String(name ?? "").trim();
         if ( !actor || !typed ) return null;
-        // "Pilot (spacecraft)" typed whole is a skill and its speciality, as a printed cell stores them; "(any)" is no speciality.
-        const split = !speciality && typed.match(/^(.+?)\s*\(([^)]+)\)$/);
-        const [wanted, held] = (split && (split[2].trim().toLowerCase() !== "any")) ? [split[1], split[2].trim()]
-            : [typed, speciality];
-        speciality = held;
-        const key = String(speciality ?? "").toLowerCase();
-
-        const existing = this.skills(actor).find(skill => MGT2Helper.matchesSkill(skill.name, wanted)
-            && (MGT2Helper.skillSpeciality(skill).toLowerCase() === key));
+        const held = heldSkill(this.skills(actor), typed, speciality);
+        const { wanted, existing } = held;
+        speciality = held.speciality;
+        if ( !existing && !this.gains(actor, { name: wanted, speciality, level, mode }) ) return null;
         const from = existing?.system.level ?? 0;
         let to = { raise: from + level, add: from + level, atLeast: Math.max(from, level),
             floor: Math.max(from + 1, floor ?? level), set: level }[mode] ?? (from + level);
@@ -113,6 +108,16 @@ export const Grants = {
             system: { subType: "skill", level: to, skill: { speciality }, provenance }
         }]);
         return { item: created, from, to, lost, degraded };
+    },
+
+    /** Core p.18: a skill printed with a level is gained only above the level held; folio 58 holds every speciality at 0. */
+    gains(actor, { name, speciality = "", level = 1, mode = "raise" } = {}) {
+        if ( mode !== "atLeast" ) return true;
+        const held = heldSkill(this.skills(actor), name, speciality);
+        if ( !held.wanted ) return true;
+        if ( held.existing ) return (held.existing.system.level ?? 0) < level;
+        const full = held.speciality ? `${held.wanted} (${held.speciality})` : held.wanted;
+        return (level > 0) || (MGT2Helper.skillLevel(actor?.items, full) === null);
     },
 
     /** A characteristic change is a signed row in the log and never a write to `base`. */
@@ -359,6 +364,19 @@ function pooling(method, entries, boon) {
 function boonOn(formula) {
     return MGT2Helper.damageFormula(formula).replace(/(\d*)d6(?!k)/, (match, count) =>
         `${(Number(count) || 1) + 1}d6kh${Number(count) || 1}`);
+}
+
+/** A typed skill split as a printed cell stores it, and the Item holding exactly that skill and speciality. */
+function heldSkill(skills, name, speciality = "") {
+    const typed = String(name ?? "").trim();
+    // "Pilot (spacecraft)" typed whole is a skill and its speciality, as a printed cell stores them; "(any)" is no speciality.
+    const split = !speciality && typed.match(/^(.+?)\s*\(([^)]+)\)$/);
+    const [wanted, held] = (split && (split[2].trim().toLowerCase() !== "any")) ? [split[1], split[2].trim()]
+        : [typed, speciality];
+    const key = String(held ?? "").toLowerCase();
+    const existing = skills.find(skill => MGT2Helper.matchesSkill(skill.name, wanted)
+        && (MGT2Helper.skillSpeciality(skill).toLowerCase() === key)) ?? null;
+    return { wanted, speciality: held, existing };
 }
 
 /** Companion p.13's heroic variant. The two lowest is the only choice of two that is never worse. */

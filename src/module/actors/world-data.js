@@ -1,4 +1,5 @@
 import { MGT2 } from "../config.js";
+import { Rules } from "../rules.js";
 import { locate } from "../space.js";
 
 const fields = foundry.data.fields;
@@ -97,13 +98,15 @@ export class WorldData extends foundry.abstract.TypeDataModel {
             .map(row => row.code);
         this.overridden = Object.keys(this.codeOverrides).length > 0;
 
+        const fuel = (port.companionFuel && Rules.on("classCRefinedFuel")) ? port.companionFuel : port.fuel;
+        const { fuelRefined, fuelUnrefined } = MGT2.ShipCosts;
         this.starport = {
             key: this.uwp.starport,
             label: port.label,
-            // Core p.257: A/B refine, C/D do not, E/X sell none.
-            fuel: port.fuel,
-            fuelPrice: (port.fuel === "refined") ? MGT2.ShipCosts.fuelRefined
-                : (port.fuel === "unrefined") ? MGT2.ShipCosts.fuelUnrefined : 0,
+            // Core p.257: A/B refine, C/D do not, E/X sell none; Companion p.133 sells both at C.
+            fuel,
+            fuelPrices: { refined: [fuelRefined], unrefined: [fuelUnrefined],
+                both: [fuelRefined, fuelUnrefined] }[fuel] ?? [],
             berthingPerDie: port.berthingPerDie,
             trafficDM: port.trafficDM
         };

@@ -66,7 +66,7 @@
 
 	<div class="block">
 		<div class="sect"><h3>{{systemFields.description.label}}</h3></div>
-		<prose-mirror name="system.description" value="{{system.description}}" toggled></prose-mirror>
+		<prose-mirror name="system.description" value="{{system.description}}" toggled>{{{enriched.description}}}</prose-mirror>
 	</div>
 
 	{{! Not merely badged GM. A stash's whole point is that players read it, so the referee's own
@@ -78,7 +78,7 @@
 			<h3>{{systemFields.notes.label}}</h3>
 			<span class="gm">{{localize 'MGT2.Actor.stash.GM'}}</span>
 		</div>
-		<prose-mirror name="system.notes" value="{{system.notes}}" toggled></prose-mirror>
+		<prose-mirror name="system.notes" value="{{system.notes}}" toggled>{{{enriched.notes}}}</prose-mirror>
 	</div>
 	{{/if}}
 </section>

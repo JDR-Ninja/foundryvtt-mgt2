@@ -1,0 +1,9 @@
+{{! Core p.241: a lot cannot be broken up, so an overfull hold is a fact the table has to solve
+    rather than something the card could have refused. What was aboard, then the lot this card moved. }}
+<div class="hold{{#if hold.over}} over{{/if}}">
+	<div class="line">
+		<span>{{localize 'MGT2.Trade.Card.Hold' ship=hold.ship used=hold.used capacity=hold.capacity}}</span>
+		{{#if hold.over}}<span class="hot">{{localize 'MGT2.Trade.Card.Over'}}</span>{{/if}}
+	</div>
+	<span class="bar"><i style="width: {{hold.aboard}}%"></i><i class="now" style="width: {{hold.lot}}%"></i>{{#if hold.cap}}<i class="cap" style="left: {{hold.cap}}%"></i>{{/if}}</span>
+</div>

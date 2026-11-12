@@ -496,6 +496,7 @@ export class SpecTradeDialog extends MGT2Screen(HandlebarsApplicationMixin(Appli
                 sale: SpecTradeDialog.tone(read.dm), percent: priced ? read.percent : null,
                 total, net: fee.net, fee: fee.fee, rate: fee.rate,
                 credits: MGT2Helper.credits(fee.net),
+                reading: read,
                 over: lot.tons > capacity,
                 sellable: (total > 0) && !this.#busy && this.canTrade
             };
@@ -804,7 +805,8 @@ export class SpecTradeDialog extends MGT2Screen(HandlebarsApplicationMixin(Appli
             });
             if ( item ) await this.#postLot({ goods: name, tons: offer.tons, percent: offer.percent,
                 base: goods.basePrice, total: offer.total, fee: offer.fee, rate: offer.rate,
-                settled: offer.due, sold: false });
+                settled: offer.due, sold: false,
+                reading: context.readings.find(read => read.side === "purchase") });
         }
         finally {
             this.#busy = false;
@@ -841,7 +843,7 @@ export class SpecTradeDialog extends MGT2Screen(HandlebarsApplicationMixin(Appli
             await item.delete();
             await this.#postLot({ goods: name, tons: row.tons, percent: row.percent,
                 base, total: row.total, fee: row.fee, rate: row.rate,
-                settled: row.net, sold: true });
+                settled: row.net, sold: true, reading: row.reading });
         }
         finally {
             this.#busy = false;
@@ -957,23 +959,37 @@ export class SpecTradeDialog extends MGT2Screen(HandlebarsApplicationMixin(Appli
         return this.#world?.name || this.#input.world;
     }
 
+    /** The three dice one side of the price roll read, in the order they were rolled. */
+    #priceFaces(side) {
+        const dice = MGT2.SpeculativeTrade.priceDice;
+        const faces = this.#priceRoll?.dice[0]?.results.map(result => result.result) ?? [];
+        return (side === "purchase") ? faces.slice(0, dice) : faces.slice(dice, dice * 2);
+    }
+
     /** ONE card, and it is about the CARGO. */
-    async #postLot({ goods, tons, percent, base, total, fee, rate, settled, sold }) {
-        const hold = this.#ship.system.cargo;
+    async #postLot({ goods, tons, percent, base, total, fee, rate, settled, sold, reading = null }) {
+        const priced = Number.isFinite(reading?.total);
         const content = await foundry.applications.handlebars.renderTemplate(
             "systems/mgt2/templates/chat/trade-lot.html", {
                 title: sold ? "MGT2.Trade.Card.Sold" : "MGT2.Trade.Card.Bought",
-                where: game.i18n.format("MGT2.Trade.At", { world: this.#marketName(), goods }),
+                world: this.#marketName(),
                 goods, tons, percent, rate,
+                // Core p.242's price roll, reprinted: the dice, the terms and where they landed.
+                reading: priced ? {
+                    faces: this.#priceFaces(reading.side),
+                    dm: MGT2Helper.signed(reading.dm, "+0"),
+                    total: reading.total,
+                    terms: reading.terms.filter(term => term.dm).map(term => ({
+                        label: term.label, dm: MGT2Helper.signed(term.dm), neg: term.dm < 0 }))
+                } : null,
                 base: MGT2Helper.credits(base),
-                credits: MGT2Helper.credits(total),
+                totalCredits: MGT2Helper.credits(total),
                 // Named on the card because the split screen posted the sum that MOVED and this is
                 // the line that explains why it is not the price.
                 fee: fee ? MGT2Helper.credits(fee) : null,
                 settled: MGT2Helper.credits(settled),
                 sold,
-                ship: this.#ship.name,
-                used: hold.used, capacity: hold.capacity, over: hold.over === true
+                hold: MGT2Helper.holdMeter(this.#ship, this.#ship.system.cargo, sold ? 0 : tons)
             });
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,
@@ -998,7 +1014,7 @@ export class SpecTradeDialog extends MGT2Screen(HandlebarsApplicationMixin(Appli
             // v14 appends no display of its own once `content` is set, so this costs the card
             // nothing and buys Dice So Nice and an auditable record. The search posts its own.
             rolls: [this.#priceRoll].filter(roll => roll),
-            content: `<div class="mgt2 theme-light card spectrade">
+            content: `<div class="mgt2 card spectrade">
                 <div class="chd"><div class="what"><h4>${
                     foundry.utils.escapeHTML(game.i18n.localize("MGT2.Trade.Speculative"))
                 }</h4><span class="tgt">${where}</span></div></div>${body}</div>`

@@ -199,7 +199,7 @@ export class SkipDebtsDialog extends MGT2Screen(HandlebarsApplicationMixin(Appli
             // The 2D the verdict was read from, so the card is a roll and not a report of one
             //.
             rolls: [this.#reading.roll],
-            content: `<div class="mgt2 theme-light card skipdebts">
+            content: `<div class="mgt2 card skipdebts">
                 <div class="chd"><div class="what"><h4>${title}</h4>
                     <span class="tgt">${ship}</span></div></div>${body}</div>`
         });

@@ -87,10 +87,10 @@
 
 // Three mechanisms put a sheet on the dark ground: MGT2's own ground setting, which outranks the
 // other two; Foundry's colourScheme, as the body class; and the per-document `themed theme-<x>`.
-// The :not()s keep an explicitly-light sheet light and let the setting overrule Foundry. Only the
-// anchors move: the derived block is declared on this same element, so it re-runs against the ink.
-body.theme-dark:not(.mgt2-ground-light) .mgt2:not(.theme-light),
-body.mgt2-ground-dark .mgt2:not(.theme-light),
+// The :not()s keep an explicitly-light sheet light and let the setting overrule Foundry, and leave
+// a chat card to its message. Only the anchors move: the derived block re-runs against the ink.
+body.theme-dark:not(.mgt2-ground-light) .mgt2:not(.theme-light, li.chat-message *),
+body.mgt2-ground-dark .mgt2:not(.theme-light, li.chat-message *),
 .mgt2.theme-dark
     --paper: var(--i-paper-d)
     --ink: var(--i-ink-d)
@@ -127,8 +127,7 @@ body.mgt2-chrome-off li.chat-message > .message-header
 // body as SIBLINGS (`templates/sidebar/chat-message.hbs`) and nothing inside the card can enclose
 // both. That makes the list item a third re-anchoring site: `mgt2` is on the card, one level down
 // inside `.message-content`, so the `li` inherits none of the anchors — and a message with no card
-// in it inherits nothing at all. Light only — core hard-codes `themed theme-light` on
-// `ol.chat-log`, so the log never meets the dark ground.
+// in it inherits nothing at all. Core pins the log light; the ground setting may force it dark.
 li.chat-message
     --chrome: var(--i-chrome)
     --paper: var(--i-paper)
@@ -136,6 +135,22 @@ li.chat-message
     --lgt: var(--i-lgt)
     --lgt-hot: var(--i-lgt-hot)
     @include derived
+
+// The dark log. The body is the window's plinth tone rather than the page's, so a card stands out of
+// the chrome frame around it, and every token re-runs against it on this same element.
+body.mgt2-ground-dark li.chat-message
+    --paper: color-mix(in oklab, var(--i-ink-d) var(--i-plinth-d), var(--i-paper-d))
+    --ink: var(--i-ink-d)
+    --lgt: var(--i-lgt-d)
+    --lgt-hot: var(--i-lgt-hot-d)
+
+// A card takes its message's ground whatever its stored HTML says: one posted while the log was
+// light-only carries `theme-light` on itself.
+li.chat-message .mgt2
+    --paper: inherit
+    --ink: inherit
+    --lgt: inherit
+    --lgt-hot: inherit
 
 // The band re-anchors on the chrome exactly as the window bar does, and for the same reason.
 li.chat-message > .message-header

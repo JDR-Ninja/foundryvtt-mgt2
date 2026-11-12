@@ -1,22 +1,27 @@
-{{! Pinned light: Foundry hard-codes `themed theme-light` on ol.chat-log, so a card never renders
-    on the dark ground. NOTHING BELOW IS STORED — every line's status, the markers and the foot are
-    derived from `game.messages` each render, so N players answering costs N messages and no updates. }}
-<div class="mgt2 theme-light card">
-	<div class="chd">
-		<div class="who">{{who}}</div>
-		<div class="what">
-			<h4>{{demand}}</h4>
-			{{! Not emitted at all when the referee hid the rung — no duplicate label, no CSS pair. }}
-			{{#if target}}<span class="tgt">{{target}}</span>{{/if}}
-		</div>
+{{! The ground is the log's. NOTHING BELOW IS STORED — every line's status, the markers and the
+    progress are derived from `game.messages` each render, so N players answering costs N messages
+    and no updates. }}
+<div class="mgt2 card request">
+	<div class="xh">
+		<div class="xk">{{who}}</div>
+		<h4>{{demand}}</h4>
+		{{! Not emitted at all when the referee hid the rung — no duplicate label, no CSS pair. }}
+		{{#if rung}}<div class="rung"><small>{{rung.word}}</small><b>{{rung.target}}+</b></div>{{/if}}
 	</div>
 	{{#if reason}}
-	<div class="cmsg">{{reason}}</div>
+	{{#if quote}}<q class="quote">{{reason}}</q>{{else}}<div class="cmsg">{{reason}}</div>{{/if}}
 	{{/if}}
 	{{#if terms.length}}
-	<div class="cmods">
-		{{#each terms}}<span{{#if negative}} class="neg"{{/if}}>{{label}}</span>{{/each}}
+	<div class="chips">
+		{{#each terms}}<span class="chip{{#if negative}} neg{{/if}}{{#if badge}} {{badge}}{{/if}}">{{label}}</span>{{/each}}
 	</div>
+	{{/if}}
+	{{#if progress.length}}
+	<div class="prog">
+		<span class="bar">{{#each progress}}<i class="{{this}}"></i>{{/each}}</span>
+		<span>{{foot}}</span>
+	</div>
+	{{#if opposedFoot}}<div class="prog sub"><span>{{opposedFoot}}</span></div>{{/if}}
 	{{/if}}
 	{{! Core p.61's six bands, one marker per answer. `.spread` is ONE class over two grounds — the
 	    Docket foot at 620 px and this card at 320 — so the markup is the Docket's own
@@ -33,29 +38,25 @@
 	</div>
 	{{/if}}
 	{{#each lines}}
-	<div class="dline{{#if tone}} {{tone}}{{/if}}{{#if mine}} mine{{/if}}{{#if resolver}} res{{/if}}{{#if message}} jump{{/if}}"{{#if message}} data-action="chainSource" data-message-id="{{message}}"{{/if}}>
+	<div class="dline pic{{#if tone}} {{tone}}{{/if}}{{#if mine}} mine{{/if}}{{#if resolver}} res{{/if}}{{#if message}} jump{{/if}}"{{#if message}} data-action="chainSource" data-message-id="{{message}}"{{/if}}>
+		{{#if img}}<img class="pf" src="{{img}}" alt="">{{else}}<span class="pf"></span>{{/if}}
 		{{! Core p.63-64's final check. The marker IS the control, as the Docket's own `self` marker
 		    is — it is a state, and a state with two values needs no menu. }}
 		<span class="n">{{#if pick}}<a class="pk" data-action="requestResolver" data-line="{{id}}"
-			data-tooltip aria-label="{{@root.resolverHint}}">{{#if resolver}}&#9673;{{else}}&#9675;{{/if}}</a>{{/if}}{{name}}{{#if late}}<span class="late">{{@root.lateLabel}}</span>{{/if}}</span>
+			data-tooltip aria-label="{{@root.resolverHint}}">{{#if resolver}}&#9673;{{else}}&#9675;{{/if}}</a>{{/if}}{{name}}{{#if you}}<span class="you">{{@root.youLabel}}</span>{{/if}}{{#if late}}<span class="late">{{@root.lateLabel}}</span>{{/if}}</span>
 		<span class="w">{{detail}}</span>
 		{{! The affordance is the DM and never a die: the three-state skill rule has to be legible at
 		    the moment of decision. Shift-click always opens the prompt. }}
 		{{#if chit}}
-		<a class="dm" data-action="requestRoll" data-line="{{id}}">{{chit}}<i class="fa-solid fa-caret-right"></i></a>
+		<a class="dm" data-action="requestRoll" data-line="{{id}}"><small>{{@root.rollLabel}}</small>{{chit}}<i class="fa-solid fa-caret-right"></i></a>
 		{{else}}
-		{{#if value}}<span class="v">{{value}}</span>{{else}}<span class="s">{{state}}</span>{{/if}}
+		{{#if value}}<span class="v">{{value}}</span>{{else}}<span class="s{{#if (eq status 'waiting')}} wait{{/if}}">{{state}}</span>{{/if}}
 		{{/if}}
 	</div>
 	{{/each}}
-	{{! The tally the referee chose, then Core p.62's own count — which is not a tally and has no
-	    control: it appears when an answer carried a comparison and never otherwise. }}
-	{{#if foot}}
-	<div class="cmods"><span>{{foot}}</span>{{#if opposedFoot}}<span>{{opposedFoot}}</span>{{/if}}</div>
-	{{/if}}
 	{{#if buttons.length}}
 	<div class="cbtns">
-		{{#each buttons}}<button data-action="{{action}}"{{#if hot}} class="hot"{{/if}}>{{label}}</button>{{/each}}
+		{{#each buttons}}<button data-action="{{action}}"{{#if hot}} class="hot"{{/if}}>{{#if icon}}<i class="{{icon}}"></i>{{/if}}{{label}}</button>{{/each}}
 	</div>
 	{{/if}}
 </div>

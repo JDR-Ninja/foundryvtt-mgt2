@@ -6,11 +6,12 @@
 	    seventh characteristic restates the other six beside it. `replaces` is the alien slot standing
 	    in for one of the six; a characteristic the species does not have at all is the field below,
 	    and replaced is not absent. }}
-	<div class="sect">
+	{{! In play the Specs tiles above read the same list, dice and DM together. }}
+	<div class="sect edit-only">
 		<h3>{{localize 'MGT2.Chargen.Frame.Rolls'}}</h3>
 		<span class="count">{{system.characteristicRolls.length}}</span>
 	</div>
-	<div class="stack" data-property="characteristicRolls">
+	<div class="stack edit-only" data-property="characteristicRolls">
 		{{#each system.characteristicRolls as |roll i|}}
 		<div class="entry" data-entry-index="{{i}}">
 			<div class="entryhead">
@@ -29,7 +30,6 @@
 				<input class="f edit-only" type="text" name="system.characteristicRolls.{{i}}.label" value="{{roll.label}}" placeholder="{{localize 'MGT2.Chargen.Frame.RollLabel'}}" />
 				<input class="f n edit-only" type="text" name="system.characteristicRolls.{{i}}.short" value="{{roll.short}}" placeholder="{{localize 'MGT2.Chargen.Frame.RollShort'}}" />
 				<input class="f n edit-only" type="text" name="system.characteristicRolls.{{i}}.sex" value="{{roll.sex}}" placeholder="{{localize 'MGT2.Chargen.Frame.LawSex'}}" />
-				<b class="play-only word">{{#if roll.label}}{{roll.label}}{{else}}{{localize (lookup @root.config.Characteristics roll.characteristic)}}{{/if}} {{roll.formula}}{{#if roll.replaces}} &rarr; {{localize (lookup @root.config.Characteristics roll.replaces)}}{{/if}}{{#if roll.sex}} &middot; {{roll.sex}}{{/if}}</b>
 				<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
 			</div>
 		</div>

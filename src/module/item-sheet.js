@@ -113,6 +113,21 @@ function stepCheckSummary(check, key) {
   return [named, target].filter(part => part).join(" ");
 }
 
+/** The tone each recurring-character reading takes on the contact sheet's pills; blank is neutral. */
+const CONTACT_TONES = {
+  relation: { Allie: "good", Rival: "warn", Enemy: "danger", Patron: "accent" },
+  attitude: { Unknow: "faint", Hostile: "danger", Unfriendly: "warn", Friendly: "good", Helpful: "good",
+    Complicated: "warn" },
+  status: { Alive: "good", Unknow: "faint", Dead: "danger" }
+};
+
+/** Past this many points a magazine or a Processing rating is drawn as a bar rather than counted. */
+const MAX_CELLS = 30;
+
+/** One cell per point, filled up to `value`; null where there are too many to count. */
+const cells = (value, of) => ((of > 0) && (of <= MAX_CELLS))
+  ? Array.from({ length: of }, (_v, index) => index < value) : null;
+
 /** The sub-type dictionary that names each type, where it has one. */
 const SUBTYPES = {
   item: MGT2.ItemSubType,
@@ -318,6 +333,19 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     return super._prepareTabs(group);
   }
 
+  /** How many entries a listing tab holds; null on a tab of prose, fields or tables. */
+  #tabCount(id, blocks, traitRows, effects, nested) {
+    if ( id === "effects" ) return effects.length;
+    if ( id === "traits" ) {
+      const rules = blocks.some(block => block.id === "rules") ? (this.item.system.rules?.length ?? 0) : 0;
+      return traitRows.reduce((sum, row) => sum + row.entries.length, rules);
+    }
+    const listing = block => ["contents", "software"].includes(block.id);
+    if ( (id === "contents") && blocks.some(listing)
+      && blocks.every(block => listing(block) || (block.id === "carried")) ) return nested.length;
+    return null;
+  }
+
   /** @inheritDoc */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
@@ -325,14 +353,23 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     const actor = item.actor;
     const traitRows = this.#prepareTraits();
     const { supply, slots } = this.#composition(traitRows);
+    const effects = prepareEffects(item);
+    const nested = this.#prepareNested(actor);
 
     // The tab record is auto-prepared by ApplicationV2, there being one group; each entry carries
-    // the blocks its body renders.
-    for ( const tab of Object.values(context.tabs) ) tab.blocks = slots[tab.id];
+    // the blocks its body renders, and a tab that lists things says how many.
+    for ( const tab of Object.values(context.tabs) ) {
+      tab.blocks = slots[tab.id];
+      const count = this.#tabCount(tab.id, slots[tab.id], traitRows, effects, nested);
+      if ( count === null ) continue;
+      tab.badge = String(count);
+      if ( count === 0 ) tab.cssClass = [tab.cssClass, "empty"].filterJoin(" ");
+    }
 
     return Object.assign(context, {
       item,
       system: item.system,
+      enriched: await MGT2Helper.enrichFields(item, ["description", "descriptionLong", "notes"]),
       source: item.toObject().system,
       systemFields: item.system.schema.fields,
       config: CONFIG.MGT2,
@@ -348,6 +385,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       supply,
       spine: this.#spine(),
       tags: this.#tags(),
+      level: this.#level(),
       subTypes: SUBTYPES[item.type] ?? null,
       hadContainer: actor != null,
       // A bag is offered neither itself nor anything already inside it.
@@ -367,23 +405,26 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       isGM: game.user.isGM,
       skills: this.#prepareSkills(actor),
       roll: this.#prepareRoll(actor),
-      effects: prepareEffects(item),
+      effects,
       // A Set is neither an array nor a plain object, so Handlebars cannot walk it.
       damageTypes: Array.from(item.system.damageType ?? [], key => game.i18n.localize(MGT2.DamageTypes[key])),
       scale: MGT2.WeaponScales[item.system.scale] ?? null,
       fireModes: this.#fireModes(),
       ammo: this.#ammo(),
+      processing: this.#processing(),
       destination: this.#destination(),
       citation: this.#citation(),
       componentTons: this.#componentTons(),
       componentCategories: TravellerItemSheet.#componentCategories(item.system.category),
       trade: this.#tradeColumns(),
-      nested: this.#prepareNested(actor),
+      nested,
       careerTables: this.#careerTables(),
       careerIssues: this.#careerIssues(),
       eventTables: this.#eventTables(),
       speciesFrame: this.#speciesFrame(),
+      speciesTiles: this.#speciesTiles(),
       contactActor: (item.type === "contact") ? this.#reference({ uuid: item.system.actor, name: "" }) : null,
+      contactPills: this.#contactPills(),
       contract: this.#contract()
     });
   }
@@ -483,6 +524,17 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     return name ? { uuid: reference.uuid, name, linked: false } : null;
   }
 
+  /** A contact's three readings as toned pills, each naming its field on hover. */
+  #contactPills() {
+    if ( this.item.type !== "contact" ) return null;
+    const system = this.item.system;
+    return [["relation", "Relation"], ["attitude", "Attitude"], ["status", "Status"]].map(([field, name]) => ({
+      label: `MGT2.Contact.${name}.${system[field]}`,
+      field: `MGT2.Items.${name}`,
+      tone: CONTACT_TONES[field][system[field]] ?? ""
+    }));
+  }
+
   /**
    * What a species frame reads as rather than what it stores: the term sequence derived against the
    * Core one, and the Set of characteristics it does without — a Set being neither an array
@@ -510,6 +562,51 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
         key => game.i18n.localize(MGT2.Characteristics[key])),
       matched: this.#matchedLaws()
     };
+  }
+
+  /** One tile per characteristic rolled, dice and species DM together, read as `Chargen.plan` reads the list. */
+  #speciesTiles() {
+    if ( this.item.type !== "species" ) return null;
+    const system = this.item.system;
+    const short = key => game.i18n.localize(`MGT2.Characteristics.${key}.short`);
+    const named = key => game.i18n.localize(MGT2.Characteristics[key] ?? key);
+    const tile = (characteristic, row = {}) => ({
+      key: characteristic,
+      short: row.short || short(characteristic),
+      name: row.label || named(characteristic),
+      formula: row.formula || "2D",
+      replaces: row.replaces ? named(row.replaces) : "",
+      dm: 0,
+      variants: []
+    });
+    const declared = system.characteristicRolls.filter(row => row.characteristic && !row.sex);
+    const tiles = declared.length ? declared.map(row => tile(row.characteristic, row))
+      : MGT2.RolledCharacteristics.filter(key => !system.withoutCharacteristics.has(key)).map(key => tile(key));
+    const find = key => tiles.find(entry => entry.key === key);
+
+    for ( const row of system.characteristicRolls ) {
+      if ( row.sex && row.characteristic ) find(row.characteristic)?.variants.push(`${row.sex} ${row.formula || "2D"}`);
+    }
+    for ( const modifier of system.modifiers ) {
+      if ( !modifier.characteristic || !modifier.value ) continue;
+      // A DM on a characteristic the species does not roll, Psionics say, still applies: its own tile.
+      let target = find(modifier.characteristic);
+      if ( !target ) {
+        target = { ...tile(modifier.characteristic), formula: "" };
+        tiles.push(target);
+      }
+      if ( modifier.sex ) target.variants.push(`${modifier.sex} ${MGT2Helper.signed(modifier.value)}`);
+      else target.dm += modifier.value;
+    }
+
+    const replaces = game.i18n.localize("MGT2.Chargen.Frame.Replaces");
+    return tiles.map(entry => ({
+      ...entry,
+      dmText: entry.dm ? MGT2Helper.signed(entry.dm) : "—",
+      tone: (entry.dm > 0) ? "up" : (entry.dm < 0) ? "down" : "",
+      tooltip: [entry.name, entry.replaces && `${replaces} ${entry.replaces}`, ...entry.variants]
+        .filter(part => part).join(" · ")
+    }));
   }
 
   /**
@@ -607,12 +704,10 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     const { type, system } = this.item;
     const tags = [];
 
-    if ( type === "talent" ) {
-      if ( system.skill.speciality
-        && !MGT2Helper.nameStatesSpeciality(this.item.name, system.skill.speciality) ) {
-        tags.push(system.skill.speciality);
-      }
-      tags.push(`${game.i18n.localize("MGT2.Items.Level")} ${system.level}`);
+    // A talent's level is not a tag: the pips beside the tags draw it, and the roll line states it.
+    if ( (type === "talent") && system.skill.speciality
+      && !MGT2Helper.nameStatesSpeciality(this.item.name, system.skill.speciality) ) {
+      tags.push(system.skill.speciality);
     }
     if ( type === "weapon" ) tags.push(game.i18n.localize(MGT2.WeaponScales[system.scale]?.label ?? ""));
     if ( type === "contract" ) {
@@ -623,6 +718,18 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     }
     if ( "tl" in system ) tags.push(game.i18n.localize(MGT2.TL[system.tl] ?? ""));
     return tags.filter(tag => tag !== "");
+  }
+
+  /** A talent's level as the character sheet's skill list draws it: four pips, filled up to it. */
+  #level() {
+    if ( this.item.type !== "talent" ) return null;
+    const value = this.item.system.level ?? 0;
+    return {
+      value,
+      zero: value <= 0,
+      label: game.i18n.format("MGT2.Items.LevelValue", { level: value }),
+      pips: Array.from({ length: Math.max(4, value) }, (_v, index) => index < value)
+    };
   }
 
   /** The skill list the roll block offers, which only an owned item has. */
@@ -720,8 +827,26 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       value: system.ammo,
       magazine,
       full: system.ammo >= magazine,
+      pips: cells(system.ammo, magazine),
+      fill: Math.round(100 * Math.min(system.ammo, magazine) / magazine),
       round: system.round?.name ?? null,
       actions: Math.max(1, MGT2Helper.traitScore(system.effective.traits, "slow-loader"))
+    };
+  }
+
+  /** What the running software spends of the host's Processing; null where none is stated. */
+  #processing() {
+    const { type, system } = this.item;
+    if ( !["computer", "armor", "equipment"].includes(type) ) return null;
+    // A null test and not a truthy one: Computer/0 is a rating and prints as one.
+    if ( (type !== "computer") && (system.processing === null) ) return null;
+    const used = system.processingUsed ?? 0;
+    const cap = system.processingCap ?? 0;
+    return {
+      used, cap,
+      over: used > cap,
+      cells: cells(used, cap),
+      fill: cap ? Math.round(100 * Math.min(used, cap) / cap) : 0
     };
   }
 
@@ -775,7 +900,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       // Most types carry neither array, and the context is built before the block list is consulted.
       const field = system.schema.fields[property];
       if ( !field ) continue;
-      rows.push(prepareTraitBlock(system[property], property, field.element.fields.family.initial, label));
+      rows.push(prepareTraitBlock(system[property], property, field.element.fields.family.initial, label, true));
     }
     return rows;
   }

@@ -133,7 +133,7 @@ export class Doses {
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor: drug.actor }),
-            content: `<div class="mgt2 theme-light card dose">
+            content: `<div class="mgt2 card dose">
                 <div class="chd"><div class="what"><h4>${escape(drug.name)}</h4>
                     <span class="tgt">${escape(game.i18n.format("MGT2.Doses.Taken", { n: doses }))}</span>
                 </div></div>
@@ -150,7 +150,7 @@ export class Doses {
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor }),
-            content: `<div class="mgt2 theme-light card dose">
+            content: `<div class="mgt2 card dose">
                 <div class="chd"><div class="what"><h4>${escape(dose.drug)}</h4>
                     <span class="tgt">${escape(game.i18n.localize("MGT2.Doses.WoreOff"))}</span>
                 </div></div>

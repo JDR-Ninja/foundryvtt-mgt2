@@ -27,8 +27,17 @@
 	{{/if}}
 
 	{{#if (eq item.type "species")}}
+	<div class="tiles play-only">
+		{{#each speciesTiles}}
+		<div class="tile {{tone}}{{#if variants.length}} sexed{{/if}}" data-tooltip="{{tooltip}}">
+			<span class="k">{{short}}{{#if replaces}}<sup>&#8634;</sup>{{/if}}</span>
+			<b>{{#if formula}}{{formula}}{{else}}&mdash;{{/if}}</b>
+			<span class="dm">{{dmText}}</span>
+		</div>
+		{{/each}}
+	</div>
 	{{#if system.modifiers.length}}
-	<table class="rows">
+	<table class="rows edit-only">
 		<thead>
 			<tr>
 				<th>{{localize 'MGT2.Items.Characteristics'}}</th>
@@ -62,20 +71,52 @@
 	{{/if}}
 
 	{{else}}
+	{{#if (eq item.type "weapon")}}
+	{{! `system.effective` and not `system.*`: while a round is loaded the weapon's own printed line
+	    is unchanged and every number on it is wrong. The round is named below. }}
+	<div class="plates play-only">
+		<div class="plate{{#unless system.effective.damage}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.Damage'}}</span><b>{{#if system.effective.damage}}{{system.effective.damage}}{{else}}&mdash;{{/if}}</b></div>
+		{{! Core p.165-167: a spacecraft weapon prints the furthest band it reaches, not a distance. }}
+		<div class="plate"><span class="lbl">{{localize 'MGT2.Items.Range'}}</span><b>{{#if system.range.isMelee}}{{localize 'MGT2.Melee'}}
+			{{else if (and scale.band system.range.band)}}{{localize (lookup (lookup config.ShipRangeBands system.range.band) 'label')}}
+			{{else if system.range.value}}{{system.range.value}}{{#if system.range.unit}}<span class="u">{{localize (concat "MGT2.MetricRange." system.range.unit)}}</span>{{/if}}
+			{{else}}&mdash;{{/if}}</b></div>
+		{{! Core folio 77: the shots left, counted against the capacity. Without the magazine rule the
+		    capacity alone is printed. }}
+		{{#if ammo}}
+		<div class="plate{{#unless ammo.value}} spent{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.Loaded'}}</span><b>{{ammo.value}}<span class="u">/ {{ammo.magazine}}</span></b>
+			{{#if ammo.pips}}<span class="pips">{{#each ammo.pips}}<i{{#if this}} class="on"{{/if}}></i>{{/each}}</span>
+			{{else}}<span class="bar"><i style="width: {{ammo.fill}}%"></i></span>{{/if}}
+		</div>
+		{{else}}
+		<div class="plate{{#unless system.effective.magazine}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span><b>{{#if system.effective.magazine}}{{system.effective.magazine}}{{else}}&mdash;{{/if}}</b></div>
+		{{/if}}
+	</div>
+	{{/if}}
+
+	{{#if (eq item.type "armor")}}
+	<div class="guard play-only">
+		<div class="shield"><svg viewBox="0 0 54 62" aria-hidden="true"><path d="M27 3 L50 11 V30 C50 45 40 54 27 59 C14 54 4 45 4 30 V11 Z"/></svg><b>{{system.protection}}</b></div>
+		<div class="gside">
+			<span class="lbl">{{localize 'MGT2.Items.Protection'}}</span>
+			{{#if system.requireSkill}}<span class="pill warn"><i class="fa-solid fa-triangle-exclamation"></i>{{localize 'MGT2.Items.RequiredSkill'}} · {{system.requireSkill}} {{system.requireSkillLevel}}</span>{{/if}}
+		</div>
+	</div>
+	{{/if}}
+
+	{{#if processing}}
+	<div class="gauge play-only{{#if processing.over}} over{{/if}}">
+		<span class="lbl">{{localize 'MGT2.Items.Processing'}}</span>
+		<b>{{processing.used}}<span class="u">/ {{processing.cap}}</span></b>
+		{{#if processing.cells}}<span class="cells">{{#each processing.cells}}<i{{#if this}} class="on"{{/if}}></i>{{/each}}</span>
+		{{else}}<span class="bar"><i style="width: {{processing.fill}}%"></i></span>{{/if}}
+	</div>
+	{{/if}}
+
 	<ul class="specs play-only">
 		{{#if (eq item.type "weapon")}}
-		{{! `system.effective` and not `system.*`: while a round is loaded the weapon's own printed line
-		    is unchanged and every number on it is wrong. The round is named below. }}
-		<li{{#unless system.effective.damage}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Damage'}}</span><b>{{#if system.effective.damage}}{{system.effective.damage}}{{else}}—{{/if}}</b></li>
-		<li><span class="lbl">{{localize 'MGT2.Items.Range'}}</span><b>{{#if system.range.isMelee}}{{localize 'MGT2.Melee'}}{{else}}{{system.range.value}}{{#if system.range.unit}}<span class="u">{{localize (concat "MGT2.MetricRange." system.range.unit)}}</span>{{/if}}{{/if}}</b></li>
 		{{#if damageTypes}}
 		<li><span class="lbl">{{localize 'MGT2.Items.DamageType'}}</span><b class="word">{{#each damageTypes}}{{#unless @first}}, {{/unless}}{{this}}{{/each}}</b></li>
-		{{/if}}
-		<li{{#unless system.effective.magazine}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span><b>{{system.effective.magazine}}</b></li>
-		{{! Core folio 77, beside the capacity it is counted against. A weapon with no magazine
-		    printed counts nothing and shows no row. }}
-		{{#if ammo}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Loaded'}}</span><b>{{ammo.value}}<span class="u">/ {{ammo.magazine}}</span></b></li>
 		{{/if}}
 		{{#if system.round}}
 		<li><span class="lbl">{{localize 'MGT2.Items.LoadedRound'}}</span><b class="word">{{system.round.name}}</b></li>
@@ -86,22 +127,23 @@
 		{{#if fireModes}}
 		<li><span class="lbl">{{localize 'MGT2.Items.FireModes'}}</span><b class="word">{{#each fireModes}}{{#unless @first}} · {{/unless}}{{this}}{{/each}}</b></li>
 		{{/if}}
-		<li{{#unless scale.fireControl}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.FireControl'}}</span><b>{{#if scale.fireControl}}{{showDM system.fireControl}}{{else}}—{{/if}}</b></li>
-		<li{{#unless scale.power}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Power'}}</span><b>{{#if scale.power}}{{system.power}}{{else}}—{{/if}}</b></li>
+		{{! Fire control and power draw exist only above ground scale, so a sidearm prints neither. }}
+		{{#if scale.fireControl}}
+		<li><span class="lbl">{{localize 'MGT2.Items.FireControl'}}</span><b>{{showDM system.fireControl}}</b></li>
+		{{/if}}
+		{{#if scale.power}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Power'}}</span><b>{{system.power}}</b></li>
+		{{/if}}
 		{{#if system.natural}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Natural'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
 		{{/if}}
 		{{/if}}
 
 		{{#if (eq item.type "armor")}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Protection'}}</span><b>{{system.protection}}</b></li>
 		{{#if conditional}}
 		<li><span class="lbl">{{localize 'MGT2.Items.ConditionalProtection'}}</span><b class="word">{{conditional}}</b></li>
 		{{/if}}
 		<li{{#unless system.radiations}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Radiations'}}</span><b>{{system.radiations}}</b></li>
-		{{#if system.requireSkill}}
-		<li><span class="lbl">{{localize 'MGT2.Items.RequiredSkill'}}</span><b class="word">{{system.requireSkill}} {{system.requireSkillLevel}}</b></li>
-		{{/if}}
 		{{#if system.powered}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Powered'}}</span><b class="word">{{#if system.active}}<i class="fa-solid fa-check"></i>{{else}}{{localize 'MGT2.Items.PowerInactive'}}{{/if}}</b></li>
 		{{/if}}
@@ -118,20 +160,10 @@
 		{{#if showSuitBreach}}
 		<li{{#if (eq system.breach "intact")}} class="off"{{/if}}><span class="lbl">{{localize 'MGT2.Items.SuitBreach'}}</span><b class="word">{{localize (lookup config.SuitBreaches system.breach)}}</b></li>
 		{{/if}}
-		{{! A null test and not a truthy one: Computer/0 is a rating and prints as one. }}
-		{{#unless (eq system.processing null)}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.processingUsed}}<span class="u">/ {{system.processingCap}}</span></b></li>
-		{{#if system.specialised.bonus}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Specialised'}}</span><b class="word">{{system.specialised.software}} {{showDM system.specialised.bonus}}</b></li>
-		{{/if}}
-		{{/unless}}
 		{{/if}}
 
-		{{#if (eq item.type "computer")}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.processingUsed}}<span class="u">/ {{system.processingCap}}</span></b></li>
-		{{#if system.specialised.bonus}}
+		{{#if (and processing system.specialised.bonus)}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Specialised'}}</span><b class="word">{{system.specialised.software}} {{showDM system.specialised.bonus}}</b></li>
-		{{/if}}
 		{{/if}}
 
 		{{#if (eq item.type "career")}}
@@ -163,13 +195,6 @@
 		{{#if system.augment.protection}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Protection'}}</span><b>{{system.augment.protection}}</b></li>
 		{{/if}}
-		{{! A null test and not a truthy one: Computer/0 is a rating and prints as one. }}
-		{{#unless (eq system.processing null)}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Processing'}}</span><b>{{system.processingUsed}}<span class="u">/ {{system.processingCap}}</span></b></li>
-		{{#if system.specialised.bonus}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Specialised'}}</span><b class="word">{{system.specialised.software}} {{showDM system.specialised.bonus}}</b></li>
-		{{/if}}
-		{{/unless}}
 		{{/if}}
 
 		{{#if (eq system.subType "software")}}
@@ -277,6 +302,7 @@
 
 	<div class="grid edit-only">
 		{{#if (eq item.type "weapon")}}
+		<h4 class="gsub">{{localize 'MGT2.Items.Group.Attack'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Scale'}}</span>
 			<select class="f" name="system.scale" data-scale-select>
@@ -315,6 +341,19 @@
 			<span class="lbl">{{localize 'MGT2.Items.DamageType'}}</span>
 			{{formInput systemFields.damageType name="system.damageType" value=system.damageType localize=true}}
 		</label>
+		<label{{#unless scale.fireControl}} class="off"{{/unless}}>
+			<span class="lbl">{{localize 'MGT2.Items.FireControl'}}</span>
+			{{formInput systemFields.fireControl name="system.fireControl" value=system.fireControl classes="f num" disabled=(not scale.fireControl)}}
+		</label>
+		<label{{#unless scale.power}} class="off"{{/unless}}>
+			<span class="lbl">{{localize 'MGT2.Items.Power'}}</span>
+			{{formInput systemFields.power name="system.power" value=system.power classes="f num" disabled=(not scale.power)}}
+		</label>
+		<label class="check">
+			{{formInput systemFields.natural name="system.natural" value=system.natural}}
+			<span>{{localize 'MGT2.Items.Natural'}}</span>
+		</label>
+		<h4 class="gsub">{{localize 'MGT2.Items.Group.Ammunition'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span>
 			{{formInput systemFields.magazine name="system.magazine" value=system.magazine classes="f num"}}
@@ -328,21 +367,10 @@
 			<span class="lbl">{{localize 'MGT2.Items.Loaded'}}</span>
 			{{formInput systemFields.loaded name="system.loaded" value=source.loaded classes="f num" placeholder=(localize 'MGT2.Items.LoadedFull')}}
 		</label>
-		<label{{#unless scale.fireControl}} class="off"{{/unless}}>
-			<span class="lbl">{{localize 'MGT2.Items.FireControl'}}</span>
-			{{formInput systemFields.fireControl name="system.fireControl" value=system.fireControl classes="f num" disabled=(not scale.fireControl)}}
-		</label>
-		<label{{#unless scale.power}} class="off"{{/unless}}>
-			<span class="lbl">{{localize 'MGT2.Items.Power'}}</span>
-			{{formInput systemFields.power name="system.power" value=system.power classes="f num" disabled=(not scale.power)}}
-		</label>
-		<label class="check">
-			{{formInput systemFields.natural name="system.natural" value=system.natural}}
-			<span>{{localize 'MGT2.Items.Natural'}}</span>
-		</label>
 		{{/if}}
 
 		{{#if (eq item.type "armor")}}
+		<h4 class="gsub">{{localize 'MGT2.Items.Group.Protection'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Protection'}}</span>
 			{{formInput systemFields.protection name="system.protection" value=system.protection classes="f num"}}
@@ -360,6 +388,7 @@
 			<span class="lbl">{{localize 'MGT2.Items.Radiations'}}</span>
 			{{formInput systemFields.radiations name="system.radiations" value=system.radiations classes="f num"}}
 		</label>
+		<h4 class="gsub">{{localize 'MGT2.Items.Group.Wearing'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.RequiredSkill'}}</span>
 			<input class="f" type="text" name="system.requireSkill" value="{{system.requireSkill}}" />
@@ -402,6 +431,7 @@
 			<select class="f" name="system.breach">{{selectOptions config.SuitBreaches selected=system.breach localize=true}}</select>
 		</label>
 		{{/if}}
+		<h4 class="gsub">{{localize 'MGT2.Items.Group.Computer'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Processing'}}</span>
 			{{formInput systemFields.processing name="system.processing" value=system.processing classes="f num"}}
@@ -715,6 +745,7 @@
 		    guard because it is true for exactly the types built on the shared physical template —
 		    `component` and `cargo` each declare a field of the same name meaning something else. }}
 		{{#if supply}}
+		{{#if (or (eq item.type "weapon") (eq item.type "armor"))}}<h4 class="gsub">{{localize 'MGT2.Items.Group.General'}}</h4>{{/if}}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.TL'}}</span>
 			<select class="f" name="system.tl">{{selectOptions config.TL selected=system.tl localize=true}}</select>

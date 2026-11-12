@@ -40,6 +40,16 @@
 		> [data-application-part="package"]
 			flex: none
 
+// The closing screen's two group decisions stand side by side under the table.
+.mgt2.application.chargen-close > .window-content
+	display: grid
+	grid-template-columns: repeat(2, minmax(0, 1fr))
+	grid-template-rows: auto minmax(0, 1fr) auto
+	column-gap: 12px
+	> [data-application-part="masthead"],
+	> [data-application-part="roster"]
+		grid-column: 1 / -1
+
 // --------------------------------------------
 //  The masthead — the session's own state, which is not a document
 // --------------------------------------------
@@ -68,6 +78,18 @@
 		font-family: var(--mono)
 		font-size: 10.5px
 		color: var(--faint)
+	// The closing screen's two counts, the rolls owed in the accent while any are left.
+	.stand
+		padding: 1px 9px 2px
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--mute)
+		border: 1px solid var(--rule)
+		border-radius: 999px
+		&.owed
+			color: var(--accent-text)
+			border-color: var(--accent-line)
+			background: var(--accent-soft)
 	// The door onto the closing screen, and the close's own teardown button. Pushed right so the
 	// masthead reads left to right as state, then action.
 	.closing,
@@ -121,7 +143,9 @@
 	thead th.tcol
 		width: 4.2rem
 	thead th.sel
-		background: var(--accent-soft)
+		box-shadow: inset 0 -2px 0 var(--accent-text)
+		.who b
+			color: var(--accent-text)
 
 	.who
 		position: relative
@@ -188,6 +212,9 @@
 		padding: 7px 9px
 		border-bottom: 1px solid var(--rule-soft)
 		white-space: nowrap
+	td.tno.now
+		font-weight: 600
+		color: var(--accent-text)
 	td.cell
 		padding: 6px 9px 7px
 		border-bottom: 1px solid var(--rule-soft)
@@ -251,6 +278,20 @@
 			width: 1.05rem
 			font-style: normal
 			color: var(--faint)
+		// A verdict is a disc in its status colour, the mark knocked out of it as on the step rail.
+		svg
+			display: block
+			width: 11px
+			height: 11px
+			margin-top: 0.2em
+			circle
+				fill: currentColor
+			path
+				fill: none
+				stroke: var(--paper)
+				stroke-width: 1.6
+				stroke-linecap: round
+				stroke-linejoin: round
 	li.good i
 		color: var(--good)
 	li.bad i
@@ -260,12 +301,66 @@
 .mgt2 .termgrid td.cell.gone
 	background: repeating-linear-gradient(135deg, transparent 0 5px, var(--rule-soft) 5px 6px)
 	cursor: default
+.mgt2 .termgrid td.cell.sel
+	background-color: var(--hover)
+// Each Traveller's term in progress: a bar down its edge, its step, and the share of the term behind it.
+// Only the selected column's takes the accent, so the accent marks where the table is acting.
 .mgt2 .termgrid td.cell.now
-	box-shadow: inset 0 0 0 1px var(--accent-text)
-	background: var(--accent-soft)
+	--live: var(--mute)
+	box-shadow: inset 3px 0 0 var(--live)
+	&.sel
+		--live: var(--accent-text)
+	.stepnow
+		display: inline-flex
+		align-items: center
+		gap: 6px
+		max-width: 100%
+		margin: 0 0 4px
+		padding: 1px 8px 1px 6px
+		font-family: var(--cond)
+		font-size: 11px
+		font-weight: 600
+		letter-spacing: 0.04em
+		color: var(--live)
+		border: 1px solid var(--rule)
+		border-radius: 999px
+		i
+			position: relative
+			flex: none
+			width: 7px
+			height: 7px
+			border-radius: 50%
+			background: currentColor
+			&::after
+				content: ""
+				position: absolute
+				inset: 0
+				border-radius: inherit
+				background: currentColor
+				opacity: 0
+		b
+			font-family: var(--mono)
+			font-size: 9.5px
+			font-weight: 400
+			color: var(--faint)
+	&.sel .stepnow
+		background: var(--accent-soft)
+		border-color: var(--accent-line)
+	.prog
+		display: block
+		max-width: 10rem
+		height: 2px
+		margin: 0 0 6px
+		border-radius: 1px
+		background: var(--track)
+		> span
+			display: block
+			height: 100%
+			border-radius: inherit
+			background: var(--live)
 
-// A column taking a frame: an outline rather than a ground, because `.now` already owns the accent
-// ground and an accepting cell has to read over it. `deny` is deliberately unpainted here — a
+// A column taking a frame: an outline rather than a ground, so it reads over the column's tint and
+// the current term's bar. `deny` is deliberately unpainted here — a
 // Traveller dragged to the roster row crosses every column on the way, and each one flashing a
 // refusal is noise the drop's own message already covers.
 .mgt2 .termgrid th.over,
@@ -302,90 +397,249 @@
 	border-top: 1px solid var(--rule)
 	padding: 9px 14px 11px
 
+	// The once-only steps share the caption's line, so the rail below it has the whole width.
+	.head
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		gap: 6px 16px
 	.lbl
+		flex: 1 1 14rem
 		font-family: var(--cond)
 		font-size: 9px
 		font-weight: 700
 		letter-spacing: 0.16em
 		text-transform: uppercase
 		color: var(--faint)
-	ol,
-	ul.pre
-		margin: 5px 0 0
-		padding: 0
-		list-style: none
-		display: flex
-		flex-wrap: wrap
-		gap: 4px
-	li
-		padding: 2px 7px 3px
+	.at
+		flex: none
 		font-family: var(--mono)
 		font-size: 10px
-		color: var(--mute)
-		border: 1px solid var(--rule)
-		border-radius: 2px
+		color: var(--accent-text)
 	// A chip is a BUTTON for a column the viewer may write to and a readout for every other, so the
-	// button is stripped back to the chip rather than the chip restyled around a button.
+	// button is stripped back to the text rather than the text restyled around a button.
 	li button
 		all: unset
 		cursor: pointer
 		font: inherit
 		color: inherit
-		&:hover
-			color: var(--accent-text)
-	// A step this frame ADDS to the Core sequence, and one it DELETES from it. Both derived.
-	li.own
-		border-color: var(--accent-text)
-		color: var(--accent-text)
-	// Where the loop is, which is the flag's own cursor and not a position in this list.
-	li.now
-		background: var(--accent-soft)
-		border-color: var(--accent-text)
-		color: var(--accent-text)
-		font-weight: 600
-	li.cut
-		text-decoration: line-through
-		color: var(--faint)
-	// Nothing to do this term: the cursor passes over it, and the tooltip says why.
-	li.idle
-		color: var(--faint)
-		border-style: dashed
-		cursor: help
-	// Taken this term: the loop refuses it again, and only the referee's reset reopens it.
-	li.done
-		border-color: var(--good)
-		color: var(--good)
-		a.reset
-			margin-left: 5px
-			cursor: pointer
-			color: var(--faint)
-			&:hover
-				color: var(--accent-text)
-	// The one step that is not a term step. Dashed until it has been taken, and then it carries the
-	// code it produced.
+
+	ul.pre
+		display: flex
+		flex: none
+		margin: 0
+		padding: 0
+		list-style: none
+		background: var(--hover)
+		border-radius: 4px
 	li.once
 		display: flex
-		align-items: baseline
+		align-items: center
 		gap: 6px
-		border-style: dashed
-	li.once.set
-		border-style: solid
-		border-color: var(--good)
-		color: var(--good)
+		padding: 4px 10px
+		font-family: var(--body)
+		font-size: 11.5px
+		color: var(--mute)
+		& + li.once
+			border-left: 1px solid var(--rule-soft)
 		b
+			font-family: var(--mono)
+			font-size: 10.5px
 			font-weight: 600
-			letter-spacing: 0.08em
-	// The allowance is a reading and not an outcome: it moves with EDU right up to the moment it is
-	// spent, so the chip carries it in both states.
-	li.once.bg b
-		font-family: var(--mono)
-		font-weight: 600
+			letter-spacing: 0.06em
+			color: var(--ink)
+		button:hover
+			color: var(--accent-text)
+		span[data-tooltip]
+			cursor: help
+	.mark
+		flex: none
+		width: 14px
+		height: 14px
+		circle
+			fill: none
+			stroke: var(--faint)
+			stroke-width: 1.2
+			stroke-dasharray: 2.5 2
+		path
+			display: none
+			fill: none
+			stroke: var(--paper)
+			stroke-width: 1.7
+			stroke-linecap: round
+			stroke-linejoin: round
+	li.once.set .mark
+		circle
+			fill: var(--accent-text)
+			stroke: none
+		path
+			display: inline
 	// PSI 0 is a taken step whose answer is no, so it reads as settled rather than as achieved.
 	li.once.set.nil
-		border-color: var(--rule)
+		b
+			color: var(--faint)
+		.mark circle
+			fill: none
+			stroke: var(--faint)
+			stroke-dasharray: none
+		.mark path
+			display: none
+
+	// The line fills up to the cursor; each node draws its step's state.
+	ol.loop
+		display: grid
+		grid-template-columns: repeat(var(--n), minmax(0, 1fr))
+		margin: 9px 0 0
+		padding: 0
+		list-style: none
+		> li
+			position: relative
+			text-align: center
+			&::before,
+			&::after
+				content: ""
+				position: absolute
+				top: 14px
+				height: 2px
+				background: var(--rule)
+				pointer-events: none
+			&::before
+				left: 0
+				right: 50%
+			&::after
+				left: 50%
+				right: 0
+			&:first-child::before,
+			&:last-child::after
+				display: none
+			&.past::before,
+			&.past::after,
+			&.now::before
+				background: var(--accent-text)
+			> button,
+			> span
+				display: block
+				box-sizing: border-box
+				// A block button still shrinks to its text, which pushes a short label off-centre.
+				width: 100%
+				padding: 3px 4px 0
+				font-family: var(--cond)
+				font-size: 12px
+				font-weight: 500
+				line-height: 1.2
+				letter-spacing: 0.02em
+				color: var(--mute)
+				overflow-wrap: break-word
+				hyphens: auto
+				// Stretched over the node, so the whole step answers the pointer and the tooltip.
+				&::after
+					content: ""
+					position: absolute
+					inset: 0
+			&:has(> button:hover)
+				> button
+					color: var(--accent-text)
+				.disc
+					stroke: var(--accent-text)
+			&:has(> button:focus-visible)
+				outline: 2px solid var(--accent-text)
+				outline-offset: 1px
+				border-radius: 3px
+	.node
+		position: relative
+		z-index: 1
+		display: block
+		width: 30px
+		height: 30px
+		margin: 0 auto
+		overflow: visible
+		pointer-events: none
+		.halo,
+		.tick,
+		.dot,
+		.dash
+			display: none
+		.disc
+			fill: var(--paper)
+			stroke: var(--edge)
+			stroke-width: 1.3
+		.num
+			font-family: var(--mono)
+			font-size: 10px
+			font-weight: 600
+			text-anchor: middle
+			fill: var(--faint)
+		.tick
+			fill: none
+			stroke: var(--paper)
+			stroke-width: 1.9
+			stroke-linecap: round
+			stroke-linejoin: round
+		.dot,
+		.add
+			fill: var(--accent-text)
+		.dash
+			stroke: var(--faint)
+			stroke-width: 1.3
+		.halo
+			fill: var(--accent-soft)
+			transform-box: fill-box
+			transform-origin: center
+	// Taken this term: the loop refuses it again, and only the referee's reset reopens it.
+	.loop > li.done .node
+		.disc
+			fill: var(--accent-text)
+			stroke: none
+		.tick
+			display: inline
+		.num
+			display: none
+	// Where the loop is, which is the flag's own cursor and not a position in this list.
+	.loop > li.now
+		> button,
+		> span
+			font-weight: 600
+			color: var(--ink)
+		.node
+			.disc
+				stroke: var(--accent-text)
+				stroke-width: 2.2
+			.dot,
+			.halo
+				display: inline
+			.num
+				display: none
+	// Nothing to do this term: the cursor passes over it, and the tooltip says why.
+	.loop > li.idle
+		> span
+			font-style: italic
+			color: var(--faint)
+			cursor: help
+		.node
+			.disc
+				stroke: var(--faint)
+				stroke-dasharray: 3 2.4
+			.dash
+				display: inline
+			.num
+				display: none
+	.loop > li a.reset
+		position: absolute
+		z-index: 2
+		top: -4px
+		right: calc(50% + 11px)
+		font-size: 10px
 		color: var(--faint)
-	li.once span[data-tooltip]
-		cursor: help
+		opacity: 0
+		cursor: pointer
+		&:hover
+			color: var(--accent-text)
+	.loop > li:hover a.reset
+		opacity: 1
+	.cuts
+		margin: 6px 0 0
+		font-size: 11px
+		color: var(--faint)
 	.why
 		margin: 6px 0 0
 		font-size: 12px
@@ -396,6 +650,19 @@
 		font-family: var(--mono)
 		font-size: 10px
 		color: var(--faint)
+
+@media (prefers-reduced-motion: no-preference)
+	.mgt2.chargen .steps .loop > li.now .halo,
+	.mgt2 .termgrid td.cell.now.sel .stepnow i::after
+		animation: mgt2-step-pulse 2.4s ease-out infinite
+
+@keyframes mgt2-step-pulse
+	from
+		opacity: 0.7
+		transform: scale(1)
+	to
+		opacity: 0
+		transform: scale(1.8)
 
 // The tray: an entry is never just a value.
 
@@ -462,11 +729,11 @@
 		margin: 14px
 		font-size: 12px
 		color: var(--faint)
-	// Seven fixed columns, and a resizable window: the floor is the width the screen opens at, so it
+	// Six fixed columns, and a resizable window: the floor is the width the screen opens at, so it
 	// scrolls below that.
 	table
 		width: 100%
-		min-width: 58rem
+		min-width: 54rem
 		border-collapse: separate
 		border-spacing: 0
 		table-layout: fixed
@@ -487,8 +754,15 @@
 	th.n,
 	td.n
 		text-align: right
+	th:first-child
+		width: 9rem
+	th.n
+		width: 8.5rem
+	// The pension column, the second figure: a short amount, so the room goes to what was taken.
+	th.n + th.n
+		width: 6.5rem
 	th.a
-		width: 7.4rem
+		width: 9.5rem
 	td
 		vertical-align: top
 		padding: 7px 9px 8px
@@ -497,10 +771,8 @@
 		font-size: 10.5px
 		color: var(--mute)
 		overflow-wrap: break-word
-	td.big
-		font-size: 15px
-		font-weight: 600
-		color: var(--accent-text)
+	td.nil
+		color: var(--faint)
 	tbody tr:last-child td
 		border-bottom: 0
 
@@ -538,15 +810,43 @@
 			color: var(--faint)
 		.pen
 			color: var(--accent-text)
-	.sh, .pre
+	.sh, .pre, .cap
 		display: block
 		font-size: 9.5px
 		color: var(--faint)
+	.meter
+		display: flex
+		justify-content: flex-end
+		gap: 3px
+		margin: 4px 0 3px
+		i
+			width: 14px
+			height: 4px
+			border-radius: 2px
+			background: var(--track)
+		i.used
+			background: var(--mute)
+		&.full i.used
+			background: var(--faint)
 	.vouchers li
 		display: flex
-		gap: 5px
-		align-items: baseline
-		margin-bottom: 2px
+		flex-wrap: wrap
+		gap: 0 6px
+		align-items: center
+		margin-bottom: 3px
+		// A redeemed row's verdict: the filled disc of the grid and the rail.
+		.mk
+			flex: none
+			width: 12px
+			height: 12px
+			circle
+				fill: var(--good)
+			path
+				fill: none
+				stroke: var(--paper)
+				stroke-width: 1.6
+				stroke-linecap: round
+				stroke-linejoin: round
 		i
 			flex: 0 0 auto
 			font-style: normal
@@ -556,18 +856,45 @@
 			letter-spacing: 0.12em
 			text-transform: uppercase
 			color: var(--faint)
+		// The redeem action is an outlined check that fills on hover, as a redeemed verdict reads.
 		a
+			flex: none
 			cursor: pointer
 			color: var(--faint)
+			svg
+				display: block
+				width: 12px
+				height: 12px
+				circle
+					fill: none
+					stroke: currentColor
+					stroke-width: 1.2
+				path
+					fill: none
+					stroke: currentColor
+					stroke-width: 1.5
+					stroke-linecap: round
+					stroke-linejoin: round
 			&:hover
 				color: var(--good)
+				circle
+					fill: currentColor
+				path
+					stroke: var(--paper)
 		.up
+			flex: none
 			font-size: 9px
 			color: var(--danger)
-	// Redeemed or given up: kept on the row rather than removed — a referee auditing a sheet needs it.
-	.vouchers li.spent
+	// Given up: kept on the row rather than removed — a referee auditing a sheet needs it.
+	.vouchers li.given
 		color: var(--faint)
-		text-decoration: line-through
+		.lab
+			text-decoration: line-through
+		.mk circle
+			fill: none
+			stroke: var(--faint)
+			stroke-width: 1.2
+			stroke-dasharray: 2.4 1.8
 	.none
 		font-size: 10px
 		color: var(--faint)
@@ -582,6 +909,46 @@
 		letter-spacing: 0.08em
 		text-transform: uppercase
 		line-height: 1.6
+	// The screen's main action, carrying the count it spends.
+	td.a button.roll
+		display: flex
+		align-items: center
+		justify-content: center
+		gap: 7px
+		white-space: nowrap
+		color: var(--accent-text)
+		border-color: var(--accent-line)
+		background: var(--accent-soft)
+		b
+			min-width: 1.2rem
+			padding: 0 4px
+			font-family: var(--mono)
+			font-size: 10px
+			font-weight: 600
+			letter-spacing: 0
+			line-height: 1.5
+			color: var(--paper)
+			background: var(--accent-text)
+			border-radius: 999px
+		&:disabled
+			color: var(--faint)
+			border-color: var(--rule)
+			background: none
+			b
+				background: var(--faint)
+	td.a button.fin
+		border-color: transparent
+		background: none
+		color: var(--mute)
+		&:hover
+			color: var(--ink)
+	td.a .owed
+		display: inline-block
+		padding: 1px 8px 2px
+		font-size: 10px
+		color: var(--accent-text)
+		border: 1px solid var(--accent-line)
+		border-radius: 999px
 
 // --------------------------------------------
 //  The ship election and the package draft
@@ -589,9 +956,27 @@
 
 .mgt2.chargen-close .election,
 .mgt2.chargen-close .packagedraft
-	border-top: 1px solid var(--rule)
-	padding: 9px 14px 11px
+	display: flex
+	align-items: flex-start
+	gap: 11px
+	margin: 12px 0 14px
+	padding: 10px 12px 11px
+	border: 1px solid var(--rule)
+	border-radius: 6px
 
+	.ico
+		flex: none
+		width: 22px
+		height: 22px
+		margin-top: 1px
+		fill: none
+		stroke: var(--faint)
+		stroke-width: 1.5
+		stroke-linecap: round
+		stroke-linejoin: round
+	.body
+		flex: 1 1 auto
+		min-width: 0
 	.lbl
 		font-family: var(--cond)
 		font-size: 9px
@@ -603,13 +988,20 @@
 			margin-left: 8px
 			color: var(--accent-text)
 	.edit
-		margin-left: 10px
+		display: inline-block
+		margin-top: 7px
+		padding: 1px 8px 2px
 		cursor: pointer
-		font-family: var(--mono)
+		font-family: var(--cond)
 		font-size: 10px
-		color: var(--faint)
+		font-weight: 600
+		letter-spacing: 0.08em
+		text-transform: uppercase
+		color: var(--accent-text)
+		border: 1px solid var(--accent-line)
+		border-radius: 4px
 		&:hover
-			color: var(--accent-text)
+			background: var(--accent-soft)
 	.why,
 	.none,
 	.settled
@@ -673,10 +1065,26 @@
 
 // The Traveller who starts the campaign owning the ship. One of them, by construction.
 .mgt2.chargen-close .election li.keeps
-	border-color: var(--accent-text)
-	background: var(--accent-soft)
+	align-items: center
 	b
-		color: var(--accent-text)
+		color: var(--ink)
+	.mk
+		flex: none
+		width: 12px
+		height: 12px
+		circle
+			fill: var(--good)
+		path
+			fill: none
+			stroke: var(--paper)
+			stroke-width: 1.6
+			stroke-linecap: round
+			stroke-linejoin: round
+// The two cards share the row the grid gives them: the gutters are the window's.
+.mgt2.chargen-close .election
+	margin-left: 14px
+.mgt2.chargen-close .packagedraft
+	margin-right: 14px
 
 .mgt2.chargen-close .packagedraft li
 	padding: 0
@@ -837,3 +1245,70 @@
 		letter-spacing: 0.09em
 		text-transform: uppercase
 		color: var(--accent-text)
+
+// The skill-table picker: the career's tables side by side, as printed. Every open cell holds a radio
+// stretched over it, so a click anywhere picks; a closed table keeps its place and its reason.
+.mgt2 .dlg.sktables table.sk
+	table-layout: fixed
+	th,
+	td
+		position: relative
+		padding: 4px 6px
+	th
+		vertical-align: bottom
+	td
+		font-size: 12.5px
+	.die
+		width: 2rem
+		font-family: var(--mono)
+		font-size: 10.5px
+		letter-spacing: 0
+		text-align: center
+		color: var(--faint)
+	.pick
+		display: flex
+		flex-wrap: wrap
+		align-items: baseline
+		gap: 2px 6px
+		cursor: var(--cursor-pointer)
+		input
+			position: absolute
+			inset: 0
+			margin: 0
+			opacity: 0
+			cursor: inherit
+	.why
+		flex-basis: 100%
+		font-family: var(--mono)
+		font-size: 9.5px
+		letter-spacing: 0
+		text-transform: none
+	// Above the stretched radio, so its tooltip answers the pointer; a click still reaches the label.
+	.lvl
+		position: relative
+		z-index: 1
+		margin-left: auto
+		padding: 0 4px
+		font-family: var(--mono)
+		font-size: 10px
+		font-weight: 400
+		color: var(--accent-text)
+		border: 1px solid var(--accent-line)
+		border-radius: 2px
+	.locked
+		color: var(--faint)
+		.pick
+			cursor: var(--cursor-default)
+	th:has(input:focus-visible),
+	td:has(input:focus-visible)
+		outline: 2px solid var(--accent-text)
+		outline-offset: -2px
+	&.cells td:has(input:checked)
+		color: var(--accent-text)
+		background: var(--accent-soft)
+
+// The die picks the row, so a radio checked anywhere in a column lights the whole of it.
+@for $i from 2 through 9
+	.mgt2 .dlg.sktables table.sk:not(.cells):has(tr > :nth-child(#{$i}) input:checked) tr > :nth-child(#{$i})
+		color: var(--accent-text)
+		background: var(--accent-soft)

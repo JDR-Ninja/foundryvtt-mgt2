@@ -20,10 +20,11 @@
 		{{#each species.modifiers}}<li><span class="lbl">{{label}}</span><b>{{showDM value}}</b></li>{{/each}}
 	</ul>
 	{{/if}}
-	{{! Apart from the chip row above: these are the species' and not the referee's to edit. }}
+	{{! Apart from the chip row above: these are the species' and not the referee's to edit. Play mode
+	    sets each beside its rule gloss, as the editable row does. }}
 	{{#if species.traits.length}}
-	<ul class="codes ro">
-		{{#each species.traits}}<li class="code"><b>{{this}}</b></li>{{/each}}
+	<ul class="codes ro{{#if species.glossed}} glossed{{/if}}">
+		{{#each species.traits}}<li class="code"><b>{{this}}</b></li>{{#if ../species.glossed}}<li class="gloss play-only">{{lookup ../species.glosses @index}}</li>{{/if}}{{/each}}
 	</ul>
 	{{/if}}
 	{{else}}

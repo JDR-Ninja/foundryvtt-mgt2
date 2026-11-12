@@ -272,7 +272,7 @@ export class MGT2Combatant extends Combatant {
             speaker: ChatMessage.getSpeaker({ actor: this.actor, token: this.token }),
             // The card wrapper is what puts this message in the log's own frame — a bare <p> now
             // reads as broken beside a neighbour with a band.
-            content: `<div class="mgt2 theme-light card"><p class="bare">${
+            content: `<div class="mgt2 card"><p class="bare">${
                 game.i18n.format("MGT2.Combatant.ReactionTaken", {
                     name: this.name,
                     reaction: game.i18n.localize(reaction.label),
@@ -322,7 +322,7 @@ export class MGT2Combatant extends Combatant {
 
         return ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ actor: this.actor, token: this.token }),
-            content: `<div class="mgt2 theme-light card"><p class="bare">${
+            content: `<div class="mgt2 card"><p class="bare">${
                 game.i18n.format("MGT2.Combatant.TacticsTaken", {
                     name: this.name,
                     effect: MGT2Helper.signed(value, "+0"),

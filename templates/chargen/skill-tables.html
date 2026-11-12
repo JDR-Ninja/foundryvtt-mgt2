@@ -1,0 +1,40 @@
+{{! A career's skill tables side by side, as the book prints them: one column per table and the die down
+    the side. A closed table stays in view with its reason and carries no radio. }}
+<div class="mgt2-dialog">
+	<div class="dlg sktables">
+		<table class="rows sk{{#if pickRow}} cells{{/if}}">
+			<thead>
+				<tr>
+					<th class="die">1D</th>
+					{{#each columns as |col|}}
+					<th class="{{#if col.locked}}locked{{/if}}">
+						<label class="pick">
+							{{#if col.pick}}<input type="radio" name="pick" value="{{col.pick}}" {{checked col.checked}} />{{/if}}
+							<span class="tn">{{col.label}}</span>
+							{{#if col.locked}}<span class="why">{{col.locked}}</span>{{/if}}
+						</label>
+					</th>
+					{{/each}}
+				</tr>
+			</thead>
+			<tbody>
+				{{#each lines as |line|}}
+				<tr>
+					<td class="die">{{line.n}}</td>
+					{{#each line.cells as |cell|}}
+					<td class="{{#if cell.locked}}locked{{/if}}">
+						{{#if cell.label}}
+						<label class="pick">
+							{{#if cell.pick}}<input type="radio" name="pick" value="{{cell.pick}}" {{checked cell.checked}} />{{/if}}
+							<span>{{cell.label}}</span>
+							{{#if cell.held}}<b class="lvl" data-tooltip="{{cell.held.tip}}">{{cell.held.text}}</b>{{/if}}
+						</label>
+						{{/if}}
+					</td>
+					{{/each}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+</div>

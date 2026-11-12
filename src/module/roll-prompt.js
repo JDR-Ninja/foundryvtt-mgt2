@@ -19,8 +19,30 @@ class RollPromptDialog extends GuideButtonMixin(DialogV2) {
 /** The average of 2D, and the roll the Effect ladder reads. */
 const AVERAGE_2D = 7;
 
-/** The strip spans this many bands either side of zero; anything beyond clamps onto the end. */
-const LADDER_REACH = 6;
+/** How many ways each total comes up: 2D, and 3D keeping the high two (Boon) or the low two (Bane). */
+const DICE_ODDS = (() => {
+    const add = (map, total) => map.set(total, (map.get(total) ?? 0) + 1);
+    const plain = new Map(), boon = new Map(), bane = new Map();
+    for ( let a = 1; a <= 6; a++ ) {
+        for ( let b = 1; b <= 6; b++ ) {
+            add(plain, a + b);
+            for ( let c = 1; c <= 6; c++ ) {
+                const [low, mid, high] = [a, b, c].sort((x, y) => x - y);
+                add(boon, mid + high);
+                add(bane, low + mid);
+            }
+        }
+    }
+    return { "": [plain, 36], boon: [boon, 216], bane: [bane, 216] };
+})();
+
+/** The percentage of throws of these dice that total at least `need`. */
+function chance(need, stance = "") {
+    const [counts, all] = DICE_ODDS[stance] ?? DICE_ODDS[""];
+    let hits = 0;
+    for ( const [total, count] of counts ) if ( total >= need ) hits += count;
+    return Math.round((100 * hits) / all);
+}
 
 /** Checks a card has offered to the next roll — what the card's "Chain into…" control arms. */
 const armedHere = new Set();
@@ -843,20 +865,20 @@ export class RollPromptHelper {
         // Effect before the dice: a player choosing between options is choosing an Effect, and the
         // reading only means anything against an assumed roll, so the caption states the 7.
         const effect = AVERAGE_2D + total - target.value;
-        const marker = Math.max(-LADDER_REACH, Math.min(LADDER_REACH, effect));
-        const cells = [];
-        for ( let e = -LADDER_REACH; e <= LADDER_REACH; e++ ) {
-            const cell = document.createElement("span");
-            cell.className = e >= 0 ? "s" : "f";
-            if ( e === marker ) cell.classList.add("here");
-            if ( e === -LADDER_REACH ) cell.textContent = `≤${sign(e)}`;
-            else if ( e === LADDER_REACH ) cell.textContent = `${sign(e)}≤`;
-            else cell.textContent = sign(e);
-            cells.push(cell);
-        }
-        out("ladder").replaceChildren(...cells);
         out("effect").textContent = sign(effect);
         out("effectBand").textContent = game.i18n.localize(MGT2Helper.getEffectBand(effect).label);
+
+        const stance = ["boon", "bane"].includes(form.elements.imposedStance?.value)
+            ? form.elements.imposedStance.value : "";
+        const need = target.value - total;
+        const odds = chance(need, stance);
+        out("chance").textContent = `${odds}%`;
+        out("odds").style.setProperty("--p", odds);
+        out("odds").classList.toggle("assumed", target.assumed);
+        out("ladder").style.setProperty("--p", `${odds}%`);
+        // An imposed stance leaves no choice of dice, so the other two readings would be moot.
+        out("alt").textContent = stance ? "" : ["boon", "bane"].map(key =>
+            `${game.i18n.localize(`MGT2.RollPrompt.${key.capitalize()}`)} ${chance(need, key)}%`).join(" · ");
     }
 
     /** RH folio 115's ceiling against the check as it stands. */

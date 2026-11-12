@@ -1,5 +1,6 @@
 import { PACKAGE_SETTING } from "./chargen-close.js";
 import { CreationTablesMenu, SharedTables } from "./chargen-tables.js";
+import { COLLAPSE_MODES, COLLAPSE_SETTING, refreshFolds } from "./chat-cards.js";
 import { CHAIN_INTO_SETTING, refreshChainInto } from "./chatHelper.js";
 import { MGT2 } from "./config.js";
 import { applyGuideButton } from "./guide.js";
@@ -88,6 +89,16 @@ export function applyPalette(preset = game.settings.get("mgt2", "palettePreset")
         body.classList.add(...on);
     }
     for ( const app of foundry.applications.instances.values() ) groundWindow(app.element, ground);
+    applyChatGround(ground);
+}
+
+/** Core pins the log light (`log.hbs`, `notifications.hbs`, `ChatPopout`), so only a forced dark ground moves it. */
+export function applyChatGround(ground = groundFor()) {
+    const scheme = (ground === "dark") ? "dark" : "light";
+    for ( const element of foundry.applications.detached.querySelectorAll(".chat-log, .chat-popout") ) {
+        element.classList.remove("theme-light", "theme-dark");
+        element.classList.add("themed", `theme-${scheme}`);
+    }
 }
 
 /**
@@ -242,6 +253,18 @@ export const registerSettings = function () {
         choices: GROUNDS,
         requiresReload: false,
         onChange: ground => applyPalette(undefined, undefined, ground)
+    });
+
+    game.settings.register("mgt2", COLLAPSE_SETTING, {
+        name: "MGT2.Settings.chatCollapse.name",
+        hint: "MGT2.Settings.chatCollapse.hint",
+        scope: "client",
+        config: true,
+        default: "older",
+        type: String,
+        choices: COLLAPSE_MODES,
+        requiresReload: false,
+        onChange: refreshFolds
     });
 
     game.settings.register("mgt2", "paletteChrome", {

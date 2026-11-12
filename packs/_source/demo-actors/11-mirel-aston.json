@@ -140,7 +140,8 @@
           "education": 1
         },
         "cost": 0,
-        "note": "advancedEducation"
+        "note": "advancedEducation",
+        "byHand": false
       }
     ],
     "entitlements": [],
@@ -2873,15 +2874,15 @@
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival",
               "event",
               "commission",
               "advance",
-              "skill",
               "ageing",
               "decide"
             ],
-            "note": "A quiet word from the Harbourmaster. Gain an Ally, and a DM+1 held for your next Qualification roll. · Ally ×1 · Pending: DM. · Skill roll: Vacc Suit 1"
+            "note": "Skill roll: Vacc Suit 1 · A quiet word from the Harbourmaster. Gain an Ally, and a DM+1 held for your next Qualification roll. · Ally ×1 · Pending: DM."
           },
           {
             "term": 3,
@@ -2891,14 +2892,17 @@
             "ejected": false,
             "closed": false,
             "kind": "",
-            "outcomes": [],
+            "outcomes": [
+              "skillRoll"
+            ],
             "steps": [
               "elect",
               "qualify",
               "basic",
+              "skill",
               "survival"
             ],
-            "note": ""
+            "note": "Skill roll: Investigate 1"
           }
         ],
         "track": {
@@ -3059,7 +3063,7 @@
       "type": "talent",
       "system": {
         "subType": "skill",
-        "level": 0,
+        "level": 1,
         "skill": {
           "speciality": "",
           "reduceEncumbrance": false
@@ -3280,6 +3284,18 @@
             "career": "dwmamMBg2TZkALYi",
             "term": 2,
             "note": "Spent on a skill table"
+          },
+          {
+            "value": 1,
+            "career": "dwmamMBg2TZkALYi",
+            "term": 3,
+            "note": "The term's own skill roll"
+          },
+          {
+            "value": -1,
+            "career": "dwmamMBg2TZkALYi",
+            "term": 3,
+            "note": "Spent on a skill table"
           }
         ],
         "tracks": {},
@@ -3328,16 +3344,17 @@
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify"},
             {"step":"basic"},
+            {"step":"skill","faces":[2],"answers":[{"title":"Pick a skill table (1 left)","pick":"service","press":"ok"}]},
             {"step":"survival","faces":[4,4]},
             {"step":"event","faces":[4,5]},
             {"step":"commission"},
             {"step":"advance","faces":[1,3]},
-            {"step":"skill","faces":[2],"answers":[{"title":"Pick a skill table (1 left)","pick":"service","press":"ok"}]},
             {"step":"ageing"},
             {"step":"decide","answers":[{"title":"Continue or leave","press":"stay"}]},
             {"step":"elect","answers":[{"title":"Start-of-term elections","press":"no"}]},
             {"step":"qualify"},
             {"step":"basic"},
+            {"step":"skill","faces":[4],"answers":[{"title":"Pick a skill table (1 left)","pick":"service","press":"ok"}]},
             {"step":"survival","faces":[4,4]}
           ]
         }

@@ -109,8 +109,8 @@ async function pick(actor, plan, count) {
         rows,
         held: held.join(", "),
         options: offered.map(one => ({ value: one })),
-        // Every skill anyone already holds, so a second Traveller types against the same words.
-        known: [...new Set([...offered, ...held])].sort((a, b) => a.localeCompare(b))
+        // Core p.18: a skill held at 0 or better gains nothing at 0, so it is named above and never offered.
+        known: offered.filter(name => Grants.gains(actor, { name, level: 0, mode: "atLeast" }))
     });
     return DialogV2.prompt({
         window: { title: "MGT2.Chargen.Background.Title", icon: "fa-solid fa-graduation-cap" },

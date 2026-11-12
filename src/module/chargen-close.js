@@ -245,6 +245,7 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
     static #row(actor) {
         const summary = Muster.summary(actor);
         const ships = Ships.rows(actor);
+        const pension = summary.pension + Muster.pensionInLieuOfShip(actor, Ships.givenUp(actor));
         return {
             id: actor.id, name: actor.name, actor,
             canEdit: actor.canUserModify(game.user, "update"),
@@ -263,10 +264,12 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
                 pension: career.pension ? MGT2Helper.credits(career.pension) : ""
             })),
             cash: summary.cash,
+            cashSlots: Array.fromRange(summary.cash.limit).map(index => index < summary.cash.taken),
+            cashFull: summary.cash.taken >= summary.cash.limit,
             preplay: MGT2Helper.credits(summary.preplayLimit),
             pension: summary.pension,
-            pensionText: MGT2Helper.credits(summary.pension
-                + Muster.pensionInLieuOfShip(actor, Ships.givenUp(actor))),
+            pensionPaid: pension > 0,
+            pensionText: MGT2Helper.credits(pension),
             shipShares: summary.shipShares,
             ships: { held: ships.reduce((sum, row) => sum + (row.count || 1), 0), kept: Ships.kept(actor),
                 givenUp: Ships.givenUp(actor) },

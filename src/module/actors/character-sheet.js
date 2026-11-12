@@ -17,8 +17,8 @@ import { RollPromptHelper } from "../roll-prompt.js";
 import { GuideButtonMixin } from "../guide.js";
 import { Rules } from "../rules.js";
 import { SheetModeMixin } from "../sheet-mode.js";
-import { appendTraitText, bindTraitInput, formatTrait, prepareTraitBlock, refreshTraitNumbers, traitConditional }
-  from "../traits.js";
+import { appendTraitText, bindTraitInput, formatTrait, prepareTraitBlock, refreshTraitNumbers, traitConditional,
+  traitGloss } from "../traits.js";
 import { CharacterPrompts } from "./character-prompts.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -26,6 +26,9 @@ const { ActorSheetV2 } = foundry.applications.sheets;
 const { DragDrop } = foundry.applications.ux;
 
 const PARTS_PATH = "systems/mgt2/templates/actors";
+
+// The header pill's colour for an NPC's attitude; an unlisted one stays neutral.
+const ATTITUDE_TONES = Object.freeze({ Hostile: "bad", Unfriendly: "warn", Friendly: "good", Helpful: "good" });
 
 /** The Traveller character sheet. @extends {ActorSheetV2} */
 export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsApplicationMixin(ActorSheetV2))) {
@@ -292,6 +295,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       sidebar: this._prepareTabs("sidebar"),
       inventory: this._prepareTabs("inventory")
     };
+    context.enriched = await MGT2Helper.enrichFields(this.actor, ["biography", "notes", "description"]);
 
     return Object.assign(context, this.#prepareViewModel());
   }
@@ -305,7 +309,10 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     const view = { _id: item.id, name: item.name, img: item.img, type: item.type, system: item.system };
     // A skill row prints its level in a cell of its own, so it takes the roll's own name without it
     // — composing one from the speciality would state it twice on a pack Item already named for it.
-    if ( item.type === "talent" ) view.rollName = item.getRollDisplay(false);
+    if ( item.type === "talent" ) {
+      view.rollName = item.getRollDisplay(false);
+      view.pips = Array.fromRange(4).map(index => index < (item.system.level ?? 0));
+    }
     return view;
   }
 
@@ -561,7 +568,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
           v.range = sys.range.isMelee
             ? game.i18n.localize("MGT2.Melee")
             : MGT2Helper.getRangeDisplay(sys.range);
-          if (sys.traits?.length > 0) v.subInfo = sys.traits.map(formatTrait).join(", ");
+          v.traitList = (sys.traits ?? []).map(formatTrait);
+          if (v.traitList.length > 0) v.subInfo = v.traitList.join(", ");
           weapons.push(v);
           break;
 
@@ -676,7 +684,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     });
 
     model.traits = prepareTraitBlock(actor.system.ownTraits, "traits",
-      actor.system.traitFamily, "MGT2.Items.Traits");
+      actor.system.traitFamily, "MGT2.Items.Traits", true);
     model.species = this.#prepareSpecies();
     // Empty for every human, which is what keeps the sex control off the sheet — not a setting.
     // Paired here because `selectOptions` reads a BARE string array positionally and would write
@@ -719,6 +727,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     const item = this.actor.system.species;
     if ( !item ) return null;
     const source = item.system.source;
+    const glosses = this.actor.system.speciesTraits.map(traitGloss);
     return {
       id: item.id,
       name: item.name,
@@ -732,7 +741,9 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
           label: game.i18n.localize(CONFIG.MGT2.Characteristics[modifier.characteristic]),
           value: modifier.value
         })),
-      traits: this.actor.system.speciesTraits.map(formatTrait)
+      traits: this.actor.system.speciesTraits.map(formatTrait),
+      glosses,
+      glossed: glosses.some(Boolean)
     };
   }
 
@@ -1414,15 +1425,31 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       game.i18n.localize(MGT2.MetricRange[key]).toLowerCase() === units);
     if (!scale || (scale !== weapon?.system.range?.unit)) return null;
 
+    const distance = TravellerActorSheet.#distanceTo(actor, token, targets[0]);
+    return (distance === null) ? null : { distance, target: targets[0].document.name };
+  }
+
+  /** Centre to centre from the attacker, rounded to 0.1, or null where the attacker has no token. */
+  static #distanceTo(actor, token, target) {
     // The sheet's own token first: an unlinked NPC opened from its token is *that* token, not a
     // sibling.
     const placed = token ? null : actor.getActiveTokens();
     const from = token ?? ((placed?.length === 1) ? placed[0] : null);
     const start = (from?.document ?? from)?.getCenterPoint();
     if (!start) return null;
+    const measured = canvas.grid.measurePath([start, target.document.getCenterPoint()]).distance;
+    return Math.round(measured * 10) / 10;
+  }
 
-    const measured = canvas.grid.measurePath([start, targets[0].document.getCenterPoint()]).distance;
-    return { distance: Math.round(measured * 10) / 10, target: targets[0].document.name };
+  /** Who this user had targeted as the attack was rolled, which the damage card applies to. */
+  static #targetsOf(actor, token) {
+    if (!canvas?.ready) return [];
+    return Array.from(game.user?.targets ?? [], target => ({
+      uuid: target.document.uuid,
+      name: target.document.name,
+      img: MGT2Helper.tokenPortrait(target.document),
+      distance: TravellerActorSheet.#distanceTo(actor, token, target)
+    }));
   }
 
   /** Core p.74's Common Modifiers, read off the prompt. @returns {[string, number][]} */
@@ -1769,13 +1796,13 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       return ui.notifications.warn(MGT2Helper.plural("MGT2.Errors.WeaponShort", magazine.ammo,
         { name: rollOptions.weapon.name, rounds: spend, ammo: magazine.ammo }));
     }
-    let ammoLine = null;
+    let ammo = null;
     if (magazine) {
       const left = magazine.ammo - spend;
       await rollOptions.weapon.update({ "system.loaded": left });
-      ammoLine = game.i18n.format("MGT2.Chat.Roll.Ammo",
-        { spent: spend, left, magazine: magazine.magazine });
+      ammo = { left, magazine: magazine.magazine, spent: spend };
     }
+    const targets = (itemObj?.type === "weapon") ? TravellerActorSheet.#targetsOf(actor, token) : [];
 
     let posted;
     for (let attack = 1; attack <= attacks; attack++) {
@@ -1850,6 +1877,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         };
       }
 
+      if (targets.length) flags.mgt2.targets = targets;
       if (firstAidPoints > 0) flags.mgt2.firstAid = { points: firstAidPoints };
       // A flag rather than a field on the check: like the damage payload it is an offer resolved
       // later and on another actor, and it rides no rule the schema validates.
@@ -1868,7 +1896,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         chainSources,
         showButtons: true,
         fireModeLine: TravellerActorSheet.#fireModeLine({ burst, rounds, attack, attacks }),
-        ammoLine: (attack === 1) ? ammoLine : null,
+        ammo: (attack === 1) ? ammo : null,
         psiLine,
         extendedLine,
         mishapLine,
@@ -2260,11 +2288,21 @@ export class NpcActorSheet extends TravellerActorSheet {
       reaction: NpcActorSheet.#reaction(system),
       size: NpcActorSheet.#size(system),
       experience: system.experienceRow,
+      attitudeTone: ATTITUDE_TONES[system.attitude] ?? "",
       flyBand: NpcActorSheet.#speedBandLabel(system.speed.fly),
       armourConditional: NpcActorSheet.#armourConditional(system),
-      track: NpcActorSheet.#track(system)
+      track: NpcActorSheet.#track(system),
+      // Play mode folds what holds nothing into one line; edit mode keeps every block to fill in.
+      vacant: { attacks: !context.naturals.length, biography: NpcActorSheet.#blank(system.biography),
+        notes: NpcActorSheet.#blank(system.notes) }
     };
     return context;
+  }
+
+  /** Rich text with neither words nor an image in it. */
+  static #blank(html) {
+    const text = String(html ?? "");
+    return !/<img\b/i.test(text) && !text.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
   }
 
   /** Fight or Flight, ready to render: the two thresholds, and whatever the referee has to settle. */
@@ -2274,6 +2312,7 @@ export class NpcActorSheet extends TravellerActorSheet {
     return {
       label: row.label,
       flee: row.flee, attack: row.attack, altAttack: row.altAttack,
+      thresholds: Boolean(row.flee || row.attack || row.altAttack),
       gate: row.gate ? `MGT2.Reactions.Gates.${row.gate}` : null,
       fleeGate: row.fleeGate ? `MGT2.Reactions.Gates.${row.fleeGate}` : null
     };
@@ -2314,16 +2353,29 @@ export class NpcActorSheet extends TravellerActorSheet {
     const scale = 2 * hits.max;
     const pct = points => Math.min(100, Math.max(0, Math.round((points / scale) * 100)));
     const states = system.states;
+    const marks = [
+      { at: 25, label: "MGT2.Actor.npc.DrivenOff", hit: states.drivenOff },
+      { at: 45, label: "MGT2.Actor.Unconscious", hit: states.unconscious },
+      { at: 50, label: "MGT2.Actor.Dead", hit: states.dead },
+      { at: 100, label: "MGT2.Actor.npc.Destroyed", hit: states.destroyed }
+    ];
+    // Marks closer than a label is wide share one caption, centred between them.
+    const labels = [];
+    for ( const mark of marks ) {
+      const last = labels.at(-1);
+      if ( last && ((mark.at - last.to) < 12) ) {
+        Object.assign(last, { to: mark.at, hit: last.hit || mark.hit });
+        last.text.push(game.i18n.localize(mark.label));
+      }
+      else labels.push({ from: mark.at, to: mark.at, hit: mark.hit, text: [game.i18n.localize(mark.label)] });
+    }
     return {
       wound: pct(hits.damage),
       stun: pct(system.stun),
       stunFrom: pct(hits.damage - system.stun),
-      marks: [
-        { at: 25, label: "MGT2.Actor.npc.DrivenOff", hit: states.drivenOff },
-        { at: 45, label: "MGT2.Actor.Unconscious", hit: states.unconscious },
-        { at: 50, label: "MGT2.Actor.Dead", hit: states.dead },
-        { at: 100, label: "MGT2.Actor.npc.Destroyed", hit: states.destroyed }
-      ]
+      marks,
+      labels: labels.map(label => ({ at: (label.from + label.to) / 2, hit: label.hit, text: label.text.join(" · "),
+        anchor: (label.to === 100) ? "end" : ((label.from === 0) ? "start" : "") }))
     };
   }
 

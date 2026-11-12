@@ -2,40 +2,43 @@
     ONE SKILL AT A TIME IN TURN. No package ships, so the referee types the line their book prints.
     Whose turn it is is the fewest picks, so the draft carries no cursor and an interrupted one resumes. }}
 <div class="packagedraft" data-actor-id="{{package.turnId}}">
-	{{#if solo}}
-	<span class="lbl">{{localize 'MGT2.Chargen.Close.PackageTitle'}}</span>
-	<p class="why">{{localize 'MGT2.Chargen.Close.SoloPackage'}}</p>
-	<ol class="solo">
-		{{#each soloPicks as |who|}}
-		<li data-actor-id="{{who.id}}"><b>{{who.name}}</b>
-			{{#if who.taken}}<span>{{who.taken}}</span>
-			{{else if who.canEdit}}<button type="button" data-action="takeSoloSkill">{{localize 'MGT2.Chargen.Close.SoloTake'}}</button>{{/if}}
-		</li>
-		{{/each}}
-	</ol>
-	{{else}}
-	<span class="lbl">
-		{{localize 'MGT2.Chargen.Close.PackageTitle'}}
-		{{#if package.name}}<b>{{package.name}}</b>{{/if}}
-	</span>
-	{{#if package.canEdit}}
-	<a class="edit" data-action="editPackage">{{localize 'MGT2.Chargen.Close.PackageEdit'}}</a>
-	{{/if}}
-	{{#if package.declared}}
-		{{#if package.drained}}
-		<p class="settled">{{plural 'MGT2.Chargen.Close.PackageDone' package.declared}}</p>
-		{{else}}
-		<p class="why">{{localize 'MGT2.Chargen.Close.PackageTurn' name=package.turnName}}
-			<span class="tally">{{#each package.takenBy as |who|}}{{who.name}} {{who.n}}{{#unless @last}} · {{/unless}}{{/each}}</span>
-		</p>
-		<ol>
-			{{#each package.remaining as |skill|}}
-			<li><button type="button" data-action="takeSkill" data-entry="{{skill}}">{{skill}}</button></li>
+	<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4"/><path d="M12 12v8"/></svg>
+	<div class="body">
+		{{#if solo}}
+		<span class="lbl">{{localize 'MGT2.Chargen.Close.PackageTitle'}}</span>
+		<p class="why">{{localize 'MGT2.Chargen.Close.SoloPackage'}}</p>
+		<ol class="solo">
+			{{#each soloPicks as |who|}}
+			<li data-actor-id="{{who.id}}"><b>{{who.name}}</b>
+				{{#if who.taken}}<span>{{who.taken}}</span>
+				{{else if who.canEdit}}<button type="button" data-action="takeSoloSkill">{{localize 'MGT2.Chargen.Close.SoloTake'}}</button>{{/if}}
+			</li>
 			{{/each}}
 		</ol>
+		{{else}}
+		<span class="lbl">
+			{{localize 'MGT2.Chargen.Close.PackageTitle'}}
+			{{#if package.name}}<b>{{package.name}}</b>{{/if}}
+		</span>
+		{{#if package.declared}}
+			{{#if package.drained}}
+			<p class="settled">{{plural 'MGT2.Chargen.Close.PackageDone' package.declared}}</p>
+			{{else}}
+			<p class="why">{{localize 'MGT2.Chargen.Close.PackageTurn' name=package.turnName}}
+				<span class="tally">{{#each package.takenBy as |who|}}{{who.name}} {{who.n}}{{#unless @last}} · {{/unless}}{{/each}}</span>
+			</p>
+			<ol>
+				{{#each package.remaining as |skill|}}
+				<li><button type="button" data-action="takeSkill" data-entry="{{skill}}">{{skill}}</button></li>
+				{{/each}}
+			</ol>
+			{{/if}}
+		{{else}}
+		<p class="none">{{localize 'MGT2.Chargen.Close.PackageNone'}}</p>
 		{{/if}}
-	{{else}}
-	<p class="none">{{localize 'MGT2.Chargen.Close.PackageNone'}}</p>
-	{{/if}}
-	{{/if}}
+		{{#if package.canEdit}}
+		<a class="edit" data-action="editPackage">{{localize 'MGT2.Chargen.Close.PackageEdit'}}</a>
+		{{/if}}
+		{{/if}}
+	</div>
 </div>

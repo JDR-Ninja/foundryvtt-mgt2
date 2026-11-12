@@ -176,7 +176,7 @@ export class VoyageScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplicat
                 VoyageScreen.#stop(stop).then(({ document, ...entry }) => ({ ...entry, index }))))
         };
         context.leg = VoyageScreen.#leg(system, parsecs, next);
-        context.fuel = this.#fuel(parsecs);
+        context.fuel = this.#fuel(parsecs, here.fuelGrade);
         context.jump = this.#jump(system, parsecs);
         context.ship = VoyageScreen.#shipStats(system);
         context.crew = await this.#crew();
@@ -235,14 +235,18 @@ export class VoyageScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplicat
      * the one row is `ops.fuel`, the real level — Poor Maintenance leaks a percentage of CAPACITY,
      * so both are needed (Core p.155).
      */
-    #fuel(parsecs) {
+    #fuel(parsecs, portGrade) {
         const system = this.#ship.system;
         const cap = system.fuel.tons;
         const level = system.ops.fuel;
         const burn = system.jumpFuel(parsecs);
         const fill = cap > 0 ? Math.min(100, (level / cap) * 100) : 0;
         const round = value => Math.round(value * 10) / 10;
+        const grade = (key, price, active) => ({ key, price, active, label: `MGT2.Actor.world.FuelGrade.${key}` });
         return {
+            // Companion p.133: a port selling both grades lets the tank take either, each at its price.
+            grades: (portGrade === "both") ? [grade("refined", MGT2.ShipCosts.fuelRefined, system.fuel.refined),
+                grade("unrefined", MGT2.ShipCosts.fuelUnrefined, !system.fuel.refined)] : null,
             level: round(level), cap: round(cap), burn: round(burn),
             rows: [{ key: "level", label: game.i18n.localize("MGT2.Voyage.InTheTank"),
                 why: system.fuel.refined
@@ -470,6 +474,8 @@ export class VoyageScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplicat
                     "system.voyage.next.parsecs": Math.max(1, Number(input.value) || 1) });
             case "fuel":
                 return this.#ship.update({ "system.ops.fuel": Math.max(0, Number(input.value) || 0) });
+            case "fuelGrade":
+                return this.#ship.update({ "system.fuel.refined": input.value === "refined" });
             case "ruleset":
                 // The reading belongs to the procedure it was read under, so switching discards it.
                 this.#reading = null;
@@ -675,7 +681,7 @@ export class VoyageScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplicat
             speaker: ChatMessage.getSpeaker({ actor: this.#ship }),
             // The dice the reading was produced from, so the card is a roll and not a report of it.
             rolls: this.#reading.rolls ?? [],
-            content: `<div class="mgt2 theme-light card misjump">
+            content: `<div class="mgt2 card misjump">
                 <div class="chd"><div class="what"><h4>${title}</h4>
                     <span class="tgt">${ship}</span></div></div>${body}</div>`
         });

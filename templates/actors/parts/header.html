@@ -77,23 +77,23 @@
 		{{! States are the session loop, not structure: they stay live in both modes. }}
 		<div class="states">
 			{{#if (rule 'encumbrance')}}
-			<label data-tooltip="{{localize 'MGT2.Actor.EncumbranceHint'}}">
+			<label class="warn" data-tooltip="{{localize 'MGT2.Actor.EncumbranceHint'}}">
 				<input type="checkbox" {{checked system.states.encumbrance}} disabled />{{localize 'MGT2.Actor.Encumbrance'}}
 			</label>
 			{{/if}}
-			<label data-tooltip="{{localize 'MGT2.Actor.FatigueHint'}}">
+			<label class="warn" data-tooltip="{{localize 'MGT2.Actor.FatigueHint'}}">
 				{{formInput systemFields.states.fields.fatigue name="system.states.fatigue" value=system.states.fatigue}}{{localize 'MGT2.Actor.Fatigue'}}
 			</label>
 			{{! Companion folio 80: the second stage of starvation, whose intervals are days — so the
 			    referee ticks it and the tooltip carries the END-derived counts. }}
 			{{#if (rule 'starvation')}}
-			<label data-tooltip="{{plural 'MGT2.Actor.StarvingHint' system.starvation.before before=system.starvation.before impaired=system.starvation.impaired}}">
+			<label class="warn" data-tooltip="{{plural 'MGT2.Actor.StarvingHint' system.starvation.before before=system.starvation.before impaired=system.starvation.impaired}}">
 				{{formInput systemFields.states.fields.starving name="system.states.starving" value=system.states.starving}}{{localize 'MGT2.Actor.Starving'}}
 			</label>
 			{{/if}}
 			{{! Core folio 81 sets this from a dose and ends it "until medical treatment received",
 			    which the rads cannot say — so the referee clears it, the way fatigue is cleared. }}
-			<label data-tooltip="{{localize 'MGT2.Radiation.NauseaHint'}}">
+			<label class="warn" data-tooltip="{{localize 'MGT2.Radiation.NauseaHint'}}">
 				{{formInput systemFields.states.fields.nausea name="system.states.nausea" value=system.states.nausea}}{{localize 'MGT2.Radiation.Nausea'}}
 			</label>
 			{{! Core p.82 derives this from the wound once first aid is spent — see CharacterData.

@@ -10,7 +10,6 @@
 			<tr>
 				<th>{{localize 'MGT2.Chargen.Close.Traveller'}}</th>
 				<th>{{localize 'MGT2.Chargen.Close.Service'}}</th>
-				<th class="n">{{localize 'MGT2.Chargen.Close.Rolls'}}</th>
 				<th class="n">{{localize 'MGT2.Chargen.Close.Cash'}}</th>
 				<th class="n">{{localize 'MGT2.Chargen.Close.Pension'}}</th>
 				<th>{{localize 'MGT2.Chargen.Close.Taken'}}</th>
@@ -36,12 +35,14 @@
 						{{/each}}
 					</ul>
 				</td>
-				<td class="n big">{{column.rolls}}</td>
 				<td class="n">
 					{{localize 'MGT2.Chargen.Close.CashOf' taken=column.cash.taken limit=column.cash.limit}}
-					<span class="pre" data-tooltip="{{localize 'MGT2.Chargen.Close.PreplayHint'}}">{{localize 'MGT2.Chargen.Close.Preplay' credits=column.preplay}}</span>
+					{{! Folio 46's three Cash rolls in a lifetime, one segment each. }}
+					<span class="meter{{#if column.cashFull}} full{{/if}}">{{#each column.cashSlots as |used|}}<i class="{{#if used}}used{{/if}}"></i>{{/each}}</span>
+					{{#if column.cashFull}}<span class="cap">{{localize 'MGT2.Chargen.Close.CashCap'}}</span>
+					{{else}}<span class="pre" data-tooltip="{{localize 'MGT2.Chargen.Close.PreplayHint'}}">{{localize 'MGT2.Chargen.Close.Preplay' credits=column.preplay}}</span>{{/if}}
 				</td>
-				<td class="n">
+				<td class="n{{#unless column.pensionPaid}} nil{{/unless}}">
 					{{localize 'MGT2.Chargen.Close.PerYear' credits=column.pensionText}}
 					{{#if column.shipShares}}<span class="sh">{{plural 'MGT2.Chargen.Close.Shares' column.shipShares}}</span>{{/if}}
 				</td>
@@ -49,11 +50,14 @@
 					{{#if column.benefits.length}}
 					<ul class="vouchers">
 						{{#each column.benefits as |row|}}
-						<li class="{{#unless row.open}}spent{{/unless}}">
-							<i>{{row.kind}}</i>{{row.label}}
+						{{! One mark per state: the redeem action, a redeemed row's verdict, a row given up. }}
+						<li class="{{#if row.surrendered}}given{{else if row.redeemed}}redeemed{{/if}}">
 							{{#if row.open}}
-							<a data-action="redeem" data-index="{{row.index}}" data-tooltip="{{localize 'MGT2.Chargen.Close.Redeem'}}">✓</a>
-							{{/if}}
+							<a data-action="redeem" data-index="{{row.index}}" data-tooltip="{{localize 'MGT2.Chargen.Close.Redeem'}}"
+								aria-label="{{localize 'MGT2.Chargen.Close.Redeem'}}"><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5"/><path d="M3.6 6.2l1.6 1.6 3.2-3.5"/></svg></a>
+							{{else if row.surrendered}}<svg class="mk" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5"/></svg>
+							{{else}}<svg class="mk" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5.5"/><path d="M3.6 6.2l1.6 1.6 3.2-3.5"/></svg>{{/if}}
+							<i>{{row.kind}}</i><span class="lab">{{row.label}}</span>
 							{{#if row.surrendered}}<span class="up">{{localize 'MGT2.Chargen.Close.GivenUp'}}</span>{{/if}}
 						</li>
 						{{/each}}
@@ -61,10 +65,12 @@
 					{{else}}<span class="none">{{localize 'MGT2.Chargen.Close.NothingYet'}}</span>{{/if}}
 				</td>
 				<td class="a">
+					{{! The rolls owed ride on the button that spends them; a column the viewer cannot write shows the count alone. }}
 					{{#if column.canEdit}}
-					<button type="button" data-action="benefit" {{#unless column.canBenefit}}disabled{{/unless}}>{{localize 'MGT2.Chargen.Close.RollBenefit'}}</button>
-					<button type="button" data-action="finish">{{localize 'MGT2.Chargen.Close.Finish'}}</button>
-					{{/if}}
+					<button type="button" class="roll" data-action="benefit" {{#unless column.canBenefit}}disabled{{/unless}}>
+						<span>{{localize 'MGT2.Chargen.Close.RollBenefit'}}</span><b>{{column.rolls}}</b></button>
+					<button type="button" class="fin" data-action="finish">{{localize 'MGT2.Chargen.Close.Finish'}}</button>
+					{{else}}<span class="owed">{{plural 'MGT2.Chargen.Close.OwedCount' column.rolls}}</span>{{/if}}
 				</td>
 			</tr>
 			{{/each}}
