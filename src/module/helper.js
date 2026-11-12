@@ -292,6 +292,12 @@ export class MGT2Helper {
             (trait.key === key) || ((trait.key === "custom") && pattern.test(trait.note ?? "")));
     }
 
+    /** Core folios 74, 77: the Effect a hit adds; a Blast miss rolls with none (folio 131); null rolls nothing. */
+    static attackEffect(effect, traits, failed = false) {
+        if (!failed && (effect >= 0)) return effect;
+        return this.hasTrait(traits, "blast") ? 0 : null;
+    }
+
     /** What a weapon's traits tell the apply path, for every site that posts a damage payload. */
     static damageTraits(traits) {
         return {

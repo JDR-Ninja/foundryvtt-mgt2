@@ -1,5 +1,4 @@
 import { CharacterPrompts } from "./actors/character-prompts.js";
-import { setTray } from "./chat-cards.js";
 import { checkOf, jumpToMessage } from "./chat-message.js";
 import { renderRollCard } from "./checks.js";
 import { Rules } from "./rules.js";
@@ -174,7 +173,6 @@ export class ChatHelper {
         event.stopPropagation();
         const damage = message.flags?.mgt2?.damage;
         if (!damage?.formula) return;
-        const targetsTray = event.currentTarget.closest(".mgt2.card")?.querySelector('[data-tray="targets"]');
 
         // Core p.77: damage is rolled with the attack's Effect added to the total, and a melee
         // attack adds the attacker's STR DM on top.
@@ -239,14 +237,13 @@ export class ChatHelper {
         };
 
         const targets = message.flags?.mgt2?.targets ?? [];
-        setTray(message.id, "targets", false, targetsTray);
 
         return getDocumentClass("ChatMessage").create({
             author: game.user.id,
             speaker: message.speaker,
             rolls: [full, reduced],
             sound: CONFIG.sounds.dice,
-            flags: { mgt2: { apply: payload, targets } },
+            flags: { mgt2: { apply: payload, targets, attack: message.id } },
             content: await foundry.applications.handlebars.renderTemplate(
                 "systems/mgt2/templates/chat/damage.html", context)
         });
@@ -285,12 +282,13 @@ export class ChatHelper {
     /** The three readings, in the order the card offers them; the first is the one preselected. */
     static #transformOptions(formula, raw, boost, flat) {
         const detail = (expression, dice) => `${MGT2Helper.showFormula(expression)} = ${dice}`;
+        const total = value => Math.max(0, value * boost);
         return [
-            { key: "full", label: MGT2.DamageTransforms.full, total: raw.full * boost,
+            { key: "full", label: MGT2.DamageTransforms.full, total: total(raw.full),
                 detail: detail(formula, raw.full - flat) },
-            { key: "reduced", label: MGT2.DamageTransforms.reduced, total: raw.reduced * boost,
+            { key: "reduced", label: MGT2.DamageTransforms.reduced, total: total(raw.reduced),
                 detail: detail(MGT2Helper.reduceDamageFormula(formula), raw.reduced - flat) },
-            { key: "minimum", label: MGT2.DamageTransforms.minimum, total: raw.minimum * boost,
+            { key: "minimum", label: MGT2.DamageTransforms.minimum, total: total(raw.minimum),
                 detail: detail(game.i18n.localize("MGT2.Chat.Damage.PerDie"), raw.minimum - flat) }
         ];
     }

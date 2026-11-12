@@ -84,7 +84,7 @@ import { WorldActorSheet } from "./actors/world-sheet.js";
 import { StashActorSheet } from "./actors/stash-sheet.js";
 import { preloadHandlebarsTemplates } from "./templates.js";
 import {ChatHelper} from "./chatHelper.js";
-import { registerPopout, wireCard } from "./chat-cards.js";
+import { registerCardHooks, wireCard } from "./chat-cards.js";
 import { registerDamageTrayHooks } from "./damage-tray.js";
 import { migrateWorld } from "./migration.js";
 
@@ -409,7 +409,7 @@ Hooks.once("init", async function () {
   // arrives — which nothing in core does.
   registerRequestHooks();
   registerDamageTrayHooks();
-  registerPopout();
+  registerCardHooks();
   registerRequestControls();
   // The fourth door, and the only one that is not a control: `@Request[…]` inside an adventure's
   // text, as a link the reader may roll and a bubble a referee sends.

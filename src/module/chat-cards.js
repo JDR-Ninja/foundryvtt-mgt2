@@ -34,6 +34,11 @@ export function cardState(id) {
     return stateOf(id);
 }
 
+/** An attack's targets are handed on with its damage, so its tray opens only until a damage card names it. */
+function trayDefault(message, name) {
+    return (name !== "targets") || !game.messages.some(other => other.flags?.mgt2?.attack === message.id);
+}
+
 function folded(message) {
     const state = states.get(message.id)?.fold;
     if ( state !== undefined ) return state;
@@ -114,7 +119,7 @@ export function wireCard(message, html) {
 
     for ( const tray of card.querySelectorAll("[data-tray]") ) {
         const name = tray.dataset.tray;
-        tray.classList.toggle("shut", !trayOpen(message.id, name));
+        tray.classList.toggle("shut", !trayOpen(message.id, name, trayDefault(message, name)));
         tray.querySelector(".tlab")?.addEventListener("click", event => {
             if ( event.target.closest(".seg, button, select") ) return;
             setTray(message.id, name, tray.classList.contains("shut"), tray);
@@ -129,10 +134,18 @@ export function wireCard(message, html) {
 }
 
 /** Core offers "Pop out message" only on a message flagged `core.canPopout`; every system card is one. */
-export function registerPopout() {
+export function registerCardHooks() {
     Hooks.on("preCreateChatMessage", message => {
         if ( !/class="(?:[^"]* )?mgt2 (?:[^"]* )?card[ "]/.test(message.content ?? "") ) return;
         if ( !message.getFlag("core", "canPopout") ) message.updateSource({ "flags.core.canPopout": true });
+    });
+    Hooks.on("createChatMessage", message => {
+        const id = message.flags?.mgt2?.attack;
+        if ( !id || (trayOpen(id, "targets", null) !== null) ) return;
+        for ( const tray of foundry.applications.detached.querySelectorAll(
+            `.chat-message[data-message-id="${id}"] [data-tray="targets"]`) ) {
+            keepBottom(tray, () => tray.classList.add("shut"));
+        }
     });
 }
 

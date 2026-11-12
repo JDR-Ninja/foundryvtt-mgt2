@@ -14,6 +14,12 @@ const facingsInForce = () => (Rules.get("vehicleCombat") === "vehicle2026") ? FA
 /** The rows each rendered tray last drew, read back by its buttons. */
 const drawn = new WeakMap();
 
+export const STAMP_QUERY = "mgt2.stampApplied";
+const STAMP_TIMEOUT = 10000;
+
+/** A player's stamp is the referee's to write, queued so two stamps arriving together keep both. */
+let writing = Promise.resolve();
+
 /** Everything `applyDamage` reads off an attack, plus the facing it struck. */
 export function damageOptions(payload, facing) {
     return {
@@ -164,7 +170,39 @@ async function fillTray(message, html) {
     }
 }
 
-/** The tray stamps what it applied and closes; the stamp is the message's where this user may write it. */
+function writeStamp(message, uuids) {
+    const queued = writing.then(() => message.setFlag("mgt2", "applied",
+        [...new Set([...(message.flags.mgt2.applied ?? []), ...uuids])]));
+    writing = queued.catch(() => null);
+    return queued;
+}
+
+/** The referee writes every stamp; with no referee on line, whoever may update the message does. */
+async function stamp(message, uuids) {
+    const gm = game.users.activeGM;
+    if ( gm && !gm.isSelf && game.user.hasPermission("QUERY_USER") ) {
+        try {
+            return await gm.query(STAMP_QUERY, { message: message.id, uuids }, { timeout: STAMP_TIMEOUT });
+        } catch(err) {
+            console.warn(`mgt2 | the referee's client did not stamp the damage card: ${err.message}`);
+            return false;
+        }
+    }
+    if ( !message.canUserModify(game.user, "update") ) return false;
+    await writeStamp(message, uuids);
+    return true;
+}
+
+async function onStamp({ message: id, uuids } = {}, { user } = {}) {
+    const message = game.messages.get(id);
+    if ( !message?.flags?.mgt2?.apply || !user ) throw new Error("not a damage card");
+    const owned = (uuids ?? []).filter(uuid => fromUuidSync(uuid, { strict: false })?.actor
+        ?.testUserPermission(user, "OWNER"));
+    if ( owned.length ) await writeStamp(message, owned);
+    return owned.length > 0;
+}
+
+/** The tray stamps what it applied and closes; this client shows the stamp before the message carries it. */
 async function applyRows(message, html, rows) {
     const payload = message.flags.mgt2.apply;
     const done = [];
@@ -183,10 +221,8 @@ async function applyRows(message, html, rows) {
     const left = (drawn.get(html.querySelector('[data-tray="apply"]')) ?? [])
         .some(row => row.canApply && !row.uuids.every(uuid => state.applied.includes(uuid)));
     if ( !left ) setTray(message.id, "apply", false, html.querySelector('[data-tray="apply"]'));
-    if ( message.canUserModify(game.user, "update") ) {
-        return message.setFlag("mgt2", "applied", [...appliedOf(message)]);
-    }
-    return fillTray(message, html);
+    await fillTray(message, html);
+    return stamp(message, done);
 }
 
 /** Wire a damage card's application tray; false where the card has none. */
@@ -242,6 +278,7 @@ function refresh(source) {
 
 /** Selected follows the canvas live, and so does Targeted where the attack recorded nobody. */
 export function registerDamageTrayHooks() {
+    CONFIG.queries[STAMP_QUERY] = onStamp;
     const selected = foundry.utils.debounce(() => refresh("selected"), 60);
     const targeted = foundry.utils.debounce(() => refresh("targeted"), 60);
     Hooks.on("controlToken", selected);

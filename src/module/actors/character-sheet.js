@@ -1854,17 +1854,20 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       // another actor entirely, and it rides messages that are not checks.
       const flags = { mgt2: {} };
 
-      if (rollOptions.damageFormula !== null && rollOptions.damageFormula !== "") {
-        // The round in it and not the weapon's own line, as the formula above already is.
-        const traits = carriesEffect
-          ? (itemObj.system.effective?.traits ?? itemObj.system.traits) : [];
+      // The round's traits; under the mishap rule a double 1 fails whatever the total (Companion folio 53).
+      const traits = carriesEffect
+        ? (itemObj.system.effective?.traits ?? itemObj.system.traits) : [];
+      const hitEffect = carriesEffect ? MGT2Helper.attackEffect(effect, traits,
+        Rules.on("combatMishaps") && TravellerActorSheet.#doubleOne(scored)) : 0;
+
+      if ((hitEffect !== null) && rollOptions.damageFormula !== null && rollOptions.damageFormula !== "") {
         flags.mgt2.damage = {
           formula: rollOptions.damageFormula,
           rollObjectName: rollOptions.rollObjectName,
           rollTypeName: rollOptions.rollTypeName,
           // Core p.77: damage is rolled with the attack's Effect added, and a melee attack adds the
           // attacker's STR DM on top.
-          effect: carriesEffect ? effect : 0,
+          effect: hitEffect,
           strengthDM: (carriesEffect && itemObj.system.range?.isMelee)
             ? actor.system.meleeDamageDM : 0,
           // Core folio 79: a burst adds the Auto score to the damage this attack deals.
@@ -1901,7 +1904,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         extendedLine,
         mishapLine,
         grapple,
-        showRollDamage: rollOptions.damageFormula !== null && rollOptions.damageFormula !== "",
+        showRollDamage: Boolean(flags.mgt2.damage),
         damageCarriesEffect: carriesEffect,
         firstAidPoints,
         cardButtons
@@ -1938,15 +1941,18 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
    * skill lands a milder row. @returns {Promise<string|null>}
    */
   static async #combatMishap(scored, skill) {
-    if (!Rules.on("combatMishaps") || (scored.effect >= 0)) return null;
-    const dice = (scored.roll.dice[0]?.results ?? []).filter(result => result.active);
-    if ((dice.length !== 2) || dice.some(result => result.result !== 1)) return null;
+    if (!Rules.on("combatMishaps") || (scored.effect >= 0) || !TravellerActorSheet.#doubleOne(scored)) return null;
 
     const level = Math.max(0, skill?.system.level ?? 0);
     const roll = await new Roll(`2d6${MGT2Helper.getFormulaDM(level)}`).roll();
     const row = MGT2.CombatMishaps.find(entry => (entry.max === null) || (roll.total <= entry.max));
     return game.i18n.format("MGT2.CombatMishaps.Line",
       { total: roll.total, result: game.i18n.localize(row.label) });
+  }
+
+  static #doubleOne(scored) {
+    const dice = (scored.roll.dice[0]?.results ?? []).filter(result => result.active);
+    return (dice.length === 2) && dice.every(result => result.result === 1);
   }
 
   /** What the card says about the fire mode (Core folio 79). @returns {string|null} */

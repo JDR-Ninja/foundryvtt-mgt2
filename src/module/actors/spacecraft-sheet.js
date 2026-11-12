@@ -1260,13 +1260,14 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
 
         // A fired mount carries the whole damage payload, so the card the defender resolves knows
         // what the mount is worth.
-        if (weapon?.system.damage) {
+        const hitEffect = MGT2Helper.attackEffect(scored.effect, weapon?.system.traits);
+        if (weapon?.system.damage && (hitEffect !== null)) {
             flags.mgt2.damage = {
                 formula: mount.linkedBonus
                     ? `${weapon.system.damage} + ${mount.linkedBonus}` : weapon.system.damage,
                 rollObjectName: weapon.name,
                 rollTypeName: game.i18n.localize(mount.typeLabel),
-                effect: scored.effect,
+                effect: hitEffect,
                 strengthDM: 0,
                 scale: weapon.system.scale ?? "spacecraft",
                 multiple: mount.multiple,
