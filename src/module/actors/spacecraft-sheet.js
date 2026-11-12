@@ -62,6 +62,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             rowCreate: SpacecraftActorSheet.#onRowCreate,
             rowDelete: SpacecraftActorSheet.#onRowDelete,
             stationAction: SpacecraftActorSheet.#onStationAction,
+            roleRefresh: SpacecraftActorSheet.#onRoleRefresh,
             openCraft: SpacecraftActorSheet.#onOpenCraft,
             electMortgage: SpacecraftActorSheet.#onElectMortgage,
             skipDebts: SpacecraftActorSheet.#onSkipDebts,
@@ -555,6 +556,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     /** The roster. */
     #crew(system) {
         const required = new Map(system.crewRequired.map(row => [row.key, row.count]));
+        const roles = this.#roles(system);
         const rows = system.crew.map((station, index) => {
             const role = station.role ? this.actor.items.get(station.role) : null;
             let actor = null;
@@ -582,25 +584,58 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                     target: action.difficulty ? MGT2Helper.getDifficultyValue(action.difficulty) : null,
                     disabled: (action.kind !== "special") && !statted
                 })),
-                roles: this.actor.items.filter(item => item.type === "role")
-                    .map(item => ({ _id: item.id, name: item.name, selected: item.id === station.role })),
+                roles: roles.map(choice => ({
+                    _id: choice._id, name: choice.label, selected: choice._id === station.role })),
                 required: role ? (required.get(role.system.crewRoleKey) ?? null) : null
             };
         });
 
         return {
             rows,
+            roles,
             required: system.crewRequired.filter(row => row.count > 0).map(row => ({
                 ...row, label: MGT2.CrewRoles[row.key]?.label ?? row.key
             })),
             totals: system.crewTotals,
             short: system.crewTotals.aboard < system.crewTotals.required,
             military: system.role === "military",
-            hasRoles: this.actor.items.some(item => item.type === "role"),
+            hasRoles: roles.length > 0,
             // The typed Crew Skill and the average the roster can see.
             skill: system.crewSkill,
             observed: system.crewSkillObserved
         };
+    }
+
+    /** The ship's own `role` Items; a name two of them share takes its rank among them. */
+    #roles(system) {
+        const items = this.actor.items.filter(item => item.type === "role");
+        const total = new Map();
+        for ( const item of items ) total.set(item.name, (total.get(item.name) ?? 0) + 1);
+        const seen = new Map();
+        return items.map(item => {
+            const n = (seen.get(item.name) ?? 0) + 1;
+            seen.set(item.name, n);
+            return {
+                _id: item.id,
+                label: (total.get(item.name) > 1)
+                    ? game.i18n.format("MGT2.Actor.spacecraft.RoleCopy", { name: item.name, n }) : item.name,
+                position: MGT2.CrewRoles[item.system.crewRoleKey]?.label ?? "",
+                department: MGT2.Departments[item.system.department] ?? "",
+                stations: system.crew.filter(station => station.role === item.id).length,
+                source: SpacecraftActorSheet.#sourceOf(item)?.name ?? null
+            };
+        });
+    }
+
+    /** The uuid a copy was dropped from: the nearer of its two recorded sources. */
+    static #sourceUuid(item) {
+        return item._stats?.duplicateSource ?? item._stats?.compendiumSource ?? null;
+    }
+
+    /** The document a copy was dropped from, while it can still be found. */
+    static #sourceOf(item) {
+        const uuid = SpacecraftActorSheet.#sourceUuid(item);
+        try { return uuid ? foundry.utils.fromUuidSync(uuid, { strict: false }) : null; } catch { return null; }
     }
 
 
@@ -1136,6 +1171,21 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return this.actor.update({ [`system.${key}`]: rows });
     }
 
+    /** A role copy takes its source's name, image and content, and keeps its id and so its stations. */
+    static async #onRoleRefresh(event, target) {
+        const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
+        if (!item) return;
+        const uuid = SpacecraftActorSheet.#sourceUuid(item);
+        let source = null;
+        try { source = uuid ? await fromUuid(uuid) : null; } catch { source = null; }
+        if (source?.type !== "role") {
+            ui.notifications.warn(game.i18n.format("MGT2.Actor.spacecraft.RoleSourceGone", { name: item.name }));
+            return;
+        }
+        await item.update({ name: source.name, img: source.img, system: source.toObject().system });
+        ui.notifications.info(game.i18n.format("MGT2.Actor.spacecraft.RoleRefreshed", { name: source.name }));
+    }
+
     /**
      * A station's action, rolled on the crew member the slot links to — the one place the ship
      * reads a linked actor at all.
@@ -1349,7 +1399,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             return false;
         }
 
-        const index = Number(event.target.closest("[data-row-index]")?.dataset.rowIndex ?? -1);
+        const index = SpacecraftActorSheet.#stationIndex(event);
         const crew = this.actor.system.crew.map(station => ({ ...station }));
         if (crew[index]) crew[index].actor = actor.uuid;
         else crew.push({ actor: actor.uuid, name: actor.name });
@@ -1372,8 +1422,33 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 { type: game.i18n.localize(CONFIG.Item.typeLabels[item.type] ?? item.type) }));
             return false;
         }
-        await this.actor.createEmbeddedDocuments("Item", [MGT2Helper.stripIds(item)]);
+        const index = (item.type === "role") ? SpacecraftActorSheet.#stationIndex(event) : -1;
+        let copy = null;
+        // A station shares a copy already aboard rather than making a second one of the same source.
+        if (index >= 0) copy = (item.parent === this.actor) ? item : this.actor.items.find(other =>
+            (other.type === "role") && (SpacecraftActorSheet.#sourceUuid(other) === item.uuid));
+        copy ??= (await this.actor.createEmbeddedDocuments("Item", [SpacecraftActorSheet.#copyOf(item)]))[0];
+        if (copy && this.actor.system.crew[index]) {
+            const crew = this.actor.system.crew.map(station => ({ ...station }));
+            crew[index].role = copy.id;
+            await this.actor.update({ "system.crew": crew });
+        }
         return true;
+    }
+
+    /** A dropped document as this ship's copy, its nearer source the uuid it came from, as core records it. */
+    static #copyOf(item) {
+        const data = MGT2Helper.stripIds(item);
+        if (!item.uuid) return data;
+        if (item.pack) foundry.utils.setProperty(data, "_stats.compendiumSource", item.uuid);
+        foundry.utils.setProperty(data, "_stats.duplicateSource", item.pack ? null : item.uuid);
+        return data;
+    }
+
+    /** The crew station a drop landed on, or -1: mount, screen and bay rows carry the same index. */
+    static #stationIndex(event) {
+        const row = event.target.closest?.('[data-roster="crew"] [data-row-index]');
+        return row ? Number(row.dataset.rowIndex) : -1;
     }
 
     /** A zone refuses at the pointer or not at all — after the drop is too late to be feedback. */

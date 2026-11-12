@@ -1615,4 +1615,23 @@ export class SpacecraftData extends CraftData {
         if (data.prototypeToken?.actorLink !== undefined) return;
         this.parent.updateSource({ prototypeToken: { actorLink: true } });
     }
+
+    /** A removed role leaves no station pointing at it; only the client that removed it writes. */
+    async onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
+        if (userId !== game.user.id) return;
+        const removed = new Map(documents.filter(item => (item.documentName === "Item") && (item.type === "role"))
+            .map(item => [item.id, item.name]));
+        const cleared = new Set();
+        let count = 0;
+        const crew = this._source.crew.map(station => {
+            if (!removed.has(station.role)) return station;
+            cleared.add(station.role);
+            count += 1;
+            return { ...station, role: null };
+        });
+        if (!count) return;
+        await this.parent.update({ "system.crew": crew });
+        const name = game.i18n.getListFormatter().format([...cleared].map(id => removed.get(id)));
+        ui.notifications.info(MGT2Helper.plural("MGT2.Actor.spacecraft.RoleCleared", count, { name, count }));
+    }
 }

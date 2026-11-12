@@ -39,12 +39,12 @@
 				<th class="r">{{localize 'MGT2.Actor.spacecraft.Req'}}</th>
 			</tr>
 		</thead>
-		{{! Drop a person on a row and they take that station; drop them on the table and nowhere in
-		    particular and they are a new one. The zone names `Actor.<type>` because the type is
-		    only known once the uuid resolves, and it refuses at the pointer. }}
-		<tbody data-accept="Actor.character Actor.npc">
+		{{! A person or a role dropped on a row takes that station; a person dropped elsewhere on the table
+		    is a new one. The zone names `<Document>.<type>` because the type is only known once the
+		    uuid resolves, and it refuses at the pointer. }}
+		<tbody data-roster="crew" data-accept="Actor.character Actor.npc Item.role">
 			{{#each ship.crew.rows as |row|}}
-			<tr data-row-index="{{row.index}}" data-accept="Actor.character Actor.npc"{{#if row.vacant}} class="vacant"{{/if}}>
+			<tr data-row-index="{{row.index}}" data-accept="Actor.character Actor.npc Item.role"{{#if row.vacant}} class="vacant"{{/if}}>
 				<td class="station">
 					<span class="play-only">
 						<b>{{#if row.station}}{{row.station}}{{else}}&mdash;{{/if}}{{#if (gt row.count 1)}} &times;{{row.count}}{{/if}}</b>
@@ -103,6 +103,39 @@
 		</tbody>
 	</table>
 	{{/if}}
+
+	{{! The ship's own role Items, which the stations above point at by id: a copy is opened, removed
+	    and refreshed here, never through the document it was dropped from. }}
+	<details class="fold edit-only" data-fold="roles"{{#unless ship.crew.hasRoles}} open{{/unless}}>
+		<summary>{{localize 'MGT2.Actor.spacecraft.Roles'}} <b>{{ship.crew.roles.length}}</b></summary>
+		{{#if ship.crew.hasRoles}}
+		<table class="rows">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Name'}}</th>
+					<th>{{localize 'MGT2.Items.Department'}}</th>
+					<th class="c">{{localize 'MGT2.Actor.spacecraft.RoleStations'}}</th>
+					<th></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each ship.crew.roles as |role|}}
+				<tr data-item-id="{{role._id}}">
+					<td>{{role.label}}{{#if role.position}}<span class="sub">{{localize role.position}}</span>{{/if}}</td>
+					<td class="word">{{localize role.department}}</td>
+					<td class="c num">{{role.stations}}</td>
+					<td class="r">{{#if role.source}}<div class="acts"><a data-action="roleRefresh" data-tooltip="{{localize 'MGT2.Actor.spacecraft.RoleRefresh' source=role.source}}"><i class="fa-solid fa-rotate"></i></a></div>{{/if}}</td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.spacecraft.EditRole" del="MGT2.Actor.spacecraft.DeleteRole"}}
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{else}}
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.RolesNone' type=(localize 'TYPES.Item.role')}}</p>
+		{{/if}}
+		<button type="button" class="btn" data-action="itemCreate" data-type-item="role" data-create-name="{{localize 'MGT2.Actor.spacecraft.NewRole'}}" data-tooltip="{{localize 'MGT2.Actor.spacecraft.AddRole'}}"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Actor.spacecraft.NewRole'}}</button>
+	</details>
 
 	{{! Advisory, and it stays advisory: the Core Rulebook's own Patrol Corvette does not satisfy
 	    its own table, and under-crewing is a legitimate campaign state. }}
