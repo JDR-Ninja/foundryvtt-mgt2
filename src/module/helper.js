@@ -246,7 +246,7 @@ export class MGT2Helper {
     }
 
     static weaponTraitRows(weapon, strengthDM = 0, distance = 0, threshold = 0) {
-        const range = this.getNumberFromInput(weapon?.system.range?.value);
+        const range = this.getNumberFromInput((weapon?.system.effective?.range ?? weapon?.system.range)?.value);
         // The traits the loaded round leaves the weapon with: a shotgun firing pellets follows
         // rules its own line never carried, and a few rounds replace the list outright.
         const traits = weapon?.system.effective?.traits ?? weapon?.system.traits;

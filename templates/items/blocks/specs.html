@@ -77,9 +77,9 @@
 	<div class="plates play-only">
 		<div class="plate{{#unless system.effective.damage}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.Damage'}}</span><b>{{#if system.effective.damage}}{{system.effective.damage}}{{else}}&mdash;{{/if}}</b></div>
 		{{! Core p.165-167: a spacecraft weapon prints the furthest band it reaches, not a distance. }}
-		<div class="plate"><span class="lbl">{{localize 'MGT2.Items.Range'}}</span><b>{{#if system.range.isMelee}}{{localize 'MGT2.Melee'}}
-			{{else if (and scale.band system.range.band)}}{{localize (lookup (lookup config.ShipRangeBands system.range.band) 'label')}}
-			{{else if system.range.value}}{{system.range.value}}{{#if system.range.unit}}<span class="u">{{localize (concat "MGT2.MetricRange." system.range.unit)}}</span>{{/if}}
+		<div class="plate"><span class="lbl">{{localize 'MGT2.Items.Range'}}</span><b>{{#if system.effective.range.isMelee}}{{localize 'MGT2.Melee'}}
+			{{else if (and scale.band system.effective.range.band)}}{{localize (lookup (lookup config.ShipRangeBands system.effective.range.band) 'label')}}
+			{{else if system.effective.range.value}}{{system.effective.range.value}}{{#if system.effective.range.unit}}<span class="u">{{localize (concat "MGT2.MetricRange." system.effective.range.unit)}}</span>{{/if}}
 			{{else}}&mdash;{{/if}}</b></div>
 		{{! Core folio 77: the shots left, counted against the capacity. Without the magazine rule the
 		    capacity alone is printed. }}
@@ -285,8 +285,9 @@
 		{{! Every override is nullable and empty means the weapon's own, which is the common case:
 		    a standard round overrides nothing at all. }}
 		<li{{#unless system.damage}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Damage'}}</span><b class="word">{{#if system.damage}}{{system.damage}}{{else}}{{localize 'MGT2.Items.WeaponsOwn'}}{{/if}}</b></li>
+		<li{{#unless (or system.range system.rangePercent)}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Range'}}</span><b class="word">{{#if system.range}}{{system.range}}{{else if system.rangePercent}}{{showDM system.rangePercent}}%{{else}}{{localize 'MGT2.Items.WeaponsOwn'}}{{/if}}</b></li>
 		<li{{#unless system.magazine}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span><b class="word">{{#if system.magazine}}{{system.magazine}}{{else}}{{localize 'MGT2.Items.WeaponsOwn'}}{{/if}}</b></li>
-		<li{{#unless system.magazineCost}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span><b class="word">{{#if system.magazineCost}}{{system.magazineCost}}<span class="u">Cr</span>{{else}}{{localize 'MGT2.Items.WeaponsOwn'}}{{/if}}</b></li>
+		<li{{#unless (or system.magazineCost system.magazineCostMultiple)}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span><b class="word">{{#if system.magazineCost}}{{system.magazineCost}}<span class="u">Cr</span>{{else if system.magazineCostMultiple}}&times;{{system.magazineCostMultiple}}{{else}}{{localize 'MGT2.Items.WeaponsOwn'}}{{/if}}</b></li>
 		{{#if system.replaceTraits}}
 		<li><span class="lbl">{{localize 'MGT2.Items.ReplaceTraits'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
 		{{/if}}
@@ -719,10 +720,18 @@
 			<span class="lbl">{{localize 'MGT2.Items.Fits'}}</span>
 			{{formInput systemFields.weaponType name="system.weaponType" value=system.weaponType classes="f"}}
 		</label>
-		{{! Blank is a real answer on all three and means the weapon's own value stands. }}
+		{{! Blank is a real answer on every override and means the weapon's own value stands. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Damage'}}</span>
 			{{formInput systemFields.damage name="system.damage" value=system.damage classes="f" placeholder=(localize 'MGT2.Items.WeaponsOwn')}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Range'}}</span>
+			{{formInput systemFields.range name="system.range" value=source.range classes="f num" placeholder=(localize 'MGT2.Items.WeaponsOwn')}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.RangePercent'}}</span>
+			{{formInput systemFields.rangePercent name="system.rangePercent" value=source.rangePercent classes="f num" placeholder=(localize 'MGT2.Items.WeaponsOwn')}}
 		</label>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span>
@@ -731,6 +740,10 @@
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span>
 			{{formInput systemFields.magazineCost name="system.magazineCost" value=source.magazineCost classes="f num" placeholder=(localize 'MGT2.Items.WeaponsOwn')}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.MagazineCostMultiple'}}</span>
+			{{formInput systemFields.magazineCostMultiple name="system.magazineCostMultiple" value=source.magazineCostMultiple classes="f num" placeholder=(localize 'MGT2.Items.WeaponsOwn')}}
 		</label>
 		{{! CSC p.179-182: a few rounds REPLACE the weapon's trait list instead of adding to it, and
 		    the list itself cannot say which. }}

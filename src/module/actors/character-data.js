@@ -300,9 +300,10 @@ export class CharacterData extends ActorBaseData {
             // as the score is rolled — so the floor binds the species delta, not the radiation loss.
             c.auto += (c.base > 0) ? Math.max(1 - c.base, delta) : delta;
         }
+        const outranked = this.augmentIssues.characteristic;
         for ( const item of this.parent.items ) {
             // Core p.106: an augment is a fact of the body only once fitted — a bag improves nothing.
-            if ( (item.system.subType !== "augment") || !item.system.equipped ) continue;
+            if ( (item.system.subType !== "augment") || !item.system.equipped || outranked.includes(item.id) ) continue;
             for ( const modifier of item.system.augment?.modifiers ?? [] ) {
                 const c = this.characteristics[modifier.characteristic];
                 if ( c && Number.isFinite(modifier.value) ) c.auto += modifier.value;

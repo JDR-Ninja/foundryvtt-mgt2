@@ -333,6 +333,11 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     return super._prepareTabs(group);
   }
 
+  /** A player reads nothing a lock holds, at any depth. */
+  get #withheld() {
+    return (this.item.type === "container") && this.item.isLocked && !game.user.isGM;
+  }
+
   /** How many entries a listing tab holds; null on a tab of prose, fields or tables. */
   #tabCount(id, blocks, traitRows, effects, nested) {
     if ( id === "effects" ) return effects.length;
@@ -341,7 +346,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       return traitRows.reduce((sum, row) => sum + row.entries.length, rules);
     }
     const listing = block => ["contents", "software"].includes(block.id);
-    if ( (id === "contents") && blocks.some(listing)
+    if ( (id === "contents") && blocks.some(listing) && !this.#withheld
       && blocks.every(block => listing(block) || (block.id === "carried")) ) return nested.length;
     return null;
   }
@@ -388,9 +393,10 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       level: this.#level(),
       subTypes: SUBTYPES[item.type] ?? null,
       hadContainer: actor != null,
-      // A bag is offered neither itself nor anything already inside it.
+      // A bag is offered neither itself nor anything already inside it; a player, no lock but its own.
       containers: actor ? [{ name: "", _id: "" }].concat(actor.getContainers()
-        .filter(c => (c.id !== item.id) && !c.containerChain.some(p => p.id === item.id))) : null,
+        .filter(c => (c.id !== item.id) && !c.containerChain.some(p => p.id === item.id)
+          && (game.user.isGM || !c.isLocked || (c.id === item.system.container?.id)))) : null,
       computers: actor ? [{ name: "", _id: "" }].concat(actor.getComputers()) : null,
       // Every round the owner carries, whatever it says it fits: `weaponType` is free text because
       // no book prints a closed list, so it is a hint on the row and never a filter.
@@ -911,6 +917,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     // A fitted augment with Processing hosts software exactly as a computer does.
     const isHost = MGT2Helper.runsSoftware(item);
     if ( !isHost && (item.type !== "container") ) return [];
+    if ( this.#withheld ) return [];
 
     const held = isHost
       ? (actor?.items.filter(i => i.system.software?.computerId === item.id) ?? [])
@@ -1237,7 +1244,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     const dropped = await getDocumentClass("Item").fromDropData(data);
     if ( !dropped || !("container" in dropped.system) ) return;
 
-    if ( container.system.locked && !game.user.isGM ) {
+    if ( container.isLocked && !game.user.isGM ) {
       return ui.notifications.error(game.i18n.localize("MGT2.Errors.LockedContainer"));
     }
     // A bag cannot end up inside itself, at any remove.

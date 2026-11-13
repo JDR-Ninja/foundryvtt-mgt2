@@ -41,7 +41,7 @@ function tokensOf(message, source) {
     if ( source === "selected" ) return (canvas.tokens?.controlled ?? []).map(token => token.document);
     const recorded = message.flags.mgt2.targets ?? [];
     if ( recorded.length ) {
-        return recorded.map(target => fromUuidSync(target.uuid, { strict: false })).filter(token => token);
+        return recorded.map(target => foundry.utils.fromUuidSync(target.uuid, { strict: false })).filter(token => token);
     }
     return Array.from(game.user.targets ?? [], token => token.document);
 }
@@ -196,7 +196,7 @@ async function stamp(message, uuids) {
 async function onStamp({ message: id, uuids } = {}, { user } = {}) {
     const message = game.messages.get(id);
     if ( !message?.flags?.mgt2?.apply || !user ) throw new Error("not a damage card");
-    const owned = (uuids ?? []).filter(uuid => fromUuidSync(uuid, { strict: false })?.actor
+    const owned = (uuids ?? []).filter(uuid => foundry.utils.fromUuidSync(uuid, { strict: false })?.actor
         ?.testUserPermission(user, "OWNER"));
     if ( owned.length ) await writeStamp(message, owned);
     return owned.length > 0;
@@ -209,7 +209,7 @@ async function applyRows(message, html, rows) {
     for ( const row of rows ) {
         if ( !row.canApply ) continue;
         for ( const uuid of row.uuids ) {
-            const actor = fromUuidSync(uuid, { strict: false })?.actor;
+            const actor = foundry.utils.fromUuidSync(uuid, { strict: false })?.actor;
             if ( !actor?.isOwner ) continue;
             await ChatHelper.applyToActor(actor, payload, row.amount, row.facing);
             done.push(uuid);

@@ -1238,21 +1238,37 @@ export class WeaponData extends PhysicalItemData {
         if (!round) {
             const traits = [...this.traits, ...granted];
             return { damage: this.damage, magazine: this.magazine, magazineCost: this.magazineCost,
+                range: { ...this.range },
                 traits, traitMap: granted.length ? buildTraitMap(traits) : this.traitMap, rules: [] };
         }
         // CSC p.179-182: a few rounds REPLACE the weapon's trait list, and no list could ever say which.
         const traits = [...(round.replaceTraits
             ? (round.traits ?? []) : [...this.traits, ...(round.traits ?? [])]), ...granted];
+        const multiple = round.magazineCostMultiple;
         return {
             damage: round.damage || this.damage,
             magazine: round.magazine ?? this.magazine,
-            magazineCost: round.magazineCost ?? this.magazineCost,
+            magazineCost: round.magazineCost
+                ?? (Number.isFinite(multiple) ? Math.floor(this.magazineCost * multiple) : this.magazineCost),
+            range: this.#rangeWith(round),
             traits,
             traitMap: buildTraitMap(traits),
             // "Pellets ignore Dodge and double Protection" — no trait vocabulary covers it, so it
             // is carried to the sheet as the referee typed it and applied by nobody.
             rules: round.rules ?? []
         };
+    }
+
+    /** CSC p.179: the round's range replaces the weapon's or scales it, rounded down (Core p.6). */
+    #rangeWith(round) {
+        const range = { ...this.range };
+        // A band is not a distance, and a melee weapon has none to change.
+        if (range.isMelee || MGT2.WeaponScales[this.scale]?.band) return range;
+        if (Number.isFinite(round.range)) range.value = round.range;
+        else if (Number.isFinite(round.rangePercent) && Number.isFinite(range.value)) {
+            range.value = Math.floor(range.value * (100 + round.rangePercent) / 100);
+        }
+        return range;
     }
 
     static defineSchema() {
@@ -1658,6 +1674,14 @@ export class AmmunitionData extends PhysicalItemData {
             required: false, nullable: true, initial: null, min: 0, integer: true });
         schema.magazineCost = new fields.NumberField({
             required: false, nullable: true, initial: null, min: 0, integer: true });
+        // CSC p.179: a cost printed as a multiple of the weapon's, a range in the weapon's own unit,
+        // and a signed percentage of the weapon's range.
+        schema.magazineCostMultiple = new fields.NumberField({
+            required: false, nullable: true, initial: null, min: 0 });
+        schema.range = new fields.NumberField({
+            required: false, nullable: true, initial: null, min: 0, integer: true });
+        schema.rangePercent = new fields.NumberField({
+            required: false, nullable: true, initial: null, min: -100, integer: true });
         schema.damage = new FormulaField({
             required: false, blank: true, trim: true, nullable: true, initial: "" });
         schema.traits = createTraitsField("weapon");

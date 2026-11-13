@@ -275,7 +275,7 @@ export async function migrateWorld() {
   try {
     let count = 0;
     for ( const migration of pending ) {
-      // Worth a log line: this rewrites documents once, and a GM chasing a problem needs the trace.
+      // eslint-disable-next-line no-console -- this rewrites documents once, and a GM chasing a problem needs the trace
       console.log(`mgt2 | migrating world to ${migration.version}: ${migration.label}`);
       count += (await migration.migrate()) ?? 0;
     }

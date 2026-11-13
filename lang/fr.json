@@ -3141,7 +3141,9 @@
           }
         }
       },
-      "AugmentDuplicate": "Le Livre de règles de Traveller p.103 n'autorise qu'une seule augmentation de compétence. Aucun MD pour {names}.",
+      "AugmentSkillLimit": "Le Central Supply Catalogue p. 61 n'autorise qu'une augmentation par compétence, et trois compétences au plus. Aucun MD pour {names}.",
+      "AugmentCharacteristicLimit": "Le Central Supply Catalogue p. 53 n'autorise qu'une augmentation par caractéristique physique. Aucun effet pour {names}.",
+      "AugmentProtectionLimit": "Le Central Supply Catalogue p. 54 : une armure subdermique ne s'ajoute pas à une autre armure subdermique. Aucune Protection pour {names}.",
       "Wealth": "Richesse (RCH)",
       "WealthHint": "Cr{cash} par mois en liquide ; un achat au-delà est un test de RCH à MD-1 par tranche de Cr5000 dépensée.",
       "Starving": "Famine",
@@ -5553,7 +5555,6 @@
       "Informations": "Informations",
       "Improvement": "Améliorations",
       "AugmentSkillDM": "MD de compétence",
-      "AugmentDuplicate": "Une seule augmentation de compétence est autorisée ; celle-ci est une seconde.",
       "Interval": "Intervalle",
       "IsMelee": "Est Mêlée",
       "Items": "Objets",
@@ -5568,6 +5569,8 @@
       "LockedDescription": "Description Verrouillée",
       "Magazine": "Chargeur",
       "MagazineCost": "Coût du Chargeur",
+      "MagazineCostMultiple": "Coût du Chargeur (×)",
+      "RangePercent": "Portée (%)",
       "Loaded": "Chargé",
       "LoadedFull": "plein",
       "Reload": "Recharger",

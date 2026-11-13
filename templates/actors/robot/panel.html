@@ -379,7 +379,7 @@
 				{{#each naturals as |weapon|}}
 				<tr data-item-id="{{weapon._id}}">
 					<td><button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button></td>
-					<td class="c num">{{weapon.system.damage}}</td>
+					<td class="c num">{{weapon.system.effective.damage}}</td>
 					<td class="c num">{{weapon.range}}</td>
 					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
 				</tr>
@@ -397,7 +397,7 @@
 				{{#each carried as |weapon|}}
 				<tr data-item-id="{{weapon._id}}">
 					<td><button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button></td>
-					<td class="c num">{{weapon.system.damage}}</td>
+					<td class="c num">{{weapon.system.effective.damage}}</td>
 					<td class="c num">{{weapon.range}}</td>
 					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
 				</tr>

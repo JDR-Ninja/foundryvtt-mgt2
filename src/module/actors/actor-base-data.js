@@ -493,14 +493,14 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     prepareArmor() {
         let armor = MGT2Helper.traitScore(this.traits, "armour");
         const psi = this.characteristics.psionic?.value ?? 0;
+        const outranked = this.augmentIssues.protection;
         for (const item of this.parent.items) {
             if ((item.type === "armor") && (item.system.equipped === true) && !isNaN(item.system.protection)) {
                 armor += (+item.system.protection || 0) + item.system.psionicProtection(psi);
             }
-            // Core p.107: subdermal armour stacks with other protection, and `equipped` is the
-            // fitted gate rather than a worn one.
-            if ((item.type === "equipment") && (item.system.subType === "augment")
-                && (item.system.equipped === true)) {
+            // CSC p.54: subdermal armour stacks with other protection but not with other subdermal
+            // armour, and `equipped` is the fitted gate rather than a worn one.
+            if (ActorBaseData.#isFittedAugment(item) && !outranked.includes(item.id)) {
                 armor += (+item.system.augment?.protection || 0);
             }
         }
@@ -621,8 +621,9 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
      */
     augmentSkillModifiers() {
         const sources = [];
+        const outranked = this.augmentIssues.skill;
         for (const item of this.parent.items) {
-            if (!ActorBaseData.#isFittedAugment(item)) continue;
+            if (!ActorBaseData.#isFittedAugment(item) || outranked.includes(item.id)) continue;
             const named = item.system.augment.skill?.name?.trim();
             const dm = Math.trunc(item.system.augment.skill?.value) || 0;
             // The augment does nothing for a skill the Traveller does not have at all.
@@ -666,17 +667,48 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             && (item.system.equipped === true);
     }
 
-    /** Core p.107 allows ONE skill augmentation. */
+    /** CSC p.53, p.54, p.61: the fitted augments another one outranks, by skill, by subdermal armour, by characteristic. */
     get augmentIssues() {
-        const skillDuplicates = [];
-        let held = false;
-        for (const item of this.parent.items) {
-            if (!ActorBaseData.#isFittedAugment(item)) continue;
-            if (!item.system.augment.skill?.name?.trim()) continue;
-            if (held) skillDuplicates.push(item.id);
-            else held = true;
+        const fitted = this.parent.items.filter(item => ActorBaseData.#isFittedAugment(item));
+        const skills = ActorBaseData.#outranked(fitted, item => {
+            const name = item.system.augment.skill?.name?.trim();
+            return name ? MGT2Helper.skillSlug(MGT2Helper.skillParent(name) ?? name) : null;
+        }, item => Math.trunc(item.system.augment.skill?.value) || 0);
+        // CSC p.61: one augmentation per skill, and three different skills at once.
+        const skill = [...skills.outranked, ...skills.kept.slice(3)];
+        const protection = ActorBaseData.#outranked(fitted,
+            item => ((+item.system.augment.protection || 0) ? "subdermal" : null),
+            item => +item.system.augment.protection || 0).outranked;
+        // CSC p.53 limits an augmentation of STR, DEX or END alone; one raising several stacks beside it.
+        const characteristic = ActorBaseData.#outranked(fitted, item => {
+            const rows = ActorBaseData.#augmentRows(item);
+            return ((rows.length === 1) && MGT2.PhysicalCharacteristics.includes(rows[0].characteristic))
+                ? rows[0].characteristic : null;
+        }, item => ActorBaseData.#augmentRows(item)[0].value).outranked;
+        return { skill, protection, characteristic,
+            any: (skill.length + protection.length + characteristic.length) > 0 };
+    }
+
+    /** Groups items by `key`, null being no group: each group keeps its strongest, the first listed on a tie. */
+    static #outranked(items, key, strength) {
+        const kept = new Map();
+        const outranked = [];
+        for (const item of items) {
+            const group = key(item);
+            if (group === null) continue;
+            const held = kept.get(group);
+            if (!held) kept.set(group, item);
+            else if (strength(item) > strength(held)) {
+                outranked.push(held.id);
+                kept.set(group, item);
+            } else outranked.push(item.id);
         }
-        return { skillDuplicates, any: skillDuplicates.length > 0 };
+        return { kept: [...kept.values()].map(item => item.id), outranked };
+    }
+
+    static #augmentRows(item) {
+        return (item.system.augment.modifiers ?? [])
+            .filter(row => row.characteristic && Number.isFinite(row.value) && (row.value !== 0));
     }
 
     /** The gravity band this actor is standing in, from the region effect that put it there. */

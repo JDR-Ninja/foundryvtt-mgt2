@@ -3141,7 +3141,9 @@
           }
         }
       },
-      "AugmentDuplicate": "Core p.107 allows one skill augmentation. No DM from {names}.",
+      "AugmentSkillLimit": "Central Supply Catalogue p.61: one augmentation per skill, and three skills at most. No DM from {names}.",
+      "AugmentCharacteristicLimit": "Central Supply Catalogue p.53: one augmentation per physical characteristic. Nothing from {names}.",
+      "AugmentProtectionLimit": "Central Supply Catalogue p.54: subdermal armour does not stack with other subdermal armour. No Protection from {names}.",
       "Wealth": "Wealth (WLT)",
       "WealthHint": "Cr{cash} a month in hand; a purchase above it is a WLT check at DM−1 per Cr5000 spent.",
       "Starving": "Starving",
@@ -3889,7 +3891,6 @@
       "Informations": "Informations",
       "Improvement": "Improvement",
       "AugmentSkillDM": "Skill DM",
-      "AugmentDuplicate": "Only one skill augmentation is allowed; this one is a second.",
       "Interval": "Interval",
       "IsMelee": "Melee",
       "Items": "Items",
@@ -3904,6 +3905,8 @@
       "LockedDescription": "Locked Description",
       "Magazine": "Magazine",
       "MagazineCost": "Magazine Cost",
+      "MagazineCostMultiple": "Magazine Cost (×)",
+      "RangePercent": "Range (%)",
       "Loaded": "Loaded",
       "LoadedFull": "full",
       "Reload": "Reload",

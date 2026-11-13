@@ -7,13 +7,13 @@
     "mgt2": {
       "demo": {
         "order": 15,
-        "cliff": "a roll lives on the thing that provokes it",
+        "cliff": "a toolkit gives a DM to a check it does not choose",
         "teaches": [
           "`subType: \"toolkit\"` is the fifth equipment sub-type, and the one a referee reaches for after `equipment` itself.",
-          "`roll {characteristic, skill, difficulty}` puts a ready-made check on the Item, which the sheet offers as a button.",
-          "`roll.skill` is the id of a skill Item on the owner, chosen on the item sheet once the toolkit is owned, so it is blank here; `requireSkill` and `augment.skill` match by name."
+          "A toolkit stores no check. Working without the right kit costs DM-2, a kit more than two TLs below the job can cost as much, and one more than two above it may give DM+2 (CSC p.125). Type it in the roll prompt's Custom DM.",
+          "`roll` is declared on every physical Item, but the equipment sheet draws no roll block, so a toolkit leaves it blank."
         ],
-        "trap": "A toolkit is not an augment: it carries no `augment` block that does anything, and the DM it gives comes from the rules for tools rather than from a stored modifier. roll.skill is a local graph: an id means nothing until an Actor holds the Item."
+        "trap": "A toolkit is not an augment: it carries no `augment` block that does anything, and nothing on it is applied for you. Its DM depends on the job in hand, which no field on the Item can know."
       }
     }
   },
@@ -28,7 +28,7 @@
     "tl": "TL10",
     "legality": 0,
     "container": { "id": "" },
-    "roll": { "characteristic": "intellect", "skill": "", "difficulty": "Average" },
+    "roll": { "characteristic": "", "skill": "", "difficulty": "" },
     "equipped": false,
     "augment": { "improvement": "", "modifiers": [], "skill": { "name": "", "value": 0 }, "protection": 0 },
     "processing": null,

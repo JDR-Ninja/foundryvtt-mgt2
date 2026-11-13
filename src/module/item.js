@@ -87,6 +87,13 @@ export class TravellerItem extends Item {
         return false;
       }
     }
+
+    // A player stores nothing into a lock, at any depth, whatever wrote it.
+    if (containerId && !user.isGM && (containerId !== this.system.container?.id)
+      && this.siblings?.get(containerId)?.isLocked) {
+      ui.notifications.error(game.i18n.localize("MGT2.Errors.LockedContainer"));
+      return false;
+    }
   }
 
   /** The collection this item's siblings live in. @type {Collection<TravellerItem>|null} */
@@ -117,6 +124,11 @@ export class TravellerItem extends Item {
       current = current.siblings?.get(current.system.container?.id);
     }
     return chain;
+  }
+
+  /** Whether this is a locked container or sits inside one, at any depth. @type {boolean} */
+  get isLocked() {
+    return [this, ...this.containerChain].some(c => c.system.locked === true);
   }
 
   /**

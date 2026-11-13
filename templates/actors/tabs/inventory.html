@@ -27,7 +27,7 @@
 							{{#if weapon.subInfo}}<span class="sub">{{weapon.subInfo}}</span>{{/if}}
 						</td>
 						<td class="c">{{weapon.range}}</td>
-						<td class="c num">{{weapon.system.damage}}</td>
+						<td class="c num">{{weapon.system.effective.damage}}</td>
 						<td class="r num">{{weapon.weight}}</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=weapon.canEquip toggle=weapon.toggleClass store=true edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
 					</tr>
@@ -117,9 +117,9 @@
 				</tbody>
 			</table>
 			{{/if}}
-			{{#if augmentDuplicates}}
-			<p class="hint bad">{{localize 'MGT2.Actor.AugmentDuplicate' names=augmentDuplicates}}</p>
-			{{/if}}
+			{{#each augmentLimits as |limit|}}
+			<p class="hint bad">{{localize limit.label names=limit.names}}</p>
+			{{/each}}
 		</div>
 
 		<div class="block">

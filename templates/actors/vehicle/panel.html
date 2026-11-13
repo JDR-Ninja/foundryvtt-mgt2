@@ -128,7 +128,7 @@
 						</select>
 					</td>
 					<td class="c num">{{#each mount.weapons as |weapon|}}<div>{{weapon.range}}</div>{{/each}}</td>
-					<td class="c num">{{#each mount.weapons as |weapon|}}<div>{{weapon.system.damage}}</div>{{/each}}</td>
+					<td class="c num">{{#each mount.weapons as |weapon|}}<div>{{weapon.system.effective.damage}}</div>{{/each}}</td>
 					<td class="c num">
 						<span class="play-only">{{#if mount.fireControl}}{{showDM mount.fireControl}}{{else}}&mdash;{{/if}}</span>
 						<input class="f num edit-only" type="number" min="0" max="4" step="1" name="system.mounts.{{mount.index}}.fireControl" value="{{mount.fireControl}}" />
@@ -150,7 +150,7 @@
 				<tr data-item-id="{{weapon._id}}">
 					<td><button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button><span class="sub">{{localize 'MGT2.Actor.vehicle.Unmounted'}}</span></td>
 					<td class="c num">{{weapon.range}}</td>
-					<td class="c num">{{weapon.system.damage}}</td>
+					<td class="c num">{{weapon.system.effective.damage}}</td>
 					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
 				</tr>
 				{{/each}}

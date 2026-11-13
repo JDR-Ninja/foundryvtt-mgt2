@@ -3141,7 +3141,9 @@
           }
         }
       },
-      "AugmentDuplicate": "O Core p.107 permite um único aprimoramento de perícia. Sem MD de {names}.",
+      "AugmentSkillLimit": "O Central Supply Catalogue p.61 permite um aprimoramento por perícia, e três perícias no máximo. Sem MD de {names}.",
+      "AugmentCharacteristicLimit": "O Central Supply Catalogue p.53 permite um único aprimoramento por característica física. Nada de {names}.",
+      "AugmentProtectionLimit": "O Central Supply Catalogue p.54: uma Subdermal Armour não se acumula com outra. Sem Proteção de {names}.",
       "Wealth": "Riqueza (RIQ)",
       "WealthHint": "Cr{cash} por mês disponíveis; uma compra acima disso é um teste de RIQ com MD−1 a cada Cr5000 gastos.",
       "Starving": "Faminto",
@@ -3889,7 +3891,6 @@
       "Informations": "Informações",
       "Improvement": "Melhoria",
       "AugmentSkillDM": "MD de perícia",
-      "AugmentDuplicate": "Apenas um aprimoramento de perícia é permitido; este é um segundo.",
       "Interval": "Intervalo",
       "IsMelee": "Corpo a corpo",
       "Items": "Itens",
@@ -3904,6 +3905,8 @@
       "LockedDescription": "Descrição quando trancado",
       "Magazine": "Carregador",
       "MagazineCost": "Custo do carregador",
+      "MagazineCostMultiple": "Custo do carregador (×)",
+      "RangePercent": "Alcance (%)",
       "Loaded": "Carregado",
       "LoadedFull": "cheio",
       "Reload": "Recarregar",

@@ -457,15 +457,17 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     }
 
     actorContainers.sort(MGT2Helper.compareByName);
+    const containerIndex = new Map(actorContainers.map(c => [c._id, c]));
+    // A player is shown nothing a lock holds, at any depth: no row, and no container's name.
+    const withholds = c => Boolean(c) && !game.user.isGM && (actor.items.get(c._id)?.isLocked === true);
+    const parentOf = c => containerIndex.get(c?.system.container?.id);
+    const shownContainers = actorContainers.filter(c => !withholds(parentOf(c)));
 
     // The picker reads `display`, so the "every container" entry had neither a label nor a
     // language: it rendered as a blank option.
     const everyContainer = game.i18n.localize("MGT2.Items.SelectAll");
-    const containers = [{ name: everyContainer, display: everyContainer, _id: "" }].concat(actorContainers);
-    const containerIndex = new Map();
+    const containers = [{ name: everyContainer, display: everyContainer, _id: "" }].concat(shownContainers);
     for (const c of actorContainers) {
-      containerIndex.set(c._id, c);
-
       if (c.system.weight > 0) {
         c.weight = `${c.system.weight} ${settings.weightUnit}`;
         c.display = c.name.length > 12 ? `${c.name.substring(0, 12)}... (${c.weight})` : `${c.name} (${c.weight})`;
@@ -476,7 +478,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       if (c.system.onHand === true) c.subItems = [];
     }
 
-    const { view: viewId, dropIn: dropInId } = this.viewState;
+    const { view: storedView, dropIn: dropInId } = this.viewState;
+    const viewId = withholds(parentOf(containerIndex.get(storedView))) ? "" : storedView;
     const currentContainerView = containerIndex.get(viewId);
     model.containerView = currentContainerView;
     model.containerShowAll = viewId === "";
@@ -511,7 +514,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
           continue;
         }
 
-        if (container.system.locked && !game.user.isGM) continue;
+        if (withholds(container)) continue;
         if (container.system.onHand === true) container.subItems.push(v);
 
         if (model.containerShowAll || viewId === sys.container.id) {
@@ -565,10 +568,10 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
           break;
 
         case "weapon":
-          v.range = sys.range.isMelee
+          v.range = sys.effective.range.isMelee
             ? game.i18n.localize("MGT2.Melee")
-            : MGT2Helper.getRangeDisplay(sys.range);
-          v.traitList = (sys.traits ?? []).map(formatTrait);
+            : MGT2Helper.getRangeDisplay(sys.effective.range);
+          v.traitList = sys.effective.traits.map(formatTrait);
           if (v.traitList.length > 0) v.subInfo = v.traitList.join(", ");
           weapons.push(v);
           break;
@@ -656,10 +659,13 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     model.protectionVs = (armors.some(view => view.conditional && (view.system.equipped === true))
       || traitConditional(actor.system.traitMap?.armour)) ? this.#protectionVs() : "";
 
-    // Core p.107 allows one skill augmentation. Advisory: the extras stay fitted and stay listed.
-    const duplicates = actor.system.augmentIssues.skillDuplicates;
-    model.augmentDuplicates = duplicates.length
-      ? duplicates.map(id => actor.items.get(id)?.name).filter(Boolean).join(" · ") : null;
+    // CSC p.53, p.54, p.61. Advisory: the outranked augments stay fitted and stay listed.
+    const issues = actor.system.augmentIssues;
+    model.augmentLimits = [["skill", "MGT2.Actor.AugmentSkillLimit"],
+      ["characteristic", "MGT2.Actor.AugmentCharacteristicLimit"], ["protection", "MGT2.Actor.AugmentProtectionLimit"]]
+      .filter(([key]) => issues[key].length)
+      .map(([key, label]) => ({ label,
+        names: issues[key].map(id => actor.items.get(id)?.name).filter(Boolean).join(" · ") }));
 
     const byName = MGT2Helper.compareByName;
     Object.assign(model, {
@@ -674,7 +680,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       wounds,
       equipments: equipments.sort(byName),
       items: items.sort(byName),
-      actorContainers: actorContainers.sort(byName),
+      actorContainers: shownContainers.sort(byName),
       skills: skills.sort(byName),
       psionics: psionics.sort(byName),
       weapons: weapons.sort(byName),
@@ -1423,7 +1429,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     const units = String(canvas.scene?.grid.units ?? "").trim().toLowerCase();
     const scale = Object.keys(MGT2.MetricRange).find(key =>
       game.i18n.localize(MGT2.MetricRange[key]).toLowerCase() === units);
-    if (!scale || (scale !== weapon?.system.range?.unit)) return null;
+    if (!scale || (scale !== weapon?.system.effective?.range.unit)) return null;
 
     const distance = TravellerActorSheet.#distanceTo(actor, token, targets[0]);
     return (distance === null) ? null : { distance, target: targets[0].document.name };
@@ -1477,7 +1483,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     const steps = Math.floor(Math.max(0, MGT2Helper.getNumberFromInput(data.targetMovement)) / fast.per);
     if (steps > 0) terms.push([named("fastMovingTarget"), steps * fast.dm]);
 
-    const band = MGT2Helper.rangeBand(data.distance, weapon?.system.range?.value, threshold);
+    const band = MGT2Helper.rangeBand(data.distance, weapon?.system.effective?.range.value, threshold);
     // Out of range is reported and rolled anyway, so it reaches the card with no DM at all.
     if (band && ((band.key === "out") || band.dm)) {
       terms.push([game.i18n.localize(MGT2.RangeBands[band.key].label), band.dm]);
@@ -1701,7 +1707,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       if (itemObj?.type === "weapon") {
         rollOptions.weapon = itemObj;
         rollOptions.blocks.traits = itemObj.system.effective.traits.length > 0;
-        rollOptions.blocks.range = itemObj.system.range?.isMelee !== true;
+        rollOptions.blocks.range = itemObj.system.effective.range.isMelee !== true;
         if (rollOptions.blocks.range) {
           rollOptions.measured = TravellerActorSheet.#measureRange(actor, token, itemObj);
         }
@@ -1868,7 +1874,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
           // Core p.77: damage is rolled with the attack's Effect added, and a melee attack adds the
           // attacker's STR DM on top.
           effect: hitEffect,
-          strengthDM: (carriesEffect && itemObj.system.range?.isMelee)
+          strengthDM: (carriesEffect && itemObj.system.effective?.range.isMelee)
             ? actor.system.meleeDamageDM : 0,
           // Core folio 79: a burst adds the Auto score to the damage this attack deals.
           burst,
@@ -2067,7 +2073,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         { name: game.i18n.localize("MGT2.Actor.NewContainer"), type: "container" }, { parent: this.actor });
 
     if (!container) return null;
-    if (container.system.locked && !game.user.isGM) {
+    if (container.isLocked && !game.user.isGM) {
       ui.notifications.error(game.i18n.localize("MGT2.Errors.LockedContainer"));
       return null;
     }
@@ -2179,7 +2185,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         return true;
       } else if (targetItem.type === "container") {
         // locked refuse
-        if (targetItem.system.locked && !game.user.isGM)
+        if (targetItem.isLocked && !game.user.isGM)
           ui.notifications.error(game.i18n.localize("MGT2.Errors.LockedContainer"));
         // A bag cannot end up inside itself, at any remove.
         else if (targetItem.containerChain.some(c => c.id === sourceItem._id))
@@ -2195,7 +2201,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       let stored = "";
       if (targetItem !== null) {
         if (targetItem.type === "container") {
-          if (!targetItem.system.locked || game.user.isGM) stored = targetId;
+          if (!targetItem.isLocked || game.user.isGM) stored = targetId;
         } else if (Object.hasOwn(targetItem.system, "container")) {
           stored = targetItem.system.container.id;   // dropped beside it, so stored with it
         }

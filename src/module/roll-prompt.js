@@ -563,13 +563,13 @@ export class RollPromptHelper {
     }
 
     /**
-     * What the Range block needs: the weapon's own Range score, the aiming ladder, the two
+     * What the Range block needs: the Range score with the loaded round, the aiming ladder, the two
      * thresholds Core folio 77 names and — for a weapon with Auto — the fire mode.
      */
     static #rangeContext(weapon, measured = null) {
         if (!weapon) return {};
         const inForce = Rules.get("extremeRange");
-        const range = weapon.system.range;
+        const range = weapon.system.effective.range;
         const unit = range.unit ? game.i18n.localize(MGT2.MetricRange[range.unit]).toLowerCase() : "";
         const aimTerm = game.i18n.localize(MGT2.AttackModifiers.aiming.label);
         const auto = MGT2Helper.traitScore(weapon.system.effective.traits, "auto");

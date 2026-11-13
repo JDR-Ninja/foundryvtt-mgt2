@@ -3141,7 +3141,9 @@
           }
         }
       },
-      "AugmentDuplicate": "El Core p.107 permite un solo aumento de habilidad. Sin MD de {names}.",
+      "AugmentSkillLimit": "El Central Supply Catalogue p.61 permite un aumento por habilidad, y tres habilidades como máximo. Sin MD de {names}.",
+      "AugmentCharacteristicLimit": "El Central Supply Catalogue p.53 permite un solo aumento por característica física. Nada de {names}.",
+      "AugmentProtectionLimit": "El Central Supply Catalogue p.54: una Subdermal Armour no se acumula con otra. Sin Protección de {names}.",
       "Wealth": "Riqueza (RIQ)",
       "WealthHint": "Cr{cash} al mes disponibles; una compra por encima de eso es una tirada de RIQ con MD−1 por cada Cr5000 gastados.",
       "Starving": "Hambriento",
@@ -3889,7 +3891,6 @@
       "Informations": "Información",
       "Improvement": "Mejora",
       "AugmentSkillDM": "MD de habilidad",
-      "AugmentDuplicate": "Solo se permite un aumento de habilidad; este es un segundo.",
       "Interval": "Intervalo",
       "IsMelee": "Cuerpo a cuerpo",
       "Items": "Objetos",
@@ -3904,6 +3905,8 @@
       "LockedDescription": "Descripción cuando está cerrado",
       "Magazine": "Cargador",
       "MagazineCost": "Coste del cargador",
+      "MagazineCostMultiple": "Coste del cargador (×)",
+      "RangePercent": "Alcance (%)",
       "Loaded": "Cargado",
       "LoadedFull": "lleno",
       "Reload": "Recargar",

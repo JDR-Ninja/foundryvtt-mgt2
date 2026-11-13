@@ -226,6 +226,8 @@ export class RobotActorSheet extends TravellerActorSheet {
         const speed = (system.speed.metres === null) ? [] : [
             term(5, "MGT2.Actor.robot.Chain.speedBase"),
             term(Math.abs(agility), loco?.label ?? "", { op: agility < 0 ? "−" : "+" }),
+            term(Math.abs(system.agilityEnhancement), "MGT2.Actor.robot.AgilityEnhancement",
+                { op: system.agilityEnhancement < 0 ? "−" : "+", off: !system.agilityEnhancement }),
             term(Math.abs(system.speed.tactical), "MGT2.Actor.robot.Chain.tactical",
                 { op: system.speed.tactical < 0 ? "−" : "+", off: !system.speed.tactical }),
             ...(system.soleSourcePower

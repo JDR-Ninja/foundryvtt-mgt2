@@ -4,7 +4,7 @@
 <li class="atk" data-item-id="{{weapon._id}}">
 	<button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice" aria-hidden="true"></i><span>{{weapon.name}}</span></button>
 	<span class="pills"><span data-tooltip="{{localize 'MGT2.Items.Range'}}">{{weapon.range}}</span>{{#each weapon.traitList as |trait|}}<span>{{trait}}</span>{{/each}}</span>
-	<span class="dmg" data-tooltip="{{localize 'MGT2.Items.Damage'}}">{{weapon.system.damage}}</span>
+	<span class="dmg" data-tooltip="{{localize 'MGT2.Items.Damage'}}">{{weapon.system.effective.damage}}</span>
 	<span class="acts">
 		<a class="play-only" data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.View'}}"><i class="fas fa-eye"></i></a>
 		<a class="edit-only" data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.EditWeapon'}}"><i class="fas fa-edit"></i></a>

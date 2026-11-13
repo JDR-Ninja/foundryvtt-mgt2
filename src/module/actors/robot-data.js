@@ -201,7 +201,7 @@ export class RobotData extends ActorBaseData {
             // back (RH p.20).
             resiliency: new fields.NumberField({
                 required: false, nullable: false, integer: true, initial: 0 }),
-            // The Agility Enhancement the DEX projection adds on top of the manipulator (RH p.115).
+            // RH p.22, p.115: +N metres and +N DEX over the manipulator, at no endurance cost.
             agilityEnhancement: new fields.NumberField({
                 required: false, nullable: false, integer: true, initial: 0 }),
 
@@ -300,10 +300,10 @@ export class RobotData extends ActorBaseData {
         return (this.endurance.source !== "internal") && !this.endurance.redundant;
     }
 
-    /** RH p.16, p.22, p.55: 5 m by Agility and tactical, halved and -2 on sole power. */
+    /** RH p.16, p.22, p.55: 5 m by Agility, its enhancement and tactical, halved and -2 on sole power. */
     get speedMetres() {
         if ((this.speed.vehicleBand !== null) || (this.agility === null)) return null;
-        const metres = SPEED_BASE + this.agility + this.speed.tactical;
+        const metres = SPEED_BASE + this.agility + this.agilityEnhancement + this.speed.tactical;
         const rate = this.soleSourcePower
             ? Math.floor(metres / SOLE_SOURCE_DIVISOR) + SOLE_SOURCE_AGILITY : metres;
         return Math.max(0, Math.min(SPEED_CAP, rate));
