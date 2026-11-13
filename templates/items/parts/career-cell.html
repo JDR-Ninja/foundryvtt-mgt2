@@ -1,17 +1,18 @@
 {{! One printed cell of a creation table, which is a small EXPRESSION and not a scalar. `text` is the
-    cell as the book prints it and is always inline; the grants that make it mechanical unfold under it.
-    Callers pass `cell` and `path`, the dotted route to this cell under `system.`, and may pass `blank`,
-    the JSON a new grant starts from. }}
+    cell as the book prints it and all that play mode shows; in edit mode the count opens the grants
+    that make it mechanical. Callers pass `cell` and `path`, the dotted route to this cell under
+    `system.`, and may pass `blank`, the JSON a new grant starts from. }}
 <div class="cell" data-cell-path="{{path}}">
 	<div class="cellhead">
 		<span class="play-only">{{#if cell.text}}{{cell.text}}{{else}}&mdash;{{/if}}</span>
 		<input class="f edit-only" type="text" name="system.{{path}}.text" value="{{cell.text}}"
 			placeholder="{{localize 'MGT2.Chargen.Template.CellText'}}" />
-		<span class="grantcount{{#unless cell.grants.length}} none{{/unless}}"
-			data-tooltip="{{localize 'MGT2.Chargen.Template.GrantsHint'}}">{{cell.grants.length}}</span>
+		<button type="button" class="grantcount edit-only{{#unless cell.grants.length}} none{{/unless}}" data-action="cellFold"
+			data-tooltip="{{localize 'MGT2.Chargen.Template.GrantsHint'}}">{{cell.grants.length}}</button>
 	</div>
 
-	<div class="grants" data-property="{{path}}.grants">
+	{{! Folded is CSS alone: a submitted grant list replaces the stored one whole. }}
+	<div class="grants edit-only" data-property="{{path}}.grants">
 		{{#if cell.grants.length}}
 		<label class="mode edit-only">
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.CellMode'}}</span>
@@ -28,7 +29,6 @@
 			<select class="f kind edit-only" name="system.{{../path}}.grants.{{g}}.kind">
 				{{selectOptions @root.config.CreationGrantKinds selected=grant.kind localize=true}}
 			</select>
-			<span class="play-only word">{{localize (lookup @root.config.CreationGrantKinds grant.kind)}}</span>
 
 			<select class="f g-pick edit-only" name="system.{{../path}}.grants.{{g}}.pick" data-tooltip="{{localize 'MGT2.Chargen.Template.SkillPickHint'}}">
 				<option value="">{{localize 'MGT2.Chargen.Template.SkillPickNamed'}}</option>

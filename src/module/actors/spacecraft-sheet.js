@@ -145,20 +145,6 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return super._prepareTabs(group);
     }
 
-    /** Folds the reader opened by hand; one with no entry keeps what the template asked for.
-     * @type {Map<string, boolean>} */
-    #folds = new Map();
-
-    /** @inheritDoc */
-    _onRender(context, options) {
-        super._onRender(context, options);
-        for ( const fold of this.element.querySelectorAll("details.fold[data-fold]") ) {
-            const key = fold.dataset.fold;
-            if ( this.#folds.has(key) ) fold.open = this.#folds.get(key);
-            fold.addEventListener("toggle", () => this.#folds.set(key, fold.open));
-        }
-    }
-
     /**
      * The parent maps document paths onto the *character* sheet's parts, and this sheet has three
      * of its own, so a document-driven render redraws all of them instead.
@@ -222,6 +208,16 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             // was computed.
             fleet: this.#fleet(system)
         };
+        // Play mode folds what holds nothing into one line; edit mode keeps every block to fill in.
+        const vacant = {
+            mounts: context.ship.mounts.empty && "MGT2.Actor.spacecraft.Mounts",
+            bays: !context.ship.bays.length && "MGT2.Actor.spacecraft.CarriedCraft",
+            manifest: !context.ship.manifest.count && "MGT2.Actor.spacecraft.Manifest"
+        };
+        for ( const tab of Object.values(context.tabs) ) {
+            tab.vacant = (tab.blocks ?? []).map(block => vacant[block.id]).filter(Boolean)
+                .map(label => ({ label, door: this.isEditable }));
+        }
         return context;
     }
 
@@ -288,12 +284,18 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     /** The pool. A hull only ever fills — there is no state under wrecked (Core p.168). */
     static #hull(system) {
         const hull = system.characteristics.hull;
+        const wound = (hull.max > 0) ? Math.min(100, Math.round((hull.damage / hull.max) * 100)) : 0;
+        const steps = system.sustainedSteps;
+        const crossed = system.sustainedCrossed;
         return {
             value: hull.value, max: hull.max, damage: hull.damage,
-            wound: (hull.max > 0) ? Math.min(100, Math.round((hull.damage / hull.max) * 100)) : 0,
+            wound, left: 100 - wound,
+            // Core p.169: a tick per tenth, counted from the right where the loss sits.
+            ticks: Array.from({ length: Math.max(0, steps - 1) }, (_tick, i) => ({
+                at: Math.round((100 - ((i + 1) * 100) / steps) * 10) / 10, hit: (i + 1) <= crossed
+            })),
             wrecked: system.states.wrecked,
-            crossed: system.sustainedCrossed,
-            steps: system.sustainedSteps,
+            crossed, steps,
             severity: system.hullSeverity
         };
     }
@@ -513,6 +515,19 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             const linked = held.length
                 ? held.filter(weapon => weapon.name === held[0].name).length : 0;
             const band = held[0]?.system.range?.band || "";
+            const linkedBonus = missile ? 0
+                : (linked - 1) * SpacecraftActorSheet.#damageDice(held[0]?.system.damage);
+            // One roll per distinct weapon: identical weapons roll identically.
+            const groups = [];
+            for ( const weapon of held ) {
+                const group = groups.find(entry => entry.name === weapon.name);
+                if ( group ) group.count += 1;
+                else groups.push({ _id: weapon._id, name: weapon.name, count: 1, damage: weapon.system.damage });
+            }
+            for ( const group of groups ) {
+                group.label = (linkedBonus && (group.name === held[0].name))
+                    ? `${group.damage} + ${linkedBonus}` : group.damage;
+            }
             return {
                 index, type: mount.type, label: mount.label, popup: mount.popup,
                 typeLabel: type.label,
@@ -522,15 +537,16 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 // Core p.165-167: the furthest band the mounted weapon reaches.
                 band, bandLabel: MGT2.ShipRangeBands[band]?.label ?? "",
                 linked: missile ? 1 : linked,
-                linkedBonus: missile ? 0
-                    : (linked - 1) * SpacecraftActorSheet.#damageDice(held[0]?.system.damage),
+                linkedBonus,
+                groups,
                 multiple: missile ? 1 : type.damageMultiple,
                 printed: type.damageMultiple,
+                showMultiple: type.damageMultiple > 1,
                 missile,
                 big: !missile && (type.damageMultiple >= 10),
                 hardpoints: type.hardpoints ?? 1,
                 tons: type.tons,
-                ammo: mount.ammo, ammoMax: ammo,
+                ammo: mount.ammo, ammoMax: ammo, hasMagazine: ammo > 0,
                 weapons: held,
                 // Core p.183: a fixed mount or a turret holds one, two or three weapons by type.
                 overCapacity: (held.length > type.weapons)
@@ -541,9 +557,11 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 }))
             };
         });
+        const unmounted = weapons.filter(weapon => !claimed.has(weapon._id));
         return {
             rows,
-            unmounted: weapons.filter(weapon => !claimed.has(weapon._id)),
+            unmounted,
+            empty: !rows.length && !unmounted.length && !system.screens.length,
             screens: system.screens.map((screen, index) => ({ ...screen, index,
                 label: MGT2.ShipScreens[screen.type]?.label ?? "" })),
             inertCount: system.inertMountCount,
@@ -582,7 +600,12 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                     cap: action.cap, capLabel: (action.cap && (action.cap !== "none"))
                         ? MGT2.ActionCaps[action.cap] : "",
                     target: action.difficulty ? MGT2Helper.getDifficultyValue(action.difficulty) : null,
-                    disabled: (action.kind !== "special") && !statted
+                    disabled: (action.kind !== "special") && !statted,
+                    tip: [((action.kind !== "special") && !statted)
+                        ? game.i18n.localize("MGT2.Actor.spacecraft.NoCrewSheet") : "",
+                    [action.skill, game.i18n.localize(MGT2.CombatSteps[action.step] ?? ""),
+                        (action.cap && (action.cap !== "none")) ? game.i18n.localize(MGT2.ActionCaps[action.cap]) : ""]
+                        .filter(Boolean).join(" · ")].filter(Boolean).join(" ")
                 })),
                 roles: roles.map(choice => ({
                     _id: choice._id, name: choice.label, selected: choice._id === station.role })),

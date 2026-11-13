@@ -1538,6 +1538,8 @@ export class PassageData extends ItemBaseData {
         const grade = MGT2.PassageClasses[this.grade] ?? MGT2.PassageClasses.middle;
         this.baggage = grade.baggage * this.count;
         this.fare = grade.unpaid ? 0 : this.farePerHead * this.count;
+        // Unrounded: the ship pairs basic passengers across bookings before it rounds.
+        this.staterooms = (grade.stateroom ?? 0) * this.count;
         // Core p.158 puts every low passenger through a revival check on arrival.
         this.lowBerth = grade.lowBerth === true;
     }

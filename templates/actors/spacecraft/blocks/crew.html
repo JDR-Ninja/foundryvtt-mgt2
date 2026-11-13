@@ -14,7 +14,7 @@
 	    the stored figure is authoritative and the observed average is a hint beside it, which is
 	    the shape the crew requirement already uses. Deliberately OUTSIDE the fleet-battles gate:
 	    the field is stored whatever the switch says. }}
-	<dl class="statline" data-derived="system.crewSkillObserved">
+	<dl class="statline">
 		<div class="stat">
 			<dt>{{localize 'MGT2.Actor.spacecraft.CrewSkill'}}</dt>
 			<dd>
@@ -22,19 +22,19 @@
 				<span class="edit-only">{{formInput systemFields.crewSkill name="system.crewSkill" value=system.crewSkill classes="f num"}}</span>
 			</dd>
 		</div>
-		<div class="stat{{#unless ship.crew.observed.bodies}} none{{/unless}}">
+		<div class="stat{{#unless ship.crew.observed.bodies}} none{{/unless}}" data-derived="system.crewSkillObserved">
 			<dt>{{localize 'MGT2.Actor.spacecraft.CrewSkillObserved'}}</dt>
 			<dd>{{#if ship.crew.observed.bodies}}{{ship.crew.observed.level}}<i>{{localize 'MGT2.Actor.spacecraft.CrewSkillRead' bodies=ship.crew.observed.bodies unread=ship.crew.observed.unread}}</i>{{else}}&mdash;<i>{{localize 'MGT2.Actor.spacecraft.CrewSkillUnread'}}</i>{{/if}}</dd>
 		</div>
 	</dl>
 
 	{{#if ship.crew.rows.length}}
-	<table class="roster">
+	<table class="roster crew">
+		<colgroup><col class="c-st" /><col class="c-who" /><col /><col class="c-rq" /></colgroup>
 		<thead>
 			<tr>
 				<th>{{localize 'MGT2.Actor.spacecraft.Station'}}</th>
 				<th>{{localize 'MGT2.Actor.spacecraft.Who'}}</th>
-				<th>{{localize 'MGT2.Actor.spacecraft.Mount'}}</th>
 				<th>{{localize 'MGT2.Actor.spacecraft.Actions'}}</th>
 				<th class="r">{{localize 'MGT2.Actor.spacecraft.Req'}}</th>
 			</tr>
@@ -48,25 +48,29 @@
 				<td class="station">
 					<span class="play-only">
 						<b>{{#if row.station}}{{row.station}}{{else}}&mdash;{{/if}}{{#if (gt row.count 1)}} &times;{{row.count}}{{/if}}</b>
-						{{#if row.department}}<span class="dept">{{localize row.department}}</span>{{/if}}
+						{{! The station's standing mount. The combat DUTY is not here: it starts and stops
+						    with the encounter, so it lives on the `crew` Combatant. }}
+						{{#if (or row.department row.dutyTarget)}}<span class="dept">{{#if row.department}}{{localize row.department}}{{/if}}{{#if row.dutyTarget}}{{#if row.department}} &middot; {{/if}}{{localize 'MGT2.Actor.spacecraft.Mount'}} {{row.dutyTarget}}{{/if}}</span>{{/if}}
 					</span>
 					<span class="edit-only">
-						<select class="f" name="system.crew.{{row.index}}.role">
-							<option value="">&mdash;</option>
-							{{#each row.roles as |choice|}}
-							<option value="{{choice._id}}"{{#if choice.selected}} selected{{/if}}>{{choice.name}}</option>
-							{{/each}}
-						</select>
-						<input class="f num" type="number" min="1" step="1" name="system.crew.{{row.index}}.count" value="{{row.count}}" data-dtype="Number" />
+						<span class="pair">
+							<select class="f" name="system.crew.{{row.index}}.role">
+								<option value="">&mdash;</option>
+								{{#each row.roles as |choice|}}
+								<option value="{{choice._id}}"{{#if choice.selected}} selected{{/if}}>{{choice.name}}</option>
+								{{/each}}
+							</select>
+							<input class="f num" type="number" min="1" step="1" name="system.crew.{{row.index}}.count" value="{{row.count}}" data-dtype="Number" />
+						</span>
+						<input class="f" type="text" name="system.crew.{{row.index}}.dutyTarget" value="{{row.dutyTarget}}" placeholder="{{localize 'MGT2.Actor.spacecraft.DutyTarget'}}" />
 					</span>
 				</td>
 				<td class="who{{#if row.statted}} linked{{else}}{{#if row.name}} plain{{/if}}{{/if}}">
 					<span class="play-only">
 						{{#if row.statted}}
-						<span class="av"></span><a data-action="openCraft" data-uuid="{{row.actor}}">{{row.name}}</a>
-						<i class="src">{{localize 'MGT2.Actor.spacecraft.LinkedActor'}}</i>
+						{{#if row.img}}<img class="av" src="{{row.img}}" alt="" />{{/if}}<a data-action="openCraft" data-uuid="{{row.actor}}" data-tooltip="{{localize 'MGT2.Actor.spacecraft.LinkedActor'}}">{{row.name}}</a>
 						{{else if row.name}}
-						<em>{{row.name}}</em><i class="src">{{localize 'MGT2.Actor.spacecraft.NameOnly'}}</i>
+						<em data-tooltip="{{localize 'MGT2.Actor.spacecraft.NameOnly'}}">{{row.name}}</em>
 						{{else}}
 						{{localize 'MGT2.Actor.spacecraft.Vacant'}}
 						{{/if}}
@@ -76,27 +80,17 @@
 						<input class="f" type="text" name="system.crew.{{row.index}}.actor" value="{{row.actor}}" placeholder="{{localize 'MGT2.Actor.spacecraft.ActorUuid'}}" />
 					</span>
 				</td>
-				{{! The station's standing mount. The combat DUTY is not here: it starts and stops
-				    with the encounter, so it lives on the `crew` Combatant. }}
-				<td class="duty">
-					<span class="ro play-only">{{#if row.dutyTarget}}{{row.dutyTarget}}{{else}}&mdash;{{/if}}</span>
-					<input class="f edit-only" type="text" name="system.crew.{{row.index}}.dutyTarget" value="{{row.dutyTarget}}" placeholder="{{localize 'MGT2.Actor.spacecraft.DutyTarget'}}" />
-				</td>
 				<td>
 					<div class="todo">
 						{{#each row.actions as |action|}}
-						<button type="button" class="btn" data-action="stationAction" data-action-index="{{action.index}}"{{#if action.disabled}} disabled data-tooltip="{{localize 'MGT2.Actor.spacecraft.NoCrewSheet'}}"{{/if}}>
-							{{action.label}}<i>{{#if action.skill}}{{action.skill}}{{/if}}{{#if action.target}} {{action.target}}+{{else}}{{#unless action.skill}}&mdash;{{/unless}}{{/if}}{{#if action.stepLabel}} &middot; {{localize action.stepLabel}}{{/if}}{{#if action.capLabel}} &middot; {{localize action.capLabel}}{{/if}}</i>
+						<button type="button" class="btn" data-action="stationAction" data-action-index="{{action.index}}"{{#if action.disabled}} disabled{{/if}}{{#if action.tip}} data-tooltip="{{action.tip}}"{{/if}}>
+							{{action.label}}{{#if action.target}}<i>{{action.target}}+</i>{{/if}}
 						</button>
 						{{/each}}
 					</div>
 				</td>
 				<td class="r">
-					{{#if row.required}}
-					<span class="need{{#if (lt row.count row.required)}} short{{/if}}">{{row.count}} / <b>{{row.required}}</b></span>
-					{{else}}
-					<span class="need">{{row.count}} / <b>&mdash;</b></span>
-					{{/if}}
+					<span class="need{{#if (and row.required (lt row.count row.required))}} short{{/if}}">{{row.count}}/{{#if row.required}}{{row.required}}{{else}}&mdash;{{/if}}</span>
 				</td>
 			</tr>
 			{{/each}}

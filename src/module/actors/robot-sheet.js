@@ -11,6 +11,24 @@ const TRAVELLER_KEYS = ["strength", "dexterity", "endurance", "intellect", "educ
 /** The three repeatable arrays one pair of handlers serves. */
 const ROW_ARRAYS = new Set(["options", "locomotion", "manipulators"]);
 
+/** Every block the panel composes from; each one is a partial of the same name. */
+const BLOCKS = ["attacks", "skills", "traits", "characteristics", "armour", "description", "notes",
+    "chassis", "derivations", "locomotion", "manipulators", "brain", "options"];
+
+const blockPath = id => `${PARTS_PATH}/robot/blocks/${id}.html`;
+
+/** Which tab holds each block. */
+const SLOT = {
+    attacks: "field", skills: "field", traits: "field", characteristics: "field", armour: "field",
+    description: "field", notes: "field",
+    chassis: "design", derivations: "design", locomotion: "design", manipulators: "design", brain: "design",
+    options: "design"
+};
+
+for ( const id of BLOCKS ) {
+    if ( !(id in SLOT) ) throw new Error(`MGT2 | the robot sheet block "${id}" has no tab slot.`);
+}
+
 /** The robot sheet. @extends {TravellerActorSheet} */
 export class RobotActorSheet extends TravellerActorSheet {
 
@@ -33,22 +51,31 @@ export class RobotActorSheet extends TravellerActorSheet {
         header: { template: `${PARTS_PATH}/robot/header.html` },
         rail: {
             template: `${PARTS_PATH}/robot/rail.html`,
-            templates: [`${PARTS_PATH}/robot/budget.html`],
+            templates: [`${PARTS_PATH}/robot/budget.html`, `${PARTS_PATH}/parts/row-controls.html`],
             scrollable: [""]
         },
         panel: {
             template: `${PARTS_PATH}/robot/panel.html`,
-            templates: [`${PARTS_PATH}/robot/budget.html`,
+            templates: BLOCKS.map(blockPath).concat(`${PARTS_PATH}/parts/tabs-nav.html`,
+                `${PARTS_PATH}/parts/attack-card.html`,
                 `${PARTS_PATH}/parts/characteristic.html`,
                 `${PARTS_PATH}/parts/row-controls.html`,
                 `${PARTS_PATH}/parts/armour-rows.html`,
-                "systems/mgt2/templates/items/blocks/traits.html"],
-            scrollable: [""]
+                "systems/mgt2/templates/items/blocks/traits.html"),
+            scrollable: ['.tab[data-group="robot"].active']
         }
     };
 
-    /** One rail and one panel, no tab strip. */
-    static TABS = {};
+    /** A round with a robot rolls and reads in the first tab; the second is where it is built. @inheritDoc */
+    static TABS = {
+        robot: {
+            tabs: [
+                { id: "field", cssClass: "item tab-select", icon: "fa-solid fa-crosshairs", label: "MGT2.Actor.robot.Tabs.Field" },
+                { id: "design", cssClass: "item tab-select", icon: "fa-solid fa-drafting-compass", label: "MGT2.Design.Title" }
+            ],
+            initial: "field"
+        }
+    };
 
     /**
      * The parent maps document paths onto the *character* sheet's parts, and this sheet has three
@@ -66,6 +93,12 @@ export class RobotActorSheet extends TravellerActorSheet {
     async _prepareContext(options) {
         const context = await super._prepareContext(options);
         const system = this.actor.system;
+
+        // The parent overwrites `context.tabs` with the character sheet's two groups.
+        context.tabs = this._prepareTabs("robot");
+        for ( const tab of Object.values(context.tabs) ) {
+            tab.blocks = BLOCKS.filter(id => SLOT[id] === tab.id).map(id => ({ id, template: blockPath(id) }));
+        }
 
         context.choices = {
             sizes: MGT2.RobotSize,
@@ -97,9 +130,21 @@ export class RobotActorSheet extends TravellerActorSheet {
             })),
             traveller: TRAVELLER_KEYS.map(key => byKey.get(key)).filter(Boolean)
         };
-        // The natural attacks print in the statblock; anything else is an ordinary weapon row.
-        context.naturals = context.weapons.filter(weapon => weapon.system.natural === true);
-        context.carried = context.weapons.filter(weapon => weapon.system.natural !== true);
+        // One Attacks block, as the printed statblock has one line: natural attacks, then carried weapons.
+        context.attacks = [...context.weapons.filter(weapon => weapon.system.natural === true),
+            ...context.weapons.filter(weapon => weapon.system.natural !== true)];
+        // Play mode folds what holds nothing into one line; edit mode keeps every block to fill in.
+        const vacant = {
+            attacks: !context.attacks.length, skills: !context.skills.length,
+            description: MGT2Helper.isBlankHtml(system.description), notes: MGT2Helper.isBlankHtml(system.notes)
+        };
+        context.robot.vacant = vacant;
+        context.tabs.field.vacant = [
+            vacant.attacks && { label: "MGT2.Actor.robot.Attacks" },
+            vacant.skills && { label: "MGT2.Actor.Skills" },
+            vacant.description && { label: "MGT2.Actor.robot.Description", door: this.isEditable },
+            vacant.notes && { label: "MGT2.Actor.Notes", door: this.isEditable }
+        ].filter(Boolean);
         return context;
     }
 
@@ -130,18 +175,17 @@ export class RobotActorSheet extends TravellerActorSheet {
         const scale = 2 * hits.max;
         const pct = points => (scale > 0) ? Math.min(100, Math.max(0, Math.round((points / scale) * 100))) : 0;
         const states = system.states;
-        let state = "operational";
-        if (states.destroyed) state = "destroyed";
-        else if (states.wrecked) state = "wrecked";
-        else if (hits.damage > 0) state = "damaged";
+        const marks = [
+            { at: 50, label: "MGT2.Actor.robot.Wrecked", hit: states.wrecked },
+            { at: 100, label: "MGT2.Actor.robot.Destroyed", hit: states.destroyed }
+        ];
         return {
             value: hits.value, max: hits.max, damage: hits.damage,
-            wound: pct(hits.damage), state,
+            wound: pct(hits.damage),
             wrecked: states.wrecked, destroyed: states.destroyed,
-            marks: [
-                { at: 50, label: "MGT2.Actor.robot.Wrecked", hit: states.wrecked },
-                { at: 100, label: "MGT2.Actor.robot.Destroyed", hit: states.destroyed }
-            ]
+            marks,
+            labels: marks.map(mark => ({ at: mark.at, hit: mark.hit, text: game.i18n.localize(mark.label),
+                anchor: (mark.at === 100) ? "end" : "" }))
         };
     }
 
@@ -161,9 +205,11 @@ export class RobotActorSheet extends TravellerActorSheet {
             });
         }
         const budget = RobotActorSheet.#budget(system.slots.total, rows);
-        budget.base = system.slots.base;
-        budget.removed = system.slots.removed;
-        budget.spare = system.slots.spare;
+        // The total departs from Base Slots only once Slots were removed (RH p.13), and only then says so.
+        if ( system.slots.removed > 0 ) {
+            budget.why = `${game.i18n.localize("MGT2.Actor.robot.BaseSlots")} ${system.slots.base} · `
+                + `${game.i18n.localize("MGT2.Actor.robot.Removed")} ${system.slots.removed}`;
+        }
         return budget;
     }
 
@@ -202,6 +248,9 @@ export class RobotActorSheet extends TravellerActorSheet {
             });
         }
         const budget = RobotActorSheet.#budget(brain.bandwidth.total, rows, "hard");
+        // The brain is a `computer` Item, so its Bandwidth reads as the computer's Processing does.
+        budget.cells = Array.from({ length: Math.ceil(Math.max(budget.cap, budget.total)) },
+            (_cell, index) => ({ on: index < budget.total }));
         budget.inherent = brain.bandwidth.inherent;
         budget.oversized = brain.bandwidth.oversized;
         budget.downgradesIgnored = brain.bandwidth.downgradesIgnored;

@@ -1,39 +1,48 @@
-{{! What is stored in this container. Reads in both modes; taking out and deleting are edit-mode. }}
+{{! What is stored in this container, as the stash lists it. Locked, a player reads the referee's
+    words in place of the rows; the eye opens a stored item, and taking out and deleting are edit-mode. }}
 <div class="block">
 	<div class="sect{{#if bare}} bare{{/if}}">
 		{{#unless bare}}<h3>{{localize 'MGT2.Items.Contents'}}</h3>{{/unless}}
-		<span class="count">{{nested.length}}</span>
+		<span class="count">{{#unless bag.withheld}}{{nested.length}}{{/unless}}</span>
 	</div>
-	{{#if nested.length}}
+	{{#if bag.withheld}}
+	<div class="withheld">
+		<span class="ic"><i class="fa-solid fa-lock"></i></span>
+		<span class="lbl">{{localize 'MGT2.Actor.stash.Withheld'}}</span>
+		{{#if system.lockedDescription}}<p class="said">{{system.lockedDescription}}</p>{{/if}}
+		<p class="why">{{localize 'MGT2.Errors.LockedContainer'}}</p>
+	</div>
+	{{else if nested.length}}
 	<table class="rows">
 		<thead>
 			<tr>
 				<th>{{localize 'MGT2.Items.Name'}}</th>
-				<th class="c">{{localize 'MGT2.Items.Type'}}</th>
-				<th class="c">{{localize 'MGT2.Items.Qty'}}</th>
-				<th class="c">{{localize 'MGT2.Items.Weight'}}</th>
+				<th>{{localize 'MGT2.Items.Type'}}</th>
+				<th class="r">{{localize 'MGT2.Items.Qty'}}</th>
+				<th class="r">{{localize 'MGT2.Items.Weight'}}<i>{{unitlabels.weight}}</i></th>
 				<th></th>
 			</tr>
 		</thead>
 		<tbody>
 			{{#each nested as |entry|}}
 			<tr class="draggable" data-item-id="{{entry._id}}">
-				<td>{{entry.name}}</td>
-				<td class="c">{{entry.type}}</td>
-				<td class="c num">{{entry.quantity}}</td>
-				<td class="c num">{{entry.weight}}</td>
+				<td>{{entry.name}}{{#if entry.held includeZero=true}}<span class="sub">{{localize 'MGT2.Actor.stash.Holds' n=entry.held}}</span>{{/if}}</td>
+				<td class="kind">{{entry.type}}</td>
+				<td class="r num{{#unless entry.quantity}} nil{{/unless}}">{{#if entry.quantity}}{{entry.quantity}}{{else}}&mdash;{{/if}}</td>
+				<td class="r num{{#unless entry.weight}} nil{{/unless}}">{{#if entry.weight}}{{entry.weight}}{{else}}&mdash;{{/if}}</td>
 				<td class="r">
-					<div class="acts edit-only">
-						<a data-action="nestedRemove" data-tooltip="{{localize 'MGT2.Actor.UnstoreItem'}}"><i class="fa-solid fa-inbox-out"></i></a>
-						<a data-action="nestedEdit" data-tooltip="{{localize 'MGT2.Actor.EditItem'}}"><i class="fas fa-edit"></i></a>
-						<a data-action="nestedDelete" data-tooltip="{{localize 'MGT2.Actor.DeleteItem'}}"><i class="fas fa-trash"></i></a>
+					<div class="acts">
+						<a class="play-only" data-action="nestedEdit" data-tooltip="{{localize 'MGT2.Actor.View'}}"><i class="fas fa-eye"></i></a>
+						<a class="edit-only" data-action="nestedRemove" data-tooltip="{{localize 'MGT2.Actor.UnstoreItem'}}"><i class="fa-solid fa-inbox-out"></i></a>
+						<a class="edit-only" data-action="nestedEdit" data-tooltip="{{localize 'MGT2.Actor.EditItem'}}"><i class="fas fa-edit"></i></a>
+						<a class="edit-only" data-action="nestedDelete" data-tooltip="{{localize 'MGT2.Actor.DeleteItem'}}"><i class="fas fa-trash"></i></a>
 					</div>
 				</td>
 			</tr>
 			{{/each}}
 		</tbody>
 	</table>
-	{{else}}
-	{{#if (eq item.type "container")}}<p class="hint">{{localize 'MGT2.Items.ContentsHint'}}</p>{{/if}}
+	{{else if bag.canDrop}}
+	<p class="hint">{{localize 'MGT2.Items.ContentsHint'}}</p>
 	{{/if}}
 </div>

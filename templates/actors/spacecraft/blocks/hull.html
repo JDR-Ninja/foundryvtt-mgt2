@@ -62,9 +62,9 @@
 			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Bridge'}}</span>
 			{{formInput systemFields.bridge.fields.type name="system.bridge.type" value=system.bridge.type localize=true classes="f"}}
 		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Holographic'}}</span>
-			{{formInput systemFields.bridge.fields.holographic name="system.bridge.holographic" value=system.bridge.holographic classes="f"}}
+		<label class="check">
+			{{formInput systemFields.bridge.fields.holographic name="system.bridge.holographic" value=system.bridge.holographic}}
+			<span>{{localize 'MGT2.Actor.spacecraft.Holographic'}}</span>
 		</label>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Sensors'}}</span>

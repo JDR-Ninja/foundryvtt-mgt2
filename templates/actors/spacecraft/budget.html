@@ -1,6 +1,28 @@
 {{! BLOCK 2 — one budget panel, four times over at four scales. Total, bar and over-state are
     computed and never authored. `switched` holds the NAME of the toggle action: a consumer taken
-    offline frees its draw (Core p.171). `under` is opt-in — a Thrust bank reads `N short`, not `N free`. }}
+    offline frees its draw (Core p.171). `under` is opt-in — a Thrust bank reads `N short`, not `N free`.
+    `line` puts label, bar, total and what is left on one line, the line being a folded budget's summary. }}
+{{#if line}}
+{{#*inline "budgetLine"}}
+<span class="lbl">{{title}}</span>
+{{#if note}}<i class="fa-solid fa-circle-info note" data-tooltip="{{note}}"></i>{{/if}}
+{{#if b.why}}<span class="why">{{localize b.why}}</span>{{/if}}
+<span class="gauge"><i style="--g: {{b.fill}}%"></i></span>
+<span class="tot" data-derived="{{derived}}"><b>{{b.total}}</b><span class="of">/ {{b.cap}}{{#if unit}} {{unit}}{{/if}}</span></span>
+<span class="rem">{{#if b.over}}{{flag}} &middot; {{localize 'MGT2.Actor.spacecraft.Over' n=b.remaining}}{{else}}{{#if under}}{{localize 'MGT2.Actor.spacecraft.ShortN' n=b.remaining}}{{else}}{{localize 'MGT2.Actor.spacecraft.FreeN' n=b.remaining}}{{/if}}{{/if}}</span>
+{{/inline}}
+<section class="budget line{{#if switched}} switched{{/if}}{{#if b.over}} over{{/if}}" data-over="{{#if over}}{{over}}{{else}}hard{{/if}}"{{#if under}} data-under="short"{{/if}}>
+	{{#if (and fold b.rows.length)}}
+	<details class="fold" data-fold="{{fold}}"{{#if b.over}} open{{/if}}>
+		<summary class="bh" data-tooltip="{{plural 'MGT2.Actor.spacecraft.FoldRows' b.rows.length}}">{{> budgetLine}}</summary>
+		{{> systems/mgt2/templates/actors/spacecraft/budget-rows.html}}
+	</details>
+	{{else}}
+	<header class="bh">{{> budgetLine}}</header>
+	{{#if b.rows.length}}{{> systems/mgt2/templates/actors/spacecraft/budget-rows.html}}{{/if}}
+	{{/if}}
+</section>
+{{else}}
 <section class="budget{{#if switched}} switched{{/if}}{{#if b.over}} over{{/if}}" data-over="{{#if over}}{{over}}{{else}}hard{{/if}}"{{#if under}} data-under="short"{{/if}}>
 	<header>
 		<span class="lbl">{{title}}</span>
@@ -25,3 +47,4 @@
 	{{/if}}
 	{{/if}}
 </section>
+{{/if}}

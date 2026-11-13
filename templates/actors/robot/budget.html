@@ -7,12 +7,19 @@
 	<header>
 		<span class="lbl">{{title}}</span>
 		{{#if note}}<i class="fa-solid fa-circle-info note" data-tooltip="{{note}}"></i>{{/if}}
+		{{#if b.why}}<span class="why">{{b.why}}</span>{{/if}}
 		{{#if b.over}}<span class="flag">{{flag}}</span>{{/if}}
 		<span class="tot" data-derived="{{derived}}"><b>{{b.total}}</b><span class="of">/ {{b.cap}}{{#if unit}} {{unit}}{{/if}}</span></span>
 		<span class="rem">{{#if b.over}}{{localize 'MGT2.Actor.robot.OverN' n=b.remaining}}{{else}}{{localize 'MGT2.Actor.robot.FreeN' n=b.remaining}}{{/if}}</span>
 	</header>
+	{{#if cells}}
+	<div class="cells">{{#each b.cells}}<i{{#if on}} class="on"{{/if}}></i>{{/each}}</div>
+	{{else}}
 	<div class="gauge"><i style="--g: {{b.fill}}%"></i><u style="--m: {{b.mark}}%"></u></div>
+	{{/if}}
 	{{#if b.rows.length}}
+	{{#if fold}}<details class="fold" data-fold="{{fold}}"{{#if b.over}} open{{/if}}>
+	<summary>{{plural 'MGT2.Actor.spacecraft.FoldRows' b.rows.length}}</summary>{{/if}}
 	<table class="rows brows" data-derived="{{derived}}">
 		<tbody>
 			{{#each b.rows}}
@@ -29,5 +36,6 @@
 			{{/each}}
 		</tbody>
 	</table>
+	{{#if fold}}</details>{{/if}}
 	{{/if}}
 </section>

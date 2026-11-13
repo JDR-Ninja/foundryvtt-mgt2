@@ -1,0 +1,52 @@
+{{! Locomotion drives four values at once, so it cannot be a plain enum — and a robot may carry
+    two modes, each granting its own traits (RH p.16, p.23). }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.robot.Locomotion'}}</h3>
+		<span class="count">{{#if robot.locomotion.length}}{{robot.locomotion.length}}{{/if}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.LocomotionHint'}}"></i>
+		<a class="add edit-only" data-action="rowCreate" data-rows="locomotion" data-tooltip="{{localize 'MGT2.Actor.robot.AddLocomotion'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	{{#if robot.locomotion.length}}
+	<table class="rows fixed">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Actor.robot.Mode'}}</th>
+				<th class="c num">{{localize 'MGT2.Actor.robot.Agility'}}</th>
+				<th class="c num">{{localize 'MGT2.Actor.robot.BaseEndurance'}}</th>
+				<th>{{localize 'MGT2.Actor.robot.TraitGranted'}}</th>
+				<th class="c num">{{localize 'MGT2.Actor.robot.CostMultiplier'}}</th>
+				<th class="acts"></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each robot.locomotion}}
+			<tr data-row-index="{{index}}">
+				<td>
+					<span class="play-only">{{localize label}}</span>
+					<select class="f edit-only" name="system.locomotion.{{index}}.type">
+						{{#each choices}}
+						<option value="{{key}}"{{#if selected}} selected{{/if}}>{{localize label}}</option>
+						{{/each}}
+					</select>
+					<span class="sub">{{#if isPrimary}}{{localize 'MGT2.Actor.robot.Primary'}}{{else}}{{localize 'MGT2.Actor.robot.Secondary'}}{{/if}}</span>
+					{{! Which mode is primary rides a hidden checkbox, because the whole array is
+					    rewritten on submit and a flag with no control would reset to its initial. }}
+					<input type="checkbox" name="system.locomotion.{{index}}.primary" {{checked isPrimary}} hidden />
+				</td>
+				<td class="c num">{{#if agility}}{{agility}}{{else}}&mdash;{{/if}}</td>
+				<td class="c num">{{endurance}}</td>
+				<td>{{#each traits}}{{#unless @first}}, {{/unless}}{{this}}{{/each}}</td>
+				<td class="c num">&times;{{costMultiplier}}</td>
+				<td>
+					<div class="acts edit-only">
+						<a data-action="locomotionPrimary" data-tooltip="{{localize 'MGT2.Actor.robot.MakePrimary'}}"><i class="fa-solid fa-star{{#unless isPrimary}}-half-stroke{{/unless}}"></i></a>
+						<a data-action="rowDelete" data-rows="locomotion" data-tooltip="{{localize 'MGT2.Actor.robot.DeleteLocomotion'}}"><i class="fa-solid fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</div>

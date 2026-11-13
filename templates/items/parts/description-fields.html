@@ -1,0 +1,15 @@
+{{! The description and where it is printed, edited on Details or on the Description tab. `rows`
+    defaults to 6; a contact's description is its own editor, so it takes the source fields alone. }}
+{{#unless (eq item.type "contact")}}
+<textarea class="f edit-only" name="system.description" rows="{{#if rows}}{{rows}}{{else}}6{{/if}}">{{system.description}}</textarea>
+{{/unless}}
+<div class="grid cols2 edit-only">
+	<label>
+		<span class="lbl">{{localize 'MGT2.Items.SourceBook'}}</span>
+		{{formInput systemFields.source.fields.book name="system.source.book" value=system.source.book classes="f"}}
+	</label>
+	<label>
+		<span class="lbl">{{localize 'MGT2.Items.SourcePage'}}</span>
+		{{formInput systemFields.source.fields.page name="system.source.page" value=system.source.page classes="f" placeholder=(localize 'MGT2.Items.SourcePagePlaceholder')}}
+	</label>
+</div>

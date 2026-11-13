@@ -1,61 +1,66 @@
 <aside class="mgt2-rail">
 
-	{{! The pool. Core p.168: a hull at zero is wrecked and there is no state under it, so the bar
-	    runs to the maximum and the sustained-damage ladder marks the tenths. }}
+	{{! The pool. Core p.168: a hull at zero is wrecked and there is no state under it, so the bar is
+	    what is left, the loss red at its end, and the sustained-damage tenths are ticks (Core p.169). }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.DamageTracks.hull'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.spacecraft.HullChain'}}</span>
+			<span class="count" data-tooltip="{{plural 'MGT2.Actor.spacecraft.SustainedHint' ship.hull.steps crossed=ship.hull.crossed steps=ship.hull.steps}}">{{ship.hull.crossed}} / {{ship.hull.steps}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.SustainedWhy'}}"></i>
 		</div>
-		<div class="trackwrap">
-			<div class="track{{#if ship.hull.damage}} hurt{{/if}}" data-derived="system.life.damage">
-				<div class="fill" style="--g: {{ship.hull.wound}}%"></div>
-				<div class="mk" data-anchor="end"{{#if ship.hull.wrecked}} data-hit="1"{{/if}} style="--x: 100%"><span>{{localize 'MGT2.Actor.spacecraft.Wrecked'}}</span></div>
+		<div class="trackwrap open" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.spacecraft.Repair'}}">
+			<div class="track pool{{#if ship.hull.damage}} hurt{{/if}}" data-derived="system.life.damage">
+				<div class="fill" style="--g: {{ship.hull.left}}%"></div>
+				{{#each ship.hull.ticks}}
+				<div class="mk"{{#if hit}} data-hit="1"{{/if}} style="--x: {{at}}%"></div>
+				{{/each}}
 			</div>
 		</div>
 		<dl class="statline" data-derived="system.characteristics.hull">
 			<div class="stat"><dt>{{localize 'MGT2.Actor.Damage'}}</dt><dd>{{ship.hull.damage}}</dd></div>
-			<div class="stat{{#if ship.hull.severity}} hurt{{/if}}">
+			<div class="stat{{#if ship.hull.severity}} hurt{{else}} none{{/if}}">
 				<dt>{{localize 'MGT2.Actor.spacecraft.HullSeverity'}}</dt>
 				<dd>{{ship.hull.severity}}</dd>
 			</div>
 		</dl>
-		<p class="hint">{{plural 'MGT2.Actor.spacecraft.SustainedHint' ship.hull.steps crossed=ship.hull.crossed steps=ship.hull.steps}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.SustainedWhy'}}"></i></p>
 	</div>
 
-	{{! Three budgets, not one — a ship is constrained by tonnage, by power and by hardpoints, and
-	    the third is easy to miss because no catalogue entry prints it. }}
-	{{> systems/mgt2/templates/actors/spacecraft/budget.html
-		b=ship.tonnage
-		fold="tonnage"
-		title=(localize 'MGT2.Actor.spacecraft.Tonnage')
-		flag=(localize 'MGT2.Actor.spacecraft.OverHull')
-		unit=(localize 'MGT2.Actor.spacecraft.Tons')
-		prefix="MGT2.Actor.spacecraft.TonnageRows."
-		derived="system.budget"}}
-
-	{{! The power panel is the one with a state, which is why it is a panel and not a number. }}
-	{{> systems/mgt2/templates/actors/spacecraft/budget.html
-		b=ship.power
-		switched="powerToggle"
-		title=(localize 'MGT2.Actor.spacecraft.Power')
-		flag=(localize 'MGT2.Actor.spacecraft.Brownout')
-		prefix="MGT2.Actor.spacecraft.DrawRows."
-		derived="system.power.requirements"}}
-	{{#if ship.power.damaged}}
-	<p class="hint">{{localize 'MGT2.Actor.spacecraft.PlantDamaged' plant=ship.power.plant available=ship.power.rated}}</p>
-	{{/if}}
-	{{#if ship.power.ionDrain}}
-	<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.IonPower' n=ship.power.ionDrain rated=ship.power.rated available=ship.power.cap}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.IonWhy'}}"></i><a class="rm" data-action="ionClear" data-track="power" data-tooltip="{{localize 'MGT2.Actor.spacecraft.IonClear'}}"><i class="fa-solid fa-eraser"></i></a></p>
-	<p class="hint">{{localize 'MGT2.Actor.spacecraft.IonAllocate'}}</p>
-	{{/if}}
-
-	{{> systems/mgt2/templates/actors/spacecraft/budget.html
-		b=ship.hardpoints
-		fold="hardpoints"
-		title=(localize 'MGT2.Actor.spacecraft.Hardpoints')
-		flag=(localize 'MGT2.Actor.spacecraft.NoHardpoint')
-		derived="system.hardpoints"}}
+	{{! Three budgets, not one — a ship is constrained by tonnage, by power and by hardpoints, and the
+	    third is easy to miss because no catalogue entry prints it. One line each, so they read as a
+	    column of meters; power keeps its rows open, because it is the one with a state. }}
+	<div class="block">
+		{{> systems/mgt2/templates/actors/spacecraft/budget.html
+			b=ship.tonnage
+			line=true
+			fold="tonnage"
+			title=(localize 'MGT2.Actor.spacecraft.Tonnage')
+			flag=(localize 'MGT2.Actor.spacecraft.OverHull')
+			unit=(localize 'MGT2.Actor.spacecraft.Tons')
+			prefix="MGT2.Actor.spacecraft.TonnageRows."
+			derived="system.budget"}}
+		{{> systems/mgt2/templates/actors/spacecraft/budget.html
+			b=ship.power
+			line=true
+			switched="powerToggle"
+			title=(localize 'MGT2.Actor.spacecraft.Power')
+			flag=(localize 'MGT2.Actor.spacecraft.Brownout')
+			prefix="MGT2.Actor.spacecraft.DrawRows."
+			derived="system.power.requirements"}}
+		{{#if ship.power.damaged}}
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.PlantDamaged' plant=ship.power.plant available=ship.power.rated}}</p>
+		{{/if}}
+		{{#if ship.power.ionDrain}}
+		<p class="hint bad">{{localize 'MGT2.Actor.spacecraft.IonPower' n=ship.power.ionDrain rated=ship.power.rated available=ship.power.cap}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.spacecraft.IonWhy'}}"></i><a class="rm" data-action="ionClear" data-track="power" data-tooltip="{{localize 'MGT2.Actor.spacecraft.IonClear'}}"><i class="fa-solid fa-eraser"></i></a></p>
+		<p class="hint">{{localize 'MGT2.Actor.spacecraft.IonAllocate'}}</p>
+		{{/if}}
+		{{> systems/mgt2/templates/actors/spacecraft/budget.html
+			b=ship.hardpoints
+			line=true
+			fold="hardpoints"
+			title=(localize 'MGT2.Actor.spacecraft.Hardpoints')
+			flag=(localize 'MGT2.Actor.spacecraft.NoHardpoint')
+			derived="system.hardpoints"}}
+	</div>
 
 	{{! One per full 100 tons, free (HG p.25-26). A cap of zero is a real answer, not a blank. }}
 	<dl class="statline" data-derived="system.firmpoints">

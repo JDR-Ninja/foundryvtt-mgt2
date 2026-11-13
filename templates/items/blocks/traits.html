@@ -7,6 +7,17 @@
 		<h3>{{localize traits.label}}</h3>
 		<span class="count">{{localize traits.familyLabel}} &middot; {{traits.entries.length}}</span>
 	</div>
+	{{! CSC p.179-182: a few rounds REPLACE the weapon's trait list instead of adding to it, and the
+	    list itself cannot say which, so the switch sits with the chips. }}
+	{{#if (and (eq item.type "ammunition") (eq traits.property "traits"))}}
+	{{#if system.replaceTraits}}<div class="pills play-only"><span class="pill warn">{{localize 'MGT2.Items.ReplaceTraits'}}</span></div>{{/if}}
+	<div class="grid edit-only">
+		<label class="check">
+			{{formInput systemFields.replaceTraits name="system.replaceTraits" value=system.replaceTraits}}
+			<span>{{localize 'MGT2.Items.ReplaceTraits'}}</span>
+		</label>
+	</div>
+	{{/if}}
 	<ul class="codes{{#if traits.glossed}} glossed{{/if}}" data-property="{{traits.property}}" data-family="{{traits.family}}">
 		{{#each traits.entries as |entry i|}}
 		<li class="code{{#if entry.note}} noted{{/if}}" data-trait-index="{{i}}">

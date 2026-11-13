@@ -1,22 +1,15 @@
 <aside class="mgt2-rail">
 
-	{{! BLOCK 2 — the spine. `slots.base` is the Size table's figure and NEVER changes with a
-	    modification: it stays the multiplier for every "per Base Slot" cost and every "% of Slots"
-	    rounding, which is why the cap and the armour row move together. }}
+	{{! The spine. `slots.base` is the Size table's figure and NEVER changes with a modification: it
+	    stays the multiplier for every "per Base Slot" cost, so the cap and the armour row move together.
+	    The option rows fold behind one line, which opens by itself once the budget is over. }}
 	{{> systems/mgt2/templates/actors/robot/budget.html
 		b=robot.slots
 		title=(localize 'MGT2.Actor.robot.Slots')
 		note=(localize 'MGT2.Actor.robot.SlotHint')
 		flag=(localize 'MGT2.Actor.robot.OverBudget')
+		fold="slots"
 		derived="system.slots"}}
-	<dl class="statline" data-derived="system.slots">
-		<div class="stat"><dt>{{localize 'MGT2.Actor.robot.Spare'}}</dt><dd>{{robot.slots.spare}}</dd></div>
-		<div class="stat"><dt>{{localize 'MGT2.Actor.robot.BaseSlots'}}</dt><dd>{{robot.slots.base}}</dd></div>
-		<div class="stat{{#unless robot.slots.removed}} none{{/unless}}">
-			<dt>{{localize 'MGT2.Actor.robot.Removed'}}</dt>
-			<dd>{{#if robot.slots.removed}}{{robot.slots.removed}}{{else}}&mdash;{{/if}}</dd>
-		</div>
-	</dl>
 
 	{{! The second budget, in a different currency, and the two are coupled: past the Default Suite's
 	    allowance each further zero-slot option costs a real Slot in the panel above. }}
@@ -25,30 +18,41 @@
 		title=(localize 'MGT2.Actor.robot.ZeroSlot')
 		note=(localize 'MGT2.Actor.robot.ZeroHint' n=robot.zero.cap)
 		flag=(localize 'MGT2.Actor.robot.ZeroFlag')
+		fold="zero"
 		derived="system.zeroSlot"}}
 
-	{{! The pool. The scale is TWICE the maximum, because `damage` can exceed `max` and that overrun
-	    is the Destroyed state — the same bar a creature's Hits use, with two marks instead of four. }}
-	<div class="block">
-		<div class="sect">
-			<h3>{{localize 'MGT2.DamageTracks.hits'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.robot.HitsChain'}}</span>
-			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.DamageHint'}}"></i>
-		</div>
-		<div class="trackwrap">
-			<div class="track{{#if robot.hits.damage}} hurt{{/if}}" data-derived="system.life.damage">
-				<div class="fill" style="--g: {{robot.hits.wound}}%"></div>
-				{{#each robot.hits.marks}}
-				<div class="mk"{{#if (eq at 100)}} data-anchor="end"{{else if (eq at 0)}} data-anchor="start"{{/if}}{{#if hit}} data-hit="1"{{/if}} style="--x: {{at}}%"><span>{{localize label}}</span></div>
-				{{/each}}
-			</div>
-		</div>
-		<dl class="statline" data-derived="system.characteristics.hits">
-			<div class="stat"><dt>{{localize 'MGT2.Actor.Damage'}}</dt><dd>{{robot.hits.damage}}</dd></div>
-			<div class="stat">
-				<dt>{{localize 'MGT2.Actor.robot.State'}}</dt>
-				<dd class="word">{{localize (concat 'MGT2.Actor.robot.States.' robot.hits.state)}}</dd>
-			</div>
-		</dl>
+	{{! The brain's Bandwidth, which carries a state, so its rows stay open: one cell per point. }}
+	<div class="brainbudget">
+		{{> systems/mgt2/templates/actors/robot/budget.html
+			b=robot.bandwidth
+			title=(localize 'MGT2.Actor.robot.Bandwidth')
+			flag=(localize 'MGT2.Actor.robot.Overload')
+			edit="MGT2.Actor.EditSoftware"
+			del="MGT2.Actor.DeleteSoftware"
+			cells=true
+			derived="system.brain.bandwidth"}}
+		{{#if robot.brain.item}}
+		<table class="rows">
+			<tbody>
+				<tr data-item-id="{{robot.brain.item._id}}">
+					<td><p class="hint">{{localize 'MGT2.Actor.robot.BrainItem' name=robot.brain.item.name n=robot.brain.item.processing}}</p></td>
+					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditComputer" del="MGT2.Actor.DeleteComputer"}}
+				</tr>
+			</tbody>
+		</table>
+		{{else}}
+		<p class="hint">{{localize 'MGT2.Actor.robot.NoBrainItem' n=robot.bandwidth.inherent}}</p>
+		{{/if}}
+		{{#if robot.bandwidth.oversized.length}}
+		<p class="hint">{{plural 'MGT2.Actor.robot.Oversized' robot.bandwidth.oversized.length count=robot.bandwidth.oversized.length n=robot.bandwidth.inherent}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.OversizedWhy' n=robot.bandwidth.inherent}}"></i></p>
+		{{/if}}
+		{{! Core folio 110's downgrade is a Traveller's choice and a brain does not get it, so a
+		    package carrying one still costs its printed Bandwidth here. }}
+		{{#if robot.bandwidth.downgradesIgnored}}
+		<p class="hint">{{plural 'MGT2.Actor.robot.DowngradeIgnored' robot.bandwidth.downgradesIgnored count=robot.bandwidth.downgradesIgnored}}<i class="fa-solid fa-circle-info note" data-tooltip="{{plural 'MGT2.Actor.robot.DowngradeIgnoredWhy' robot.bandwidth.downgradesIgnored count=robot.bandwidth.downgradesIgnored}}"></i></p>
+		{{/if}}
+		{{#if robot.bandwidth.surcharged}}
+		<p class="hint">{{plural 'MGT2.Actor.robot.Surcharged' robot.bandwidth.surcharged count=robot.bandwidth.surcharged}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.SurchargedWhy' count=robot.bandwidth.surcharged}}"></i></p>
+		{{/if}}
 	</div>
 </aside>

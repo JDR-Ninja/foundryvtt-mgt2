@@ -1,61 +1,24 @@
 <aside class="mgt2-rail">
 
-	{{! A permission model you cannot look through is one nobody checks, so the sheet states its own
-	    verdict on the viewer rather than leaving it to be inferred from an empty table. }}
+	{{! THE ACCESS LADDER, and the only reason this type exists: an Item's ownership is its parent's, and
+	    an Actor carries its own. Four levels in Foundry's order, each said once with what it lets a viewer
+	    do, and the people standing on it; a dashed name takes Everyone else's level. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.stash.Access'}}</h3>
-			<span class="count">{{localize (concat 'MGT2.Actor.stash.Rung.' stash.access.rung)}}</span>
+			{{#if isGM}}<a class="add" data-action="configureOwnership" data-tooltip="{{localize 'MGT2.Actor.stash.ConfigureOwnership'}}"><i class="fa-solid fa-gear"></i></a>{{/if}}
 		</div>
-		<div class="asseen">
-			<span class="tag">{{localize (concat 'MGT2.Actor.stash.Gloss.' stash.access.rung)}}</span>
-			<p>
-				{{~#if (eq stash.access.withheld 'locked')}}{{localize 'MGT2.Actor.stash.WithheldLocked'}}
-				{{~else if (eq stash.access.withheld 'rung')}}{{localize 'MGT2.Actor.stash.WithheldRung'}}
-				{{~else}}{{localize 'MGT2.Actor.stash.WithheldNone'}}{{/if~}}
-			</p>
-		</div>
-	</div>
-
-	{{! THE LOCK, and the one screen in the system that enforces it. `locked` and `lockedDescription`
-	    have been on `container` since the start and read by nothing (`datamodels.js`). Only
-	    here: retrofitting it onto every `container` would shut inventories referees treat as open. }}
-	{{#if isGM}}
-	<div class="block">
-		<div class="sect">
-			<h3>{{localize 'MGT2.Actor.stash.Lock'}}</h3>
-			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.stash.LockHint'}}"></i>
-			<span class="gm">{{localize 'MGT2.Actor.stash.GM'}}</span>
-		</div>
-		<div class="lockrow">
-			<span class="v {{#if system.locked}}shut{{else}}open{{/if}}">
-				{{~#if system.locked}}{{localize 'MGT2.Actor.stash.Shut'}}{{else}}{{localize 'MGT2.Actor.stash.Open'}}{{/if~}}
-			</span>
-			<button type="button" data-action="lockToggle">
-				{{~#if system.locked}}{{localize 'MGT2.Actor.stash.Unlock'}}{{else}}{{localize 'MGT2.Actor.stash.LockIt'}}{{/if~}}
-			</button>
-		</div>
-		<div class="grid">
-			<label>
-				<span class="lbl">{{systemFields.lockedDescription.label}}</span>
-				{{formInput systemFields.lockedDescription name="system.lockedDescription" value=system.lockedDescription classes="f"}}
-			</label>
-		</div>
-	</div>
-	{{/if}}
-
-	{{! Three things an Actor buys that a `container` Item cannot, drawn rather than argued. If a
-	    campaign wants none of them the ship's locker stays a `container` — that is Q12's own test,
-	    kept here so it can be checked instead of re-argued. }}
-	<div class="block">
-		<div class="sect">
-			<h3>{{localize 'MGT2.Actor.stash.WhyActor'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.stash.WhyActorCount'}}</span>
-		</div>
-		<div class="vs">
-			<div class="v"><span class="nm">{{localize 'MGT2.Actor.stash.WhyOwnership'}}<span class="g">{{localize 'MGT2.Actor.stash.WhyOwnershipHint'}}</span></span></div>
-			<div class="v"><span class="nm">{{localize 'MGT2.Actor.stash.WhyPlaceable'}}<span class="g">{{localize 'MGT2.Actor.stash.WhyPlaceableHint'}}</span></span></div>
-			<div class="v"><span class="nm">{{localize 'MGT2.Actor.stash.WhyOutlives'}}<span class="g">{{localize 'MGT2.Actor.stash.WhyOutlivesHint'}}</span></span></div>
+		<div class="ladder">
+			{{#each stash.ladder as |rung|}}
+			<div class="rung{{#unless rung.people}} nobody{{/unless}}{{#if rung.you}} you{{/if}}" data-rung="{{rung.key}}">
+				<b>{{localize (concat 'MGT2.Actor.stash.Rung.' rung.key)}}</b>
+				<span class="g">{{localize (concat 'MGT2.Actor.stash.Gloss.' rung.key)}}</span>
+				<span class="who">
+					{{~#if rung.fallback}}<span class="u fallback">{{localize 'MGT2.Actor.stash.Everyone'}}</span>{{/if~}}
+					{{~#each rung.users as |user|}}<span class="u{{#if user.inherited}} inh{{/if}}{{#if user.you}} you{{/if}}"{{#if user.inherited}} data-tooltip="{{localize 'MGT2.Actor.stash.Everyone'}}"{{/if}}>{{user.name}}</span>{{/each~}}
+				</span>
+			</div>
+			{{/each}}
 		</div>
 	</div>
 </aside>

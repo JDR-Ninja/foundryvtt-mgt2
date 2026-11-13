@@ -101,6 +101,17 @@ export class VehicleActorSheet extends TravellerActorSheet {
             combat: VehicleActorSheet.#combat(system),
             mounts: this.#mounts(system, context.weapons)
         };
+        // Play mode folds what holds nothing into one line; edit mode keeps every block to fill in.
+        const vacant = {
+            mounts: !context.vehicle.mounts.rows.length && !context.vehicle.mounts.unmounted.length,
+            description: MGT2Helper.isBlankHtml(system.description), notes: MGT2Helper.isBlankHtml(system.notes)
+        };
+        context.vehicle.vacant = vacant;
+        context.vehicle.quiet = [
+            vacant.mounts && { label: "MGT2.Actor.vehicle.Mounts" },
+            vacant.description && { label: "MGT2.Actor.vehicle.Description" },
+            vacant.notes && { label: "MGT2.Actor.Notes" }
+        ].filter(Boolean).map(entry => ({ ...entry, door: this.isEditable }));
         return context;
     }
 
@@ -121,12 +132,17 @@ export class VehicleActorSheet extends TravellerActorSheet {
     static #hull(system) {
         const hull = system.characteristics.hull;
         const pct = points => (hull.max > 0) ? Math.min(100, Math.round((points / hull.max) * 100)) : 0;
+        const steps = system.sustainedSteps;
+        const crossed = system.sustainedCrossed;
         return {
             value: hull.value, max: hull.max, damage: hull.damage,
-            wound: pct(hull.damage),
+            left: 100 - pct(hull.damage),
+            // Core p.140: a tick per tenth, counted from the right where the loss sits.
+            ticks: Array.from({ length: Math.max(0, steps - 1) }, (_tick, i) => ({
+                at: Math.round((100 - ((i + 1) * 100) / steps) * 10) / 10, hit: (i + 1) <= crossed
+            })),
             wrecked: system.states.wrecked,
-            crossed: system.sustainedCrossed,
-            steps: system.sustainedSteps,
+            crossed, steps,
             weapons: system.mountedWeapons,
             cap: system.weaponCap
         };
@@ -190,13 +206,14 @@ export class VehicleActorSheet extends TravellerActorSheet {
     /**
      * Six faces. VH2026 p.56 states all six on every card, but Core p.140 lets a roof or a floor be
      * left unstated — so a facing carries both the effective number and the stored one, and `src`
-     * says which of the three `ArmourSrc` labels the cell has earned.
+     * names the `ArmourSrc` label an inferred roof or floor has earned.
      */
     static #armour(system) {
         const armour = system.armour;
         const INFERRED = { dorsal: "top", ventral: "bottom" };
         const facing = key => ({ key, value: armour[key], stored: system._source.armour[key],
             reactive: armour.reactive[key], field: key,
+            inferred: Boolean(armour.inferred?.[key]),
             src: armour.inferred?.[key] ? INFERRED[key] : "stored" });
         return {
             facings: ["forward", "aft", "port", "starboard", "dorsal", "ventral"].map(facing),
@@ -245,7 +262,9 @@ export class VehicleActorSheet extends TravellerActorSheet {
                 effect: VehicleActorSheet.#effectText(system.criticalEffect(key))
             };
         });
-        return { locations, hullSeverity: system.hullSeverity, standing: system.criticalEffects,
+        const hit = locations.filter(location => location.severity > 0);
+        return { locations, hit, intact: locations.filter(location => !location.severity), count: hit.length,
+            hullSeverity: system.hullSeverity, standing: system.criticalEffects,
             runs2026: system.runs2026, structure: system.structure,
             structureExceeded: system.structureExceeded,
             structureState: system.structureState && `MGT2.Actor.vehicle.StructureState.${system.structureState}`,
@@ -363,11 +382,19 @@ export class VehicleActorSheet extends TravellerActorSheet {
                 claimed.add(id);
                 held.push(weapon);
             }
+            // One roll per distinct weapon: identical weapons roll identically.
+            const groups = [];
+            for ( const weapon of held ) {
+                const group = groups.find(entry => entry.name === weapon.name);
+                if ( group ) group.count += 1;
+                else groups.push({ _id: weapon._id, name: weapon.name, count: 1, damage: weapon.system.effective.damage });
+            }
             return {
                 index, type: mount.type, arc: mount.arc, fireControl: mount.fireControl,
                 typeLabel: MGT2.VehicleMounts[mount.type] ?? "",
                 arcLabel: MGT2.FireArcs[mount.arc] ?? "",
-                weapons: held,
+                weapons: held, groups,
+                pills: [...new Set(held.flatMap(weapon => [weapon.range, ...(weapon.traitList ?? [])]).filter(Boolean))],
                 choices: weapons.map(weapon => ({
                     _id: weapon._id, name: weapon.name, selected: mount.weapons.includes(weapon._id)
                 }))

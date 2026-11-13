@@ -1,0 +1,59 @@
+{{! A record's terms as the creation screen reads them: the marks and outcomes first, then the
+    term's lines, a line that is a dated event carrying its age. Edit mode adds the dated events. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Items.Terms'}}</h3>
+		<span class="count">{{termRows.length}}</span>
+	</div>
+	{{#each termRows as |term|}}
+	<div class="term">
+		<div class="thead">
+			<h4>{{localize 'MGT2.Chargen.Screen.Term' n=term.index}}</h4>
+			<span class="ages">{{localize 'MGT2.Items.Age'}} {{term.from}} &ndash; {{term.to}}</span>
+		</div>
+		{{#if (or term.marks.length term.outcomes.length)}}
+		<div class="tmarks">
+			{{#each term.marks as |line|}}<span class="tm {{line.tone}}">{{> systems/mgt2/templates/items/parts/mark.html tone=line.tone mark=line.mark}}{{line.text}}</span>{{/each}}
+			{{#each term.outcomes as |outcome|}}<span class="pill">{{localize outcome}}</span>{{/each}}
+		</div>
+		{{/if}}
+		{{#if term.lines.length}}
+		<ul class="tlines">
+			{{#each term.lines as |line|}}
+			<li>{{> systems/mgt2/templates/items/parts/mark.html tone=line.tone mark=line.mark}}<span class="t">{{line.text}}</span>{{#if (ne line.age null)}}<span class="age">{{line.age}}</span>{{/if}}</li>
+			{{/each}}
+		</ul>
+		{{/if}}
+	</div>
+	{{/each}}
+
+	<div class="sect edit-only">
+		<h3>{{localize 'MGT2.Items.EventsMishaps'}}</h3>
+		<span class="count">{{system.events.length}}</span>
+		<a class="add" data-action="eventCreate" data-tooltip="{{localize 'MGT2.Items.AddEvent'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	{{#if system.events.length}}
+	<table class="rows dated edit-only">
+		<thead>
+			<tr>
+				<th class="c age">{{localize 'MGT2.Items.Age'}}</th>
+				<th>{{localize 'MGT2.Items.Details'}}</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each system.events as |event i|}}
+			<tr class="events-part" data-events-part="{{i}}">
+				<td class="c num age"><input class="f num" type="number" name="system.events.{{i}}.age" value="{{event.age}}" /></td>
+				<td><textarea class="f" name="system.events.{{i}}.description" rows="2">{{event.description}}</textarea></td>
+				<td class="r">
+					<div class="acts">
+						<a data-action="eventDelete" data-tooltip="{{localize 'MGT2.Items.DeleteEvent'}}"><i class="fas fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</div>

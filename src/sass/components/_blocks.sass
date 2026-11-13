@@ -197,12 +197,17 @@ li.chat-message
 			min-width: 0
 		label.wide
 			grid-column: span 2
+		// A switch reads as a toggle pill, lit while it is on.
 		label.check
 			flex-direction: row
 			align-items: center
 			align-self: end
+			justify-self: start
 			gap: 6px
-			padding-bottom: 3px
+			padding: 3px 11px 3px 8px
+			border: 1px solid var(--rule)
+			border-radius: 999px
+			cursor: var(--cursor-pointer)
 			input
 				margin: 0
 				accent-color: var(--accent-text)
@@ -213,6 +218,21 @@ li.chat-message
 				letter-spacing: 0.16em
 				text-transform: uppercase
 				color: var(--mute)
+			&:has(input:checked)
+				background: var(--accent-soft)
+				border-color: var(--accent-line)
+				span
+					color: var(--accent-text)
+			&.off
+				opacity: 0.55
+
+	// The same switch at table size is the roll prompt's `.tog`, lit as a sheet's toggle pill is.
+	table.rows .tog
+		white-space: nowrap
+		&:has(input:checked)
+			color: var(--accent-text)
+			background: var(--accent-soft)
+			border-color: var(--accent-line)
 
 	// A table whose rows are edited in place declares its columns rather than measuring them: under
 	// `auto` layout a cell that swaps a readout for an input re-measures the whole table, and an
@@ -399,10 +419,6 @@ li.chat-message
 			letter-spacing: 0.12em
 			text-transform: uppercase
 			color: var(--faint)
-		.word
-			font-size: 13px
-			font-weight: 600
-			letter-spacing: 0.04em
 
 	.stat.none dd
 		color: var(--faint)
@@ -438,6 +454,14 @@ li.chat-message
 	dd
 		font-size: 16px
 
+// A word value, on the `dd` itself as every template writes it or on a span inside one; after the
+// grid variant so its 16 px figure does not win.
+.mgt2 .statline dd.word,
+.mgt2 .statline dd .word
+	font-size: 13px
+	font-weight: 600
+	letter-spacing: 0.04em
+
 // --------------------------------------------
 //  BLOCK 2 — BUDGET. Rows that sum into a cap.
 // --------------------------------------------
@@ -462,6 +486,10 @@ li.chat-message
 			margin-left: auto
 		.rem
 			min-width: 6.5rem
+		// In a narrow rail a long flag wraps; the figures beside it never do.
+		.tot,
+		.rem
+			white-space: nowrap
 
 	// The sketch scopes the total to `> header`, which the `.compact` face has no room for — its
 	// own markup puts `.tot` directly on the section, so there it was drawn unstyled. Only the
@@ -502,13 +530,19 @@ li.chat-message
 			width: 1px
 			background: var(--mute)
 
+	// Inside a budget a lit cell takes the fill: on the red accent an accent cell reads as an overload.
+	.cells i.on
+		background: var(--fill)
+
 	&.over
-		.gauge i
+		.gauge i,
+		.cells i.on
 			background: var(--danger)
 		.tot
 			color: var(--danger)
 	&.over[data-over="soft"]
-		.gauge i
+		.gauge i,
+		.cells i.on
 			background: var(--fill)
 		.tot
 			color: var(--ink)
@@ -576,6 +610,65 @@ li.chat-message
 			color: var(--faint)
 		tr.mismatch td.d
 			color: var(--danger)
+
+	// One line per budget: label, bar, total and what is left. A folded budget makes the line its
+	// summary, so the marker's width is the indent an unfolded header takes to line up with it.
+	&.line
+		gap: 4px
+		// A flag and its overrun can outgrow a narrow rail; they wrap under the line, never off it.
+		.bh
+			display: flex
+			flex-wrap: wrap
+			align-items: center
+			gap: 2px 8px
+			min-height: 20px
+			// A floor rather than a width: the French "Points d'emport" is wider than 5.6rem.
+			.lbl
+				flex: 0 0 auto
+				min-width: 5.6rem
+				white-space: nowrap
+			.gauge
+				display: block
+				flex: 1 1 0
+				min-width: 2.5rem
+				height: 5px
+				border-radius: 3px
+				i
+					border-radius: 3px
+				u
+					display: none
+			.tot
+				margin-left: 0
+				font-size: 15px
+			.rem
+				min-width: 3.6rem
+		header.bh
+			padding-left: 15px
+		&.over .bh .rem
+			color: var(--danger)
+		details.fold > summary
+			font-family: var(--body)
+			font-size: inherit
+			letter-spacing: 0
+			text-transform: none
+			color: inherit
+			&::before
+				flex: 0 0 7px
+			&:hover .lbl
+				color: var(--accent-hot)
+
+// A capacity small enough to count: one cell per point, lit while spent.
+.mgt2 .cells
+	display: flex
+	flex-wrap: wrap
+	gap: 3px
+	i
+		flex: 0 0 24px
+		height: 8px
+		background: var(--track)
+		border-radius: 2px
+	i.on
+		background: var(--accent-text)
 
 // --------------------------------------------
 //  BLOCK 3 — ROSTER. Linked actors in stations that carry their own actions.
@@ -904,8 +997,34 @@ li.chat-message
 		&[data-hit]
 			color: var(--danger)
 
+	// A craft's pool, 5 px and rounded: what is left fills it, the loss is red at the right end, and
+	// each sustained-damage tenth is a tick, red once crossed.
+	&.pool
+		height: 5px
+		border-radius: 3px
+		.fill
+			border-radius: 3px
+		.mk
+			width: 1px
+			background: var(--rule)
+			&[data-hit]
+				background: var(--danger)
+		&.hurt
+			background: color-mix(in oklab, var(--danger) 60%, transparent)
+			.fill
+				border-radius: 3px 0 0 3px
+				background: var(--fill)
+
 .mgt2 .trackwrap
 	padding-top: 13px
+	// The wound track is the same door as the pool figure, wider.
+	&.open
+		cursor: var(--cursor-pointer)
+		&:hover .track
+			box-shadow: 0 0 0 1px var(--accent-line)
+	// A pool bar carries no labels above it, only ticks.
+	&:has(> .track.pool)
+		padding: 5px 0
 
 // A design verdict, a budget breakdown or a list of untouched locations folds behind one line, so
 // the block costs its heading and nothing else until it is asked for.
@@ -983,7 +1102,8 @@ li.chat-message
 			&.on
 				background: color-mix(in oklab, var(--danger) 70%, var(--paper))
 				border-color: color-mix(in oklab, var(--danger) 70%, var(--paper))
-	.row.hit .loc
+	.row.hit .loc,
+	.loc.hit
 		color: var(--danger)
 	.eff
 		grid-column: 2
@@ -993,6 +1113,28 @@ li.chat-message
 		b
 			font-weight: 600
 			color: var(--danger)
+
+// The critical's controls on one line: the apply group, then the typed values as label and input.
+.mgt2 .critrow
+	display: flex
+	flex-wrap: wrap
+	align-items: center
+	gap: 6px 18px
+	padding-top: 6px
+	border-top: 1px solid var(--rule-soft)
+	.critctl
+		flex-wrap: nowrap
+		select.f
+			flex: 0 1 11rem
+			min-width: 7rem
+		input.f
+			flex: 0 0 3.4rem
+	label.pair
+		display: inline-flex
+		align-items: center
+		gap: 6px
+		input.f
+			width: 3.4rem
 
 // --------------------------------------------
 //  CHARACTERISTICS COLUMN
@@ -1385,3 +1527,122 @@ li.chat-message
 		b
 			font-family: var(--mono)
 			font-variant-numeric: tabular-nums
+
+// --------------------------------------------
+//  THE LOCK AND WHAT STANDS FOR THE ROWS — a stash and a container alike
+// --------------------------------------------
+// A state, so a pill: red and filled while it holds.
+.mgt2 .lockpill
+	display: inline-flex
+	align-items: center
+	gap: 6px
+	height: auto
+	min-height: 0
+	padding: 2px 11px 3px 9px
+	font: inherit
+	font-family: var(--cond)
+	font-size: 11px
+	font-weight: 600
+	letter-spacing: 0.12em
+	line-height: 1.4
+	text-transform: uppercase
+	white-space: nowrap
+	color: var(--faint)
+	background: none
+	border: 1px solid var(--rule)
+	border-radius: 999px
+	i
+		font-size: 10px
+	&.shut
+		color: var(--danger)
+		border-color: currentColor
+		background: color-mix(in oklab, var(--danger) 12%, transparent)
+// A stash's lock is a button; a container's a label around its checkbox, written through the form.
+.mgt2 button.lockpill,
+.mgt2 label.lockpill
+	cursor: var(--cursor-pointer)
+	&:hover
+		outline: 1px solid var(--accent-line)
+		outline-offset: 1px
+	&:not(.shut):hover
+		color: var(--accent-text)
+
+// Withheld rows are a statement, not an empty table: the referee's words first, then the system's.
+.mgt2 .withheld
+	display: grid
+	grid-template-columns: auto minmax(0, 1fr)
+	gap: 5px 11px
+	padding: 10px 12px 11px
+	border: 1px dashed var(--rule)
+	border-radius: 2px
+	.ic
+		grid-row: 1 / span 3
+		padding-top: 1px
+		color: var(--faint)
+	.said
+		margin: 0
+		font-size: 13.5px
+		line-height: 1.45
+		color: var(--ink)
+	.why
+		margin: 0
+		font-size: 12px
+		line-height: 1.45
+		color: var(--mute)
+	.said,
+	.why
+		grid-column: 2 / -1
+	// Under the inventory's (all), one box per case: its name in ink, its mass at the right.
+	&.named
+		grid-template-columns: auto minmax(0, 1fr) auto
+	.lbl b
+		margin-right: 7px
+		color: var(--ink)
+	.kg
+		grid-column: 3
+		grid-row: 1
+		font-family: var(--mono)
+		font-size: 12px
+		color: var(--mute)
+		i
+			font-style: normal
+			font-size: 10px
+			color: var(--faint)
+
+// A section heading's row keeps its height: the pill there is a readout, compact.
+.mgt2 .sect .lockpill
+	height: 18px
+	padding: 0 8px 0 6px
+	font-size: 10px
+
+.mgt2 label.lockpill
+	position: relative
+	input
+		position: absolute
+		width: 1px
+		height: 1px
+		margin: 0
+		opacity: 0
+		pointer-events: none
+	&:has(input:disabled)
+		cursor: default
+
+// A list of stored things: the type in the row's caption voice, the numbers right, a dash for nothing.
+.mgt2 table.rows
+	th i
+		margin-left: 4px
+		font-style: normal
+		font-family: var(--mono)
+		font-size: 9.5px
+		letter-spacing: 0
+		text-transform: none
+		color: var(--faint)
+	td.num.nil
+		color: var(--faint)
+	td.kind
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		color: var(--mute)

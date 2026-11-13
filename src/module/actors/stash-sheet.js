@@ -62,9 +62,13 @@ export class StashActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsA
         const stash = {
             open: reads && opens,
             access: StashActorSheet.#access(actor, reads, opens),
-            ownership: StashActorSheet.#ownership(actor),
-            showWeight: system.showWeight
+            showWeight: system.showWeight,
+            canEdit: this.isEditable,
+            // Play mode folds an empty editor into one line; edit mode keeps both to fill in.
+            vacant: { description: MGT2Helper.isBlankHtml(system.description),
+                notes: game.user.isGM && MGT2Helper.isBlankHtml(system.notes) }
         };
+        stash.ladder = StashActorSheet.#ladder(actor, stash.access.rung);
         // The value goes inside the guard with the inventory it sums, and is the one number a
         // player would most want off a locked cache.
         if (stash.open) {
@@ -91,18 +95,16 @@ export class StashActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsA
         };
     }
 
-    /** The strip, and the whole reason this is an Actor. */
-    static #ownership(actor) {
-        const rows = [{
-            name: game.i18n.localize("MGT2.Actor.stash.Everyone"),
-            rung: RUNGS[actor.ownership.default] ?? "none",
-            fallback: true
-        }];
-        for (const user of game.users) {
-            if (user.isGM) continue;
-            rows.push({ name: user.name, rung: RUNGS[actor.getUserLevel(user)] ?? "none" });
-        }
-        return rows;
+    /** The four levels in Foundry's order, each with who stands on it: the whole reason this is an Actor. */
+    static #ladder(actor, viewerRung) {
+        const fallback = RUNGS[actor.ownership.default] ?? "none";
+        return Object.values(RUNGS).map(key => {
+            const users = game.users.filter(user => !user.isGM && ((RUNGS[actor.getUserLevel(user)] ?? "none") === key))
+                .map(user => ({ name: user.name, inherited: !(user.id in actor.ownership), you: user.id === game.user.id }));
+            const isFallback = fallback === key;
+            return { key, users, fallback: isFallback, people: users.length || isFallback,
+                you: !game.user.isGM && (viewerRung === key) };
+        });
     }
 
     /** One row per top-level thing. */

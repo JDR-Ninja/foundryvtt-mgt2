@@ -190,28 +190,7 @@ export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplica
 
     /** One cell: the career, the assignment and the term's own typed facts. */
     static #cell(row, frame) {
-        const lines = [];
-        const say = (tone, mark, key) => lines.push({ tone, mark, text: game.i18n.localize(key) });
-        if ( row.survived === true ) say("good", "✓", "MGT2.Chargen.Screen.Survived");
-        if ( row.survived === false ) say("bad", "✗", "MGT2.Chargen.Screen.SurvivalFailed");
-        // Ejection is a FIELD and never a phrase: a note reading "not ejected" would fool
-        // any text match, which is why the row carries the boolean and this reads it.
-        if ( row.ejected ) say("bad", "✗", "MGT2.Chargen.Screen.Ejected");
-        // The term KIND is the frame's own vocabulary — the frame declares what a term
-        // yields and names it, so the label comes off the frame and never off a list in this file.
-        const kind = frame?.termKinds?.find(entry => entry.key === row.kind);
-        if ( row.kind ) lines.push({ tone: "", mark: "·", text: kind?.label || row.kind });
-        // Each step appends to one note field, joined on " · "; the cell is a list of them.
-        const notes = row.note ? row.note.split(" · ").filter(part => part.trim()) : [];
-        for ( const part of notes ) lines.push({ tone: "", mark: "·", text: part });
-        // An event writes its lines into the note as it fires, joined the same way, so a copy whose
-        // every line is already printed would print them twice.
-        for ( const event of row.events ) {
-            const parts = event.description.split(" · ").filter(part => part.trim());
-            if ( !parts.every(part => notes.includes(part)) ) {
-                lines.push({ tone: "", mark: "·", text: event.description });
-            }
-        }
+        const lines = Chargen.termLines(row, frame);
         return {
             career: row.careerName, assignment: row.assignment, lines,
             track: row.track ? { ...row.track, display: ChargenScreen.#trackDisplay(row.track) } : null

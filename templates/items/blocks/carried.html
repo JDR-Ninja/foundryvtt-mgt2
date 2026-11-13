@@ -1,23 +1,36 @@
-{{! What is left of the Carried block once it dissolved: a container's own storage properties, which
-    belong beside what is in it. Weight, quantity, cost, storage and equipped are the masthead's
-    supply cell now, and TL, legality and weightless describe the item, so they joined Specs. }}
+{{! A container's strip: its states, where it is and what its carrier feels, over the list. Headless,
+    so Contents stays the tab's one titled block; the edit grid stays outside `.carried`. }}
 <div class="block">
-	<div class="sect"><h3>{{localize 'MGT2.Items.Storage'}}</h3></div>
-
-	<div class="carried">
-		<label class="chk">
+	<div class="bagstrip carried">
+		{{#unless bag.nested}}
+		<label class="eq">
 			{{formInput systemFields.onHand name="system.onHand" value=system.onHand}}
+			<i class="fa-regular fa-circle"></i><i class="fa-solid fa-circle-check"></i>
 			<span>{{localize 'MGT2.Items.OnHand'}}</span>
 		</label>
+		{{/unless}}
+		{{#if system.weightless}}<span class="pill warn play-only"><i class="fa-solid fa-feather"></i>{{localize 'MGT2.Items.Weightless'}}</span>{{/if}}
 		{{#if isGM}}
-		<label class="chk">
+		<label class="lockpill{{#if system.locked}} shut{{/if}}">
 			{{formInput systemFields.locked name="system.locked" value=system.locked}}
-			<span>{{localize 'MGT2.Items.Locked'}}</span>
+			<i class="fa-solid fa-lock{{#unless system.locked}}-open{{/unless}}"></i><span>{{localize 'MGT2.Items.Locked'}}</span>
 		</label>
+		{{else if system.locked}}
+		<span class="lockpill shut"><i class="fa-solid fa-lock"></i><span>{{localize 'MGT2.Items.Locked'}}</span></span>
+		{{/if}}
+		{{#if system.location}}<span class="where play-only"><i class="fa-solid fa-location-dot"></i>{{system.location}}</span>{{/if}}
+		{{#if bag.carrier}}
+		<dl class="statline" data-derived="system.weight">
+			<div class="stat{{#unless bag.counted}} none{{/unless}}">
+				<dt>{{localize 'MGT2.Actor.Encumbrance'}}</dt>
+				<dd>{{#if bag.counted}}{{weight}}<i>{{unitlabels.weight}}</i>{{else}}&mdash;{{/if}}</dd>
+			</div>
+		</dl>
 		{{/if}}
 	</div>
 
 	<div class="grid edit-only">
+		<h4 class="gsub">{{localize 'MGT2.Items.Storage'}}</h4>
 		<label class="wide">
 			<span class="lbl">{{localize 'MGT2.Items.Location'}}</span>
 			{{formInput systemFields.location name="system.location" value=system.location classes="f"}}
@@ -27,9 +40,10 @@
 			<span>{{localize 'MGT2.Items.Weightless'}}</span>
 		</label>
 		{{#if isGM}}
-		<label class="wide">
-			<span class="lbl">{{localize 'MGT2.Items.LockedDescription'}}</span>
-			<textarea class="f" name="system.lockedDescription" rows="3">{{system.lockedDescription}}</textarea>
+		<label class="full">
+			<span class="lbl">{{localize 'MGT2.Actor.stash.FIELDS.lockedDescription.label'}}</span>
+			<textarea class="f" name="system.lockedDescription" rows="2">{{system.lockedDescription}}</textarea>
+			<p class="hint">{{localize 'MGT2.Actor.stash.FIELDS.lockedDescription.hint'}}</p>
 		</label>
 		{{/if}}
 	</div>

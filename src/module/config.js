@@ -1558,12 +1558,13 @@ MGT2.LowBerths = Object.freeze({
 });
 
 // Passage classes (Core p.158, p.238-239), priced by parsec for a single jump; `baggage` is in kg.
+// `stateroom` is one passenger's share of a room (Core p.158, p.238): basic passengers go two to one.
 MGT2.PassageClasses = Object.freeze({
-    high: {label: "MGT2.PassageClasses.high", baggage: 1000},
-    middle: {label: "MGT2.PassageClasses.middle", baggage: 100},
-    basic: {label: "MGT2.PassageClasses.basic", baggage: 10},
-    low: {label: "MGT2.PassageClasses.low", baggage: 10, lowBerth: true},
-    working: {label: "MGT2.PassageClasses.working", baggage: 100, unpaid: true}
+    high: {label: "MGT2.PassageClasses.high", baggage: 1000, stateroom: 1},
+    middle: {label: "MGT2.PassageClasses.middle", baggage: 100, stateroom: 1},
+    basic: {label: "MGT2.PassageClasses.basic", baggage: 10, stateroom: 0.5},
+    low: {label: "MGT2.PassageClasses.low", baggage: 10, lowBerth: true, stateroom: 0},
+    working: {label: "MGT2.PassageClasses.working", baggage: 100, unpaid: true, stateroom: 1}
 });
 
 // Screens (HG p.41). A count, not a flag: every five nuclear dampers strike off a further 1DD.

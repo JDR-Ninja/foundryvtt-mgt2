@@ -111,7 +111,7 @@
 		margin-bottom: 8px
 		font-size: 13px
 		color: var(--mute)
-		span:not(:last-child)::after
+		> span:not(:last-child)::after
 			content: "·"
 			margin-left: 8px
 			color: var(--faint)
@@ -155,11 +155,6 @@
 			color: var(--accent-text)
 			background: var(--hover)
 			box-shadow: inset 0 0 0 1px var(--accent-line)
-
-	.trackwrap.open
-		cursor: var(--cursor-pointer)
-		&:hover .track
-			box-shadow: 0 0 0 1px var(--accent-line)
 
 	// The one live entry. `system.stun` is stored, bounded by END and undone by Rest 1 h, so the
 	// readout swaps in a single field on click — created in JS, and carrying no `name`.
@@ -468,6 +463,12 @@
 .mgt2[data-mode="edit"] table.rows .acts
 	opacity: 1
 
+// The referee's mark on a row a player reads as withheld.
+.mgt2 table.rows .locked
+	margin-left: 5px
+	font-size: 10px
+	color: var(--danger)
+
 // --------------------------------------------
 //  Training strip — a readout, and one verb at most
 // --------------------------------------------
@@ -739,7 +740,7 @@
 			color: var(--faint)
 
 // An attack is a card: the card rolls, the damage is its figure, range and traits are its pills.
-.mgt2 .mgt2-npc-panel .attacks
+.mgt2 .attacks
 	display: flex
 	flex-direction: column
 	gap: 6px
@@ -756,6 +757,18 @@
 		border-radius: 6px
 		&:hover
 			border-color: var(--edge)
+	.acts
+		display: inline-flex
+		gap: 6px
+		a
+			color: var(--faint)
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
+
+// A mount table that carries `.cards` draws each row as the same card.
+.mgt2 .attacks,
+.mgt2 table.mounts.cards
 	button.roll
 		all: unset
 		display: inline-flex
@@ -803,17 +816,9 @@
 		font-size: 15px
 		font-weight: 600
 		color: var(--ink)
-	.acts
-		display: inline-flex
-		gap: 6px
-		a
-			color: var(--faint)
-			cursor: var(--cursor-pointer)
-			&:hover
-				color: var(--accent-text)
 
 // What play mode folded: the empty blocks as one line, the writable ones a door into edit mode.
-.mgt2 .mgt2-npc-panel .vacant
+.mgt2 p.vacant
 	display: flex
 	flex-wrap: wrap
 	gap: 6px 18px
@@ -891,11 +896,30 @@
 		font-size: 10px
 		color: var(--faint)
 
-// The transcription form. Eleven printed lines is too many to bind inside the statline itself, so
-// the readout and the inputs are two blocks and only the readout carries `data-derived`.
-.mgt2 .mgt2-header .vstat
-	grid-column: 1 / -1
-	padding-top: 10px
+// The vehicle's statline edits in place: each stored line's input stands in its own cell, Range spans
+// two, and the lines the rail writes stay muted readouts.
+.mgt2 .mgt2-header .statline.grid
+	dd input.f,
+	dd select.f
+		width: 100%
+		margin-top: 2px
+	dd select.f
+		font-size: 12px
+		padding: 1px 3px
+	dd .pair
+		display: flex
+		gap: 4px
+		input.f
+			flex: 1 1 0
+			min-width: 0
+		select.f
+			flex: 0 0 auto
+			width: auto
+.mgt2[data-mode="edit"] .mgt2-header .statline.grid
+	.stat.wide
+		grid-column: span 2
+	.stat.fed dd
+		color: var(--mute)
 
 .mgt2 .mgt2-rail
 	display: flex
@@ -939,10 +963,12 @@
 // a fallback, not a value", which is the distinction the books' "unless otherwise stated" rests on.
 .mgt2 .facings
 	display: grid
-	grid-template-columns: repeat(5, minmax(0, 1fr))
+	grid-template-columns: repeat(6, minmax(0, 1fr))
 	gap: 6px
 
 	.facing
+		min-width: 0
+		overflow: hidden
 		padding: 5px 7px
 		text-align: center
 		border: 1px solid var(--rule)
@@ -963,11 +989,38 @@
 			letter-spacing: 0.12em
 			text-transform: uppercase
 			color: var(--faint)
+		// Reactive armour, spent during the fight, so its field is live in its own pill.
 		.re
-			display: block
+			display: inline-flex
+			align-items: center
+			gap: 3px
+			max-width: 100%
+			margin-top: 4px
+			padding: 0 6px
 			font-family: var(--mono)
 			font-size: 10px
-			color: var(--accent-text)
+			line-height: 1.6
+			color: var(--mute)
+			border: 1px solid var(--rule)
+			border-radius: 999px
+			input
+				width: 2.4em
+				height: auto
+				padding: 0 2px
+				font-family: var(--mono)
+				font-size: 10px
+				line-height: 1.4
+				text-align: right
+				color: var(--ink)
+				background: var(--hover)
+				border: 0
+				border-radius: 2px
+			// Six faces across leave little room: the word gives way before the figure does.
+			.w
+				min-width: 0
+				overflow: hidden
+				text-overflow: ellipsis
+				white-space: nowrap
 		input.f
 			text-align: center
 			font-family: var(--cond)
@@ -981,25 +1034,86 @@
 			color: var(--mute)
 
 // Six lines, six kinds of number — and two of them are a DM on the OBSERVER's roll, not on ours.
-.mgt2 table.systems
-	td.who
-		width: 11rem
+.mgt2 .statline.grid.sys
+	grid-template-columns: repeat(3, minmax(0, 1fr))
+	.who
+		display: block
 		font-family: var(--cond)
-		font-size: 10px
+		font-size: 9.5px
 		font-weight: 600
-		letter-spacing: 0.14em
+		letter-spacing: 0.1em
+		line-height: 1.25
 		text-transform: uppercase
+		white-space: normal
 		color: var(--faint)
-	tr.opposed td.who
+	.stat.opposed .who
 		color: var(--danger)
-	td.val
-		width: 7rem
-		text-align: right
-		font-family: var(--mono)
-		font-size: 13px
-		font-variant-numeric: tabular-nums
-	tr.absent td
+	.stat.absent dd
+		font-weight: 500
 		color: var(--faint)
+	dd input.f
+		width: 5rem
+
+// The fire control is a DM, neutral until the pointer finds it, with its field in the pill in edit mode.
+.mgt2 table.mounts.cards
+	.mcfg.side
+		flex-direction: row
+		flex-wrap: wrap
+	.pills span.dm
+		display: inline-flex
+		align-items: center
+		gap: 3px
+		color: var(--ink)
+		border-color: var(--edge)
+		&:hover
+			color: var(--accent-hot)
+			border-color: var(--accent-line)
+			background: var(--accent-soft)
+		input
+			width: 2.4em
+			height: auto
+			padding: 0 2px
+			font-family: var(--mono)
+			font-size: 10px
+			line-height: 1.4
+			text-align: right
+			color: var(--ink)
+			background: var(--hover)
+			border: 0
+
+// A quiet edit-mode line under a block: one door, no section rule.
+.mgt2 p.quiet
+	margin: 0
+	font-family: var(--cond)
+	font-size: 10.5px
+	font-weight: 600
+	letter-spacing: 0.12em
+	text-transform: uppercase
+	color: var(--faint)
+	a
+		display: inline-flex
+		align-items: center
+		gap: 5px
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--accent-text)
+
+// Two editors stand side by side past 980 px, each capped and scrolling inside, and stack below it.
+.mgt2 .prose2
+	display: flex
+	flex-direction: column
+	gap: 17px
+	> .block
+		min-width: 0
+	prose-mirror
+		min-height: 7rem
+		max-height: 22rem
+
+@container sheet (min-width: 980px)
+	.mgt2 .prose2
+		flex-direction: row
+		> .block
+			flex: 1 1 0
 
 // Effect in, severity out. The location is the referee's own 2D roll, typed rather than rolled.
 .mgt2 .critctl
@@ -1033,13 +1147,15 @@
 
 // The shell holds the nav and the six bodies; each body is the `.mgt2-panel` that scrolls and
 // carries the column inset, so the shell itself takes neither padding nor a scrollbar.
-.mgt2 .mgt2-spacecraft-panel
+.mgt2 .mgt2-spacecraft-panel,
+.mgt2 .mgt2-robot-panel
 	display: flex
 	flex-direction: column
 	min-height: 0
 	overflow: hidden
 
-.mgt2 .tab[data-group="spacecraft"].active
+.mgt2 .tab[data-group="spacecraft"].active,
+.mgt2 .tab[data-group="robot"].active
 	display: flex
 	flex-direction: column
 	flex: 1 1 auto
@@ -1063,15 +1179,6 @@
 			flex: 1 1 0
 			min-width: 0
 
-// The magazine reads as one figure: what is loaded, over what the mount holds.
-.mgt2 td.ammo
-	display: flex
-	align-items: baseline
-	justify-content: center
-	gap: 5px
-	.f.num
-		width: 3.4rem
-
 // The manifest is where a route ENDS: the act sits beside the consignment that travelled, and a lot
 // past its due day is marked because Core p.241 prices the delay off the day of arrival.
 .mgt2 table.manifest
@@ -1082,48 +1189,113 @@
 		display: inline
 		margin: 0
 
-// The mount is not packaging: it carries a damage multiple spanning three orders of magnitude, and
-// the readout has to make ×1 and ×1 000 tell apart at a glance.
-.mgt2 table.mounts
-	td.mt
-		width: 10.5rem
+// A mount is the attack card inside its row: one roll per distinct weapon over its caption, the
+// pills, and the damage as rolled. Fixed columns, so the mode flip moves nothing.
+.mgt2 table.mounts.cards
+	table-layout: fixed
+	col.c-pl
+		width: 42%
+	col.c-dm
+		width: 6.5rem
+	col.c-ac
+		width: 2.2rem
+	td
+		padding: 7px 6px
+		vertical-align: middle
+	.wg
+		display: flex
+		flex-direction: column
+		align-items: flex-start
+		gap: 3px
+		min-width: 0
+	.mtl
+		font-family: var(--cond)
+		font-size: 10px
+		letter-spacing: 0.14em
+		text-transform: uppercase
+		color: var(--faint)
+	// Under a roll the caption lines up with the weapon's name, past the die.
+	button.roll ~ .mtl
+		margin-left: 32px
+	.mcfg
+		display: flex
+		flex-direction: column
+		align-items: flex-start
+		gap: 4px
+		margin-top: 4px
 		select.f
 			font-size: 12px
 			padding: 1px 3px
-		b
-			display: block
-			font-family: var(--cond)
-			font-size: 12.5px
-			font-weight: 700
-			letter-spacing: 0.1em
-			text-transform: uppercase
-		.arc
-			font-family: var(--cond)
-			font-size: 9.5px
-			letter-spacing: 0.14em
-			text-transform: uppercase
-			color: var(--faint)
-	td.dmg
-		width: 8rem
-		text-align: right
-		font-family: var(--mono)
-		font-variant-numeric: tabular-nums
-		b
-			font-family: var(--cond)
-			font-size: 16px
-			font-weight: 700
-		.mult
-			display: block
-			font-size: 10px
-			color: var(--faint)
-	td.dmg.big b
-		color: var(--danger)
-	.mag
-		font-family: var(--mono)
-		font-size: 11.5px
-		color: var(--mute)
+	// The magazine is live in both modes: what is loaded, typed in its pill, over what the mount holds.
+	.pills span.ammo
+		display: inline-flex
+		align-items: center
+		gap: 3px
+		input.f.num
+			width: 2.6rem
+			height: auto
+			padding: 0 3px
+			font-size: 10.5px
+			line-height: 1.4
 		&.empty
 			color: var(--danger)
+			border-color: currentColor
+	select[multiple]
+		margin-top: 4px
+	// One damage per roll, each on the line of its roll.
+	td.dmg
+		text-align: right
+		b
+			display: block
+			line-height: 24px
+		b + b
+			margin-top: 3px
+	// ×10 and up: the multiple spans three orders of magnitude and ×1 000 must read apart at a glance.
+	td.dmg.big b
+		color: var(--danger)
+
+// The crew roster declares its columns, so switching modes moves none of them.
+.mgt2 table.roster.crew
+	table-layout: fixed
+	col.c-st
+		width: 9.5rem
+	col.c-who
+		width: 11.5rem
+	col.c-rq
+		width: 3.6rem
+	.who
+		overflow: hidden
+		text-overflow: ellipsis
+	.station .edit-only,
+	.who .edit-only
+		display: flex
+		flex-direction: column
+		gap: 3px
+	.station .pair
+		display: flex
+		gap: 4px
+		input
+			flex: 0 0 2.8rem
+	.todo .btn i
+		margin-left: 4px
+		color: var(--mute)
+	.need
+		display: inline-block
+		padding: 0 6px
+		line-height: 1.6
+		color: var(--mute)
+		border: 1px solid var(--rule)
+		border-radius: 999px
+		&.short
+			color: var(--danger)
+			border-color: currentColor
+			background: color-mix(in oklab, var(--danger) 10%, transparent)
+
+// A linked crewman or craft shows its own portrait as the thumb.
+.mgt2 .roster .who img.av
+	object-fit: cover
+	border: 0
+	border-radius: 2px
 
 // The running costs. A row of label, reason and figure — not a budget, because nothing here has a
 // cap, and not a statline, because every figure wants the same right-aligned column.
@@ -1182,9 +1354,65 @@ ul.softwares
 //  Robot — the one thing the kit genuinely does not carry
 // --------------------------------------------
 
-.mgt2 .mgt2-robot-panel
+// Bandwidth, then the brain Item's row and the notes on its figure, kept close under the budget.
+.mgt2 .mgt2-rail .brainbudget
 	display: flex
 	flex-direction: column
+	gap: 6px
+
+// One row per skill, two across where the panel is wider than about 31rem.
+.mgt2 .skills
+	display: grid
+	grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr))
+	gap: 0 22px
+	margin: 0
+	padding: 0
+	list-style: none
+	li
+		display: flex
+		align-items: center
+		gap: 10px
+		padding: 6px 4px 5px
+		border-bottom: 1px solid var(--rule-soft)
+		&:hover
+			background: var(--hover)
+	button.roll
+		all: unset
+		flex: 1 1 auto
+		min-width: 0
+		overflow: hidden
+		text-overflow: ellipsis
+		white-space: nowrap
+		font-family: var(--body)
+		font-size: 13px
+		color: var(--ink)
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--accent-text)
+		&:focus-visible
+			outline: 2px solid var(--accent-text)
+			outline-offset: 1px
+	.lvl
+		font-family: var(--mono)
+		font-size: 12px
+	.acts
+		display: inline-flex
+		gap: 6px
+		a
+			color: var(--faint)
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
+
+// An option's slot cost and its zero-slot flag share one cell.
+.mgt2 table.rows th.slotcol
+	width: 9.5rem
+.mgt2 table.rows .slotcell
+	display: flex
+	align-items: center
+	gap: 6px
+	input.f
+		width: 3.2rem
 
 // A derivation chain, written out. Nine of the thirteen printed statblock rows are computed and
 // several of them multiplicatively, so a bare result is unauditable: the reader cannot tell a wrong
@@ -1401,11 +1629,12 @@ ul.softwares
 		grid-template-rows: auto auto minmax(0, 1fr)
 		grid-template-areas: "header" "chars" "panel"
 
+	// The rail scrolls in its own third, so a long rail cannot leave the panel a sliver.
 	.mgt2.application.vehicle > .window-content,
 	.mgt2.application.spacecraft > .window-content,
 	.mgt2.application.robot > .window-content
 		grid-template-columns: minmax(0, 1fr)
-		grid-template-rows: auto auto minmax(0, 1fr)
+		grid-template-rows: auto minmax(0, 35%) minmax(0, 1fr)
 		grid-template-areas: "header" "rail" "panel"
 
 	.mgt2 .mgt2-header
@@ -1428,6 +1657,9 @@ ul.softwares
 
 	.mgt2 .facings
 		grid-template-columns: repeat(3, minmax(0, 1fr))
+
+	.mgt2 .statline.grid.sys
+		grid-template-columns: repeat(2, minmax(0, 1fr))
 
 	.mgt2 .char-list
 		display: grid
@@ -1481,7 +1713,8 @@ ul.softwares
 		padding: 14px 22px 20px
 
 // A skill's level beside four pips filled up to it; a level 0 is held but adds nothing, so it recedes.
-.mgt2 table.rows .lvl
+.mgt2 table.rows .lvl,
+.mgt2 .skills .lvl
 	display: inline-flex
 	align-items: center
 	gap: 7px

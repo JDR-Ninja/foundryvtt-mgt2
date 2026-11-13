@@ -9,15 +9,15 @@ import { RollPromptHelper } from "./roll-prompt.js";
 import { Rules } from "./rules.js";
 import { GuideButtonMixin } from "./guide.js";
 import { SheetModeMixin } from "./sheet-mode.js";
-import { appendTraitText, bindTraitInput, prepareTraitBlock, refreshTraitNumbers } from "./traits.js";
+import { appendTraitText, bindTraitInput, formatTrait, prepareTraitBlock, refreshTraitNumbers } from "./traits.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ItemSheetV2 } = foundry.applications.sheets;
 
 /** Every block the sheet can compose from; each one is a partial of the same name. */
-const BLOCKS = ["roll", "hazard", "specs", "carried", "traits", "rules", "relationship", "description",
-  "detail", "notes", "software", "contents", "trade", "events", "station", "actions", "effects",
-  "career", "careertables", "species", "speciesframe",
+const BLOCKS = ["roll", "hazard", "summary", "specs", "augment", "hosts", "carried", "traits", "rules", "relationship", "description",
+  "detail", "notes", "software", "contents", "trade", "terms", "actions", "effects",
+  "career", "careertables", "careerevents", "species", "speciesframe",
   "bounty", "referee", "leads", "associates", "generate"];
 
 const blockPath = id => `systems/mgt2/templates/items/blocks/${id}.html`;
@@ -25,12 +25,14 @@ const blockPath = id => `systems/mgt2/templates/items/blocks/${id}.html`;
 /** Which tab holds each block. */
 const SLOT = {
   roll: "masthead", hazard: "masthead",
-  specs: "details", relationship: "details", station: "details", career: "details",
-  species: "details",
-  // A round's printed rules are what the trait vocabulary cannot say, so they sit beside it.
-  traits: "traits", rules: "traits",
-  contents: "contents", software: "contents", events: "contents", actions: "contents",
-  trade: "contents", carried: "contents", careertables: "contents", speciesframe: "contents",
+  specs: "details", relationship: "details", career: "details", actions: "details",
+  species: "details", summary: "details", augment: "details",
+  // On a round the printed rules are what it does, so they sit under its plates.
+  rules: "details", hosts: "details", trade: "details",
+  traits: "traits",
+  contents: "contents", software: "contents",
+  carried: "contents", speciesframe: "contents",
+  careertables: "tables", careerevents: "events", terms: "terms",
   effects: "effects",
   description: "description", detail: "description", notes: "description",
   // Bounty Hunter p.18-19's two portions, and the party's copy of what has been shown.
@@ -46,8 +48,8 @@ for ( const id of BLOCKS ) {
  * `CareerData` is two schemas in one Item and `isTemplate` is which — the Item having no Actor
  * parent, read and never stored.
  */
-const TEMPLATE_ONLY = new Set(["career", "careertables"]);
-const RECORD_ONLY = new Set(["events"]);
+const TEMPLATE_ONLY = new Set(["career", "careertables", "careerevents"]);
+const RECORD_ONLY = new Set(["terms"]);
 
 /**
  * Bounty Hunter p.19's rows and p.22's generator are the referee's; the party gets `leads`, which
@@ -58,6 +60,9 @@ const PLAYER_ONLY = new Set(["leads"]);
 
 /** Blocks whose heading only repeats the nav entry above it, so alone in a tab they drop it. */
 const EPONYMOUS = new Set(["effects", "description", "contents"]);
+
+/** Blocks drawn without a heading, which the bare rule does not count: a container's strip. */
+const HEADLESS = new Set(["carried"]);
 
 /**
  * Every array of NON-BLANK strings a sheet draws, and the reason they are listed together: the
@@ -121,6 +126,13 @@ const CONTACT_TONES = {
   status: { Alive: "good", Unknow: "faint", Dead: "danger" }
 };
 
+/** A ship component's rating under its own name, where its category gives it one; every other reads Rating. */
+const RATING_LABELS = Object.freeze({
+  mDrive: "MGT2.Actor.spacecraft.Thrust", rDrive: "MGT2.Actor.spacecraft.Thrust", jDrive: "MGT2.Actor.spacecraft.Jump",
+  computer: "MGT2.Actor.spacecraft.Processing", armour: "MGT2.Actor.spacecraft.Armour",
+  automation: "MGT2.ComponentCategories.automation"
+});
+
 /** Past this many points a magazine or a Processing rating is drawn as a bar rather than counted. */
 const MAX_CELLS = 30;
 
@@ -171,7 +183,10 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       itemRoll: TravellerItemSheet.#onItemRoll,
       reload: TravellerItemSheet.#onReload,
       doseTake: TravellerItemSheet.#onDoseTake,
+      doseCountReset: TravellerItemSheet.#onDoseCountReset,
       nestedEdit: TravellerItemSheet.#onNestedEdit,
+      rowFold: TravellerItemSheet.#onRowFold,
+      cellFold: TravellerItemSheet.#onCellFold,
       nestedRemove: TravellerItemSheet.#onNestedRemove,
       nestedDelete: TravellerItemSheet.#onNestedDelete,
       openReference: TravellerItemSheet.#onOpenReference,
@@ -202,6 +217,8 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
         "systems/mgt2/templates/items/parts/standing-modifier.html",
         "systems/mgt2/templates/items/parts/step-outcome.html",
         "systems/mgt2/templates/items/parts/tray-row.html",
+        "systems/mgt2/templates/items/parts/mark.html",
+        "systems/mgt2/templates/items/parts/description-fields.html",
         "systems/mgt2/templates/items/parts/education-picks.html",
         "systems/mgt2/templates/items/parts/education-arm.html",
         "systems/mgt2/templates/items/parts/law-selectors.html",
@@ -226,6 +243,9 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
         { id: "associates", cssClass: "item tab-select", icon: "fa-solid fa-users", label: "MGT2.Contract.AssociatesTab" },
         { id: "traits", cssClass: "item tab-select", icon: "fa-solid fa-tag", label: "MGT2.Items.Traits" },
         { id: "contents", cssClass: "item tab-select", icon: "fa-solid fa-box-open", label: "MGT2.Items.Contents" },
+        { id: "tables", cssClass: "item tab-select", icon: "fa-solid fa-table", label: "MGT2.Items.Tables" },
+        { id: "events", cssClass: "item tab-select", icon: "fa-solid fa-dice-d6", label: "MGT2.Items.EventsMishaps" },
+        { id: "terms", cssClass: "item tab-select", icon: "fa-solid fa-timeline", label: "MGT2.Items.Terms" },
         { id: "description", cssClass: "item tab-select", icon: "fa-solid fa-book", label: "MGT2.Items.Description" },
         { id: "generate", cssClass: "item tab-select gmtab", icon: "fa-solid fa-dice", label: "MGT2.Contract.GenerateTab" },
         { id: "effects", cssClass: "item tab-select", icon: "fa-solid fa-person-rays", label: "MGT2.Effects.Title" }
@@ -245,23 +265,28 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     computer: ["specs", "carried", "traits", "effects", "description", "software"],
     // A wafer jack is a computer as much as an implant, and so is a transceiver from TL10 up, so
     // equipment lists what it runs; `#composition` drops the block on one that hosts nothing.
-    equipment: ["specs", "carried", "effects", "description", "software"],
+    equipment: ["summary", "specs", "carried", "effects", "software"],
+    "equipment:augment": ["summary", "augment", "specs", "carried", "effects", "software"],
+    drug: ["summary", "specs", "carried", "effects"],
+    // `carried` sets the supply flag; a found thing or a program hosts nothing, so it never gains Contents.
+    item: ["summary", "specs", "carried", "effects"],
     container: ["carried", "effects", "description", "contents"],
     // Both halves are listed and `#composition` drops the one this Item is not.
-    career: ["specs", "career", "effects", "description", "careertables", "events"],
+    career: ["specs", "career", "effects", "description", "careertables", "careerevents", "terms"],
     // A contact is someone the Traveller KNOWS, and knowing someone moves no number on the sheet:
     // the relationship is the whole record, so there is nothing for a change to carry.
     contact: ["relationship", "description", "notes"],
     // The split is where the schema already splits: `frame.*` is the term this species runs and
     // everything beside it is what a Traveller of it rolls.
     species: ["specs", "species", "traits", "speciesframe", "effects", "description", "detail"],
-    role: ["station", "actions", "effects", "description"],
+    role: ["actions", "summary", "effects"],
     // The three ship-owned types are not carried by anyone, so none of them takes `carried` and
     // none shows a supply cell.
-    cargo: ["specs", "trade", "effects", "description"],
-    passage: ["specs", "effects", "description"],
-    component: ["specs", "effects", "description"],
-    ammunition: ["specs", "carried", "traits", "rules", "effects", "description"],
+    cargo: ["specs", "trade", "summary", "effects"],
+    passage: ["specs", "summary", "effects"],
+    component: ["summary", "specs", "effects"],
+    // A round changes the weapon and not the shooter: no Effects tab unless one is already there.
+    ammunition: ["specs", "rules", "hosts", "summary", "carried", "traits", "effects"],
     // Bounty Hunter p.18: one document rendered for two seats. `#composition` drops the two GM
     // blocks for a player and the party's `leads` copy for the referee. `notes` is not listed: the
     // referee's own prep belongs behind the fold, so the referee block draws it.
@@ -278,13 +303,17 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     const byType = TravellerItemSheet.#BLOCKS_BY_TYPE;
     const list = byType[`${item.type}:${item.system.subType}`] ?? byType[item.type] ?? byType._default;
     const slots = {};
+    const template = (item.type === "career") && item.system.isTemplate;
     const sharedTable = (item.type === "career") && (item.system.kind === "table");
     let supply = false;
 
     for ( const id of list ) {
       if ( TEMPLATE_ONLY.has(id) && !item.system.isTemplate ) continue;
       if ( RECORD_ONLY.has(id) && item.system.isTemplate ) continue;
-      if ( sharedTable && (id === "specs") ) continue;
+      // A template reads as its qualification card, so Specs is the record's alone.
+      if ( template && (id === "specs") ) continue;
+      if ( sharedTable && (id === "careertables") ) continue;
+      if ( (id === "effects") && (item.type === "ammunition") && !item.effects.size ) continue;
       if ( GM_ONLY.has(id) && !game.user.isGM ) continue;
       if ( PLAYER_ONLY.has(id) && game.user.isGM ) continue;
       if ( id === "carried" ) {
@@ -301,7 +330,8 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     }
 
     for ( const blocks of Object.values(slots) ) {
-      if ( (blocks.length === 1) && EPONYMOUS.has(blocks[0].id) ) blocks[0].bare = true;
+      const titled = blocks.filter(block => !HEADLESS.has(block.id));
+      if ( (titled.length === 1) && EPONYMOUS.has(titled[0].id) ) titled[0].bare = true;
     }
     return { supply, slots };
   }
@@ -345,6 +375,14 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       const rules = blocks.some(block => block.id === "rules") ? (this.item.system.rules?.length ?? 0) : 0;
       return traitRows.reduce((sum, row) => sum + row.entries.length, rules);
     }
+    if ( (id === "events") && (this.item.type === "career") ) {
+      const system = this.item.system;
+      return system.eventTable.length + ((system.kind === "table") ? 0 : system.mishapTable.length);
+    }
+    if ( id === "terms" ) return this.#termRows()?.length ?? 0;
+    // Both slots exist only on a contract.
+    if ( id === "associates" ) return this.item.system.parties.length;
+    if ( id === "leads" ) return this.item.system.referee.filter(row => row.shown).length;
     const listing = block => ["contents", "software"].includes(block.id);
     if ( (id === "contents") && blocks.some(listing) && !this.#withheld
       && blocks.every(block => listing(block) || (block.id === "carried")) ) return nested.length;
@@ -360,11 +398,17 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     const { supply, slots } = this.#composition(traitRows);
     const effects = prepareEffects(item);
     const nested = this.#prepareNested(actor);
+    const careerBook = this.#careerBook();
 
     // The tab record is auto-prepared by ApplicationV2, there being one group; each entry carries
     // the blocks its body renders, and a tab that lists things says how many.
     for ( const tab of Object.values(context.tabs) ) {
       tab.blocks = slots[tab.id];
+      if ( (tab.id === "events") && (item.type === "career") && (item.system.kind === "table") ) {
+        tab.label = "MGT2.Chargen.Template.EventTable";
+      }
+      // A pre-career with nothing to draw keeps its Tables tab, dimmed: edit mode is where it is filled.
+      if ( (tab.id === "tables") && careerBook?.empty ) tab.cssClass = [tab.cssClass, "empty"].filterJoin(" ");
       const count = this.#tabCount(tab.id, slots[tab.id], traitRows, effects, nested);
       if ( count === null ) continue;
       tab.badge = String(count);
@@ -406,6 +450,8 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       // The counter lives on the Traveller, not on the drug, so that it survives the last dose
       // being swallowed — which is precisely when it matters most.
       doses: (item.type === "drug") ? Doses.countOf(actor, item.name) : null,
+      canDose: (item.type === "drug") && Doses.canTake(actor),
+      addiction: this.#addiction(),
       weight: "weight" in item.system ? item.system.weight : null,
       unitlabels: { weight: MGT2Helper.getWeightLabel() },
       isGM: game.user.isGM,
@@ -418,17 +464,33 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       fireModes: this.#fireModes(),
       ammo: this.#ammo(),
       processing: this.#processing(),
-      destination: this.#destination(),
       citation: this.#citation(),
-      componentTons: this.#componentTons(),
+      component: this.#component(),
       componentCategories: TravellerItemSheet.#componentCategories(item.system.category),
       trade: this.#tradeColumns(),
       nested,
       careerTables: this.#careerTables(),
       careerIssues: this.#careerIssues(),
       eventTables: this.#eventTables(),
+      careerCard: this.#careerCard(),
+      careerBook,
+      qualChoices: this.#qualChoices(),
+      termRows: this.#termRows(),
+      serviceCard: this.#serviceCard(),
+      mastPills: this.#mastPills(),
+      cargo: this.#cargo(),
+      passage: this.#passage(),
       speciesFrame: this.#speciesFrame(),
       speciesTiles: this.#speciesTiles(),
+      // A role's line follows its actions, so it reads as prose and not as the lede the tab opens on.
+      summary: this.#summary(slots.details?.[0]?.id !== "actions"),
+      station: item.type === "role",
+      stationActions: this.#stationActions(),
+      augmentTiles: this.#augmentTiles(),
+      bandwidth: this.#bandwidth(),
+      host: this.#host(),
+      bag: this.#bag(actor),
+      hosts: this.#hosts(),
       contactActor: (item.type === "contact") ? this.#reference({ uuid: item.system.actor, name: "" }) : null,
       contactPills: this.#contactPills(),
       contract: this.#contract()
@@ -462,7 +524,18 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       hunter: this.#reference(system.hunter),
       rep: system.hunterRep,
       hasRep: system.hunterRep !== null,
-      short: (system.hunterRep !== null) && (system.hunterRep < system.repFloor),
+      // The floor is a referee row: until it is shown, the party's sheet must not tell them it is there.
+      short: (gm || system.repFloorShown) && (system.hunterRep !== null) && (system.hunterRep < system.repFloor),
+      pills: [
+        { label: MGT2.ContractPriorities[system.priority], field: "MGT2.Contract.PriorityLabel",
+          tone: { high: "warn", critical: "danger" }[system.priority] ?? "" },
+        { label: MGT2.JobStatus[system.status], field: "MGT2.Contract.Status",
+          tone: { done: "good", failed: "danger", cancelled: "faint" }[system.status] ?? "" },
+        system.paid && { label: "MGT2.Contract.Paid", field: "MGT2.Contract.Paid", tone: "good", icon: "fa-solid fa-check" }
+      ].filter(Boolean),
+      shownLabel: MGT2Helper.plural("MGT2.Contract.ShownCount", system.referee.length,
+        { shown: shown.length, total: system.referee.length }),
+      leadLabel: MGT2Helper.plural("MGT2.Contract.LeadCount", shown.length, { n: shown.length }),
       rows: system.referee.map((row, index) => ({
         index, ...row,
         label: MGT2.ContractRefereeRows[row.key] ?? row.label,
@@ -484,9 +557,11 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       qualify: this.#contractAction("qualify"),
       repChange: this.#contractAction("repChange"),
       repInPlay: Rules.characteristic("reputation"),
-      repDM: MGT2Helper.signed(Contract.repChangeDM(system.hunterRep ?? 0), "+0"),
+      repChangeDM: MGT2Helper.signed(Contract.repChangeDM(system.hunterRep ?? 0), "+0"),
+      // The hunter's own REP DM, which the two party rolls add; none with nobody to roll.
+      repDM: system.hunterActor ? (system.hunterActor.system.characteristics?.reputation?.dm ?? null) : null,
       circumstances: Object.entries(MGT2.RepModification).map(([value, row]) => ({
-        value, label: `${MGT2Helper.signed(row.dm)} · ${game.i18n.localize(row.label)}`
+        value, dm: MGT2Helper.signed(row.dm), label: game.i18n.localize(row.label)
       })),
       // The floor is a referee-side field, so until it is shown the party does not know there is
       // one to fall under — and folio 10's check is only for a hunter under it.
@@ -513,8 +588,12 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
    */
   #generatorLog() {
     const drawn = this.#drawLog ?? [];
-    return Contract.sequence.map(step =>
-      ({ ...step, ...(drawn.find(row => row.step === step.step) ?? {}) }));
+    // A step waiting for its draw names the table it draws from; three take theirs from an earlier result.
+    return Contract.sequence.map(step => ({
+      ...step, chained: !step.table || step.table.includes("{"),
+      name: step.table?.replace(/\{\w+\}/g, "…") ?? null,
+      ...(drawn.find(row => row.step === step.step) ?? {})
+    }));
   }
 
   /**
@@ -568,6 +647,82 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
         key => game.i18n.localize(MGT2.Characteristics[key])),
       matched: this.#matchedLaws()
     };
+  }
+
+  /**
+   * The printed line Details opens on, and on an augment the printed cell when the description does
+   * not already begin with it: the same text is never drawn twice.
+   * @returns {{head: string, rest: string, short: boolean, vacant: boolean}|null}
+   */
+  #summary(lead = true) {
+    const system = this.item.system;
+    if ( typeof system.description !== "string" ) return null;
+    const sub = `${this.item.type}:${system.subType}`;
+    const cell = (sub === "equipment:augment") ? (system.augment.improvement ?? "").trim()
+      : (sub === "item:software") ? (system.software.effect ?? "").trim() : "";
+    const text = system.description.trim();
+    const head = (!cell || text.startsWith(cell)) ? text : cell;
+    const rest = ((head === cell) && text && (text !== cell)) ? text : "";
+    return { head, rest, short: lead && (head.length <= 120) && !head.includes("\n"), vacant: !head && !this.#citation() };
+  }
+
+  /** What the Traveller's derivations read off an augment, one tile each; a tile they skip is off. */
+  #augmentTiles() {
+    const item = this.item;
+    if ( (item.type !== "equipment") || (item.system.subType !== "augment") ) return null;
+    const augment = item.system.augment;
+    const fitted = item.system.equipped === true;
+    const issues = item.actor?.system.augmentIssues;
+    const limits = { characteristic: "MGT2.Actor.AugmentCharacteristicLimit", skill: "MGT2.Actor.AugmentSkillLimit",
+      protection: "MGT2.Actor.AugmentProtectionLimit" };
+    // The sheet reads the inventory's own lists, so it cannot disagree with the numbers.
+    const tile = (kind, label, value, tooltip) => {
+      const outranked = fitted && Boolean(issues?.[kind]?.includes(item.id));
+      return { kind, label, value, text: MGT2Helper.signed(value), tone: (value > 0) ? "up" : "down",
+        off: !fitted || outranked,
+        tooltip: outranked ? game.i18n.format(limits[kind], { names: item.name }) : tooltip };
+    };
+    const tiles = [];
+    for ( const row of augment.modifiers ?? [] ) {
+      if ( !row.characteristic || !Number.isFinite(row.value) || !row.value ) continue;
+      tiles.push(tile("characteristic", game.i18n.localize(`MGT2.Characteristics.${row.characteristic}.short`), row.value,
+        game.i18n.localize(MGT2.Characteristics[row.characteristic] ?? row.characteristic)));
+    }
+    const skill = augment.skill?.name?.trim();
+    if ( skill && augment.skill.value ) {
+      tiles.push(tile("skill", skill, augment.skill.value,
+        game.i18n.format("MGT2.Actor.AugmentSkill", { augment: item.name, skill })));
+    }
+    if ( augment.protection > 0 ) tiles.push(tile("protection", game.i18n.localize("MGT2.Items.Protection"), augment.protection, ""));
+    return { fitted, tiles, hasEffects: item.effects.size > 0 };
+  }
+
+  /** A drug's three addiction values, read together, or null while the referee has not set one (CSC p.97). */
+  #addiction() {
+    const { type, system } = this.item;
+    if ( type !== "drug" ) return null;
+    const { dosesBefore, checkInterval, cravingDM } = system.addiction;
+    if ( (dosesBefore === null) && !checkInterval && (cravingDM === null) ) return null;
+    return { before: dosesBefore, interval: checkInterval ?? "", craving: cravingDM };
+  }
+
+  /** A program's Bandwidth as cells, lit up to the figure it runs at (Core p.110's downgrade). */
+  #bandwidth() {
+    const { type, system } = this.item;
+    // A program carries its figures under `software`; a ship's software row on itself, its host the ship.
+    const source = ((type === "item") && (system.subType === "software")) ? system.software
+      : ((type === "component") && (system.category === "software")) ? system : null;
+    if ( !source ) return null;
+    const { bandwidthRun: run, bandwidth: rated, downgraded } = source;
+    return { run, rated, downgraded, cells: cells(run, rated), fill: rated ? Math.round(100 * run / rated) : 0,
+      blocked: (type === "component") && (system.tlBlocked === true) };
+  }
+
+  /** The computer an owned program runs on, read off its owner's items. */
+  #host() {
+    const { type, system, actor } = this.item;
+    if ( (type !== "item") || (system.subType !== "software") || !actor ) return null;
+    return { name: actor.items.get(system.software.computerId)?.name ?? "", blocked: system.software.tlBlocked === true };
   }
 
   /** One tile per characteristic rolled, dice and species DM together, read as `Chargen.plan` reads the list. */
@@ -691,10 +846,252 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       return { key, choices: Object.fromEntries(["", ...Object.keys(MGT2.TrayConditions)].map(condition => [condition,
         game.i18n.format(`MGT2.Chargen.Template.BorrowWhen.${condition || "never"}`, { table })])) };
     });
-    const events = { key: "eventTable", label: "MGT2.Chargen.Template.EventTable", rows: this.item.system.eventTable, borrow };
-    if ( this.item.system.kind === "table" ) return [events];
-    return [events,
-      { key: "mishapTable", label: "MGT2.Chargen.Template.MishapTable", rows: this.item.system.mishapTable, borrow }];
+    const shared = this.item.system.kind === "table";
+    const read = key => this.item.system[key].map(row => ({ ...row, pills: TravellerItemSheet.#eventPills(row, key) }));
+    const events = { key: "eventTable", label: "MGT2.Chargen.Template.EventTable", dice: shared ? "" : "2D",
+      rows: read("eventTable"), borrow };
+    if ( shared ) return [events];
+    return [events, { key: "mishapTable", label: "MGT2.Chargen.Template.MishapTable", dice: "1D",
+      rows: read("mishapTable"), borrow }];
+  }
+
+  /** A characteristic key as its short form, `INT`. */
+  static #short(key) {
+    return key ? game.i18n.localize(`MGT2.Characteristics.${key}.short`) : "";
+  }
+
+  /** What an event or mishap row does, as pills; one whose effect hangs on a condition is dashed. */
+  static #eventPills(row, table) {
+    const pills = [];
+    const loc = key => game.i18n.localize(key);
+    const when = condition => ((condition && (condition !== "always")) ? loc(MGT2.TrayConditions[condition] ?? "") : "");
+    // A pill that carries what the referee typed keeps its case; a state is set in capitals.
+    const add = (text, { tone = "", icon = "", condition = "", tip = "", dashed = false, typed = false } = {}) => {
+      if ( text ) pills.push({ text, tone, icon, typed, dashed: dashed || Boolean(condition), tip: condition || tip });
+    };
+    const ejection = { ejects: "danger", mishap: "faint", choice: "warn", stays: "good" };
+    // Staying is the exception on a Mishap row and the rule on an Events row.
+    if ( (row.ejects in ejection) && ((row.ejects !== "stays") || (table === "mishapTable")) ) {
+      add(loc(`MGT2.Chargen.Ejection.${row.ejects}`), { tone: ejection[row.ejects], condition: when(row.ejectsCondition) });
+    }
+    if ( row.subTable && (row.subTable !== "Injury") ) add(`→ ${row.subTable}`, { typed: true });
+    if ( row.injury?.modes?.size || (row.subTable === "Injury") ) {
+      const how = Array.from(row.injury?.modes ?? [], mode => loc(MGT2.InjuryModes[mode] ?? "")).filter(Boolean).join(" / ");
+      const who = (row.injury?.who === "associate") ? loc(MGT2.InjuryTargets.associate) : how;
+      add(`→ ${loc("MGT2.Chargen.Template.Injury")}${who ? ` · ${who}` : ""}`, { tone: "warn", typed: true });
+    }
+    const check = row.check ?? {};
+    if ( check.target ) {
+      const reading = one => `${[TravellerItemSheet.#short(one.characteristic), ...(one.skills ?? [])]
+        .filter(Boolean).join(" / ")} ${one.target}+`;
+      add([check, ...(check.alternatives ?? [])].map(reading).join(" · "), { icon: "fa-solid fa-dice", typed: true });
+    }
+    const cellText = text => (text ? text[0].toUpperCase() + text.slice(1) : "");
+    add(cellText(row.grant?.text), { icon: "fa-solid fa-plus", condition: when(row.grantCondition), typed: true });
+    add(cellText(row.grant2?.text), { icon: "fa-solid fa-plus", condition: when(row.grant2Condition), typed: true });
+    for ( const entry of row.tray ?? [] ) {
+      const kind = (entry.kind === "dm") ? `DM${MGT2Helper.signed(entry.dm)}` : loc(MGT2.TrayKinds[entry.kind] ?? "");
+      const on = Array.from(entry.appliesTo ?? [], key => loc(MGT2.TrayChecks[key] ?? "")).filter(Boolean).join(", ");
+      add([kind, on].filter(Boolean).join(" · "), { icon: "fa-solid fa-hourglass-half", condition: when(entry.condition),
+        dashed: true });
+    }
+    if ( row.awards?.outcomes?.size ) {
+      add(Array.from(row.awards.outcomes, key => loc(MGT2.TermOutcomes[key] ?? "")).join(" / "), { icon: "fa-solid fa-star" });
+    }
+    if ( row.career ) add(`→ ${row.career}`, { tip: loc(MGT2.RowCareerModes[row.careerMode] ?? ""), typed: true });
+    if ( row.benefit && (row.benefit !== "none") ) {
+      add(loc(MGT2.BenefitRowEffects[row.benefit]), { tone: ["lose", "wipe"].includes(row.benefit) ? "danger" : "good",
+        condition: when(row.benefitCondition) });
+    }
+    const gate = row.gate ?? {};
+    if ( gate.kind === "characteristic" ) {
+      add([TravellerItemSheet.#short(gate.characteristic), (gate.min !== null) ? `${gate.min}+` : "",
+        (gate.max !== null) ? `≤ ${gate.max}` : ""].filter(Boolean).join(" "));
+    } else if ( gate.kind && gate.key ) add(gate.key, { typed: true });
+    if ( row.track?.key ) {
+      add(`${row.track.key} ${row.track.formula || MGT2Helper.signed(row.track.value ?? 0)}`, { typed: true });
+    }
+    return pills;
+  }
+
+  /** The qualification card a template opens on: plates, the DM line, the switches, the assignments. */
+  #careerCard() {
+    const { item } = this;
+    if ( (item.type !== "career") || !item.system.isTemplate || (item.system.kind === "table") ) return null;
+    const system = item.system;
+    const loc = key => game.i18n.localize(key);
+    const short = TravellerItemSheet.#short;
+    const or = game.i18n.getListFormatter({ type: "disjunction" });
+    const qualification = system.qualification;
+    const plates = [{
+      label: "MGT2.Chargen.Steps.qualify",
+      value: (qualification.entry === "target") ? `${system.difficulty}+` : loc(MGT2.QualificationEntry[qualification.entry]),
+      word: qualification.entry !== "target",
+      on: or.format(qualification.characteristics.map(short)),
+      note: qualification.autoIf.characteristic ? [loc("MGT2.Chargen.Template.AutoIf"),
+        short(qualification.autoIf.characteristic),
+        (qualification.autoIf.min !== null) ? `${qualification.autoIf.min}+` : "",
+        (qualification.autoIf.max !== null) ? `≤ ${qualification.autoIf.max}` : ""].filter(Boolean).join(" ") : ""
+    }];
+    if ( system.commission ) {
+      plates.push({ label: "MGT2.Chargen.Steps.commission",
+        value: system.commissionCheck.target ? `${system.commissionCheck.target}+` : "—",
+        on: short(system.commissionCheck.characteristic) });
+    }
+    if ( system.basicFrom ) {
+      plates.push({ label: "MGT2.Chargen.Steps.basic", value: loc(MGT2.BasicTrainingTables[system.basicFrom]), word: true });
+    }
+    const escape = foundry.utils.escapeHTML;
+    const dm = value => `<span class="dmp${value ? "" : " zero"}">${MGT2Helper.signed(value)}</span>`;
+    const dms = [];
+    if ( qualification.perPreviousCareer ) {
+      dms.push(game.i18n.format("MGT2.Chargen.Template.DMPerPrevious", { dm: dm(qualification.perPreviousCareer) }));
+    }
+    for ( const row of qualification.conditionalDMs ) {
+      if ( row.characteristic ) dms.push(`${dm(row.dm)} ${short(row.characteristic)} ${row.min ?? ""}+`);
+      else if ( row.afterCareers?.length ) {
+        dms.push(game.i18n.format("MGT2.Chargen.Template.DMAfter",
+          { dm: dm(row.dm), careers: escape(or.format([row.afterCareers].flat())) }));
+      }
+    }
+    if ( (system.ageDM.from !== null) && system.ageDM.dm ) {
+      dms.push(game.i18n.format("MGT2.Chargen.Template.DMFromAge", { dm: dm(system.ageDM.dm), age: system.ageDM.from }));
+    }
+    const switches = [["pensionable", "Pensionable"], ["alwaysAvailable", "AlwaysAvailable"], ["neverEjects", "NeverEjects"],
+      ["blocksAnagathics", "BlocksAnagathics"]].filter(([key]) => system[key])
+      .map(([, label]) => `MGT2.Chargen.Template.${label}`);
+    if ( qualification.requiresPermission ) switches.push("MGT2.Chargen.Template.RequiresPermission");
+    const reading = (row) => (row?.characteristic ? `${short(row.characteristic)} ${row.target}+` : "—");
+    const bills = system.medicalBillsRow;
+    const facts = [
+      { label: "MGT2.Chargen.Template.AssignmentChange", value: system.assignmentChange
+        ? loc(MGT2.AssignmentChangeRules[system.assignmentChange]) : loc("MGT2.Chargen.Template.Undeclared") },
+      { label: "MGT2.Chargen.Template.EventRow7", value: loc(MGT2.EventRow7[system.eventRow7] ?? "") },
+      { label: "MGT2.Chargen.Template.MedicalBillsRow", value: bills
+        ? (MGT2.MedicalBillsGroups[bills] ? loc(MGT2.MedicalBillsGroups[bills]) : bills) : "—" },
+      system.restrictedTo.species && { label: "MGT2.Chargen.Template.RestrictedSpecies", value: system.restrictedTo.species },
+      system.restrictedTo.sex && { label: "MGT2.Chargen.Template.RestrictedSex", value: system.restrictedTo.sex },
+      system.exitRule.track && { label: "MGT2.Chargen.Template.ExitRule",
+        value: [system.exitRule.track, system.exitRule.test].filter(Boolean).join(" · ") }
+    ].filter(Boolean);
+    return {
+      plates, dms: dms.join(" · "), switches, facts,
+      assignments: system.assignments.map(row => ({ name: row.name, survival: reading(row.survival),
+        advancement: reading(row.advancement) }))
+    };
+  }
+
+  /** The career's printed tables, laid out as the book prints them. */
+  #careerBook() {
+    const { item } = this;
+    if ( (item.type !== "career") || !item.system.isTemplate || (item.system.kind === "table") ) return null;
+    const system = item.system;
+    const short = TravellerItemSheet.#short;
+    const text = cell => cell?.text || "";
+    const ladders = system.rankLadders.map(ladder => ({ name: ladder.name, officer: ladder.officer,
+      rows: ladder.rows.map(row => ({ rank: row.rank, title: row.title, bonus: text(row.bonus) })) }));
+    const assignments = system.assignments.map(row => ({ name: row.name,
+      gate: [row.survival?.characteristic ? `${short(row.survival.characteristic)} ${row.survival.target}+` : "",
+        row.advancement?.characteristic ? `${short(row.advancement.characteristic)} ${row.advancement.target}+` : ""]
+        .filter(Boolean).join(" · "),
+      cells: row.skills.map(text) }));
+    const tables = Object.entries(system.tables).filter(([, table]) => table.present).map(([key, table]) => ({
+      label: `MGT2.Chargen.Template.Tables.${key}`,
+      gate: table.requiresCommission ? game.i18n.localize("MGT2.Chargen.Template.RequiresCommission")
+        : (table.gate?.characteristic ? `${short(table.gate.characteristic)} ${table.gate.min ?? ""}+` : ""),
+      cells: table.rows.map(text) }));
+    const width = Math.max(0, ...assignments.map(row => row.cells.length), ...tables.map(row => row.cells.length));
+    const benefitRows = Math.max(system.benefits.cash.length, system.benefits.other.length);
+    return {
+      ladders,
+      assignments: { heads: assignments, rows: Array.from({ length: Math.max(0, ...assignments.map(row => row.cells.length)) },
+        (_r, index) => ({ roll: index + 1, cells: assignments.map(row => row.cells[index] ?? "") })) },
+      tables: { heads: tables, rows: Array.from({ length: Math.max(0, ...tables.map(row => row.cells.length)) },
+        (_r, index) => ({ roll: index + 1, cells: tables.map(row => row.cells[index] ?? "") })) },
+      benefits: Array.from({ length: benefitRows }, (_r, index) => ({ roll: index + 1,
+        cash: system.benefits.cash[index] ?? null, other: text(system.benefits.other[index]) })),
+      empty: !ladders.length && !assignments.length && !width && !benefitRows
+    };
+  }
+
+  /** The characteristics a career may qualify on: the six rolled, the optional ones in play, and any already stored. */
+  #qualChoices() {
+    const { item } = this;
+    if ( (item.type !== "career") || !item.system.isTemplate || (item.system.kind === "table") ) return null;
+    const stored = item.system.qualification.characteristics;
+    const keys = [...MGT2.RolledCharacteristics,
+      ...Object.keys(MGT2.Characteristics).filter(key => !MGT2.RolledCharacteristics.includes(key)
+        && (Rules.characteristic?.(key) || stored.includes(key)))];
+    return keys.map(key => ({ key, label: TravellerItemSheet.#short(key), on: stored.includes(key) }));
+  }
+
+  /** A record's terms, as the creation screen reads them. */
+  #termRows() {
+    const { item } = this;
+    if ( (item.type !== "career") || item.system.isTemplate || !item.actor ) return null;
+    const frame = Chargen.frame(item.actor)?.system.frame;
+    return Chargen.timeline(item.actor).filter(row => row.careerId === item.id).map(row => {
+      // The toned lines are the survival and ejection marks, which head the card beside the outcomes.
+      const lines = Chargen.termLines(row, frame);
+      return { index: row.index, from: row.from, to: row.to,
+        outcomes: Array.from(row.outcomes, key => MGT2.TermOutcomes[key]).filter(Boolean),
+        marks: lines.filter(line => line.tone), lines: lines.filter(line => !line.tone) };
+    });
+  }
+
+  /** A record's service: the rank and its title, the terms and their marks, the assignment and its two thresholds. */
+  #serviceCard() {
+    const { item } = this;
+    if ( (item.type !== "career") || item.system.isTemplate ) return null;
+    const system = item.system;
+    const ladder = system.rankLadders.find(entry => entry.id === system.ladder);
+    const assignment = system.assignments.find(entry => entry.name === system.assignment);
+    const short = TravellerItemSheet.#short;
+    const reading = row => (row?.characteristic ? `${short(row.characteristic)} ${row.target}+` : "");
+    return {
+      rank: system.rank,
+      title: ladder?.rows.find(row => row.rank === system.rank)?.title ?? "",
+      ladder: ladder?.name ?? "",
+      enlisted: TravellerItemSheet.#enlisted(system, assignment),
+      terms: system.terms,
+      marks: (system.termLog ?? []).map(entry => ({ term: entry.term,
+        tone: !entry.closed ? "open" : (((entry.survived !== false) && !entry.ejected) ? "good" : "bad") })),
+      assignment: system.assignment,
+      survival: reading(assignment?.survival),
+      advancement: reading(assignment?.advancement)
+    };
+  }
+
+  /** The rank a commissioned record left behind, read off the assignment's enlisted ladder: `Ratings 4 · Leading Hand`. */
+  static #enlisted(system, assignment) {
+    if ( !(system.enlistedRank > 0) ) return "";
+    const ladder = system.rankLadders.find(entry => entry.id === assignment?.ladder);
+    const title = ladder?.rows.find(row => row.rank === system.enlistedRank)?.title;
+    return [`${ladder?.name ?? ""} ${system.enlistedRank}`.trim(), title].filter(Boolean).join(" · ");
+  }
+
+  /** The pills under the masthead: a template's references, a record's entry and exit. */
+  #mastPills() {
+    const { item } = this;
+    if ( item.type === "cargo" ) return this.#cargoPills();
+    if ( item.type === "passage" ) return this.#passagePills();
+    if ( item.type !== "career" ) return null;
+    const system = item.system;
+    if ( system.isTemplate ) {
+      if ( system.kind === "table" ) return null;
+      const checks = system.templateIssues.checks.filter(check => check.applies);
+      if ( !checks.length ) return null;
+      const passed = checks.filter(check => check.ok).length;
+      const ok = passed === checks.length;
+      return [{ label: `${game.i18n.localize("MGT2.Chargen.Template.Integrity")} ${passed}/${checks.length}`,
+        tone: ok ? "good" : "danger", mark: ok ? "good" : "bad",
+        tooltip: checks.map(check => game.i18n.localize(`MGT2.Chargen.Template.Checks.${check.key}`)).join(" · ") }];
+    }
+    const exitTone = { graduated: "good", paroled: "good", forcedOutByAdvancement: "warn", blocked: "warn",
+      ejectedByMishap: "danger", died: "danger" };
+    return [{ label: game.i18n.localize(MGT2.CareerEntryModes[system.entryMode] ?? ""), tone: "" },
+      { label: game.i18n.localize(MGT2.CareerExitModes[system.exitMode] ?? ""), tone: exitTone[system.exitMode] ?? "" }]
+      .filter(pill => pill.label);
   }
 
   /** The spine reads the sub-type where there is one, because that is the name on the character sheet. */
@@ -702,6 +1099,8 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     const item = this.item;
     // `TYPES.Item.container` disambiguates in the create dialog — too long to stand on a spine.
     if ( item.type === "container" ) return "MGT2.Items.Container";
+    // A component's sub-type is its category, the word the ship's parts list prints.
+    if ( item.type === "component" ) return MGT2.ComponentCategories[item.system.category] ?? "TYPES.Item.component";
     return SUBTYPES[item.type]?.[item.system.subType] ?? `TYPES.Item.${item.type}`;
   }
 
@@ -716,13 +1115,28 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       tags.push(system.skill.speciality);
     }
     if ( type === "weapon" ) tags.push(game.i18n.localize(MGT2.WeaponScales[system.scale]?.label ?? ""));
+    if ( type === "career" ) tags.push(game.i18n.localize(MGT2.CareerKinds[system.kind] ?? ""));
     if ( type === "contract" ) {
+      // The status is a state, so it is a pill under this line, and the line says each term once.
       tags.push(game.i18n.localize(MGT2.ContractClients[system.client] ?? ""));
-      tags.push(game.i18n.localize(MGT2.JobStatus[system.status] ?? ""));
       tags.push(game.i18n.localize((system.subject.kind === "person")
         ? MGT2.ContractWanted[system.alive] : "MGT2.Contract.ToBeFound"));
+      if ( system.issued ) tags.push(`${game.i18n.localize("MGT2.Contract.Issued")} ${system.issued}`);
     }
-    if ( "tl" in system ) tags.push(game.i18n.localize(MGT2.TL[system.tl] ?? ""));
+    if ( type === "role" ) {
+      tags.push(game.i18n.localize(MGT2.Departments[system.department] ?? ""));
+      // The crew position, unless the name already says it (a talent's speciality follows the same rule).
+      const key = system.crewRoleKey;
+      if ( key && (system.constructor.matchCrewRole(this.item.name) !== key) ) {
+        tags.push(game.i18n.localize(MGT2.CrewRoles[key]?.label ?? ""));
+      }
+    }
+    if ( "tl" in system ) {
+      // A component's TL is a number, as the ship's own is.
+      const key = (typeof system.tl === "number") ? `TL${String(system.tl).padStart(2, "0")}` : system.tl;
+      tags.push(game.i18n.localize(MGT2.TL[key] ?? ""));
+    }
+    if ( (type === "component") && (system.quantity > 1) ) tags.push(`×${system.quantity}`);
     return tags.filter(tag => tag !== "");
   }
 
@@ -856,14 +1270,6 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     };
   }
 
-  /** Where a lot or a booking is bound for, as one name. @returns {string|null} */
-  #destination() {
-    const destination = this.item.system.destination;
-    if ( !destination ) return null;
-    const world = destination.world ? foundry.utils.fromUuidSync(destination.world) : null;
-    return world?.name || destination.name || null;
-  }
-
   /** The printed reference as one line, from the two strings stored. @returns {string|null} */
   #citation() {
     const source = this.item.system.source;
@@ -871,14 +1277,81 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
   }
 
   /**
-   * The tonnage triple resolved against the hull this row is fitted to.
-   * @returns {number|null}
+   * A ship component's plates — tons, cost, power and its rating — each with the arm and count behind
+   * it, read as the ship's parts list reads the same row; and its critical and Hardened pills.
    */
-  #componentTons() {
+  #component() {
     const item = this.item;
     if ( item.type !== "component" ) return null;
-    const hull = item.actor?.system.hull?.tons;
-    return hull ? Math.round(item.system.tonsFor(hull) * 10) / 10 : null;
+    const system = item.system;
+    const loc = key => game.i18n.localize(key);
+    const lang = game.i18n.lang;
+    const number = value => Number(value).toLocaleString(lang, { maximumFractionDigits: 2 });
+    const unit = text => `<span class="u">${foundry.utils.escapeHTML(text)}</span>`;
+    const hull = item.actor?.system.hull?.tons ?? null;
+    const q = Math.max(1, system.quantity);
+    const tenth = value => Math.round(value * 10) / 10;
+    const t = loc("MGT2.Actor.spacecraft.Tons");
+    const each = loc("MGT2.Actor.spacecraft.Each");
+    const { tons, percent, minimum } = system.tonnage;
+    const software = system.category === "software";
+    const plant = system.category === "powerPlant";
+    const floor = `${loc("MGT2.Items.Minimum")} ${number(minimum)} ${t}`;
+    const plates = [];
+
+    if ( !software ) {
+      const how = [];
+      let value;
+      let total;
+      if ( hull ) {
+        total = system.tonsFor(hull);
+        value = `${number(tenth(total))}${unit(t)}`;
+        // The arm that won `tonsFor`'s max, which is not always the one declared first.
+        const share = (percent > 0) ? (hull * percent / 100) : 0;
+        if ( (percent > 0) && (share >= Math.max(tons, minimum)) ) how.push(`${number(percent)} ${loc("MGT2.Items.PercentOfHull")}`);
+        else if ( (percent > 0) && minimum && (minimum >= Math.max(tons, share)) ) how.push(floor);
+      } else if ( percent > 0 ) {
+        total = percent;
+        value = `${number(percent)}${unit(loc("MGT2.Items.PercentOfHull"))}`;
+        if ( minimum ) how.push(floor);
+      } else {
+        total = Math.max(tons, minimum) * q;
+        value = `${number(tenth(total))}${unit(t)}`;
+      }
+      if ( (q > 1) && (hull || !(percent > 0)) ) how.push(`×${q} · ${number(tenth(total / q))} ${t} ${each}`);
+      plates.push({ key: "tons", label: loc("MGT2.Items.Tons"), value, off: !total, how: how.join(" · ") });
+    }
+
+    plates.push({ key: "cost", label: loc("MGT2.Items.Cost"), value: `${unit(loc("MGT2.Design.MCr"))}${number(system.cost * q)}`,
+      off: !system.cost, how: (q > 1) ? `${loc("MGT2.Design.MCr")}${number(system.cost)} ${each}` : "" });
+
+    if ( !software ) {
+      const draw = system.drawFor(hull ?? 0);
+      const how = [];
+      if ( system.powerPerTon ) how.push(`${number(system.powerPerTon)} ${loc("MGT2.Items.PowerPerTon")}`);
+      if ( (q > 1) && system.power && !plant ) how.push(`−${number(system.power)} ${each}`);
+      plates.push(plant
+        ? { key: "power", label: loc("MGT2.Items.Power"), value: `+${number(system.generates)}`, off: !system.generates,
+          tone: "gen", how: how.join(" · ") }
+        : { key: "power", label: loc("MGT2.Items.Power"), value: `−${number(tenth(draw))}`, off: !draw, how: how.join(" · ") });
+    }
+
+    // A plant's rating is its output, which the Power plate already states.
+    const ratingLabel = plant ? "MGT2.Actor.spacecraft.PowerPlant" : (RATING_LABELS[system.category] ?? "MGT2.Items.Rating");
+    if ( !plant && (RATING_LABELS[system.category] || (system.rating > 0)) ) {
+      const row = (system.category === "automation") ? MGT2.ShipAutomation.find(entry => entry.rating === system.rating) : null;
+      plates.push({ key: "rating", label: loc(ratingLabel), off: !system.rating && !row,
+        value: row ? `<span class="word">${foundry.utils.escapeHTML(loc(row.label))}</span>` : number(system.rating) });
+    }
+
+    return {
+      plates, ratingLabel,
+      pills: { critical: (system.dm > 0) ? { dm: system.dm, rungs: [1, 2, 3, 4, 5, 6].map(n => n <= system.dm) } : null,
+        hardened: system.hardened },
+      grades: [0, 1, 2, 3, 4, 5, 6].map(n => ({ n, checked: n === system.dm })),
+      // A grade typed outside the strip rides a hidden rung, so a submit keeps it until one is clicked.
+      stray: ((system.dm >= 0) && (system.dm <= 6)) ? null : system.dm
+    };
   }
 
   /**
@@ -889,10 +1362,110 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
   #tradeColumns() {
     if ( this.item.type !== "cargo" ) return null;
     const system = this.item.system;
-    return [
-      { property: "purchaseDM", label: "MGT2.Items.PurchaseDM", rows: system.purchaseDM },
-      { property: "saleDM", label: "MGT2.Items.SaleDM", rows: system.saleDM }
+    const named = rows => rows.map(row => ({ ...row, name: row.code ? game.i18n.localize(`MGT2.TradeCodes.${row.code}`) : "" }));
+    const columns = [
+      { property: "purchaseDM", label: "MGT2.Items.PurchaseDM", rows: named(system.purchaseDM) },
+      { property: "saleDM", label: "MGT2.Items.SaleDM", rows: named(system.saleDM) }
     ];
+    const count = columns.reduce((sum, column) => sum + column.rows.length, 0);
+    return { columns, count, empty: count === 0 };
+  }
+
+  /**
+   * A cargo lot's terms, plates, lateness and hold, read as the ship's manifest reads the same lot.
+   * Freight is paid on delivery; a speculative lot was bought. The derived flag tells them apart.
+   */
+  #cargo() {
+    const item = this.item;
+    if ( item.type !== "cargo" ) return null;
+    const s = item.system;
+    const day = game.settings.get("mgt2", "campaignDay");
+    const late = (s.dueDay !== null) && (day > s.dueDay);
+    const terms = !s.speculative
+      ? { label: "MGT2.Trade.Fare", field: "fare", value: s.fare, tooltip: "MGT2.Trade.Card.PaidOnDelivery", cost: s.paid }
+      : ((s.paid !== null) ? { label: "MGT2.Items.Cost", field: "paid", value: s.paid, cost: null } : null);
+    const actor = item.actor;
+    let hold = null;
+    if ( actor?.type === "spacecraft" ) {
+      const cargo = actor.system.cargo;
+      hold = MGT2Helper.holdMeter(actor, cargo, s.tons);
+      // One lot bigger than the hull will never fit, which is the trade screen's own sentence.
+      if ( s.tons > cargo.capacity ) hold.why = game.i18n.format("MGT2.Trade.HoldTooSmall", { tons: s.tons, capacity: cargo.capacity });
+    }
+    return {
+      day, late, daysLate: late ? (day - s.dueDay) : 0, terms, hold,
+      destination: s.speculative ? null : this.#reference({ uuid: s.destination.world, name: s.destination.name }),
+      due: !s.speculative && (s.dueDay !== null), fare: !s.speculative && (s.farePerTon > 0),
+      price: s.basePrice > 0, paid: s.purchasePct !== null
+    };
+  }
+
+  /**
+   * A role's actions grouped by the step of the round they belong to (Core p.164), reactions last
+   * (p.171), each keeping its stored index: the roster and the combat screen address an action by it.
+   */
+  #stationActions() {
+    if ( this.item.type !== "role" ) return null;
+    const actions = this.item.system.actions;
+    const read = (action, index) => ({
+      index, label: action.label, weapon: action.kind === "weapon", special: action.kind === "special",
+      skill: action.skill,
+      short: action.characteristic ? game.i18n.localize(`MGT2.Characteristics.${action.characteristic}.short`) : "",
+      characteristic: action.characteristic ? game.i18n.localize(MGT2.Characteristics[action.characteristic] ?? "") : "",
+      dm: action.dm, dmText: MGT2Helper.signed(action.dm),
+      difficulty: action.difficulty ? MGT2Helper.getDifficultyDisplay(action.difficulty) : null,
+      cap: (action.cap && (action.cap !== "none")) ? game.i18n.localize(MGT2.ActionCaps[action.cap] ?? "") : null
+    });
+    const groups = ["manoeuvre", "attack", "actions", "reaction"].map((step, n) => ({
+      step, number: (step === "reaction") ? null : n + 1, reaction: step === "reaction",
+      label: (step === "reaction") ? "MGT2.SpaceCombat.Reactions" : MGT2.CombatSteps[step],
+      actions: actions.map(read).filter((_row, index) => actions[index].step === step)
+    })).filter(group => group.actions.length);
+    return { count: actions.length, groups };
+  }
+
+  /** A booking's fare, destination, staterooms and the share of the hold its baggage takes. */
+  #passage() {
+    const item = this.item;
+    if ( item.type !== "passage" ) return null;
+    const s = item.system;
+    const actor = item.actor;
+    return {
+      terms: (s.fare > 0) ? { fare: s.fare, perHead: s.farePerHead } : null,
+      destination: this.#reference({ uuid: s.destination.world, name: s.destination.name }),
+      staterooms: s.staterooms.toLocaleString(game.i18n.lang),
+      // The ship counts baggage in tonnes of hold (Core p.238).
+      hold: (actor?.type === "spacecraft") ? MGT2Helper.holdMeter(actor, actor.system.cargo, s.baggage / 1000) : null
+    };
+  }
+
+  /** A booking's class under its name, and the revival check a low passage owes on arrival. */
+  #passagePills() {
+    const s = this.item.system;
+    const pills = [{ label: game.i18n.localize(MGT2.PassageClasses[s.grade]?.label ?? ""), tone: "",
+      tooltip: game.i18n.localize("MGT2.Items.PassageHint") }];
+    if ( s.lowBerth ) {
+      pills.push({ label: game.i18n.localize("MGT2.Trade.Card.RevivalCheck"), tone: "warn", dashed: true,
+        tooltip: MGT2Helper.plural("MGT2.Trade.Card.Revival", s.count, { n: s.count }) });
+    }
+    return pills;
+  }
+
+  /** A cargo lot's states under its name: its kind, lateness, and the two bans. */
+  #cargoPills() {
+    const s = this.item.system;
+    const loc = key => game.i18n.localize(key);
+    const pills = [{ label: loc(s.speculative ? "MGT2.Trade.Speculation" : "MGT2.Trade.Freight"), tone: "", dashed: true,
+      tooltip: loc("MGT2.Items.SpeculativeHint") }];
+    const day = game.settings.get("mgt2", "campaignDay");
+    if ( (s.dueDay !== null) && (day > s.dueDay) ) {
+      const n = day - s.dueDay;
+      pills.push({ label: MGT2Helper.plural("MGT2.Items.DaysLate", n, { n }), tone: "danger", dashed: true,
+        tooltip: loc("MGT2.Actor.spacecraft.DeliverLate") });
+    }
+    if ( s.illegal ) pills.push({ label: loc("MGT2.Items.IllegalEverywhere"), tone: "danger" });
+    if ( s.legality !== null ) pills.push({ label: `${loc("MGT2.Items.BannedAt")} ${s.legality}`, tone: "warn" });
+    return pills;
   }
 
   /**
@@ -933,13 +1506,115 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       downgraded: sibling.system.software?.downgraded === true,
       tlBlocked: sibling.system.software?.tlBlocked === true,
       quantity: sibling.system.quantity ?? null,
-      weight: MGT2Helper.roundWeight(sibling.getTotalWeight())
+      weight: MGT2Helper.roundWeight(sibling.getTotalWeight()),
+      held: (sibling.type === "container") ? sibling.system.count : null
     })).sort(MGT2Helper.compareByName);
+  }
+
+  /** Each weapon of the owner this round is loaded in: what it holds, and every value the round changes. */
+  #hosts() {
+    const { item } = this;
+    const actor = item.actor;
+    if ( (item.type !== "ammunition") || !actor ) return null;
+    const list = traits => traits.map(formatTrait).join(" · ");
+    const credits = value => (Number.isFinite(value) ? `Cr ${MGT2Helper.credits(value)}` : "");
+    return actor.items.filter(weapon => (weapon.type === "weapon") && (weapon.system.ammunition === item.id))
+      .map(weapon => {
+        const own = weapon.system;
+        const eff = own.effective;
+        // VH2026 p.104: fire control's Scope is the weapon's whatever is loaded, so it is not the round's.
+        const granted = (!own.traitMap.scope && actor.system.fireControlFor?.(weapon)) ? [{ key: "scope" }] : [];
+        const rows = [
+          ["MGT2.Items.Damage", own.damage, eff.damage],
+          ["MGT2.Items.Range", MGT2Helper.getRangeDisplay(own.range), MGT2Helper.getRangeDisplay(eff.range)],
+          ["MGT2.Items.Magazine", own.magazine, eff.magazine],
+          ["MGT2.Items.MagazineCost", credits(own.magazineCost), credits(eff.magazineCost)],
+          ["MGT2.Items.Traits", list([...own.traits, ...granted]), list(eff.traits)]
+        ].filter(([, was, now]) => String(was ?? "") !== String(now ?? ""))
+          .map(([label, was, now]) => ({ label, was: was || "—", now: now || "—" }));
+        const ammo = (Rules.on("magazines") && (eff.magazine > 0)) ? { value: own.ammo, magazine: eff.magazine,
+          pips: cells(own.ammo, eff.magazine), fill: Math.round(100 * Math.min(own.ammo, eff.magazine) / eff.magazine) }
+          : null;
+        return { id: weapon.id, name: weapon.name, ammo, rows };
+      }).sort(MGT2Helper.compareByName);
+  }
+
+  /** A round's sheet reads its weapons, so it follows them: firing, reloading and unloading change the weapon. */
+  #onHostUpdate = (weapon, change) => {
+    if ( (weapon.type !== "weapon") || (weapon.parent !== this.item.parent) ) return;
+    if ( (weapon.system.ammunition === this.item.id) || foundry.utils.hasProperty(change, "system.ammunition") ) {
+      this.render();
+    }
+  };
+
+  #hostHook = null;
+
+  /** @inheritDoc */
+  async _onFirstRender(context, options) {
+    await super._onFirstRender(context, options);
+    if ( (this.item.type === "ammunition") && this.item.actor ) this.#hostHook = Hooks.on("updateItem", this.#onHostUpdate);
+  }
+
+  /** @inheritDoc */
+  _onClose(options) {
+    super._onClose(options);
+    if ( this.#hostHook !== null ) Hooks.off("updateItem", this.#hostHook);
+    this.#hostHook = null;
+  }
+
+  /**
+   * A container's state as its sheet reads it: whether the lock withholds it from this viewer, what
+   * it holds, and whether its mass reaches the carrier's load, by the rule `prepareWeight` applies.
+   */
+  #bag(actor) {
+    const item = this.item;
+    if ( item.type !== "container" ) return null;
+    const withheld = this.#withheld;
+    const chain = [item, ...item.containerChain];
+    return {
+      withheld,
+      count: withheld ? null : item.system.count,
+      nested: Boolean(item.system.container?.id),
+      carrier: Boolean(actor) && ("inventory" in actor.system),
+      counted: !chain.some(bag => bag.system.weightless) && (chain.at(-1).system.onHand === true),
+      canDrop: this.isEditable && !withheld
+    };
+  }
+
+  /** The one event row open in edit mode, as `"eventTable.3"`. */
+  #openRow = null;
+
+  /** The career cells whose grants are open in edit mode, by `data-cell-path`. */
+  #openCells = new Set();
+
+  /** Opening an event row closes the other: the form keeps every control, CSS folds the rest. */
+  static #onRowFold(event, target) {
+    const row = target.closest(".entry[data-row-key]");
+    const key = row?.dataset.rowKey;
+    if ( !key ) return;
+    this.#openRow = (this.#openRow === key) ? null : key;
+    for ( const entry of this.element.querySelectorAll(".careerevents .entry[data-row-key]") ) {
+      entry.classList.toggle("open", entry.dataset.rowKey === this.#openRow);
+    }
+  }
+
+  /** A cell's grants fold behind their count; several may be open. */
+  static #onCellFold(event, target) {
+    const cell = target.closest(".cell[data-cell-path]");
+    if ( !cell ) return;
+    const path = cell.dataset.cellPath;
+    if ( this.#openCells.has(path) ) this.#openCells.delete(path);
+    else this.#openCells.add(path);
+    cell.classList.toggle("open", this.#openCells.has(path));
   }
 
   /** @inheritDoc */
   async _onRender(context, options) {
     await super._onRender(context, options);
+    if ( this.#openRow ) this.element.querySelector(`.careerevents .entry[data-row-key="${this.#openRow}"]`)?.classList.add("open");
+    for ( const path of this.#openCells ) {
+      this.element.querySelector(`.cell[data-cell-path="${CSS.escape(path)}"]`)?.classList.add("open");
+    }
     // A root part is unwrapped into the window content, so the sheet has no element of its own to
     // carry the variant: the application root does.
     this.element.classList.toggle("hazard", context.roll.hazard);
@@ -1199,8 +1874,15 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
    * in and there is nothing to count.
    */
   /** A dose is taken, not equipped — everything that follows from that is in `doses.js`. */
-  static #onDoseTake() {
-    return Doses.take(this.item);
+  static async #onDoseTake() {
+    await Doses.take(this.item);
+    return this.render();
+  }
+
+  /** The count lives on the Traveller, whose update does not reach this sheet. */
+  static async #onDoseCountReset() {
+    await Doses.reset(this.item.actor, this.item.name);
+    return this.render();
   }
 
   static #onReload() {
@@ -1371,8 +2053,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
 
   /** The circumstances are chosen at the moment of the roll and stored nowhere. @this {TravellerItemSheet} */
   static #onContractRepChange() {
-    const select = this.element.querySelector("[data-rep-circumstance]");
-    const chosen = [...(select?.selectedOptions ?? [])].map(option => option.value);
+    const chosen = [...this.element.querySelectorAll("[data-rep-circumstance] input:checked")].map(input => input.value);
     return Contract.reputationChange(this.item, ...chosen);
   }
 

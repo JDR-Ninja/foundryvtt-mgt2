@@ -17,10 +17,23 @@
 	    Effects onto the Traveller, spends one of the doses carried, and counts it. }}
 	{{#if (eq item.type "drug")}}
 	<div class="rollbar dose-take">
-		<span class="why">{{localize 'MGT2.Doses.NotEquipped'}}</span>
+		{{! The three moments, as the disease's cycle: the after-effect names its kind, damage red and a
+		    condition amber, so the tone is never the only signal. }}
+		<div class="cycle dose play-only">
+			<div class="plate{{#unless system.onset}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.Onset'}}</span>{{#if system.onset}}<b class="word">{{system.onset}}</b>{{else}}<b class="none">{{localize 'MGT2.Items.Immediate'}}</b>{{/if}}</div>
+			<i class="fa-solid fa-arrow-right-long"></i>
+			<div class="plate{{#unless system.duration}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.Duration'}}</span>{{#if system.duration}}<b class="word">{{system.duration}}</b>{{else}}<b class="none">{{localize 'MGT2.Items.NotAClock'}}</b>{{/if}}</div>
+			<i class="fa-solid fa-arrow-right-long"></i>
+			{{#if system.afterEffect}}
+			<div class="plate{{#if (eq system.afterKind 'damage')}} harm{{else if (eq system.afterKind 'condition')}} warn{{/if}}"><span class="lbl">{{localize 'MGT2.Items.AfterEffect'}}{{#unless (eq system.afterKind 'none')}} &middot; {{localize (lookup config.DrugAfterKinds system.afterKind)}}{{/unless}}</span><b class="word">{{system.afterEffect}}</b></div>
+			{{else}}
+			<div class="plate off"><span class="lbl">{{localize 'MGT2.Items.AfterEffect'}}</span><b class="none">{{localize 'MGT2.DrugAfterKinds.none'}}</b></div>
+			{{/if}}
+		</div>
+		{{#if doses}}<span class="pill kept">{{localize 'MGT2.Doses.Counter'}} <b>{{doses}}</b><a class="reset" data-action="doseCountReset" data-tooltip="{{localize 'MGT2.Doses.Reset'}}"><i class="fa-solid fa-rotate-left"></i></a></span>{{/if}}
 		<button type="button" class="btn-roll" data-action="doseTake"
-			{{#unless hadContainer}}disabled data-tooltip="{{localize 'MGT2.Doses.NeedsOwner'}}"
-			{{else}}{{#unless system.quantity}}disabled{{/unless}}{{/unless}}>
+			{{#unless canDose}}disabled data-tooltip="{{localize 'MGT2.Doses.NeedsOwner'}}"
+			{{else}}{{#unless system.quantity}}disabled data-tooltip="{{localize 'MGT2.Doses.None' name=item.name}}"{{/unless}}{{/unless}}>
 			<i class="fa-solid fa-syringe"></i>{{localize 'MGT2.Doses.Take'}}
 		</button>
 	</div>
@@ -94,6 +107,56 @@
 	</div>
 	{{/if}}
 
+	{{! A round's overrides are the weapon's own plates: what it stores, or the weapon's own in faint. }}
+	{{#if (eq item.type "ammunition")}}
+	<ul class="plates play-only">
+		<li class="plate{{#unless system.damage}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.Damage'}}</span>{{#if system.damage}}<b>{{system.damage}}</b>{{else}}<b class="none">{{localize 'MGT2.Items.WeaponsOwn'}}</b>{{/if}}</li>
+		<li class="plate{{#unless (or system.range system.rangePercent)}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.Range'}}</span>{{#if system.range}}<b>{{system.range}}</b>{{else if system.rangePercent}}<b>{{showDM system.rangePercent}}<span class="u">%</span></b>{{else}}<b class="none">{{localize 'MGT2.Items.WeaponsOwn'}}</b>{{/if}}</li>
+		<li class="plate{{#unless system.magazine}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span>{{#if system.magazine}}<b>{{system.magazine}}</b>{{else}}<b class="none">{{localize 'MGT2.Items.WeaponsOwn'}}</b>{{/if}}</li>
+		<li class="plate{{#unless (or system.magazineCost system.magazineCostMultiple)}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span>{{#if system.magazineCost}}<b>Cr {{credits system.magazineCost}}</b>{{else if system.magazineCostMultiple}}<b>&times;{{system.magazineCostMultiple}}</b>{{else}}<b class="none">{{localize 'MGT2.Items.WeaponsOwn'}}</b>{{/if}}</li>
+	</ul>
+	{{/if}}
+
+	{{! A lot's terms as plates, one per term it has: freight carries its destination, deadline and
+	    rate; a bought lot its price and what was paid. Core p.242: a speculative lot has neither. }}
+	{{#if cargo}}
+	<ul class="plates play-only">
+		<li class="plate{{#unless system.tons}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.Tons'}}</span>{{#if system.tons}}<b>{{system.tons}}<span class="u">t</span></b>{{else}}<b class="none">&mdash;</b>{{/if}}</li>
+		{{#if cargo.destination}}
+		<li class="plate"><span class="lbl">{{localize 'MGT2.Items.Destination'}}</span><b class="word">{{#if cargo.destination.linked}}<a class="ref" data-action="openReference" data-uuid="{{cargo.destination.uuid}}">{{cargo.destination.name}}</a>{{else}}{{cargo.destination.name}}{{/if}}</b></li>
+		{{/if}}
+		{{#if cargo.due}}
+		<li class="plate{{#if cargo.late}} harm{{/if}}"><span class="lbl">{{localize 'MGT2.Items.DueDay'}}</span><b>{{system.dueDay}}</b><span class="psub">{{localize 'MGT2.Actor.world.CampaignDay'}} {{cargo.day}}</span></li>
+		{{/if}}
+		{{#if cargo.fare}}
+		<li class="plate"><span class="lbl">{{localize 'MGT2.Items.FarePerTon'}}</span><b><span class="u">Cr</span>{{credits system.farePerTon}}</b></li>
+		{{/if}}
+		{{#if cargo.price}}
+		<li class="plate"><span class="lbl">{{localize 'MGT2.Items.BasePrice'}}</span><b><span class="u">Cr</span>{{credits system.basePrice}}</b></li>
+		{{/if}}
+		{{#if cargo.paid}}
+		<li class="plate"><span class="lbl">{{localize 'MGT2.Items.PurchasePct'}}</span><b>{{system.purchasePct}}<span class="u">%</span></b></li>
+		{{/if}}
+	</ul>
+	{{#if cargo.hold}}{{> "systems/mgt2/templates/chat/parts/hold.html" hold=cargo.hold}}{{/if}}
+	{{/if}}
+
+	{{! A booking is a berth class, not tonnage: who travels, where to, the rooms they take aboard, and
+	    the baggage the ship carries for them. }}
+	{{#if passage}}
+	<ul class="plates play-only">
+		<li class="plate{{#unless system.count}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.Passengers'}}</span>{{#if system.count}}<b>{{system.count}}</b>{{else}}<b class="none">&mdash;</b>{{/if}}</li>
+		<li class="plate{{#unless passage.destination}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Items.Destination'}}</span>{{#if passage.destination}}<b class="word">{{#if passage.destination.linked}}<a class="ref" data-action="openReference" data-uuid="{{passage.destination.uuid}}">{{passage.destination.name}}</a>{{else}}{{passage.destination.name}}{{/if}}</b>{{else}}<b class="none">&mdash;</b>{{/if}}</li>
+		{{#if system.lowBerth}}
+		<li class="plate"><span class="lbl">{{localize 'MGT2.Voyage.LowBerths'}}</span><b>{{system.count}}</b></li>
+		{{else}}
+		<li class="plate{{#unless system.staterooms}} off{{/unless}}"><span class="lbl">{{localize 'MGT2.Voyage.Staterooms'}}</span>{{#if system.staterooms}}<b>{{passage.staterooms}}</b>{{else}}<b class="none">&mdash;</b>{{/if}}</li>
+		{{/if}}
+		<li class="plate"><span class="lbl">{{localize 'MGT2.Items.Baggage'}}</span><b>{{credits system.baggage}}<span class="u">{{unitlabels.weight}}</span></b></li>
+	</ul>
+	{{#if passage.hold}}{{> "systems/mgt2/templates/chat/parts/hold.html" hold=passage.hold}}{{/if}}
+	{{/if}}
+
 	{{#if (eq item.type "armor")}}
 	<div class="guard play-only">
 		<div class="shield"><svg viewBox="0 0 54 62" aria-hidden="true"><path d="M27 3 L50 11 V30 C50 45 40 54 27 59 C14 54 4 45 4 30 V11 Z"/></svg><b>{{system.protection}}</b></div>
@@ -110,6 +173,63 @@
 		<b>{{processing.used}}<span class="u">/ {{processing.cap}}</span></b>
 		{{#if processing.cells}}<span class="cells">{{#each processing.cells}}<i{{#if this}} class="on"{{/if}}></i>{{/each}}</span>
 		{{else}}<span class="bar"><i style="width: {{processing.fill}}%"></i></span>{{/if}}
+	</div>
+	{{/if}}
+
+	{{! A ship component's figures as plates, each with the arm and count behind it: the parts list's
+	    vocabulary for the same row. }}
+	{{#if component}}
+	<div class="plates play-only">
+		{{#each component.plates as |plate|}}
+		<div class="plate{{#if plate.off}} off{{/if}}{{#if plate.tone}} {{plate.tone}}{{/if}}" data-plate="{{plate.key}}">
+			<span class="lbl">{{plate.label}}</span><b>{{#if plate.off}}&mdash;{{else}}{{{plate.value}}}{{/if}}</b>
+			{{#if (and plate.how (not plate.off))}}<span class="how">{{plate.how}}</span>{{/if}}
+		</div>
+		{{/each}}
+	</div>
+	{{/if}}
+
+	{{! A program's cells are the ones it fills on its host's Processing gauge, so it reads as one. }}
+	{{#if bandwidth}}
+	<div class="gauge play-only"{{#if bandwidth.downgraded}} data-tooltip="{{localize 'MGT2.Items.SoftwareDowngraded'}}"{{/if}}>
+		<span class="lbl">{{localize 'MGT2.Items.Bandwidth'}}</span>
+		<b>{{bandwidth.run}}{{#if bandwidth.downgraded}}<span class="u">/ {{bandwidth.rated}}</span>{{/if}}{{#if bandwidth.blocked}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.SoftwareBlocked'}}"></i>{{/if}}</b>
+		{{#if bandwidth.cells}}<span class="cells">{{#each bandwidth.cells}}<i{{#if this}} class="on"{{/if}}></i>{{/each}}</span>
+		{{else if bandwidth.rated}}<span class="bar"><i style="width: {{bandwidth.fill}}%"></i></span>{{/if}}
+	</div>
+	{{/if}}
+
+	{{#if (or component.pills.critical component.pills.hardened)}}
+	<div class="pills play-only">
+		{{#if component.pills.critical}}<span class="pill danger">{{localize 'MGT2.Items.Critical'}} &minus;{{component.pills.critical.dm}}<span class="sev">{{#each component.pills.critical.rungs}}<i{{#if this}} class="on"{{/if}}></i>{{/each}}</span></span>{{/if}}
+		{{#if component.pills.hardened}}<span class="pill" data-tooltip="{{localize 'MGT2.Items.Hardened'}}">{{localize 'MGT2.FleetTraits.hardened'}}</span>{{/if}}
+	</div>
+	{{/if}}
+
+	{{! A record's service: the rank and its title, the terms and their marks, the assignment and its
+	    two thresholds. Entry and exit are pills in the masthead. }}
+	{{#if serviceCard}}
+	<div class="plates service play-only">
+		<div class="plate">
+			<span class="lbl">{{localize 'MGT2.Items.Rank'}}</span>
+			<span class="pv"><b>{{serviceCard.rank}}</b>{{#if serviceCard.title}}<span class="on">{{serviceCard.title}}</span>{{/if}}</span>
+			{{#if serviceCard.ladder}}<span class="note">{{serviceCard.ladder}}</span>{{/if}}
+			{{#if serviceCard.enlisted}}<span class="note">{{serviceCard.enlisted}}</span>{{/if}}
+		</div>
+		<div class="plate">
+			<span class="lbl">{{localize 'MGT2.Items.Terms'}}</span>
+			<b>{{serviceCard.terms}}</b>
+			{{#if serviceCard.marks.length}}
+			<span class="tmk">{{#each serviceCard.marks as |mark|}}<span class="tp {{mark.tone}}">{{mark.term}}{{> systems/mgt2/templates/items/parts/mark.html tone=mark.tone}}</span>{{/each}}</span>
+			{{/if}}
+		</div>
+		<div class="plate">
+			<span class="lbl">{{localize 'MGT2.Items.Assignment'}}</span>
+			<b class="word">{{#if serviceCard.assignment}}{{serviceCard.assignment}}{{else}}&mdash;{{/if}}</b>
+			{{#if (or serviceCard.survival serviceCard.advancement)}}
+			<span class="note">{{#if serviceCard.survival}}{{localize 'MGT2.Chargen.Template.Survival'}} {{serviceCard.survival}}{{/if}}{{#if (and serviceCard.survival serviceCard.advancement)}} &middot; {{/if}}{{#if serviceCard.advancement}}{{localize 'MGT2.Chargen.Template.Advancement'}} {{serviceCard.advancement}}{{/if}}</span>
+			{{/if}}
+		</div>
 	</div>
 	{{/if}}
 
@@ -166,15 +286,6 @@
 		<li><span class="lbl">{{localize 'MGT2.Items.Specialised'}}</span><b class="word">{{system.specialised.software}} {{showDM system.specialised.bonus}}</b></li>
 		{{/if}}
 
-		{{#if (eq item.type "career")}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Assignment'}}</span><b class="word">{{#if system.assignment}}{{system.assignment}}{{else}}—{{/if}}</b></li>
-		<li><span class="lbl">{{localize 'MGT2.Items.Terms'}}</span><b>{{system.terms}}</b></li>
-		<li><span class="lbl">{{localize 'MGT2.Items.Rank'}}</span><b>{{system.rank}}</b></li>
-		{{#unless system.isTemplate}}
-		<li><span class="lbl">{{localize 'MGT2.Items.EntryMode'}}</span><b class="word">{{localize (lookup config.CareerEntryModes system.entryMode)}}</b></li>
-		{{/unless}}
-		{{/if}}
-
 		{{#if (eq item.type "talent")}}
 		{{#if system.psionic.reach}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Reach'}}</span><b class="word">{{localize (concat "MGT2.PsionicReach." system.psionic.reach)}}</b></li>
@@ -185,112 +296,22 @@
 		{{/if}}
 		{{/if}}
 
-		{{#if (eq item.type "equipment")}}
-		{{#if system.augment.improvement}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Improvement'}}</span><b class="word">{{system.augment.improvement}}</b></li>
-		{{/if}}
-		{{#if system.augment.skill.name}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Skill'}}</span><b class="word">{{system.augment.skill.name}} {{showDM system.augment.skill.value}}</b></li>
-		{{/if}}
-		{{#if system.augment.protection}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Protection'}}</span><b>{{system.augment.protection}}</b></li>
-		{{/if}}
-		{{/if}}
-
-		{{#if (eq system.subType "software")}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Bandwidth'}}</span><b>{{system.software.bandwidth}}</b></li>
-		{{#if system.software.downgraded}}
-		<li><span class="lbl">{{localize 'MGT2.Items.RunAt'}}</span><b>{{system.software.bandwidthRun}}</b></li>
-		{{/if}}
-		{{#if system.software.effect}}
-		<li><span class="lbl">{{localize 'MGT2.Items.SoftwareEffect'}}</span><b class="word">{{system.software.effect}}</b></li>
-		{{/if}}
-		{{/if}}
-
-		{{#if (eq item.type "cargo")}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Tons'}}</span><b>{{system.tons}}</b></li>
-		{{! Core p.242: a speculative lot is bought with no destination and no deadline at all, so
-		    both rows go quiet rather than absent — the lot is still a lot. }}
-		<li{{#unless destination}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Destination'}}</span><b class="word">{{#if destination}}{{destination}}{{else}}&mdash;{{/if}}</b></li>
-		{{#if system.illegal}}
-		<li><span class="lbl">{{localize 'MGT2.Items.IllegalEverywhere'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
-		{{/if}}
-		<li{{#unless system.dueDay}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.DueDay'}}</span><b>{{#if system.dueDay}}{{system.dueDay}}{{else}}&mdash;{{/if}}</b></li>
-		<li{{#unless system.farePerTon}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.FarePerTon'}}</span><b>{{system.farePerTon}}<span class="u">Cr</span></b></li>
-		<li{{#unless system.basePrice}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.BasePrice'}}</span><b>{{system.basePrice}}<span class="u">Cr</span></b></li>
-		<li{{#unless system.purchasePct}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.PurchasePct'}}</span><b>{{#if system.purchasePct}}{{system.purchasePct}}<span class="u">%</span>{{else}}&mdash;{{/if}}</b></li>
-		<li{{#unless system.legality}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.BannedAt'}}</span><b>{{#if system.legality}}{{system.legality}}{{else}}&mdash;{{/if}}</b></li>
-		{{/if}}
-
-		{{#if (eq item.type "passage")}}
-		<li><span class="lbl">{{localize 'MGT2.Items.PassageClass'}}</span><b class="word">{{localize (lookup (lookup config.PassageClasses system.grade) 'label')}}</b></li>
-		<li><span class="lbl">{{localize 'MGT2.Items.Passengers'}}</span><b>{{system.count}}</b></li>
-		<li{{#unless destination}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Destination'}}</span><b class="word">{{#if destination}}{{destination}}{{else}}&mdash;{{/if}}</b></li>
-		{{! Both derive from the class and neither is stored: a working passage is carried for free
-		    and its fare is nothing, however much the per-head figure beside it says. }}
-		<li{{#unless system.fare}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Fare'}}</span><b>{{system.fare}}<span class="u">Cr</span></b></li>
-		<li><span class="lbl">{{localize 'MGT2.Items.Baggage'}}</span><b>{{system.baggage}}<span class="u">{{unitlabels.weight}}</span></b></li>
-		{{#if system.lowBerth}}
-		<li><span class="lbl">{{localize 'MGT2.Items.LowBerth'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
-		{{/if}}
-		{{/if}}
-
-		{{#if (eq item.type "component")}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Category'}}</span><b class="word">{{localize (lookup config.ComponentCategories system.category)}}</b></li>
-		<li><span class="lbl">{{localize 'MGT2.Items.TL'}}</span><b>{{system.tl}}</b></li>
-		{{! The tonnage triple: one row per arm that priced this part, and the hull's own answer
-		    beside them where the part is fitted to a ship rather than sitting in a compendium. }}
-		<li{{#unless system.tonnage.tons}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Tons'}}</span><b>{{system.tonnage.tons}}</b></li>
-		{{#if system.tonnage.percent}}
-		<li><span class="lbl">{{localize 'MGT2.Items.PercentOfHull'}}</span><b>{{system.tonnage.percent}}<span class="u">%</span></b></li>
-		{{/if}}
-		{{#if system.tonnage.minimum}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Minimum'}}</span><b>{{system.tonnage.minimum}}</b></li>
-		{{/if}}
-		{{#if componentTons}}
-		<li><span class="lbl">{{localize 'MGT2.Items.OnThisHull'}}</span><b>{{componentTons}}</b></li>
-		{{/if}}
-		<li{{#unless system.cost}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.CostMCr'}}</span><b>{{system.cost}}</b></li>
-		<li{{#unless system.power}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Power'}}</span><b>{{system.power}}</b></li>
-		{{#if system.rating}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Rating'}}</span><b>{{system.rating}}</b></li>
-		{{/if}}
-		{{#if (eq system.category "software")}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Bandwidth'}}</span><b>{{system.bandwidth}}</b></li>
-		{{#if system.downgraded}}
-		<li><span class="lbl">{{localize 'MGT2.Items.RunAt'}}</span><b>{{system.bandwidthRun}}</b></li>
-		{{/if}}
-		{{/if}}
-		<li{{#unless system.dm}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Critical'}}</span><b>{{#if system.dm}}&minus;{{system.dm}}{{else}}&mdash;{{/if}}</b></li>
+		{{#if host}}
+		<li{{#unless host.name}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Computer'}}</span><b class="word">{{#if host.name}}{{host.name}}{{#if host.blocked}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.SoftwareBlocked'}}"></i>{{/if}}{{else}}&mdash;{{/if}}</b></li>
 		{{/if}}
 
 		{{#if (eq item.type "drug")}}
 		<li{{#unless system.dose}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Dose'}}</span><b class="word">{{#if system.dose}}{{system.dose}}{{else}}&mdash;{{/if}}</b></li>
-		{{! The three moments a duration cannot hold on its own — an onset before anything happens, a
-		    run, and what it leaves behind. Empty is a drug the book states none for, not one nobody
-		    has typed: Fast Drug and anti-rad are no kind of clock. }}
-		<li{{#unless system.onset}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Onset'}}</span><b class="word">{{#if system.onset}}{{system.onset}}{{else}}{{localize 'MGT2.Items.Immediate'}}{{/if}}</b></li>
-		<li{{#unless system.duration}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Duration'}}</span><b class="word">{{#if system.duration}}{{system.duration}}{{else}}{{localize 'MGT2.Items.NotAClock'}}{{/if}}</b></li>
-		<li{{#unless system.afterEffect}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.AfterEffect'}}</span><b class="word">{{#if system.afterEffect}}{{system.afterEffect}}{{else}}&mdash;{{/if}}</b></li>
-		{{#if system.addiction.dosesBefore}}
-		<li><span class="lbl">{{localize 'MGT2.Items.DosesBefore'}}</span><b>{{system.addiction.dosesBefore}}</b></li>
-		{{/if}}
-		{{#if doses}}
-		<li><span class="lbl">{{localize 'MGT2.Doses.Counter'}}</span><b>{{doses}}</b></li>
+		{{! Empty is the referee not having switched the rule on (CSC p.97), so the three read together. }}
+		{{#if addiction}}
+		<li{{#if (eq addiction.before null)}} class="off"{{/if}}><span class="lbl">{{localize 'MGT2.Items.DosesBefore'}}</span><b>{{#if (eq addiction.before null)}}&mdash;{{else}}{{addiction.before}}{{/if}}</b></li>
+		<li{{#unless addiction.interval}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.CheckInterval'}}</span><b class="word">{{#if addiction.interval}}{{addiction.interval}}{{else}}&mdash;{{/if}}</b></li>
+		<li{{#if (eq addiction.craving null)}} class="off"{{/if}}><span class="lbl">{{localize 'MGT2.Items.CravingDM'}}</span><b>{{#if (eq addiction.craving null)}}&mdash;{{else}}{{showDM addiction.craving}}{{/if}}</b></li>
 		{{/if}}
 		{{/if}}
 
 		{{#if (eq item.type "ammunition")}}
 		<li{{#unless system.weaponType}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Fits'}}</span><b class="word">{{#if system.weaponType}}{{system.weaponType}}{{else}}&mdash;{{/if}}</b></li>
-		{{! Every override is nullable and empty means the weapon's own, which is the common case:
-		    a standard round overrides nothing at all. }}
-		<li{{#unless system.damage}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Damage'}}</span><b class="word">{{#if system.damage}}{{system.damage}}{{else}}{{localize 'MGT2.Items.WeaponsOwn'}}{{/if}}</b></li>
-		<li{{#unless (or system.range system.rangePercent)}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Range'}}</span><b class="word">{{#if system.range}}{{system.range}}{{else if system.rangePercent}}{{showDM system.rangePercent}}%{{else}}{{localize 'MGT2.Items.WeaponsOwn'}}{{/if}}</b></li>
-		<li{{#unless system.magazine}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Magazine'}}</span><b class="word">{{#if system.magazine}}{{system.magazine}}{{else}}{{localize 'MGT2.Items.WeaponsOwn'}}{{/if}}</b></li>
-		<li{{#unless (or system.magazineCost system.magazineCostMultiple)}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.MagazineCost'}}</span><b class="word">{{#if system.magazineCost}}{{system.magazineCost}}<span class="u">Cr</span>{{else if system.magazineCostMultiple}}&times;{{system.magazineCostMultiple}}{{else}}{{localize 'MGT2.Items.WeaponsOwn'}}{{/if}}</b></li>
-		{{#if system.replaceTraits}}
-		<li><span class="lbl">{{localize 'MGT2.Items.ReplaceTraits'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
-		{{/if}}
 		{{/if}}
 
 		{{! `supply` is the honest guard for the rest of the dissolved Carried block: it is true for
@@ -467,6 +488,10 @@
 			<span class="lbl">{{localize 'MGT2.Items.EntryMode'}}</span>
 			{{formInput systemFields.entryMode name="system.entryMode" value=system.entryMode localize=true classes="f"}}
 		</label>
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.ExitMode'}}</span>
+			{{formInput systemFields.exitMode name="system.exitMode" value=system.exitMode localize=true classes="f"}}
+		</label>
 		{{/unless}}
 		{{/if}}
 
@@ -494,10 +519,7 @@
 		{{/if}}
 
 		{{#if (eq item.type "equipment")}}
-		<label class="wide">
-			<span class="lbl">{{localize 'MGT2.Items.Improvement'}}</span>
-			{{formInput systemFields.augment.fields.improvement name="system.augment.improvement" value=system.augment.improvement classes="f"}}
-		</label>
+		<h4 class="gsub">{{localize 'MGT2.Items.Group.Computer'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Processing'}}</span>
 			{{formInput systemFields.processing name="system.processing" value=system.processing classes="f num"}}
@@ -505,24 +527,8 @@
 		{{> systems/mgt2/templates/items/parts/specialised.html f=systemFields.specialised v=system.specialised path="system.specialised"}}
 		{{/if}}
 
-		{{! Core p.106's IMPROVEMENTS cell in the three kinds the system can compute. The printed cell
-		    above stays whatever the book prints; these are what a rule can read. }}
-		{{#if (eq system.subType "augment")}}
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.Skill'}}</span>
-			{{formInput systemFields.augment.fields.skill.fields.name name="system.augment.skill.name" value=system.augment.skill.name classes="f"}}
-		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.AugmentSkillDM'}}</span>
-			{{formInput systemFields.augment.fields.skill.fields.value name="system.augment.skill.value" value=system.augment.skill.value classes="f num"}}
-		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.Protection'}}</span>
-			{{formInput systemFields.augment.fields.protection name="system.augment.protection" value=system.augment.protection classes="f num"}}
-		</label>
-		{{/if}}
-
 		{{#if (eq system.subType "software")}}
+		<h4 class="gsub">{{localize 'MGT2.ItemSubType.software'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Bandwidth'}}</span>
 			{{formInput systemFields.software.fields.bandwidth name="system.software.bandwidth" value=system.software.bandwidth classes="f num"}}
@@ -534,23 +540,32 @@
 			<span class="lbl">{{localize 'MGT2.Items.RunAt'}}</span>
 			{{formInput systemFields.software.fields.runAt name="system.software.runAt" value=source.software.runAt classes="f num" placeholder=system.software.bandwidth}}
 		</label>
-		<label class="wide">
-			<span class="lbl">{{localize 'MGT2.Items.SoftwareEffect'}}</span>
-			{{formInput systemFields.software.fields.effect name="system.software.effect" value=system.software.effect classes="f"}}
-		</label>
 		{{/if}}
 
 		{{#if (eq item.type "cargo")}}
+		<h4 class="gsub">{{localize 'MGT2.Items.Group.General'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Tons'}}</span>
 			{{formInput systemFields.tons name="system.tons" value=system.tons classes="f num"}}
 		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.BannedAt'}}</span>
+			{{formInput systemFields.legality name="system.legality" value=source.legality classes="f num" placeholder=(localize 'MGT2.Items.Unrestricted')}}
+		</label>
+		{{! Two different bans, and the pair has to stay legible: a Law Level is what a WORLD forbids,
+		    the flag is Core p.243's "illegal throughout the Imperium", which prints no level at all. }}
+		<label class="check wide">
+			{{formInput systemFields.illegal name="system.illegal" value=system.illegal}}
+			<span>{{localize 'MGT2.Items.IllegalEverywhere'}}</span>
+		</label>
+		{{! Typing a destination is what turns a lot into freight, so both shapes stay editable. }}
+		<h4 class="gsub">{{localize 'MGT2.Trade.Freight'}}</h4>
 		{{! The pair degrades: the uuid where the world is an Actor, the bare name where it is not. }}
 		<label class="wide">
 			<span class="lbl">{{localize 'MGT2.Items.DestinationWorld'}}</span>
 			{{formInput systemFields.destination.fields.world name="system.destination.world" value=source.destination.world}}
 		</label>
-		<label>
+		<label class="wide">
 			<span class="lbl">{{localize 'MGT2.Items.DestinationName'}}</span>
 			{{formInput systemFields.destination.fields.name name="system.destination.name" value=system.destination.name classes="f"}}
 		</label>
@@ -562,6 +577,7 @@
 			<span class="lbl">{{localize 'MGT2.Items.FarePerTon'}}</span>
 			{{formInput systemFields.farePerTon name="system.farePerTon" value=system.farePerTon classes="f num"}}
 		</label>
+		<h4 class="gsub">{{localize 'MGT2.Trade.Speculative'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.BasePrice'}}</span>
 			{{formInput systemFields.basePrice name="system.basePrice" value=system.basePrice classes="f num"}}
@@ -570,19 +586,10 @@
 			<span class="lbl">{{localize 'MGT2.Items.PurchasePct'}}</span>
 			{{formInput systemFields.purchasePct name="system.purchasePct" value=source.purchasePct classes="f num"}}
 		</label>
-		{{! Two different bans, and the pair has to stay legible: a Law Level is what a WORLD forbids,
-		    the flag is Core p.243's "illegal throughout the Imperium", which prints no level at all. }}
-		<label class="check">
-			{{formInput systemFields.illegal name="system.illegal" value=system.illegal}}
-			<span>{{localize 'MGT2.Items.IllegalEverywhere'}}</span>
-		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.BannedAt'}}</span>
-			{{formInput systemFields.legality name="system.legality" value=source.legality classes="f num" placeholder=(localize 'MGT2.Items.Unrestricted')}}
-		</label>
 		{{/if}}
 
 		{{#if (eq item.type "passage")}}
+		<h4 class="gsub">{{localize 'MGT2.Trade.Passengers'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.PassageClass'}}</span>
 			<select class="f" name="system.grade">
@@ -594,21 +601,23 @@
 			<span class="lbl">{{localize 'MGT2.Items.Passengers'}}</span>
 			{{formInput systemFields.count name="system.count" value=system.count classes="f num"}}
 		</label>
-		<label class="wide">
-			<span class="lbl">{{localize 'MGT2.Items.DestinationWorld'}}</span>
-			{{formInput systemFields.destination.fields.world name="system.destination.world" value=source.destination.world}}
-		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.DestinationName'}}</span>
-			{{formInput systemFields.destination.fields.name name="system.destination.name" value=system.destination.name classes="f"}}
-		</label>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.FarePerHead'}}</span>
 			{{formInput systemFields.farePerHead name="system.farePerHead" value=system.farePerHead classes="f num"}}
 		</label>
+		<h4 class="gsub">{{localize 'MGT2.Items.Destination'}}</h4>
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.DestinationWorld'}}</span>
+			{{formInput systemFields.destination.fields.world name="system.destination.world" value=source.destination.world}}
+		</label>
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.DestinationName'}}</span>
+			{{formInput systemFields.destination.fields.name name="system.destination.name" value=system.destination.name classes="f"}}
+		</label>
 		{{/if}}
 
 		{{#if (eq item.type "component")}}
+		<h4 class="gsub">{{localize 'MGT2.Items.Group.General'}}</h4>
 		<label class="wide">
 			<span class="lbl">{{localize 'MGT2.Items.Category'}}</span>
 			<select class="f" name="system.category">
@@ -622,6 +631,20 @@
 			{{formInput systemFields.tl name="system.tl" value=system.tl classes="f num"}}
 		</label>
 		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Qty'}}</span>
+			{{formInput systemFields.quantity name="system.quantity" value=system.quantity classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize component.ratingLabel}}</span>
+			{{formInput systemFields.rating name="system.rating" value=system.rating classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.CostMCr'}}</span>
+			{{formInput systemFields.cost name="system.cost" value=system.cost classes="f num"}}
+		</label>
+		{{#unless (eq system.category "software")}}
+		<h4 class="gsub">{{localize 'MGT2.Design.Checks.tonnage'}}</h4>
+		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Tons'}}</span>
 			{{formInput systemFields.tonnage.fields.tons name="system.tonnage.tons" value=system.tonnage.tons classes="f num"}}
 		</label>
@@ -633,10 +656,7 @@
 			<span class="lbl">{{localize 'MGT2.Items.Minimum'}}</span>
 			{{formInput systemFields.tonnage.fields.minimum name="system.tonnage.minimum" value=system.tonnage.minimum classes="f num"}}
 		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.CostMCr'}}</span>
-			{{formInput systemFields.cost name="system.cost" value=system.cost classes="f num"}}
-		</label>
+		<h4 class="gsub">{{localize 'MGT2.Actor.spacecraft.Power'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Power'}}</span>
 			{{formInput systemFields.power name="system.power" value=system.power classes="f num"}}
@@ -650,13 +670,11 @@
 			{{formInput systemFields.hardened name="system.hardened" value=system.hardened}}
 			<span>{{localize 'MGT2.Items.Hardened'}}</span>
 		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.Rating'}}</span>
-			{{formInput systemFields.rating name="system.rating" value=system.rating classes="f num"}}
-		</label>
+		{{/unless}}
 		{{! What this row spends of the ship's Processing, and Core p.110's downgrade beside it — the
 		    `subType` gate above for the personal carrier, on the field a component discriminates by. }}
 		{{#if (eq system.category "software")}}
+		<h4 class="gsub">{{localize 'MGT2.ComponentCategories.software'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Bandwidth'}}</span>
 			{{formInput systemFields.bandwidth name="system.bandwidth" value=system.bandwidth classes="f num"}}
@@ -666,17 +684,19 @@
 			{{formInput systemFields.runAt name="system.runAt" value=source.runAt classes="f num" placeholder=system.bandwidth}}
 		</label>
 		{{/if}}
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.Qty'}}</span>
-			{{formInput systemFields.quantity name="system.quantity" value=system.quantity classes="f num"}}
-		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.Critical'}}</span>
-			{{formInput systemFields.dm name="system.dm" value=system.dm classes="f num"}}
-		</label>
+		{{! A grade from 0 to 6 bounded by the control, with no schema bound: a value stored outside it
+		    checks no rung and rides a hidden one, so it stands until a rung is clicked. }}
+		<h4 class="gsub">{{localize 'MGT2.Items.Critical'}}</h4>
+		<div class="segcell">
+			<span class="seg num" role="radiogroup" aria-label="{{localize 'MGT2.Items.Critical'}}">
+				{{#each component.grades as |grade|}}<label{{#unless grade.n}} class="off"{{/unless}}><input type="radio" name="system.dm" value="{{grade.n}}" data-dtype="Number"{{#if grade.checked}} checked{{/if}} />{{grade.n}}</label>{{/each}}
+				{{#if (ne component.stray null)}}<input type="radio" name="system.dm" value="{{component.stray}}" data-dtype="Number" checked hidden />{{/if}}
+			</span>
+		</div>
 		{{/if}}
 
 		{{#if (eq item.type "drug")}}
+		<h4 class="gsub">{{localize 'MGT2.Items.Dose'}}</h4>
 		<label class="wide">
 			<span class="lbl">{{localize 'MGT2.Items.Dose'}}</span>
 			{{formInput systemFields.dose name="system.dose" value=system.dose classes="f"}}
@@ -695,12 +715,15 @@
 		</label>
 		{{! Which pipeline the expiry goes down: a condition is a state, 2D damage is the damage
 		    pipeline, and most drugs leave neither. }}
-		<label>
+		<div class="segcell">
 			<span class="lbl">{{localize 'MGT2.Items.AfterKind'}}</span>
-			<select class="f" name="system.afterKind">
-				{{selectOptions config.DrugAfterKinds selected=system.afterKind localize=true}}
-			</select>
-		</label>
+			<span class="seg fill" role="radiogroup" aria-label="{{localize 'MGT2.Items.AfterKind'}}">
+				{{#each config.DrugAfterKinds as |label key|}}
+				<label><input type="radio" name="system.afterKind" value="{{key}}"{{#if (eq key ../system.afterKind)}} checked{{/if}} /><span>{{localize label}}</span></label>
+				{{/each}}
+			</span>
+		</div>
+		<h4 class="gsub">{{localize 'MGT2.Items.Group.Addiction'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.DosesBefore'}}</span>
 			{{formInput systemFields.addiction.fields.dosesBefore name="system.addiction.dosesBefore" value=source.addiction.dosesBefore classes="f num"}}
@@ -716,10 +739,7 @@
 		{{/if}}
 
 		{{#if (eq item.type "ammunition")}}
-		<label class="wide">
-			<span class="lbl">{{localize 'MGT2.Items.Fits'}}</span>
-			{{formInput systemFields.weaponType name="system.weaponType" value=system.weaponType classes="f"}}
-		</label>
+		<h4 class="gsub">{{localize 'MGT2.Items.Group.Ammunition'}}</h4>
 		{{! Blank is a real answer on every override and means the weapon's own value stands. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Damage'}}</span>
@@ -745,12 +765,6 @@
 			<span class="lbl">{{localize 'MGT2.Items.MagazineCostMultiple'}}</span>
 			{{formInput systemFields.magazineCostMultiple name="system.magazineCostMultiple" value=source.magazineCostMultiple classes="f num" placeholder=(localize 'MGT2.Items.WeaponsOwn')}}
 		</label>
-		{{! CSC p.179-182: a few rounds REPLACE the weapon's trait list instead of adding to it, and
-		    the list itself cannot say which. }}
-		<label class="check">
-			{{formInput systemFields.replaceTraits name="system.replaceTraits" value=system.replaceTraits}}
-			<span>{{localize 'MGT2.Items.ReplaceTraits'}}</span>
-		</label>
 		{{/if}}
 
 		{{! TL, legality and weightless describe what the item IS, so they stay here rather than
@@ -758,7 +772,13 @@
 		    guard because it is true for exactly the types built on the shared physical template —
 		    `component` and `cargo` each declare a field of the same name meaning something else. }}
 		{{#if supply}}
-		{{#if (or (eq item.type "weapon") (eq item.type "armor"))}}<h4 class="gsub">{{localize 'MGT2.Items.Group.General'}}</h4>{{/if}}
+		{{#if (or (eq item.type "weapon") (eq item.type "armor") (eq item.type "equipment") (eq item.type "item") (eq item.type "ammunition") (eq item.type "drug"))}}<h4 class="gsub">{{localize 'MGT2.Items.Group.General'}}</h4>{{/if}}
+		{{#if (eq item.type "ammunition")}}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.Fits'}}</span>
+			{{formInput systemFields.weaponType name="system.weaponType" value=system.weaponType classes="f"}}
+		</label>
+		{{/if}}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.TL'}}</span>
 			<select class="f" name="system.tl">{{selectOptions config.TL selected=system.tl localize=true}}</select>

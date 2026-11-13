@@ -1,0 +1,22 @@
+<div class="block{{#if robot.vacant.skills}} edit-only{{/if}}">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.Skills'}}</h3>
+		<span class="count">{{#if skills.length}}{{skills.length}}{{/if}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.SkillHint' n=robot.brain.skillCap}}"></i>
+		<a class="add edit-only" data-action="itemCreate" data-type-item="talent" data-subtype="skill" data-create-name="{{localize 'MGT2.Actor.NewSkill'}}" data-tooltip="{{localize 'MGT2.Actor.AddSkill'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	{{#if skills.length}}
+	<ul class="skills">
+		{{#each skills as |skill|}}
+		<li class="drag-item-list" data-item-id="{{skill._id}}">
+			<button type="button" class="roll" data-action="roll" data-roll="skill" data-roll-skill="{{skill._id}}">{{skill.rollName}}</button>
+			<span class="lvl{{#unless skill.system.level}} zero{{/unless}}"><span class="pips" aria-hidden="true">{{#each skill.pips as |on|}}<i class="{{#if on}}on{{/if}}"></i>{{/each}}</span>{{skill.system.level}}</span>
+			<span class="acts edit-only">
+				<a data-action="itemEdit" data-tooltip="{{localize 'MGT2.Actor.EditSkill'}}"><i class="fas fa-edit"></i></a>
+				<a data-action="itemDelete" data-tooltip="{{localize 'MGT2.Actor.DeleteSkill'}}"><i class="fas fa-trash"></i></a>
+			</span>
+		</li>
+		{{/each}}
+	</ul>
+	{{/if}}
+</div>

@@ -269,7 +269,7 @@ export const Chargen = {
                     assignment: system.assignment, rank: system.rank, ladder: system.ladder,
                     from: age, to: age + years, years,
                     survived: entry.survived, ejected: entry.ejected,
-                    kind: entry.kind, note: entry.note,
+                    kind: entry.kind, note: entry.note, outcomes: [...(entry.outcomes ?? [])], closed: entry.closed,
                     // The track as of THIS term: every adjustment carries its term, so a past term
                     // reads by unwinding the ones that came after it.
                     track: trackAt(system.track, index),
@@ -288,6 +288,37 @@ export const Chargen = {
             }
         }
         return rows;
+    },
+
+    /**
+     * A timeline row's lines as the creation screen prints them; a line that is a dated event carries its age.
+     * @returns {{tone: string, mark: string, text: string, age: number|null}[]}
+     */
+    termLines(row, frame) {
+        const lines = [];
+        const say = (tone, mark, key) => lines.push({ tone, mark, text: game.i18n.localize(key), age: null });
+        if ( row.survived === true ) say("good", "✓", "MGT2.Chargen.Screen.Survived");
+        if ( row.survived === false ) say("bad", "✗", "MGT2.Chargen.Screen.SurvivalFailed");
+        // Ejection is a FIELD and never a phrase: a note reading "not ejected" would fool
+        // any text match, which is why the row carries the boolean and this reads it.
+        if ( row.ejected ) say("bad", "✗", "MGT2.Chargen.Screen.Ejected");
+        // The term KIND is the frame's own vocabulary, so the label comes off the frame.
+        const kind = frame?.termKinds?.find(entry => entry.key === row.kind);
+        if ( row.kind ) lines.push({ tone: "", mark: "·", text: kind?.label || row.kind, age: null });
+        // Each step appends to one note field, joined on " · "; the cell is a list of them.
+        const notes = row.note ? row.note.split(" · ").filter(part => part.trim()) : [];
+        // An event writes its lines into the note as it fires, so a copy whose every line is
+        // already printed would print them twice: its age goes on the first of those lines instead.
+        const ages = new Map();
+        const extra = [];
+        for ( const event of row.events ) {
+            const age = Number.isFinite(event.age) ? event.age : null;
+            const parts = event.description.split(" · ").filter(part => part.trim());
+            if ( !parts.every(part => notes.includes(part)) ) extra.push({ tone: "", mark: "·", text: event.description, age });
+            else if ( (age !== null) && parts.length && !ages.has(parts[0]) ) ages.set(parts[0], age);
+        }
+        for ( const part of notes ) lines.push({ tone: "", mark: "·", text: part, age: ages.get(part) ?? null });
+        return lines.concat(extra);
     },
 
     /**

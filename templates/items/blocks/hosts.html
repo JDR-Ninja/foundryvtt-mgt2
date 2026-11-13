@@ -1,0 +1,36 @@
+{{! Each weapon of the owner this round is loaded in, and what the round makes of it: the rounds left,
+    then every value it changes, the weapon's own struck through. Play only; loading is the weapon's. }}
+{{#if hosts.length}}
+<div class="block play-only">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Items.LoadedIn'}}</h3>
+		<span class="count">{{hosts.length}}</span>
+	</div>
+	<ul class="hosts">
+		{{#each hosts as |host|}}
+		<li class="host" data-item-id="{{host.id}}">
+			<div class="hhead">
+				<a class="nm" data-action="nestedEdit">{{host.name}}</a>
+				{{#if host.ammo}}
+				<span class="ld">
+					<span class="lbl">{{localize 'MGT2.Items.Loaded'}}</span>
+					<b>{{host.ammo.value}}<span class="u">/ {{host.ammo.magazine}}</span></b>
+					{{#if host.ammo.pips}}<span class="pips">{{#each host.ammo.pips}}<i{{#if this}} class="on"{{/if}}></i>{{/each}}</span>
+					{{else}}<span class="bar"><i style="width: {{host.ammo.fill}}%"></i></span>{{/if}}
+				</span>
+				{{/if}}
+			</div>
+			{{#if host.rows.length}}
+			<ul class="swap">
+				{{#each host.rows as |row|}}
+				<li><span class="lbl">{{localize row.label}}</span><s>{{row.was}}</s><span class="to">&rarr;</span><b>{{row.now}}</b></li>
+				{{/each}}
+			</ul>
+			{{else}}
+			<p class="same">{{localize 'MGT2.Items.WeaponsOwn'}}</p>
+			{{/if}}
+		</li>
+		{{/each}}
+	</ul>
+</div>
+{{/if}}

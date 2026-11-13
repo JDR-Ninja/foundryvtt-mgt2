@@ -1,0 +1,5 @@
+{{! The shared code row: NAME(param, param), each beside its rule gloss in play mode. }}
+{{> systems/mgt2/templates/items/blocks/traits.html}}
+{{#if robot.statblock.traits.length}}
+<p class="hint">{{localize 'MGT2.Actor.robot.LocomotionTraits'}} {{#each robot.statblock.traits}}{{#unless @first}}, {{/unless}}{{this}}{{/each}}</p>
+{{/if}}

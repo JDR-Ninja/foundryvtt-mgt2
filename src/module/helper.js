@@ -30,6 +30,12 @@ export class MGT2Helper {
         return out;
     }
 
+    /** Rich text with neither words nor an image in it. */
+    static isBlankHtml(html) {
+        const text = String(html ?? "");
+        return !/<img\b/i.test(text) && !text.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+    }
+
     /** Substitute `{0}`, `{1}`… placeholders. The indexed form is persisted in chat message flags. */
     static format(template, ...values) {
         return values.reduce((text, value, i) => text.replaceAll(`{${i}}`, String(value)), template);

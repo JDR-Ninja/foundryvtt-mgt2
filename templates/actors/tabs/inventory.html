@@ -282,13 +282,14 @@
 			</div>
 		</div>
 
-		{{#if (and containerView.system.locked (not isGM))}}
-		<p class="mgt2-label"><i class="fa-solid fa-lock"></i> {{localize 'MGT2.Items.Locked'}}</p>
-		{{else}}
+		{{! A lock withholds the rows and never the mass: the box stands where they would, and the total
+		    stays. The referee reads every row, the lock marked. }}
 		<div class="block">
 			<div class="sect">
 				<h3>{{localize 'MGT2.Items.Items'}}</h3>
-				<span class="count">{{containerItems.length}}</span>
+				<span class="count">{{#unless containerHeld}}{{containerItems.length}}{{/unless}}</span>
+				{{#if (and isGM containerView.system.locked)}}<span class="lockpill shut"><i class="fa-solid fa-lock"></i><span>{{localize 'MGT2.Items.Locked'}}</span></span>{{/if}}
+				{{#unless containerHeld}}
 				{{! `data-store` puts the new row in the picker's container — created on hand it would
 				    vanish from the panel that made it. }}
 				<div class="acts">
@@ -297,6 +298,7 @@
 					<a data-action="itemCreate" data-store="true" data-type-item="equipment" data-create-name="{{localize 'MGT2.Actor.NewEquipment'}}" data-tooltip="{{localize 'MGT2.Actor.AddEquipment'}}"><i class="fa-solid fa-toolbox"></i></a>
 					<a data-action="itemCreate" data-store="true" data-type-item="item" data-create-name="{{localize 'MGT2.Actor.NewItem'}}" data-tooltip="{{localize 'MGT2.Actor.AddItem'}}"><i class="fa-solid fa-plus"></i></a>
 				</div>
+				{{/unless}}
 			</div>
 			{{#if containerItems.length}}
 			<table class="rows">
@@ -313,7 +315,7 @@
 					{{#each containerItems as |containerItem|}}
 					<tr class="drag-item-list" data-item-id="{{containerItem._id}}">
 						<td>{{containerItem.name}}</td>
-						{{#if ../containerShowAll}}<td class="c">{{containerItem.containerName}}</td>{{/if}}
+						{{#if ../containerShowAll}}<td class="c">{{containerItem.containerName}}{{#if containerItem.containerLocked}}<i class="fa-solid fa-lock locked" data-tooltip="{{localize 'MGT2.Items.Locked'}}"></i>{{/if}}</td>{{/if}}
 						<td class="c num">{{containerItem.system.quantity}}</td>
 						<td class="r num">{{containerItem.weight}}</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html unstore=true edit="MGT2.Actor.EditItem" del="MGT2.Actor.DeleteItem"}}
@@ -322,12 +324,20 @@
 				</tbody>
 			</table>
 			{{/if}}
+			{{#each withheldCases as |held|}}
+			<div class="withheld{{#if ../containerShowAll}} named{{/if}}">
+				<span class="ic"><i class="fa-solid fa-lock"></i></span>
+				<span class="lbl">{{#if ../containerShowAll}}<b>{{held.name}}</b>{{/if}}{{localize 'MGT2.Actor.stash.Withheld'}}</span>
+				{{#if (and ../containerShowAll held.mass)}}<span class="kg">{{held.mass}}<i> {{../settings.weightUnit}}</i></span>{{/if}}
+				{{#if held.said}}<p class="said">{{held.said}}</p>{{/if}}
+				<p class="why">{{localize 'MGT2.Errors.LockedContainer'}}</p>
+			</div>
+			{{/each}}
 		</div>
 		<div class="mgt2-encumbrance">
 			<span class="lbl">{{localize 'MGT2.Actor.TotalWeight'}}</span>
 			<span class="total">{{containerWeight}} {{settings.weightUnit}}</span>
 		</div>
-		{{/if}}
 	</div>
 
 	<div class="tab mgt2-panel{{#if tabs.inventory.finance.active}} active{{/if}}" data-group="inventory" data-tab="finance">

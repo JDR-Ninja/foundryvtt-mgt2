@@ -3,7 +3,7 @@
 <div class="hold{{#if hold.over}} over{{/if}}">
 	<div class="line">
 		<span>{{localize 'MGT2.Trade.Card.Hold' ship=hold.ship used=hold.used capacity=hold.capacity}}</span>
-		{{#if hold.over}}<span class="hot">{{localize 'MGT2.Trade.Card.Over'}}</span>{{/if}}
+		{{#if hold.over}}<span class="hot{{#if hold.why}} why{{/if}}">{{#if hold.why}}{{hold.why}}{{else}}{{localize 'MGT2.Trade.Card.Over'}}{{/if}}</span>{{/if}}
 	</div>
 	<span class="bar"><i style="width: {{hold.aboard}}%"></i><i class="now" style="width: {{hold.lot}}%"></i>{{#if hold.cap}}<i class="cap" style="left: {{hold.cap}}%"></i>{{/if}}</span>
 </div>

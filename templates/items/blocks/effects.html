@@ -53,6 +53,6 @@
 		</tbody>
 	</table>
 	{{else}}
-	<p class="hint">{{localize 'MGT2.Effects.Empty'}}</p>
+	<p class="hint">{{#if (eq item.type "drug")}}{{localize 'MGT2.Doses.EffectsEmpty'}}{{else}}{{localize 'MGT2.Effects.Empty'}}{{/if}}</p>
 	{{/if}}
 </div>

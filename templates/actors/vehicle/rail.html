@@ -1,26 +1,21 @@
 <aside class="mgt2-rail">
 
-	{{! The pool. A hull only ever fills — there is no state under wrecked — so the bar runs to the
-	    maximum and the sustained-damage ladder marks the tenths (Core p.140). }}
+	{{! The pool. A hull at zero is wrecked and there is no state under it, so the bar is what is left,
+	    the loss red at its end, and the sustained-damage tenths are ticks (Core p.140). }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.DamageTracks.hull'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.vehicle.HullChain'}}</span>
+			<span class="count" data-tooltip="{{plural 'MGT2.Actor.vehicle.SustainedHint' vehicle.hull.steps crossed=vehicle.hull.crossed steps=vehicle.hull.steps}}">{{vehicle.hull.crossed}} / {{vehicle.hull.steps}}</span>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.SustainedWhy'}}"></i>
 		</div>
-		<div class="trackwrap">
-			<div class="track{{#if vehicle.hull.damage}} hurt{{/if}}" data-derived="system.life.damage">
-				<div class="fill" style="--g: {{vehicle.hull.wound}}%"></div>
-				<div class="mk" data-anchor="end"{{#if vehicle.hull.wrecked}} data-hit="1"{{/if}} style="--x: 100%"><span>{{localize 'MGT2.Actor.vehicle.Wrecked'}}</span></div>
+		<div class="trackwrap open" data-action="openDamage" data-tooltip="{{localize 'MGT2.Actor.Damage'}} · {{localize 'MGT2.Actor.vehicle.Repair'}}">
+			<div class="track pool{{#if vehicle.hull.damage}} hurt{{/if}}" data-derived="system.life.damage">
+				<div class="fill" style="--g: {{vehicle.hull.left}}%"></div>
+				{{#each vehicle.hull.ticks}}
+				<div class="mk"{{#if hit}} data-hit="1"{{/if}} style="--x: {{at}}%"></div>
+				{{/each}}
 			</div>
 		</div>
-		<dl class="statline" data-derived="system.characteristics.hull">
-			<div class="stat"><dt>{{localize 'MGT2.Actor.Damage'}}</dt><dd>{{vehicle.hull.damage}}</dd></div>
-			<div class="stat{{#if vehicle.hull.wrecked}} hurt{{/if}}">
-				<dt>{{localize 'MGT2.Actor.vehicle.State'}}</dt>
-				<dd class="word">{{#if vehicle.hull.wrecked}}{{localize 'MGT2.Actor.vehicle.Wrecked'}}{{else if vehicle.hull.damage}}{{localize 'MGT2.Actor.vehicle.Damaged'}}{{else}}{{localize 'MGT2.Actor.vehicle.Intact'}}{{/if}}</dd>
-			</div>
-		</dl>
-		<p class="hint">{{plural 'MGT2.Actor.vehicle.SustainedHint' vehicle.hull.steps crossed=vehicle.hull.crossed steps=vehicle.hull.steps}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.SustainedWhy'}}"></i></p>
 	</div>
 
 	{{! One number plus modes, not a base plus a table: the printed AGILITY is the value in the
@@ -28,7 +23,7 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Agility'}}</h3>
-			<span class="count">{{localize (lookup (lookup choices.operatingModes system.operatingMode) 'label')}}{{#if system.towing}} · {{localize 'MGT2.Actor.vehicle.Towing'}}{{/if}}{{#if vehicle.terrainImpassible}} · {{localize 'MGT2.Actor.vehicle.Impassible'}}{{/if}}</span>
+			{{#if vehicle.terrainImpassible}}<span class="flag">{{localize 'MGT2.Actor.vehicle.Impassible'}}</span>{{/if}}
 		</div>
 		{{! The two live controls come first and the track count is pinned: an edit-only cell placed
 		    ahead of them takes their column on the mode flip, and one joining an auto-fit row
@@ -105,7 +100,6 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Combat'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.vehicle.CombatCount'}}</span>
 			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.CombatHint'}}"></i>
 			<a class="rm" data-action="combatClear" data-tooltip="{{localize 'MGT2.Actor.vehicle.ClearCombat'}}"><i class="fa-solid fa-rotate-left"></i></a>
 		</div>
@@ -139,7 +133,6 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Speed'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.vehicle.SpeedBand'}}</span>
 		</div>
 		<div class="grid">
 			<label>
@@ -194,7 +187,6 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Environment'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.vehicle.EnvironmentCount'}}</span>
 			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.EnvironmentHint'}}"></i>
 		</div>
 		<div class="grid cols2">
@@ -253,8 +245,9 @@
 	</div>
 	{{/if}}
 
-	{{! The chassis sets both, and an array because a multi-mode vehicle prints more than one pair. }}
-	<div class="block">
+	{{! The chassis sets both, and an array because a multi-mode vehicle prints more than one pair. Edit
+	    only: in play the statline's Skill cell says it. }}
+	<div class="block edit-only">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Chassis'}}</h3>
 			<span class="count">{{vehicle.skills.length}}</span>

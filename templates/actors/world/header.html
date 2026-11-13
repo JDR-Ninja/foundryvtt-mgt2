@@ -5,11 +5,11 @@
 		<div class="name">
 			<span class="play-only">{{name}}</span>
 			<input class="f edit-only" name="name" type="text" value="{{name}}" />
+			<span class="zp play-only {{world.zoneTone}}" data-tooltip="{{systemFields.zone.label}}">{{localize world.zone}}</span>
 		</div>
 
 		<div class="meta play-only">
 			{{#if world.location.line}}<span data-tooltip-text="{{world.location.hint}}">{{world.location.line}}</span>{{/if}}
-			<span>{{localize system.starport.label}}</span>
 			{{#each world.bases.on as |base|}}<span>{{localize base.label}}</span>{{/each}}
 			{{#if system.gasGiants}}<span>{{plural 'MGT2.Actor.world.GasGiantsN' system.gasGiants}}</span>{{/if}}
 		</div>
@@ -38,21 +38,27 @@
 	</div>
 
 	{{! The printed line takes the registration's slot: it is what a world is called on paper. }}
+	{{! In edit mode the paste field stands where the line does. No `name`: the field submits nothing and
+	    the sheet stops its change from reaching the form, which would write the stale cells back. }}
 	<div class="reg">
-		<span class="lbl">{{localize 'MGT2.Actor.world.Profile'}}</span>
+		<span class="lbl play-only">{{localize 'MGT2.Actor.world.Profile'}}</span>
 		<div class="code play-only">{{world.profile}}</div>
 		<div class="ref play-only">{{localize 'MGT2.Actor.world.Ref'}}</div>
+		<label class="edit-only">
+			<span class="lbl">{{localize 'MGT2.Actor.world.Paste'}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.world.PasteHint'}}"></i></span>
+			<input class="f line" type="text" data-uwp-line value="{{world.profile}}" aria-label="{{localize 'MGT2.Actor.world.Paste'}}" />
+		</label>
 	</div>
 
 	{{! THE UWP STRIP. The eight cells are STORED and the line above is a reading of them, not the
 	    other way round. Pasting a line fills the cells once; after that a cell is edited on its own. }}
 	<dl class="uwp">
 		{{#each world.cells as |cell|}}
-		<div class="u{{#if cell.port}} port{{/if}}">
+		<div class="u" data-cell="{{cell.key}}">
 			<dt>{{cell.field.label}}</dt>
 			<dd>
 				<span class="play-only">{{cell.glyph}}</span>
-				<span class="edit-only">{{formInput cell.field name=cell.name value=cell.value localize=true classes=cell.classes}}</span>
+				<span class="edit-only">{{formInput cell.field name=cell.name value=cell.value localize=true classes=cell.classes choices=cell.choices}}</span>
 			</dd>
 			{{! Localised in the sheet: the decimal behind a letter and the digit's own gloss join. Eight
 			    cells ellipsis it, so the whole line rides on `data-tooltip-text` — v14's `data-tooltip`
@@ -60,46 +66,5 @@
 			<span class="g" data-tooltip-text="{{cell.gloss}}">{{cell.gloss}}</span>
 		</div>
 		{{/each}}
-	</dl>
-
-	{{! No `name`: the field submits nothing and the sheet stops its change from reaching the form,
-	    which would otherwise write the stale cells back over the parse. }}
-	<div class="paste edit-only">
-		<span class="lbl">{{localize 'MGT2.Actor.world.Paste'}}</span>
-		<input class="f" type="text" data-uwp-line value="{{world.profile}}" aria-label="{{localize 'MGT2.Actor.world.Paste'}}" />
-		<span class="src">{{localize 'MGT2.Actor.world.PasteHint'}}</span>
-	</div>
-
-	<dl class="statline" data-derived="system">
-		{{! The absolute coordinate is not printed: it is the frame, not the reading. It rides the
-		    tooltip, which is also where an unplaceable location says so. }}
-		<div class="stat{{#unless world.location.line}} none{{/unless}}">
-			<dt>{{localize 'MGT2.Actor.world.Location'}}</dt>
-			<dd class="word" data-tooltip-text="{{world.location.hint}}">{{#if world.location.line}}{{world.location.line}}{{else}}&mdash;{{/if}}</dd>
-		</div>
-		<div class="stat lead{{#unless world.ledger.publishedCount}} none{{/unless}}">
-			<dt>{{localize 'MGT2.Actor.world.TradeCodes'}}</dt>
-			<dd class="word">{{#if world.ledger.publishedCount}}{{world.ledger.publishedLine}}{{else}}&mdash;{{/if}}</dd>
-		</div>
-		<div class="stat">
-			<dt>{{localize 'MGT2.Actor.world.Fuel'}}</dt>
-			<dd class="word">{{localize (concat 'MGT2.Actor.world.FuelGrade.' system.starport.fuel)}}</dd>
-		</div>
-		<div class="stat{{#unless system.starport.fuelPrices.length}} none{{/unless}}">
-			<dt>{{localize 'MGT2.Actor.world.FuelPrice'}}</dt>
-			<dd>{{#each system.starport.fuelPrices as |price|}}{{#unless @first}} &middot; {{/unless}}<i>Cr</i>{{credits price}}{{else}}&mdash;{{/each}}</dd>
-		</div>
-		<div class="stat{{#unless world.berthing.rollable}} none{{/unless}}">
-			<dt>{{localize 'MGT2.Actor.world.Berthing'}}</dt>
-			<dd>{{#if world.berthing.rollable}}{{localize 'MGT2.Actor.world.BerthingBand' amount=world.berthing.perDie}}{{else}}&mdash;{{/if}}</dd>
-		</div>
-		<div class="stat{{#unless world.bases.on.length}} none{{/unless}}">
-			<dt>{{localize 'MGT2.Actor.world.Bases'}}</dt>
-			<dd class="word">{{#if world.bases.on.length}}{{#each world.bases.on as |base|}}{{#unless @first}} &middot; {{/unless}}{{localize base.label}}{{/each}}{{else}}&mdash;{{/if}}</dd>
-		</div>
-		<div class="stat{{#if world.forbidden}} hurt{{/if}}">
-			<dt>{{localize 'MGT2.Actor.world.Zone'}}</dt>
-			<dd class="word">{{localize world.zone}}</dd>
-		</div>
 	</dl>
 </section>

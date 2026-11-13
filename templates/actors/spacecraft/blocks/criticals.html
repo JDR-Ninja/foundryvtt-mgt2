@@ -37,40 +37,29 @@
 		</div>
 	</details>
 	{{/if}}
-	{{! Both are typed at the round they happen: Core p.170's armour cells strip points that no
-	    critical writes, and sixteen cells raise Hull Severity instead of their own location. }}
-	<div class="grid">
-		<label>
+	{{! One control line: the referee's apply group, then the two values typed at the round they happen —
+	    Core p.170's armour cells strip points no critical writes, and sixteen cells raise Hull Severity
+	    instead of their own location. The apply group's controls carry no `name`: they belong to the
+	    referee's action, and `submitOnChange` submits every named control on the sheet. }}
+	<div class="critrow">
+		<div class="critctl">
+			<select class="f" data-crit="location" aria-label="{{localize 'MGT2.Actor.spacecraft.Location'}}">
+				{{#each ship.criticals.locations as |location|}}
+				<option value="{{location.key}}">{{location.roll}} &middot; {{localize location.label}}</option>
+				{{/each}}
+			</select>
+			<input class="f num" type="number" data-crit="effect" min="0" step="1" value="6" aria-label="{{localize 'MGT2.Actor.spacecraft.Effect'}}" />
+			<button type="button" class="btn b-dmg" data-action="criticalRoll">{{localize 'MGT2.Actor.spacecraft.ApplyCritical'}}</button>
+		</div>
+		<label class="pair">
 			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.ArmourDamage'}}</span>
 			{{formInput systemFields.armour.fields.damage name="system.armour.damage" value=system.armour.damage classes="f num"}}
 		</label>
-		<label>
+		<label class="pair">
 			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.HullSeverity'}}</span>
 			{{! A number, not the <range-picker> a min-and-max NumberField would otherwise render. }}
 			<input class="f num" type="number" min="0" max="6" step="1"
 				name="system.hullSeverity" value="{{system.hullSeverity}}" data-dtype="Number" />
 		</label>
-	</div>
-	<dl class="statline" data-derived="system.criticalEffects">
-		<div class="stat{{#unless ship.criticals.standing.controlDM}} none{{/unless}}">
-			<dt>{{localize 'MGT2.Actor.spacecraft.ControlDM'}}</dt><dd>{{showDM ship.criticals.standing.controlDM}}</dd>
-		</div>
-		<div class="stat{{#unless ship.criticals.standing.sensorDM}} none{{/unless}}">
-			<dt>{{localize 'MGT2.Actor.spacecraft.SensorDM'}}</dt><dd>{{showDM ship.criticals.standing.sensorDM}}</dd>
-		</div>
-		<div class="stat{{#unless ship.criticals.standing.jumpDM}} none{{/unless}}">
-			<dt>{{localize 'MGT2.Actor.spacecraft.JumpDM'}}</dt><dd>{{showDM ship.criticals.standing.jumpDM}}</dd>
-		</div>
-	</dl>
-	{{! No `name` on either control: they belong to the referee's action, not to the document,
-	    and `submitOnChange` submits every named control on the sheet. }}
-	<div class="critctl">
-		<select class="f" data-crit="location" aria-label="{{localize 'MGT2.Actor.spacecraft.Location'}}">
-			{{#each ship.criticals.locations as |location|}}
-			<option value="{{location.key}}">{{location.roll}} &middot; {{localize location.label}}</option>
-			{{/each}}
-		</select>
-		<input class="f num" type="number" data-crit="effect" min="0" step="1" value="6" aria-label="{{localize 'MGT2.Actor.spacecraft.Effect'}}" />
-		<button type="button" class="btn b-dmg" data-action="criticalRoll">{{localize 'MGT2.Actor.spacecraft.ApplyCritical'}}</button>
 	</div>
 </div>

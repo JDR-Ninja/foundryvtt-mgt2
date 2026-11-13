@@ -1,0 +1,41 @@
+{{! Options are the slot budget's rows, transcribed by the referee rather than `equipment` Items: a
+    robot option has no use for weight, quantity or an equipped flag. Play mode reads them in the rail. }}
+<div class="block edit-only">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.robot.Options'}}</h3>
+		<span class="count">{{#if system.options.length}}{{system.options.length}}{{/if}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.OptionHint'}}"></i>
+		<a class="add" data-action="rowCreate" data-rows="options" data-tooltip="{{localize 'MGT2.Actor.robot.AddOption'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	{{#if system.options.length}}
+	<table class="rows fixed">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Items.Name'}}</th>
+				<th class="slotcol">{{localize 'MGT2.Actor.robot.SlotCost'}}</th>
+				<th>{{localize 'MGT2.Actor.robot.Why'}}</th>
+				<th class="acts"></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each system.options}}
+			<tr data-row-index="{{@index}}">
+				<td><input class="f" type="text" name="system.options.{{@index}}.name" value="{{name}}" /></td>
+				<td>
+					<span class="slotcell">
+						<input class="f num" type="number" min="0" step="1" name="system.options.{{@index}}.slots" value="{{slots}}" />
+						<label class="tog"><input type="checkbox" name="system.options.{{@index}}.zeroSlot" {{checked zeroSlot}} />{{localize 'MGT2.Actor.robot.ZeroSlotFlag'}}</label>
+					</span>
+				</td>
+				<td><input class="f" type="text" name="system.options.{{@index}}.note" value="{{note}}" /></td>
+				<td>
+					<div class="acts">
+						<a data-action="rowDelete" data-rows="options" data-tooltip="{{localize 'MGT2.Actor.robot.DeleteOption'}}"><i class="fa-solid fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</div>

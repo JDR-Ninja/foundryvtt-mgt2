@@ -6,9 +6,7 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.stash.Contents'}}</h3>
-			<span class="count">
-				{{~#if stash.open}}{{stash.contents.length}}{{else}}{{localize 'MGT2.Actor.stash.Withheld'}}{{/if~}}
-			</span>
+			<span class="count">{{#if stash.open}}{{stash.contents.length}}{{/if}}</span>
 			{{#if stash.open}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.stash.NoEncumbranceHint'}}"></i>{{/if}}
 		</div>
 
@@ -18,10 +16,10 @@
 			<thead>
 				<tr>
 					<th>{{localize 'MGT2.Items.Name'}}</th>
-					<th class="c">{{localize 'MGT2.Items.Type'}}</th>
-					<th class="c">{{localize 'MGT2.Items.Qty'}}</th>
-					{{#if stash.showWeight}}<th class="c">{{localize 'MGT2.Items.Weight'}}</th>{{/if}}
-					<th class="c">{{localize 'MGT2.Items.Cost'}}</th>
+					<th>{{localize 'MGT2.Items.Type'}}</th>
+					<th class="r">{{localize 'MGT2.Items.Qty'}}</th>
+					{{#if stash.showWeight}}<th class="r">{{localize 'MGT2.Items.Weight'}}<i>{{stash.unit}}</i></th>{{/if}}
+					<th class="r">{{localize 'MGT2.Actor.stash.Value'}}<i>Cr</i></th>
 					<th></th>
 				</tr>
 			</thead>
@@ -32,10 +30,10 @@
 						{{entry.name}}
 						{{#if entry.held}}<span class="sub">{{localize 'MGT2.Actor.stash.Holds' n=entry.held}}</span>{{/if}}
 					</td>
-					<td class="c">{{entry.type}}</td>
-					<td class="c num">{{entry.quantity}}</td>
-					{{#if @root.stash.showWeight}}<td class="c num">{{entry.weight}}</td>{{/if}}
-					<td class="c num">{{entry.value}}</td>
+					<td class="kind">{{entry.type}}</td>
+					<td class="r num{{#unless entry.quantity}} nil{{/unless}}">{{#if entry.quantity}}{{entry.quantity}}{{else}}&mdash;{{/if}}</td>
+					{{#if @root.stash.showWeight}}<td class="r num{{#unless entry.weight}} nil{{/unless}}">{{#if entry.weight}}{{entry.weight}}{{else}}&mdash;{{/if}}</td>{{/if}}
+					<td class="r num{{#unless entry.value}} nil{{/unless}}">{{#if entry.value}}{{credits entry.value}}{{else}}&mdash;{{/if}}</td>
 					<td class="r">
 						{{! The actor's two faces for one action. Reading is the point of a cache and an
 						    observer never leaves play mode, so the eye is the row's only control there. }}
@@ -49,22 +47,27 @@
 				{{/each}}
 			</tbody>
 		</table>
+		{{#unless isGM}}<p class="hint">{{localize 'MGT2.Actor.stash.WithheldNone'}}</p>{{/unless}}
 		{{else}}
-		<p class="hint">{{localize 'MGT2.Actor.stash.EmptyHint'}}</p>
+		{{#if stash.canEdit}}<p class="hint">{{localize 'MGT2.Actor.stash.EmptyHint'}}</p>{{/if}}
 		{{/if}}
 		{{else}}
-		{{! The sheet stays open and draws no rows — the state a `container` Item has no way
-		    to produce, and the one an adventure actually wants. }}
-		{{#if (eq stash.access.withheld 'locked')}}
-		<p class="hint shut">{{localize 'MGT2.Actor.stash.WithheldLocked'}}</p>
-		{{#if system.lockedDescription}}<p class="hint">{{system.lockedDescription}}</p>{{/if}}
-		{{else}}
-		<p class="hint shut">{{localize 'MGT2.Actor.stash.WithheldRung'}}</p>
-		{{/if}}
+		{{! The sheet stays open and draws no rows, the state an adventure actually wants. The referee's
+		    words lead, the system's follow. }}
+		<div class="withheld">
+			<span class="ic"><i class="fa-solid {{#if (eq stash.access.withheld 'locked')}}fa-lock{{else}}fa-eye-slash{{/if}}"></i></span>
+			<span class="lbl">{{localize 'MGT2.Actor.stash.Withheld'}}</span>
+			{{#if (eq stash.access.withheld 'locked')}}
+			{{#if system.lockedDescription}}<p class="said">{{system.lockedDescription}}</p>{{/if}}
+			<p class="why">{{localize 'MGT2.Actor.stash.WithheldLocked'}}</p>
+			{{else}}
+			<p class="why">{{localize 'MGT2.Actor.stash.WithheldRung'}}</p>
+			{{/if}}
+		</div>
 		{{/if}}
 	</div>
 
-	<div class="block">
+	<div class="block{{#if stash.vacant.description}} edit-only{{/if}}">
 		<div class="sect"><h3>{{systemFields.description.label}}</h3></div>
 		<prose-mirror name="system.description" value="{{system.description}}" toggled>{{{enriched.description}}}</prose-mirror>
 	</div>
@@ -73,7 +76,7 @@
 	    notes are not rendered for them at all — the world sheet badges the same block and still
 	    draws it, which is the treatment this type cannot afford. }}
 	{{#if isGM}}
-	<div class="block">
+	<div class="block{{#if stash.vacant.notes}} edit-only{{/if}}">
 		<div class="sect">
 			<h3>{{systemFields.notes.label}}</h3>
 			<span class="gm">{{localize 'MGT2.Actor.stash.GM'}}</span>
@@ -81,4 +84,12 @@
 		<prose-mirror name="system.notes" value="{{system.notes}}" toggled>{{{enriched.notes}}}</prose-mirror>
 	</div>
 	{{/if}}
+
+	{{! What play mode folded, in one line: an empty block is a heading and nothing else. }}
+	{{#if stash.canEdit}}{{#if (or stash.vacant.description stash.vacant.notes)}}
+	<p class="vacant play-only">
+		{{#if stash.vacant.description}}<a data-action="toggleSheetMode"><i class="fa-solid fa-plus" aria-hidden="true"></i>{{systemFields.description.label}}</a>{{/if}}
+		{{#if stash.vacant.notes}}<a data-action="toggleSheetMode"><i class="fa-solid fa-plus" aria-hidden="true"></i>{{systemFields.notes.label}}</a>{{/if}}
+	</p>
+	{{/if}}{{/if}}
 </section>

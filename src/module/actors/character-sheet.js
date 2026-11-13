@@ -519,6 +519,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
 
         if (model.containerShowAll || viewId === sys.container.id) {
           v.containerName = container.name;
+          // Only the referee reaches a locked case's rows, so only the referee's padlock reads this.
+          v.containerLocked = container.system.locked === true;
           containerItems.push(v);
         }
         continue;
@@ -605,6 +607,13 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
           break;
       }
     }
+
+    // Each case the lock withholds from this viewer stands as one box: picked, or one per case under
+    // (all), where a case inside a withheld case is not named because its own row is not drawn.
+    model.withheldCases = actorContainers
+      .filter(c => withholds(c) && (model.containerShowAll || (c._id === viewId)) && !withholds(parentOf(c)))
+      .map(c => ({ name: c.name, said: c.system.lockedDescription, mass: MGT2Helper.roundWeight(c.system.weight) }));
+    model.containerHeld = !model.containerShowAll && (model.withheldCases.length > 0);
 
     const life = actor.system.life;
     model.lifeTrack = (settings.showLife && life.max > 0) ? {
@@ -753,10 +762,19 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     };
   }
 
+  /** Folds the reader opened by hand; one with no entry keeps what the template asked for.
+   * @type {Map<string, boolean>} */
+  #folds = new Map();
+
   /** @inheritDoc */
   async _onRender(context, options) {
     await super._onRender(context, options);
     bindTraitInput(this.element, (property, text) => this.#addTrait(text));
+    for ( const fold of this.element.querySelectorAll("details.fold[data-fold]") ) {
+      const key = fold.dataset.fold;
+      if ( this.#folds.has(key) ) fold.open = this.#folds.get(key);
+      fold.addEventListener("toggle", () => this.#folds.set(key, fold.open));
+    }
   }
 
   /**
@@ -2248,7 +2266,7 @@ export class NpcActorSheet extends TravellerActorSheet {
     panel: {
       template: `${PARTS_PATH}/npc/panel.html`,
       templates: [`${PARTS_PATH}/parts/row-controls.html`, `${PARTS_PATH}/parts/armour-rows.html`,
-        `${PARTS_PATH}/parts/species.html`,
+        `${PARTS_PATH}/parts/species.html`, `${PARTS_PATH}/parts/attack-card.html`,
         "systems/mgt2/templates/items/blocks/traits.html"],
       scrollable: [""]
     }
@@ -2305,16 +2323,10 @@ export class NpcActorSheet extends TravellerActorSheet {
       armourConditional: NpcActorSheet.#armourConditional(system),
       track: NpcActorSheet.#track(system),
       // Play mode folds what holds nothing into one line; edit mode keeps every block to fill in.
-      vacant: { attacks: !context.naturals.length, biography: NpcActorSheet.#blank(system.biography),
-        notes: NpcActorSheet.#blank(system.notes) }
+      vacant: { attacks: !context.naturals.length, biography: MGT2Helper.isBlankHtml(system.biography),
+        notes: MGT2Helper.isBlankHtml(system.notes) }
     };
     return context;
-  }
-
-  /** Rich text with neither words nor an image in it. */
-  static #blank(html) {
-    const text = String(html ?? "");
-    return !/<img\b/i.test(text) && !text.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
   }
 
   /** Fight or Flight, ready to render: the two thresholds, and whatever the referee has to settle. */

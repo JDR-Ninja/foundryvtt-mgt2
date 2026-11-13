@@ -1,7 +1,7 @@
 {{! BLOCK 3 again, different columns. A carried craft is a full independent ship record, so it
     is a reference and not an embedded document — and the parent has to know which craft it
     carries in order to exclude them from its own maintenance (Core p.183). }}
-<div class="block">
+<div class="block{{#unless ship.bays.length}} edit-only{{/unless}}">
 	<div class="sect">
 		<h3>{{localize 'MGT2.Actor.spacecraft.CarriedCraft'}}</h3>
 		<span class="count">{{localize 'MGT2.Actor.spacecraft.BayCount' bays=(plural 'MGT2.Actor.spacecraft.BayCountBays' ship.bays.length) craft=(plural 'MGT2.Actor.spacecraft.BayCountCraft' ship.craftCount)}}</span>
@@ -37,8 +37,7 @@
 					    sits beside the name rather than making ten identical rows. }}
 					<span class="play-only">
 						{{#if bay.name}}
-						<span class="av"></span>{{#if bay.many}}<b class="times">{{bay.count}}&times;</b> {{/if}}<a data-action="openCraft" data-uuid="{{bay.craft}}">{{bay.name}}</a>
-						<i class="src">{{localize 'MGT2.Actor.spacecraft.LinkedActor'}}</i>
+						{{#if bay.img}}<img class="av" src="{{bay.img}}" alt="" />{{/if}}{{#if bay.many}}<b class="times">{{bay.count}}&times;</b> {{/if}}<a data-action="openCraft" data-uuid="{{bay.craft}}" data-tooltip="{{localize 'MGT2.Actor.spacecraft.LinkedActor'}}">{{bay.name}}</a>
 						{{else}}{{localize 'MGT2.Actor.spacecraft.Empty'}}{{/if}}
 					</span>
 					<input class="f edit-only" type="text" name="system.bays.{{bay.index}}.craft" value="{{bay.craft}}" placeholder="{{localize 'MGT2.Actor.spacecraft.ActorUuid'}}" />

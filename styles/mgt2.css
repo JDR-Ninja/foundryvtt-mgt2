@@ -3088,8 +3088,12 @@ li.chat-message {
   flex-direction: row;
   align-items: center;
   align-self: end;
+  justify-self: start;
   gap: 6px;
-  padding-bottom: 3px;
+  padding: 3px 11px 3px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: var(--cursor-pointer);
 }
 .mgt2 .grid label.check input {
   margin: 0;
@@ -3102,6 +3106,24 @@ li.chat-message {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--mute);
+}
+.mgt2 .grid label.check:has(input:checked) {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+.mgt2 .grid label.check:has(input:checked) span {
+  color: var(--accent-text);
+}
+.mgt2 .grid label.check.off {
+  opacity: 0.55;
+}
+.mgt2 table.rows .tog {
+  white-space: nowrap;
+}
+.mgt2 table.rows .tog:has(input:checked) {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
 }
 .mgt2 table.rows.fixed {
   table-layout: fixed;
@@ -3292,11 +3314,6 @@ li.chat-message {
   text-transform: uppercase;
   color: var(--faint);
 }
-.mgt2 .statline dd .word {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
 .mgt2 .statline .stat.none dd {
   color: var(--faint);
   font-weight: 500;
@@ -3340,6 +3357,13 @@ li.chat-message {
   font-size: 16px;
 }
 
+.mgt2 .statline dd.word,
+.mgt2 .statline dd .word {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
 .mgt2 .budget {
   display: flex;
   flex-direction: column;
@@ -3355,6 +3379,10 @@ li.chat-message {
 }
 .mgt2 .budget > header .rem {
   min-width: 6.5rem;
+}
+.mgt2 .budget > header .tot,
+.mgt2 .budget > header .rem {
+  white-space: nowrap;
 }
 .mgt2 .budget .tot {
   font-family: var(--cond);
@@ -3394,13 +3422,18 @@ li.chat-message {
   width: 1px;
   background: var(--mute);
 }
-.mgt2 .budget.over .gauge i {
+.mgt2 .budget .cells i.on {
+  background: var(--fill);
+}
+.mgt2 .budget.over .gauge i,
+.mgt2 .budget.over .cells i.on {
   background: var(--danger);
 }
 .mgt2 .budget.over .tot {
   color: var(--danger);
 }
-.mgt2 .budget.over[data-over=soft] .gauge i {
+.mgt2 .budget.over[data-over=soft] .gauge i,
+.mgt2 .budget.over[data-over=soft] .cells i.on {
   background: var(--fill);
 }
 .mgt2 .budget.over[data-over=soft] .tot {
@@ -3473,6 +3506,75 @@ li.chat-message {
 }
 .mgt2 .budget.check .brows tr.mismatch td.d {
   color: var(--danger);
+}
+.mgt2 .budget.line {
+  gap: 4px;
+}
+.mgt2 .budget.line .bh {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+  min-height: 20px;
+}
+.mgt2 .budget.line .bh .lbl {
+  flex: 0 0 auto;
+  min-width: 5.6rem;
+  white-space: nowrap;
+}
+.mgt2 .budget.line .bh .gauge {
+  display: block;
+  flex: 1 1 0;
+  min-width: 2.5rem;
+  height: 5px;
+  border-radius: 3px;
+}
+.mgt2 .budget.line .bh .gauge i {
+  border-radius: 3px;
+}
+.mgt2 .budget.line .bh .gauge u {
+  display: none;
+}
+.mgt2 .budget.line .bh .tot {
+  margin-left: 0;
+  font-size: 15px;
+}
+.mgt2 .budget.line .bh .rem {
+  min-width: 3.6rem;
+}
+.mgt2 .budget.line header.bh {
+  padding-left: 15px;
+}
+.mgt2 .budget.line.over .bh .rem {
+  color: var(--danger);
+}
+.mgt2 .budget.line details.fold > summary {
+  font-family: var(--body);
+  font-size: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+  color: inherit;
+}
+.mgt2 .budget.line details.fold > summary::before {
+  flex: 0 0 7px;
+}
+.mgt2 .budget.line details.fold > summary:hover .lbl {
+  color: var(--accent-hot);
+}
+
+.mgt2 .cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.mgt2 .cells i {
+  flex: 0 0 24px;
+  height: 8px;
+  background: var(--track);
+  border-radius: 2px;
+}
+.mgt2 .cells i.on {
+  background: var(--accent-text);
 }
 
 .mgt2 .roster {
@@ -3815,9 +3917,39 @@ li.chat-message {
 .mgt2 .track .ml[data-hit] {
   color: var(--danger);
 }
+.mgt2 .track.pool {
+  height: 5px;
+  border-radius: 3px;
+}
+.mgt2 .track.pool .fill {
+  border-radius: 3px;
+}
+.mgt2 .track.pool .mk {
+  width: 1px;
+  background: var(--rule);
+}
+.mgt2 .track.pool .mk[data-hit] {
+  background: var(--danger);
+}
+.mgt2 .track.pool.hurt {
+  background: color-mix(in oklab, var(--danger) 60%, transparent);
+}
+.mgt2 .track.pool.hurt .fill {
+  border-radius: 3px 0 0 3px;
+  background: var(--fill);
+}
 
 .mgt2 .trackwrap {
   padding-top: 13px;
+}
+.mgt2 .trackwrap.open {
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .trackwrap.open:hover .track {
+  box-shadow: 0 0 0 1px var(--accent-line);
+}
+.mgt2 .trackwrap:has(> .track.pool) {
+  padding: 5px 0;
 }
 
 .mgt2 details.fold > summary {
@@ -3898,7 +4030,8 @@ li.chat-message {
   background: color-mix(in oklab, var(--danger) 70%, var(--paper));
   border-color: color-mix(in oklab, var(--danger) 70%, var(--paper));
 }
-.mgt2 .crits .row.hit .loc {
+.mgt2 .crits .row.hit .loc,
+.mgt2 .crits .loc.hit {
   color: var(--danger);
 }
 .mgt2 .crits .eff {
@@ -3910,6 +4043,33 @@ li.chat-message {
 .mgt2 .crits .eff b {
   font-weight: 600;
   color: var(--danger);
+}
+
+.mgt2 .critrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  padding-top: 6px;
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2 .critrow .critctl {
+  flex-wrap: nowrap;
+}
+.mgt2 .critrow .critctl select.f {
+  flex: 0 1 11rem;
+  min-width: 7rem;
+}
+.mgt2 .critrow .critctl input.f {
+  flex: 0 0 3.4rem;
+}
+.mgt2 .critrow label.pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.mgt2 .critrow label.pair input.f {
+  width: 3.4rem;
 }
 
 .mgt2 .chars {
@@ -4299,6 +4459,140 @@ li.chat-message {
   font-variant-numeric: tabular-nums;
 }
 
+.mgt2 .lockpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: auto;
+  min-height: 0;
+  padding: 2px 11px 3px 9px;
+  font: inherit;
+  font-family: var(--cond);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--faint);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .lockpill i {
+  font-size: 10px;
+}
+.mgt2 .lockpill.shut {
+  color: var(--danger);
+  border-color: currentColor;
+  background: color-mix(in oklab, var(--danger) 12%, transparent);
+}
+
+.mgt2 button.lockpill,
+.mgt2 label.lockpill {
+  cursor: var(--cursor-pointer);
+}
+.mgt2 button.lockpill:hover,
+.mgt2 label.lockpill:hover {
+  outline: 1px solid var(--accent-line);
+  outline-offset: 1px;
+}
+.mgt2 button.lockpill:not(.shut):hover,
+.mgt2 label.lockpill:not(.shut):hover {
+  color: var(--accent-text);
+}
+
+.mgt2 .withheld {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px 11px;
+  padding: 10px 12px 11px;
+  border: 1px dashed var(--rule);
+  border-radius: 2px;
+}
+.mgt2 .withheld .ic {
+  grid-row: 1/span 3;
+  padding-top: 1px;
+  color: var(--faint);
+}
+.mgt2 .withheld .said {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.mgt2 .withheld .why {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--mute);
+}
+.mgt2 .withheld .said,
+.mgt2 .withheld .why {
+  grid-column: 2/-1;
+}
+.mgt2 .withheld.named {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.mgt2 .withheld .lbl b {
+  margin-right: 7px;
+  color: var(--ink);
+}
+.mgt2 .withheld .kg {
+  grid-column: 3;
+  grid-row: 1;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--mute);
+}
+.mgt2 .withheld .kg i {
+  font-style: normal;
+  font-size: 10px;
+  color: var(--faint);
+}
+
+.mgt2 .sect .lockpill {
+  height: 18px;
+  padding: 0 8px 0 6px;
+  font-size: 10px;
+}
+
+.mgt2 label.lockpill {
+  position: relative;
+}
+.mgt2 label.lockpill input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.mgt2 label.lockpill:has(input:disabled) {
+  cursor: default;
+}
+
+.mgt2 table.rows th i {
+  margin-left: 4px;
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--faint);
+}
+.mgt2 table.rows td.num.nil {
+  color: var(--faint);
+}
+.mgt2 table.rows td.kind {
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
 .mgt2 {
   --mgt2-cond: var(--cond);
   --mgt2-rule: 1px solid var(--rule);
@@ -4404,7 +4698,7 @@ li.chat-message {
   font-size: 13px;
   color: var(--mute);
 }
-.mgt2 .mgt2-header .meta span:not(:last-child)::after {
+.mgt2 .mgt2-header .meta > span:not(:last-child)::after {
   content: "·";
   margin-left: 8px;
   color: var(--faint);
@@ -4449,12 +4743,6 @@ li.chat-message {
   color: var(--accent-text);
   background: var(--hover);
   box-shadow: inset 0 0 0 1px var(--accent-line);
-}
-.mgt2 .mgt2-header .trackwrap.open {
-  cursor: var(--cursor-pointer);
-}
-.mgt2 .mgt2-header .trackwrap.open:hover .track {
-  box-shadow: 0 0 0 1px var(--accent-line);
 }
 .mgt2 .mgt2-header .stat.live dd {
   display: inline-flex;
@@ -4764,6 +5052,12 @@ li.chat-message {
   opacity: 1;
 }
 
+.mgt2 table.rows .locked {
+  margin-left: 5px;
+  font-size: 10px;
+  color: var(--danger);
+}
+
 .mgt2 .tsks {
   display: block;
 }
@@ -5034,7 +5328,7 @@ li.chat-message {
   color: var(--faint);
 }
 
-.mgt2 .mgt2-npc-panel .attacks {
+.mgt2 .attacks {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -5042,7 +5336,7 @@ li.chat-message {
   padding: 0;
   list-style: none;
 }
-.mgt2 .mgt2-npc-panel .attacks .atk {
+.mgt2 .attacks .atk {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -5051,10 +5345,23 @@ li.chat-message {
   border: 1px solid var(--rule);
   border-radius: 6px;
 }
-.mgt2 .mgt2-npc-panel .attacks .atk:hover {
+.mgt2 .attacks .atk:hover {
   border-color: var(--edge);
 }
-.mgt2 .mgt2-npc-panel .attacks button.roll {
+.mgt2 .attacks .acts {
+  display: inline-flex;
+  gap: 6px;
+}
+.mgt2 .attacks .acts a {
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .attacks .acts a:hover {
+  color: var(--accent-text);
+}
+
+.mgt2 .attacks button.roll,
+.mgt2 table.mounts.cards button.roll {
   all: unset;
   display: inline-flex;
   align-items: center;
@@ -5065,15 +5372,18 @@ li.chat-message {
   color: var(--ink);
   cursor: var(--cursor-pointer);
 }
-.mgt2 .mgt2-npc-panel .attacks button.roll:focus-visible {
+.mgt2 .attacks button.roll:focus-visible,
+.mgt2 table.mounts.cards button.roll:focus-visible {
   outline: 2px solid var(--accent-text);
   outline-offset: 2px;
   border-radius: 4px;
 }
-.mgt2 .mgt2-npc-panel .attacks button.roll:hover span {
+.mgt2 .attacks button.roll:hover span,
+.mgt2 table.mounts.cards button.roll:hover span {
   color: var(--accent-text);
 }
-.mgt2 .mgt2-npc-panel .attacks button.roll i {
+.mgt2 .attacks button.roll i,
+.mgt2 table.mounts.cards button.roll i {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5084,16 +5394,19 @@ li.chat-message {
   background: var(--hover);
   border-radius: 5px;
 }
-.mgt2 .mgt2-npc-panel .attacks button.roll:hover i {
+.mgt2 .attacks button.roll:hover i,
+.mgt2 table.mounts.cards button.roll:hover i {
   color: var(--accent-text);
   background: var(--accent-soft);
 }
-.mgt2 .mgt2-npc-panel .attacks .pills {
+.mgt2 .attacks .pills,
+.mgt2 table.mounts.cards .pills {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
-.mgt2 .mgt2-npc-panel .attacks .pills span {
+.mgt2 .attacks .pills span,
+.mgt2 table.mounts.cards .pills span {
   padding: 0 7px;
   font-family: var(--mono);
   font-size: 10px;
@@ -5102,26 +5415,16 @@ li.chat-message {
   border: 1px solid var(--rule);
   border-radius: 999px;
 }
-.mgt2 .mgt2-npc-panel .attacks .dmg {
+.mgt2 .attacks .dmg,
+.mgt2 table.mounts.cards .dmg {
   margin-left: auto;
   font-family: var(--mono);
   font-size: 15px;
   font-weight: 600;
   color: var(--ink);
 }
-.mgt2 .mgt2-npc-panel .attacks .acts {
-  display: inline-flex;
-  gap: 6px;
-}
-.mgt2 .mgt2-npc-panel .attacks .acts a {
-  color: var(--faint);
-  cursor: var(--cursor-pointer);
-}
-.mgt2 .mgt2-npc-panel .attacks .acts a:hover {
-  color: var(--accent-text);
-}
 
-.mgt2 .mgt2-npc-panel .vacant {
+.mgt2 p.vacant {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 18px;
@@ -5135,17 +5438,17 @@ li.chat-message {
   text-transform: uppercase;
   color: var(--faint);
 }
-.mgt2 .mgt2-npc-panel .vacant b {
+.mgt2 p.vacant b {
   font-family: var(--mono);
   font-weight: 400;
 }
-.mgt2 .mgt2-npc-panel .vacant a {
+.mgt2 p.vacant a {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   cursor: var(--cursor-pointer);
 }
-.mgt2 .mgt2-npc-panel .vacant a:hover {
+.mgt2 p.vacant a:hover {
   color: var(--accent-text);
 }
 
@@ -5206,9 +5509,33 @@ li.chat-message {
   color: var(--faint);
 }
 
-.mgt2 .mgt2-header .vstat {
-  grid-column: 1/-1;
-  padding-top: 10px;
+.mgt2 .mgt2-header .statline.grid dd input.f,
+.mgt2 .mgt2-header .statline.grid dd select.f {
+  width: 100%;
+  margin-top: 2px;
+}
+.mgt2 .mgt2-header .statline.grid dd select.f {
+  font-size: 12px;
+  padding: 1px 3px;
+}
+.mgt2 .mgt2-header .statline.grid dd .pair {
+  display: flex;
+  gap: 4px;
+}
+.mgt2 .mgt2-header .statline.grid dd .pair input.f {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.mgt2 .mgt2-header .statline.grid dd .pair select.f {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.mgt2[data-mode=edit] .mgt2-header .statline.grid .stat.wide {
+  grid-column: span 2;
+}
+.mgt2[data-mode=edit] .mgt2-header .statline.grid .stat.fed dd {
+  color: var(--mute);
 }
 
 .mgt2 .mgt2-rail {
@@ -5253,10 +5580,12 @@ li.chat-message {
 
 .mgt2 .facings {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px;
 }
 .mgt2 .facings .facing {
+  min-width: 0;
+  overflow: hidden;
   padding: 5px 7px;
   text-align: center;
   border: 1px solid var(--rule);
@@ -5282,10 +5611,37 @@ li.chat-message {
   color: var(--faint);
 }
 .mgt2 .facings .facing .re {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 100%;
+  margin-top: 4px;
+  padding: 0 6px;
   font-family: var(--mono);
   font-size: 10px;
-  color: var(--accent-text);
+  line-height: 1.6;
+  color: var(--mute);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .facings .facing .re input {
+  width: 2.4em;
+  height: auto;
+  padding: 0 2px;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.4;
+  text-align: right;
+  color: var(--ink);
+  background: var(--hover);
+  border: 0;
+  border-radius: 2px;
+}
+.mgt2 .facings .facing .re .w {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .mgt2 .facings .facing input.f {
   text-align: center;
@@ -5301,29 +5657,100 @@ li.chat-message {
   color: var(--mute);
 }
 
-.mgt2 table.systems td.who {
-  width: 11rem;
+.mgt2 .statline.grid.sys {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.mgt2 .statline.grid.sys .who {
+  display: block;
   font-family: var(--cond);
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  white-space: normal;
+  color: var(--faint);
+}
+.mgt2 .statline.grid.sys .stat.opposed .who {
+  color: var(--danger);
+}
+.mgt2 .statline.grid.sys .stat.absent dd {
+  font-weight: 500;
+  color: var(--faint);
+}
+.mgt2 .statline.grid.sys dd input.f {
+  width: 5rem;
+}
+
+.mgt2 table.mounts.cards .mcfg.side {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.mgt2 table.mounts.cards .pills span.dm {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--ink);
+  border-color: var(--edge);
+}
+.mgt2 table.mounts.cards .pills span.dm:hover {
+  color: var(--accent-hot);
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+.mgt2 table.mounts.cards .pills span.dm input {
+  width: 2.4em;
+  height: auto;
+  padding: 0 2px;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.4;
+  text-align: right;
+  color: var(--ink);
+  background: var(--hover);
+  border: 0;
+}
+
+.mgt2 p.quiet {
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--faint);
 }
-.mgt2 table.systems tr.opposed td.who {
-  color: var(--danger);
+.mgt2 p.quiet a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: var(--cursor-pointer);
 }
-.mgt2 table.systems td.val {
-  width: 7rem;
-  text-align: right;
-  font-family: var(--mono);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-}
-.mgt2 table.systems tr.absent td {
-  color: var(--faint);
+.mgt2 p.quiet a:hover {
+  color: var(--accent-text);
 }
 
+.mgt2 .prose2 {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+.mgt2 .prose2 > .block {
+  min-width: 0;
+}
+.mgt2 .prose2 prose-mirror {
+  min-height: 7rem;
+  max-height: 22rem;
+}
+
+@container sheet (min-width: 980px) {
+  .mgt2 .prose2 {
+    flex-direction: row;
+  }
+  .mgt2 .prose2 > .block {
+    flex: 1 1 0;
+  }
+}
 .mgt2 .critctl {
   display: flex;
   flex-wrap: wrap;
@@ -5355,14 +5782,16 @@ li.chat-message {
   white-space: nowrap;
 }
 
-.mgt2 .mgt2-spacecraft-panel {
+.mgt2 .mgt2-spacecraft-panel,
+.mgt2 .mgt2-robot-panel {
   display: flex;
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
 }
 
-.mgt2 .tab[data-group=spacecraft].active {
+.mgt2 .tab[data-group=spacecraft].active,
+.mgt2 .tab[data-group=robot].active {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
@@ -5389,16 +5818,6 @@ li.chat-message {
     min-width: 0;
   }
 }
-.mgt2 td.ammo {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 5px;
-}
-.mgt2 td.ammo .f.num {
-  width: 3.4rem;
-}
-
 .mgt2 table.manifest td .btn {
   padding: 1px 9px;
   font-size: 11px;
@@ -5408,54 +5827,134 @@ li.chat-message {
   margin: 0;
 }
 
-.mgt2 table.mounts td.mt {
-  width: 10.5rem;
+.mgt2 table.mounts.cards {
+  table-layout: fixed;
 }
-.mgt2 table.mounts td.mt select.f {
-  font-size: 12px;
-  padding: 1px 3px;
+.mgt2 table.mounts.cards col.c-pl {
+  width: 42%;
 }
-.mgt2 table.mounts td.mt b {
-  display: block;
+.mgt2 table.mounts.cards col.c-dm {
+  width: 6.5rem;
+}
+.mgt2 table.mounts.cards col.c-ac {
+  width: 2.2rem;
+}
+.mgt2 table.mounts.cards td {
+  padding: 7px 6px;
+  vertical-align: middle;
+}
+.mgt2 table.mounts.cards .wg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+}
+.mgt2 table.mounts.cards .mtl {
   font-family: var(--cond);
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.mgt2 table.mounts td.mt .arc {
-  font-family: var(--cond);
-  font-size: 9.5px;
+  font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--faint);
 }
-.mgt2 table.mounts td.dmg {
-  width: 8rem;
+.mgt2 table.mounts.cards button.roll ~ .mtl {
+  margin-left: 32px;
+}
+.mgt2 table.mounts.cards .mcfg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 4px;
+}
+.mgt2 table.mounts.cards .mcfg select.f {
+  font-size: 12px;
+  padding: 1px 3px;
+}
+.mgt2 table.mounts.cards .pills span.ammo {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.mgt2 table.mounts.cards .pills span.ammo input.f.num {
+  width: 2.6rem;
+  height: auto;
+  padding: 0 3px;
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+.mgt2 table.mounts.cards .pills span.ammo.empty {
+  color: var(--danger);
+  border-color: currentColor;
+}
+.mgt2 table.mounts.cards select[multiple] {
+  margin-top: 4px;
+}
+.mgt2 table.mounts.cards td.dmg {
   text-align: right;
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
 }
-.mgt2 table.mounts td.dmg b {
-  font-family: var(--cond);
-  font-size: 16px;
-  font-weight: 700;
-}
-.mgt2 table.mounts td.dmg .mult {
+.mgt2 table.mounts.cards td.dmg b {
   display: block;
-  font-size: 10px;
-  color: var(--faint);
+  line-height: 24px;
 }
-.mgt2 table.mounts td.dmg.big b {
+.mgt2 table.mounts.cards td.dmg b + b {
+  margin-top: 3px;
+}
+.mgt2 table.mounts.cards td.dmg.big b {
   color: var(--danger);
 }
-.mgt2 table.mounts .mag {
-  font-family: var(--mono);
-  font-size: 11.5px;
+
+.mgt2 table.roster.crew {
+  table-layout: fixed;
+}
+.mgt2 table.roster.crew col.c-st {
+  width: 9.5rem;
+}
+.mgt2 table.roster.crew col.c-who {
+  width: 11.5rem;
+}
+.mgt2 table.roster.crew col.c-rq {
+  width: 3.6rem;
+}
+.mgt2 table.roster.crew .who {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mgt2 table.roster.crew .station .edit-only,
+.mgt2 table.roster.crew .who .edit-only {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.mgt2 table.roster.crew .station .pair {
+  display: flex;
+  gap: 4px;
+}
+.mgt2 table.roster.crew .station .pair input {
+  flex: 0 0 2.8rem;
+}
+.mgt2 table.roster.crew .todo .btn i {
+  margin-left: 4px;
   color: var(--mute);
 }
-.mgt2 table.mounts .mag.empty {
+.mgt2 table.roster.crew .need {
+  display: inline-block;
+  padding: 0 6px;
+  line-height: 1.6;
+  color: var(--mute);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 table.roster.crew .need.short {
   color: var(--danger);
+  border-color: currentColor;
+  background: color-mix(in oklab, var(--danger) 10%, transparent);
+}
+
+.mgt2 .roster .who img.av {
+  object-fit: cover;
+  border: 0;
+  border-radius: 2px;
 }
 
 .mgt2 .finance {
@@ -5515,9 +6014,76 @@ ul.softwares li:hover a {
   display: inline-block;
 }
 
-.mgt2 .mgt2-robot-panel {
+.mgt2 .mgt2-rail .brainbudget {
   display: flex;
   flex-direction: column;
+  gap: 6px;
+}
+
+.mgt2 .skills {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .skills li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px 5px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .skills li:hover {
+  background: var(--hover);
+}
+.mgt2 .skills button.roll {
+  all: unset;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--body);
+  font-size: 13px;
+  color: var(--ink);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .skills button.roll:hover {
+  color: var(--accent-text);
+}
+.mgt2 .skills button.roll:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 1px;
+}
+.mgt2 .skills .lvl {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.mgt2 .skills .acts {
+  display: inline-flex;
+  gap: 6px;
+}
+.mgt2 .skills .acts a {
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .skills .acts a:hover {
+  color: var(--accent-text);
+}
+
+.mgt2 table.rows th.slotcol {
+  width: 9.5rem;
+}
+
+.mgt2 table.rows .slotcell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mgt2 table.rows .slotcell input.f {
+  width: 3.2rem;
 }
 
 .mgt2 .chain {
@@ -5732,7 +6298,7 @@ ul.softwares li:hover a {
   .mgt2.application.spacecraft > .window-content,
   .mgt2.application.robot > .window-content {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 35%) minmax(0, 1fr);
     grid-template-areas: "header" "rail" "panel";
   }
   .mgt2 .mgt2-header {
@@ -5759,6 +6325,9 @@ ul.softwares li:hover a {
   }
   .mgt2 .facings {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .mgt2 .statline.grid.sys {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .mgt2 .char-list {
     display: grid;
@@ -5807,26 +6376,31 @@ ul.softwares li:hover a {
     padding: 14px 22px 20px;
   }
 }
-.mgt2 table.rows .lvl {
+.mgt2 table.rows .lvl,
+.mgt2 .skills .lvl {
   display: inline-flex;
   align-items: center;
   gap: 7px;
 }
-.mgt2 table.rows .lvl .pips {
+.mgt2 table.rows .lvl .pips,
+.mgt2 .skills .lvl .pips {
   display: inline-flex;
   gap: 3px;
 }
-.mgt2 table.rows .lvl .pips i {
+.mgt2 table.rows .lvl .pips i,
+.mgt2 .skills .lvl .pips i {
   width: 7px;
   height: 7px;
   border: 1px solid var(--faint);
   border-radius: 50%;
 }
-.mgt2 table.rows .lvl .pips i.on {
+.mgt2 table.rows .lvl .pips i.on,
+.mgt2 .skills .lvl .pips i.on {
   border-color: var(--mute);
   background: var(--mute);
 }
-.mgt2 table.rows .lvl.zero {
+.mgt2 table.rows .lvl.zero,
+.mgt2 .skills .lvl.zero {
   color: var(--faint);
 }
 
@@ -5878,14 +6452,14 @@ ul.softwares li:hover a {
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
   margin: 12px 0 0;
-  border: 1px solid var(--rule-soft);
+  border-top: 1px solid var(--rule);
 }
 .mgt2 .uwp .u {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
-  padding: 5px 6px 6px;
+  padding: 6px 8px 9px;
   border-right: 1px solid var(--rule-soft);
 }
 .mgt2 .uwp .u:last-child {
@@ -5894,57 +6468,164 @@ ul.softwares li:hover a {
 .mgt2 .uwp .u dt {
   overflow: hidden;
   font-family: var(--cond);
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   white-space: nowrap;
   text-overflow: ellipsis;
-  color: var(--faint);
+  color: var(--mute);
 }
 .mgt2 .uwp .u dd {
   margin: 0;
   font-family: var(--mono);
-  font-size: 17px;
+  font-size: 22px;
+  font-weight: 600;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
+.mgt2 .uwp .u dd .f {
+  font-size: 14px;
+}
 .mgt2 .uwp .u .g {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   font-family: var(--cond);
-  font-size: 9px;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
   color: var(--mute);
 }
-.mgt2 .uwp .u.port {
-  background: var(--accent-soft);
+.mgt2 .uwp .u .g:empty {
+  display: none;
 }
-.mgt2 .uwp .u.port dt {
-  color: var(--mute);
+.mgt2 .uwp .u[data-cell=starport] {
+  border-right: 1px solid var(--rule);
 }
-.mgt2 .uwp .u.port dd {
-  color: var(--accent-text);
-  font-weight: 600;
+.mgt2 .uwp .u[data-cell=starport] dd {
+  font-weight: 700;
+}
+.mgt2 .uwp .u[data-cell=techLevel] {
+  border-left: 1px solid var(--rule);
 }
 
-.mgt2 .paste {
-  grid-column: 1/-1;
+.mgt2 .mgt2-header .name {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 7px;
-  padding-top: 9px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
-.mgt2 .paste input.f {
-  width: 11rem;
-  font-family: var(--mono);
-}
-.mgt2 .paste .src {
-  font-family: var(--mono);
-  font-size: 9.5px;
+
+.mgt2 .zp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 9px 2px 7px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--faint);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .zp::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+.mgt2 .zp.amber {
+  color: var(--warn);
+  border-color: currentColor;
+  background: color-mix(in oklab, var(--warn) 14%, transparent);
+}
+.mgt2 .zp.red {
+  color: var(--danger);
+  border-color: currentColor;
+  background: color-mix(in oklab, var(--danger) 12%, transparent);
+}
+.mgt2 .zp.amber::before, .mgt2 .zp.red::before {
+  opacity: 1;
+}
+
+.mgt2 .mgt2-header .reg label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+.mgt2 .mgt2-header .reg label .lbl {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.mgt2 .mgt2-header .reg label input.f.line {
+  width: 9.6rem;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.mgt2 .codes .code.drv {
+  border-style: dashed;
+  border-color: var(--edge);
+}
+.mgt2 .codes .code.hand {
+  border-color: var(--ink);
+}
+.mgt2 .codes .code.hand.off {
+  border-color: var(--faint);
+}
+.mgt2 .codes .code.nm {
+  color: var(--faint);
+  border-color: var(--rule-soft);
+}
+
+.mgt2 .codes .gloss .why {
+  margin-left: 6px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.mgt2 .codes .gloss .cnd {
+  margin-left: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--faint);
+}
+
+.mgt2 .mgt2-world-panel ul.rest {
+  display: grid;
+  grid-template-columns: 2.6rem minmax(0, 1fr);
+  gap: 3px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--faint);
+}
+.mgt2 .mgt2-world-panel ul.rest .c {
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.mgt2 .mgt2-world-panel ul.rest .cnd {
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
 }
 
 .mgt2 .ledger {
@@ -5953,93 +6634,135 @@ ul.softwares li:hover a {
 }
 .mgt2 .ledger .lr {
   display: grid;
-  grid-template-columns: 2.4rem minmax(0, 1fr) auto auto;
-  gap: 0 9px;
-  align-items: baseline;
+  grid-template-columns: 3rem minmax(0, 1fr) auto auto;
+  gap: 0 10px;
+  align-items: center;
   padding: 3px 2px;
   border-bottom: 1px solid var(--rule-soft);
 }
 .mgt2 .ledger .lr:last-child {
   border-bottom: 0;
 }
-.mgt2 .ledger .lr .c {
-  font-family: var(--cond);
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+.mgt2 .ledger .lr .codes {
+  display: inline-flex;
 }
 .mgt2 .ledger .lr .cond {
   min-width: 0;
-  overflow: hidden;
+  font-size: 12px;
+  color: var(--mute);
+}
+.mgt2 .ledger .lr .cond .cnd {
+  margin-left: 6px;
   font-family: var(--mono);
-  font-size: 10px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  font-size: 10.5px;
   color: var(--faint);
 }
 .mgt2 .ledger .lr .st {
   font-family: var(--cond);
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   white-space: nowrap;
+  color: var(--faint);
 }
-.mgt2 .ledger .lr .ov {
+.mgt2 .ledger .lr.forced .st {
+  color: var(--ink);
+}
+.mgt2 .ledger .lr.off .cond {
+  color: var(--faint);
+}
+
+.mgt2 .seg {
   display: inline-flex;
-  gap: 3px;
 }
-.mgt2 .ledger .lr .ov button {
-  width: auto;
+.mgt2 .seg button {
   height: auto;
   min-height: 0;
-  padding: 1px 6px 2px;
+  padding: 1px 8px 2px;
   font: inherit;
   font-family: var(--cond);
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--mute);
   background: none;
   border: 1px solid var(--rule);
-  border-radius: 2px;
+  border-radius: 0;
   cursor: var(--cursor-pointer);
 }
-.mgt2 .ledger .lr .ov button:hover {
+.mgt2 .seg button:first-child {
+  border-radius: 2px 0 0 2px;
+}
+.mgt2 .seg button:last-child {
+  border-radius: 0 2px 2px 0;
+}
+.mgt2 .seg button + button {
+  border-left: 0;
+}
+.mgt2 .seg button:hover {
   color: var(--ink);
   background: var(--hover);
 }
-.mgt2 .ledger .lr .ov button.on {
+.mgt2 .seg button.on {
   color: var(--accent-text);
+  background: var(--accent-soft);
   border-color: var(--accent-line);
 }
-.mgt2 .ledger .lr.on .c {
-  color: var(--accent-text);
+.mgt2 .seg button.on + button {
+  border-left: 1px solid var(--accent-line);
 }
-.mgt2 .ledger .lr.on .st {
-  color: var(--good);
+.mgt2 .seg button.on[data-state=derive] {
+  color: var(--ink);
+  background: var(--hover);
+  border-color: var(--rule);
 }
-.mgt2 .ledger .lr.off {
-  color: var(--faint);
+.mgt2 .seg button.on[data-state=derive] + button {
+  border-left: 0;
 }
-.mgt2 .ledger .lr.off .ov button {
-  color: var(--faint);
+
+.mgt2 .fuel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1px 8px;
+  align-items: baseline;
 }
-.mgt2 .ledger .lr.forced .st {
-  color: var(--danger);
+.mgt2 .fuel span {
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--mute);
 }
-.mgt2 .ledger .lr.forced .c {
-  text-decoration: underline;
-  text-decoration-style: dotted;
+.mgt2 .fuel b {
+  font-size: 17px;
+}
+.mgt2 .fuel b i {
+  margin-right: 1px;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--mute);
 }
 
 .mgt2 .berth {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 2px 10px;
   align-items: baseline;
-  gap: 9px;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2 .berth > .lbl {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.mgt2 .berth > .lbl .gm {
+  margin-left: auto;
 }
 .mgt2 .berth .v {
   font-family: var(--cond);
@@ -6058,123 +6781,148 @@ ul.softwares li:hover a {
   color: var(--faint);
 }
 .mgt2 .berth .band {
+  min-width: 0;
   font-family: var(--mono);
   font-size: 10.5px;
   color: var(--faint);
 }
-.mgt2 .berth button {
-  width: auto;
-  height: auto;
-  min-height: 0;
-  margin-left: auto;
-  padding: 3px 9px 4px;
-  font: inherit;
-  font-family: var(--cond);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--paper);
-  background: var(--accent-text);
-  border: 1px solid var(--accent-text);
-  border-radius: 2px;
-  cursor: var(--cursor-pointer);
-}
-.mgt2 .berth button[disabled] {
-  color: var(--faint);
-  background: none;
-  border-color: var(--rule);
-  cursor: not-allowed;
+.mgt2 .berth .ed {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: minmax(0, 8rem) auto;
+  gap: 8px;
+  align-items: end;
+  margin-top: 6px;
 }
 
 .mgt2 .lock {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 10px;
+  align-items: center;
 }
-.mgt2 .lock .row {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-.mgt2 .lock .row .v {
-  margin-left: auto;
+.mgt2 .lock .v {
+  justify-self: end;
   font-family: var(--mono);
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
 }
-.mgt2 .lock .row .v.shut {
-  color: var(--danger);
-}
-.mgt2 .lock .why {
-  font-family: var(--cond);
-  font-size: 9.5px;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  color: var(--faint);
-}
-
-.mgt2 .halves {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border: 1px solid var(--rule-soft);
-}
-.mgt2 .halves .h {
-  min-width: 0;
-  padding: 8px 11px 10px;
-}
-.mgt2 .halves .h h4 {
-  margin: 0 0 4px;
+.mgt2 .lock .pill {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 1px 4px 1px 9px;
   font-family: var(--cond);
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  border: none;
+  white-space: nowrap;
+  color: var(--faint);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
 }
-.mgt2 .halves .h + .h {
-  border-left: 1px solid var(--rule-soft);
+.mgt2 .lock .pill.quiet {
+  padding-right: 9px;
 }
-.mgt2 .halves table {
-  width: 100%;
-  border-collapse: collapse;
+.mgt2 .lock .pill.warn {
+  color: var(--warn);
+  border-color: color-mix(in oklab, var(--warn) 55%, transparent);
+  background: color-mix(in oklab, var(--warn) 12%, transparent);
 }
-.mgt2 .halves td {
-  padding: 1px 0;
+.mgt2 .lock .pill.danger {
+  color: var(--danger);
+  border-color: color-mix(in oklab, var(--danger) 55%, transparent);
+  background: color-mix(in oklab, var(--danger) 10%, transparent);
+}
+.mgt2 .lock .pill button.x {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  min-height: 0;
+  padding: 0;
+  font-size: 10px;
+  line-height: 1;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: var(--cursor-pointer);
+  opacity: 0.75;
+}
+.mgt2 .lock .pill button.x:hover {
+  opacity: 1;
+  background: var(--hover);
+}
+.mgt2 .lock .dmpill {
+  justify-self: end;
+  padding: 0 8px;
+  font-family: var(--mono);
   font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
 }
-.mgt2 .halves td.w {
+.mgt2 .lock .dmpill.zero {
+  color: var(--faint);
+  border-color: var(--rule-soft);
+}
+
+.mgt2 .mgt2-world-panel .vacts .btn.hot,
+.mgt2 .mgt2-rail .vacts .btn.hot {
+  flex: 1 0 100%;
+  text-align: center;
+}
+
+.mgt2 ul.pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 ul.pick li {
+  padding: 2px 11px 3px;
   font-family: var(--cond);
   font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 ul.pick li.on {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+
+.mgt2 .traffic .plate .terms {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1px 8px;
+  margin-top: 3px;
+  font-family: var(--cond);
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--mute);
 }
-.mgt2 .halves td.d {
-  width: 1px;
-  padding-left: 8px;
+.mgt2 .traffic .plate .terms em {
+  font-style: normal;
   font-family: var(--mono);
-  font-size: 11.5px;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
+  letter-spacing: 0;
+  text-transform: none;
 }
-.mgt2 .halves td.d.pos {
-  color: var(--good);
-}
-.mgt2 .halves td.d.neg {
-  color: var(--danger);
-}
-.mgt2 .halves td.d.nil {
+.mgt2 .traffic .plate .terms em.nil {
   color: var(--faint);
-}
-.mgt2 .halves tr.sum td {
-  padding-top: 3px;
-  font-family: var(--cond);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  border-top: 1px solid var(--rule-soft);
 }
 
 .mgt2 p.hint.forbidden {
@@ -6193,11 +6941,7 @@ ul.softwares li:hover a {
   .mgt2 .uwp .u:nth-child(4) {
     border-right: 0;
   }
-  .mgt2 .halves {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .mgt2 .halves .h + .h {
-    border-top: 1px solid var(--rule-soft);
+  .mgt2 .uwp .u[data-cell=techLevel] {
     border-left: 0;
   }
 }
@@ -6207,21 +6951,12 @@ ul.softwares li:hover a {
     grid-template-rows: auto auto minmax(0, 1fr);
     grid-template-areas: "header" "rail" "panel";
   }
-  .mgt2 .uwp {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .mgt2 .uwp .u:nth-child(4) {
-    border-right: 1px solid var(--rule-soft);
-  }
-  .mgt2 .uwp .u:nth-child(2n) {
-    border-right: 0;
-  }
   .mgt2 .ledger .lr {
-    grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
   }
-  .mgt2 .ledger .lr .ov {
+  .mgt2 .ledger .lr .seg {
     grid-column: 2/-1;
-    justify-content: flex-end;
+    justify-self: end;
   }
 }
 .mgt2 .mgt2-damage-order {
@@ -6322,6 +7057,11 @@ ul.softwares li:hover a {
   font-size: 11.5px;
   line-height: 1.4;
   color: var(--mgt2-subrow-color);
+}
+
+.mgt2.application.item {
+  container-type: inline-size;
+  container-name: itemsheet;
 }
 
 .mgt2 .window-content.itemsheet {
@@ -6491,49 +7231,6 @@ ul.softwares li:hover a {
   min-width: 0;
   font-size: 12px;
 }
-.mgt2 .mast .supply .eq {
-  position: relative;
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 24px;
-  padding: 0 10px 0 7px;
-  font-family: var(--cond);
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--faint);
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  cursor: var(--cursor-pointer);
-}
-.mgt2 .mast .supply .eq input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-.mgt2 .mast .supply .eq .fa-circle-check {
-  display: none;
-}
-.mgt2 .mast .supply .eq:has(:checked) {
-  color: var(--accent-text);
-  background: var(--accent-soft);
-  border-color: var(--accent-line);
-}
-.mgt2 .mast .supply .eq:has(:checked) .fa-circle {
-  display: none;
-}
-.mgt2 .mast .supply .eq:has(:checked) .fa-circle-check {
-  display: inline;
-}
-.mgt2 .mast .supply .eq:focus-within {
-  border-color: var(--accent-text);
-}
 .mgt2 .mast .bind {
   grid-column: 1/-1;
   grid-row: 2;
@@ -6557,7 +7254,15 @@ ul.softwares li:hover a {
   border-radius: 999px;
 }
 .mgt2 .imain > nav.horizontal-tabs a.item.empty:not(.active) {
-  opacity: 0.5;
+  color: var(--faint);
+}
+.mgt2 .imain > nav.horizontal-tabs a.item.empty:not(.active):hover {
+  color: var(--accent-hot);
+}
+.mgt2 .imain > nav.horizontal-tabs a.item.empty:not(.active) .badge {
+  color: var(--faint);
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--rule);
 }
 
 .mgt2 .tab[data-group=item].active {
@@ -6656,13 +7361,23 @@ ul.softwares li:hover a {
   font-size: 11px;
 }
 
-.mgt2 .rollbar.dose-take .why {
-  flex: 1 1 auto;
-  font-family: var(--cond);
-  font-size: 9.5px;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  color: var(--faint);
+.mgt2 .cycle.dose {
+  flex: 1 0 100%;
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+.mgt2 .cycle.dose > i {
+  align-self: center;
+}
+.mgt2 .cycle.dose .plate {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.mgt2 .cycle .plate b.word {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
 }
 
 .mgt2 .rows .onset {
@@ -6709,8 +7424,53 @@ ul.softwares li:hover a {
   color: var(--faint);
 }
 
+.mgt2 .mast .terms {
+  grid-column: 3;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+.mgt2 .mast .terms .lbl {
+  font-size: 9.5px;
+}
+.mgt2 .mast .terms .bounty,
+.mgt2 .mast .terms .sum {
+  font-family: var(--cond);
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mgt2 .mast .terms .bounty u,
+.mgt2 .mast .terms .sum u {
+  margin-right: 3px;
+  font-size: 12px;
+  text-decoration: none;
+  color: var(--mute);
+}
+.mgt2 .mast .terms .per {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.mgt2 .mast .terms .was {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+  text-decoration: line-through;
+}
+
 .mgt2.hazard .itemsheet-header span {
   color: var(--danger);
+}
+
+.mgt2 ul.plates {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .mgt2 .plates {
@@ -6760,23 +7520,205 @@ ul.softwares li:hover a {
 .mgt2 .plate.harm b {
   color: var(--danger);
 }
-.mgt2 .plate .pips {
+.mgt2 .plate.gen b {
+  color: var(--good);
+}
+.mgt2 .plate .how {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+}
+.mgt2 .plate b .word {
+  font-size: 14px;
+}
+.mgt2 .plate.warn {
+  border-color: color-mix(in oklab, var(--warn) 45%, transparent);
+}
+.mgt2 .plate.warn b {
+  color: var(--warn);
+}
+
+.mgt2 .plate .psub {
+  font-size: 11.5px;
+  color: var(--faint);
+}
+
+.mgt2 .plate b a.ref {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 3px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .plate b a.ref:hover {
+  color: var(--accent-text);
+  text-decoration-color: var(--accent-line);
+}
+
+.mgt2 .tdm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 8px 18px;
+}
+.mgt2 .tdm .th {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .tdm ul {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .tdm li {
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+.mgt2 .tdm li.none {
+  display: block;
+  color: var(--faint);
+}
+.mgt2 .tdm li.ed {
+  grid-template-columns: minmax(0, 1fr) 4rem 1.2rem;
+}
+.mgt2 .tdm li.ed a {
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .tdm li.ed a:hover {
+  color: var(--accent-text);
+}
+.mgt2 .tdm .code {
+  font-family: var(--cond);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+.mgt2 .tdm .nm {
+  color: var(--mute);
+}
+.mgt2 .tdm .dm {
+  padding: 0 7px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .tdm .dm.zero {
+  color: var(--faint);
+}
+
+.mgt2 .plate .pips,
+.mgt2 .host .pips {
   display: flex;
   flex-wrap: wrap;
   gap: 3px;
   margin-top: 2px;
 }
-.mgt2 .plate .pips i {
+.mgt2 .plate .pips i,
+.mgt2 .host .pips i {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: var(--track);
 }
-.mgt2 .plate .pips i.on {
+.mgt2 .plate .pips i.on,
+.mgt2 .host .pips i.on {
   background: var(--accent-text);
 }
 
+.mgt2 .hosts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mgt2 .host .hhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+.mgt2 .host .nm {
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .host .nm:hover {
+  color: var(--accent-text);
+}
+.mgt2 .host .ld {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.mgt2 .host .ld b {
+  font-family: var(--cond);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .host .ld .u {
+  margin-left: 2px;
+  font-size: 11px;
+  color: var(--mute);
+}
+.mgt2 .host .ld .bar {
+  width: 5rem;
+}
+.mgt2 .host .same {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--faint);
+}
+
+.mgt2 .swap {
+  display: grid;
+  grid-template-columns: max-content minmax(0, max-content) auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 3px 9px;
+  margin: 5px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .swap li {
+  display: contents;
+}
+.mgt2 .swap s {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--faint);
+  overflow-wrap: anywhere;
+}
+.mgt2 .swap .to {
+  color: var(--faint);
+}
+.mgt2 .swap b {
+  font-family: var(--cond);
+  font-size: 15px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
 .mgt2 .plate .bar,
+.mgt2 .host .bar,
 .mgt2 .gauge .bar {
   display: block;
   height: 6px;
@@ -6786,6 +7728,7 @@ ul.softwares li:hover a {
   overflow: hidden;
 }
 .mgt2 .plate .bar i,
+.mgt2 .host .bar i,
 .mgt2 .gauge .bar i {
   display: block;
   height: 100%;
@@ -6828,53 +7771,39 @@ ul.softwares li:hover a {
   gap: 5px;
 }
 
-.mgt2 .gauge {
+.mgt2 .imain .gauge {
   display: grid;
   grid-template-columns: auto auto;
   justify-content: start;
   align-items: baseline;
   gap: 4px 10px;
 }
-.mgt2 .gauge > b {
+.mgt2 .imain .gauge > b {
   justify-self: end;
   font-family: var(--cond);
   font-size: 17px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.mgt2 .gauge > b .u {
+.mgt2 .imain .gauge > b .u {
   margin-left: 2px;
   font-size: 11.5px;
   font-weight: 500;
   color: var(--mute);
 }
-.mgt2 .gauge .cells,
-.mgt2 .gauge .bar {
+.mgt2 .imain .gauge .cells,
+.mgt2 .imain .gauge .bar {
   grid-column: 1/-1;
 }
-.mgt2 .gauge .bar {
+.mgt2 .imain .gauge .bar {
   width: 12rem;
 }
-.mgt2 .gauge .cells {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-}
-.mgt2 .gauge .cells i {
-  flex: 0 0 24px;
-  height: 8px;
-  background: var(--track);
-  border-radius: 2px;
-}
-.mgt2 .gauge .cells i.on {
-  background: var(--accent-text);
-}
-.mgt2 .gauge.over > b,
-.mgt2 .gauge.over > b .u {
+.mgt2 .imain .gauge.over > b,
+.mgt2 .imain .gauge.over > b .u {
   color: var(--danger);
 }
-.mgt2 .gauge.over .cells i.on,
-.mgt2 .gauge.over .bar i {
+.mgt2 .imain .gauge.over .cells i.on,
+.mgt2 .imain .gauge.over .bar i {
   background: var(--danger);
 }
 
@@ -6947,6 +7876,86 @@ ul.softwares li:hover a {
 .mgt2 .imain .pill.faint {
   color: var(--faint);
 }
+.mgt2 .imain .pill .sev {
+  display: inline-flex;
+  gap: 2px;
+}
+.mgt2 .imain .pill .sev i {
+  width: 6px;
+  height: 6px;
+  border: 1px solid currentColor;
+  border-radius: 1px;
+}
+.mgt2 .imain .pill .sev i.on {
+  background: currentColor;
+}
+.mgt2 .imain .pill.kept {
+  border-style: dashed;
+  color: var(--mute);
+}
+.mgt2 .imain .pill.kept b {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ink);
+}
+.mgt2 .imain .pill.kept .reset {
+  display: inline-flex;
+  font-size: 10px;
+  color: var(--faint);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .imain .pill.kept .reset:hover {
+  color: var(--accent-text);
+}
+.mgt2 .imain .pill.dashed {
+  border-style: dashed;
+}
+.mgt2 .imain .pill.text {
+  font-family: var(--body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.mgt2 .imain .pill > i {
+  font-size: 9.5px;
+  color: var(--faint);
+}
+.mgt2 .imain .mast .mastpills {
+  margin-top: 7px;
+}
+.mgt2 .imain multi-checkbox.tpills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.mgt2 .imain multi-checkbox.tpills label.checkbox {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  padding: 2px 10px 2px 7px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .imain multi-checkbox.tpills label.checkbox input {
+  margin: 0;
+  accent-color: var(--accent-text);
+}
+.mgt2 .imain multi-checkbox.tpills label.checkbox:has(input:checked) {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
 
 .mgt2 .facts {
   display: grid;
@@ -7013,32 +8022,250 @@ ul.softwares li:hover a {
   font-size: 11.5px;
   color: var(--faint);
 }
+.mgt2 .tiles .k {
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.mgt2 .tiles .tile.off {
+  border-color: var(--rule-soft);
+}
+.mgt2 .tiles .tile.off .k,
+.mgt2 .tiles .tile.off b {
+  color: var(--faint);
+}
 
-.mgt2 .carried {
+.mgt2 .stationacts {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mgt2 .stepgrp {
+  display: flex;
+  flex-direction: column;
+}
+
+.mgt2 .stephead {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding-bottom: 3px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mute);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .stephead b {
+  font-family: var(--mono);
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--faint);
+}
+.mgt2 .stephead i {
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: none;
+  color: var(--faint);
+}
+
+.mgt2 .stepgrp .act {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr) 9.5rem;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 6px 2px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .stepgrp .act:last-child {
+  border-bottom: 0;
+}
+.mgt2 .stepgrp .act .nm {
+  font-family: var(--cond);
+  font-size: 14px;
+  font-weight: 700;
+}
+.mgt2 .stepgrp .act .roll {
+  display: flex;
   flex-wrap: wrap;
-  gap: 8px 20px;
+  align-items: baseline;
+  gap: 3px 6px;
+  font-family: var(--cond);
+  font-size: 13px;
 }
-.mgt2 .carried .chk {
+.mgt2 .stepgrp .act .roll .op {
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.mgt2 .stepgrp .act .roll abbr {
+  text-decoration: none;
+  font-weight: 600;
+  cursor: help;
+}
+.mgt2 .stepgrp .act .roll .none {
+  color: var(--faint);
+}
+.mgt2 .stepgrp .act .dm {
+  padding: 0 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .stepgrp .act .dm:hover {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+}
+.mgt2 .stepgrp .act .tail {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 2px 8px;
 }
-.mgt2 .carried .chk input {
-  margin: 0;
-  accent-color: var(--accent-text);
-}
-.mgt2 .carried .chk span {
+.mgt2 .stepgrp .act .kp {
+  padding: 0 7px;
   font-family: var(--cond);
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .stepgrp .act .cap {
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--faint);
+}
+
+.mgt2 table.rows.acted tbody tr td {
+  border-bottom: 0;
+}
+.mgt2 table.rows.acted tbody + tbody tr:first-child td {
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2 table.rows.acted tbody:hover tr {
+  background: var(--hover);
+}
+.mgt2 table.rows.acted tbody tr:hover {
+  background: none;
+}
+.mgt2 table.rows.acted td {
+  padding: 3px 4px;
+}
+.mgt2 table.rows.acted .f {
+  font-size: 12px;
+}
+.mgt2 table.rows.acted thead tr + tr th {
+  padding-top: 0;
+}
+
+.mgt2 .mast .supply.station .sedit {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.mgt2 .mast .supply.station .sline .none {
+  color: var(--faint);
+}
+
+.mgt2 .lede {
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.mgt2 .imain .eq {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 10px 0 7px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .imain .eq input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.mgt2 .imain .eq .fa-circle-check {
+  display: none;
+}
+.mgt2 .imain .eq:has(:checked), .mgt2 .imain .eq.on {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+.mgt2 .imain .eq:has(:checked) .fa-circle, .mgt2 .imain .eq.on .fa-circle {
+  display: none;
+}
+.mgt2 .imain .eq:has(:checked) .fa-circle-check, .mgt2 .imain .eq.on .fa-circle-check {
+  display: inline;
+}
+.mgt2 .imain .eq:focus-within {
+  border-color: var(--accent-text);
+}
+.mgt2 .imain .eq:has(input:disabled) {
+  cursor: default;
+}
+
+.mgt2 .imain button.eq {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+  background: none;
+  box-shadow: none;
+}
+.mgt2 .imain button.eq.on {
+  background: var(--accent-soft);
+}
+
+.mgt2 .bagstrip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+.mgt2 .bagstrip .where {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
   color: var(--mute);
 }
-.mgt2 .carried .chk input:checked + span {
-  color: var(--accent-text);
+.mgt2 .bagstrip .statline {
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+}
+.mgt2 .bagstrip .statline .stat {
+  padding: 0;
 }
 
 .mgt2 .prose {
@@ -7060,6 +8287,16 @@ ul.softwares li:hover a {
 .mgt2 .imain document-tags {
   min-width: 0;
   font-size: 12px;
+}
+.mgt2 .imain .grid .segcell {
+  grid-column: 1/-1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.mgt2 .imain .grid .seg label {
+  flex-direction: row;
 }
 .mgt2 .imain .pair {
   display: flex;
@@ -7091,23 +8328,6 @@ ul.softwares li:hover a {
 }
 .mgt2 .imain .grid .gsub:first-child {
   margin-top: 0;
-}
-.mgt2 .imain .grid label.check {
-  justify-self: start;
-  padding: 3px 11px 3px 8px;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  cursor: var(--cursor-pointer);
-}
-.mgt2 .imain .grid label.check:has(input:checked) {
-  background: var(--accent-soft);
-  border-color: var(--accent-line);
-}
-.mgt2 .imain .grid label.check:has(input:checked) span {
-  color: var(--accent-text);
-}
-.mgt2 .imain .grid label.check.off {
-  opacity: 0.55;
 }
 
 .mgt2 .codes .code input {
@@ -7158,60 +8378,14 @@ ul.softwares li:hover a {
   color: var(--danger);
 }
 
-.mgt2 .terms {
-  grid-column: 3;
-  grid-row: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 5px;
-}
-.mgt2 .terms .bounty {
-  font-family: var(--cond);
-  font-size: 25px;
-  font-weight: 700;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.mgt2 .terms .bounty u {
-  margin-right: 3px;
-  font-size: 12px;
-  text-decoration: none;
-  color: var(--mute);
-}
-.mgt2 .terms .was {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  color: var(--faint);
-  text-decoration: line-through;
-}
-.mgt2 .terms .prio {
-  padding: 1px 7px;
-  font-family: var(--cond);
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: var(--accent-text);
-  border: 1px solid var(--accent-line);
-}
-.mgt2 .terms .prio.crit {
-  color: var(--danger);
-  border-color: var(--danger);
-}
-
 .mgt2 nav.horizontal-tabs a.item.gmtab {
-  color: var(--danger);
-  opacity: 0.72;
+  color: color-mix(in oklab, var(--danger) 70%, var(--faint));
 }
 .mgt2 nav.horizontal-tabs a.item.gmtab:hover {
   color: var(--danger);
 }
 .mgt2 nav.horizontal-tabs a.item.gmtab.active {
   color: var(--danger);
-  opacity: 1;
 }
 .mgt2 nav.horizontal-tabs a.item.gmtab.active::after {
   border-bottom-color: var(--danger);
@@ -7263,14 +8437,35 @@ ul.softwares li:hover a {
 .mgt2 .fields {
   display: flex;
   flex-direction: column;
-  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
+.mgt2 .fields > li {
+  display: grid;
+  grid-template-columns: 6.4rem minmax(0, 1fr);
+  gap: 4px 10px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .fields > li:last-child {
+  border-bottom: 0;
+}
 .mgt2 .fields > li > .lbl {
-  display: block;
-  margin-bottom: 1px;
+  color: var(--faint);
+}
+.mgt2 .fields > li > .v {
+  min-width: 0;
+}
+.mgt2 .fields > li > .v > .grid {
+  margin-top: 6px;
+}
+.mgt2 .fields .pill.rep {
+  font-family: var(--mono);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .mgt2 .subj {
@@ -7294,31 +8489,6 @@ ul.softwares li:hover a {
   color: var(--mute);
 }
 .mgt2 .subj .alt.gm {
-  color: var(--danger);
-}
-
-.mgt2 .taken {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex-wrap: wrap;
-  padding: 7px 9px;
-  background: var(--hover);
-  border: 1px solid var(--rule);
-}
-.mgt2 .taken .lbl {
-  flex: none;
-}
-.mgt2 .taken.empty {
-  border-style: dashed;
-}
-.mgt2 .taken .rep {
-  margin-left: auto;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--faint);
-}
-.mgt2 .taken .rep.short {
   color: var(--danger);
 }
 
@@ -7359,7 +8529,10 @@ ul.softwares li:hover a {
   width: 4rem;
 }
 .mgt2 .reveal .tell {
-  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px 2px 7px;
   font: inherit;
   font-family: var(--cond);
   font-size: 10px;
@@ -7370,20 +8543,20 @@ ul.softwares li:hover a {
   color: var(--faint);
   background: none;
   border: 1px solid var(--rule);
-  border-radius: 2px;
+  border-radius: 999px;
   cursor: var(--cursor-pointer);
 }
 .mgt2 .reveal .tell:hover {
   color: var(--accent-text);
   border-color: var(--accent-line);
 }
+.mgt2 .reveal .r .k {
+  color: var(--mute);
+}
 .mgt2 .reveal .r.told .tell {
   color: var(--accent-text);
   background: var(--accent-soft);
   border-color: var(--accent-line);
-}
-.mgt2 .reveal .r.told .k {
-  color: var(--accent-text);
 }
 .mgt2 .reveal .r.held .v {
   color: var(--mute);
@@ -7410,55 +8583,91 @@ ul.softwares li:hover a {
   color: var(--mute);
 }
 
-.mgt2 .act {
+.mgt2 .proll {
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  padding: 9px 11px;
-  background: var(--hover);
-  border: 1px solid var(--rule);
+  gap: 4px;
+  padding: 9px 0 10px;
+  border-bottom: 1px solid var(--rule-soft);
 }
-.mgt2 .act .top {
+.mgt2 .proll:last-child {
+  border-bottom: 0;
+}
+.mgt2 .proll .head {
   display: flex;
   align-items: baseline;
   gap: 9px;
   flex-wrap: wrap;
 }
-.mgt2 .act .top h4 {
+.mgt2 .proll .head h4 {
   margin: 0;
   font-family: var(--cond);
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
 }
-.mgt2 .act .top .cite {
-  margin-left: auto;
+.mgt2 .proll .head .cite {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 10.5px;
   color: var(--faint);
 }
-.mgt2 .act .line {
+.mgt2 .proll .head .btn-roll {
+  align-self: center;
+}
+.mgt2 .proll .dmp {
+  padding: 0 7px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .proll .dmp:hover {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+}
+.mgt2 .proll .dmp.zero {
+  color: var(--faint);
+}
+.mgt2 .proll .line {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
   font-size: 12.5px;
   line-height: 1.5;
   color: var(--mute);
 }
-.mgt2 .act .row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
+.mgt2 .proll .mk svg {
+  width: 12px;
+  height: 12px;
+  margin-top: 0.15em;
 }
-.mgt2 .act .out {
-  font-family: var(--mono);
+.mgt2 .proll .why {
+  margin: 0;
   font-size: 11.5px;
-  color: var(--accent-text);
+  color: var(--faint);
 }
-.mgt2 .act .out.bad {
-  color: var(--danger);
+.mgt2 .proll details.fold {
+  margin-top: 2px;
 }
-.mgt2 .act.spent {
-  opacity: 0.75;
+.mgt2 .proll .circ {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .proll .circ label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .proll .circ label input {
+  margin: 0;
+  accent-color: var(--accent-text);
 }
 
 .mgt2 .genbar {
@@ -7469,7 +8678,7 @@ ul.softwares li:hover a {
 }
 .mgt2 .genbar .why {
   font-size: 11.5px;
-  color: var(--danger);
+  color: var(--faint);
 }
 
 .mgt2 .gen {
@@ -7493,7 +8702,7 @@ ul.softwares li:hover a {
   color: var(--faint);
 }
 .mgt2 .gen .d {
-  color: var(--accent-text);
+  color: var(--mute);
   font-variant-numeric: tabular-nums;
 }
 .mgt2 .gen .t {
@@ -7511,10 +8720,13 @@ ul.softwares li:hover a {
 }
 .mgt2 .gen .g.chained .t::before {
   content: "↳";
-  color: var(--danger);
+  color: var(--faint);
 }
-.mgt2 .gen .g.waiting {
-  opacity: 0.45;
+.mgt2 .gen .g.waiting .n,
+.mgt2 .gen .g.waiting .d,
+.mgt2 .gen .g.waiting .t,
+.mgt2 .gen .g.waiting .f {
+  color: var(--faint);
 }
 
 li.chat-message {
@@ -8894,49 +10106,6 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.mgt2.card .hold {
-  padding: 7px 11px;
-  font-family: var(--cond);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--faint);
-  border-top: 1px solid var(--rule-soft);
-}
-.mgt2.card .hold .line {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 10px;
-}
-.mgt2.card .hold .line .hot {
-  margin-left: auto;
-  color: var(--danger);
-}
-.mgt2.card .hold .bar {
-  position: relative;
-  display: flex;
-  height: 6px;
-  margin-top: 5px;
-  background: var(--track);
-}
-.mgt2.card .hold .bar i {
-  background: var(--mute);
-}
-.mgt2.card .hold .bar i.now {
-  background: var(--accent-line);
-}
-.mgt2.card .hold .bar i.cap {
-  position: absolute;
-  top: -2px;
-  bottom: -2px;
-  width: 2px;
-  margin-left: -1px;
-  background: var(--ink);
-}
-.mgt2.card .hold.over .bar i.now {
-  background: var(--danger);
-}
 .mgt2.card q.quote {
   display: block;
   padding: 7px 11px 0;
@@ -9067,6 +10236,72 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 .mgt2-jumped {
   background: var(--accent-text);
   transition: background-color 0.5s ease-out;
+}
+
+.mgt2.card .hold,
+.mgt2 .imain .hold {
+  padding: 7px 11px;
+  font-family: var(--cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border-top: 1px solid var(--rule-soft);
+}
+.mgt2.card .hold .line,
+.mgt2 .imain .hold .line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+.mgt2.card .hold .line .hot,
+.mgt2 .imain .hold .line .hot {
+  margin-left: auto;
+  color: var(--danger);
+}
+.mgt2.card .hold .bar,
+.mgt2 .imain .hold .bar {
+  position: relative;
+  display: flex;
+  height: 6px;
+  margin-top: 5px;
+  background: var(--track);
+}
+.mgt2.card .hold .bar i,
+.mgt2 .imain .hold .bar i {
+  background: var(--mute);
+}
+.mgt2.card .hold .bar i.now,
+.mgt2 .imain .hold .bar i.now {
+  background: var(--accent-line);
+}
+.mgt2.card .hold .bar i.cap,
+.mgt2 .imain .hold .bar i.cap {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--ink);
+}
+.mgt2.card .hold.over .bar i.now,
+.mgt2 .imain .hold.over .bar i.now {
+  background: var(--danger);
+}
+
+.mgt2 .imain .hold {
+  padding: 0;
+  border-top: 0;
+}
+.mgt2 .imain .hold .line .hot.why {
+  flex-basis: 100%;
+  margin-left: 0;
+  font-family: var(--body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .mgt2 .mgt2-combat-head {
@@ -13563,7 +14798,7 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   background: var(--accent-soft);
 }
 
-.mgt2 .careerblk .pfields, .mgt2 .careertbl .pfields, .mgt2 .speciesblk .pfields, .mgt2 .speciesfrm .pfields {
+.mgt2 .careerblk .pfields, .mgt2 .careertbl .pfields, .mgt2 .careerevents .pfields, .mgt2 .speciesblk .pfields, .mgt2 .speciesfrm .pfields {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -13571,7 +14806,7 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   min-width: 0;
   margin: 4px 0;
 }
-.mgt2 .careerblk .pfields > label, .mgt2 .careertbl .pfields > label, .mgt2 .speciesblk .pfields > label, .mgt2 .speciesfrm .pfields > label {
+.mgt2 .careerblk .pfields > label, .mgt2 .careertbl .pfields > label, .mgt2 .careerevents .pfields > label, .mgt2 .speciesblk .pfields > label, .mgt2 .speciesfrm .pfields > label {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
@@ -13579,24 +14814,24 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   flex: 1 1 14rem;
   min-width: 0;
 }
-.mgt2 .careerblk .pfields > label.wide, .mgt2 .careertbl .pfields > label.wide, .mgt2 .speciesblk .pfields > label.wide, .mgt2 .speciesfrm .pfields > label.wide {
+.mgt2 .careerblk .pfields > label.wide, .mgt2 .careertbl .pfields > label.wide, .mgt2 .careerevents .pfields > label.wide, .mgt2 .speciesblk .pfields > label.wide, .mgt2 .speciesfrm .pfields > label.wide {
   flex: 1 1 100%;
 }
-.mgt2 .careerblk .pfields .lbl, .mgt2 .careertbl .pfields .lbl, .mgt2 .speciesblk .pfields .lbl, .mgt2 .speciesfrm .pfields .lbl {
+.mgt2 .careerblk .pfields .lbl, .mgt2 .careertbl .pfields .lbl, .mgt2 .careerevents .pfields .lbl, .mgt2 .speciesblk .pfields .lbl, .mgt2 .speciesfrm .pfields .lbl {
   flex: 0 0 auto;
 }
-.mgt2 .careerblk .pfields .f, .mgt2 .careertbl .pfields .f, .mgt2 .speciesblk .pfields .f, .mgt2 .speciesfrm .pfields .f {
+.mgt2 .careerblk .pfields .f, .mgt2 .careertbl .pfields .f, .mgt2 .careerevents .pfields .f, .mgt2 .speciesblk .pfields .f, .mgt2 .speciesfrm .pfields .f {
   flex: 1 1 5rem;
   min-width: 4.5rem;
 }
-.mgt2 .careerblk .pfields .f.num, .mgt2 .careertbl .pfields .f.num, .mgt2 .speciesblk .pfields .f.num, .mgt2 .speciesfrm .pfields .f.num {
+.mgt2 .careerblk .pfields .f.num, .mgt2 .careertbl .pfields .f.num, .mgt2 .careerevents .pfields .f.num, .mgt2 .speciesblk .pfields .f.num, .mgt2 .speciesfrm .pfields .f.num {
   flex: 0 0 3.4rem;
   min-width: 0;
   text-align: right;
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
 }
-.mgt2 .careerblk .pfields .f.whole, .mgt2 .careertbl .pfields .f.whole, .mgt2 .speciesblk .pfields .f.whole, .mgt2 .speciesfrm .pfields .f.whole {
+.mgt2 .careerblk .pfields .f.whole, .mgt2 .careertbl .pfields .f.whole, .mgt2 .careerevents .pfields .f.whole, .mgt2 .speciesblk .pfields .f.whole, .mgt2 .speciesfrm .pfields .f.whole {
   flex: 0 1 auto;
   width: auto;
 }
@@ -13606,7 +14841,10 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 .mgt2 .careerblk .pfields .gate[data-gate=sex] :is(.g-min, .g-max), .mgt2 .careertbl .pfields .gate[data-gate=""] :is(.g-characteristic, .g-key, .g-min, .g-max),
 .mgt2 .careertbl .pfields .gate[data-gate=characteristic] .g-key,
 .mgt2 .careertbl .pfields .gate:not([data-gate=characteristic]) .g-characteristic,
-.mgt2 .careertbl .pfields .gate[data-gate=sex] :is(.g-min, .g-max), .mgt2 .speciesblk .pfields .gate[data-gate=""] :is(.g-characteristic, .g-key, .g-min, .g-max),
+.mgt2 .careertbl .pfields .gate[data-gate=sex] :is(.g-min, .g-max), .mgt2 .careerevents .pfields .gate[data-gate=""] :is(.g-characteristic, .g-key, .g-min, .g-max),
+.mgt2 .careerevents .pfields .gate[data-gate=characteristic] .g-key,
+.mgt2 .careerevents .pfields .gate:not([data-gate=characteristic]) .g-characteristic,
+.mgt2 .careerevents .pfields .gate[data-gate=sex] :is(.g-min, .g-max), .mgt2 .speciesblk .pfields .gate[data-gate=""] :is(.g-characteristic, .g-key, .g-min, .g-max),
 .mgt2 .speciesblk .pfields .gate[data-gate=characteristic] .g-key,
 .mgt2 .speciesblk .pfields .gate:not([data-gate=characteristic]) .g-characteristic,
 .mgt2 .speciesblk .pfields .gate[data-gate=sex] :is(.g-min, .g-max), .mgt2 .speciesfrm .pfields .gate[data-gate=""] :is(.g-characteristic, .g-key, .g-min, .g-max),
@@ -13615,7 +14853,7 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 .mgt2 .speciesfrm .pfields .gate[data-gate=sex] :is(.g-min, .g-max) {
   display: none;
 }
-.mgt2 .careerblk label.chk, .mgt2 .careertbl label.chk, .mgt2 .speciesblk label.chk, .mgt2 .speciesfrm label.chk {
+.mgt2 .careerblk label.chk, .mgt2 .careertbl label.chk, .mgt2 .careerevents label.chk, .mgt2 .speciesblk label.chk, .mgt2 .speciesfrm label.chk {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -13623,25 +14861,25 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   font-size: 11.5px;
   color: var(--faint);
 }
-.mgt2 .careerblk label.chk input, .mgt2 .careertbl label.chk input, .mgt2 .speciesblk label.chk input, .mgt2 .speciesfrm label.chk input {
+.mgt2 .careerblk label.chk input, .mgt2 .careertbl label.chk input, .mgt2 .careerevents label.chk input, .mgt2 .speciesblk label.chk input, .mgt2 .speciesfrm label.chk input {
   margin: 0;
 }
-.mgt2 .careerblk .flags, .mgt2 .careertbl .flags, .mgt2 .speciesblk .flags, .mgt2 .speciesfrm .flags {
+.mgt2 .careerblk .flags, .mgt2 .careertbl .flags, .mgt2 .careerevents .flags, .mgt2 .speciesblk .flags, .mgt2 .speciesfrm .flags {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 14px;
   margin: 6px 0 2px;
 }
-.mgt2 .careerblk .del, .mgt2 .careertbl .del, .mgt2 .speciesblk .del, .mgt2 .speciesfrm .del {
+.mgt2 .careerblk .del, .mgt2 .careertbl .del, .mgt2 .careerevents .del, .mgt2 .speciesblk .del, .mgt2 .speciesfrm .del {
   flex: 0 0 auto;
   margin-left: auto;
   font-size: 11px;
   color: var(--faint);
 }
-.mgt2 .careerblk .del:hover, .mgt2 .careertbl .del:hover, .mgt2 .speciesblk .del:hover, .mgt2 .speciesfrm .del:hover {
+.mgt2 .careerblk .del:hover, .mgt2 .careertbl .del:hover, .mgt2 .careerevents .del:hover, .mgt2 .speciesblk .del:hover, .mgt2 .speciesfrm .del:hover {
   color: var(--accent-text);
 }
-.mgt2 .careerblk .add, .mgt2 .careertbl .add, .mgt2 .speciesblk .add, .mgt2 .speciesfrm .add {
+.mgt2 .careerblk .add, .mgt2 .careertbl .add, .mgt2 .careerevents .add, .mgt2 .speciesblk .add, .mgt2 .speciesfrm .add {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -13652,16 +14890,16 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   text-transform: uppercase;
   color: var(--faint);
 }
-.mgt2 .careerblk .add:hover, .mgt2 .careertbl .add:hover, .mgt2 .speciesblk .add:hover, .mgt2 .speciesfrm .add:hover {
+.mgt2 .careerblk .add:hover, .mgt2 .careertbl .add:hover, .mgt2 .careerevents .add:hover, .mgt2 .speciesblk .add:hover, .mgt2 .speciesfrm .add:hover {
   color: var(--accent-text);
 }
 
-.mgt2 .careerblk .stack, .mgt2 .careertbl .stack, .mgt2 .speciesblk .stack, .mgt2 .speciesfrm .stack {
+.mgt2 .careerblk .stack, .mgt2 .careertbl .stack, .mgt2 .careerevents .stack, .mgt2 .speciesblk .stack, .mgt2 .speciesfrm .stack {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.mgt2 .careerblk .entry, .mgt2 .careertbl .entry, .mgt2 .speciesblk .entry, .mgt2 .speciesfrm .entry {
+.mgt2 .careerblk .entry, .mgt2 .careertbl .entry, .mgt2 .careerevents .entry, .mgt2 .speciesblk .entry, .mgt2 .speciesfrm .entry {
   --mute: color-mix(in oklab, var(--ink) var(--i-mute), var(--sunk));
   --faint: color-mix(in oklab, var(--ink) var(--i-faint), var(--sunk));
   --fill: color-mix(in oklab, var(--ink) var(--i-fill), var(--sunk));
@@ -13670,29 +14908,29 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   padding: 5px 7px;
   background: var(--sunk);
 }
-.mgt2 .careerblk .entryhead, .mgt2 .careertbl .entryhead, .mgt2 .speciesblk .entryhead, .mgt2 .speciesfrm .entryhead {
+.mgt2 .careerblk .entryhead, .mgt2 .careertbl .entryhead, .mgt2 .careerevents .entryhead, .mgt2 .speciesblk .entryhead, .mgt2 .speciesfrm .entryhead {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 5px;
 }
-.mgt2 .careerblk .entryhead .f, .mgt2 .careertbl .entryhead .f, .mgt2 .speciesblk .entryhead .f, .mgt2 .speciesfrm .entryhead .f {
+.mgt2 .careerblk .entryhead .f, .mgt2 .careertbl .entryhead .f, .mgt2 .careerevents .entryhead .f, .mgt2 .speciesblk .entryhead .f, .mgt2 .speciesfrm .entryhead .f {
   flex: 1 1 6rem;
   min-width: 0;
 }
-.mgt2 .careerblk .entryhead .f.num, .mgt2 .careertbl .entryhead .f.num, .mgt2 .speciesblk .entryhead .f.num, .mgt2 .speciesfrm .entryhead .f.num {
+.mgt2 .careerblk .entryhead .f.num, .mgt2 .careertbl .entryhead .f.num, .mgt2 .careerevents .entryhead .f.num, .mgt2 .speciesblk .entryhead .f.num, .mgt2 .speciesfrm .entryhead .f.num {
   flex: 0 0 3rem;
   text-align: right;
 }
-.mgt2 .careerblk .entryhead .f.wide, .mgt2 .careertbl .entryhead .f.wide, .mgt2 .speciesblk .entryhead .f.wide, .mgt2 .speciesfrm .entryhead .f.wide {
+.mgt2 .careerblk .entryhead .f.wide, .mgt2 .careertbl .entryhead .f.wide, .mgt2 .careerevents .entryhead .f.wide, .mgt2 .speciesblk .entryhead .f.wide, .mgt2 .speciesfrm .entryhead .f.wide {
   flex: 4 1 16rem;
 }
-.mgt2 .careerblk .nest, .mgt2 .careertbl .nest, .mgt2 .speciesblk .nest, .mgt2 .speciesfrm .nest {
+.mgt2 .careerblk .nest, .mgt2 .careertbl .nest, .mgt2 .careerevents .nest, .mgt2 .speciesblk .nest, .mgt2 .speciesfrm .nest {
   margin: 5px 0 0 10px;
   padding-left: 8px;
   border-left: 1px solid var(--rule);
 }
-.mgt2 .careerblk .nlbl, .mgt2 .careertbl .nlbl, .mgt2 .speciesblk .nlbl, .mgt2 .speciesfrm .nlbl {
+.mgt2 .careerblk .nlbl, .mgt2 .careertbl .nlbl, .mgt2 .careerevents .nlbl, .mgt2 .speciesblk .nlbl, .mgt2 .speciesfrm .nlbl {
   display: block;
   font-family: var(--cond);
   font-size: 10px;
@@ -13700,26 +14938,26 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   text-transform: uppercase;
   color: var(--faint);
 }
-.mgt2 .careerblk .nrow, .mgt2 .careertbl .nrow, .mgt2 .speciesblk .nrow, .mgt2 .speciesfrm .nrow {
+.mgt2 .careerblk .nrow, .mgt2 .careertbl .nrow, .mgt2 .careerevents .nrow, .mgt2 .speciesblk .nrow, .mgt2 .speciesfrm .nrow {
   display: flex;
   align-items: flex-start;
   gap: 5px;
   padding: 2px 0;
 }
-.mgt2 .careerblk .nrow .f, .mgt2 .careertbl .nrow .f, .mgt2 .speciesblk .nrow .f, .mgt2 .speciesfrm .nrow .f {
+.mgt2 .careerblk .nrow .f, .mgt2 .careertbl .nrow .f, .mgt2 .careerevents .nrow .f, .mgt2 .speciesblk .nrow .f, .mgt2 .speciesfrm .nrow .f {
   flex: 1 1 6rem;
   min-width: 0;
 }
-.mgt2 .careerblk .nrow .f.num, .mgt2 .careertbl .nrow .f.num, .mgt2 .speciesblk .nrow .f.num, .mgt2 .speciesfrm .nrow .f.num {
+.mgt2 .careerblk .nrow .f.num, .mgt2 .careertbl .nrow .f.num, .mgt2 .careerevents .nrow .f.num, .mgt2 .speciesblk .nrow .f.num, .mgt2 .speciesfrm .nrow .f.num {
   flex: 0 0 3rem;
   text-align: right;
 }
-.mgt2 .careerblk .nrow.inline, .mgt2 .careertbl .nrow.inline, .mgt2 .speciesblk .nrow.inline, .mgt2 .speciesfrm .nrow.inline {
+.mgt2 .careerblk .nrow.inline, .mgt2 .careertbl .nrow.inline, .mgt2 .careerevents .nrow.inline, .mgt2 .speciesblk .nrow.inline, .mgt2 .speciesfrm .nrow.inline {
   display: inline-flex;
   align-items: center;
   margin-right: 8px;
 }
-.mgt2 .careerblk .ord, .mgt2 .careertbl .ord, .mgt2 .speciesblk .ord, .mgt2 .speciesfrm .ord {
+.mgt2 .careerblk .ord, .mgt2 .careertbl .ord, .mgt2 .careerevents .ord, .mgt2 .speciesblk .ord, .mgt2 .speciesfrm .ord {
   flex: 0 0 1.3rem;
   font-family: var(--mono);
   font-size: 11px;
@@ -13727,83 +14965,105 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   color: var(--faint);
   text-align: right;
 }
-.mgt2 .careerblk .trayrow, .mgt2 .careertbl .trayrow, .mgt2 .speciesblk .trayrow, .mgt2 .speciesfrm .trayrow {
+.mgt2 .careerblk .trayrow, .mgt2 .careertbl .trayrow, .mgt2 .careerevents .trayrow, .mgt2 .speciesblk .trayrow, .mgt2 .speciesfrm .trayrow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
   padding: 2px 0;
 }
-.mgt2 .careerblk .trayrow .f, .mgt2 .careertbl .trayrow .f, .mgt2 .speciesblk .trayrow .f, .mgt2 .speciesfrm .trayrow .f {
+.mgt2 .careerblk .trayrow .f, .mgt2 .careertbl .trayrow .f, .mgt2 .careerevents .trayrow .f, .mgt2 .speciesblk .trayrow .f, .mgt2 .speciesfrm .trayrow .f {
   flex: 1 1 5rem;
   min-width: 0;
 }
-.mgt2 .careerblk .trayrow .f.kind, .mgt2 .careertbl .trayrow .f.kind, .mgt2 .speciesblk .trayrow .f.kind, .mgt2 .speciesfrm .trayrow .f.kind {
+.mgt2 .careerblk .trayrow .f.kind, .mgt2 .careertbl .trayrow .f.kind, .mgt2 .careerevents .trayrow .f.kind, .mgt2 .speciesblk .trayrow .f.kind, .mgt2 .speciesfrm .trayrow .f.kind {
   flex: 0 0 7rem;
 }
-.mgt2 .careerblk .trayrow .f.num, .mgt2 .careertbl .trayrow .f.num, .mgt2 .speciesblk .trayrow .f.num, .mgt2 .speciesfrm .trayrow .f.num {
+.mgt2 .careerblk .trayrow .f.num, .mgt2 .careertbl .trayrow .f.num, .mgt2 .careerevents .trayrow .f.num, .mgt2 .speciesblk .trayrow .f.num, .mgt2 .speciesfrm .trayrow .f.num {
   flex: 0 0 3rem;
   text-align: right;
 }
-.mgt2 .careerblk .trayrow .f.wide, .mgt2 .careertbl .trayrow .f.wide, .mgt2 .speciesblk .trayrow .f.wide, .mgt2 .speciesfrm .trayrow .f.wide {
+.mgt2 .careerblk .trayrow .f.wide, .mgt2 .careertbl .trayrow .f.wide, .mgt2 .careerevents .trayrow .f.wide, .mgt2 .speciesblk .trayrow .f.wide, .mgt2 .speciesfrm .trayrow .f.wide {
   flex: 1 1 100%;
 }
-.mgt2 .careerblk .cell, .mgt2 .careertbl .cell, .mgt2 .speciesblk .cell, .mgt2 .speciesfrm .cell {
+.mgt2 .careerblk .cell, .mgt2 .careertbl .cell, .mgt2 .careerevents .cell, .mgt2 .speciesblk .cell, .mgt2 .speciesfrm .cell {
   flex: 1 1 auto;
   min-width: 0;
 }
-.mgt2 .careerblk .cellhead, .mgt2 .careertbl .cellhead, .mgt2 .speciesblk .cellhead, .mgt2 .speciesfrm .cellhead {
+.mgt2 .careerblk .cellhead, .mgt2 .careertbl .cellhead, .mgt2 .careerevents .cellhead, .mgt2 .speciesblk .cellhead, .mgt2 .speciesfrm .cellhead {
   display: flex;
   align-items: center;
   gap: 5px;
 }
-.mgt2 .careerblk .cellhead .f, .mgt2 .careertbl .cellhead .f, .mgt2 .speciesblk .cellhead .f, .mgt2 .speciesfrm .cellhead .f {
+.mgt2 .careerblk .cellhead .f, .mgt2 .careertbl .cellhead .f, .mgt2 .careerevents .cellhead .f, .mgt2 .speciesblk .cellhead .f, .mgt2 .speciesfrm .cellhead .f {
   flex: 1 1 auto;
   min-width: 0;
 }
-.mgt2 .careerblk .grantcount, .mgt2 .careertbl .grantcount, .mgt2 .speciesblk .grantcount, .mgt2 .speciesfrm .grantcount {
+.mgt2 .careerblk .grantcount, .mgt2 .careertbl .grantcount, .mgt2 .careerevents .grantcount, .mgt2 .speciesblk .grantcount, .mgt2 .speciesfrm .grantcount {
   flex: 0 0 auto;
-  min-width: 1.1rem;
+  width: auto;
+  min-width: 1.6rem;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 1px 5px;
+  font: inherit;
   font-family: var(--mono);
   font-size: 10.5px;
+  line-height: 1.4;
   text-align: center;
   color: var(--accent-text);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: var(--cursor-pointer);
 }
-.mgt2 .careerblk .grantcount.none, .mgt2 .careertbl .grantcount.none, .mgt2 .speciesblk .grantcount.none, .mgt2 .speciesfrm .grantcount.none {
+.mgt2 .careerblk .grantcount:hover, .mgt2 .careertbl .grantcount:hover, .mgt2 .careerevents .grantcount:hover, .mgt2 .speciesblk .grantcount:hover, .mgt2 .speciesfrm .grantcount:hover {
+  border-color: var(--accent-line);
+}
+.mgt2 .careerblk .grantcount.none, .mgt2 .careertbl .grantcount.none, .mgt2 .careerevents .grantcount.none, .mgt2 .speciesblk .grantcount.none, .mgt2 .speciesfrm .grantcount.none {
   color: var(--faint);
 }
-.mgt2 .careerblk .grants, .mgt2 .careertbl .grants, .mgt2 .speciesblk .grants, .mgt2 .speciesfrm .grants {
+.mgt2 .careerblk .cell.open > .cellhead .grantcount, .mgt2 .careertbl .cell.open > .cellhead .grantcount, .mgt2 .careerevents .cell.open > .cellhead .grantcount, .mgt2 .speciesblk .cell.open > .cellhead .grantcount, .mgt2 .speciesfrm .cell.open > .cellhead .grantcount {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+.mgt2 .careerblk .grants, .mgt2 .careertbl .grants, .mgt2 .careerevents .grants, .mgt2 .speciesblk .grants, .mgt2 .speciesfrm .grants {
   margin-left: 6px;
 }
-.mgt2 .careerblk .grant, .mgt2 .careertbl .grant, .mgt2 .speciesblk .grant, .mgt2 .speciesfrm .grant {
+.mgt2 .careerblk .cell:not(.open) > .grants, .mgt2 .careertbl .cell:not(.open) > .grants, .mgt2 .careerevents .cell:not(.open) > .grants, .mgt2 .speciesblk .cell:not(.open) > .grants, .mgt2 .speciesfrm .cell:not(.open) > .grants {
+  display: none;
+}
+.mgt2 .careerblk .grant, .mgt2 .careertbl .grant, .mgt2 .careerevents .grant, .mgt2 .speciesblk .grant, .mgt2 .speciesfrm .grant {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
   padding: 2px 0;
 }
-.mgt2 .careerblk .grant .f, .mgt2 .careertbl .grant .f, .mgt2 .speciesblk .grant .f, .mgt2 .speciesfrm .grant .f {
+.mgt2 .careerblk .grant .f, .mgt2 .careertbl .grant .f, .mgt2 .careerevents .grant .f, .mgt2 .speciesblk .grant .f, .mgt2 .speciesfrm .grant .f {
   flex: 1 1 5rem;
   min-width: 0;
 }
-.mgt2 .careerblk .grant .f.kind, .mgt2 .careertbl .grant .f.kind, .mgt2 .speciesblk .grant .f.kind, .mgt2 .speciesfrm .grant .f.kind {
+.mgt2 .careerblk .grant .f.kind, .mgt2 .careertbl .grant .f.kind, .mgt2 .careerevents .grant .f.kind, .mgt2 .speciesblk .grant .f.kind, .mgt2 .speciesfrm .grant .f.kind {
   flex: 0 0 7rem;
 }
-.mgt2 .careerblk .grant .f.num, .mgt2 .careertbl .grant .f.num, .mgt2 .speciesblk .grant .f.num, .mgt2 .speciesfrm .grant .f.num {
+.mgt2 .careerblk .grant .f.num, .mgt2 .careertbl .grant .f.num, .mgt2 .careerevents .grant .f.num, .mgt2 .speciesblk .grant .f.num, .mgt2 .speciesfrm .grant .f.num {
   flex: 0 0 3rem;
   text-align: right;
 }
-.mgt2 .careerblk .grant .f.g-mode, .mgt2 .careertbl .grant .f.g-mode, .mgt2 .speciesblk .grant .f.g-mode, .mgt2 .speciesfrm .grant .f.g-mode {
+.mgt2 .careerblk .grant .f.g-mode, .mgt2 .careertbl .grant .f.g-mode, .mgt2 .careerevents .grant .f.g-mode, .mgt2 .speciesblk .grant .f.g-mode, .mgt2 .speciesfrm .grant .f.g-mode {
   flex-basis: 12rem;
 }
-.mgt2 .careerblk .grant .f.g-floor, .mgt2 .careertbl .grant .f.g-floor, .mgt2 .speciesblk .grant .f.g-floor, .mgt2 .speciesfrm .grant .f.g-floor {
+.mgt2 .careerblk .grant .f.g-floor, .mgt2 .careertbl .grant .f.g-floor, .mgt2 .careerevents .grant .f.g-floor, .mgt2 .speciesblk .grant .f.g-floor, .mgt2 .speciesfrm .grant .f.g-floor {
   flex-basis: 4.5rem;
 }
-.mgt2 .careerblk .grant .f.g-pick, .mgt2 .careertbl .grant .f.g-pick, .mgt2 .speciesblk .grant .f.g-pick, .mgt2 .speciesfrm .grant .f.g-pick {
+.mgt2 .careerblk .grant .f.g-pick, .mgt2 .careertbl .grant .f.g-pick, .mgt2 .careerevents .grant .f.g-pick, .mgt2 .speciesblk .grant .f.g-pick, .mgt2 .speciesfrm .grant .f.g-pick {
   flex: 0 1 auto;
   width: auto;
 }
-.mgt2 .careerblk .grant .f.g-except, .mgt2 .careertbl .grant .f.g-except, .mgt2 .speciesblk .grant .f.g-except, .mgt2 .speciesfrm .grant .f.g-except {
+.mgt2 .careerblk .grant .f.g-except, .mgt2 .careertbl .grant .f.g-except, .mgt2 .careerevents .grant .f.g-except, .mgt2 .speciesblk .grant .f.g-except, .mgt2 .speciesfrm .grant .f.g-except {
   flex-basis: 14rem;
 }
 .mgt2 .careerblk .grant:not([data-kind=skill]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family, .g-pick, .g-except),
@@ -13828,7 +15088,18 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 .mgt2 .careertbl .grant:not([data-kind=contact], [data-kind=convert]) .g-relation,
 .mgt2 .careertbl .grant:not([data-kind=benefit], [data-kind=note]) .g-ref,
 .mgt2 .careertbl .grant:not([data-mode=floor]):not([data-kind=characteristic][data-mode=add]) .g-floor,
-.mgt2 .careertbl .grant:is([data-kind=skill], [data-kind=characteristic])[data-mode=floor] :is(.g-value, .g-formula), .mgt2 .speciesblk .grant:not([data-kind=skill]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family, .g-pick, .g-except),
+.mgt2 .careertbl .grant:is([data-kind=skill], [data-kind=characteristic])[data-mode=floor] :is(.g-value, .g-formula), .mgt2 .careerevents .grant:not([data-kind=skill]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family, .g-pick, .g-except),
+.mgt2 .careerevents .grant[data-kind=skill]:not([data-pick=""]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family),
+.mgt2 .careerevents .grant[data-pick=""] .g-except,
+.mgt2 .careerevents .trayrow.inarm .f.cond,
+.mgt2 .careerevents .grant:not([data-kind=characteristic]) .g-characteristic,
+.mgt2 .careerevents .grant:is([data-kind=convert], [data-kind=benefit], [data-kind=note]) .g-value,
+.mgt2 .careerevents .grant:not([data-kind=characteristic], [data-kind=contact], [data-kind=cash], [data-kind=shipShare]) .g-formula,
+.mgt2 .careerevents .grant:not([data-kind=skill], [data-kind=characteristic]) :is(.g-mode, .g-floor),
+.mgt2 .careerevents .grant:not([data-kind=contact], [data-kind=convert]) .g-relation,
+.mgt2 .careerevents .grant:not([data-kind=benefit], [data-kind=note]) .g-ref,
+.mgt2 .careerevents .grant:not([data-mode=floor]):not([data-kind=characteristic][data-mode=add]) .g-floor,
+.mgt2 .careerevents .grant:is([data-kind=skill], [data-kind=characteristic])[data-mode=floor] :is(.g-value, .g-formula), .mgt2 .speciesblk .grant:not([data-kind=skill]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family, .g-pick, .g-except),
 .mgt2 .speciesblk .grant[data-kind=skill]:not([data-pick=""]) :is(.g-skill, .g-speciality, .g-shortlist, .g-family),
 .mgt2 .speciesblk .grant[data-pick=""] .g-except,
 .mgt2 .speciesblk .trayrow.inarm .f.cond,
@@ -13852,6 +15123,339 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
 .mgt2 .speciesfrm .grant:not([data-mode=floor]):not([data-kind=characteristic][data-mode=add]) .g-floor,
 .mgt2 .speciesfrm .grant:is([data-kind=skill], [data-kind=characteristic])[data-mode=floor] :is(.g-value, .g-formula) {
   display: none;
+}
+
+.mgt2 .careerblk .qcard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mgt2 .careerblk .plate .pv, .mgt2 .plates.service .plate .pv {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+}
+.mgt2 .careerblk .plate .on, .mgt2 .plates.service .plate .on {
+  font-family: var(--cond);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mute);
+}
+.mgt2 .careerblk .plate .note, .mgt2 .plates.service .plate .note {
+  font-size: 11.5px;
+  color: var(--faint);
+}
+.mgt2 .careerblk .plate b.word, .mgt2 .plates.service .plate b.word {
+  font-size: 15px;
+}
+
+.mgt2 .careerblk table.qasg th.num {
+  text-align: left;
+}
+.mgt2 .careerblk .dmline {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--mute);
+}
+.mgt2 .careerblk .dmp {
+  display: inline-block;
+  margin-right: 4px;
+  padding: 0 7px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .careerblk .dmp:hover {
+  color: var(--accent-text);
+  border-color: var(--accent-line);
+}
+.mgt2 .careerblk .dmp.zero {
+  color: var(--faint);
+}
+.mgt2 .careerblk .grid > .full {
+  grid-column: 1/-1;
+}
+.mgt2 .careerblk .grid > .full > .lbl {
+  display: block;
+  margin-bottom: 4px;
+}
+.mgt2 .careerblk .grid > .switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+
+.mgt2 .careertbl table.book {
+  table-layout: fixed;
+}
+.mgt2 .careertbl table.book th.dice,
+.mgt2 .careertbl table.book td.dice {
+  width: 2.6rem;
+  text-align: center;
+}
+.mgt2 .careertbl table.book td.dice {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--faint);
+}
+.mgt2 .careertbl table.book td {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.mgt2 .careertbl table.book th .pill {
+  margin-left: 4px;
+  padding: 0 7px;
+  font-size: 9.5px;
+  vertical-align: 1px;
+}
+.mgt2 .careertbl table.book.benefits th.r {
+  width: 7rem;
+}
+.mgt2 .careertbl .ladders {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  align-items: start;
+}
+.mgt2 .careertbl .ladders th:nth-child(2) {
+  color: var(--ink);
+}
+.mgt2 .careertbl .standing,
+.mgt2 .careertbl .tracks {
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+}
+.mgt2 .careertbl .nrow.rankrow {
+  display: grid;
+  grid-template-columns: 3rem minmax(9rem, 1fr) minmax(0, 1.4fr) auto;
+  align-items: start;
+}
+.mgt2 .careertbl .nrow.rankrow .f.num {
+  flex: none;
+}
+.mgt2 .careertbl .d6 {
+  columns: 2;
+  column-gap: 16px;
+}
+.mgt2 .careertbl .d6 .nrow {
+  break-inside: avoid;
+}
+
+@container itemsheet (max-width: 640px) {
+  .mgt2 .careertbl .d6 {
+    columns: 1;
+  }
+}
+.mgt2 .careerevents .sect .dice {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+.mgt2 .careerevents .erows {
+  display: flex;
+  flex-direction: column;
+}
+.mgt2 .careerevents .erow {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px 8px;
+  padding: 7px 4px 8px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .careerevents .erow:last-child {
+  border-bottom: 0;
+}
+.mgt2 .careerevents .erow .roll {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--faint);
+}
+.mgt2 .careerevents .erow .txt {
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.mgt2 .careerevents .erow .epills {
+  grid-column: 2;
+}
+.mgt2 .careerevents .epills {
+  gap: 4px 5px;
+}
+.mgt2 .careerevents .entry > .epills {
+  margin: 5px 0 1px 1.9rem;
+}
+.mgt2 .careerevents .entry:not(.open) > .ebody {
+  display: none;
+}
+.mgt2 .careerevents .entry.open {
+  border-color: var(--accent-line);
+}
+.mgt2 .careerevents .fold {
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--faint);
+  background: none;
+  border: none;
+  cursor: var(--cursor-pointer);
+}
+.mgt2 .careerevents .fold i {
+  transition: transform 0.12s ease;
+}
+.mgt2 .careerevents .fold:hover {
+  color: var(--accent-text);
+}
+.mgt2 .careerevents .entry.open .fold i {
+  transform: rotate(90deg);
+}
+
+.mgt2 .imain .mk {
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-style: normal;
+  color: var(--faint);
+}
+.mgt2 .imain .mk svg {
+  display: block;
+  width: 11px;
+  height: 11px;
+}
+.mgt2 .imain .mk svg circle {
+  fill: currentColor;
+}
+.mgt2 .imain .mk svg circle.ring {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+.mgt2 .imain .mk svg path {
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mgt2 .imain .mk.good {
+  color: var(--good);
+}
+.mgt2 .imain .mk.bad {
+  color: var(--danger);
+}
+.mgt2 .imain .mk.open {
+  color: var(--accent-text);
+}
+
+.mgt2 .plates.service .tmk {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+.mgt2 .plates.service .tp {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 5px 0 6px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--mute);
+  border: 1px solid var(--rule-soft);
+  border-radius: 999px;
+}
+
+.mgt2 .imain .term {
+  padding: 8px 10px 9px;
+  border: 1px solid var(--rule-soft);
+  border-radius: 3px;
+}
+.mgt2 .imain .term + .term {
+  margin-top: 8px;
+}
+.mgt2 .imain .term .thead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.mgt2 .imain .term .thead h4 {
+  margin: 0;
+  font-family: var(--cond);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border: none;
+}
+.mgt2 .imain .term .ages {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--faint);
+}
+.mgt2 .imain .term .tmarks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 10px;
+  margin-top: 6px;
+}
+.mgt2 .imain .term .tmarks .pill {
+  padding: 0 8px;
+}
+.mgt2 .imain .term .tm {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+}
+.mgt2 .imain .term .tm.good {
+  color: var(--good);
+}
+.mgt2 .imain .term .tm.bad {
+  color: var(--danger);
+}
+.mgt2 .imain .term .tlines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 7px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.mgt2 .imain .term .tlines li {
+  display: grid;
+  grid-template-columns: 1.05rem minmax(0, 1fr) auto;
+  gap: 5px;
+  align-items: baseline;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.mgt2 .imain .term .tlines .age {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+
+.mgt2 .imain table.dated th.age,
+.mgt2 .imain table.dated td.age {
+  width: 4.5rem;
 }
 
 .mgt2.application.stash {
@@ -13888,175 +15492,91 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   height: 84px;
 }
 
-.mgt2.application.stash .reg .code {
-  font-family: var(--cond);
-  font-size: 17px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.mgt2.application.stash .reg .code.shut {
-  color: var(--danger);
+.mgt2 .reg:has(> .lockpill) {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
-.mgt2 .own {
-  grid-column: 1/-1;
+.mgt2 .ladder {
+  display: flex;
+  flex-direction: column;
+}
+.mgt2 .ladder .rung {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  margin: 12px 0 0;
-  border: 1px solid var(--rule-soft);
-}
-.mgt2 .own .r {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  padding: 6px 9px 7px;
-  border-right: 1px solid var(--rule-soft);
-}
-.mgt2 .own .r:last-child {
-  border-right: 0;
-}
-.mgt2 .own .r .who {
-  overflow: hidden;
-  font-family: var(--cond);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.mgt2 .own .r b {
-  font-family: var(--cond);
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.mgt2 .own .r .g {
-  overflow: hidden;
-  font-family: var(--mono);
-  font-size: 9px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: var(--faint);
-}
-.mgt2 .own .r.none b {
-  color: var(--faint);
-}
-.mgt2 .own .r.limited b {
-  color: var(--warn);
-}
-.mgt2 .own .r.observer b {
-  color: var(--good);
-}
-.mgt2 .own .r.owner b {
-  color: var(--accent-text);
-}
-.mgt2 .own .r.fallback {
-  background: var(--hover);
-}
-.mgt2 .own .r[data-action] {
-  cursor: var(--cursor-pointer);
-}
-.mgt2 .own .r[data-action]:hover {
-  background: var(--accent-soft);
-}
-
-.mgt2 .asseen {
-  padding: 8px 11px 10px;
-  border: 1px dashed var(--rule);
-}
-.mgt2 .asseen .tag {
-  font-family: var(--cond);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--faint);
-}
-.mgt2 .asseen p {
-  margin: 4px 0 0;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--mute);
-}
-
-.mgt2 .lockrow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 9px;
-}
-.mgt2 .lockrow .v {
-  font-family: var(--cond);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.mgt2 .lockrow .v.shut {
-  color: var(--danger);
-}
-.mgt2 .lockrow .v.open {
-  color: var(--good);
-}
-.mgt2 .lockrow button {
-  width: auto;
-  height: auto;
-  min-height: 0;
-  margin-left: auto;
-  padding: 3px 9px 4px;
-  font: inherit;
-  font-family: var(--cond);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--mute);
-  background: none;
-  border: 1px solid var(--rule);
-  border-radius: 2px;
-  cursor: var(--cursor-pointer);
-}
-.mgt2 .lockrow button:hover {
-  color: var(--accent-text);
-  border-color: var(--accent-line);
-}
-
-.mgt2 p.hint.shut {
-  padding-left: 9px;
-  color: var(--mute);
-  border-left: 2px solid var(--danger);
-}
-
-.mgt2.application.stash .vs {
-  display: flex;
-  flex-direction: column;
-}
-.mgt2.application.stash .vs .v {
-  padding: 5px 2px;
+  grid-template-columns: 5.4rem minmax(0, 1fr);
+  gap: 3px 8px;
+  padding: 7px 4px 8px 9px;
   border-bottom: 1px solid var(--rule-soft);
+  border-left: 2px solid transparent;
 }
-.mgt2.application.stash .vs .v:last-child {
+.mgt2 .ladder .rung:last-child {
   border-bottom: 0;
 }
-.mgt2.application.stash .vs .nm {
+.mgt2 .ladder .rung b {
   font-family: var(--cond);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.12em;
+  line-height: 1.35;
   text-transform: uppercase;
 }
-.mgt2.application.stash .vs .g {
-  display: block;
-  font-family: var(--mono);
-  font-size: 9.5px;
-  line-height: 1.5;
-  letter-spacing: 0;
-  text-transform: none;
+.mgt2 .ladder .rung .g {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--mute);
+}
+.mgt2 .ladder .rung .who {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.mgt2 .ladder .rung .who:empty {
+  display: none;
+}
+.mgt2 .ladder .rung.nobody b,
+.mgt2 .ladder .rung.nobody .g {
   color: var(--faint);
+}
+.mgt2 .ladder .rung.you {
+  border-left-color: var(--accent-text);
+}
+.mgt2 .ladder .u {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px 1px;
+  font-family: var(--cond);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1.45;
+  white-space: nowrap;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.mgt2 .ladder .u.inh {
+  border-style: dashed;
+  color: var(--mute);
+}
+.mgt2 .ladder .u.fallback {
+  color: var(--mute);
+  background: var(--hover);
+  border-color: transparent;
+}
+.mgt2 .ladder .u.you {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  border-style: solid;
+}
+
+.mgt2.application.stash .mgt2-header .meta.edit-only > label.wide {
+  grid-column: span 2;
+}
+.mgt2.application.stash .mgt2-header .meta.edit-only > label.full {
+  grid-column: 1/-1;
 }
 
 @container sheet (max-width: 640px) {
@@ -14064,6 +15584,29 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto minmax(0, 1fr);
     grid-template-areas: "header" "rail" "panel";
+  }
+  .mgt2 .ladder {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border: 1px solid var(--rule-soft);
+  }
+  .mgt2 .ladder .rung {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    padding: 6px 8px 7px;
+    border-bottom: 0;
+    border-left: 0;
+    border-right: 1px solid var(--rule-soft);
+    border-top: 2px solid transparent;
+  }
+  .mgt2 .ladder .rung:last-child {
+    border-right: 0;
+  }
+  .mgt2 .ladder .rung .who {
+    grid-column: 1;
+  }
+  .mgt2 .ladder .rung.you {
+    border-top-color: var(--accent-text);
   }
 }
 .mgt2 nav.tabs {

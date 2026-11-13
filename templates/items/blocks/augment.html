@@ -1,0 +1,69 @@
+{{! What the system applies from an augment, one tile for each thing the Traveller's derivations read
+    off it. A tile they skip — the augment not fitted, or outranked by another — recolours. }}
+<div class="block augment">
+	<div class="sect{{#unless augmentTiles.tiles.length}} edit-only{{/unless}}">
+		<h3>{{localize 'MGT2.Items.Modifiers'}}</h3>
+		<span class="count">{{augmentTiles.tiles.length}}</span>
+		<a class="add edit-only" data-action="entryCreate" data-property="augment.modifiers" data-blank='{"characteristic":"","value":null}' data-tooltip="{{localize 'MGT2.Items.AddModifier'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	{{#if augmentTiles.tiles.length}}
+	<div class="tiles play-only">
+		{{#each augmentTiles.tiles as |tile|}}
+		<div class="tile {{tile.tone}}{{#if tile.off}} off{{/if}}"{{#if tile.tooltip}} data-tooltip="{{tile.tooltip}}"{{/if}}>
+			<span class="k">{{tile.label}}</span>
+			<b>{{tile.text}}</b>
+		</div>
+		{{/each}}
+	</div>
+	{{else}}
+	{{! Zero reads as zero; an augment carrying an Active Effect may work through it, so it says nothing. }}
+	{{#unless augmentTiles.hasEffects}}
+	<p class="vacant play-only"><a data-action="toggleSheetMode"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Items.Modifiers'}} <b>0</b></a></p>
+	{{/unless}}
+	{{/if}}
+
+	<div class="edit-only" data-property="augment.modifiers">
+		{{#if system.augment.modifiers.length}}
+		<table class="rows fixed">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Characteristic'}}</th>
+					<th class="num">{{localize 'MGT2.Items.Modifier'}}</th>
+					<th class="acts"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each system.augment.modifiers as |row i|}}
+				<tr data-entry-index="{{i}}">
+					<td>
+						<select class="f" name="system.augment.modifiers.{{i}}.characteristic">
+							<option value=""></option>
+							{{selectOptions @root.config.Characteristics selected=row.characteristic localize=true}}
+						</select>
+					</td>
+					<td class="num"><input class="f num" type="number" step="1" name="system.augment.modifiers.{{i}}.value" value="{{row.value}}" data-dtype="Number" /></td>
+					<td class="r">
+						<div class="acts"><a data-action="entryDelete" data-tooltip="{{localize 'MGT2.Items.DeleteModifier'}}"><i class="fas fa-trash"></i></a></div>
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+	</div>
+	{{! The printed cell in the two other kinds the system can compute. }}
+	<div class="grid edit-only">
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.Skill'}}</span>
+			{{formInput systemFields.augment.fields.skill.fields.name name="system.augment.skill.name" value=system.augment.skill.name classes="f"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.AugmentSkillDM'}}</span>
+			{{formInput systemFields.augment.fields.skill.fields.value name="system.augment.skill.value" value=system.augment.skill.value classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Protection'}}</span>
+			{{formInput systemFields.augment.fields.protection name="system.augment.protection" value=system.augment.protection classes="f num"}}
+		</label>
+	</div>
+</div>

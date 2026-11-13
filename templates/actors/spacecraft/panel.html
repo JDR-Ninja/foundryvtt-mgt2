@@ -8,6 +8,14 @@
 		{{#each tab.blocks as |block|}}
 		{{> (lookup block "template") @root}}
 		{{/each}}
+		{{! What play mode folded, in one line: an empty block is a heading and nothing else. }}
+		{{#if tab.vacant.length}}
+		<p class="vacant play-only">
+			{{#each tab.vacant as |entry|}}
+			{{#if entry.door}}<a data-action="toggleSheetMode"><i class="fa-solid fa-plus" aria-hidden="true"></i>{{localize entry.label}}</a>{{else}}<span>{{localize entry.label}}</span>{{/if}}
+			{{/each}}
+		</p>
+		{{/if}}
 	</section>
 	{{/each}}
 </section>

@@ -78,11 +78,32 @@ export class WorldActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsA
             traffic: WorldActorSheet.#traffic(system),
             trade: WorldActorSheet.#trade(system, day),
             zone: MGT2.TravelZones[system.zone]?.label ?? "",
+            zoneTone: { amber: "amber", red: "red" }[system.zone] ?? "",
+            fuel: WorldActorSheet.#fuel(system),
             forbidden: system.travel.forbidden,
             day
         };
         context.enriched = await MGT2Helper.enrichFields(this.actor, ["description", "notes"]);
         return context;
+    }
+
+    /** Size and hydrographics gloss as arithmetic, not a table: 1 600 km a step, 10 % a step (Core p.249, p.251). */
+    static #measure(key, value) {
+        const lang = game.i18n.lang;
+        if ( key === "size" ) {
+            const km = new Intl.NumberFormat(lang, { style: "unit", unit: "kilometer" });
+            return value ? km.format(value * 1600) : `< ${km.format(1000)}`;
+        }
+        if ( key === "hydrographics" ) return new Intl.NumberFormat(lang, { style: "percent" }).format(value / 10);
+        return "";
+    }
+
+    /** One line per grade the port sells, beside its price. */
+    static #fuel(system) {
+        const fuel = system.starport.fuel;
+        const grades = (fuel === "both") ? ["refined", "unrefined"] : ((fuel === "none") ? [] : [fuel]);
+        return grades.map((grade, index) => ({ label: `MGT2.Actor.world.FuelGrade.${grade}`,
+            price: system.starport.fuelPrices[index] })).filter(row => row.price !== undefined);
     }
 
     /** The eight cells of the strip. */
@@ -93,14 +114,20 @@ export class WorldActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsA
             const value = system.uwp[key];
             const port = (key === "starport");
             const label = (port ? MGT2.Starports : UWP_TABLES[key])?.[value]?.label;
+            const decimal = (!port && (value > 9)) ? String(value) : "";
+            // The law level's gloss states the legality bound, the decimal inside it.
+            const gloss = (key === "lawLevel")
+                ? [game.i18n.format("MGT2.Actor.world.LawGloss", { n: value })]
+                : [decimal, label ? game.i18n.localize(label) : WorldActorSheet.#measure(key, value)];
             return {
                 key, value, port,
                 glyph: glyphs[index],
                 field: system.schema.fields.uwp.fields[key],
                 name: `system.uwp.${key}`,
                 classes: port ? "f" : "f n",
-                gloss: [(!port && (value > 9)) ? String(value) : "",
-                    label ? game.i18n.localize(label) : ""].filter(Boolean).join(" · ")
+                choices: port ? Object.fromEntries(Object.entries(MGT2.Starports).map(([letter, row]) =>
+                    [letter, `${letter} — ${game.i18n.localize(row.label)}`])) : undefined,
+                gloss: gloss.filter(Boolean).join(" · ")
             };
         });
     }
@@ -158,10 +185,15 @@ export class WorldActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsA
                 state: (override === undefined) ? "derive" : override ? "on" : "off"
             };
         });
+        for ( const row of rows ) {
+            if ( row.state === "off" ) row.tone = "hand off";
+            else if ( row.state === "on" ) row.tone = "hand";
+            else row.tone = row.derived ? "drv" : "nm";
+        }
         return {
             rows,
-            derivedLine: system.derivedCodes.join(" "),
-            publishedLine: system.codes.join(" "),
+            shown: rows.filter(row => row.published || (row.state !== "derive")),
+            rest: rows.filter(row => !row.published && (row.state === "derive")),
             derivedCount: system.derivedCodes.length,
             publishedCount: system.codes.length
         };
@@ -197,11 +229,20 @@ export class WorldActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsA
         };
     }
 
+    /** Folds the reader opened by hand; one with no entry keeps what the template asked for.
+     * @type {Map<string, boolean>} */
+    #folds = new Map();
+
     /** @inheritDoc */
     async _onRender(context, options) {
         await super._onRender(context, options);
         this.element.querySelector("[data-uwp-line]")
             ?.addEventListener("change", this.#onPasteUwp.bind(this));
+        for ( const fold of this.element.querySelectorAll("details.fold[data-fold]") ) {
+            const key = fold.dataset.fold;
+            if ( this.#folds.has(key) ) fold.open = this.#folds.get(key);
+            fold.addEventListener("toggle", () => this.#folds.set(key, fold.open));
+        }
     }
 
     /**

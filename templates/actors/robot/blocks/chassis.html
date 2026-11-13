@@ -1,0 +1,50 @@
+{{! The chassis as printed: what the builder picks before anything else, edited here and read in the
+    header's statline. Size is a `<select>` and not the schema's bounded number: a NumberField carrying
+    both a min and a max renders as a range-picker through `formInput`. }}
+<div class="block edit-only">
+	<div class="sect"><h3>{{localize 'MGT2.Actor.vehicle.Chassis'}}</h3></div>
+	<div class="grid">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.robot.Size'}}</span>
+			<select class="f" name="system.size" data-dtype="Number">
+				{{#each robot.sizes}}
+				<option value="{{key}}"{{#if selected}} selected{{/if}}>{{localize label}} &middot; {{slots}}/{{hits}}</option>
+				{{/each}}
+			</select>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.robot.TL'}}</span>
+			{{formInput systemFields.tl name="system.tl" value=system.tl classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.robot.SlotsRemoved'}}</span>
+			{{formInput systemFields.slots.fields.removed name="system.slots.removed" value=system.slots.removed classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.robot.Resiliency'}}</span>
+			{{formInput systemFields.resiliency name="system.resiliency" value=system.resiliency classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.robot.Cost'}}</span>
+			{{formInput systemFields.cost name="system.cost" value=system.cost classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.robot.Owner'}}</span>
+			{{formInput systemFields.owner name="system.owner" value=system.owner classes="f"}}
+		</label>
+		<label data-tooltip="{{localize 'MGT2.Actor.robot.VacuumSealingHint'}}">
+			<span class="lbl">{{localize 'MGT2.Actor.robot.VacuumSealing'}}</span>
+			{{formInput systemFields.vacuumSealing name="system.vacuumSealing" value=system.vacuumSealing blank=robot.vacuumRows localize=true classes="f"}}
+		</label>
+		<label class="check">
+			{{formInput systemFields.biological name="system.biological" value=system.biological}}
+			<span>{{localize 'MGT2.Actor.robot.Biological'}}</span>
+		</label>
+		{{! One type with a flag: the six canonical characteristics are declared on every robot and this
+		    only reveals them. }}
+		<label class="check">
+			{{formInput systemFields.traveller.fields.enabled name="system.traveller.enabled" value=system.traveller.enabled}}
+			<span>{{localize 'MGT2.Actor.robot.Traveller'}}</span>
+		</label>
+	</div>
+</div>

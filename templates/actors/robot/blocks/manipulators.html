@@ -1,0 +1,57 @@
+{{! STR and DEX are stored and not derived even though both have a formula: each limb may be
+    bought up independently, so the formula is the starting point and never the value. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.robot.Manipulators'}}</h3>
+		<span class="count">{{robot.statblock.manipulators}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.ManipulatorHint'}}"></i>
+		<a class="add edit-only" data-action="rowCreate" data-rows="manipulators" data-tooltip="{{localize 'MGT2.Actor.robot.AddManipulator'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	{{#if robot.manipulators.length}}
+	<table class="rows manip fixed">
+		<thead>
+			<tr>
+				<th class="c num">{{localize 'MGT2.Actor.robot.Limbs'}}</th>
+				<th class="c num">{{localize 'MGT2.Actor.robot.LimbSize'}}</th>
+				<th class="c num">{{localize 'MGT2.Characteristics.strength.short'}}</th>
+				<th class="c num">{{localize 'MGT2.Characteristics.dexterity.short'}}</th>
+				<th class="f">{{localize 'MGT2.Actor.robot.Formula'}}</th>
+				<th class="acts"></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each robot.manipulators}}
+			<tr data-row-index="{{index}}">
+				<td class="c num">
+					<span class="play-only">&times;{{count}}{{#if isLeg}} <i class="fa-solid fa-shoe-prints" data-tooltip="{{localize 'MGT2.Actor.robot.IsLeg'}}"></i>{{/if}}</span>
+					<input class="f num edit-only" type="number" min="1" step="1" name="system.manipulators.{{index}}.count" value="{{count}}" />
+					{{! RH p.26: a walker's legs can be promoted to manipulators. }}
+					<label class="edit-only" data-tooltip="{{localize 'MGT2.Actor.robot.IsLeg'}}">
+						<input type="checkbox" name="system.manipulators.{{index}}.isLeg" {{checked isLeg}} />
+					</label>
+				</td>
+				<td class="c num">
+					<span class="play-only">{{size}}</span>
+					<input class="f num edit-only" type="number" min="1" max="10" step="1" name="system.manipulators.{{index}}.size" value="{{size}}" />
+				</td>
+				{{! The two limbs the STR and DEX projections read (RH p.115). }}
+				<td class="c num"{{#if strongest}} data-tooltip="{{localize 'MGT2.Actor.robot.Strongest'}}"{{/if}}>
+					<span class="play-only">{{#if strongest}}<b>{{strength}}</b>{{else}}{{strength}}{{/if}}</span>
+					<input class="f num edit-only" type="number" min="0" step="1" name="system.manipulators.{{index}}.strength" value="{{strength}}" />
+				</td>
+				<td class="c num"{{#if deftest}} data-tooltip="{{localize 'MGT2.Actor.robot.Deftest'}}"{{/if}}>
+					<span class="play-only">{{#if deftest}}<b>{{dexterity}}</b>{{else}}{{dexterity}}{{/if}}</span>
+					<input class="f num edit-only" type="number" min="0" step="1" name="system.manipulators.{{index}}.dexterity" value="{{dexterity}}" />
+				</td>
+				<td class="f">{{localize 'MGT2.Actor.robot.ManipulatorFormula' str=baseStrength dex=baseDexterity}}</td>
+				<td>
+					<div class="acts edit-only">
+						<a data-action="rowDelete" data-rows="manipulators" data-tooltip="{{localize 'MGT2.Actor.robot.DeleteManipulator'}}"><i class="fa-solid fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{/if}}
+</div>

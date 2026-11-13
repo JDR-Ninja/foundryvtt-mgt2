@@ -8,25 +8,37 @@
 			<span class="count">{{localize 'MGT2.Actor.world.LedgerCount' derived=world.ledger.derivedCount published=world.ledger.publishedCount}}</span>
 			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.world.LedgerHint'}}"></i>
 		</div>
-		<dl class="statline" data-derived="system.codes">
-			<div class="stat{{#unless world.ledger.derivedCount}} none{{/unless}}">
-				<dt>{{localize 'MGT2.Actor.world.Derived'}}</dt>
-				<dd class="word">{{#if world.ledger.derivedCount}}{{world.ledger.derivedLine}}{{else}}&mdash;{{/if}}</dd>
-			</div>
-			<div class="stat{{#unless world.ledger.publishedCount}} none{{/unless}}">
-				<dt>{{localize 'MGT2.Actor.world.Published'}}</dt>
-				<dd class="word">{{#if world.ledger.publishedCount}}{{world.ledger.publishedLine}}{{else}}&mdash;{{/if}}</dd>
-			</div>
-		</dl>
-		<div class="ledger">
+		{{! Play: the codes that hold, a chip's outline telling derived (dashed) from forced (solid), and
+		    the codes not met folded. Edit: all eighteen with Auto · On · Off. }}
+		<div class="play-only">
+			{{#if world.ledger.shown.length}}
+			<ul class="codes glossed" data-derived="system.codes">
+				{{#each world.ledger.shown as |row|}}
+				<li class="code {{row.tone}}"><b>{{row.code}}</b></li>
+				<li class="gloss">{{localize row.label}} <span class="cnd">&mdash; {{row.condition}}</span>{{#if (eq row.state 'on')}}<span class="why">{{localize 'MGT2.Actor.world.ForcedOn'}}</span>{{else if (eq row.state 'off')}}<span class="why">{{localize 'MGT2.Actor.world.ForcedOff'}}</span>{{/if}}</li>
+				{{/each}}
+			</ul>
+			{{/if}}
+			{{#if world.ledger.rest.length}}
+			<details class="fold" data-fold="codes">
+				<summary>{{plural 'MGT2.Actor.world.NotMetN' world.ledger.rest.length}}</summary>
+				<ul class="rest">
+					{{#each world.ledger.rest as |row|}}
+					<li class="c">{{row.code}}</li><li class="cnd">{{localize row.label}} &mdash; {{row.condition}}</li>
+					{{/each}}
+				</ul>
+			</details>
+			{{/if}}
+		</div>
+		<div class="ledger edit-only">
 			{{#each world.ledger.rows as |row|}}
-			<div class="lr {{#if row.published}}on{{else}}off{{/if}}{{#unless (eq row.state 'derive')}} forced{{/unless}}" data-code="{{row.code}}">
-				<span class="c">{{row.code}}</span>
-				<span class="cond">{{localize row.label}} &mdash; {{row.condition}}</span>
+			<div class="lr{{#unless row.published}} off{{/unless}}{{#unless (eq row.state 'derive')}} forced{{/unless}}" data-code="{{row.code}}">
+				<ul class="codes"><li class="code {{row.tone}}"><b>{{row.code}}</b></li></ul>
+				<span class="cond">{{localize row.label}}<span class="cnd">{{row.condition}}</span></span>
 				<span class="st">
-					{{~#if (eq row.state 'on')}}{{localize 'MGT2.Actor.world.ForcedOn'}}{{else if (eq row.state 'off')}}{{localize 'MGT2.Actor.world.ForcedOff'}}{{else if row.derived}}{{localize 'MGT2.Actor.world.Derived'}}{{else}}&mdash;{{/if~}}
+					{{~#if (eq row.state 'on')}}{{localize 'MGT2.Actor.world.ForcedOn'}}{{else if (eq row.state 'off')}}{{localize 'MGT2.Actor.world.ForcedOff'}}{{else if row.derived}}{{localize 'MGT2.Actor.world.Derived'}}{{/if~}}
 				</span>
-				<span class="ov edit-only">
+				<span class="seg">
 					<button type="button" data-action="codeOverride" data-state="derive" class="{{#if (eq row.state 'derive')}}on{{/if}}" data-tooltip="{{localize 'MGT2.Actor.world.OverrideDeriveHint'}}">{{localize 'MGT2.Actor.world.OverrideDerive'}}</button>
 					<button type="button" data-action="codeOverride" data-state="on" class="{{#if (eq row.state 'on')}}on{{/if}}">{{localize 'MGT2.Actor.world.OverrideOn'}}</button>
 					<button type="button" data-action="codeOverride" data-state="off" class="{{#if (eq row.state 'off')}}on{{/if}}">{{localize 'MGT2.Actor.world.OverrideOff'}}</button>
@@ -39,35 +51,31 @@
 	{{! This world's own half of the two traffic tables, and only the half it can answer for. The
 	    other half belongs to whatever world is at the other end of a leg, so the sheet reports a
 	    contribution and never rolls one: a world has no destination. }}
-	<div class="block">
+	<div class="block traffic">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.world.Traffic'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.world.TrafficCount'}}</span>
 			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.world.TrafficHint'}}"></i>
 		</div>
 		{{#if world.forbidden}}
 		<p class="hint forbidden">{{localize 'MGT2.Actor.world.Forbidden'}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.world.ForbiddenWhy'}}"></i></p>
 		{{/if}}
-		<div class="halves" data-derived="system.travel">
-			<div class="h">
-				<h4>{{localize 'MGT2.Actor.world.Passengers'}}</h4>
-				<table>
-					{{#each world.traffic.passengers.rows as |row|}}
-					<tr><td class="w">{{localize row.label}}</td><td class="d {{#if (gt row.dm 0)}}pos{{else if (lt row.dm 0)}}neg{{else}}nil{{/if}}">{{showDM row.dm}}</td></tr>
-					{{/each}}
-					<tr class="sum"><td>{{localize 'MGT2.Actor.world.ThisWorld'}}</td><td class="d">{{showDM world.traffic.passengers.total}}</td></tr>
-				</table>
+		<div class="plates" data-derived="system.travel">
+			<div class="plate">
+				<span class="lbl">{{localize 'MGT2.Actor.world.Passengers'}}</span>
+				<b>{{showDM world.traffic.passengers.total}}</b>
+				<div class="terms">
+					{{#each world.traffic.passengers.rows as |row|}}<span>{{localize row.label}}</span><em class="{{#unless row.dm}}nil{{/unless}}">{{showDM row.dm}}</em>{{/each}}
+				</div>
 			</div>
-			<div class="h">
-				<h4>{{localize 'MGT2.Actor.world.Freight'}}</h4>
-				<table>
-					{{#each world.traffic.freight.rows as |row|}}
-					<tr><td class="w">{{localize row.label}}</td><td class="d {{#if (gt row.dm 0)}}pos{{else if (lt row.dm 0)}}neg{{else}}nil{{/if}}">{{showDM row.dm}}</td></tr>
-					{{/each}}
-					<tr class="sum"><td>{{localize 'MGT2.Actor.world.ThisWorld'}}</td><td class="d">{{showDM world.traffic.freight.total}}</td></tr>
-				</table>
+			<div class="plate">
+				<span class="lbl">{{localize 'MGT2.Actor.world.Freight'}}</span>
+				<b>{{showDM world.traffic.freight.total}}</b>
+				<div class="terms">
+					{{#each world.traffic.freight.rows as |row|}}<span>{{localize row.label}}</span><em class="{{#unless row.dm}}nil{{/unless}}">{{showDM row.dm}}</em>{{/each}}
+				</div>
 			</div>
 		</div>
+		<p class="hint">{{localize 'MGT2.Actor.world.TrafficCount'}}</p>
 	</div>
 
 	<div class="block">

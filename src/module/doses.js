@@ -7,10 +7,19 @@ export const DOSE_FLAG = "dose";
 /** A dose of a drug, which is a *consumption* and not a possession. */
 export class Doses {
 
+    /** Whether an Actor takes doses: a dose is taken by a person, a Traveller or an NPC. */
+    static canTake(actor) {
+        return ["character", "npc"].includes(actor?.type);
+    }
+
     /** Take one dose of a drug. @returns {Promise<ActiveEffect[]|null>} */
     static async take(drug) {
-        const actor = drug?.actor;
-        if ( (drug?.type !== "drug") || !actor ) return null;
+        if ( drug?.type !== "drug" ) return null;
+        const actor = drug.actor;
+        if ( !Doses.canTake(actor) ) {
+            ui.notifications.warn(game.i18n.localize("MGT2.Doses.NeedsOwner"));
+            return null;
+        }
         if ( !(drug.system.quantity > 0) ) {
             ui.notifications.warn(game.i18n.format("MGT2.Doses.None", { name: drug.name }));
             return null;
@@ -45,6 +54,14 @@ export class Doses {
             }
         }
         return Doses.#afterCard(actor, dose, damage);
+    }
+
+    /** Set a drug's count back to zero, keeping its row: a person resets it, after sleep or a new day. */
+    static async reset(actor, name) {
+        if ( !Array.isArray(actor?.system.drugCounters) ) return null;
+        if ( !actor.system.drugCounters.some(row => row.drug === name) ) return null;
+        const counters = actor.system.drugCounters.map(row => ((row.drug === name) ? { ...row, doses: 0 } : { ...row }));
+        return actor.update({ "system.drugCounters": counters });
     }
 
     /** How many doses of this drug the Traveller has taken, or null where nothing counts them. */
@@ -135,7 +152,8 @@ export class Doses {
             speaker: ChatMessage.getSpeaker({ actor: drug.actor }),
             content: `<div class="mgt2 card dose">
                 <div class="chd"><div class="what"><h4>${escape(drug.name)}</h4>
-                    <span class="tgt">${escape(game.i18n.format("MGT2.Doses.Taken", { n: doses }))}</span>
+                    ${Number.isFinite(doses)
+        ? `<span class="tgt">${escape(game.i18n.format("MGT2.Doses.Taken", { n: doses }))}</span>` : ""}
                 </div></div>
                 <p class="dose-line">${lines.map(escape).join(" · ")}</p></div>`
         });

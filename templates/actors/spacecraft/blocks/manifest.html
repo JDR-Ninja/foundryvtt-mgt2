@@ -3,7 +3,7 @@
     travelled. Core p.241 pays for cargo on delivery and docks a late lot 1D+4 × 10%; a passage was
     paid for when the berth was taken (Core p.239), so putting passengers ashore moves no money and
     a low berth leaves Core p.158's revival check with the referee. }}
-<div class="block">
+<div class="block{{#unless ship.manifest.count}} edit-only{{/unless}}">
 	<div class="sect">
 		<h3>{{localize 'MGT2.Actor.spacecraft.Manifest'}}</h3>
 		<span class="count">{{localize 'MGT2.Actor.spacecraft.ManifestCount' n=ship.manifest.count day=ship.manifest.day}}</span>

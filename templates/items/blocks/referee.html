@@ -8,8 +8,8 @@
 <div class="block">
 	<div class="sect">
 		<h3>{{localize 'MGT2.Contract.RefereeSide'}}</h3>
-		<span class="count">{{plural 'MGT2.Contract.ShownCount' contract.rows.length shown=contract.shownCount total=contract.rows.length}}</span>
-		<span class="gm">{{localize 'MGT2.Contract.Folio19'}}</span>
+		<span class="count" data-tooltip="{{contract.shownLabel}}">{{contract.shownCount}}/{{contract.rows.length}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Contract.Folio19'}}"></i>
 	</div>
 
 	<div class="reveal">
@@ -35,14 +35,12 @@
 				<input type="hidden" name="system.referee.{{row.index}}.key" value="{{row.key}}" />
 				<input type="hidden" name="system.referee.{{row.index}}.shown" value="{{row.shown}}" data-dtype="Boolean" />
 			</span>
-			<button type="button" class="tell" data-action="contractShow">
-				{{#if row.shown}}{{localize 'MGT2.Contract.Shown'}}{{else}}{{localize 'MGT2.Contract.ShowTheParty'}}{{/if}}
+			<button type="button" class="tell" data-action="contractShow"{{#if (eq row.key 'repMin')}} data-tooltip="{{localize 'MGT2.Contract.FloorHint'}}"{{/if}}>
+				<i class="fa-solid fa-eye{{#unless row.shown}}-slash{{/unless}}"></i>{{#if row.shown}}{{localize 'MGT2.Contract.Shown'}}{{else}}{{localize 'MGT2.Contract.ShowTheParty'}}{{/if}}
 			</button>
 		</div>
 		{{/each}}
 	</div>
-
-	<p class="hint">{{localize 'MGT2.Contract.FloorHint'}}</p>
 </div>
 
 <div class="block">

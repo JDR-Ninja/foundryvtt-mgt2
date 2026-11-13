@@ -1,0 +1,81 @@
+{{! The one thing this type owns. Nine of the thirteen printed rows are computed, several of them
+    multiplicatively, and a bare result is unauditable — a wrong efficiency flag cannot be told
+    from a wrong TL band. So the sheet prints the terms. }}
+<div class="block">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.robot.Derivations'}}</h3>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.ChainHint'}}"></i>
+	</div>
+
+	<span class="lbl">{{localize 'MGT2.Actor.robot.ChainEndurance'}}</span>
+	<div class="chain" data-derived="system.endurance.hours">
+		{{#each robot.chains.endurance}}
+		{{#unless @first}}<span class="{{#if result}}eq{{else}}op{{/if}}">{{#if result}}={{else}}{{#if op}}{{op}}{{else}}&times;{{/if}}{{/if}}</span>{{/unless}}
+		<span class="t{{#if off}} off{{/if}}{{#if result}} result{{/if}}"><b>{{value}}</b><span>{{localize label}}</span></span>
+		{{/each}}
+	</div>
+
+	{{#if robot.chains.speed.length}}
+	<span class="lbl">{{localize 'MGT2.Actor.robot.ChainSpeed'}}</span>
+	<div class="chain" data-derived="system.speed.metres">
+		{{#each robot.chains.speed}}
+		{{#unless @first}}<span class="{{#if result}}eq{{else}}op{{/if}}">{{#if result}}={{else}}{{#if op}}{{op}}{{else}}+{{/if}}{{/if}}</span>{{/unless}}
+		<span class="t{{#if off}} off{{/if}}{{#if result}} result{{/if}}"><b>{{value}}</b><span>{{localize label}}</span></span>
+		{{/each}}
+	</div>
+	{{/if}}
+
+	<span class="lbl">{{localize 'MGT2.Actor.robot.ChainCost'}}</span>
+	<div class="chain" data-derived="system.baseCost">
+		{{#each robot.chains.cost}}
+		{{#unless @first}}<span class="{{#if result}}eq{{else}}op{{/if}}">{{#if result}}={{else}}&times;{{/if}}</span>{{/unless}}
+		<span class="t{{#if result}} result{{/if}}"><b>{{value}}</b><span>{{localize label}}</span></span>
+		{{/each}}
+	</div>
+
+	{{#if robot.chains.vehicle}}
+	<p class="hint">{{plural 'MGT2.Actor.robot.VehicleSpeedOn' robot.chains.vehicle hours=robot.chains.vehicle}}<i class="fa-solid fa-circle-info note" data-tooltip="{{plural 'MGT2.Actor.robot.VehicleSpeedHint' robot.chains.vehicle hours=robot.chains.vehicle}}"></i></p>
+	{{/if}}
+
+	<div class="grid edit-only">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.robot.Tactical'}}</span>
+			{{formInput systemFields.speed.fields.tactical name="system.speed.tactical" value=system.speed.tactical classes="f num"}}
+		</label>
+		{{! An explicit control and not `formInput`: a nullable NumberField carrying both a min and
+		    a max renders as a range-picker, and a slider cannot express `null`. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.robot.VehicleBand'}}</span>
+			<select class="f" name="system.speed.vehicleBand" data-dtype="Number">
+				<option value="">&mdash;</option>
+				{{#each choices.speedBands as |label key|}}
+				<option value="{{@index}}"{{#if (eq @index ../system.speed.vehicleBand)}} selected{{/if}}>{{localize label}}</option>
+				{{/each}}
+			</select>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.robot.AgilityEnhancement'}}</span>
+			{{formInput systemFields.agilityEnhancement name="system.agilityEnhancement" value=system.agilityEnhancement classes="f num"}}
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.robot.Power'}}</span>
+			{{formInput systemFields.endurance.fields.source name="system.endurance.source" value=system.endurance.source localize=true classes="f"}}
+		</label>
+		<label class="check" data-tooltip="{{localize 'MGT2.Actor.robot.RedundantHint'}}">
+			{{formInput systemFields.endurance.fields.redundant name="system.endurance.redundant" value=system.endurance.redundant}}
+			<span>{{localize 'MGT2.Actor.robot.Redundant'}}</span>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.robot.PowerPacks'}}</span>
+			<input class="f num" type="number" name="system.endurance.powerPacks" min="0" max="3" step="1" value="{{system.endurance.powerPacks}}" />
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Actor.robot.HalfLife'}}</span>
+			{{formInput systemFields.endurance.fields.halfLife name="system.endurance.halfLife" value=system.endurance.halfLife classes="f num"}}
+		</label>
+		<label class="check">
+			{{formInput systemFields.endurance.fields.efficiency name="system.endurance.efficiency" value=system.endurance.efficiency}}
+			<span>{{localize 'MGT2.Actor.robot.Efficiency'}}</span>
+		</label>
+	</div>
+</div>

@@ -2,6 +2,11 @@
 // .grid, .codes, table.rows — are _blocks.sass; what is below is the spine, the identity header,
 // the roll line and the two blocks that exist only here.
 
+// The item sheet reflows on its own width, as the actor sheets do on theirs.
+.mgt2.application.item
+	container-type: inline-size
+	container-name: itemsheet
+
 // A root part is unwrapped into the window content, so the content element IS the grid.
 .mgt2 .window-content.itemsheet
 	display: grid
@@ -168,45 +173,6 @@
 				min-width: 0
 				font-size: 12px
 
-		// The toggle stays a checkbox under its clothes: `_processFormData` reads `equipped` and
-		// `container` off the same submit to settle which one the other clears, so an action button
-		// writing the field directly would skip that rule.
-		.eq
-			position: relative
-			flex: none
-			display: inline-flex
-			align-items: center
-			gap: 5px
-			height: 24px
-			padding: 0 10px 0 7px
-			font-family: var(--cond)
-			font-size: 10.5px
-			font-weight: 600
-			letter-spacing: 0.14em
-			text-transform: uppercase
-			color: var(--faint)
-			border: 1px solid var(--rule)
-			border-radius: 999px
-			cursor: var(--cursor-pointer)
-			input
-				position: absolute
-				width: 1px
-				height: 1px
-				margin: 0
-				opacity: 0
-				pointer-events: none
-			.fa-circle-check
-				display: none
-			&:has(:checked)
-				color: var(--accent-text)
-				background: var(--accent-soft)
-				border-color: var(--accent-line)
-				.fa-circle
-					display: none
-				.fa-circle-check
-					display: inline
-			&:focus-within
-				border-color: var(--accent-text)
 
 	// The binding spans all three columns at the full content width, and that is load-bearing:
 	// beside the portrait the row is ~90 px narrower and a weapon carrying a Reload button wraps.
@@ -242,8 +208,15 @@
 			color: var(--mute)
 			background: var(--hover)
 			border-radius: 999px
+		// An empty tab recolours, never fades: its count is an outlined pill, and the pointer still wins.
 		&.empty:not(.active)
-			opacity: 0.5
+			color: var(--faint)
+			&:hover
+				color: var(--accent-hot)
+			.badge
+				color: var(--faint)
+				background: none
+				box-shadow: inset 0 0 0 1px var(--rule)
 
 .mgt2 .tab[data-group="item"].active
 	display: flex
@@ -339,16 +312,20 @@
 	font-family: var(--cond)
 	font-size: 11px
 
-// A drug's bar carries no roll sentence, so the button would sit alone against the right edge with
-// the caption stranded. The caption takes the space instead.
-.mgt2 .rollbar.dose-take
-	.why
-		flex: 1 1 auto
-		font-family: var(--cond)
-		font-size: 9.5px
-		letter-spacing: 0.11em
-		text-transform: uppercase
-		color: var(--faint)
+// A drug's moments are prose, so they share the bar's width instead of sizing to a short value.
+.mgt2 .cycle.dose
+	flex: 1 0 100%
+	flex-wrap: nowrap
+	align-items: stretch
+	> i
+		align-self: center
+	.plate
+		flex: 1 1 0
+		min-width: 0
+.mgt2 .cycle .plate b.word
+	font-size: 14px
+	font-weight: 600
+	line-height: 1.25
 
 // An onset reads in the duration column, where "—" would otherwise say the dose is permanent.
 .mgt2 .rows .onset
@@ -393,11 +370,57 @@
 		font-weight: 500
 		color: var(--faint)
 
+// --------------------------------------------
+//  TERMS — the masthead's third cell, where a carried item shows its supply: a contract's bounty,
+//  a cargo lot's fare or cost. Scoped to the masthead: other screens have a `.terms` of their own.
+// --------------------------------------------
+.mgt2 .mast .terms
+	grid-column: 3
+	grid-row: 1
+	display: flex
+	flex-direction: column
+	align-items: flex-end
+	gap: 5px
+
+	.lbl
+		font-size: 9.5px
+	.bounty,
+	.sum
+		font-family: var(--cond)
+		font-size: 25px
+		font-weight: 700
+		line-height: 1
+		font-variant-numeric: tabular-nums
+		white-space: nowrap
+		u
+			margin-right: 3px
+			font-size: 12px
+			text-decoration: none
+			color: var(--mute)
+
+	.per
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--faint)
+
+	// An agreed bounty replaces the offer; the offer stays visible struck through, because the
+	// pair is the record of the negotiation and one number is not.
+	.was
+		font-family: var(--mono)
+		font-size: 10.5px
+		color: var(--faint)
+		text-decoration: line-through
+
+
 // A hazard is what the item does TO you, so its spine carries the danger colour.
 .mgt2.hazard .itemsheet-header span
 	color: var(--danger)
 
-// The two or three numbers a type is opened for, at reading size.
+// The two or three numbers a type is opened for, at reading size. A round's are a list.
+.mgt2 ul.plates
+	margin: 0
+	padding: 0
+	list-style: none
 .mgt2 .plates
 	display: grid
 	grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr))
@@ -436,20 +459,173 @@
 		border-color: color-mix(in oklab, var(--danger) 45%, transparent)
 		b
 			color: var(--danger)
-	.pips
+	// A plant's output, in the parts list's green.
+	&.gen b
+		color: var(--good)
+	// The arm and the count behind a figure.
+	.how
+		font-family: var(--mono)
+		font-size: 10px
+		color: var(--faint)
+	b .word
+		font-size: 14px
+	// A condition left behind: amber, where damage is red.
+	&.warn
+		border-color: color-mix(in oklab, var(--warn) 45%, transparent)
+		b
+			color: var(--warn)
+
+// A plate's second line, and a plate that names another document.
+.mgt2 .plate .psub
+	font-size: 11.5px
+	color: var(--faint)
+.mgt2 .plate b a.ref
+	color: inherit
+	text-decoration: underline
+	text-decoration-color: var(--rule)
+	text-underline-offset: 3px
+	cursor: var(--cursor-pointer)
+	&:hover
+		color: var(--accent-text)
+		text-decoration-color: var(--accent-line)
+
+// A lot's trade-code DMs: two columns side by side, a code chip, its name and the DM as a pill.
+.mgt2 .tdm
+	display: grid
+	grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr))
+	gap: 8px 18px
+	.th
+		display: flex
+		align-items: center
+		justify-content: space-between
+		margin-bottom: 4px
+		padding-bottom: 3px
+		border-bottom: 1px solid var(--rule-soft)
+	ul
+		display: flex
+		flex-direction: column
+		gap: 3px
+		margin: 0
+		padding: 0
+		list-style: none
+	li
+		display: grid
+		grid-template-columns: 2.4rem minmax(0, 1fr) auto
+		align-items: center
+		gap: 8px
+		font-size: 12.5px
+	li.none
+		display: block
+		color: var(--faint)
+	li.ed
+		grid-template-columns: minmax(0, 1fr) 4rem 1.2rem
+		a
+			color: var(--faint)
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
+	.code
+		font-family: var(--cond)
+		font-size: 11.5px
+		font-weight: 700
+		letter-spacing: 0.1em
+		color: var(--ink)
+	.nm
+		color: var(--mute)
+	.dm
+		padding: 0 7px
+		font-family: var(--mono)
+		font-size: 11.5px
+		line-height: 1.5
+		font-variant-numeric: tabular-nums
+		color: var(--ink)
+		border: 1px solid var(--rule)
+		border-radius: 999px
+		&.zero
+			color: var(--faint)
+
+// One dot per round, on a weapon's plate and on a round's weapon alike.
+.mgt2 .plate .pips,
+.mgt2 .host .pips
+	display: flex
+	flex-wrap: wrap
+	gap: 3px
+	margin-top: 2px
+	i
+		width: 7px
+		height: 7px
+		border-radius: 50%
+		background: var(--track)
+	i.on
+		background: var(--accent-text)
+
+// A round's weapons: the name opens it, the rounds left at the right, then what the round changes.
+.mgt2 .hosts
+	display: flex
+	flex-direction: column
+	gap: 10px
+	margin: 0
+	padding: 0
+	list-style: none
+.mgt2 .host
+	.hhead
 		display: flex
 		flex-wrap: wrap
-		gap: 3px
-		margin-top: 2px
-		i
-			width: 7px
-			height: 7px
-			border-radius: 50%
-			background: var(--track)
-		i.on
-			background: var(--accent-text)
+		align-items: center
+		justify-content: space-between
+		gap: 4px 12px
+	.nm
+		font-family: var(--cond)
+		font-size: 15px
+		font-weight: 700
+		cursor: var(--cursor-pointer)
+		&:hover
+			color: var(--accent-text)
+	.ld
+		display: inline-flex
+		align-items: center
+		gap: 7px
+		b
+			font-family: var(--cond)
+			font-size: 15px
+			font-variant-numeric: tabular-nums
+		.u
+			margin-left: 2px
+			font-size: 11px
+			color: var(--mute)
+		.bar
+			width: 5rem
+	.same
+		margin: 4px 0 0
+		font-size: 12.5px
+		color: var(--faint)
+
+// A before → after pair: the weapon's own struck through, the value in force at reading size.
+.mgt2 .swap
+	display: grid
+	grid-template-columns: max-content minmax(0, max-content) auto minmax(0, 1fr)
+	align-items: baseline
+	gap: 3px 9px
+	margin: 5px 0 0
+	padding: 0
+	list-style: none
+	li
+		display: contents
+	s
+		font-family: var(--mono)
+		font-size: 11.5px
+		color: var(--faint)
+		overflow-wrap: anywhere
+	.to
+		color: var(--faint)
+	b
+		font-family: var(--cond)
+		font-size: 15px
+		font-weight: 700
+		overflow-wrap: anywhere
 
 .mgt2 .plate .bar,
+.mgt2 .host .bar,
 .mgt2 .gauge .bar
 	display: block
 	height: 6px
@@ -494,7 +670,7 @@
 		gap: 5px
 
 // What the running software spends of the host's Processing; past the rating it turns red.
-.mgt2 .gauge
+.mgt2 .imain .gauge
 	display: grid
 	grid-template-columns: auto auto
 	justify-content: start
@@ -516,17 +692,6 @@
 		grid-column: 1 / -1
 	.bar
 		width: 12rem
-	.cells
-		display: flex
-		flex-wrap: wrap
-		gap: 3px
-		i
-			flex: 0 0 24px
-			height: 8px
-			background: var(--track)
-			border-radius: 2px
-		i.on
-			background: var(--accent-text)
 	&.over
 		> b,
 		> b .u
@@ -594,6 +759,77 @@
 			border-color: color-mix(in oklab, var(--danger) 45%, transparent)
 		&.faint
 			color: var(--faint)
+		// A ship critical's six rungs, filled up to its grade.
+		.sev
+			display: inline-flex
+			gap: 2px
+			i
+				width: 6px
+				height: 6px
+				border: 1px solid currentColor
+				border-radius: 1px
+			i.on
+				background: currentColor
+		// A count the system keeps and nobody ticks, with the hand reset at its end.
+		&.kept
+			border-style: dashed
+			color: var(--mute)
+			b
+				font-family: var(--mono)
+				font-size: 11px
+				font-weight: 400
+				color: var(--ink)
+			.reset
+				display: inline-flex
+				font-size: 10px
+				color: var(--faint)
+				cursor: var(--cursor-pointer)
+				&:hover
+					color: var(--accent-text)
+		// A condition the effect hangs on, named in the tooltip.
+		&.dashed
+			border-style: dashed
+		// Printed text, which keeps its case: a state is set in capitals, a cell of the book is not.
+		&.text
+			font-family: var(--body)
+			font-size: 12px
+			font-weight: 500
+			letter-spacing: 0
+			text-transform: none
+		> i
+			font-size: 9.5px
+			color: var(--faint)
+	.mast .mastpills
+		margin-top: 7px
+
+	// An array of choices as a row of toggle pills, the face `.grid label.check` gives a single switch.
+	multi-checkbox.tpills
+		display: flex
+		flex-wrap: wrap
+		gap: 5px
+		label.checkbox
+			display: inline-flex
+			flex: 0 0 auto
+			align-items: center
+			gap: 5px
+			margin: 0
+			padding: 2px 10px 2px 7px
+			font-family: var(--cond)
+			font-size: 10.5px
+			font-weight: 600
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--mute)
+			border: 1px solid var(--rule)
+			border-radius: 999px
+			cursor: var(--cursor-pointer)
+			input
+				margin: 0
+				accent-color: var(--accent-text)
+			&:has(input:checked)
+				color: var(--accent-text)
+				background: var(--accent-soft)
+				border-color: var(--accent-line)
 
 .mgt2 .facts
 	display: grid
@@ -647,33 +883,221 @@
 		font-family: var(--mono)
 		font-size: 11.5px
 		color: var(--faint)
+	// A skill's name in a 4.4rem tile; the species tiles hold three letters and are unchanged.
+	.k
+		text-align: center
+		overflow-wrap: anywhere
+	// A tile the derivations skip recolours, never fades.
+	.tile.off
+		border-color: var(--rule-soft)
+		.k,
+		b
+			color: var(--faint)
 
-// --------------------------------------------
-//  CARRIED — a container's own storage properties, live in play mode
-// --------------------------------------------
-
-.mgt2 .carried
+// A role's actions, grouped by the step of the round, each a line: its name, the roll as a sentence,
+// and a tail holding the Weapon pill and the limit.
+.mgt2 .stationacts
 	display: flex
-	align-items: center
-	flex-wrap: wrap
-	gap: 8px 20px
-
-	.chk
+	flex-direction: column
+	gap: 10px
+.mgt2 .stepgrp
+	display: flex
+	flex-direction: column
+.mgt2 .stephead
+	display: flex
+	align-items: baseline
+	gap: 7px
+	padding-bottom: 3px
+	font-family: var(--cond)
+	font-size: 10.5px
+	font-weight: 700
+	letter-spacing: 0.18em
+	text-transform: uppercase
+	color: var(--mute)
+	border-bottom: 1px solid var(--rule-soft)
+	b
+		font-family: var(--mono)
+		font-weight: 400
+		letter-spacing: 0
+		color: var(--faint)
+	i
+		font-style: normal
+		font-weight: 500
+		letter-spacing: 0.1em
+		text-transform: none
+		color: var(--faint)
+.mgt2 .stepgrp .act
+	display: grid
+	// Fixed outer tracks, so every roll starts on the same line whatever its tail holds.
+	grid-template-columns: 8.5rem minmax(0, 1fr) 9.5rem
+	align-items: baseline
+	gap: 4px 12px
+	padding: 6px 2px
+	border-bottom: 1px solid var(--rule-soft)
+	&:last-child
+		border-bottom: 0
+	.nm
+		font-family: var(--cond)
+		font-size: 14px
+		font-weight: 700
+	.roll
 		display: flex
-		align-items: center
-		gap: 6px
-		input
-			margin: 0
-			accent-color: var(--accent-text)
-		span
-			font-family: var(--cond)
-			font-size: 10px
-			font-weight: 600
-			letter-spacing: 0.16em
+		flex-wrap: wrap
+		align-items: baseline
+		gap: 3px 6px
+		font-family: var(--cond)
+		font-size: 13px
+		.op
+			font-size: 10.5px
+			letter-spacing: 0.1em
 			text-transform: uppercase
-			color: var(--mute)
-		input:checked + span
+			color: var(--faint)
+		abbr
+			text-decoration: none
+			font-weight: 600
+			cursor: help
+		.none
+			color: var(--faint)
+	.dm
+		padding: 0 6px
+		font-family: var(--mono)
+		font-size: 11px
+		line-height: 1.5
+		color: var(--ink)
+		border: 1px solid var(--rule)
+		border-radius: 999px
+		&:hover
 			color: var(--accent-text)
+			border-color: var(--accent-line)
+	.tail
+		display: flex
+		flex-wrap: wrap
+		align-items: baseline
+		justify-content: flex-end
+		gap: 2px 8px
+	.kp
+		padding: 0 7px
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--ink)
+		border: 1px solid var(--rule)
+		border-radius: 999px
+	.cap
+		font-family: var(--cond)
+		font-size: 10px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		white-space: nowrap
+		color: var(--faint)
+// In edit mode one action is two rows of one table: no rule inside an action, the hover over both.
+.mgt2 table.rows.acted
+	tbody tr td
+		border-bottom: 0
+	tbody + tbody tr:first-child td
+		border-top: 1px solid var(--rule-soft)
+	tbody:hover tr
+		background: var(--hover)
+	tbody tr:hover
+		background: none
+	td
+		padding: 3px 4px
+	.f
+		font-size: 12px
+	thead tr + tr th
+		padding-top: 0
+// A station's seats and pay take two tracks, and no salary reads faint.
+.mgt2 .mast .supply.station
+	.sedit
+		grid-template-columns: repeat(2, minmax(0, 1fr))
+	.sline .none
+		color: var(--faint)
+
+// The printed line an item is opened for, at reading size.
+.mgt2 .lede
+	margin: 0
+	font-family: var(--cond)
+	font-size: 18px
+	font-weight: 600
+	line-height: 1.3
+
+// --------------------------------------------
+//  CARRIED — a container's strip: its states, where it is, what its carrier feels
+// --------------------------------------------
+
+// The toggle stays a checkbox under its clothes: `_processFormData` reads `equipped` and
+// `container` off the same submit to settle which one the other clears, so an action button
+// writing the field directly would skip that rule. A container's On hand is the same pill.
+.mgt2 .imain .eq
+	position: relative
+	flex: none
+	display: inline-flex
+	align-items: center
+	gap: 5px
+	height: 24px
+	padding: 0 10px 0 7px
+	font-family: var(--cond)
+	font-size: 10.5px
+	font-weight: 600
+	letter-spacing: 0.14em
+	text-transform: uppercase
+	color: var(--faint)
+	border: 1px solid var(--rule)
+	border-radius: 999px
+	cursor: var(--cursor-pointer)
+	input
+		position: absolute
+		width: 1px
+		height: 1px
+		margin: 0
+		opacity: 0
+		pointer-events: none
+	.fa-circle-check
+		display: none
+	&:has(:checked),
+	&.on
+		color: var(--accent-text)
+		background: var(--accent-soft)
+		border-color: var(--accent-line)
+		.fa-circle
+			display: none
+		.fa-circle-check
+			display: inline
+	&:focus-within
+		border-color: var(--accent-text)
+	// An observer's pill is a state, not a broken control.
+	&:has(input:disabled)
+		cursor: default
+// A contract's handover is the same pill as a button, which takes none of the core button's face.
+.mgt2 .imain button.eq
+	width: auto
+	min-height: 0
+	margin: 0
+	background: none
+	box-shadow: none
+	&.on
+		background: var(--accent-soft)
+
+.mgt2 .bagstrip
+	display: flex
+	flex-wrap: wrap
+	align-items: center
+	gap: 6px 8px
+	.where
+		display: inline-flex
+		align-items: center
+		gap: 5px
+		font-size: 13px
+		color: var(--mute)
+	.statline
+		margin-left: auto
+		padding: 0
+		border: 0
+		.stat
+			padding: 0
 
 // --------------------------------------------
 //  Shared odds and ends
@@ -698,6 +1122,15 @@
 	document-tags
 		min-width: 0
 		font-size: 12px
+	// A strip of choices in a grid cell: its own cells are labels, so the cell is a div, and they stay rows.
+	.grid .segcell
+		grid-column: 1 / -1
+		display: flex
+		flex-direction: column
+		gap: 3px
+		min-width: 0
+	.grid .seg label
+		flex-direction: row
 	// Two controls sharing one grid cell: a value and the unit or unit-like enum beside it.
 	.pair
 		display: flex
@@ -725,20 +1158,6 @@
 		border-bottom: 1px dashed var(--rule-soft)
 		&:first-child
 			margin-top: 0
-	// A switch reads as a toggle pill, lit while it is on.
-	.grid label.check
-		justify-self: start
-		padding: 3px 11px 3px 8px
-		border: 1px solid var(--rule)
-		border-radius: 999px
-		cursor: var(--cursor-pointer)
-		&:has(input:checked)
-			background: var(--accent-soft)
-			border-color: var(--accent-line)
-			span
-				color: var(--accent-text)
-		&.off
-			opacity: 0.55
 
 // The code row's edit face: a custom chip becomes its own name field, a registered one keeps its
 // name and opens its printed parameters, and both carry the owner's note.

@@ -1,7 +1,7 @@
 // The world screen. Everything it can take from the shared kit it takes — `.statline`, `.codes`,
 // `.block`, `.sect`, `.hint` and the header/rail/panel skeleton are _blocks.sass and _character.sass
-// unchanged. What is here is the window grid, and the three components this type owns: the UWP
-// strip, the derivation ledger and the two traffic halves.
+// unchanged. What is here is the window grid, and the components this type owns: the UWP strip, the
+// derivation ledger, the port's services and the supplier state.
 
 // `world` extends TypeDataModel rather than ActorBaseData, so its sheet is not a subclass of the
 // character sheet and does not inherit the `character` class ApplicationV2 concatenates up the chain
@@ -60,14 +60,14 @@
 	display: grid
 	grid-template-columns: repeat(8, minmax(0, 1fr))
 	margin: 12px 0 0
-	border: 1px solid var(--rule-soft)
+	border-top: 1px solid var(--rule)
 
 	.u
 		display: flex
 		flex-direction: column
-		gap: 1px
+		gap: 2px
 		min-width: 0
-		padding: 5px 6px 6px
+		padding: 6px 8px 9px
 		border-right: 1px solid var(--rule-soft)
 		&:last-child
 			border-right: 0
@@ -75,153 +75,271 @@
 		dt
 			overflow: hidden
 			font-family: var(--cond)
-			font-size: 8.5px
-			font-weight: 700
-			letter-spacing: 0.14em
+			font-size: 10px
+			font-weight: 600
+			letter-spacing: 0.16em
 			text-transform: uppercase
 			white-space: nowrap
 			text-overflow: ellipsis
-			color: var(--faint)
+			color: var(--mute)
 
 		dd
 			margin: 0
 			font-family: var(--mono)
-			font-size: 17px
+			font-size: 22px
+			font-weight: 600
 			line-height: 1.1
 			font-variant-numeric: tabular-nums
+			.f
+				font-size: 14px
 
+		// Two lines and then the tooltip: a gloss is a reading, not a sentence to scroll.
 		.g
+			display: -webkit-box
+			-webkit-line-clamp: 2
+			-webkit-box-orient: vertical
 			overflow: hidden
 			font-family: var(--cond)
-			font-size: 9px
-			letter-spacing: 0.06em
-			white-space: nowrap
-			text-overflow: ellipsis
+			font-size: 11px
+			font-weight: 500
+			letter-spacing: 0.04em
+			line-height: 1.25
 			color: var(--mute)
+			&:empty
+				display: none
 
-	// The starport letter is the busiest digit on the sheet — fuel, berthing, both traffic DMs and
-	// the supplier search all key off it — so it reads as the heading it is.
-	.u.port
-		background: var(--accent-soft)
-		dt
-			color: var(--mute)
+	// The printed line's three groups, `A | 788899 | C`: the port set apart by weight, the TL by a rule.
+	.u[data-cell="starport"]
+		border-right: 1px solid var(--rule)
 		dd
-			color: var(--accent-text)
-			font-weight: 600
+			font-weight: 700
+	.u[data-cell="techLevel"]
+		border-left: 1px solid var(--rule)
 
-.mgt2 .paste
-	grid-column: 1 / -1
+// The zone is a state, so it reads as one beside the name: amber and red only while they hold.
+.mgt2 .mgt2-header .name
 	display: flex
-	flex-wrap: wrap
 	align-items: center
-	gap: 7px
-	padding-top: 9px
+	flex-wrap: wrap
+	gap: 10px
+.mgt2 .zp
+	display: inline-flex
+	align-items: center
+	gap: 5px
+	padding: 1px 9px 2px 7px
+	font-family: var(--cond)
+	font-size: 10.5px
+	font-weight: 600
+	letter-spacing: 0.12em
+	text-transform: uppercase
+	color: var(--faint)
+	border: 1px solid var(--rule)
+	border-radius: 999px
+	&::before
+		content: ""
+		width: 6px
+		height: 6px
+		border-radius: 50%
+		background: currentColor
+		opacity: 0.5
+	&.amber
+		color: var(--warn)
+		border-color: currentColor
+		background: color-mix(in oklab, var(--warn) 14%, transparent)
+	&.red
+		color: var(--danger)
+		border-color: currentColor
+		background: color-mix(in oklab, var(--danger) 12%, transparent)
+	&.amber::before,
+	&.red::before
+		opacity: 1
 
-	input.f
-		width: 11rem
+// In edit mode the paste field stands where the printed line does, at its size.
+.mgt2 .mgt2-header .reg label
+	display: flex
+	flex-direction: column
+	align-items: flex-end
+	gap: 3px
+	.lbl
+		display: inline-flex
+		align-items: baseline
+		gap: 6px
+	input.f.line
+		width: 9.6rem
+		text-align: right
 		font-family: var(--mono)
-
-	.src
-		font-family: var(--mono)
-		font-size: 9.5px
-		color: var(--faint)
+		font-size: 16px
+		font-weight: 600
+		letter-spacing: 0.1em
 
 // --------------------------------------------
 //  THE DERIVATION LEDGER
 // --------------------------------------------
-// Every code with the condition that produced it, on or off. A code the referee has forced keeps its
-// condition visible beside the override, which is the only way a derivation and a typo stay apart.
+// A code's outline says where it comes from: dashed derived from the profile, solid ink forced on,
+// struck forced off; a code not met is a faint chip, and the strike means forced off and nothing else.
+.mgt2 .codes .code
+	&.drv
+		border-style: dashed
+		border-color: var(--edge)
+	&.hand
+		border-color: var(--ink)
+	&.hand.off
+		border-color: var(--faint)
+	&.nm
+		color: var(--faint)
+		border-color: var(--rule-soft)
+.mgt2 .codes .gloss
+	.why
+		margin-left: 6px
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--ink)
+	.cnd
+		margin-left: 4px
+		font-family: var(--mono)
+		font-size: 11px
+		color: var(--faint)
+
+.mgt2 .mgt2-world-panel ul.rest
+	display: grid
+	grid-template-columns: 2.6rem minmax(0, 1fr)
+	gap: 3px 10px
+	margin: 0
+	padding: 0
+	list-style: none
+	color: var(--faint)
+	.c
+		font-family: var(--cond)
+		font-size: 12px
+		font-weight: 700
+		letter-spacing: 0.1em
+		text-transform: uppercase
+	.cnd
+		min-width: 0
+		font-family: var(--mono)
+		font-size: 10.5px
 
 .mgt2 .ledger
 	display: flex
 	flex-direction: column
-
 	.lr
 		display: grid
-		grid-template-columns: 2.4rem minmax(0, 1fr) auto auto
-		gap: 0 9px
-		align-items: baseline
+		grid-template-columns: 3rem minmax(0, 1fr) auto auto
+		gap: 0 10px
+		align-items: center
 		padding: 3px 2px
 		border-bottom: 1px solid var(--rule-soft)
 		&:last-child
 			border-bottom: 0
-
-		.c
-			font-family: var(--cond)
-			font-size: 12.5px
-			font-weight: 700
-			letter-spacing: 0.1em
-			text-transform: uppercase
-
+		.codes
+			display: inline-flex
 		.cond
 			min-width: 0
-			overflow: hidden
-			font-family: var(--mono)
-			font-size: 10px
-			white-space: nowrap
-			text-overflow: ellipsis
-			color: var(--faint)
-
+			font-size: 12px
+			color: var(--mute)
+			.cnd
+				margin-left: 6px
+				font-family: var(--mono)
+				font-size: 10.5px
+				color: var(--faint)
 		.st
 			font-family: var(--cond)
-			font-size: 9.5px
+			font-size: 10px
 			font-weight: 600
 			letter-spacing: 0.12em
 			text-transform: uppercase
 			white-space: nowrap
-
-		.ov
-			display: inline-flex
-			gap: 3px
-			button
-				width: auto
-				height: auto
-				min-height: 0
-				padding: 1px 6px 2px
-				font: inherit
-				font-family: var(--cond)
-				font-size: 9px
-				font-weight: 700
-				letter-spacing: 0.1em
-				text-transform: uppercase
-				color: var(--mute)
-				background: none
-				border: 1px solid var(--rule)
-				border-radius: 2px
-				cursor: var(--cursor-pointer)
-				&:hover
-					color: var(--ink)
-					background: var(--hover)
-				&.on
-					color: var(--accent-text)
-					border-color: var(--accent-line)
-
-	.lr.on .c
-		color: var(--accent-text)
-	.lr.on .st
-		color: var(--good)
-	.lr.off
-		color: var(--faint)
-		.ov button
 			color: var(--faint)
 	.lr.forced .st
-		color: var(--danger)
-	.lr.forced .c
-		text-decoration: underline
-		text-decoration-style: dotted
+		color: var(--ink)
+	.lr.off .cond
+		color: var(--faint)
+
+// Auto · On · Off as one control. Auto is where sixteen rows rest, so it is selected but quiet; the
+// accent marks an override, which is what the eye should find.
+.mgt2 .seg
+	display: inline-flex
+	button
+		height: auto
+		min-height: 0
+		padding: 1px 8px 2px
+		font: inherit
+		font-family: var(--cond)
+		font-size: 9.5px
+		font-weight: 700
+		letter-spacing: 0.1em
+		text-transform: uppercase
+		color: var(--mute)
+		background: none
+		border: 1px solid var(--rule)
+		border-radius: 0
+		cursor: var(--cursor-pointer)
+		&:first-child
+			border-radius: 2px 0 0 2px
+		&:last-child
+			border-radius: 0 2px 2px 0
+		& + button
+			border-left: 0
+		&:hover
+			color: var(--ink)
+			background: var(--hover)
+		&.on
+			color: var(--accent-text)
+			background: var(--accent-soft)
+			border-color: var(--accent-line)
+		&.on + button
+			border-left: 1px solid var(--accent-line)
+		&.on[data-state="derive"]
+			color: var(--ink)
+			background: var(--hover)
+			border-color: var(--rule)
+		&.on[data-state="derive"] + button
+			border-left: 0
 
 // --------------------------------------------
-//  THE BERTHING CELL
+//  THE STARPORT AND ITS BERTHING
 // --------------------------------------------
-// Three states, and a naive `0` collapses two of them: `null` is NOT YET ROLLED, class E charges
-// nothing and class X has no port at all (Core p.259).
+// The berthing is three states, and a naive `0` collapses two of them: `null` is NOT YET ROLLED,
+// class E charges nothing and class X has no port at all (Core p.259).
+
+.mgt2 .fuel
+	display: grid
+	grid-template-columns: minmax(0, 1fr) auto
+	gap: 1px 8px
+	align-items: baseline
+	span
+		font-family: var(--cond)
+		font-size: 12px
+		font-weight: 600
+		letter-spacing: 0.06em
+		color: var(--mute)
+	b
+		font-size: 17px
+		i
+			margin-right: 1px
+			font-style: normal
+			font-size: 11px
+			font-weight: 500
+			color: var(--mute)
 
 .mgt2 .berth
-	display: flex
-	flex-wrap: wrap
+	display: grid
+	grid-template-columns: auto minmax(0, 1fr) auto
+	gap: 2px 10px
 	align-items: baseline
-	gap: 9px
-
+	margin-top: 4px
+	padding-top: 6px
+	border-top: 1px solid var(--rule-soft)
+	> .lbl
+		grid-column: 1 / -1
+		display: flex
+		align-items: baseline
+		gap: 6px
+		.gm
+			margin-left: auto
 	.v
 		font-family: var(--cond)
 		font-size: 22px
@@ -235,119 +353,138 @@
 			color: var(--mute)
 	.v.unrolled
 		color: var(--faint)
-
 	.band
+		min-width: 0
 		font-family: var(--mono)
 		font-size: 10.5px
 		color: var(--faint)
-
-	button
-		width: auto
-		height: auto
-		min-height: 0
-		margin-left: auto
-		padding: 3px 9px 4px
-		font: inherit
-		font-family: var(--cond)
-		font-size: 9.5px
-		font-weight: 700
-		letter-spacing: 0.12em
-		text-transform: uppercase
-		color: var(--paper)
-		background: var(--accent-text)
-		border: 1px solid var(--accent-text)
-		border-radius: 2px
-		cursor: var(--cursor-pointer)
-		&[disabled]
-			color: var(--faint)
-			background: none
-			border-color: var(--rule)
-			cursor: not-allowed
+	.ed
+		grid-column: 1 / -1
+		display: grid
+		grid-template-columns: minmax(0, 8rem) auto
+		gap: 8px
+		align-items: end
+		margin-top: 6px
 
 // The supplier lockout: per-world state that outlives any voyage, which is why it sits on this
-// document and not on the ship's leg.
+// document and not on the ship's leg. Each state is a pill, and its clear rides the pill it clears.
 .mgt2 .lock
-	display: flex
-	flex-direction: column
-	gap: 4px
-
-	.row
-		display: flex
-		align-items: baseline
-		gap: 8px
-		.v
-			margin-left: auto
-			font-family: var(--mono)
-			font-size: 12px
-			font-variant-numeric: tabular-nums
-		.v.shut
-			color: var(--danger)
-
-	.why
+	display: grid
+	grid-template-columns: auto minmax(0, 1fr)
+	gap: 6px 10px
+	align-items: center
+	.v
+		justify-self: end
+		font-family: var(--mono)
+		font-size: 12px
+	.pill
+		justify-self: end
+		display: inline-flex
+		align-items: center
+		gap: 6px
+		max-width: 100%
+		padding: 1px 4px 1px 9px
 		font-family: var(--cond)
-		font-size: 9.5px
-		letter-spacing: 0.11em
+		font-size: 11px
+		font-weight: 600
+		letter-spacing: 0.1em
 		text-transform: uppercase
+		white-space: nowrap
 		color: var(--faint)
+		border: 1px solid var(--rule)
+		border-radius: 999px
+		&.quiet
+			padding-right: 9px
+		&.warn
+			color: var(--warn)
+			border-color: color-mix(in oklab, var(--warn) 55%, transparent)
+			background: color-mix(in oklab, var(--warn) 12%, transparent)
+		&.danger
+			color: var(--danger)
+			border-color: color-mix(in oklab, var(--danger) 55%, transparent)
+			background: color-mix(in oklab, var(--danger) 10%, transparent)
+		button.x
+			display: inline-grid
+			place-items: center
+			width: 16px
+			height: 16px
+			min-height: 0
+			padding: 0
+			font-size: 10px
+			line-height: 1
+			color: inherit
+			background: none
+			border: 0
+			border-radius: 50%
+			cursor: var(--cursor-pointer)
+			opacity: 0.75
+			&:hover
+				opacity: 1
+				background: var(--hover)
+	.dmpill
+		justify-self: end
+		padding: 0 8px
+		font-family: var(--mono)
+		font-size: 12px
+		line-height: 1.6
+		color: var(--ink)
+		border: 1px solid var(--rule)
+		border-radius: 999px
+		&.zero
+			color: var(--faint)
+			border-color: var(--rule-soft)
+.mgt2 .mgt2-world-panel .vacts .btn.hot,
+.mgt2 .mgt2-rail .vacts .btn.hot
+	flex: 1 0 100%
+	text-align: center
+
+// In edit mode the bases are picked as toggle pills, lit while present.
+.mgt2 ul.pick
+	display: flex
+	flex-wrap: wrap
+	gap: 5px
+	margin: 0
+	padding: 0
+	list-style: none
+	li
+		padding: 2px 11px 3px
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.12em
+		text-transform: uppercase
+		color: var(--mute)
+		border: 1px solid var(--rule)
+		border-radius: 999px
+		cursor: var(--cursor-pointer)
+		&.on
+			color: var(--accent-text)
+			background: var(--accent-soft)
+			border-color: var(--accent-line)
 
 // --------------------------------------------
 //  THE TWO TRAFFIC HALVES
 // --------------------------------------------
-// The world's own half of each table. The sheet does not roll them — a leg does, with the other end
-// — but the opposite signs are the thing to see.
-
-.mgt2 .halves
+// The world's own half of each table, as two plates: the total, and its terms under it. The sheet
+// does not roll them — a leg does, with the other end — but the opposite signs are the thing to see.
+.mgt2 .traffic .plate .terms
 	display: grid
-	grid-template-columns: repeat(2, minmax(0, 1fr))
-	border: 1px solid var(--rule-soft)
-
-	.h
-		min-width: 0
-		padding: 8px 11px 10px
-		h4
-			margin: 0 0 4px
-			font-family: var(--cond)
-			font-size: 11px
-			font-weight: 700
-			letter-spacing: 0.14em
-			text-transform: uppercase
-			border: none
-	.h + .h
-		border-left: 1px solid var(--rule-soft)
-
-	table
-		width: 100%
-		border-collapse: collapse
-	td
-		padding: 1px 0
-		font-size: 12px
-	td.w
-		font-family: var(--cond)
-		font-size: 10.5px
-		font-weight: 600
-		letter-spacing: 0.08em
-		text-transform: uppercase
-		color: var(--mute)
-	td.d
-		width: 1px
-		padding-left: 8px
+	grid-template-columns: minmax(0, 1fr) auto
+	gap: 1px 8px
+	margin-top: 3px
+	font-family: var(--cond)
+	font-size: 11px
+	font-weight: 600
+	letter-spacing: 0.08em
+	text-transform: uppercase
+	color: var(--mute)
+	em
+		font-style: normal
 		font-family: var(--mono)
-		font-size: 11.5px
-		font-variant-numeric: tabular-nums
-		text-align: right
-	td.d.pos
-		color: var(--good)
-	td.d.neg
-		color: var(--danger)
-	td.d.nil
-		color: var(--faint)
-	tr.sum td
-		padding-top: 3px
-		font-family: var(--cond)
-		font-weight: 700
-		letter-spacing: 0.1em
-		text-transform: uppercase
-		border-top: 1px solid var(--rule-soft)
+		letter-spacing: 0
+		text-transform: none
+		&.nil
+			color: var(--faint)
 
 // A Red Zone is not a modifier, it is a refusal (Core p.261).
 .mgt2 p.hint.forbidden
@@ -355,8 +492,8 @@
 	color: var(--danger)
 	border-left: 2px solid var(--danger)
 
-// Eight cells stop being legible well before the sheet stops being wide, so the strip and the two
-// halves reflow one breakpoint ahead of the column split the other four types share at 640.
+// Eight cells stop being legible well before the sheet stops being wide, so the strip reflows one
+// breakpoint ahead of the column split the other four types share at 640, and stays four across.
 @container sheet (max-width: 880px)
 	.mgt2 .uwp
 		grid-template-columns: repeat(4, minmax(0, 1fr))
@@ -364,11 +501,7 @@
 			border-bottom: 1px solid var(--rule-soft)
 		.u:nth-child(4)
 			border-right: 0
-
-	.mgt2 .halves
-		grid-template-columns: minmax(0, 1fr)
-		.h + .h
-			border-top: 1px solid var(--rule-soft)
+		.u[data-cell="techLevel"]
 			border-left: 0
 
 @container sheet (max-width: 640px)
@@ -377,16 +510,9 @@
 		grid-template-rows: auto auto minmax(0, 1fr)
 		grid-template-areas: "header" "rail" "panel"
 
-	.mgt2 .uwp
-		grid-template-columns: repeat(2, minmax(0, 1fr))
-		.u:nth-child(4)
-			border-right: 1px solid var(--rule-soft)
-		.u:nth-child(2n)
-			border-right: 0
-
-	// Three buttons and a condition do not share 640 px: the override moves under its own row.
+	// A condition and three buttons do not share 640 px: the segment moves under its own row.
 	.mgt2 .ledger .lr
-		grid-template-columns: 2.4rem minmax(0, 1fr) auto
-		.ov
+		grid-template-columns: 3rem minmax(0, 1fr) auto
+		.seg
 			grid-column: 2 / -1
-			justify-content: flex-end
+			justify-self: end

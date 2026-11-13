@@ -20,11 +20,43 @@
 				{{#each tags}}<span>{{this}}</span>{{/each}}
 			</div>
 			{{/if}}
+			{{! Kept out of `.isub`, whose spans are the tags. }}
+			{{#if mastPills}}
+			<div class="pills mastpills play-only">
+				{{#each mastPills as |pill|}}<span class="pill{{#if pill.tone}} {{pill.tone}}{{/if}}{{#if pill.dashed}} dashed{{/if}}"{{#if pill.tooltip}} data-tooltip="{{pill.tooltip}}"{{/if}}>{{#if pill.mark}}{{> systems/mgt2/templates/items/parts/mark.html tone=pill.mark}}{{/if}}{{pill.label}}</span>{{/each}}
+			</div>
+			{{/if}}
+			{{! A contract's states: priority and status, toned where they matter, and paid. }}
+			{{#if contract}}
+			<div class="pills mastpills play-only">
+				{{#each contract.pills as |pill|}}<span class="pill{{#if pill.tone}} {{pill.tone}}{{/if}}" data-tooltip="{{localize pill.field}}">{{#if pill.icon}}<i class="{{pill.icon}}"></i>{{/if}}{{localize pill.label}}</span>{{/each}}
+			</div>
+			{{/if}}
 			{{#if subTypes}}
 			<div class="isub edit-only">
 				<label>
 					<span class="lbl">{{localize 'MGT2.Items.Type'}}</span>
 					<select class="f" name="system.subType">{{selectOptions subTypes selected=system.subType localize=true}}</select>
+				</label>
+			</div>
+			{{else if station}}
+			{{! The station's construction position — the only handle on it that is not the user's own
+			    wording, and what the ship reads to find its pilot — and its department. }}
+			<div class="isub edit-only">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Items.CrewRole'}}</span>
+					<select class="f" name="system.crewRole">
+						<option value="">&mdash;</option>
+						{{#each config.CrewRoles as |entry key|}}
+						<option value="{{key}}"{{#if (eq key ../system.crewRole)}} selected{{/if}}>{{localize entry.label}}</option>
+						{{/each}}
+					</select>
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Items.Department'}}</span>
+					<select class="f" name="system.department">
+						{{selectOptions config.Departments selected=system.department localize=true}}
+					</select>
 				</label>
 			</div>
 			{{/if}}
@@ -37,7 +69,46 @@
 		<div class="terms">
 			<div class="bounty" data-derived="system.bounty"><u>Cr</u>{{credits system.bounty}}</div>
 			{{#if system.negotiated}}<span class="was">{{localize 'MGT2.Contract.WasOffered'}} Cr{{credits system.fee}}</span>{{/if}}
-			<span class="prio{{#if (eq system.priority 'critical')}} crit{{/if}}">{{localize (lookup config.ContractPriorities system.priority)}}</span>
+			{{! Folio 18's handover, the referee's session control on every tab. }}
+			{{#if contract.gm}}
+			<button type="button" class="eq{{#if system.given}} on{{/if}}" data-action="contractHandover">
+				<i class="fa-regular fa-circle"></i><i class="fa-solid fa-circle-check"></i>
+				<span>{{#if system.given}}{{localize 'MGT2.Contract.HandedOver'}}{{else}}{{localize 'MGT2.Contract.HandOver'}}{{/if}}</span>
+			</button>
+			{{/if}}
+		</div>
+		{{else if cargo.terms}}
+		{{! A cargo lot is never carried either: its cell is the money the lot is about, the fare it is
+		    owed on delivery or what it cost at the counter. }}
+		<div class="terms" data-derived="system.{{cargo.terms.field}}">
+			<span class="lbl">{{localize cargo.terms.label}}</span>
+			<div class="sum"{{#if cargo.terms.tooltip}} data-tooltip="{{localize cargo.terms.tooltip}}"{{/if}}><u>Cr</u>{{credits cargo.terms.value}}</div>
+			{{#if (ne cargo.terms.cost null)}}<span class="per">{{localize 'MGT2.Items.Cost'}} Cr{{credits cargo.terms.cost}}</span>{{/if}}
+		</div>
+		{{else if passage.terms}}
+		{{! A booking's fare was collected when the berth was taken; a working passage pays by serving. }}
+		<div class="terms" data-derived="system.fare">
+			<span class="lbl">{{localize 'MGT2.Items.Fare'}}</span>
+			<div class="sum" data-tooltip="{{localize 'MGT2.Trade.Card.FarePaid'}}"><u>Cr</u>{{credits passage.terms.fare}}</div>
+			<span class="per">{{localize 'MGT2.Trade.PerHead' credits=(credits passage.terms.perHead)}}</span>
+		</div>
+		{{else if station}}
+		{{! A station's seats and pay, where a carried item keeps its supply line. }}
+		<div class="supply station">
+			<div class="sline play-only">
+				<span data-tooltip="{{localize 'MGT2.Items.Positions'}}">&times;{{system.positions}}</span>
+				<span data-tooltip="{{localize 'MGT2.Items.Salary'}}">{{#if system.salary}}Cr {{credits system.salary}}<u>/{{localize 'MGT2.Actor.spacecraft.Month'}}</u>{{else}}<span class="none">Cr &mdash;</span>{{/if}}</span>
+			</div>
+			<div class="sedit edit-only">
+				<label>
+					<span class="lbl">{{localize 'MGT2.Items.Positions'}}</span>
+					{{formInput systemFields.positions name="system.positions" value=system.positions classes="f num"}}
+				</label>
+				<label>
+					<span class="lbl">{{localize 'MGT2.Items.Salary'}}</span>
+					{{formInput systemFields.salary name="system.salary" value=system.salary classes="f num"}}
+				</label>
+			</div>
 		</div>
 		{{/if}}
 
@@ -47,7 +118,7 @@
 			{{! A bag has no mass, no price and no count of its own: all three read off its contents. }}
 			<div class="sline">
 				<span>{{weight}}<u>{{unitlabels.weight}}</u></span>
-				<span>&times;{{system.count}}</span>
+				{{#if bag.count includeZero=true}}<span>{{localize 'MGT2.Actor.stash.Holds' n=bag.count}}</span>{{/if}}
 			</div>
 			{{else}}
 			<div class="sline play-only">

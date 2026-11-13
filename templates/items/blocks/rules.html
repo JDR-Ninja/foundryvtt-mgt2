@@ -1,7 +1,7 @@
 {{! What a round does that is neither damage nor a trait — pellets ignoring the target's Dodge and
     doubling its armour (Core p.128). No printed vocabulary covers these, so they are the referee's
     own sentences and they sit beside the trait row rather than in it. }}
-<div class="block">
+<div class="block{{#unless system.rules.length}} edit-only{{/unless}}">
 	<div class="sect">
 		<h3>{{localize 'MGT2.Items.Rules'}}</h3>
 		<span class="count">{{system.rules.length}}</span>
@@ -30,5 +30,5 @@
 			</tr>
 		</tbody>
 	</table>
-	<p class="hint">{{localize 'MGT2.Items.RulesHint'}}</p>
+	<p class="hint edit-only">{{localize 'MGT2.Items.RulesHint'}}</p>
 </div>

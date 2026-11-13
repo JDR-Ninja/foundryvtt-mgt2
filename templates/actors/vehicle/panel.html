@@ -6,26 +6,19 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Armour'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.vehicle.ArmourCount'}}</span>
 			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.ArmourHint'}}"></i>
 		</div>
+		{{! Reactive armour is spent during the fight (VH2026 p.77), so its field stays live in play on a
+		    face that has some, and edit mode offers it on all six: one control per name either way. }}
 		<div class="facings">
 			{{#each vehicle.armour.facings as |facing|}}
-			<div class="facing">
+			<div class="facing{{#if facing.inferred}} derived{{/if}}">
 				<span class="lbl">{{localize (concat 'MGT2.Actor.vehicle.Facing.' facing.key)}}</span>
 				<b class="play-only">{{facing.value}}</b>
 				{{formInput (lookup ../systemFields.armour.fields facing.key) name=(concat "system.armour." facing.key) value=facing.stored classes="f edit-only"}}
-				<span class="src">{{localize (concat 'MGT2.Actor.vehicle.ArmourSrc.' facing.src)}}</span>
-				{{#if facing.reactive}}<span class="re">+{{facing.reactive}} {{localize 'MGT2.Actor.vehicle.Reactive'}}</span>{{/if}}
+				{{#if facing.inferred}}<span class="src">{{localize (concat 'MGT2.Actor.vehicle.ArmourSrc.' facing.src)}}</span>{{/if}}
+				<span class="re{{#unless facing.reactive}} edit-only{{/unless}}">+<input type="number" min="0" step="1" name="system.armour.reactive.{{facing.key}}" value="{{facing.reactive}}" data-dtype="Number" aria-label="{{localize 'MGT2.Actor.vehicle.Reactive'}}" /><span class="w">{{localize 'MGT2.Actor.vehicle.Reactive'}}</span></span>
 			</div>
-			{{/each}}
-		</div>
-		<div class="grid edit-only">
-			{{#each vehicle.armour.facings as |facing|}}
-			<label>
-				<span class="lbl">{{localize 'MGT2.Actor.vehicle.Reactive'}} — {{localize (concat 'MGT2.Actor.vehicle.Facing.' facing.key)}}</span>
-				{{formInput (lookup ../systemFields.armour.fields.reactive.fields facing.key) name=(concat "system.armour.reactive." facing.key) value=facing.reactive classes="f num"}}
-			</label>
 			{{/each}}
 		</div>
 		<dl class="statline" data-derived="system.armour">
@@ -41,68 +34,51 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Systems'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.vehicle.SystemsCount'}}</span>
 		</div>
-		<table class="rows systems">
-			<thead>
-				<tr>
-					<th>{{localize 'MGT2.Actor.vehicle.System'}}</th>
-					<th>{{localize 'MGT2.Actor.vehicle.AppliesTo'}}</th>
-					<th class="r">{{localize 'MGT2.Actor.vehicle.Value'}}</th>
-				</tr>
-			</thead>
-			<tbody>
-				{{#each vehicle.systems as |row|}}
-				<tr class="{{#if row.opposed}}opposed {{/if}}{{#if row.absent}}absent{{/if}}">
-					<td>{{localize (concat 'MGT2.Actor.vehicle.Sys.' row.key)}}</td>
-					<td class="who">{{localize (concat 'MGT2.Actor.vehicle.SysWho.' row.key)}}</td>
-					<td class="val">
-						<span class="play-only">
-							{{#if row.absent}}&mdash;{{else}}{{#if row.signed}}{{showDM row.value}}{{else}}{{row.value}}{{/if}}{{#if row.unit}} {{localize row.unit}}{{/if}}{{/if}}
-						</span>
-						{{! Written out rather than taken from the field: `formInput` turns a NumberField
-						    carrying both `min` and `max` into a <range-picker>, and a slider cannot
-						    express the one distinction this block exists to keep — a printed `-` is
-						    absent, not zero, and Sensors genuinely prints +0. }}
-						<input class="f num edit-only" type="number" step="1" placeholder="—"
-							name="system.systems.{{row.key}}" value="{{row.value}}" data-dtype="Number" />
-					</td>
-				</tr>
-				{{/each}}
-			</tbody>
-		</table>
+		<dl class="statline grid sys">
+			{{#each vehicle.systems as |row|}}
+			<div class="stat{{#if row.opposed}} opposed{{/if}}{{#if row.absent}} absent{{/if}}">
+				<dt>{{localize (concat 'MGT2.Actor.vehicle.Sys.' row.key)}}</dt>
+				<dd>
+					<span class="play-only">{{#if row.absent}}&mdash;{{else}}{{#if row.signed}}{{showDM row.value}}{{else}}{{row.value}}{{/if}}{{#if row.unit}} <i>{{localize row.unit}}</i>{{/if}}{{/if}}</span>
+					{{! Written out rather than taken from the field: `formInput` turns a NumberField carrying
+					    both `min` and `max` into a <range-picker>, which cannot say that a printed `-` is absent,
+					    not zero, where Sensors genuinely prints +0. }}
+					<input class="f num edit-only" type="number" step="1" placeholder="—"
+						name="system.systems.{{row.key}}" value="{{row.value}}" data-dtype="Number" />
+				</dd>
+				<span class="who">{{localize (concat 'MGT2.Actor.vehicle.SysWho.' row.key)}}</span>
+			</div>
+			{{/each}}
+		</dl>
 	</div>
 
 	{{! The mount belongs to the vehicle, not the weapon: it supplies the fire arc and the fire
 	    control, and one mount can hold several weapons (VH2026 p.101). The weapons themselves are
 	    ordinary embedded Items and roll through the same path a Traveller's do. }}
-	<div class="block">
+	<div class="block{{#if vehicle.vacant.mounts}} edit-only{{/if}}">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Mounts'}}</h3>
-			<span class="count">{{vehicle.mounts.rows.length}}</span>
+			<span class="count">{{#if vehicle.mounts.rows.length}}{{vehicle.mounts.rows.length}}{{/if}}</span>
 			<a class="add edit-only" data-action="mountCreate" data-tooltip="{{localize 'MGT2.Actor.vehicle.AddMount'}}"><i class="fa-solid fa-plus"></i></a>
 		</div>
 		{{#if vehicle.mounts.rows.length}}
-		<table class="rows">
-			<thead>
-				<tr>
-					<th>{{localize 'MGT2.Actor.vehicle.Mount'}}</th>
-					<th>{{localize 'MGT2.Items.Weapons'}}</th>
-					<th class="c">{{localize 'MGT2.Items.Range'}}</th>
-					<th class="c">{{localize 'MGT2.Items.Damage'}}</th>
-					<th class="c">{{localize 'MGT2.Actor.vehicle.FireControl'}}</th>
-					<th></th>
-				</tr>
-			</thead>
+		<table class="rows mounts cards">
+			<colgroup><col class="c-id" /><col class="c-pl" /><col class="c-dm" /><col class="c-ac" /></colgroup>
 			<tbody>
 				{{#each vehicle.mounts.rows as |mount|}}
 				<tr data-mount-index="{{mount.index}}">
-					<td>
-						<span class="play-only"><b class="mount">{{localize mount.typeLabel}}</b><span class="sub">{{localize mount.arcLabel}}</span></span>
-						<span class="edit-only mountedit">
+					<td class="mt">
+						<div class="wg">
+							{{#each mount.groups as |group|}}
+							<button type="button" class="roll" data-action="roll" data-item-id="{{group._id}}"><i class="fa-solid fa-dice" aria-hidden="true"></i><span>{{#if (gt group.count 1)}}{{group.count}} &times; {{/if}}{{group.name}}</span></button>
+							{{/each}}
+							<span class="mtl play-only">{{localize mount.typeLabel}} &middot; {{localize mount.arcLabel}}</span>
+						</div>
+						<div class="mcfg side edit-only">
 							{{! `mount` is a block param and stays lexically in scope inside the nested each;
-							    `../mount` would look the key up on the parent CONTEXT, which is the
-							    mount itself, and silently select the first option every time. }}
+							    `../mount` would look the key up on the parent CONTEXT, which is the mount itself,
+							    and silently select the first option every time. }}
 							<select class="f" name="system.mounts.{{mount.index}}.type">
 								{{#each ../choices.mountTypes as |label key|}}
 								<option value="{{key}}"{{#if (eq key mount.type)}} selected{{/if}}>{{localize label}}</option>
@@ -113,29 +89,23 @@
 								<option value="{{key}}"{{#if (eq key mount.arc)}} selected{{/if}}>{{localize label}}</option>
 								{{/each}}
 							</select>
-						</span>
+						</div>
 					</td>
 					<td>
-						{{#each mount.weapons as |weapon|}}
-						<div class="mw">
-							<button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button>
-						</div>
-						{{/each}}
-						<select class="f edit-only" name="system.mounts.{{mount.index}}.weapons" multiple size="3">
+						<span class="pills">
+							{{#each mount.pills as |pill|}}<span>{{pill}}</span>{{/each}}
+							<span class="dm{{#unless mount.fireControl}} edit-only{{/unless}}">{{localize 'MGT2.Actor.vehicle.FireControl'}} <span class="play-only">{{showDM mount.fireControl}}</span><input class="edit-only" type="number" min="0" max="4" step="1" name="system.mounts.{{mount.index}}.fireControl" value="{{mount.fireControl}}" data-dtype="Number" /></span>
+						</span>
+						<select class="f edit-only" name="system.mounts.{{mount.index}}.weapons" multiple size="2">
 							{{#each mount.choices as |choice|}}
 							<option value="{{choice._id}}"{{#if choice.selected}} selected{{/if}}>{{choice.name}}</option>
 							{{/each}}
 						</select>
 					</td>
-					<td class="c num">{{#each mount.weapons as |weapon|}}<div>{{weapon.range}}</div>{{/each}}</td>
-					<td class="c num">{{#each mount.weapons as |weapon|}}<div>{{weapon.system.effective.damage}}</div>{{/each}}</td>
-					<td class="c num">
-						<span class="play-only">{{#if mount.fireControl}}{{showDM mount.fireControl}}{{else}}&mdash;{{/if}}</span>
-						<input class="f num edit-only" type="number" min="0" max="4" step="1" name="system.mounts.{{mount.index}}.fireControl" value="{{mount.fireControl}}" />
-					</td>
+					<td class="dmg">{{#each mount.groups as |group|}}<b>{{group.damage}}</b>{{/each}}</td>
 					<td class="r">
-						<div class="acts">
-							<a class="edit-only" data-action="mountDelete" data-tooltip="{{localize 'MGT2.Actor.vehicle.DeleteMount'}}"><i class="fas fa-trash"></i></a>
+						<div class="acts edit-only">
+							<a data-action="mountDelete" data-tooltip="{{localize 'MGT2.Actor.vehicle.DeleteMount'}}"><i class="fas fa-trash"></i></a>
 						</div>
 					</td>
 				</tr>
@@ -144,22 +114,25 @@
 		</table>
 		{{/if}}
 		{{#if vehicle.mounts.unmounted.length}}
-		<table class="rows">
+		<table class="rows mounts cards">
+			<colgroup><col class="c-id" /><col class="c-pl" /><col class="c-dm" /><col class="c-ac" /></colgroup>
 			<tbody>
 				{{#each vehicle.mounts.unmounted as |weapon|}}
 				<tr data-item-id="{{weapon._id}}">
-					<td><button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}">{{weapon.name}}</button><span class="sub">{{localize 'MGT2.Actor.vehicle.Unmounted'}}</span></td>
-					<td class="c num">{{weapon.range}}</td>
-					<td class="c num">{{weapon.system.effective.damage}}</td>
+					<td class="mt">
+						<div class="wg">
+							<button type="button" class="roll" data-action="roll" data-item-id="{{weapon._id}}"><i class="fa-solid fa-dice" aria-hidden="true"></i><span>{{weapon.name}}</span></button>
+							<span class="mtl">{{localize 'MGT2.Actor.vehicle.Unmounted'}}</span>
+						</div>
+					</td>
+					<td><span class="pills"><span>{{weapon.range}}</span>{{#each weapon.traitList as |trait|}}<span>{{trait}}</span>{{/each}}</span></td>
+					<td class="dmg"><b>{{weapon.system.effective.damage}}</b></td>
 					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
 				</tr>
 				{{/each}}
 			</tbody>
 		</table>
 		{{/if}}
-		<div class="sect">
-			<a class="add edit-only" data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-plus"></i></a>
-		</div>
 		{{! The attacker-side rules the system deliberately will not resolve: nothing here reads the
 		    canvas or a selected target, so these are reminders and not modifiers. }}
 		<ul class="codes" data-family="vehicle">
@@ -170,6 +143,7 @@
 				<span class="ps"><span class="p">{{vehicle.hull.weapons}} / {{vehicle.hull.cap}}</span></span>
 			</li>
 		</ul>
+		<p class="quiet edit-only"><a data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}"><i class="fa-solid fa-plus" aria-hidden="true"></i>{{localize 'MGT2.Actor.AddWeapon'}}</a></p>
 	</div>
 
 	{{! Severity is stored, the effect is a lookup. A critical is written on every hit and is
@@ -177,13 +151,14 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.Criticals'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.vehicle.CriticalsCount'}}</span>
+			<span class="count">{{#if vehicle.criticals.count}}{{vehicle.criticals.count}}{{/if}}</span>
 			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.CriticalHint'}}"></i>
 			<a class="rm edit-only" data-action="criticalClear" data-tooltip="{{localize 'MGT2.Actor.vehicle.ClearCriticals'}}"><i class="fa-solid fa-eraser"></i></a>
 		</div>
+		{{#if vehicle.criticals.hit.length}}
 		<div class="crits">
-			{{#each vehicle.criticals.locations as |location|}}
-			<span class="loc{{#if location.severity}} hit{{/if}}">{{localize location.label}}<i>{{location.roll}}</i></span>
+			{{#each vehicle.criticals.hit as |location|}}
+			<span class="loc hit">{{localize location.label}}<i>{{location.roll}}</i></span>
 			<div class="pips" data-location="{{location.key}}">
 				{{#each location.pips as |pip|}}
 				<i class="{{#if pip.on}}on{{/if}}" data-action="criticalSet" data-step="{{pip.step}}"></i>
@@ -194,52 +169,28 @@
 			{{/if}}
 			{{/each}}
 		</div>
-		{{! Its own track rather than a tenth location: eight of the nine locations have cells that
-		    raise this instead of damaging the location that was hit. }}
-		<div class="grid edit-only">
-			<label>
-				<span class="lbl">{{localize 'MGT2.Actor.vehicle.HullSeverity'}}</span>
-				{{! A number, not the <range-picker> a min-and-max NumberField would otherwise render. }}
-				<input class="f num" type="number" min="0" max="6" step="1"
-					name="system.hullSeverity" value="{{system.hullSeverity}}" data-dtype="Number" />
-			</label>
-			{{#if vehicle.criticals.runs2026}}
-			{{! VH2026 p.11: Structure comes back by a repair of its own, so the eraser leaves this. }}
-			<label>
-				<span class="lbl">{{localize 'MGT2.Criticals.StructureHalved'}}</span>
-				<input class="f num" type="number" min="0" step="1"
-					name="system.structureHalvings" value="{{system.structureHalvings}}" data-dtype="Number" />
-			</label>
-			{{/if}}
-		</div>
+		{{/if}}
+		{{#if vehicle.criticals.intact.length}}
+		<details class="fold" data-fold="criticals">
+			<summary>{{plural 'MGT2.Actor.spacecraft.IntactLocations' vehicle.criticals.intact.length}}</summary>
+			<div class="crits">
+				{{#each vehicle.criticals.intact as |location|}}
+				<span class="loc">{{localize location.label}}<i>{{location.roll}}</i></span>
+				<div class="pips" data-location="{{location.key}}">
+					{{#each location.pips as |pip|}}
+					<i data-action="criticalSet" data-step="{{pip.step}}"></i>
+					{{/each}}
+				</div>
+				{{/each}}
+			</div>
+		</details>
+		{{/if}}
+		{{#if vehicle.criticals.runs2026}}
 		<dl class="statline">
-			{{#unless vehicle.criticals.runs2026}}
-			<div class="stat{{#if vehicle.criticals.hullSeverity}} hurt{{/if}}">
-				<dt>{{localize 'MGT2.Actor.vehicle.HullSeverity'}}</dt>
-				<dd>{{vehicle.criticals.hullSeverity}}</dd>
-			</div>
-			{{/unless}}
-			{{#if vehicle.criticals.runs2026}}
-			<div class="stat">
-				<dt>{{localize 'MGT2.Actor.vehicle.Structure'}}</dt>
-				<dd>{{vehicle.criticals.structure}}</dd>
-			</div>
 			<div class="stat{{#if vehicle.criticals.structureState}} hurt{{/if}}">
 				<dt>{{localize 'MGT2.Actor.vehicle.StructureExceeded'}}</dt>
 				<dd>{{vehicle.criticals.structureExceeded}}{{#if vehicle.criticals.structureState}} · {{localize vehicle.criticals.structureState}}{{/if}}</dd>
 			</div>
-			{{#if vehicle.criticals.spaces}}
-			<div class="stat">
-				<dt>{{localize 'MGT2.Actor.vehicle.Spaces'}}</dt>
-				<dd>{{vehicle.criticals.spaces}}</dd>
-			</div>
-			{{/if}}
-			{{#if vehicle.criticals.comfort}}
-			<div class="stat" data-tooltip="{{localize vehicle.criticals.comfort.effect}}">
-				<dt>{{localize 'MGT2.Actor.vehicle.Comfort'}}</dt>
-				<dd>{{localize vehicle.criticals.comfort.label}}</dd>
-			</div>
-			{{/if}}
 			{{#if vehicle.criticals.repairs.total}}
 			<div class="stat">
 				<dt>{{localize 'MGT2.Actor.vehicle.Repairs'}}</dt>
@@ -258,28 +209,44 @@
 				<dd>{{localize vehicle.criticals.immunity}}</dd>
 			</div>
 			{{/if}}
-			{{/if}}
-			<div class="stat{{#unless vehicle.criticals.standing.controlDM}} none{{/unless}}">
-				<dt>{{localize 'MGT2.Actor.vehicle.ControlDM'}}</dt>
-				<dd>{{showDM vehicle.criticals.standing.controlDM}}</dd>
-			</div>
-			<div class="stat{{#unless vehicle.criticals.standing.systemsDM}} none{{/unless}}">
-				<dt>{{localize 'MGT2.Actor.vehicle.SystemsDM'}}</dt>
-				<dd>{{showDM vehicle.criticals.standing.systemsDM}}</dd>
+		</dl>
+		{{else}}
+		<dl class="statline">
+			<div class="stat{{#if vehicle.criticals.hullSeverity}} hurt{{else}} none{{/if}}">
+				<dt>{{localize 'MGT2.Actor.vehicle.HullSeverity'}}</dt>
+				<dd>{{vehicle.criticals.hullSeverity}}</dd>
 			</div>
 		</dl>
-		{{! No `name` on either control: they belong to the referee's action, not to the document, and
-		    `submitOnChange` submits every named control on the sheet. }}
-		<div class="critctl">
-			<select class="f" data-crit="location" aria-label="{{localize 'MGT2.Actor.vehicle.Location'}}">
-				{{#each vehicle.criticals.locations as |location|}}
-				<option value="{{location.key}}">{{location.roll}} &middot; {{localize location.label}}</option>
-				{{/each}}
-			</select>
-			<input class="f num" type="number" data-crit="effect" min="0" step="1" value="6" aria-label="{{localize 'MGT2.Actor.vehicle.Effect'}}" />
-			<button type="button" class="btn b-dmg" data-action="criticalRoll">{{localize 'MGT2.Actor.vehicle.ApplyCritical'}}</button>
+		{{/if}}
+		{{! One control line. The apply group's controls carry no `name`: they belong to the referee's
+		    action, and `submitOnChange` submits every named control on the sheet. Hull Severity is its own
+		    track rather than a tenth location, and VH2026 p.11 repairs Structure apart, so the eraser
+		    leaves the halvings. }}
+		<div class="critrow">
+			<div class="critctl">
+				<select class="f" data-crit="location" aria-label="{{localize 'MGT2.Actor.vehicle.Location'}}">
+					{{#each vehicle.criticals.locations as |location|}}
+					<option value="{{location.key}}">{{location.roll}} &middot; {{localize location.label}}</option>
+					{{/each}}
+				</select>
+				<input class="f num" type="number" data-crit="effect" min="0" step="1" value="6" aria-label="{{localize 'MGT2.Actor.vehicle.Effect'}}" />
+				<button type="button" class="btn b-dmg" data-action="criticalRoll">{{localize 'MGT2.Actor.vehicle.ApplyCritical'}}</button>
+				{{#if vehicle.criticals.runs2026}}
+				<button type="button" class="btn" data-action="collision">{{localize 'MGT2.Collision.Title'}}</button>
+				{{/if}}
+			</div>
+			<label class="pair edit-only">
+				<span class="lbl">{{localize 'MGT2.Actor.vehicle.HullSeverity'}}</span>
+				{{! A number, not the <range-picker> a min-and-max NumberField would otherwise render. }}
+				<input class="f num" type="number" min="0" max="6" step="1"
+					name="system.hullSeverity" value="{{system.hullSeverity}}" data-dtype="Number" />
+			</label>
 			{{#if vehicle.criticals.runs2026}}
-			<button type="button" class="btn" data-action="collision">{{localize 'MGT2.Collision.Title'}}</button>
+			<label class="pair edit-only">
+				<span class="lbl">{{localize 'MGT2.Criticals.StructureHalved'}}</span>
+				<input class="f num" type="number" min="0" step="1"
+					name="system.structureHalvings" value="{{system.structureHalvings}}" data-dtype="Number" />
+			</label>
 			{{/if}}
 		</div>
 	</div>
@@ -291,7 +258,6 @@
 	<div class="block{{#unless (or system.submersible system.remote)}} edit-only{{/unless}}">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.vehicle.SubTypeDetail'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.vehicle.SubTypeCount'}}</span>
 			{{#if system.remote}}<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.vehicle.RemoteHint'}}"></i>{{/if}}
 		</div>
 		<div class="grid edit-only">
@@ -351,13 +317,25 @@
 		{{/if}}
 	</div>
 
-	<div class="block">
-		<div class="sect"><h3>{{localize 'MGT2.Actor.vehicle.Description'}}</h3></div>
-		<prose-mirror name="system.description" value="{{system.description}}" toggled>{{{enriched.description}}}</prose-mirror>
+	{{! A packed vehicle's notes hold its whole equipment list, so the two editors stand side by side
+	    where the width is there, each capped and scrolling inside. }}
+	<div class="prose2">
+		<div class="block{{#if vehicle.vacant.description}} edit-only{{/if}}">
+			<div class="sect"><h3>{{localize 'MGT2.Actor.vehicle.Description'}}</h3></div>
+			<prose-mirror name="system.description" value="{{system.description}}" toggled>{{{enriched.description}}}</prose-mirror>
+		</div>
+		<div class="block{{#if vehicle.vacant.notes}} edit-only{{/if}}">
+			<div class="sect"><h3>{{localize 'MGT2.Actor.Notes'}}</h3></div>
+			<prose-mirror name="system.notes" value="{{system.notes}}" toggled>{{{enriched.notes}}}</prose-mirror>
+		</div>
 	</div>
 
-	<div class="block">
-		<div class="sect"><h3>{{localize 'MGT2.Actor.Notes'}}</h3></div>
-		<prose-mirror name="system.notes" value="{{system.notes}}" toggled>{{{enriched.notes}}}</prose-mirror>
-	</div>
+	{{! What play mode folded, in one line: an empty block is a heading and nothing else. }}
+	{{#if vehicle.quiet.length}}
+	<p class="vacant play-only">
+		{{#each vehicle.quiet as |entry|}}
+		{{#if entry.door}}<a data-action="toggleSheetMode"><i class="fa-solid fa-plus" aria-hidden="true"></i>{{localize entry.label}}</a>{{else}}<span>{{localize entry.label}}</span>{{/if}}
+		{{/each}}
+	</p>
+	{{/if}}
 </section>

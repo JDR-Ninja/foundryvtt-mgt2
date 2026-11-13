@@ -1,0 +1,32 @@
+{{! What the gear does, as the book prints it, and where: the line Details opens on. A short line
+    reads at lede size, a longer one as prose; in edit mode it is the Description fields. }}
+<div class="block summary">
+	{{#if summary.head}}
+	<p class="{{#if summary.short}}lede{{else}}prose{{/if}} play-only">{{summary.head}}</p>
+	{{/if}}
+	{{#if summary.rest}}<p class="prose play-only">{{summary.rest}}</p>{{/if}}
+	{{#if citation}}<p class="hint play-only"><b>{{localize 'MGT2.Items.Source'}}</b> {{citation}}</p>{{/if}}
+	{{#if summary.vacant}}
+	<p class="vacant play-only"><a data-action="toggleSheetMode"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Items.Description'}}</a></p>
+	{{/if}}
+
+	<div class="sect edit-only"><h3>{{localize 'MGT2.Items.Description'}}</h3></div>
+	{{! The augment table's IMPROVEMENTS column, or a program's effect: the lede when the description
+	    does not already begin with it. }}
+	{{#if (eq system.subType "augment")}}
+	<div class="grid cols2 edit-only">
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.Improvement'}}</span>
+			{{formInput systemFields.augment.fields.improvement name="system.augment.improvement" value=system.augment.improvement classes="f"}}
+		</label>
+	</div>
+	{{else if (and (eq item.type "item") (eq system.subType "software"))}}
+	<div class="grid cols2 edit-only">
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.SoftwareEffect'}}</span>
+			{{formInput systemFields.software.fields.effect name="system.software.effect" value=system.software.effect classes="f"}}
+		</label>
+	</div>
+	{{/if}}
+	{{> systems/mgt2/templates/items/parts/description-fields.html rows=3}}
+</div>

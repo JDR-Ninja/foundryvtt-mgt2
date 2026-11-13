@@ -1,60 +1,45 @@
 <aside class="mgt2-rail">
 
 	{{! Core p.258-259. One letter drives the fuel grade, the fuel price, the berthing band and both
-	    traffic tables' Starport DM, which is why it is the busiest digit in the profile. }}
+	    traffic tables' Starport DM, which is why it is the busiest digit in the profile. The berthing is
+	    the port's own price, rolled once and kept, and three states a naive `0` would collapse: `null` is
+	    not yet rolled, class E charges nothing and class X is no port at all. }}
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.world.Starport'}}</h3>
 			<span class="count">{{system.starport.key}} &middot; {{localize system.starport.label}}</span>
 		</div>
-		<dl class="statline grid" data-derived="system.starport">
-			<div class="stat">
-				<dt>{{localize 'MGT2.Actor.world.Fuel'}}</dt>
-				<dd class="word">{{localize (concat 'MGT2.Actor.world.FuelGrade.' system.starport.fuel)}}</dd>
+		<div class="plates" data-derived="system.starport">
+			<div class="plate">
+				<span class="lbl">{{localize 'MGT2.Actor.world.Fuel'}} &middot; {{localize 'MGT2.Actor.world.FuelPrice'}}</span>
+				{{#if world.fuel.length}}
+				<div class="fuel">
+					{{#each world.fuel as |row|}}<span>{{localize row.label}}</span><b><i>Cr</i>{{credits row.price}}</b>{{/each}}
+				</div>
+				{{else}}<b class="none">{{localize 'MGT2.Actor.world.FuelGrade.none'}}</b>{{/if}}
 			</div>
-			<div class="stat{{#unless system.starport.fuelPrices.length}} none{{/unless}}">
-				<dt>{{localize 'MGT2.Actor.world.FuelPrice'}}</dt>
-				<dd>{{#each system.starport.fuelPrices as |price|}}{{#unless @first}} &middot; {{/unless}}<i>Cr</i>{{credits price}}{{else}}&mdash;{{/each}}</dd>
+			<div class="plate">
+				<span class="lbl">{{localize 'MGT2.Actor.world.StarportDM'}}</span>
+				<b>{{showDM system.starport.trafficDM}}</b>
 			</div>
-			<div class="stat{{#unless world.berthing.rollable}} none{{/unless}}">
-				<dt>{{localize 'MGT2.Actor.world.PerDie'}}</dt>
-				<dd>{{#if world.berthing.rollable}}<i>Cr</i>{{credits world.berthing.perDie}}{{else}}&mdash;{{/if}}</dd>
-			</div>
-			<div class="stat">
-				<dt>{{localize 'MGT2.Actor.world.StarportDM'}}</dt>
-				<dd>{{showDM system.starport.trafficDM}}</dd>
-			</div>
-		</dl>
-	</div>
-
-	{{! THE BERTHING CELL — three states, and a naive `0` collapses two of them. `null` is NOT YET
-	    ROLLED, class E is a port that charges nothing and class X is no port at all, which is also no
-	    fuel and no supplier (Core p.259). Rolled once and kept: prices are stable at any given port. }}
-	<div class="block">
-		<div class="sect">
-			<h3>{{localize 'MGT2.Actor.world.Berthing'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.world.BerthingCount'}}</span>
-			<i class="fa-solid fa-circle-info note" data-tooltip="{{~#if world.berthing.noPort}}{{localize 'MGT2.Actor.world.BerthingNoPortHint'}}{{else if world.berthing.free}}{{localize 'MGT2.Actor.world.BerthingFreeHint'}}{{else if world.berthing.unrolled}}{{localize 'MGT2.Actor.world.BerthingUnrolledHint'}}{{else}}{{localize 'MGT2.Actor.world.BerthingKeptHint'}}{{/if~}}"></i>
-			<span class="gm">{{localize 'MGT2.Actor.world.GM'}}</span>
 		</div>
 		<div class="berth">
+			<span class="lbl">
+				{{localize 'MGT2.Actor.world.Berthing'}}
+				<i class="fa-solid fa-circle-info note" data-tooltip="{{~#if world.berthing.noPort}}{{localize 'MGT2.Actor.world.BerthingNoPortHint'}}{{else if world.berthing.free}}{{localize 'MGT2.Actor.world.BerthingFreeHint'}}{{else if world.berthing.unrolled}}{{localize 'MGT2.Actor.world.BerthingUnrolledHint'}}{{else}}{{localize 'MGT2.Actor.world.BerthingKeptHint'}}{{/if~}}"></i>
+				<span class="gm">{{localize 'MGT2.Actor.world.GM'}}</span>
+			</span>
 			<span class="v{{#if world.berthing.unrolled}} unrolled{{/if}}">
 				{{~#if world.berthing.noPort}}&mdash;{{else if world.berthing.free}}{{localize 'MGT2.Actor.world.BerthingFree'}}{{else if world.berthing.unrolled}}&mdash;{{else}}<i>Cr</i>{{credits world.berthing.value}}{{/if~}}
 			</span>
 			<span class="band">
 				{{~#if world.berthing.noPort}}{{localize 'MGT2.Actor.world.BerthingNoPort'}}{{else if world.berthing.free}}{{localize 'MGT2.Actor.world.BerthingNothing'}}{{else}}{{localize 'MGT2.Actor.world.BerthingBand' amount=world.berthing.perDie}}{{/if~}}
 			</span>
-			<button type="button" data-action="berthingRoll" {{disabled (not world.berthing.rollable)}}>{{localize 'MGT2.Actor.world.BerthingRoll'}}</button>
-		</div>
-		{{! Deliberately an explicit number input: a NumberField carrying both `min` and `max` renders
-		    as a <range-picker>, which cannot express null, so the schema declares neither. An emptied
-		    number input submits null, which is the third state getting back. }}
-		<div class="grid cols2 edit-only">
-			<label>
-				<span class="lbl">{{systemFields.berthing.label}}</span>
-				<input class="f n" type="number" name="system.berthing" step="1" value="{{system.berthing}}" placeholder="&mdash;" />
-			</label>
-			<div class="vacts">
+			<button type="button" class="btn" data-action="berthingRoll" {{disabled (not world.berthing.rollable)}}>{{localize 'MGT2.Actor.world.BerthingRoll'}}</button>
+			{{! An explicit number input: a NumberField carrying both `min` and `max` renders as a
+			    <range-picker>, which cannot express null. An emptied input submits null, the third state. }}
+			<div class="ed edit-only">
+				<input class="f n" type="number" name="system.berthing" step="1" value="{{system.berthing}}" placeholder="&mdash;" aria-label="{{systemFields.berthing.label}}" />
 				<button type="button" class="btn" data-action="berthingClear" {{disabled (not world.berthing.rolled)}}>{{localize 'MGT2.Actor.world.BerthingClear'}}</button>
 			</div>
 		</div>
@@ -65,60 +50,41 @@
 	<div class="block">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.world.Suppliers'}}</h3>
-			<span class="count">{{localize 'MGT2.Actor.world.SuppliersCount'}}</span>
-			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.world.SuppliersHint'}}"></i>
+			<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.world.SuppliersCount'}}. {{localize 'MGT2.Actor.world.SuppliersHint'}}"></i>
 			<span class="gm">{{localize 'MGT2.Actor.world.GM'}}</span>
 		</div>
 		<div class="lock">
-			<div class="row">
-				<span class="lbl">{{localize 'MGT2.Actor.world.CampaignDay'}}</span>
-				<span class="v">{{world.day}}</span>
-			</div>
-			<div class="row">
-				<span class="lbl">{{localize 'MGT2.Actor.world.Searched'}}</span>
-				<span class="v">{{#if world.trade.attempts}}{{world.trade.attempts}} &middot; {{localize 'MGT2.Actor.world.ThisMonth' n=world.trade.thisMonth}}{{else}}{{localize 'MGT2.Actor.world.SearchedNone'}}{{/if}}</span>
-			</div>
-			<div class="row">
-				<span class="lbl">{{localize 'MGT2.Actor.world.SearchDM'}}</span>
-				<span class="v{{#if world.trade.searchDM}} shut{{/if}}">{{showDM world.trade.searchDM}}</span>
-			</div>
-			<div class="row">
-				<span class="lbl">{{localize 'MGT2.Actor.world.WalkedAway'}}</span>
-				<span class="v{{#if world.trade.closedUntil}} shut{{/if}}">
-					{{~#if world.trade.closedUntil}}{{localize 'MGT2.Actor.world.ShutUntil' day=world.trade.closedUntil}}{{else if world.trade.refused}}{{localize 'MGT2.Actor.world.Expired' day=world.trade.refusedOn}}{{else}}{{localize 'MGT2.Actor.world.Never'}}{{/if~}}
-				</span>
-			</div>
+			<span class="lbl">{{localize 'MGT2.Actor.world.CampaignDay'}}</span>
+			<span class="v">{{world.day}}</span>
+			<span class="lbl">{{localize 'MGT2.Actor.world.Searched'}}</span>
+			{{#if world.trade.attempts}}
+			<span class="pill{{#if world.trade.thisMonth}} warn{{/if}}">{{world.trade.attempts}} &middot; {{localize 'MGT2.Actor.world.ThisMonth' n=world.trade.thisMonth}}<button type="button" class="x" data-action="searchClear" data-tooltip="{{localize 'MGT2.Actor.world.ClearSearches'}}" aria-label="{{localize 'MGT2.Actor.world.ClearSearches'}}"><i class="fa-solid fa-xmark"></i></button></span>
+			{{else}}<span class="pill quiet">{{localize 'MGT2.Actor.world.SearchedNone'}}</span>{{/if}}
+			<span class="lbl">{{localize 'MGT2.Actor.world.SearchDM'}}</span>
+			<span class="dmpill{{#unless world.trade.searchDM}} zero{{/unless}}">{{showDM world.trade.searchDM}}</span>
+			<span class="lbl">{{localize 'MGT2.Actor.world.WalkedAway'}}</span>
+			{{#if world.trade.refused}}
+			<span class="pill{{#if world.trade.closedUntil}} danger{{/if}}">{{#if world.trade.closedUntil}}{{localize 'MGT2.Actor.world.ShutUntil' day=world.trade.closedUntil}}{{else}}{{localize 'MGT2.Actor.world.Expired' day=world.trade.refusedOn}}{{/if}}<button type="button" class="x" data-action="supplierClear" data-tooltip="{{localize 'MGT2.Actor.world.ClearRefusal'}}" aria-label="{{localize 'MGT2.Actor.world.ClearRefusal'}}"><i class="fa-solid fa-xmark"></i></button></span>
+			{{else}}<span class="pill quiet">{{localize 'MGT2.Actor.world.Never'}}</span>{{/if}}
 		</div>
 		{{! The screen seeded with this world, because the two buttons below are the same two acts it
 		    makes — and a retyped profile silently changes every DM on that page. }}
 		<div class="vacts">
 			<button type="button" class="btn hot" data-action="tradeScreen">{{localize 'MGT2.Actor.world.TradeHere'}}</button>
 			<button type="button" class="btn" data-action="searchRecord">{{localize 'MGT2.Actor.world.RecordSearch'}}</button>
-			<button type="button" class="btn" data-action="searchClear" {{disabled (not world.trade.attempts)}}>{{localize 'MGT2.Actor.world.ClearSearches'}}</button>
 			<button type="button" class="btn" data-action="supplierRefuse">{{localize 'MGT2.Actor.world.Refuse'}}</button>
-			<button type="button" class="btn" data-action="supplierClear" {{disabled (not world.trade.refused)}}>{{localize 'MGT2.Actor.world.ClearRefusal'}}</button>
 		</div>
 	</div>
 
-	{{! What the world carries besides its profile. A chip reads out in play and picks in edit, the
-	    same control the ship's hull options use. }}
-	<div class="block">
+	{{! The bases read in the header's meta line; here, in edit mode, they are picked. }}
+	<div class="block edit-only">
 		<div class="sect">
 			<h3>{{localize 'MGT2.Actor.world.Bases'}}</h3>
-			<span class="count">{{world.bases.on.length}}</span>
+			<span class="count">{{#if world.bases.on.length}}{{world.bases.on.length}}{{/if}}</span>
 		</div>
-		{{#if world.bases.on.length}}
-		<ul class="codes play-only" data-family="world">
-			{{#each world.bases.on as |base|}}
-			<li class="code"><b>{{localize base.label}}</b></li>
-			{{/each}}
-		</ul>
-		{{/if}}
-		<ul class="codes edit-only" data-family="world">
+		<ul class="pick">
 			{{#each world.bases.rows as |base|}}
-			<li class="code{{#unless base.on}} off{{/unless}}" data-action="baseToggle" data-base="{{base.key}}">
-				<b>{{localize base.label}}</b>
-			</li>
+			<li class="{{#if base.on}}on{{/if}}" data-action="baseToggle" data-base="{{base.key}}">{{localize base.label}}</li>
 			{{/each}}
 		</ul>
 	</div>

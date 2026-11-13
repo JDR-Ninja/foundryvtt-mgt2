@@ -3,7 +3,7 @@
 <div class="block">
 	<div class="sect">
 		<h3>{{localize 'MGT2.Contract.WhatWeWereTold'}}</h3>
-		<span class="count">{{plural 'MGT2.Contract.LeadCount' contract.shownCount n=contract.shownCount}}</span>
+		<span class="count" data-tooltip="{{contract.leadLabel}}">{{#if contract.shownCount}}{{contract.shownCount}}{{/if}}</span>
 	</div>
 
 	{{#if contract.shownCount}}

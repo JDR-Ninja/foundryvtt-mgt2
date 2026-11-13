@@ -1,63 +1,15 @@
 // The contract sheet's own components. The primitives — .block, .sect, .grid, .roster, .statline,
 // .btn — are _blocks.sass and are used as they ship; what is below exists only here.
 
-// --------------------------------------------
-//  TERMS — the masthead's third cell, where a carried item shows its supply
-// --------------------------------------------
-.mgt2 .terms
-	grid-column: 3
-	grid-row: 1
-	display: flex
-	flex-direction: column
-	align-items: flex-end
-	gap: 5px
-
-	.bounty
-		font-family: var(--cond)
-		font-size: 25px
-		font-weight: 700
-		line-height: 1
-		font-variant-numeric: tabular-nums
-		white-space: nowrap
-		u
-			margin-right: 3px
-			font-size: 12px
-			text-decoration: none
-			color: var(--mute)
-
-	// An agreed bounty replaces the offer; the offer stays visible struck through, because the
-	// pair is the record of the negotiation and one number is not.
-	.was
-		font-family: var(--mono)
-		font-size: 10.5px
-		color: var(--faint)
-		text-decoration: line-through
-
-	.prio
-		padding: 1px 7px
-		font-family: var(--cond)
-		font-size: 10.5px
-		font-weight: 600
-		letter-spacing: 0.16em
-		text-transform: uppercase
-		white-space: nowrap
-		color: var(--accent-text)
-		border: 1px solid var(--accent-line)
-		&.crit
-			color: var(--danger)
-			border-color: var(--danger)
-
 // The two tabs whose content the players are not meant to read yet are drawn in the danger hue in
 // BOTH states. A tab that looks like its neighbours is one a referee shares in a screen-share by
 // reflex, which on this design is the actual failure mode.
 .mgt2 nav.horizontal-tabs a.item.gmtab
-	color: var(--danger)
-	opacity: 0.72
+	color: color-mix(in oklab, var(--danger) 70%, var(--faint))
 	&:hover
 		color: var(--danger)
 	&.active
 		color: var(--danger)
-		opacity: 1
 		&::after
 			border-bottom-color: var(--danger)
 
@@ -107,16 +59,34 @@
 		font-variant-caps: all-small-caps
 		letter-spacing: 0.1em
 
+// The particulars, one row each, the label left and the value right; each row is one drop zone.
 .mgt2 .fields
 	display: flex
 	flex-direction: column
-	gap: 8px
 	margin: 0
 	padding: 0
 	list-style: none
-	> li > .lbl
-		display: block
-		margin-bottom: 1px
+	> li
+		display: grid
+		grid-template-columns: 6.4rem minmax(0, 1fr)
+		gap: 4px 10px
+		align-items: baseline
+		padding: 7px 0
+		border-bottom: 1px solid var(--rule-soft)
+		&:last-child
+			border-bottom: 0
+		> .lbl
+			color: var(--faint)
+		> .v
+			min-width: 0
+			> .grid
+				margin-top: 6px
+	// The hunter's REP: danger only where this seat knows the floor and the hunter is under it.
+	.pill.rep
+		font-family: var(--mono)
+		font-weight: 400
+		letter-spacing: 0
+		text-transform: none
 
 // Folio 18 says the subject is not always a person: a kind of place or thing empties the mark line
 // on purpose, and folio 19 empties the last known location with it.
@@ -140,26 +110,6 @@
 	.alt.gm
 		color: var(--danger)
 
-// Who took the job. Empty is the interesting state — both printed rolls need a sheet to write to.
-.mgt2 .taken
-	display: flex
-	align-items: center
-	gap: 9px
-	flex-wrap: wrap
-	padding: 7px 9px
-	background: var(--hover)
-	border: 1px solid var(--rule)
-	.lbl
-		flex: none
-	&.empty
-		border-style: dashed
-	.rep
-		margin-left: auto
-		font-family: var(--mono)
-		font-size: 11px
-		color: var(--faint)
-		&.short
-			color: var(--danger)
 
 // --------------------------------------------
 //  REVEAL — folio 19's rows, each with one switch
@@ -202,7 +152,10 @@
 			width: 4rem
 
 	.tell
-		padding: 2px 8px
+		display: inline-flex
+		align-items: center
+		gap: 5px
+		padding: 2px 9px 2px 7px
 		font: inherit
 		font-family: var(--cond)
 		font-size: 10px
@@ -213,19 +166,19 @@
 		color: var(--faint)
 		background: none
 		border: 1px solid var(--rule)
-		border-radius: 2px
+		border-radius: 999px
 		cursor: var(--cursor-pointer)
 		&:hover
 			color: var(--accent-text)
 			border-color: var(--accent-line)
 
-	.r.told
-		.tell
-			color: var(--accent-text)
-			background: var(--accent-soft)
-			border-color: var(--accent-line)
-		.k
-			color: var(--accent-text)
+	// The accent is on the switch alone; the row's label stays in its own voice whether shown or not.
+	.r .k
+		color: var(--mute)
+	.r.told .tell
+		color: var(--accent-text)
+		background: var(--accent-soft)
+		border-color: var(--accent-line)
 	.r.held .v
 		color: var(--mute)
 
@@ -250,17 +203,17 @@
 		color: var(--mute)
 
 // --------------------------------------------
-//  ACT — one printed rule the party rolls, and what it did to the document
+//  PROLL — one printed roll as a roll line, and what it did to the document
 // --------------------------------------------
-.mgt2 .act
+.mgt2 .proll
 	display: flex
 	flex-direction: column
-	gap: 7px
-	padding: 9px 11px
-	background: var(--hover)
-	border: 1px solid var(--rule)
-
-	.top
+	gap: 4px
+	padding: 9px 0 10px
+	border-bottom: 1px solid var(--rule-soft)
+	&:last-child
+		border-bottom: 0
+	.head
 		display: flex
 		align-items: baseline
 		gap: 9px
@@ -268,36 +221,63 @@
 		h4
 			margin: 0
 			font-family: var(--cond)
-			font-size: 12px
+			font-size: 15px
 			font-weight: 700
-			letter-spacing: 0.14em
-			text-transform: uppercase
 		.cite
-			margin-left: auto
 			font-family: var(--mono)
-			font-size: 10px
+			font-size: 10.5px
 			color: var(--faint)
-
+		.btn-roll
+			align-self: center
+	// The hunter's DM, neutral and in the accent under the pointer; a 0 recedes.
+	.dmp
+		padding: 0 7px
+		font-family: var(--mono)
+		font-size: 11.5px
+		line-height: 1.5
+		color: var(--ink)
+		border: 1px solid var(--rule)
+		border-radius: 999px
+		&:hover
+			color: var(--accent-text)
+			border-color: var(--accent-line)
+		&.zero
+			color: var(--faint)
 	.line
+		display: flex
+		align-items: baseline
+		gap: 6px
 		font-size: 12.5px
 		line-height: 1.5
 		color: var(--mute)
-
-	.row
-		display: flex
-		gap: 8px
-		align-items: center
-		flex-wrap: wrap
-
-	.out
-		font-family: var(--mono)
+	.mk svg
+		width: 12px
+		height: 12px
+		margin-top: 0.15em
+	// A refusal is a reason, never an error.
+	.why
+		margin: 0
 		font-size: 11.5px
-		color: var(--accent-text)
-		&.bad
-			color: var(--danger)
-
-	&.spent
-		opacity: 0.75
+		color: var(--faint)
+	details.fold
+		margin-top: 2px
+	// The circumstances: tick every one that applied; the reader keeps the highest.
+	.circ
+		display: flex
+		flex-direction: column
+		gap: 3px
+		margin: 6px 0 0
+		padding: 0
+		list-style: none
+		label
+			display: flex
+			align-items: center
+			gap: 8px
+			font-size: 12.5px
+			cursor: var(--cursor-pointer)
+			input
+				margin: 0
+				accent-color: var(--accent-text)
 
 // --------------------------------------------
 //  GEN — the eight declared draws, and not one row of what they return
@@ -309,7 +289,7 @@
 	flex-wrap: wrap
 	.why
 		font-size: 11.5px
-		color: var(--danger)
+		color: var(--faint)
 
 .mgt2 .gen
 	display: flex
@@ -330,7 +310,7 @@
 	.n
 		color: var(--faint)
 	.d
-		color: var(--accent-text)
+		color: var(--mute)
 		font-variant-numeric: tabular-nums
 	.t
 		min-width: 0
@@ -346,6 +326,11 @@
 	// A step whose table is named by an earlier result, and one that has not been drawn yet.
 	.g.chained .t::before
 		content: "\21b3 "
-		color: var(--danger)
+		color: var(--faint)
+	// Not drawn yet: it recolours rather than fading.
 	.g.waiting
-		opacity: 0.45
+		.n,
+		.d,
+		.t,
+		.f
+			color: var(--faint)

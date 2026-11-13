@@ -1,171 +1,202 @@
 {{! What a career DOES, drawn only on a template — an Item with no Actor parent. }}
 <div class="block careerblk">
-	<div class="sect">
-		<h3>{{localize 'MGT2.Chargen.Template.Career'}}</h3>
-		<span class="count">{{localize (lookup config.CareerKinds system.kind)}}</span>
+	{{#if careerCard}}
+	{{! The qualification card: what a Traveller reads before rolling to join. }}
+	<div class="qcard play-only">
+		<div class="plates">
+			{{#each careerCard.plates as |plate|}}
+			<div class="plate">
+				<span class="lbl">{{localize plate.label}}</span>
+				<span class="pv"><b{{#if plate.word}} class="word"{{/if}}>{{plate.value}}</b>{{#if plate.on}}<span class="on">{{plate.on}}</span>{{/if}}</span>
+				{{#if plate.note}}<span class="note">{{plate.note}}</span>{{/if}}
+			</div>
+			{{/each}}
+		</div>
+		{{#if careerCard.dms}}<p class="dmline">{{{careerCard.dms}}}</p>{{/if}}
+		{{#if careerCard.switches.length}}
+		<div class="pills">{{#each careerCard.switches}}<span class="pill">{{localize this}}</span>{{/each}}</div>
+		{{/if}}
+		{{#if careerCard.assignments.length}}
+		<table class="rows qasg">
+			<thead>
+				<tr>
+					<th>{{localize 'MGT2.Items.Assignment'}}</th>
+					<th class="num">{{localize 'MGT2.Chargen.Template.Survival'}}</th>
+					<th class="num">{{localize 'MGT2.Chargen.Template.Advancement'}}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each careerCard.assignments as |row|}}
+				<tr><td>{{row.name}}</td><td class="num">{{row.survival}}</td><td class="num">{{row.advancement}}</td></tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+		<dl class="facts">
+			{{#each careerCard.facts as |fact|}}<dt class="lbl">{{localize fact.label}}</dt><dd>{{fact.value}}</dd>{{/each}}
+		</dl>
 	</div>
 
-	<div class="pfields">
+	{{! Four groups, each with its switches on one row. Every name the form carried stays. }}
+	<div class="grid edit-only">
+		<h4 class="gsub">{{localize 'MGT2.Chargen.Steps.qualify'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.Kind'}}</span>
-			<select class="f edit-only" name="system.kind">{{selectOptions config.CareerKinds selected=system.kind localize=true}}</select>
-			<b class="play-only word">{{localize (lookup config.CareerKinds system.kind)}}</b>
+			<select class="f" name="system.kind">{{selectOptions config.CareerKinds selected=system.kind localize=true}}</select>
 		</label>
-		{{#unless (eq system.kind "table")}}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.Entry'}}</span>
+			<select class="f" name="system.qualification.entry">{{selectOptions config.QualificationEntry selected=system.qualification.entry localize=true}}</select>
+		</label>
 		{{! The qualification target number, 0 where the career takes anyone. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.Difficulty'}}</span>
 			{{formInput systemFields.difficulty name="system.difficulty" value=system.difficulty classes="f num"}}
-		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Chargen.Template.Entry'}}</span>
-			<select class="f edit-only" name="system.qualification.entry">{{selectOptions config.QualificationEntry selected=system.qualification.entry localize=true}}</select>
-			<b class="play-only word">{{localize (lookup config.QualificationEntry system.qualification.entry)}}</b>
-		</label>
-		{{/unless}}
-	</div>
-
-	{{#unless (eq system.kind "table")}}
-	<div class="pfields">
-		{{! A LIST because the Entertainer prints "DEX or INT 5+". Same control the Docket uses for
-		    the same question. }}
-		<label class="wide">
-			<span class="lbl">{{localize 'MGT2.Chargen.Template.QualChars'}}</span>
-			<select class="f chars edit-only" name="system.qualification.characteristics" multiple size="3">
-				{{selectOptions config.Characteristics selected=system.qualification.characteristics localize=true}}
-			</select>
-			<b class="play-only word">{{#each system.qualification.characteristics as |key|}}{{localize (lookup @root.config.Characteristics key)}} {{else}}&mdash;{{/each}}</b>
-		</label>
-		{{! The Noble's "automatic qualification if your SOC is 10 or higher", printed on the same
-		    line as its own target — the book's own clause, so it needs no ruling marker. }}
-		<label>
-			<span class="lbl">{{localize 'MGT2.Chargen.Template.AutoIf'}}</span>
-			<select class="f edit-only" name="system.qualification.autoIf.characteristic">
-				<option value="">&mdash;</option>
-				{{selectOptions config.Characteristics selected=system.qualification.autoIf.characteristic localize=true}}
-			</select>
-			{{formInput systemFields.qualification.fields.autoIf.fields.min name="system.qualification.autoIf.min" value=system.qualification.autoIf.min classes="f num" placeholder="min"}}
-			{{formInput systemFields.qualification.fields.autoIf.fields.max name="system.qualification.autoIf.max" value=system.qualification.autoIf.max classes="f num" placeholder="max"}}
 		</label>
 		{{! ABSENT from two of the twelve, so 0 is the honest initial and this field is per template. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.PerPrevious'}}</span>
 			{{formInput systemFields.qualification.fields.perPreviousCareer name="system.qualification.perPreviousCareer" value=system.qualification.perPreviousCareer classes="f num"}}
 		</label>
-	</div>
-
-	{{! "DM+2 if SOC 9+" and "DM+2 if the last term was in the Agent or Rogue careers": a row takes
-	    either a characteristic threshold or the careers typed on one line. }}
-	<div class="stack" data-property="qualification.conditionalDMs">
-		<span class="lbl">{{localize 'MGT2.Chargen.Template.ConditionalDMs'}}</span>
-		{{#each system.qualification.conditionalDMs as |row c|}}
-		<div class="entry pfields" data-entry-index="{{c}}">
-			<select class="f edit-only" name="system.qualification.conditionalDMs.{{c}}.characteristic">
-				<option value="">&mdash;</option>
-				{{selectOptions @root.config.Characteristics selected=row.characteristic localize=true}}
-			</select>
-			<input class="f num edit-only" type="number" step="1" name="system.qualification.conditionalDMs.{{c}}.min"
-				value="{{row.min}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.ConditionalMin'}}" />
-			<input class="f edit-only" type="text" name="system.qualification.conditionalDMs.{{c}}.afterCareers"
-				value="{{row.afterCareers}}" placeholder="{{localize 'MGT2.Chargen.Template.ConditionalAfter'}}" />
-			<input class="f num edit-only" type="number" step="1" name="system.qualification.conditionalDMs.{{c}}.dm"
-				value="{{row.dm}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.ConditionalDM'}}" />
-			<b class="play-only word">{{#if row.characteristic}}{{localize (lookup @root.config.Characteristics row.characteristic)}} {{row.min}}+{{else}}{{row.afterCareers}}{{/if}} {{showDM row.dm}}</b>
-			<a class="del edit-only" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+		{{! A LIST because the Entertainer prints "DEX or INT 5+". }}
+		<div class="full">
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.QualChars'}}</span>
+			<multi-checkbox class="tpills" name="system.qualification.characteristics">
+				{{#each qualChoices as |choice|}}<option value="{{choice.key}}"{{#if choice.on}} selected{{/if}}>{{choice.label}}</option>{{/each}}
+			</multi-checkbox>
 		</div>
-		{{/each}}
-		<a class="add edit-only" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.ConditionalDM'}}</a>
-	</div>
-
-	<div class="pfields">
+		{{! The Noble's "automatic qualification if your SOC is 10 or higher". }}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.AutoIf'}}</span>
+			<span class="pair">
+				<select class="f" name="system.qualification.autoIf.characteristic">
+					<option value="">&mdash;</option>
+					{{selectOptions config.Characteristics selected=system.qualification.autoIf.characteristic localize=true}}
+				</select>
+				{{formInput systemFields.qualification.fields.autoIf.fields.min name="system.qualification.autoIf.min" value=system.qualification.autoIf.min classes="f num" placeholder="min"}}
+				{{formInput systemFields.qualification.fields.autoIf.fields.max name="system.qualification.autoIf.max" value=system.qualification.autoIf.max classes="f num" placeholder="max"}}
+			</span>
+		</label>
 		{{! "The Army and Marines at 30+, the Navy at 34+". Blank `from` = the DM is not printed. }}
-		<label>
+		<label class="wide">
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.AgeDM'}}</span>
-			{{formInput systemFields.ageDM.fields.from name="system.ageDM.from" value=system.ageDM.from classes="f num"}}
-			{{formInput systemFields.ageDM.fields.dm name="system.ageDM.dm" value=system.ageDM.dm classes="f num"}}
+			<span class="pair">
+				{{formInput systemFields.ageDM.fields.from name="system.ageDM.from" value=system.ageDM.from classes="f num"}}
+				{{formInput systemFields.ageDM.fields.dm name="system.ageDM.dm" value=system.ageDM.dm classes="f num"}}
+			</span>
 		</label>
-		{{! The boolean says whether the step exists at all; a frame deletes it for every career at once. }}
-		<label>
-			<span class="lbl">{{localize 'MGT2.Chargen.Template.Commission'}}</span>
-			<select class="f edit-only" name="system.commissionCheck.characteristic">
-				<option value="">&mdash;</option>
-				{{selectOptions config.Characteristics selected=system.commissionCheck.characteristic localize=true}}
-			</select>
-			{{formInput systemFields.commissionCheck.fields.target name="system.commissionCheck.target" value=system.commissionCheck.target classes="f num"}}
-		</label>
+		{{! "DM+2 if SOC 9+" and "DM+2 if the last term was in the Agent or Rogue careers": a row takes
+		    either a characteristic threshold or the careers typed on one line. }}
+		<div class="stack full" data-property="qualification.conditionalDMs">
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.ConditionalDMs'}}</span>
+			{{#each system.qualification.conditionalDMs as |row c|}}
+			<div class="entry pfields" data-entry-index="{{c}}">
+				<select class="f" name="system.qualification.conditionalDMs.{{c}}.characteristic">
+					<option value="">&mdash;</option>
+					{{selectOptions @root.config.Characteristics selected=row.characteristic localize=true}}
+				</select>
+				<input class="f num" type="number" step="1" name="system.qualification.conditionalDMs.{{c}}.min"
+					value="{{row.min}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.ConditionalMin'}}" />
+				<input class="f" type="text" name="system.qualification.conditionalDMs.{{c}}.afterCareers"
+					value="{{row.afterCareers}}" placeholder="{{localize 'MGT2.Chargen.Template.ConditionalAfter'}}" />
+				<input class="f num" type="number" step="1" name="system.qualification.conditionalDMs.{{c}}.dm"
+					value="{{row.dm}}" data-dtype="Number" data-tooltip="{{localize 'MGT2.Chargen.Template.ConditionalDM'}}" />
+				<a class="del" data-action="entryDelete"><i class="fa-solid fa-xmark"></i></a>
+			</div>
+			{{/each}}
+			<a class="add" data-action="entryCreate"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Chargen.Template.ConditionalDM'}}</a>
+		</div>
+		{{! Beats the generic no-return check rather than being filtered by it: this is the fallback. }}
+		<div class="switches full">
+			<label class="check"><input type="checkbox" name="system.alwaysAvailable" {{checked system.alwaysAvailable}} /><span>{{localize 'MGT2.Chargen.Template.AlwaysAvailable'}}</span></label>
+			<label class="check"><input type="checkbox" name="system.qualification.requiresPermission" {{checked system.qualification.requiresPermission}} /><span>{{localize 'MGT2.Chargen.Template.RequiresPermission'}}</span></label>
+		</div>
+
+		<h4 class="gsub">{{localize 'MGT2.Chargen.Screen.TermColumn'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.BasicFrom'}}</span>
-			<select class="f edit-only" name="system.basicFrom">
+			<select class="f" name="system.basicFrom">
 				<option value="">&mdash;</option>
 				{{selectOptions config.BasicTrainingTables selected=system.basicFrom localize=true}}
 			</select>
-			<b class="play-only word">{{localize (lookup config.BasicTrainingTables system.basicFrom)}}</b>
 		</label>
-	</div>
-
-	<div class="pfields">
-		{{! BLANK is a template that declares no rule: the book groups the careers two ways and leaves
-		    one in neither list. }}
+		{{! The switch says whether the step exists at all; a frame deletes it for every career at once. }}
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.Commission'}}</span>
+			<span class="pair">
+				<select class="f" name="system.commissionCheck.characteristic">
+					<option value="">&mdash;</option>
+					{{selectOptions config.Characteristics selected=system.commissionCheck.characteristic localize=true}}
+				</select>
+				{{formInput systemFields.commissionCheck.fields.target name="system.commissionCheck.target" value=system.commissionCheck.target classes="f num"}}
+			</span>
+		</label>
+		{{! BLANK is a template that declares no rule: the book leaves one career in neither list. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.AssignmentChange'}}</span>
-			<select class="f edit-only" name="system.assignmentChange">
+			<select class="f" name="system.assignmentChange">
 				<option value="">&mdash;</option>
 				{{selectOptions config.AssignmentChangeRules selected=system.assignmentChange localize=true}}
 			</select>
-			<b class="play-only word">{{#if system.assignmentChange}}{{localize (lookup config.AssignmentChangeRules system.assignmentChange)}}{{else}}{{localize 'MGT2.Chargen.Template.Undeclared'}}{{/if}}</b>
 		</label>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.EventRow7'}}</span>
-			<select class="f edit-only" name="system.eventRow7">{{selectOptions config.EventRow7 selected=system.eventRow7 localize=true}}</select>
-			<b class="play-only word">{{localize (lookup config.EventRow7 system.eventRow7)}}</b>
+			<select class="f" name="system.eventRow7">{{selectOptions config.EventRow7 selected=system.eventRow7 localize=true}}</select>
 		</label>
-		{{! Which row of the Medical Bills table this employer sits on. Blank is legitimate: neither
-		    the Prisoner nor the Psion appears in any row, and a prisoner has no employer to bill. }}
+		{{! Blank is legitimate: neither the Prisoner nor the Psion appears in any row. }}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.MedicalBillsRow'}}</span>
-			<select class="f edit-only" name="system.medicalBillsRow">
+			<select class="f" name="system.medicalBillsRow">
 				<option value="">&mdash;</option>
 				{{selectOptions @root.config.MedicalBillsGroups selected=system.medicalBillsRow localize=true}}
 				{{#if system.medicalBillsRow}}{{#unless (lookup @root.config.MedicalBillsGroups system.medicalBillsRow)}}<option value="{{system.medicalBillsRow}}" selected>{{system.medicalBillsRow}}</option>{{/unless}}{{/if}}
 			</select>
-			<b class="play-only word">{{#if system.medicalBillsRow}}{{#if (lookup @root.config.MedicalBillsGroups system.medicalBillsRow)}}{{localize (lookup @root.config.MedicalBillsGroups system.medicalBillsRow)}}{{else}}{{system.medicalBillsRow}}{{/if}}{{else}}&mdash;{{/if}}</b>
 		</label>
-	</div>
+		<div class="switches full">
+			<label class="check"><input type="checkbox" name="system.commission" {{checked system.commission}} /><span>{{localize 'MGT2.Chargen.Template.HasCommission'}}</span></label>
+			<label class="check"><input type="checkbox" name="system.blocksAnagathics" {{checked system.blocksAnagathics}} /><span>{{localize 'MGT2.Chargen.Template.BlocksAnagathics'}}</span></label>
+		</div>
 
-	<div class="flags edit-only">
-		<label class="chk"><input type="checkbox" name="system.commission" {{checked system.commission}} /><span>{{localize 'MGT2.Chargen.Template.HasCommission'}}</span></label>
-		<label class="chk"><input type="checkbox" name="system.pensionable" {{checked system.pensionable}} /><span>{{localize 'MGT2.Chargen.Template.Pensionable'}}</span></label>
-		{{! Beats the generic no-return check rather than being filtered by it, and it must: this is
-		    the fallback, and closing it leaves a Traveller with nowhere to go. }}
-		<label class="chk"><input type="checkbox" name="system.alwaysAvailable" {{checked system.alwaysAvailable}} /><span>{{localize 'MGT2.Chargen.Template.AlwaysAvailable'}}</span></label>
-		<label class="chk"><input type="checkbox" name="system.neverEjects" {{checked system.neverEjects}} /><span>{{localize 'MGT2.Chargen.Template.NeverEjects'}}</span></label>
-		<label class="chk"><input type="checkbox" name="system.blocksAnagathics" {{checked system.blocksAnagathics}} /><span>{{localize 'MGT2.Chargen.Template.BlocksAnagathics'}}</span></label>
-		<label class="chk"><input type="checkbox" name="system.qualification.requiresPermission" {{checked system.qualification.requiresPermission}} /><span>{{localize 'MGT2.Chargen.Template.RequiresPermission'}}</span></label>
-	</div>
+		<h4 class="gsub">{{localize 'MGT2.Items.ExitMode'}}</h4>
+		{{! The leaving rule that DISPLACES the generic outcomes. `track` names one of the career's tracks. }}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.ExitRule'}}</span>
+			<span class="pair">
+				<input class="f" type="text" name="system.exitRule.track" value="{{system.exitRule.track}}" placeholder="{{localize 'MGT2.Chargen.Template.TrackKey'}}" />
+				<input class="f" type="text" name="system.exitRule.test" value="{{system.exitRule.test}}" placeholder="{{localize 'MGT2.Chargen.Template.ExitTest'}}" />
+			</span>
+		</label>
+		<div class="switches full">
+			<label class="check"><input type="checkbox" name="system.pensionable" {{checked system.pensionable}} /><span>{{localize 'MGT2.Chargen.Template.Pensionable'}}</span></label>
+			<label class="check"><input type="checkbox" name="system.neverEjects" {{checked system.neverEjects}} /><span>{{localize 'MGT2.Chargen.Template.NeverEjects'}}</span></label>
+		</div>
 
-	<div class="pfields">
-		{{! Species careers are ordinary templates carrying a restriction, and for the Aslan a sex gate
-		    as well: one of the strings that species declares, and never the identity field. Both free
-		    text, because a species is an Item the referee typed. }}
+		{{! Species careers are ordinary templates carrying a restriction, and for the Aslan a sex gate:
+		    one of the strings that species declares. Both free text. }}
+		<h4 class="gsub">{{localize 'MGT2.Chargen.Template.Restrictions'}}</h4>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.RestrictedSpecies'}}</span>
-			<input class="f edit-only" type="text" name="system.restrictedTo.species" value="{{system.restrictedTo.species}}" />
-			<b class="play-only word">{{#if system.restrictedTo.species}}{{system.restrictedTo.species}}{{else}}&mdash;{{/if}}</b>
+			<input class="f" type="text" name="system.restrictedTo.species" value="{{system.restrictedTo.species}}" />
 		</label>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Chargen.Template.RestrictedSex'}}</span>
-			<input class="f edit-only" type="text" name="system.restrictedTo.sex" value="{{system.restrictedTo.sex}}" />
-			<b class="play-only word">{{#if system.restrictedTo.sex}}{{system.restrictedTo.sex}}{{else}}&mdash;{{/if}}</b>
-		</label>
-		{{! The leaving rule that DISPLACES the generic outcomes rather than layering on them.
-		    `track` names one of the tracks below. }}
-		<label>
-			<span class="lbl">{{localize 'MGT2.Chargen.Template.ExitRule'}}</span>
-			<input class="f edit-only" type="text" name="system.exitRule.track" value="{{system.exitRule.track}}" placeholder="{{localize 'MGT2.Chargen.Template.TrackKey'}}" />
-			<input class="f edit-only" type="text" name="system.exitRule.test" value="{{system.exitRule.test}}" placeholder="{{localize 'MGT2.Chargen.Template.ExitTest'}}" />
+			<input class="f" type="text" name="system.restrictedTo.sex" value="{{system.restrictedTo.sex}}" />
 		</label>
 	</div>
-	{{/unless}}
+	{{else}}
+	{{! A shared table: its kind is the one thing this block holds. }}
+	<div class="sect">
+		<h3>{{localize 'MGT2.Chargen.Template.Career'}}</h3>
+		<span class="count">{{localize (lookup config.CareerKinds system.kind)}}</span>
+	</div>
+	<div class="pfields">
+		<label>
+			<span class="lbl">{{localize 'MGT2.Chargen.Template.Kind'}}</span>
+			<select class="f edit-only" name="system.kind">{{selectOptions config.CareerKinds selected=system.kind localize=true}}</select>
+			<b class="play-only word">{{localize (lookup config.CareerKinds system.kind)}}</b>
+		</label>
+	</div>
+	{{/if}}
 
 	{{#if (eq system.kind "preCareer")}}
 	{{! Core p.16-17: the window, the entry DM by term, the tied career, the skills taken on entry, and a

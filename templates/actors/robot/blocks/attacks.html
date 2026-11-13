@@ -1,0 +1,15 @@
+{{! One block, as the printed statblock has one Attacks line: natural attacks, which are `weapon`
+    Items flagged `natural` as a creature's are, then carried weapons. }}
+<div class="block{{#if robot.vacant.attacks}} edit-only{{/if}}">
+	<div class="sect">
+		<h3>{{localize 'MGT2.Actor.robot.Attacks'}}</h3>
+		<span class="count">{{#if attacks.length}}{{attacks.length}}{{/if}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.robot.AttackHint'}}"></i>
+		<a class="add edit-only" data-action="itemCreate" data-type-item="weapon" data-create-name="{{localize 'MGT2.Actor.NewWeapon'}}" data-tooltip="{{localize 'MGT2.Actor.AddWeapon'}}"><i class="fa-solid fa-plus"></i></a>
+	</div>
+	{{#if attacks.length}}
+	<ul class="attacks">
+		{{#each attacks as |weapon|}}{{> systems/mgt2/templates/actors/parts/attack-card.html weapon=weapon}}{{/each}}
+	</ul>
+	{{/if}}
+</div>
