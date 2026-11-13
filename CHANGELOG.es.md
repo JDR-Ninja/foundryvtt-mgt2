@@ -8,6 +8,167 @@
 
 ---
 
+## [0.2.12]
+
+**Verificado en Foundry VTT 14.370.**
+
+**Una renovación visual de todo el sistema, cartas del chat que aplican el daño, y los roles de una
+nave gestionables por fin desde su hoja**
+([#9](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/9)). Las cartas de tirada, las hojas de
+cada actor y de cada objeto y el diálogo de tirada se han redibujado. La creación hace la tirada de
+habilidad del periodo en el orden del libro, los aumentos siguen los límites del Central Supply
+Catalogue, y dos reglas del Traveller Companion pasan a ser opciones.
+
+### ⚠ Cambios que rompen
+
+* **La tirada de habilidad del periodo va antes de la Supervivencia** (Core p.18), en lugar del
+  entrenamiento básico, y ya no después del Ascenso. Una tirada ganada más tarde en el periodo, por
+  un ascenso o una fila de evento, devuelve el cursor al paso de habilidad hasta que se haga. Una
+  creación en curso continúa en el nuevo orden.
+* **Un ataque fallido ya no ofrece tirada de daño** (Core p.74, p.77), venga de un personaje o de
+  una montura de nave. Un arma **Blast** la conserva, sin Efecto añadido, para la granada que queda
+  a criterio del árbitro y para la dispersión: una interpretación. Con la regla *Percances de
+  combate*, un doble 1 que llega a 8+ sigue fallando y tampoco ofrece nada (Companion p.53).
+* **Los aumentos siguen los límites del Central Supply Catalogue**, que sustituyen al del Core: un
+  aumento por habilidad y tres habilidades como máximo (CSC p.61), un solo aumento por
+  característica física (p.53), y una Subdermal Armour no se acumula con otra (p.54). El aumento
+  superado sigue instalado, no da nada, y el inventario lo nombra. Un aumento que sube varias
+  características, como el Muscular Bridging, se suma aparte: una interpretación. **Un Viajero que
+  acumulaba dos aumentos de la misma habilidad pierde el MD del más débil.**
+* **Un contenedor bloqueado oculta todo lo que contiene, a cualquier profundidad.** Una bolsa
+  guardada en un baúl bloqueado ya no es visible para un jugador, ni bajo *(todos)*, ni en el
+  selector, ni en su propia hoja, y no se puede guardar nada en ella, ni arrastrando ni desde el
+  menú de almacenamiento de la hoja de un objeto. El árbitro lo ve y lo hace todo, como antes.
+
+### Cartas del chat
+
+* **Una carta de tirada se lee de un vistazo**: la dificultad en palabras sobre su umbral, cada dado
+  como ficha, el dado que descarta una Ventaja o una Desventaja tachado, el Efecto en su escala de
+  seis tramos (Core p.61), y cada MD por su nombre. La Ventaja y la Desventaja son una insignia ▲ o
+  ▼. Una carta publicada ya no muestra probabilidad de éxito: la tirada está hecha. El detalle de
+  los dados se abre bajo el resultado sin desplazar el chat.
+* **El chat sigue el ajuste *Claro u oscuro*.** En *Claro* u *Oscuro* las cartas siguen la paleta de
+  las hojas; por defecto el chat se queda claro, como el de Foundry.
+* **Las cartas antiguas se pliegan**, según el nuevo ajuste de cliente *Plegar las cartas
+  antiguas*: *Nunca*, *Pasados cinco minutos* (por defecto) o *Siempre*. Una carta plegada conserva
+  su cabecera y su Efecto, o el total de daño; un clic en la cabecera la abre.
+* **Un ataque anota sus objetivos.** Los tokens marcados como objetivo al tirar entran en una
+  bandeja *Objetivos*, con su distancia, y pasan a la carta de daño. El cargador se lee en un
+  indicador, y el botón de daño nombra la tirada, *Daño 4D +6*.
+* **Una carta de daño aplica el daño.** Su bandeja *Aplicación* lista los objetivos del ataque, o
+  los tokens seleccionados, y sigue el lienzo en directo. Cada fila da la lectura elegida (◆ cuando
+  la elige un rasgo del defensor), la Protección encontrada, la PA descontada, y lo que hará el
+  daño: una herida, un aturdimiento, el apagado iónico de un robot, la descarga iónica de una nave,
+  la electrónica perturbada de un vehículo, o nada contra una inmunidad. Un vehículo elige su cara
+  en su propia fila. Un botón por fila, y *Aplicar a los 3*; los tokens no vinculados de un mismo
+  actor se agrupan en *3× Nombre*. El árbitro ve todas las cifras, un jugador solo las de sus
+  propios tokens. Una fila aplicada queda marcada *Aplicado* para todos. No se puede deshacer.
+* **Las tres lecturas de daño ya no bajan de cero**, cuando un MD de FUE negativo las llevaba ahí.
+* **La petición de tirada** muestra un retrato por línea, *Tú* en la tuya, una barra de progreso y
+  el motivo de la petición. **La carta de un lote comercial** muestra sus toneladas y sus precios,
+  reproduce la tirada de precio, y un indicador de la bodega marca un exceso.
+* **Cualquier carta del sistema puede abrirse en su propia ventana**, desde el menú contextual del
+  mensaje. Los mensajes publicados antes de esta versión no lo ofrecen.
+
+### Hojas
+
+* **Las hojas del Viajero y del PNJ** muestran los estados como píldoras, las armas como cartas de
+  ataque, los niveles de habilidad como puntos, y pliegan los bloques vacíos.
+* **Cada rasgo lleva una línea que dice lo que hace**, *AP 3: ignora 3 de la Protección del
+  objetivo*, en las hojas de objeto y en las del Viajero, del PNJ, del robot y del vehículo, en modo
+  de juego. El texto es del sistema, no de los libros.
+* **El robot** cabe en dos pestañas; el riel muestra sus tres presupuestos (ranuras, opciones sin
+  ranura, Ancho de banda), y sus umbrales de daño aparecen bajo la cabecera como los de una
+  criatura. El bloque Opciones solo aparece en modo edición.
+* **La nave** mantiene una cabecera de ocho cifras, el casco como barra de reserva, una línea por
+  presupuesto y sus monturas como cartas de ataque. **El vehículo** hace lo mismo, cada cifra de su
+  cabecera se edita en su propia casilla, y sus localizaciones intactas se pliegan.
+* **El mundo** agranda y glosa su perfil, muestra los servicios de su astropuerto como placas y sus
+  códigos comerciales como fichas. **El alijo** muestra su cerradura como píldora y sus accesos como
+  una escala, cada nivel con lo que da.
+* **Cada hoja de objeto** abre con su línea impresa y sus cifras clave, cuenta sus pestañas y lee sus
+  indicadores. Una carrera pone sus tablas y sus eventos en pestañas propias, su cualificación como
+  una carta. Un aumento muestra lo que aplica. Un programa muestra su efecto, su Ancho de banda y el
+  ordenador que lo aloja. Una droga muestra su ciclo, y solo una persona puede tomar una dosis. Una
+  munición muestra sus placas y las armas en las que está cargada. Un rol de tripulación agrupa sus
+  acciones por paso del asalto (Core p.164).
+* **El diálogo de tirada** muestra la probabilidad de éxito como un anillo y una barra, y los
+  modificadores de situación como píldoras.
+* **Un editor de texto cerrado muestra el texto con formato.**
+
+### Creación
+
+* **Elegir una tabla de habilidades es una cuadrícula**, una columna por tabla como en el libro. Una
+  tabla cerrada por su característica o por la comisión sigue visible, en gris con su motivo, y una
+  casilla muestra el nivel ya poseído.
+* **Una elección de habilidad a un nivel impreso oculta lo que no puede subir** (Core p.18): el
+  entrenamiento básico de una segunda carrera ya no ofrece una habilidad ya poseída a 0, y una
+  habilidad a nivel 0 ya no crea *Engineer 0* junto a *Engineer (j-drive) 1*.
+* **Un paso sin nada que hacer aparece en gris con su motivo**, y el cursor lo salta: la comisión de
+  una carrera que no la imprime, el envejecimiento que aún no toca.
+* **Una tirada en una tabla muestra la fila obtenida**, en su carta y sobre la elección que pide. En
+  un cliente francés la fila se lee en francés cuando el compendio de la carrera la traduce, y una
+  tabla nombrada en inglés se encuentra bajo su nombre traducido.
+* **El árbitro puede reabrir una cualificación rechazada** con la flecha del paso, tanto para un
+  centro de estudios como para una carrera.
+* **Todo lo que aplica una tirada de Beneficios entra en la columna *Tomado*** de la pantalla de
+  cierre, no solo el dinero y los beneficios: un Aliado, una característica, una habilidad.
+* **La celda de un periodo ya no dice dos veces lo mismo**, y la banda de pasos y la pantalla de
+  cierre se han redibujado.
+
+### Equipo y robots
+
+* **Una munición puede cambiar el alcance y el coste del cargador de su arma** (CSC p.179): un
+  alcance propio, un porcentaje o un múltiplo del coste del cargador, redondeados hacia abajo
+  (Core p.6). La granada de 40 mm del Advanced Combat Rifle llega a 250 m (Core p.126). Las hojas,
+  el diálogo de tirada y las bandas de alcance leen el arma cargada. Un arma cuerpo a cuerpo y un
+  arma de nave conservan su alcance.
+* **La lista de armas muestra el daño y los rasgos de la munición cargada**, y la de un vehículo el
+  Scope que le da su control de tiro (Vehicle Handbook 2026 p.104).
+* **La Agility Enhancement de un robot suma sus metros a su velocidad** (Robot Handbook p.22), sin
+  coste de autonomía.
+* **Un contenedor bloqueado muestra a un jugador el texto del árbitro** en lugar de su contenido, y
+  su masa sigue contando.
+
+### Naves
+
+* **Los roles de puesto de una nave se gestionan desde su hoja**
+  ([#9](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/9)). En modo edición, el bloque
+  Tripulación gana un pliegue *Roles de puesto*: cada rol a bordo, su puesto de tripulación, su
+  departamento y cuántos puestos lo usan, con *Nuevo rol*, abrir y eliminar. Eliminar un rol vacía
+  los puestos que lo usaban, y lo dice.
+* **Dos roles con el mismo nombre se numeran**, *Piloto (1)*, *Piloto (2)*, en el menú del puesto
+  como en el pliegue.
+* **Un rol soltado recuerda su origen**, y *Actualizar desde su origen* lo refresca sin separarlo de
+  sus puestos.
+* **Un rol soltado sobre una fila de tripulación se asigna a ese puesto**, reutilizando la copia del
+  mismo origen que ya está a bordo.
+
+### Reglas del Traveller Companion
+
+Donde el Companion reimprime una regla del Core de otra forma, prevalece, y cada una de esas reglas
+pasa a ser una opción, activa en un mundo nuevo y desactivada en un mundo actualizado, que conserva
+así la regla del Core hasta que el árbitro la active.
+
+* ***MD de característica por encima de 15*** (Companion p.4): +4 de 18 a 20, +5 de 21 a 23, y +1
+  más por cada 3 adicionales. El Core se detiene en +3.
+* ***Combustible refinado en un astropuerto de clase C*** (Companion p.133): la hoja del mundo
+  muestra *Refinado y sin refinar* y los dos precios, y la pantalla de viaje gana una elección
+  *Combustible cargado*, refinado a Cr500 o sin refinar a Cr100, que decide el MD−2 del salto.
+
+### Correcciones
+
+* **La píldora de REP de un contrato ya no delata el umbral de reputación oculto del cliente.**
+* **Una persona soltada sobre una fila de montura, pantalla o bahía** ya no se une al puesto de
+  tripulación del mismo índice.
+* **Las barras de presupuesto de las hojas con riel vuelven a llenarse.**
+* **El rasgo Slow Loader cuenta acciones, no asaltos** (Field Catalogue p.8); un arma existente se
+  corrige al cargar.
+* **El estilo de las condiciones de un contrato** ya no se filtra al diálogo de tirada.
+* **Una palabra en una línea de estadísticas** se lee a tamaño de palabra, ya no al de una cifra.
+
+---
+
 ## [0.2.11]
 
 **Verificado en Foundry VTT 14.370.**

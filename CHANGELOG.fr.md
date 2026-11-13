@@ -4,6 +4,170 @@
 
 ---
 
+## [0.2.12]
+
+**Vérifié sur Foundry VTT 14.370.**
+
+**Une refonte visuelle de tout le système, des cartes de discussion qui appliquent les dégâts, et
+les rôles d'un vaisseau enfin gérables depuis sa fiche**
+([#9](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/9)). Les cartes de jet, les fiches de
+chaque acteur et de chaque objet et la fenêtre de jet sont redessinées. La création suit l'ordre
+du livre pour le jet de compétence de la période, les augmentations suivent les limites du Central
+Supply Catalogue, et deux règles du Traveller Companion deviennent des options.
+
+### ⚠ Ruptures
+
+* **Le jet de compétence de la période vient avant la Survie** (Core p.18), à la place de
+  l'entraînement de base, et non plus après l'Avancement. Un jet gagné plus tard dans la période,
+  par une promotion ou une ligne d'événement, ramène le curseur sur l'étape de compétence jusqu'à
+  ce qu'il soit pris. Une création en cours reprend dans ce nouvel ordre.
+* **Une attaque ratée ne propose plus de jet de dégâts** (Core p.74, p.77), qu'elle vienne d'un
+  personnage ou d'une monture de vaisseau. Une arme **Blast** le garde, sans Effet ajouté, pour la
+  grenade laissée à l'arbitre et la dispersion : une interprétation. Avec la règle *Aléas de
+  combat*, un double 1 qui atteint 8+ reste un échec et ne propose rien non plus (Companion p.53).
+* **Les augmentations suivent les limites du Central Supply Catalogue**, qui remplacent celle du
+  Core : une augmentation par compétence et trois compétences au plus (CSC p.61), une seule
+  augmentation par caractéristique physique (p.53), et une armure subdermique ne s'ajoute pas à une
+  autre (p.54). L'augmentation dépassée reste posée, ne donne plus rien, et l'inventaire la nomme.
+  Une augmentation qui relève plusieurs caractéristiques, comme le Muscular Bridging, s'ajoute à
+  côté : une interprétation. **Un Voyageur qui cumulait deux augmentations de la même compétence
+  perd le MD de la plus faible.**
+* **Un conteneur verrouillé cache tout ce qu'il contient, à toute profondeur.** Un sac rangé dans
+  une malle verrouillée n'est plus visible d'un joueur, ni sous *(tous)*, ni dans le sélecteur, ni
+  sur sa propre fiche, et rien ne peut y être rangé, par glisser-déposer comme par le menu de
+  rangement de la fiche d'un objet. L'arbitre voit et fait tout, comme avant.
+
+### Cartes de discussion
+
+* **Une carte de test se lit d'un coup d'œil** : la difficulté en toutes lettres au-dessus de son
+  seuil, chaque dé en pastille, le dé écarté par un Coup de pouce ou un Coup du sort barré, l'Effet
+  sur l'échelle de ses six paliers (Core p.61), et chaque MD nommé. Le Coup de pouce et le Coup du
+  sort sont un badge ▲ ou ▼. Une carte postée ne montre plus de chance de réussite : le jet est
+  fait. Le détail des dés s'ouvre sous le résultat sans faire défiler la discussion.
+* **La discussion prend le réglage *Clair ou sombre*.** En *Clair* ou *Sombre*, les cartes suivent
+  la palette des fiches ; par défaut, la discussion reste claire comme celle de Foundry.
+* **Les anciennes cartes se replient**, selon le nouveau réglage client *Replier les cartes
+  anciennes* : *Jamais*, *Après cinq minutes* (par défaut) ou *Toujours*. Une carte repliée garde
+  son en-tête et son Effet, ou le total des dégâts ; un clic sur l'en-tête l'ouvre.
+* **Une attaque note ses cibles.** Les jetons ciblés au moment du jet s'inscrivent dans un tiroir
+  *Cibles*, avec leur distance, et passent à la carte de dégâts. Le chargeur se lit sur une jauge,
+  et le bouton de dégâts nomme le jet, *Dégâts 4D +6*.
+* **Une carte de dégâts applique les dégâts.** Son tiroir *Application* liste les cibles de
+  l'attaque, ou les jetons sélectionnés, et suit le canevas en direct. Chaque ligne donne la
+  lecture retenue (◆ quand un trait du défenseur la choisit), la Protection rencontrée, la PA
+  déduite, et ce que les dégâts feront : une blessure, un étourdissement, l'arrêt ionique d'un
+  robot, la décharge ionique d'un vaisseau, l'électronique perturbée d'un véhicule, ou rien contre
+  une immunité. Un véhicule choisit sa face dans sa ligne. Un bouton par ligne, et *Appliquer aux
+  3* ; les jetons non liés d'un même acteur se regroupent en *3× Nom*. L'arbitre voit tous les
+  chiffres, un joueur seulement ceux de ses propres jetons. Une ligne appliquée est marquée
+  *Appliqué* pour tout le monde. Il n'y a pas d'annulation.
+* **Les trois lectures de dégâts ne descendent plus sous zéro**, quand un MD de FOR négatif les y
+  menait.
+* **La demande de jet** montre un portrait par ligne, *À vous* sur la vôtre, une barre de
+  progression et la raison de la demande. **La carte d'un lot de commerce** montre ses tonnes et
+  ses prix, refait le jet de prix, et une jauge de la soute marque un dépassement.
+* **Toute carte du système peut s'ouvrir dans sa propre fenêtre**, par le menu contextuel du
+  message. Les messages postés avant cette version ne l'offrent pas.
+
+### Fiches
+
+* **Les fiches du Voyageur et du PNJ** montrent les états en pastilles, les armes en cartes
+  d'attaque, les niveaux de compétence en points, et replient les blocs vides.
+* **Chaque trait porte une ligne qui dit ce qu'il fait**, *AP 3 : ignore la Protection à hauteur
+  de 3*, sur les fiches d'objet et sur celles du Voyageur, du PNJ, du robot et du véhicule, en mode
+  jeu. Le texte est celui du système, pas celui des livres.
+* **Le robot** tient en deux onglets ; le rail montre ses trois budgets (emplacements, options sans
+  emplacement, Bande passante), et ses seuils de dégâts s'affichent sous l'en-tête comme ceux d'une
+  créature. Le bloc Options ne paraît plus qu'en mode édition.
+* **Le vaisseau** garde un en-tête de huit valeurs, la coque en barre de réserve, ses budgets sur
+  une ligne chacun et ses montures en cartes d'attaque. **Le véhicule** fait de même, chaque valeur
+  de son en-tête s'édite dans sa propre case, et ses localisations intactes se replient.
+* **Le monde** agrandit son profil et le glose, montre les services de son astroport en plaques et
+  ses codes commerciaux en pastilles. **La cachette** montre son verrou en pastille et ses accès en
+  échelle, chaque niveau avec ce qu'il donne.
+* **Chaque fiche d'objet** ouvre sur sa ligne imprimée et ses chiffres clés, compte ses onglets,
+  et lit ses jauges. La carrière range ses tables et ses événements dans leurs propres onglets,
+  sa qualification en carte. Une augmentation montre ce qu'elle applique. Un programme montre son
+  effet, sa Bande passante et l'ordinateur qui l'accueille. Une drogue montre son cycle, et seule
+  une personne peut en prendre une dose. Une munition montre ses plaques et les armes où elle est
+  chargée. Un rôle d'équipage range ses actions par étape du round (Core p.164).
+* **La fenêtre de jet** montre la chance de réussite en anneau et en barre, et les modificateurs de
+  situation en pastilles.
+* **Un éditeur de texte fermé montre le texte mis en forme.**
+
+### Création
+
+* **Le choix d'une table de compétences est une grille**, une colonne par table comme dans le
+  livre. Une table fermée par sa caractéristique ou par la commission reste visible, grisée avec sa
+  raison, et une case montre le niveau déjà détenu.
+* **Un choix de compétence à un niveau imprimé cache ce qu'il ne peut pas relever** (Core p.18) :
+  l'entraînement de base d'une deuxième carrière n'offre plus une compétence déjà détenue à 0, et
+  une compétence au niveau 0 ne crée plus *Engineer 0* à côté d'*Engineer (j-drive) 1*.
+* **Une étape sans objet est grisée avec sa raison**, et le curseur la passe : la commission d'une
+  carrière qui n'en imprime pas, le vieillissement pas encore dû.
+* **Le jet sur une table montre la ligne obtenue**, sur sa carte et au-dessus du choix qu'elle
+  demande. Dans un client français, cette ligne se lit en français quand le compendium de la
+  carrière la traduit, et une table nommée en anglais se trouve sous son nom traduit.
+* **L'arbitre peut rouvrir une qualification refusée** par la flèche de l'étape, pour un
+  établissement d'études comme pour une carrière.
+* **Tout ce qu'un jet d'Avantages applique s'inscrit dans la colonne *Obtenu*** de l'écran de
+  clôture, pas seulement l'argent et les avantages : un allié, une caractéristique, une compétence.
+* **La cellule d'une période ne dit plus deux fois la même chose**, et la bande des étapes et
+  l'écran de clôture sont redessinés.
+
+### Équipement et robots
+
+* **Une munition peut changer la portée et le coût du chargeur de son arme** (CSC p.179) : une
+  portée propre, un pourcentage, ou un multiple du coût du chargeur, arrondis à l'inférieur
+  (Core p.6). La grenade de 40 mm d'un fusil de combat avancé porte à 250 m (Core p.126). Les
+  fiches, la fenêtre de jet et les bandes de portée lisent l'arme chargée. Une arme de mêlée et une
+  arme de vaisseau gardent leur portée.
+* **La liste des armes montre les dégâts et les traits de la munition chargée**, et celle d'un
+  véhicule la Portée que lui donne son contrôle de tir (Vehicle Handbook 2026 p.104).
+* **L'Agility Enhancement d'un robot ajoute ses mètres à sa vitesse** (Robot Handbook p.22), sans
+  coûter d'autonomie.
+* **Un conteneur verrouillé montre à un joueur le texte de l'arbitre** à la place de son contenu,
+  et sa masse reste comptée.
+
+### Vaisseaux
+
+* **Les rôles de poste d'un vaisseau se gèrent depuis sa fiche**
+  ([#9](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/9)). En mode édition, le bloc
+  Équipage gagne un pli *Rôles de poste* : chaque rôle à bord, son poste d'équipage, son
+  département et le nombre de postes qui l'utilisent, avec *Nouveau rôle*, ouvrir et supprimer.
+  Supprimer un rôle vide les postes qui l'utilisaient, et le dit.
+* **Deux rôles du même nom se numérotent**, *Pilote (1)*, *Pilote (2)*, dans le menu du poste comme
+  dans le pli.
+* **Un rôle déposé garde la trace de sa source**, et *Mettre à jour depuis sa source* le
+  rafraîchit sans le détacher de ses postes.
+* **Un rôle déposé sur une ligne d'équipage est assigné à ce poste**, en réutilisant la copie de la
+  même source déjà à bord.
+
+### Règles du Traveller Companion
+
+Là où le Companion réimprime une règle du Core autrement, il l'emporte, et chaque règle devient une
+option, active dans un nouveau monde et désactivée dans un monde mis à jour, qui garde ainsi la
+règle du Core jusqu'à ce que l'arbitre l'active.
+
+* ***MD des caractéristiques au-delà de 15*** (Companion p.4) : +4 de 18 à 20, +5 de 21 à 23,
+  puis +1 par tranche de 3. Le Core s'arrête à +3.
+* ***Carburant raffiné dans un astroport de classe C*** (Companion p.133) : la fiche du monde
+  affiche *Raffiné et non raffiné* et les deux prix, et l'écran de voyage gagne un choix
+  *Carburant embarqué*, raffiné à Cr500 ou non raffiné à Cr100, qui règle le MD−2 du saut.
+
+### Correctifs
+
+* **La pastille de REP d'un contrat ne trahit plus le seuil de réputation caché du client.**
+* **Une personne déposée sur une ligne de monture, d'écran ou de baie** ne rejoint plus le poste
+  d'équipage du même rang.
+* **Les barres de budget des fiches à rail se remplissent à nouveau.**
+* **Le trait Slow Loader compte des actions, pas des rounds** (Field Catalogue p.8) ; une arme
+  existante est corrigée au chargement.
+* **Le style des conditions d'un contrat** ne déborde plus sur la fenêtre de jet.
+* **Un mot dans une ligne de statistiques** se lit à la taille d'un mot, plus à celle d'un chiffre.
+
+---
+
 ## [0.2.11]
 
 **Vérifié sur Foundry VTT 14.370.**

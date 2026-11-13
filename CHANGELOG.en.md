@@ -4,6 +4,164 @@
 
 ---
 
+## [0.2.12]
+
+**Verified on Foundry VTT 14.370.**
+
+**A visual overhaul of the whole system, chat cards that apply damage, and a ship's roles managed
+from its own sheet at last** ([#9](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/9)). The roll
+cards, every actor and item sheet and the roll prompt are redrawn. Creation takes the term's skill
+roll in the book's order, augments follow the Central Supply Catalogue's limits, and two Traveller
+Companion rules become options.
+
+### ⚠ Breaking changes
+
+* **The term's skill roll comes before Survival** (Core p.18), in basic training's place, and no
+  longer after Advancement. A roll earned later in the term, by a promotion or an event row, sends
+  the cursor back to the skill step until it is taken. A creation in progress picks up in the new
+  order.
+* **A missed attack no longer offers a damage roll** (Core p.74, p.77), whether from a character
+  or from a ship's mount. A **Blast** weapon keeps it, with no Effect added, for the grenade left to
+  the referee and for scatter: a ruling. Under the *Combat mishaps* rule, a double 1 that reaches 8+
+  still fails and offers nothing either (Companion p.53).
+* **Augments follow the Central Supply Catalogue's limits**, which replace the Core's: one
+  augmentation per skill and three skills at most (CSC p.61), one augmentation per physical
+  characteristic (p.53), and subdermal armour does not stack with other subdermal armour (p.54).
+  The outranked augment stays fitted, gives nothing, and the inventory names it. An augment that
+  raises several characteristics, such as Muscular Bridging, adds beside them: a ruling. **A
+  Traveller who stacked two augments of the same skill loses the weaker one's DM.**
+* **A locked container hides everything inside it, at any depth.** A bag stored in a locked case is
+  no longer visible to a player, not under *(all)*, not in the picker and not on its own sheet, and
+  nothing can be stored in it, whether by drag and drop or from an item sheet's storage menu. The
+  referee sees and does everything, as before.
+
+### Chat cards
+
+* **A check card reads at a glance**: the difficulty as a word above its target, each die as a
+  chip, the die a Boon or a Bane drops struck through, the Effect on its ladder of six bands (Core
+  p.61), and every DM by name. Boon and Bane are a ▲ or ▼ badge. A posted card no longer shows a
+  chance of success: the roll is made. The dice detail opens under the result without scrolling
+  the chat.
+* **The chat takes the *Light or dark* setting.** Under *Light* or *Dark* the cards follow the
+  sheets' palette; by default the chat stays light, as Foundry's does.
+* **Older cards fold**, under the new client setting *Fold older chat cards*: *Never*, *After five
+  minutes* (the default) or *Always*. A folded card keeps its head and its Effect, or the damage
+  total; a click on the head opens it.
+* **An attack records its targets.** The tokens targeted when the roll is made go into a *Targets*
+  tray, with their distance, and are handed on to the damage card. The magazine reads as a meter,
+  and the damage button names the roll, *Damage 4D +6*.
+* **A damage card applies the damage.** Its *Application* tray lists the attack's targets, or the
+  selected tokens, and follows the canvas live. Each row gives the reading taken (◆ where a
+  defender's trait picks it), the Protection met, the AP deducted, and what the damage will do: a
+  wound, a stun, a robot's ion shutdown, a ship's ion drain, a vehicle's disrupted electronics, or
+  nothing against an immunity. A vehicle picks its facing in its own row. One button per row, and
+  *Apply to all 3*; unlinked tokens of one actor group as *3× Name*. The referee sees every number,
+  a player only those of their own tokens. An applied row is stamped *Applied* for everyone. There
+  is no undo.
+* **The three damage readings no longer go below zero**, where a negative STR DM took them there.
+* **The roll request** shows a portrait per line, *You* on yours, a progress bar and the reason for
+  the request. **A trade lot's card** shows its tons and prices, reprints the price roll, and a hold
+  meter marks an overrun.
+* **Any system card can open in its own window**, from the message's context menu. Messages posted
+  before this version do not offer it.
+
+### Sheets
+
+* **The Traveller and NPC sheets** show states as pills, weapons as attack cards, skill levels as
+  pips, and fold empty blocks.
+* **Every trait carries a line saying what it does**, *AP 3: ignores 3 of the target's Protection*,
+  on item sheets and on the Traveller, NPC, robot and vehicle sheets, in play mode. The wording is
+  the system's own, not the books'.
+* **The robot** fits in two tabs; the rail shows its three budgets (slots, zero-slot options,
+  Bandwidth), and its damage thresholds show under the header as a creature's do. The Options block
+  appears in edit mode only.
+* **The ship** keeps a header of eight figures, the hull as a pool bar, one line for each budget and
+  its mounts as attack cards. **The vehicle** does the same, each figure in its header edits in its
+  own cell, and its intact hit locations fold away.
+* **The world** enlarges and glosses its profile, shows its starport's services as plates and its
+  trade codes as chips. **The stash** shows its lock as a pill and its access as a ladder, each
+  level with what it gives.
+* **Every item sheet** opens on its printed line and its key figures, counts its tabs, and reads its
+  meters. A career puts its tables and its events on tabs of their own, its qualification as a card.
+  An augment shows what it applies. A program shows its effect, its Bandwidth and the computer that
+  hosts it. A drug shows its cycle, and only a person can take a dose. A round shows its plates and
+  the weapons it is loaded in. A crew role groups its actions by step of the round (Core p.164).
+* **The roll prompt** shows the chance of success as a ring and a bar, and situational modifiers as
+  pills.
+* **A closed text editor shows the formatted text.**
+
+### Creation
+
+* **Choosing a skill table is a grid**, one column per table as the book prints them. A table closed
+  by its characteristic or by commission stays in view, greyed with its reason, and a cell shows
+  the level already held.
+* **A skill choice at a printed level hides what it cannot raise** (Core p.18): a second career's
+  basic training no longer offers a skill already held at 0, and a skill at level 0 no longer
+  creates *Engineer 0* beside *Engineer (j-drive) 1*.
+* **A step with nothing to do is greyed with its reason**, and the cursor passes over it: the
+  commission of a career that prints none, ageing not yet due.
+* **A table roll shows the row it landed on**, on its card and above the choice the row asks. In a
+  French client the row reads in French where the career's compendium translates it, and a table
+  named in English is found under its translated name.
+* **The referee can reopen a refused qualification** from the step's arrow, for a school as for a
+  career.
+* **Everything a Benefit roll applies goes into the *Taken* column** of the closing screen, not only
+  cash and benefits: an Ally, a characteristic, a skill.
+* **A term's cell no longer says the same thing twice**, and the step strip and the closing screen
+  are redrawn.
+
+### Equipment and robots
+
+* **A round can change its weapon's range and magazine cost** (CSC p.179): a range of its own, a
+  percentage, or a multiple of the magazine cost, rounded down (Core p.6). The Advanced Combat
+  Rifle's 40 mm grenade reaches 250 m (Core p.126). Sheets, the roll prompt and range bands read the
+  loaded weapon. A melee weapon and a ship's weapon keep their range.
+* **The weapon list shows the loaded round's damage and traits**, and a vehicle's the Scope its fire
+  control grants (Vehicle Handbook 2026 p.104).
+* **A robot's Agility Enhancement adds its metres to its speed** (Robot Handbook p.22), at no cost
+  in endurance.
+* **A locked container shows a player the referee's text** in place of its contents, and its mass
+  still counts.
+
+### Ships
+
+* **A ship's station roles are managed from its sheet**
+  ([#9](https://github.com/JDR-Ninja/foundryvtt-mgt2/issues/9)). In edit mode the Crew block gains a
+  *Station roles* fold: each role aboard, its crew position, its department and how many stations
+  use it, with *New role*, open and remove. Removing a role clears the stations that used it, and
+  says so.
+* **Two roles with the same name are numbered**, *Pilot (1)*, *Pilot (2)*, in the station menu as in
+  the fold.
+* **A dropped role remembers its source**, and *Update from its source* refreshes it without
+  detaching it from its stations.
+* **A role dropped on a crew row is assigned to that station**, reusing the copy of the same source
+  already aboard.
+
+### Traveller Companion rules
+
+Where the Companion reprints a Core rule differently, it governs, and each such rule becomes an
+option, on in a new world and off in an upgraded one, which keeps the Core's rule until the referee
+turns it on.
+
+* ***Characteristic DMs past 15*** (Companion p.4): +4 at 18–20, +5 at 21–23, then +1 for every 3
+  more. The Core stops at +3.
+* ***Refined fuel at a Class C starport*** (Companion p.133): the world sheet shows *Refined and
+  unrefined* and both prices, and the voyage screen gains a *Grade taken on* choice, refined at
+  Cr500 or unrefined at Cr100, which sets the jump's DM−2.
+
+### Fixes
+
+* **A contract's REP pill no longer gives away the client's hidden reputation floor.**
+* **A person dropped on a mount, screen or bay row** no longer joins the crew station with the same
+  index.
+* **The rail sheets' budget bars fill again.**
+* **The Slow Loader trait counts actions, not rounds** (Field Catalogue p.8); an existing weapon is
+  corrected on load.
+* **A contract's terms styling** no longer leaks into the roll prompt.
+* **A word in a statline** reads at word size, no longer at a number's.
+
+---
+
 ## [0.2.11]
 
 **Verified on Foundry VTT 14.370.**
