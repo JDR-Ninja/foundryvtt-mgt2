@@ -108,7 +108,8 @@ export const Chargen = {
     isBlank(actor) {
         if ( actor?.type !== "character" ) return false;
         if ( actor.items.some(item => ["career", "talent"].includes(item.type)) ) return false;
-        return actor.system.characteristicKeys.every(key => actor.system.characteristics[key].base === 0);
+        return actor.system.characteristicKeys.every(key =>
+            (key in MGT2.DamageTracks) || (actor.system.characteristics[key].base === 0));
     },
 
     /** **The roster, with no session document behind it**. @returns {Actor[]} */

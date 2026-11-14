@@ -27,9 +27,10 @@ export function prepareDamageOrder(system) {
         };
     };
 
-    // A characteristic the world has not adopted cannot be added to the chain — but one already in
-    // a stored chain stays listed, because a rule switched off must not silently reroute damage.
-    const rest = roster.filter(k => !chain.includes(k) && Rules.characteristic(k));
+    // A characteristic the world has not adopted cannot be added, nor Hits the world's rule places;
+    // one already in a stored chain stays listed, because a rule switched off must not reroute damage.
+    const rest = roster.filter(k => !chain.includes(k) && Rules.characteristic(k)
+        && !((k === "hits") && system.hitsRuleApplies));
     return chain.filter(k => roster.includes(k)).map(entry).concat(rest.map(entry));
 }
 

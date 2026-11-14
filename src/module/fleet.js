@@ -1114,7 +1114,8 @@ export class FleetShipData extends foundry.abstract.TypeDataModel {
         await this.spend("repair", wanted);
         // `spend` refuses a pool it cannot cover, so the severity only moves once the points did.
         if ( this.parent._source.system.spent.repair === before ) return this.parent;
-        await ship.update({ [`system.criticals.${location}`]: current - wanted });
+        await ship.update({ [`system.criticals.${location}`]: current - wanted,
+            ...ship.system.criticalAppliedChanges?.(location) });
         return this.parent;
     }
 

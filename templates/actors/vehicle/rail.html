@@ -106,7 +106,7 @@
 		<dl class="statline" data-derived="system.combat">
 			<div class="stat{{#unless vehicle.combat.driver}} none{{/unless}}">
 				<dt>{{localize 'MGT2.Actor.vehicle.Driver'}}</dt>
-				<dd class="word">{{#if vehicle.combat.driver}}<a data-action="openDriver">{{vehicle.combat.driver}}</a>{{else}}&mdash;{{/if}}</dd>
+				<dd class="word">{{#if vehicle.combat.driverLinked}}<a data-action="openDriver">{{vehicle.combat.driver}}</a>{{else if vehicle.combat.driver}}{{vehicle.combat.driver}}{{else}}&mdash;{{/if}}</dd>
 			</div>
 			<div class="stat{{#unless vehicle.combat.dogfight}} none{{/unless}}">
 				<dt>{{localize 'MGT2.Actor.vehicle.Dogfight'}}</dt>

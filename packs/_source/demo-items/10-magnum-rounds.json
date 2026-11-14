@@ -11,7 +11,8 @@
         "teaches": [
           "`weaponType` is free text and is the entire way a round says what it fits — no id, no link, and nothing filters on it.",
           "A round may override the weapon's `damage` and carry its own `magazine` and `magazineCost`.",
-          "`replaceTraits: true` makes these traits *replace* the weapon's rather than add to them."
+          "`replaceTraits: true` makes these traits *replace* the weapon's rather than add to them.",
+          "`quantity` counts full magazines, weighed and priced one magazine at a time: Reload on the weapon spends one."
         ],
         "trap": "`replaceTraits` is the field that decides whether `AP (3)` on the pistol survives loading this round. Here it does not: the round is Lo-Pen and says so by replacing."
       }
@@ -20,10 +21,10 @@
   "system": {
     "description": "Heavy slugs for the patrol sidearm. They hit harder and bite less deeply.",
     "source": { "book": "", "page": "" },
-    "quantity": 24,
-    "weight": 0.02,
+    "quantity": 3,
+    "weight": 0.2,
     "weightless": false,
-    "cost": 40,
+    "cost": 30,
     "tl": "TL08",
     "legality": 3,
     "container": { "id": "" },

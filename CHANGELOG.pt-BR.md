@@ -8,6 +8,34 @@
 
 ---
 
+## [0.2.13]
+
+**Verificado no Foundry VTT 14.370.**
+
+### ⚠ Mudanças incompatíveis
+
+* **A quantidade de uma munição conta carregadores de reserva**: *Recarregar* gasta um. Uma
+  quantidade digitada em balas agora se lê em carregadores.
+
+### Novidades
+
+* **Criação**: a relação *Conexão*, anotada na ficha de cada Viajante ligado.
+* **Finanças**: *Cobrar os itens soltos sobre um Viajante*, um ajuste desativado por padrão.
+* **Regra da casa**: *Pontos de Vida para os Viajantes*, desativada por padrão.
+* **Espécies**: os traços que mudam uma rolagem aparecem na janela de rolagem; o Metabolismo rápido
+  ou lento conta para a Iniciativa.
+* **Armas**: acessórios montados (mira telescópica, mira a laser, bipé…); a mira a laser dá MD+1 a
+  menos de 50 m (CSC p.176).
+* **Armas**: uma arma secundária montada em outra (lança-granadas, Intruder…).
+* **Armas psiônicas**: o MD de PSI no dano e o gasto de pontos; High Yield, Very High Yield e
+  Intense Focus nas armas de nave.
+* **Veículos**: um artilheiro por montagem, e as seteiras.
+* **Naves**: remendar ou reparar uma localização danificada, com peças de reposição.
+
+### Correções
+
+* Apagar um contêiner de um personagem não se repete mais em cada cliente conectado.
+
 ## [0.2.12]
 
 **Verificado no Foundry VTT 14.370.**

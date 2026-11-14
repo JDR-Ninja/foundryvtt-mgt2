@@ -4,6 +4,34 @@
 
 ---
 
+## [0.2.13]
+
+**Vérifié sur Foundry VTT 14.370.**
+
+### ⚠ Ruptures
+
+* **La quantité d'une munition compte des chargeurs de rechange** : *Recharger* en dépense un. Une
+  quantité saisie en balles se lit désormais en chargeurs.
+
+### Nouveautés
+
+* **Création** : la relation *Connexion*, inscrite sur la feuille de chaque Voyageur relié.
+* **Finances** : *Faire payer les objets déposés sur un Voyageur*, un réglage désactivé par défaut.
+* **Règle maison** : *Points de vie pour les Voyageurs*, désactivée par défaut.
+* **Espèces** : les traits qui modifient un jet apparaissent dans la fenêtre de jet ; le Métabolisme
+  rapide ou lent compte à l'Initiative.
+* **Armes** : accessoires montés (lunette, viseur laser, bipied…) ; le viseur laser donne MD+1
+  sous 50 m (CSC p.176).
+* **Armes** : une arme secondaire montée sur une autre (lance-grenades, Intruder…).
+* **Armes psioniques** : le MD de PSI aux dégâts et la dépense de points ; High Yield, Very High
+  Yield et Intense Focus sur les armes de vaisseau.
+* **Véhicules** : un artilleur par montage, et les sabords de tir.
+* **Vaisseaux** : rafistoler ou réparer une localisation endommagée, avec les pièces de rechange.
+
+### Corrections
+
+* Supprimer un conteneur sur un personnage ne se rejoue plus sur chaque client connecté.
+
 ## [0.2.12]
 
 **Vérifié sur Foundry VTT 14.370.**

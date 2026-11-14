@@ -583,6 +583,18 @@
         "core": "Core Rulebook — 1D cumulativo por rodada",
         "companion": "Traveller Companion — a tabela de Dano por Vácuo"
       },
+      "travellerHits": {
+        "name": "Pontos de Vida para os Viajantes",
+        "hint": "Os Viajantes e os NPCs do tipo Pessoa sofrem o dano em uma reserva de Pontos de Vida, como um animal, em vez de RES, FOR e DES. A reserva é digitada na ficha, onde um botão a define como FOR + DES + RES. Inconsciente a um décimo ou menos, morto a 0; o atordoamento incapacita na metade e nunca mata. Os MD das características não caem mais com os ferimentos, e o Golpe nocauteante não se aplica. Um Viajante sem reserva mantém as características. Trocar a regra não converte nada.",
+        "StrandedOn": {
+          "one": "{count} Viajante ou NPC mantém um ferimento nas características, que não recebem mais dano. Ele ainda reduz seus MD e cura como antes.",
+          "other": "{count} Viajantes e NPCs mantêm um ferimento nas características, que não recebem mais dano. Ele ainda reduz seus MD e cura como antes."
+        },
+        "StrandedOff": {
+          "one": "{count} Viajante ou NPC mantém um ferimento nos Pontos de Vida, que não recebem mais dano. Ele é guardado, fora de vista, até a regra voltar.",
+          "other": "{count} Viajantes e NPCs mantêm um ferimento nos Pontos de Vida, que não recebem mais dano. Ele é guardado, fora de vista, até a regra voltar."
+        }
+      },
       "shipAutomation": {
         "name": "Automação de naves estelares",
         "hint": "Oferece uma peça de automação; a linha que ela carrega move a exigência de tripulação por sua porcentagem impressa, e um posto que precisa de um corpo continua precisando de um."
@@ -1202,7 +1214,9 @@
         "Note": "O evento compartilhado",
         "Agree": "Concordar",
         "Made": "{name} e {other} estão conectados.",
-        "NeedsTwo": "Uma conexão precisa de dois Viajantes na lista."
+        "NeedsTwo": "Uma conexão precisa de dois Viajantes na lista.",
+        "Record": "Registrado na ficha de {name} como",
+        "NotRecorded": "Não registrado"
       },
       "Muster": {
         "PendingTitle": "MD nesta rolagem",
@@ -1910,6 +1924,10 @@
       "DamageOrderEmpty": "Nenhuma cadeia configurada",
       "DamageOrderHint": "O dano esvazia cada elo antes de passar ao seguinte. Uma característica sem máximo não pode entrar na cadeia.",
       "DamageOrderNeedsMax": "Sem máximo definido",
+      "HitsInForce": "Os Pontos de Vida estão em vigor nesta mesa: o dano vai só para a reserva de Pontos de Vida. A ordem guardada aqui é mantida, sem ser lida, até a regra ser desativada.",
+      "HitsNoPool": "Ainda não há reserva de Pontos de Vida: o dano continua indo para as características. Digite uma no modo edição.",
+      "HitsFromCharacteristics": "Definir pelas características",
+      "HitsFromCharacteristicsHint": "Digita FOR + DES + RES, em seus máximos atuais, como reserva de Pontos de Vida. Escrito uma vez: uma característica que mude depois não a altera.",
       "DamageOrderRemove": "Remover da cadeia",
       "ChainRank": "Posição na cadeia",
       "NotInChain": "Fora da cadeia",
@@ -1956,6 +1974,7 @@
       "Finance": "Finanças",
       "Dead": "Morto",
       "DeadHint": "Todos os elos da cadeia de dano esvaziados.",
+      "DeadHitsHint": "Pontos de Vida em 0, sem contar o atordoamento.",
       "Heal": "Curar",
       "HealChainHint": "De trás para frente na cadeia — o elo ferido por último é reparado primeiro. Os procedimentos do livro na aba Saúde distribuem seus pontos de outro modo; isto é o desfazer simples ao lado deles.",
       "Health": "Saúde",
@@ -2010,6 +2029,7 @@
       "UPP": "PUP",
       "Unconscious": "Inconsciente",
       "UnconsciousHint": "Um elo além do primeiro esvaziado — para um Viajante, FOR ou DES em 0.",
+      "UnconsciousHitsHint": "Pontos de Vida a um décimo da reserva ou menos, sem contar o atordoamento.",
       "UnloadSoftware": "Descarregar programa",
       "UnstoreItem": "Retirar o item",
       "View": "Ver",
@@ -2173,6 +2193,17 @@
         "Driver": "Motorista",
         "NoDriver": "Ninguém aos controles: solte antes um personagem ou um NPC na ficha.",
         "NotDriver": "Apenas um personagem ou um NPC pode conduzir um veículo.",
+        "Gunner": "Artilheiro",
+        "GunnerClear": "Remover o artilheiro",
+        "NoGunner": "{mount}, {arc}: sem artilheiro. Solte um personagem ou um NPC no cartão da montagem.",
+        "RollsAs": "Disparada por {name}",
+        "NotGunner": "Apenas um personagem ou um NPC pode disparar uma montagem.",
+        "NotYours": "O ocupante deste posto não é seu: apenas o dono ou o árbitro podem rolar por ele.",
+        "FromPack": "{name} está em um compêndio: importe-o para o mundo e depois solte-o aqui.",
+        "GunportPick": "Arma própria",
+        "NoOwnWeapon": "{name} não tem uma arma de longo alcance equipada para disparar pela seteira.",
+        "FromVehicle": "Disparar deste veículo",
+        "PerArc": "2 por arco, 1 se militar",
         "Dogfight": "Combate aproximado",
         "DogfightDM": "Combate aproximado",
         "DogfightCarry": "Arrasto do combate aproximado",
@@ -3398,7 +3429,12 @@
       "clothing": "Roupa",
       "equipment": "Equipamento",
       "trinket": "Bugiganga",
+      "accessory": "Acessório",
       "toolkit": "Kit de ferramentas"
+    },
+    "AccessorySteadies": {
+      "reduce": "Reduz Bulky",
+      "ignore": "Ignora Bulky depois de armado"
     },
     "ItemSubType": {
       "loot": "Espólio",
@@ -3450,6 +3486,7 @@
       "Relation": {
         "Allie": "Aliado",
         "Contact": "Contato",
+        "Connection": "Conexão",
         "Rival": "Rival",
         "Enemy": "Inimigo",
         "Patron": "Patrono"
@@ -3549,8 +3586,15 @@
         "one": "{points} ponto de PSI",
         "other": "{points} pontos de PSI"
       },
+      "PsiSpend": "Gastar se acertar",
+      "PsiSpendHint": "Pontos de PSI gastos só se o ataque acertar: cada um soma 1 ao dano.",
+      "PsiSpendHintAP": "Pontos de PSI gastos só se o ataque acertar: cada um soma 1 ao dano e {ap} ao AP.",
       "PhysicalOnly": "A regra põe isto sobre as ações físicas — segue a característica que for rolada, até você dizer outra coisa.",
       "SkillOnly": "O aprimoramento foi comprado para uma perícia — segue a perícia que for rolada, até você dizer outra coisa.",
+      "SpeciesTrait": "{trait} ({condition})",
+      "SpeciesTraitHint": "Um traço desta espécie, para as perícias que nomeia — segue a perícia que for rolada, até você dizer outra coisa.",
+      "SpeciesTraitOffered": "Um traço desta espécie que só vale em certas circunstâncias — marque-o quando este teste for feito nelas.",
+      "SpeciesTraitAll": "Um traço desta espécie, em todo teste — desmarque-o para deixá-lo de lado.",
       "Ceiling": "cérebro {grade} · até {ceiling}",
       "CeilingOver": "cérebro {grade} · acima de seu teto, {ceiling}",
       "RangeUpTo": "até {max} {unit}",
@@ -3885,7 +3929,18 @@
       "LoadedIn": "Carregada em",
       "LoadedFull": "cheio",
       "Reload": "Recarregar",
-      "ReloadHint": "Coloca um carregador cheio. Ações Menores necessárias: {actions}.",
+      "ReloadHint": "Coloca um carregador reserva de {round}. Ações Menores necessárias: {actions}.",
+      "ReloadFree": "Coloca um carregador cheio. Ações Menores necessárias: {actions}. A munição própria da arma não é contada: carregue um cartucho da lista para contar seus carregadores.",
+      "ReloadNoSpare": "Nenhum carregador reserva de {round}.",
+      "ReloadLost": {
+        "one": "O carregador retirado é descartado com {n} cartucho ainda dentro.",
+        "other": "O carregador retirado é descartado com {n} cartuchos ainda dentro."
+      },
+      "SpareMagazines": {
+        "one": "{n} carregador reserva",
+        "other": "{n} carregadores reserva"
+      },
+      "SpareHint": "Carregadores reserva: a quantidade de uma munição conta carregadores cheios, e recarregar gasta um (Core p.77).",
       "FireModes": "Modos de tiro",
       "FireModeCost": {
         "one": "{mode} {gain}, {rounds} cartucho",
@@ -3895,6 +3950,9 @@
       "Modifiers": "Modificadores",
       "Name": "Nome",
       "Natural": "Natural",
+      "PsiDamage": "MD de PSI no dano",
+      "PsiAP": "AP por MD de PSI",
+      "PsiAPEach": "AP {ap} por MD de PSI e por ponto",
       "Nickname": "Apelido",
       "NotProficient": "Sem proficiência",
       "Notes": "Notas",
@@ -3965,6 +4023,9 @@
       "Terms": "Períodos",
       "Title": "Título",
       "Trait": "Traço",
+      "TraitModifiers": "MD de traços",
+      "TraitModifiersHint": "Um MD que um dos traços desta espécie aplica a uma rolagem: os livros imprimem um diferente para cada espécie sob o mesmo nome de traço. Perícias: separadas por vírgulas, sob Aplica-se a. Sem condição, o MD se aplica sozinho; com uma condição, só é oferecido na janela da rolagem, desmarcado, e uma linha de Iniciativa só na rolagem de Iniciativa. Uma linha de Proteção não leva condição. Sexo: vazio para todo Viajante.",
+      "TraitModifierInert": "Uma linha de Proteção com uma condição não se aplica em lugar nenhum: nenhuma tela pode saber quando a condição vale. Apague a condição, ou a linha não faz nada.",
       "Traits": "Traços",
       "Type": "Tipo",
       "Weapon": "Arma",
@@ -3998,6 +4059,8 @@
       "PurchasePct": "Pago",
       "BannedAt": "Proibido no nível de lei",
       "IllegalEverywhere": "Ilegal em todo o Império",
+      "SpareParts": "Peças sobressalentes",
+      "SparePartsHint": "Peças sobressalentes para os reparos da nave, a Cr100000 a tonelada. Um reparo a bordo usa primeiro o menor lote marcado.",
       "Unrestricted": "sem restrição",
       "PurchaseDM": "MD de compra",
       "SaleDM": "MD de venda",
@@ -4034,6 +4097,30 @@
       "CravingDM": "MD de fissura",
       "AddictionHint": "O início e a duração ficam vazios quando o livro não indica nenhum, não quando ninguém os digitou. O vício é opcional e definido por droga (CSC p.97): deixe seus três campos vazios e o árbitro não o ligou para esta.",
       "Fits": "Serve em",
+      "Fitted": "Acessórios",
+      "FittedTo": "Montado em",
+      "NotFitted": "Não montado",
+      "FittedHint": "O que serve em quê é decisão do árbitro: um acessório nunca é recusado, e uma arma só aproveita uma mira (CSC p.174). Uma arma secundária é montada em uma arma principal (Field Catalogue p.40); o sistema vai a um só nível, então uma arma secundária não leva arma própria.",
+      "FittedDrop": "Arraste um acessório ou uma arma secundária para esta ficha para montá-lo na arma.",
+      "FittedDropSecondary": "Arraste um acessório para esta ficha para montá-lo na arma. Uma arma secundária não leva arma própria.",
+      "FittedToName": "Montado em {name}",
+      "PartOf": "Parte de {name}",
+      "PartOfHint": "Seu peso e seu custo são contados em {name}: o livro imprime o par como uma só arma.",
+      "Unfit": "Retirar da arma",
+      "Steadies": "Estabiliza",
+      "Deployed": "Armado",
+      "NotDeployed": "não armado",
+      "DeployedHint": "Um bipé só conta enquanto está armado, o que leva duas Ações Menores (CSC p.174).",
+      "AttackDM": "MD de ataque",
+      "AttackDMAdd": "Adicionar um MD de ataque",
+      "AttackUnder": "a menos de {n} m",
+      "AttackFrom": "a {n} m ou mais",
+      "AttackUnderPlaceholder": "menos de (m)",
+      "AttackFromPlaceholder": "a partir de (m)",
+      "Sight": "Mira ou mira telescópica",
+      "SightHint": "Uma arma só pode ter uma mira: uma segunda montada não concede nada (CSC p.174).",
+      "SightIdle": "A arma já tem uma mira montada, então esta não concede nada (CSC p.174).",
+      "Idle": "Inativa",
       "WeaponsOwn": "o da própria arma",
       "LoadedRound": "Cartucho carregado",
       "ReplaceTraits": "Substitui os traços da arma",
@@ -4286,13 +4373,31 @@
       "Settings": {
         "balances": {
           "name": "Os cartões de crédito mostram os saldos",
-          "hint": "Se um cartão de transferência começa com «mostrar os saldos» marcado. De todo modo é perguntado de novo a cada transferência."
+          "hint": "Se um cartão de transferência começa com «mostrar os saldos» marcado. De todo modo é perguntado de novo a cada transferência. Um cartão de compra só mostra o saldo do comprador se este ajuste estiver ativado."
         },
         "visibility": {
           "name": "Visibilidade do cartão de crédito",
-          "hint": "Se um cartão de transferência começa público ou dirigido ao árbitro e às bolsas afetadas. De todo modo é perguntado de novo a cada transferência."
+          "hint": "Se um cartão de transferência começa público ou dirigido ao árbitro e às bolsas afetadas. De todo modo é perguntado de novo a cada transferência. Um cartão de compra segue este ajuste como está: dirigido, vai ao árbitro e à bolsa do comprador."
+        },
+        "purchaseOnDrop": {
+          "name": "Cobrar os itens soltos sobre um Viajante",
+          "hint": "Quando um item é arrastado do diretório de Itens ou de um compêndio para a ficha de um Viajante, se o preço sai do Dinheiro em mãos. Não: é adicionado de graça. Perguntar: mostra o preço e pergunta. Sempre: paga quando o dinheiro cobre, e pergunta quando não. Um item solto vindo de outro ator nunca é cobrado. Cada compra publica um cartão, enviado e mostrado conforme os dois ajustes dos cartões de crédito.",
+          "off": "Não",
+          "ask": "Perguntar",
+          "always": "Sempre"
         }
       }
+    },
+    "Purchase": {
+      "Title": "Comprar para {name}",
+      "Total": "Total",
+      "After": "Dinheiro depois",
+      "Pay": "Pagar Cr{price}",
+      "AddFree": "Adicionar sem pagar",
+      "Short": "Faltam Cr{credits}",
+      "Card": "Comprado por {name}",
+      "Refused": "Agora faltam Cr{credits} a {name}: nada foi pago nem adicionado.",
+      "PaidNotCreated": "Cr{credits} saíram do dinheiro de {name}, mas o item não pôde ser adicionado. Adicione-o à mão."
     },
     "Errors": {
       "DocketGMOnly": "A pauta é a janela do árbitro.",
@@ -4310,6 +4415,7 @@
       "DocketUnavailable": "A pauta de pedidos de rolagem não está disponível neste mundo.",
       "AnswerUnavailable": "Este pedido não pode ser respondido daqui.",
       "ContainerRecursive": "Um recipiente não pode ser colocado dentro de si mesmo.",
+      "FitDepth": "Uma arma secundária é montada em uma arma que não está montada em outra, e não leva arma própria.",
       "CouldNotFindItem": "Não foi possível encontrar o item _ITEM_ID_.",
       "NoOwnedTokenSelected": "Nenhum token que você possui está selecionado.",
       "NoPsiPoints": "{name} não tem mais pontos PSI, então nenhum poder pode ser tentado.",
@@ -5236,12 +5342,15 @@
         "ap": "ignora {score} da Blindagem do alvo, antes de qualquer multiplicador de dano",
         "auto": "dispara rajadas rápidas; o efeito em escala de Espaçonave é decidido pelo árbitro",
         "chain-reaction": "o dano se repete a cada rodada pela metade (para baixo) até zerar; não se acumula",
+        "high-yield": "cada 1 no dano conta como 2; exceto mísseis e torpedos",
+        "intense-focus": "AP+2; apenas lasers e armas de partículas",
         "ion": "ignora Blindagem; drena Energia e largura de banda, não Casco; computadores /fib imunes",
         "orbital-bombardment": "Artilharia de Nave (ortilharia); MD-12 contra naves manobrando; Blast 100 contra o solo",
         "orbital-strike": "Artilharia de Nave (ortilharia); MD-8 contra naves manobrando; preciso, sem Blast",
         "radiation": "2D×60 rads a até 10 m do acerto; nave: MD-1 por 10% de Casco perdido (40% se blindada)",
         "reductor": "cada dado de dano reduz em 1 a Blindagem do alvo antes de o dano ser aplicado",
         "smart": "guiado: MD+1 a +6 pelo NT acima do alvo; perde-se em Adjacente ou Próximo",
+        "very-high-yield": "cada 1 ou 2 no dano conta como 3; exceto mísseis e torpedos",
         "weak": "a Blindagem do alvo conta em dobro contra seu dano"
       },
       "species": {
@@ -5349,6 +5458,12 @@
       "6-hours": "6 horas",
       "3-hours": "3 horas"
     },
+    "TraitModifierTargets": {
+      "skills": "Perícias",
+      "check": "Qualquer teste",
+      "initiative": "Iniciativa",
+      "protection": "Proteção"
+    },
     "TraitSlot": {
       "acceleration": "Aceleração",
       "actions": "Ações",
@@ -5395,6 +5510,8 @@
       "burrowing": "Burrowing",
       "camouflaged": "Camouflaged",
       "chain-reaction": "Chain Reaction",
+      "high-yield": "High Yield",
+      "intense-focus": "Intense Focus",
       "chameleon": "Chameleon",
       "claustrophobic": "Claustrophobic",
       "claws": "Claws",
@@ -5474,6 +5591,7 @@
       "slow-metabolism": "Slow Metabolism",
       "small": "Small",
       "smart": "Smart",
+      "very-high-yield": "Very High Yield",
       "smasher": "Smasher",
       "social-norms": "Social Norms",
       "sonic": "Sonic",
@@ -5551,10 +5669,59 @@
       "marine": "Fuzileiro",
       "passenger": "Passageiro"
     },
+    "Repair": {
+      "Title": "Reparos a bordo: {ship}",
+      "Mode": "Trabalho",
+      "Patch": "Reparar Sistema",
+      "Repair": "Reparo definitivo",
+      "PatchHint": "Reparar Sistema: um teste de Engenharia de dificuldade Média (8+) de 1 rodada, com um MD negativo igual à Severidade e +1 por rodada já dedicada a este acerto. Só os efeitos são reparados, por 1D horas.",
+      "RepairHint": "Um reparo definitivo: um teste de Engenharia ou de Mecânica de dificuldade Média (8+) de 1D horas, e peças sobressalentes conforme o Efeito menos a Severidade. A localização volta a zero.",
+      "Skills": {
+        "engineer": "Engenharia",
+        "mechanic": "Mecânica",
+        "remoteOps": "Eletrônicos (Operações Remotas), pelos drones de reparo"
+      },
+      "PatchOf": "Reparar Sistema: {location}",
+      "RepairOf": "Reparo definitivo: {location}",
+      "WorkDM": "Trabalho neste acerto",
+      "AutoRepairHint": "O Autorreparo precisa de drones de reparo a bordo.",
+      "DronesCap": "Drones de reparo: Engenharia 1 no máximo",
+      "ApplyPatch": "Aplicar Reparar Sistema",
+      "ApplyRepair": "Aplicar o reparo definitivo",
+      "KeepWorking": "Continuar trabalhando",
+      "KeepHint": "Continue trabalhando, e a próxima rodada neste acerto vai com {dm}.",
+      "PatchLasts": "Depois de aplicado, o reparo aguenta 1D horas.",
+      "PartsNeeded": "Precisa de {tons} t de peças sobressalentes; {aboard} t a bordo.",
+      "NoParts": "Nenhuma peça sobressalente necessária.",
+      "PatchedFor": {
+        "one": "Reparo temporário — {count} hora",
+        "other": "Reparo temporário — {count} horas"
+      },
+      "PatchedOn": {
+        "one": "{location}: Reparar Sistema aplicado, aguenta {count} hora.",
+        "other": "{location}: Reparar Sistema aplicado, aguenta {count} horas."
+      },
+      "EndPatch": "Encerrar o reparo",
+      "SpareAboard": "Peças sobressalentes a bordo: {tons} t",
+      "Repaired": "{location}: reparo definitivo feito, {tons} t de peças sobressalentes gastas.",
+      "Working": "{location}: a próxima rodada de trabalho vai com {dm}.",
+      "NotHit": "{location}: nenhum acerto crítico a reparar.",
+      "HullRefused": "O dano ao Casco é reparado ponto a ponto: um teste de Mecânica de dificuldade Rotineira (6+) e peças sobressalentes por ponto de Casco. Este reparo não o alcança.",
+      "Destroyed": "{location}: sistema destruído. Precisa ser substituído; peças sobressalentes não podem repará-lo.",
+      "NothingToPatch": "{location}: nenhum efeito duradouro a reparar, e o que o acerto destruiu ou feriu continua assim. Um reparo definitivo ainda zera a localização.",
+      "Changed": "{location}: a localização mudou desde este teste; role de novo.",
+      "Failed": "Este teste falhou: não há nada a aplicar.",
+      "AlreadyPatched": "Esta localização já tem Reparar Sistema aplicado.",
+      "Counted": "Esta rodada de trabalho já está contada.",
+      "ShortParts": "Este reparo precisa de {tons} t de peças sobressalentes e a nave leva {aboard} t: nada foi aplicado.",
+      "NoCrew": "Nenhum tripulante seu a bordo desta nave pode fazer o reparo.",
+      "NothingHit": "Nenhuma localização desta nave pode ser reparada."
+    },
     "RoleActions": {
       "skill": "Teste de perícia",
       "weapon": "Arma",
-      "special": "Especial"
+      "special": "Especial",
+      "repair": "Reparo"
     },
     "CombatSteps": {
       "label": "Etapa",

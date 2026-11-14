@@ -1223,9 +1223,13 @@
 
 // Two pre-term pickers on the dialog ground: the connection's pair, and the background allowance.
 
-.mgt2 .dlg.connect .drow select.f
-	flex: 1 1 8rem
-	width: auto
+.mgt2 .dlg.connect .drow
+	grid-template-columns: var(--lbl-col, 7.5rem) minmax(0, 1fr)
+	&.twin
+		grid-template-columns: var(--lbl-col, 7.5rem) repeat(2, minmax(0, 1fr))
+	select.f
+		flex: 1 1 8rem
+		width: auto
 
 .mgt2 .dlg.bgskills
 	.hint .dm

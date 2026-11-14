@@ -894,6 +894,31 @@
 		b
 			color: var(--faint)
 
+// A species' trait DMs: the trait, the sex under it, and a blank condition read as "always" in faint.
+.mgt2 .traitdms
+	display: flex
+	flex-direction: column
+	gap: 8px
+	// The heading sits as close to its rows as every other section on the tab.
+	table.rows
+		margin: 0
+	table.rows.fixed th.trait
+		width: 35%
+	table.rows.fixed th.target
+		width: 25%
+	table.rows.fixed th.num
+		width: 3.2rem
+	// Not `th.acts`: `.acts` is a flex row, and a flex header cell drops out of the fixed layout.
+	table.rows.fixed th.ctl
+		width: 2.5rem
+	td.nil
+		color: var(--faint)
+	td.inert
+		color: var(--warn)
+		i
+			margin-right: 4px
+			cursor: help
+
 // A role's actions, grouped by the step of the round, each a line: its name, the roll as a sentence,
 // and a tail holding the Weapon pill and the limit.
 .mgt2 .stationacts
@@ -1138,6 +1163,30 @@
 		select.f
 			width: auto
 			flex: 0 0 auto
+	// An accessory's attack rows, one line each: the DM, then from and under in metres.
+	.grid .attackdms
+		grid-column: 1 / -1
+		display: flex
+		flex-direction: column
+		gap: 3px
+		.lbl .add
+			margin-left: 6px
+		.pair
+			align-items: center
+			input.f,
+			> span
+				flex: 1 1 0
+				min-width: 0
+			> .x,
+			> i
+				flex: 0 0 14px
+				text-align: center
+		.heads > span
+			font-family: var(--cond)
+			font-size: 10px
+			letter-spacing: 0.12em
+			text-transform: uppercase
+			color: var(--mute)
 	// A field the current scale does not reach still occupies its cell, greyed.
 	label.off
 		color: var(--faint)

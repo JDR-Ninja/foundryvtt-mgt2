@@ -19,6 +19,7 @@
 			</div>
 			{{/each}}
 		</div>
+		{{#each notes}}<div class="cmsg">{{this}}</div>{{/each}}
 		<div class="chips">
 			{{#each chips}}<span class="chip{{#if hot}} neg{{/if}}">{{label}}</span>{{/each}}
 		</div>

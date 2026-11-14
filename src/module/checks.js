@@ -124,7 +124,7 @@ export class Checks {
  * @param {string[]} [options.lines]      Sentences appended to the opposed verdict
  * @param {object} [options.damage]       The weapon's offer, which names the damage button
  * @param {object[]} [options.targets]    `{name, img, distance}` per token targeted as it was rolled
- * @param {object} [options.ammo]         `{left, magazine, spent}` after the shot
+ * @param {object} [options.ammo]         `{left, magazine, spent, spare}` after the shot, `spare` null when uncounted
  */
 export async function buildRollCardContext({
     roll = null, outcome = null, difficulty = null,
@@ -173,13 +173,14 @@ export async function buildRollCardContext({
 
     if ( ammo?.magazine > 0 ) {
         context.ammo = { ...ammo, leftPct: Math.round(ammo.left * 1000 / ammo.magazine) / 10,
-            spentPct: Math.round(ammo.spent * 1000 / ammo.magazine) / 10 };
+            spentPct: Math.round(ammo.spent * 1000 / ammo.magazine) / 10,
+            spareLabel: Number.isInteger(ammo.spare) ? MGT2Helper.plural("MGT2.Items.SpareMagazines", ammo.spare) : null };
     }
     const units = canvas?.scene?.grid.units ?? "";
     context.targets = targets.map(target => ({ name: target.name, img: target.img,
         distance: Number.isFinite(target.distance) ? `${target.distance} ${units}`.trim() : "" }));
     if ( damage?.formula ) {
-        const flat = (damage.effect ?? 0) + (damage.strengthDM ?? 0) + (damage.burst ?? 0);
+        const flat = MGT2Helper.damageBonuses(damage).reduce((sum, term) => sum + term, 0);
         context.damageLabel = game.i18n.format("MGT2.Chat.Roll.DamageFormula", { formula: [
             MGT2Helper.showFormula(MGT2Helper.damageFormula(damage.formula)),
             flat ? MGT2Helper.signed(flat) : ""].join(" ").trim() });

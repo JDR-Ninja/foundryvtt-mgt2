@@ -8,8 +8,12 @@ const TRAIT_STATUS = {
     reminded: "MGT2.RollPrompt.TraitReminded"
 };
 
+// HG folio 72: a High Yield die never reads under 2 nor a Very High Yield one under 3; Intense Focus is AP+2.
+const YIELD_FLOORS = Object.freeze({ "very-high-yield": 3, "high-yield": 2 });
+const INTENSE_FOCUS_AP = 2;
+
 // A skill name as `matchesSkill` reads it: any run of spaces, hyphens or underscores is one space, and
-// a name pasted from a PDF can carry a soft hyphen, a non-breaking hyphen or a dash.
+// a name pasted from a rulebook can carry a soft hyphen, a non-breaking hyphen or a dash.
 const skillWords = name => String(name ?? "").toLowerCase().replaceAll("\u00ad", "")
     .replace(/[\s_\u2010-\u2015\u2212-]+/g, " ").trim();
 
@@ -137,6 +141,13 @@ export class MGT2Helper {
         return number.toLocaleString(game.i18n?.lang ?? "en");
     }
 
+    static itemCost(item) {
+        const system = item?.system ?? {};
+        if (!("container" in system) || !("cost" in system)) return 0;
+        const qty = system.quantity;
+        return (!isNaN(qty) && qty > 0) ? system.cost * qty : 0;
+    }
+
     static getFormulaDM(dm) {
         return (dm === 0) ? "+0" : (dm > 0) ? `+${dm}` : String(dm);
     }
@@ -150,10 +161,7 @@ export class MGT2Helper {
         return `${sign} ${Math.abs(value)}${flavor ? `[${flavor}]` : ""}`;
     }
 
-    /**
-     * The books print damage as `3D`, a Destructive weapon as `3DD` (Core p.78) and a D3 weapon as
-     * `3D3`; Foundry's parser reads none of the three.
-     */
+    /** The books' `3D`, Destructive `3DD` (Core p.78) and `3D3`, none of which Foundry's parser reads. */
     static damageFormula(formula) {
         // ⚠ Anchored against letters on both sides, or the `d` of a word is read as a die and prose
         // becomes an expression: "200 rads" once normalised to "200 ra1d6s".
@@ -162,15 +170,24 @@ export class MGT2Helper {
                 (_m, n, faces) => `${n === "" ? 1 : n}d${faces ?? 6}`);
     }
 
+    /** HG folio 72: every d6 of a normalised damage formula rolled at a floor, `2d6` to `2d6min2`. */
+    static yieldFormula(formula, floor) {
+        if ( !(floor > 1) ) return formula;
+        return String(formula ?? "").replace(/(\d+d6)(?![\da-z])/gi, `$1min${floor}`);
+    }
+
+    /** The flat terms an attack adds to its damage dice, in formula order, zeroes dropped. */
+    static damageBonuses(damage) {
+        return [damage?.effect, damage?.strengthDM, damage?.psiDM, damage?.psiPoints, damage?.burst]
+            .filter(term => Number.isFinite(term) && (term !== 0));
+    }
+
     /** Core p.78: the doubled D of `3DD` is the Destructive trait, written into the damage score. */
     static isDestructive(formula) {
         return /\d*[dD]{2}(?!\d)/.test(String(formula ?? ""));
     }
 
-    /**
-     * Companion p.93, Reduced Damage — a weapon's damage dice drop to D3 and keep any plus or
-     * minus, so `3d6-3` becomes `3D3-3`.
-     */
+    /** Companion p.93, Reduced Damage: the dice drop to D3 and keep any plus or minus, `3d6-3` to `3D3-3`. */
     static reduceDamageFormula(formula) {
         const reduced = String(formula ?? "").replace(/(\d*)[dD](?:3|6)?(?![0-9dD])/g, (_m, n) => `${n}D3`);
         return Roll.validate(reduced) ? reduced : String(formula ?? "");
@@ -239,7 +256,6 @@ export class MGT2Helper {
      * The Weapon traits block: one row per stored trait, each in the tone its own rule earns.
      * @param {Item} weapon        The weapon being attacked with
      * @param {number} strengthDM  The attacker's STR DM, which Bulky and Very Bulky read
-     * @returns {object[]}
      */
     static tieredDM(rule, { distance = 0, range = 0, threshold = 0 } = {}) {
         if ( rule.bands ) {
@@ -253,8 +269,7 @@ export class MGT2Helper {
 
     static weaponTraitRows(weapon, strengthDM = 0, distance = 0, threshold = 0) {
         const range = this.getNumberFromInput((weapon?.system.effective?.range ?? weapon?.system.range)?.value);
-        // The traits the loaded round leaves the weapon with: a shotgun firing pellets follows
-        // rules its own line never carried, and a few rounds replace the list outright.
+        // The traits the loaded round and the fitted accessories leave the weapon with.
         const traits = weapon?.system.effective?.traits ?? weapon?.system.traits;
         return (traits ?? []).map(trait => {
             const rule = WEAPON_ROLL[trait.key] ?? {};
@@ -288,7 +303,28 @@ export class MGT2Helper {
                 status: rule.target ? "MGT2.RollPrompt.TraitNeedsTarget"
                     : (rule.control ? `MGT2.RollPrompt.TraitControl.${rule.control}` : TRAIT_STATUS[tone])
             };
+        }).concat(this.#fittedRows(weapon));
+    }
+
+    /** CSC folios 175-176: a fitted accessory's DMs, offered by the distance in the weapon's own unit. */
+    static #fittedRows(weapon) {
+        const unit = weapon?.system.effective?.range?.unit;
+        return (weapon?.system.effective?.attackDMs ?? []).map(row => {
+            const ranged = (row.within !== null) || (row.beyond !== null);
+            return { key: "fitted", term: row.name, tone: "offered", dm: row.dm, numeric: true, tiers: "", bands: "",
+                auto: ranged, name: `fitted-${row.id}-${row.index}`, display: this.signed(row.dm, "+0"),
+                params: [(row.beyond !== null) && game.i18n.format("MGT2.Items.AttackFrom", { n: row.beyond }),
+                    (row.within !== null) && game.i18n.format("MGT2.Items.AttackUnder", { n: row.within })].filter(Boolean),
+                checked: !ranged, requires: "", suppress: "", when: ranged ? "range" : "", whenValue: 0,
+                under: this.metresIn(row.within, unit) ?? "", from: this.metresIn(row.beyond, unit) ?? "",
+                status: TRAIT_STATUS.offered };
         });
+    }
+
+    /** A distance printed in metres, in the unit a weapon's range is scored in; null stays null. */
+    static metresIn(metres, unit) {
+        if ( !Number.isFinite(metres) ) return null;
+        return (unit === "kilometer") ? (metres / 1000) : metres;
     }
 
     /** Whether a stored trait list carries a registry slug at all. */
@@ -305,10 +341,12 @@ export class MGT2Helper {
     }
 
     /** What a weapon's traits tell the apply path, for every site that posts a damage payload. */
-    static damageTraits(traits) {
+    static damageTraits(traits, { weapon = null, missile = false } = {}) {
         return {
-            ap: this.traitScore(traits, "ap"),
+            ap: this.traitScore(traits, "ap") + (this.hasTrait(traits, "intense-focus") ? INTENSE_FOCUS_AP : 0),
             loPen: this.traitScore(traits, "lo-pen"),
+            sonic: this.hasTrait(traits, "sonic") ? -Math.abs(this.traitScore(traits, "sonic")) : null,
+            yieldFloor: this.yieldFloor(traits, { weapon, missile }),
             stun: this.hasTrait(traits, "stun"),
             // Core folio 79: a Radiation weapon doses whoever it hits, which only the apply path knows.
             radiation: this.hasTrait(traits, "radiation"),
@@ -320,6 +358,17 @@ export class MGT2Helper {
             // Poison and Diseased become an Item the DEFENDER owns, built on the apply path.
             hazards: hazardTraits(traits)
         };
+    }
+
+    /** The face every lower damage die counts as, or 0; never a missile, a torpedo or a loaded round. */
+    static yieldFloor(traits, { weapon = null, missile = false } = {}) {
+        if ( missile || this.isMissileWeapon(weapon) || weapon?.system?.round ) return 0;
+        const key = Object.keys(YIELD_FLOORS).find(slug => this.hasTrait(traits, slug));
+        return key ? YIELD_FLOORS[key] : 0;
+    }
+
+    static yieldTrait(floor) {
+        return Object.keys(YIELD_FLOORS).find(slug => YIELD_FLOORS[slug] === floor) ?? null;
     }
 
     /** The key a skill modifier is filed under, derived from the free-text Item name. */

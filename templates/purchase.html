@@ -1,0 +1,24 @@
+{{! The price of a drop, stated before it is paid. The sums are filled and kept current by the dialog. }}
+<div class="dlg purchase">
+	<div class="goods">
+		<img src="{{img}}" alt="" />
+		<div>
+			<b class="nm">{{name}}</b>
+			{{#if spec}}<span class="spec">{{spec}}</span>{{/if}}
+		</div>
+	</div>
+	<div class="dblock">
+		<label class="drow">
+			<span class="lbl">{{localize 'MGT2.Items.Quantity'}}</span>
+			<input class="f n" type="number" name="quantity" step="1" min="1" value="{{quantity}}"{{#if fixed}} disabled{{/if}} />
+		</label>
+	</div>
+	<div class="sums">
+		<div class="total"><small>{{localize 'MGT2.Purchase.Total'}}</small><b></b></div>
+		<div class="cash"><small>{{localize 'MGT2.Actor.CashOnHand'}}</small><b>Cr{{cash}}</b></div>
+		<div class="after"><small>{{localize 'MGT2.Purchase.After'}}</small><b></b></div>
+	</div>
+	{{#if preplay}}
+	<p class="hint preplay" data-tooltip="{{localize 'MGT2.Chargen.Close.PreplayHint'}}">{{localize 'MGT2.Chargen.Close.Preplay' credits=preplay}}</p>
+	{{/if}}
+</div>

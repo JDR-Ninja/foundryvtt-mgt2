@@ -204,8 +204,8 @@ export class VehicleData extends CraftData {
                 stealth: new fields.NumberField({ integer: true, max: 0, nullable: true, initial: null })
             }),
 
-            // The mount belongs to the vehicle: it supplies the fire arc and the fire control, and
-            // one mount can hold several weapons (VH2026 p.101).
+            // VH2026 folios 101-102: the mount supplies the fire arc and the fire control, holds
+            // several weapons, and has its own gunner, who fires all of them.
             mounts: new fields.ArrayField(new fields.SchemaField({
                 type: new fields.StringField({
                     required: false, blank: false, initial: "fixed", choices: MGT2.VehicleMounts }),
@@ -213,13 +213,13 @@ export class VehicleData extends CraftData {
                     required: false, blank: false, initial: "front", choices: MGT2.FireArcs }),
                 fireControl: new fields.NumberField({
                     required: false, nullable: false, integer: true, min: 0, max: 4, initial: 0 }),
-                weapons: new fields.ArrayField(new fields.DocumentIdField(), { initial: [] })
+                weapons: new fields.ArrayField(new fields.DocumentIdField(), { initial: [] }),
+                gunner: new fields.DocumentUUIDField({
+                    type: "Actor", embedded: false, required: false, nullable: true, initial: null })
             }), { initial: [] }),
 
-            // Core folio 138: "the drivers of both vehicles make opposed skill checks using the
-            // skill appropriate to their vehicle … modified by their vehicle's Agility as normal."
-            // The check is a person's and the Agility is the vehicle's, so the vehicle has to know
-            // who is at the controls — a UUID, the shape a ship's crew station already stores.
+            // Core folio 138: the drivers make the opposed checks with their vehicle's Agility, so
+            // the vehicle names who is at the controls.
             driver: new fields.DocumentUUIDField({
                 type: "Actor", embedded: false, required: false, nullable: true, initial: null }),
 
@@ -674,10 +674,27 @@ export class VehicleData extends CraftData {
 
     /** Whoever is at the controls, or null. @type {Actor|null} */
     get driverActor() {
-        if (!this.driver) return null;
-        // fromUuidSync only answers for documents already loaded; a compendium driver degrades to
-        // null rather than throwing, which is how the ship's roster reads its own stations.
-        try { return foundry.utils.fromUuidSync(this.driver); } catch { return null; }
+        return VehicleData.#person(this.driver);
+    }
+
+    /** A person who can roll, or null: a pack's entry answers with an index record, a deleted Actor with nothing. */
+    static #person(uuid) {
+        if (!uuid) return null;
+        try {
+            const actor = foundry.utils.fromUuidSync(uuid);
+            return (actor?.documentName === "Actor") ? actor : null;
+        } catch { return null; }
+    }
+
+    mountGunner(mount) {
+        return VehicleData.#person(mount?.gunner);
+    }
+
+    /** VH2026 folios 102 and 104: the gunner, else the driver at a fixed mount or one with fire control holding a weapon. */
+    gunnerFor(mount) {
+        const gunner = this.mountGunner(mount);
+        if (gunner || !mount?.weapons.some(id => this.parent?.items.has(id))) return gunner;
+        return ((mount.type === "fixed") || (mount.fireControl > 0)) ? this.driverActor : null;
     }
 
     /** VH p.24: the gas envelope may not exceed a tenth of the Spaces. Airships only. */

@@ -10,6 +10,8 @@
 			<span class="lbl">{{ localize 'MGT2.Actor.Damage' }}</span>
 			<input class="f num" type="number" name="damage" data-dtype="Number" min="0" step="1" value="{{characteristic.damage}}" />
 		</label>
+		{{! Under the world's Hits rule the rule places Hits: no rank, and the stored chain is left as it is. }}
+		{{#if rankable}}
 		<label>
 			<span class="lbl">{{ localize 'MGT2.Actor.ChainRank' }}</span>
 			<select class="f" name="rank" data-dtype="Number">
@@ -19,6 +21,7 @@
 				{{/each}}
 			</select>
 		</label>
+		{{/if}}
 	</div>
 	{{! Where the maximum came from. Derived readings only — the block may hold no form control. }}
 	<dl class="statline" data-derived="system.characteristics.{{key}}" data-tooltip="{{localize 'MGT2.Actor.CharacteristicHint'}}">

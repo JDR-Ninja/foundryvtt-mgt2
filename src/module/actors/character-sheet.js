@@ -12,7 +12,9 @@ import { MGT2 } from "../config.js";
 import { CreditSplit } from "../credit-split.js";
 import { EFFECT_ACTIONS, prepareEffects } from "../effects.js";
 import { MGT2Helper } from "../helper.js";
-import { copyItemWithContents } from "../item.js";
+import { copyItemWithContents, fitsWeapon, isAccessory, secondaryRefused } from "../item.js";
+import { Magazines } from "../magazines.js";
+import { Purchase } from "../purchase.js";
 import { RollPromptHelper } from "../roll-prompt.js";
 import { GuideButtonMixin } from "../guide.js";
 import { Rules } from "../rules.js";
@@ -47,6 +49,9 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
   /** Types with placement of their own, handled before the inventory branch below. */
   static DROP_ITEM_SIMPLE = new Set(["contact", "disease", "career", "talent", "species"]);
 
+  /** Whether a weapon dropped on a weapon's row is fitted as its secondary; a vehicle's mounts hold several instead. */
+  static SECONDARIES = true;
+
   /** @inheritDoc */
   static DEFAULT_OPTIONS = {
     classes: ["mgt2", "actor", "character", "nopad"],
@@ -65,6 +70,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       itemStorageIn: TravellerActorSheet.#onItemStorageIn,
       itemStorageOut: TravellerActorSheet.#onItemStorageOut,
       softwareEject: TravellerActorSheet.#onSoftwareEject,
+      itemUnfit: TravellerActorSheet.#onItemUnfit,
       applyDamage: TravellerActorSheet.#onApplyDamage,
       openDamage: TravellerActorSheet.#onOpenDamage,
       editStun: TravellerActorSheet.#onEditStun,
@@ -88,6 +94,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       roll: TravellerActorSheet.#onRoll,
       openConfig: TravellerActorSheet.#onOpenConfig,
       openCharacteristic: TravellerActorSheet.#onOpenCharacteristic,
+      hitsFromCharacteristics: TravellerActorSheet.#onHitsFromCharacteristics,
       traitDelete: TravellerActorSheet.#onTraitDelete,
       openEditor: TravellerActorSheet.#onOpenEditor,
       speciesFind: TravellerActorSheet.#onSpeciesFind,
@@ -316,6 +323,13 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     return view;
   }
 
+  static #weaponRow(view) {
+    const effective = view.system.effective;
+    view.range = effective.range.isMelee ? game.i18n.localize("MGT2.Melee") : MGT2Helper.getRangeDisplay(effective.range);
+    view.traitList = effective.traits.map(formatTrait);
+    if (view.traitList.length > 0) view.subInfo = view.traitList.join(", ");
+  }
+
   /** The header's reading of worn conditional armour: each Protection a single damage type meets. */
   #protectionVs() {
     const system = this.actor.system;
@@ -366,6 +380,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         // this characteristic exist.
         show: this.actor.system.isCharacteristicShown(key),
         modifier: c.auto + c.effect,
+        track: (key === "hits") && this.actor.system.hitsRuleApplies,
         percent: c.max > 0 ? Math.round((c.value / c.max) * 100) : 0,
         hurt: c.damage > 0,
         depleted: c.max > 0 && c.value <= 0,
@@ -403,6 +418,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     const byKey = new Map(characteristics.map(c => [c.key, c]));
     const chain = actor.system.damageChain;
     const psionic = actor.system.config.psionic ? byKey.get("psionic") : null;
+    const hits = actor.system.hitsRuleApplies ? byKey.get("hits") : null;
 
     const model = {
       name: actor.name,
@@ -420,10 +436,15 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       damageTrack: characteristics.filter(c => c.show && chain.includes(c.key)),
       chainOrder: chain.map(key => byKey.get(key)).filter(c => c?.show),
       psionic: psionic?.show ? psionic : null,
-      statics: characteristics.filter(c => c.show && (c.key !== "psionic") && !chain.includes(c.key)),
-      // The talent list is the per-actor flag under the world's rule: with psionics not adopted,
-      // the section is not drawn and the flag that would draw it is not offered
-      // (`actor-config-sheet`).
+      statics: characteristics.filter(c => c.show && (c.key !== "psionic") && (c !== hits) && !chain.includes(c.key)),
+      // The world's Hits rule: the pool's row while it is empty, and STR + DEX + END beside it.
+      hitsPool: hits && {
+        inForce: actor.system.hitsInForce,
+        row: hits,
+        sumLabel: MGT2.PhysicalCharacteristics.map(key => game.i18n.localize(byKey.get(key).short)).join(" + "),
+        sum: actor.system.hitsFromCharacteristics
+      },
+      // The per-actor flag under the world's rule: with psionics not adopted the section is not drawn.
       showPsionicTalents: Rules.on("psionics") && (actor.system.config.psionic === true)
     };
 
@@ -446,8 +467,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         if (v.type === "computer") computers.push(v);
         hosts.push(v);
         v.subItems = [];
-        // A flag rather than `subItems.length`, because Handlebars reads an empty array as false
-        // and a host with nothing loaded still has to draw as one.
+        // A flag, not `subItems.length`: Handlebars reads an empty array as false, and an empty host still draws.
         v.hostsSoftware = true;
         // The ratio reddens for the two rules that are about it — the Bandwidth sum and folio 110's
         // one package at Processing 0. A package the host's TL cannot run marks itself instead: the
@@ -463,8 +483,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     const parentOf = c => containerIndex.get(c?.system.container?.id);
     const shownContainers = actorContainers.filter(c => !withholds(parentOf(c)));
 
-    // The picker reads `display`, so the "every container" entry had neither a label nor a
-    // language: it rendered as a blank option.
+    // The picker reads `display`, so the every-container entry carries one.
     const everyContainer = game.i18n.localize("MGT2.Items.SelectAll");
     const containers = [{ name: everyContainer, display: everyContainer, _id: "" }].concat(shownContainers);
     for (const c of actorContainers) {
@@ -494,14 +513,30 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     model.containerViewId = viewId;
     model.containerDropInId = dropInId;
 
+    // A fitted Item has no row of its own: an accessory is named on its weapon's, a weapon drawn under its primary's.
+    const fitted = new Set();
+    for (const item of actor.items) {
+      const host = item.fittedHost;
+      if (!host || !views.has(host.id)) continue;
+      fitted.add(item.id);
+      const view = views.get(item.id);
+      const root = views.get(item.fittedRoot.id) ?? views.get(host.id);
+      (root.fitted ??= []).push(view);
+      if (item.type === "weapon") (root.secondaries ??= []).push(Object.assign(view, { hostName: host.name }));
+      else (views.get(host.id).accessories ??= []).push(view);
+    }
+
     for (const v of views.values()) {
       const sys = v.system;
+      if (v.type === "weapon") TravellerActorSheet.#weaponRow(v);
+      if (fitted.has(v._id)) continue;
 
       // `in`, not `hasOwn`: a container's weight is a getter, and it lives on the prototype.
       if (("weight" in sys) && sys.weight > 0) {
         const total = isNaN(sys.quantity) ? sys.weight : sys.weight * sys.quantity;
         v.weight = `${MGT2Helper.roundWeight(total)} ${settings.weightUnit}`;
       }
+      if (v.fitted) v.weight = `${MGT2Helper.roundWeight(actor.items.get(v._id).getTotalWeight())} ${settings.weightUnit}`;
 
       // Item in storage
       if (Object.hasOwn(sys, "container") && sys.container.id) {
@@ -569,14 +604,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
           }
           break;
 
-        case "weapon":
-          v.range = sys.effective.range.isMelee
-            ? game.i18n.localize("MGT2.Melee")
-            : MGT2Helper.getRangeDisplay(sys.effective.range);
-          v.traitList = sys.effective.traits.map(formatTrait);
-          if (v.traitList.length > 0) v.subInfo = v.traitList.join(", ");
-          weapons.push(v);
-          break;
+        case "weapon": weapons.push(v); break;
 
         // Both are `PhysicalItemData` and both are in `DROP_ITEM_TYPES`, so with no case here a
         // dropped one landed on the actor and drew nowhere.
@@ -846,17 +874,24 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     const userConfig = await CharacterPrompts.openConfig(this.actor.system);
     if ( !userConfig ) return;
     const config = foundry.utils.expandObject(userConfig);
-    // The editor mirrors its ordered list into one hidden field.
-    config.damageOrder = config.damageOrder ? config.damageOrder.split(",") : [];
+    // The editor mirrors its ordered list into one hidden field, absent while Hits are in force.
+    if ( "damageOrder" in config ) config.damageOrder = config.damageOrder ? config.damageOrder.split(",") : [];
     return this.actor.update({ "system.config": config });
+  }
+
+  /** @this {TravellerActorSheet} */
+  static async #onHitsFromCharacteristics() {
+    return this.actor.system.setHitsFromCharacteristics();
   }
 
   /** @this {TravellerActorSheet} */
   static async #onOpenCharacteristic(event, target) {
     const name = target.dataset.cfgCharacteristic;
-    const characteristic = this.actor.system.characteristics[name];
-    const chain = this.actor.system.config.damageOrder;
+    const system = this.actor.system;
+    const characteristic = system.characteristics[name];
+    const chain = system.config.damageOrder;
     const rank = chain.indexOf(name) + 1;
+    const flagged = system.characteristicKeys.filter(key => !((key === "hits") && system.hitsRuleApplies));
 
     const userConfig = await CharacterPrompts.openCharacteristic({
       key: name,
@@ -866,7 +901,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       // A link outside the chain can only be appended, so it is offered one rank more than there
       // are links; one already in it can move anywhere.
       ranks: Array.fromRange(rank ? chain.length : chain.length + 1, 1),
-      showAll: Object.values(this.actor.system.characteristics).some(c => !c.show)
+      rankable: !system.hitsRuleApplies || ((name !== "hits") && !system.hitsInForce),
+      showAll: flagged.some(key => !system.characteristics[key].show)
     });
 
     if ( !userConfig ) return;
@@ -890,7 +926,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     }
 
     if (userConfig.showAll === true) {
-      for (const [key, value] of Object.entries(this.actor.system.characteristics)) {
+      for (const key of flagged) {
+        const value = this.actor.system.characteristics[key];
         if (key !== name && !value.show) {
           data.system.characteristics[key] = { show: true };
         }
@@ -1490,12 +1527,10 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     const aiming = forfeitsAim ? 0
       : Math.min(aim.max, Math.max(0, MGT2Helper.getIntegerFromInput(data.aiming)));
     const threshold = TravellerActorSheet.#rangeThreshold(data, aiming);
-    if (aiming > 0) {
-      terms.push([named("aiming"), aiming * aim.dm]);
-      if (data.laserSight === true) {
-        terms.push([named("laserSight"), MGT2.AttackModifiers.laserSight.dm]);
-      }
-    }
+    if (aiming > 0) terms.push([named("aiming"), aiming * aim.dm]);
+    const laser = MGT2.AttackModifiers.laserSight;
+    if ((data.laserSight === true) && !(MGT2Helper.getNumberFromInput(data.distance)
+      >= MGT2Helper.metresIn(laser.under, weapon?.system.effective?.range.unit))) terms.push([named("laserSight"), laser.dm]);
 
     const fast = MGT2.AttackModifiers.fastMovingTarget;
     const steps = Math.floor(Math.max(0, MGT2Helper.getNumberFromInput(data.targetMovement)) / fast.per);
@@ -1558,14 +1593,17 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
    * @param {string} [what.roll]            `initiative` | `characteristic` | `skill` | `psionic`
    * @param {string} [what.characteristic]  A characteristic key, for `roll: "characteristic"`
    * @param {string} [what.skill]           A `talent` Item id, for `roll: "skill"`
-   * @param {string} [what.itemId]          Whatever else is being rolled
+   * @param {string} [what.itemId]          Whatever else is being rolled, or `item` the Item itself
+   * @param {Actor|null} [what.platform]    The vehicle a weapon is fired from, `from` naming the mount
    * @param {string|null} [what.difficulty] A `MGT2.Difficulty` key the caller's rule states
    * @param {object[]} [what.modifiers]     The caller's own waivable modifiers
-   * @param {TokenDocument|null} [token]    The token this was rolled from, where there is one
+   * @param {TokenDocument|null} [token]    The token this was rolled from, the platform's where there is one
    * @returns {Promise<ChatMessage|undefined>}
    */
-  static async roll(actor, { roll = "", characteristic = "", skill = "", itemId = "",
-    difficulty = null, modifiers = [] } = {}, token = null) {
+  static async roll(actor, { roll = "", characteristic = "", skill = "", itemId = "", item = null,
+    platform = null, from = "", difficulty = null, modifiers = [] } = {}, token = null) {
+    // Core folio 139: a vehicle-mounted weapon fires on the person's skill, from where the vehicle stands.
+    const mounted = Boolean(platform) && (item?.parent === platform);
     const rollOptions = {
       rollTypeName: game.i18n.localize("MGT2.RollPrompt.Roll"),
       rollObjectName: "",
@@ -1573,19 +1611,18 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       characteristic: "",
       skills: RollPromptHelper.actorSkills(actor),
       skill: "",
-      // A caller's own sources join the actor's BEFORE the prompt is built, which is what leaves
-      // them un-tickable beside it rather than pushed in past the checkbox filter.
-      checkModifiers: [...RollPromptHelper.checkModifiers(actor, token), ...modifiers],
+      // A caller's own sources join before the prompt is built, so they stay tickable beside the actor's.
+      checkModifiers: [...RollPromptHelper.checkModifiers(actor, platform ? null : token),
+        ...TravellerActorSheet.#platformModifiers(platform), ...modifiers],
       difficulty,
       damageFormula: null,
-      // The prompt renders its blocks from what is being rolled, so a bare characteristic check is
-      // shorter than a weapon attack.
+      // The prompt renders its blocks from what is rolled: a characteristic check is shorter than an attack.
       blocks: { skill: true, range: false, traits: false, psionic: false, attack: false,
         extended: false },
       // RH folio 115's brain ceiling, which only a robot answers with anything.
       ceiling: actor.system.taskCeiling,
-      // Core p.79: Bulky and Very Bulky are read against the attacker's own STR DM.
-      strengthDM: actor.system.characteristics.strength?.dm ?? 0
+      // Core p.79: Bulky and Very Bulky read the attacker's STR DM; a mount bears the weapon, so neither costs.
+      strengthDM: mounted ? Infinity : (actor.system.characteristics.strength?.dm ?? 0)
     };
 
     const cardButtons = [];
@@ -1599,9 +1636,9 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       // characteristic named the whole figure is offered as a waivable modifier instead.
       const standing = rollOptions.characteristic
         ? actor.system.modifiers.initiative.dm : actor.system.initiative;
+      rollOptions.checkModifiers = [...RollPromptHelper.checkModifiers(actor, token, { initiative: true }), ...modifiers];
       if (standing !== 0) {
-        rollOptions.checkModifiers = [...rollOptions.checkModifiers,
-          { key: "initiative", label: "MGT2.Actor.Initiative", dm: standing }];
+        rollOptions.checkModifiers.push({ key: "initiative", label: "MGT2.Actor.Initiative", dm: standing });
       }
       isInitiative = true;
     } else if (roll === "characteristic") {
@@ -1623,10 +1660,12 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         }
       }
 
-      if (itemObj === null && itemId) {
-        itemObj = actor.getEmbeddedDocument("Item", itemId);
-        rollOptions.rollObjectName = itemObj.name;
-        if (itemObj.type === "weapon")
+      if (itemObj === null && (item || itemId)) {
+        itemObj = item ?? actor.getEmbeddedDocument("Item", itemId);
+        rollOptions.rollObjectName = itemObj.attackName;
+        if (platform)
+          rollOptions.rollTypeName = from || platform.name;
+        else if (itemObj.type === "weapon")
           rollOptions.rollTypeName = game.i18n.localize("TYPES.Item.weapon");
         else if (itemObj.type === "armor")
           rollOptions.rollTypeName = game.i18n.localize("TYPES.Item.armor");
@@ -1636,9 +1675,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
 
       if (itemObj && roll === "psionic") {
         if (MGT2Helper.psiBarred(actor, itemObj)) return ui.notifications.warn(game.i18n.localize("MGT2.Loss.PsiLost"));
-        // Core folio 229: "A Traveller with no PSI points cannot attempt to activate a power." The
-        // refusal is what makes the folio's next clause reachable at all — the excess a spend
-        // pushes past zero can only exist when there was a reserve to start from.
+        // Core folio 229: "A Traveller with no PSI points cannot attempt to activate a power"; the
+        // excess a spend pushes past zero can only exist when there was a reserve to start from.
         const reserve = actor.system.characteristics.psionic;
         const tracked = actor.system.isCharacteristicShown("psionic");
         if (tracked && (reserve.value <= 0)) {
@@ -1671,9 +1709,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       }
 
       if (itemObj && Object.hasOwn(itemObj.system, "damage")) {
-        // A weapon answers with the round in it, which may replace its damage outright — a 40mm
-        // grenade in an Advanced Combat Rifle does the grenade's damage and not the rifle's 3D
-        // (Core p.127).
+        // A weapon answers with the round in it, which may replace its damage outright: a 40mm
+        // grenade in an Advanced Combat Rifle does the grenade's damage (Core p.127).
         rollOptions.damageFormula = itemObj.system.effective?.damage ?? itemObj.system.damage;
         if (itemObj.type === "disease") {
           if (itemObj.system.subType === "disease") {
@@ -1698,6 +1735,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
           rollOptions.difficulty = itemObj.system.roll.difficulty;
         }
       }
+      if (mounted) rollOptions.skill = TravellerActorSheet.#gunnerySkill(actor);
 
       // Core p.229: the PSI DM is added to every power, so a talent that names no characteristic of
       // its own still gets one — but only where the sheet shows PSI at all.
@@ -1724,22 +1762,20 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       // Attacks", so the range block belongs to a ranged one and to nothing else.
       if (itemObj?.type === "weapon") {
         rollOptions.weapon = itemObj;
-        rollOptions.blocks.traits = itemObj.system.effective.traits.length > 0;
+        rollOptions.blocks.traits = (itemObj.system.effective.traits.length + itemObj.system.effective.attackDMs.length) > 0;
         rollOptions.blocks.range = itemObj.system.effective.range.isMelee !== true;
         if (rollOptions.blocks.range) {
-          rollOptions.measured = TravellerActorSheet.#measureRange(actor, token, itemObj);
+          rollOptions.measured = TravellerActorSheet.#measureRange(platform ?? actor, token, itemObj);
         }
-        // Core folio 78's pair is one-handed weapons of either kind, so this outlives the range
-        // block: a melee attack is offered the second weapon as readily as a pistol is.
+        // Core folio 78's pair is one-handed weapons of either kind, melee included: this outlives the range block.
         rollOptions.blocks.attack = true;
-        const fireControl = actor.system.fireControlFor?.(itemObj) ?? 0;
+        const fireControl = (mounted ? platform : actor).system.fireControlFor?.(itemObj) ?? 0;
         if (fireControl) {
           rollOptions.checkModifiers = [...rollOptions.checkModifiers,
             { key: "fireControl", label: "MGT2.Items.FireControl", dm: fireControl }];
         }
-        // Core folio 81: in zero gravity every close combat weapon and every ranged weapon without
-        // the Zero-G trait owes an Athletics (dexterity) check. Stated, and rolled by nobody.
-        if (actor.system.gravityBand === MGT2.Microgravity.band) {
+        // Core folio 81: in zero gravity a weapon without Zero-G owes an Athletics (dexterity) check, stated and unrolled.
+        if (!mounted && (actor.system.gravityBand === MGT2.Microgravity.band)) {
           const traits = itemObj.system.effective?.traits ?? itemObj.system.traits;
           rollOptions.microgravity = {
             exempt: MGT2Helper.hasTrait(traits, MGT2.Microgravity.trait)
@@ -1747,10 +1783,14 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         }
         // Core folio 77: the magazine is how many shots can be fired "before reloading is
         // necessary", so an empty one is refused here rather than allowed to drift negative.
-        if (TravellerActorSheet.#magazine(itemObj)?.ammo === 0) {
+        if (Magazines.counter(itemObj)?.ammo === 0) {
           return ui.notifications.warn(
             game.i18n.format("MGT2.Errors.WeaponEmpty", { name: itemObj.name }));
         }
+        // CSC folio 137: PSI points a psi weapon may spend once it hits, up to what the reserve holds.
+        const reserve = (itemObj.system.psionic?.damage && (actor.system.psiDamageDM !== null))
+          ? actor.system.characteristics.psionic.value : 0;
+        if (reserve > 0) rollOptions.psiWeapon = { reserve, ap: itemObj.system.psionic.ap };
       }
 
       // Core folio 58 makes characteristic checks and skill checks two different kinds of task
@@ -1814,7 +1854,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     // Core folio 77 counts shots against the magazine, so an ordinary attack spends one round and
     // folio 79's two Auto modes spend what they are priced at — once for the whole salvo, since
     // full auto is one pull of the trigger however many attacks it makes.
-    const magazine = TravellerActorSheet.#magazine(rollOptions.weapon);
+    const magazine = Magazines.counter(rollOptions.weapon);
     const spend = magazine ? Math.max(1, rounds) : 0;
     if (magazine && (spend > magazine.ammo)) {
       return ui.notifications.warn(MGT2Helper.plural("MGT2.Errors.WeaponShort", magazine.ammo,
@@ -1824,9 +1864,10 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     if (magazine) {
       const left = magazine.ammo - spend;
       await rollOptions.weapon.update({ "system.loaded": left });
-      ammo = { left, magazine: magazine.magazine, spent: spend };
+      // A card is read by the table, so a locked round's spares stay off it.
+      ammo = { left, magazine: magazine.magazine, spent: spend, spare: Magazines.spares(rollOptions.weapon, false).spare };
     }
-    const targets = (itemObj?.type === "weapon") ? TravellerActorSheet.#targetsOf(actor, token) : [];
+    const targets = (itemObj?.type === "weapon") ? TravellerActorSheet.#targetsOf(platform ?? actor, token) : [];
 
     let posted;
     for (let attack = 1; attack <= attacks; attack++) {
@@ -1881,25 +1922,29 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       // The round's traits; under the mishap rule a double 1 fails whatever the total (Companion folio 53).
       const traits = carriesEffect
         ? (itemObj.system.effective?.traits ?? itemObj.system.traits) : [];
-      const hitEffect = carriesEffect ? MGT2Helper.attackEffect(effect, traits,
-        Rules.on("combatMishaps") && TravellerActorSheet.#doubleOne(scored)) : 0;
+      const failed = Rules.on("combatMishaps") && TravellerActorSheet.#doubleOne(scored);
+      const hitEffect = carriesEffect ? MGT2Helper.attackEffect(effect, traits, failed) : 0;
+      const psi = carriesEffect
+        ? await TravellerActorSheet.#psiWeapon(actor, itemObj, userRollData, !failed && (effect >= 0)) : null;
 
       if ((hitEffect !== null) && rollOptions.damageFormula !== null && rollOptions.damageFormula !== "") {
+        const dealt = MGT2Helper.damageTraits(traits, { weapon: carriesEffect ? itemObj : null });
         flags.mgt2.damage = {
           formula: rollOptions.damageFormula,
           rollObjectName: rollOptions.rollObjectName,
           rollTypeName: rollOptions.rollTypeName,
-          // Core p.77: damage is rolled with the attack's Effect added, and a melee attack adds the
-          // attacker's STR DM on top.
+          // Core p.77: the attack's Effect, and a melee attack's STR DM; CSC folio 137: a psi weapon's PSI DM and points.
           effect: hitEffect,
-          strengthDM: (carriesEffect && itemObj.system.effective?.range.isMelee)
+          strengthDM: (carriesEffect && !mounted && itemObj.system.effective?.range.isMelee)
             ? actor.system.meleeDamageDM : 0,
+          psiDM: psi?.dm ?? 0,
+          psiPoints: psi?.points ?? 0,
           // Core folio 79: a burst adds the Auto score to the damage this attack deals.
           burst,
-          // The rest of the pipeline's inputs, carried so that stages 2 to 6 can run later on
-          // whichever actor was hit.
+          // The rest of the pipeline's inputs, carried so that stages 2 to 6 can run on whoever was hit.
           scale: itemObj?.system.scale ?? actor.system.scale,
-          ...MGT2Helper.damageTraits(traits),
+          ...dealt,
+          ap: dealt.ap + (psi?.ap ?? 0),
           damageType: carriesEffect ? Array.from(itemObj.system.damageType ?? []) : []
         };
       }
@@ -1924,7 +1969,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         showButtons: true,
         fireModeLine: TravellerActorSheet.#fireModeLine({ burst, rounds, attack, attacks }),
         ammo: (attack === 1) ? ammo : null,
-        psiLine,
+        psiLine: psi?.line ?? psiLine,
         extendedLine,
         mishapLine,
         grapple,
@@ -1937,27 +1982,27 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     return posted;
   }
 
+  /** A vehicle's standing rows on a shot fired from it: dogfight, evasive, and its own DM under its name. */
+  static #platformModifiers(platform) {
+    const check = platform?.system.modifiers?.check;
+    if (!check) return [];
+    const standing = check.custom + check.effect;
+    return [...(check.sources ?? []), ...(standing ? [{ key: "platform", label: platform.name, dm: standing }] : [])];
+  }
+
+  /** Heavy Weapons (vehicle) as held, or folio 58's fallback on the skill's other specialities. */
+  static #gunnerySkill(actor) {
+    const names = MGT2.VehicleGunnerySkills;
+    const held = actor.items.find(item => (item.type === "talent") && (item.system.subType === "skill")
+      && names.some(name => MGT2Helper.matchesSkillItem(item, name)));
+    return held?.id ?? names.map(name => MGT2Helper.skillFallback(actor.items, name)).find(Boolean)?._id ?? "NP";
+  }
+
   /** Who won the grapple and by how much. @returns {{winner: string, effect: number}} */
   static #grappleWinner(actor, opposed, effect) {
     const winner = (opposed.outcome === "won") ? actor.name
       : (game.messages.get(opposed.message)?.speaker?.alias || opposed.label);
     return { winner, effect: Math.max(effect, opposed.effect) };
-  }
-
-  /**
-   * What one attack with this weapon is counted against, or null where it counts nothing.
-   * @returns {{ammo: number, magazine: number}|null}
-   */
-  static #magazine(weapon) {
-    // The one gate for the rule: counting nothing is what makes an attack roll and spend nothing,
-    // refuse nothing and say nothing about ammunition on the card.
-    if (!Rules.on("magazines")) return null;
-    const system = weapon?.system;
-    // The loaded round's magazine, where there is one: a grenade takes a 40-round rifle to 1, so
-    // the capacity the shot is counted against is the round's and not the weapon's.
-    const magazine = system?.effective?.magazine ?? system?.magazine;
-    if (!system || (system.scale === "spacecraft") || !(magazine > 0)) return null;
-    return { ammo: system.ammo, magazine };
   }
 
   /**
@@ -2005,6 +2050,19 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     if (!spent) return null;
     return game.i18n.format(
       spent.damage > 0 ? "MGT2.Chat.Roll.PsiSpentDamage" : "MGT2.Chat.Roll.PsiSpent", spent);
+  }
+
+  /** CSC folio 137: a psi weapon's PSI DM, the points spent on a hit, and the AP both buy, or null. */
+  static async #psiWeapon(actor, weapon, data, hit) {
+    const psionic = weapon?.system.psionic;
+    const dm = psionic?.damage ? actor.system.psiDamageDM : null;
+    if (dm === null) return null;
+    const asked = Math.min(Math.max(0, MGT2Helper.getIntegerFromInput(data.psiPoints)),
+      actor.system.characteristics.psionic?.value ?? 0);
+    const spent = (hit && (asked > 0)) ? await actor.system.spendPsi(asked) : null;
+    const points = spent?.spent ?? 0;
+    return { dm, points, ap: (psionic.ap ?? 0) * (Math.max(0, dm) + points),
+      line: spent ? game.i18n.format("MGT2.Chat.Roll.PsiSpent", spent) : null };
   }
 
   /** @this {TravellerActorSheet} */
@@ -2112,6 +2170,14 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     return this.actor.updateEmbeddedDocuments("Item", [item]);
   }
 
+  #fitsOnRow(item) {
+    return fitsWeapon(item) && (isAccessory(item) || this.constructor.SECONDARIES);
+  }
+
+  static #onItemUnfit(event, target) {
+    return this.actor.items.get(TravellerActorSheet.#itemId(target))?.update({ "system.fittedTo": "" });
+  }
+
   /** @this {TravellerActorSheet} */
   static #onContainerCreate() {
     return getDocumentClass("Item").create({ name: game.i18n.localize("MGT2.Actor.NewContainer"), type: "container" },
@@ -2187,7 +2253,11 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       sourceItem = foundry.utils.duplicate(sourceItem);
       if (sourceItem._id === targetId) return false; // Same item
 
-      if (targetItem.type === "item" || targetItem.type === "equipment") {
+      if ((targetItem.type === "weapon") && this.#fitsOnRow(sourceItem)) {
+        if (sourceItem.system.fittedTo === targetId) return false;
+        await this.actor.items.get(sourceItem._id).update({ "system.fittedTo": targetId });
+        return true;
+      } else if (targetItem.type === "item" || targetItem.type === "equipment") {
         // SOFTWARE --> COMPUTER
         if (targetItem.system.subType === "software" && sourceItem.system.software) {
           sourceItem.system.software.computerId = targetItem.system.software.computerId;
@@ -2215,7 +2285,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         }
       }
     } else {
-      // Copy from another collection.
+      // Copy from another collection, bought at its listed cost when the world asks for it (Core p.97).
       let stored = "";
       if (targetItem !== null) {
         if (targetItem.type === "container") {
@@ -2225,7 +2295,15 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         }
       }
 
-      const toCreate = await copyItemWithContents(sourceItemData, stored);
+      const fitTo = ((targetItem?.type === "weapon") && this.#fitsOnRow(sourceItemData)) ? targetItem.id : "";
+      if (fitTo && secondaryRefused(sourceItemData, targetItem, await sourceItemData.getFitted())) {
+        ui.notifications.error(game.i18n.localize("MGT2.Errors.FitDepth"));
+        return false;
+      }
+      const toCreate = await copyItemWithContents(sourceItemData, stored, 0, fitTo);
+      if (!this.constructor.SECONDARIES) {
+        for (const entry of toCreate) if ((entry.type === "weapon") && entry.system?.fittedTo) entry.system.fittedTo = "";
+      }
       const head = toCreate[0];
 
       // SOFTWARE --> COMPUTER: software follows the machine it was dropped on, not a container.
@@ -2234,6 +2312,9 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
         else if (targetItem.system.software) head.system.software.computerId = targetItem.system.software.computerId;
       }
 
+      const deal = await Purchase.confirm(this.actor, toCreate, sourceItemData);
+      if (!deal) return false;
+      if (deal.pay) return Purchase.pay(this.actor, toCreate);
       await this.actor.createEmbeddedDocuments("Item", toCreate, { keepId: true });
     }
     return true;
@@ -2373,7 +2454,7 @@ export class NpcActorSheet extends TravellerActorSheet {
   /** The pool drawn on the stored wound. */
   static #track(system) {
     const hits = system.characteristics.hits;
-    if ( !(hits.max > 0) || !system.damageChain.includes("hits") ) return null;
+    if ( system.hitsInForce || !(hits.max > 0) || !system.damageChain.includes("hits") ) return null;
     const scale = 2 * hits.max;
     const pct = points => Math.min(100, Math.max(0, Math.round((points / scale) * 100)));
     const states = system.states;

@@ -1,7 +1,12 @@
 <div class="char{{#if spent}} spent{{else}}{{#if hurt}} hurt{{/if}}{{/if}}" data-characteristic="{{key}}">
 	<div class="n">
-		{{! No dice icon: the name is the secondary roll target and the DM below is the primary one. }}
+		{{! No dice icon: the name is the secondary roll target and the DM below is the primary one. The
+		    Hits rule's pool is no characteristic: nothing rolls on it, so it has no DM. }}
+		{{#if track}}
+		<span class="nm" data-tooltip="{{localize label}}">{{localize short}}</span>
+		{{else}}
 		<a class="nm" data-action="roll" data-roll="characteristic" data-roll-characteristic="{{key}}" tabindex="-1" data-tooltip="{{localize label}}">{{localize short}}</a>
+		{{/if}}
 	</div>
 	<div class="v">
 		{{! Only a pool has a current value distinct from its max; a constant reads as one number,
@@ -19,7 +24,9 @@
 	</div>
 	<div class="d">
 		{{! You click the number that goes into the roll; its pill says so, and a DM of 0 recedes. }}
+		{{#unless track}}
 		<a class="dm play-only{{#unless dm}} zero{{/unless}}" data-action="roll" data-roll="characteristic" data-roll-characteristic="{{key}}" data-derived="system.characteristics.{{key}}.dm" data-tooltip="{{localize 'MGT2.Actor.RollFormula' formula=formula label=(localize label)}}">{{showDM dm}}</a>
+		{{/unless}}
 		<a class="cfg edit-only" data-action="openCharacteristic" data-cfg-characteristic="{{key}}" data-tooltip="{{localize 'MGT2.Actor.Configuration'}}"><i class="fa-solid fa-gear"></i></a>
 	</div>
 	{{#if pool}}<div class="g"><i style="--g: {{percent}}%"></i></div>{{/if}}

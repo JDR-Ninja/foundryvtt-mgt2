@@ -148,18 +148,21 @@ export class NpcData extends ActorBaseData {
         return this.subType === "creature" ? "animal" : "species";
     }
 
-    /**
-     * Core p.85, restated p.84: four states off one number, because the wound is what is stored.
-     * @inheritDoc
-     */
+    /** @inheritDoc */
+    get isPerson() {
+        return this.subType === "person";
+    }
+
+    /** Core p.85, restated p.84: four states off one number, because the wound is what is stored. @inheritDoc */
     damageStatesFor(characteristics) {
         const hits = characteristics.hits;
-        if (!(hits.max > 0) || !this.damageChain.includes("hits")) return super.damageStatesFor(characteristics);
+        if (this.hitsInForce || !(hits.max > 0) || !this.damageChain.includes("hits")) {
+            return super.damageStatesFor(characteristics);
+        }
         return {
             // "at the referee's option" — reported, never acted on.
             drivenOff: hits.damage >= (hits.max / 2),
-            unconscious: hits.damage >= (0.9 * hits.max),
-            dead: hits.damage >= hits.max,
+            ...ActorBaseData.hitsLadder(hits.max, hits.damage),
             destroyed: hits.damage >= (2 * hits.max)
         };
     }
@@ -190,6 +193,7 @@ export class NpcData extends ActorBaseData {
      * reaches half its Hits — where a Traveller's comes off END alone (p.79).
      */
     get stunIncapacitated() {
+        if (this.hitsInForce) return super.stunIncapacitated;
         const hits = this.characteristics.hits;
         return (hits.max > 0) && this.damageChain.includes("hits") && (this.stun >= (hits.max / 2));
     }
@@ -221,11 +225,6 @@ export class NpcData extends ActorBaseData {
     /** @inheritDoc */
     prepareDerivedData() {
         super.prepareDerivedData();
-
-        // Core p.85: Fast Metabolism (+X) "gains a DM to Initiative rolls equal to the figure
-        // shown", and its mirror the other way.
-        this.initiative += MGT2Helper.traitScore(this.traits, "fast-metabolism")
-            - Math.abs(MGT2Helper.traitScore(this.traits, "slow-metabolism"));
 
         // Fight or Flight (Core p.90), keyed on the pattern alone.
         this.reaction = MGT2.Reactions[this.behaviour.pattern] ?? null;

@@ -33,7 +33,7 @@ export class StashData extends foundry.abstract.TypeDataModel {
 
     /** What is in it. @type {Item[]} */
     get contents() {
-        return this.parent.items.filter(item => !item.system.container?.id);
+        return this.parent.items.filter(item => !item.system.container?.id && !item.fittedHost);
     }
 
     /** Mass of everything inside, nested containers included. @type {number} */
@@ -55,11 +55,11 @@ export class StashData extends foundry.abstract.TypeDataModel {
     get valueByRow() {
         const rows = new Map();
         for ( const item of this.parent.items ) {
-            const row = item.containerChain.at(-1) ?? item;
+            const row = item.containerChain.at(-1) ?? item.fittedRoot;
             // A dangling storage reference reaches no row, so it counts towards none — the same
             // items `weight` misses, for the same reason.
             if ( row.system.container?.id ) continue;
-            rows.set(row.id, (rows.get(row.id) ?? 0) + StashData.#cost(item));
+            rows.set(row.id, (rows.get(row.id) ?? 0) + MGT2Helper.itemCost(item));
         }
         return rows;
     }
@@ -67,13 +67,6 @@ export class StashData extends foundry.abstract.TypeDataModel {
     /** What the lot is worth. @type {number} */
     get value() {
         return [...this.valueByRow.values()].reduce((sum, cost) => sum + cost, 0);
-    }
-
-    /** One item's price, stack included. */
-    static #cost(item) {
-        if ( !("container" in item.system) || !("cost" in item.system) ) return 0;
-        const qty = item.system.quantity;
-        return (!isNaN(qty) && qty > 0) ? item.system.cost * qty : 0;
     }
 
     /** Whether a user may see past the lid. @returns {boolean} */

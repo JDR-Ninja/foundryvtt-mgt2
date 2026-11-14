@@ -556,7 +556,7 @@ export class MissileSalvoData extends foundry.abstract.TypeDataModel {
                 strengthDM: 0,
                 scale: missile.system.scale ?? "spacecraft",
                 multiple,
-                ...MGT2Helper.damageTraits(loaded.traits),
+                ...MGT2Helper.damageTraits(loaded.traits, { missile: true }),
                 damageType: Array.from(missile.system.damageType ?? [])
             };
         }

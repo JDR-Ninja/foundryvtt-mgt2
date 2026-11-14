@@ -40,7 +40,8 @@ export class MGT2ActiveEffect extends foundry.documents.ActiveEffect {
     // changes nothing: the trigger is consumption, not equipment.
     if ( item?.type === "drug" ) return true;
     // Gear with an `equipped` field transfers only while equipped; a loose Item has no wearer.
-    if ( this.transfer && item?.actor && item.system?.schema?.has("equipped") && !item.system.equipped ) {
+    const holder = (item?.type === "weapon") ? item.fittedRoot : item;
+    if ( this.transfer && item?.actor && holder.system?.schema?.has("equipped") && !holder.system.equipped ) {
       return true;
     }
     return (this.flags?.mgt2?.suspended === true) || super.isSuppressed;

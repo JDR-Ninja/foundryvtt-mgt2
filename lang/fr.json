@@ -21,9 +21,9 @@
   "TYPES.CombatantGroup.fleet": "Flotte",
   "TYPES.HINTS.CombatantGroup.fleet": "Plusieurs vaisseaux se déplaçant comme une unité, derrière un vaisseau amiral.",
   "TYPES.Combatant.fleetShip": "Vaisseau de flotte",
-  "TYPES.HINTS.Combatant.fleetShip": "Une coque d’une flotte, qui lit sa Fiche de vaisseau de flotte sur le vaisseau spatial.",
+  "TYPES.HINTS.Combatant.fleetShip": "Une coque d'une flotte, qui lit sa Fiche de vaisseau de flotte sur le vaisseau spatial.",
   "TYPES.Combatant.squadron": "Escadron",
-  "TYPES.HINTS.Combatant.squadron": "Un escadron de chasseurs, qui en perd un par tranche de points de Coque d’un chasseur détruite.",
+  "TYPES.HINTS.Combatant.squadron": "Un escadron de chasseurs, qui en perd un par tranche de points de Coque d'un chasseur détruite.",
   "TYPES.Combatant.salvo": "Salve",
   "TYPES.HINTS.Combatant.salvo": "Missiles ou torpilles en vol, avec une cible, une ogive et un nombre de rounds avant impact.",
   "TYPES.Item.container": "Contenant (sac, coffre)",
@@ -210,7 +210,7 @@
         "Negotiated": "La prime a déjà été négociée, et elle ne se négocie qu'une fois.",
         "Qualified": "Le jet de REP a déjà été fait.",
         "FloorHidden": "Le REP minimum du client n'a pas été révélé au groupe.",
-        "NotShort": "Le chasseur atteint déjà le REP minimum du client : il n’y a rien à demander.",
+        "NotShort": "Le chasseur atteint déjà le REP minimum du client : il n'y a rien à demander.",
         "NoRep": "Ce chasseur n'a pas de REP — la caractéristique est optionnelle et n'est pas en jeu ici.",
         "NoModule": "Les tables ne sont pas installées — la séquence est ici, les lignes ne le sont pas.",
         "AlreadyGiven": "Remis — le groupe est en train de le lire, il n'est donc pas retiré."
@@ -239,7 +239,7 @@
       "neutral": "Neutres"
     },
     "Combatant": {
-      "ReactionTaken": "{name} réagit — {reaction}. L’attaquant subit {against} ; ses propres actions suivantes subissent {own}.",
+      "ReactionTaken": "{name} réagit — {reaction}. L'attaquant subit {against} ; ses propres actions suivantes subissent {own}.",
       "ClearReactions": "Effacer les réactions",
       "Setup": "Camp et Initiative",
       "Side": "Camp",
@@ -248,15 +248,15 @@
       "NoAmbush": "Aucune embuscade",
       "Tactics": "Effet de Tactique",
       "TacticsHolder": "Le test de ce camp est détenu par",
-      "TacticsSurprised": "{name} a été surpris : aucun test de Tactique n’est possible. Rien n’a été enregistré.",
+      "TacticsSurprised": "{name} a été surpris : aucun test de Tactique n'est possible. Rien n'a été enregistré.",
       "TacticsDropped": "{name} a été surpris et ne détient plus le test de Tactique de ce camp.",
       "SurprisedHint": "Un Voyageur surpris ne peut faire aucun test de Tactique.",
-      "TacticsTaken": "{name} commande {side} : Effet de Tactique {effect} sur l’Initiative de tout ce camp.",
+      "TacticsTaken": "{name} commande {side} : Effet de Tactique {effect} sur l'Initiative de tout ce camp.",
       "TacticsLate": {
-        "one": "Le test de Tactique se fait au début du combat. {count} combattant de ce camp a déjà lancé l’Initiative et doit la relancer — rien n’a été modifié pour lui.",
-        "other": "Le test de Tactique se fait au début du combat. {count} combattants de ce camp ont déjà lancé l’Initiative et doivent la relancer — rien n’a été modifié pour eux."
+        "one": "Le test de Tactique se fait au début du combat. {count} combattant de ce camp a déjà lancé l'Initiative et doit la relancer — rien n'a été modifié pour lui.",
+        "other": "Le test de Tactique se fait au début du combat. {count} combattants de ce camp ont déjà lancé l'Initiative et doivent la relancer — rien n'a été modifié pour eux."
       },
-      "SideHint": "Un seul test de Tactique par camp, son Effet sur l’Initiative de tous. Le camp est déduit de l’attitude du pion et vous pouvez le corriger."
+      "SideHint": "Un seul test de Tactique par camp, son Effet sur l'Initiative de tous. Le camp est déduit de l'attitude du pion et vous pouvez le corriger."
     },
     "Edit": "Modifier",
     "Save": "Sauvegarder",
@@ -582,6 +582,18 @@
         "hint": "Le Livre de règles de Traveller ajoute un dé aux dégâts propres à la région à chaque round — 1D, puis 2D, puis 3D. Le Compagnon lit une table fixe à la place : 2D par round dans le vide absolu et 1D dans le vide partiel, ramenés à 2D−4 et 1D−2 par une rupture majeure de combinaison et à 2D−8 et 1D−4 par une rupture mineure, une combinaison étanche et intacte annulant entièrement la ligne. Avec le Compagnon, la case Dégâts de la région n'est plus lue, la région nomme l'objet porté qui tient lieu de combinaison étanche, et chaque combinaison porte sa propre rupture. L'atmosphère ténue est un intervalle dans les deux livres : elle est affichée pour l'arbitre et jamais lancée.",
         "core": "Livre de règles de Traveller — 1D cumulatif par round",
         "companion": "Compagnon Traveller — la table des dégâts liés au vide"
+      },
+      "travellerHits": {
+        "name": "Points de vie pour les Voyageurs",
+        "hint": "Les Voyageurs et les PNJ de type Personne subissent les dégâts sur une réserve de points de vie, comme un animal, au lieu de l'END, la FOR et la DEX. La réserve se saisit sur la feuille, où un bouton la règle sur FOR + DEX + END. Inconscient à un dixième ou moins, mort à 0 ; les dégâts incapacitants mettent hors de combat à la moitié et ne tuent jamais. Les MD des caractéristiques ne baissent plus avec les blessures, et le K.-O. ne s'applique pas. Un Voyageur sans réserve garde ses caractéristiques. Changer de règle ne convertit rien.",
+        "StrandedOn": {
+          "one": "{count} Voyageur ou PNJ garde une blessure sur ses caractéristiques, qui ne prennent plus de dégâts. Elle abaisse toujours ses MD et guérit comme avant.",
+          "other": "{count} Voyageurs et PNJ gardent une blessure sur leurs caractéristiques, qui ne prennent plus de dégâts. Elle abaisse toujours leurs MD et guérit comme avant."
+        },
+        "StrandedOff": {
+          "one": "{count} Voyageur ou PNJ garde une blessure sur ses points de vie, qui ne prennent plus de dégâts. Elle est conservée, hors de vue, jusqu'au retour de la règle.",
+          "other": "{count} Voyageurs et PNJ gardent une blessure sur leurs points de vie, qui ne prennent plus de dégâts. Elle est conservée, hors de vue, jusqu'au retour de la règle."
+        }
       },
       "shipAutomation": {
         "name": "Automatisation des vaisseaux",
@@ -1202,7 +1214,9 @@
         "Note": "L'événement partagé",
         "Agree": "S'accorder",
         "Made": "{name} et {other} sont reliés.",
-        "NeedsTwo": "Une connexion demande deux Voyageurs sur la liste."
+        "NeedsTwo": "Une connexion demande deux Voyageurs sur la liste.",
+        "Record": "Inscrit sur la feuille de {name} comme",
+        "NotRecorded": "Non inscrit"
       },
       "Muster": {
         "PendingTitle": "MD sur ce jet",
@@ -1354,7 +1368,7 @@
         "Survived": "Survie réussie",
         "SurvivalFailed": "Survie échouée",
         "Ejected": "Évincé",
-        "DropRefused": "La liste n’accepte que des Voyageurs — glissez-y un personnage pour l’inscrire.",
+        "DropRefused": "La liste n'accepte que des Voyageurs — glissez-y un personnage pour l'inscrire.",
         "DropSpecies": "Une espèce se dépose sur un Voyageur — sur sa colonne ici, ou sur sa propre fiche.",
         "DropCareer": "Une carrière se dépose sur la fiche du Voyageur — un dossier y naît du modèle.",
         "FrameSet": "{name} prend le cadre {frame}.",
@@ -1910,6 +1924,10 @@
       "DamageOrderEmpty": "Aucune chaîne configurée",
       "DamageOrderHint": "Les dégâts vident chaque maillon avant de passer au suivant. Une caractéristique sans maximum renseigné ne peut pas entrer dans la chaîne.",
       "DamageOrderNeedsMax": "Aucun maximum renseigné",
+      "HitsInForce": "Les points de vie sont en vigueur à cette table : les dégâts vont à la seule réserve de points de vie. L'ordre enregistré ici est conservé, non lu, jusqu'à ce que la règle soit désactivée.",
+      "HitsNoPool": "Pas encore de réserve de points de vie : les dégâts vont toujours aux caractéristiques. Saisissez-en une en mode édition.",
+      "HitsFromCharacteristics": "Régler sur les caractéristiques",
+      "HitsFromCharacteristicsHint": "Saisit FOR + DEX + END, à leurs maximums actuels, comme réserve de points de vie. Écrit une fois : une caractéristique qui change ensuite ne la modifie pas.",
       "DamageOrderRemove": "Retirer de la chaîne",
       "ChainRank": "Rang dans la chaîne",
       "NotInChain": "Hors de la chaîne",
@@ -1956,6 +1974,7 @@
       "Finance": "Finance",
       "Dead": "Mort",
       "DeadHint": "Tous les maillons de la chaîne de dégâts sont vidés.",
+      "DeadHitsHint": "Points de vie à 0, incapacitation non comptée.",
       "Heal": "Soigner",
       "HealChainHint": "À rebours le long de la chaîne — le maillon blessé en dernier est soigné en premier. Les procédures du livre de règles, sur l'onglet Santé, répartissent leurs points ; ceci est l'annulation directe à côté d'elles.",
       "Health": "Santé",
@@ -2010,6 +2029,7 @@
       "UPP": "PUP",
       "Unconscious": "Inconscient",
       "UnconsciousHint": "Un maillon vidé après le premier — pour un Voyageur, FOR ou DEX à 0.",
+      "UnconsciousHitsHint": "Points de vie à un dixième de la réserve ou moins, incapacitation non comptée.",
       "UnloadSoftware": "Éjecter le Logiciel",
       "UnstoreItem": "Reprendre l'objet",
       "View": "Consulter",
@@ -2173,6 +2193,17 @@
         "Driver": "Conducteur",
         "NoDriver": "Personne aux commandes : déposez d'abord un personnage ou un PNJ sur la fiche.",
         "NotDriver": "Seul un personnage ou un PNJ peut conduire un véhicule.",
+        "Gunner": "Artilleur",
+        "GunnerClear": "Retirer l'artilleur",
+        "NoGunner": "{mount}, {arc} : aucun artilleur. Déposez un personnage ou un PNJ sur la carte de la monture.",
+        "RollsAs": "Tiré par {name}",
+        "NotGunner": "Seul un personnage ou un PNJ peut servir une monture.",
+        "NotYours": "L'occupant de ce poste ne vous appartient pas : seuls son propriétaire et l'arbitre peuvent lancer les dés pour lui.",
+        "FromPack": "{name} est dans un compendium : importez-le dans le monde, puis déposez-le ici.",
+        "GunportPick": "Arme personnelle",
+        "NoOwnWeapon": "{name} n'a aucune arme à distance équipée pour tirer par le sabord de tir.",
+        "FromVehicle": "Tirer depuis ce véhicule",
+        "PerArc": "2 par arc, 1 si militaire",
         "Dogfight": "Combat rapproché",
         "DogfightDM": "Combat rapproché",
         "DogfightCarry": "Report de combat rapproché",
@@ -2821,7 +2852,7 @@
         "Hardened": "Cerveau durci (/fib)",
         "Biological": "Robot biologique",
         "VacuumSealing": "Étanchéité au vide",
-        "VacuumSealingHint": "Ce qui protège ce robot dans le vide : la protection contre les environnements hostiles ou contre le vide. Une valeur choisie l’emporte sur les lignes d’options, et répond pour une ligne écrite dans une autre langue ou pour une protection que le modèle possède d’origine.",
+        "VacuumSealingHint": "Ce qui protège ce robot dans le vide : la protection contre les environnements hostiles ou contre le vide. Une valeur choisie l'emporte sur les lignes d'options, et répond pour une ligne écrite dans une autre langue ou pour une protection que le modèle possède d'origine.",
         "VacuumHostile": "Hostile",
         "VacuumFull": "Vide",
         "VacuumNone": "aucune",
@@ -3398,7 +3429,12 @@
       "clothing": "Vêtement",
       "equipment": "Équipement",
       "trinket": "Babiole",
+      "accessory": "Accessoire",
       "toolkit": "Outils"
+    },
+    "AccessorySteadies": {
+      "reduce": "Réduit Encombrante",
+      "ignore": "Ignore Encombrante une fois déployé"
     },
     "ItemSubType": {
       "loot": "Butin",
@@ -3450,6 +3486,7 @@
       "Relation": {
         "Allie": "Allié",
         "Contact": "Contact",
+        "Connection": "Connexion",
         "Rival": "Rival",
         "Enemy": "Ennemie",
         "Patron": "Patron"
@@ -3538,8 +3575,15 @@
         "one": "{points} point de PSI",
         "other": "{points} points de PSI"
       },
+      "PsiSpend": "À dépenser si l'attaque touche",
+      "PsiSpendHint": "Points de PSI dépensés seulement si l'attaque touche : chacun ajoute 1 aux dégâts.",
+      "PsiSpendHintAP": "Points de PSI dépensés seulement si l'attaque touche : chacun ajoute 1 aux dégâts et {ap} à l'AP.",
       "PhysicalOnly": "La règle applique ceci aux actions physiques — le modificateur suit la caractéristique jetée, jusqu'à ce que vous en décidiez autrement.",
       "SkillOnly": "L'augmentation a été acquise pour une seule compétence — le modificateur suit la compétence jetée, jusqu'à ce que vous en décidiez autrement.",
+      "SpeciesTrait": "{trait} ({condition})",
+      "SpeciesTraitHint": "Un trait de cette espèce, pour les compétences qu'il nomme — le modificateur suit la compétence jetée, jusqu'à ce que vous en décidiez autrement.",
+      "SpeciesTraitOffered": "Un trait de cette espèce qui ne vaut que dans certaines circonstances — cochez-le quand ce test s'y déroule.",
+      "SpeciesTraitAll": "Un trait de cette espèce, sur chaque test — décochez-le pour l'écarter.",
       "Ceiling": "cerveau {grade} · jusqu'à {ceiling}",
       "CeilingOver": "cerveau {grade} · au-delà de son plafond, {ceiling}",
       "RangeUpTo": "jusqu'à {max} {unit}",
@@ -3588,23 +3632,23 @@
     "Canvas": {
       "RangeLabel": "{band} · {km} km",
       "RangeCrossLevel": "Pas de portée — le trajet change de niveau",
-      "RangeElevation": "Pas de portée — le trajet change d’altitude",
-      "SetBand": "Fixer la zone de portée d’après deux jetons",
+      "RangeElevation": "Pas de portée — le trajet change d'altitude",
+      "SetBand": "Fixer la zone de portée d'après deux jetons",
       "BandSet": "{a} ↔ {b} — {range}",
       "NeedTwo": "Sélectionnez exactement deux jetons : une zone de portée se mesure entre deux.",
-      "NotSpaceScene": "Cette scène n’est pas une scène spatiale : ses distances ne sont pas des kilomètres.",
+      "NotSpaceScene": "Cette scène n'est pas une scène spatiale : ses distances ne sont pas des kilomètres.",
       "LevelSplit": "Les deux jetons sont sur des niveaux différents de cette scène, dessinés à des échelles différentes.",
-      "ElevationSplit": "Les deux jetons sont à des altitudes différentes, or l’altitude ordonne les niveaux d’une scène spatiale au lieu d’y mesurer une hauteur.",
-      "NoCombat": "Aucun combat spatial ni bataille entre flottes n’est affiché, or la zone de portée appartient à l’un d’eux.",
-      "NotInCombat": "{name} n’est pas un contact de la rencontre affichée.",
+      "ElevationSplit": "Les deux jetons sont à des altitudes différentes, or l'altitude ordonne les niveaux d'une scène spatiale au lieu d'y mesurer une hauteur.",
+      "NoCombat": "Aucun combat spatial ni bataille entre flottes n'est affiché, or la zone de portée appartient à l'un d'eux.",
+      "NotInCombat": "{name} n'est pas un contact de la rencontre affichée.",
       "ManyContacts": "{name} vole dans plusieurs vaisseaux ou flottes de cette rencontre : son acteur ne dit pas lequel.",
-      "SalvoPosition": "{name} est une salve en vol : elle est là où elle est, pas là où est la flotte qui l’a tirée.",
-      "NoGroup": "{name} n’appartient à aucun vaisseau ni à aucune flotte, or une zone de portée se mesure entre deux d’entre eux.",
+      "SalvoPosition": "{name} est une salve en vol : elle est là où elle est, pas là où est la flotte qui l'a tirée.",
+      "NoGroup": "{name} n'appartient à aucun vaisseau ni à aucune flotte, or une zone de portée se mesure entre deux d'entre eux.",
       "SameGroup": "Les deux jetons appartiennent à {name}, or une zone de portée se mesure entre deux.",
       "ConfigureScene": "Configurer pour le combat spatial",
-      "ConfigureSceneHint": "{name} devient une scène sans quadrillage de {size} × {size} pixels mesurée en kilomètres, avec un niveau par échelle : {levels}, et deux régions qui proposent à un jeton l’échelle suivante vers l’extérieur ou vers l’intérieur. Ses dimensions, son quadrillage, ces quatre niveaux et ces deux régions sont écrasés ; son arrière-plan, ses jetons et tout le reste ne le sont pas.",
+      "ConfigureSceneHint": "{name} devient une scène sans quadrillage de {size} × {size} pixels mesurée en kilomètres, avec un niveau par échelle : {levels}, et deux régions qui proposent à un jeton l'échelle suivante vers l'extérieur ou vers l'intérieur. Ses dimensions, son quadrillage, ces quatre niveaux et ces deux régions sont écrasés ; son arrière-plan, ses jetons et tout le reste ne le sont pas.",
       "SceneConfigured": "{name} est désormais une scène spatiale : {levels}.",
-      "NotGM": "Seul l’arbitre peut configurer une scène pour le combat spatial.",
+      "NotGM": "Seul l'arbitre peut configurer une scène pour le combat spatial.",
       "Levels": {
         "contact": "Contact",
         "approach": "Approche",
@@ -3612,19 +3656,19 @@
         "theatre": "Théâtre"
       },
       "Regions": {
-        "edge": "Bord — échelle vers l’extérieur",
-        "centre": "Centre — échelle vers l’intérieur"
+        "edge": "Bord — échelle vers l'extérieur",
+        "centre": "Centre — échelle vers l'intérieur"
       }
     },
     "SpaceCombat": {
       "Create": "Nouveau combat spatial",
       "Open": "Écran de combat spatial",
-      "NoPermission": "Seul l’arbitre peut modifier la rencontre.",
+      "NoPermission": "Seul l'arbitre peut modifier la rencontre.",
       "RangeFrom": "Portée depuis",
       "NoContacts": "Aucun contact",
       "EveryContact": "chaque autre contact, épinglé",
-      "DropShipHint": "Déposez un vaisseau sur une zone de portée pour l’engager.",
-      "DistanceLabel": "Distance jusqu’au contact mesuré, en kilomètres",
+      "DropShipHint": "Déposez un vaisseau sur une zone de portée pour l'engager.",
+      "DistanceLabel": "Distance jusqu'au contact mesuré, en kilomètres",
       "Km": "km",
       "To": "vers {name}",
       "BandUpTo": "≤ {max} km",
@@ -3634,7 +3678,7 @@
       "CellDM": "MD {dm}",
       "CellThrust": "P {thrust}",
       "Band": "Zone",
-      "AttackDM": "MD d’attaque",
+      "AttackDM": "MD d'attaque",
       "ToClose": "Pour changer",
       "ThrustUnit": "poussée",
       "TargetSize": "MD de taille de cible",
@@ -3648,12 +3692,12 @@
         "one": "{n} contact",
         "other": "{n} contacts"
       },
-      "RollInitiative": "Lancer l’Initiative du vaisseau",
+      "RollInitiative": "Lancer l'Initiative du vaisseau",
       "ShipLine": "{tons} t · P{thrust}",
       "Fleet": "Flotte",
       "Entered": "saisi, non dérivé",
       "Tactics": "Tactique (navale)",
-      "TacticsWhy": "un test pour tout un camp, ajouté à l’Initiative",
+      "TacticsWhy": "un test pour tout un camp, ajouté à l'Initiative",
       "Formula": "Initiative",
       "Reactions": "Réactions",
       "NotAStep": "pas une phase",
@@ -3665,7 +3709,7 @@
       "Initiative": "Initiative",
       "ControlDM": "MD de contrôle",
       "Aboard": "Équipage à bord",
-      "Foreign": "Ce vaisseau ne vous appartient pas. Postes, poussée et état courant sont sur la copie de l’arbitre.",
+      "Foreign": "Ce vaisseau ne vous appartient pas. Postes, poussée et état courant sont sur la copie de l'arbitre.",
       "ThrustTitle": "Poussée",
       "ThrustWhy": "répartie par le pilote",
       "AddAllocation": "Répartir de la poussée",
@@ -3677,7 +3721,7 @@
       "ClosingWhy": "accumulé au fil des rounds",
       "Against": "Contre",
       "Toward": "Vers",
-      "ClosingRate": "{rate} de poussée par round, net de celle de l’autre vaisseau",
+      "ClosingRate": "{rate} de poussée par round, net de celle de l'autre vaisseau",
       "Banked": "Accumulé",
       "BandChange": "Changement de zone",
       "Stations": "Postes",
@@ -3740,12 +3784,12 @@
     "Fleet": {
       "NewFleet": "Nouvelle flotte",
       "RuleOff": "Les batailles entre flottes sont désactivées dans les règles optionnelles de ce monde.",
-      "NotACommandBridge": "{name} n’a pas de passerelle de commandement et ne peut pas être le vaisseau amiral.",
+      "NotACommandBridge": "{name} n'a pas de passerelle de commandement et ne peut pas être le vaisseau amiral.",
       "TacticsTerm": "Tactique (navale)",
       "Morale": "Moral",
-      "PoolEmpty": "{name} n’a plus que {left} et {wanted}.",
-      "DispersalBusy": "{name} est en pleine dispersion : ses vaisseaux n’entreprennent aucune autre action avant la fin des rounds (Garde Haute p.120).",
-      "DispersalOwed": "{name} n’a pas achevé sa dispersion, et ses vaisseaux ne se séparent qu’ensuite (Garde Haute p.120).",
+      "PoolEmpty": "{name} n'a plus que {left} et {wanted}.",
+      "DispersalBusy": "{name} est en pleine dispersion : ses vaisseaux n'entreprennent aucune autre action avant la fin des rounds (Garde Haute p.120).",
+      "DispersalOwed": "{name} n'a pas achevé sa dispersion, et ses vaisseaux ne se séparent qu'ensuite (Garde Haute p.120).",
       "DetachLarge": "Garde Haute renvoie un groupe de {max} vaisseaux ou moins aux règles de combat spatial standard ; {count} ont été détachés.",
       "SplitOf": "{name} (détachement)",
       "Mode": {
@@ -3764,7 +3808,7 @@
         "NoDirectFireIonHint": "Le folio 111 exclut les armes ioniques de la table des armes de combat de flotte : elles n'infligent aucun dégât et se lisent sur la table des armes ioniques, à part.",
         "IonOnly": "ionique seulement",
         "Create": "Nouvelle bataille entre flottes",
-        "Open": "Ouvrir l’écran de bataille entre flottes",
+        "Open": "Ouvrir l'écran de bataille entre flottes",
         "RangeFrom": "Portée depuis",
         "NoFleets": "Aucune flotte",
         "To": "vers {name}",
@@ -3779,16 +3823,16 @@
         },
         "RemoveContact": "Retirer de la bataille",
         "Strength": "{left} sur {of} restants",
-        "RollFleet": "Lancer l’Initiative de la flotte",
+        "RollFleet": "Lancer l'Initiative de la flotte",
         "RollShips": "Par vaisseau",
-        "RollShipsHint": "Lancer l’Initiative de chaque vaisseau — la procédure détaillée de Garde Haute",
+        "RollShipsHint": "Lancer l'Initiative de chaque vaisseau — la procédure détaillée de Garde Haute",
         "Reserve": "réserve",
         "Arriving": "Arrive ce round",
-        "DropShipHint": "Déposez un vaisseau spatial ici pour l’ajouter à la ligne",
+        "DropShipHint": "Déposez un vaisseau spatial ici pour l'ajouter à la ligne",
         "DropWingHint": "Déposez une classe de chasseur ici pour ajouter un escadron",
         "DispersalHolds": "Aucune autre action avant leur fin : ni réparation, ni rompre le combat. Ses vaisseaux tirent encore, avec ce MD.",
-        "DispersalServing": "La dispersion a échoué, et ses rounds passent d’abord : les vaisseaux pourront retenter la manœuvre ensuite (Garde Haute p.120).",
-        "DispersalFailed": "La dispersion a échoué. Les vaisseaux peuvent retenter la manœuvre, et ne se séparent qu’après une réussite (Garde Haute p.120).",
+        "DispersalServing": "La dispersion a échoué, et ses rounds passent d'abord : les vaisseaux pourront retenter la manœuvre ensuite (Garde Haute p.120).",
+        "DispersalFailed": "La dispersion a échoué. Les vaisseaux peuvent retenter la manœuvre, et ne se séparent qu'après une réussite (Garde Haute p.120).",
         "DivideWhy": "Cochez ce qui part. Les vaisseaux se séparent une fois la dispersion achevée (Garde Haute p.120).",
         "Split": "Séparer en une nouvelle flotte",
         "FoldInto": "Rejoindre {name}",
@@ -3798,7 +3842,7 @@
           "other": "Faire rejoindre {into} à {name} ? Ses {count} vaisseaux rallient cette flotte, et {name} quitte la bataille avec toutes ses portées."
         },
         "Opposing": "Flotte adverse",
-        "OpposingHint": "Quelle flotte s’oppose à {name} ? Le Moral lit ses pertes et son vaisseau amiral.",
+        "OpposingHint": "Quelle flotte s'oppose à {name} ? Le Moral lit ses pertes et son vaisseau amiral.",
         "ShipLine": "coque {hull} · blindage {armour}",
         "WingLine": {
           "one": "{n} sur {of} chasseur",
@@ -3829,7 +3873,7 @@
         "MustDisperse": "le round de grâce est écoulé",
         "ThrustDerived": "le plus lent de la ligne : {n}",
         "ThrustOverride": "Poussée (saisie)",
-        "CrewSkill": "Compétence d’équipage",
+        "CrewSkill": "Compétence d'équipage",
         "OffensiveMean": "MD offensif moyen {dm}",
         "Terrain": "Terrain céleste",
         "TerrainDM": "MD défensif +{dm} pour supériorité de Poussée",
@@ -3845,12 +3889,12 @@
         "Held": "{n} en réserve",
         "EachRound": "testé à chaque round",
         "MoraleTotal": "MD du test",
-        "MoraleApplied": "Compétence d’équipage ce round",
-        "MoraleWhy": "Garde Haute n’imprime ni seuil ni conséquence — l’Arbitre indique ce que le test a coûté",
+        "MoraleApplied": "Compétence d'équipage ce round",
+        "MoraleWhy": "Garde Haute n'imprime ni seuil ni conséquence — l'Arbitre indique ce que le test a coûté",
         "RollMorale": "Lancer le Moral",
         "Fighters": "Chasseurs",
-        "WingCount": "Chasseurs de l’escadron",
-        "WingSkill": "Compétence d’équipage (saisie)",
+        "WingCount": "Chasseurs de l'escadron",
+        "WingSkill": "Compétence d'équipage (saisie)",
         "WingWhy": {
           "one": "{per} point de coque ajusté par chasseur",
           "other": "{per} points de coque ajustés par chasseur"
@@ -3865,7 +3909,7 @@
         "Launched": "Lancées",
         "SalvoTarget": "Cible",
         "FiredBy": "Tirée par",
-        "Antiradiation": "Anti-radiation : le MD défensif de la cible est divisé par deux, ce qui ne joue qu’avec la table d’Efficacité des attaques activée.",
+        "Antiradiation": "Anti-radiation : le MD défensif de la cible est divisé par deux, ce qui ne joue qu'avec la table d'Efficacité des attaques activée.",
         "Intercept": "Défense de salve dépensée",
         "Spend": "Dépenser",
         "Defences": "Défenses",
@@ -3874,8 +3918,8 @@
         "SandAgainst": "calculée contre {name}",
         "Radiation": "Expositions aux radiations",
         "RadiationWhy": {
-          "one": "Compétence d’équipage {skill}, {weapons} système d’armes éliminé",
-          "other": "Compétence d’équipage {skill}, {weapons} systèmes d’armes éliminés"
+          "one": "Compétence d'équipage {skill}, {weapons} système d'armes éliminé",
+          "other": "Compétence d'équipage {skill}, {weapons} systèmes d'armes éliminés"
         },
         "RepairWhy": "un point de réparation par niveau de sévérité",
         "Repair": "Réparer",
@@ -3888,7 +3932,7 @@
         "OptMeson": "Méson — ignore le Blindage",
         "OptPiercing": "Baie à fusion ou électromagnétique — MD+1 contre le Blindage",
         "OptCustom": "Haut rendement ou focalisation intense",
-        "OptEffectiveness": "Les missiles consultent la table d’Efficacité des attaques",
+        "OptEffectiveness": "Les missiles consultent la table d'Efficacité des attaques",
         "Battery": "Batterie",
         "DamageMultiple": "Dég./mult.",
         "Firing": "Tirent",
@@ -3896,13 +3940,13 @@
         "FireSpinal": "Jet pour toucher",
         "LaunchSalvo": "Lancer une salve",
         "Launch": "Lancer",
-        "NoSalvoTarget": "Cette salve n’a plus de cible dans la bataille.",
-        "NoSalvoDefence": "{name} est un escadron et n’a pas de réserve de défense de salve.",
+        "NoSalvoTarget": "Cette salve n'a plus de cible dans la bataille.",
+        "NoSalvoDefence": "{name} est un escadron et n'a pas de réserve de défense de salve.",
         "Resolved": "Résolu",
         "ClearAttack": "Effacer",
-        "Factor": "Facteur d’attaque",
+        "Factor": "Facteur d'attaque",
         "Damage": "Dégâts",
-        "ImperviousHint": "La cible est insensible : les dégâts de cette arme n’atteignent pas la moitié de son Blindage.",
+        "ImperviousHint": "La cible est insensible : les dégâts de cette arme n'atteignent pas la moitié de son Blindage.",
         "Mitigate": "Réduire avec",
         "MitigateWhy": "les écrans et les lance-sables sortent de la réserve de la cible et réduisent les dégâts avant application",
         "Apply": "Appliquer",
@@ -3917,11 +3961,11 @@
         "DefensiveHalved": "MD défensif (divisé par deux)",
         "Range": "Portée",
         "SmallTarget": "Cible de moins de 100 tonnes",
-        "OutOfRange": "{weapon} n’atteint pas la portée {band}.",
+        "OutOfRange": "{weapon} n'atteint pas la portée {band}.",
         "Weapons": "{count} × {name}",
-        "Impervious": "{name} est insensible : des dégâts de {damage} n’atteignent pas la moitié du Blindage {armour}.",
-        "Meson": "Méson — le Blindage ne s’applique pas.",
-        "Factor": "Facteur d’attaque {factor} — multiplicateur de dégâts ×{multiple}",
+        "Impervious": "{name} est insensible : des dégâts de {damage} n'atteignent pas la moitié du Blindage {armour}.",
+        "Meson": "Méson — le Blindage ne s'applique pas.",
+        "Factor": "Facteur d'attaque {factor} — multiplicateur de dégâts ×{multiple}",
         "Subtotal": "Sous-total des dégâts {subtotal}",
         "Final": "{damage} à {target}",
         "Missiles": "Salve",
@@ -3931,7 +3975,7 @@
         }
       },
       "Spinal": {
-        "Gunner": "Compétence d’équipage (artilleur)",
+        "Gunner": "Compétence d'équipage (artilleur)",
         "TargetTonnage": "Tonnage de la cible",
         "Bulk": "Tonnage du vaisseau",
         "CannotAttack": "Une monture spinale ne peut pas suivre une cible aussi petite.",
@@ -3945,14 +3989,14 @@
           "other": "Effet ionique {effect} contre {hull} points de coque ajustés"
         },
         "Result": {
-          "one": "{name} réduit sa Poussée de {n} ou élimine {n} système d’armes",
-          "other": "{name} réduit sa Poussée de {n} ou élimine {n} systèmes d’armes"
+          "one": "{name} réduit sa Poussée de {n} ou élimine {n} système d'armes",
+          "other": "{name} réduit sa Poussée de {n} ou élimine {n} systèmes d'armes"
         },
         "Rounds": {
           "one": "pendant {n} round",
           "other": "pendant {n} rounds"
         },
-        "NoEffect": "Aucun effet — le total ionique n’atteint pas une coque entière."
+        "NoEffect": "Aucun effet — le total ionique n'atteint pas une coque entière."
       },
       "Chart": {
         "Title": "Schéma des manœuvres de flotte",
@@ -4190,7 +4234,7 @@
       "UnrefinedDM": "Carburant non raffiné",
       "DebitWhy": "Le saut débite le réservoir au moment du jet. Rien d'autre ne touche au carburant, et aucun jet ne fait avancer l'étape.",
       "NoFuel": "Ce saut consomme {need} t et le réservoir en contient {have}. Sans le carburant, le propulseur ne s'allume pas.",
-      "DriveOut": "Propulseur-S : {state}. Il ne peut pas servir avant d’être réparé.",
+      "DriveOut": "Propulseur-S : {state}. Il ne peut pas servir avant d'être réparé.",
       "NoStation": "Aucun {station} à bord avec une fiche liée — le test n'a aucun personnage où lire le niveau de compétence.",
       "Ruleset": "Corpus de règles",
       "Declared": "déclaré, jamais supposé",
@@ -4972,7 +5016,7 @@
           }
         }
       },
-      "BadDose": "« {dose} » n’est pas une dose que cette région peut lancer — aucune irradiation n’a été appliquée."
+      "BadDose": "« {dose} » n'est pas une dose que cette région peut lancer — aucune irradiation n'a été appliquée."
     },
     "GravityBands": {
       "micro": "Micro-gravité",
@@ -5131,12 +5175,15 @@
         "ap": "ignore le Blindage à hauteur de {score}, avant tout multiplicateur de dégâts",
         "auto": "tire en rafales rapides ; à l'échelle vaisseau, l'effet est laissé à l'arbitre",
         "chain-reaction": "dégâts répétés à moitié chaque round (arrondi inférieur) jusqu'à zéro ; sans cumul",
+        "high-yield": "chaque 1 obtenu aux dégâts compte comme un 2 ; ni missiles ni torpilles",
+        "intense-focus": "AP +2 ; lasers et armes à particules uniquement",
         "ion": "ignore le Blindage ; frappe Énergie et Bande passante, pas la Coque ; /fib immunisé",
         "orbital-bombardment": "Artilleur (ortillerie) ; MD-12 contre vaisseau manœuvrant ; Explosion 100 au sol",
         "orbital-strike": "Artilleur (ortillerie) ; MD-8 contre vaisseau manœuvrant ; précise, sans Explosion",
         "radiation": "2D×60 rads à 10 m de l'impact ; MD-1 par 10 % de Coque perdue (40 % si anti-radiations)",
         "reductor": "chaque dé de dégâts ôte 1 au Blindage de la cible avant résolution des dégâts",
         "smart": "guidée : MD+1 à +6 par NT d'avance ; perdu à portée Adjacente ou Proche",
+        "very-high-yield": "chaque 1 ou 2 obtenu aux dégâts compte comme un 3 ; ni missiles ni torpilles",
         "weak": "le Blindage de la cible compte double contre ses dégâts"
       },
       "species": {
@@ -5244,6 +5291,12 @@
       "6-hours": "6 heures",
       "3-hours": "3 heures"
     },
+    "TraitModifierTargets": {
+      "skills": "Compétences",
+      "check": "Tout test",
+      "initiative": "Initiative",
+      "protection": "Protection"
+    },
     "TraitSlot": {
       "acceleration": "Accélération",
       "actions": "Actions",
@@ -5316,10 +5369,59 @@
       "marine": "Marine",
       "passenger": "Passager"
     },
+    "Repair": {
+      "Title": "Réparations à bord : {ship}",
+      "Mode": "Intervention",
+      "Patch": "Réparation de système",
+      "Repair": "Réparation définitive",
+      "PatchHint": "Réparation de système : un test d'Ingénieur Moyenne (8+) en 1 round, avec un MD négatif égal à la Sévérité et +1 par round déjà consacré à ce coup. Seuls les effets sont réparés, pendant 1D heures.",
+      "RepairHint": "Réparation définitive : un test d'Ingénieur ou de Mécanique Moyenne (8+) en 1D heures, et des pièces de rechange selon l'Effet diminué de la Sévérité. La localisation est remise à zéro.",
+      "Skills": {
+        "engineer": "Ingénieur",
+        "mechanic": "Mécanique",
+        "remoteOps": "Électronique (téléopérations), par les drones de réparation"
+      },
+      "PatchOf": "Réparation de système : {location}",
+      "RepairOf": "Réparation définitive : {location}",
+      "WorkDM": "Travail sur ce coup",
+      "AutoRepairHint": "L'Auto-réparation exige des drones de réparation à bord.",
+      "DronesCap": "Drones de réparation : Ingénieur 1 au plus",
+      "ApplyPatch": "Appliquer la réparation de système",
+      "ApplyRepair": "Appliquer la réparation définitive",
+      "KeepWorking": "Continuer le travail",
+      "KeepHint": "Continuez le travail, et le round suivant sur ce coup se fait avec un MD de {dm}.",
+      "PatchLasts": "Une fois appliquée, la réparation tient 1D heures.",
+      "PartsNeeded": "Exige {tons} t de pièces de rechange ; {aboard} t à bord.",
+      "NoParts": "Aucune pièce de rechange nécessaire.",
+      "PatchedFor": {
+        "one": "Réparation temporaire — {count} heure",
+        "other": "Réparation temporaire — {count} heures"
+      },
+      "PatchedOn": {
+        "one": "{location} : réparation de système appliquée, elle tient {count} heure.",
+        "other": "{location} : réparation de système appliquée, elle tient {count} heures."
+      },
+      "EndPatch": "Fin de la réparation",
+      "SpareAboard": "Pièces de rechange à bord : {tons} t",
+      "Repaired": "{location} : réparation définitive faite, {tons} t de pièces de rechange consommées.",
+      "Working": "{location} : le round de travail suivant se fait avec un MD de {dm}.",
+      "NotHit": "{location} : aucun coup critique à réparer.",
+      "HullRefused": "Les dégâts à la Coque se réparent point par point : un test de Mécanique Routine (6+) et des pièces de rechange par point de Coque. Cette réparation ne les atteint pas.",
+      "Destroyed": "{location} : système détruit. Il faut le remplacer, les pièces de rechange ne peuvent pas le réparer.",
+      "NothingToPatch": "{location} : aucun effet durable à réparer, et ce que le coup a détruit ou blessé le reste. Une réparation définitive remet tout de même la localisation à zéro.",
+      "Changed": "{location} : la localisation a changé depuis ce test, relancez.",
+      "Failed": "Ce test a échoué : il n'y a rien à appliquer.",
+      "AlreadyPatched": "Cette localisation a déjà une réparation de système.",
+      "Counted": "Ce round de travail est déjà compté.",
+      "ShortParts": "Cette réparation exige {tons} t de pièces de rechange et le vaisseau en transporte {aboard} t : rien n'a été appliqué.",
+      "NoCrew": "Aucun membre d'équipage qui vous appartient ne peut faire cette réparation à bord.",
+      "NothingHit": "Aucune localisation de ce vaisseau ne peut être réparée."
+    },
     "RoleActions": {
       "skill": "Test de compétence",
       "weapon": "Arme",
-      "special": "Spéciale"
+      "special": "Spéciale",
+      "repair": "Réparation"
     },
     "Timeframes": {
       "Normal": "Normal",
@@ -5549,7 +5651,18 @@
       "LoadedIn": "Chargée dans",
       "LoadedFull": "plein",
       "Reload": "Recharger",
-      "ReloadHint": "Insère un chargeur plein. Actions Mineures nécessaires : {actions}.",
+      "ReloadHint": "Insère un chargeur de rechange de {round}. Actions Mineures nécessaires : {actions}.",
+      "ReloadFree": "Insère un chargeur plein. Actions Mineures nécessaires : {actions}. Les munitions de l'arme elle-même ne sont pas comptées : chargez une munition de la liste pour en compter les chargeurs.",
+      "ReloadNoSpare": "Aucun chargeur de rechange de {round}.",
+      "ReloadLost": {
+        "one": "Le chargeur retiré est jeté avec {n} balle encore dedans.",
+        "other": "Le chargeur retiré est jeté avec {n} balles encore dedans."
+      },
+      "SpareMagazines": {
+        "one": "{n} chargeur de rechange",
+        "other": "{n} chargeurs de rechange"
+      },
+      "SpareHint": "Chargeurs de rechange : la quantité d'une munition compte des chargeurs pleins, et recharger en dépense un (Livre de règles de Traveller p. 74).",
       "FireModes": "Modes de tir",
       "FireModeCost": {
         "one": "{mode} {gain}, {rounds} balle",
@@ -5559,6 +5672,9 @@
       "Modifiers": "Modificateurs",
       "Name": "Nom",
       "Natural": "Naturelle",
+      "PsiDamage": "MD de PSI aux dégâts",
+      "PsiAP": "AP par MD de PSI",
+      "PsiAPEach": "AP {ap} par MD de PSI et par point",
       "Nickname": "Surnom",
       "NotProficient": "Incompétent",
       "Notes": "Notes",
@@ -5629,6 +5745,9 @@
       "Terms": "Périodes",
       "Title": "Titre",
       "Trait": "Trait",
+      "TraitModifiers": "MD des traits",
+      "TraitModifiersHint": "Un MD que l'un des traits de cette espèce applique à un jet : les livres en impriment un différent pour chaque espèce sous le même nom de trait. Compétences : séparées par des virgules, sous S'applique à. Sans condition, le MD s'applique de lui-même ; avec une condition, il est seulement proposé dans la fenêtre du jet, décoché, une ligne d'Initiative sur le seul jet d'Initiative. Une ligne de Protection ne prend pas de condition. Sexe : vide pour tous les Voyageurs.",
+      "TraitModifierInert": "Une ligne de Protection avec une condition ne s'applique nulle part : aucun écran ne peut savoir quand la condition est remplie. Effacez la condition, ou la ligne ne fait rien.",
       "Traits": "Traits",
       "Type": "Type",
       "Weapon": "Arme",
@@ -5652,6 +5771,8 @@
       "PurchasePct": "Payé",
       "BannedAt": "Interdit au niveau de loi",
       "IllegalEverywhere": "Illégal dans tout l'Imperium",
+      "SpareParts": "Pièces de rechange",
+      "SparePartsHint": "Pièces de rechange pour les réparations du vaisseau, à 100 000 Cr la tonne. Une réparation à bord puise d'abord dans le plus petit lot marqué.",
       "Unrestricted": "sans restriction",
       "PurchaseDM": "MD d'Achat",
       "SaleDM": "MD de Vente",
@@ -5688,6 +5809,30 @@
       "CravingDM": "MD de Manque",
       "AddictionHint": "Le délai d'action et la durée sont vides là où le livre n'en donne pas, non là où personne n'a rien saisi. L'addiction est optionnelle et se règle drogue par drogue (CSC p.97) : laissez ses trois champs vides et l'arbitre ne l'a pas activée pour celle-ci.",
       "Fits": "Compatible avec",
+      "Fitted": "Accessoires",
+      "FittedTo": "Fixé sur",
+      "NotFitted": "Non fixé",
+      "FittedHint": "Ce qui s'adapte relève du meneur : un accessoire n'est jamais refusé, et une arme ne profite que d'un seul viseur ou d'une seule lunette (CSC p.174). Une arme secondaire se fixe sur une arme principale (Field Catalogue p.40) ; le système ne va qu'à un niveau, si bien qu'une arme secondaire ne porte aucune arme.",
+      "FittedDrop": "Glissez un accessoire ou une arme secondaire sur cette fiche pour le fixer sur l'arme.",
+      "FittedDropSecondary": "Glissez un accessoire sur cette fiche pour le fixer sur l'arme. Une arme secondaire ne porte aucune arme.",
+      "FittedToName": "Fixé sur {name}",
+      "PartOf": "Fait partie de {name}",
+      "PartOfHint": "Son poids et son coût sont comptés sur {name} : le livre présente la paire comme une seule arme.",
+      "Unfit": "Retirer de l'arme",
+      "Steadies": "Stabilise",
+      "Deployed": "Déployé",
+      "NotDeployed": "non déployé",
+      "DeployedHint": "Un bipied ne compte que lorsqu'il est installé, ce qui demande deux actions mineures (CSC p.174).",
+      "AttackDM": "MD d'attaque",
+      "AttackDMAdd": "Ajouter un MD d'attaque",
+      "AttackUnder": "à moins de {n} m",
+      "AttackFrom": "à {n} m ou plus",
+      "AttackUnderPlaceholder": "moins de (m)",
+      "AttackFromPlaceholder": "à partir de (m)",
+      "Sight": "Viseur ou lunette",
+      "SightHint": "Une arme ne peut avoir qu'un seul viseur ou qu'une seule lunette : un second ne lui apporte rien (CSC p.174).",
+      "SightIdle": "L'arme porte déjà un viseur ou une lunette : celui-ci ne lui apporte rien (CSC p.174).",
+      "Idle": "Inactif",
       "WeaponsOwn": "selon l'arme",
       "LoadedRound": "Munition chargée",
       "ReplaceTraits": "Remplace les traits de l'arme",
@@ -5940,13 +6085,31 @@
       "Settings": {
         "balances": {
           "name": "Les cartes de crédit affichent les soldes",
-          "hint": "Si une carte de transfert démarre avec « afficher les soldes » coché. Dans les deux cas la question est reposée à chaque transfert."
+          "hint": "Si une carte de transfert démarre avec « afficher les soldes » coché. Dans les deux cas la question est reposée à chaque transfert. Une carte d'achat n'affiche le solde de l'acheteur que si ce réglage est activé."
         },
         "visibility": {
           "name": "Visibilité des cartes de crédit",
-          "hint": "Si une carte de transfert démarre publique ou adressée à l'arbitre et aux bourses concernées. Dans les deux cas la question est reposée à chaque transfert."
+          "hint": "Si une carte de transfert démarre publique ou adressée à l'arbitre et aux bourses concernées. Dans les deux cas la question est reposée à chaque transfert. Une carte d'achat suit ce réglage tel quel : adressée, elle va à l'arbitre et à la bourse de l'acheteur."
+        },
+        "purchaseOnDrop": {
+          "name": "Faire payer les objets déposés sur un Voyageur",
+          "hint": "Quand un objet est glissé depuis l'onglet Objets ou un compendium sur la fiche d'un Voyageur, si son prix est retiré de ses Crédits en main. Non : il est ajouté gratuitement. Demander : le prix est affiché et la question posée. Toujours : il est payé dès que les crédits suffisent, et la question est posée sinon. Un objet déposé depuis un autre acteur n'est jamais facturé. Chaque achat publie une carte, envoyée et affichée selon les deux réglages des cartes de crédit.",
+          "off": "Non",
+          "ask": "Demander",
+          "always": "Toujours"
         }
       }
+    },
+    "Purchase": {
+      "Title": "Acheter pour {name}",
+      "Total": "Total",
+      "After": "Crédits après",
+      "Pay": "Payer Cr{price}",
+      "AddFree": "Ajouter sans payer",
+      "Short": "Il manque Cr{credits}",
+      "Card": "Acheté par {name}",
+      "Refused": "Il manque désormais Cr{credits} à {name} : rien n'a été payé ni ajouté.",
+      "PaidNotCreated": "Cr{credits} ont été retirés des crédits de {name}, mais l'objet n'a pas pu être ajouté. Ajoutez-le à la main."
     },
     "Errors": {
       "DocketGMOnly": "Le dossier est la fenêtre de l'Arbitre.",
@@ -5964,6 +6127,7 @@
       "DocketUnavailable": "La table des demandes de jet n'est pas disponible dans ce monde.",
       "AnswerUnavailable": "Cette demande ne peut pas recevoir de réponse depuis ici.",
       "ContainerRecursive": "Un conteneur ne peut pas être rangé dans lui-même.",
+      "FitDepth": "Une arme secondaire se fixe sur une arme qui n'est fixée sur aucune autre, et ne porte aucune arme.",
       "CouldNotFindItem": "Objet introuvable : _ITEM_ID_.",
       "NoOwnedTokenSelected": "Aucun jeton vous appartenant n'est sélectionné.",
       "NoPsiPoints": "{name} n'a plus de points de PSI : aucun pouvoir ne peut être tenté.",
@@ -6473,9 +6637,12 @@
       "radiation": "Rayonnement",
       "scope": "Viseur",
       "smart": "Intelligente",
+      "very-high-yield": "Très haut rendement",
       "stun": "Incapacitante",
       "zero-g": "Zéro-G",
       "chain-reaction": "Réaction en chaîne",
+      "high-yield": "Haut rendement",
+      "intense-focus": "Focalisation intense",
       "ion": "Ion",
       "orbital-bombardment": "Bombardement orbital",
       "orbital-strike": "Frappe orbitale",

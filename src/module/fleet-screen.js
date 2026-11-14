@@ -122,6 +122,9 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
     /** Folio 118's three riders that name a weapon by the words on its page. */
     #options = { ignoresArmour: false, armourPiercing: false, customised: false, effectiveness: false };
 
+    /** Batteries whose own High Yield or Intense Focus the referee has unticked or ticked again. */
+    #customised = new Map();
+
     /**
      * The attack last resolved on this client, held so `apply` can be a separate gesture.
      * @type {object|null}
@@ -455,8 +458,7 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
             software: stats?.software ?? [],
             pools: FLAT_POOLS.map(key => ({ ...system.pools[key],
                 label: `MGT2.Fleet.Pool.${key}` })),
-            // Folio 119 makes the sandcaster pool a function of who is SHOOTING, and the panel is a
-            // ship's own.
+            // Folio 119 makes the sandcaster pool a function of who is SHOOTING; the panel is a ship's own.
             sand: { ...sand, label: "MGT2.Fleet.Pool.sand", against: target?.name ?? null },
             criticals: Object.entries(ship?.system.criticals ?? {})
                 .filter(([, severity]) => severity > 0)
@@ -530,7 +532,8 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
                 ...row, key,
                 mountLabel: game.i18n.localize(row.mountLabel),
                 bandLabel: row.band ? MGT2.ShipRangeBands[row.band]?.label : null,
-                firing: Math.min(row.count, this.#firing.get(key) ?? row.count)
+                firing: Math.min(row.count, this.#firing.get(key) ?? row.count),
+                customisedOn: Boolean(row.customised) && (this.#customised.get(key) ?? true)
             };
         });
     }
@@ -592,6 +595,9 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
                 return this.render();
             case "attackOption":
                 this.#options[input.dataset.option] = input.checked;
+                return this.render();
+            case "batteryCustomised":
+                this.#customised.set(input.dataset.battery, input.checked);
                 return this.render();
             case "mitigatePool":
                 this.#mitigate.pool = value;
@@ -858,6 +864,7 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
         const battery = this.#batteryOf(attacker, target.dataset.battery);
         if ( !battery ) return;
         const count = Math.max(1, Math.min(battery.count, this.#firing.get(battery.key) ?? battery.count));
+        const options = { ...this.#options, customised: this.#options.customised || battery.customisedOn };
 
         let result = null;
         if ( target.dataset.kind === "ion" ) {
@@ -869,11 +876,11 @@ export class FleetCombatScreen extends MGT2Screen(HandlebarsApplicationMixin(App
                 return ui.notifications.warn(game.i18n.localize("MGT2.Fleet.Screen.SpinalLocked"));
             }
             result = await FleetAttack.resolveSpinal({
-                attacker, target: victim, weapon: battery, ...this.#options });
+                attacker, target: victim, weapon: battery, ...options });
         }
         else {
             result = await FleetAttack.resolveStandard({
-                attacker, target: victim, weapon: battery, count, ...this.#options });
+                attacker, target: victim, weapon: battery, count, ...options });
         }
         if ( !result ) return this.render();
         this.#attack = {

@@ -8,6 +8,34 @@
 
 ---
 
+## [0.2.13]
+
+**Verificado en Foundry VTT 14.370.**
+
+### ⚠ Cambios que rompen
+
+* **La cantidad de una munición cuenta cargadores de repuesto**: *Recargar* gasta uno. Una cantidad
+  escrita en balas se lee ahora en cargadores.
+
+### Novedades
+
+* **Creación**: la relación *Conexión*, anotada en la hoja de cada Viajero vinculado.
+* **Finanzas**: *Cobrar los objetos soltados sobre un Viajero*, un ajuste desactivado por defecto.
+* **Regla de la casa**: *Impactos para los Viajeros*, desactivada por defecto.
+* **Especies**: los rasgos que modifican una tirada aparecen en el diálogo de tirada; el Metabolismo
+  rápido o lento cuenta para la Iniciativa.
+* **Armas**: accesorios montados (mira, mira láser, bípode…); la mira láser da MD+1 a menos de
+  50 m (CSC p.176).
+* **Armas**: un arma secundaria montada en otra (lanzagranadas, Intruder…).
+* **Armas psiónicas**: el MD de PSI al daño y el gasto de puntos; High Yield, Very High Yield e
+  Intense Focus en las armas de nave.
+* **Vehículos**: un artillero por montura, y las troneras.
+* **Naves**: parchear o reparar una localización dañada, con piezas de repuesto.
+
+### Correcciones
+
+* Borrar un contenedor de un personaje ya no se repite en cada cliente conectado.
+
 ## [0.2.12]
 
 **Verificado en Foundry VTT 14.370.**

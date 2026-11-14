@@ -2,13 +2,14 @@ import { INTERPRETATION_SECTIONS, MENU_ID, RULE_GROUPS, RULES, Rules, ruleSettin
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-/** Where a rule is printed; a house rule prints nothing, the page it sits on says so. */
+/** Where a rule is printed; an interpretation prints nothing, the page it sits on says so. */
 function sourceLine(rule) {
     if ( rule.book ) return rule.page
         ? game.i18n.format("MGT2.Rules.Source",
             { book: game.i18n.localize(`MGT2.Books.${rule.book}`), page: rule.page })
         : game.i18n.localize(`MGT2.Books.${rule.book}`);
     if ( rule.unofficial ) return game.i18n.format("MGT2.Rules.Unofficial", { year: rule.unofficial });
+    if ( rule.house ) return game.i18n.localize("MGT2.Rules.HouseRule");
     return "";
 }
 
@@ -52,7 +53,7 @@ export class OptionalRulesMenu extends HandlebarsApplicationMixin(ApplicationV2)
         const pages = RULE_GROUPS.map(group => ({
             key: group,
             label: `MGT2.Rules.Groups.${group}`,
-            sections: [{ rules: rows.filter(row => row.book && (row.group === group)) }]
+            sections: [{ rules: rows.filter(row => (row.book || row.house) && (row.group === group)) }]
         }));
         pages.push({
             key: "interpretations",
@@ -77,6 +78,7 @@ export class OptionalRulesMenu extends HandlebarsApplicationMixin(ApplicationV2)
             group: rule.group,
             section: rule.section ?? null,
             book: Boolean(rule.book),
+            house: rule.house === true,
             name: `MGT2.Rules.${key}.name`,
             hint: `MGT2.Rules.${key}.hint`,
             source: sourceLine(rule),

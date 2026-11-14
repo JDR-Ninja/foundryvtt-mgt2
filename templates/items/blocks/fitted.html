@@ -1,0 +1,43 @@
+{{! What is fitted to this weapon, as the contents list draws a bag's. CSC folio 174: one sight works, so
+    a second is marked and grants nothing; a bipod's row carries its deployed pill, live in play. }}
+<div class="block">
+	<div class="sect{{#if bare}} bare{{/if}}">
+		{{#unless bare}}<h3>{{localize 'MGT2.Items.Fitted'}}</h3>{{/unless}}
+		<span class="count">{{nested.length}}</span>
+		<i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Items.FittedHint'}}"></i>
+	</div>
+	{{#if nested.length}}
+	<table class="rows fitted">
+		<thead>
+			<tr>
+				<th>{{localize 'MGT2.Items.Name'}}</th>
+				<th>{{localize 'MGT2.Items.Type'}}</th>
+				<th class="r">{{localize 'MGT2.Items.Weight'}}<i>{{unitlabels.weight}}</i></th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each nested as |entry|}}
+			<tr class="draggable" data-item-id="{{entry._id}}">
+				<td>{{entry.name}}{{#if entry.fits}}<span class="sub">{{localize 'MGT2.Items.Fits'}} · {{entry.fits}}</span>{{/if}}
+					{{#if entry.idle}}<span class="pill warn" data-tooltip="{{localize 'MGT2.Items.SightIdle'}}">{{localize 'MGT2.Items.Idle'}}</span>{{/if}}
+					{{#if entry.deploys}}<button type="button" class="eq{{#if entry.deployed}} on{{/if}}" data-action="fittedDeploy" data-tooltip="{{localize 'MGT2.Items.DeployedHint'}}"><i class="fa-regular fa-circle"></i><i class="fa-solid fa-circle-check"></i><span>{{localize 'MGT2.Items.Deployed'}}</span></button>{{/if}}
+				</td>
+				<td class="kind">{{entry.type}}</td>
+				<td class="r num{{#unless entry.weight}} nil{{/unless}}">{{#if entry.weight}}{{entry.weight}}{{else}}&mdash;{{/if}}</td>
+				<td class="r">
+					<div class="acts">
+						<a class="play-only" data-action="nestedEdit" data-tooltip="{{localize 'MGT2.Actor.View'}}"><i class="fas fa-eye"></i></a>
+						<a class="edit-only" data-action="nestedRemove" data-tooltip="{{localize 'MGT2.Items.Unfit'}}"><i class="fa-solid fa-link-slash"></i></a>
+						<a class="edit-only" data-action="nestedEdit" data-tooltip="{{localize 'MGT2.Actor.EditItem'}}"><i class="fas fa-edit"></i></a>
+						<a class="edit-only" data-action="nestedDelete" data-tooltip="{{localize 'MGT2.Actor.DeleteItem'}}"><i class="fas fa-trash"></i></a>
+					</div>
+				</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+	{{else}}
+	<p class="hint">{{#if secondary}}{{localize 'MGT2.Items.FittedDropSecondary'}}{{else}}{{localize 'MGT2.Items.FittedDrop'}}{{/if}}</p>
+	{{/if}}
+</div>

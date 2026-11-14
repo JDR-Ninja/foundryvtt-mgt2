@@ -29,6 +29,7 @@
 					<td>
 						{{entry.name}}
 						{{#if entry.held}}<span class="sub">{{localize 'MGT2.Actor.stash.Holds' n=entry.held}}</span>{{/if}}
+						{{#if entry.fitted.length}}<span class="sub fitted" data-tooltip="{{localize 'MGT2.Items.Fitted'}}">{{#each entry.fitted as |fit|}}{{#unless @first}} · {{/unless}}<a data-action="itemEdit" data-item-id="{{fit._id}}">{{fit.name}}</a>{{/each}}</span>{{/if}}
 					</td>
 					<td class="kind">{{entry.type}}</td>
 					<td class="r num{{#unless entry.quantity}} nil{{/unless}}">{{#if entry.quantity}}{{entry.quantity}}{{else}}&mdash;{{/if}}</td>

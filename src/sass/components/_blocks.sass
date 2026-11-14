@@ -1113,6 +1113,41 @@ li.chat-message
 		b
 			font-weight: 600
 			color: var(--danger)
+	// A ship's effect line carries its repair controls beside the sentence, never inside it.
+	.effrow
+		grid-column: 2
+		display: flex
+		flex-wrap: wrap
+		align-items: baseline
+		gap: 3px 10px
+		margin: -1px 0 3px
+		font-size: 11.5px
+		.eff
+			margin: 0
+	// Core folio 172: a patched location keeps its severity and loses its effects while the patch holds.
+	.effrow.patched .eff b
+		color: var(--faint)
+		text-decoration: line-through
+	.pat
+		padding: 0 7px
+		font-family: var(--cond)
+		font-size: 10.5px
+		font-weight: 600
+		letter-spacing: 0.06em
+		color: var(--warn)
+		border: 1px solid currentColor
+		border-radius: 999px
+		background: color-mix(in oklab, var(--warn) 14%, transparent)
+	.racts
+		display: inline-flex
+		align-items: baseline
+		gap: 10px
+		margin-left: auto
+		a
+			cursor: var(--cursor-pointer)
+			color: var(--mute)
+			&:hover
+				color: var(--accent-text)
 
 // The critical's controls on one line: the apply group, then the typed values as label and input.
 .mgt2 .critrow
@@ -1135,6 +1170,10 @@ li.chat-message
 		gap: 6px
 		input.f
 			width: 3.4rem
+	.spare
+		margin-left: auto
+		font-size: 11.5px
+		color: var(--mute)
 
 // --------------------------------------------
 //  CHARACTERISTICS COLUMN
@@ -1388,6 +1427,27 @@ li.chat-message
 // it needs a gap its own layout does not give it.
 .mgt2 .chars .dmgctl
 	margin-top: 7px
+
+// The world's Hits rule: what STR + DEX + END would give, and the one button that types it.
+.mgt2 .chars .hitsum
+	display: flex
+	flex-wrap: wrap
+	align-items: baseline
+	gap: 6px
+	margin-top: 7px
+	.lbl,
+	.btn
+		white-space: nowrap
+	b
+		font-family: var(--mono)
+		font-size: 12px
+		font-weight: 500
+		color: var(--ink)
+	.btn
+		margin-left: auto
+
+.mgt2 .chars .hitsask
+	margin: 6px 0 0
 
 // --------------------------------------------
 //  DROP FEEDBACK — shared by every zone that takes a document

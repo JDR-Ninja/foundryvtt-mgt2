@@ -124,7 +124,8 @@ export class RollPromptHelper {
                         scope: source.characteristics?.join(" ") ?? "",
                         // `|`, never a space: an other-speciality key is `P0:` and the skill's words.
                         skillScope: skills?.join("|") ?? "",
-                        idle: skills?.length === 0
+                        idle: (source.waived === true) || (skills?.length === 0),
+                        hint: source.hint ? game.i18n.localize(source.hint) : ""
                     };
                 }),
                 difficulty: options.difficulty,
@@ -153,8 +154,8 @@ export class RollPromptHelper {
                 priorChecks: this.#priorChecks(6, options.armed),
                 ...this.#ceilingContext(options.ceiling),
                 ...this.#reachContext(options.blocks?.psionic ? options.talent : null),
-                // Core p.74's table is headed "Common Modifiers to Ranged Attacks"; a melee weapon
-                // still brings its traits.
+                psiWeapon: this.#psiWeaponContext(options.psiWeapon),
+                // Core p.74's table is headed "Common Modifiers to Ranged Attacks"; a melee weapon still brings its traits.
                 ...this.#rangeContext(options.blocks?.range ? options.weapon : null, options.measured)
             });
 
@@ -473,15 +474,16 @@ export class RollPromptHelper {
 
     /** Core folio 59: an untrained check is still a check of the skill, so `NP` follows a skill a request named. */
     static skillScope(source, named = "") {
-        return (named && MGT2Helper.isSkillOrSpecialityOf(named, source.skillSlug))
+        const slugs = [source.skillSlug, ...(source.skillSlugs ?? [])];
+        return (named && slugs.some(slug => MGT2Helper.isSkillOrSpecialityOf(named, slug)))
             ? [...source.skills, "NP"] : source.skills;
     }
 
-    /** Everything standing against `modifiers.check`, each entry still named, for the actor whose skill rolls. */
-    static checkModifiers(actor, token = null) {
+    /** Everything standing against `modifiers.check`, each still named; a row held for Initiative only on that roll. */
+    static checkModifiers(actor, token = null, { initiative = false } = {}) {
         const check = actor.system.modifiers?.check;
         if ( !check ) return [];
-        const sources = [...(check.sources ?? [])];
+        const sources = (check.sources ?? []).filter(source => initiative || !source.initiative);
         const standing = check.custom + check.effect;
         if ( standing !== 0 ) sources.push({ key: "actor", label: "MGT2.RollPrompt.ActorDM", dm: standing });
         // Core p.76: every Reaction taken costs DM-1 on the next set of actions.
@@ -562,6 +564,15 @@ export class RollPromptHelper {
             })) };
     }
 
+    /** CSC folio 137's spend row: the reserve it is capped at, and what a point buys. */
+    static #psiWeaponContext(psi) {
+        if ( !(psi?.reserve > 0) ) return null;
+        return { reserve: psi.reserve,
+            of: MGT2Helper.plural("MGT2.RollPrompt.ReachCost", psi.reserve, { points: psi.reserve }),
+            hint: psi.ap ? game.i18n.format("MGT2.RollPrompt.PsiSpendHintAP", { ap: psi.ap })
+                : game.i18n.localize("MGT2.RollPrompt.PsiSpendHint") };
+    }
+
     /**
      * What the Range block needs: the Range score with the loaded round, the aiming ladder, the two
      * thresholds Core folio 77 names and — for a weapon with Auto — the fire mode.
@@ -584,6 +595,11 @@ export class RollPromptHelper {
                 distance: measured?.distance ?? "",
                 // Under the gutter word, so the band can be read against the score it came from.
                 rangeLabel: range.value ? MGT2Helper.getRangeDisplay(range) : "",
+                // The box steps aside once the weapon's own fitted aiming aids are on its chips.
+                laserSight: (weapon.system.effective.sighted
+                    || weapon.system.effective.attackDMs.some(row => row.within !== null)) ? null : {
+                    within: MGT2Helper.metresIn(MGT2.AttackModifiers.laserSight.under, range.unit),
+                    label: game.i18n.format("MGT2.Items.AttackUnder", { n: MGT2.AttackModifiers.laserSight.under }) },
                 // Core folio 77 states the rule in metres, so a weapon ranged in kilometres is not offered it.
                 thresholds: (range.unit === "kilometer") ? null
                     : Object.entries(MGT2.ExtremeRangeThresholds).map(([key, threshold]) => ({
@@ -694,9 +710,11 @@ export class RollPromptHelper {
         for ( const box of form.querySelectorAll("input[data-when]") ) {
             const bound = Number(box.dataset.whenValue);
             if ( !box.dataset.when ) continue;
-            const met = (box.dataset.when === "beyond")
-                ? (distance > bound)
-                : ((distance > 0) && (bound > 0) && (distance <= bound));
+            const { under, from } = box.dataset;
+            const met = (box.dataset.when === "range")
+                ? ((distance > 0) && (!under || (distance < Number(under))) && (!from || (distance >= Number(from))))
+                : (box.dataset.when === "beyond") ? (distance > bound)
+                    : ((distance > 0) && (bound > 0) && (distance <= bound));
             if ( box.dataset.auto === "true" ) box.checked = met;
             const status = form.querySelector(`[data-status="${box.name}"]`);
             if ( status ) {
@@ -807,20 +825,21 @@ export class RollPromptHelper {
             if ( dm ) terms.push([input.dataset.term, dm]);
         }
 
+        const distance = MGT2Helper.getNumberFromInput(form.elements.distance?.value);
         for ( const box of form.querySelectorAll("input[type=checkbox][data-dm]") ) {
-            // Core p.74: a laser sight is worth nothing to an attacker who is not aiming.
             const requires = box.dataset.requires;
-            const live = !requires || (!suppressed.has(requires)
-                && (MGT2Helper.getNumberFromInput(form.elements[requires]?.value) > 0));
+            const live = (!requires || (!suppressed.has(requires)
+                && (MGT2Helper.getNumberFromInput(form.elements[requires]?.value) > 0)))
+                && !(box.dataset.within && (distance >= Number(box.dataset.within)));
             box.disabled = !live;
             box.closest("label")?.classList.toggle("disabled", !live);
             // A box the player cannot reach is not an offer, and "your call" on a greyed control
             // says the opposite of what it is doing.
-            const status = requires && form.querySelector(`[data-status="${box.name}"]`);
+            const status = (requires || box.dataset.within) && form.querySelector(`[data-status="${box.name}"]`);
             if ( status ) {
                 status.title = live ? game.i18n.localize("MGT2.RollPrompt.TraitOffered")
-                    : game.i18n.format("MGT2.RollPrompt.TraitUnmet",
-                        { requirement: game.i18n.localize(MGT2.AttackModifiers[requires]?.label ?? requires) });
+                    : game.i18n.format("MGT2.RollPrompt.TraitUnmet", { requirement: requires
+                        ? game.i18n.localize(MGT2.AttackModifiers[requires]?.label ?? requires) : box.dataset.withinLabel });
             }
             // A chip is solid while it is in the roll and struck through while it is not.
             const chip = box.closest(".code");

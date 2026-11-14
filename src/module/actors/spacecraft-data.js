@@ -29,6 +29,9 @@ const BIS_PROCESSING = 5;
 /** HG p.111 divides Armour and Hull points by this and never says why: it is the mean of 1D. */
 const FLEET_DIVISOR = 3.5;
 
+/** Core folio 172 patches a critical's effects; these cell keys happen once and leave none. */
+const ONE_OFF_EFFECTS = ["damage", "occupants", "cargo", "armour", "hullSeverity"];
+
 /** HG p.110: the Tech Level step every fleet DM adds — +1 at TL12-14, +2 at TL15. */
 const FLEET_TL_STEPS = [{ tl: 15, dm: 2 }, { tl: 12, dm: 1 }];
 
@@ -258,10 +261,8 @@ export class SpacecraftData extends CraftData {
                 // **Per craft, not for the bay**: what one of them costs the hull, so
                 // the row consumes `count × capacity`.
                 capacity: tons(0),
-                // The Indigo class flies ten light fighters off ten clamps, and one entry per
-                // craft makes that ten rows differing only in a name the referee had to invent —
-                // which is a live request against `mgt2e`, where the same limit forces ten
-                // separately-named Actors.
+                // The Indigo class flies ten light fighters off ten clamps: one row, not ten rows
+                // differing only in an invented name.
                 count: new fields.NumberField({
                     required: false, nullable: false, integer: true, min: 1, initial: 1 }),
                 craft: new fields.DocumentUUIDField({
@@ -335,11 +336,21 @@ export class SpacecraftData extends CraftData {
                 // readout stays blank rather than declaring a brand-new hull overdue.
                 servicedOn: new fields.NumberField({
                     required: false, nullable: true, integer: true, initial: null })
-            })
+            }),
+
+            // Core folio 172: a patch repairs a location's effects for 1D hours, and each round worked
+            // on the same hit adds DM+1. `stamp` counts every settled state; a card is good for its own.
+            criticalRepairs: new fields.SchemaField(Object.fromEntries(this.CRITICAL_KEYS.map(location =>
+                [location, new fields.SchemaField({
+                    patched: new fields.BooleanField({ required: false, initial: false }),
+                    hours: new fields.NumberField({
+                        required: false, nullable: true, integer: true, min: 0, initial: null }),
+                    attempts: count(0),
+                    stamp: count(0)
+                })])))
         });
 
-        // HG p.120's Crew critical and p.121's Radiation both take Crew Skill down, so the
-        // accumulator is declared here rather than in `ActorBaseData` — no other Actor type has one.
+        // HG p.120's Crew critical and p.121's Radiation take Crew Skill down; no other Actor has one.
         schema.modifiers.extendFields({ crewSkill: createModifierField() });
         return schema;
     }
@@ -579,12 +590,8 @@ export class SpacecraftData extends CraftData {
     }
 
     /**
-     * The rating of a named software package fitted to this ship — `Evade/2` answers `evade` with
-     * 2. Ship software is a `component` Item of category `software`, and `ComponentData.rating`
-     * already IS the rating: no new field, and the work was in the content rather than the schema
-     *.
-     * @param {string} key   A key of `MGT2.ShipSoftware`
-     * @returns {number} The highest rating fitted, or 0
+     * The highest rating of a named package fitted — `Evade/2` answers `evade` with 2, read off a
+     * `component` Item of category `software`, or 0. @param {string} key   A key of `MGT2.ShipSoftware`
      */
     softwareRating(key) {
         const entry = MGT2.ShipSoftware[key];
@@ -761,12 +768,7 @@ export class SpacecraftData extends CraftData {
         };
     }
 
-    /**
-     * Hull points are a derivation and not a transcription, so they land in `auto` exactly as a
-     * species modifier does — and here, before the base clears it, because `prepareDerivedData`
-     * reads `auto` on its first line.
-     * @inheritDoc
-     */
+    /** Hull points are derived into `auto`, here because `prepareDerivedData` reads it first. @inheritDoc */
     prepareBaseData() {
         super.prepareBaseData();
         this.characteristics.hull.auto = this.hull.pointsOverride ?? this.hullPoints;
@@ -817,7 +819,7 @@ export class SpacecraftData extends CraftData {
             { state: game.i18n.localize(`MGT2.Criticals.States.${state}`) }) : null;
     }
 
-    /** The standing criticals as numbers. */
+    /** The standing criticals as numbers; Core folio 172's patch lifts a location's while it holds. */
     #foldCriticals() {
         const totals = {
             powerFactor: 1, thrustLoss: 0, thrustZero: false,
@@ -827,11 +829,12 @@ export class SpacecraftData extends CraftData {
         for (const location of this.criticalLocations) {
             const cell = this.criticalEffect(location);
             if (!cell) continue;
-            // HG p.120's Crew column carries a rider Core p.170's does not: at Severity 3 the cell
-            // reads "3D% of crew take 3D damage.
+            // HG p.120's Crew column carries a rider Core p.170's does not: the crew lost at Severity 3+,
+            // which a patch on the systems does not bring back.
             if ((location === "crew") && (this.criticals.crew >= FLEET_CREW_CRITICAL.severity)) {
                 totals.crewSkill += FLEET_CREW_CRITICAL.dm;
             }
+            if (this.criticalRepairs[location]?.patched) continue;
             if (cell.power === 0) totals.powerFactor = 0;
             else if (Number.isInteger(cell.power)) totals.powerFactor *= 1 + (cell.power / 100);
             if (cell.thrust === 0) totals.thrustZero = true;
@@ -843,6 +846,116 @@ export class SpacecraftData extends CraftData {
             if (cell.jump) totals.jump = cell.jump;
         }
         return totals;
+    }
+
+    get sparePartLots() {
+        return (this.parent?.items ?? []).filter(item => (item.type === "cargo") && item.system.spareParts
+            && (item.system.tons > 0)).sort((a, b) => a.system.tons - b.system.tons);
+    }
+
+    get sparePartsAboard() {
+        return SpacecraftData.#tons(this.sparePartLots.reduce((sum, lot) => sum + lot.system.tons, 0));
+    }
+
+    static #tons(value) {
+        return Math.round(value * 1000) / 1000;
+    }
+
+    /** Core folio 159's table read at Effect − Severity, never under its one-ton row. */
+    static sparePartsFor(effect, severity) {
+        const row = Math.max(1, Math.trunc(effect) - Math.trunc(severity));
+        return MGT2.SpareParts[Math.min(row, MGT2.SpareParts.length) - 1];
+    }
+
+    /** Core folio 159, HG folio 54: drones let Electronics (remote ops) make the Repair System action. */
+    get repairDrones() {
+        return (this.parent?.items ?? []).some(item => (item.type === "component")
+            && MGT2.RepairDrones.some(name => SpacecraftData.#plainName(item.name).includes(name)));
+    }
+
+    /** Why `location` takes no `patch` or `repair` (Core folios 159 and 172) as a sentence, or null. */
+    repairRefusal(location, mode) {
+        const name = game.i18n.localize(MGT2.ShipCriticals[location]?.label ?? location);
+        const cell = this.criticalEffect(location);
+        if (!cell) return game.i18n.format("MGT2.Repair.NotHit", { location: name });
+        if (location === "hull") return game.i18n.localize("MGT2.Repair.HullRefused");
+        const states = [cell.fuel?.state, cell.jump, cell.weapons?.state, cell.computer, cell.bridge?.station];
+        if (states.some(state => ["destroyed", "explodes"].includes(state))) {
+            return game.i18n.format("MGT2.Repair.Destroyed", { location: name });
+        }
+        if ((mode === "patch") && !Object.keys(cell).some(key => !ONE_OFF_EFFECTS.includes(key))) {
+            return game.i18n.format("MGT2.Repair.NothingToPatch", { location: name });
+        }
+        return null;
+    }
+
+    /** Core folio 172: a new critical on the location starts the work again and ends its patch. @inheritDoc */
+    criticalAppliedChanges(location) {
+        return this.criticalRepairs?.[location] ? { [`system.criticalRepairs.${location}`]: this.#settled(location) } : {};
+    }
+
+    /** The location's repair state cleared, and stamped so no card rolled before it applies. */
+    #settled(location, changes = {}) {
+        return { patched: false, hours: null, attempts: 0, ...changes, stamp: this.criticalRepairs[location].stamp + 1 };
+    }
+
+    /** Why a card no longer applies: rolled against another severity, or before the location last settled. */
+    #repairStale(location, severity, stamp, checks = []) {
+        const changed = () => game.i18n.format("MGT2.Repair.Changed",
+            { location: game.i18n.localize(MGT2.ShipCriticals[location]?.label ?? location) });
+        if (this.criticals[location] !== severity) return changed();
+        return checks.map(check => check()).find(Boolean)
+            ?? (((stamp ?? 0) === this.criticalRepairs[location].stamp) ? null : changed());
+    }
+
+    /** A scored patch lasts 1D hours (Core folio 172); a repair clears the location and spends parts (folio 159). */
+    async applyRepair({ mode, location, effect, severity, stamp }) {
+        const patched = () => (((mode === "patch") && this.criticalRepairs[location].patched)
+            ? game.i18n.localize("MGT2.Repair.AlreadyPatched") : null);
+        const refused = this.#repairStale(location, severity, stamp, [() => this.repairRefusal(location, mode),
+            () => ((effect >= 0) ? null : game.i18n.localize("MGT2.Repair.Failed")), patched]);
+        if (refused) return { refused };
+        if (mode === "patch") {
+            const roll = await new Roll("1d6").roll();
+            await this.parent.update({ [`system.criticalRepairs.${location}`]:
+                this.#settled(location, { patched: true, hours: roll.total }) });
+            return { hours: roll.total };
+        }
+
+        const tons = SpacecraftData.sparePartsFor(effect, severity);
+        const aboard = this.sparePartsAboard;
+        if (tons > aboard) return { refused: game.i18n.format("MGT2.Repair.ShortParts", { tons, aboard }) };
+        const updates = [];
+        const deletes = [];
+        let left = tons;
+        for (const lot of this.sparePartLots) {
+            if (left <= 0) break;
+            const rest = SpacecraftData.#tons(lot.system.tons - Math.min(lot.system.tons, left));
+            left = SpacecraftData.#tons(left - (lot.system.tons - rest));
+            if (rest > 0) updates.push({ _id: lot.id, "system.tons": rest });
+            else deletes.push(lot.id);
+        }
+        await this.parent.update({ [`system.criticals.${location}`]: 0,
+            [`system.criticalRepairs.${location}`]: this.#settled(location) });
+        if (updates.length) await this.parent.updateEmbeddedDocuments("Item", updates);
+        if (deletes.length) await this.parent.deleteEmbeddedDocuments("Item", deletes);
+        return { tons };
+    }
+
+    /** Core folio 172: DM+1 for each round worked on the same hit; a card raises the count once. */
+    async keepWorking({ location, severity, attempts, stamp }) {
+        const state = this.criticalRepairs[location];
+        const refused = this.#repairStale(location, severity, stamp, [() => this.repairRefusal(location, "patch"),
+            () => (state.patched ? game.i18n.localize("MGT2.Repair.AlreadyPatched") : null),
+            () => ((state.attempts === attempts) ? null : game.i18n.localize("MGT2.Repair.Counted"))]);
+        if (refused) return { refused };
+        await this.parent.update({ [`system.criticalRepairs.${location}.attempts`]: attempts + 1 });
+        return { attempts: attempts + 1 };
+    }
+
+    /** The referee ends a patch: no clock runs it out. */
+    async endPatch(location) {
+        return this.parent.update({ [`system.criticalRepairs.${location}`]: this.#settled(location) });
     }
 
     /**
@@ -1034,11 +1147,7 @@ export class SpacecraftData extends CraftData {
         this.power.fullDraw = round(full);
     }
 
-    /**
-     * The tonnage budget, derived row by row from the stored ratings rather than summed from
-     * component Items — which is the whole of the argument for storing them, and the reason a ship
-     * with no items still balances.
-     */
+    /** The tonnage budget, derived row by row from the stored ratings, so a ship with no Items balances. */
     #prepareTonnage() {
         const mounts = this.mountClasses.reduce((sum, type) => sum + (type.tons ?? 0), 0);
         const bays = this.bayTons;

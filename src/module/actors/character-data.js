@@ -49,7 +49,9 @@ export class CharacterData extends ActorBaseData {
                 charm: createCharacteristicField(false),
                 psionic: createCharacteristicField(true),
                 other: createCharacteristicField(false),
-                reputation: createCharacteristicField(false)
+                reputation: createCharacteristicField(false),
+                // The world's Hits rule's pool: typed, never derived into.
+                hits: createCharacteristicField(false)
             }),
 
             health: new fields.SchemaField({
@@ -249,8 +251,9 @@ export class CharacterData extends ActorBaseData {
         // ⚠ v14 runs migrateData over update payloads as well as stored documents, and a `-=value`
         // deletion arrives here as an undefined `value` — hence the type test rather than `"value"
         // in c`.
-        for (const c of Object.values(source.characteristics ?? {})) {
-            if (typeof c?.value !== "number") continue;
+        for (const [key, c] of Object.entries(source.characteristics ?? {})) {
+            // The old shape never carried Hits, so a bare `value` there is a stray write and never splits the pool.
+            if ((typeof c?.value !== "number") || (key === "hits")) continue;
             const split = ("base" in c) || ("damage" in c);
             // Nine of the twelve never set a maximum, so `max - value` would read INT 8 as a wound of -8.
             c.base ??= Math.max(c.max ?? 0, c.value);
@@ -265,12 +268,18 @@ export class CharacterData extends ActorBaseData {
         return super.migrateData(source, options);
     }
 
-    /**
-     * Core folio 81's cumulative radiation column costs END permanently, and the table prints the
-     * TOTAL at each band rather than a step — so it derives from the rad count instead of being
-     * written to the score once per crossing.
-     * @inheritDoc
-     */
+    /** @inheritDoc */
+    get isPerson() {
+        return true;
+    }
+
+    /** A Traveller's Hits exist only while the world's rule does. @inheritDoc */
+    get characteristicKeys() {
+        const keys = super.characteristicKeys;
+        return this.hitsRuleApplies ? keys : keys.filter(key => key !== "hits");
+    }
+
+    /** Core folio 81's cumulative END loss derives from the rad count, the table printing totals. @inheritDoc */
     prepareBaseData() {
         super.prepareBaseData();
         this.prepareRadiationLoss();
@@ -331,6 +340,7 @@ export class CharacterData extends ActorBaseData {
             .map(key => MGT2Helper.uppDigit((this.characteristics[replaced[key]] ?? this.characteristics[key]).max)).join("");
 
         this.#prepareTreatment();
+        if (this.hitsRuleApplies) this.states.incapacitated = this.stunIncapacitated;
         this.#prepareTraining();
         this.#prepareWealth();
         // Companion p.80: END days before starvation tells, then twice END more at DM-2.
@@ -390,10 +400,12 @@ export class CharacterData extends ActorBaseData {
     #prepareTreatment() {
         const damaged = this.damagedLinks.length;
         const spent = this.states.firstAidUsed;
-        this.states.surgeryByRule = spent && (damaged >= 3);
+        // Under the Hits rule no three characteristics are counted: surgery is the referee's flag alone.
+        const counted = !this.hitsInForce;
+        this.states.surgeryByRule = counted && spent && (damaged >= 3);
         this.states.needsSurgery = this.states.surgeryRequired || this.states.surgeryByRule;
         // Restoring one of the three to its maximum is what moves a patient here from surgery.
-        this.states.canMedicalCare = spent && (damaged >= 1) && (damaged <= 2);
+        this.states.canMedicalCare = spent && (damaged >= 1) && (counted ? (damaged <= 2) : !this.states.needsSurgery);
     }
 
     /**
@@ -594,17 +606,21 @@ export class CharacterData extends ActorBaseData {
         this.parent.updateSource({ prototypeToken: { actorLink: true } }); // QoL
     }
 
-    /**
-     * Deleting a container takes its contents with it, and deleting a computer ejects its software.
-     */
+    /** Deleting a container takes its contents; deleting a computer or a weapon ejects what it runs or has fitted. */
     async onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
+        if (userId !== game.user.id) return;
         const toDeleteIds = [];
         const itemToUpdates = [];
 
         for (const d of documents) {
             if (d.type === "container") {
                 for (const item of this.parent.items) {
-                    if (item.system.container?.id === d._id) toDeleteIds.push(item.id);
+                    if (item.system.container?.id !== d._id) continue;
+                    toDeleteIds.push(item.id, ...item.fitted.flatMap(f => [f.id, ...f.fitted.map(g => g.id)]));
+                }
+            } else if (d.type === "weapon") {
+                for (const item of this.parent.items) {
+                    if (item.system.fittedTo === d._id) itemToUpdates.push({ _id: item.id, "system.fittedTo": "" });
                 }
             } else if (MGT2Helper.runsSoftware(d)) {
                 for (const item of this.parent.items) {

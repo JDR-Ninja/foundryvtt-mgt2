@@ -48,8 +48,7 @@ export class CraftData extends ActorBaseData {
             tl: new fields.NumberField({
                 required: false, nullable: false, integer: true, min: 0, initial: 12 }),
 
-            // Severity per location, stored; what a severity *does* is a lookup in `CRITICALS`
-            //, which keeps the books' prose out of the document.
+            // Severity per location, stored; what a severity does is a lookup in `CRITICALS`.
             criticals: new fields.SchemaField(Object.fromEntries(
                 this.CRITICAL_KEYS.map(location => [location, severity()]))),
             // Its own track rather than a tenth location: eight of the vehicle's cells and sixteen
@@ -148,17 +147,24 @@ export class CraftData extends ActorBaseData {
     async applyCritical(location, severity) {
         const current = this.criticals?.[location];
         if (current === undefined) return null;
+        const reset = this.criticalAppliedChanges(location);
 
         if (current >= MAX_SEVERITY) {
             const roll = await new Roll(OVERFLOW_DAMAGE).roll();
-            await this.applyDamage(roll.total, { ignoreArmour: true });
+            if (!foundry.utils.isEmpty(reset)) await this.parent.update(reset);
+            await this.parent.system.applyDamage(roll.total, { ignoreArmour: true });
             return { location, severity: current, overflow: roll };
         }
 
         const wanted = Math.min(MAX_SEVERITY, Math.max(1, Math.trunc(severity) || 0));
         const next = Math.min(MAX_SEVERITY, Math.max(wanted, current + 1));
-        await this.parent.update({ [`system.criticals.${location}`]: next });
+        await this.parent.update({ [`system.criticals.${location}`]: next, ...reset });
         return { location, severity: next, overflow: null };
+    }
+
+    /** What else a new critical on `location` writes, merged into its update. */
+    criticalAppliedChanges(location) {
+        return {};
     }
 
     /** Core p.140, p.169: a cell reading `+1` or `+1D`, capped like every other severity. */

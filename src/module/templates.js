@@ -7,6 +7,8 @@ export const preloadHandlebarsTemplates = async function() {
     "systems/mgt2/templates/chat/collision.html",
     "systems/mgt2/templates/chat/request.html",
     "systems/mgt2/templates/chat/credit-split.html",
+    "systems/mgt2/templates/chat/purchase.html",
+    "systems/mgt2/templates/purchase.html",
     "systems/mgt2/templates/chat/trade-lot.html",
     "systems/mgt2/templates/chat/traffic-booking.html",
     "systems/mgt2/templates/chat/traffic-delivery.html",

@@ -16,9 +16,15 @@
 			<i class="{{#if pip.on}}on{{/if}}" data-action="criticalSet" data-step="{{pip.step}}"></i>
 			{{/each}}
 		</div>
-		{{#if location.effect}}
-		<span class="eff">{{localize 'MGT2.Actor.spacecraft.Severity'}} {{location.severity}} — <b>{{location.effect}}</b></span>
-		{{/if}}
+		{{! Core folio 172: a patch strikes the effect out until the referee ends it; folio 159 repairs it. }}
+		<div class="effrow{{#if location.patched}} patched{{/if}}" data-location="{{location.key}}">
+			<span class="eff">{{localize 'MGT2.Actor.spacecraft.Severity'}} {{location.severity}} — <b>{{location.effect}}</b></span>
+			{{#if location.patched}}<span class="pat">{{location.lasts}}</span>{{/if}}
+			<span class="racts play-only">
+				{{#if location.patched}}<a data-action="criticalPatchEnd">{{localize 'MGT2.Repair.EndPatch'}}</a>{{/if}}
+				<button type="button" class="btn" data-action="criticalRepair"><i class="fa-solid fa-screwdriver-wrench"></i> {{localize 'MGT2.Actor.spacecraft.Repair'}}</button>
+			</span>
+		</div>
 		{{/each}}
 	</div>
 	{{/if}}
@@ -61,5 +67,6 @@
 			<input class="f num" type="number" min="0" max="6" step="1"
 				name="system.hullSeverity" value="{{system.hullSeverity}}" data-dtype="Number" />
 		</label>
+		<span class="pair spare">{{ship.criticals.spareParts}}</span>
 	</div>
 </div>

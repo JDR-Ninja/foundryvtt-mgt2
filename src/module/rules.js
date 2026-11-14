@@ -169,11 +169,8 @@ export const RULES = Object.freeze({
         default: true
     },
 
-    /**
-     * The Companion's optional creation rules, which are **session configuration** and not
-     * per-actor state: a table plays one way for everybody, and having no session document was
-     * about session STATE, never about configuration.
-     */
+    // The Companion's optional creation rules are session configuration, not per-actor state: a table
+    // plays one way for everybody.
 
     // A failed Survival kills the Traveller instead of causing a Mishap.
     creationIronMan: {
@@ -264,6 +261,11 @@ export const RULES = Object.freeze({
             companion: "MGT2.Rules.vacuumRuleset.companion" },
         default: "core"
     },
+    // No book puts a person on Hits: Core p.84's animal pool, typed once from STR + DEX + END.
+    travellerHits: {
+        group: "health", house: true,
+        default: false, seed: false
+    },
     // The default a NEW hull is created with.
     jumpRuleset: {
         group: "space", book: "core", page: "158",
@@ -352,8 +354,8 @@ export const RULES = Object.freeze({
 });
 
 for ( const [key, rule] of Object.entries(RULES) ) {
-    if ( !rule.book && !INTERPRETATION_SECTIONS.includes(rule.section) ) {
-        throw new Error(`MGT2 | the rule "${key}" prints in no book and names no interpretation section.`);
+    if ( !rule.book && !rule.house && !INTERPRETATION_SECTIONS.includes(rule.section) ) {
+        throw new Error(`MGT2 | the rule "${key}" prints in no book, is no house rule and names no interpretation section.`);
     }
 }
 

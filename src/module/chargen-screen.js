@@ -466,7 +466,7 @@ export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplica
             Grants.skills(actor).map(item => item.name)))].sort((a, b) => a.localeCompare(b));
         const first = roster.find(actor => actor.id === this.#selectedId) ?? roster[0];
         const opening = { a: first.id, b: roster.find(actor => actor !== first).id,
-            skills: { a: "", b: "" }, note: "" };
+            skills: { a: "", b: "" }, note: "", relations: { a: "Connection", b: "Connection" } };
 
         // A refusal reopens on the same words: the pair is chosen and the sentence is written
         // before either can be checked, and losing both to one warning costs the table twice.
@@ -475,7 +475,8 @@ export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplica
             if ( !agreed ) return;
             const [a, b] = [game.actors.get(agreed.a), game.actors.get(agreed.b)];
             const written = await Grants.connect(a, b,
-                { [agreed.a]: agreed.skills.a, [agreed.b]: agreed.skills.b }, agreed.note);
+                { [agreed.a]: agreed.skills.a, [agreed.b]: agreed.skills.b }, agreed.note,
+                { [agreed.a]: agreed.relations.a, [agreed.b]: agreed.relations.b });
             if ( written ) {
                 ui.notifications.info(game.i18n.format("MGT2.Chargen.Connect.Made",
                     { name: a.name, other: b.name }));
@@ -489,12 +490,16 @@ export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplica
     static async #askConnection(roster, known, seed) {
         const option = (actor, selected) => `<option value="${actor.id}"${selected
             ? " selected" : ""}>${foundry.utils.escapeHTML(actor.name)}</option>`;
+        const record = chosen => [...MGT2.CreationLimits.connectionRelations, ""].map(key =>
+            `<option value="${key}"${(key === chosen) ? " selected" : ""}>${foundry.utils.escapeHTML(game.i18n.localize(
+                key ? MGT2.ContactRelations[key] : "MGT2.Chargen.Connect.NotRecorded"))}</option>`).join("");
         const content = document.createElement("div");
         content.innerHTML = await foundry.applications.handlebars.renderTemplate(
             `${PARTS_PATH}/connect.html`, {
                 first: roster.map(actor => option(actor, actor.id === seed.a)).join(""),
                 second: roster.map(actor => option(actor, actor.id === seed.b)).join(""),
                 skillA: seed.skills.a, skillB: seed.skills.b, note: seed.note,
+                recordA: record(seed.relations.a), recordB: record(seed.relations.b),
                 skills: known.map(name =>
                     `<option value="${foundry.utils.escapeHTML(name)}"></option>`).join("")
             });
@@ -511,23 +516,26 @@ export class ChargenScreen extends GuideButtonMixin(MGT2Screen(HandlebarsApplica
                     a: button.form.elements.a.value, b: button.form.elements.b.value,
                     skills: { a: button.form.elements["skill-a"].value.trim(),
                         b: button.form.elements["skill-b"].value.trim() },
-                    note: button.form.elements.note.value.trim()
+                    note: button.form.elements.note.value.trim(),
+                    relations: { a: button.form.elements["record-a"].value, b: button.form.elements["record-b"].value }
                 })
             },
-            // Each side's skill row names the Traveller it belongs to, and the pair may be changed
-            // after the dialog opens — so the labels follow the selects rather than the seed.
+            // Each side's rows name the Traveller they belong to, and the pair may be changed after
+            // the dialog opens — so the labels follow the selects rather than the seed.
             render: (click, dialog) => ChargenScreen.#nameSkillRows(dialog.element),
             rejectClose: false
         });
     }
 
-    /** The two skill labels, kept on the Travellers the two selects are actually holding. */
+    /** Each side's skill and record labels, kept on the Travellers the two selects are actually holding. */
     static #nameSkillRows(element) {
         const paint = () => {
             for ( const side of ["a", "b"] ) {
-                const chosen = element.querySelector(`select[name="${side}"]`).selectedOptions[0];
+                const name = element.querySelector(`select[name="${side}"]`).selectedOptions[0]?.textContent ?? "";
                 element.querySelector(`label[data-for="${side}"]`).textContent =
-                    game.i18n.format("MGT2.Chargen.Connect.SkillFor", { name: chosen?.textContent ?? "" });
+                    game.i18n.format("MGT2.Chargen.Connect.SkillFor", { name });
+                element.querySelector(`label[data-record="${side}"]`).textContent =
+                    game.i18n.format("MGT2.Chargen.Connect.Record", { name });
             }
         };
         for ( const side of ["a", "b"] ) {

@@ -8,6 +8,7 @@ import { injectAskTheSame, REQUEST, setupRequestCard } from "./request.js";
 import { injectAskedStrip } from "./request-answer.js";
 import { armChain } from "./roll-prompt.js";
 import { damageOptions, wireDamageTray } from "./damage-tray.js";
+import { traitGloss, traitLabel } from "./traits.js";
 
 /** The check card's own chain control, offered only where the referee turns it on. */
 export const CHAIN_INTO_SETTING = "check.chainInto";
@@ -19,10 +20,7 @@ export function stripCardButton(button) {
     if (buttons && !buttons.childElementCount) buttons.remove();
 }
 
-/**
- * The switch reaches the cards already in the log. The button is baked into the message's stored
- * content, so restoring it is a re-render and never an injection.
- */
+/** The switch reaches the cards already in the log: the button is in the stored content, so this re-renders. */
 export function refreshChainInto() {
     for (const li of ui.chat?.element?.querySelectorAll(".chat-message[data-message-id]") ?? []) {
         const message = game.messages.get(li.dataset.messageId);
@@ -82,6 +80,7 @@ export class ChatHelper {
                 await this._applyChatCardFirstAid(message, event);
             });
         }
+        ChatHelper.#wireRepair(message, html);
 
         // A card with the application tray reads each target itself; one without it predates the tray.
         const tray = wireDamageTray(message, html);
@@ -174,14 +173,10 @@ export class ChatHelper {
         const damage = message.flags?.mgt2?.damage;
         if (!damage?.formula) return;
 
-        // Core p.77: damage is rolled with the attack's Effect added to the total, and a melee
-        // attack adds the attacker's STR DM on top.
-        const attackBonus = [];
-        if (damage.effect) attackBonus.push(MGT2Helper.getFormulaDM(damage.effect));
-        if (damage.strengthDM) attackBonus.push(MGT2Helper.getFormulaDM(damage.strengthDM));
-        if (damage.burst) attackBonus.push(MGT2Helper.getFormulaDM(damage.burst));
-        const bonus = attackBonus.join("");
-        const flat = (damage.effect ?? 0) + (damage.strengthDM ?? 0) + (damage.burst ?? 0);
+        // Core p.77: the attack's Effect and a melee attack's STR DM; CSC folio 137 a psi weapon's PSI; folio 79 a burst.
+        const terms = MGT2Helper.damageBonuses(damage);
+        const bonus = terms.map(term => MGT2Helper.getFormulaDM(term)).join("");
+        const flat = terms.reduce((sum, term) => sum + term, 0);
 
         // The books print `3D`, `3DD` and `3D3` and Foundry parses none of the three, so the stored
         // score is normalised here; an unresolved term throws out of the click handler rather than
@@ -196,7 +191,7 @@ export class ChatHelper {
         // doubled D of `3DD` or as the trait.
         const boost = (MGT2Helper.isDestructive(damage.formula) || damage.destructive) ? 10 : 1;
 
-        const full = await new Roll(formula + bonus, {}).roll();
+        const full = await new Roll(MGT2Helper.yieldFormula(formula, damage.yieldFloor) + bonus, {}).roll();
         const reduced = await new Roll(MGT2Helper.reduceDamageFormula(formula) + bonus, {}).roll();
         const minimum = MGT2Helper.minimumDamage(formula) + flat;
 
@@ -232,6 +227,7 @@ export class ChatHelper {
             source: damage.rollObjectName ?? "",
             formula: [MGT2Helper.showFormula(formula), flat ? MGT2Helper.signed(flat) : ""].join(" ").trim(),
             chips: ChatHelper.#payloadChips(payload, damage),
+            notes: ChatHelper.#reminders(damage),
             options: ChatHelper.#transformOptions(formula,
                 { full: full.total, reduced: reduced.total, minimum }, boost, flat)
         };
@@ -266,9 +262,17 @@ export class ChatHelper {
             chips.push(chip(`${game.i18n.localize("MGT2.Characteristics.strength.name")} ${
                 MGT2Helper.signed(damage.strengthDM)}`));
         }
+        if (damage.psiDM) {
+            chips.push(chip(`${game.i18n.localize("MGT2.Characteristics.psionic.name")} ${MGT2Helper.signed(damage.psiDM)}`));
+        }
+        if (damage.psiPoints) {
+            chips.push(chip(`${MGT2Helper.plural("MGT2.RollPrompt.ReachCost", damage.psiPoints,
+                { points: damage.psiPoints })} ${MGT2Helper.signed(damage.psiPoints)}`));
+        }
         if (damage.burst) {
             chips.push(chip(`${game.i18n.localize("MGT2.FireModes.burst")} ${MGT2Helper.signed(damage.burst)}`));
         }
+        if (damage.yieldFloor) chips.push(chip(traitLabel({ family: "shipWeapon", key: MGT2Helper.yieldTrait(damage.yieldFloor) })));
         // Both meet the target's Protection when the card is applied: AP subtracts from it (Core p.79)
         // and Lo-Pen multiplies it (FC p.7).
         if (payload.ap) chips.push(chip(game.i18n.format("MGT2.Chat.Damage.AP", { score: payload.ap }), true));
@@ -277,6 +281,13 @@ export class ChatHelper {
         if (payload.stun) chips.push(chip(game.i18n.localize("MGT2.Chat.Damage.Stun"), true));
         if (payload.effect >= 6) chips.push(chip(game.i18n.localize("MGT2.Chat.Damage.Floor"), true));
         return chips;
+    }
+
+    /** Aliens 3 folio 180: a Sonic hit's END check, stated for the table and rolled by nobody. */
+    static #reminders(damage) {
+        if ( !Number.isFinite(damage.sonic) ) return [];
+        const sonic = { family: "weapon", key: "sonic", params: [{ slot: "score", value: String(damage.sonic), num: damage.sonic }] };
+        return [`${traitLabel(sonic)} — ${traitGloss(sonic)}`];
     }
 
     /** The three readings, in the order the card offers them; the first is the one preselected. */
@@ -537,6 +548,40 @@ export class ChatHelper {
         return ChatHelper.postRecovery(actor, "MGT2.Radiation.Exposure", message, roll, "MGT2.Actor.Rads");
     }
 
+    /** A repair card's two buttons answer to the ship's owner and nobody else. */
+    static #wireRepair(message, html) {
+        const payload = message.flags?.mgt2?.repair;
+        let ship = null;
+        try { ship = payload?.ship ? foundry.utils.fromUuidSync(payload.ship) : null; } catch { ship = null; }
+        const buttons = [html.querySelector('button[data-action="repairApply"]'),
+            html.querySelector('button[data-action="repairKeep"]')];
+        for (const button of buttons.filter(Boolean)) {
+            if (!ship?.isOwner) {
+                stripCardButton(button);
+                continue;
+            }
+            button.addEventListener("click", async event => {
+                event.preventDefault();
+                event.stopPropagation();
+                const apply = button.dataset.action === "repairApply";
+                // A second click lands before the first one's write; the guard on the severity cannot see it.
+                button.disabled = true;
+                let result;
+                try { result = await (apply ? ship.system.applyRepair(payload) : ship.system.keepWorking(payload)); }
+                finally { button.disabled = false; }
+                const location = game.i18n.localize(MGT2.ShipCriticals[payload.location]?.label ?? "");
+                if (result.refused) return ui.notifications.warn(result.refused);
+                if (result.hours) {
+                    return ui.notifications.info(MGT2Helper.plural("MGT2.Repair.PatchedOn", result.hours,
+                        { location, count: result.hours }));
+                }
+                return ui.notifications.info(apply
+                    ? game.i18n.format("MGT2.Repair.Repaired", { location, tons: result.tons })
+                    : game.i18n.format("MGT2.Repair.Working", { location, dm: MGT2Helper.signed(result.attempts) }));
+            });
+        }
+    }
+
     /** The card knows the Effect; who was treated is the referee's pick, as it is for damage. */
     static async _applyChatCardFirstAid(message, event) {
         event.preventDefault();
@@ -589,7 +634,7 @@ export class ChatHelper {
     static restoredMessage(healed, distribution) {
         const detail = Object.entries(distribution ?? {})
             .filter(([, points]) => points > 0)
-            .map(([key, points]) => `${game.i18n.localize(MGT2.Characteristics[key] ?? key)} ${points}`)
+            .map(([key, points]) => `${game.i18n.localize(MGT2.Characteristics[key] ?? MGT2.DamageTracks[key] ?? key)} ${points}`)
             .join(" · ");
         return detail
             ? game.i18n.format("MGT2.Recovery.Restored", { points: healed, detail })

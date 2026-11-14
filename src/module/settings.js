@@ -4,7 +4,9 @@ import { COLLAPSE_MODES, COLLAPSE_SETTING, refreshFolds } from "./chat-cards.js"
 import { CHAIN_INTO_SETTING, refreshChainInto } from "./chatHelper.js";
 import { MGT2 } from "./config.js";
 import { applyGuideButton } from "./guide.js";
+import { MGT2Helper } from "./helper.js";
 import { PACKS_SETTING, WorldPacksMenu } from "./packs.js";
+import { PURCHASE_MODES } from "./purchase.js";
 import { ASK_AGAIN_SETTING, ASK_SAME_SETTING, NUDGE_MODES, refreshAskTheSame, refreshRequestCards,
     VISIBILITY_MODES } from "./request.js";
 import { refreshRuleUI, RULES, ruleSetting, SEEDED_SETTING } from "./rules.js";
@@ -208,6 +210,21 @@ function ruleField(rule) {
         { initial: () => [...rule.default] });
 }
 
+/** Switching the Hits rule converts nothing: the referee who switched it is told how many wounds no damage now reaches. */
+function reportHitsSwitch(on, userId) {
+    if ( (userId !== game.user.id) || !game.user.isGM ) return;
+    const actors = [...game.actors];
+    for ( const scene of game.scenes ) {
+        for ( const token of scene.tokens ) if ( !token.actorLink && token.actor ) actors.push(token.actor);
+    }
+    const count = actors.filter(actor => actor.system.hitsStranded?.(on)).length;
+    if ( !count ) return;
+    const key = on ? "MGT2.Rules.travellerHits.StrandedOn" : "MGT2.Rules.travellerHits.StrandedOff";
+    ui.notifications.info(MGT2Helper.plural(key, count, { count }));
+}
+
+const RULE_SWITCHED = { travellerHits: reportHitsSwitch };
+
 /** Every setting and menu the system has; nothing is registered anywhere else. */
 export const registerSettings = function () {
 
@@ -386,13 +403,15 @@ export const registerSettings = function () {
             name: `MGT2.Rules.${key}.name`,
             hint: `MGT2.Rules.${key}.hint`,
             scope: "world",
-            // The grouped menu below is where these are set: Foundry's settings pane cannot group,
-            // and an ungrouped list of switches is the noise this feature exists to remove.
+            // The grouped menu below is where these are set: Foundry's settings pane cannot group.
             config: false,
             type: (rule.choices || rule.options || rule.number) ? ruleField(rule) : Boolean,
             default: rule.default,
             requiresReload: false,
-            onChange: refreshRuleUI
+            onChange: (value, options, userId) => {
+                refreshRuleUI();
+                RULE_SWITCHED[key]?.(value, userId);
+            }
         });
     }
 
@@ -469,6 +488,17 @@ export const registerSettings = function () {
         type: String,
         choices: VISIBILITY_MODES,
         default: "public",
+        requiresReload: false
+    });
+
+    game.settings.register("mgt2", "credit.purchaseOnDrop", {
+        name: "MGT2.CreditSplit.Settings.purchaseOnDrop.name",
+        hint: "MGT2.CreditSplit.Settings.purchaseOnDrop.hint",
+        scope: "world",
+        config: true,
+        type: String,
+        choices: PURCHASE_MODES,
+        default: "off",
         requiresReload: false
     });
 

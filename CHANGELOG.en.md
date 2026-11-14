@@ -4,6 +4,34 @@
 
 ---
 
+## [0.2.13]
+
+**Verified on Foundry VTT 14.370.**
+
+### ⚠ Breaking changes
+
+* **A round's quantity counts spare magazines**: *Reload* spends one. A quantity typed in rounds now
+  reads as magazines.
+
+### New
+
+* **Creation**: the *Connection* relation, written on each linked Traveller's sheet.
+* **Finance**: *Charge for items dropped on a Traveller*, a setting off by default.
+* **House rule**: *Hits for Travellers*, off by default.
+* **Species**: traits that change a roll appear in the roll prompt; Fast or Slow Metabolism counts
+  toward Initiative.
+* **Weapons**: fitted accessories (scope, laser sight, bipod…); the laser sight gives DM+1 under
+  50 m (CSC p.176).
+* **Weapons**: a secondary weapon fitted to another (grenade launcher, Intruder…).
+* **Psi weapons**: the PSI DM to damage and spending points; High Yield, Very High Yield and Intense
+  Focus on ship weapons.
+* **Vehicles**: a gunner per mount, and gun ports.
+* **Ships**: patch or repair a damaged location, with spare parts.
+
+### Fixes
+
+* Deleting a container on a character no longer replays on every connected client.
+
 ## [0.2.12]
 
 **Verified on Foundry VTT 14.370.**

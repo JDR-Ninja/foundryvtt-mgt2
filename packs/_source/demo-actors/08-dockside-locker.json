@@ -57,10 +57,10 @@
       "system": {
         "description": "Heavy slugs for the patrol sidearm. They hit harder and bite less deeply.",
         "source": { "book": "", "page": "" },
-        "quantity": 48,
-        "weight": 0.02,
+        "quantity": 6,
+        "weight": 0.2,
         "weightless": false,
-        "cost": 40,
+        "cost": 30,
         "tl": "TL08",
         "legality": 3,
         "container": { "id": "stashContainrKit" },

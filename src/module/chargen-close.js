@@ -536,13 +536,16 @@ export class ChargenClose extends MGT2Screen(HandlebarsApplicationMixin(Applicat
         });
     }
 
-    /** Bank the pension and take the flag off, in that order. */
+    /** Bank the pension, stamp an empty Hits pool under the world's rule, and take the flag off, in that order. */
     static async finish(actor) {
         if ( !actor.canUserModify(game.user, "update") ) {
             ui.notifications.warn(game.i18n.format("MGT2.Chargen.Screen.NoPermission", { name: actor.name }));
             return null;
         }
         await Muster.applyPension(actor, { shipsGivenUp: Ships.givenUp(actor) });
+        if ( actor.system.hitsRuleApplies && !actor.system.characteristics.hits.base ) {
+            await actor.system.setHitsFromCharacteristics();
+        }
         // Core p.52: medical care and anagathics are paid out of the Benefits first; the rest stays debt.
         const { credits, debt } = actor.system.finance;
         if ( Math.min(credits, debt) > 0 ) {

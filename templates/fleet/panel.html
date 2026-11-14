@@ -284,6 +284,11 @@
 					<td>
 						{{row.count}} &times; {{row.name}}
 						<span class="why">{{row.mountLabel}}{{#if row.bandLabel}} &middot; {{localize row.bandLabel}}{{/if}}</span>
+						{{! FOLIO 118's rider read off the weapon's own traits, ticked until the referee says otherwise. }}
+						{{#if row.customised}}
+						<span class="opts"><label data-tooltip="{{localize 'MGT2.Fleet.Screen.OptCustom'}}"><input type="checkbox" name="batteryCustomised"
+							data-battery="{{row.key}}" {{checked row.customisedOn}} /><span>{{row.customised}}</span></label></span>
+						{{/if}}
 					</td>
 					{{! `0/N` on a mount whose label named a weapon is the one figure on this sheet
 					    that is wrong rather than absent: a class can be priced, a die count cannot. }}

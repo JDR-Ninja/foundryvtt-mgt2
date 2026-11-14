@@ -1920,7 +1920,7 @@ async function pickLosses(actor, row, { title, choose, owed, physical }) {
 /** Everything this Traveller has that is not physical — the only partition the books state (folio 9). */
 function mentalCharacteristics(actor) {
     return Object.keys(actor.system.characteristics ?? {})
-        .filter(key => !MGT2.PhysicalCharacteristics.includes(key)
+        .filter(key => !MGT2.PhysicalCharacteristics.includes(key) && !(key in MGT2.DamageTracks)
             && (actor.system.isCharacteristicShown?.(key) !== false)
             && !(MGT2.CharacteristicCare.crisisExempt.includes(key) && (actor.system.characteristics[key].max <= 0)));
 }

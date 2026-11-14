@@ -83,6 +83,67 @@
 	</table>
 	{{/if}}
 
+	{{! One trait name prints a different DM for each species, so the number is a row here and never
+	    the registry's. A blank condition applies by itself; a condition is offered in the roll prompt.
+	    A skills row reads as its skills under *Applies to*, the list typed under the select. }}
+	<div class="traitdms{{#unless traitModifiers.length}} edit-only{{/unless}}" data-property="traitModifiers">
+		<div class="sect">
+			<h3>{{localize 'MGT2.Items.TraitModifiers'}}</h3>
+			<span class="count">{{#if traitModifiers.length}}{{traitModifiers.length}}{{/if}}</span>
+			<i class="fa-solid fa-circle-info note edit-only" data-tooltip="{{localize 'MGT2.Items.TraitModifiersHint'}}"></i>
+			<a class="add edit-only" data-action="entryCreate" data-tooltip="{{localize 'MGT2.Items.AddModifier'}}"><i class="fa-solid fa-plus"></i></a>
+		</div>
+		{{#if traitModifiers.length}}
+		<table class="rows fixed">
+			<thead>
+				<tr>
+					<th class="trait">{{localize 'MGT2.Items.Trait'}}</th>
+					<th class="target">{{localize 'MGT2.Chargen.Screen.TrayApplies'}}</th>
+					<th class="num c">{{localize 'MGT2.Items.DM'}}</th>
+					<th>{{localize 'MGT2.TraitSlot.condition'}}</th>
+					<th class="ctl edit-only"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each traitModifiers as |row i|}}
+				<tr data-entry-index="{{i}}">
+					<td>
+						<span class="play-only">{{row.label}}{{#if row.sex}}<span class="sub">{{row.sex}}</span>{{/if}}</span>
+						<select class="f edit-only" name="system.traitModifiers.{{i}}.trait">
+							<option value=""></option>
+							{{selectOptions row.traits selected=row.trait}}
+						</select>
+						<input class="f edit-only" type="text" name="system.traitModifiers.{{i}}.sex" value="{{row.sex}}" placeholder="{{localize 'MGT2.Chargen.Frame.LawSex'}}" />
+					</td>
+					<td>
+						<span class="play-only">{{row.applies}}</span>
+						<select class="f edit-only" name="system.traitModifiers.{{i}}.target">
+							{{selectOptions @root.config.TraitModifierTargets selected=row.target localize=true}}
+						</select>
+						<input class="f edit-only" type="text" name="system.traitModifiers.{{i}}.skills" value="{{row.skillsText}}" placeholder="{{localize 'MGT2.Actor.Skills'}}" />
+					</td>
+					<td class="c num">
+						<span class="play-only">{{showDM row.dm}}</span>
+						<input class="f num edit-only" type="number" name="system.traitModifiers.{{i}}.dm" value="{{row.dm}}" />
+					</td>
+					{{! No screen can tell when a conditional Protection holds, so such a row applies nowhere and says so. }}
+					<td class="{{#if row.inert}}inert{{/if}}{{#unless row.condition}}nil{{/unless}}">
+						{{#if row.inert}}<i class="fa-solid fa-triangle-exclamation" data-tooltip="{{localize 'MGT2.Items.TraitModifierInert'}}"></i>{{/if}}
+						<span class="play-only">{{#if row.condition}}{{row.condition}}{{else}}{{localize 'MGT2.Chargen.TrayConditions.always'}}{{/if}}</span>
+						<input class="f edit-only" type="text" name="system.traitModifiers.{{i}}.condition" value="{{row.condition}}" placeholder="{{localize 'MGT2.Chargen.TrayConditions.always'}}" />
+					</td>
+					<td class="r edit-only">
+						<div class="acts">
+							<a data-action="entryDelete" data-tooltip="{{localize 'MGT2.Items.DeleteModifier'}}"><i class="fas fa-trash"></i></a>
+						</div>
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{/if}}
+	</div>
+
 	{{else}}
 	{{#if (eq item.type "weapon")}}
 	{{! `system.effective` and not `system.*`: while a round is loaded the weapon's own printed line
@@ -257,6 +318,9 @@
 		{{#if system.natural}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Natural'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
 		{{/if}}
+		{{#if system.psionic.damage}}
+		<li data-spec="psionic"><span class="lbl">{{localize 'MGT2.Items.PsiDamage'}}</span><b class="word">{{#if system.psionic.ap}}{{localize 'MGT2.Items.PsiAPEach' ap=system.psionic.ap}}{{else}}<i class="fa-solid fa-check"></i>{{/if}}</b></li>
+		{{/if}}
 		{{/if}}
 
 		{{#if (eq item.type "armor")}}
@@ -298,6 +362,23 @@
 
 		{{#if host}}
 		<li{{#unless host.name}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Computer'}}</span><b class="word">{{#if host.name}}{{host.name}}{{#if host.blocked}} <i class="fa-solid fa-ban computer-overload" data-tooltip="{{localize 'MGT2.Items.SoftwareBlocked'}}"></i>{{/if}}{{else}}&mdash;{{/if}}</b></li>
+		{{/if}}
+
+		{{! CSC folios 174-177: what the accessory does to the weapon it is fitted to. }}
+		{{#if accessory}}
+		{{#if accessory.steadies}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Steadies'}}</span><b class="word">{{localize accessory.steadies}}{{#if (eq system.accessory.steadies "ignore")}} · {{#if system.accessory.deployed}}{{localize 'MGT2.Items.Deployed'}}{{else}}{{localize 'MGT2.Items.NotDeployed'}}{{/if}}{{/if}}</b></li>
+		{{/if}}
+		{{#each accessory.attack as |row|}}
+		<li{{#unless row.dm}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.AttackDM'}}</span><b class="word">{{row.display}}{{#if row.when}} · {{row.when}}{{/if}}</b></li>
+		{{/each}}
+		{{#if system.accessory.rangePercent}}
+		<li><span class="lbl">{{localize 'MGT2.Items.RangePercent'}}</span><b>{{showDM system.accessory.rangePercent}}<span class="u">%</span></b></li>
+		{{/if}}
+		{{#if system.accessory.sight}}
+		<li><span class="lbl">{{localize 'MGT2.Items.Sight'}}</span><b class="word"><i class="fa-solid fa-check"></i>{{#if accessory.idle}} <span class="pill warn" data-tooltip="{{localize 'MGT2.Items.SightIdle'}}">{{localize 'MGT2.Items.Idle'}}</span>{{/if}}</b></li>
+		{{/if}}
+		<li{{#unless system.accessory.fits}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Fits'}}</span><b class="word">{{#if system.accessory.fits}}{{system.accessory.fits}}{{else}}&mdash;{{/if}}</b></li>
 		{{/if}}
 
 		{{#if (eq item.type "drug")}}
@@ -362,6 +443,15 @@
 		<label class="wide">
 			<span class="lbl">{{localize 'MGT2.Items.DamageType'}}</span>
 			{{formInput systemFields.damageType name="system.damageType" value=system.damageType localize=true}}
+		</label>
+		{{! CSC folio 137: a psi weapon adds the wielder's PSI DM to its damage, and AP per PSI DM and per point spent. }}
+		<label class="check">
+			{{formInput systemFields.psionic.fields.damage name="system.psionic.damage" value=system.psionic.damage}}
+			<span>{{localize 'MGT2.Items.PsiDamage'}}</span>
+		</label>
+		<label{{#unless system.psionic.damage}} class="off"{{/unless}}>
+			<span class="lbl">{{localize 'MGT2.Items.PsiAP'}}</span>
+			{{formInput systemFields.psionic.fields.ap name="system.psionic.ap" value=system.psionic.ap classes="f num"}}
 		</label>
 		<label{{#unless scale.fireControl}} class="off"{{/unless}}>
 			<span class="lbl">{{localize 'MGT2.Items.FireControl'}}</span>
@@ -518,6 +608,45 @@
 		</label>
 		{{/if}}
 
+		{{#if accessory}}
+		<h4 class="gsub">{{localize 'MGT2.EquipmentSubType.accessory'}}</h4>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.Steadies'}}</span>
+			<select class="f" name="system.accessory.steadies">{{selectOptions config.AccessorySteadies selected=system.accessory.steadies localize=true blank=""}}</select>
+		</label>
+		<label>
+			<span class="lbl">{{localize 'MGT2.Items.RangePercent'}}</span>
+			{{formInput systemFields.accessory.fields.rangePercent name="system.accessory.rangePercent" value=source.accessory.rangePercent classes="f num"}}
+		</label>
+		<label class="check" data-tooltip="{{localize 'MGT2.Items.SightHint'}}">
+			{{formInput systemFields.accessory.fields.sight name="system.accessory.sight" value=system.accessory.sight}}
+			<span>{{localize 'MGT2.Items.Sight'}}</span>
+		</label>
+		<label class="check{{#unless (eq system.accessory.steadies "ignore")}} off{{/unless}}">
+			{{formInput systemFields.accessory.fields.deployed name="system.accessory.deployed" value=system.accessory.deployed}}
+			<span>{{localize 'MGT2.Items.Deployed'}}</span>
+		</label>
+		{{! Compatibility is the referee's to judge (CSC folio 174), so what it fits is words, as a round's is. }}
+		<label class="wide">
+			<span class="lbl">{{localize 'MGT2.Items.Fits'}}</span>
+			{{formInput systemFields.accessory.fields.fits name="system.accessory.fits" value=system.accessory.fits classes="f"}}
+		</label>
+		<div class="wide attackdms" data-property="accessory.attack">
+			<span class="lbl">{{localize 'MGT2.Items.AttackDM'}}<a class="add" data-action="entryCreate" data-blank='{"dm":1,"within":null,"beyond":null}' data-tooltip="{{localize 'MGT2.Items.AttackDMAdd'}}"><i class="fa-solid fa-plus"></i></a></span>
+			{{#if accessory.attack.length}}
+			<span class="pair heads"><span>{{localize 'MGT2.Items.DM'}}</span><span>{{localize 'MGT2.Items.AttackFromPlaceholder'}}</span><span>{{localize 'MGT2.Items.AttackUnderPlaceholder'}}</span><i></i></span>
+			{{/if}}
+			{{#each accessory.attack as |row|}}
+			<span class="pair" data-entry-index="{{row.index}}">
+				<input class="f num" type="number" step="1" name="system.accessory.attack.{{row.index}}.dm" value="{{row.dm}}" data-dtype="Number" placeholder="{{localize 'MGT2.Items.DM'}}" aria-label="{{localize 'MGT2.Items.DM'}}" />
+				<input class="f num" type="number" min="0" name="system.accessory.attack.{{row.index}}.beyond" value="{{row.beyond}}" data-dtype="Number" placeholder="{{localize 'MGT2.Items.AttackFromPlaceholder'}}" aria-label="{{localize 'MGT2.Items.AttackFromPlaceholder'}}" />
+				<input class="f num" type="number" min="0" name="system.accessory.attack.{{row.index}}.within" value="{{row.within}}" data-dtype="Number" placeholder="{{localize 'MGT2.Items.AttackUnderPlaceholder'}}" aria-label="{{localize 'MGT2.Items.AttackUnderPlaceholder'}}" />
+				<a class="x" data-action="entryDelete" data-tooltip="{{localize 'MGT2.Items.DeleteEntry'}}">&times;</a>
+			</span>
+			{{/each}}
+		</div>
+		{{/if}}
+
 		{{#if (eq item.type "equipment")}}
 		<h4 class="gsub">{{localize 'MGT2.Items.Group.Computer'}}</h4>
 		<label>
@@ -557,6 +686,10 @@
 		<label class="check wide">
 			{{formInput systemFields.illegal name="system.illegal" value=system.illegal}}
 			<span>{{localize 'MGT2.Items.IllegalEverywhere'}}</span>
+		</label>
+		<label class="check wide" data-tooltip="{{localize 'MGT2.Items.SparePartsHint'}}">
+			{{formInput systemFields.spareParts name="system.spareParts" value=system.spareParts}}
+			<span>{{localize 'MGT2.Items.SpareParts'}}</span>
 		</label>
 		{{! Typing a destination is what turns a lot into freight, so both shapes stay editable. }}
 		<h4 class="gsub">{{localize 'MGT2.Trade.Freight'}}</h4>

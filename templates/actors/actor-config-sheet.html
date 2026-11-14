@@ -23,6 +23,14 @@
             <input type="number" step="1" name="initiative.flat" value="{{system.config.initiative.flat}}" data-dtype="Number" />
         </div>
     </fieldset>
+    {{! The world's Hits rule reads the chain as Hits alone and writes nothing here: the stored order
+        waits, untouched, for the rule to go off. }}
+    {{#if hitsInForce}}
+    <fieldset>
+        <legend>{{ localize 'MGT2.Actor.DamageOrder' }}</legend>
+        <p class="mgt2-label">{{ localize 'MGT2.Actor.HitsInForce' }}</p>
+    </fieldset>
+    {{else}}
     <fieldset class="mgt2-damage-order">
         <legend>{{ localize 'MGT2.Actor.DamageOrder' }} <i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Actor.DamageOrderHint'}}"></i></legend>
         <p class="mgt2-label">{{ localize 'MGT2.Actor.DamageChain' }}</p>
@@ -45,4 +53,5 @@
         </div>
         <input type="hidden" name="damageOrder" value="{{damageOrder}}" />
     </fieldset>
+    {{/if}}
 </div>

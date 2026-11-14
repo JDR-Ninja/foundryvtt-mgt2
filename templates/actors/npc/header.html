@@ -74,11 +74,17 @@
 			<label class="warn" data-tooltip="{{localize 'MGT2.Actor.FatigueHint'}}">
 				{{formInput systemFields.states.fields.fatigue name="system.states.fatigue" value=system.states.fatigue}}{{localize 'MGT2.Actor.Fatigue'}}
 			</label>
+			{{! A person under the world's Hits rule takes the animal's Stun reading, not its other rungs. }}
+			{{#if hitsPool.inForce}}
+			<label data-tooltip="{{localize 'MGT2.Actor.npc.IncapacitatedHint'}}">
+				<input type="checkbox" {{checked system.states.incapacitated}} disabled />{{localize 'MGT2.Actor.npc.Incapacitated'}}
+			</label>
 			{{/if}}
-			<label data-tooltip="{{localize 'MGT2.Actor.UnconsciousHint'}}">
+			{{/if}}
+			<label data-tooltip="{{#if hitsPool.inForce}}{{localize 'MGT2.Actor.UnconsciousHitsHint'}}{{else}}{{localize 'MGT2.Actor.UnconsciousHint'}}{{/if}}">
 				<input type="checkbox" {{checked system.states.unconscious}} disabled />{{localize 'MGT2.Actor.Unconscious'}}
 			</label>
-			<label data-tooltip="{{localize 'MGT2.Actor.DeadHint'}}">
+			<label data-tooltip="{{#if hitsPool.inForce}}{{localize 'MGT2.Actor.DeadHitsHint'}}{{else}}{{localize 'MGT2.Actor.DeadHint'}}{{/if}}">
 				<input type="checkbox" {{checked system.states.dead}} disabled />{{localize 'MGT2.Actor.Dead'}}
 			</label>
 			{{#if (rule 'radiation')}}

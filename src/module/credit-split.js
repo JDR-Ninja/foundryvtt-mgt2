@@ -774,7 +774,7 @@ export class CreditSplit extends MGT2Screen(HandlebarsApplicationMixin(Applicati
     }
 
     /** `Addressed` reaches the referees and whoever owns a purse the transfer touched. */
-    static #audience(visibility, actors) {
+    static audience(visibility, actors) {
         if ( visibility !== "addressed" ) return {};
         const recipients = new Set(ChatMessage.getWhisperRecipients("GM").map(user => user.id));
         for ( const user of game.users ) {
@@ -801,7 +801,7 @@ export class CreditSplit extends MGT2Screen(HandlebarsApplicationMixin(Applicati
         const touched = [giver, ...entries.map(entry => CreditSplit.#actorOf(entry.uuid))];
         return getDocumentClass("ChatMessage").create({
             author: game.user.id, speaker: ChatMessage.getSpeaker({ actor: giver }), content,
-            ...CreditSplit.#audience(visibility, touched) });
+            ...CreditSplit.audience(visibility, touched) });
     }
 
     /** The card, and it is what makes the write honest. */
@@ -826,7 +826,7 @@ export class CreditSplit extends MGT2Screen(HandlebarsApplicationMixin(Applicati
             author: game.user.id,
             speaker: ChatMessage.getSpeaker(),
             content,
-            ...CreditSplit.#audience(this.#visibility, entries.map(entry => CreditSplit.#actorOf(entry.uuid)))
+            ...CreditSplit.audience(this.#visibility, entries.map(entry => CreditSplit.#actorOf(entry.uuid)))
         });
     }
 

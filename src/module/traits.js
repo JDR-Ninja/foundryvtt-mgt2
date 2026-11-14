@@ -2,7 +2,7 @@
 
 const fields = foundry.data.fields;
 
-// >>> generated — 147 entries over 128 names, 48 parameterised, across 7 families. Emitted whole
+// >>> generated — 150 entries over 131 names, 48 parameterised, across 7 families. Emitted whole
 // from the trait extraction; edit the extraction and re-emit rather than patching a row here.
 const REGISTRY = {
     animal: {
@@ -75,12 +75,15 @@ const REGISTRY = {
         "ap": {label: "AP", params: [{slot: "score", type: "int"}]},
         "auto": {label: "Auto", params: [{slot: "score", type: "int"}]},
         "chain-reaction": {label: "Chain Reaction"},
+        "high-yield": {label: "High Yield", conflict: ["very-high-yield"]},
+        "intense-focus": {label: "Intense Focus"},
         "ion": {label: "Ion"},
         "orbital-bombardment": {label: "Orbital Bombardment"},
         "orbital-strike": {label: "Orbital Strike"},
         "radiation": {label: "Radiation"},
         "reductor": {label: "Reductor"},
         "smart": {label: "Smart"},
+        "very-high-yield": {label: "Very High Yield", conflict: ["high-yield"]},
         "weak": {label: "Weak"},
     },
     species: {
@@ -317,8 +320,7 @@ export function traitConditional(entry) {
 
 /** How each weapon trait meets an attack roll — Core p.79, CSC p.131 and FC p.6-8 between them. */
 export const WEAPON_ROLL = Object.freeze({
-    // Core p.79: "a negative DM equal to the difference between their STR DM and +1" — +2 for Very
-    // Bulky.
+    // Core p.79: "a negative DM equal to the difference between their STR DM and +1"; +2 for Very Bulky.
     "bulky": { tone: "applied", strength: 1 },
     "very-bulky": { tone: "applied", strength: 2 },
     // FC p.7: "The DM is applied to attack rolls and the results of weapon malfunctions."
@@ -345,7 +347,10 @@ export const WEAPON_ROLL = Object.freeze({
     // RH folio 106: an ion hit shuts a robot's brain down and its armour does not protect.
     "ion": { tone: "reminded", target: true },
     "smart": { tone: "reminded", target: true },
-    "blast": { tone: "reminded", target: true }
+    "blast": { tone: "reminded", target: true },
+    // Aliens 3 folio 180: whoever is hit makes an END check at the Sonic score; HG folio 72: Intense Focus is AP+2.
+    "sonic": { tone: "reminded", target: true },
+    "intense-focus": { tone: "reminded", target: true }
 });
 
 // Companion p.93-94: five creature traits substitute into the damage expression rather than scaling

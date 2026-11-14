@@ -6,9 +6,8 @@ export const MGT2 = {};
 MGT2.Traits = TRAITS;
 MGT2.TraitFamilies = TRAIT_FAMILIES;
 
-// What a guide page may answer and a sheet's `GUIDE_TOPIC` may name. A topic joins this list on the
-// day its page is written; the guide's build refuses a page or a sheet naming anything else, and
-// refuses a member here that no page answers.
+// What a guide page may answer and a sheet's `GUIDE_TOPIC` may name; the guide's build refuses a page
+// or a sheet naming anything else, and a member here that no page answers.
 MGT2.GuideTopics = Object.freeze([
     "about", "setup", "first-traveller", "first-check", "first-fight", "first-ship", "character",
     "npc", "vehicle", "robot", "world", "stash", "spacecraft", "item", "roll", "chat", "docket",
@@ -256,7 +255,8 @@ MGT2.RangeBands = Object.freeze({
 // Core p.74's Common Modifiers to Ranged Attacks, in book order.
 MGT2.AttackModifiers = Object.freeze({
     aiming: {label: "MGT2.AttackModifiers.aiming", dm: 1, max: 6},
-    laserSight: {label: "MGT2.AttackModifiers.laserSight", dm: 1, requires: "aiming"},
+    // CSC folio 176 and Core folio 135: under 50 m, aiming or not; folio 74's table reads "if Aiming".
+    laserSight: {label: "MGT2.AttackModifiers.laserSight", dm: 1, under: 50},
     fastMovingTarget: {label: "MGT2.AttackModifiers.fastMovingTarget", dm: -1, per: 10},
     shortRange: {label: "MGT2.RangeBands.short", dm: 1, band: "short"},
     longRange: {label: "MGT2.RangeBands.long", dm: -2, band: "long"},
@@ -274,16 +274,14 @@ MGT2.ExtremeRangeThresholds = Object.freeze({
     noStress: {label: "MGT2.RollPrompt.ThresholdNoStress", metres: 300}
 });
 
-// Core folio 79. The mode is a per-attack choice, so nothing stores one; `rounds` is the multiple
-// of the Auto score it spends.
+// Core folio 79. A per-attack choice, stored nowhere; `rounds` is the multiple of the Auto score spent.
 MGT2.FireModes = Object.freeze({
     single: {label: "MGT2.FireModes.single"},
     burst: {label: "MGT2.FireModes.burst", damage: true, rounds: 1, suppress: "aiming"},
     fullAuto: {label: "MGT2.FireModes.fullAuto", attacks: true, rounds: 3, suppress: "aiming"}
 });
 
-// Companion p.53: a combat check that comes up double 1 AND fails, read against 2D + weapon skill,
-// so a higher skill lands a milder row.
+// Companion p.53: a double 1 that fails, read against 2D + weapon skill.
 MGT2.CombatMishaps = Object.freeze([
     { max: 2, label: "MGT2.CombatMishaps.self" },
     { max: 4, label: "MGT2.CombatMishaps.lost" },
@@ -335,6 +333,7 @@ MGT2.DamageTransforms = Object.freeze({
 
 // Core p.82. The names a rolled free-text skill is matched against to offer the first-aid button.
 MGT2.FirstAidSkills = Object.freeze(["medic", "médecine"]);
+MGT2.VehicleGunnerySkills = Object.freeze(["heavy weapons (vehicle)", "armes lourdes (véhicule)"]);
 
 // Core p.181, HG p.19-21: the sensor grade covers Electronics (comms) and (sensors); a command bridge, Tactics (naval) DM+1.
 MGT2.ShipCheckSkills = Object.freeze({
@@ -390,7 +389,14 @@ MGT2.EquipmentSubType = Object.freeze({
     clothing: "MGT2.EquipmentSubType.clothing",
     equipment: "MGT2.EquipmentSubType.equipment",
     trinket: "MGT2.EquipmentSubType.trinket",
-    toolkit: "MGT2.EquipmentSubType.toolkit"
+    toolkit: "MGT2.EquipmentSubType.toolkit",
+    accessory: "MGT2.EquipmentSubType.accessory"
+});
+
+// CSC folios 174-175: a gyrostabiliser takes Bulky off and Very Bulky to Bulky; a bipod set up ignores both.
+MGT2.AccessorySteadies = Object.freeze({
+    reduce: "MGT2.AccessorySteadies.reduce",
+    ignore: "MGT2.AccessorySteadies.ignore"
 });
 
 MGT2.TalentSubType = Object.freeze({
@@ -429,10 +435,11 @@ MGT2.PsionicBoosts = Object.freeze([
     {bands: 2, cost: 4}
 ]);
 
-// The five recurring-character types (Core p.91).
+// The five recurring-character types (Core p.91), and a Traveller met under the Connections Rule (p.19).
 MGT2.ContactRelations = Object.freeze({
     Allie: "MGT2.Contact.Relation.Allie",
     Contact: "MGT2.Contact.Relation.Contact",
+    Connection: "MGT2.Contact.Relation.Connection",
     Rival: "MGT2.Contact.Relation.Rival",
     Enemy: "MGT2.Contact.Relation.Enemy",
     Patron: "MGT2.Contact.Relation.Patron"
@@ -643,9 +650,8 @@ MGT2.SpeedBands = Object.freeze({
     Orbital: "MGT2.SpeedBands.Orbital"   // VH2026 p.18; the Core ladder stops at Hypersonic
 });
 
-// The three columns VH2026 p.18 prints beside the names above, in the same order, so the band
-// number indexes both. `rounds` is cumulative from a standstill and `metres` is one round at the
-// top of the band.
+// VH2026 p.18's three columns beside the names above, indexed by band; `rounds` is cumulative from
+// a standstill and `metres` is one round at the top of the band.
 MGT2.SpeedBandRows = Object.freeze([
     {kph: [0, 0], rounds: 0, metres: 0},
     {kph: [1, 20], rounds: 1, metres: 33},
@@ -1292,6 +1298,21 @@ MGT2.ShipCriticals = Object.freeze({
     }
 });
 
+// Core folio 159's spare-parts tons at Effect 1-6; folio 172 patches on Engineer, folio 159 repairs on
+// Engineer or Mechanic, its drones patch on Electronics (remote ops). English and Modül's French names.
+MGT2.SpareParts = Object.freeze([1, 0.8, 0.6, 0.4, 0.2, 0]);
+MGT2.RepairSkills = Object.freeze({
+    engineer: {label: "MGT2.Repair.Skills.engineer", names: ["engineer", "ingénieur"], modes: ["patch", "repair"]},
+    mechanic: {label: "MGT2.Repair.Skills.mechanic", names: ["mechanic", "mécanique"], modes: ["repair"]},
+    remoteOps: {label: "MGT2.Repair.Skills.remoteOps", modes: ["patch"], drones: true,
+        names: ["electronics (remote ops)", "électronique (téléopérations)"]}
+});
+MGT2.RepairSpecialities = Object.freeze({
+    mDrive: ["m-drive", "propulseur-m"], jDrive: ["j-drive", "propulseur-s"],
+    powerPlant: ["power", "énergie"], crew: ["life support", "support de vie"]
+});
+MGT2.RepairDrones = Object.freeze(["repair drone", "drones de reparation"]);
+
 // Spacecraft weapon mounts (HG p.26, p.29, p.34-35).
 MGT2.ShipMounts = Object.freeze({
     // Core p.183: a fixed mount takes up to three weapons. The one-weapon limit is the Firmpoint's,
@@ -1405,7 +1426,8 @@ MGT2.Departments = Object.freeze({
 MGT2.RoleActions = Object.freeze({
     skill: "MGT2.RoleActions.skill",
     weapon: "MGT2.RoleActions.weapon",
-    special: "MGT2.RoleActions.special"
+    special: "MGT2.RoleActions.special",
+    repair: "MGT2.RoleActions.repair"
 });
 
 // Core folio 164. Three steps, and every ship takes one before any ship takes the next.
@@ -2474,6 +2496,13 @@ MGT2.QualificationOverrides = Object.freeze({
     addDM: "MGT2.Chargen.QualificationOverrides.addDM"
 });
 
+MGT2.TraitModifierTargets = Object.freeze({
+    skills: "MGT2.TraitModifierTargets.skills",
+    check: "MGT2.TraitModifierTargets.check",
+    initiative: "MGT2.TraitModifierTargets.initiative",
+    protection: "MGT2.TraitModifierTargets.protection"
+});
+
 // How a record was entered and how it ended.
 MGT2.CareerEntryModes = Object.freeze({
     qualified: "MGT2.Chargen.EntryModes.qualified",
@@ -2767,11 +2796,12 @@ MGT2.CreationLimits = Object.freeze({
     backgroundBase: 3,
     backgroundMin: 0,
     backgroundMax: 6,
-    // Folio 19's Connections Rule: at most two, each with a DIFFERENT Traveller, never above level
-    // 3 and never Jack-of-All-Trades — named in both spellings the system targets.
+    // Folio 19: at most two connections, each with a DIFFERENT Traveller, never above level 3, never
+    // Jack-of-All-Trades; folio 20: the other "can be Contacts, Allies or even Rivals", or none of them.
     connections: 2,
     connectionLevel: 3,
     connectionExcluded: Object.freeze(["Jack-of-All-Trades", "Polyvalent"]),
+    connectionRelations: Object.freeze(["Connection", "Contact", "Allie", "Rival"]),
     // "One of your Contacts or Allies betrays you" — a Rival or an Enemy has nothing left to turn.
     convertibleRelations: Object.freeze(["Contact", "Allie"])
 });

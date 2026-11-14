@@ -223,11 +223,12 @@ export const Grants = {
     },
 
     /**
-     * Record the agreement and pay both sides.
+     * Record the agreement, pay both sides, and write each side's contact for the other where one is chosen.
      * @param {object} skills   `{[actor.id]: "Streetwise", [other.id]: "Deception"}`
      * @param {string} [note]   The shared event, in the table's own words
+     * @param {object} [relations]   `{[actor.id]: "Connection"}`: each side's contact for the other, none where blank
      */
-    async connect(actor, other, skills = {}, note = "") {
+    async connect(actor, other, skills = {}, note = "", relations = {}) {
         for ( const [side, partner] of [[actor, other], [other, actor]] ) {
             const skill = skills[side.id] ?? "";
             const verdict = this.canConnect(side, partner, skill);
@@ -236,9 +237,8 @@ export const Grants = {
                     { name: side.name, other: partner.name }));
                 return null;
             }
-            // **Both sides are written, so both sides must be writable.** A connection is the one
-            // transaction in creation that spans two Travellers, and a player owns only their own —
-            // so in practice the referee performs it.
+            // Both sides are written, so both must be writable: a player owns only their own
+            // Traveller, so in practice the referee performs it.
             if ( !side.canUserModify(game.user, "update") ) {
                 ui.notifications.warn(game.i18n.format("MGT2.Chargen.Screen.NoPermission", { name: side.name }));
                 return null;
@@ -247,13 +247,18 @@ export const Grants = {
         const written = [];
         for ( const [side, partner] of [[actor, other], [other, actor]] ) {
             const skill = skills[side.id] ?? "";
+            const term = Chargen.read(side).term;
             await Chargen.update(side, {
                 connections: [...this.connections(side), { with: partner.id, skill, note }]
             });
             if ( skill ) {
                 written.push(await this.grantSkill(side, { name: skill, level: 1, mode: "raise",
-                    provenance: { term: Chargen.read(side).term, table: "connection",
-                        note: note || partner.name } }));
+                    provenance: { term, table: "connection", note: note || partner.name } }));
+            }
+            const relation = relations[side.id] ?? "";
+            if ( relation ) {
+                await this.contact(side, { name: partner.name, relation, uuid: partner.uuid,
+                    provenance: { term, table: "connection", note } });
             }
         }
         return written;

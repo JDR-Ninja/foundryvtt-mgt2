@@ -1,0 +1,44 @@
+{{! Core folio 172's patch and folio 159's repair of one hit location: where, which work, who, and on
+    which skill. The dialog keeps the work and the skill consistent; the roll prompt follows. }}
+<div class="dlg repair">
+	<div class="dblock">
+		<label class="drow">
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Location'}}</span>
+			<select class="f" name="location">
+				{{#each locations as |location|}}
+				<option value="{{location.key}}" data-patch="{{location.patch}}" data-why="{{location.why}}">{{location.label}} · {{localize 'MGT2.Actor.spacecraft.Severity'}} {{location.severity}}</option>
+				{{/each}}
+			</select>
+			<span></span>
+		</label>
+		<div class="drow">
+			<span class="lbl">{{localize 'MGT2.Repair.Mode'}}</span>
+			<span class="dstates" role="radiogroup">
+				<label><input type="radio" name="mode" value="patch" checked /><span>{{localize 'MGT2.Repair.Patch'}}</span></label>
+				<label><input type="radio" name="mode" value="repair" /><span>{{localize 'MGT2.Repair.Repair'}}</span></label>
+			</span>
+			<span></span>
+		</div>
+		<label class="drow">
+			<span class="lbl">{{localize 'MGT2.Actor.spacecraft.Who'}}</span>
+			<select class="f" name="crew">
+				{{#each people as |person|}}
+				<option value="{{person.uuid}}">{{person.name}}{{#if person.station}} · {{person.station}}{{/if}}</option>
+				{{/each}}
+			</select>
+			<span></span>
+		</label>
+		<label class="drow">
+			<span class="lbl">{{localize 'MGT2.Items.Skill'}}</span>
+			<select class="f" name="skill">
+				{{#each skills as |skill|}}
+				<option value="{{skill.key}}" data-modes="{{skill.modes}}">{{localize skill.label}}</option>
+				{{/each}}
+			</select>
+			<span></span>
+		</label>
+	</div>
+	<p class="hint" data-hint="patch">{{localize 'MGT2.Repair.PatchHint'}}</p>
+	<p class="hint" data-hint="repair">{{localize 'MGT2.Repair.RepairHint'}} {{aboard}}</p>
+	<p class="hint why" hidden></p>
+</div>

@@ -2,8 +2,8 @@ import { MGT2 } from "../config.js";
 import { LocalDocumentField } from "../datamodels.js";
 import { MGT2Helper } from "../helper.js";
 import { Rules } from "../rules.js";
-import { buildHazardItem, buildTraitMap, createTraitsField, hazardTraits, resolveDamageResponse, traitConditional }
-    from "../traits.js";
+import { CUSTOM_KEY, buildHazardItem, buildTraitMap, createTraitsField, hazardTraits, resolveDamageResponse,
+    traitConditional, traitLabel } from "../traits.js";
 
 const fields = foundry.data.fields;
 
@@ -45,9 +45,8 @@ export function withPersonal() {
             // Identity, and free: what the sheet prints, and what a statblock's printed GENDER line
             // transcribes. Nothing mechanical reads it.
             gender: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-            // Mechanics, and closed: which row of a species' sexed laws answers for this Traveller.
-            // Its values are the species Item's `frame.sexes`, so a species declaring none puts no
-            // control on the sheet at all — which is every human.
+            // Mechanics, and closed: which row of a species' sexed laws answers for this Traveller, out
+            // of the species Item's `frame.sexes`; a species declaring none puts no control on the sheet.
             sex: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             pronouns: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
             homeworld: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
@@ -55,10 +54,7 @@ export function withPersonal() {
     };
 }
 
-/**
- * A modifier accumulator: three provenances and their total, because one integer cannot tell an
- * Active Effect, a computed bonus and the referee's own entry apart.
- */
+/** A modifier accumulator: an Active Effect, a computed bonus and the referee's own entry, and their total. */
 export function createModifierField() {
     return new fields.SchemaField({
         custom: new fields.NumberField({ required: true, nullable: false, integer: true, initial: 0 }),
@@ -111,9 +107,8 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
 
             modifiers: new fields.SchemaField({
                 check: createModifierField(),
-                // Core p.74 makes Initiative the Effect of a DEX or INT check, so a printed
-                // `Initiative -2` has no sink beside it: `check` would hit every check that species
-                // makes.
+                // Core p.74 makes Initiative the Effect of a DEX or INT check, so a printed `Initiative -2`
+                // has no sink beside it: `check` would hit every check that species makes.
                 initiative: createModifierField(),
                 // Keyed by a free-text skill's slug; `validateKey` drops a typo rather than storing it.
                 skills: new fields.TypedObjectField(createModifierField(),
@@ -178,7 +173,42 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
      * at all, the actor whether it shows one that does.
      */
     isCharacteristicShown(key) {
+        if ((key === "hits") && this.hitsRuleApplies) return true;
         return (this.characteristics[key]?.show === true) && Rules.characteristic(key);
+    }
+
+    /** Somebody rather than a creature or a craft: who the world's Hits rule reaches. */
+    get isPerson() {
+        return false;
+    }
+
+    get hitsRuleApplies() {
+        return this.isPerson && Rules.on("travellerHits");
+    }
+
+    /** The rule and a pool to put it on: a person with no Hits typed keeps the stored chain. */
+    get hitsInForce() {
+        return this.hitsRuleApplies && (this.characteristics.hits?.max > 0);
+    }
+
+    /** STR + DEX + END at their maxima, the figure the Hits rule's pool is typed from. */
+    get hitsFromCharacteristics() {
+        return MGT2.PhysicalCharacteristics.reduce((sum, key) => sum + (this.characteristics[key]?.max ?? 0), 0);
+    }
+
+    /** Write that figure as the pool's base, once: nothing derives into it afterwards. */
+    async setHitsFromCharacteristics() {
+        if (!this.characteristics.hits) return;
+        return this.parent.update({ "system.characteristics.hits.base": this.hitsFromCharacteristics });
+    }
+
+    /** Whether switching the Hits rule `on`, or off, leaves a wound where damage no longer goes. */
+    hitsStranded(on) {
+        const hits = this.characteristics.hits;
+        const stored = this.config.damageOrder;
+        if (!this.isPerson || !(hits?.max > 0)) return false;
+        if (!on) return (hits.damage > 0) && !stored.includes("hits");
+        return stored.some(key => (key !== "hits") && (this.characteristics[key]?.damage > 0));
     }
 
     /**
@@ -191,11 +221,9 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             this.isCharacteristicShown(key) && !(key in MGT2.DamageTracks));
     }
 
-    /**
-     * The damage chain, less any link this sub-type does not declare: a chain outlives the schema
-     * it was written against, and an unguarded sum would give NaN and a blank token bar.
-     */
+    /** Hits under the world's rule, else the stored chain less any link this sub-type does not declare (NaN otherwise). */
     get damageChain() {
+        if (this.hitsInForce) return ["hits"];
         const chain = [];
         for (const key of this.config.damageOrder) {
             if (key in this.characteristics) chain.push(key);
@@ -211,9 +239,11 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         console.warn(`mgt2 | damage chain link "${key}" is not a characteristic of "${this.parent?.type}" and is ignored`);
     }
 
-    /** The chain links carrying a wound — what every healing procedure divides itself among. */
+    /** The links carrying a wound, which every healing procedure divides among; one taken before the Hits rule stays. */
     get damagedLinks() {
-        return this.damageChain.filter(key => this.characteristics[key].damage > 0);
+        const chain = this.damageChain;
+        const links = this.hitsInForce ? [...chain, ...MGT2.PhysicalCharacteristics] : chain;
+        return links.filter(key => this.characteristics[key]?.damage > 0);
     }
 
     /** Which link Stun damage drains. @type {string|null} */
@@ -302,6 +332,12 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         return this.characteristics.strength?.dm ?? 0;
     }
 
+    /** CSC folio 137: the PSI DM a psi weapon adds, read off current PSI; null where PSI is not shown or is lost. */
+    get psiDamageDM() {
+        if ( !this.isCharacteristicShown("psionic") || (this.states?.psiLost === true) ) return null;
+        return this.characteristics.psionic?.dm ?? 0;
+    }
+
     /** Every healing rate on Core p.83 is measured in the patient's own END DM. */
     get enduranceDM() {
         return this.characteristics.endurance?.dm ?? 0;
@@ -313,20 +349,23 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             ...Object.values(this.modifiers.skills)];
     }
 
-    /**
-     * Core p.77: unconscious once a characteristic PAST the first has been emptied — the chain puts
-     * END first, so the first zero is the one the rule does not count — and dead once the whole
-     * chain is at zero.
-     */
+    /** Core p.77: unconscious once a link past the first (END's) is emptied, dead once the whole chain is. */
     get damageStates() {
         return this.damageStatesFor(this.characteristics);
     }
 
-    /**
-     * The same rule read against a projection instead of the stored wound, so the damage dialog can
-     * state what a hit would cause before writing it.
-     */
+    /** Core p.84-85 on one pool: unconscious at a tenth of it or less, dead at none left. */
+    static hitsLadder(max, wound) {
+        return { unconscious: wound >= (0.9 * max), dead: wound >= max };
+    }
+
+    /** The same rule read against a projection, so the damage dialog can state what a hit would cause. */
     damageStatesFor(characteristics) {
+        // The Hits rule reads the lethal wound: Stun alone never kills a person.
+        if (this.hitsInForce) {
+            const hits = characteristics.hits;
+            return ActorBaseData.hitsLadder(hits.max, hits.damage - this.stun);
+        }
         // A link with no score has no pool to empty, so a blank sheet is not a corpse.
         const chain = this.damageChain.filter(key => characteristics[key].max > 0);
         if (chain.length === 0) return { unconscious: false, dead: false };
@@ -340,6 +379,11 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     /** Which of `damageStates` the damage dialog names, and this type's word for each. */
     get damageStateLabels() {
         return { unconscious: "MGT2.Actor.Unconscious", dead: "MGT2.Actor.Dead" };
+    }
+
+    /** Core p.84 under the Hits rule: Stun incapacitates at half the pool, rounded down (Core p.6). */
+    get stunIncapacitated() {
+        return this.hitsInForce && (this.stun >= Math.floor(this.characteristics.hits.max / 2));
     }
 
     /**
@@ -372,12 +416,32 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             modifier.auto = 0;
             modifier.effect = 0;
         }
+        // Core p.85, Aliens 4 p.224: Fast and Slow Metabolism are a DM to every Initiative roll.
+        this.modifiers.initiative.auto = MGT2Helper.traitScore(this.traits, "fast-metabolism")
+            - Math.abs(MGT2Helper.traitScore(this.traits, "slow-metabolism")) + this.speciesTraitDM("initiative");
     }
 
-    /**
-     * Sliced and not pushed: `prepareData` may run over a model that was not re-initialised, and
-     * appending would double the list each time.
-     */
+    /** The species trait DM rows this actor answers for: a DM to give, and the sex matched. */
+    get speciesTraitRows() {
+        const sex = MGT2Helper.skillSlug(this.personal?.sex);
+        const rows = [];
+        for (const item of this.speciesItems) {
+            for (const [index, row] of (item.system.traitModifiers ?? []).entries()) {
+                if (!Number.isFinite(row.dm) || (row.dm === 0)) continue;
+                if (row.sex && (MGT2Helper.skillSlug(row.sex) !== sex)) continue;
+                rows.push({ item, index, row });
+            }
+        }
+        return rows;
+    }
+
+    /** What the unconditional rows give a standing figure, `initiative` or `protection`. */
+    speciesTraitDM(target) {
+        return this.speciesTraitRows.reduce((sum, { row }) =>
+            (((row.target === target) && !row.condition) ? sum + row.dm : sum), 0);
+    }
+
+    /** Sliced and not pushed: `prepareData` may run over a model that was not re-initialised. */
     #declareTraits() {
         this.ownTraits = this.traits.slice(0, this._source.traits.length);
         this.speciesTraits = this.speciesItems.flatMap(item => item.system.traits ?? []);
@@ -450,12 +514,11 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         const states = this.damageStates;
         // Companion p.50: the knockout outlives the blow that wrote it and expires when END refills,
         // which is what keeps it out of the chain's own reading.
-        if (this.states?.knockedOut && Rules.on("knockoutBlow")
+        if (this.states?.knockedOut && Rules.on("knockoutBlow") && !this.hitsInForce
             && (this.characteristics[this.stunLink]?.value <= 0)) {
             states.unconscious = true;
         }
-        // Core p.83: an END check restores consciousness without healing, so the chain alone cannot
-        // answer.
+        // Core p.83: an END check restores consciousness without healing, which the chain cannot answer.
         if (states.unconscious && (life.damage <= (this.states?.consciousWound ?? -1))) {
             states.unconscious = false;
         }
@@ -489,9 +552,9 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         this.encumbranceMultiplier = carrying;
     }
 
-    /** Protection: what is worn, plus what a trait grants. */
+    /** Protection: what is worn, plus what a trait or a species row grants. */
     prepareArmor() {
-        let armor = MGT2Helper.traitScore(this.traits, "armour");
+        let armor = MGT2Helper.traitScore(this.traits, "armour") + this.speciesTraitDM("protection");
         const psi = this.characteristics.psionic?.value ?? 0;
         const outranked = this.augmentIssues.protection;
         for (const item of this.parent.items) {
@@ -515,7 +578,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
     prepareWeight() {
         let onHand = 0;
         for (const item of this.parent.items) {
-            if (item.system.container?.id) continue;   // counted through its container
+            if (item.system.container?.id || item.fittedHost) continue;   // counted through its container or weapon
             // A container is only carried when it is on the traveller rather than left somewhere.
             if (item.type === "container") {
                 if (item.system.onHand === true) onHand += item.getTotalWeight();
@@ -573,6 +636,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             ...this.stateCheckModifiers(),
             ...this.armorSkillModifiers(),
             ...this.augmentSkillModifiers(),
+            ...this.speciesTraitModifiers(),
             ...this.skillAccumulatorModifiers(),
             ...this.scopedEffectModifiers(),
             ...extra
@@ -639,6 +703,52 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
                 params: { augment: item.name, skill: named }, skills });
         }
         return sources;
+    }
+
+    /** Core p.53-54: a species row's DM, ticked on the skills it names and only offered under a condition. */
+    speciesTraitModifiers() {
+        const held = this.parent.items.filter(item => (item.type === "talent") && (item.system.subType === "skill"));
+        const sources = [];
+        for (const { item, index, row } of this.speciesTraitRows) {
+            if ((row.target === "protection") || ((row.target === "initiative") && !row.condition)) continue;
+            const trait = ActorBaseData.#traitRowLabel(item, row);
+            const source = { key: `species-${item.id}-${index}`, dm: row.dm, label: trait,
+                hint: "MGT2.RollPrompt.SpeciesTraitAll" };
+            if (row.condition) {
+                Object.assign(source, { label: "MGT2.RollPrompt.SpeciesTrait", skills: [],
+                    params: { trait, condition: row.condition }, hint: "MGT2.RollPrompt.SpeciesTraitOffered",
+                    initiative: row.target === "initiative" });
+            } else if (row.target === "skills") {
+                Object.assign(source, { skills: ActorBaseData.#rowSkills(held, row.skills),
+                    skillSlugs: row.skills.map(name => MGT2Helper.skillSlug(name)),
+                    hint: "MGT2.RollPrompt.SpeciesTraitHint" }, row.skills.length
+                    ? { label: "MGT2.RollPrompt.SpeciesTrait", params: { trait, condition: row.skills.join(", ") } } : {});
+            }
+            sources.push(source);
+        }
+        return sources;
+    }
+
+    /** The prompt entries a row's skill names answer to, folio 58's fallback for a speciality none holds. */
+    static #rowSkills(held, names) {
+        const ids = new Set(held.filter(skill => names.some(named => MGT2Helper.matchesSkillItem(skill, named)))
+            .map(skill => skill.id));
+        for (const entry of MGT2Helper.otherSpecialities(held)) {
+            if (names.some(named => MGT2Helper.matchesSkill(entry.term, named))) ids.add(entry._id);
+        }
+        for (const named of names) {
+            if (held.some(skill => MGT2Helper.matchesSkillItem(skill, named))) continue;
+            const fallback = MGT2Helper.skillFallback(held, named);
+            if (fallback) ids.add(fallback._id);
+        }
+        return [...ids];
+    }
+
+    /** A row's trait as the species Item names it, or the Item's own name for a row naming none. */
+    static #traitRowLabel(item, row) {
+        const entry = item.system.traits.find(trait => (trait.key === row.trait)
+            || ((trait.key === CUSTOM_KEY) && (trait.note === row.trait)));
+        return (entry ? traitLabel(entry) : traitLabel({ family: "species", key: row.trait })) || item.name;
     }
 
     /** A standing DM on a skill and its specialities, from `modifiers.skills.<slug>`; it follows the skill row. */
@@ -782,7 +892,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         // Companion p.50: END taken from its STARTING value to 0 by one attack, which is a fact
         // about the blow and cannot be read back off the wound afterwards.
         const link = this.characteristics[this.stunLink];
-        const knocked = ("knockedOut" in (this.states ?? {})) && Rules.on("knockoutBlow")
+        const knocked = ("knockedOut" in (this.states ?? {})) && Rules.on("knockoutBlow") && !this.hitsInForce
             && link && !link.damage && (wound >= link.max);
         const system = knocked
             ? { characteristics: data, states: { knockedOut: true } } : { characteristics: data };

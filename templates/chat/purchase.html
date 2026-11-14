@@ -1,0 +1,12 @@
+{{! The ground is the log's. This card is the audit of a purchase already paid: what was bought, by whom and
+    for how much. What the buyer has left is their standing, published only when the table asks for balances. }}
+<div class="mgt2 card purchase">
+	<div class="xh">
+		<div class="xk">{{localize 'MGT2.Purchase.Card' name=buyer}}</div>
+		<h4>{{quantity}} &times; {{item}}</h4>
+		<div class="rung"><small>{{localize 'MGT2.Trade.Card.Price'}}</small><b>Cr{{price}}</b></div>
+	</div>
+	{{#if left}}
+	<div class="pipe"><span>{{localize 'MGT2.CreditSplit.Card.GiverLeft' name=buyer credits=left}}</span></div>
+	{{/if}}
+</div>

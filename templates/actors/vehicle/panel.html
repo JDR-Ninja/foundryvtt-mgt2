@@ -71,9 +71,20 @@
 					<td class="mt">
 						<div class="wg">
 							{{#each mount.groups as |group|}}
-							<button type="button" class="roll" data-action="roll" data-item-id="{{group._id}}"><i class="fa-solid fa-dice" aria-hidden="true"></i><span>{{#if (gt group.count 1)}}{{group.count}} &times; {{/if}}{{group.name}}</span></button>
+							<button type="button" class="roll" data-action="mountRoll" data-item-id="{{group._id}}" data-tooltip="{{mount.rollsAs}}"><i class="fa-solid fa-dice" aria-hidden="true"></i><span>{{#if (gt group.count 1)}}{{group.count}} &times; {{/if}}{{group.name}}</span></button>
 							{{/each}}
+							{{#if mount.gunport}}
+							<button type="button" class="roll" data-action="mountRoll" data-tooltip="{{mount.rollsAs}}"><i class="fa-solid fa-dice" aria-hidden="true"></i><span>{{localize 'MGT2.Actor.vehicle.GunportPick'}}</span></button>
+							{{/if}}
 							<span class="mtl play-only">{{localize mount.typeLabel}} &middot; {{localize mount.arcLabel}}</span>
+							{{! VH2026 folio 102: the mount's own crew. A person dropped anywhere on the card takes it, and
+							    the hidden field carries it through every submit of the mounts array. }}
+							<span class="gun" data-accept="Actor.character Actor.npc">
+								<span class="lbl">{{localize 'MGT2.Actor.vehicle.Gunner'}}</span>
+								{{#if mount.gunner.linked}}<a data-action="openGunner">{{mount.gunner.name}}</a>{{else if mount.gunner.name}}{{mount.gunner.name}}{{else}}&mdash;{{/if}}
+								{{#if mount.gunner.uuid}}<a class="x edit-only" data-action="mountGunnerClear" data-tooltip="{{localize 'MGT2.Actor.vehicle.GunnerClear'}}"><i class="fa-solid fa-xmark"></i></a>{{/if}}
+								<input type="hidden" name="system.mounts.{{mount.index}}.gunner" value="{{mount.gunner.uuid}}" />
+							</span>
 						</div>
 						<div class="mcfg side edit-only">
 							{{! `mount` is a block param and stays lexically in scope inside the nested each;
@@ -136,7 +147,11 @@
 		{{! The attacker-side rules the system deliberately will not resolve: nothing here reads the
 		    canvas or a selected target, so these are reminders and not modifiers. }}
 		<ul class="codes" data-family="vehicle">
-			<li class="code inert"><b>{{localize 'MGT2.Actor.vehicle.BandDifference'}}</b><span class="ps"><span class="p">{{localize 'MGT2.Actor.vehicle.BandDifferenceValue'}}</span></span></li>
+			{{! Core folios 138-139: what binds everyone firing out of the vehicle, its passengers included. }}
+			<li class="code inert from">
+				<b>{{localize 'MGT2.Actor.vehicle.FromVehicle'}}</b>
+				<span class="ps"><span class="p">{{localize 'MGT2.Actor.vehicle.BandDifference'}} {{localize 'MGT2.Actor.vehicle.BandDifferenceValue'}}</span>{{#if vehicle.fromVehicle.evasive}}<span class="p">{{localize 'MGT2.Actor.vehicle.EvasiveDM'}} {{showDM vehicle.fromVehicle.evasive}}</span>{{/if}}{{#if vehicle.fromVehicle.closed}}<span class="p">{{localize 'MGT2.Actor.vehicle.PerArc'}}</span>{{/if}}</span>
+			</li>
 			<li class="code inert"><b>{{localize 'MGT2.Actor.vehicle.MinEngagement'}}</b><span class="ps"><span class="p">{{localize 'MGT2.Actor.vehicle.MinEngagementValue'}}</span></span></li>
 			<li class="code{{#unless (lte vehicle.hull.weapons vehicle.hull.cap)}} hot{{/unless}}">
 				<b>{{localize 'MGT2.Actor.vehicle.WeaponCap'}}</b>

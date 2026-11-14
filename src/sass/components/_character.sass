@@ -469,6 +469,14 @@
 	font-size: 10px
 	color: var(--danger)
 
+// A secondary weapon's row sits under its primary's, indented behind the link it is fitted by.
+.mgt2 table.rows tr.secondary td:first-child
+	padding-left: 18px
+	> i
+		margin-right: 5px
+		font-size: 10px
+		color: var(--faint)
+
 // --------------------------------------------
 //  Training strip — a readout, and one verb at most
 // --------------------------------------------
@@ -757,6 +765,8 @@
 		border-radius: 6px
 		&:hover
 			border-color: var(--edge)
+	.atk.secondary
+		margin-left: 18px
 	.acts
 		display: inline-flex
 		gap: 6px
@@ -1189,6 +1199,14 @@
 		display: inline
 		margin: 0
 
+// The chip every shot out of a vehicle reads is a sentence of pills, so it wraps where the panel narrows.
+.mgt2 .codes .code.from
+	flex-wrap: wrap
+	max-width: 100%
+	white-space: normal
+	.ps
+		min-width: 0
+
 // A mount is the attack card inside its row: one roll per distinct weapon over its caption, the
 // pills, and the damage as rolled. Fixed columns, so the mode flip moves nothing.
 .mgt2 table.mounts.cards
@@ -1217,6 +1235,30 @@
 	// Under a roll the caption lines up with the weapon's name, past the die.
 	button.roll ~ .mtl
 		margin-left: 32px
+	button.roll ~ .gun
+		margin-left: 27px
+	// The mount's gunner: a caption, a name that opens their sheet, and the zone a person is dropped on.
+	.gun
+		display: inline-flex
+		align-items: baseline
+		gap: 6px
+		padding: 0 4px
+		margin-left: -4px
+		font-size: 12px
+		border: 1px dashed transparent
+		border-radius: 3px
+		.lbl
+			font-size: 9.5px
+			color: var(--faint)
+		a
+			color: var(--ink)
+			cursor: var(--cursor-pointer)
+			&:hover
+				color: var(--accent-text)
+		a.x
+			color: var(--faint)
+			&:hover
+				color: var(--danger)
 	.mcfg
 		display: flex
 		flex-direction: column

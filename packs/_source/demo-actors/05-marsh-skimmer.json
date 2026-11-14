@@ -79,7 +79,7 @@
       "stealth": null
     },
     "mounts": [
-      { "type": "pintle", "arc": "front", "fireControl": 0, "weapons": ["vehWeaponGun0001"] }
+      { "type": "pintle", "arc": "front", "fireControl": 0, "weapons": ["vehWeaponGun0001"], "gunner": null }
     ],
     "driver": null,
     "combat": { "dogfight": 0, "carry": 2, "evasive": 1 },

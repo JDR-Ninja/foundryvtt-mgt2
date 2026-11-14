@@ -3,7 +3,7 @@
 import { MGT2 } from "./config.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
-import { buildTraitMap, createTraitsField, migrateTraitArray } from "./traits.js";
+import { CUSTOM_KEY, buildTraitMap, createTraitsField, migrateTraitArray } from "./traits.js";
 
 const fields = foundry.data.fields;
 
@@ -75,6 +75,10 @@ function createSpecialisedField() {
         bonus: new fields.NumberField({
             required: false, nullable: false, min: 0, integer: true, initial: 0 })
     });
+}
+
+function createFittedField() {
+    return new fields.StringField({ required: false, blank: true, initial: "" });
 }
 
 /** Where the entry is printed. */
@@ -208,8 +212,25 @@ export class EquipmentData extends PhysicalItemData {
         schema.processing = new fields.NumberField({
             required: false, nullable: true, initial: null, integer: true, min: 0 });
         schema.specialised = createSpecialisedField();
+        schema.fittedTo = createFittedField();
+        // CSC folios 174-177: what an accessory does to the weapon it is fitted to; `attack` ranges are metres.
+        schema.accessory = new fields.SchemaField({
+            traits: createTraitsField("weapon"),
+            steadies: new fields.StringField({
+                required: false, blank: true, initial: "", choices: MGT2.AccessorySteadies }),
+            deployed: new fields.BooleanField({ required: false, initial: false }),
+            attack: new fields.ArrayField(new fields.SchemaField({
+                dm: new fields.NumberField({ required: false, nullable: false, initial: 0, integer: true }),
+                within: new fields.NumberField({ required: false, nullable: true, initial: null, min: 0 }),
+                beyond: new fields.NumberField({ required: false, nullable: true, initial: null, min: 0 })
+            }), { initial: () => [] }),
+            rangePercent: new fields.NumberField({
+                required: false, nullable: true, initial: null, min: -100, integer: true }),
+            sight: new fields.BooleanField({ required: false, initial: false }),
+            fits: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
+        });
 
-        schema.subType.initial = "equipment"; // augment, clothing, trinket, toolkit, equipment
+        schema.subType.initial = "equipment";
 
         return schema;
     }
@@ -1204,8 +1225,7 @@ export class WeaponData extends PhysicalItemData {
     static migrateData(source, options) {
         migrateTraitArray(source.traits, "weapon");
         migrateTraitArray(source.options, "custom");
-        // `range.unit` now validates against MGT2.MetricRange, so an outside value would fail on
-        // load.
+        // `range.unit` validates against MGT2.MetricRange, so an outside value would fail on load.
         if (source.range?.unit && !(source.range.unit in MGT2.MetricRange)) {
             source.range.unit = MGT2.WeaponScales[source.scale]?.range ?? "meter";
         }
@@ -1214,11 +1234,12 @@ export class WeaponData extends PhysicalItemData {
 
     prepareDerivedData() {
         this.traitMap = buildTraitMap(this.traits);
-        // What the weapon is while the loaded round is in it.
         this.round = this.#round();
-        this.effective = this.#effective();
-        // Core folio 77: the magazine is "how many shots can be fired before reloading", so what is
-        // left in it is only a number where there is a magazine.
+        this.fitted = this.#fitted();
+        // What the weapon is with nothing loaded, and while the loaded round is in it.
+        this.unloaded = this.#withFitted(this.#loaded(null));
+        this.effective = this.round ? this.#withFitted(this.#loaded(this.round.system)) : this.unloaded;
+        // Core folio 77: what is left in the magazine is only a number where there is one.
         this.ammo = (this.effective.magazine > 0)
             ? Math.min(this.effective.magazine, this.loaded ?? this.effective.magazine) : 0;
     }
@@ -1229,9 +1250,51 @@ export class WeaponData extends PhysicalItemData {
         return (round?.type === "ammunition") ? round : null;
     }
 
-    /** The weapon's own values with the round's overrides laid over them. */
-    #effective() {
-        const round = this.round?.system;
+    /** What is fitted to it on its owner, in collection order; a second sight grants nothing (CSC folio 174). */
+    #fitted() {
+        const weapon = this.parent;
+        let sighted = false;
+        return (weapon?.actor?.items.filter(item => (item.id !== weapon.id) && (item.system.fittedTo === weapon.id)) ?? [])
+            .map(item => {
+                const accessory = (item.type === "equipment") ? item.system.accessory : null;
+                const idle = Boolean(accessory?.sight) && sighted;
+                sighted ||= Boolean(accessory?.sight);
+                return { item, accessory: idle ? null : accessory, idle };
+            });
+    }
+
+    /** CSC folios 174-177: the fitted accessories laid over the loaded weapon. */
+    #withFitted(loaded) {
+        const active = this.fitted.filter(entry => entry.accessory).map(entry => [entry.item, entry.accessory]);
+        if (!active.length) return { ...loaded, attackDMs: [], sighted: false };
+        const keys = new Set(loaded.traits.map(trait => trait.key));
+        let traits = [...loaded.traits];
+        for (const [, accessory] of active) {
+            for (const trait of accessory.traits) {
+                if ((trait.key !== CUSTOM_KEY) && keys.has(trait.key)) continue;
+                keys.add(trait.key);
+                traits.push(trait);
+            }
+        }
+        const steadies = new Set(active.map(([, a]) => (((a.steadies === "ignore") && !a.deployed) ? "" : a.steadies)));
+        if (steadies.has("ignore")) traits = traits.filter(trait => !["bulky", "very-bulky"].includes(trait.key));
+        else if (steadies.has("reduce")) {
+            traits = traits.filter(trait => trait.key !== "bulky")
+                .map(trait => ((trait.key === "very-bulky") ? { ...trait, key: "bulky" } : trait));
+        }
+        const range = { ...loaded.range };
+        const percent = active.reduce((sum, [, a]) => sum + (a.rangePercent ?? 0), 0);
+        if (percent && !range.isMelee && !MGT2.WeaponScales[this.scale]?.band && Number.isFinite(range.value)) {
+            range.value = Math.floor(range.value * (100 + percent) / 100);
+        }
+        const attackDMs = active.flatMap(([item, a]) => a.attack.map((row, index) => ({ id: item.id, index,
+            name: item.name, dm: row.dm, within: row.within, beyond: row.beyond })).filter(row => row.dm));
+        return { ...loaded, range, traits, traitMap: buildTraitMap(traits), attackDMs,
+            sighted: active.some(([, a]) => a.sight) };
+    }
+
+    /** The weapon's own values with a round's overrides laid over them. */
+    #loaded(round) {
         // VH2026 p.104: every fire control system grants Scope to the weapon it serves.
         const granted = (!this.traitMap.scope && this.parent?.actor?.system?.fireControlFor?.(this.parent))
             ? [{ key: "scope" }] : [];
@@ -1253,8 +1316,7 @@ export class WeaponData extends PhysicalItemData {
             range: this.#rangeWith(round),
             traits,
             traitMap: buildTraitMap(traits),
-            // "Pellets ignore Dodge and double Protection" — no trait vocabulary covers it, so it
-            // is carried to the sheet as the referee typed it and applied by nobody.
+            // "Pellets ignore Dodge and double Protection": no trait covers it, so nobody applies it.
             rules: round.rules ?? []
         };
     }
@@ -1285,8 +1347,7 @@ export class WeaponData extends PhysicalItemData {
                 required: false, blank: true, initial: "", choices: MGT2.ShipRangeBands })
         });
         schema.damage = new FormulaField({ required: false, blank: true, trim: true, initial: "" });
-        // Companion p.93-94. A set because the printed vocabulary is not a partition, and empty
-        // because no book types every weapon: guessing a type would be inventing a rule.
+        // Companion p.93-94: a set, the vocabulary being no partition, and empty, as no book types every weapon.
         schema.damageType = new fields.SetField(
             new fields.StringField({ required: true, blank: false, choices: MGT2.DamageTypes }),
             { required: false, initial: [] });
@@ -1295,8 +1356,7 @@ export class WeaponData extends PhysicalItemData {
         // What is in the weapon, against the capacity above.
         schema.loaded = new fields.NumberField({
             required: false, nullable: true, initial: null, min: 0, integer: true });
-        // WHICH round is in it — an `ammunition` Item on the same actor, by id, blank for the
-        // weapon's own.
+        // Which round is in it: an `ammunition` Item on the same actor by id, blank for the weapon's own.
         schema.ammunition = new fields.StringField({ required: false, blank: true, initial: "" });
         // One enum selects which range vocabulary the weapon speaks and which accuracy fields it
         // has, instead of a vehicleWeapon type duplicating the whole roll path.
@@ -1308,9 +1368,15 @@ export class WeaponData extends PhysicalItemData {
         schema.power = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
         // A creature's Claw or Charge is a weapon it cannot drop, store or be disarmed of.
         schema.natural = new fields.BooleanField({ required: false, initial: false });
+        // CSC folio 137: a psi weapon adds the wielder's PSI DM to damage, `ap` per PSI DM and per point spent.
+        schema.psionic = new fields.SchemaField({
+            damage: new fields.BooleanField({ required: false, initial: false }),
+            ap: new fields.NumberField({ required: false, nullable: false, initial: 0, min: 0, integer: true })
+        });
         schema.traits = createTraitsField("weapon");
-        // Accessories, not traits: no family in the registry covers them, so they declare `custom`.
+        // Free notes, not traits: no family in the registry covers them, so they declare `custom`.
         schema.options = createTraitsField("custom");
+        schema.fittedTo = createFittedField();
 
         return schema;
     }
@@ -1484,10 +1550,11 @@ export class CargoData extends ItemBaseData {
         // The Law Level this is banned at or above; null is a lot nobody restricts.
         schema.legality = new fields.NumberField({
             required: false, nullable: true, initial: null, min: 0, integer: true });
-        // Core p.243's OTHER kind of illegal: rows 61-65 are banned "throughout the Imperium" and
-        // print no Law Level, so `legality` cannot say it — a stored 0 would read as Law Level 0,
-        // the most permissive there is, and manufacture a smuggler's Sale DM the book never prints.
+        // Core p.243's rows 61-65 are banned "throughout the Imperium" at no Law Level, which a
+        // stored `legality` 0 would misread as the most permissive one.
         schema.illegal = new fields.BooleanField({ required: false, initial: false });
+        // Core folio 159: Cr100000 a ton, drawn by a repair in fractions of a ton.
+        schema.spareParts = new fields.BooleanField({ required: false, initial: false });
 
         return schema;
     }
@@ -1801,6 +1868,17 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
                     sex: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
                 })
             ),
+            // Core p.53-54: one trait name prints a different DM per species; a blank condition applies unasked.
+            traitModifiers: new fields.ArrayField(new fields.SchemaField({
+                trait: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+                target: new fields.StringField({
+                    required: true, blank: false, initial: "skills", choices: MGT2.TraitModifierTargets }),
+                skills: new fields.ArrayField(
+                    new fields.StringField({ required: true, blank: false, trim: true }), { initial: [] }),
+                dm: new fields.NumberField({ required: true, nullable: false, integer: true, initial: 0 }),
+                condition: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
+                sex: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
+            }), { initial: [] }),
 
             frame: new fields.SchemaField({
                 // Empty runs the Core sequence.
@@ -1848,9 +1926,8 @@ export class SpeciesData extends foundry.abstract.TypeDataModel {
                 replaces: new fields.StringField({
                     required: false, blank: true, initial: "", choices: MGT2.Characteristics }),
                 sex: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-                // The book's own name for a slot: BOL, RES and FOL read as Other or Charm without it.
-                // `label` is the full name and `short` the printed abbreviation; the sheet needs both,
-                // because the cell prints one and its tooltip the other.
+                // The book's own name for a slot, BOL, RES or FOL: `label` the full name for the tooltip,
+                // `short` the printed abbreviation for the cell.
                 label: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
                 short: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
             }), { initial: [] }),

@@ -68,6 +68,7 @@ export class CharacterPrompts {
             config: CONFIG.MGT2,
             system,
             ordered: prepareDamageOrder(system),
+            hitsInForce: system.hitsInForce,
             chainLength: system.config.damageOrder.length,
             damageOrder: system.config.damageOrder.join(",")
         });
@@ -86,7 +87,7 @@ export class CharacterPrompts {
     /**
      * Configure one characteristic: its stored base, its rank in the damage chain, and what the
      * sheet shows of it.
-     * @param {object} context   `{key, label, characteristic, rank, ranks, showAll}`
+     * @param {object} context   `{key, label, characteristic, rank, ranks, rankable, showAll}`
      * @returns {Promise<object|null>}
      */
     static async openCharacteristic(context) {

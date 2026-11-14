@@ -22,12 +22,13 @@
 		{{! Core folio 79: which of the three modes was fired, and what it cost. Its own line rather
 		    than a modifier — a fire mode changes what the attack does, not the DM it is rolled at. }}
 		{{#if fireModeLine}}<div class="cmsg">{{fireModeLine}}</div>{{/if}}
-		{{! Core folio 77: the rounds this pull of the trigger took out of the magazine, already spent. }}
+		{{! Core folio 77: the rounds this pull of the trigger took out, already spent, and the spares left. }}
 		{{#if ammo}}
 		<div class="meter">
 			<span>{{localize 'MGT2.Items.Magazine'}}</span>
 			<span class="bar"><i style="width: {{ammo.leftPct}}%"></i><i class="now" style="width: {{ammo.spentPct}}%"></i></span>
 			<b>{{ammo.left}}/{{ammo.magazine}}</b>
+			{{#if ammo.spareLabel}}<span class="spare">· {{ammo.spareLabel}}</span>{{/if}}
 		</div>
 		{{/if}}
 		{{! Core folio 229: what the power cost the reserve, already spent by the time the card lands. }}
@@ -98,6 +99,13 @@
 			{{/if}}
 			{{#if applyLabel}}
 			<button data-action="damage"><i class="fa-regular fa-heart-circle-minus"></i><span>{{applyLabel}}</span></button>
+			{{/if}}
+			{{! Core folios 159 and 172: the ship's owner writes what the check scored, or counts another round. }}
+			{{#if repairApply}}
+			<button data-action="repairApply" class="hot"><i class="fa-solid fa-screwdriver-wrench"></i>{{repairApply}}</button>
+			{{/if}}
+			{{#if repairKeep}}
+			<button data-action="repairKeep"><i class="fa-solid fa-rotate-right"></i>{{repairKeep}}</button>
 			{{/if}}
 			{{#each cardButtons as |cardButton i|}}
 			<button data-index="{{i}}"><i class="fa-solid fa-dice"></i>{{cardButton.label}}</button>

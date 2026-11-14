@@ -868,6 +868,81 @@ body.mgt2-guide-off .mgt2 .window-header button[data-action=openGuide] {
   color: var(--faint);
 }
 
+.mgt2 .dlg.repair {
+  --lbl-col: 6.5rem;
+}
+.mgt2 .dlg.repair .dstates input {
+  accent-color: var(--accent);
+}
+.mgt2 .dlg.repair .dstates input:checked + span {
+  color: var(--accent-text);
+}
+.mgt2 .dlg.repair .dstates input:disabled + span {
+  color: var(--faint);
+  cursor: default;
+}
+
+.mgt2 .dlg.purchase .goods {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mgt2 .dlg.purchase .goods img {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border: 0;
+}
+.mgt2 .dlg.purchase .goods .nm {
+  display: block;
+  font-family: var(--cond);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.mgt2 .dlg.purchase .goods .spec {
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .dlg.purchase .sums {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.mgt2 .dlg.purchase .sums > div {
+  padding: 6px 9px;
+  border-right: 1px solid var(--rule-soft);
+}
+.mgt2 .dlg.purchase .sums > div:last-child {
+  border-right: 0;
+}
+.mgt2 .dlg.purchase .sums small {
+  display: block;
+  font-family: var(--cond);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.mgt2 .dlg.purchase .sums b {
+  font-family: var(--cond);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.mgt2 .dlg.purchase .sums .short b {
+  font-size: 13px;
+  color: var(--danger);
+}
+
 .mgt2 .dmgdlg {
   --lbl-col: 9.5rem;
 }
@@ -4044,6 +4119,46 @@ li.chat-message {
   font-weight: 600;
   color: var(--danger);
 }
+.mgt2 .crits .effrow {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 10px;
+  margin: -1px 0 3px;
+  font-size: 11.5px;
+}
+.mgt2 .crits .effrow .eff {
+  margin: 0;
+}
+.mgt2 .crits .effrow.patched .eff b {
+  color: var(--faint);
+  text-decoration: line-through;
+}
+.mgt2 .crits .pat {
+  padding: 0 7px;
+  font-family: var(--cond);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--warn);
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--warn) 14%, transparent);
+}
+.mgt2 .crits .racts {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-left: auto;
+}
+.mgt2 .crits .racts a {
+  cursor: var(--cursor-pointer);
+  color: var(--mute);
+}
+.mgt2 .crits .racts a:hover {
+  color: var(--accent-text);
+}
 
 .mgt2 .critrow {
   display: flex;
@@ -4070,6 +4185,11 @@ li.chat-message {
 }
 .mgt2 .critrow label.pair input.f {
   width: 3.4rem;
+}
+.mgt2 .critrow .spare {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--mute);
 }
 
 .mgt2 .chars {
@@ -4318,6 +4438,31 @@ li.chat-message {
 
 .mgt2 .chars .dmgctl {
   margin-top: 7px;
+}
+
+.mgt2 .chars .hitsum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 7px;
+}
+.mgt2 .chars .hitsum .lbl,
+.mgt2 .chars .hitsum .btn {
+  white-space: nowrap;
+}
+.mgt2 .chars .hitsum b {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.mgt2 .chars .hitsum .btn {
+  margin-left: auto;
+}
+
+.mgt2 .chars .hitsask {
+  margin: 6px 0 0;
 }
 
 .mgt2 [data-accept].over {
@@ -5058,6 +5203,15 @@ li.chat-message {
   color: var(--danger);
 }
 
+.mgt2 table.rows tr.secondary td:first-child {
+  padding-left: 18px;
+}
+.mgt2 table.rows tr.secondary td:first-child > i {
+  margin-right: 5px;
+  font-size: 10px;
+  color: var(--faint);
+}
+
 .mgt2 .tsks {
   display: block;
 }
@@ -5347,6 +5501,9 @@ li.chat-message {
 }
 .mgt2 .attacks .atk:hover {
   border-color: var(--edge);
+}
+.mgt2 .attacks .atk.secondary {
+  margin-left: 18px;
 }
 .mgt2 .attacks .acts {
   display: inline-flex;
@@ -5827,6 +5984,15 @@ li.chat-message {
   margin: 0;
 }
 
+.mgt2 .codes .code.from {
+  flex-wrap: wrap;
+  max-width: 100%;
+  white-space: normal;
+}
+.mgt2 .codes .code.from .ps {
+  min-width: 0;
+}
+
 .mgt2 table.mounts.cards {
   table-layout: fixed;
 }
@@ -5859,6 +6025,36 @@ li.chat-message {
 }
 .mgt2 table.mounts.cards button.roll ~ .mtl {
   margin-left: 32px;
+}
+.mgt2 table.mounts.cards button.roll ~ .gun {
+  margin-left: 27px;
+}
+.mgt2 table.mounts.cards .gun {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0 4px;
+  margin-left: -4px;
+  font-size: 12px;
+  border: 1px dashed transparent;
+  border-radius: 3px;
+}
+.mgt2 table.mounts.cards .gun .lbl {
+  font-size: 9.5px;
+  color: var(--faint);
+}
+.mgt2 table.mounts.cards .gun a {
+  color: var(--ink);
+  cursor: var(--cursor-pointer);
+}
+.mgt2 table.mounts.cards .gun a:hover {
+  color: var(--accent-text);
+}
+.mgt2 table.mounts.cards .gun a.x {
+  color: var(--faint);
+}
+.mgt2 table.mounts.cards .gun a.x:hover {
+  color: var(--danger);
 }
 .mgt2 table.mounts.cards .mcfg {
   display: flex;
@@ -8034,6 +8230,37 @@ ul.softwares li:hover a {
   color: var(--faint);
 }
 
+.mgt2 .traitdms {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mgt2 .traitdms table.rows {
+  margin: 0;
+}
+.mgt2 .traitdms table.rows.fixed th.trait {
+  width: 35%;
+}
+.mgt2 .traitdms table.rows.fixed th.target {
+  width: 25%;
+}
+.mgt2 .traitdms table.rows.fixed th.num {
+  width: 3.2rem;
+}
+.mgt2 .traitdms table.rows.fixed th.ctl {
+  width: 2.5rem;
+}
+.mgt2 .traitdms td.nil {
+  color: var(--faint);
+}
+.mgt2 .traitdms td.inert {
+  color: var(--warn);
+}
+.mgt2 .traitdms td.inert i {
+  margin-right: 4px;
+  cursor: help;
+}
+
 .mgt2 .stationacts {
   display: flex;
   flex-direction: column;
@@ -8305,6 +8532,35 @@ ul.softwares li:hover a {
 .mgt2 .imain .pair select.f {
   width: auto;
   flex: 0 0 auto;
+}
+.mgt2 .imain .grid .attackdms {
+  grid-column: 1/-1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.mgt2 .imain .grid .attackdms .lbl .add {
+  margin-left: 6px;
+}
+.mgt2 .imain .grid .attackdms .pair {
+  align-items: center;
+}
+.mgt2 .imain .grid .attackdms .pair input.f,
+.mgt2 .imain .grid .attackdms .pair > span {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.mgt2 .imain .grid .attackdms .pair > .x,
+.mgt2 .imain .grid .attackdms .pair > i {
+  flex: 0 0 14px;
+  text-align: center;
+}
+.mgt2 .imain .grid .attackdms .heads > span {
+  font-family: var(--cond);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
 }
 .mgt2 .imain label.off {
   color: var(--faint);
@@ -10856,6 +11112,9 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--faint);
+}
+.mgt2 table.batteries td .opts {
+  padding: 2px 0 0;
 }
 .mgt2 table.batteries input.f.num {
   width: 4rem;
@@ -14662,6 +14921,12 @@ li.chat-message .dice-tooltip .dice-rolls .roll.discarded, li.chat-message .dice
   line-height: 1.6;
 }
 
+.mgt2 .dlg.connect .drow {
+  grid-template-columns: var(--lbl-col, 7.5rem) minmax(0, 1fr);
+}
+.mgt2 .dlg.connect .drow.twin {
+  grid-template-columns: var(--lbl-col, 7.5rem) repeat(2, minmax(0, 1fr));
+}
 .mgt2 .dlg.connect .drow select.f {
   flex: 1 1 8rem;
   width: auto;

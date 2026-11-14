@@ -3,6 +3,7 @@ import { Checks, renderRollCard } from "./checks.js";
 import { MGT2Helper } from "./helper.js";
 import { Rules } from "./rules.js";
 import { SQUADRON } from "./fleet.js";
+import { traitLabel } from "./traits.js";
 
 /**
  * The fleet attack path (HG folios 116-121) — the half of the chapter that shares nothing with
@@ -37,6 +38,8 @@ const SUPERIORITY = 4;
 const DICE = /(\d*)\s*[dD]/;
 
 const BANDS = Object.freeze(Object.keys(MGT2.ShipRangeBands));
+
+const CUSTOMISED = Object.freeze(["high-yield", "very-high-yield", "intense-focus"]);
 
 function localize(key, data) {
     return data ? game.i18n.format(key, data) : game.i18n.localize(key);
@@ -86,13 +89,14 @@ export function fleetWeaponRow(actor, mountIndex, weaponId = "") {
         band: weapon?.system.range?.band ?? "",
         fireControl: weapon?.system.fireControl ?? 0,
         ion: Boolean(traits.ion),
-        // Folio 111: ortillery "is expected to be used specifically as ortillery and not typically
-        // employed during fleet combat against other ships", so it is excluded rather than costed.
+        // Folio 111: ortillery "is expected to be used specifically as ortillery", so it is excluded rather than costed.
         ortillery: Boolean(traits["orbital-bombardment"] || traits["orbital-strike"]),
         // Folio 111 keeps three things out of the Fleet Combat Weapons table: ortillery, ion — which
         // "do not inflict damage" — and missiles, which it sends to folio 36 to be salvoed instead.
         salvo: MGT2Helper.isMissileWeapon(weapon),
         directFire: !traits.ion && !MGT2Helper.isMissileWeapon(weapon),
+        // Folio 118's DM+1 for a High Yield or Intense Focus weapon, named where its Item carries one.
+        customised: CUSTOMISED.filter(key => traits[key]).map(key => traitLabel(traits[key])).join(", "),
         traits
     };
 }

@@ -132,6 +132,20 @@
 	</div>
 	{{/if}}
 
+	{{! CSC folio 137: the points a psi weapon spends once it hits. A spend and no DM, so no readout. }}
+	{{#if psiWeapon}}
+	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.PsiSpend' }}">
+		<span class="pgut">{{ localize 'MGT2.Characteristics.psionic.short' }}</span>
+		<div class="pfields">
+			<span class="numunit" title="{{psiWeapon.hint}}">
+				<i class="pre">{{ localize 'MGT2.RollPrompt.PsiSpend' }}</i>
+				<input class="f n" type="number" name="psiPoints" min="0" max="{{psiWeapon.reserve}}" step="1" value="0"
+					aria-label="{{ localize 'MGT2.RollPrompt.PsiSpend' }}" /><i>/ {{psiWeapon.of}}</i>
+			</span>
+		</div>
+	</div>
+	{{/if}}
+
 	{{#if blocks.range}}
 	<div class="pline" role="group" aria-label="{{ localize 'MGT2.RollPrompt.Range' }}">
 		<span class="pgut">{{ localize 'MGT2.RollPrompt.Range' }}<b>{{weapon.rangeLabel}}</b></span>
@@ -173,11 +187,13 @@
 				</span>
 			</span>
 			{{/if}}
+			{{#if weapon.laserSight}}
 			<label class="tog pos" data-status="laserSight">
-				<input type="checkbox" name="laserSight" data-dtype="Boolean" data-dm="1" data-requires="aiming"
-					data-term="{{localize 'MGT2.AttackModifiers.laserSight'}}" />
+				<input type="checkbox" name="laserSight" data-dtype="Boolean" data-dm="1" data-within="{{weapon.laserSight.within}}"
+					data-within-label="{{weapon.laserSight.label}}" data-term="{{localize 'MGT2.AttackModifiers.laserSight'}}" />
 				<span>{{ localize 'MGT2.AttackModifiers.laserSight' }}</span><span class="v">+1</span>
 			</label>
+			{{/if}}
 
 			<span class="brk"></span>
 			<label class="tog neg">
@@ -257,7 +273,7 @@
 						title="{{ localize t.status }}">
 					<input type="checkbox" name="{{t.name}}" data-dtype="Boolean" data-dm="{{t.dm}}"
 						data-term="{{t.term}}" data-trait="{{t.key}}" data-auto="{{#if t.auto}}true{{/if}}"
-						data-when="{{t.when}}" data-when-value="{{t.whenValue}}"
+						data-when="{{t.when}}" data-when-value="{{t.whenValue}}" data-under="{{t.under}}" data-from="{{t.from}}"
 						data-tiers="{{t.tiers}}" data-bands="{{t.bands}}"
 						data-requires="{{t.requires}}" data-suppress="{{t.suppress}}"
 						{{#if t.checked}}checked{{/if}} />
@@ -289,7 +305,7 @@
 			    the player touches it — Core folio 98 puts the encumbered DM on physical actions,
 			    and folio 9's roster is what "physical" means to a system that flags no skill. }}
 			{{#each checkModifiers as |m|}}
-			<label class="tog {{#if m.negative}}neg{{else}}pos{{/if}}"{{#if m.scope}} title="{{ localize 'MGT2.RollPrompt.PhysicalOnly' }}"{{else if m.skillScope}} title="{{ localize 'MGT2.RollPrompt.SkillOnly' }}"{{/if}}>
+			<label class="tog {{#if m.negative}}neg{{else}}pos{{/if}}"{{#if m.hint}} title="{{m.hint}}"{{else if m.scope}} title="{{ localize 'MGT2.RollPrompt.PhysicalOnly' }}"{{else if m.skillScope}} title="{{ localize 'MGT2.RollPrompt.SkillOnly' }}"{{/if}}>
 				<input type="checkbox" name="check-{{m.key}}" data-dtype="Boolean" data-dm="{{m.dm}}"
 					data-term="{{m.label}}"{{#if m.scope}} data-scope="{{m.scope}}" data-auto="true"{{/if}}{{#if m.skillScope}} data-skill-scope="{{m.skillScope}}" data-auto="true"{{/if}}{{#unless m.idle}} checked{{/unless}} />
 				<span>{{m.label}}</span><span class="v">{{m.display}}</span>

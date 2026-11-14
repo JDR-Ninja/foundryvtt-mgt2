@@ -4,7 +4,7 @@
 	<div class="dlg connect">
 		<p class="hint">{{localize 'MGT2.Chargen.Connect.Hint'}}</p>
 		<div class="dblock">
-			<div class="drow">
+			<div class="drow twin">
 				<label>{{localize 'MGT2.Chargen.Connect.Pair'}}</label>
 				<select class="f" name="a" aria-label="{{localize 'MGT2.Chargen.Connect.Pair'}}">{{{first}}}</select>
 				<select class="f" name="b" aria-label="{{localize 'MGT2.Chargen.Connect.Pair'}}">{{{second}}}</select>
@@ -15,9 +15,17 @@
 					aria-label="{{localize 'MGT2.Chargen.Connect.Skill'}}" />
 			</div>
 			<div class="drow">
+				<label data-record="a">{{localize 'MGT2.Items.Relation'}}</label>
+				<select class="f" name="record-a" aria-label="{{localize 'MGT2.Items.Relation'}}">{{{recordA}}}</select>
+			</div>
+			<div class="drow">
 				<label data-for="b">{{localize 'MGT2.Chargen.Connect.Skill'}}</label>
 				<input class="f" type="text" name="skill-b" value="{{skillB}}" list="mgt2-connect-skills"
 					aria-label="{{localize 'MGT2.Chargen.Connect.Skill'}}" />
+			</div>
+			<div class="drow">
+				<label data-record="b">{{localize 'MGT2.Items.Relation'}}</label>
+				<select class="f" name="record-b" aria-label="{{localize 'MGT2.Items.Relation'}}">{{{recordB}}}</select>
 			</div>
 			{{! The shared event, in the table's own words: the book asks the two players to discuss
 			    exactly what happened, and that sentence is the whole record of it. }}

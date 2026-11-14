@@ -2324,10 +2324,10 @@
           "book": "",
           "page": ""
         },
-        "quantity": 16,
-        "weight": 0.02,
+        "quantity": 2,
+        "weight": 0.2,
         "weightless": false,
-        "cost": 40,
+        "cost": 30,
         "tl": "TL08",
         "legality": 3,
         "container": {

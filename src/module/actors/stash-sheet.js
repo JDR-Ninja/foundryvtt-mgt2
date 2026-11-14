@@ -118,7 +118,8 @@ export class StashActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsA
             quantity: item.system.quantity ?? null,
             weight: MGT2Helper.roundWeight(item.getTotalWeight()),
             value: value.get(item.id) ?? 0,
-            held: (item.type === "container") ? item.system.count : null
+            held: (item.type === "container") ? item.system.count : null,
+            fitted: item.fitted.flatMap(entry => [entry, ...entry.fitted]).map(entry => ({ _id: entry.id, name: entry.name }))
         })).sort(MGT2Helper.compareByName);
     }
 

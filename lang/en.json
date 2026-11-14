@@ -583,6 +583,18 @@
         "core": "Core Rulebook — cumulative 1D per round",
         "companion": "Traveller Companion — the Vacuum Damage table"
       },
+      "travellerHits": {
+        "name": "Hits for Travellers",
+        "hint": "Travellers and person NPCs take damage on a pool of Hits, as an animal does, instead of END, STR and DEX. The pool is typed on the sheet, where a button sets it from STR + DEX + END. Unconscious at a tenth of it or less, dead at 0; Stun incapacitates at half and never kills. Characteristic DMs no longer fall with wounds, and Knockout blow does not apply. A Traveller with no pool keeps the characteristics. Switching converts nothing.",
+        "StrandedOn": {
+          "one": "{count} Traveller or NPC keeps a wound on their characteristics, which no longer take damage. It still lowers their DMs and heals as before.",
+          "other": "{count} Travellers and NPCs keep a wound on their characteristics, which no longer take damage. It still lowers their DMs and heals as before."
+        },
+        "StrandedOff": {
+          "one": "{count} Traveller or NPC keeps a wound on their Hits, which no longer take damage. It is kept, out of sight, until the rule is back.",
+          "other": "{count} Travellers and NPCs keep a wound on their Hits, which no longer take damage. It is kept, out of sight, until the rule is back."
+        }
+      },
       "shipAutomation": {
         "name": "Starship automation",
         "hint": "Offers an automation part; the row it carries moves the crew requirement by its printed percentage, and a role that needs one body still needs one."
@@ -1202,7 +1214,9 @@
         "Note": "The shared event",
         "Agree": "Agree",
         "Made": "{name} and {other} are connected.",
-        "NeedsTwo": "A connection needs two Travellers on the roster."
+        "NeedsTwo": "A connection needs two Travellers on the roster.",
+        "Record": "Recorded on {name}'s sheet as",
+        "NotRecorded": "Not recorded"
       },
       "Muster": {
         "PendingTitle": "DMs on this roll",
@@ -1910,6 +1924,10 @@
       "DamageOrderEmpty": "No chain configured",
       "DamageOrderHint": "Damage drains each link before moving on to the next. A characteristic with no maximum cannot enter the chain.",
       "DamageOrderNeedsMax": "No maximum set",
+      "HitsInForce": "Hits are in force at this table: damage goes to the Hits pool alone. The order stored here is kept, unread, until the rule is switched off.",
+      "HitsNoPool": "No Hits pool yet: damage still goes to the characteristics. Type one in edit mode.",
+      "HitsFromCharacteristics": "Set from characteristics",
+      "HitsFromCharacteristicsHint": "Types STR + DEX + END, at their current maxima, as the Hits pool. Written once: a characteristic that changes later does not move it.",
       "DamageOrderRemove": "Remove from the chain",
       "ChainRank": "Rank in the chain",
       "NotInChain": "Not in the chain",
@@ -1956,6 +1974,7 @@
       "Finance": "Finance",
       "Dead": "Dead",
       "DeadHint": "Every link of the damage chain emptied.",
+      "DeadHitsHint": "Hits at 0, Stun not counted.",
       "Heal": "Heal",
       "HealChainHint": "Backwards along the chain — the link injured last is repaired first. The rulebook procedures on the Health tab divide their points instead; this is the flat undo beside them.",
       "Health": "Health",
@@ -2010,6 +2029,7 @@
       "UPP": "UPP",
       "Unconscious": "Unconscious",
       "UnconsciousHint": "A link past the first emptied — for a Traveller, STR or DEX at 0.",
+      "UnconsciousHitsHint": "Hits at a tenth of the pool or less, Stun not counted.",
       "UnloadSoftware": "Unload Software",
       "UnstoreItem": "Unstore Item",
       "View": "View",
@@ -2173,6 +2193,17 @@
         "Driver": "Driver",
         "NoDriver": "No driver at the controls: drop a character or an NPC on the sheet first.",
         "NotDriver": "Only a character or an NPC can drive a vehicle.",
+        "Gunner": "Gunner",
+        "GunnerClear": "Remove the gunner",
+        "NoGunner": "{mount}, {arc}: no gunner. Drop a character or an NPC on the mount's card.",
+        "RollsAs": "Fired by {name}",
+        "NotGunner": "Only a character or an NPC can fire a mount.",
+        "NotYours": "This seat's occupant is not yours to roll for: only their owner or the referee can.",
+        "FromPack": "{name} is in a compendium: import them into the world, then drop them here.",
+        "GunportPick": "Own weapon",
+        "NoOwnWeapon": "{name} has no ranged weapon equipped to fire through the gun port.",
+        "FromVehicle": "Firing from this vehicle",
+        "PerArc": "2 per arc, 1 if military",
         "Dogfight": "Dogfight",
         "DogfightDM": "Dogfight",
         "DogfightCarry": "Dogfight carry-over",
@@ -3398,7 +3429,12 @@
       "clothing": "Clothing",
       "equipment": "Equipment",
       "trinket": "Trinket",
+      "accessory": "Accessory",
       "toolkit": "Toolkit"
+    },
+    "AccessorySteadies": {
+      "reduce": "Reduces Bulky",
+      "ignore": "Ignores Bulky once deployed"
     },
     "ItemSubType": {
       "loot": "Loot",
@@ -3450,6 +3486,7 @@
       "Relation": {
         "Allie": "Ally",
         "Contact": "Contact",
+        "Connection": "Connection",
         "Rival": "Rival",
         "Enemy": "Enemy",
         "Patron": "Patron"
@@ -3549,8 +3586,15 @@
         "one": "{points} PSI point",
         "other": "{points} PSI points"
       },
+      "PsiSpend": "Spend if it hits",
+      "PsiSpendHint": "PSI points spent only if the attack hits: each adds 1 to damage.",
+      "PsiSpendHintAP": "PSI points spent only if the attack hits: each adds 1 to damage and {ap} to AP.",
       "PhysicalOnly": "The rule puts this on physical actions — it follows the characteristic being rolled, until you say otherwise.",
       "SkillOnly": "The augment was bought for one skill — it follows the skill being rolled, until you say otherwise.",
+      "SpeciesTrait": "{trait} ({condition})",
+      "SpeciesTraitHint": "A trait of this species, for the skills it names — it follows the skill being rolled, until you say otherwise.",
+      "SpeciesTraitOffered": "A trait of this species that holds only in some circumstances — tick it when this check is made in them.",
+      "SpeciesTraitAll": "A trait of this species, on every check — untick it to set it aside.",
       "Ceiling": "{grade} brain · up to {ceiling}",
       "CeilingOver": "{grade} brain · beyond its ceiling, {ceiling}",
       "RangeUpTo": "up to {max} {unit}",
@@ -3885,7 +3929,18 @@
       "LoadedIn": "Loaded in",
       "LoadedFull": "full",
       "Reload": "Reload",
-      "ReloadHint": "Puts a full magazine in. Minor Actions needed: {actions}.",
+      "ReloadHint": "Puts in a spare magazine of {round}. Minor Actions needed: {actions}.",
+      "ReloadFree": "Puts a full magazine in. Minor Actions needed: {actions}. The weapon's own ammunition is not counted: load a round from the list to count its magazines.",
+      "ReloadNoSpare": "No spare magazine of {round}.",
+      "ReloadLost": {
+        "one": "The magazine taken out is discarded with {n} round still in it.",
+        "other": "The magazine taken out is discarded with {n} rounds still in it."
+      },
+      "SpareMagazines": {
+        "one": "{n} spare",
+        "other": "{n} spare"
+      },
+      "SpareHint": "Spare magazines: a round's quantity counts full ones, and a reload spends one (Core p.77).",
       "FireModes": "Fire Modes",
       "FireModeCost": {
         "one": "{mode} {gain}, {rounds} round",
@@ -3895,6 +3950,9 @@
       "Modifiers": "Modifiers",
       "Name": "Name",
       "Natural": "Natural",
+      "PsiDamage": "PSI DM to damage",
+      "PsiAP": "AP per PSI DM",
+      "PsiAPEach": "AP {ap} per PSI DM and per point",
       "Nickname": "Nickname",
       "NotProficient": "Not proficient",
       "Notes": "Notes",
@@ -3965,6 +4023,9 @@
       "Terms": "Terms",
       "Title": "Title",
       "Trait": "Trait",
+      "TraitModifiers": "Trait DMs",
+      "TraitModifiersHint": "A DM one of this species' traits puts on a roll: the books print a different one for each species under the same trait name. Skills: comma-separated, under Applies to. With no condition the DM applies by itself; with a condition it is only offered in the roll prompt, unticked, an Initiative row on the Initiative roll alone. A Protection row takes no condition. Sex: blank for every Traveller.",
+      "TraitModifierInert": "A Protection row with a condition applies nowhere: no screen can tell when the condition holds. Clear the condition, or the row does nothing.",
       "Traits": "Traits",
       "Type": "Type",
       "Weapon": "Weapon",
@@ -3998,6 +4059,8 @@
       "PurchasePct": "Paid",
       "BannedAt": "Banned at law level",
       "IllegalEverywhere": "Illegal throughout the Imperium",
+      "SpareParts": "Spare parts",
+      "SparePartsHint": "Spare parts for the ship's repairs, Cr100000 a ton. A repair aboard draws on the smallest flagged lot first.",
       "Unrestricted": "unrestricted",
       "PurchaseDM": "Purchase DM",
       "SaleDM": "Sale DM",
@@ -4034,6 +4097,30 @@
       "CravingDM": "Craving DM",
       "AddictionHint": "Onset and duration are empty where the book states none, not where nobody typed one. Addiction is optional and set per drug (CSC p.97): leave its three fields empty and the referee has not switched it on for this one.",
       "Fits": "Fits",
+      "Fitted": "Fitted",
+      "FittedTo": "Fitted to",
+      "NotFitted": "Not fitted",
+      "FittedHint": "What fits is the referee's call: an accessory is never refused, and only one sight or scope works on a weapon (CSC p.174). A secondary weapon goes on a primary one (Field Catalogue p.40); this system fits one level deep, so a secondary carries no weapon of its own.",
+      "FittedDrop": "Drop an accessory or a secondary weapon on this sheet to fit it.",
+      "FittedDropSecondary": "Drop an accessory on this sheet to fit it. A secondary weapon carries no weapon of its own.",
+      "FittedToName": "Fitted to {name}",
+      "PartOf": "Part of {name}",
+      "PartOfHint": "Its weight and cost are counted on {name}: the book prints the pair as one weapon.",
+      "Unfit": "Take off the weapon",
+      "Steadies": "Stabilises",
+      "Deployed": "Deployed",
+      "NotDeployed": "not deployed",
+      "DeployedHint": "A bipod counts only while it is set up, which takes two Minor Actions (CSC p.174).",
+      "AttackDM": "Attack DM",
+      "AttackDMAdd": "Add an attack DM",
+      "AttackUnder": "under {n} m",
+      "AttackFrom": "{n} m or more",
+      "AttackUnderPlaceholder": "under (m)",
+      "AttackFromPlaceholder": "from (m)",
+      "Sight": "Sight or scope",
+      "SightHint": "A weapon may only have one sight or scope: a second one fitted grants nothing (CSC p.174).",
+      "SightIdle": "The weapon already has a sight or scope fitted, so this one grants nothing (CSC p.174).",
+      "Idle": "Idle",
       "WeaponsOwn": "the weapon's own",
       "LoadedRound": "Loaded round",
       "ReplaceTraits": "Replaces the weapon's traits",
@@ -4286,13 +4373,31 @@
       "Settings": {
         "balances": {
           "name": "Credit cards show balances",
-          "hint": "Whether a transfer card starts with 'show balances' ticked. Either way it is asked again on every transfer."
+          "hint": "Whether a transfer card starts with 'show balances' ticked. Either way it is asked again on every transfer. A purchase card prints what the buyer has left only when this is on."
         },
         "visibility": {
           "name": "Credit card visibility",
-          "hint": "Whether a transfer card starts public or addressed to the referee and the purses it touched. Either way it is asked again on every transfer."
+          "hint": "Whether a transfer card starts public or addressed to the referee and the purses it touched. Either way it is asked again on every transfer. A purchase card follows it as it stands: addressed, it goes to the referee and the buyer's purse."
+        },
+        "purchaseOnDrop": {
+          "name": "Charge for items dropped on a Traveller",
+          "hint": "When an item is dragged from the Items directory or a compendium onto a Traveller's sheet, whether its listed price comes out of Cash On Hand. Off adds it free. Ask shows the price and asks. Always pays whenever the cash covers it, and asks when it does not. A drop from another actor is never charged. Each purchase posts a card, sent and shown as the two credit card settings say.",
+          "off": "Off",
+          "ask": "Ask",
+          "always": "Always"
         }
       }
+    },
+    "Purchase": {
+      "Title": "Buy for {name}",
+      "Total": "Total",
+      "After": "Cash after",
+      "Pay": "Pay Cr{price}",
+      "AddFree": "Add without paying",
+      "Short": "Short by Cr{credits}",
+      "Card": "Bought by {name}",
+      "Refused": "{name} is now short by Cr{credits}: nothing was paid or added.",
+      "PaidNotCreated": "Cr{credits} was taken from {name}'s cash, but the item could not be added. Add it by hand."
     },
     "Errors": {
       "DocketGMOnly": "The docket is the referee's window.",
@@ -4310,6 +4415,7 @@
       "DocketUnavailable": "The roll-request docket is not available in this world.",
       "AnswerUnavailable": "This request cannot be answered from here.",
       "ContainerRecursive": "A container cannot be placed inside itself.",
+      "FitDepth": "A secondary weapon goes on a weapon fitted to no other, and carries no weapon of its own.",
       "CouldNotFindItem": "Could not find item _ITEM_ID_.",
       "NoOwnedTokenSelected": "No token you own is selected.",
       "NoPsiPoints": "{name} has no PSI points left, so no power can be attempted.",
@@ -5236,12 +5342,15 @@
         "ap": "ignores {score} of the target's Armour, before any damage multiple",
         "auto": "fires in rapid bursts; ship-scale effect is left to the Referee",
         "chain-reaction": "damage recurs each round at half (round down) until zero; no stacking",
+        "high-yield": "each 1 rolled for damage counts as a 2; not missiles or torpedoes",
+        "intense-focus": "AP+2; lasers and particle weapons only",
         "ion": "ignores Armour; drains Power and bandwidth, not Hull; /fib computers immune",
         "orbital-bombardment": "Gunnery (ortillery); DM-12 vs manoeuvring ships; Blast 100 vs ground",
         "orbital-strike": "Gunnery (ortillery); DM-8 vs manoeuvring ships; precise, no Blast",
         "radiation": "2D×60 rads within 10 m of the hit; ship DM-1 per 10% Hull lost (40% shielded)",
         "reductor": "each damage die cuts the target's Armour by 1 before damage lands",
         "smart": "guided: DM+1 to +6 by TL over target; lost at Adjacent or Close range",
+        "very-high-yield": "each 1 or 2 rolled for damage counts as a 3; not missiles or torpedoes",
         "weak": "the target's Armour counts double against its damage"
       },
       "species": {
@@ -5349,6 +5458,12 @@
       "6-hours": "6 hours",
       "3-hours": "3 hours"
     },
+    "TraitModifierTargets": {
+      "skills": "Skills",
+      "check": "Any check",
+      "initiative": "Initiative",
+      "protection": "Protection"
+    },
     "TraitSlot": {
       "acceleration": "Acceleration",
       "actions": "Actions",
@@ -5395,6 +5510,8 @@
       "burrowing": "Burrowing",
       "camouflaged": "Camouflaged",
       "chain-reaction": "Chain Reaction",
+      "high-yield": "High Yield",
+      "intense-focus": "Intense Focus",
       "chameleon": "Chameleon",
       "claustrophobic": "Claustrophobic",
       "claws": "Claws",
@@ -5474,6 +5591,7 @@
       "slow-metabolism": "Slow Metabolism",
       "small": "Small",
       "smart": "Smart",
+      "very-high-yield": "Very High Yield",
       "smasher": "Smasher",
       "social-norms": "Social Norms",
       "sonic": "Sonic",
@@ -5551,10 +5669,59 @@
       "marine": "Marine",
       "passenger": "Passenger"
     },
+    "Repair": {
+      "Title": "Repairs aboard {ship}",
+      "Mode": "Work",
+      "Patch": "Patch",
+      "Repair": "Repair",
+      "PatchHint": "Repair System: an Average (8+) Engineer check taking 1 round, at minus the Severity and plus 1 for each round already worked on this hit. Only the effects are repaired, for 1D hours.",
+      "RepairHint": "A proper repair: an Average (8+) Engineer or Mechanic check taking 1D hours, and spare parts read at the Effect minus the Severity. The location is cleared.",
+      "Skills": {
+        "engineer": "Engineer",
+        "mechanic": "Mechanic",
+        "remoteOps": "Electronics (remote ops), through the repair drones"
+      },
+      "PatchOf": "Patch: {location}",
+      "RepairOf": "Repair: {location}",
+      "WorkDM": "Work on this hit",
+      "AutoRepairHint": "Auto-Repair needs repair drones aboard.",
+      "DronesCap": "Repair drones: Engineer 1 at most",
+      "ApplyPatch": "Apply the patch",
+      "ApplyRepair": "Apply the repair",
+      "KeepWorking": "Keep working",
+      "KeepHint": "Keep working, and the next round on this hit is at {dm}.",
+      "PatchLasts": "Once applied, the patch lasts 1D hours.",
+      "PartsNeeded": "Needs {tons} t of spare parts; {aboard} t aboard.",
+      "NoParts": "No spare parts needed.",
+      "PatchedFor": {
+        "one": "Patched — lasts {count} hour",
+        "other": "Patched — lasts {count} hours"
+      },
+      "PatchedOn": {
+        "one": "{location} patched: it lasts {count} hour.",
+        "other": "{location} patched: it lasts {count} hours."
+      },
+      "EndPatch": "End patch",
+      "SpareAboard": "Spare parts aboard: {tons} t",
+      "Repaired": "{location} repaired; {tons} t of spare parts spent.",
+      "Working": "{location}: the next round of work is at {dm}.",
+      "NotHit": "{location}: no critical hit to repair.",
+      "HullRefused": "Hull damage is repaired point by point: a Routine (6+) Mechanic check and spare parts for each Hull point. This repair does not reach it.",
+      "Destroyed": "{location}: destroyed. It must be replaced, and spare parts cannot repair it.",
+      "NothingToPatch": "{location}: no standing effect to patch, and what the hit destroyed or wounded stays. A repair still clears the location.",
+      "Changed": "{location} has changed since this check: roll again.",
+      "Failed": "This check failed: there is nothing to apply.",
+      "AlreadyPatched": "This location is already patched.",
+      "Counted": "This round of work is already counted.",
+      "ShortParts": "This repair needs {tons} t of spare parts and the ship carries {aboard} t: nothing was applied.",
+      "NoCrew": "No crew member of yours aboard this ship can make the repair.",
+      "NothingHit": "No location of this ship can be repaired."
+    },
     "RoleActions": {
       "skill": "Skill check",
       "weapon": "Weapon",
-      "special": "Special"
+      "special": "Special",
+      "repair": "Repair"
     },
     "CombatSteps": {
       "label": "Step",

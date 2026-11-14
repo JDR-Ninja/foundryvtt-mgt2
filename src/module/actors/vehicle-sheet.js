@@ -18,6 +18,8 @@ const DM_KEYS = ["controlDM", "systemsDM", "sensorDM"];
  */
 export class VehicleActorSheet extends TravellerActorSheet {
 
+  static SECONDARIES = false;
+
   /** @inheritDoc */
   static GUIDE_TOPIC = "vehicle";
 
@@ -37,7 +39,10 @@ export class VehicleActorSheet extends TravellerActorSheet {
             blockToggle: VehicleActorSheet.#onBlockToggle,
             vehicleAction: VehicleActorSheet.#onVehicleAction,
             combatClear: VehicleActorSheet.#onCombatClear,
-            openDriver: VehicleActorSheet.#onOpenDriver
+            openDriver: VehicleActorSheet.#onOpenDriver,
+            mountRoll: VehicleActorSheet.#onMountRoll,
+            mountGunnerClear: VehicleActorSheet.#onMountGunnerClear,
+            openGunner: VehicleActorSheet.#onOpenGunner
         }
     };
 
@@ -56,12 +61,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
     /** One rail and one panel, no tab strip. */
     static TABS = {};
 
-    /**
-     * The parent maps document paths onto the *character* sheet's parts, and this sheet has three
-     * of its own — an unlucky mapping would filter the list down to nothing — so a document-driven
-     * render redraws all of them instead.
-     * @inheritDoc
-     */
+    /** A document-driven render redraws all three parts: the parent's mapping names the character sheet's. @inheritDoc */
     _configureRenderOptions(options) {
         super._configureRenderOptions(options);
         if (options.renderContext && !options.isFirstRender) {
@@ -99,7 +99,10 @@ export class VehicleActorSheet extends TravellerActorSheet {
             terrainImpassible: system.terrainImpassible,
             criticals: this.#criticals(system),
             combat: VehicleActorSheet.#combat(system),
-            mounts: this.#mounts(system, context.weapons)
+            mounts: this.#mounts(system, context.weapons.flatMap(weapon => [weapon, ...(weapon.secondaries ?? [])])),
+            // Core folio 138: an occupant shoots out of a closed vehicle by arc, and the evasive DM is theirs too.
+            fromVehicle: { evasive: -system.combat.evasive,
+                closed: !["open-vehicle", "open-topped"].some(trait => MGT2Helper.hasTrait(system.traits, trait)) }
         };
         // Play mode folds what holds nothing into one line; edit mode keeps every block to fill in.
         const vacant = {
@@ -117,15 +120,29 @@ export class VehicleActorSheet extends TravellerActorSheet {
 
     /** Core folio 138: who rolls the two vehicular actions, and what the last ones left standing. */
     static #combat(system) {
+        const seat = VehicleActorSheet.#seen(system.driverActor);
         return {
-            driver: system.driverActor?.name ?? "",
+            driver: seat.name, driverLinked: seat.linked,
             dogfight: system.combat.dogfight,
             carry: system.combat.carry,
             evasive: system.combat.evasive,
-            // The Effect is what is stored; the rule turns it into a negative DM, so that is what
-            // the row prints — and a failed check's negative Effect prints as a positive one.
+            // The Effect is stored and the rule makes it a negative DM: a failed check's prints positive.
             evasiveDM: -system.combat.evasive
         };
+    }
+
+    /** A seat's occupant as this viewer may read them: one they cannot observe is Unknown, and opens nothing. */
+    static #seen(actor) {
+        if (!actor) return { name: "", linked: false };
+        const visible = actor.testUserPermission(game.user, "LIMITED");
+        return { name: visible ? actor.name : game.i18n.localize("COMMON.Unknown"), linked: visible };
+    }
+
+    /** Who a mount's roll fires as, or why it cannot: nobody there, or a person this user may not roll for. */
+    static #rollsAs(mount, roller) {
+        if (!roller) return VehicleActorSheet.#noGunner(mount);
+        return roller.isOwner ? game.i18n.format("MGT2.Actor.vehicle.RollsAs", { name: roller.name })
+            : game.i18n.localize("MGT2.Actor.vehicle.NotYours");
     }
 
     /** The pool, drawn on the stored wound. */
@@ -278,10 +295,8 @@ export class VehicleActorSheet extends TravellerActorSheet {
         if (!cell) return null;
         const parts = [];
         const say = (key, data) => parts.push(game.i18n.format(`MGT2.Criticals.${key}`, data));
-        // A critical counts in three shapes and only the first is a number: `1`, a dice expression
-        // (`D3`, `1D`) or a share of the whole (`10%`, `1Dx10%`). Where the sentence is a plural
-        // group the raw value goes to `MGT2Helper.plural`, which floors both non-numbers to
-        // `other` — the form each of them wants.
+        // A critical counts as `1`, a dice expression (`D3`) or a share (`10%`); a plural group takes the raw
+        // value through `MGT2Helper.plural`, which floors both non-numbers to `other`, the form each wants.
         // ⚠ `all` is a fourth shape and is NOT one of these: it is a quantifier, not a quantity, so
         // it cannot be substituted into the slot a quantity fills. One word cannot agree with a
         // masculine plural, a feminine mass noun and a `×` multiplier at once — *Toutes occupants*,
@@ -389,11 +404,15 @@ export class VehicleActorSheet extends TravellerActorSheet {
                 if ( group ) group.count += 1;
                 else groups.push({ _id: weapon._id, name: weapon.name, count: 1, damage: weapon.system.effective.damage });
             }
+            const roller = system.gunnerFor(mount);
             return {
                 index, type: mount.type, arc: mount.arc, fireControl: mount.fireControl,
                 typeLabel: MGT2.VehicleMounts[mount.type] ?? "",
                 arcLabel: MGT2.FireArcs[mount.arc] ?? "",
                 weapons: held, groups,
+                gunner: { uuid: mount.gunner ?? "", ...VehicleActorSheet.#seen(system.mountGunner(mount)) },
+                gunport: (mount.type === "gunPort") && !held.length,
+                rollsAs: VehicleActorSheet.#rollsAs(mount, roller),
                 pills: [...new Set(held.flatMap(weapon => [weapon.range, ...(weapon.traitList ?? [])]).filter(Boolean))],
                 choices: weapons.map(weapon => ({
                     _id: weapon._id, name: weapon.name, selected: mount.weapons.includes(weapon._id)
@@ -460,6 +479,65 @@ export class VehicleActorSheet extends TravellerActorSheet {
         return this.actor.update({ "system.mounts": mounts });
     }
 
+    /** One mount rewritten whole, since a dotted index into the array would rebuild it from that key alone. */
+    async #setMount(index, changes) {
+        await this.submit();
+        const mounts = this.actor.system.mounts.map((m, i) => ((i === index) ? { ...m, ...changes } : { ...m }));
+        return this.actor.update({ "system.mounts": mounts });
+    }
+
+    /** `Pintle Mount, Front: no gunner…`, for the refusal and for the tooltip that warns of it. */
+    static #noGunner(mount) {
+        return game.i18n.format("MGT2.Actor.vehicle.NoGunner", {
+            mount: game.i18n.localize(MGT2.VehicleMounts[mount.type] ?? ""),
+            arc: game.i18n.localize(MGT2.FireArcs[mount.arc] ?? "") });
+    }
+
+    /** A mounted weapon fires on whoever `gunnerFor` names, with the vehicle's rows beside their own. */
+    static async #onMountRoll(event, target) {
+        const mount = this.actor.system.mounts[Number(target.closest("[data-mount-index]").dataset.mountIndex)];
+        if (!mount) return;
+        const roller = this.actor.system.gunnerFor(mount);
+        if (!roller) return ui.notifications.warn(VehicleActorSheet.#noGunner(mount));
+        if (!roller.isOwner) return ui.notifications.warn(game.i18n.localize("MGT2.Actor.vehicle.NotYours"));
+        const item = target.dataset.itemId ? this.actor.items.get(target.dataset.itemId)
+            : await VehicleActorSheet.#ownWeapon(roller);
+        if (!item) return;
+        const from = [this.actor.name, game.i18n.localize(MGT2.VehicleMounts[mount.type] ?? ""),
+            game.i18n.localize(MGT2.FireArcs[mount.arc] ?? "")].join(" · ");
+        return TravellerActorSheet.roll(roller, { item, platform: this.actor, from }, this.token);
+    }
+
+    /** VH2026 folio 103: an occupant fires a weapon of their own through a gun port. */
+    static async #ownWeapon(actor) {
+        const weapons = actor.items.filter(item => (item.type === "weapon") && item.fittedRoot.system.equipped
+            && !item.system.effective?.range?.isMelee);
+        if (!weapons.length) {
+            ui.notifications.warn(game.i18n.format("MGT2.Actor.vehicle.NoOwnWeapon", { name: actor.name }));
+            return null;
+        }
+        if (weapons.length === 1) return weapons[0];
+        const content = document.createElement("div");
+        content.innerHTML = `<div class="form-group"><select name="weapon">${weapons.map(weapon =>
+            `<option value="${weapon.id}">${foundry.utils.escapeHTML(weapon.attackName)}</option>`).join("")}</select></div>`;
+        const picked = await foundry.applications.api.DialogV2.prompt({
+            window: { title: "MGT2.Actor.vehicle.GunportPick" }, classes: ["mgt2"], content, rejectClose: false,
+            ok: { label: "MGT2.RollPrompt.Roll", callback: (event, button) => button.form.elements.weapon.value }
+        });
+        return weapons.find(weapon => weapon.id === picked) ?? null;
+    }
+
+    /** @this {VehicleActorSheet} */
+    static async #onMountGunnerClear(event, target) {
+        return this.#setMount(Number(target.closest("[data-mount-index]").dataset.mountIndex), { gunner: null });
+    }
+
+    /** @this {VehicleActorSheet} */
+    static async #onOpenGunner(event, target) {
+        const mount = this.actor.system.mounts[Number(target.closest("[data-mount-index]").dataset.mountIndex)];
+        return this.actor.system.mountGunner(mount)?.sheet?.render(true);
+    }
+
     /** @this {VehicleActorSheet} */
     static async #onSkillCreate() {
         await this.submit();
@@ -488,6 +566,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
         const system = this.actor.system;
         const driver = system.driverActor;
         if (!driver) return ui.notifications.warn(game.i18n.localize("MGT2.Actor.vehicle.NoDriver"));
+        if (!driver.isOwner) return ui.notifications.warn(game.i18n.localize("MGT2.Actor.vehicle.NotYours"));
 
         // Folio 141: a critical's Control DM stands on control checks, and both actions here are
         // control checks — they roll the chassis skill.
@@ -629,22 +708,52 @@ export class VehicleActorSheet extends TravellerActorSheet {
         return this.actor.system.driverActor?.sheet?.render(true);
     }
 
-    /**
-     * A person dropped on the sheet takes the controls — the same drop the ship's crew roster
-     * accepts, at one seat instead of a table.
-     * @inheritDoc
-     */
+    /** A person dropped on a mount's card is its gunner, and anywhere else on the sheet takes the controls. @inheritDoc */
     async _onDrop(event) {
         const data = MGT2Helper.getDataFromDropEvent(event);
         if (data?.type !== "Actor") return super._onDrop(event);
         if (!this.isEditable) return false;
 
+        const card = event.target.closest?.("[data-mount-index]");
         const actor = await fromUuid(data.uuid);
         if (!["character", "npc"].includes(actor?.type)) {
-            ui.notifications.warn(game.i18n.localize("MGT2.Actor.vehicle.NotDriver"));
+            ui.notifications.warn(game.i18n.localize(card ? "MGT2.Actor.vehicle.NotGunner" : "MGT2.Actor.vehicle.NotDriver"));
             return false;
         }
-        await this.actor.update({ "system.driver": actor.uuid });
+        if (actor.pack) {
+            ui.notifications.warn(game.i18n.format("MGT2.Actor.vehicle.FromPack", { name: actor.name }));
+            return false;
+        }
+        if (card) await this.#setMount(Number(card.dataset.mountIndex), { gunner: actor.uuid });
+        else await this.actor.update({ "system.driver": actor.uuid });
         return true;
+    }
+
+    #onDelete = null;
+
+    /** A seat's Actor deleted elsewhere would stay named here until the sheet next draws. @inheritDoc */
+    async _onFirstRender(context, options) {
+        await super._onFirstRender(context, options);
+        this.#onDelete = Hooks.on("deleteActor", actor => {
+            const system = this.actor.system;
+            if ([system.driver, ...system.mounts.map(mount => mount.gunner)].includes(actor.uuid)) this.render();
+        });
+    }
+
+    _onClose(options) {
+        super._onClose(options);
+        Hooks.off("deleteActor", this.#onDelete);
+    }
+
+    /** A gunner's line refuses at the pointer what it would refuse on the drop. */
+    _onDragOver(event) {
+        const zone = event.target.closest("[data-accept]");
+        for (const node of this.element.querySelectorAll("[data-accept].over, [data-accept].deny")) {
+            if (node !== zone) node.classList.remove("over", "deny");
+        }
+        if (!zone) return super._onDragOver(event);
+        const accepted = MGT2Helper.dropAccepted(zone);
+        zone.classList.toggle("over", accepted);
+        zone.classList.toggle("deny", !accepted);
     }
 }

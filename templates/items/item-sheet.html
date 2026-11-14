@@ -123,7 +123,7 @@
 			{{else}}
 			<div class="sline play-only">
 				<span>{{weight}}<u>{{unitlabels.weight}}</u></span>
-				<span>&times;{{system.quantity}}</span>
+				<span{{#if (eq item.type "ammunition")}} data-tooltip="{{localize 'MGT2.Items.SpareHint'}}"{{/if}}>&times;{{system.quantity}}</span>
 				<span>Cr {{system.cost}}</span>
 			</div>
 			<div class="sedit edit-only">
@@ -135,7 +135,7 @@
 					    own and this field silently stops saving. }}
 					<input class="f num" type="number" name="weight" value="{{weight}}" step="0.5" data-dtype="Number" />
 				</label>
-				<label>
+				<label{{#if (eq item.type "ammunition")}} data-tooltip="{{localize 'MGT2.Items.SpareHint'}}"{{/if}}>
 					<span class="lbl">{{localize 'MGT2.Items.Qty'}}</span>
 					{{formInput systemFields.quantity name="system.quantity" value=system.quantity classes="f num"}}
 				</label>
@@ -146,9 +146,9 @@
 			</div>
 			{{/if}}
 
-			{{! Equipping and storing are the session loop rather than structure, so both stay live in
-			    play mode — which is why an item sheet is deliberately not zero-input there. }}
-			{{#if (or systemFields.equipped hadContainer)}}
+			{{! Equipping and storing are the session loop, so both stay live in play; a secondary weapon is
+			    equipped and stored with its primary, so it has neither. }}
+			{{#if (and (or systemFields.equipped hadContainer) (not secondary))}}
 			<div class="srow">
 				{{#if systemFields.equipped}}
 				<label class="eq">
@@ -157,7 +157,7 @@
 					<span>{{localize 'MGT2.Items.Equipped'}}</span>
 				</label>
 				{{/if}}
-				{{#if hadContainer}}
+				{{#if (and hadContainer (not fitted))}}
 				<select class="f" name="system.container.id" data-tooltip="{{localize 'MGT2.Items.Storage'}}" aria-label="{{localize 'MGT2.Items.Storage'}}">
 					{{selectOptions containers selected=system.container.id valueAttr="_id" labelAttr="name"}}
 				</select>
@@ -168,6 +168,15 @@
 			<div class="srow edit-only">
 				<select class="f" name="system.software.computerId" data-tooltip="{{localize 'MGT2.Items.Computer'}}" aria-label="{{localize 'MGT2.Items.Computer'}}">
 					{{selectOptions computers selected=system.software.computerId valueAttr="_id" labelAttr="name"}}
+				</select>
+			</div>
+			{{/if}}
+			{{! Fitting an accessory is a session action, as a reload is, so its select is live in play (FC folio 44);
+			    a secondary weapon is built on (FC folio 40), so its select is edit mode's and play reads its pill. }}
+			{{#if weapons}}
+			<div class="srow{{#if (eq item.type "weapon")}} edit-only{{/if}}">
+				<select class="f" name="system.fittedTo" data-tooltip="{{localize 'MGT2.Items.FittedTo'}}" aria-label="{{localize 'MGT2.Items.FittedTo'}}">
+					{{selectOptions weapons selected=system.fittedTo valueAttr="_id" labelAttr="name"}}
 				</select>
 			</div>
 			{{/if}}

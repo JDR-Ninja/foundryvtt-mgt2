@@ -4,19 +4,21 @@ import { Contract } from "./contract.js";
 import { Doses } from "./doses.js";
 import { EFFECT_ACTIONS, prepareEffects } from "./effects.js";
 import { MGT2Helper } from "./helper.js";
-import { copyItemWithContents } from "./item.js";
+import { copyItemWithContents, fitsWeapon, isAccessory, secondaryRefused } from "./item.js";
+import { Magazines } from "./magazines.js";
 import { RollPromptHelper } from "./roll-prompt.js";
 import { Rules } from "./rules.js";
 import { GuideButtonMixin } from "./guide.js";
 import { SheetModeMixin } from "./sheet-mode.js";
-import { appendTraitText, bindTraitInput, formatTrait, prepareTraitBlock, refreshTraitNumbers } from "./traits.js";
+import { CUSTOM_KEY, appendTraitText, bindTraitInput, formatTrait, prepareTraitBlock, refreshTraitNumbers, traitLabel }
+  from "./traits.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ItemSheetV2 } = foundry.applications.sheets;
 
 /** Every block the sheet can compose from; each one is a partial of the same name. */
 const BLOCKS = ["roll", "hazard", "summary", "specs", "augment", "hosts", "carried", "traits", "rules", "relationship", "description",
-  "detail", "notes", "software", "contents", "trade", "terms", "actions", "effects",
+  "detail", "notes", "software", "contents", "fitted", "trade", "terms", "actions", "effects",
   "career", "careertables", "careerevents", "species", "speciesframe",
   "bounty", "referee", "leads", "associates", "generate"];
 
@@ -30,7 +32,7 @@ const SLOT = {
   // On a round the printed rules are what it does, so they sit under its plates.
   rules: "details", hosts: "details", trade: "details",
   traits: "traits",
-  contents: "contents", software: "contents",
+  contents: "contents", software: "contents", fitted: "contents",
   carried: "contents", speciesframe: "contents",
   careertables: "tables", careerevents: "events", terms: "terms",
   effects: "effects",
@@ -59,7 +61,7 @@ const GM_ONLY = new Set(["referee", "generate"]);
 const PLAYER_ONLY = new Set(["leads"]);
 
 /** Blocks whose heading only repeats the nav entry above it, so alone in a tab they drop it. */
-const EPONYMOUS = new Set(["effects", "description", "contents"]);
+const EPONYMOUS = new Set(["effects", "description", "contents", "fitted"]);
 
 /** Blocks drawn without a heading, which the bare rule does not count: a container's strip. */
 const HEADLESS = new Set(["carried"]);
@@ -189,6 +191,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       cellFold: TravellerItemSheet.#onCellFold,
       nestedRemove: TravellerItemSheet.#onNestedRemove,
       nestedDelete: TravellerItemSheet.#onNestedDelete,
+      fittedDeploy: TravellerItemSheet.#onFittedDeploy,
       openReference: TravellerItemSheet.#onOpenReference,
       contactUnlink: TravellerItemSheet.#onContactUnlink,
       contractHandover: TravellerItemSheet.#onContractHandover,
@@ -225,8 +228,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
         "systems/mgt2/templates/items/parts/specialised.html",
         // One reference shape, drawn four times on a contract.
         "systems/mgt2/templates/items/parts/person-ref.html"),
-      // The masthead never scrolls, so the open tab is the only scroller — and `submitOnChange`
-      // re-renders the whole sheet on every keystroke.
+      // The masthead never scrolls, so the open tab is the only scroller.
       scrollable: ['.tab[data-group="item"].active']
     }
   };
@@ -256,7 +258,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
   /** Which blocks each type carries, in render order. */
   static #BLOCKS_BY_TYPE = {
     _default: ["specs", "carried", "effects", "description"],
-    weapon: ["roll", "specs", "carried", "traits", "effects", "description"],
+    weapon: ["roll", "specs", "carried", "traits", "fitted", "effects", "description"],
     // Battle dress carries a computer; `#composition` drops the block on armour that hosts nothing.
     armor: ["specs", "carried", "traits", "effects", "description", "software"],
     talent: ["roll", "effects", "description"],
@@ -267,6 +269,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     // equipment lists what it runs; `#composition` drops the block on one that hosts nothing.
     equipment: ["summary", "specs", "carried", "effects", "software"],
     "equipment:augment": ["summary", "augment", "specs", "carried", "effects", "software"],
+    "equipment:accessory": ["summary", "specs", "carried", "traits", "effects", "software"],
     drug: ["summary", "specs", "carried", "effects"],
     // `carried` sets the supply flag; a found thing or a program hosts nothing, so it never gains Contents.
     item: ["summary", "specs", "carried", "effects"],
@@ -320,11 +323,10 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
         supply = true;
         if ( item.type !== "container" ) continue;
       }
-      // An augment is a host only while it is fitted and states Processing; one that is
-      // neither has no software to list, and a `computer` always passes.
+      // An augment hosts software only while fitted and rated; a `computer` always does.
       if ( (id === "software") && !MGT2Helper.runsSoftware(item) ) continue;
-      // A weapon declares both trait arrays and the sheet had one code row to spend, so the block
-      // renders once per array rather than once per type.
+      if ( (id === "fitted") && !item.actor ) continue;
+      // The traits block renders once per trait array the type declares.
       const rows = ((id === "traits") && traits) ? traits : [null];
       for ( const row of rows ) (slots[SLOT[id]] ??= []).push({ id, template: blockPath(id), row });
     }
@@ -383,7 +385,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     // Both slots exist only on a contract.
     if ( id === "associates" ) return this.item.system.parties.length;
     if ( id === "leads" ) return this.item.system.referee.filter(row => row.shown).length;
-    const listing = block => ["contents", "software"].includes(block.id);
+    const listing = block => ["contents", "software", "fitted"].includes(block.id);
     if ( (id === "contents") && blocks.some(listing) && !this.#withheld
       && blocks.every(block => listing(block) || (block.id === "carried")) ) return nested.length;
     return null;
@@ -400,13 +402,13 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     const nested = this.#prepareNested(actor);
     const careerBook = this.#careerBook();
 
-    // The tab record is auto-prepared by ApplicationV2, there being one group; each entry carries
-    // the blocks its body renders, and a tab that lists things says how many.
+    // Each auto-prepared tab carries the blocks its body renders, and a listing tab its count.
     for ( const tab of Object.values(context.tabs) ) {
       tab.blocks = slots[tab.id];
       if ( (tab.id === "events") && (item.type === "career") && (item.system.kind === "table") ) {
         tab.label = "MGT2.Chargen.Template.EventTable";
       }
+      if ( (tab.id === "contents") && (item.type === "weapon") ) tab.label = "MGT2.Items.Fitted";
       // A pre-career with nothing to draw keeps its Tables tab, dimmed: edit mode is where it is filled.
       if ( (tab.id === "tables") && careerBook?.empty ) tab.cssClass = [tab.cssClass, "empty"].filterJoin(" ");
       const count = this.#tabCount(tab.id, slots[tab.id], traitRows, effects, nested);
@@ -438,17 +440,26 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       subTypes: SUBTYPES[item.type] ?? null,
       hadContainer: actor != null,
       // A bag is offered neither itself nor anything already inside it; a player, no lock but its own.
-      containers: actor ? [{ name: "", _id: "" }].concat(actor.getContainers()
+      containers: actor ? [{ name: ("inventory" in actor.system) ? game.i18n.localize("MGT2.Items.OnHand") : "", _id: "" }]
+        .concat(actor.getContainers()
         .filter(c => (c.id !== item.id) && !c.containerChain.some(p => p.id === item.id)
           && (game.user.isGM || !c.isLocked || (c.id === item.system.container?.id)))) : null,
       computers: actor ? [{ name: "", _id: "" }].concat(actor.getComputers()) : null,
-      // Every round the owner carries, whatever it says it fits: `weaponType` is free text because
-      // no book prints a closed list, so it is a hint on the row and never a filter.
+      // The owner's weapons; a player is offered none inside a lock but the one already fitted to.
+      fitted: Boolean(item.fittedHost),
+      secondary: (item.type === "weapon") && Boolean(item.fittedHost),
+      weapons: (actor && (isAccessory(item) || item.fittedHost))
+        ? [{ name: game.i18n.localize("MGT2.Items.NotFitted"), _id: "" }].concat(actor.items.filter(entry =>
+        (entry.type === "weapon") && (entry !== item) && (game.user.isGM || !entry.isLocked || (entry.id === item.system.fittedTo))
+        && !secondaryRefused(item, entry, item.fitted)).sort(MGT2Helper.compareByName)) : null,
+      accessory: this.#accessory(),
+      // Every round the owner carries: `weaponType` is free text and never a filter. A player is
+      // offered nothing inside a lock but the round already loaded.
       rounds: (actor && (item.type === "weapon"))
         ? [{ name: game.i18n.localize("MGT2.Items.WeaponsOwn"), _id: "" }]
-          .concat(actor.items.filter(entry => entry.type === "ammunition")) : null,
-      // The counter lives on the Traveller, not on the drug, so that it survives the last dose
-      // being swallowed — which is precisely when it matters most.
+          .concat(actor.items.filter(entry => (entry.type === "ammunition")
+            && (game.user.isGM || !entry.isLocked || (entry.id === item.system.ammunition)))) : null,
+      // The counter lives on the Traveller, so it survives the last dose being swallowed.
       doses: (item.type === "drug") ? Doses.countOf(actor, item.name) : null,
       canDose: (item.type === "drug") && Doses.canTake(actor),
       addiction: this.#addiction(),
@@ -482,6 +493,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       passage: this.#passage(),
       speciesFrame: this.#speciesFrame(),
       speciesTiles: this.#speciesTiles(),
+      traitModifiers: this.#traitModifiers(),
       // A role's line follows its actions, so it reads as prose and not as the lede the tab opens on.
       summary: this.#summary(slots.details?.[0]?.id !== "actions"),
       station: item.type === "role",
@@ -768,6 +780,22 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       tooltip: [entry.name, entry.replaces && `${replaces} ${entry.replaces}`, ...entry.variants]
         .filter(part => part).join(" · ")
     }));
+  }
+
+  /** Each trait DM row, named by one of the Item's own traits, a custom one by its text. */
+  #traitModifiers() {
+    const { type, system } = this.item;
+    if ( type !== "species" ) return null;
+    const traits = system.traits.map(entry => ({ value: (entry.key === CUSTOM_KEY) ? entry.note : entry.key,
+      label: traitLabel(entry) })).filter(entry => entry.value);
+    return system.traitModifiers.map(row => {
+      const named = traits.find(entry => entry.value === row.trait);
+      const skillsText = row.skills.join(", ");
+      return { ...row, label: named?.label ?? row.trait, skillsText,
+        applies: ((row.target === "skills") && skillsText) || game.i18n.localize(MGT2.TraitModifierTargets[row.target] ?? ""),
+        inert: (row.target === "protection") && !!row.condition,
+        traits: (named || !row.trait) ? traits : [...traits, { value: row.trait, label: row.trait }] };
+    });
   }
 
   /**
@@ -1075,6 +1103,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     const { item } = this;
     if ( item.type === "cargo" ) return this.#cargoPills();
     if ( item.type === "passage" ) return this.#passagePills();
+    if ( item.type === "weapon" ) return this.#secondaryPills();
     if ( item.type !== "career" ) return null;
     const system = item.system;
     if ( system.isTemplate ) {
@@ -1092,6 +1121,14 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     return [{ label: game.i18n.localize(MGT2.CareerEntryModes[system.entryMode] ?? ""), tone: "" },
       { label: game.i18n.localize(MGT2.CareerExitModes[system.exitMode] ?? ""), tone: exitTone[system.exitMode] ?? "" }]
       .filter(pill => pill.label);
+  }
+
+  #secondaryPills() {
+    const { fittedHost: host, system } = this.item;
+    if ( !host ) return null;
+    const part = !(system.weight > 0) && !(system.cost > 0);
+    return [{ label: game.i18n.format(part ? "MGT2.Items.PartOf" : "MGT2.Items.FittedToName", { name: host.name }),
+      tooltip: part ? game.i18n.format("MGT2.Items.PartOfHint", { name: host.name }) : "" }];
   }
 
   /** The spine reads the sub-type where there is one, because that is the name on the character sheet. */
@@ -1230,27 +1267,32 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     });
   }
 
-  /**
-   * What is in the magazine, and what putting a full one in costs in actions.
-   * @returns {{value: number, magazine: number, full: boolean, actions: number}|null}
-   */
+  /** What is in the magazine, the loaded round's spares, and what a reload costs and discards. */
   #ammo() {
     const { type, system } = this.item;
-    // The loaded round's magazine, where one is loaded: a 40mm grenade takes the rifle from 40 to 1
-    // and every number on the weapon's own line is wrong while it is in there.
+    // The loaded round's magazine, where one is loaded: a 40mm grenade takes the rifle from 40 to 1.
     const magazine = system.effective?.magazine ?? system.magazine;
     if ( (type !== "weapon") || !(magazine > 0) ) return null;
     // Core p.77 counts the shots: one null closes the loaded readout and the Reload button. The
     // round selector renders off `rounds` and is not gated here — a loaded round is a damage rule.
     if ( !Rules.on("magazines") ) return null;
+    const full = system.ammo >= magazine;
+    const actions = Math.max(1, MGT2Helper.traitScore(system.effective.traits, "slow-loader"));
+    const { round, spare, refusal } = Magazines.spares(this.item);
+    const lost = (round && !full && (system.ammo > 0)) ? MGT2Helper.plural("MGT2.Items.ReloadLost", system.ammo) : "";
     return {
       value: system.ammo,
       magazine,
-      full: system.ammo >= magazine,
+      full,
       pips: cells(system.ammo, magazine),
       fill: Math.round(100 * Math.min(system.ammo, magazine) / magazine),
-      round: system.round?.name ?? null,
-      actions: Math.max(1, MGT2Helper.traitScore(system.effective.traits, "slow-loader"))
+      round: round?.name ?? null,
+      actions,
+      spare,
+      spareLabel: Number.isInteger(spare) ? MGT2Helper.plural("MGT2.Items.SpareMagazines", spare) : null,
+      blocked: Boolean(refusal),
+      hint: refusal ?? [round ? game.i18n.format("MGT2.Items.ReloadHint", { round: round.name, actions })
+        : game.i18n.format("MGT2.Items.ReloadFree", { actions }), lost].filterJoin(" ")
     };
   }
 
@@ -1465,28 +1507,37 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     }
     if ( s.illegal ) pills.push({ label: loc("MGT2.Items.IllegalEverywhere"), tone: "danger" });
     if ( s.legality !== null ) pills.push({ label: `${loc("MGT2.Items.BannedAt")} ${s.legality}`, tone: "warn" });
+    if ( s.spareParts ) pills.push({ label: loc("MGT2.Items.SpareParts"), tone: "", tooltip: loc("MGT2.Items.SparePartsHint") });
     return pills;
   }
 
-  /**
-   * The trait arrays as shared code rows, one per array the schema declares.
-   * @returns {object[]}
-   */
+  /** The trait arrays as shared code rows, one per array the schema declares. @returns {object[]} */
   #prepareTraits() {
-    const system = this.item.system;
+    const { type, system } = this.item;
     const rows = [];
-    for ( const [property, label] of [["traits", "MGT2.Items.Traits"], ["options", "MGT2.Items.Options"]] ) {
+    const notes = (type === "weapon") ? "MGT2.Items.Notes" : "MGT2.Items.Options";
+    const arrays = [["traits", "MGT2.Items.Traits"], ["options", notes]];
+    if ( isAccessory(this.item) ) arrays.push(["accessory.traits", "MGT2.Items.Traits"]);
+    for ( const [property, label] of arrays ) {
       // Most types carry neither array, and the context is built before the block list is consulted.
-      const field = system.schema.fields[property];
-      if ( !field ) continue;
-      rows.push(prepareTraitBlock(system[property], property, field.element.fields.family.initial, label, true));
+      if ( !system.schema.getField(property) ) continue;
+      rows.push(prepareTraitBlock(foundry.utils.getProperty(system, property), property,
+        this.#traitFamily(property), label, true));
     }
     return rows;
   }
 
-  /** What this item holds: software loaded into a computer, or items stored in a container. */
+  /** The vocabulary a row is typed in: a spacecraft-scale weapon's own traits are High Guard's. */
+  #traitFamily(property) {
+    const { type, system } = this.item;
+    if ( (type === "weapon") && (property === "traits") && (system.scale === "spacecraft") ) return "shipWeapon";
+    return system.schema.getField(property).element.fields.family.initial;
+  }
+
+  /** What this item holds: software loaded into a computer, items stored in a container, or what a weapon has fitted. */
   #prepareNested(actor) {
     const item = this.item;
+    if ( item.type === "weapon" ) return this.#fittedRows();
     // A fitted augment with Processing hosts software exactly as a computer does.
     const isHost = MGT2Helper.runsSoftware(item);
     if ( !isHost && (item.type !== "container") ) return [];
@@ -1511,6 +1562,38 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     })).sort(MGT2Helper.compareByName);
   }
 
+  /** A weapon's fitted Items; a second sight is marked idle, and a bipod's row carries its deployed toggle. */
+  #fittedRows() {
+    return (this.item.system.fitted ?? []).map(({ item: fitted, accessory, idle }) => ({
+      _id: fitted.id,
+      name: fitted.name,
+      img: fitted.img,
+      type: game.i18n.localize(SUBTYPES[fitted.type]?.[fitted.system.subType] ?? `TYPES.Item.${fitted.type}`),
+      fits: fitted.system.accessory?.fits ?? "",
+      idle,
+      deploys: accessory?.steadies === "ignore",
+      deployed: accessory?.deployed === true,
+      weight: MGT2Helper.roundWeight(fitted.getTotalWeight())
+    }));
+  }
+
+  /** What an accessory does to the weapon it is fitted to, as its sheet reads it. */
+  #accessory() {
+    const item = this.item;
+    if ( !isAccessory(item) ) return null;
+    const { accessory } = item.system;
+    const host = item.fittedHost;
+    return {
+      host: host?.name ?? "",
+      idle: Boolean(host?.system.fitted?.find(entry => entry.item === item)?.idle),
+      steadies: accessory.steadies ? MGT2.AccessorySteadies[accessory.steadies] : "",
+      attack: accessory.attack.map((row, index) => ({ ...row, index, display: MGT2Helper.signed(row.dm, "+0"),
+        when: [(row.beyond !== null) && game.i18n.format("MGT2.Items.AttackFrom", { n: row.beyond }),
+          (row.within !== null) && game.i18n.format("MGT2.Items.AttackUnder", { n: row.within })]
+          .filter(Boolean).join(" · ") }))
+    };
+  }
+
   /** Each weapon of the owner this round is loaded in: what it holds, and every value the round changes. */
   #hosts() {
     const { item } = this;
@@ -1522,14 +1605,14 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       .map(weapon => {
         const own = weapon.system;
         const eff = own.effective;
-        // VH2026 p.104: fire control's Scope is the weapon's whatever is loaded, so it is not the round's.
-        const granted = (!own.traitMap.scope && actor.system.fireControlFor?.(weapon)) ? [{ key: "scope" }] : [];
+        // Fire control's Scope and a fitted accessory's grants are the weapon's whatever is loaded.
+        const bare = own.unloaded;
         const rows = [
-          ["MGT2.Items.Damage", own.damage, eff.damage],
-          ["MGT2.Items.Range", MGT2Helper.getRangeDisplay(own.range), MGT2Helper.getRangeDisplay(eff.range)],
-          ["MGT2.Items.Magazine", own.magazine, eff.magazine],
-          ["MGT2.Items.MagazineCost", credits(own.magazineCost), credits(eff.magazineCost)],
-          ["MGT2.Items.Traits", list([...own.traits, ...granted]), list(eff.traits)]
+          ["MGT2.Items.Damage", bare.damage, eff.damage],
+          ["MGT2.Items.Range", MGT2Helper.getRangeDisplay(bare.range), MGT2Helper.getRangeDisplay(eff.range)],
+          ["MGT2.Items.Magazine", bare.magazine, eff.magazine],
+          ["MGT2.Items.MagazineCost", credits(bare.magazineCost), credits(eff.magazineCost)],
+          ["MGT2.Items.Traits", list(bare.traits), list(eff.traits)]
         ].filter(([, was, now]) => String(was ?? "") !== String(now ?? ""))
           .map(([label, was, now]) => ({ label, was: was || "—", now: now || "—" }));
         const ammo = (Rules.on("magazines") && (eff.magazine > 0)) ? { value: own.ammo, magazine: eff.magazine,
@@ -1539,27 +1622,46 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       }).sort(MGT2Helper.compareByName);
   }
 
-  /** A round's sheet reads its weapons, so it follows them: firing, reloading and unloading change the weapon. */
-  #onHostUpdate = (weapon, change) => {
-    if ( (weapon.type !== "weapon") || (weapon.parent !== this.item.parent) ) return;
-    if ( (weapon.system.ammunition === this.item.id) || foundry.utils.hasProperty(change, "system.ammunition") ) {
-      this.render();
+  /** A round's sheet reads its weapons, a weapon's its round's spares and lock; a reload renders its own weapon already. */
+  #onHostUpdate = (other, change, options) => {
+    if ( other.parent !== this.item.parent ) return;
+    if ( this.item.type === "weapon" ) {
+      const round = this.item.system.round;
+      if ( ((other.id === round?.id) && (options.mgt2Reload !== this.item.id))
+        || (foundry.utils.hasProperty(change, "system.locked") && round?.containerChain.some(c => c.id === other.id))
+        || this.#fitsHere(other, change) ) {
+        this.render();
+      }
     }
+    else if ( (other.type === "weapon") && ((other.system.ammunition === this.item.id)
+      || foundry.utils.hasProperty(change, "system.ammunition")) ) this.render();
   };
 
-  #hostHook = null;
+  #fitsHere(other, change = {}) {
+    return (other.system.fittedTo === this.item.id) || foundry.utils.hasProperty(change, "system.fittedTo");
+  }
+
+  /** A fitted Item created or deleted elsewhere changes the weapon's list. */
+  #onFittedChange = other => {
+    if ( (other.parent === this.item.parent) && this.#fitsHere(other) ) this.render();
+  };
+
+  #hostHooks = [];
 
   /** @inheritDoc */
   async _onFirstRender(context, options) {
     await super._onFirstRender(context, options);
-    if ( (this.item.type === "ammunition") && this.item.actor ) this.#hostHook = Hooks.on("updateItem", this.#onHostUpdate);
+    if ( !["ammunition", "weapon"].includes(this.item.type) || !this.item.actor ) return;
+    this.#hostHooks.push(["updateItem", Hooks.on("updateItem", this.#onHostUpdate)]);
+    if ( this.item.type !== "weapon" ) return;
+    for ( const hook of ["createItem", "deleteItem"] ) this.#hostHooks.push([hook, Hooks.on(hook, this.#onFittedChange)]);
   }
 
   /** @inheritDoc */
   _onClose(options) {
     super._onClose(options);
-    if ( this.#hostHook !== null ) Hooks.off("updateItem", this.#hostHook);
-    this.#hostHook = null;
+    for ( const [hook, id] of this.#hostHooks ) Hooks.off(hook, id);
+    this.#hostHooks = [];
   }
 
   /**
@@ -1629,8 +1731,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
 
   async #addTrait(property, text) {
     await this.submit();
-    const family = this.item.system.schema.fields[property].element.fields.family.initial;
-    const entries = appendTraitText(this.item.system[property], text, family);
+    const entries = appendTraitText(foundry.utils.getProperty(this.item.system, property), text, this.#traitFamily(property));
     if (entries) await this.item.update({ [`system.${property}`]: entries });
   }
 
@@ -1680,8 +1781,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     }
 
     if ( system?.quantity !== undefined ) system.quantity = MGT2Helper.getIntegerFromInput(system.quantity);
-    // A ship component is priced in MCr and carries decimals, so the conversion asks the schema
-    // rather than the field's name — truncating it silently costs a drive most of its price.
+    // A component's MCr cost carries decimals, so the schema decides whether it is truncated.
     if ( system?.cost !== undefined ) {
       system.cost = this.item.system.schema.fields.cost.integer
         ? MGT2Helper.getIntegerFromInput(system.cost) : MGT2Helper.getNumberFromInput(system.cost);
@@ -1714,7 +1814,9 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     splitTypedLists(system);
 
     // The chip row lets a printed parameter be retyped; the number a rule reads follows from it.
-    for ( const property of ["traits", "options"] ) refreshTraitNumbers(system?.[property]);
+    for ( const property of ["traits", "options", "accessory.traits"] ) {
+      refreshTraitNumbers(foundry.utils.getProperty(system ?? {}, property));
+    }
 
     return submitData;
   }
@@ -1869,10 +1971,6 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     return handler.call(sheet, event, target);
   }
 
-  /**
-   * Core folio 77: a spare magazine "will fully reload the weapon", so the whole capacity goes back
-   * in and there is nothing to count.
-   */
   /** A dose is taken, not equipped — everything that follows from that is in `doses.js`. */
   static async #onDoseTake() {
     await Doses.take(this.item);
@@ -1885,8 +1983,15 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     return this.render();
   }
 
+  /** Core folio 77: a spare magazine "will fully reload the weapon", so the whole capacity goes back in. */
   static #onReload() {
-    return this.item.update({ "system.loaded": this.item.system.effective.magazine });
+    return Magazines.reload(this.item);
+  }
+
+  /** The round select binds to no field: picking a round is a reload, and a refused one redraws the select. @inheritDoc */
+  async _onChangeForm(formConfig, event) {
+    if ( !event.target.matches?.("select.loadedround") ) return super._onChangeForm(formConfig, event);
+    if ( !(await Magazines.load(this.item, event.target.value)) ) return this.render();
   }
 
   /**
@@ -1918,6 +2023,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       return this.#onDropPerson(event, data);
     }
     if ( (container.type === "contact") && (data?.type === "Actor") ) return this.#onDropContactActor(data);
+    if ( (container.type === "weapon") && (data?.type === "Item") ) return this.#onDropFit(data);
     if ( (container.type !== "container") || (data?.type !== "Item") ) return super._onDrop(event);
     if ( !this.isEditable ) return;
     if ( Hooks.call("dropItemSheetData", container, this, data) === false ) return;
@@ -1948,6 +2054,24 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     for ( const entry of toCreate ) entry.folder = container.folder?.id ?? null;
     await getDocumentClass("Item").createDocuments(toCreate,
       { parent: container.parent, pack: container.pack, keepId: true });
+    return this.render();
+  }
+
+  /** An accessory or a secondary dropped on an owned weapon's sheet is fitted to it; one from elsewhere is copied in fitted. */
+  async #onDropFit(data) {
+    const weapon = this.item;
+    if ( !this.isEditable || !weapon.actor ) return false;
+    if ( Hooks.call("dropItemSheetData", weapon, this, data) === false ) return false;
+    const dropped = await getDocumentClass("Item").fromDropData(data);
+    if ( !fitsWeapon(dropped) || (dropped === weapon) ) return false;
+    if ( dropped.parent !== weapon.parent ) {
+      if ( secondaryRefused(dropped, weapon, await dropped.getFitted()) ) {
+        return ui.notifications.error(game.i18n.localize("MGT2.Errors.FitDepth"));
+      }
+      await getDocumentClass("Item").createDocuments(await copyItemWithContents(dropped, "", 0, weapon.id),
+        { parent: weapon.parent, keepId: true });
+    }
+    else if ( dropped.system.fittedTo !== weapon.id ) await dropped.update({ "system.fittedTo": weapon.id });
     return this.render();
   }
 
@@ -2078,10 +2202,16 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
 
   /** A sibling changing is not a change to this item, so nothing re-renders the list on its own. */
   static async #onNestedRemove(event, target) {
-    const field = MGT2Helper.runsSoftware(this.item)
-      ? "system.software.computerId" : "system.container.id";
+    const field = (this.item.type === "weapon") ? "system.fittedTo"
+      : MGT2Helper.runsSoftware(this.item) ? "system.software.computerId" : "system.container.id";
     await TravellerItemSheet.#nestedItem.call(this, target)?.update({ [field]: "" });
     return this.render();
+  }
+
+  /** CSC folio 174: a bipod counts only while it is set up, which is the player's to say in play. */
+  static async #onFittedDeploy(event, target) {
+    const fitted = TravellerItemSheet.#nestedItem.call(this, target);
+    await fitted?.update({ "system.accessory.deployed": !fitted.system.accessory.deployed });
   }
 
   /** @this {TravellerItemSheet} */

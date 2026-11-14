@@ -25,12 +25,35 @@
 						<td>
 							<button type="button" class="roll" data-action="roll" data-roll="item" data-item-id="{{weapon._id}}">{{weapon.name}}</button>
 							{{#if weapon.subInfo}}<span class="sub">{{weapon.subInfo}}</span>{{/if}}
+							{{#if weapon.accessories}}<span class="sub fitted" data-tooltip="{{localize 'MGT2.Items.Fitted'}}">{{#each weapon.accessories as |fit|}}{{#unless @first}} · {{/unless}}<a data-action="itemEdit" data-item-id="{{fit._id}}">{{fit.name}}</a>{{/each}}</span>{{/if}}
 						</td>
 						<td class="c">{{weapon.range}}</td>
 						<td class="c num">{{weapon.system.effective.damage}}</td>
 						<td class="r num">{{weapon.weight}}</td>
 						{{> systems/mgt2/templates/actors/parts/row-controls.html canEquip=weapon.canEquip toggle=weapon.toggleClass store=true edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
 					</tr>
+					{{! A fitted intelligent weapon runs its programs on the weapon's row (CSC folio 175). }}
+					{{#each weapon.accessories as |fit|}}{{#each fit.subItems as |subItem|}}
+					{{> systems/mgt2/templates/actors/parts/host-software.html sub=subItem cols=4}}
+					{{/each}}{{/each}}
+					{{! A secondary weapon is an attack of its own, drawn under its primary and weighed with it (FC folio 40). }}
+					{{#each weapon.secondaries as |sub|}}
+					<tr class="drag-item-list secondary" data-item-id="{{sub._id}}">
+						<td>
+							<i class="fa-solid fa-link" data-tooltip="{{localize 'MGT2.Items.FittedToName' name=sub.hostName}}"></i>
+							<button type="button" class="roll" data-action="roll" data-roll="item" data-item-id="{{sub._id}}">{{sub.name}}</button>
+							{{#if sub.subInfo}}<span class="sub">{{sub.subInfo}}</span>{{/if}}
+							{{#if sub.accessories}}<span class="sub fitted" data-tooltip="{{localize 'MGT2.Items.Fitted'}}">{{#each sub.accessories as |fit|}}{{#unless @first}} · {{/unless}}<a data-action="itemEdit" data-item-id="{{fit._id}}">{{fit.name}}</a>{{/each}}</span>{{/if}}
+						</td>
+						<td class="c">{{sub.range}}</td>
+						<td class="c num">{{sub.system.effective.damage}}</td>
+						<td class="r num"></td>
+						{{> systems/mgt2/templates/actors/parts/row-controls.html unfit=true edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
+					</tr>
+					{{#each sub.accessories as |fit|}}{{#each fit.subItems as |subItem|}}
+					{{> systems/mgt2/templates/actors/parts/host-software.html sub=subItem cols=4}}
+					{{/each}}{{/each}}
+					{{/each}}
 					{{/each}}
 				</tbody>
 			</table>
@@ -314,7 +337,7 @@
 				<tbody>
 					{{#each containerItems as |containerItem|}}
 					<tr class="drag-item-list" data-item-id="{{containerItem._id}}">
-						<td>{{containerItem.name}}</td>
+						<td>{{containerItem.name}}{{#if containerItem.fitted}}<span class="sub fitted" data-tooltip="{{localize 'MGT2.Items.Fitted'}}">{{#each containerItem.fitted as |fit|}}{{#unless @first}} · {{/unless}}<a data-action="itemEdit" data-item-id="{{fit._id}}">{{fit.name}}</a>{{/each}}</span>{{/if}}</td>
 						{{#if ../containerShowAll}}<td class="c">{{containerItem.containerName}}{{#if containerItem.containerLocked}}<i class="fa-solid fa-lock locked" data-tooltip="{{localize 'MGT2.Items.Locked'}}"></i>{{/if}}</td>{{/if}}
 						<td class="c num">{{containerItem.system.quantity}}</td>
 						<td class="r num">{{containerItem.weight}}</td>

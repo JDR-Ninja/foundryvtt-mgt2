@@ -1,4 +1,5 @@
 import { Checks } from "../checks.js";
+import { SPACE } from "../combat.js";
 import { MGT2 } from "../config.js";
 import { CreditSplit } from "../credit-split.js";
 import { fleetBatteries } from "../fleet-attack.js";
@@ -6,6 +7,7 @@ import { MGT2Helper } from "../helper.js";
 import { RollPromptHelper } from "../roll-prompt.js";
 import { Rules } from "../rules.js";
 import { SkipDebtsDialog } from "../skip-debts.js";
+import { buildContent } from "./character-prompts.js";
 import { CraftData } from "./craft-data.js";
 import { TravellerActorSheet } from "./character-sheet.js";
 
@@ -13,6 +15,7 @@ const PARTS_PATH = "systems/mgt2/templates/actors";
 
 /** Cell keys that phrase themselves as a signed DM and nothing else. */
 const DM_KEYS = ["sensorDM", "controlDM", "jumpDM"];
+
 
 /** Every block the panel composes from; each one is a partial of the same name. */
 const BLOCKS = ["hull", "accommodation", "manifest", "mounts", "crew", "bays", "criticals",
@@ -34,12 +37,7 @@ for ( const id of BLOCKS ) {
     if ( !(id in SLOT) ) throw new Error(`MGT2 | the spacecraft sheet block "${id}" has no tab slot.`);
 }
 
-/**
- * The spacecraft sheet, and the hard one: it is the single
- * screen that needs all four layout blocks at once: a statline header, three budgets with live
- * totals, two rosters of linked actors, and a code row.
- * @extends {TravellerActorSheet}
- */
+/** The spacecraft sheet: a statline header, three live budgets, two rosters and a code row. @extends {TravellerActorSheet} */
 export class SpacecraftActorSheet extends TravellerActorSheet {
 
   /** @inheritDoc */
@@ -53,6 +51,8 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             criticalSet: SpacecraftActorSheet.#onCriticalSet,
             criticalRoll: SpacecraftActorSheet.#onCriticalRoll,
             criticalClear: SpacecraftActorSheet.#onCriticalClear,
+            criticalRepair: SpacecraftActorSheet.#onCriticalRepair,
+            criticalPatchEnd: SpacecraftActorSheet.#onCriticalPatchEnd,
             powerToggle: SpacecraftActorSheet.#onPowerToggle,
             softwareToggle: SpacecraftActorSheet.#onSoftwareToggle,
             backupToggle: SpacecraftActorSheet.#onBackupToggle,
@@ -71,10 +71,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         }
     };
 
-    /**
-     * What a hull takes on a drop: the four types `SpacecraftData` reads off its own Items.
-     * @inheritDoc
-     */
+    /** What a hull takes on a drop: the types `SpacecraftData` reads off its own Items. @inheritDoc */
     static DROP_ITEM_TYPES = new Set(["component", "cargo", "passage", "role", "weapon"]);
 
     /** @inheritDoc */
@@ -145,11 +142,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return super._prepareTabs(group);
     }
 
-    /**
-     * The parent maps document paths onto the *character* sheet's parts, and this sheet has three
-     * of its own, so a document-driven render redraws all of them instead.
-     * @inheritDoc
-     */
+    /** The parent maps paths onto the character sheet's parts, so a document render redraws all three. @inheritDoc */
     _configureRenderOptions(options) {
         super._configureRenderOptions(options);
         if (options.renderContext && !options.isFirstRender) {
@@ -188,7 +181,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             computer: SpacecraftActorSheet.#computer(system),
             options: SpacecraftActorSheet.#hullOptions(system),
             accommodation: SpacecraftActorSheet.#accommodation(system),
-            mounts: SpacecraftActorSheet.#mounts(system, context.weapons),
+            mounts: SpacecraftActorSheet.#mounts(system, context.weapons.flatMap(weapon => [weapon, ...(weapon.secondaries ?? [])])),
             crew: this.#crew(system),
             bays: this.#bays(system),
             // Craft and bays are two counts now: a clamp rack of ten fighters is one row.
@@ -708,10 +701,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         return lines;
     }
 
-    /**
-     * What the hull is actually carrying, as the two things a referee acts on at the far end of a
-     * route: freight to hand over and passengers to put ashore.
-     */
+    /** What the hull carries, as what a referee acts on at a route's end: freight and passengers. */
     #manifest() {
         const day = game.settings.get("mgt2", "campaignDay");
         const settle = this.#canSettle;
@@ -764,18 +754,23 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     #criticals(system) {
         const locations = Object.entries(MGT2.ShipCriticals).map(([key, location]) => {
             const severity = system.criticals[key] ?? 0;
+            const repair = system.criticalRepairs[key];
             return {
                 key, label: location.label, severity,
                 roll: `${location.roll[0]}`,
                 pips: Array.fromRange(6, 1).map(step => ({ step, on: step <= severity })),
-                effect: SpacecraftActorSheet.#effectText(system.criticalEffect(key))
+                effect: SpacecraftActorSheet.#effectText(system.criticalEffect(key)),
+                patched: (severity > 0) && repair.patched,
+                lasts: repair.patched ? MGT2Helper.plural("MGT2.Repair.PatchedFor", repair.hours ?? 0,
+                    { count: repair.hours ?? "?" }) : ""
             };
         });
         return {
             locations,
             hit: locations.filter(location => location.severity),
             intact: locations.filter(location => !location.severity),
-            hullSeverity: system.hullSeverity, standing: system.criticalEffects
+            hullSeverity: system.hullSeverity, standing: system.criticalEffects,
+            spareParts: game.i18n.format("MGT2.Repair.SpareAboard", { tons: system.sparePartsAboard })
         };
     }
 
@@ -1072,13 +1067,25 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         const location = target.closest("[data-location]").dataset.location;
         const step = Number(target.dataset.step);
         const current = this.actor.system.criticals[location] ?? 0;
-        return this.actor.update({ [`system.criticals.${location}`]: (current === step) ? step - 1 : step });
+        // A severity set by hand is another hit: the patch and the work on the old one end.
+        return this.actor.update({ [`system.criticals.${location}`]: (current === step) ? step - 1 : step,
+            ...this.actor.system.criticalAppliedChanges(location) });
     }
 
     /** @this {SpacecraftActorSheet} */
     static async #onCriticalClear() {
-        const criticals = Object.fromEntries(Object.keys(MGT2.ShipCriticals).map(key => [key, 0]));
-        return this.actor.update({ system: { criticals, hullSeverity: 0 } });
+        const keys = Object.keys(MGT2.ShipCriticals);
+        return this.actor.update({ "system.hullSeverity": 0, ...Object.assign({}, ...keys.map(key =>
+            ({ [`system.criticals.${key}`]: 0, ...this.actor.system.criticalAppliedChanges(key) }))) });
+    }
+
+    static async #onCriticalRepair(event, target) {
+        return SpacecraftActorSheet.repair(this.actor,
+            { location: target.closest("[data-location]").dataset.location });
+    }
+
+    static async #onCriticalPatchEnd(event, target) {
+        return this.actor.system.endPatch(target.closest("[data-location]").dataset.location);
     }
 
     /**
@@ -1232,9 +1239,11 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
      * @param {object} action              A `role.actions[]` record
      * @param {Actor|null} [options.crew]  Whoever is at the station, or null
      * @param {object[]} [options.extraModifiers]  The caller's own waivable modifiers
+     * @param {string} [options.skill]     The prompt's skill, where the caller picked it
+     * @param {Function} [options.extend]  `(scored) => ({flags, card})`, merged into the card posted
      */
     static async rollStationAction(ship, action,
-        { crew: actor = null, dutyTarget = "", extraModifiers = [] } = {}) {
+        { crew: actor = null, dutyTarget = "", extraModifiers = [], skill: picked = null, extend = null } = {}) {
         if ((action.kind !== "special") && !actor) {
             return ui.notifications.warn(game.i18n.localize("MGT2.Actor.spacecraft.NoCrewSheet"));
         }
@@ -1242,6 +1251,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             return ui.notifications.info(game.i18n.format("MGT2.Actor.spacecraft.RefereeAction",
                 { action: action.label }));
         }
+        if (action.kind === "repair") return SpacecraftActorSheet.repair(ship, { crew: actor, action });
 
         const system = ship.system;
         // Core folio 170: "All checks to use jump drive"; folio 171's Jump in combat is the same check.
@@ -1302,7 +1312,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             characteristic: action.characteristic || "",
             skills: RollPromptHelper.actorSkills(actor),
             // Core folio 58: a speciality not held is the skill at 0 to a crewman who holds it in another.
-            skill: skill?.id ?? MGT2Helper.skillFallback(actor.items, action.skill)?._id ?? "NP",
+            skill: picked ?? skill?.id ?? MGT2Helper.skillFallback(actor.items, action.skill)?._id ?? "NP",
             checkModifiers: shipModifiers,
             difficulty: action.difficulty,
             damageFormula: weapon?.system.damage ?? null,
@@ -1329,7 +1339,8 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
         });
         if (!scored) return;
 
-        const flags = { mgt2: {} };
+        const extra = extend?.(scored) ?? {};
+        const flags = { mgt2: { ...extra.flags?.mgt2 } };
 
         // A fired mount carries the whole damage payload, so the card the defender resolves knows
         // what the mount is worth.
@@ -1344,7 +1355,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
                 strengthDM: 0,
                 scale: weapon.system.scale ?? "spacecraft",
                 multiple: mount.multiple,
-                ...MGT2Helper.damageTraits(weapon.system.traits),
+                ...MGT2Helper.damageTraits(weapon.system.traits, { weapon }),
                 damageType: Array.from(weapon.system.damageType ?? [])
             };
         }
@@ -1364,8 +1375,152 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
             chainSources,
             showButtons: true,
             showRollDamage: Boolean(flags.mgt2.damage),
-            damageCarriesEffect: true
+            damageCarriesEffect: true,
+            ...extra.card
         });
+    }
+
+    /** Core folio 172's patch or folio 159's repair of a hit location, asking what the caller left open. */
+    static async repair(ship, { location = null, crew = null, action = null } = {}) {
+        const system = ship.system;
+        const say = key => game.i18n.localize(key);
+        const refused = location && system.repairRefusal(location, "repair");
+        if (refused) return ui.notifications.warn(refused);
+        const locations = (location ? [location] : system.criticalLocations
+            .filter(key => !system.repairRefusal(key, "repair"))).map(key => {
+            const why = system.repairRefusal(key, "patch")
+                ?? (system.criticalRepairs[key].patched ? say("MGT2.Repair.AlreadyPatched") : "");
+            return { key, label: say(MGT2.ShipCriticals[key].label), severity: system.criticals[key], patch: !why, why };
+        });
+        if (!locations.length) return ui.notifications.info(say("MGT2.Repair.NothingHit"));
+        const people = crew ? [{ actor: crew, station: "" }] : SpacecraftActorSheet.#repairCrew(ship);
+        if (!people.length) return ui.notifications.warn(say("MGT2.Repair.NoCrew"));
+        const skills = Object.entries(MGT2.RepairSkills).filter(([, entry]) => !entry.drones || system.repairDrones)
+            .map(([key, entry]) => ({ key, label: entry.label, modes: entry.modes.join(" ") }));
+
+        const content = await buildContent(`${PARTS_PATH}/spacecraft/repair.html`, { locations, skills,
+            people: people.map(({ actor, station }) => ({ uuid: actor.uuid, name: actor.name, station })),
+            aboard: game.i18n.format("MGT2.Repair.SpareAboard", { tons: system.sparePartsAboard }) });
+        const asked = await foundry.applications.api.DialogV2.prompt({
+            window: { title: game.i18n.format("MGT2.Repair.Title", { ship: ship.name }) },
+            classes: ["mgt2"], position: { width: 440 }, content, rejectClose: false,
+            ok: { label: "MGT2.RollPrompt.Roll", icon: "fa-solid fa-dice",
+                callback: (event, button) => new foundry.applications.ux.FormDataExtended(button.form).object },
+            render: (event, dialog) => SpacecraftActorSheet.#wireRepair(dialog.element)
+        });
+        const picked = locations.find(entry => entry.key === asked?.location);
+        if (!picked) return null;
+        const mode = ((asked.mode === "patch") && picked.patch) ? "patch" : "repair";
+        const skill = MGT2.RepairSkills[asked.skill]?.modes.includes(mode) ? asked.skill : "engineer";
+        const actor = people.find(entry => entry.actor.uuid === asked.crew)?.actor ?? people[0].actor;
+        return SpacecraftActorSheet.#rollRepair(ship, { location: picked.key, mode, actor, skill, action });
+    }
+
+    /** Core folio 172: DM− the Severity and DM+1 per round already worked; folio 161's Auto-Repair. */
+    static async #rollRepair(ship, { location, mode, actor, skill, action }) {
+        const system = ship.system;
+        const severity = system.criticals[location];
+        const attempts = system.criticalRepairs[location].attempts;
+        const patch = mode === "patch";
+        const modifiers = patch ? [{ key: "severity", label: "MGT2.Actor.spacecraft.Severity", dm: -severity }] : [];
+        if (patch && attempts) modifiers.push({ key: "work", label: "MGT2.Repair.WorkDM", dm: attempts });
+        const autoRepair = system.softwareRating("autoRepair");
+        // Core folio 161: Auto-Repair needs drones aboard, so without them the row is offered unticked.
+        if (autoRepair) {
+            modifiers.push({ key: "autoRepair", label: "MGT2.ShipSoftware.autoRepair", dm: autoRepair,
+                hint: "MGT2.Repair.AutoRepairHint", waived: !system.repairDrones });
+        }
+        const picked = SpacecraftActorSheet.#repairSkill(actor, skill, location);
+        // Core folio 159: the drones count as Engineer 1, or the operator's Electronics (remote ops) if lower.
+        const level = actor.items.get(picked)?.system.level ?? 0;
+        if ((skill === "remoteOps") && (level > 1)) {
+            modifiers.push({ key: "drones", label: "MGT2.Repair.DronesCap", dm: 1 - level });
+        }
+        const dm = key => actor.system.characteristics?.[key]?.dm ?? -Infinity;
+        const label = game.i18n.format(patch ? "MGT2.Repair.PatchOf" : "MGT2.Repair.RepairOf",
+            { location: game.i18n.localize(MGT2.ShipCriticals[location].label) });
+        const repair = { ship: ship.uuid, location, mode, severity, attempts,
+            stamp: system.criticalRepairs[location].stamp };
+        return SpacecraftActorSheet.rollStationAction(ship, {
+            label, kind: "skill", skill: MGT2.RepairSkills[skill].names[0], difficulty: "Average", dm: action?.dm ?? 0,
+            characteristic: (dm("education") > dm("intellect")) ? "education" : "intellect"
+        }, { crew: actor, extraModifiers: modifiers, skill: picked, extend: scored => ({
+            flags: { mgt2: { repair: { ...repair, effect: scored.effect } } },
+            card: SpacecraftActorSheet.#repairCard(ship, { ...repair, effect: scored.effect }) }) });
+    }
+
+    /** The card's line and its one button: a success is applied, a failed patch worked on again. */
+    static #repairCard(ship, { mode, severity, attempts, effect }) {
+        const say = (key, data = {}) => game.i18n.format(key, data);
+        if (effect < 0) {
+            return (mode !== "patch") ? {} : { repairKeep: say("MGT2.Repair.KeepWorking"),
+                lines: [say("MGT2.Repair.KeepHint", { dm: MGT2Helper.signed(attempts + 1) })] };
+        }
+        if (mode === "patch") return { repairApply: say("MGT2.Repair.ApplyPatch"), lines: [say("MGT2.Repair.PatchLasts")] };
+        const tons = ship.system.constructor.sparePartsFor(effect, severity);
+        return { repairApply: say("MGT2.Repair.ApplyRepair"), lines: [tons ? say("MGT2.Repair.PartsNeeded",
+            { tons, aboard: ship.system.sparePartsAboard }) : say("MGT2.Repair.NoParts")] };
+    }
+
+    /** Core folio 58: the location's speciality at its level, else the skill held bare, else another speciality at 0. */
+    static #repairSkill(actor, skill, location) {
+        const specialities = (skill === "engineer") ? (MGT2.RepairSpecialities[location] ?? []) : [];
+        const wanted = MGT2.RepairSkills[skill].names.flatMap(name => (specialities.length
+            ? specialities.map(speciality => `${name} (${speciality})`) : [name]));
+        const bare = item => !MGT2Helper.skillParent(item.name) && !item.system.skill?.speciality;
+        const held = actor.items.find(item => (item.type === "talent") && (item.system.subType === "skill")
+            && wanted.some(name => (MGT2Helper.skillParent(name) ? MGT2Helper.matchesSkillItem(item, name)
+                : (bare(item) && MGT2Helper.matchesSkill(item.name, name)))));
+        if (held) return held.id;
+        const other = MGT2Helper.otherSpecialities(actor.items);
+        return wanted.map(name => (MGT2Helper.skillParent(name) ? MGT2Helper.skillFallback(actor.items, name)
+            : other.find(entry => entry._id === MGT2Helper.otherSpecialityKey(name)))).find(Boolean)?._id ?? "NP";
+    }
+
+    /** This user's own people aboard, engineering first; in a running space combat, the engineer duty leads. */
+    static #repairCrew(ship) {
+        const found = new Map();
+        const add = (actor, station) => {
+            if (actor?.isOwner && !found.has(actor.uuid)) found.set(actor.uuid, { actor, station });
+        };
+        const duty = game.i18n.localize(MGT2.CombatDuties.engineer.label);
+        for (const combat of game.combats.filter(entry => (entry.type === SPACE) && entry.started)) {
+            const group = combat.system.shipGroups.find(entry => entry.system.ship === ship);
+            for (const combatant of group?.system.crew ?? []) {
+                if (combatant.system.duty === "engineer") add(combatant.actor, duty);
+            }
+        }
+        const engineering = station => (["engineer", "maintenance"]
+            .includes(ship.items.get(station.role)?.system.crewRoleKey) ? 0 : 1);
+        for (const station of [...ship.system.crew].sort((a, b) => engineering(a) - engineering(b))) {
+            let actor = null;
+            try { actor = station.actor ? foundry.utils.fromUuidSync(station.actor) : null; } catch { actor = null; }
+            const label = ship.items.get(station.role)?.name || station.name;
+            add(actor, (label === actor?.name) ? "" : label);
+        }
+        return [...found.values()];
+    }
+
+    /** The work follows the location, which a patch may refuse, and the skills follow the work. */
+    static #wireRepair(root) {
+        const location = root.querySelector('select[name="location"]');
+        const patch = root.querySelector('input[name="mode"][value="patch"]');
+        const repair = root.querySelector('input[name="mode"][value="repair"]');
+        const skill = root.querySelector('select[name="skill"]');
+        const why = root.querySelector(".hint.why");
+        const sync = () => {
+            const option = location.selectedOptions[0];
+            patch.disabled = option?.dataset.patch !== "true";
+            if (patch.disabled && patch.checked) repair.checked = true;
+            const mode = patch.checked ? "patch" : "repair";
+            for (const entry of skill.options) entry.disabled = entry.hidden = !entry.dataset.modes.split(" ").includes(mode);
+            if (skill.selectedOptions[0]?.disabled) skill.value = [...skill.options].find(entry => !entry.disabled)?.value;
+            for (const hint of root.querySelectorAll("[data-hint]")) hint.hidden = hint.dataset.hint !== mode;
+            why.textContent = option?.dataset.why ?? "";
+            why.hidden = !why.textContent;
+        };
+        root.addEventListener("change", sync);
+        sync();
     }
 
     /** Whether a station action's free-text skill is any name an `MGT2.ShipCheckSkills` row prints. */
@@ -1462,6 +1617,7 @@ export class SpacecraftActorSheet extends TravellerActorSheet {
     /** A dropped document as this ship's copy, its nearer source the uuid it came from, as core records it. */
     static #copyOf(item) {
         const data = MGT2Helper.stripIds(item);
+        if (item.type === "weapon") foundry.utils.setProperty(data, "system.fittedTo", "");
         if (!item.uuid) return data;
         if (item.pack) foundry.utils.setProperty(data, "_stats.compendiumSource", item.uuid);
         foundry.utils.setProperty(data, "_stats.duplicateSource", item.pack ? null : item.uuid);

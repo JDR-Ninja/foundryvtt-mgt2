@@ -192,7 +192,8 @@ Hooks.once("init", async function () {
         "characteristics.charm",
         "characteristics.psionic",
         "characteristics.other",
-        "characteristics.reputation"
+        "characteristics.reputation",
+        "characteristics.hits"
       ],
       // `life.value` is derived: a value-attribute write to it is discarded on the next prepare.
       value: ["health.radiations",
@@ -208,7 +209,8 @@ Hooks.once("init", async function () {
         "characteristics.charm.value",
         "characteristics.psionic.value",
         "characteristics.other.value",
-        "characteristics.reputation.value"]
+        "characteristics.reputation.value",
+        "characteristics.hits.value"]
     },
     // A non-empty map with no entry for a type unions every OTHER type's attributes
     // (token.mjs:4071-4093), so a missing entry is not a fallback — it is nonsense in the picker.

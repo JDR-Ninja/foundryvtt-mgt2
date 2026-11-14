@@ -18,6 +18,25 @@
 	</div>
 	{{/if}}
 
+	{{! The world's Hits rule. The pool is typed: the sum beside it is a readout, and the button writes
+	    it once. An empty pool keeps the chain above and asks for one, so nobody becomes unkillable. }}
+	{{#if hitsPool}}
+	{{#unless hitsPool.inForce}}
+	<div class="char-list">
+		{{#with hitsPool.row}}
+		{{> systems/mgt2/templates/actors/parts/characteristic.html pool=true}}
+		{{/with}}
+	</div>
+	<p class="hint hitsask">{{localize 'MGT2.Actor.HitsNoPool'}}</p>
+	{{/unless}}
+	<div class="hitsum">
+		<span class="lbl">{{hitsPool.sumLabel}}</span>
+		<b data-derived="system.characteristics">{{hitsPool.sum}}</b>
+		<button type="button" class="btn edit-only" data-action="hitsFromCharacteristics"
+			data-tooltip="{{localize 'MGT2.Actor.HitsFromCharacteristicsHint'}}">{{localize 'MGT2.Actor.HitsFromCharacteristics'}}</button>
+	</div>
+	{{/if}}
+
 	{{! Group 2: the constants. Nothing depletes here, so no gauge and no current/max reading — but
 	    the same row as the other two groups, so the mode flip moves nothing sideways. }}
 	{{#if statics.length}}
