@@ -30,13 +30,14 @@
 
 	{{#if ship.crew.rows.length}}
 	<table class="roster crew">
-		<colgroup><col class="c-st" /><col class="c-who" /><col /><col class="c-rq" /></colgroup>
+		<colgroup><col class="c-st" /><col class="c-who" /><col /><col class="c-rq" /><col class="c-act" /></colgroup>
 		<thead>
 			<tr>
 				<th>{{localize 'MGT2.Actor.spacecraft.Station'}}</th>
 				<th>{{localize 'MGT2.Actor.spacecraft.Who'}}</th>
 				<th>{{localize 'MGT2.Actor.spacecraft.Actions'}}</th>
 				<th class="r">{{localize 'MGT2.Actor.spacecraft.Req'}}</th>
+				<th class="act"></th>
 			</tr>
 		</thead>
 		{{! A person or a role dropped on a row takes that station; a person dropped elsewhere on the table
@@ -91,6 +92,11 @@
 				</td>
 				<td class="r">
 					<span class="need{{#if (and row.required (lt row.count row.required))}} short{{/if}}">{{row.count}}/{{#if row.required}}{{row.required}}{{else}}&mdash;{{/if}}</span>
+				</td>
+				<td class="r">
+					<div class="acts edit-only">
+						<a data-action="rowDelete" data-rows="crew" data-tooltip="{{localize 'MGT2.Actor.spacecraft.DeleteStation'}}"><i class="fas fa-trash"></i></a>
+					</div>
 				</td>
 			</tr>
 			{{/each}}

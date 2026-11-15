@@ -2489,6 +2489,7 @@
           "other": "{stations} puestos · {aboard} a bordo"
         },
         "AddStation": "Añadir un puesto",
+        "DeleteStation": "Quitar este puesto",
         "Station": "Puesto",
         "Who": "Quién",
         "Duty": "Función de combate",
