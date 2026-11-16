@@ -6112,6 +6112,9 @@ li.chat-message {
 .mgt2 table.roster.crew col.c-rq {
   width: 3.6rem;
 }
+.mgt2 table.roster.crew col.c-act {
+  width: 2.4rem;
+}
 .mgt2 table.roster.crew .who {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -6124,7 +6127,12 @@ li.chat-message {
 }
 .mgt2 table.roster.crew .station .pair {
   display: flex;
+  align-items: center;
   gap: 4px;
+}
+.mgt2 table.roster.crew .station .pair select {
+  flex: 1 1 0;
+  min-width: 0;
 }
 .mgt2 table.roster.crew .station .pair input {
   flex: 0 0 2.8rem;
