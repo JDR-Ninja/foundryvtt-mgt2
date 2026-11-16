@@ -2406,12 +2406,19 @@
               "value": 1
             }
           ],
-          "skill": {
-            "name": "Gun Combat",
-            "value": 1
-          },
           "protection": 0
         },
+        "rollModifiers": [
+          {
+            "target": "skills",
+            "skills": [
+              "Gun Combat"
+            ],
+            "characteristic": "",
+            "dm": 1,
+            "condition": ""
+          }
+        ],
         "processing": null,
         "specialised": {
           "software": "",
@@ -2423,7 +2430,7 @@
         "mgt2": {
           "demo": {
             "copyOf": "Demo — Reflex Wiring",
-            "trap": "augment.skill.name reads the real name, Gun Combat, which matches this Traveller's Gun Combat (slug) by the same prefix rule an armour uses."
+            "trap": "The row's skill reads the real name, Gun Combat, which matches this Traveller's Gun Combat (slug) by the same prefix rule an armour uses."
           }
         }
       }
@@ -2458,12 +2465,9 @@
         "augment": {
           "improvement": "",
           "modifiers": [],
-          "skill": {
-            "name": "",
-            "value": 0
-          },
           "protection": 0
         },
+        "rollModifiers": [],
         "processing": null,
         "specialised": {
           "software": "",
@@ -2510,12 +2514,9 @@
         "augment": {
           "improvement": "",
           "modifiers": [],
-          "skill": {
-            "name": "",
-            "value": 0
-          },
           "protection": 0
         },
+        "rollModifiers": [],
         "processing": null,
         "specialised": {
           "software": "",

@@ -919,6 +919,16 @@
 			margin-right: 4px
 			cursor: help
 
+// An equipment row shows the field its target reads; the other stays in the form, hidden.
+.mgt2 .block.augment
+	table.rows.fixed th.ctl
+		width: 2.5rem
+	.gearrows table.rows.fixed th.target
+		width: 45%
+	.gearrows tr:not([data-target="skills"]) .g-skills,
+	.gearrows tr:not([data-target="characteristic"]) .g-characteristic
+		display: none
+
 // A role's actions, grouped by the step of the round, each a line: its name, the roll as a sentence,
 // and a tail holding the Weapon pill and the limit.
 .mgt2 .stationacts

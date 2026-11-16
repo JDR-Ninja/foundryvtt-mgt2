@@ -267,7 +267,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     computer: ["specs", "carried", "traits", "effects", "description", "software"],
     // A wafer jack is a computer as much as an implant, and so is a transceiver from TL10 up, so
     // equipment lists what it runs; `#composition` drops the block on one that hosts nothing.
-    equipment: ["summary", "specs", "carried", "effects", "software"],
+    equipment: ["roll", "summary", "augment", "specs", "carried", "effects", "software"],
     "equipment:augment": ["summary", "augment", "specs", "carried", "effects", "software"],
     "equipment:accessory": ["summary", "specs", "carried", "traits", "effects", "software"],
     drug: ["summary", "specs", "carried", "effects"],
@@ -494,6 +494,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       speciesFrame: this.#speciesFrame(),
       speciesTiles: this.#speciesTiles(),
       traitModifiers: this.#traitModifiers(),
+      rollModifiers: this.#rollModifiers(),
       // A role's line follows its actions, so it reads as prose and not as the lede the tab opens on.
       summary: this.#summary(slots.details?.[0]?.id !== "actions"),
       station: item.type === "role",
@@ -678,35 +679,51 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     return { head, rest, short: lead && (head.length <= 120) && !head.includes("\n"), vacant: !head && !this.#citation() };
   }
 
-  /** What the Traveller's derivations read off an augment, one tile each; a tile they skip is off. */
+  /** What the Traveller's derivations read off an equipment Item, one tile each; a tile they skip is off. */
   #augmentTiles() {
     const item = this.item;
-    if ( (item.type !== "equipment") || (item.system.subType !== "augment") ) return null;
-    const augment = item.system.augment;
+    if ( (item.type !== "equipment") || (item.system.subType === "accessory") ) return null;
+    const { augment: { modifiers, protection }, rollModifiers } = item.system;
+    const isAugment = item.system.subType === "augment";
     const fitted = item.system.equipped === true;
     const issues = item.actor?.system.augmentIssues;
     const limits = { characteristic: "MGT2.Actor.AugmentCharacteristicLimit", skill: "MGT2.Actor.AugmentSkillLimit",
       protection: "MGT2.Actor.AugmentProtectionLimit" };
     // The sheet reads the inventory's own lists, so it cannot disagree with the numbers.
-    const tile = (kind, label, value, tooltip) => {
-      const outranked = fitted && Boolean(issues?.[kind]?.includes(item.id));
-      return { kind, label, value, text: MGT2Helper.signed(value), tone: (value > 0) ? "up" : "down",
+    const tile = (kind, label, value, tooltip, outranked = fitted && Boolean(issues?.[kind]?.includes(item.id))) => (
+      { kind, label, value, text: MGT2Helper.signed(value), tone: (value > 0) ? "up" : "down",
         off: !fitted || outranked,
-        tooltip: outranked ? game.i18n.format(limits[kind], { names: item.name }) : tooltip };
-    };
+        tooltip: outranked ? game.i18n.format(limits[kind], { names: item.name }) : tooltip });
     const tiles = [];
-    for ( const row of augment.modifiers ?? [] ) {
+    for ( const row of (isAugment ? modifiers : null) ?? [] ) {
       if ( !row.characteristic || !Number.isFinite(row.value) || !row.value ) continue;
       tiles.push(tile("characteristic", game.i18n.localize(`MGT2.Characteristics.${row.characteristic}.short`), row.value,
         game.i18n.localize(MGT2.Characteristics[row.characteristic] ?? row.characteristic)));
     }
-    const skill = augment.skill?.name?.trim();
-    if ( skill && augment.skill.value ) {
-      tiles.push(tile("skill", skill, augment.skill.value,
-        game.i18n.format("MGT2.Actor.AugmentSkill", { augment: item.name, skill })));
+    for ( const row of rollModifiers ) {
+      const skills = (row.target === "skills") ? row.skills.join(", ") : "";
+      if ( !row.dm || ((row.target === "skills") && !skills) || ((row.target === "characteristic") && !row.characteristic) ) continue;
+      const label = skills || ((row.target === "characteristic")
+        ? game.i18n.localize(`MGT2.Characteristics.${row.characteristic}.short`)
+        : game.i18n.localize(MGT2.GearModifierTargets[row.target]));
+      const scoped = isAugment && skills && !row.condition;
+      const lost = scoped && row.skills.every(name => issues?.skillRows?.includes(
+        `${item.id}/${MGT2Helper.skillSlug(MGT2Helper.skillParent(name) ?? name)}`));
+      tiles.push(tile("skill", label, row.dm, row.condition
+        ? game.i18n.format("MGT2.RollPrompt.GearDM", { item: item.name, detail: row.condition })
+        : (scoped ? game.i18n.format("MGT2.Actor.AugmentSkill", { augment: item.name, skill: skills }) : ""),
+      fitted && lost));
     }
-    if ( augment.protection > 0 ) tiles.push(tile("protection", game.i18n.localize("MGT2.Items.Protection"), augment.protection, ""));
-    return { fitted, tiles, hasEffects: item.effects.size > 0 };
+    if ( isAugment && (protection > 0) ) {
+      tiles.push(tile("protection", game.i18n.localize("MGT2.Items.Protection"), protection, ""));
+    }
+    return { fitted, augment: isAugment, tiles, hasEffects: item.effects.size > 0 };
+  }
+
+  #rollModifiers() {
+    const { type, system } = this.item;
+    if ( (type !== "equipment") || (system.subType === "accessory") ) return null;
+    return system.rollModifiers.map(row => ({ ...row, skillsText: row.skills.join(", ") }));
   }
 
   /** A drug's three addiction values, read together, or null while the referee has not set one (CSC p.97). */
@@ -1241,7 +1258,8 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       difficulty: MGT2Helper.getDifficultyDisplay(hazard ? system.difficulty : binding.difficulty),
       label: hazard ? "MGT2.Items.Resist" : "MGT2.Items.Roll",
       // An item with no owner has no characteristics and no skills to roll against.
-      disabled: actor === null
+      disabled: actor === null,
+      idle: (type === "equipment") && !binding.skill && !binding.characteristic && !system.rollModifiers?.length
     };
   }
 
@@ -1812,6 +1830,10 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     }
 
     splitTypedLists(system);
+    for ( const row of Object.values(system?.rollModifiers ?? {}) ) {
+      if ( row?.target && (row.target !== "skills") ) row.skills = [];
+      if ( row?.target && (row.target !== "characteristic") ) row.characteristic = "";
+    }
 
     // The chip row lets a printed parameter be retyped; the number a rule reads follows from it.
     for ( const property of ["traits", "options", "accessory.traits"] ) {

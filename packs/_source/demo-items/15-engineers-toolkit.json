@@ -7,13 +7,13 @@
     "mgt2": {
       "demo": {
         "order": 15,
-        "cliff": "a toolkit gives a DM to a check it does not choose",
+        "cliff": "a toolkit gives its DM only while it is in use",
         "teaches": [
           "`subType: \"toolkit\"` is the fifth equipment sub-type, and the one a referee reaches for after `equipment` itself.",
-          "A toolkit stores no check. Working without the right kit costs DM-2, a kit more than two TLs below the job can cost as much, and one more than two above it may give DM+2 (CSC p.125). Type it in the roll prompt's Custom DM.",
-          "`roll` is declared on every physical Item, but the equipment sheet draws no roll block, so a toolkit leaves it blank."
+          "A `rollModifiers` row gives the holder's own Mechanic checks DM+1 while the kit is equipped, or when it is rolled from its own Roll button. The kit's TL against the job's is not a row (CSC p.125): type it in the roll prompt's Custom DM.",
+          "`roll` binds the Roll button to a skill and a characteristic; on equipment the bar shows in play once the Item has a binding or a row."
         ],
-        "trap": "A toolkit is not an augment: it carries no `augment` block that does anything, and nothing on it is applied for you. Its DM depends on the job in hand, which no field on the Item can know."
+        "trap": "Equipped is what makes the row count: a kit carried in a bag gives nothing, so the prompt does not offer every toolkit the Traveller owns on every check."
       }
     }
   },
@@ -30,7 +30,10 @@
     "container": { "id": "" },
     "roll": { "characteristic": "", "skill": "", "difficulty": "" },
     "equipped": false,
-    "augment": { "improvement": "", "modifiers": [], "skill": { "name": "", "value": 0 }, "protection": 0 },
+    "augment": { "improvement": "", "modifiers": [], "protection": 0 },
+    "rollModifiers": [
+      { "target": "skills", "skills": ["Mechanic"], "characteristic": "", "dm": 1, "condition": "" }
+    ],
     "processing": null,
     "specialised": { "software": "", "bonus": 0 }
   },

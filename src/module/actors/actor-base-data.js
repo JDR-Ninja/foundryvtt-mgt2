@@ -418,7 +418,19 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         }
         // Core p.85, Aliens 4 p.224: Fast and Slow Metabolism are a DM to every Initiative roll.
         this.modifiers.initiative.auto = MGT2Helper.traitScore(this.traits, "fast-metabolism")
-            - Math.abs(MGT2Helper.traitScore(this.traits, "slow-metabolism")) + this.speciesTraitDM("initiative");
+            - Math.abs(MGT2Helper.traitScore(this.traits, "slow-metabolism")) + this.speciesTraitDM("initiative")
+            + this.gearInitiativeDM();
+    }
+
+    gearInitiativeDM() {
+        let dm = 0;
+        for (const item of this.parent?.items ?? []) {
+            if (!ActorBaseData.#gearInUse(item)) continue;
+            for (const row of item.system.rollModifiers ?? []) {
+                if ((row.target === "initiative") && !row.condition && Number.isFinite(row.dm)) dm += row.dm;
+            }
+        }
+        return dm;
     }
 
     /** The species trait DM rows this actor answers for: a DM to give, and the sex matched. */
@@ -635,7 +647,7 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         const sources = [
             ...this.stateCheckModifiers(),
             ...this.armorSkillModifiers(),
-            ...this.augmentSkillModifiers(),
+            ...this.gearModifiers(),
             ...this.speciesTraitModifiers(),
             ...this.skillAccumulatorModifiers(),
             ...this.scopedEffectModifiers(),
@@ -679,28 +691,49 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
         return sources;
     }
 
-    /**
-     * Core p.107: a skill augmentation gives DM+1 "when using that specific skill" — the first
-     * source in the system scoped to a SKILL rather than to a characteristic roster.
-     */
-    augmentSkillModifiers() {
-        const sources = [];
-        const outranked = this.augmentIssues.skill;
-        for (const item of this.parent.items) {
-            if (!ActorBaseData.#isFittedAugment(item) || outranked.includes(item.id)) continue;
-            const named = item.system.augment.skill?.name?.trim();
-            const dm = Math.trunc(item.system.augment.skill?.value) || 0;
-            // The augment does nothing for a skill the Traveller does not have at all.
-            if (!named || (dm === 0) || (this.skillLevel(named) === null)) continue;
+    /** The rows of the equipment in use, one source each; an augment's skill rows under CSC folio 61's limits. */
+    gearModifiers() {
+        const outranked = new Set(this.augmentIssues.skillRows);
+        return this.parent.items.filter(item => ActorBaseData.#gearInUse(item))
+            .flatMap(item => this.gearSources(item, outranked));
+    }
 
-            // Resolved to Item ids here, where `matchesSkillItem` can settle the speciality form.
-            const skills = this.parent.items.filter(skill => (skill.type === "talent")
-                && (skill.system.subType === "skill")
-                && MGT2Helper.matchesSkillItem(skill, named)).map(skill => skill.id);
-            if (!skills.length) skills.push(MGT2Helper.skillFallback(this.parent.items, named)._id);
+    /** A roll made from an Item brings its own rows though it is not in use; an augment works only fitted. */
+    itemRollSources(item) {
+        if ((item?.type !== "equipment") || ["augment", "accessory"].includes(item.system.subType)) return [];
+        return this.gearSources(item).filter(source => !source.initiative);
+    }
+
+    /**
+     * One check source per row of an Item, in use or not; Core p.107, an augment's skill must be held.
+     * @param {Set<string>} [outranked]   `<itemId>/<skill group>` an augment loses to CSC folio 61
+     */
+    gearSources(item, outranked = new Set()) {
+        const held = this.parent.items.filter(skill => (skill.type === "talent") && (skill.system.subType === "skill"));
+        const augment = item.system.subType === "augment";
+        const sources = [];
+        for (const [index, row] of (item.system.rollModifiers ?? []).entries()) {
+            if (!Number.isFinite(row.dm) || (row.dm === 0) || ((row.target === "initiative") && !row.condition)) continue;
             // Hyphenated, never dotted: the prompt names a form control after this key.
-            sources.push({ key: `augment-${item.id}`, label: "MGT2.Actor.AugmentSkill", dm,
-                params: { augment: item.name, skill: named }, skills });
+            const source = { key: `gear-${item.id}-${index}`, dm: row.dm, label: "MGT2.RollPrompt.GearDM",
+                params: { item: item.name, detail: row.condition }, hint: "MGT2.RollPrompt.GearHint" };
+            if (row.condition) {
+                Object.assign(source, { skills: [], hint: "MGT2.RollPrompt.GearOffered",
+                    initiative: row.target === "initiative" });
+            } else if (row.target === "skills") {
+                const names = augment ? row.skills.filter(name => (this.skillLevel(name) !== null)
+                    && !outranked.has(`${item.id}/${ActorBaseData.#skillGroup(name)}`)) : row.skills;
+                if (!names.length) continue;
+                Object.assign(source, { skills: ActorBaseData.#rowSkills(held, names),
+                    skillSlugs: names.map(name => MGT2Helper.skillSlug(name)) }, augment
+                    ? { label: "MGT2.Actor.AugmentSkill", params: { augment: item.name, skill: names.join(", ") }, hint: "" }
+                    : { params: { item: item.name, detail: names.join(", ") } });
+            } else if (row.target === "characteristic") {
+                if (!row.characteristic) continue;
+                Object.assign(source, { characteristics: [row.characteristic], params: { item: item.name,
+                    detail: game.i18n.localize(MGT2.Characteristics[row.characteristic] ?? row.characteristic) } });
+            } else Object.assign(source, { label: item.name, params: undefined, hint: "MGT2.RollPrompt.GearAll" });
+            sources.push(source);
         }
         return sources;
     }
@@ -777,15 +810,24 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             && (item.system.equipped === true);
     }
 
+    /** Equipped, out of every bag, and not an accessory, whose DMs are its weapon's. */
+    static #gearInUse(item) {
+        return (item.type === "equipment") && (item.system.subType !== "accessory")
+            && (item.system.equipped === true) && !item.system.container?.id;
+    }
+
+    static #skillGroup(name) {
+        return MGT2Helper.skillSlug(MGT2Helper.skillParent(name) ?? name);
+    }
+
     /** CSC p.53, p.54, p.61: the fitted augments another one outranks, by skill, by subdermal armour, by characteristic. */
     get augmentIssues() {
         const fitted = this.parent.items.filter(item => ActorBaseData.#isFittedAugment(item));
-        const skills = ActorBaseData.#outranked(fitted, item => {
-            const name = item.system.augment.skill?.name?.trim();
-            return name ? MGT2Helper.skillSlug(MGT2Helper.skillParent(name) ?? name) : null;
-        }, item => Math.trunc(item.system.augment.skill?.value) || 0);
-        // CSC p.61: one augmentation per skill, and three different skills at once.
-        const skill = [...skills.outranked, ...skills.kept.slice(3)];
+        // CSC p.61: one augmentation per skill and three skills at once, counted on unconditional skill rows.
+        const skills = ActorBaseData.#outranked(fitted.flatMap(item => ActorBaseData.#augmentSkills(item)),
+            entry => entry.group, entry => entry.dm);
+        const skillRows = [...skills.outranked, ...skills.kept.slice(3)];
+        const skill = [...new Set(skillRows.map(key => key.split("/")[0]))];
         const protection = ActorBaseData.#outranked(fitted,
             item => ((+item.system.augment.protection || 0) ? "subdermal" : null),
             item => +item.system.augment.protection || 0).outranked;
@@ -795,8 +837,21 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
             return ((rows.length === 1) && MGT2.PhysicalCharacteristics.includes(rows[0].characteristic))
                 ? rows[0].characteristic : null;
         }, item => ActorBaseData.#augmentRows(item)[0].value).outranked;
-        return { skill, protection, characteristic,
+        return { skill, skillRows, protection, characteristic,
             any: (skill.length + protection.length + characteristic.length) > 0 };
+    }
+
+    /** One augmentation per skill an unconditional row names, at the stronger DM where two rows name it. */
+    static #augmentSkills(item) {
+        const groups = new Map();
+        for (const row of item.system.rollModifiers ?? []) {
+            if ((row.target !== "skills") || row.condition || !Number.isFinite(row.dm) || (row.dm === 0)) continue;
+            for (const name of row.skills) {
+                const group = ActorBaseData.#skillGroup(name);
+                if (group) groups.set(group, Math.max(groups.get(group) ?? -Infinity, row.dm));
+            }
+        }
+        return [...groups].map(([group, dm]) => ({ id: `${item.id}/${group}`, group, dm }));
     }
 
     /** Groups items by `key`, null being no group: each group keeps its strongest, the first listed on a tie. */

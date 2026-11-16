@@ -1735,6 +1735,9 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
           rollOptions.difficulty = itemObj.system.roll.difficulty;
         }
       }
+      const listed = new Set(rollOptions.checkModifiers.map(source => source.key));
+      rollOptions.checkModifiers.push(...(actor.system.itemRollSources?.(itemObj) ?? [])
+        .filter(source => !listed.has(source.key)));
       if (mounted) rollOptions.skill = TravellerActorSheet.#gunnerySkill(actor);
 
       // Core p.229: the PSI DM is added to every power, so a talent that names no characteristic of

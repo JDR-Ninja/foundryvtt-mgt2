@@ -5,8 +5,7 @@ export const MAX_CONTAINER_DEPTH = 5;
 
 /**
  * Creation data for an item, what it holds and what is fitted to it, re-keyed: `keepId: true` keeps the new ids.
- * @param {string} [containerId]   The container it lands in, blank for loose
- * @param {string} [fittedTo]      The weapon it lands fitted to instead, blank for none
+ * @param {string} [containerId]   The container it lands in, blank for loose; `fittedTo` the weapon instead
  * @returns {Promise<object[]>}    The head of the list is the item itself
  */
 export async function copyItemWithContents(item, containerId = "", depth = 0, fittedTo = "") {
@@ -70,6 +69,15 @@ export function singularItemLimits(type, system) {
 }
 
 export class TravellerItem extends Item {
+
+  /** Marks a raw augment skill for the world step: the root migrates before `system` lifts it. @inheritDoc */
+  static migrateData(source, options) {
+    const named = source.system?.augment?.skill?.name;
+    if ( (typeof named === "string") && named.trim() ) {
+      foundry.utils.setProperty(source, "flags.mgt2.persistSourceMigration", true);
+    }
+    return super.migrateData(source, options);
+  }
 
   /** The item rules hold on a create too: a pack, a macro or a drop can build a stack of computers. @inheritDoc */
   async _preCreate(data, options, user) {

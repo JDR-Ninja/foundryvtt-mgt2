@@ -11,6 +11,18 @@ import { seedRules } from "./rules.js";
 const NPC_CHAIN_STALE = ["strength", "dexterity", "endurance"];
 const NPC_CHAIN_FIXED = ["endurance", "strength", "dexterity"];
 
+/** Packages whose maintainers migrate their packs at the source: no world step writes them. */
+export const MIGRATED_AT_SOURCE = new Set(["mgt2", "mgt2-data"]);
+
+export function migratablePack(pack) {
+  return (pack.metadata.packageType === "world") && !MIGRATED_AT_SOURCE.has(pack.metadata.packageName);
+}
+
+const PERSIST = "persistSourceMigration";
+// ⚠ The server holds no system model, so a default update MERGES into the row and keeps a removed field;
+// `recursive: false` replaces each root key whole. A fresh object each call: the update writes `parent` into it.
+const replace = () => ({ diff: false, recursive: false, render: false });
+
 const MIGRATIONS = [
   {
     version: "0.2.0",
@@ -55,8 +67,88 @@ const MIGRATIONS = [
       }
       if ( missed.length ) await reportMissedBonuses(missed);
     }
+  },
+  {
+    version: "0.2.14",
+    label: "an augment's skill becomes an equipment roll modifier row",
+    migrate: persistLiftedSources
   }
 ];
+
+/** Every document `TravellerItem.migrateData` marked, written back whole: world, Actors, world packs, token deltas. */
+async function persistLiftedSources() {
+  const counts = { items: 0, embedded: 0, packs: 0, deltas: 0, effects: 0, failed: 0 };
+  const persist = async (item, kind, write) => {
+    listStaleEffects(item, counts);
+    if ( item._source.flags?.mgt2?.[PERSIST] !== true ) return;
+    const data = item.toObject();
+    delete data.effects;
+    delete data.flags.mgt2[PERSIST];
+    try {
+      await write(data);
+      counts[kind]++;
+    } catch(err) {
+      counts.failed++;
+      console.error(`mgt2 | "${item.name}" (${item.uuid}) was not migrated:`, err);
+    }
+  };
+
+  for ( const item of game.items ) await persist(item, "items", data => item.update(data, replace()));
+  for ( const actor of game.actors ) {
+    for ( const item of actor.items ) {
+      await persist(item, "embedded", data => actor.updateEmbeddedDocuments("Item", [data], replace()));
+    }
+  }
+  for ( const pack of game.packs.filter(migratablePack) ) {
+    if ( !["Item", "Actor"].includes(pack.documentName) ) continue;
+    const relock = pack.locked;
+    try {
+      if ( relock ) await pack.configure({ locked: false });
+      for ( const document of await pack.getDocuments() ) {
+        if ( pack.documentName === "Item" ) {
+          await persist(document, "packs", data => document.update(data, replace()));
+          continue;
+        }
+        for ( const item of document.items ) {
+          await persist(item, "packs", data => document.updateEmbeddedDocuments("Item", [data], replace()));
+        }
+      }
+    } catch(err) {
+      counts.failed++;
+      console.error(`mgt2 | the compendium "${pack.collection}" was not migrated:`, err);
+    } finally {
+      if ( relock ) await pack.configure({ locked: true });
+    }
+  }
+  // One token at a time and only the Items its delta holds: the rest are the base Actor's, written above.
+  for ( const scene of game.scenes ) {
+    for ( const token of scene.tokens ) {
+      if ( token.actorLink || !token.actor ) continue;
+      for ( const item of token.actor.items ) {
+        if ( !token.delta.items.manages(item.id) ) continue;
+        await persist(item, "deltas", data => token.actor.updateEmbeddedDocuments("Item", [data], replace()));
+      }
+    }
+  }
+
+  // eslint-disable-next-line no-console -- the GM chasing a missing DM needs the trace
+  console.log(`mgt2 | augment skills persisted as rows: ${counts.items} world Items, ${counts.embedded} on Actors, `
+    + `${counts.packs} in world compendiums, ${counts.deltas} on unlinked tokens; ${counts.effects} effect change(s) listed`);
+  if ( counts.failed ) throw new Error(`mgt2 | ${counts.failed} document(s) could not be migrated; the next load retries`);
+  return 0;
+}
+
+/** An Active Effect change on the removed `augment.skill` now targets nothing, and is named rather than rewritten. */
+function listStaleEffects(item, counts) {
+  for ( const effect of item.effects ?? [] ) {
+    for ( const change of effect.system?.changes ?? [] ) {
+      if ( !change.key?.startsWith("system.augment.skill") ) continue;
+      counts.effects++;
+      console.warn(`mgt2 | "${effect.name}" on "${item.name}"${item.actor ? ` (${item.actor.name})` : ""} changes `
+        + `${change.key}, which no longer exists: an augment's skill is a row under Modifiers now.`);
+    }
+  }
+}
 
 /** A 0.2.x record's blank assignment and ladder, filled where the template leaves one answer; never its rank. */
 export function collectCareerEntry(item) {

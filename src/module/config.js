@@ -2503,6 +2503,13 @@ MGT2.TraitModifierTargets = Object.freeze({
     protection: "MGT2.TraitModifierTargets.protection"
 });
 
+MGT2.GearModifierTargets = Object.freeze({
+    skills: "MGT2.TraitModifierTargets.skills",
+    check: "MGT2.TraitModifierTargets.check",
+    initiative: "MGT2.TraitModifierTargets.initiative",
+    characteristic: "MGT2.Items.Characteristic"
+});
+
 // How a record was entered and how it ended.
 MGT2.CareerEntryModes = Object.freeze({
     qualified: "MGT2.Chargen.EntryModes.qualified",

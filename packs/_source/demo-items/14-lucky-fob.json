@@ -30,7 +30,8 @@
     "container": { "id": "" },
     "roll": { "characteristic": "", "skill": "", "difficulty": "" },
     "equipped": true,
-    "augment": { "improvement": "", "modifiers": [], "skill": { "name": "", "value": 0 }, "protection": 0 },
+    "augment": { "improvement": "", "modifiers": [], "protection": 0 },
+    "rollModifiers": [],
     "processing": null,
     "specialised": { "software": "", "bonus": 0 }
   },

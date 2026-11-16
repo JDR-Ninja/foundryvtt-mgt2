@@ -7,13 +7,13 @@
     "mgt2": {
       "demo": {
         "order": 12,
-        "cliff": "the only skill-scoped modifier",
+        "cliff": "a modifier scoped to one skill",
         "teaches": [
           "`subType: \"augment\"` is what makes an equipment Item an augment; the four other sub-types are ordinary gear.",
           "`augment.modifiers[]` raises a characteristic, and `augment.protection` adds to Protection.",
-          "`augment.skill {name, value}` is the system's only modifier scoped to one skill."
+          "A `rollModifiers` row on `skills` is scoped to the skills it names; on an augment it counts toward one augmentation per skill and three skills."
         ],
-        "trap": "`augment.skill.name` matches a skill Item by name, exactly as an armour's `requireSkill` does. It reads the real name, `Gun Combat`, which matches the Item named `Gun Combat (slug)` by the same prefix rule; a name no skill on the Traveller carries matches nothing, and the augment does nothing."
+        "trap": "A row's skill matches a skill Item by name, exactly as an armour's `requireSkill` does. It reads the real name, `Gun Combat`, which matches the Item named `Gun Combat (slug)` by the same prefix rule; a name no skill on the Traveller carries matches nothing, and the augment does nothing."
       }
     }
   },
@@ -35,9 +35,11 @@
       "modifiers": [
         { "characteristic": "dexterity", "value": 1 }
       ],
-      "skill": { "name": "Gun Combat", "value": 1 },
       "protection": 0
     },
+    "rollModifiers": [
+      { "target": "skills", "skills": ["Gun Combat"], "characteristic": "", "dm": 1, "condition": "" }
+    ],
     "processing": null,
     "specialised": { "software": "", "bonus": 0 }
   },

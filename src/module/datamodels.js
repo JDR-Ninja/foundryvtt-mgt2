@@ -157,12 +157,18 @@ export class ItemData extends PhysicalItemData {
 
 export class EquipmentData extends PhysicalItemData {
 
-    /** The rating left `augment` once gear that is not one turned out to carry it. @inheritDoc */
+    /** What left `augment` for every equipment: the rating, and the one skill, which is now a row. @inheritDoc */
     static migrateData(source, options) {
         for ( const key of ["processing", "specialised"] ) {
             if ( (source.augment?.[key] !== undefined) && (source[key] === undefined) ) {
                 source[key] = source.augment[key];
             }
+        }
+        const skill = source.augment?.skill;
+        const named = (typeof skill?.name === "string") ? skill.name.trim() : "";
+        if ( named && (source.rollModifiers === undefined) ) {
+            source.rollModifiers = [{ target: "skills", skills: [named], characteristic: "",
+                dm: Math.trunc(Number(skill.value)) || 0, condition: "" }];
         }
         return super.migrateData(source, options);
     }
@@ -197,14 +203,20 @@ export class EquipmentData extends PhysicalItemData {
                         required: false, integer: true, nullable: true, initial: null })
                 })
             ),
-            // Core p.107 names the skill the table would not: the augment is bought FOR one.
-            skill: new fields.SchemaField({
-                name: new fields.StringField({ required: false, blank: true, trim: true, initial: "" }),
-                value: new fields.NumberField({ required: false, initial: 0, integer: true })
-            }),
             // Core p.107: subdermal armour "stacks with other protection" — additive over worn armour.
             protection: new fields.NumberField({ required: false, initial: 0, integer: true, min: 0 })
         });
+        // CSC folios 120-130: the holder's own check DMs while in use; a blank condition applies by itself.
+        schema.rollModifiers = new fields.ArrayField(new fields.SchemaField({
+            target: new fields.StringField({
+                required: true, blank: false, initial: "skills", choices: MGT2.GearModifierTargets }),
+            skills: new fields.ArrayField(
+                new fields.StringField({ required: true, blank: false, trim: true }), { initial: () => [] }),
+            characteristic: new fields.StringField({
+                required: false, blank: true, trim: true, initial: "", choices: MGT2.Characteristics }),
+            dm: new fields.NumberField({ required: true, nullable: false, integer: true, initial: 0 }),
+            condition: new fields.StringField({ required: false, blank: true, trim: true, initial: "" })
+        }), { initial: () => [] });
 
         // Core p.110 glosses `Computer/N` as the Processing score, the same scale `ComputerData`
         // and `ArmorData` store: `null` is no computer, `0` is Computer/0. Not an augment field —

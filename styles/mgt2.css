@@ -8261,6 +8261,17 @@ ul.softwares li:hover a {
   cursor: help;
 }
 
+.mgt2 .block.augment table.rows.fixed th.ctl {
+  width: 2.5rem;
+}
+.mgt2 .block.augment .gearrows table.rows.fixed th.target {
+  width: 45%;
+}
+.mgt2 .block.augment .gearrows tr:not([data-target=skills]) .g-skills,
+.mgt2 .block.augment .gearrows tr:not([data-target=characteristic]) .g-characteristic {
+  display: none;
+}
+
 .mgt2 .stationacts {
   display: flex;
   flex-direction: column;

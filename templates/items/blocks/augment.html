@@ -1,10 +1,12 @@
-{{! What the system applies from an augment, one tile for each thing the Traveller's derivations read
-    off it. A tile they skip — the augment not fitted, or outranked by another — recolours. }}
-<div class="block augment">
+{{! What the system applies from an equipment Item, one tile for each thing the Traveller's derivations
+    read off it. A tile they skip — the Item not in use, or an augment outranked by another — recolours.
+    Off an augment, a block with no row has nothing to say in play. }}
+<div class="block augment{{#unless (or augmentTiles.augment augmentTiles.tiles.length)}} edit-only{{/unless}}">
 	<div class="sect{{#unless augmentTiles.tiles.length}} edit-only{{/unless}}">
 		<h3>{{localize 'MGT2.Items.Modifiers'}}</h3>
 		<span class="count">{{augmentTiles.tiles.length}}</span>
-		<a class="add edit-only" data-action="entryCreate" data-property="augment.modifiers" data-blank='{"characteristic":"","value":null}' data-tooltip="{{localize 'MGT2.Items.AddModifier'}}"><i class="fa-solid fa-plus"></i></a>
+		<i class="fa-solid fa-circle-info note edit-only" data-tooltip="{{localize 'MGT2.Items.RollModifiersHint'}}"></i>
+		<a class="add edit-only" data-action="entryCreate" data-property="rollModifiers" data-tooltip="{{localize 'MGT2.Items.AddModifier'}}"><i class="fa-solid fa-plus"></i></a>
 	</div>
 	{{#if augmentTiles.tiles.length}}
 	<div class="tiles play-only">
@@ -15,21 +17,21 @@
 		</div>
 		{{/each}}
 	</div>
-	{{else}}
+	{{else if augmentTiles.augment}}
 	{{! Zero reads as zero; an augment carrying an Active Effect may work through it, so it says nothing. }}
 	{{#unless augmentTiles.hasEffects}}
 	<p class="vacant play-only"><a data-action="toggleSheetMode"><i class="fa-solid fa-plus"></i> {{localize 'MGT2.Items.Modifiers'}} <b>0</b></a></p>
 	{{/unless}}
 	{{/if}}
 
+	{{#if augmentTiles.augment}}
 	<div class="edit-only" data-property="augment.modifiers">
-		{{#if system.augment.modifiers.length}}
 		<table class="rows fixed">
 			<thead>
 				<tr>
 					<th>{{localize 'MGT2.Items.Characteristic'}}</th>
 					<th class="num">{{localize 'MGT2.Items.Modifier'}}</th>
-					<th class="acts"></th>
+					<th class="ctl"><a class="add" data-action="entryCreate" data-blank='{"characteristic":"","value":null}' data-tooltip="{{localize 'MGT2.Items.AddModifier'}}"><i class="fa-solid fa-plus"></i></a></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -49,21 +51,52 @@
 				{{/each}}
 			</tbody>
 		</table>
-		{{/if}}
 	</div>
-	{{! The printed cell in the two other kinds the system can compute. }}
+	{{/if}}
+
+	{{! A row shows the field its target reads, by CSS, so every leaf is still submitted. }}
+	{{#if rollModifiers.length}}
+	<div class="gearrows edit-only" data-property="rollModifiers">
+		<table class="rows fixed">
+			<thead>
+				<tr>
+					<th class="target">{{localize 'MGT2.Chargen.Screen.TrayApplies'}}</th>
+					<th class="num c">{{localize 'MGT2.Items.DM'}}</th>
+					<th>{{localize 'MGT2.TraitSlot.condition'}}</th>
+					<th class="ctl"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each rollModifiers as |row i|}}
+				<tr data-entry-index="{{i}}" data-target="{{row.target}}">
+					<td>
+						<select class="f" name="system.rollModifiers.{{i}}.target">
+							{{selectOptions @root.config.GearModifierTargets selected=row.target localize=true}}
+						</select>
+						<input class="f g-skills" type="text" name="system.rollModifiers.{{i}}.skills" value="{{row.skillsText}}" placeholder="{{localize 'MGT2.Actor.Skills'}}" />
+						<select class="f g-characteristic" name="system.rollModifiers.{{i}}.characteristic">
+							<option value=""></option>
+							{{selectOptions @root.config.Characteristics selected=row.characteristic localize=true}}
+						</select>
+					</td>
+					<td class="c num"><input class="f num" type="number" step="1" name="system.rollModifiers.{{i}}.dm" value="{{row.dm}}" /></td>
+					<td><input class="f" type="text" name="system.rollModifiers.{{i}}.condition" value="{{row.condition}}" placeholder="{{localize 'MGT2.Chargen.TrayConditions.always'}}" /></td>
+					<td class="r">
+						<div class="acts"><a data-action="entryDelete" data-tooltip="{{localize 'MGT2.Items.DeleteModifier'}}"><i class="fas fa-trash"></i></a></div>
+					</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+	{{/if}}
+
+	{{#if augmentTiles.augment}}
 	<div class="grid edit-only">
-		<label class="wide">
-			<span class="lbl">{{localize 'MGT2.Items.Skill'}}</span>
-			{{formInput systemFields.augment.fields.skill.fields.name name="system.augment.skill.name" value=system.augment.skill.name classes="f"}}
-		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.AugmentSkillDM'}}</span>
-			{{formInput systemFields.augment.fields.skill.fields.value name="system.augment.skill.value" value=system.augment.skill.value classes="f num"}}
-		</label>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Protection'}}</span>
 			{{formInput systemFields.augment.fields.protection name="system.augment.protection" value=system.augment.protection classes="f num"}}
 		</label>
 	</div>
+	{{/if}}
 </div>
