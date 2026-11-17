@@ -4,6 +4,52 @@
 
 ---
 
+## [0.2.15]
+
+**Vérifié sur Foundry VTT 14.370.**
+
+### ⚠ Ruptures
+
+* **La compétence requise d'une armure devient une liste** : au premier chargement, la migration
+  convertit les armures du monde, des personnages, des compendiums du monde et des tokens non liés.
+  Un effet actif qui modifiait l'ancienne compétence requise est signalé dans la console et ne fait
+  plus rien.
+
+### Nouveautés
+
+* **Armures** : plusieurs compétences possibles pour porter une armure, la meilleure que possède le
+  porteur comptant ; la combinaison VDO en accepte deux (CSC p.114).
+* **Armures** : *S'ajoute au MD-3*, pour une armure dont les niveaux manquants s'ajoutent au MD-3 de
+  non-formé au lieu de le remplacer, comme la combinaison VDO (MD-5 sans aucune des deux).
+* **Niveaux technologiques** : la liste va jusqu'à NT24. Une valeur absente de la liste reste
+  affichée et n'est plus écrasée à l'enregistrement.
+
+## [0.2.14]
+
+**Vérifié sur Foundry VTT 14.370.**
+
+### ⚠ Ruptures
+
+* **La compétence d'une augmentation devient une ligne de *Modificateurs*** : au premier chargement,
+  la migration convertit les augmentations du monde, des personnages, des compendiums du monde et des
+  tokens non liés. Un effet actif qui modifiait l'ancienne compétence est signalé dans la console et
+  ne fait plus rien.
+
+### Nouveautés
+
+* **Équipement** : un bloc *Modificateurs* sur les augmentations, l'équipement, les outils, les
+  babioles et les vêtements. Chaque ligne donne un MD à des compétences, à tout test, à l'Initiative
+  ou à une caractéristique, avec une condition facultative ; elle compte tant que l'objet est équipé
+  et quand on lance un jet depuis l'objet.
+* **Équipement** : la barre de jet sur la fiche d'un équipement, d'outils, d'une babiole ou d'un
+  vêtement.
+* **Augmentations** : les limites par compétence s'appliquent ligne par ligne (CSC p.61).
+
+### Corrections
+
+* **Vaisseaux** : un poste d'équipage se supprime depuis la fiche en mode édition, et son menu prend
+  la place disponible (#11).
+
 ## [0.2.13]
 
 **Vérifié sur Foundry VTT 14.370.**

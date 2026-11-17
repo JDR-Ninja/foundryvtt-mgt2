@@ -1395,11 +1395,15 @@ export class WeaponData extends PhysicalItemData {
 }
 
 export class ArmorData extends PhysicalItemData {
-    /** protection was a StringField; blank and non-numeric values become 0. @inheritDoc */
+    /** protection was a StringField; the one required skill is now a row. @inheritDoc */
     static migrateData(source, options) {
         if (typeof source.protection === "string") {
             const value = Number.parseInt(source.protection, 10);
             source.protection = Number.isFinite(value) && value > 0 ? value : 0;
+        }
+        const named = (typeof source.requireSkill === "string") ? source.requireSkill.trim() : "";
+        if ( named && (source.requireSkills === undefined) ) {
+            source.requireSkills = [{ name: named, level: Math.max(0, Math.trunc(Number(source.requireSkillLevel)) || 0) }];
         }
         migrateTraitArray(source.options, "custom");
         return super.migrateData(source, options);
@@ -1463,11 +1467,13 @@ export class ArmorData extends PhysicalItemData {
             required: false, nullable: true, initial: null, min: 0, integer: true });
         schema.specialised = createSpecialisedField();
 
-        // DM-1 to every check per missing level of the required skill; not having the skill at all
-        // inflicts the usual DM-3 unskilled penalty instead.
-        schema.requireSkill = new fields.StringField({ required: false, blank: false });
-        schema.requireSkillLevel = new fields.NumberField({
-            required: false, min: 0, integer: true, initial: null });
+        // Alternatives: the best row the wearer holds decides (CSC folio 114 names two).
+        schema.requireSkills = new fields.ArrayField(new fields.SchemaField({
+            name: new fields.StringField({ required: true, blank: true, initial: "" }),
+            level: new fields.NumberField({ required: true, nullable: false, initial: 0, min: 0, integer: true })
+        }), { required: false, initial: () => [] });
+        // CSC folio 114: the missing levels add to the unskilled DM-3 instead of replacing it.
+        schema.stacksUnskilled = new fields.BooleanField({ required: false, initial: false });
 
 
         // Powered battle dress supports its own weight and is effectively weightless while active.

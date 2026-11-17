@@ -72,6 +72,11 @@ const MIGRATIONS = [
     version: "0.2.14",
     label: "an augment's skill becomes an equipment roll modifier row",
     migrate: persistLiftedSources
+  },
+  {
+    version: "0.2.15",
+    label: "an armour's required skill becomes a row of alternatives",
+    migrate: persistLiftedSources
   }
 ];
 
@@ -132,20 +137,27 @@ async function persistLiftedSources() {
   }
 
   // eslint-disable-next-line no-console -- the GM chasing a missing DM needs the trace
-  console.log(`mgt2 | augment skills persisted as rows: ${counts.items} world Items, ${counts.embedded} on Actors, `
+  console.log(`mgt2 | lifted skills persisted as rows: ${counts.items} world Items, ${counts.embedded} on Actors, `
     + `${counts.packs} in world compendiums, ${counts.deltas} on unlinked tokens; ${counts.effects} effect change(s) listed`);
   if ( counts.failed ) throw new Error(`mgt2 | ${counts.failed} document(s) could not be migrated; the next load retries`);
   return 0;
 }
 
-/** An Active Effect change on the removed `augment.skill` now targets nothing, and is named rather than rewritten. */
+/** The removed fields an Active Effect change may still target, and where each one went. */
+const STALE_KEYS = {
+  "system.augment.skill": "an augment's skill is a row under Modifiers now",
+  "system.requireSkill": "an armour's required skill is a row under Required Skill now"
+};
+
+/** An Active Effect change on a removed field now targets nothing, and is named rather than rewritten. */
 function listStaleEffects(item, counts) {
   for ( const effect of item.effects ?? [] ) {
     for ( const change of effect.system?.changes ?? [] ) {
-      if ( !change.key?.startsWith("system.augment.skill") ) continue;
+      const stale = Object.keys(STALE_KEYS).find(key => change.key?.startsWith(key));
+      if ( !stale ) continue;
       counts.effects++;
       console.warn(`mgt2 | "${effect.name}" on "${item.name}"${item.actor ? ` (${item.actor.name})` : ""} changes `
-        + `${change.key}, which no longer exists: an augment's skill is a row under Modifiers now.`);
+        + `${change.key}, which no longer exists: ${STALE_KEYS[stale]}.`);
     }
   }
 }

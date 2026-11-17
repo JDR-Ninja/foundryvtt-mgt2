@@ -2214,8 +2214,13 @@
           "software": "",
           "bonus": 0
         },
-        "requireSkill": "Vacc Suit",
-        "requireSkillLevel": 1,
+        "requireSkills": [
+          {
+            "name": "Vacc Suit",
+            "level": 1
+          }
+        ],
+        "stacksUnskilled": false,
         "powered": false,
         "breach": "intact",
         "options": [
@@ -2232,7 +2237,7 @@
         "mgt2": {
           "demo": {
             "copyOf": "Demo — Deck Vest",
-            "trap": "requireSkill reads the real name, Vacc Suit, which is the name this Traveller's skill carries, and at 1 it is exactly requireSkillLevel — so no armour DM applies. Take the skill Item away and the penalty appears with no message."
+            "trap": "The requireSkills row reads the real name, Vacc Suit, which is the name this Traveller's skill carries, and at 1 it is exactly the row's level — so no armour DM applies. Take the skill Item away and the penalty appears with no message."
           }
         }
       }

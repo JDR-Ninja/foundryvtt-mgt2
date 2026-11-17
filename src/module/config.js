@@ -602,7 +602,16 @@ MGT2.TL = Object.freeze({
     TL12: "MGT2.TL.L12",
     TL13: "MGT2.TL.L13",
     TL14: "MGT2.TL.L14",
-    TL15: "MGT2.TL.L15"
+    TL15: "MGT2.TL.L15",
+    TL16: "MGT2.TL.L16",
+    TL17: "MGT2.TL.L17",
+    TL18: "MGT2.TL.L18",
+    TL19: "MGT2.TL.L19",
+    TL20: "MGT2.TL.L20",
+    TL21: "MGT2.TL.L21",
+    TL22: "MGT2.TL.L22",
+    TL23: "MGT2.TL.L23",
+    TL24: "MGT2.TL.L24"
 });
 
 MGT2.Timeframes = Object.freeze({

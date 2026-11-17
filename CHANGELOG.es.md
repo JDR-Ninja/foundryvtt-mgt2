@@ -8,6 +8,53 @@
 
 ---
 
+## [0.2.15]
+
+**Verificado en Foundry VTT 14.370.**
+
+### ⚠ Cambios que rompen
+
+* **La habilidad requerida de una armadura pasa a ser una lista**: en la primera carga, la migración
+  convierte las armaduras del mundo, de los personajes, de los compendios del mundo y de los tokens
+  no vinculados. Un efecto activo que modificaba la antigua habilidad requerida se señala en la
+  consola y ya no hace nada.
+
+### Novedades
+
+* **Armaduras**: varias habilidades pueden habilitar a quien la lleva, y cuenta la mejor que tenga;
+  el traje VDO acepta dos (CSC p.114).
+* **Armaduras**: *Se suma al MD-3*, para una armadura cuyos niveles que faltan se suman al MD-3 por
+  falta de entrenamiento en lugar de sustituirlo, como los del traje VDO (MD-5 sin ninguna de las
+  dos).
+* **Niveles tecnológicos**: la lista llega hasta NT24. Un valor que no está en la lista sigue
+  mostrándose y ya no se sobrescribe al guardar.
+
+## [0.2.14]
+
+**Verificado en Foundry VTT 14.370.**
+
+### ⚠ Cambios que rompen
+
+* **La habilidad de un aumento pasa a ser una fila de *Modificadores***: en la primera carga, la
+  migración convierte los aumentos del mundo, de los personajes, de los compendios del mundo y de los
+  tokens no vinculados. Un efecto activo que modificaba la antigua habilidad se señala en la consola y
+  ya no hace nada.
+
+### Novedades
+
+* **Equipo**: un bloque *Modificadores* en los aumentos, el equipo, los juegos de herramientas, las
+  baratijas y la ropa. Cada fila da un MD a habilidades, a cualquier tirada, a la Iniciativa o a una
+  característica, con una condición opcional; cuenta mientras el objeto está equipado y al tirar desde
+  el objeto.
+* **Equipo**: la barra de tirada en la hoja de un equipo, un juego de herramientas, una baratija o
+  una prenda.
+* **Aumentos**: los límites por habilidad se aplican fila por fila (CSC p.61).
+
+### Correcciones
+
+* **Naves**: un puesto de tripulación se elimina desde la hoja en modo edición, y su menú ocupa el
+  espacio disponible (#11).
+
 ## [0.2.13]
 
 **Verificado en Foundry VTT 14.370.**

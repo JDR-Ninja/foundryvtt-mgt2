@@ -223,7 +223,7 @@
 		<div class="shield"><svg viewBox="0 0 54 62" aria-hidden="true"><path d="M27 3 L50 11 V30 C50 45 40 54 27 59 C14 54 4 45 4 30 V11 Z"/></svg><b>{{system.protection}}</b></div>
 		<div class="gside">
 			<span class="lbl">{{localize 'MGT2.Items.Protection'}}</span>
-			{{#if system.requireSkill}}<span class="pill warn"><i class="fa-solid fa-triangle-exclamation"></i>{{localize 'MGT2.Items.RequiredSkill'}} · {{system.requireSkill}} {{system.requireSkillLevel}}</span>{{/if}}
+			{{#if armorTraining}}<span class="pill warn"><i class="fa-solid fa-triangle-exclamation"></i>{{localize 'MGT2.Items.RequiredSkill'}} · {{armorTraining}}</span>{{/if}}
 		</div>
 	</div>
 	{{/if}}
@@ -501,13 +501,30 @@
 			{{formInput systemFields.radiations name="system.radiations" value=system.radiations classes="f num"}}
 		</label>
 		<h4 class="gsub">{{localize 'MGT2.Items.Group.Wearing'}}</h4>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.RequiredSkill'}}</span>
-			<input class="f" type="text" name="system.requireSkill" value="{{system.requireSkill}}" />
-		</label>
-		<label>
-			<span class="lbl">{{localize 'MGT2.Items.Level'}}</span>
-			<input class="f num" type="number" name="system.requireSkillLevel" value="{{system.requireSkillLevel}}" min="0" step="1" />
+		{{! Core p.100: any one row is enough, and the best the wearer holds counts. }}
+		<div class="trainrows" data-property="requireSkills">
+			<table class="rows fixed">
+				<thead>
+					<tr>
+						<th>{{localize 'MGT2.Items.RequiredSkill'}} <i class="fa-solid fa-circle-info note" data-tooltip="{{localize 'MGT2.Items.RequiredSkillsHint'}}"></i></th>
+						<th class="num">{{localize 'MGT2.Items.Level'}}</th>
+						<th class="ctl"><a class="add" data-action="entryCreate" data-blank='{"name":"","level":0}' data-tooltip="{{localize 'MGT2.Items.AddRequiredSkill'}}"><i class="fa-solid fa-plus"></i></a></th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each system.requireSkills as |row i|}}
+					<tr data-entry-index="{{i}}">
+						<td><input class="f" type="text" name="system.requireSkills.{{i}}.name" value="{{row.name}}" /></td>
+						<td class="num"><input class="f num" type="number" min="0" step="1" name="system.requireSkills.{{i}}.level" value="{{row.level}}" data-dtype="Number" /></td>
+						<td class="r"><div class="acts"><a data-action="entryDelete" data-tooltip="{{localize 'MGT2.Items.DeleteRequiredSkill'}}"><i class="fas fa-trash"></i></a></div></td>
+					</tr>
+					{{/each}}
+				</tbody>
+			</table>
+		</div>
+		<label class="check" data-tooltip="{{localize 'MGT2.Items.StacksUnskilledHint'}}">
+			{{formInput systemFields.stacksUnskilled name="system.stacksUnskilled" value=system.stacksUnskilled}}
+			<span>{{localize 'MGT2.Items.StacksUnskilled'}}</span>
 		</label>
 		<label class="check">
 			{{formInput systemFields.powered name="system.powered" value=system.powered}}
@@ -914,7 +931,7 @@
 		{{/if}}
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.TL'}}</span>
-			<select class="f" name="system.tl">{{selectOptions config.TL selected=system.tl localize=true}}</select>
+			<select class="f" name="system.tl">{{selectOptions tlOptions selected=system.tl localize=true}}</select>
 		</label>
 		<label>
 			<span class="lbl">{{localize 'MGT2.Items.Legality'}}</span>

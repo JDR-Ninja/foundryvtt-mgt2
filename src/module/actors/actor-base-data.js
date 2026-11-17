@@ -671,22 +671,29 @@ export class ActorBaseData extends foundry.abstract.TypeDataModel {
 
     /**
      * Core p.100: armour with a required skill costs DM-1 per level the wearer is short, and a flat
-     * DM-3 to a wearer with no such skill at all.
+     * DM-3 to a wearer with no such skill at all. The best row held decides.
      */
     armorSkillModifiers() {
         const sources = [];
         for (const item of this.parent.items) {
             if ((item.type !== "armor") || (item.system.equipped !== true)) continue;
-            const required = item.system.requireSkill?.trim();
-            if (!required) continue;
+            const rows = (item.system.requireSkills ?? []).map(row => ({ name: row.name?.trim(),
+                level: Math.max(0, Math.trunc(row.level) || 0) })).filter(row => row.name);
+            if (!rows.length) continue;
 
-            const level = this.skillLevel(required);
-            const dm = (level === null) ? -3
-                : -Math.max(0, (Math.trunc(item.system.requireSkillLevel) || 0) - level);
+            let best = null;
+            for (const row of rows) {
+                const held = this.skillLevel(row.name);
+                if (held === null) continue;
+                const dm = -Math.max(0, row.level - held);
+                if (!best || (dm > best.dm)) best = { row, dm };
+            }
+            // CSC folio 114: on the VDO suit, the missing levels add to the unskilled DM-3.
+            const dm = best?.dm ?? (-3 - (item.system.stacksUnskilled ? Math.min(...rows.map(row => row.level)) : 0));
             if (dm === 0) continue;
             // Hyphenated, never dotted: the prompt names a form control after this key.
             sources.push({ key: `armor-${item.id}`, label: "MGT2.Actor.ArmorSkill", dm,
-                params: { armor: item.name, skill: required } });
+                params: { armor: item.name, skill: (best?.row ?? rows[0]).name } });
         }
         return sources;
     }

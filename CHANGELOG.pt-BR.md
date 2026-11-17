@@ -8,6 +8,52 @@
 
 ---
 
+## [0.2.15]
+
+**Verificado no Foundry VTT 14.370.**
+
+### ⚠ Mudanças incompatíveis
+
+* **A perícia exigida de uma armadura passa a ser uma lista**: no primeiro carregamento, a migração
+  converte as armaduras do mundo, dos personagens, dos compêndios do mundo e dos tokens não
+  vinculados. Um efeito ativo que alterava a antiga perícia exigida é apontado no console e não faz
+  mais nada.
+
+### Novidades
+
+* **Armaduras**: várias perícias podem habilitar o usuário, e conta a melhor que ele possui; o traje
+  VDO aceita duas (CSC p.114).
+* **Armaduras**: *Soma-se ao MD-3*, para uma armadura cujos níveis que faltam somam-se ao MD-3 de
+  leigo em vez de o substituir, como os do traje VDO (MD-5 sem nenhuma das duas).
+* **Níveis tecnológicos**: a lista vai até NT24. Um valor que não está na lista continua exibido e
+  não é mais sobrescrito ao salvar.
+
+## [0.2.14]
+
+**Verificado no Foundry VTT 14.370.**
+
+### ⚠ Mudanças incompatíveis
+
+* **A perícia de um aprimoramento passa a ser uma linha de *Modificadores***: no primeiro
+  carregamento, a migração converte os aprimoramentos do mundo, dos personagens, dos compêndios do
+  mundo e dos tokens não vinculados. Um efeito ativo que alterava a antiga perícia é apontado no
+  console e não faz mais nada.
+
+### Novidades
+
+* **Equipamento**: um bloco *Modificadores* nos aprimoramentos, equipamentos, kits de ferramentas,
+  bugigangas e roupas. Cada linha dá um MD a perícias, a qualquer teste, à Iniciativa ou a uma
+  característica, com uma condição opcional; conta enquanto o item está equipado e ao rolar a partir
+  do item.
+* **Equipamento**: a barra de rolagem na ficha de um equipamento, kit de ferramentas, bugiganga ou
+  roupa.
+* **Aprimoramentos**: os limites por perícia se aplicam linha a linha (CSC p.61).
+
+### Correções
+
+* **Naves**: um posto da tripulação pode ser removido pela ficha no modo de edição, e seu menu ocupa
+  o espaço disponível (#11).
+
 ## [0.2.13]
 
 **Verificado no Foundry VTT 14.370.**

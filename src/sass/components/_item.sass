@@ -929,6 +929,14 @@
 	.gearrows tr:not([data-target="characteristic"]) .g-characteristic
 		display: none
 
+// An armour's training alternatives span the edit grid.
+.mgt2 .grid .trainrows
+	grid-column: 1 / -1
+	table.rows.fixed th.num
+		width: 4.5rem
+	table.rows.fixed th.ctl
+		width: 2.5rem
+
 // A role's actions, grouped by the step of the round, each a line: its name, the roll as a sentence,
 // and a tail holding the Weapon pill and the limit.
 .mgt2 .stationacts

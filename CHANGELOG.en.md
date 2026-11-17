@@ -4,6 +4,48 @@
 
 ---
 
+## [0.2.15]
+
+**Verified on Foundry VTT 14.370.**
+
+### ⚠ Breaking changes
+
+* **An armour's required skill becomes a list**: on first load, the migration converts the armour of
+  the world, of characters, of the world's compendiums and of unlinked tokens. An Active Effect that
+  changed the old required skill is named in the console and no longer does anything.
+
+### New
+
+* **Armour**: several skills can qualify a wearer, and the best one they hold counts; the VDO diving
+  suit accepts two (CSC p.114).
+* **Armour**: *Adds to DM-3*, for armour whose missing levels add to the unskilled DM-3 instead of
+  replacing it, as the VDO diving suit's do (DM-5 with neither skill).
+* **Tech Levels**: the list runs to TL24. A value missing from the list stays shown and is no longer
+  overwritten on save.
+
+## [0.2.14]
+
+**Verified on Foundry VTT 14.370.**
+
+### ⚠ Breaking changes
+
+* **An augment's skill becomes a *Modifiers* row**: on first load, the migration converts the augments
+  of the world, of characters, of the world's compendiums and of unlinked tokens. An Active Effect that
+  changed the old skill is named in the console and no longer does anything.
+
+### New
+
+* **Equipment**: a *Modifiers* block on augments, equipment, toolkits, trinkets and clothing. Each row
+  gives a DM to skills, to any check, to Initiative or to a characteristic, with an optional
+  condition; it counts while the Item is equipped and when a roll is made from the Item.
+* **Equipment**: the roll bar on the sheet of equipment, a toolkit, a trinket or clothing.
+* **Augments**: the per-skill limits apply row by row (CSC p.61).
+
+### Fixes
+
+* **Spacecraft**: a crew station can be removed from the sheet in edit mode, and its menu takes the
+  room available (#11).
+
 ## [0.2.13]
 
 **Verified on Foundry VTT 14.370.**

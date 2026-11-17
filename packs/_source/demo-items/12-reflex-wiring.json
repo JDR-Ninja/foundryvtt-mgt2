@@ -13,7 +13,7 @@
           "`augment.modifiers[]` raises a characteristic, and `augment.protection` adds to Protection.",
           "A `rollModifiers` row on `skills` is scoped to the skills it names; on an augment it counts toward one augmentation per skill and three skills."
         ],
-        "trap": "A row's skill matches a skill Item by name, exactly as an armour's `requireSkill` does. It reads the real name, `Gun Combat`, which matches the Item named `Gun Combat (slug)` by the same prefix rule; a name no skill on the Traveller carries matches nothing, and the augment does nothing."
+        "trap": "A row's skill matches a skill Item by name, exactly as an armour's `requireSkills` row does. It reads the real name, `Gun Combat`, which matches the Item named `Gun Combat (slug)` by the same prefix rule; a name no skill on the Traveller carries matches nothing, and the augment does nothing."
       }
     }
   },

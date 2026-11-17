@@ -70,10 +70,10 @@ export function singularItemLimits(type, system) {
 
 export class TravellerItem extends Item {
 
-  /** Marks a raw augment skill for the world step: the root migrates before `system` lifts it. @inheritDoc */
+  /** Marks a raw augment or armour skill for the world step: the root migrates before `system` lifts it. @inheritDoc */
   static migrateData(source, options) {
-    const named = source.system?.augment?.skill?.name;
-    if ( (typeof named === "string") && named.trim() ) {
+    const lifted = [source.system?.augment?.skill?.name, source.system?.requireSkill];
+    if ( lifted.some(named => (typeof named === "string") && named.trim()) ) {
       foundry.utils.setProperty(source, "flags.mgt2.persistSourceMigration", true);
     }
     return super.migrateData(source, options);

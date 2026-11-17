@@ -432,6 +432,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       showSuitBreach: (item.type === "armor") && (Rules.get("vacuumRuleset") === "companion"),
       conditional: (item.type === "armor") ? MGT2Helper.protectionVs(item.system.conditional) : "",
       armourBoosts: (item.type === "armor") ? TravellerItemSheet.#armourBoosts(item.system) : null,
+      tlOptions: TravellerItemSheet.#tlOptions(item.system.tl),
       binding: slots.masthead?.[0] ?? null,
       supply,
       spine: this.#spine(),
@@ -495,6 +496,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       speciesTiles: this.#speciesTiles(),
       traitModifiers: this.#traitModifiers(),
       rollModifiers: this.#rollModifiers(),
+      armorTraining: this.#armorTraining(),
       // A role's line follows its actions, so it reads as prose and not as the lede the tab opens on.
       summary: this.#summary(slots.details?.[0]?.id !== "actions"),
       station: item.type === "role",
@@ -726,6 +728,14 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     return system.rollModifiers.map(row => ({ ...row, skillsText: row.skills.join(", ") }));
   }
 
+  /** The armour's training alternatives as one phrase, *Profession (diver) 2 or Vacc Suit 2*, or null. */
+  #armorTraining() {
+    if ( this.item.type !== "armor" ) return null;
+    const rows = this.item.system.requireSkills.filter(row => row.name.trim());
+    if ( !rows.length ) return null;
+    return game.i18n.getListFormatter({ type: "disjunction" }).format(rows.map(row => `${row.name.trim()} ${row.level}`));
+  }
+
   /** A drug's three addiction values, read together, or null while the referee has not set one (CSC p.97). */
   #addiction() {
     const { type, system } = this.item;
@@ -830,6 +840,12 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       ageing: at(system.ageing),
       backgroundSkills: at(system.backgroundSkills)
     };
+  }
+
+  /** The Tech Level choices, plus a stored value MGT2.TL has no key for, so a save keeps it. */
+  static #tlOptions(tl) {
+    if ( (typeof tl !== "string") || !tl || Object.hasOwn(MGT2.TL, tl) ) return MGT2.TL;
+    return { ...MGT2.TL, [tl]: tl };
   }
 
   /** The STR and DEX controls, and the line the play view prints. */
@@ -1188,7 +1204,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     if ( "tl" in system ) {
       // A component's TL is a number, as the ship's own is.
       const key = (typeof system.tl === "number") ? `TL${String(system.tl).padStart(2, "0")}` : system.tl;
-      tags.push(game.i18n.localize(MGT2.TL[key] ?? ""));
+      tags.push(MGT2.TL[key] ? game.i18n.localize(MGT2.TL[key]) : (key ?? ""));
     }
     if ( (type === "component") && (system.quantity > 1) ) tags.push(`×${system.quantity}`);
     return tags.filter(tag => tag !== "");

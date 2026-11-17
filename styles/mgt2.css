@@ -8280,6 +8280,16 @@ ul.softwares li:hover a {
   display: none;
 }
 
+.mgt2 .grid .trainrows {
+  grid-column: 1/-1;
+}
+.mgt2 .grid .trainrows table.rows.fixed th.num {
+  width: 4.5rem;
+}
+.mgt2 .grid .trainrows table.rows.fixed th.ctl {
+  width: 2.5rem;
+}
+
 .mgt2 .stationacts {
   display: flex;
   flex-direction: column;

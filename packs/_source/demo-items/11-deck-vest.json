@@ -10,10 +10,10 @@
         "cliff": "the armour skill DM",
         "teaches": [
           "`protection` is the number subtracted from every wound before it reaches a characteristic.",
-          "`requireSkill` and `requireSkillLevel` are the pair behind the armour DM: a wearer short of the level takes a penalty on every check.",
+          "`requireSkills` are the rows behind the armour DM, any one of them enough: a wearer short of the best row's level takes a penalty on every check.",
           "`processing` on an armour is what lets a suit run software — `null` means it runs none."
         ],
-        "trap": "`requireSkill` matches an owned skill Item by name, so it reads the skill's real name, `Vacc Suit`, which is the name on the wearer's skill. A name that matches nothing silently penalises everyone who wears it."
+        "trap": "A `requireSkills` row matches an owned skill Item by name, so it reads the skill's real name, `Vacc Suit`, which is the name on the wearer's skill. A name that matches nothing silently penalises everyone who wears it."
       }
     }
   },
@@ -33,8 +33,8 @@
     "protection": 6,
     "processing": null,
     "specialised": { "software": "", "bonus": 0 },
-    "requireSkill": "Vacc Suit",
-    "requireSkillLevel": 1,
+    "requireSkills": [{ "name": "Vacc Suit", "level": 1 }],
+    "stacksUnskilled": false,
     "powered": false,
     "breach": "intact",
     "options": [
