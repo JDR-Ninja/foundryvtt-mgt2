@@ -3383,7 +3383,8 @@
     },
     "MetricSystem": {
       "Weight": {
-        "kg": "kg"
+        "kg": "kg",
+        "t": "t"
       },
       "Distance": {
         "km": "km"

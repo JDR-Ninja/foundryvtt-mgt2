@@ -465,6 +465,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       canDose: (item.type === "drug") && Doses.canTake(actor),
       addiction: this.#addiction(),
       weight: "weight" in item.system ? item.system.weight : null,
+      weightShown: "weight" in item.system ? MGT2Helper.weightParts(item.system.weight) : null,
       unitlabels: { weight: MGT2Helper.getWeightLabel() },
       isGM: game.user.isGM,
       skills: this.#prepareSkills(actor),

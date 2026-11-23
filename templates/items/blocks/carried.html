@@ -23,7 +23,7 @@
 		<dl class="statline" data-derived="system.weight">
 			<div class="stat{{#unless bag.counted}} none{{/unless}}">
 				<dt>{{localize 'MGT2.Actor.Encumbrance'}}</dt>
-				<dd>{{#if bag.counted}}{{weight}}<i>{{unitlabels.weight}}</i>{{else}}&mdash;{{/if}}</dd>
+				<dd>{{#if bag.counted}}{{weightShown.value}}<i>{{weightShown.unit}}</i>{{else}}&mdash;{{/if}}</dd>
 			</div>
 		</dl>
 		{{/if}}

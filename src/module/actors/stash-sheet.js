@@ -74,8 +74,8 @@ export class StashActorSheet extends GuideButtonMixin(SheetModeMixin(HandlebarsA
         if (stash.open) {
             stash.contents = this.#contents();
             stash.count = system.count;
-            stash.weight = system.weight;
             stash.unit = MGT2Helper.getWeightLabel();
+            stash.mass = MGT2Helper.weightParts(system.weight);
             stash.value = system.value;
         }
         context.stash = stash;

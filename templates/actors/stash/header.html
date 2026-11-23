@@ -46,7 +46,7 @@
 		{{#if stash.showWeight}}
 		<div class="stat{{#unless stash.open}} none{{/unless}}">
 			<dt>{{localize 'MGT2.Actor.stash.Mass'}}</dt>
-			<dd>{{#if stash.open}}{{stash.weight}}<i>{{stash.unit}}</i>{{else}}&mdash;{{/if}}</dd>
+			<dd>{{#if stash.open}}{{stash.mass.value}}<i>{{stash.mass.unit}}</i>{{else}}&mdash;{{/if}}</dd>
 		</div>
 		{{/if}}
 		{{! A readout, not a till: the sum of what the contents cost, with no control on this sheet that

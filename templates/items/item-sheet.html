@@ -117,12 +117,12 @@
 			{{#if (eq item.type "container")}}
 			{{! A bag has no mass, no price and no count of its own: all three read off its contents. }}
 			<div class="sline">
-				<span>{{weight}}<u>{{unitlabels.weight}}</u></span>
+				<span>{{weightShown.value}}<u>{{weightShown.unit}}</u></span>
 				{{#if bag.count includeZero=true}}<span>{{localize 'MGT2.Actor.stash.Holds' n=bag.count}}</span>{{/if}}
 			</div>
 			{{else}}
 			<div class="sline play-only">
-				<span>{{weight}}<u>{{unitlabels.weight}}</u></span>
+				<span>{{weightShown.value}}<u>{{weightShown.unit}}</u></span>
 				<span{{#if (eq item.type "ammunition")}} data-tooltip="{{localize 'MGT2.Items.SpareHint'}}"{{/if}}>&times;{{system.quantity}}</span>
 				<span>Cr {{system.cost}}</span>
 			</div>
@@ -133,7 +133,7 @@
 					    _processFormData. It round-trips only because the root part is unwrapped into
 					    .window-content, which IS the form element — give the masthead a PART of its
 					    own and this field silently stops saving. }}
-					<input class="f num" type="number" name="weight" value="{{weight}}" step="0.5" data-dtype="Number" />
+					<input class="f num" type="number" name="weight" value="{{weight}}" step="any" min="0" data-dtype="Number" />
 				</label>
 				<label{{#if (eq item.type "ammunition")}} data-tooltip="{{localize 'MGT2.Items.SpareHint'}}"{{/if}}>
 					<span class="lbl">{{localize 'MGT2.Items.Qty'}}</span>

@@ -488,7 +488,7 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     const containers = [{ name: everyContainer, display: everyContainer, _id: "" }].concat(shownContainers);
     for (const c of actorContainers) {
       if (c.system.weight > 0) {
-        c.weight = `${c.system.weight} ${settings.weightUnit}`;
+        c.weight = MGT2Helper.formatWeight(c.system.weight);
         c.display = c.name.length > 12 ? `${c.name.substring(0, 12)}... (${c.weight})` : `${c.name} (${c.weight})`;
       } else {
         c.display = c.name.length > 12 ? `${c.name.substring(0, 12)}...` : c.name;
@@ -534,9 +534,9 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
       // `in`, not `hasOwn`: a container's weight is a getter, and it lives on the prototype.
       if (("weight" in sys) && sys.weight > 0) {
         const total = isNaN(sys.quantity) ? sys.weight : sys.weight * sys.quantity;
-        v.weight = `${MGT2Helper.roundWeight(total)} ${settings.weightUnit}`;
+        v.weight = MGT2Helper.formatWeight(total);
       }
-      if (v.fitted) v.weight = `${MGT2Helper.roundWeight(actor.items.get(v._id).getTotalWeight())} ${settings.weightUnit}`;
+      if (v.fitted) v.weight = MGT2Helper.formatWeight(actor.items.get(v._id).getTotalWeight());
 
       // Item in storage
       if (Object.hasOwn(sys, "container") && sys.container.id) {

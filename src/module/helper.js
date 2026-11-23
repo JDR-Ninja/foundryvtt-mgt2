@@ -624,6 +624,26 @@ export class MGT2Helper {
         return game.i18n.localize("MGT2.MetricSystem.Weight.kg");
     }
 
+    /**
+     * A mass as it is read at the table: kilograms below a tonne, tonnes from 1000 kg, as the
+     * Central Supply Catalogue prints its artillery and vehicle weapons. Storage stays in kg.
+     * @param {number} kg
+     * @returns {{value: number, unit: string}}
+     */
+    static weightParts(kg) {
+        const tonnes = Math.abs(kg) >= 1000;
+        return {
+            value: this.roundWeight(tonnes ? kg / 1000 : kg),
+            unit: game.i18n.localize(`MGT2.MetricSystem.Weight.${tonnes ? "t" : "kg"}`)
+        };
+    }
+
+    /** {@link MGT2Helper.weightParts} joined into one string, `0.25 kg` or `2.5 t`. */
+    static formatWeight(kg) {
+        const { value, unit } = this.weightParts(kg);
+        return `${value} ${unit}`;
+    }
+
     static getIntegerFromInput(data) {
         return Math.trunc(this.getNumberFromInput(data));
     }
@@ -649,9 +669,9 @@ export class MGT2Helper {
         return converted;
     }
 
-    /** Weights are stored and displayed to one decimal. */
+    /** Weights are stored and displayed to two decimals: the catalogues print 0.25 kg. */
     static roundWeight(weight) {
-        return Math.round(weight * 10) / 10;
+        return Math.round(weight * 100) / 100;
     }
 
     static getDataFromDropEvent(event) {

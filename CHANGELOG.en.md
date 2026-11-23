@@ -4,6 +4,19 @@
 
 ---
 
+## [0.2.16]
+
+**Verified on Foundry VTT 14.370.**
+
+### New
+
+* **Weights**: a mass of 1000 kg or more reads in tonnes on item sheets, in the inventory and on stashes,
+  as the Central Supply Catalogue prints artillery and vehicle weapons. It is still entered in kg.
+
+### Fixes
+
+* **Weights** keep two decimals: an item of 0.25 kg was saved as 0.3 kg.
+
 ## [0.2.15]
 
 **Verified on Foundry VTT 14.370.**

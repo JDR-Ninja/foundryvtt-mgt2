@@ -8,6 +8,20 @@
 
 ---
 
+## [0.2.16]
+
+**Verificado no Foundry VTT 14.370.**
+
+### Novidades
+
+* **Pesos**: uma massa de 1000 kg ou mais aparece em toneladas nas fichas de item, no inventário e
+  nas reservas, como o Central Supply Catalogue imprime a artilharia e as armas de veículo.
+  Continua sendo digitada em kg.
+
+### Correções
+
+* **Os pesos** mantêm duas casas decimais: um item de 0,25 kg era salvo como 0,3 kg.
+
 ## [0.2.15]
 
 **Verificado no Foundry VTT 14.370.**

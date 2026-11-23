@@ -351,7 +351,7 @@
 			<div class="withheld{{#if ../containerShowAll}} named{{/if}}">
 				<span class="ic"><i class="fa-solid fa-lock"></i></span>
 				<span class="lbl">{{#if ../containerShowAll}}<b>{{held.name}}</b>{{/if}}{{localize 'MGT2.Actor.stash.Withheld'}}</span>
-				{{#if (and ../containerShowAll held.mass)}}<span class="kg">{{held.mass}}<i> {{../settings.weightUnit}}</i></span>{{/if}}
+				{{#if (and ../containerShowAll held.mass)}}<span class="kg">{{weightText held.mass}}</span>{{/if}}
 				{{#if held.said}}<p class="said">{{held.said}}</p>{{/if}}
 				<p class="why">{{localize 'MGT2.Errors.LockedContainer'}}</p>
 			</div>
@@ -359,7 +359,7 @@
 		</div>
 		<div class="mgt2-encumbrance">
 			<span class="lbl">{{localize 'MGT2.Actor.TotalWeight'}}</span>
-			<span class="total">{{containerWeight}} {{settings.weightUnit}}</span>
+			<span class="total">{{weightText containerWeight}}</span>
 		</div>
 	</div>
 

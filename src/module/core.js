@@ -96,6 +96,7 @@ function registerHandlebarsHelpers() {
   Handlebars.registerHelper('showDM', dm => (typeof dm === "string") ? dm : MGT2Helper.signed(dm));
   Handlebars.registerHelper('showFormula', text => MGT2Helper.showFormula(text));
   Handlebars.registerHelper('credits', value => MGT2Helper.credits(value));
+  Handlebars.registerHelper('weightText', kg => MGT2Helper.formatWeight(kg));
   // What an optional rule is set to.
   Handlebars.registerHelper('rule', key => Rules.get(key));
   // A printed table's rows are numbered from 1 and stored from 0, and a career template draws six
