@@ -313,7 +313,7 @@
 		<li><span class="lbl">{{localize 'MGT2.Items.FireControl'}}</span><b>{{showDM system.fireControl}}</b></li>
 		{{/if}}
 		{{#if scale.power}}
-		<li><span class="lbl">{{localize 'MGT2.Items.Power'}}</span><b>{{system.power}}</b></li>
+		<li{{#unless powerCode}} class="off"{{/unless}}><span class="lbl">{{localize 'MGT2.Items.Power'}}</span><b>{{#if powerCode}}{{powerCode}}{{else}}0{{/if}}</b></li>
 		{{/if}}
 		{{#if system.natural}}
 		<li><span class="lbl">{{localize 'MGT2.Items.Natural'}}</span><b class="word"><i class="fa-solid fa-check"></i></b></li>
@@ -460,6 +460,12 @@
 		<label{{#unless scale.power}} class="off"{{/unless}}>
 			<span class="lbl">{{localize 'MGT2.Items.Power'}}</span>
 			{{formInput systemFields.power name="system.power" value=system.power classes="f num" disabled=(not scale.power)}}
+		</label>
+		<label{{#unless scale.powerSource}} class="off"{{/unless}}>
+			<span class="lbl">{{localize 'MGT2.Items.PowerSource'}}</span>
+			<select class="f" name="system.powerSource"{{#unless scale.powerSource}} disabled{{/unless}}>
+				{{selectOptions config.WeaponPowerSources selected=system.powerSource labelAttr="label" localize=true blank=""}}
+			</select>
 		</label>
 		<label class="check">
 			{{formInput systemFields.natural name="system.natural" value=system.natural}}

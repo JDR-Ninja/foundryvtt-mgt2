@@ -327,6 +327,8 @@ export class TravellerActorSheet extends GuideButtonMixin(SheetModeMixin(Handleb
     const effective = view.system.effective;
     view.range = effective.range.isMelee ? game.i18n.localize("MGT2.Melee") : MGT2Helper.getRangeDisplay(effective.range);
     view.traitList = effective.traits.map(formatTrait);
+    const code = view.system.powerCode;
+    if (code) view.power = game.i18n.format("MGT2.Items.PowerCode", { code });
     if (view.traitList.length > 0) view.subInfo = view.traitList.join(", ");
   }
 

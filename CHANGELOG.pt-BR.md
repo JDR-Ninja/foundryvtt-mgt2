@@ -8,6 +8,15 @@
 
 ---
 
+## [0.2.17]
+
+**Verificado no Foundry VTT 14.371.**
+
+### Novidades
+
+* **Armas de veículo**: a Energia também pode ser indicada na escala de veículo, com sua fonte
+  (veículo motorizado ou fissão/fusão). A ficha a mostra como o Vehicle Handbook: P, F ou F8.
+
 ## [0.2.16]
 
 **Verificado no Foundry VTT 14.370.**

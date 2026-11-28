@@ -8,6 +8,15 @@
 
 ---
 
+## [0.2.17]
+
+**Verificado en Foundry VTT 14.371.**
+
+### Novedades
+
+* **Armas de vehículo**: la Potencia también se indica a escala de vehículo, con su fuente de energía
+  (vehículo motorizado o fisión/fusión). La hoja la muestra como el Vehicle Handbook: P, F o F8.
+
 ## [0.2.16]
 
 **Verificado en Foundry VTT 14.370.**

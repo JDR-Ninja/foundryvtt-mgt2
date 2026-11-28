@@ -1376,8 +1376,10 @@ export class WeaponData extends PhysicalItemData {
             required: false, blank: false, initial: "ground", choices: MGT2.WeaponScales });
         // The vehicle and spacecraft accuracy grade, which stands in for a scope (VH2026 p.104).
         schema.fireControl = new fields.NumberField({ required: false, initial: 0, min: 0, max: 4, integer: true });
-        // A spacecraft weapon draws against the ship's power budget (HG p.26).
+        // Power drawn: from the ship's budget (HG p.26) or from a vehicle's plant (VH2026 p.105).
         schema.power = new fields.NumberField({ required: false, initial: 0, min: 0, integer: true });
+        schema.powerSource = new fields.StringField({
+            required: false, blank: true, initial: "", choices: MGT2.WeaponPowerSources });
         // A creature's Claw or Charge is a weapon it cannot drop, store or be disarmed of.
         schema.natural = new fields.BooleanField({ required: false, initial: false });
         // CSC folio 137: a psi weapon adds the wielder's PSI DM to damage, `ap` per PSI DM and per point spent.
@@ -1391,6 +1393,15 @@ export class WeaponData extends PhysicalItemData {
         schema.fittedTo = createFittedField();
 
         return schema;
+    }
+
+    /** VH2026 p.105's Power column: P or F, then the Power drawn when it is above 1 (F3). */
+    get powerCode() {
+        const scale = MGT2.WeaponScales[this.scale];
+        if ( !scale?.power ) return "";
+        const letter = scale.powerSource ? MGT2.WeaponPowerSources[this.powerSource]?.code : null;
+        if ( !letter ) return this.power ? String(this.power) : "";
+        return (this.power > 1) ? `${letter}${this.power}` : letter;
     }
 }
 

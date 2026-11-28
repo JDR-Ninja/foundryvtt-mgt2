@@ -319,9 +319,15 @@ MGT2.Scales = Object.freeze({
 
 // A weapon's own scale.
 MGT2.WeaponScales = Object.freeze({
-    ground: {label: "MGT2.Scales.ground", range: "meter", fireControl: false, power: false, band: false},
-    vehicle: {label: "MGT2.Scales.vehicle", range: "kilometer", fireControl: true, power: false, band: false},
-    spacecraft: {label: "MGT2.Scales.spacecraft", range: "kilometer", fireControl: true, power: true, band: true}
+    ground: {label: "MGT2.Scales.ground", range: "meter", fireControl: false, power: false, powerSource: false, band: false},
+    vehicle: {label: "MGT2.Scales.vehicle", range: "kilometer", fireControl: true, power: true, powerSource: true, band: false},
+    spacecraft: {label: "MGT2.Scales.spacecraft", range: "kilometer", fireControl: true, power: true, powerSource: false, band: true}
+});
+
+// VH2026 p.105: P needs a powered vehicle, F a fission or fusion plant.
+MGT2.WeaponPowerSources = Object.freeze({
+    powered: {label: "MGT2.WeaponPowerSources.powered", code: "P"},
+    nuclear: {label: "MGT2.WeaponPowerSources.nuclear", code: "F"}
 });
 
 // Companion p.93. Reduced and Minimum substitute into the expression and are rolled with the attack.

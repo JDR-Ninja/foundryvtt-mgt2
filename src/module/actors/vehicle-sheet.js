@@ -413,7 +413,7 @@ export class VehicleActorSheet extends TravellerActorSheet {
                 gunner: { uuid: mount.gunner ?? "", ...VehicleActorSheet.#seen(system.mountGunner(mount)) },
                 gunport: (mount.type === "gunPort") && !held.length,
                 rollsAs: VehicleActorSheet.#rollsAs(mount, roller),
-                pills: [...new Set(held.flatMap(weapon => [weapon.range, ...(weapon.traitList ?? [])]).filter(Boolean))],
+                pills: [...new Set(held.flatMap(weapon => [weapon.range, weapon.power, ...(weapon.traitList ?? [])]).filter(Boolean))],
                 choices: weapons.map(weapon => ({
                     _id: weapon._id, name: weapon.name, selected: mount.weapons.includes(weapon._id)
                 }))

@@ -136,7 +136,7 @@
 							<span class="mtl">{{localize 'MGT2.Actor.vehicle.Unmounted'}}</span>
 						</div>
 					</td>
-					<td><span class="pills"><span>{{weapon.range}}</span>{{#each weapon.traitList as |trait|}}<span>{{trait}}</span>{{/each}}</span></td>
+					<td><span class="pills"><span>{{weapon.range}}</span>{{#if weapon.power}}<span>{{weapon.power}}</span>{{/if}}{{#each weapon.traitList as |trait|}}<span>{{trait}}</span>{{/each}}</span></td>
 					<td class="dmg"><b>{{weapon.system.effective.damage}}</b></td>
 					{{> systems/mgt2/templates/actors/parts/row-controls.html edit="MGT2.Actor.EditWeapon" del="MGT2.Actor.DeleteWeapon"}}
 				</tr>

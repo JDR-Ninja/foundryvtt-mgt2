@@ -474,6 +474,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
       // A Set is neither an array nor a plain object, so Handlebars cannot walk it.
       damageTypes: Array.from(item.system.damageType ?? [], key => game.i18n.localize(MGT2.DamageTypes[key])),
       scale: MGT2.WeaponScales[item.system.scale] ?? null,
+      powerCode: item.system.powerCode ?? "",
       fireModes: this.#fireModes(),
       ammo: this.#ammo(),
       processing: this.#processing(),
@@ -1780,7 +1781,7 @@ export class TravellerItemSheet extends GuideButtonMixin(SheetModeMixin(Handleba
     const root = this.element;
     const unit = root.querySelector("[name='system.range.unit']");
     if ( unit ) unit.value = scale.range;
-    for ( const field of ["fireControl", "power", "range.band"] ) {
+    for ( const field of ["fireControl", "power", "powerSource", "range.band"] ) {
       const input = root.querySelector(`[name='system.${field}']`);
       if ( !input ) continue;
       const applies = scale[field.split(".").pop()];

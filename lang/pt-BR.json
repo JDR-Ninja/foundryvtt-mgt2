@@ -3983,6 +3983,8 @@
       "ConditionalProtection": "Proteção condicional",
       "Protection": "Proteção",
       "ProtectionVs": "{protection} contra {types}",
+      "PowerSource": "Fonte de energia",
+      "PowerCode": "Energia {code}",
       "PowerActive": "Ativa",
       "PowerInactive": "Inativa",
       "ArmourBonus": "Bônus de {characteristic}",
@@ -4497,6 +4499,10 @@
       "ground": "Terrestre",
       "vehicle": "Veículo",
       "spacecraft": "Espaçonave"
+    },
+    "WeaponPowerSources": {
+      "powered": "Veículo motorizado (P)",
+      "nuclear": "Fissão ou fusão (F)"
     },
     "ComfortLevels": {
       "intolerable": "Intolerável",

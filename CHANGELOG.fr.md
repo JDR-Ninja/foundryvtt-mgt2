@@ -4,6 +4,15 @@
 
 ---
 
+## [0.2.17]
+
+**Vérifié sur Foundry VTT 14.371.**
+
+### Nouveautés
+
+* **Armes de véhicule** : la Power s'indique aussi à l'échelle véhicule, avec sa source d'énergie
+  (véhicule motorisé ou fission/fusion). La fiche l'affiche comme le Vehicle Handbook : P, F ou F8.
+
 ## [0.2.16]
 
 **Vérifié sur Foundry VTT 14.370.**

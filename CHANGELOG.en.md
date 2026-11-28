@@ -4,6 +4,15 @@
 
 ---
 
+## [0.2.17]
+
+**Verified on Foundry VTT 14.371.**
+
+### New
+
+* **Vehicle weapons**: Power can now be set at vehicle scale too, with its source (powered vehicle or
+  fission/fusion). The sheet prints it as the Vehicle Handbook does: P, F or F8.
+
 ## [0.2.16]
 
 **Verified on Foundry VTT 14.370.**
